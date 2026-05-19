@@ -5,7 +5,6 @@
 
 // ─── Configuration ───────────────────────────────────────────────────────────
 export { loadConfig, getConfig, resetConfig } from "./config";
-export type { ZeroAuthConfig } from "./shared/types";
 
 // ─── Database ────────────────────────────────────────────────────────────────
 export {
@@ -100,10 +99,10 @@ export { FingerprintService } from "./services/fingerprint.service";
  * Call this at application startup
  */
 export async function initializeZeroAuth() {
-  const { getConfig } = await import("./config");
-  const { initializeDatabase } = await import("./db");
-  const { initializeCSFLE } = await import("./crypto/csfle");
-  const { initializeLogger } = await import("./logger");
+  const { getConfig } = await import("./config/index.ts");
+  const { initializeDatabase } = await import("./db/index.ts");
+  const { initializeCSFLE } = await import("./crypto/csfle.ts");
+  const { initializeLogger } = await import("./logger/index.ts");
 
   const config = getConfig();
   const logger = initializeLogger(config);
@@ -124,8 +123,8 @@ export async function initializeZeroAuth() {
  * Gracefully shutdown ZeroAuth system
  */
 export async function shutdownZeroAuth() {
-  const { getLogger } = await import("./logger");
-  const { closeDatabase } = await import("./db");
+  const { getLogger } = await import("./logger/index.ts");
+  const { closeDatabase } = await import("./db/index.ts");
 
   const logger = getLogger();
   logger.info("Shutting down ZeroAuth system...");
