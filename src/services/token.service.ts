@@ -7,8 +7,9 @@
  */
 
 import { nanoid } from "nanoid";
-import type { TokenPayload, ZeroAuthConfig } from "@zeroauth/shared";
-import { DEFAULT_ACCESS_TOKEN_TTL } from "@zeroauth/shared";
+import type { TokenPayload } from "../shared/types";
+import { DEFAULT_ACCESS_TOKEN_TTL } from "../shared/types";
+import type { ZeroAuthConfig } from "../shared/types";
 
 export class TokenService {
   private key!: CryptoKey;

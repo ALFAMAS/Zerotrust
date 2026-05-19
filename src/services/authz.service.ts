@@ -1,26 +1,6 @@
-import type { Permission, ABACCondition, User } from "@zeroauth/shared";
+import type { Permission, ABACCondition, User, AuthzContext, AuthzResult } from "../shared/types";
 import { RoleModel } from "../models/index";
 import { JITModel } from "../models/index";
-
-export interface AuthzContext {
-  user: User;
-  resource: string;
-  action: string;
-  environment?: {
-    ip?: string;
-    country?: string;
-    time?: Date;
-    [key: string]: unknown;
-  };
-  resourceAttributes?: Record<string, unknown>;
-}
-
-export interface AuthzResult {
-  allowed: boolean;
-  reason?: string;
-  matchedRole?: string;
-  matchedPermission?: string;
-}
 
 export class AuthorizationEngine {
   async evaluate(ctx: AuthzContext): Promise<AuthzResult> {

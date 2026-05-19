@@ -1,0 +1,300 @@
+/**
+ * Structured logging infrastructure for ZeroAuth
+ * Supports JSON logging, correlation IDs, and Elasticsearch streaming
+ */
+
+import type { ZeroAuthConfig } from "../shared/types";
+import { getConfig } from "../config";
+
+export interface LogContext {
+  correlationId?: string;
+  userId?: string;
+  sessionId?: string;
+  ipAddress?: string;
+  userAgent?: string;
+  timestamp?: Date;
+  [key: string]: unknown;
+}
+
+export type LogLevel = "debug" | "info" | "warn" | "error";
+
+const LOG_LEVELS: Record<LogLevel, number> = {
+  debug: 0,
+  info: 1,
+  warn: 2,
+  error: 3,
+};
+
+class Logger {
+  private config: ZeroAuthConfig;
+  private context: LogContext = {};
+  private minLogLevel: number;
+  private elasticsearchClient: any; // Will be populated if ES enabled
+
+  constructor(config: ZeroAuthConfig, contextModule?: string) {
+    this.config = config;
+    this.minLogLevel = LOG_LEVELS[config.logging.level];
+
+    if (contextModule) {
+      this.context.module = contextModule;
+    }
+  }
+
+  /**
+   * Set correlation ID (for tracing requests across services)
+   */
+  setCorrelationId(id: string): void {
+    this.context.correlationId = id;
+  }
+
+  /**
+   * Set user context
+   */
+  setUserContext(userId: string, sessionId?: string): void {
+    this.context.userId = userId;
+    if (sessionId) this.context.sessionId = sessionId;
+  }
+
+  /**
+   * Set request context
+   */
+  setRequestContext(ipAddress: string, userAgent?: string): void {
+    this.context.ipAddress = ipAddress;
+    if (userAgent) this.context.userAgent = userAgent;
+  }
+
+  /**
+   * Clear context
+   */
+  clearContext(): void {
+    this.context = {};
+  }
+
+  /**
+   * Log debug message
+   */
+  debug(message: string, data?: Record<string, unknown>): void {
+    this.log("debug", message, data);
+  }
+
+  /**
+   * Log info message
+   */
+  info(message: string, data?: Record<string, unknown>): void {
+    this.log("info", message, data);
+  }
+
+  /**
+   * Log warning message
+   */
+  warn(message: string, data?: Record<string, unknown>): void {
+    this.log("warn", message, data);
+  }
+
+  /**
+   * Log error message
+   */
+  error(message: string, error?: Error | Record<string, unknown>): void {
+    const errorData = error instanceof Error
+      ? {
+          errorMessage: error.message,
+          errorStack: error.stack,
+          errorName: error.name,
+        }
+      : error;
+    this.log("error", message, errorData as Record<string, unknown>);
+  }
+
+  /**
+   * Core logging function
+   */
+  private log(level: LogLevel, message: string, data?: Record<string, unknown>): void {
+    if (LOG_LEVELS[level] < this.minLogLevel) {
+      return; // Skip logs below configured level
+    }
+
+    const logEntry = {
+      timestamp: new Date().toISOString(),
+      level,
+      message,
+      ...this.context,
+      ...data,
+    };
+
+    // Output based on configured format
+    if (this.config.logging.format === "json") {
+      console.log(JSON.stringify(logEntry));
+    } else {
+      const levelColor = this.getLevelColor(level);
+      const timestamp = logEntry.timestamp;
+      const correlationId = logEntry.correlationId ? ` [${logEntry.correlationId}]` : "";
+      const userId = logEntry.userId ? ` [user:${logEntry.userId}]` : "";
+      console.log(
+        `${levelColor}${level.toUpperCase()}${"\x1b[0m"} ${timestamp}${correlationId}${userId} - ${message}`,
+        data || ""
+      );
+    }
+
+    // Stream to Elasticsearch if enabled
+    if (this.config.elasticsearch.enabled && level !== "debug") {
+      this.streamToElasticsearch(logEntry).catch((err) => {
+        console.error("Failed to stream log to Elasticsearch:", err);
+      });
+    }
+  }
+
+  /**
+   * Stream log to Elasticsearch
+   */
+  private async streamToElasticsearch(logEntry: Record<string, unknown>): Promise<void> {
+    // This will be implemented when Elasticsearch client is initialized
+    // For now, we'll queue it for later
+    if (!this.elasticsearchClient) {
+      return;
+    }
+
+    try {
+      const indexName = `${this.config.elasticsearch.indexPrefix}-logs-${new Date()
+        .toISOString()
+        .split("T")[0]}`;
+
+      await this.elasticsearchClient.index({
+        index: indexName,
+        document: logEntry,
+      });
+    } catch (error) {
+      console.error("Failed to index log in Elasticsearch:", error);
+    }
+  }
+
+  /**
+   * Get ANSI color code for log level
+   */
+  private getLevelColor(level: LogLevel): string {
+    const colors: Record<LogLevel, string> = {
+      debug: "\x1b[36m", // Cyan
+      info: "\x1b[32m", // Green
+      warn: "\x1b[33m", // Yellow
+      error: "\x1b[31m", // Red
+    };
+    return colors[level];
+  }
+
+  /**
+   * Set Elasticsearch client (called during initialization)
+   */
+  setElasticsearchClient(client: any): void {
+    this.elasticsearchClient = client;
+  }
+}
+
+let loggerSingleton: Logger | null = null;
+
+/**
+ * Initialize global logger
+ */
+export function initializeLogger(config?: ZeroAuthConfig): Logger {
+  if (loggerSingleton) return loggerSingleton;
+
+  const cfg = config || getConfig();
+  const logger = new Logger(cfg);
+
+  loggerSingleton = logger;
+  return logger;
+}
+
+/**
+ * Get global logger instance
+ */
+export function getLogger(module?: string): Logger {
+  if (!loggerSingleton) {
+    const cfg = getConfig();
+    loggerSingleton = new Logger(cfg, module);
+  }
+  return loggerSingleton;
+}
+
+/**
+ * Create a child logger with additional context
+ */
+export function createChildLogger(module: string, context?: LogContext): Logger {
+  const logger = new Logger(getConfig(), module);
+  if (context) {
+    for (const [key, value] of Object.entries(context)) {
+      (logger as any).context[key] = value;
+    }
+  }
+  return logger;
+}
+
+/**
+ * Audit log helper - specifically for security-sensitive operations
+ * Always goes to both console and Elasticsearch
+ */
+export async function auditLog(
+  action: string,
+  actor: string,
+  target: string,
+  success: boolean,
+  details?: Record<string, unknown>,
+  error?: Error
+): Promise<void> {
+  const logger = getLogger("audit");
+
+  const auditEntry = {
+    action,
+    actor,
+    target,
+    success,
+    timestamp: new Date().toISOString(),
+    ...details,
+  };
+
+  if (error) {
+    auditEntry.error = {
+      message: error.message,
+      stack: error.stack,
+    };
+  }
+
+  // Always log audit at info level minimum
+  if (success) {
+    logger.info(`AUDIT: ${action} by ${actor}`, auditEntry);
+  } else {
+    logger.warn(`AUDIT FAILED: ${action} by ${actor}`, auditEntry);
+  }
+
+  // Stream to Elasticsearch
+  if (getConfig().elasticsearch.enabled) {
+    const es = (logger as any).elasticsearchClient;
+    if (es) {
+      try {
+        const indexName = `${getConfig().elasticsearch.indexPrefix}-audit-${new Date()
+          .toISOString()
+          .split("T")[0]}`;
+        await es.index({
+          index: indexName,
+          document: auditEntry,
+        });
+      } catch (err) {
+        console.error("Failed to index audit log:", err);
+      }
+    }
+  }
+}
+
+/**
+ * Reset logger (for testing)
+ */
+export function resetLogger(): void {
+  loggerSingleton = null;
+}
+
+/**
+ * Generate correlation ID
+ */
+export function generateCorrelationId(): string {
+  const timestamp = Date.now().toString(36);
+  const random = Math.random().toString(36).substring(2, 8);
+  return `${timestamp}-${random}`;
+}

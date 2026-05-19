@@ -1,5 +1,12 @@
 import mongoose, { Schema, Document } from "mongoose";
-import type { Session, Role, JITAccessRequest, AuditLog, RefreshTokenRecord } from "@zeroauth/shared";
+import type {
+  Session,
+  Role,
+  JITAccessRequest,
+  AuditLog,
+  RefreshTokenRecord,
+  OTP,
+} from "../shared/types";
 
 // ─── Session ─────────────────────────────────────────────────────────────────
 
@@ -31,6 +38,17 @@ const SessionSchema = new Schema<SessionDocument>(
     isActive: { type: Boolean, default: true, index: true },
     revokedAt: Date,
     revokedReason: String,
+    proofOfPossessionKey: String,
+    continuousEvalResult: {
+      decision: { type: String, enum: ["allow", "deny", "challenge"] },
+      riskScore: Number,
+      evaluatedAt: Date,
+    },
+    anomalyFlags: {
+      deviceChangeDetected: { type: Boolean, default: false },
+      locationChangeDetected: { type: Boolean, default: false },
+      timeAnomalyDetected: { type: Boolean, default: false },
+    },
   },
   { timestamps: true }
 );
@@ -114,6 +132,10 @@ const AuditSchema = new Schema<AuditDocument>({
   sessionId: String,
   success: { type: Boolean, required: true, index: true },
   errorCode: String,
+  duration: Number,
+  resourceDetails: { type: Map, of: Schema.Types.Mixed },
+  riskScore: Number,
+  continuousEvalContext: { type: Map, of: Schema.Types.Mixed },
   metadata: { type: Map, of: Schema.Types.Mixed },
   timestamp: { type: Date, default: Date.now, index: true },
 });

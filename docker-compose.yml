@@ -1,0 +1,180 @@
+version: '3.8'
+
+services:
+  # ─────────────────────────────────────────────────────────────────────────
+  # MongoDB: Main application database
+  # ─────────────────────────────────────────────────────────────────────────
+  mongodb:
+    image: mongo:7.0-alpine
+    container_name: zeroauth-mongodb
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_DATABASE: zeroauth
+    volumes:
+      - mongodb_data:/data/db
+      - mongodb_config:/data/configdb
+      - ./scripts/mongodb-init.js:/docker-entrypoint-initdb.d/init.js
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - zeroauth
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # Redis: Distributed rate limiting, caching, session storage
+  # ─────────────────────────────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: zeroauth-redis
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes --requirepass redispass
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - zeroauth
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # Elasticsearch: Audit logs, event streaming, analytics
+  # ─────────────────────────────────────────────────────────────────────────
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.10.0
+    container_name: zeroauth-elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - xpack.security.enrollment.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: curl -s http://localhost:9200 >/dev/null || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - zeroauth
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # Kibana: Elasticsearch UI for monitoring and dashboards
+  # ─────────────────────────────────────────────────────────────────────────
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.10.0
+    container_name: zeroauth-kibana
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    ports:
+      - "5601:5601"
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    healthcheck:
+      test: curl -s http://localhost:5601/api/status >/dev/null || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - zeroauth
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # ZeroAuth API Server
+  # ─────────────────────────────────────────────────────────────────────────
+  zeroauth:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        RUNTIME: bun  # or 'node' for Node.js runtime
+    container_name: zeroauth-api
+    ports:
+      - "3000:3000"
+    environment:
+      # Database
+      MONGO_URI: mongodb://admin:password@mongodb:27017/zeroauth?authSource=admin
+      MONGO_POOL_SIZE: 10
+
+      # Session
+      SESSION_TTL: 3600
+      REFRESH_TOKEN_TTL: 604800
+      MAX_CONCURRENT_DEVICES: 5
+
+      # Security (CHANGE THESE IN PRODUCTION!)
+      TOKEN_SECRET_HEX: 0000000000000000000000000000000000000000000000000000000000000000
+      CSFLE_MASTER_KEY_HEX: 0000000000000000000000000000000000000000000000000000000000000000
+
+      # OAuth Providers (Set your actual credentials)
+      OAUTH_GOOGLE_CLIENT_ID: ${OAUTH_GOOGLE_CLIENT_ID:-}
+      OAUTH_GOOGLE_CLIENT_SECRET: ${OAUTH_GOOGLE_CLIENT_SECRET:-}
+      OAUTH_FACEBOOK_CLIENT_ID: ${OAUTH_FACEBOOK_CLIENT_ID:-}
+      OAUTH_FACEBOOK_CLIENT_SECRET: ${OAUTH_FACEBOOK_CLIENT_SECRET:-}
+
+      # MFA Configuration
+      MFA_EMAIL_ENABLED: true
+      MAIL_HOST: ${MAIL_HOST:-smtp.gmail.com}
+      MAIL_PORT: ${MAIL_PORT:-587}
+      MAIL_USER: ${MAIL_USER:-}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+
+      # Rate Limiting
+      RATE_LIMITING_ENABLED: true
+      REDIS_URI: redis://:redispass@redis:6379
+
+      # Elasticsearch
+      ELASTICSEARCH_ENABLED: true
+      ELASTICSEARCH_HOST: elasticsearch
+      ELASTICSEARCH_PORT: 9200
+
+      # Logging
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      LOG_FORMAT: json
+      NODE_ENV: development
+      PORT: 3000
+
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
+
+    healthcheck:
+      test: wget --quiet --tries=1 --spider http://localhost:3000/health || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+    networks:
+      - zeroauth
+
+    # Uncomment for local development with hot reload
+    # volumes:
+    #   - ./src:/app/src
+    #   - /app/node_modules
+
+networks:
+  zeroauth:
+    driver: bridge
+
+volumes:
+  mongodb_data:
+    driver: local
+  mongodb_config:
+    driver: local
+  redis_data:
+    driver: local
+  elasticsearch_data:
+    driver: local

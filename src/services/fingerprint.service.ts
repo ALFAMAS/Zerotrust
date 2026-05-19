@@ -1,5 +1,5 @@
 import { UAParser } from "ua-parser-js";
-import type { DeviceFingerprint } from "@zeroauth/shared";
+import type { DeviceFingerprint } from "../shared/types";
 
 export interface FingerprintInput {
   userAgent: string;

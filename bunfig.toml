@@ -1,0 +1,44 @@
+# Bun configuration file
+
+[install]
+# Peer dependencies are automatically installed (default: true)
+peer = true
+
+# Whether to automatically install optional dependencies (default: false)
+optional = false
+
+# Whether to allow downloading dependencies from the registry (default: true)
+frozenLockfile = false
+
+[run]
+# Environment variable files
+env = ".env"
+
+# Hot reload
+hot = true
+
+# Watch mode for file changes
+watch = true
+
+[build]
+# Root directory for builds
+root = "./src"
+
+# Entry point
+entrypoint = "./index.ts"
+
+# Output directory
+outdir = "./dist"
+
+# Target environment
+target = "node"
+
+[test]
+# Test file patterns
+testNamePattern = ".*\\.test\\.ts$|.*\\.spec\\.ts$"
+
+# Timeout for tests (in milliseconds)
+timeout = 5000
+
+# Root directory for tests
+root = "./src"

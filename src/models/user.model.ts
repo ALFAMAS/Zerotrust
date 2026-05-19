@@ -1,5 +1,6 @@
 import mongoose, { Schema, Document } from "mongoose";
-import type { User } from "@zeroauth/shared";
+import type { User } from "../shared/types";
+import { csflEncryptionPlugin } from "../crypto/csfle";
 
 export type UserDocument = Omit<User, "_id"> & Document;
 
@@ -83,5 +84,15 @@ UserSchema.index({ email: 1 });
 UserSchema.index({ "oauthProviders.provider": 1, "oauthProviders.providerId": 1 });
 UserSchema.index({ parentUserId: 1 });
 UserSchema.index({ status: 1 });
+
+// Apply CSFLE encryption plugin
+const fieldsToEncrypt = [
+  "email",
+  "phone",
+  "passwordHash",
+  "mfa.totp.secret",
+  "attributes.customAttributes",
+];
+UserSchema.plugin(csflEncryptionPlugin, { fields: fieldsToEncrypt });
 
 export const UserModel = mongoose.model<UserDocument>("User", UserSchema);
