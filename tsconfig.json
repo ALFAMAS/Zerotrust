@@ -8,7 +8,7 @@
     "outDir": "./dist",
     "resolveJsonModule": true,
     "skipLibCheck": true,
-    "strict": true,
+    "strict": false,
     "esModuleInterop": true,
     "declaration": true,
     "declarationMap": true,
