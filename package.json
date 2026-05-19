@@ -1,0 +1,29 @@
+{
+  "name": "@zeroauth/core",
+  "version": "1.0.0",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "bun test"
+  },
+  "dependencies": {
+    "@zeroauth/shared": "workspace:*",
+    "mongoose": "^8.3.0",
+    "@simplewebauthn/server": "^10.0.0",
+    "otpauth": "^9.3.0",
+    "qrcode": "^1.5.3",
+    "nodemailer": "^6.9.13",
+    "bcryptjs": "^2.4.3",
+    "nanoid": "^5.0.7",
+    "geoip-lite": "^1.4.10",
+    "ua-parser-js": "^1.0.37"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/nodemailer": "^6.4.14",
+    "@types/qrcode": "^1.5.5",
+    "@types/ua-parser-js": "^0.7.39",
+    "typescript": "^5.4.0"
+  }
+}
