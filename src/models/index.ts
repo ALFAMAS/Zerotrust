@@ -159,7 +159,10 @@ const RefreshTokenSchema = new Schema<RefreshTokenDocument>({
   isRevoked: { type: Boolean, default: false },
 });
 
-export const RefreshTokenModel = mongoose.model<RefreshTokenDocument>("RefreshToken", RefreshTokenSchema);
+export const RefreshTokenModel = mongoose.model<RefreshTokenDocument>(
+  "RefreshToken",
+  RefreshTokenSchema
+);
 
 // ─── OTP / Password Reset ─────────────────────────────────────────────────────
 
@@ -177,7 +180,11 @@ export interface OTPDocument extends Document {
 const OTPSchema = new Schema<OTPDocument>({
   userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
   code: { type: String, required: true },
-  type: { type: String, enum: ["password_reset", "email_verify", "phone_verify", "login"], required: true },
+  type: {
+    type: String,
+    enum: ["password_reset", "email_verify", "phone_verify", "login"],
+    required: true,
+  },
   channel: { type: String, enum: ["email", "sms", "whatsapp", "telegram"], required: true },
   target: { type: String, required: true },
   expiresAt: { type: Date, required: true, index: { expireAfterSeconds: 0 } },
@@ -188,3 +195,29 @@ const OTPSchema = new Schema<OTPDocument>({
 OTPSchema.index({ userId: 1, type: 1 });
 
 export const OTPModel = mongoose.model<OTPDocument>("OTP", OTPSchema);
+
+// ─── Workload Credential ─────────────────────────────────────────────────────
+
+import type { WorkloadCredential } from "../shared/types";
+
+export type WorkloadCredentialDocument = Omit<WorkloadCredential, "_id"> & Document;
+
+const WorkloadCredentialSchema = new Schema<WorkloadCredentialDocument>(
+  {
+    workloadId: { type: String, required: true, index: true },
+    workloadSecret: { type: String, required: true },
+    createdBy: { type: Schema.Types.ObjectId, ref: "User" },
+    scopes: [String],
+    ttl: Number,
+    autoRotate: { type: Boolean, default: false },
+    lastRotatedAt: Date,
+    expiresAt: Date,
+    isRevoked: { type: Boolean, default: false },
+  },
+  { timestamps: true }
+);
+
+export const WorkloadCredentialModel = mongoose.model<WorkloadCredentialDocument>(
+  "WorkloadCredential",
+  WorkloadCredentialSchema
+);

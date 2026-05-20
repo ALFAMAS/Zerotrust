@@ -95,13 +95,14 @@ class Logger {
    * Log error message
    */
   error(message: string, error?: Error | Record<string, unknown>): void {
-    const errorData = error instanceof Error
-      ? {
-          errorMessage: error.message,
-          errorStack: error.stack,
-          errorName: error.name,
-        }
-      : error;
+    const errorData =
+      error instanceof Error
+        ? {
+            errorMessage: error.message,
+            errorStack: error.stack,
+            errorName: error.name,
+          }
+        : error;
     this.log("error", message, errorData as Record<string, unknown>);
   }
 
@@ -154,9 +155,9 @@ class Logger {
     }
 
     try {
-      const indexName = `${this.config.elasticsearch.indexPrefix}-logs-${new Date()
-        .toISOString()
-        .split("T")[0]}`;
+      const indexName = `${this.config.elasticsearch.indexPrefix}-logs-${
+        new Date().toISOString().split("T")[0]
+      }`;
 
       await this.elasticsearchClient.index({
         index: indexName,
@@ -198,6 +199,28 @@ export function initializeLogger(config?: ZeroAuthConfig): Logger {
 
   const cfg = config || getConfig();
   const logger = new Logger(cfg);
+
+  // Initialize a minimal Elasticsearch client if enabled
+  if (cfg.elasticsearch.enabled) {
+    const host = cfg.elasticsearch.host;
+    const port = cfg.elasticsearch.port;
+    const base = `http://${host}:${port}`;
+    const esClient = {
+      index: async ({ index, document }: { index: string; document: Record<string, unknown> }) => {
+        try {
+          const url = `${base}/${index}/_doc`;
+          await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(document),
+          });
+        } catch (err) {
+          console.error("ES index error", err);
+        }
+      },
+    };
+    logger.setElasticsearchClient(esClient);
+  }
 
   loggerSingleton = logger;
   return logger;
@@ -269,9 +292,9 @@ export async function auditLog(
     const es = (logger as any).elasticsearchClient;
     if (es) {
       try {
-        const indexName = `${getConfig().elasticsearch.indexPrefix}-audit-${new Date()
-          .toISOString()
-          .split("T")[0]}`;
+        const indexName = `${getConfig().elasticsearch.indexPrefix}-audit-${
+          new Date().toISOString().split("T")[0]
+        }`;
         await es.index({
           index: indexName,
           document: auditEntry,

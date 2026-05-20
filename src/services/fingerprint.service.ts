@@ -11,7 +11,9 @@ export interface FingerprintInput {
 }
 
 export class FingerprintService {
-  static compute(input: FingerprintInput): Omit<DeviceFingerprint, "isTrusted" | "firstSeenAt" | "lastSeenAt"> {
+  static compute(
+    input: FingerprintInput
+  ): Omit<DeviceFingerprint, "isTrusted" | "firstSeenAt" | "lastSeenAt"> {
     const parser = new UAParser(input.userAgent);
     const result = parser.getResult();
 
@@ -29,11 +31,14 @@ export class FingerprintService {
     const raw = components.join("|");
     const hash = this.hashString(raw);
 
+    const browserStr =
+      `${result.browser.name ?? ""} ${result.browser.major ?? ""}`.trim() || "unknown";
+    const osStr = `${result.os.name ?? ""} ${result.os.version ?? ""}`.trim() || "unknown";
     return {
       hash,
       platform: result.device.type ?? "desktop",
-      browser: `${result.browser.name ?? ""} ${result.browser.major ?? ""}`.trim(),
-      os: `${result.os.name ?? ""} ${result.os.version ?? ""}`.trim(),
+      browser: browserStr,
+      os: osStr,
       screen: input.screenResolution,
       timezone: input.timezone,
       languages: input.acceptLanguage
@@ -59,7 +64,7 @@ export class FingerprintService {
   }): FingerprintInput {
     const get = (key: string): string => {
       const v = req.headers[key];
-      return Array.isArray(v) ? v[0] : v ?? "";
+      return Array.isArray(v) ? v[0] : (v ?? "");
     };
 
     return {
