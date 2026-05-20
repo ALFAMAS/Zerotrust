@@ -5,7 +5,7 @@ import { JITModel } from "../models/index";
 export class AuthorizationEngine {
   async evaluate(ctx: AuthzContext): Promise<AuthzResult> {
     const { user, resource, action } = ctx;
-    const now = ctx.environment?.time ?? new Date();
+    const now = ctx.environment?.currentTime ?? new Date();
 
     // 1. Check schedule restriction
     const scheduleCheck = this.checkSchedule(user, now);
@@ -49,7 +49,9 @@ export class AuthorizationEngine {
       userId: user._id,
       status: "approved",
       expiresAt: { $gt: new Date() },
-    }).populate("roleId").lean();
+    })
+      .populate("roleId")
+      .lean();
 
     for (const jit of jitGrants) {
       const role = jit.roleId as { name: string } | null;
@@ -106,7 +108,7 @@ export class AuthorizationEngine {
         obj = ctx.user as unknown as Record<string, unknown>;
         break;
       case "env":
-        obj = ctx.environment as Record<string, unknown> ?? {};
+        obj = (ctx.environment as Record<string, unknown>) ?? {};
         break;
       case "resource":
         obj = ctx.resourceAttributes ?? {};
@@ -123,21 +125,34 @@ export class AuthorizationEngine {
     }, obj);
   }
 
-  private checkCondition(actual: unknown, op: ABACCondition["operator"], expected: unknown): boolean {
+  private checkCondition(
+    actual: unknown,
+    op: ABACCondition["operator"],
+    expected: unknown
+  ): boolean {
     switch (op) {
-      case "eq": return actual === expected;
-      case "ne": return actual !== expected;
-      case "in": return Array.isArray(expected) && expected.includes(actual);
-      case "nin": return Array.isArray(expected) && !expected.includes(actual);
-      case "gt": return typeof actual === "number" && typeof expected === "number" && actual > expected;
-      case "lt": return typeof actual === "number" && typeof expected === "number" && actual < expected;
-      case "gte": return typeof actual === "number" && typeof expected === "number" && actual >= expected;
-      case "lte": return typeof actual === "number" && typeof expected === "number" && actual <= expected;
+      case "eq":
+        return actual === expected;
+      case "ne":
+        return actual !== expected;
+      case "in":
+        return Array.isArray(expected) && expected.includes(actual);
+      case "nin":
+        return Array.isArray(expected) && !expected.includes(actual);
+      case "gt":
+        return typeof actual === "number" && typeof expected === "number" && actual > expected;
+      case "lt":
+        return typeof actual === "number" && typeof expected === "number" && actual < expected;
+      case "gte":
+        return typeof actual === "number" && typeof expected === "number" && actual >= expected;
+      case "lte":
+        return typeof actual === "number" && typeof expected === "number" && actual <= expected;
       case "contains":
         if (Array.isArray(actual)) return actual.includes(expected);
         if (typeof actual === "string") return actual.includes(String(expected));
         return false;
-      default: return false;
+      default:
+        return false;
     }
   }
 

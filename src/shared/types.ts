@@ -71,7 +71,7 @@ export interface ZeroAuthConfig {
 export interface TokenPayload {
   sub: string; // user ID
   email: string;
-  sid: string; // session ID
+  sid?: string; // session ID
   jti: string; // JWT ID (unique token identifier)
   iat: number; // issued at
   exp: number; // expiration

@@ -1,14 +1,14 @@
 /**
- * Rate limiting middleware (in-memory primary, Redis optional stub)
- * - Per-IP sliding window
- * - Per-endpoint configurable limits via options
+ * Rate limiting middleware — in-memory pre-check → Redis fallback.
+ * Per-IP sliding window with exponential backoff on repeat violations.
  */
 
 import type { Request, Response, NextFunction } from "express";
 import { getConfig } from "../config";
 import { getLogger } from "../logger";
-import { ZeroAuthError, ErrorCodes } from "../shared/types";
-import type { Redis } from "ioredis";
+import { ErrorCodes } from "../shared/types";
+import { consumeInMemory, isIpBanned } from "../services/rateLimiter/inmemory";
+
 let useRedis = false as boolean;
 let redisConsume:
   | ((
@@ -20,14 +20,6 @@ let redisConsume:
 
 const logger = getLogger("rate-limiter");
 
-type Bucket = {
-  count: number;
-  windowStart: number; // epoch seconds
-};
-
-const ipBuckets: Map<string, Bucket> = new Map();
-
-/** Initialize rate limiter (placeholder for Redis-backed init) */
 export async function initRateLimiter(): Promise<void> {
   const cfg = getConfig();
   if (!cfg.rateLimiting.enabled) {
@@ -37,7 +29,6 @@ export async function initRateLimiter(): Promise<void> {
 
   if (cfg.rateLimiting.redisUri) {
     try {
-      // Lazy import to avoid requiring ioredis if not configured
       const { initRedisRateLimiter, consumePoint } = await import("../services/rateLimiter/redis");
       await initRedisRateLimiter(cfg.rateLimiting.redisUri!);
       redisConsume = consumePoint;
@@ -55,10 +46,6 @@ export async function initRateLimiter(): Promise<void> {
   logger.info("Rate limiter initialized (in-memory)");
 }
 
-/**
- * Middleware factory to rate-limit requests per-IP and per-route.
- * options.points = allowed requests per windowSecs
- */
 export function rateLimit(options?: { points?: number; windowSecs?: number }) {
   const cfg = getConfig();
   const points = options?.points ?? cfg.rateLimiting.perIpLimit;
@@ -67,64 +54,73 @@ export function rateLimit(options?: { points?: number; windowSecs?: number }) {
   return (req: Request, res: Response, next: NextFunction): void => {
     if (!cfg.rateLimiting.enabled) return next();
 
-    try {
-      const ip = (req.ip || req.headers["x-forwarded-for"] || "unknown") as string;
+    const ip = ((req.headers["x-forwarded-for"] as string) || req.ip || "unknown")
+      .split(",")[0]
+      .trim();
 
-      if (useRedis && redisConsume) {
-        const { allowed, remaining, current } = await redisConsume(ip, points, windowSecs);
-        if (!allowed) {
-          logger.warn("Rate limit exceeded (redis)", {
-            ip,
-            path: req.path,
-            method: req.method,
-            current,
-          });
-          res.setHeader("Retry-After", String(windowSecs));
-          res
-            .status(429)
-            .json({ error: ErrorCodes.RATE_LIMIT_EXCEEDED, message: "Too many requests" });
-          return;
-        }
-        // continue
-        return next();
-      }
-
-      const now = Math.floor(Date.now() / 1000);
-
-      const bucket = ipBuckets.get(ip);
-      if (!bucket) {
-        ipBuckets.set(ip, { count: 1, windowStart: now });
-        return next();
-      }
-
-      // If window expired, reset
-      if (now - bucket.windowStart >= windowSecs) {
-        ipBuckets.set(ip, { count: 1, windowStart: now });
-        return next();
-      }
-
-      // Within window
-      if (bucket.count + 1 > points) {
-        // Too many requests
-        logger.warn("Rate limit exceeded", { ip, path: req.path, method: req.method });
-        res.setHeader("Retry-After", String(windowSecs - (now - bucket.windowStart)));
-        res
-          .status(429)
-          .json({ error: ErrorCodes.RATE_LIMIT_EXCEEDED, message: "Too many requests" });
-        return;
-      }
-
-      bucket.count += 1;
-      ipBuckets.set(ip, bucket);
-      return next();
-    } catch (err) {
-      logger.error("Rate limiter error", err as Error);
-      next();
+    const banCheck = isIpBanned(ip);
+    if (banCheck.banned) {
+      logger.warn("Banned IP attempted request", {
+        ip,
+        path: req.path,
+        secondsRemaining: banCheck.seconds,
+      });
+      res.setHeader("Retry-After", String(banCheck.seconds));
+      res.status(429).json({
+        code: ErrorCodes.RATE_LIMIT_EXCEEDED,
+        message: "Too many requests — IP temporarily banned",
+        details: [],
+      });
+      return;
     }
+
+    const inMemResult = consumeInMemory(ip, 1, points, windowSecs);
+    if (!inMemResult.allowed) {
+      logger.warn("Rate limit exceeded (in-memory pre-check)", {
+        ip,
+        path: req.path,
+        method: req.method,
+      });
+      const retryAfter = inMemResult.banSeconds ?? windowSecs;
+      res.setHeader("Retry-After", String(retryAfter));
+      res
+        .status(429)
+        .json({ code: ErrorCodes.RATE_LIMIT_EXCEEDED, message: "Too many requests", details: [] });
+      return;
+    }
+
+    if (useRedis && redisConsume) {
+      redisConsume(ip, 1, windowSecs)
+        .then(({ allowed, current }) => {
+          if (!allowed) {
+            logger.warn("Rate limit exceeded (redis)", {
+              ip,
+              path: req.path,
+              method: req.method,
+              current,
+            });
+            res.setHeader("Retry-After", String(windowSecs));
+            res.status(429).json({
+              code: ErrorCodes.RATE_LIMIT_EXCEEDED,
+              message: "Too many requests",
+              details: [],
+            });
+            return;
+          }
+          next();
+        })
+        .catch((err) => {
+          logger.error("Redis rate limiter error, passing through", err as Error);
+          next();
+        });
+      return;
+    }
+
+    next();
   };
 }
 
-/** Utility to clear in-memory buckets (used in tests) */
 export function clearRateLimiter(): void {
-  ipBuckets.clear();
+  const { clearInMemoryBuckets } = require("../services/rateLimiter/inmemory");
+  clearInMemoryBuckets();
 }

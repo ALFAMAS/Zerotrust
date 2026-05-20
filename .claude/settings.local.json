@@ -12,7 +12,9 @@
       "PowerShell(python -m graphify cluster-only . --no-viz)",
       "PowerShell(Get-Content *)",
       "PowerShell(grep *)",
-      "PowerShell(Get-ChildItem -Path .\\\\src -Directory | Where-Object {$_.Name -eq \"api\"})"
+      "PowerShell(Get-ChildItem -Path .\\\\src -Directory | Where-Object {$_.Name -eq \"api\"})",
+      "Bash(mkdir -p /home/user/zeroauth/src/api/schemas /home/user/zeroauth/src/oauth/providers /home/user/zeroauth/src/audit /home/user/zeroauth/.github/workflows /home/user/zeroauth/.vscode /home/user/zeroauth/src/__tests__ /home/user/zeroauth/tests/load)",
+      "Bash(cat > *)"
     ]
   }
 }
