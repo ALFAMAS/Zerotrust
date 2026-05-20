@@ -49,10 +49,10 @@ export function consumeInMemory(
   const now = Date.now();
 
   const ban = banList.get(key);
-  if (ban && now < ban.bannedUntil) {
+  if (ban && ban.bannedUntil > 0 && now < ban.bannedUntil) {
     const banSeconds = Math.ceil((ban.bannedUntil - now) / 1000);
     return { allowed: false, remaining: 0, banSeconds };
-  } else if (ban && now >= ban.bannedUntil) {
+  } else if (ban && ban.bannedUntil > 0 && now >= ban.bannedUntil) {
     banList.delete(key);
   }
 
