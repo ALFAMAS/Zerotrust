@@ -23,7 +23,7 @@
         "zod": "^4.4.3",
       },
       "devDependencies": {
-        "@rollup/rollup-linux-x64-gnu": "^4.60.4",
+        "@rollup/rollup-win32-x64-msvc": "^4.60.4",
         "@types/bcryptjs": "^2.4.6",
         "@types/cors": "^2.8.17",
         "@types/express": "^4.17.21",
