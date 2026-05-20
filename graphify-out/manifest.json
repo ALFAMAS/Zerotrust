@@ -1,0 +1,117 @@
+{
+  "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\.eslintrc.json": {
+    "mtime": 1779208819.589182,
+    "ast_hash": "fc8d6be23d6fd1d91d279c02e7b75400",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\.prettierrc.json": {
+    "mtime": 1779208819.589182,
+    "ast_hash": "144b0eb5bda042188f8d351d2b9ec8c5",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json": {
+    "mtime": 1779209678.8365393,
+    "ast_hash": "148075d055a1e8d58c238fc59355e8e7",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\tsconfig.json": {
+    "mtime": 1779210143.0949538,
+    "ast_hash": "db64904890b3897937302dc831631487",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\vitest.config.ts": {
+    "mtime": 1779208819.597183,
+    "ast_hash": "321399142892c85f85823e9823f49d64",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\.claude\\settings.local.json": {
+    "mtime": 1779282734.8113666,
+    "ast_hash": "a038054288cf3ea477c3d97f62d80d5e",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\index.ts": {
+    "mtime": 1779210190.3163683,
+    "ast_hash": "ca5290d40583b108e757d83a23ef46c1",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\config\\index.ts": {
+    "mtime": 1779208819.5731838,
+    "ast_hash": "261242e37beb5517e2e2cb341f56e649",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\csfle.ts": {
+    "mtime": 1779208819.589182,
+    "ast_hash": "c21ca1d4d3f76a89436621974ecedc72",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\db\\index.ts": {
+    "mtime": 1779208819.5881824,
+    "ast_hash": "f5cbb28f8c97d8658c0b231ee9f32834",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\logger\\index.ts": {
+    "mtime": 1779208819.589182,
+    "ast_hash": "73087c60eee71481529f77d0d1de5f98",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\middleware\\auth.ts": {
+    "mtime": 1779208916.6661818,
+    "ast_hash": "341729ffb9bfa01ec07b4393ca5117f5",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\middleware\\continuousEval.ts": {
+    "mtime": 1779208916.6661818,
+    "ast_hash": "18c6d40eeb65d8528ecc057de38b19c7",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\middleware\\deviceAttestation.ts": {
+    "mtime": 1779208916.6661818,
+    "ast_hash": "00f1ea499cb39afe9f59146bd88effbc",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\models\\index.ts": {
+    "mtime": 1779208819.596182,
+    "ast_hash": "b9c90460fea47413806bb2a671a98bae",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\models\\user.model.ts": {
+    "mtime": 1779208819.596182,
+    "ast_hash": "1593c3251a113b7ef971d6ad9de66eee",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts": {
+    "mtime": 1779208819.601182,
+    "ast_hash": "332eba0870ee9e1c381692370740f95a",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\fingerprint.service.ts": {
+    "mtime": 1779208819.599184,
+    "ast_hash": "3aa45e1874f0e2460a4c001c6668a6ce",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\shared\\types.ts": {
+    "mtime": 1779208819.5731838,
+    "ast_hash": "7e91b71235793761453699a9bc074f62",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\CHANGELOG.md": {
+    "mtime": 1779208819.597183,
+    "ast_hash": "c90734d01269063708bfcc20fa48e54f",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\CLAUDE.md": {
+    "mtime": 1779282480.259879,
+    "ast_hash": "219f4a7c89b49227075670a543531d3f",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\docker-compose.yml": {
+    "mtime": 1779208819.589182,
+    "ast_hash": "e77c653945eaadf99909686b6071846a",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\README.md": {
+    "mtime": 1779280519.0543206,
+    "ast_hash": "f11d0acf736af82521624574c9e2cf53",
+    "semantic_hash": ""
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Get-ChildItem -Recurse -File | Measure-Object | ForEach-Object {$_.Count})",
+      "PowerShell(python -c \"import graphify; print\\('graphify is installed'\\)\" 2>$null)",
+      "PowerShell(python -m graphify . --mode deep)",
+      "PowerShell(python -m graphify . --mode deep --update)",
+      "PowerShell(python -c \"import graphify; print\\('Graphify is working'\\)\" > $null)",
+      "PowerShell(python -m graphify --help)",
+      "PowerShell(python -m graphify extract . --no-cluster)",
+      "PowerShell(python -m graphify update . --no-cluster)",
+      "PowerShell(python -m graphify cluster-only . --no-viz)",
+      "PowerShell(Get-Content *)",
+      "PowerShell(grep *)",
+      "PowerShell(Get-ChildItem -Path .\\\\src -Directory | Where-Object {$_.Name -eq \"api\"})"
+    ]
+  }
+}

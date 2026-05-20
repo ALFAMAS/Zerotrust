@@ -5,6 +5,7 @@ A production-grade, zero-trust authentication and authorization system built wit
 ## 🎯 Key Features
 
 ### Authentication
+
 - ✅ **OAuth 2.0 Integration** - Google, Facebook, GitHub, Apple (provider-agnostic framework)
 - ✅ **Multi-Factor Authentication** - TOTP, WebAuthn/Passkeys, with email/SMS/WhatsApp/Telegram channels
 - ✅ **Passwordless Authentication** - Passkeys with hardware-backed device attestation
@@ -12,12 +13,14 @@ A production-grade, zero-trust authentication and authorization system built wit
 - ✅ **Cryptographic Session Binding** - Proof-of-Possession validation to prevent token theft
 
 ### Authorization
+
 - ✅ **Attribute-Based Access Control (ABAC)** - Dynamic, context-aware access decisions
 - ✅ **Role-Based Access Control (RBAC)** - Hierarchical roles with permission inheritance
 - ✅ **Just-In-Time (JIT) Privilege Escalation** - Temporal privilege grants with auto-revocation
 - ✅ **Continuous Access Evaluation** - Real-time risk assessment and policy enforcement
 
 ### Security
+
 - ✅ **Client-Side Field Level Encryption (CSFLE)** - Transparent encryption for sensitive data
 - ✅ **Device Fingerprinting** - Detect compromised endpoints mid-session
 - ✅ **Device Attestation** - WebAuthn hardware verification
@@ -26,6 +29,7 @@ A production-grade, zero-trust authentication and authorization system built wit
 - ✅ **Geo-fencing** - Geographic and IP-based access control
 
 ### Observability
+
 - ✅ **Immutable Audit Logging** - Complete forensic trail to Elasticsearch
 - ✅ **Structured JSON Logging** - ELK stack integration
 - ✅ **Correlation IDs** - Request tracing across services
@@ -34,6 +38,7 @@ A production-grade, zero-trust authentication and authorization system built wit
 ## 🚀 Quick Start
 
 ### Prerequisites
+
 - Node.js 18+ or Bun 1.0+
 - MongoDB 5.0+
 - Redis 7.0+ (for distributed rate limiting)
@@ -56,6 +61,7 @@ docker-compose logs -f zeroauth
 ```
 
 Services will be available at:
+
 - API: `http://localhost:3000`
 - MongoDB: `mongodb://admin:password@localhost:27017`
 - Redis: `redis://localhost:6379`
@@ -112,12 +118,14 @@ All configuration is environment-based. See `.env.example` for complete options.
 ### Critical Security Keys
 
 Generate secure random keys:
+
 ```bash
 # Generate 32-byte random key (64 hex chars)
 openssl rand -hex 32
 ```
 
 Set these in `.env`:
+
 ```
 TOKEN_SECRET_HEX=<32-byte random key>
 CSFLE_MASTER_KEY_HEX=<32-byte random key>
@@ -126,6 +134,7 @@ CSFLE_MASTER_KEY_HEX=<32-byte random key>
 ### OAuth Setup
 
 Configure OAuth providers in `.env`:
+
 ```
 OAUTH_GOOGLE_CLIENT_ID=your-client-id
 OAUTH_GOOGLE_CLIENT_SECRET=your-client-secret
@@ -135,6 +144,7 @@ OAUTH_GOOGLE_REDIRECT_URI=http://localhost:3000/auth/oauth/google/callback
 ### MFA Channels
 
 Enable desired channels:
+
 ```
 MFA_EMAIL_ENABLED=true
 MFA_SMS_ENABLED=false
@@ -176,9 +186,9 @@ Request → Auth Middleware
   ├─ Session validation
   ├─ Device fingerprint check
   └─ Proof-of-possession validation
-  
+
   ↓
-  
+
 Continuous Evaluation Middleware
   ├─ Schedule restriction check
   ├─ Geofencing validation
@@ -187,7 +197,7 @@ Continuous Evaluation Middleware
   └─ Decision: Allow | Deny | Challenge
 
   ↓
-  
+
 Access Granted / Denied
   └─ Audit log created
 ```
@@ -195,6 +205,7 @@ Access Granted / Denied
 ### CSFLE Implementation
 
 Sensitive fields are transparently encrypted:
+
 - Email, phone, password hash
 - TOTP secrets, OAuth tokens
 - User attributes
@@ -204,6 +215,7 @@ Encryption is handled by Mongoose pre-save/post-retrieve hooks.
 ## 🔄 Implementation Phases
 
 ### Phase 1 ✅ (Foundation - Complete)
+
 - [x] Configuration management
 - [x] Database connection layer
 - [x] CSFLE encryption foundation
@@ -213,12 +225,14 @@ Encryption is handled by Mongoose pre-save/post-retrieve hooks.
 - [x] Docker setup
 
 ### Phase 2 (API & OAuth - In Progress)
+
 - [ ] REST API endpoints
 - [ ] OAuth provider factory
 - [ ] MFA channel implementations
 - [ ] Request validation middleware
 
 ### Phase 3 (Middleware & Evaluation - Pending)
+
 - [ ] Auth middleware (token verification)
 - [ ] Device attestation middleware
 - [ ] Continuous access evaluation
@@ -227,6 +241,7 @@ Encryption is handled by Mongoose pre-save/post-retrieve hooks.
 - [ ] Geo-fencing
 
 ### Phase 4 (Observability & Hardening - Pending)
+
 - [ ] Audit logging to Elasticsearch
 - [ ] Shared Signals Framework
 - [ ] Workload identity credentials
@@ -254,10 +269,12 @@ bun run test src/__tests__/unit/token.test.ts
 ### Elasticsearch / Kibana
 
 Audit logs are automatically indexed in Elasticsearch:
+
 - **Index Pattern**: `zeroauth-audit-YYYY-MM-DD`
 - **Access**: http://localhost:5601
 
 Create dashboards to monitor:
+
 - Authentication success/failure rates
 - MFA adoption
 - Access denied patterns
@@ -267,6 +284,7 @@ Create dashboards to monitor:
 ### Application Logs
 
 JSON logs are streamed to Elasticsearch:
+
 ```bash
 # Check logs in Kibana
 # Index Pattern: zeroauth-logs-YYYY-MM-DD
@@ -284,6 +302,7 @@ JSON logs are streamed to Elasticsearch:
 ## 📚 API Documentation
 
 Coming in Phase 2. Will include:
+
 - OpenAPI/Swagger spec
 - Endpoint documentation
 - Request/response examples
@@ -304,6 +323,7 @@ Coming in Phase 2. Will include:
 ## 🆘 Troubleshooting
 
 ### MongoDB Connection Issues
+
 ```bash
 # Check MongoDB logs
 docker-compose logs mongodb
@@ -313,6 +333,7 @@ docker-compose exec mongodb mongosh -u admin -p password
 ```
 
 ### CSFLE Key Errors
+
 ```bash
 # Regenerate encryption keys
 openssl rand -hex 32 > .env  # Update TOKEN_SECRET_HEX and CSFLE_MASTER_KEY_HEX
@@ -320,7 +341,9 @@ docker-compose restart zeroauth
 ```
 
 ### Rate Limiting Not Working
+
 Ensure Redis is running and accessible:
+
 ```bash
 docker-compose exec redis redis-cli ping
 ```
@@ -328,8 +351,7 @@ docker-compose exec redis redis-cli ping
 ## 📞 Support
 
 For issues and questions:
+
 - GitHub Issues: [repo/issues]
 - Documentation: [docs link]
 - Security: security@zeroauth.dev
-
-
