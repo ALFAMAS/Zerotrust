@@ -8,6 +8,7 @@ import { getConfig } from "../config";
 import { getLogger } from "../logger";
 import { ErrorCodes } from "../shared/types";
 import { consumeInMemory, isIpBanned } from "../services/rateLimiter/inmemory";
+import { AuditModel } from "../models";
 
 let useRedis = false as boolean;
 let redisConsume:
@@ -65,6 +66,15 @@ export function rateLimit(options?: { points?: number; windowSecs?: number }) {
         path: req.path,
         secondsRemaining: banCheck.seconds,
       });
+      AuditModel.create({
+        action: "rate_limit.ip_banned",
+        ipAddress: ip,
+        userAgent: req.headers["user-agent"],
+        success: false,
+        errorCode: ErrorCodes.RATE_LIMIT_EXCEEDED,
+        resourceDetails: { path: req.path, method: req.method, secondsRemaining: banCheck.seconds },
+        timestamp: new Date(),
+      }).catch(() => {});
       res.setHeader("Retry-After", String(banCheck.seconds));
       res.status(429).json({
         code: ErrorCodes.RATE_LIMIT_EXCEEDED,
@@ -81,6 +91,15 @@ export function rateLimit(options?: { points?: number; windowSecs?: number }) {
         path: req.path,
         method: req.method,
       });
+      AuditModel.create({
+        action: "rate_limit.exceeded",
+        ipAddress: ip,
+        userAgent: req.headers["user-agent"],
+        success: false,
+        errorCode: ErrorCodes.RATE_LIMIT_EXCEEDED,
+        resourceDetails: { path: req.path, method: req.method, backend: "inmemory" },
+        timestamp: new Date(),
+      }).catch(() => {});
       const retryAfter = inMemResult.banSeconds ?? windowSecs;
       res.setHeader("Retry-After", String(retryAfter));
       res
@@ -99,6 +118,15 @@ export function rateLimit(options?: { points?: number; windowSecs?: number }) {
               method: req.method,
               current,
             });
+            AuditModel.create({
+              action: "rate_limit.exceeded",
+              ipAddress: ip,
+              userAgent: req.headers["user-agent"],
+              success: false,
+              errorCode: ErrorCodes.RATE_LIMIT_EXCEEDED,
+              resourceDetails: { path: req.path, method: req.method, backend: "redis", current },
+              timestamp: new Date(),
+            }).catch(() => {});
             res.setHeader("Retry-After", String(windowSecs));
             res.status(429).json({
               code: ErrorCodes.RATE_LIMIT_EXCEEDED,
