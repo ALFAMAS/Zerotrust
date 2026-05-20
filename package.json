@@ -14,41 +14,53 @@
     "lint": "eslint src --ext .ts",
     "lint:fix": "eslint src --ext .ts --fix",
     "format": "prettier --write \"src/**/*.ts\"",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "prepare": "husky",
+    "lint-staged": "lint-staged"
+  },
+  "lint-staged": {
+    "src/**/*.ts": [
+      "prettier --write"
+    ]
   },
   "dependencies": {
-    "mongoose": "^8.3.0",
     "@simplewebauthn/server": "^10.0.0",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "geoip-lite": "^1.4.10",
+    "helmet": "^7.1.0",
+    "ioredis": "^5.3.2",
+    "mongoose": "^8.3.0",
+    "nanoid": "^5.0.7",
+    "nodemailer": "^6.9.13",
     "otpauth": "^9.3.0",
     "qrcode": "^1.5.3",
-    "nodemailer": "^6.9.13",
-    "bcryptjs": "^2.4.3",
-    "nanoid": "^5.0.7",
-    "geoip-lite": "^1.4.10",
-    "ua-parser-js": "^1.0.37",
-    "express": "^4.18.2",
-    "ioredis": "^5.3.2",
-    "twilio": "^4.7.0",
     "swagger-ui-express": "^4.6.3",
-    "helmet": "^7.1.0",
-    "cors": "^2.8.5"
+    "twilio": "^4.7.0",
+    "ua-parser-js": "^1.0.37",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@rollup/rollup-linux-x64-gnu": "^4.60.4",
     "@types/bcryptjs": "^2.4.6",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.10.0",
     "@types/nodemailer": "^6.4.14",
     "@types/qrcode": "^1.5.5",
+    "@types/swagger-ui-express": "^4.1.8",
     "@types/ua-parser-js": "^0.7.39",
-    "@types/node": "^20.10.0",
-    "@types/express": "^4.17.21",
-    "@types/cors": "^2.8.17",
-    "typescript": "^5.4.0",
-    "vitest": "^1.0.0",
-    "@vitest/ui": "^1.0.0",
-    "@vitest/coverage-v8": "^1.0.0",
-    "eslint": "^8.55.0",
     "@typescript-eslint/eslint-plugin": "^6.13.0",
     "@typescript-eslint/parser": "^6.13.0",
+    "@vitest/coverage-v8": "^1.0.0",
+    "@vitest/ui": "^1.0.0",
+    "eslint": "^8.55.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.0.5",
     "prettier": "^3.1.0",
-    "tsx": "^4.6.0"
+    "tsx": "^4.6.0",
+    "typescript": "^5.4.0",
+    "vitest": "^1.0.0"
   }
 }

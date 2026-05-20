@@ -105,7 +105,22 @@ export { geoFencingMiddleware } from "./middleware/geoFencing";
 export { temporalAccessMiddleware } from "./middleware/temporalAccess";
 export { createServer as createApiServer } from "./api/server";
 export { sendOTP } from "./mfa";
-export { requireFields, allowOnlyMethods } from "./middleware/validation";
+export { requireFields, allowOnlyMethods, validate } from "./middleware/validation";
+export { securityHeaders } from "./middleware/securityHeaders";
+export {
+  checkAccountLockout,
+  recordFailedLogin,
+  recordSuccessfulLogin,
+  clearLockout,
+  isAccountLocked,
+} from "./middleware/accountLockout";
+export {
+  initAuditPipeline,
+  queueAuditDoc,
+  flushAuditPipeline,
+  getElasticsearchHealth,
+  shutdownAuditPipeline,
+} from "./audit";
 export { getProviderAdapter } from "./oauth/provider.factory";
 export { handleSSFEvent } from "./ssf/receiver";
 export { sendSSFEvent } from "./ssf/sender";
@@ -140,6 +155,14 @@ export async function initializeZeroAuth() {
     logger.warn("Rate limiter initialization skipped or failed", err as Error);
   }
 
+  // Initialize Elasticsearch audit pipeline
+  try {
+    const { initAuditPipeline } = await import("./audit");
+    await initAuditPipeline();
+  } catch (err) {
+    logger.warn("Audit pipeline initialization skipped or failed", err as Error);
+  }
+
   // Initialize auth middleware (token service)
   try {
     const { initAuthMiddleware } = await import("./middleware/auth");
@@ -161,6 +184,13 @@ export async function shutdownZeroAuth() {
 
   const logger = getLogger();
   logger.info("Shutting down ZeroAuth system...");
+
+  try {
+    const { shutdownAuditPipeline } = await import("./audit");
+    await shutdownAuditPipeline();
+  } catch {
+    // best effort
+  }
 
   try {
     await closeDatabase();

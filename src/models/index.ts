@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document } from "mongoose";
+export { UserModel, type UserDocument } from "./user.model";
 import type {
   Session,
   Role,
