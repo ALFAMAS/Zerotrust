@@ -1,442 +1,578 @@
-# ZeroAuth - Zero-Trust Authentication & Authorization System
+# ZeroAuth
 
-A production-grade, zero-trust authentication and authorization system built with TypeScript, Mongoose, and modern cryptographic standards. Designed for enterprise security with continuous access evaluation, device attestation, and comprehensive audit logging.
+A zero-trust authentication and authorization library for TypeScript applications. Built on PASETO v4, ABAC/RBAC, device attestation, and continuous access evaluation — designed to be embedded in any Node.js or Bun service as a secure auth layer.
 
-## 🎯 Key Features
+---
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Feature Status](#feature-status)
+- [Quick Start](#quick-start)
+- [Project Structure](#project-structure)
+- [Configuration](#configuration)
+- [Architecture](#architecture)
+- [API Reference](#api-reference)
+- [Testing](#testing)
+- [Deployment](#deployment)
+- [Security](#security)
+- [Roadmap & TODO](#roadmap--todo)
+- [Contributing](#contributing)
+- [Troubleshooting](#troubleshooting)
+
+---
+
+## Overview
+
+ZeroAuth implements a full zero-trust security model where every request is verified, every device is tracked, and every access decision is evaluated at runtime — not just at login.
+
+**Core principles:**
+
+- **Never trust, always verify** — PASETO tokens are cryptographically bound to the originating device
+- **Least privilege by default** — JIT privilege escalation with automatic expiry
+- **Continuous evaluation** — risk scoring and ABAC enforcement on every request
+- **Audit everything** — immutable forensic trail for all security-sensitive actions
+
+**Runtime requirements:**
+
+| Dependency | Version | Purpose |
+|---|---|---|
+| Node.js or Bun | 18+ / 1.0+ | Runtime |
+| MongoDB | 5.0+ | Persistence |
+| Redis | 7.0+ | Distributed rate limiting |
+| Elasticsearch | 8.0+ | Audit log storage *(optional)* |
+
+---
+
+## Feature Status
 
 ### Authentication
 
-- ✅ **OAuth 2.0 Integration** - Google, Facebook, GitHub, Apple (provider-agnostic framework)
-- ✅ **Multi-Factor Authentication** - TOTP, WebAuthn/Passkeys, with email/SMS/WhatsApp/Telegram channels
-- ✅ **Passwordless Authentication** - Passkeys with hardware-backed device attestation
-- ✅ **PASETO v4.local Tokens** - Platform-agnostic security tokens (no JWT confusion vulnerabilities)
-- ✅ **Cryptographic Session Binding** - Proof-of-Possession validation to prevent token theft
+| Feature | Status | Notes |
+|---|---|---|
+| PASETO v4.local tokens | ✅ Complete | AES-256-GCM, no JWT confusion vulnerabilities |
+| Session management | ✅ Complete | TTL, device binding, concurrent device limits |
+| Proof-of-Possession | ✅ Complete | Cryptographic token-to-device binding |
+| Passkeys / WebAuthn | ✅ Schema + service | API routes pending |
+| TOTP (authenticator apps) | ✅ Schema + OTP service | Enrollment flow pending |
+| Password hashing | ✅ Complete | bcryptjs, configurable rounds |
+| OAuth 2.0 — GitHub | ✅ Complete | Provider adapter implemented |
+| OAuth 2.0 — Google | ⬜ Pending | Adapter interface ready |
+| OAuth 2.0 — Facebook | ⬜ Pending | Adapter interface ready |
+| OAuth 2.0 — Apple | ⬜ Pending | Adapter interface ready |
+| MFA — Email OTP | ✅ Complete | Nodemailer |
+| MFA — SMS OTP | ✅ Complete | Twilio |
+| MFA — WhatsApp OTP | ✅ Complete | Twilio |
+| MFA — Telegram OTP | ✅ Complete | Telegram Bot API |
+| Passwordless (magic link) | ⬜ Pending | — |
 
 ### Authorization
 
-- ✅ **Attribute-Based Access Control (ABAC)** - Dynamic, context-aware access decisions
-- ✅ **Role-Based Access Control (RBAC)** - Hierarchical roles with permission inheritance
-- ✅ **Just-In-Time (JIT) Privilege Escalation** - Temporal privilege grants with auto-revocation
-- ✅ **Continuous Access Evaluation** - Real-time risk assessment and policy enforcement
+| Feature | Status | Notes |
+|---|---|---|
+| RBAC with role hierarchy | ✅ Complete | Hierarchical permission inheritance |
+| ABAC with dynamic conditions | ✅ Complete | Context-aware runtime evaluation |
+| JIT privilege escalation | ✅ Complete | Temporal grants with auto-revocation |
+| Continuous access evaluation | ✅ Complete | Risk scoring per request |
+| Schedule-based access control | ✅ Complete | Timezone-aware window checks |
+| Geo-fencing | ✅ Complete | Country allow-lists, subnet checks |
 
-### Security
+### Security Primitives
 
-- ✅ **Client-Side Field Level Encryption (CSFLE)** - Transparent encryption for sensitive data
-- ✅ **Device Fingerprinting** - Detect compromised endpoints mid-session
-- ✅ **Device Attestation** - WebAuthn hardware verification
-- ✅ **Shared Signals Framework (SSF)** - Receive/transmit compromise signals
-- ✅ **Rate Limiting** - Multi-layer (in-memory, Redis, IP-based)
-- ✅ **Geo-fencing** - Geographic and IP-based access control
+| Feature | Status | Notes |
+|---|---|---|
+| Client-Side Field Level Encryption | ✅ Complete | AES-256-GCM + HKDF key derivation |
+| CSFLE key rotation | ✅ Complete | Versioned key management |
+| Device fingerprinting | ✅ Complete | FNV-1a, anomaly detection |
+| Device attestation middleware | ✅ Complete | Strict and permissive modes |
+| Rate limiting — Redis (distributed) | ✅ Complete | Token bucket, namespaced keys |
+| Rate limiting — in-memory | ⬜ Pending | Single-process fallback |
+| IP-based rate limiting | ✅ Complete | Sliding window counters |
+| Security headers middleware | ⬜ Pending | CSP, HSTS, X-Frame-Options |
+| Shared Signals Framework (receive) | ✅ Complete | SET validation and ingestion |
+| Shared Signals Framework (send) | ✅ Complete | Transmit local compromise signals |
+| Workload identity credentials | ✅ Complete | Short-lived scoped tokens |
+
+### API Surface
+
+| Feature | Status | Notes |
+|---|---|---|
+| Auth routes (register, login, refresh, logout) | ✅ Complete | `src/api/routes/auth.routes.ts` |
+| Workload credential routes | ✅ Complete | `src/api/routes/workload.routes.ts` |
+| Session management routes | ⬜ Pending | List, revoke, device enumeration |
+| MFA enrollment/verification routes | ⬜ Pending | TOTP setup, WebAuthn, backup codes |
+| OAuth callback routes | ⬜ Pending | Authorization code exchange |
+| Password reset routes | ⬜ Pending | Token-based reset flow |
+| Admin routes | ⬜ Pending | User management, role assignment |
+| Request validation schemas | ⬜ Pending | Zod schemas for all endpoints |
+| OpenAPI / Swagger spec | ⬜ Pending | — |
 
 ### Observability
 
-- ✅ **Immutable Audit Logging** - Complete forensic trail to Elasticsearch
-- ✅ **Structured JSON Logging** - ELK stack integration
-- ✅ **Correlation IDs** - Request tracing across services
-- ✅ **Real-time Alerting** - Elasticsearch alerting rules
+| Feature | Status | Notes |
+|---|---|---|
+| Structured JSON logging | ✅ Complete | Correlation IDs, ELK-ready |
+| Audit log model | ✅ Complete | Schema with forensic fields |
+| Elasticsearch audit pipeline | ⬜ Pending | Stream indexing, retention policy |
+| Kibana dashboards | ⬜ Pending | Auth metrics, anomaly views |
 
-## 🚀 Quick Start
+---
 
-### Prerequisites
+## Quick Start
 
-- Node.js 18+ or Bun 1.0+
-- MongoDB 5.0+
-- Redis 7.0+ (for distributed rate limiting)
-- Elasticsearch 8.0+ (optional, for audit logs)
-
-### Docker Setup (Recommended)
+### Docker (Recommended)
 
 ```bash
-# Clone and setup
-git clone <repo>
+git clone https://github.com/alfamas/zeroauth
 cd zeroauth
 cp .env.example .env
+# Edit .env with your secrets
 
-# Start all services with Docker Compose
 docker-compose up -d
-
-# Verify services are healthy
 docker-compose ps
 docker-compose logs -f zeroauth
 ```
 
-Services will be available at:
+Services:
 
-- API: `http://localhost:3000`
-- MongoDB: `mongodb://admin:password@localhost:27017`
-- Redis: `redis://localhost:6379`
-- Elasticsearch: `http://localhost:9200`
-- Kibana: `http://localhost:5601`
+| Service | URL |
+|---|---|
+| ZeroAuth API | `http://localhost:3000` |
+| MongoDB | `mongodb://admin:password@localhost:27017` |
+| Redis | `redis://localhost:6379` |
+| Elasticsearch | `http://localhost:9200` |
+| Kibana | `http://localhost:5601` |
 
 ### Local Development
 
 ```bash
-# Install dependencies
-bun install  # or: npm install
-
-# Setup environment
+bun install        # or: npm install
 cp .env.example .env
-# Edit .env with your configuration
 
-# Initialize database and encryption keys
-bun src/index.ts
-
-# Run in development mode
-bun run dev
-
-# Run tests
-bun run test
-
-# Build for production
-bun run build
+bun run dev        # tsx watch — hot reload
+bun run test       # vitest
+bun run type-check # tsc --noEmit
+bun run lint
+bun run format
 ```
 
-## 📁 Project Structure
+### Embed in Your Application
+
+```typescript
+import { initializeZeroAuth, shutdownZeroAuth } from "@zeroauth/core";
+
+const { config, logger } = await initializeZeroAuth();
+
+// On process exit
+process.on("SIGTERM", () => shutdownZeroAuth());
+```
+
+---
+
+## Project Structure
 
 ```
 src/
-├── config/              # Environment configuration management
-├── crypto/              # CSFLE encryption management
-├── db/                  # MongoDB connection & health checks
-├── logger/              # Structured logging infrastructure
-├── models/              # Mongoose schemas (User, Session, Role, etc.)
-├── services/            # Core services (Authorization, Token, Fingerprinting)
-├── middleware/          # Express middleware (auth, validation, rate limiting)
-├── api/                 # REST API routes (Phase 2)
-├── oauth/               # OAuth provider implementations (Phase 2)
-├── mfa/                 # MFA channel implementations (Phase 2)
-├── audit/               # Audit logging to Elasticsearch (Phase 4)
-├── ssf/                 # Shared Signals Framework (Phase 4)
-├── workload/            # Workload identity credentials (Phase 4)
-└── shared/types.ts      # Central type definitions
+├── config/                  # Environment config loader + validation
+├── crypto/
+│   └── csfle.ts             # AES-256-GCM field encryption, HKDF key derivation
+├── db/                      # MongoDB connection, health checks, pooling
+├── logger/                  # Structured JSON logging, correlation IDs, ES stream
+├── shared/
+│   └── types.ts             # Canonical type definitions (User, Session, Token…)
+├── models/
+│   ├── user.model.ts        # User schema with CSFLE hooks
+│   └── index.ts             # Session, Role, JIT, AuditLog, RefreshToken, OTP
+├── services/
+│   ├── token.service.ts     # PASETO v4.local token issue/verify
+│   ├── authz.service.ts     # ABAC engine, role hierarchy, JIT evaluation
+│   ├── fingerprint.service.ts
+│   └── rateLimiter/
+│       └── redis.ts         # Redis token bucket rate limiter
+├── middleware/
+│   ├── auth.ts              # Token verification, session hydration
+│   ├── deviceAttestation.ts # Fingerprint comparison, anomaly flagging
+│   ├── continuousEval.ts    # Per-request risk scoring + ABAC enforcement
+│   ├── rateLimiting.ts      # Multi-layer rate limiting orchestration
+│   ├── geoFencing.ts        # Country/subnet access control
+│   ├── temporalAccess.ts    # Schedule-based restrictions, JIT expiry
+│   ├── proofOfPossession.ts # Nonce-based token-to-device binding
+│   ├── sessionControl.ts    # Concurrent device limits, session revocation
+│   └── validation.ts        # Field presence and method guards
+├── api/
+│   ├── server.ts            # Express app factory
+│   ├── auth/index.ts        # Auth request handlers
+│   └── routes/
+│       ├── auth.routes.ts   # Register, login, refresh, logout
+│       └── workload.routes.ts
+├── oauth/
+│   ├── provider.factory.ts  # Provider-agnostic adapter interface
+│   └── providers/
+│       └── github.ts        # GitHub OAuth adapter
+├── mfa/
+│   ├── index.ts             # OTP dispatch
+│   └── channels/            # email | sms | whatsapp | telegram
+├── ssf/
+│   ├── receiver.ts          # Ingest SET payloads, trigger revocations
+│   ├── sender.ts            # Transmit local security events
+│   └── verify.ts            # SET signature validation
+├── workload/
+│   └── index.ts             # Short-lived workload credential issuance
+└── __tests__/
+    └── fingerprint.test.ts
 ```
 
-## 🔐 Configuration
+---
 
-All configuration is environment-based. See `.env.example` for complete options.
+## Configuration
 
-### Critical Security Keys
+All configuration is environment-based. Copy `.env.example` and fill in values.
 
-Generate secure random keys:
+### Critical Keys
+
+Generate with:
 
 ```bash
-# Generate 32-byte random key (64 hex chars)
 openssl rand -hex 32
 ```
 
-Set these in `.env`:
-
-```
-TOKEN_SECRET_HEX=<32-byte random key>
-CSFLE_MASTER_KEY_HEX=<32-byte random key>
+```env
+TOKEN_SECRET_HEX=<32-byte random hex>
+CSFLE_MASTER_KEY_HEX=<32-byte random hex>
 ```
 
 ### OAuth Setup
 
-Configure OAuth providers in `.env`:
+```env
+OAUTH_GITHUB_CLIENT_ID=your-client-id
+OAUTH_GITHUB_CLIENT_SECRET=your-client-secret
+OAUTH_GITHUB_REDIRECT_URI=http://localhost:3000/auth/oauth/github/callback
 
-```
-OAUTH_GOOGLE_CLIENT_ID=your-client-id
-OAUTH_GOOGLE_CLIENT_SECRET=your-client-secret
+# Google, Facebook, Apple — adapters pending, keys can be pre-configured
+OAUTH_GOOGLE_CLIENT_ID=
+OAUTH_GOOGLE_CLIENT_SECRET=
 OAUTH_GOOGLE_REDIRECT_URI=http://localhost:3000/auth/oauth/google/callback
 ```
 
 ### MFA Channels
 
-Enable desired channels:
-
-```
+```env
 MFA_EMAIL_ENABLED=true
 MFA_SMS_ENABLED=false
 MFA_WHATSAPP_ENABLED=false
 MFA_TELEGRAM_ENABLED=false
 ```
 
-## 🏗️ Architecture
+---
 
-### Authentication Flow
+## Architecture
 
-```
-┌─ User Registration ─────────────┐
-│  1. Email/phone verification    │
-│  2. Password hash + CSFLE       │
-│  3. Optional: Passkey enroll    │
-└────────────────────────────────┘
-                ↓
-┌─ Login Challenge ──────────────┐
-│  1. Email/password OR passkey   │
-│  2. MFA challenge (if enabled)  │
-│  3. Device fingerprinting       │
-│  4. Proof-of-possession gen     │
-└────────────────────────────────┘
-                ↓
-┌─ Token Generation ─────────────┐
-│  1. PASETO v4.local encryption  │
-│  2. Cryptographic binding       │
-│  3. Session creation            │
-│  4. Refresh token issuance      │
-└────────────────────────────────┘
-```
-
-### Authorization Flow
+### Request Lifecycle
 
 ```
-Request → Auth Middleware
-  ├─ Token verification (PASETO)
-  ├─ Session validation
-  ├─ Device fingerprint check
-  └─ Proof-of-possession validation
-
-  ↓
-
-Continuous Evaluation Middleware
-  ├─ Schedule restriction check
-  ├─ Geofencing validation
-  ├─ Risk score calculation
-  ├─ ABAC condition evaluation
-  └─ Decision: Allow | Deny | Challenge
-
-  ↓
-
-Access Granted / Denied
-  └─ Audit log created
+Incoming Request
+      │
+      ▼
+┌─────────────────────────┐
+│  Rate Limiting Layer    │  In-memory → Redis → IP sliding window
+└─────────────┬───────────┘
+              │
+              ▼
+┌─────────────────────────┐
+│  Auth Middleware        │  PASETO verify → session hydrate → PoP validate
+└─────────────┬───────────┘
+              │
+              ▼
+┌─────────────────────────┐
+│  Device Attestation     │  Fingerprint diff → anomaly flag → step-up
+└─────────────┬───────────┘
+              │
+              ▼
+┌─────────────────────────┐
+│  Continuous Eval        │  ABAC conditions → risk score → allow/deny/challenge
+└─────────────┬───────────┘
+              │
+              ▼
+┌─────────────────────────┐
+│  Geo + Temporal Guards  │  Country check → schedule window → JIT expiry
+└─────────────┬───────────┘
+              │
+              ▼
+         Route Handler
+              │
+              ▼
+         Audit Log
 ```
 
-### CSFLE Implementation
+### Token Architecture
 
-Sensitive fields are transparently encrypted:
+```
+Login Success
+      │
+      ▼
+TokenService.issue()
+  ├── PASETO v4.local (AES-256-GCM)
+  ├── Payload: userId, sessionId, roles, deviceId
+  ├── Cryptographic binding (PoP nonce)
+  └── 15-min access token + rotating refresh token
 
-- Email, phone, password hash
-- TOTP secrets, OAuth tokens
-- User attributes
+Per Request
+  ├── PASETO verify
+  ├── PoP nonce check
+  ├── Session.lastActivityAt update
+  └── Attach req.user + req.session + req.token
+```
 
-Encryption is handled by Mongoose pre-save/post-retrieve hooks.
+### CSFLE Field Encryption
 
-## 🔄 Implementation Phases
+Sensitive fields encrypted transparently via Mongoose hooks:
 
-### Phase 1 ✅ (Foundation - Complete)
+- `email`, `phone`, `passwordHash`
+- `totp.secret`, OAuth access/refresh tokens
+- Custom `encryptedAttributes` map
 
-- [x] Configuration management
-- [x] Database connection layer
-- [x] CSFLE encryption foundation
-- [x] Structured logging
-- [x] Root entry point
-- [x] Shared type definitions
-- [x] Docker setup
+Encryption: AES-256-GCM with HKDF-derived per-field keys. Key version stored alongside ciphertext for rotation.
 
-### Phase 2 (API & OAuth - In Progress)
+---
 
-This phase implements the REST surface, OAuth provider integrations, and MFA channel adapters. Each item below lists the purpose, files to add or modify, security considerations, and tests to implement.
+## API Reference
 
-- REST API endpoints
-  - Purpose: Provide the HTTP endpoints for registration, login, OAuth callbacks, MFA enrollment/verification, passkey flows, token management, password reset, and session management.
-  - Files: `src/api/routes/auth.routes.ts`, `src/api/server.ts`, `src/api/routes/session.routes.ts`, `src/api/routes/mfa.routes.ts`, `src/api/routes/oauth.routes.ts`
-  - Key behaviors: Input validation, CSFLE-safe persistence, audit logging for security-sensitive actions, proper error codes, idempotency where applicable.
-  - Security: Rate-limit high-risk endpoints (login, password reset), require state/nonce for OAuth, implement PKCE for public clients, always validate redirect URIs.
-  - Tests: Unit tests for controllers, integration tests for end-to-end flows (register → login → access protected resource).
+> Full OpenAPI spec is pending. Current implemented routes:
 
-- OAuth provider factory
-  - Purpose: Provider-agnostic abstraction to add providers (Google, Facebook, GitHub, Apple) via configuration rather than code changes.
-  - Files: `src/oauth/provider.factory.ts`, `src/oauth/providers/google.ts`, `src/oauth/providers/facebook.ts`, etc.
-  - Key behaviors: Exchange authorization code, fetch user profile, normalize provider claims, link or create user accounts, store provider metadata encrypted by CSFLE.
-  - Security: Validate provider tokens signature if present, rotate stored refresh tokens, log provider actions to audit, honor Shared Signals Framework signals from providers.
-  - Tests: Provider adapter unit tests that mock provider responses and normalized user mapping.
+### Auth (`/auth`)
 
-- MFA channel implementations
-  - Purpose: Modular channel adapters to send OTPs or messages via Email, SMS (Twilio), WhatsApp (Twilio), Telegram.
-  - Files: `src/mfa/channels/email.ts`, `src/mfa/channels/sms.ts`, `src/mfa/channels/whatsapp.ts`, `src/mfa/channels/telegram.ts`, `src/mfa/index.ts`
-  - Key behaviors: Retry/backoff, attempt counters, channel-specific rate limits, secure templating for OTPs, recovery/backup code issuance.
-  - Security: Never log OTPs; store OTP attempts and expiry; require biometric or identity-proof step-up for high-privilege recovery.
-  - Tests: Channel mocks, delivery simulation, and rate-limit enforcement tests.
+| Method | Path | Description |
+|---|---|---|
+| POST | `/auth/register` | Create account |
+| POST | `/auth/login` | Password or passkey login |
+| POST | `/auth/refresh` | Rotate access token |
+| POST | `/auth/logout` | Revoke session |
+| POST | `/auth/logout/all` | Revoke all sessions |
 
-- Request validation middleware
-  - Purpose: Central input-validation using Zod or Joi to validate body, query, and params for every route.
-  - Files: `src/middleware/validation.ts`, `src/api/schemas/*.ts`
-  - Key behaviors: Strong validation rules for email, phone, password complexity, passkey attestation objects; return consistent error format.
-  - Tests: Schema unit tests and integration tests exercising invalid inputs.
+### Workload (`/workload`)
 
-### Phase 3 (Middleware & Evaluation - In Progress)
+| Method | Path | Description |
+|---|---|---|
+| POST | `/workload/credentials` | Issue scoped workload token |
+| POST | `/workload/validate` | Validate workload token |
 
-Phase 3 is the core runtime protection layer. Several middleware components have been scaffolded; remaining items describe responsibilities and implementation notes.
+### Pending Routes
 
-- Auth middleware (token verification)
-  - Purpose: Verify PASETO v4.local access tokens, token binding (proof-of-possession), session validity, and user status.
-  - Files: `src/middleware/auth.ts` (implemented), ensure `initAuthMiddleware()` is called at server startup.
-  - Key behaviors: Reject expired/revoked sessions, update lastActivityAt, attach `req.user`, `req.session`, and `req.token` to request.
-  - Tests: Token creation & verification unit tests, expired/revoked session tests.
+- `GET/DELETE /sessions` — session list and revocation
+- `POST /auth/mfa/totp/setup`, `/auth/mfa/verify`
+- `GET /auth/oauth/:provider`, `/auth/oauth/:provider/callback`
+- `POST /auth/password-reset/request`, `/auth/password-reset/confirm`
+- `POST /auth/passkey/register`, `/auth/passkey/authenticate`
+- `POST /ssf/events` — SSF webhook ingestion
 
-- Device attestation middleware
-  - Purpose: Compute device fingerprint, compare with session fingerprint, flag anomalies, and optionally require re-authentication or step-up.
-  - Files: `src/middleware/deviceAttestation.ts` (implemented), `src/services/fingerprint.service.ts`
-  - Key behaviors: Support strict and permissive modes; preserve audit trail; support marking device as trusted after step-up.
-  - Tests: Fingerprint variation tests, device-change workflows.
+---
 
-- Continuous access evaluation
-  - Purpose: Real-time ABAC evaluation and risk scoring per request, enforced at the gateway or app layer.
-  - Files: `src/middleware/continuousEval.ts` (implemented), `src/services/authz.service.ts`
-  - Key behaviors: Aggregate anomaly signals (device, location, time), evaluate ABAC conditions, calculate risk score, return allow/deny/challenge decisions, require MFA step-up for elevated risk.
-  - Tests: ABAC condition evaluation scenarios, risk threshold boundary tests.
-
-- Rate limiting (mixed strategy)
-  - Purpose: Protect against brute-force and credential stuffing using a layered approach:
-    - Fast in-memory token bucket for single-process low-latency checks
-    - Redis-backed token bucket for distributed deployments
-    - IP-based sliding window counters for suspicious IP tracking
-  - Files: `src/middleware/rateLimiting.ts`, `src/services/rateLimiter/redis.ts`, `src/services/rateLimiter/inmemory.ts`
-  - Key behaviors: Per-endpoint configurable thresholds, global login limits, exponential backoff and temporary bans, audit and alert on abuse.
-  - Security: Back-pressure to slow attackers without denying legitimate users; ensure Redis keys are namespaced and TTL'd.
-  - Tests: Simulate bursts, distributed enforcement with mocked Redis.
-
-- Temporal access control
-  - Purpose: Enforce schedule-based restrictions via ABAC/time checks and JIT expiry enforcement.
-  - Files: `src/middleware/temporalAccess.ts`, use `session.sessionConfig.scheduleRestriction` and `JITModel` for active grants
-  - Key behaviors: Timezone-aware checks, auto-revoke expired JIT grants, block out-of-window access.
-  - Tests: Timezone edge-case tests and JIT grant lifecycle tests.
-
-- Geo-fencing
-  - Purpose: Restrict access by country or IP subnet and detect suspicious geolocation changes.
-  - Files: `src/middleware/geoFencing.ts`, use `geoip-lite` service and optional IP reputation services
-  - Key behaviors: Country allow-lists, subnet checks, VPN/proxy heuristics, immediate revocation on critical compromise signals.
-  - Tests: Geo rule enforcement and proxy/VPN heuristics tests.
-
-### Phase 4 (Observability & Hardening - In Progress)
-
-Phase 4 focuses on telemetry, external integrations, workload identities, and resilience testing.
-
-- Audit logging to Elasticsearch
-  - Purpose: Immutable, filterable forensic logs for all critical system actions.
-  - Files: `src/audit/index.ts`, integration with `src/logger/index.ts` streaming into ES
-  - Key behaviors: Append-only store, index mappings for fast queries (actor, action, timestamps, device metadata), retention & export policies.
-  - Security: Mask sensitive fields in logs, ensure log pipeline integrity and access controls to ES.
-  - Tests: Verify log entries created for each critical action and indexed into ES (integration test with test ES instance).
-
-- Shared Signals Framework (SSF)
-  - Purpose: Full bidirectional SSF integration to receive provider compromise signals and transmit local signals upstream.
-  - Files: `src/ssf/receiver.ts`, `src/ssf/sender.ts`, webhook endpoint `POST /ssf/events`
-  - Key behaviors: Accept SET (Security Event Token) payloads, validate signatures, map events to sessions/users, trigger automated revocation or alerts, and transmit local SETs for critical events.
-  - Tests: Verify SET parsing, signature validation, and automated actions on simulated signals.
-
-- Workload identity credentials
-  - Purpose: Short-lived, ephemeral credentials for non-human identities (CI, agents, AI workloads) with least-privilege scopes.
-  - Files: `src/workload/index.ts`, `src/api/routes/workload.routes.ts`
-  - Key behaviors: Issue scoped tokens with short TTLs, rotate secrets, provide audit trail for all workload actions, support token exchange flows.
-  - Security: Enforce usage policies, IP and time restrictions for workload tokens, and strong rotation policies.
-  - Tests: Token issuance, rotation, scope enforcement, and TTL expiry tests.
-
-- Security headers middleware & hardening
-  - Purpose: Enforce HTTP headers and runtime hardening (CSP, HSTS, X-Frame-Options, Referrer-Policy, Permissions-Policy).
-  - Files: `src/middleware/securityHeaders.ts`, integrated into `src/api/server.ts`
-  - Tests: Verify headers are returned, CSP coverage tests.
-
-- Load and chaos testing
-  - Purpose: Validate resilience under load and failure modes (DB failover, Redis outage, network partition, event flood).
-  - Tools: k6 or Artillery for load tests, Chaos Toolkit for fault injection, custom scripts for session revocation across nodes.
-  - Tests: Authenticate at scale, refresh token storms, session revocation cascade, rate limiter efficacy, and SSF flood handling.
-
-## 🧪 Testing
+## Testing
 
 ```bash
-# Run all tests
-bun run test
+bun run test              # run all tests (vitest)
+bun run test:watch        # watch mode
+bun run test:coverage     # coverage report (v8)
 
-# Watch mode
-bun run test:watch
-
-# Coverage report
-bun run test:coverage
-
-# Run specific test file
-bun run test src/__tests__/unit/token.test.ts
+# Run a specific file
+bun run test src/__tests__/fingerprint.test.ts
 ```
 
-## 📊 Monitoring
+**Current coverage:** The `fingerprint.service` is tested. All other modules need test coverage — see [Roadmap](#roadmap--todo).
 
-### Elasticsearch / Kibana
+---
 
-Audit logs are automatically indexed in Elasticsearch:
+## Deployment
 
-- **Index Pattern**: `zeroauth-audit-YYYY-MM-DD`
-- **Access**: http://localhost:5601
-
-Create dashboards to monitor:
-
-- Authentication success/failure rates
-- MFA adoption
-- Access denied patterns
-- Device fingerprint anomalies
-- Rate limit violations
-
-### Application Logs
-
-JSON logs are streamed to Elasticsearch:
+### Docker Compose
 
 ```bash
-# Check logs in Kibana
-# Index Pattern: zeroauth-logs-YYYY-MM-DD
-```
-
-## 🔒 Security Best Practices
-
-1. **Never commit `.env` files** - Use `.env.example` as template
-2. **Rotate encryption keys regularly** - Set `CSFLE_KEY_ROTATION_DAYS`
-3. **Use strong random secrets** - Min 32 bytes for TOKEN_SECRET_HEX
-4. **Enable HTTPS in production** - Don't run over HTTP
-5. **Monitor audit logs continuously** - Set up Elasticsearch alerts
-6. **Keep dependencies updated** - Run `npm audit` regularly
-
-## 📚 API Documentation
-
-Coming in Phase 2. Will include:
-
-- OpenAPI/Swagger spec
-- Endpoint documentation
-- Request/response examples
-- OAuth flow diagrams
-- WebAuthn registration guide
-
-## 🤝 Contributing
-
-1. Follow TypeScript strict mode
-2. Add tests for new features
-3. Update CHANGELOG
-4. Run `npm run lint` and `npm run format` before committing
-
-## 📝 License
-
-[Add your license here]
-
-## 🆘 Troubleshooting
-
-### MongoDB Connection Issues
-
-```bash
-# Check MongoDB logs
-docker-compose logs mongodb
-
-# Verify connection
+docker-compose up -d
+docker-compose logs -f zeroauth
 docker-compose exec mongodb mongosh -u admin -p password
-```
-
-### CSFLE Key Errors
-
-```bash
-# Regenerate encryption keys
-openssl rand -hex 32 > .env  # Update TOKEN_SECRET_HEX and CSFLE_MASTER_KEY_HEX
-docker-compose restart zeroauth
-```
-
-### Rate Limiting Not Working
-
-Ensure Redis is running and accessible:
-
-```bash
 docker-compose exec redis redis-cli ping
 ```
 
-## 📞 Support
+### Production Checklist
 
-For issues and questions:
+- [ ] Replace default MongoDB/Redis passwords in `docker-compose.yml`
+- [ ] Set `NODE_ENV=production`
+- [ ] Configure TLS termination (nginx/Caddy in front of port 3000)
+- [ ] Set `ELASTICSEARCH_URL` for audit log shipping
+- [ ] Enable `CSFLE_KEY_ROTATION_DAYS` for key rotation schedule
+- [ ] Restrict Elasticsearch access to internal network only
+- [ ] Set Redis `requirepass` and update `REDIS_URL`
+- [ ] Configure log retention policy in Elasticsearch ILM
 
-- GitHub Issues: [repo/issues]
-- Documentation: [docs link]
-- Security: mas.arafat.dev@gmail.com
+---
+
+## Security
+
+### Best Practices
+
+1. Never commit `.env` — use `.env.example` as the template only
+2. Rotate `TOKEN_SECRET_HEX` and `CSFLE_MASTER_KEY_HEX` on schedule using `CSFLE_KEY_ROTATION_DAYS`
+3. Enforce HTTPS at the load balancer — ZeroAuth runs plain HTTP internally
+4. Subscribe to provider SSF streams (Google, GitHub) so account compromise triggers automatic session revocation
+5. Run `npm audit` or `bun audit` in CI on every push
+6. Review Kibana audit dashboards for anomaly spikes before each release
+
+### Vulnerability Reporting
+
+Send security issues to: **mas.arafat.dev@gmail.com**
+
+Do not open public GitHub issues for vulnerabilities.
+
+---
+
+## Roadmap & TODO
+
+Items are grouped by category and ordered by priority within each group.
+
+### API Completeness
+
+- [ ] **Session routes** — `GET /sessions` (list active), `DELETE /sessions/:id` (revoke single), `DELETE /sessions` (revoke all except current)
+- [ ] **MFA routes** — TOTP setup (`POST /auth/mfa/totp/setup` + QR code), TOTP verify, backup code generation and redemption
+- [ ] **OAuth routes** — initiation (`GET /auth/oauth/:provider`), callback (`GET /auth/oauth/:provider/callback`), account link/unlink
+- [ ] **Password reset** — request token (`POST /auth/password-reset/request`), validate and apply (`POST /auth/password-reset/confirm`)
+- [ ] **Passkey / WebAuthn** — registration options and response (`POST /auth/passkey/register/options`, `/auth/passkey/register`), authentication flow
+- [ ] **SSF webhook endpoint** — `POST /ssf/events` wired into `ssf/receiver.ts`
+- [ ] **Admin routes** — user lookup, role assignment, session revocation by admin, JIT grant management
+
+### Request Validation
+
+- [ ] Add Zod schemas in `src/api/schemas/` for every route body, params, and query
+- [ ] Wire schemas into `src/middleware/validation.ts` centrally
+- [ ] Return consistent error envelope `{ code, message, details[] }` on validation failure
+- [ ] Validate redirect URIs against allowlist on every OAuth initiation request
+- [ ] Enforce password complexity rules (length, entropy) in registration schema
+
+### OAuth Providers
+
+- [ ] **Google** — `src/oauth/providers/google.ts`: exchange code, verify ID token signature, normalize claims, handle token refresh, store encrypted in CSFLE
+- [ ] **Facebook** — `src/oauth/providers/facebook.ts`: Graph API profile fetch, handle app-scoped user IDs
+- [ ] **Apple** — `src/oauth/providers/apple.ts`: Sign in with Apple JWKS validation, `name` claim only on first request
+- [ ] PKCE (`code_challenge` / `code_verifier`) support for all public OAuth clients
+- [ ] State + nonce parameter enforcement on all OAuth flows
+- [ ] Provider token refresh and re-encryption on rotation
+
+### Rate Limiting
+
+- [ ] **In-memory rate limiter** — `src/services/rateLimiter/inmemory.ts`: token bucket for single-process deployments and as a fast pre-check before Redis
+- [ ] Exponential backoff with jitter for repeat violators
+- [ ] Temporary IP ban with configurable duration after threshold breach
+- [ ] Per-endpoint override config (login stricter than token refresh)
+- [ ] Emit audit events on rate limit violations
+
+### Security Hardening
+
+- [ ] **Security headers middleware** — `src/middleware/securityHeaders.ts`: CSP, HSTS, `X-Frame-Options: DENY`, `Referrer-Policy`, `Permissions-Policy`; wire into `api/server.ts` after Helmet
+- [ ] Account lockout policy — lock after N failed login attempts, notify user, admin unlock route
+- [ ] Enforce maximum concurrent devices per user (model exists, enforcement needs API wiring)
+- [ ] Rotate refresh tokens on every use (prevent refresh token replay)
+- [ ] Add `jti` (JWT ID equivalent) to PASETO payloads for single-use enforcement on sensitive flows
+
+### Audit & Observability
+
+- [ ] **Elasticsearch audit pipeline** — `src/audit/index.ts`: bulk-index `AuditLog` documents into `zeroauth-audit-YYYY-MM-DD`, configurable flush interval and batch size
+- [ ] Index lifecycle management (ILM) policy in Elasticsearch for audit log retention
+- [ ] Kibana saved dashboards: auth success/failure rates, MFA adoption, denied access patterns, rate limit heatmap, device anomaly alerts
+- [ ] Mask sensitive fields (OTP codes, token fragments) before log shipping
+- [ ] Elasticsearch health check wired into `/healthz` endpoint
+
+### Testing
+
+- [ ] **Unit tests for TokenService** — issue, verify, expiry, revoked session, tampered payload
+- [ ] **Unit tests for AuthorizationEngine** — ABAC condition evaluation, role hierarchy resolution, JIT grant lifecycle
+- [ ] **Unit tests for CSFLE** — encrypt/decrypt round-trip, key rotation, schema plugin hooks
+- [ ] **Unit tests for each MFA channel** — mock transports, OTP expiry, retry limits
+- [ ] **Unit tests for OAuth adapters** — mock provider responses, normalized user mapping, error cases
+- [ ] **Integration tests** — register → login → access protected route → refresh → logout flow
+- [ ] **Middleware integration tests** — rate limiting under burst, geo-fence enforcement, temporal window edge cases
+- [ ] **Test coverage gate** — enforce ≥ 80% coverage in CI; fail build below threshold
+- [ ] **Load tests** — k6 or Artillery scripts: 1000 concurrent logins, refresh token storm, session revocation cascade
+- [ ] **Chaos tests** — MongoDB failover, Redis outage, Elasticsearch unavailability; verify graceful degradation
+
+### Documentation
+
+- [ ] **OpenAPI 3.1 spec** — `src/api/openapi.yaml`: all routes, request/response schemas, security schemes, examples
+- [ ] **Swagger UI** — mount at `/docs` in development builds using `swagger-ui-express`
+- [ ] WebAuthn registration and authentication sequence diagrams
+- [ ] ABAC condition language reference with examples
+- [ ] JIT access request and approval workflow guide
+- [ ] SSF integration guide (subscribing to provider streams, processing SETs)
+- [ ] Deployment guide: Kubernetes / Helm chart, nginx TLS termination, Elasticsearch ILM
+
+### CI/CD
+
+- [ ] GitHub Actions workflow: lint → type-check → test → build on every PR
+- [ ] Coverage report posted as PR comment
+- [ ] `npm audit` / `bun audit` on dependency changes
+- [ ] Docker image build and push to registry on merge to `main`
+- [ ] Semantic release with auto-generated CHANGELOG from conventional commits
+
+### Developer Experience
+
+- [ ] CLI tool: `npx zeroauth init` to scaffold `.env`, generate keys, and run Docker stack
+- [ ] Prettier + ESLint pre-commit hook via Husky
+- [ ] VS Code `launch.json` for attaching debugger to `bun run dev`
+
+### Future / Post-MVP
+
+- [ ] OIDC provider — expose ZeroAuth itself as an OIDC identity provider
+- [ ] SAML 2.0 — SP-initiated SSO for enterprise integrations
+- [ ] Multi-tenant support — tenant isolation at the data model and middleware level
+- [ ] SDK client libraries — typed fetch wrappers for consuming ZeroAuth from frontend apps
+- [ ] Admin UI — Next.js dashboard for user management, session oversight, and audit log review
+
+---
+
+## Contributing
+
+1. Work in TypeScript strict mode — no `any`, no disabled lint rules without comment explaining why
+2. Every new module needs at least one test file
+3. Security-sensitive changes require a description of the threat model in the PR body
+4. Run `bun run lint && bun run format && bun run type-check` before opening a PR
+5. Update `CHANGELOG.md` under `[Unreleased]` for any user-visible change
+
+---
+
+## Troubleshooting
+
+### MongoDB connection errors
+
+```bash
+docker-compose logs mongodb
+docker-compose exec mongodb mongosh -u admin -p password
+```
+
+### CSFLE key errors
+
+```bash
+# Regenerate keys (do not reuse old values in production)
+openssl rand -hex 32  # paste into TOKEN_SECRET_HEX
+openssl rand -hex 32  # paste into CSFLE_MASTER_KEY_HEX
+docker-compose restart zeroauth
+```
+
+### Rate limiting not working
+
+```bash
+docker-compose exec redis redis-cli ping
+# Expected: PONG
+docker-compose exec redis redis-cli keys "rl:*"
+```
+
+### Elasticsearch not receiving logs
+
+```bash
+docker-compose logs elasticsearch
+curl http://localhost:9200/_cluster/health
+# Check ELASTICSEARCH_URL in .env matches the container name: http://elasticsearch:9200
+```
+
+---
+
+## License
+
+[Add your license here]
