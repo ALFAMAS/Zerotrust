@@ -1,0 +1,54 @@
+{
+  "name": "@zeroauth/sdk",
+  "version": "1.0.0",
+  "description": "TypeScript client SDK for the ZeroAuth zero-trust authentication API",
+  "keywords": ["zeroauth", "authentication", "zero-trust", "sdk", "typescript", "webauthn", "passkey", "mfa"],
+  "license": "MIT",
+  "author": {
+    "email": "mas.arafat.dev@gmail.com"
+  },
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/esm/index.d.ts",
+        "default": "./dist/esm/index.js"
+      },
+      "require": {
+        "types": "./dist/cjs/index.d.ts",
+        "default": "./dist/cjs/index.js"
+      }
+    }
+  },
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/esm/index.d.ts",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "npm run build:esm && npm run build:cjs",
+    "build:esm": "tsc -p tsconfig.json",
+    "build:cjs": "tsc -p tsconfig.cjs.json",
+    "dev": "tsc -p tsconfig.json --watch",
+    "type-check": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "devDependencies": {
+    "@simplewebauthn/types": "^10.0.0",
+    "@types/node": "^20.10.0",
+    "typescript": "^5.4.0"
+  },
+  "peerDependencies": {
+    "@simplewebauthn/types": "^10.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@simplewebauthn/types": {
+      "optional": true
+    }
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
