@@ -229,6 +229,75 @@ function normaliseAaguid(raw?: string): string | undefined {
   return raw.toLowerCase();
 }
 
+// ─── MDS3-enriched Verification ──────────────────────────────────────────────
+
+export interface AttestationVerificationResultWithMDS3 extends AttestationVerificationResult {
+  deviceDescription?: string;
+  mds3Certified?: boolean;
+}
+
+/**
+ * Verify attestation and optionally enrich the result with MDS3 data.
+ *
+ * If `policy.requireFidoCertified` is true, performs a live MDS3 lookup via
+ * `isFidoCertified()` and `getDeviceDescription()`.  Gracefully falls back
+ * when the MDS3 service is unreachable.
+ */
+export async function verifyAttestationWithMDS3(
+  opts: {
+    fmt: string;
+    aaguid?: string;
+    attestationType?: string;
+    userVerified: boolean;
+  },
+  policy: AttestationPolicy = DEFAULT_POLICY
+): Promise<AttestationVerificationResultWithMDS3> {
+  // Run the synchronous base verification first
+  const baseResult = verifyAttestation(opts, policy);
+
+  // Short-circuit: if already failed there is nothing to enrich
+  if (!baseResult.passed) {
+    return baseResult;
+  }
+
+  const aaguid = baseResult.aaguid;
+  let deviceDescription: string | undefined;
+  let mds3Certified: boolean | undefined;
+
+  if (aaguid) {
+    try {
+      // Dynamic import avoids a hard circular dependency at module load time
+      const { isFidoCertified, getDeviceDescription } = await import("./fido-mds3");
+
+      if (policy.requireFidoCertified) {
+        const certified = await isFidoCertified(aaguid);
+        mds3Certified = certified;
+
+        if (!certified) {
+          return {
+            passed: false,
+            attestationType: baseResult.attestationType,
+            aaguid,
+            reason: `Authenticator AAGUID ${aaguid} is not FIDO certified according to MDS3`,
+            mds3Certified: false,
+          };
+        }
+      }
+
+      const desc = await getDeviceDescription(aaguid);
+      if (desc) deviceDescription = desc;
+    } catch (err) {
+      logger.warn("MDS3 lookup failed during verifyAttestationWithMDS3; continuing without it", err as Error);
+    }
+  }
+
+  return {
+    ...baseResult,
+    ...(deviceDescription !== undefined ? { deviceDescription } : {}),
+    ...(mds3Certified !== undefined ? { mds3Certified } : {}),
+  };
+}
+
 /**
  * Get attestation policy from environment config.
  */

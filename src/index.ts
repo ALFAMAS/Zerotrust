@@ -132,12 +132,48 @@ export { sendMagicLink, verifyMagicLink } from "./services/magicLink.service";
 // ─── FIDO2 Hardware Attestation ──────────────────────────────────────────────
 export {
   verifyAttestation,
+  verifyAttestationWithMDS3,
   getAttestationPolicy,
   KNOWN_HARDWARE_KEY_AAGUIDS,
   DEFAULT_POLICY as DEFAULT_ATTESTATION_POLICY,
   HIGH_ASSURANCE_POLICY,
 } from "./mfa/attestation";
-export type { AttestationPolicy, AttestationVerificationResult } from "./mfa/attestation";
+export type {
+  AttestationPolicy,
+  AttestationVerificationResult,
+  AttestationVerificationResultWithMDS3,
+} from "./mfa/attestation";
+
+// ─── FIDO MDS3 ───────────────────────────────────────────────────────────────
+export {
+  initMDS3,
+  getMDS3Entry,
+  isFidoCertified,
+  getDeviceDescription,
+} from "./mfa/fido-mds3";
+export type { MDS3Entry, MDS3StatusReport, MDS3Cache } from "./mfa/fido-mds3";
+
+// ─── Attestation CA Pinning ───────────────────────────────────────────────────
+export {
+  pinAttestationCA,
+  unpinAttestationCA,
+  getAttestationCAPins,
+  verifyAttestationCAPin,
+} from "./mfa/attestation-ca-pin";
+export type { AttestationCAPin } from "./mfa/attestation-ca-pin";
+
+// ─── mTLS Middleware ──────────────────────────────────────────────────────────
+export { requireMTLS, extractWorkloadIdentity } from "./middleware/mtls";
+export type { mTLSOptions, WorkloadIdentity } from "./middleware/mtls";
+
+// ─── FIDO2 Discoverable Credentials ──────────────────────────────────────────
+export {
+  generateDiscoverableRegistrationOptions,
+  verifyDiscoverableRegistration,
+  generateDiscoverableAuthenticationOptions,
+  verifyDiscoverableAuthentication,
+} from "./mfa/resident-keys";
+export type { DiscoverableAuthenticator } from "./mfa/resident-keys";
 
 // ─── Multi-Tenant ────────────────────────────────────────────────────────────
 export { TenantModel } from "./models/tenant.model";
@@ -158,6 +194,23 @@ export {
 // ─── SAML 2.0 ────────────────────────────────────────────────────────────────
 export { buildAuthnRequest, parseSAMLResponse, buildSPMetadata } from "./saml/sp";
 export type { SAMLAssertion, SAMLIdPConfig, SAMLSPConfig } from "./saml/sp";
+
+// ─── Webhooks ────────────────────────────────────────────────────────────────
+export { dispatchEvent, webhookStore, signPayload } from "./webhooks";
+export type { WebhookEventType, WebhookEndpoint, WebhookDelivery } from "./webhooks/types";
+
+// ─── Metrics ─────────────────────────────────────────────────────────────────
+export { recordAuth, recordMFA, recordRateLimit, metricsRoute, metricsMiddleware } from "./metrics";
+
+// ─── Telemetry ───────────────────────────────────────────────────────────────
+export { initTelemetry, getTracer, withSpan, tracingMiddleware } from "./telemetry";
+
+// ─── SCIM 2.0 ────────────────────────────────────────────────────────────────
+export { scimRoutes } from "./scim";
+export type { SCIMUser, SCIMGroup } from "./scim";
+
+// ─── Multi-Tenant Rate Limiting ───────────────────────────────────────────────
+export { tenantRateLimit, configureTenantQuota, getTenantQuota } from "./middleware/rateLimiting";
 
 /**
  * Initialize entire ZeroAuth system
