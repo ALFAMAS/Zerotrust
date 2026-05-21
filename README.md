@@ -229,6 +229,7 @@ ZeroAuth is organized as a monorepo with multiple packages:
 | `@zeroauth/core` | `./` | Core auth library (Express API, models, services) |
 | `@zeroauth/cli` | `packages/cli/` | `npx zeroauth init` scaffold CLI |
 | `@zeroauth/sdk` | `packages/sdk/` | Typed JS/TS client for consuming ZeroAuth |
+| `@zeroauth/react` | `packages/react/` | React hooks + context provider built on `@zeroauth/sdk` |
 | `@zeroauth/admin-ui` | `packages/admin-ui/` | Next.js admin dashboard (port 3001) |
 | `@zeroauth/ui` | `packages/ui/` | Next.js user-facing app (port 3002) |
 
@@ -327,6 +328,73 @@ if (!result.passed) throw new Error(result.reason);
 
 Environment override: `ATTESTATION_LEVEL=direct ATTESTATION_HIGH_ASSURANCE=true`
 
+### React Quick Start
+
+```tsx
+import { ZeroAuthProvider, useAuth, AuthGuard } from "@zeroauth/react";
+
+// Wrap your app
+export default function App() {
+  return (
+    <ZeroAuthProvider baseUrl="https://auth.example.com" tokenStorage="localStorage">
+      <AuthGuard fallback={<LoginPage />}>
+        <Dashboard />
+      </AuthGuard>
+    </ZeroAuthProvider>
+  );
+}
+
+// Use hooks anywhere inside the provider
+function Dashboard() {
+  const { user, logout } = useAuth();
+  return <button onClick={logout}>Sign out {user?.email}</button>;
+}
+```
+
+Available hooks: `useAuth`, `useSession`, `useMFA`, `usePasskey`, `useMagicLink`  
+Available components: `AuthGuard`, `withAuth` HOC
+
+### SCIM 2.0 Provisioning
+
+Enable automatic user provisioning from Azure AD, Okta, or any SCIM-compatible IdP:
+
+```bash
+# Set the shared secret
+SCIM_API_TOKEN=your-secret-token
+
+# Point your IdP at:
+# Base URL:    https://auth.example.com/scim/v2
+# Auth method: Bearer token
+```
+
+Supported: create, update, deactivate users; create/manage groups (maps to ZeroAuth roles).
+
+### Prometheus Metrics
+
+```bash
+# Scrape endpoint (no auth required — firewall at the load balancer level)
+curl https://auth.example.com/metrics
+```
+
+Configure in Prometheus:
+```yaml
+scrape_configs:
+  - job_name: zeroauth
+    static_configs:
+      - targets: ["auth.example.com:443"]
+    scheme: https
+    metrics_path: /metrics
+```
+
+### OpenTelemetry
+
+```bash
+# Environment variables
+OTEL_ENABLED=true
+OTEL_SERVICE_NAME=zeroauth
+OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
+```
+
 ---
 
 ## Project Structure
@@ -336,6 +404,7 @@ Environment override: `ATTESTATION_LEVEL=direct ATTESTATION_HIGH_ASSURANCE=true`
 ├── packages/
 │   ├── cli/                 # @zeroauth/cli — npx zeroauth init
 │   ├── sdk/                 # @zeroauth/sdk — typed JS/TS client
+│   ├── react/               # @zeroauth/react — React hooks + context provider
 │   ├── admin-ui/            # @zeroauth/admin-ui — Next.js admin (port 3001)
 │   └── ui/                  # @zeroauth/ui — Next.js user app (port 3002)
 ├── kibana/                  # Kibana saved object exports (.ndjson)
@@ -363,7 +432,7 @@ Environment override: `ATTESTATION_LEVEL=direct ATTESTATION_HIGH_ASSURANCE=true`
 │   ├── auth.ts              # Token verification, session hydration
 │   ├── deviceAttestation.ts # Fingerprint comparison, anomaly flagging
 │   ├── continuousEval.ts    # Per-request risk scoring + ABAC enforcement
-│   ├── rateLimiting.ts      # Multi-layer rate limiting + audit events
+│   ├── rateLimiting.ts      # Multi-layer + per-tenant rate limiting + audit events
 │   ├── geoFencing.ts        # Country/subnet access control
 │   ├── temporalAccess.ts    # Schedule-based restrictions, JIT expiry
 │   ├── proofOfPossession.ts # Nonce-based token-to-device binding
@@ -371,6 +440,7 @@ Environment override: `ATTESTATION_LEVEL=direct ATTESTATION_HIGH_ASSURANCE=true`
 │   ├── accountLockout.ts    # Failed login tracking, lockout enforcement
 │   ├── validation.ts        # Zod schema validation, consistent error envelope
 │   ├── securityHeaders.ts   # CSP, HSTS, X-Frame-Options, Referrer-Policy
+│   ├── mtls.ts              # Client certificate auth, SPIFFE workload identity
 │   └── tenant.ts            # X-Tenant-ID / subdomain resolution, requireTenant
 ├── api/
 │   ├── server.ts            # Express app factory
@@ -402,11 +472,34 @@ Environment override: `ATTESTATION_LEVEL=direct ATTESTATION_HIGH_ASSURANCE=true`
 ├── mfa/
 │   ├── index.ts             # OTP dispatch
 │   ├── attestation.ts       # FIDO2 attestation policy + AAGUID database
+│   ├── attestation-ca-pin.ts# Per-deployment CA trust anchor pinning
+│   ├── fido-mds3.ts         # FIDO Alliance MDS3 real-time AAGUID lookups
+│   ├── resident-keys.ts     # Discoverable credential / usernameless auth flow
 │   └── channels/            # email | sms | whatsapp | telegram
 ├── ssf/
 │   ├── receiver.ts          # Ingest SET payloads, trigger revocations
 │   ├── sender.ts            # Transmit local security events
 │   └── verify.ts            # SET signature validation
+├── webhooks/
+│   ├── types.ts             # WebhookEndpoint, WebhookDelivery, event types
+│   ├── store.ts             # In-memory endpoint registry (singleton)
+│   ├── delivery.ts          # HMAC-signed delivery, exponential backoff retry
+│   ├── routes.ts            # /admin/webhooks CRUD + test ping
+│   └── index.ts
+├── metrics/
+│   ├── registry.ts          # prom-client Registry
+│   ├── counters.ts          # Auth, MFA, rate limit, anomaly, webhook counters/histograms
+│   ├── middleware.ts        # requestDurationSeconds histogram + /metrics route handler
+│   └── index.ts
+├── telemetry/
+│   ├── tracer.ts            # OpenTelemetry SDK init, OTLP exporter, withSpan helper
+│   ├── middleware.ts        # X-Trace-Id injection middleware
+│   └── index.ts
+├── scim/
+│   ├── types.ts             # SCIMUser, SCIMGroup, SCIMListResponse, SCIMError
+│   ├── utils.ts             # userToSCIM, scimToUserFields, parseSCIMFilter
+│   ├── routes.ts            # /scim/v2 — Users + Groups CRUD (RFC 7644)
+│   └── index.ts
 ├── workload/
 │   └── index.ts             # Short-lived workload credential issuance
 ├── audit/
@@ -761,35 +854,37 @@ Items are grouped by category. All v1 features are complete. Items below are v2 
 | **OIDC provider** | RFC 6749 + OIDC Core 1.0 — discovery, authorize, token, userinfo, logout endpoints | `src/oidc/` |
 | **SAML 2.0 SP** | SP-initiated SSO, ACS handler, SP metadata, relay-state CSRF protection | `src/saml/` |
 
-### 🔵 v2 — Next Priorities
+### ✅ Completed in v2
+
+| Feature | Description | Location |
+|---------|-------------|----------|
+| **FIDO MDS3 integration** | Real-time AAGUID certification lookups with 24h cache; enriches attestation results | `src/mfa/fido-mds3.ts` |
+| **Multi-tenant rate limiting** | Per-tenant quota namespaces with `tenantRateLimit()` and `configureTenantQuota()` | `src/middleware/rateLimiting.ts` |
+| **Tenant provisioning API** | REST CRUD at `/admin/tenants`; plan management, OIDC + SAML SSO config per tenant | `src/api/routes/tenant.routes.ts` |
+| **SCIM 2.0** | Full RFC 7644 at `/scim/v2`; Users + Groups CRUD, filter, PATCH ops, Bearer auth | `src/scim/` |
+| **FIDO2 resident keys** | Discoverable credential registration and usernameless authentication flow | `src/mfa/resident-keys.ts` |
+| **Attestation CA pinning** | Per-deployment trust anchor pinning with AAGUID allow-lists | `src/mfa/attestation-ca-pin.ts` |
+| **Mutual TLS (mTLS)** | Client certificate auth with proxy header support (X-Client-Cert-CN, Envoy XFCC) | `src/middleware/mtls.ts` |
+| **Webhook delivery** | HMAC-SHA256 signed events, exponential backoff retry, CRUD at `/admin/webhooks` | `src/webhooks/` |
+| **Prometheus metrics** | prom-client counters/histograms/gauges for auth flows; scrape at `/metrics` | `src/metrics/` |
+| **OpenTelemetry tracing** | OTLP export, auto-instrumentation, `X-Trace-Id` on responses | `src/telemetry/` |
+| **`@zeroauth/react`** | `ZeroAuthProvider`, `useAuth`, `useSession`, `useMFA`, `usePasskey`, `useMagicLink`, `AuthGuard` | `packages/react/` |
+
+### 🔵 v3 — Next Priorities
 
 #### Enterprise & Scale
 
-- [ ] **FIDO MDS3 integration** — real-time AAGUID metadata lookups against the FIDO Alliance Metadata Service
-- [ ] **Multi-tenant rate limiting** — per-tenant rate limit namespaces and quotas
-- [ ] **Tenant provisioning API** — REST endpoints for tenant CRUD, plan upgrades, SSO config
 - [ ] **Cross-tenant JIT** — approve privilege escalation across tenant boundaries
-- [ ] **SCIM 2.0** — auto-provision users from enterprise IdPs (Azure AD, Okta)
+- [ ] **LDAP/Active Directory** — user import and bind authentication
+- [ ] **Slack / Teams notifications** — real-time alerts for anomaly events
 
 #### Security
 
-- [ ] **FIDO2 resident keys** — discoverable credentials (passkey sync across devices)
-- [ ] **Attestation CA pinning** — pin attestation trust anchors per deployment
-- [ ] **Mutual TLS (mTLS)** — client certificate auth for workload identities
 - [ ] **Token binding** — bind tokens to TLS sessions
 - [ ] **Hardware-backed key storage** — use TPM/Secure Enclave for PASETO key material
 
-#### Integrations
-
-- [ ] **LDAP/Active Directory** — user import and bind authentication
-- [ ] **Webhook delivery** — push auth events to configurable HTTP endpoints
-- [ ] **Slack / Teams notifications** — real-time alerts for anomaly events
-- [ ] **Datadog / Prometheus metrics** — operational metrics endpoint (`/metrics`)
-
 #### Developer Experience
 
-- [ ] **OpenTelemetry tracing** — distributed traces across auth flows
-- [ ] **`@zeroauth/react`** — React hooks + context provider built on `@zeroauth/sdk`
 - [ ] **VS Code extension** — syntax highlighting for ZeroAuth config files
 - [ ] **Terraform provider** — manage tenants, roles, and clients as infrastructure
 
