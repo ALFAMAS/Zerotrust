@@ -4,9 +4,15 @@
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "moduleResolution": "nodenext",
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
     "build": "tsc",
-    "dev": "tsx watch src/index.ts",
+    "dev:backend": "tsx watch src/server.ts",
+    "dev:ui": "npm run dev --prefix packages/ui",
+    "dev:admin": "npm run dev --prefix packages/admin-ui",
+    "dev": "concurrently --names \"API,UI,ADMIN\" --prefix-colors \"cyan.bold,green.bold,yellow.bold\" --kill-others-on-fail \"npm run dev:backend\" \"npm run dev:ui\" \"npm run dev:admin\"",
     "start": "node dist/index.js",
     "test": "vitest",
     "test:watch": "vitest --watch",
@@ -73,6 +79,8 @@
     "lint-staged": "^17.0.5",
     "prettier": "^3.1.0",
     "semantic-release": "^23.0.0",
+    "concurrently": "^9.0.0",
+    "dotenv": "^16.4.0",
     "tsx": "^4.6.0",
     "typescript": "^5.4.0",
     "vitest": "^1.0.0"
