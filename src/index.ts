@@ -205,6 +205,13 @@ export { recordAuth, recordMFA, recordRateLimit, metricsRoute, metricsMiddleware
 // ─── Telemetry ───────────────────────────────────────────────────────────────
 export { initTelemetry, getTracer, withSpan, tracingMiddleware } from "./telemetry";
 
+// ─── SCIM 2.0 ────────────────────────────────────────────────────────────────
+export { scimRoutes } from "./scim";
+export type { SCIMUser, SCIMGroup } from "./scim";
+
+// ─── Multi-Tenant Rate Limiting ───────────────────────────────────────────────
+export { tenantRateLimit, configureTenantQuota, getTenantQuota } from "./middleware/rateLimiting";
+
 /**
  * Initialize entire ZeroAuth system
  * Call this at application startup

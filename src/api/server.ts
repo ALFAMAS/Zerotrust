@@ -25,6 +25,8 @@ import { getElasticsearchHealth } from "../audit";
 import { metricsMiddleware, metricsRoute } from "../metrics";
 import { tracingMiddleware } from "../telemetry";
 import webhookRoutes from "../webhooks/routes";
+import scimRoutes from "../scim/routes";
+import tenantRoutes from "./routes/tenant.routes";
 
 const logger = getLogger("api-server");
 
@@ -57,6 +59,10 @@ export async function createServer() {
   // Admin routes
   app.use("/admin", adminRoutes);
   app.use("/admin/webhooks", webhookRoutes);
+  app.use("/admin/tenants", tenantRoutes);
+
+  // SCIM 2.0 provisioning
+  app.use("/scim/v2", scimRoutes);
 
   // OIDC Provider (RFC 6749 + OIDC Core 1.0)
   app.use("/oidc", oidcRoutes);
