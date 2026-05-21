@@ -10,9 +10,9 @@
   "scripts": {
     "build": "tsc",
     "dev:backend": "tsx watch src/server.ts",
-    "dev:ui": "npm run dev --prefix packages/ui",
-    "dev:admin": "npm run dev --prefix packages/admin-ui",
-    "dev": "concurrently --names \"API,UI,ADMIN\" --prefix-colors \"cyan.bold,green.bold,yellow.bold\" --kill-others-on-fail \"npm run dev:backend\" \"npm run dev:ui\" \"npm run dev:admin\"",
+    "dev:ui": "bun --cwd packages/ui run dev",
+    "dev:admin": "bun --cwd packages/admin-ui run dev",
+    "dev": "concurrently --names \"API,UI,ADMIN\" --prefix-colors \"cyan.bold,green.bold,yellow.bold\" --kill-others-on-fail \"bun run dev:backend\" \"bun run dev:ui\" \"bun run dev:admin\"",
     "start": "node dist/index.js",
     "test": "vitest",
     "test:watch": "vitest --watch",
