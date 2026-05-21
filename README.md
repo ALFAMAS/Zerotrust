@@ -64,7 +64,8 @@ ZeroAuth implements a full zero-trust security model where every request is veri
 | MFA — SMS OTP | ✅ Complete | Twilio |
 | MFA — WhatsApp OTP | ✅ Complete | Twilio |
 | MFA — Telegram OTP | ✅ Complete | Telegram Bot API |
-| Passwordless (magic link) | ⬜ Pending | Post-MVP |
+| Passwordless (magic link) | ✅ Complete | Single-use token, 15-min TTL, anti-enumeration |
+| Hardware security key attestation | ✅ Complete | FIDO2 attestation policy, AAGUID allow/deny lists |
 
 ### Authorization
 
@@ -111,6 +112,9 @@ ZeroAuth implements a full zero-trust security model where every request is veri
 | SSF webhook endpoint | ✅ Complete | `POST /ssf/events` |
 | Admin routes | ✅ Complete | Users, roles, sessions, JIT grants, audit logs |
 | Workload credential routes | ✅ Complete | `src/api/routes/workload.routes.ts` |
+| Magic link routes | ✅ Complete | `POST /auth/magic-link/send`, `GET|POST /auth/magic-link/verify` |
+| OIDC provider routes | ✅ Complete | `/oidc/authorize`, `/oidc/token`, `/oidc/userinfo`, `/oidc/jwks` |
+| SAML 2.0 SP routes | ✅ Complete | `/saml/login`, `/saml/acs`, `/saml/metadata` |
 | Request validation schemas | ✅ Complete | Zod schemas for all endpoints |
 | OpenAPI 3.1 spec | ✅ Complete | `src/api/openapi.json` — all routes documented |
 | Swagger UI | ✅ Complete | Mounted at `/docs` in development |
@@ -125,7 +129,7 @@ ZeroAuth implements a full zero-trust security model where every request is veri
 | ILM policy | ✅ Complete | Hot/warm/cold/delete lifecycle |
 | Sensitive field masking | ✅ Complete | OTP codes, tokens redacted before shipping |
 | Elasticsearch health check | ✅ Complete | Exposed at `/healthz` |
-| Kibana dashboards | ⬜ Pending | Saved objects not yet exported |
+| Kibana dashboards | ✅ Complete | 6 `.ndjson` dashboards in `kibana/` directory |
 
 ### Testing
 
@@ -150,7 +154,7 @@ ZeroAuth implements a full zero-trust security model where every request is veri
 | Coverage report as PR comment | ✅ Complete | Posted automatically on every PR |
 | Dependency audit | ✅ Complete | `npm audit --audit-level=high` on every push |
 | Docker image build | ✅ Complete | Built and cached on merge to main |
-| Semantic release | ⬜ Pending | Conventional commits not yet configured |
+| Semantic release | ✅ Complete | `.releaserc.json` + commitlint + auto-CHANGELOG |
 
 ### Developer Experience
 
@@ -158,7 +162,8 @@ ZeroAuth implements a full zero-trust security model where every request is veri
 |---|---|---|
 | Pre-commit hooks | ✅ Complete | Prettier + ESLint via Husky + lint-staged |
 | VS Code debugger | ✅ Complete | `.vscode/launch.json` — bun, tsx, and test configs |
-| CLI scaffold tool | ⬜ Pending | `npx zeroauth init` — post-MVP |
+| CLI scaffold tool | ✅ Complete | `npx zeroauth init` — `packages/cli/` |
+| Commit-message linting | ✅ Complete | commitlint + conventional commits |
 
 ---
 
@@ -215,10 +220,126 @@ process.on("SIGTERM", () => shutdownZeroAuth());
 
 ---
 
+## Packages
+
+ZeroAuth is organized as a monorepo with multiple packages:
+
+| Package | Path | Description |
+|---------|------|-------------|
+| `@zeroauth/core` | `./` | Core auth library (Express API, models, services) |
+| `@zeroauth/cli` | `packages/cli/` | `npx zeroauth init` scaffold CLI |
+| `@zeroauth/sdk` | `packages/sdk/` | Typed JS/TS client for consuming ZeroAuth |
+| `@zeroauth/admin-ui` | `packages/admin-ui/` | Next.js admin dashboard (port 3001) |
+| `@zeroauth/ui` | `packages/ui/` | Next.js user-facing app (port 3002) |
+
+### CLI Quick Start
+
+```bash
+# Initialize a new project
+npx @zeroauth/cli init my-app
+cd my-app
+docker compose up -d
+```
+
+### SDK Quick Start
+
+```typescript
+import { ZeroAuthClient } from "@zeroauth/sdk";
+
+const auth = new ZeroAuthClient({
+  baseUrl: "https://auth.example.com",
+  tokenStorage: "localStorage",       // or "memory" (SSR) or "cookie"
+  onRefreshFailed: () => router.push("/login"),
+});
+
+// Register
+await auth.register("user@example.com", "password123", "Alice");
+
+// Login
+await auth.login("user@example.com", "password123");
+
+// Magic link
+await auth.sendMagicLink("user@example.com");
+
+// Passkey
+const options = await auth.getPasskeyRegistrationOptions();
+// ... call @simplewebauthn/browser startRegistration(options)
+await auth.registerPasskey(credential);
+```
+
+### OIDC Provider Configuration
+
+```typescript
+import { registerOIDCClient } from "@zeroauth/core";
+
+registerOIDCClient({
+  clientId: "my-frontend-app",
+  redirectUris: ["https://app.example.com/callback"],
+  scopes: ["openid", "profile", "email"],
+  pkceRequired: true,
+  name: "My Frontend App",
+});
+```
+
+Discovery document: `GET /.well-known/openid-configuration`
+
+### SAML 2.0 Configuration
+
+```env
+SAML_SP_ENTITY_ID=https://auth.example.com/saml/metadata
+SAML_ACS_URL=https://auth.example.com/saml/acs
+SAML_IDP_ENTITY_ID=https://sts.windows.net/<tenant-id>/
+SAML_IDP_SSO_URL=https://login.microsoftonline.com/<tenant-id>/saml2
+SAML_IDP_CERT=<base64-cert>
+```
+
+SP-initiated login: `GET /saml/login?redirect=/dashboard`
+SP metadata: `GET /saml/metadata`
+
+### Multi-Tenant
+
+```typescript
+import { resolveTenant, requireTenant } from "@zeroauth/core";
+
+// Resolve tenant from X-Tenant-ID header, subdomain, or query param
+app.use(resolveTenant());
+
+// Protect tenant-scoped routes
+app.get("/api/data", requireTenant, (req, res) => {
+  const { tenantId } = req; // set by resolveTenant()
+  // ...
+});
+```
+
+### Hardware Attestation
+
+```typescript
+import { verifyAttestation, HIGH_ASSURANCE_POLICY } from "@zeroauth/core";
+
+const result = verifyAttestation(
+  { fmt: "packed", aaguid: "cb69481e-8ff7-4039-93ec-0a2729a154a8", userVerified: true },
+  HIGH_ASSURANCE_POLICY
+);
+
+if (!result.passed) throw new Error(result.reason);
+// result.authenticatorName → "YubiKey 5 Series"
+```
+
+Environment override: `ATTESTATION_LEVEL=direct ATTESTATION_HIGH_ASSURANCE=true`
+
+---
+
 ## Project Structure
 
 ```
-src/
+.
+├── packages/
+│   ├── cli/                 # @zeroauth/cli — npx zeroauth init
+│   ├── sdk/                 # @zeroauth/sdk — typed JS/TS client
+│   ├── admin-ui/            # @zeroauth/admin-ui — Next.js admin (port 3001)
+│   └── ui/                  # @zeroauth/ui — Next.js user app (port 3002)
+├── kibana/                  # Kibana saved object exports (.ndjson)
+├── src/
 ├── config/                  # Environment config loader + validation
 ├── crypto/
 │   └── csfle.ts             # AES-256-GCM field encryption, HKDF key derivation
@@ -228,11 +349,13 @@ src/
 │   └── types.ts             # Canonical type definitions (User, Session, Token…)
 ├── models/
 │   ├── user.model.ts        # User schema with CSFLE hooks
+│   ├── tenant.model.ts      # Tenant schema (slug, plan, OIDC/SAML config)
 │   └── index.ts             # Session, Role, JIT, AuditLog, RefreshToken, OTP
 ├── services/
 │   ├── token.service.ts     # PASETO v4.local token issue/verify
 │   ├── authz.service.ts     # ABAC engine, role hierarchy, JIT evaluation
 │   ├── fingerprint.service.ts
+│   ├── magicLink.service.ts # Send + verify single-use passwordless tokens
 │   └── rateLimiter/
 │       ├── redis.ts         # Redis token bucket rate limiter
 │       └── inmemory.ts      # In-memory token bucket with IP ban
@@ -247,7 +370,8 @@ src/
 │   ├── sessionControl.ts    # Concurrent device limits, session revocation
 │   ├── accountLockout.ts    # Failed login tracking, lockout enforcement
 │   ├── validation.ts        # Zod schema validation, consistent error envelope
-│   └── securityHeaders.ts   # CSP, HSTS, X-Frame-Options, Referrer-Policy
+│   ├── securityHeaders.ts   # CSP, HSTS, X-Frame-Options, Referrer-Policy
+│   └── tenant.ts            # X-Tenant-ID / subdomain resolution, requireTenant
 ├── api/
 │   ├── server.ts            # Express app factory
 │   ├── openapi.json         # OpenAPI 3.1 specification (all routes)
@@ -260,7 +384,14 @@ src/
 │       ├── passkey.routes.ts     # WebAuthn register + authenticate
 │       ├── password-reset.routes.ts
 │       ├── admin.routes.ts       # Users, roles, sessions, JIT, audit logs
-│       └── workload.routes.ts
+│       ├── workload.routes.ts
+│       └── magic-link.routes.ts  # POST /auth/magic-link/send, GET|POST /verify
+├── oidc/
+│   ├── provider.ts          # OIDC client registry, code exchange, userinfo
+│   └── routes.ts            # Discovery, authorize, token, userinfo, logout
+├── saml/
+│   ├── sp.ts                # SP-initiated AuthnRequest, assertion parsing, metadata
+│   └── routes.ts            # /saml/login, /saml/acs, /saml/metadata
 ├── oauth/
 │   ├── provider.factory.ts  # Provider-agnostic adapter interface
 │   └── providers/
@@ -270,6 +401,7 @@ src/
 │       └── apple.ts         # Apple Sign In adapter
 ├── mfa/
 │   ├── index.ts             # OTP dispatch
+│   ├── attestation.ts       # FIDO2 attestation policy + AAGUID database
 │   └── channels/            # email | sms | whatsapp | telegram
 ├── ssf/
 │   ├── receiver.ts          # Ingest SET payloads, trigger revocations
@@ -611,46 +743,62 @@ Do not open public GitHub issues for vulnerabilities.
 
 ## Roadmap & TODO
 
-Items are grouped by category and ordered by priority within each group.
+Items are grouped by category. All v1 features are complete. Items below are v2 targets.
 
-### In Progress / Recently Completed
+### ✅ Completed in v1.1
 
-All items in API completeness, request validation, OAuth providers, rate limiting, security hardening, audit pipeline, and core testing are now complete. See [Feature Status](#feature-status) for details.
+| Item | Description | Location |
+|------|-------------|----------|
+| **Kibana dashboards** | 6 `.ndjson` dashboards: auth rates, MFA adoption, denial patterns, rate-limit heatmap, device anomalies, overview | `kibana/` |
+| **Semantic release** | `@semantic-release/changelog` + conventional commits, auto-CHANGELOG, commitlint | `.releaserc.json`, `commitlint.config.js` |
+| **CLI tool** | `npx zeroauth init` — interactive wizard, key generation, Docker Compose scaffold | `packages/cli/` |
+| **SDK client** | Typed fetch wrapper for all ZeroAuth API endpoints; isomorphic (browser + Node.js) | `packages/sdk/` |
+| **Admin UI** | Next.js 14 admin dashboard — users, sessions, audit logs, JIT approvals, role management | `packages/admin-ui/` |
+| **User-facing UI** | Next.js 14 app — landing page, login, register, magic link, user dashboard | `packages/ui/` |
+| **Passwordless magic links** | Single-use email tokens, 15-min TTL, anti-user-enumeration response | `src/services/magicLink.service.ts` |
+| **Hardware attestation** | FIDO2 attestation policy engine, AAGUID allow/deny lists, known HW key database | `src/mfa/attestation.ts` |
+| **Multi-tenant middleware** | Tenant resolution (header/subdomain/query), `TenantModel`, `resolveTenant()` middleware | `src/middleware/tenant.ts`, `src/models/tenant.model.ts` |
+| **OIDC provider** | RFC 6749 + OIDC Core 1.0 — discovery, authorize, token, userinfo, logout endpoints | `src/oidc/` |
+| **SAML 2.0 SP** | SP-initiated SSO, ACS handler, SP metadata, relay-state CSRF protection | `src/saml/` |
 
-### Remaining Work
+### 🔵 v2 — Next Priorities
 
-#### Observability
+#### Enterprise & Scale
 
-- [ ] **Kibana saved dashboards** — export `.ndjson` objects for: auth success/failure rates, MFA adoption, denied access patterns, rate limit heatmap, device anomaly alerts
+- [ ] **FIDO MDS3 integration** — real-time AAGUID metadata lookups against the FIDO Alliance Metadata Service
+- [ ] **Multi-tenant rate limiting** — per-tenant rate limit namespaces and quotas
+- [ ] **Tenant provisioning API** — REST endpoints for tenant CRUD, plan upgrades, SSO config
+- [ ] **Cross-tenant JIT** — approve privilege escalation across tenant boundaries
+- [ ] **SCIM 2.0** — auto-provision users from enterprise IdPs (Azure AD, Okta)
 
-#### CI/CD
+#### Security
 
-- [ ] **Semantic release** — configure `@semantic-release/changelog` + conventional commits for auto-versioned releases and CHANGELOG
+- [ ] **FIDO2 resident keys** — discoverable credentials (passkey sync across devices)
+- [ ] **Attestation CA pinning** — pin attestation trust anchors per deployment
+- [ ] **Mutual TLS (mTLS)** — client certificate auth for workload identities
+- [ ] **Token binding** — bind tokens to TLS sessions
+- [ ] **Hardware-backed key storage** — use TPM/Secure Enclave for PASETO key material
+
+#### Integrations
+
+- [ ] **LDAP/Active Directory** — user import and bind authentication
+- [ ] **Webhook delivery** — push auth events to configurable HTTP endpoints
+- [ ] **Slack / Teams notifications** — real-time alerts for anomaly events
+- [ ] **Datadog / Prometheus metrics** — operational metrics endpoint (`/metrics`)
 
 #### Developer Experience
 
-- [ ] **CLI tool** — `npx zeroauth init`: scaffold `.env`, generate keys, pull Docker Compose, run first-time setup
+- [ ] **OpenTelemetry tracing** — distributed traces across auth flows
+- [ ] **`@zeroauth/react`** — React hooks + context provider built on `@zeroauth/sdk`
+- [ ] **VS Code extension** — syntax highlighting for ZeroAuth config files
+- [ ] **Terraform provider** — manage tenants, roles, and clients as infrastructure
 
-### Future / Post-MVP
+### Future / Long-term
 
-- [ ] **OIDC provider** — expose ZeroAuth itself as an OIDC identity provider (RFC 6749 + OIDC Core)
-- [ ] **SAML 2.0** — SP-initiated SSO for enterprise integrations
-- [ ] **Multi-tenant support** — tenant isolation at the data model and middleware level
-- [ ] **SDK client libraries** — typed fetch wrappers for consuming ZeroAuth from frontend apps
-- [ ] **Admin UI** — Next.js dashboard for user management, session oversight, and audit log review
-- [ ] **Passwordless magic links** — email-based link login without a password
-- [ ] **Hardware security key attestation** — enforce FIDO2 attestation verification for high-assurance deployments
-
-### Next Steps
-
-The core ZeroAuth implementation is feature-complete. Recommended progression:
-
-1. **Export Kibana dashboards** — configure index patterns and save dashboard objects to `kibana/` for one-click import in new deployments
-2. **Configure semantic-release** — add `.releaserc.json`, migrate commit messages to Conventional Commits, enable auto-CHANGELOG
-3. **Build the Admin UI** — a Next.js dashboard would unlock self-service user management without direct API calls
-4. **Multi-tenant isolation** — add a `tenantId` field to User and Session models, tenant-scoped middleware, and per-tenant rate limiting
-5. **OIDC provider mode** — let ZeroAuth act as an identity provider so downstream services can delegate auth entirely
-6. **Distribute as an npm package** — add a build step, publish `@zeroauth/core` to npm, create a companion `@zeroauth/client` fetch wrapper
+- [ ] **FIDO2 enterprise attestation** — CA-signed attestation for device fleet management
+- [ ] **Decentralized identity (DID)** — W3C DID-based authentication
+- [ ] **Post-quantum cryptography** — ML-KEM key encapsulation for future-proof sessions
+- [ ] **Edge deployment** — Cloudflare Workers / Bun Edge compatible distribution
 
 ---
 

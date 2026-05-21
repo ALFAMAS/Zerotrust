@@ -126,6 +126,39 @@ export { handleSSFEvent } from "./ssf/receiver";
 export { sendSSFEvent } from "./ssf/sender";
 export { createWorkloadCredential, validateWorkloadCredential } from "./workload";
 
+// ─── Magic Links ─────────────────────────────────────────────────────────────
+export { sendMagicLink, verifyMagicLink } from "./services/magicLink.service";
+
+// ─── FIDO2 Hardware Attestation ──────────────────────────────────────────────
+export {
+  verifyAttestation,
+  getAttestationPolicy,
+  KNOWN_HARDWARE_KEY_AAGUIDS,
+  DEFAULT_POLICY as DEFAULT_ATTESTATION_POLICY,
+  HIGH_ASSURANCE_POLICY,
+} from "./mfa/attestation";
+export type { AttestationPolicy, AttestationVerificationResult } from "./mfa/attestation";
+
+// ─── Multi-Tenant ────────────────────────────────────────────────────────────
+export { TenantModel } from "./models/tenant.model";
+export type { TenantDocument } from "./models/tenant.model";
+export { resolveTenant, requireTenant, withTenant } from "./middleware/tenant";
+
+// ─── OIDC Provider ───────────────────────────────────────────────────────────
+export {
+  registerOIDCClient,
+  getOIDCClient,
+  validateAuthorizeRequest,
+  issueAuthCode,
+  exchangeCode as exchangeOIDCCode,
+  buildUserInfo,
+  getDiscoveryDocument,
+} from "./oidc/provider";
+
+// ─── SAML 2.0 ────────────────────────────────────────────────────────────────
+export { buildAuthnRequest, parseSAMLResponse, buildSPMetadata } from "./saml/sp";
+export type { SAMLAssertion, SAMLIdPConfig, SAMLSPConfig } from "./saml/sp";
+
 /**
  * Initialize entire ZeroAuth system
  * Call this at application startup
