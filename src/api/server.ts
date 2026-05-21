@@ -26,8 +26,15 @@ import { getElasticsearchHealth } from "../audit";
 const logger = getLogger("api-server");
 
 export async function createServer() {
-  const { logger: initLogger } = await initializeZeroAuth();
-  initLogger.info("Starting API server setup");
+  try {
+    await initializeZeroAuth();
+    logger.info("Starting API server setup");
+  } catch (err) {
+    logger.warn(
+      `ZeroAuth init failed — starting in degraded mode. ` +
+        `DB-dependent routes will return 503. Error: ${(err as Error).message}`
+    );
+  }
 
   const app = express();
 
