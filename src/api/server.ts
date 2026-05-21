@@ -22,6 +22,9 @@ import { securityHeaders } from "../middleware/securityHeaders";
 import { resolveTenant } from "../middleware/tenant";
 import { getLogger } from "../logger";
 import { getElasticsearchHealth } from "../audit";
+import { metricsMiddleware, metricsRoute } from "../metrics";
+import { tracingMiddleware } from "../telemetry";
+import webhookRoutes from "../webhooks/routes";
 
 const logger = getLogger("api-server");
 
@@ -32,6 +35,8 @@ export async function createServer() {
   const app = express();
 
   app.use(securityHeaders());
+  app.use(tracingMiddleware());
+  app.use(metricsMiddleware());
   app.use(helmet());
   app.use(cors());
   app.use(bodyParser.json());
@@ -51,6 +56,7 @@ export async function createServer() {
 
   // Admin routes
   app.use("/admin", adminRoutes);
+  app.use("/admin/webhooks", webhookRoutes);
 
   // OIDC Provider (RFC 6749 + OIDC Core 1.0)
   app.use("/oidc", oidcRoutes);
@@ -106,6 +112,9 @@ export async function createServer() {
       res.json({ ok: true, user: req.user?._id });
     }
   );
+
+  // Prometheus metrics scrape endpoint
+  app.get("/metrics", metricsRoute());
 
   // Health + readiness
   app.get("/healthz", async (req, res) => {
