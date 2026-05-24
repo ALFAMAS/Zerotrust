@@ -341,6 +341,93 @@ GET    /docs                               (Swagger UI — dev only)
 
 This starter handles auth end-to-end. Everything below is what a real SaaS product needs on top of it.
 
+### 🔥 Priority — Build These First
+
+The items below should be tackled before anything else. They cover the foundational UX, compliance, and infrastructure every SaaS needs regardless of niche.
+
+**UI & UX**
+- [ ] Dark / light mode toggle — system preference detection + manual override, persisted
+- [ ] Toast notification system — global toast context for success/error feedback
+- [ ] Loading skeletons — skeleton screens instead of spinners
+- [ ] Mobile-responsive dashboard — all pages usable on phone
+- [ ] Keyboard navigation — focus rings, skip-to-main, ARIA roles on modals and dropdowns
+- [ ] Internationalization (i18n) — next-intl with English default, ready for translations
+
+**Mobile & PWA**
+- [ ] Progressive Web App (PWA) — `manifest.json`, service worker, "Add to Home Screen"
+- [ ] Offline support — cache dashboard shell; queue writes offline, sync on reconnect
+- [ ] Deep linking — invite and magic-link URLs open correctly in web and native app
+
+**In-app Notifications**
+- [ ] Notification model — per-user with `read`/`unread` state
+- [ ] Bell icon + dropdown — notification center UI in dashboard nav
+- [ ] Mark as read — single and bulk
+- [ ] Real-time delivery — Server-Sent Events (SSE) or WebSocket push
+- [ ] Email fallback — deliver via email if user hasn't visited in N days
+
+**File Storage & Uploads**
+- [ ] Avatar upload — resize + optimize, store to S3/R2
+- [ ] File attachments — per-feature uploads with type/size validation
+- [ ] S3-compatible storage — AWS S3, Cloudflare R2, or MinIO for local dev
+- [ ] Pre-signed URLs — secure direct-to-storage uploads from the browser
+- [ ] CDN delivery — serve files from edge for fast global access
+
+**Organizations & Teams**
+- [ ] Workspace model — one org → many members, one user → many orgs
+- [ ] Invite by email — time-limited signed invite links
+- [ ] Org roles — owner, admin, member, viewer with permission checks
+- [ ] Transfer ownership — reassign org owner with confirmation flow
+- [ ] Org settings page — name, logo, slug, billing contact
+- [ ] Per-org billing — one Stripe subscription per organization
+- [ ] Remove / leave org — with safety checks (can't remove last owner)
+- [ ] Custom org roles & permissions — fine-grained resource permissions defined per org
+- [ ] Per-tenant branding — org logo, brand color, app name replace defaults
+
+**Email**
+- [ ] Transactional email templates — welcome, verify, invite, receipt, password reset, trial expiry
+- [ ] React Email or MJML — proper HTML templates, not raw strings
+- [ ] Email queue — Bull/BullMQ so sending never blocks a request
+- [ ] Notification preferences — users choose which emails they receive
+- [ ] Unsubscribe tokens — one-click unsubscribe with signed tokens (CAN-SPAM)
+
+**Customer Support**
+- [ ] Live chat widget — Crisp, Intercom, or Tawk.to embed in dashboard layout
+- [ ] Help center — `/help` searchable FAQ (Mintlify, GitBook, or plain MDX)
+- [ ] In-app feedback — thumbs up/down or NPS survey after key actions
+- [ ] Support ticket model — lightweight tickets if you don't want a third-party tool
+
+**Error Monitoring & Observability**
+- [ ] Sentry — client-side error boundaries + server-side exception capture
+- [ ] Health status page — public `status.yourapp.com` uptime check
+- [ ] Alerting — Elasticsearch watcher or PagerDuty/Slack on error spike or latency breach
+- [ ] Distributed tracing — OpenTelemetry already wired; add Jaeger/Tempo trace viewer
+
+**SEO & Marketing**
+- [ ] Blog or changelog — MDX pages under `/blog` and `/changelog`
+- [ ] Proper meta tags — `<title>`, Open Graph, Twitter cards on every page
+- [ ] Sitemap.xml + robots.txt — generated at build time from Next.js
+- [ ] Cookie consent banner — GDPR-compliant accept/reject
+- [ ] Analytics script — Plausible or Google Analytics with consent gate
+
+**Legal & Compliance**
+- [ ] Privacy policy page — `/privacy`
+- [ ] Terms of service page — `/terms`
+- [ ] GDPR data export — "Export my data" downloads JSON zip
+- [ ] Account deletion — 30-day soft-delete grace period, then purge all PII
+- [ ] Data retention policy — auto-purge audit logs and old sessions after N days
+
+**CI/CD & Deployment**
+- [ ] GitHub Actions — lint + type-check + test on every PR
+- [ ] Docker production build — multi-stage Dockerfile, push to ghcr.io
+- [ ] One-click deploy — Railway / Render / Fly.io deploy button in this README
+- [ ] Environment parity — staging environment that mirrors production
+- [ ] DB backup — daily MongoDB dump to S3 with 30-day retention
+- [ ] Secret rotation — document how to rotate TOKEN_SECRET_HEX without downtime
+
+---
+
+### All Features by Category
+
 ### Billing & Subscriptions
 
 - [ ] **Stripe integration** — subscriptions, one-time charges, setup intents
