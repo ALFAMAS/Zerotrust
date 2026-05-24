@@ -80,7 +80,6 @@ const UserSchema = new Schema<UserDocument>(
   { timestamps: true }
 );
 
-UserSchema.index({ email: 1 });
 UserSchema.index({ "oauthProviders.provider": 1, "oauthProviders.providerId": 1 });
 UserSchema.index({ parentUserId: 1 });
 UserSchema.index({ status: 1 });

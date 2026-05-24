@@ -203,7 +203,7 @@ export default function UsersPage() {
                   <td className="px-5 py-4 text-right">
                     <div className="flex items-center justify-end gap-2">
                       <Link
-                        href={`/users/${u.id}`}
+                        href={`/admin/users/${u.id}`}
                         className="rounded px-2 py-1 text-xs text-indigo-400 hover:bg-indigo-900/30 transition-colors"
                       >
                         View

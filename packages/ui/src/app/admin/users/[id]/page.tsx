@@ -84,7 +84,7 @@ export default function UserDetailPage() {
     try {
       await api.delete(`/admin/users/${id}`);
       showToast("User deleted");
-      setTimeout(() => router.push("/users"), 800);
+      setTimeout(() => router.push("/admin/users"), 800);
     } catch {
       showToast("Delete failed");
     } finally {

@@ -6,8 +6,10 @@
   "moduleResolution": "nodenext",
   "scripts": {
     "build": "tsc",
-    "dev": "tsx watch src/index.ts",
-    "start": "node dist/index.js",
+    "dev": "concurrently --kill-others-on-fail -n API,UI -c cyan,magenta \"tsx watch src/api/server.ts\" \"cd packages/ui && next dev -p 3001\"",
+    "dev:api": "tsx watch src/api/server.ts",
+    "dev:ui": "cd packages/ui && next dev -p 3001",
+    "start": "node dist/api/server.js",
     "test": "vitest",
     "test:watch": "vitest --watch",
     "test:coverage": "vitest --coverage",
@@ -49,6 +51,7 @@
     "@typescript-eslint/eslint-plugin": "^6.13.0",
     "@typescript-eslint/parser": "^6.13.0",
     "prettier": "^3.1.0",
-    "tsx": "^4.6.0"
+    "tsx": "^4.6.0",
+    "concurrently": "^8.2.0"
   }
 }

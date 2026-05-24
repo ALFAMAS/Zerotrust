@@ -96,7 +96,7 @@ export default function DashboardPage() {
         <div className="rounded-xl bg-gray-900 border border-gray-800 overflow-hidden">
           <div className="flex items-center justify-between px-5 py-4 border-b border-gray-800">
             <h2 className="font-semibold text-white">Recent Users</h2>
-            <Link href="/users" className="text-xs text-indigo-400 hover:text-indigo-300">
+            <Link href="/admin/users" className="text-xs text-indigo-400 hover:text-indigo-300">
               View all →
             </Link>
           </div>
@@ -130,7 +130,7 @@ export default function DashboardPage() {
           </div>
           <div className="p-5 grid grid-cols-2 gap-3">
             <Link
-              href="/users"
+              href="/admin/users"
               className="flex flex-col items-start gap-2 rounded-lg bg-gray-800 hover:bg-gray-750 border border-gray-700 p-4 transition-colors hover:border-indigo-500/50"
             >
               <span className="text-xl">➕</span>
@@ -138,7 +138,7 @@ export default function DashboardPage() {
               <span className="text-xs text-gray-500">Invite a new member</span>
             </Link>
             <Link
-              href="/sessions"
+              href="/admin/sessions"
               className="flex flex-col items-start gap-2 rounded-lg bg-gray-800 border border-gray-700 p-4 transition-colors hover:border-indigo-500/50"
             >
               <span className="text-xl">🔐</span>
@@ -146,7 +146,7 @@ export default function DashboardPage() {
               <span className="text-xs text-gray-500">Active user sessions</span>
             </Link>
             <Link
-              href="/settings/auth"
+              href="/admin/settings/auth"
               className="flex flex-col items-start gap-2 rounded-lg bg-gray-800 border border-gray-700 p-4 transition-colors hover:border-indigo-500/50"
             >
               <span className="text-xl">🔑</span>
