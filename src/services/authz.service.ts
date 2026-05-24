@@ -5,15 +5,15 @@ import { JITModel } from "../models/index";
 export class AuthorizationEngine {
   async evaluate(ctx: AuthzContext): Promise<AuthzResult> {
     const { user, resource, action } = ctx;
-    const now = ctx.environment?.time ?? new Date();
+    const now = ctx.environment?.currentTime ?? new Date();
 
     // 1. Check schedule restriction
     const scheduleCheck = this.checkSchedule(user, now);
-    if (!scheduleCheck.allowed) return scheduleCheck;
+    if (scheduleCheck.decision !== "allow") return scheduleCheck;
 
     // 2. Check geo / IP restrictions
     const geoCheck = this.checkGeoRestriction(user, ctx.environment);
-    if (!geoCheck.allowed) return geoCheck;
+    if (geoCheck.decision !== "allow") return geoCheck;
 
     // 3. Resolve effective roles (static + JIT)
     const effectiveRoles = await this.resolveEffectiveRoles(user);
@@ -33,12 +33,12 @@ export class AuthorizationEngine {
         // Evaluate ABAC conditions
         const condResult = this.evaluateConditions(perm.conditions ?? [], ctx);
         if (condResult) {
-          return { allowed: true, matchedRole: roleName, matchedPermission: perm.resource };
+          return { decision: "allow", riskScore: 0 };
         }
       }
     }
 
-    return { allowed: false, reason: "No matching permission found" };
+    return { decision: "deny", riskScore: 0, reason: "No matching permission found" };
   }
 
   private async resolveEffectiveRoles(user: User): Promise<string[]> {
@@ -106,10 +106,10 @@ export class AuthorizationEngine {
         obj = ctx.user as unknown as Record<string, unknown>;
         break;
       case "env":
-        obj = ctx.environment as Record<string, unknown> ?? {};
+        obj = (ctx.environment as Record<string, unknown>) ?? {};
         break;
       case "resource":
-        obj = ctx.resourceAttributes ?? {};
+        obj = {};
         break;
       default:
         return undefined;
@@ -144,7 +144,6 @@ export class AuthorizationEngine {
   private matchesResource(pattern: string, resource: string): boolean {
     if (pattern === "*") return true;
     if (pattern === resource) return true;
-    // Wildcard: "flights:*" matches "flights:read"
     if (pattern.endsWith(":*")) {
       return resource.startsWith(pattern.slice(0, -2));
     }
@@ -153,33 +152,33 @@ export class AuthorizationEngine {
 
   private checkSchedule(user: User, now: Date): AuthzResult {
     const sched = user.sessionConfig?.scheduleRestriction;
-    if (!sched?.enabled) return { allowed: true };
+    if (!sched?.enabled) return { decision: "allow", riskScore: 0 };
 
     const localTime = new Date(now.toLocaleString("en-US", { timeZone: sched.timezone }));
     const day = localTime.getDay();
     const hour = localTime.getHours();
 
     if (sched.allowedDays.length > 0 && !sched.allowedDays.includes(day)) {
-      return { allowed: false, reason: "ACCESS_SCHEDULE_BLOCKED" };
+      return { decision: "deny", riskScore: 0, reason: "ACCESS_SCHEDULE_BLOCKED" };
     }
 
     if (hour < sched.allowedHoursStart || hour >= sched.allowedHoursEnd) {
-      return { allowed: false, reason: "ACCESS_SCHEDULE_BLOCKED" };
+      return { decision: "deny", riskScore: 0, reason: "ACCESS_SCHEDULE_BLOCKED" };
     }
 
-    return { allowed: true };
+    return { decision: "allow", riskScore: 0 };
   }
 
   private checkGeoRestriction(user: User, env?: AuthzContext["environment"]): AuthzResult {
     const config = user.sessionConfig;
-    if (!config) return { allowed: true };
+    if (!config) return { decision: "allow", riskScore: 0 };
 
     if (config.allowedCountries && config.allowedCountries.length > 0) {
-      if (env?.country && !config.allowedCountries.includes(env.country as string)) {
-        return { allowed: false, reason: "ACCESS_GEOFENCE_BLOCKED" };
+      if (env?.currentCountry && !config.allowedCountries.includes(env.currentCountry as string)) {
+        return { decision: "deny", riskScore: 0, reason: "ACCESS_GEOFENCE_BLOCKED" };
       }
     }
 
-    return { allowed: true };
+    return { decision: "allow", riskScore: 0 };
   }
 }

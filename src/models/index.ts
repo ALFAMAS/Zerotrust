@@ -5,8 +5,9 @@ import type {
   JITAccessRequest,
   AuditLog,
   RefreshTokenRecord,
-  OTP,
 } from "../shared/types";
+
+export { UserModel, type UserDocument } from "./user.model";
 
 // ─── Session ─────────────────────────────────────────────────────────────────
 

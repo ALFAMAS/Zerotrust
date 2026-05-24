@@ -2,17 +2,18 @@ import express from "express";
 import bcrypt from "bcryptjs";
 import { nanoid } from "nanoid";
 import * as nodeCrypto from "crypto";
+import mongoose from "mongoose";
 import { UserModel, SessionModel, RefreshTokenModel } from "../../models";
 import { FingerprintService } from "../../services/fingerprint.service";
 import { TokenService } from "../../services/token.service";
 import { getConfig } from "../../config";
 import {
   enforceMaxConcurrentDevices,
-  requireSessionLimitOnLogin,
 } from "../../middleware/sessionControl";
 import { rateLimit } from "../../middleware/rateLimiting";
 import { requireProofOfPossession } from "../../middleware/proofOfPossession";
 import { getLogger } from "../../logger";
+import { getProviderAdapter } from "../../oauth/provider.factory";
 
 const router = express.Router();
 const logger = getLogger("auth-routes");
@@ -89,7 +90,6 @@ router.post("/register", rateLimit({ points: 10, windowSecs: 60 }), async (req, 
       },
     });
 
-    export default router;
     res.status(201).json({ success: true, userId: user._id.toString() });
   } catch (err) {
     logger.error("Registration error", err as Error);
@@ -125,10 +125,12 @@ router.post("/login", rateLimit({ points: 20, windowSecs: 60 }), async (req, res
 
     // Include PoP key if provided by client
     const popKey = (req.headers["x-pop-key"] as string) || undefined;
+    const sessionId = new mongoose.Types.ObjectId();
 
     const accessToken = await tokenSvc.signAccessToken({
       sub: user._id.toString(),
       email: user.email,
+      sid: sessionId.toString(),
       aud: "zeroauth",
       scope: ["openid"],
       pop_key: popKey,
@@ -137,6 +139,7 @@ router.post("/login", rateLimit({ points: 20, windowSecs: 60 }), async (req, res
 
     // Create session
     const session = await SessionModel.create({
+      _id: sessionId,
       userId: user._id,
       tokenId: payload.jti,
       deviceFingerprint: {
@@ -209,9 +212,11 @@ router.post(
         return res.status(404).json({ error: "USER_NOT_FOUND", message: "User not found" });
 
       const popKey = (req.headers["x-pop-key"] as string) || undefined;
+      const refreshSessionId = new mongoose.Types.ObjectId();
       const accessToken = await tokenSvc.signAccessToken({
         sub: user._id.toString(),
         email: user.email,
+        sid: refreshSessionId.toString(),
         aud: "zeroauth",
         scope: ["openid"],
         pop_key: popKey,
@@ -220,6 +225,7 @@ router.post(
 
       // Create session entry
       const session = await SessionModel.create({
+        _id: refreshSessionId,
         userId: user._id,
         tokenId: payload.jti,
         deviceFingerprint: {},
@@ -259,8 +265,6 @@ router.post("/oauth/state", rateLimit({ points: 20, windowSecs: 60 }), (req, res
 });
 
 // OAuth callback: supports PKCE/state validation and exchanges code with provider adapters
-import { getProviderAdapter } from "../../oauth/provider.factory";
-
 router.get(
   "/oauth/:provider/callback",
   rateLimit({ points: 20, windowSecs: 60 }),
@@ -313,9 +317,11 @@ router.get(
 
       const tokenSvc = await getTokenService();
       const popKey = (req.headers["x-pop-key"] as string) || undefined;
+      const oauthSessionId = new mongoose.Types.ObjectId();
       const accessToken = await tokenSvc.signAccessToken({
         sub: user._id.toString(),
         email: user.email,
+        sid: oauthSessionId.toString(),
         aud: "zeroauth",
         scope: ["openid"],
         pop_key: popKey,
@@ -323,6 +329,7 @@ router.get(
       const payload = await tokenSvc.verifyAccessToken(accessToken);
 
       const session = await SessionModel.create({
+        _id: oauthSessionId,
         userId: user._id,
         tokenId: payload.jti,
         deviceFingerprint: {},
