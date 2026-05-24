@@ -482,3 +482,153 @@ This starter handles auth end-to-end. Everything below is what a real SaaS produ
 - [ ] **Help center** — `/help` with searchable FAQ (Mintlify, GitBook, or plain MDX)
 - [ ] **In-app feedback** — thumbs up/down or NPS survey triggered after key actions
 - [ ] **Support ticket model** — lightweight ticket system if you don't want a third-party tool
+
+### Loyalty & Rewards System
+
+- [ ] **Points model** — `UserPoints` collection: balance, lifetime total, expiry date per user
+- [ ] **Earning rules engine** — configurable rules: daily login (+10 pts), referral signup (+200 pts), first payment (+500 pts), plan anniversary (+250 pts), profile complete (+50 pts), leaving a review (+100 pts)
+- [ ] **Tier system** — Bronze (0–999), Silver (1 000–4 999), Gold (5 000–19 999), Platinum (20 000+); tier stored on user, re-evaluated on every points change
+- [ ] **Tier benefits** — each tier unlocks perks: extra API rate limit quota, storage bonus, priority support badge, discount percentage, extended session TTL
+- [ ] **Redemption catalog** — users spend points on: account credit (100 pts = $1), feature unlock (e.g. unlock dark mode early), extended trial, swag/merch codes, one-month plan upgrade
+- [ ] **Points history page** — timestamped ledger showing every earn and spend event with source label
+- [ ] **Expiry policy** — points expire after 12 months of account inactivity; warning email sent at 30 days before expiry
+- [ ] **Birthday & anniversary bonuses** — auto-award on account creation anniversary and user birthday (if collected)
+- [ ] **Referral multiplier** — referred users earn 1.5× points on their first 90 days
+- [ ] **Admin controls** — manually award/deduct points with reason, bulk-award to a segment, adjust tier thresholds from admin panel
+- [ ] **Leaderboard** — opt-in public leaderboard of top point earners (anonymized option)
+- [ ] **Points badge on profile** — show tier badge and point count in dashboard nav and public profile
+
+### Referral & Affiliate Program
+
+- [ ] **Referral link generator** — unique signed short-link per user (`yourapp.com/r/abc123`)
+- [ ] **Referral tracking** — cookie + UTM attribution, link referrer to signup, store `referredBy` on new user
+- [ ] **Referral rewards** — referrer gets account credit or points when referee converts to paid; referee gets trial extension or discount
+- [ ] **Referral dashboard** — show user how many clicks, signups, and conversions their link produced
+- [ ] **Multi-tier referral** — optional: referrer earns a % when their referral also refers someone (1 level deep only to avoid pyramid schemes)
+- [ ] **Affiliate portal** — separate `/affiliate` section for external promoters: unique codes, commission rate, payout history, payment threshold
+- [ ] **Payout integration** — trigger payouts via Stripe Connect, PayPal Payouts, or Wise on the 1st of each month
+- [ ] **Fraud detection** — flag self-referrals (same IP/device), same-email patterns, and referrals that churn within 7 days
+
+### Gamification & Engagement
+
+- [ ] **Achievement badges** — unlock badges for milestones: "First Login", "Power User" (30-day streak), "Team Player" (invited 5 members), "Early Adopter", "Completionist" (100% profile)
+- [ ] **Streak tracking** — daily login streak counter with grace period (miss 1 day = streak paused, not reset); streak shown in dashboard
+- [ ] **Progress bars** — onboarding completion %, profile completeness %, plan usage %; visual motivation to fill gaps
+- [ ] **Challenges** — weekly/monthly opt-in challenges (e.g. "Invite a teammate this week") with point rewards on completion
+- [ ] **Activity points feed** — live mini-feed in dashboard: "You earned 50 pts for completing your profile" with confetti animation
+- [ ] **Social sharing** — "I just reached Gold tier on [App]!" share card generated as OG image (Satori/`@vercel/og`)
+- [ ] **Level-up notifications** — in-app + email when a user crosses a tier threshold
+
+### White-labeling & Custom Domains
+
+- [ ] **Custom domain per tenant** — orgs can map `app.theirdomain.com` to your platform (Cloudflare for SaaS / Vercel domains API)
+- [ ] **Custom subdomain** — auto-provision `theirorg.yourapp.com` on org creation (wildcard DNS + TLS)
+- [ ] **Per-tenant branding** — org logo, brand color, and app name replace defaults in the UI
+- [ ] **Custom email domain** — org sends transactional emails from `noreply@theirdomain.com` via SendGrid / Resend domain auth
+- [ ] **Remove "Powered by" badge** — white-label tier hides all ZeroAuth / starter branding
+- [ ] **Custom login page** — org-specific login URL with their logo, colors, and SSO button
+
+### Integrations & Automation
+
+- [ ] **Zapier integration** — publish a Zapier app with triggers (new user, new payment) and actions (create user, update plan)
+- [ ] **Make (Integromat) integration** — same as Zapier; share the OpenAPI spec to auto-generate module
+- [ ] **Slack app** — slash commands (`/myapp status`, `/myapp users`) + DM notifications for key events
+- [ ] **Native integration marketplace** — `/integrations` page listing available connections; per-user OAuth flows to connect third-party accounts
+- [ ] **IFTTT / n8n support** — webhook-in + webhook-out enough to support these; document the patterns
+- [ ] **HubSpot / Salesforce sync** — push new signups and plan changes to CRM; sync contact properties back
+- [ ] **Segment.io or Rudderstack** — server-side analytics pipeline: track every business event to any downstream tool
+
+### Revenue Recovery & Retention
+
+- [ ] **Dunning management** — retry failed payments on days 3, 7, 14; send escalating email sequence with payment link
+- [ ] **Pause subscription** — users can pause (not cancel) for up to 3 months; billing pauses, access restricted
+- [ ] **Cancellation flow** — offboarding survey before cancel (reason, competitor?), offer discount or pause as alternatives, gather churn insight
+- [ ] **Win-back campaign** — automated email sequence to churned users at 7, 30, 90 days; offer time-limited discount code
+- [ ] **Usage-based upsell nudges** — "You've used 80% of your storage quota" → upgrade prompt in-app and via email
+- [ ] **Plan downgrade warnings** — when a user tries to downgrade, show what they'll lose (features, team seats, storage)
+- [ ] **Lifetime deal (LTD) support** — special plan type: one payment, no subscription, with usage cap enforcement
+
+### Enterprise Features
+
+- [ ] **SAML 2.0 SSO** — SP-initiated SSO for Okta, Azure AD, Google Workspace; per-org identity provider config
+- [ ] **SCIM provisioning** — auto-create/deactivate users from Azure AD / Okta via SCIM 2.0 (RFC 7644)
+- [ ] **Custom org roles & permissions** — admins define roles with fine-grained resource permissions, assign to members
+- [ ] **Audit log export** — download audit events as CSV or stream to customer's SIEM (Splunk, Datadog, Elastic)
+- [ ] **Data residency** — choose storage region (EU / US / APAC) per org to satisfy GDPR / data sovereignty
+- [ ] **SLA tiers** — 99.9% uptime SLA for Pro, 99.99% for Enterprise; SLA credit automation on breach
+- [ ] **Dedicated instance** — single-tenant deployment option: own MongoDB, own Redis, own subdomain
+- [ ] **Security questionnaire** — pre-filled VSA / CAIQ security questionnaire document for enterprise procurement
+- [ ] **SOC 2 Type II readiness** — access control evidence, change management, incident response, vendor review checklist
+- [ ] **IP allowlist per org** — restrict API + dashboard access to specific CIDR ranges
+
+### Mobile & Offline
+
+- [ ] **React Native / Expo app** — shared auth logic with the web app; biometric login (Face ID / fingerprint) via passkeys
+- [ ] **Web push notifications** — service worker + Push API; browser permission prompt at the right moment
+- [ ] **Progressive Web App (PWA)** — `manifest.json`, service worker, "Add to Home Screen" prompt on mobile
+- [ ] **Offline support** — service worker caches dashboard shell; queue writes when offline, sync on reconnect
+- [ ] **Deep linking** — `/invite/:token` and `/magic-link/verify` links open correctly in both web and native app
+
+### AI & Smart Features
+
+- [ ] **AI-powered onboarding assistant** — chat widget that guides new users through setup using Claude / GPT-4o
+- [ ] **Smart search** — Elasticsearch semantic search or OpenAI embeddings for natural language queries across user data
+- [ ] **Anomaly detection** — ML model on login patterns: flag unusual login time, location, device; already have the signals
+- [ ] **Churn prediction score** — logistic regression on usage signals (logins, feature depth, team activity) → at-risk score shown in admin
+- [ ] **Auto-generated reports** — weekly digest email: "Here's what happened in your account this week" built with LLM summary
+- [ ] **AI support bot** — trained on your help docs; deflects tier-1 support before escalating to human
+- [ ] **Usage recommendations** — "Teams that use feature X retain 30% longer. You haven't tried it yet." — personalized suggestions
+
+### Tax, Multi-currency & Global
+
+- [ ] **Stripe Tax** — auto-calculate and collect VAT / GST / sales tax by customer location; one line of config
+- [ ] **Tax exemption certificates** — nonprofits and B2B EU orgs submit VAT ID or exemption cert to remove tax
+- [ ] **Multi-currency pricing** — display prices in user's local currency; Stripe handles FX; lock local price per region
+- [ ] **Purchasing Power Parity (PPP)** — automatic regional discounts based on country GDP (use `ppp` npm package)
+- [ ] **Invoice localization** — invoice language, currency, and legal address match customer's country
+- [ ] **EU VAT compliance** — collect and validate EU VAT numbers via VIES; reverse-charge on B2B EU invoices
+
+### Advanced Search & Discovery
+
+- [ ] **Global search bar** — `Cmd+K` / `Ctrl+K` command palette searching users, settings, docs, and recent actions
+- [ ] **Elasticsearch full-text search** — already have ES running; index user content and surface results with highlighting
+- [ ] **Faceted filters** — filter search results by type, date, plan, status with instant counts
+- [ ] **Search analytics** — log queries with no results → identify docs/features to build
+- [ ] **Autocomplete suggestions** — debounced type-ahead suggestions from a search-suggest endpoint
+
+### Collaboration & Activity
+
+- [ ] **Team activity feed** — per-org timeline of who did what: "Alice invited Bob", "Charlie upgraded to Pro"
+- [ ] **@mentions** — `@username` in comments or notes triggers in-app + email notification
+- [ ] **Threaded comments** — attach comments to any resource (file, project, record) with reply threading
+- [ ] **Emoji reactions** — lightweight engagement on activity feed items and comments
+- [ ] **Real-time presence** — show which team members are currently online (WebSocket `online` heartbeat)
+- [ ] **Shared notes / docs** — lightweight collaborative notes per org (Tiptap or plain textarea + autosave)
+
+### Data, Import & Export
+
+- [ ] **CSV import** — bulk-create users, records, or contacts from a CSV with column mapping UI
+- [ ] **CSV / JSON export** — every list/table has an "Export" button; streams large exports instead of loading all into memory
+- [ ] **Data migration wizard** — guided flow to import data from common competitors or spreadsheets
+- [ ] **Scheduled exports** — daily/weekly automated export to S3 bucket or email attachment
+- [ ] **API-first data access** — every piece of user data accessible via a paginated REST or GraphQL API so power users can self-serve exports
+- [ ] **Bulk operations** — select all → bulk delete, bulk status change, bulk assign tag
+
+### Security & Trust
+
+- [ ] **HaveIBeenPwned check** — on register/password change, check the password hash prefix against HIBP API; warn or block compromised passwords
+- [ ] **Security headers audit** — A+ on securityheaders.com; CSP, HSTS, COOP, CORP configured in Helmet
+- [ ] **Dependency vulnerability scanning** — `npm audit` in CI; Dependabot or Renovate for automated PRs
+- [ ] **Bug bounty program** — responsible disclosure policy page at `/security`; HackerOne or Bugcrowd listing
+- [ ] **Pen test report** — annual third-party penetration test; publish summary to enterprise prospects
+- [ ] **Login notification emails** — email user on new device login with "Not you? Revoke this session" link (already have session data)
+- [ ] **Account takeover detection** — flag password reset + email change within short window; require re-auth for sensitive changes
+
+### Customer Success
+
+- [ ] **Health score per account** — composite score from: login frequency, feature depth, team size, support tickets, payment history
+- [ ] **At-risk account alerts** — Slack/email alert to CS team when an account's health score drops below threshold
+- [ ] **Automated lifecycle emails** — day 1 welcome, day 3 "have you tried X", day 7 check-in, day 14 trial expiry warning
+- [ ] **NPS survey automation** — in-app NPS prompt after 30 days, quarterly thereafter; store score + comment; export to CSV
+- [ ] **Customer segments** — tag accounts as "champion", "at-risk", "expansion candidate"; use segments to target campaigns
+- [ ] **Usage benchmarking** — show user how their usage compares to similar accounts ("You're in the top 20% of teams your size")
