@@ -64,7 +64,7 @@ export function rateLimit(options?: { points?: number; windowSecs?: number }) {
   const points = options?.points ?? cfg.rateLimiting.perIpLimit;
   const windowSecs = options?.windowSecs ?? cfg.rateLimiting.windowSecs;
 
-  return (req: Request, res: Response, next: NextFunction): void => {
+  return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     if (!cfg.rateLimiting.enabled) return next();
 
     try {
