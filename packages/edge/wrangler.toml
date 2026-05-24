@@ -1,0 +1,20 @@
+name = "zeroauth-edge"
+main = "src/worker.ts"
+compatibility_date = "2024-03-14"
+compatibility_flags = ["nodejs_compat"]
+
+[vars]
+ENVIRONMENT = "production"
+
+[[kv_namespaces]]
+binding = "SESSIONS"
+id = "your-kv-namespace-id"
+preview_id = "your-preview-kv-id"
+
+[[kv_namespaces]]
+binding = "RATE_LIMIT"
+id = "your-rate-limit-kv-id"
+preview_id = "your-preview-rate-limit-kv-id"
+
+[build]
+command = "npm run build"

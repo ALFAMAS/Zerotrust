@@ -1,0 +1,96 @@
+{
+  "Full ZeroAuth Config": {
+    "prefix": "zeroauth-full",
+    "body": [
+      "[server]",
+      "port = ${1:3000}",
+      "node_env = ${2:development}",
+      "",
+      "[database]",
+      "mongo_uri = \"${3:mongodb://localhost:27017/zeroauth}\"",
+      "redis_url = \"${4:redis://localhost:6379}\"",
+      "",
+      "[tokens]",
+      "secret_hex = \"${5:replace-with-openssl-rand-hex-32}\"",
+      "access_ttl = ${6:900}",
+      "refresh_ttl = ${7:604800}",
+      "",
+      "[mfa]",
+      "totp_enabled = ${8:true}",
+      "email_otp = ${9:true}",
+      "",
+      "[passkeys]",
+      "rp_id = \"${10:localhost}\"",
+      "rp_name = \"${11:My App}\"",
+      "rp_origin = \"${12:http://localhost:3000}\""
+    ],
+    "description": "Full ZeroAuth configuration template"
+  },
+  "Server Section": {
+    "prefix": "za-server",
+    "body": ["[server]", "port = ${1:3000}", "node_env = ${2:development}"],
+    "description": "ZeroAuth server section"
+  },
+  "Database Section": {
+    "prefix": "za-database",
+    "body": [
+      "[database]",
+      "mongo_uri = \"${1:mongodb://localhost:27017/zeroauth}\"",
+      "redis_url = \"${2:redis://localhost:6379}\"",
+      "elasticsearch_url = \"${3:http://localhost:9200}\""
+    ],
+    "description": "ZeroAuth database section"
+  },
+  "Tokens Section": {
+    "prefix": "za-tokens",
+    "body": [
+      "[tokens]",
+      "secret_hex = \"${1:}\"",
+      "access_ttl = ${2:900}",
+      "refresh_ttl = ${3:604800}"
+    ],
+    "description": "ZeroAuth tokens section"
+  },
+  "MFA Section": {
+    "prefix": "za-mfa",
+    "body": [
+      "[mfa]",
+      "totp_enabled = ${1:true}",
+      "email_otp = ${2:true}",
+      "sms_otp = ${3:false}",
+      "smtp_host = \"${4:smtp.example.com}\"",
+      "smtp_port = ${5:587}"
+    ],
+    "description": "ZeroAuth MFA section"
+  },
+  "Passkeys Section": {
+    "prefix": "za-passkeys",
+    "body": [
+      "[passkeys]",
+      "rp_id = \"${1:example.com}\"",
+      "rp_name = \"${2:My App}\"",
+      "rp_origin = \"${3:https://example.com}\""
+    ],
+    "description": "ZeroAuth passkeys / WebAuthn section"
+  },
+  "OAuth Section": {
+    "prefix": "za-oauth",
+    "body": [
+      "[oauth]",
+      "github_client_id = \"${1:}\"",
+      "github_client_secret = \"${2:}\"",
+      "google_client_id = \"${3:}\"",
+      "google_client_secret = \"${4:}\""
+    ],
+    "description": "ZeroAuth OAuth providers section"
+  },
+  "Multi-tenant Section": {
+    "prefix": "za-tenant",
+    "body": [
+      "[tenant]",
+      "resolver = \"${1|header,subdomain,query|}\"",
+      "default_tenant = \"${2:default}\""
+    ],
+    "description": "ZeroAuth multi-tenant section"
+  }
+}

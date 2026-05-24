@@ -854,6 +854,22 @@ Items are grouped by category. All v1 features are complete. Items below are v2 
 | **OIDC provider** | RFC 6749 + OIDC Core 1.0 — discovery, authorize, token, userinfo, logout endpoints | `src/oidc/` |
 | **SAML 2.0 SP** | SP-initiated SSO, ACS handler, SP metadata, relay-state CSRF protection | `src/saml/` |
 
+### ✅ Completed in v3
+
+| Feature | Description | Location |
+|---------|-------------|----------|
+| **Cross-tenant JIT** | In-memory store for cross-tenant privilege requests with approve/deny + auto-expiry | `src/jit/` |
+| **LDAP/Active Directory** | LDAPClient with bind, authenticate, search, sync; schedulable incremental sync | `src/ldap/` |
+| **Slack/Teams notifications** | Slack Block Kit + Teams Adaptive Cards + PagerDuty Events API v2; env-var init | `src/notifications/` |
+| **Token binding** | Ties tokens to TLS sessions via tbh claim; strict/relaxed modes; proxy header support | `src/middleware/tokenBinding.ts` |
+| **Hardware-backed key storage** | Provider interface with TPM2/Secure Enclave/PKCS#11 stubs + Software fallback (HKDF+AES-GCM) | `src/crypto/hardware-key-store.ts` |
+| **FIDO2 enterprise attestation** | CA-signed attestation for device fleets; X.509 chain verification; OU/serial restrictions | `src/mfa/enterprise-attestation.ts` |
+| **VS Code extension** | `.zeroauth` syntax highlighting, snippets (full config + 7 sections), secret detection diagnostics | `packages/vscode-extension/` |
+| **Terraform provider** | Go Terraform Plugin Framework provider: `zeroauth_tenant`, `zeroauth_role`, `zeroauth_webhook` resources | `packages/terraform-provider/` |
+| **Decentralized identity (DID)** | W3C DID resolution (did:key, did:web), challenge-response auth, user provisioning | `src/did/` |
+| **Post-quantum cryptography** | ML-KEM-768 interface with SimulatedMLKEM (ECDH-P256) + NobleMLKEM stub; hybrid AES-GCM encryption | `src/crypto/post-quantum.ts` |
+| **Edge deployment** | Cloudflare Workers worker: token verify/issue, KV session store, rate limiting via KV | `packages/edge/` |
+
 ### ✅ Completed in v2
 
 | Feature | Description | Location |
@@ -870,30 +886,11 @@ Items are grouped by category. All v1 features are complete. Items below are v2 
 | **OpenTelemetry tracing** | OTLP export, auto-instrumentation, `X-Trace-Id` on responses | `src/telemetry/` |
 | **`@zeroauth/react`** | `ZeroAuthProvider`, `useAuth`, `useSession`, `useMFA`, `usePasskey`, `useMagicLink`, `AuthGuard` | `packages/react/` |
 
-### 🔵 v3 — Next Priorities
+### Future
 
-#### Enterprise & Scale
-
-- [ ] **Cross-tenant JIT** — approve privilege escalation across tenant boundaries
-- [ ] **LDAP/Active Directory** — user import and bind authentication
-- [ ] **Slack / Teams notifications** — real-time alerts for anomaly events
-
-#### Security
-
-- [ ] **Token binding** — bind tokens to TLS sessions
-- [ ] **Hardware-backed key storage** — use TPM/Secure Enclave for PASETO key material
-
-#### Developer Experience
-
-- [ ] **VS Code extension** — syntax highlighting for ZeroAuth config files
-- [ ] **Terraform provider** — manage tenants, roles, and clients as infrastructure
-
-### Future / Long-term
-
-- [ ] **FIDO2 enterprise attestation** — CA-signed attestation for device fleet management
-- [ ] **Decentralized identity (DID)** — W3C DID-based authentication
-- [ ] **Post-quantum cryptography** — ML-KEM key encapsulation for future-proof sessions
-- [ ] **Edge deployment** — Cloudflare Workers / Bun Edge compatible distribution
+- [ ] **Cross-tenant federation** — federated identity across ZeroAuth deployments
+- [ ] **Biometric continuous auth** — re-verify identity mid-session using device sensors
+- [ ] **AI-powered anomaly detection** — ML-based behavioral baselines per user
 
 ---
 

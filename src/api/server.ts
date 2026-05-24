@@ -27,6 +27,10 @@ import { tracingMiddleware } from "../telemetry";
 import webhookRoutes from "../webhooks/routes";
 import scimRoutes from "../scim/routes";
 import tenantRoutes from "./routes/tenant.routes";
+import jitCrossTenantRoutes from "../jit/routes";
+import ldapRoutes from "../ldap/routes";
+import notificationRoutes from "../notifications/routes";
+import didRoutes from "../did/routes";
 
 const logger = getLogger("api-server");
 
@@ -63,6 +67,16 @@ export async function createServer() {
 
   // SCIM 2.0 provisioning
   app.use("/scim/v2", scimRoutes);
+
+  // DID authentication
+  app.use("/auth/did", didRoutes);
+
+  // JIT cross-tenant
+  app.use("/jit/cross-tenant", jitCrossTenantRoutes);
+
+  // Admin: LDAP and notifications
+  app.use("/admin/ldap", ldapRoutes);
+  app.use("/admin/notifications", notificationRoutes);
 
   // OIDC Provider (RFC 6749 + OIDC Core 1.0)
   app.use("/oidc", oidcRoutes);
