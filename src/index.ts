@@ -212,6 +212,39 @@ export type { SCIMUser, SCIMGroup } from "./scim";
 // ─── Multi-Tenant Rate Limiting ───────────────────────────────────────────────
 export { tenantRateLimit, configureTenantQuota, getTenantQuota } from "./middleware/rateLimiting";
 
+// ─── Cross-Tenant JIT ─────────────────────────────────────────────────────────
+export { crossTenantJITStore, requestCrossTenantAccess, requireCrossTenantJIT } from "./jit/cross-tenant";
+export type { CrossTenantJITRequest } from "./jit/cross-tenant";
+
+// ─── LDAP / Active Directory ─────────────────────────────────────────────────
+export { LDAPClient, createLDAPClient } from "./ldap/client";
+export { syncAllUsers, syncModifiedUsers, scheduleLDAPSync } from "./ldap/sync";
+export type { LDAPConfig, LDAPUser, LDAPGroup } from "./ldap/types";
+
+// ─── Notifications (Slack / Teams / PagerDuty) ────────────────────────────────
+export { notificationDispatcher, initNotificationsFromEnv } from "./notifications";
+export type { NotificationEvent, NotificationChannel } from "./notifications/types";
+
+// ─── Token Binding ────────────────────────────────────────────────────────────
+export { verifyTokenBinding, attachTokenBinding, computeTokenBindingId, createTokenBindingConfig } from "./middleware/tokenBinding";
+
+// ─── Hardware Key Storage ─────────────────────────────────────────────────────
+export { initHardwareKeyStore, SoftwareKeyProvider, TPMKeyProvider, SecureEnclaveProvider, PKCS11Provider } from "./crypto/hardware-key-store";
+export type { HardwareKeyProvider } from "./crypto/hardware-key-store";
+
+// ─── Enterprise Attestation ───────────────────────────────────────────────────
+export { enterpriseCARegistry, verifyEnterpriseAttestation, requireEnterpriseAttestation, parseCertificate } from "./mfa/enterprise-attestation";
+export type { EnterpriseAttestationCA, EnterpriseCertificate } from "./mfa/enterprise-attestation";
+
+// ─── Decentralized Identity (DID) ─────────────────────────────────────────────
+export { resolveDID, resolveDIDKey, resolveDIDWeb } from "./did/resolver";
+export { createDIDChallenge, verifyDIDProof, provisionDIDUser } from "./did/verifier";
+export type { DIDDocument, DIDAuthChallenge, DIDProof, DIDAuthResult, VerificationMethod } from "./did/types";
+
+// ─── Post-Quantum Cryptography ────────────────────────────────────────────────
+export { createKEMProvider, generatePQKeyPair, hybridEncrypt, hybridDecrypt, SimulatedMLKEM, NobleMLKEM, establishPQSessionKey } from "./crypto/post-quantum";
+export type { KEMPublicKey, KEMPrivateKey, KEMEncapsulation, PQKEMProvider } from "./crypto/post-quantum";
+
 /**
  * Initialize entire ZeroAuth system
  * Call this at application startup
