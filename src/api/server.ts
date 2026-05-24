@@ -4,6 +4,11 @@ import cors from "cors";
 import bodyParser from "body-parser";
 import { initializeZeroAuth } from "..";
 import authRoutes from "./routes/auth.routes";
+import magicLinkRoutes from "./routes/magic-link.routes";
+import mfaRoutes from "./routes/mfa.routes";
+import sessionRoutes from "./routes/session.routes";
+import adminRoutes from "./routes/admin.routes";
+import passkeyRoutes from "./routes/passkey.routes";
 import path from "path";
 import swaggerUi from "swagger-ui-express";
 import { rateLimit } from "../middleware/rateLimiting";
@@ -23,10 +28,23 @@ export async function createServer() {
   app.use(cors());
   app.use(bodyParser.json());
 
-  // Public auth routes
+  // ─── Auth routes ─────────────────────────────────────────────────────────
   app.use("/auth", authRoutes);
+  app.use("/auth/magic-link", magicLinkRoutes);
 
-  // Swagger UI
+  // MFA routes (auth required — enforced inside the router)
+  app.use("/auth/mfa", mfaRoutes);
+
+  // Passkey routes (mixed auth — individual handlers enforce as needed)
+  app.use("/auth/passkey", passkeyRoutes);
+
+  // ─── Session routes (auth required — enforced inside the router) ─────────
+  app.use("/sessions", sessionRoutes);
+
+  // ─── Admin routes (auth + admin role — enforced inside the router) ───────
+  app.use("/admin", adminRoutes);
+
+  // ─── Swagger UI ──────────────────────────────────────────────────────────
   try {
     const spec = require(path.resolve(__dirname, "./openapi.json"));
     app.use("/docs", swaggerUi.serve, swaggerUi.setup(spec));
@@ -34,7 +52,7 @@ export async function createServer() {
     logger.warn("Swagger UI not available", e as Error);
   }
 
-  // SSF webhook endpoint with signature validation
+  // ─── SSF webhook endpoint ─────────────────────────────────────────────────
   app.post("/ssf/events", async (req, res) => {
     try {
       const signature = req.headers["x-ssf-signature"] as string | undefined;
@@ -51,11 +69,11 @@ export async function createServer() {
     }
   });
 
-  // Workload credential routes
+  // ─── Workload credential routes ───────────────────────────────────────────
   const workloadRoutes = await (async () => await import("./routes/workload.routes"));
   app.use("/workload", (workloadRoutes as any).default);
 
-  // Protected example route chain
+  // ─── Protected example route chain ───────────────────────────────────────
   app.get(
     "/protected",
     rateLimit({ points: 200, windowSecs: 60 }),
@@ -67,17 +85,51 @@ export async function createServer() {
     }
   );
 
-  // Health
-  app.get("/health", async (req, res) => {
+  // ─── Health checks ────────────────────────────────────────────────────────
+  app.get("/health", async (_req, res) => {
     const health: any = { status: "ok" };
     try {
       const { pingRedis } = await import("../services/rateLimiter/redis");
       const ok = await pingRedis();
       health.redis = ok ? "ok" : "down";
-    } catch (e) {
+    } catch (_e) {
       health.redis = "unconfigured";
     }
     res.json(health);
+  });
+
+  app.get("/healthz", async (_req, res) => {
+    const health: any = { status: "ok", timestamp: new Date().toISOString() };
+
+    // Redis
+    try {
+      const { pingRedis } = await import("../services/rateLimiter/redis");
+      health.redis = (await pingRedis()) ? "ok" : "down";
+    } catch (_e) {
+      health.redis = "unconfigured";
+    }
+
+    // MongoDB
+    try {
+      const mongoose = await import("mongoose");
+      const state = mongoose.default.connection.readyState;
+      // 0=disconnected, 1=connected, 2=connecting, 3=disconnecting
+      health.mongo = state === 1 ? "ok" : state === 2 ? "connecting" : "down";
+    } catch (_e) {
+      health.mongo = "unknown";
+    }
+
+    // Settings (SaaS config quick-check)
+    try {
+      const { getSettings } = await import("../models/settings.model");
+      const settings = await getSettings();
+      health.settings = { appName: settings.appName };
+    } catch (_e) {
+      health.settings = "unavailable";
+    }
+
+    const httpStatus = health.mongo === "ok" ? 200 : 503;
+    res.status(httpStatus).json(health);
   });
 
   return app;
