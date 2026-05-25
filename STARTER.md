@@ -424,6 +424,30 @@ The items below should be tackled before anything else. They cover the foundatio
 - [ ] DB backup — daily MongoDB dump to S3 with 30-day retention
 - [ ] Secret rotation — document how to rotate TOKEN_SECRET_HEX without downtime
 
+**Multi-language (i18n)**
+- [ ] i18n foundation — install next-intl (or react-i18next); define message namespaces; wrap app in provider
+- [ ] Translation file structure — JSON files per locale under `/messages/{locale}.json`; enforce no hardcoded UI strings
+- [ ] Locale detection — read `Accept-Language` header on first visit; fallback to stored preference on user profile; cookie-persist choice
+- [ ] Language switcher — dropdown in nav and settings page; persists to user profile via API
+- [ ] Locale-aware formatting — use `Intl.DateTimeFormat`, `Intl.NumberFormat`, `Intl.RelativeTimeFormat` everywhere; no manual date string building
+- [ ] RTL layout support — `dir="rtl"` toggle on `<html>`; audit CSS for absolute positioning that breaks in RTL; test with Arabic
+- [ ] Locale-aware email templates — send emails in the user's stored locale; translate subject lines and body
+- [ ] hreflang tags — add `<link rel="alternate" hreflang="…">` to all marketing pages for multilingual SEO
+- [ ] Translation management workflow — Crowdin or Lokalise for translator-facing UI; or keep JSON files in-repo with a contribution guide
+- [ ] Missing translation fallback — always fall back to English rather than showing a key string; log missing keys in dev mode
+
+**Multi-currency & Pricing**
+- [ ] Currency detection — infer from IP geolocation on first visit; allow manual override; store preference on user/org profile
+- [ ] Currency switcher UI — dropdown in pricing page, checkout, and billing settings; updates all prices instantly client-side
+- [ ] Stripe multi-currency price objects — create one `Price` per currency per plan in Stripe dashboard; select correct price at checkout by stored currency
+- [ ] Exchange rate integration — fetch daily rates from Open Exchange Rates, Fixer.io, or ECB; cache in Redis with 24 h TTL; never call live on each request
+- [ ] `Intl.NumberFormat` everywhere — format all money values with locale + currency code; no manual `$` prefixes or hardcoded decimal points
+- [ ] Purchasing Power Parity (PPP) — apply automatic regional discount % based on country; show "Local pricing available" banner; use `ppp` npm package or own table
+- [ ] Presentment currency vs settlement — show user their local currency but settle in your base currency (USD/EUR); communicate clearly on invoice
+- [ ] Invoice in customer's currency — generate PDF invoices with the currency and amount the customer actually paid, not the base currency equivalent
+- [ ] Multi-currency admin dashboard — convert all plan values to base currency for MRR/ARR charts using stored exchange rates; show raw currency breakdown table
+- [ ] Currency on org profile — orgs on annual plans lock their currency at signup to prevent arbitrage on renewals
+
 ---
 
 ### All Features by Category
