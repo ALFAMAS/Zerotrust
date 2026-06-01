@@ -1,16 +1,10 @@
-/**
- * Proof-of-Possession (PoP) middleware
- * Lightweight enforcement: compares token `pop_key` with client-provided PoP header.
- * Also enforces nonce replay protection with an in-memory cache.
- */
-
-import type { Request, Response, NextFunction } from "express";
+import { createMiddleware } from "hono/factory";
+import type { HonoEnv } from "../shared/types";
 import { getLogger } from "../logger";
-import { ErrorCodes, ZeroAuthError } from "../shared/types";
+import { ErrorCodes } from "../shared/types";
 
 const logger = getLogger("proof-of-possession");
 
-// Simple nonce cache with expiry (in-memory). Map<nonce, expiryEpochMs>
 const nonceCache: Map<string, number> = new Map();
 
 function cleanupNonces() {
@@ -22,67 +16,40 @@ function cleanupNonces() {
 
 setInterval(cleanupNonces, 60 * 1000).unref();
 
-/**
- * Middleware to validate PoP. Expects:
- * - `req.token.pop_key` to be present (set during token issuance)
- * - header `x-pop-key` containing the client's public key (string)
- * - header `x-pop-nonce` containing a one-time nonce to prevent replays
- */
 export function requireProofOfPossession() {
-  return (req: Request, res: Response, next: NextFunction): void => {
+  return createMiddleware<HonoEnv>(async (c, next) => {
     try {
-      // If no token or no pop_key set, skip PoP enforcement
-      const token = req.token as any;
-      if (!token || !token.pop_key) {
-        return next();
-      }
+      const token = c.get("token") as any;
+      if (!token || !token.pop_key) return next();
 
-      const clientPop = (req.headers["x-pop-key"] as string) || "";
-      const nonce = (req.headers["x-pop-nonce"] as string) || "";
+      const clientPop = c.req.header("x-pop-key") || "";
+      const nonce = c.req.header("x-pop-nonce") || "";
 
       if (!clientPop || !nonce) {
-        res
-          .status(401)
-          .json({ error: ErrorCodes.TOKEN_INVALID, message: "Proof-of-possession required" });
-        return;
+        return c.json({ error: ErrorCodes.TOKEN_INVALID, message: "Proof-of-possession required" }, 401);
       }
 
-      // Replay protection: ensure nonce unused and recent
       const expiry = nonceCache.get(nonce);
       if (expiry && expiry > Date.now()) {
-        // Nonce already used
-        logger.warn("Replay detected for PoP nonce", { nonce, ip: req.ip });
-        res.status(401).json({ error: ErrorCodes.TOO_MANY_ATTEMPTS, message: "Invalid PoP nonce" });
-        return;
+        logger.warn("Replay detected for PoP nonce", { nonce });
+        return c.json({ error: ErrorCodes.TOO_MANY_ATTEMPTS, message: "Invalid PoP nonce" }, 401);
       }
 
-      // Simple string equality check between token pop_key and presented key
       if (clientPop !== token.pop_key) {
-        logger.warn("PoP key mismatch", {
-          expected: token.pop_key?.slice?.(0, 8),
-          got: clientPop?.slice?.(0, 8),
-        });
-        res
-          .status(401)
-          .json({ error: ErrorCodes.TOKEN_INVALID, message: "Proof-of-possession mismatch" });
-        return;
+        logger.warn("PoP key mismatch");
+        return c.json({ error: ErrorCodes.TOKEN_INVALID, message: "Proof-of-possession mismatch" }, 401);
       }
 
-      // Mark nonce as used for 5 minutes
       nonceCache.set(nonce, Date.now() + 5 * 60 * 1000);
-
-      // Attach PoP verified flag
-      (req as any).popVerified = true;
-
-      next();
+      c.set("popVerified", true);
+      return next();
     } catch (err) {
       logger.error("PoP middleware error", err as Error);
-      res.status(500).json({ error: ErrorCodes.INTERNAL_ERROR, message: "PoP validation failed" });
+      return c.json({ error: ErrorCodes.INTERNAL_ERROR, message: "PoP validation failed" }, 500);
     }
-  };
+  });
 }
 
-/** Testing helper to clear nonce cache */
 export function clearPoPNonces(): void {
   nonceCache.clear();
 }

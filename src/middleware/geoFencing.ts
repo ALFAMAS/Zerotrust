@@ -1,10 +1,5 @@
-/**
- * GeoFencing middleware
- * - Uses geoip-lite to infer country from IP
- * - Enforces allowed countries and optional allowed IP CIDR ranges
- */
-
-import type { Request, Response, NextFunction } from "express";
+import { createMiddleware } from "hono/factory";
+import type { HonoEnv } from "../shared/types";
 import geoip from "geoip-lite";
 import { getConfig } from "../config";
 import { getLogger } from "../logger";
@@ -17,35 +12,33 @@ function ipToLong(ip: string): number {
 }
 
 function cidrContains(cidr: string, ip: string): boolean {
-  // cidr expected like '1.2.3.0/24'
   const [range, bits] = cidr.split("/");
   if (!bits) return range === ip;
   const mask = ~(2 ** (32 - Number(bits)) - 1) >>> 0;
-  const ipNum = ipToLong(ip);
-  const rangeNum = ipToLong(range);
-  return (ipNum & mask) === (rangeNum & mask);
+  return (ipToLong(ip) & mask) === (ipToLong(range) & mask);
 }
 
 export function geoFencingMiddleware() {
-  return (req: Request, res: Response, next: NextFunction): void => {
+  return createMiddleware<HonoEnv>(async (c, next) => {
     try {
       const cfg = getConfig();
       if (!cfg.geofencing.enabled) return next();
 
-      const ipRaw = (req.ip || (req.headers["x-forwarded-for"] as string) || "")
-        .split(",")[0]
-        .trim();
+      const ipRaw = (
+        c.req.header("x-forwarded-for")?.split(",")[0].trim() ||
+        c.req.header("x-real-ip") ||
+        ""
+      );
       if (!ipRaw) return next();
 
       const geo = geoip.lookup(ipRaw);
       const country = geo?.country || "";
 
-      // Attach inferred country for downstream auditors
-      (req as any).inferredCountry = country;
+      c.set("inferredCountry", country);
 
-      // Check allowed countries global + per-user (attached on req.user.sessionConfig.allowedCountries)
+      const user = c.get("user");
       const allowedGlobal = cfg.geofencing.allowedCountries.map((c) => c.trim().toUpperCase());
-      const allowedUser = (req.user as any)?.sessionConfig?.allowedCountries || [];
+      const allowedUser = (user as any)?.sessionConfig?.allowedCountries || [];
       const allowed = new Set([
         ...allowedGlobal,
         ...allowedUser.map((c: string) => c.toUpperCase()),
@@ -53,45 +46,33 @@ export function geoFencingMiddleware() {
 
       if (allowed.size > 0 && !allowed.has(country.toUpperCase())) {
         logger.warn("Access denied by geofencing (country)", { ip: ipRaw, country });
-        res
-          .status(403)
-          .json({
-            error: ErrorCodes.ACCESS_DENIED_LOCATION,
-            message: "Access from this country is not allowed",
-          });
-        return;
+        return c.json(
+          { error: ErrorCodes.ACCESS_DENIED_LOCATION, message: "Access from this country is not allowed" },
+          403
+        );
       }
 
-      // Check allowed IP ranges if configured
       const allowedRanges = cfg.geofencing.allowedIpRanges || [];
       if (allowedRanges.length > 0) {
         let inRange = false;
         for (const r of allowedRanges) {
           try {
-            if (cidrContains(r, ipRaw)) {
-              inRange = true;
-              break;
-            }
-          } catch (e) {
-            // ignore malformed ranges
-          }
+            if (cidrContains(r, ipRaw)) { inRange = true; break; }
+          } catch {}
         }
         if (!inRange) {
           logger.warn("Access denied by geofencing (ip range)", { ip: ipRaw });
-          res
-            .status(403)
-            .json({
-              error: ErrorCodes.ACCESS_DENIED_IP,
-              message: "Access from this IP is not allowed",
-            });
-          return;
+          return c.json(
+            { error: ErrorCodes.ACCESS_DENIED_IP, message: "Access from this IP is not allowed" },
+            403
+          );
         }
       }
 
-      next();
+      return next();
     } catch (err) {
       logger.error("GeoFencing error", err as Error);
-      next();
+      return next();
     }
-  };
+  });
 }

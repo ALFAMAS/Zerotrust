@@ -1,237 +1,297 @@
-import express from "express";
+import { Hono } from "hono";
+import { eq, and, ne, ilike, or, sql, desc, gt } from "drizzle-orm";
+import { getDb } from "../../db";
+import { usersTable, sessionsTable, auditLogsTable } from "../../db/schema";
 import { authMiddleware } from "../../middleware/auth";
-import { rateLimit } from "../../middleware/rateLimiting";
-import { validate } from "../../middleware/validation";
-import {
-  AdminUpdateUserSchema,
-  AdminAssignRoleSchema,
-  JITApproveSchema,
-  JITDenySchema,
-  CreateRoleSchema,
-} from "../schemas/admin.schema";
-import { UserModel, SessionModel, JITModel, RoleModel, AuditModel } from "../../models";
+import { getSettings, updateSettings } from "../../models/settings.model";
 import { revokeAllSessionsForUser, revokeSession } from "../../middleware/sessionControl";
 import { getLogger } from "../../logger";
-import { ErrorCodes } from "../../shared/types";
+import type { HonoEnv } from "../../shared/types";
 
-const router = express.Router();
+const router = new Hono<HonoEnv>();
 const logger = getLogger("admin-routes");
 
-function requireAdmin(req: express.Request, res: express.Response, next: express.NextFunction) {
-  if (!req.user?.roles?.includes("admin")) {
-    res
-      .status(403)
-      .json({ code: ErrorCodes.ACCESS_DENIED, message: "Admin access required", details: [] });
-    return;
+// Auth + admin guard on all admin routes
+router.use("*", authMiddleware);
+router.use("*", async (c, next) => {
+  const user = c.get("user");
+  if (!user) {
+    return c.json({ error: "UNAUTHORIZED", message: "Authentication required" }, 401);
   }
-  next();
-}
+  if (!user.roles?.includes("admin")) {
+    return c.json({ error: "FORBIDDEN", message: "Admin role required" }, 403);
+  }
+  return next();
+});
 
-// ── Users ────────────────────────────────────────────────────────────────────
+// GET /settings
+router.get("/settings", async (c) => {
+  try {
+    const settings = await getSettings();
+    return c.json(settings);
+  } catch (err) {
+    logger.error("Admin get settings error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR", message: "Failed to retrieve settings" }, 500);
+  }
+});
 
-router.get(
-  "/users",
-  rateLimit({ points: 60, windowSecs: 60 }),
-  authMiddleware,
-  requireAdmin,
-  async (req, res) => {
-    try {
-      const limit = Math.min(parseInt((req.query.limit as string) || "20"), 100);
-      const offset = parseInt((req.query.offset as string) || "0");
-      const search = req.query.search as string | undefined;
+// PUT /settings
+router.put("/settings", async (c) => {
+  try {
+    const body = await c.req.json();
+    const adminId = c.get("user").id;
+    const updated = await updateSettings(body, adminId);
+    return c.json(updated);
+  } catch (err) {
+    logger.error("Admin update settings error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR", message: "Failed to update settings" }, 500);
+  }
+});
 
-      const filter: any = {};
-      if (search) {
-        filter.$or = [
-          { email: { $regex: search, $options: "i" } },
-          { displayName: { $regex: search, $options: "i" } },
-        ];
+// GET /users?page=1&limit=20&search=&status=
+router.get("/users", async (c) => {
+  try {
+    const page = Math.max(1, parseInt(c.req.query("page") || "1"));
+    const limit = Math.min(100, Math.max(1, parseInt(c.req.query("limit") || "20")));
+    const search = c.req.query("search") || "";
+    const status = c.req.query("status") || "";
+
+    const db = getDb();
+
+    const conditions: any[] = [];
+    if (search) {
+      conditions.push(or(ilike(usersTable.email, `%${search}%`), ilike(usersTable.displayName, `%${search}%`)));
+    }
+    if (status) {
+      conditions.push(eq(usersTable.status, status));
+    }
+
+    const whereClause = conditions.length > 0 ? and(...(conditions as [any, ...any[]])) : undefined;
+
+    const [users, countResult] = await Promise.all([
+      db
+        .select({
+          id: usersTable.id,
+          email: usersTable.email,
+          displayName: usersTable.displayName,
+          username: usersTable.username,
+          roles: usersTable.roles,
+          status: usersTable.status,
+          lastLoginAt: usersTable.lastLoginAt,
+          createdAt: usersTable.createdAt,
+        })
+        .from(usersTable)
+        .where(whereClause)
+        .orderBy(desc(usersTable.createdAt))
+        .offset((page - 1) * limit)
+        .limit(limit),
+      db
+        .select({ count: sql<number>`count(*)::int` })
+        .from(usersTable)
+        .where(whereClause),
+    ]);
+
+    const total = countResult[0]?.count ?? 0;
+    return c.json({
+      users,
+      pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+    });
+  } catch (err) {
+    logger.error("Admin list users error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR", message: "Failed to list users" }, 500);
+  }
+});
+
+// GET /users/:id
+router.get("/users/:id", async (c) => {
+  try {
+    const db = getDb();
+    const userRows = await db
+      .select({
+        id: usersTable.id,
+        email: usersTable.email,
+        displayName: usersTable.displayName,
+        username: usersTable.username,
+        phone: usersTable.phone,
+        roles: usersTable.roles,
+        status: usersTable.status,
+        attributes: usersTable.attributes,
+        lastLoginAt: usersTable.lastLoginAt,
+        createdAt: usersTable.createdAt,
+        updatedAt: usersTable.updatedAt,
+      })
+      .from(usersTable)
+      .where(eq(usersTable.id, c.req.param("id")))
+      .limit(1);
+
+    if (userRows.length === 0) {
+      return c.json({ error: "USER_NOT_FOUND", message: "User not found" }, 404);
+    }
+
+    const [{ count }] = await db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(sessionsTable)
+      .where(and(eq(sessionsTable.userId, c.req.param("id")), eq(sessionsTable.isActive, true)));
+
+    return c.json({ ...userRows[0], activeSessions: count });
+  } catch (err) {
+    logger.error("Admin get user error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR", message: "Failed to get user" }, 500);
+  }
+});
+
+// PATCH /users/:id
+router.patch("/users/:id", async (c) => {
+  try {
+    const body = await c.req.json();
+    const allowed: Record<string, any> = {};
+
+    if (body.displayName !== undefined) allowed.displayName = body.displayName;
+    if (body.status !== undefined) {
+      const validStatuses = ["active", "suspended", "pending", "deleted"];
+      if (!validStatuses.includes(body.status)) {
+        return c.json({ error: "INVALID_REQUEST", message: "Invalid status value" }, 400);
       }
+      allowed.status = body.status;
+    }
 
-      const [users, total] = await Promise.all([
-        UserModel.find(filter)
-          .select("-passwordHash -mfa.totp.secret -mfa.totp.backupCodes")
-          .skip(offset)
-          .limit(limit)
-          .lean(),
-        UserModel.countDocuments(filter),
-      ]);
+    if (Object.keys(allowed).length === 0) {
+      return c.json({ error: "INVALID_REQUEST", message: "No updatable fields provided" }, 400);
+    }
 
-      res.json({ users, total, limit, offset });
-    } catch (err) {
-      logger.error("Admin list users error", err as Error);
-      res
-        .status(500)
-        .json({ code: ErrorCodes.INTERNAL_ERROR, message: "Failed to list users", details: [] });
+    allowed.updatedAt = new Date();
+    const db = getDb();
+    const rows = await db
+      .update(usersTable)
+      .set(allowed)
+      .where(eq(usersTable.id, c.req.param("id")))
+      .returning({ id: usersTable.id, email: usersTable.email, displayName: usersTable.displayName, status: usersTable.status });
+
+    if (rows.length === 0) {
+      return c.json({ error: "USER_NOT_FOUND", message: "User not found" }, 404);
+    }
+    return c.json(rows[0]);
+  } catch (err) {
+    logger.error("Admin update user error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR", message: "Failed to update user" }, 500);
+  }
+);
+
+// DELETE /users/:id
+router.delete("/users/:id", async (c) => {
+  try {
+    const id = c.req.param("id");
+    const db = getDb();
+    const rows = await db
+      .update(usersTable)
+      .set({ status: "deleted", updatedAt: new Date() })
+      .where(eq(usersTable.id, id))
+      .returning({ id: usersTable.id });
+
+    if (rows.length === 0) {
+      return c.json({ error: "USER_NOT_FOUND", message: "User not found" }, 404);
+    }
+
+    await revokeAllSessionsForUser(id);
+    return c.json({ deleted: true, userId: id });
+  } catch (err) {
+    logger.error("Admin delete user error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR", message: "Failed to delete user" }, 500);
+  }
+);
+
+// POST /users/:id/force-logout
+router.post("/users/:id/force-logout", async (c) => {
+  try {
+    const id = c.req.param("id");
+    const db = getDb();
+    const userRows = await db.select({ id: usersTable.id }).from(usersTable).where(eq(usersTable.id, id)).limit(1);
+
+    if (userRows.length === 0) {
+      return c.json({ error: "USER_NOT_FOUND", message: "User not found" }, 404);
+    }
+
+    const count = await revokeAllSessionsForUser(id);
+    return c.json({ revoked: count });
+  } catch (err) {
+    logger.error("Admin force-logout error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR", message: "Failed to force logout" }, 500);
+  }
+);
+
+// GET /sessions?userId=&active=true
+router.get("/sessions", async (c) => {
+  try {
+    const page = Math.max(1, parseInt(c.req.query("page") || "1"));
+    const limit = Math.min(100, Math.max(1, parseInt(c.req.query("limit") || "20")));
+
+    const db = getDb();
+    const conditions: any[] = [];
+    if (c.req.query("userId")) conditions.push(eq(sessionsTable.userId, c.req.query("userId")!));
+    if (c.req.query("active") !== undefined) {
+      conditions.push(eq(sessionsTable.isActive, c.req.query("active") === "true"));
     }
   }
 );
 
-router.get(
-  "/users/:id",
-  rateLimit({ points: 60, windowSecs: 60 }),
-  authMiddleware,
-  requireAdmin,
-  async (req, res) => {
-    try {
-      const user = await UserModel.findById(req.params.id)
-        .select("-passwordHash -mfa.totp.secret -mfa.totp.backupCodes")
-        .lean();
-      if (!user)
-        return res
-          .status(404)
-          .json({ code: ErrorCodes.USER_NOT_FOUND, message: "User not found", details: [] });
-      res.json({ user });
-    } catch (err) {
-      logger.error("Admin get user error", err as Error);
-      res
-        .status(500)
-        .json({ code: ErrorCodes.INTERNAL_ERROR, message: "Failed to get user", details: [] });
+    const whereClause = conditions.length > 0 ? and(...(conditions as [any, ...any[]])) : undefined;
+
+    const [sessions, countResult] = await Promise.all([
+      db.select().from(sessionsTable).where(whereClause).orderBy(desc(sessionsTable.lastActivityAt)).offset((page - 1) * limit).limit(limit),
+      db.select({ count: sql<number>`count(*)::int` }).from(sessionsTable).where(whereClause),
+    ]);
+
+    const total = countResult[0]?.count ?? 0;
+    return c.json({ sessions, pagination: { page, limit, total, totalPages: Math.ceil(total / limit) } });
+  } catch (err) {
+    logger.error("Admin list sessions error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR", message: "Failed to list sessions" }, 500);
+  }
+});
+
+// DELETE /sessions/:id
+router.delete("/sessions/:id", async (c) => {
+  try {
+    const id = c.req.param("id");
+    const db = getDb();
+    const rows = await db.select({ id: sessionsTable.id }).from(sessionsTable).where(eq(sessionsTable.id, id)).limit(1);
+
+    if (rows.length === 0) {
+      return c.json({ error: "SESSION_NOT_FOUND", message: "Session not found" }, 404);
     }
+
+    await revokeSession(id, "ADMIN_REVOKED");
+    return c.json({ revoked: true });
+  } catch (err) {
+    logger.error("Admin revoke session error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR", message: "Failed to revoke session" }, 500);
   }
 );
 
-router.patch(
-  "/users/:id",
-  rateLimit({ points: 30, windowSecs: 60 }),
-  authMiddleware,
-  requireAdmin,
-  validate(AdminUpdateUserSchema),
-  async (req, res) => {
-    try {
-      const { status, roles, displayName } = req.body as any;
-      const update: any = {};
-      if (status !== undefined) update.status = status;
-      if (roles !== undefined) update.roles = roles;
-      if (displayName !== undefined) update.displayName = displayName;
+// GET /stats
+router.get("/stats", async (c) => {
+  try {
+    const now = new Date();
+    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    const db = getDb();
 
-      const user = await UserModel.findByIdAndUpdate(req.params.id, update, { new: true }).select(
-        "-passwordHash -mfa.totp.secret -mfa.totp.backupCodes"
-      );
-      if (!user)
-        return res
-          .status(404)
-          .json({ code: ErrorCodes.USER_NOT_FOUND, message: "User not found", details: [] });
+    const [totalUsersRes, activeSessionsRes, activeUsersRes, logins24hRes] = await Promise.all([
+      db.select({ count: sql<number>`count(*)::int` }).from(usersTable).where(ne(usersTable.status, "deleted")),
+      db.select({ count: sql<number>`count(*)::int` }).from(sessionsTable).where(eq(sessionsTable.isActive, true)),
+      db.selectDistinct({ userId: sessionsTable.userId }).from(sessionsTable).where(gt(sessionsTable.lastActivityAt, thirtyDaysAgo)),
+      db.select({ count: sql<number>`count(*)::int` }).from(sessionsTable).where(gt(sessionsTable.createdAt, twentyFourHoursAgo)),
+    ]);
 
-      if (status === "suspended" || status === "deleted") {
-        await revokeAllSessionsForUser(req.params.id);
-      }
-
-      await AuditModel.create({
-        action: "admin.user.update",
-        actorId: req.user!._id,
-        actorEmail: req.user!.email,
-        targetId: req.params.id,
-        targetType: "User",
-        success: true,
-        resourceDetails: update,
-        timestamp: new Date(),
-      });
-
-      res.json({ user });
-    } catch (err) {
-      logger.error("Admin update user error", err as Error);
-      res
-        .status(500)
-        .json({ code: ErrorCodes.INTERNAL_ERROR, message: "Failed to update user", details: [] });
-    }
-  }
-);
-
-router.delete(
-  "/users/:id",
-  rateLimit({ points: 10, windowSecs: 60 }),
-  authMiddleware,
-  requireAdmin,
-  async (req, res) => {
-    try {
-      if (req.params.id === req.user!._id!.toString()) {
-        return res.status(400).json({
-          code: ErrorCodes.INVALID_REQUEST,
-          message: "Cannot delete your own account",
-          details: [],
-        });
-      }
-
-      const user = await UserModel.findByIdAndUpdate(req.params.id, { status: "deleted" });
-      if (!user)
-        return res
-          .status(404)
-          .json({ code: ErrorCodes.USER_NOT_FOUND, message: "User not found", details: [] });
-
-      await revokeAllSessionsForUser(req.params.id);
-
-      await AuditModel.create({
-        action: "admin.user.delete",
-        actorId: req.user!._id,
-        actorEmail: req.user!.email,
-        targetId: req.params.id,
-        targetType: "User",
-        success: true,
-        timestamp: new Date(),
-      });
-
-      res.json({ success: true });
-    } catch (err) {
-      logger.error("Admin delete user error", err as Error);
-      res
-        .status(500)
-        .json({ code: ErrorCodes.INTERNAL_ERROR, message: "Failed to delete user", details: [] });
-    }
-  }
-);
-
-// ── User Sessions ────────────────────────────────────────────────────────────
-
-router.get(
-  "/users/:id/sessions",
-  rateLimit({ points: 60, windowSecs: 60 }),
-  authMiddleware,
-  requireAdmin,
-  async (req, res) => {
-    try {
-      const sessions = await SessionModel.find({ userId: req.params.id })
-        .sort({ lastActivityAt: -1 })
-        .lean();
-      res.json({ sessions });
-    } catch (err) {
-      logger.error("Admin list user sessions error", err as Error);
-      res
-        .status(500)
-        .json({ code: ErrorCodes.INTERNAL_ERROR, message: "Failed to list sessions", details: [] });
-    }
-  }
-);
-
-router.delete(
-  "/users/:id/sessions",
-  rateLimit({ points: 10, windowSecs: 60 }),
-  authMiddleware,
-  requireAdmin,
-  async (req, res) => {
-    try {
-      const count = await revokeAllSessionsForUser(req.params.id);
-
-      await AuditModel.create({
-        action: "admin.sessions.revoke_all",
-        actorId: req.user!._id,
-        actorEmail: req.user!.email,
-        targetId: req.params.id,
-        targetType: "User",
-        success: true,
-        resourceDetails: { revokedCount: count },
-        timestamp: new Date(),
-      });
-
-      res.json({ success: true, revokedCount: count });
-    } catch (err) {
-      logger.error("Admin revoke sessions error", err as Error);
-      res.status(500).json({
-        code: ErrorCodes.INTERNAL_ERROR,
-        message: "Failed to revoke sessions",
-        details: [],
-      });
-    }
+    return c.json({
+      totalUsers: totalUsersRes[0]?.count ?? 0,
+      activeUsers: activeUsersRes.length,
+      activeSessions: activeSessionsRes[0]?.count ?? 0,
+      totalLogins24h: logins24hRes[0]?.count ?? 0,
+    });
+  } catch (err) {
+    logger.error("Admin stats error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR", message: "Failed to retrieve stats" }, 500);
   }
 );
 

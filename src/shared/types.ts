@@ -1,15 +1,8 @@
-/**
- * Shared type definitions for ZeroAuth system
- * Used across models, services, and middleware
- */
-
-import type { ObjectId } from "mongoose";
-
 // ─── Configuration Types ─────────────────────────────────────────────────────
 
 export interface ZeroAuthConfig {
   database: {
-    mongoUri: string;
+    databaseUrl: string;
     connectionPoolSize: number;
   };
   session: {
@@ -69,16 +62,16 @@ export interface ZeroAuthConfig {
 // ─── Authentication & Token Types ──────────────────────────────────────────
 
 export interface TokenPayload {
-  sub: string; // user ID
+  sub: string;
   email: string;
-  sid?: string; // session ID
-  jti: string; // JWT ID (unique token identifier)
-  iat: number; // issued at
-  exp: number; // expiration
-  aud?: string; // audience
-  iss?: string; // issuer
+  sid: string;
+  jti: string;
+  iat: number;
+  exp: number;
+  aud?: string;
+  iss?: string;
   scope?: string[];
-  pop_key?: string; // proof of possession public key
+  pop_key?: string;
 }
 
 export interface AccessTokenResponse {
@@ -91,13 +84,13 @@ export interface AccessTokenResponse {
 // ─── User Types ───────────────────────────────────────────────────────────
 
 export interface User {
-  _id?: ObjectId;
+  id: string;
   email: string;
-  username?: string;
-  passwordHash?: string;
-  phone?: string;
+  username?: string | null;
+  passwordHash?: string | null;
+  phone?: string | null;
   displayName: string;
-  avatarUrl?: string;
+  avatarUrl?: string | null;
   roles: string[];
   attributes: {
     country?: string;
@@ -121,8 +114,8 @@ export interface User {
   passkeys: Passkey[];
   oauthProviders: OAuthProvider[];
   status: "active" | "suspended" | "pending" | "deleted";
-  parentUserId?: ObjectId;
-  subUserIds: ObjectId[];
+  parentUserId?: string | null;
+  subUserIds: string[];
   sessionConfig: {
     maxDevices: number;
     allowedCountries: string[];
@@ -135,8 +128,8 @@ export interface User {
       allowedHoursEnd: number;
     };
   };
-  lastLoginAt?: Date;
-  metadata?: Record<string, unknown>;
+  lastLoginAt?: Date | null;
+  metadata?: Record<string, unknown> | null;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -163,29 +156,29 @@ export interface OAuthProvider {
 // ─── Session Types ────────────────────────────────────────────────────────
 
 export interface Session {
-  _id?: ObjectId;
-  userId: ObjectId;
+  id: string;
+  userId: string;
   tokenId: string;
   deviceFingerprint: DeviceFingerprint;
   ipAddress: string;
-  country?: string;
-  userAgent: string;
+  country?: string | null;
+  userAgent?: string | null;
   expiresAt: Date;
   lastActivityAt: Date;
   isActive: boolean;
-  revokedAt?: Date;
-  revokedReason?: string;
-  proofOfPossessionKey?: string;
+  revokedAt?: Date | null;
+  revokedReason?: string | null;
+  proofOfPossessionKey?: string | null;
   continuousEvalResult?: {
     decision: "allow" | "deny" | "challenge";
     riskScore: number;
     evaluatedAt: Date;
-  };
+  } | null;
   anomalyFlags?: {
     deviceChangeDetected: boolean;
     locationChangeDetected: boolean;
     timeAnomalyDetected: boolean;
-  };
+  } | null;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -206,12 +199,12 @@ export interface DeviceFingerprint {
 // ─── Role & Authorization Types ─────────────────────────────────────────
 
 export interface Role {
-  _id?: ObjectId;
+  id: string;
   name: string;
   displayName: string;
-  description?: string;
+  description?: string | null;
   permissions: Permission[];
-  parentRoleId?: ObjectId;
+  parentRoleId?: string | null;
   isSystem: boolean;
   createdAt?: Date;
   updatedAt?: Date;
@@ -234,6 +227,7 @@ export interface AuthzContext {
   session: Session;
   resource: string;
   action: string;
+  resourceAttributes?: Record<string, unknown>;
   environment: {
     currentTime: Date;
     currentIp: string;
@@ -255,17 +249,17 @@ export interface AuthzResult {
 // ─── JIT & Privilege Types ────────────────────────────────────────────────
 
 export interface JITAccessRequest {
-  _id?: ObjectId;
-  userId: ObjectId;
-  roleId: ObjectId;
+  id: string;
+  userId: string;
+  roleId: string;
   reason: string;
   requestedAt: Date;
   expiresAt: Date;
-  approvedBy?: ObjectId;
-  approvedAt?: Date;
+  approvedBy?: string | null;
+  approvedAt?: Date | null;
   status: "pending" | "approved" | "denied" | "expired" | "revoked";
-  revokedAt?: Date;
-  revokedBy?: ObjectId;
+  revokedAt?: Date | null;
+  revokedBy?: string | null;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -273,64 +267,65 @@ export interface JITAccessRequest {
 // ─── Audit & Logging Types ────────────────────────────────────────────
 
 export interface AuditLog {
-  _id?: ObjectId;
+  id?: string;
   action: string;
-  actorId?: ObjectId;
-  actorEmail?: string;
-  targetId?: string;
-  targetType?: string;
-  ipAddress?: string;
-  country?: string;
-  userAgent?: string;
-  deviceHash?: string;
-  sessionId?: string;
+  actorId?: string | null;
+  actorEmail?: string | null;
+  targetId?: string | null;
+  targetType?: string | null;
+  ipAddress?: string | null;
+  country?: string | null;
+  userAgent?: string | null;
+  deviceHash?: string | null;
+  sessionId?: string | null;
   success: boolean;
-  errorCode?: string;
-  duration?: number;
-  resourceDetails?: Record<string, unknown>;
-  riskScore?: number;
-  continuousEvalContext?: Record<string, unknown>;
-  metadata?: Record<string, unknown>;
+  errorCode?: string | null;
+  duration?: number | null;
+  resourceDetails?: Record<string, unknown> | null;
+  riskScore?: number | null;
+  continuousEvalContext?: Record<string, unknown> | null;
+  metadata?: Record<string, unknown> | null;
   timestamp: Date;
 }
 
 // ─── Refresh Token Types ──────────────────────────────────────────────────
 
 export interface RefreshTokenRecord {
-  _id?: ObjectId;
-  userId: ObjectId;
-  sessionId: ObjectId;
+  id?: string;
+  userId: string;
+  sessionId: string;
   tokenHash: string;
   expiresAt: Date;
-  usedAt?: Date;
+  usedAt?: Date | null;
   isRevoked: boolean;
 }
 
 // ─── OTP Types ────────────────────────────────────────────────────────────
 
 export interface OTP {
-  userId: ObjectId;
+  id?: string;
+  userId: string;
   code: string;
   type: "password_reset" | "email_verify" | "phone_verify" | "login";
   channel: "email" | "sms" | "whatsapp" | "telegram";
   target: string;
   expiresAt: Date;
-  usedAt?: Date;
+  usedAt?: Date | null;
   attempts: number;
 }
 
 // ─── Workload Identity Types ──────────────────────────────────────────────
 
 export interface WorkloadCredential {
-  _id?: ObjectId;
+  id?: string;
   workloadId: string;
   workloadSecret: string;
-  createdBy: ObjectId;
+  createdBy?: string | null;
   scopes: string[];
-  ttl: number;
+  ttl?: number | null;
   autoRotate: boolean;
-  lastRotatedAt?: Date;
-  expiresAt: Date;
+  lastRotatedAt?: Date | null;
+  expiresAt?: Date | null;
   isRevoked: boolean;
   createdAt?: Date;
   updatedAt?: Date;
@@ -359,6 +354,18 @@ export interface MFAChallengeResponse {
   channels: ("email" | "sms" | "whatsapp" | "telegram")[];
 }
 
+// ─── Hono Environment Type ────────────────────────────────────────────────
+
+export type HonoEnv = {
+  Variables: {
+    user: User;
+    session: Session;
+    token: TokenPayload;
+    popVerified?: boolean;
+    inferredCountry?: string;
+  };
+};
+
 // ─── Error Types ──────────────────────────────────────────────────────────
 
 export class ZeroAuthError extends Error {
@@ -373,9 +380,7 @@ export class ZeroAuthError extends Error {
   }
 }
 
-// Common error codes
 export const ErrorCodes = {
-  // Authentication
   INVALID_CREDENTIALS: "INVALID_CREDENTIALS",
   TOKEN_EXPIRED: "TOKEN_EXPIRED",
   TOKEN_INVALID: "TOKEN_INVALID",
@@ -383,42 +388,30 @@ export const ErrorCodes = {
   MFA_REQUIRED: "MFA_REQUIRED",
   MFA_INVALID: "MFA_INVALID",
   PASSKEY_NOT_FOUND: "PASSKEY_NOT_FOUND",
-
-  // Authorization
   ACCESS_DENIED: "ACCESS_DENIED",
   INSUFFICIENT_PRIVILEGE: "INSUFFICIENT_PRIVILEGE",
   RESOURCE_NOT_FOUND: "RESOURCE_NOT_FOUND",
-
-  // User Management
   USER_NOT_FOUND: "USER_NOT_FOUND",
   USER_ALREADY_EXISTS: "USER_ALREADY_EXISTS",
   USER_SUSPENDED: "USER_SUSPENDED",
   USER_DELETED: "USER_DELETED",
-
-  // Device & Session
   DEVICE_NOT_TRUSTED: "DEVICE_NOT_TRUSTED",
   DEVICE_COMPROMISED: "DEVICE_COMPROMISED",
   SESSION_NOT_FOUND: "SESSION_NOT_FOUND",
   SESSION_EXPIRED: "SESSION_EXPIRED",
   MAX_DEVICES_EXCEEDED: "MAX_DEVICES_EXCEEDED",
-
-  // Rate Limiting
   RATE_LIMIT_EXCEEDED: "RATE_LIMIT_EXCEEDED",
   TOO_MANY_ATTEMPTS: "TOO_MANY_ATTEMPTS",
-
-  // Geofencing
   ACCESS_DENIED_LOCATION: "ACCESS_DENIED_LOCATION",
   ACCESS_DENIED_IP: "ACCESS_DENIED_IP",
-
-  // General
   INVALID_REQUEST: "INVALID_REQUEST",
   INTERNAL_ERROR: "INTERNAL_ERROR",
 };
 
 // ─── Constants ──────────────────────────────────────────────────────────
 
-export const DEFAULT_ACCESS_TOKEN_TTL = 3600; // 1 hour
-export const DEFAULT_REFRESH_TOKEN_TTL = 604800; // 7 days
-export const DEFAULT_SESSION_TTL = 86400; // 24 hours
-export const DEFAULT_OTP_TTL = 900; // 15 minutes
-export const DEFAULT_JIT_GRANT_TTL = 1800; // 30 minutes
+export const DEFAULT_ACCESS_TOKEN_TTL = 3600;
+export const DEFAULT_REFRESH_TOKEN_TTL = 604800;
+export const DEFAULT_SESSION_TTL = 86400;
+export const DEFAULT_OTP_TTL = 900;
+export const DEFAULT_JIT_GRANT_TTL = 1800;

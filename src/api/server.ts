@@ -1,36 +1,21 @@
-import express from "express";
-import helmet from "helmet";
-import cors from "cors";
-import bodyParser from "body-parser";
-import path from "path";
-import swaggerUi from "swagger-ui-express";
+import { Hono } from "hono";
+import { cors } from "hono/cors";
+import { secureHeaders } from "hono/secure-headers";
+import { serve } from "@hono/node-server";
 import { initializeZeroAuth } from "..";
 import authRoutes from "./routes/auth.routes";
-import sessionRoutes from "./routes/session.routes";
-import mfaRoutes from "./routes/mfa.routes";
-import passkeyRoutes from "./routes/passkey.routes";
-import adminRoutes from "./routes/admin.routes";
-import passwordResetRoutes from "./routes/password-reset.routes";
 import magicLinkRoutes from "./routes/magic-link.routes";
-import oidcRoutes from "../oidc/routes";
-import samlRoutes from "../saml/routes";
+import mfaRoutes from "./routes/mfa.routes";
+import sessionRoutes from "./routes/session.routes";
+import adminRoutes from "./routes/admin.routes";
+import passkeyRoutes from "./routes/passkey.routes";
+import workloadRoutes from "./routes/workload.routes";
 import { rateLimit } from "../middleware/rateLimiting";
 import { geoFencingMiddleware } from "../middleware/geoFencing";
 import { temporalAccessMiddleware } from "../middleware/temporalAccess";
 import { authMiddleware } from "../middleware/auth";
-import { securityHeaders } from "../middleware/securityHeaders";
-import { resolveTenant } from "../middleware/tenant";
 import { getLogger } from "../logger";
-import { getElasticsearchHealth } from "../audit";
-import { metricsMiddleware, metricsRoute } from "../metrics";
-import { tracingMiddleware } from "../telemetry";
-import webhookRoutes from "../webhooks/routes";
-import scimRoutes from "../scim/routes";
-import tenantRoutes from "./routes/tenant.routes";
-import jitCrossTenantRoutes from "../jit/routes";
-import ldapRoutes from "../ldap/routes";
-import notificationRoutes from "../notifications/routes";
-import didRoutes from "../did/routes";
+import type { HonoEnv } from "../shared/types";
 
 const logger = getLogger("api-server");
 
@@ -38,107 +23,70 @@ export async function createServer() {
   const { logger: initLogger } = await initializeZeroAuth();
   initLogger.info("Starting API server setup");
 
-  const app = express();
+  const app = new Hono<HonoEnv>();
 
-  app.use(securityHeaders());
-  app.use(tracingMiddleware());
-  app.use(metricsMiddleware());
-  app.use(helmet());
-  app.use(cors());
-  app.use(bodyParser.json());
+  app.use("*", cors());
+  app.use("*", secureHeaders());
 
-  // Multi-tenant resolution (optional — no-op for single-tenant deployments)
-  app.use(resolveTenant());
+  // ─── Auth routes ──────────────────────────────────────────────────────────
+  app.route("/auth", authRoutes);
+  app.route("/auth/magic-link", magicLinkRoutes);
+  app.route("/auth/mfa", mfaRoutes);
+  app.route("/auth/passkey", passkeyRoutes);
 
-  // Auth routes
-  app.use("/auth", authRoutes);
-  app.use("/auth/password-reset", passwordResetRoutes);
-  app.use("/auth/passkey", passkeyRoutes);
-  app.use("/auth/mfa", mfaRoutes);
-  app.use("/auth/magic-link", magicLinkRoutes);
+  // ─── Session routes ───────────────────────────────────────────────────────
+  app.route("/sessions", sessionRoutes);
 
-  // Session management
-  app.use("/sessions", sessionRoutes);
+  // ─── Admin routes ─────────────────────────────────────────────────────────
+  app.route("/admin", adminRoutes);
 
-  // Admin routes
-  app.use("/admin", adminRoutes);
-  app.use("/admin/webhooks", webhookRoutes);
-  app.use("/admin/tenants", tenantRoutes);
+  // ─── Workload routes ──────────────────────────────────────────────────────
+  app.route("/workload", workloadRoutes);
 
-  // SCIM 2.0 provisioning
-  app.use("/scim/v2", scimRoutes);
-
-  // DID authentication
-  app.use("/auth/did", didRoutes);
-
-  // JIT cross-tenant
-  app.use("/jit/cross-tenant", jitCrossTenantRoutes);
-
-  // Admin: LDAP and notifications
-  app.use("/admin/ldap", ldapRoutes);
-  app.use("/admin/notifications", notificationRoutes);
-
-  // OIDC Provider (RFC 6749 + OIDC Core 1.0)
-  app.use("/oidc", oidcRoutes);
-  app.use("/.well-known/openid-configuration", (_req, res) =>
-    res.redirect("/oidc/.well-known/openid-configuration")
-  );
-
-  // SAML 2.0 SP-initiated SSO
-  app.use("/saml", samlRoutes);
-
-  // Swagger UI
-  try {
-    const spec = require(path.resolve(__dirname, "./openapi.json"));
-    app.use("/docs", swaggerUi.serve, swaggerUi.setup(spec));
-  } catch (e) {
-    logger.warn("Swagger UI not available", { error: String(e) });
-  }
-
-  // SSF webhook endpoint
-  app.post("/ssf/events", async (req, res) => {
+  // ─── SSF webhook endpoint ─────────────────────────────────────────────────
+  app.post("/ssf/events", async (c) => {
     try {
-      const signature = req.headers["x-ssf-signature"] as string | undefined;
+      const signature = c.req.header("x-ssf-signature");
+      const body = await c.req.json();
       const { verifySSFSignature } = await import("../ssf/verify");
-      const ok = verifySSFSignature(req.body, signature);
-      if (!ok)
-        return res
-          .status(401)
-          .json({ code: "INVALID_SIGNATURE", message: "Invalid SSF signature", details: [] });
+      const ok = verifySSFSignature(body, signature);
+      if (!ok) return c.json({ error: "INVALID_SIGNATURE" }, 401);
 
       const { handleSSFEvent } = await import("../ssf/receiver");
-      const result = await handleSSFEvent(req.body);
-      res.json(result);
+      const result = await handleSSFEvent(body);
+      return c.json(result);
     } catch (err) {
       logger.error("Failed to handle SSF event", err as Error);
-      res
-        .status(500)
-        .json({ code: "INTERNAL_ERROR", message: "SSF event handling failed", details: [] });
+      return c.json({ error: "INTERNAL_ERROR" }, 500);
     }
   });
 
-  // Workload credential routes
-  const workloadRoutes = await (async () => await import("./routes/workload.routes"));
-  app.use("/workload", (workloadRoutes as any).default);
-
-  // Protected example route chain
+  // ─── Protected example route ──────────────────────────────────────────────
   app.get(
     "/protected",
     rateLimit({ points: 200, windowSecs: 60 }),
     authMiddleware,
     geoFencingMiddleware(),
     temporalAccessMiddleware(),
-    (req, res) => {
-      res.json({ ok: true, user: req.user?._id });
+    (c) => {
+      return c.json({ ok: true, user: c.get("user")?.id });
     }
   );
 
-  // Prometheus metrics scrape endpoint
-  app.get("/metrics", metricsRoute());
+  // ─── Health checks ────────────────────────────────────────────────────────
+  app.get("/health", async (c) => {
+    const health: Record<string, unknown> = { status: "ok" };
+    try {
+      const { pingRedis } = await import("../services/rateLimiter/redis");
+      health.redis = (await pingRedis()) ? "ok" : "down";
+    } catch {
+      health.redis = "unconfigured";
+    }
+    return c.json(health);
+  });
 
-  // Health + readiness
-  app.get("/healthz", async (req, res) => {
-    const health: Record<string, string> = { status: "ok" };
+  app.get("/healthz", async (c) => {
+    const health: Record<string, unknown> = { status: "ok", timestamp: new Date().toISOString() };
 
     try {
       const { pingRedis } = await import("../services/rateLimiter/redis");
@@ -148,20 +96,23 @@ export async function createServer() {
     }
 
     try {
-      const esHealth = await getElasticsearchHealth();
-      health.elasticsearch = esHealth.available ? esHealth.status : "down";
+      const { isDbConnected } = await import("../db");
+      health.postgres = isDbConnected() ? "ok" : "down";
     } catch {
-      health.elasticsearch = "unconfigured";
+      health.postgres = "unknown";
     }
 
-    const allOk = Object.values(health).every(
-      (v) => v === "ok" || v === "unconfigured" || v === "disabled"
-    );
-    res.status(allOk ? 200 : 503).json(health);
-  });
+    try {
+      const { getSettings } = await import("../models/settings.model");
+      const settings = await getSettings();
+      health.settings = { appName: settings.appName };
+    } catch {
+      health.settings = "unavailable";
+    }
 
-  // Keep legacy /health path
-  app.get("/health", async (_req, res) => res.redirect("/healthz"));
+    const httpStatus = health.postgres === "ok" ? 200 : 503;
+    return c.json(health, httpStatus as any);
+  });
 
   return app;
 }
@@ -169,7 +120,9 @@ export async function createServer() {
 if (require.main === module) {
   (async () => {
     const app = await createServer();
-    const port = process.env.PORT || 3000;
-    app.listen(port, () => logger.info(`Server listening on http://localhost:${port}`));
+    const port = parseInt(process.env.PORT || "3000");
+    serve({ fetch: app.fetch, port }, (info) => {
+      logger.info(`Server listening on http://localhost:${info.port}`);
+    });
   })();
 }

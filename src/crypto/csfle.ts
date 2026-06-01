@@ -278,8 +278,8 @@ export function resetCSFLE(): void {
 }
 
 /**
- * Mongoose schema plugin for transparent CSFLE encryption
- * Usage: schema.plugin(csflEncryptionPlugin, { fields: ['email', 'phone', 'passwordHash'] })
+ * @deprecated Use CSFLE.encrypt/decrypt directly with Drizzle queries.
+ * Kept for backward compatibility only.
  */
 export function csflEncryptionPlugin(schema: any, options: { fields: string[] }): void {
   const fieldsToEncrypt = options.fields || [];

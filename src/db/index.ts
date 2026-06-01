@@ -1,61 +1,56 @@
-/**
- * Database connection management for ZeroAuth
- * Handles Mongoose initialization, connection pooling, and health checks
- */
-
-import mongoose from "mongoose";
-import type { ZeroAuthConfig } from "../shared/types";
+import { drizzle } from "drizzle-orm/postgres-js";
+import postgres from "postgres";
+import * as schema from "./schema";
 import { getConfig } from "../config";
 
+type DrizzleDb = ReturnType<typeof drizzle<typeof schema>>;
+
+let dbInstance: DrizzleDb | null = null;
+let sqlClient: ReturnType<typeof postgres> | null = null;
 let isConnected = false;
 
-/**
- * Initialize MongoDB connection
- */
-export async function initializeDatabase(config?: ZeroAuthConfig): Promise<void> {
-  const cfg = config || getConfig();
+export function getDb(): DrizzleDb {
+  if (!dbInstance) {
+    throw new Error("Database not initialized. Call initializeDatabase() first.");
+  }
+  return dbInstance;
+}
 
-  if (isConnected) {
+export async function initializeDatabase(): Promise<void> {
+  if (isConnected && dbInstance) {
     console.log("Database already connected");
     return;
   }
 
-  try {
-    console.log(`Connecting to MongoDB at ${cfg.database.mongoUri.replace(/(:[^/]*@)/, ":***@")}`);
+  const cfg = getConfig();
+  const url = cfg.database.databaseUrl;
 
-    await mongoose.connect(cfg.database.mongoUri, {
-      maxPoolSize: cfg.database.connectionPoolSize,
-      minPoolSize: 2,
-      connectTimeoutMS: 10000,
-      socketTimeoutMS: 45000,
-      retryWrites: true,
-      w: "majority",
-      // Connection monitoring
-      serverSelectionTimeoutMS: 5000,
+  console.log(`Connecting to PostgreSQL at ${url.replace(/:([^@/]+)@/, ":***@")}`);
+
+  try {
+    sqlClient = postgres(url, {
+      max: cfg.database.connectionPoolSize,
+      idle_timeout: 20,
+      connect_timeout: 10,
     });
 
+    dbInstance = drizzle(sqlClient, { schema });
     isConnected = true;
     console.log("✓ Database connected successfully");
-
-    // Setup connection event listeners
-    setupConnectionListeners();
   } catch (error) {
     console.error("✗ Failed to connect to database:", error);
     throw error;
   }
 }
 
-/**
- * Close database connection
- */
 export async function closeDatabase(): Promise<void> {
-  if (!isConnected) {
-    return;
-  }
+  if (!isConnected || !sqlClient) return;
 
   try {
     console.log("Closing database connection...");
-    await mongoose.disconnect();
+    await sqlClient.end();
+    dbInstance = null;
+    sqlClient = null;
     isConnected = false;
     console.log("✓ Database connection closed");
   } catch (error) {
@@ -64,118 +59,44 @@ export async function closeDatabase(): Promise<void> {
   }
 }
 
-/**
- * Check database health
- */
 export async function checkDatabaseHealth(): Promise<{
   status: "healthy" | "degraded" | "unhealthy";
   uptime: number;
-  connections: {
-    current: number;
-    available: number;
-  };
+  connections: { current: number; available: number };
 }> {
-  if (!isConnected || !mongoose.connection) {
-    return {
-      status: "unhealthy",
-      uptime: 0,
-      connections: { current: 0, available: 0 },
-    };
+  if (!isConnected || !dbInstance) {
+    return { status: "unhealthy", uptime: 0, connections: { current: 0, available: 0 } };
   }
 
   try {
-    // Ping the database
-    const adminDb = mongoose.connection.db?.admin();
-    if (!adminDb) {
-      return {
-        status: "unhealthy",
-        uptime: 0,
-        connections: { current: 0, available: 0 },
-      };
+    const result = await sqlClient!`SELECT extract(epoch from now())::int as ts`;
+    if (result.length > 0) {
+      return { status: "healthy", uptime: 0, connections: { current: 1, available: 99 } };
     }
-
-    const pingResult = await adminDb.ping();
-
-    if (!pingResult) {
-      return {
-        status: "unhealthy",
-        uptime: 0,
-        connections: { current: 0, available: 0 },
-      };
-    }
-
-    // Get connection stats
-    const client = mongoose.connection.getClient();
-    const serverStatus = await adminDb.serverStatus();
-
-    return {
-      status: "healthy",
-      uptime: serverStatus?.uptime || 0,
-      connections: {
-        current: serverStatus?.connections?.current || 0,
-        available: serverStatus?.connections?.available || 0,
-      },
-    };
-  } catch (error) {
-    console.error("Database health check failed:", error);
-    return {
-      status: "degraded",
-      uptime: 0,
-      connections: { current: 0, available: 0 },
-    };
+    return { status: "degraded", uptime: 0, connections: { current: 0, available: 0 } };
+  } catch {
+    return { status: "degraded", uptime: 0, connections: { current: 0, available: 0 } };
   }
 }
 
-/**
- * Setup connection event listeners
- */
-function setupConnectionListeners(): void {
-  const connection = mongoose.connection;
-
-  connection.on("connected", () => {
-    console.log("[DB] Connected to MongoDB");
-  });
-
-  connection.on("error", (error) => {
-    console.error("[DB] Connection error:", error);
-    isConnected = false;
-  });
-
-  connection.on("disconnected", () => {
-    console.log("[DB] Disconnected from MongoDB");
-    isConnected = false;
-  });
-
-  connection.on("reconnected", () => {
-    console.log("[DB] Reconnected to MongoDB");
-    isConnected = true;
-  });
-}
-
-/**
- * Get connection status
- */
 export function isDbConnected(): boolean {
-  return isConnected && mongoose.connection.readyState === 1;
+  return isConnected && dbInstance !== null;
 }
 
-/**
- * Drop all collections (WARNING: Use only in development/testing)
- */
-export async function dropAllCollections(): Promise<void> {
+export async function dropAllTables(): Promise<void> {
   if (process.env.NODE_ENV === "production") {
-    throw new Error("Cannot drop collections in production");
+    throw new Error("Cannot drop tables in production");
   }
 
-  try {
-    const collections = mongoose.connection.collections;
-    for (const key in collections) {
-      const collection = collections[key];
-      await collection.deleteMany({});
-    }
-    console.log("✓ All collections dropped");
-  } catch (error) {
-    console.error("✗ Error dropping collections:", error);
-    throw error;
-  }
+  const db = getDb();
+  await sqlClient!`
+    DO $$ DECLARE
+      r RECORD;
+    BEGIN
+      FOR r IN (SELECT tablename FROM pg_tables WHERE schemaname = 'public') LOOP
+        EXECUTE 'TRUNCATE TABLE ' || quote_ident(r.tablename) || ' CASCADE';
+      END LOOP;
+    END $$;
+  `;
+  console.log("✓ All tables truncated");
 }

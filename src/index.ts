@@ -1,8 +1,3 @@
-/**
- * ZeroAuth Core - Root entry point
- * Exports all models, services, utilities, and types for external consumption
- */
-
 // ─── Configuration ───────────────────────────────────────────────────────────
 export { loadConfig, getConfig, resetConfig } from "./config";
 
@@ -12,16 +7,28 @@ export {
   closeDatabase,
   checkDatabaseHealth,
   isDbConnected,
-  dropAllCollections,
+  dropAllTables,
+  getDb,
 } from "./db";
+
+// ─── Schema ──────────────────────────────────────────────────────────────────
+export {
+  usersTable,
+  sessionsTable,
+  rolesTable,
+  jitAccessTable,
+  auditLogsTable,
+  refreshTokensTable,
+  otpsTable,
+  workloadCredentialsTable,
+  saasSettingsTable,
+} from "./db/schema";
 
 // ─── Encryption (CSFLE) ──────────────────────────────────────────────────────
 export {
   initializeCSFLE,
   getCSFLE,
   resetCSFLE,
-  csflEncryptionPlugin,
-  applyCSFLEToUserSchema,
   type EncryptionKeyVersion,
 } from "./crypto/csfle";
 
@@ -60,6 +67,7 @@ export type {
   OAuthAuthorizationRequest,
   OAuthTokenResponse,
   MFAChallengeResponse,
+  HonoEnv,
 } from "./shared/types";
 
 export {
@@ -72,23 +80,6 @@ export {
   DEFAULT_JIT_GRANT_TTL,
 } from "./shared/types";
 
-// ─── Models ─────────────────────────────────────────────────────────────────
-export { UserModel, type UserDocument } from "./models/user.model";
-export {
-  SessionModel,
-  RoleModel,
-  JITModel,
-  AuditModel,
-  RefreshTokenModel,
-  OTPModel,
-  type SessionDocument,
-  type RoleDocument,
-  type JITDocument,
-  type AuditDocument,
-  type RefreshTokenDocument,
-  type OTPDocument,
-} from "./models";
-
 // ─── Services ───────────────────────────────────────────────────────────────
 export { TokenService } from "./services/token.service";
 export { AuthorizationEngine } from "./services/authz.service";
@@ -97,7 +88,6 @@ export {
   enforceMaxConcurrentDevices,
   revokeSession,
   revokeAllSessionsForUser,
-  requireSessionLimitOnLogin,
 } from "./middleware/sessionControl";
 export { requireProofOfPossession, clearPoPNonces } from "./middleware/proofOfPossession";
 export { rateLimit, initRateLimiter, clearRateLimiter } from "./middleware/rateLimiting";
@@ -105,8 +95,7 @@ export { geoFencingMiddleware } from "./middleware/geoFencing";
 export { temporalAccessMiddleware } from "./middleware/temporalAccess";
 export { createServer as createApiServer } from "./api/server";
 export { sendOTP } from "./mfa";
-export { requireFields, allowOnlyMethods, validate } from "./middleware/validation";
-export { securityHeaders } from "./middleware/securityHeaders";
+export { requireFields, allowOnlyMethods } from "./middleware/validation";
 export {
   checkAccountLockout,
   recordFailedLogin,
@@ -245,10 +234,6 @@ export type { DIDDocument, DIDAuthChallenge, DIDProof, DIDAuthResult, Verificati
 export { createKEMProvider, generatePQKeyPair, hybridEncrypt, hybridDecrypt, SimulatedMLKEM, NobleMLKEM, establishPQSessionKey } from "./crypto/post-quantum";
 export type { KEMPublicKey, KEMPrivateKey, KEMEncapsulation, PQKEMProvider } from "./crypto/post-quantum";
 
-/**
- * Initialize entire ZeroAuth system
- * Call this at application startup
- */
 export async function initializeZeroAuth() {
   const { getConfig } = await import("./config");
   const { initializeDatabase } = await import("./db");
@@ -260,13 +245,10 @@ export async function initializeZeroAuth() {
 
   logger.info("Initializing ZeroAuth system...");
 
-  // Initialize database
-  await initializeDatabase(config);
+  await initializeDatabase();
 
-  // Initialize CSFLE
   await initializeCSFLE(config);
 
-  // Initialize rate limiter (optional Redis-backed)
   try {
     const { initRateLimiter } = await import("./middleware/rateLimiting");
     await initRateLimiter();
@@ -282,7 +264,6 @@ export async function initializeZeroAuth() {
     logger.warn("Audit pipeline initialization skipped or failed", err as Error);
   }
 
-  // Initialize auth middleware (token service)
   try {
     const { initAuthMiddleware } = await import("./middleware/auth");
     await initAuthMiddleware();
@@ -294,9 +275,6 @@ export async function initializeZeroAuth() {
   return { config, logger };
 }
 
-/**
- * Gracefully shutdown ZeroAuth system
- */
 export async function shutdownZeroAuth() {
   const { getLogger } = await import("./logger");
   const { closeDatabase } = await import("./db");
