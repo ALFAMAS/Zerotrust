@@ -5,7 +5,8 @@
  * ZeroAuth acts as the SP; an external IdP (Azure AD, Okta, etc.) handles authentication.
  */
 import crypto from "crypto";
-import { getLogger } from "../logger";
+import zlib from "zlib";
+import { getLogger } from "../logger/index.js";
 
 const logger = getLogger("saml-sp");
 
@@ -58,13 +59,10 @@ export function buildAuthnRequest(
     ts: Date.now(),
   });
 
-  const nameIdFormat =
-    sp.nameIdFormat ||
-    "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress";
+  const nameIdFormat = sp.nameIdFormat ?? "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress";
 
   const authnContextClassRef =
-    sp.authnContextClassRef ||
-    "urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport";
+    sp.authnContextClassRef ?? "urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport";
 
   const authnRequest = `<?xml version="1.0"?>
 <samlp:AuthnRequest
@@ -86,7 +84,7 @@ export function buildAuthnRequest(
   </samlp:RequestedAuthnContext>
 </samlp:AuthnRequest>`.trim();
 
-  const deflated = deflateRaw(authnRequest);
+  const deflated = zlib.deflateRawSync(Buffer.from(authnRequest, "utf-8"));
   const encoded = Buffer.from(deflated).toString("base64");
 
   const params = new URLSearchParams({
@@ -119,13 +117,11 @@ export function parseSAMLResponse(
   }
 
   // Extract status code
-  const statusMatch = xml.match(
-    /<samlp?:StatusCode[^>]*Value="([^"]+)"/
-  );
+  const statusMatch = xml.match(/<samlp?:StatusCode[^>]*Value="([^"]+)"/);
   const statusCode = statusMatch?.[1] ?? "";
   if (!statusCode.includes(":Success")) {
     const statusMsg = xml.match(/<samlp?:StatusMessage[^>]*>([^<]+)/)?.[1];
-    throw new Error(`SAML authentication failed: ${statusMsg || statusCode}`);
+    throw new Error(`SAML authentication failed: ${statusMsg ?? statusCode}`);
   }
 
   // Extract NameID
@@ -134,11 +130,12 @@ export function parseSAMLResponse(
   const nameId = nameIdMatch[1].trim();
 
   const nameIdFormatMatch = xml.match(/<saml:?NameID[^>]*Format="([^"]+)"/);
-  const nameIdFormat = nameIdFormatMatch?.[1] || "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress";
+  const nameIdFormat =
+    nameIdFormatMatch?.[1] ?? "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress";
 
   // Extract Issuer
   const issuerMatch = xml.match(/<saml:?Issuer[^>]*>([^<]+)<\/saml:?Issuer>/);
-  const issuer = issuerMatch?.[1]?.trim() || "";
+  const issuer = issuerMatch?.[1]?.trim() ?? "";
 
   // Validate audience
   const audienceMatch = xml.match(/<saml:?Audience[^>]*>([^<]+)<\/saml:?Audience>/);
@@ -173,8 +170,7 @@ export function parseSAMLResponse(
 
   // Extract attributes
   const attributes: Record<string, string | string[]> = {};
-  const attrRegex =
-    /<saml:?Attribute[^>]*Name="([^"]+)"[^>]*>([\s\S]*?)<\/saml:?Attribute>/g;
+  const attrRegex = /<saml:?Attribute[^>]*Name="([^"]+)"[^>]*>([\s\S]*?)<\/saml:?Attribute>/g;
   let attrMatch: RegExpExecArray | null;
   while ((attrMatch = attrRegex.exec(xml)) !== null) {
     const attrName = attrMatch[1];
@@ -187,6 +183,9 @@ export function parseSAMLResponse(
     }
     attributes[attrName] = values.length === 1 ? values[0] : values;
   }
+
+  // Suppress unused-parameter warning for idp (kept for API compatibility)
+  void idp;
 
   return {
     nameId,
@@ -206,7 +205,10 @@ export function consumeRelayState(relayState: string) {
   return entry;
 }
 
-export function buildSPMetadata(sp: SAMLSPConfig, org: { name: string; url: string } = { name: "ZeroAuth", url: "https://zeroauth.dev" }): string {
+export function buildSPMetadata(
+  sp: SAMLSPConfig,
+  org: { name: string; url: string } = { name: "ZeroAuth", url: "https://zeroauth.dev" }
+): string {
   return `<?xml version="1.0"?>
 <md:EntityDescriptor
   xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata"
@@ -226,12 +228,4 @@ export function buildSPMetadata(sp: SAMLSPConfig, org: { name: string; url: stri
     <md:OrganizationURL xml:lang="en">${org.url}</md:OrganizationURL>
   </md:Organization>
 </md:EntityDescriptor>`;
-}
-
-// Minimal DEFLATE without zlib (zlib is available in Node but avoid dynamic import)
-function deflateRaw(str: string): Buffer {
-  // Node.js zlib is synchronous — use the Buffer directly for base64 encoding
-  // We use raw deflate (zlib.deflateRawSync) for SAML redirect binding
-  const { deflateRawSync } = require("zlib");
-  return deflateRawSync(Buffer.from(str, "utf-8"));
 }
