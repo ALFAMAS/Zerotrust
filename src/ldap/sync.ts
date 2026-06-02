@@ -1,13 +1,11 @@
-import type { LDAPClient } from "./client";
-import { UserModel } from "../models/user.model";
-import { RoleModel } from "../models";
-import { getLogger } from "../logger";
+import type { LDAPClient } from "./client.js";
+import { getLogger } from "../logger/index.js";
 
 export async function syncAllUsers(
   client: LDAPClient,
   tenantId?: string
 ): Promise<{ synced: number; errors: number }> {
-  const logger = getLogger();
+  const logger = getLogger("ldap-sync");
   let synced = 0;
   let errors = 0;
 
@@ -20,7 +18,7 @@ export async function syncAllUsers(
         synced++;
       } catch (err) {
         errors++;
-        logger.warn("Failed to sync LDAP user", { dn: user.dn, error: (err as Error).message });
+        logger.warn("Failed to sync LDAP user", { dn: user.dn, error: String(err) });
       }
     }
   } finally {
@@ -36,7 +34,7 @@ export async function syncModifiedUsers(
   since: Date,
   tenantId?: string
 ): Promise<{ synced: number; errors: number }> {
-  const logger = getLogger();
+  const logger = getLogger("ldap-sync");
   let synced = 0;
   let errors = 0;
 
@@ -55,25 +53,27 @@ export async function syncModifiedUsers(
         synced++;
       } catch (err) {
         errors++;
-        logger.warn("Failed to sync modified LDAP user", { dn: user.dn, error: (err as Error).message });
+        logger.warn("Failed to sync modified LDAP user", { dn: user.dn, error: String(err) });
       }
     }
   } finally {
     await client.close();
   }
 
-  logger.info("LDAP incremental sync complete", { synced, errors, since: since.toISOString(), tenantId });
+  logger.info("LDAP incremental sync complete", {
+    synced,
+    errors,
+    since: since.toISOString(),
+    tenantId,
+  });
   return { synced, errors };
 }
 
-export function scheduleLDAPSync(
-  intervalMs: number,
-  tenantId?: string
-): NodeJS.Timeout {
-  const { createLDAPClient } = require("./client");
-  const logger = getLogger();
+export function scheduleLDAPSync(intervalMs: number, tenantId?: string): NodeJS.Timeout {
+  const logger = getLogger("ldap-sync");
 
   const run = async () => {
+    const { createLDAPClient } = await import("./client.js");
     const client = createLDAPClient();
     try {
       const result = await syncAllUsers(client, tenantId);
