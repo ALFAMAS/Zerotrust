@@ -1,11 +1,13 @@
 import crypto from "crypto";
 import nodemailer from "nodemailer";
-import { OTPModel } from "../models";
-import { UserModel } from "../models/user.model";
+import { eq, and, gt } from "drizzle-orm";
+import { getDb } from "../db";
+import { usersTable, otpsTable } from "../db/schema";
 import { getSettings } from "../models/settings.model";
 import { getLogger } from "../logger";
 
 const logger = getLogger("magic-link");
+
 const MAGIC_LINK_TTL_MS = 15 * 60 * 1000;
 
 function hashToken(token: string): string {
@@ -23,10 +25,7 @@ function getTransporter(): nodemailer.Transporter {
       secure: process.env.SMTP_SECURE === "true",
       auth:
         process.env.SMTP_USER || process.env.MAIL_USER
-          ? {
-              user: process.env.SMTP_USER || process.env.MAIL_USER,
-              pass: process.env.SMTP_PASS || process.env.MAIL_PASS,
-            }
+          ? { user: process.env.SMTP_USER || process.env.MAIL_USER, pass: process.env.SMTP_PASS || process.env.MAIL_PASS }
           : undefined,
     } as any);
   } else {
@@ -35,24 +34,22 @@ function getTransporter(): nodemailer.Transporter {
   return _transporter;
 }
 
-export async function sendMagicLink(
-  email: string,
-  redirectUrl?: string
-): Promise<{ sent: boolean }> {
-  // Anti-enumeration: always return { sent: true }
+export async function sendMagicLink(email: string, redirectUrl?: string): Promise<{ sent: boolean }> {
   try {
-    const user = await UserModel.findOne({ email });
-    if (!user) {
+    const db = getDb();
+    const userRows = await db.select({ id: usersTable.id }).from(usersTable).where(eq(usersTable.email, email.toLowerCase())).limit(1);
+
+    if (userRows.length === 0) {
       logger.debug("Magic link requested for unknown email (silently ignored)", { email });
       return { sent: true };
     }
 
+    const user = userRows[0];
     const rawToken = crypto.randomBytes(32).toString("hex");
     const tokenHash = hashToken(rawToken);
 
-    // Store hashed token as OTP record
-    await OTPModel.create({
-      userId: user._id,
+    await db.insert(otpsTable).values({
+      userId: user.id,
       code: tokenHash,
       type: "login",
       channel: "email",
@@ -61,7 +58,7 @@ export async function sendMagicLink(
     });
 
     const settings = await getSettings();
-    const appUrl = settings.appUrl || process.env.APP_URL || "http://localhost:3002";
+    const appUrl = settings.appUrl || process.env.APP_URL || "http://localhost:3001";
     const verifyUrl =
       `${appUrl}/auth/magic-link/verify` +
       `?token=${encodeURIComponent(rawToken)}&email=${encodeURIComponent(email)}` +
@@ -71,9 +68,7 @@ export async function sendMagicLink(
     if (hasMailConfig) {
       const t = getTransporter();
       await t.sendMail({
-        from:
-          process.env.SMTP_FROM ||
-          `no-reply@${process.env.AUTH_DOMAIN || "zeroauth.local"}`,
+        from: process.env.SMTP_FROM || `no-reply@${process.env.AUTH_DOMAIN || "zeroauth.local"}`,
         to: email,
         subject: `Sign in to ${settings.appName}`,
         text: `Click this link to sign in (expires in 15 minutes):\n\n${verifyUrl}\n\nIf you didn't request this, you can ignore this email.`,
@@ -81,52 +76,46 @@ export async function sendMagicLink(
       });
       logger.info("Magic link email sent", { email });
     } else {
-      logger.info("Magic link (no mail transport — logging to console)", {
-        email,
-        verifyUrl,
-      });
+      logger.info("Magic link (no mail transport — logging to console)", { email, verifyUrl });
       console.log(`[MAGIC LINK] ${email} → ${verifyUrl}`);
     }
   } catch (err) {
     logger.error("sendMagicLink error", err as Error);
   }
-
   return { sent: true };
 }
 
-export async function verifyMagicLink(
-  email: string,
-  token: string
-): Promise<{ userId: string; userEmail: string } | null> {
+export async function verifyMagicLink(email: string, token: string): Promise<{ userId: string; userEmail: string } | null> {
   try {
     const tokenHash = hashToken(token);
+    const db = getDb();
+    const now = new Date();
 
-    const otpRecord = await OTPModel.findOne({
-      target: email,
-      channel: "email",
-      type: "login",
-      code: tokenHash,
-      expiresAt: { $gt: new Date() },
-    });
+    const records = await db.select().from(otpsTable).where(
+      and(
+        eq(otpsTable.target, email),
+        eq(otpsTable.channel, "email"),
+        eq(otpsTable.type, "login"),
+        eq(otpsTable.code, tokenHash),
+        gt(otpsTable.expiresAt, now)
+      )
+    ).limit(1);
 
-    if (!otpRecord) {
+    if (records.length === 0) {
       logger.warn("Magic link verification failed — record not found or expired", { email });
       return null;
     }
 
-    // Single-use: delete the record
-    await OTPModel.deleteOne({ _id: otpRecord._id });
+    const record = records[0];
+    await db.delete(otpsTable).where(eq(otpsTable.id, record.id));
 
-    const user = await UserModel.findById(otpRecord.userId);
-    if (!user) {
-      logger.warn("Magic link user not found after record lookup", { userId: otpRecord.userId });
+    const userRows = await db.select({ id: usersTable.id, email: usersTable.email }).from(usersTable).where(eq(usersTable.id, record.userId)).limit(1);
+    if (userRows.length === 0) {
+      logger.warn("Magic link user not found after record lookup", { userId: record.userId });
       return null;
     }
 
-    return {
-      userId: user._id.toString(),
-      userEmail: user.email,
-    };
+    return { userId: userRows[0].id, userEmail: userRows[0].email };
   } catch (err) {
     logger.error("verifyMagicLink error", err as Error);
     return null;

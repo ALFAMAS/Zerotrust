@@ -23,7 +23,7 @@ export class TokenService {
     const keyBytes = this.hexToBytes(this.config.secretKeyHex);
     this.key = await crypto.subtle.importKey(
       "raw",
-      keyBytes,
+      keyBytes as unknown as ArrayBuffer,
       { name: "AES-GCM" },
       false,
       ["encrypt", "decrypt"]
@@ -77,9 +77,9 @@ export class TokenService {
     const iv = this.fromBase64url(parts[2]);
     const ciphertext = this.fromBase64url(parts[3]);
     const plaintext = await crypto.subtle.decrypt(
-      { name: "AES-GCM", iv },
+      { name: "AES-GCM", iv: iv as unknown as ArrayBuffer },
       this.key,
-      ciphertext
+      ciphertext as unknown as ArrayBuffer
     );
     return new TextDecoder().decode(plaintext);
   }

@@ -1,34 +1,16 @@
-/**
- * PASETO Token Verification Middleware
- * Verifies token signature, expiry, and session validity
- */
-
-import type { Request, Response, NextFunction } from "express";
-import type { TokenPayload, Session, User } from "../shared/types";
+import { createMiddleware } from "hono/factory";
+import type { TokenPayload, HonoEnv } from "../shared/types";
 import { ErrorCodes, ZeroAuthError } from "../shared/types";
 import { TokenService } from "../services/token.service";
-import { SessionModel, UserModel } from "../models";
+import { getDb } from "../db";
+import { usersTable, sessionsTable } from "../db/schema";
+import { eq, and } from "drizzle-orm";
 import { getLogger } from "../logger";
 import { getConfig } from "../config";
-
-// Extend Express Request type
-declare global {
-  namespace Express {
-    interface Request {
-      user?: User;
-      session?: Session & { _id: string };
-      token?: TokenPayload;
-      correlationId?: string;
-    }
-  }
-}
 
 const logger = getLogger("auth-middleware");
 let tokenService: TokenService;
 
-/**
- * Initialize auth middleware (call this at app startup)
- */
 export async function initAuthMiddleware(): Promise<void> {
   const config = getConfig();
   tokenService = new TokenService(config.security.tokenSecretHex, config.session);
@@ -36,218 +18,192 @@ export async function initAuthMiddleware(): Promise<void> {
   logger.info("✓ Auth middleware initialized");
 }
 
-/**
- * Main authentication middleware
- * Extracts and verifies PASETO token, validates session
- */
-export async function authMiddleware(
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> {
+export const authMiddleware = createMiddleware<HonoEnv>(async (c, next) => {
   try {
-    // Extract token from Authorization header
-    const authHeader = req.headers.authorization;
+    const authHeader = c.req.header("authorization");
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      throw new ZeroAuthError(
-        ErrorCodes.TOKEN_INVALID,
-        "Missing or malformed Authorization header",
+      return c.json(
+        { error: ErrorCodes.TOKEN_INVALID, message: "Missing or malformed Authorization header" },
         401
       );
     }
 
-    const token = authHeader.substring(7); // Remove "Bearer "
+    const token = authHeader.substring(7);
 
-    // Verify token signature and expiry
     let payload: TokenPayload;
     try {
       payload = await tokenService.verifyAccessToken(token);
     } catch (error) {
       if (error instanceof Error && error.message === "TOKEN_EXPIRED") {
-        throw new ZeroAuthError(
-          ErrorCodes.TOKEN_EXPIRED,
-          "Access token has expired",
-          401
-        );
+        return c.json({ error: ErrorCodes.TOKEN_EXPIRED, message: "Access token has expired" }, 401);
       }
-      throw new ZeroAuthError(
-        ErrorCodes.TOKEN_INVALID,
-        "Invalid or tampered token",
-        401
-      );
+      return c.json({ error: ErrorCodes.TOKEN_INVALID, message: "Invalid or tampered token" }, 401);
     }
 
-    // Verify session exists and is active
-    const session = await SessionModel.findOne({
-      tokenId: payload.jti,
-      userId: payload.sub,
-      isActive: true,
-    });
+    const db = getDb();
 
-    if (!session) {
-      throw new ZeroAuthError(
-        ErrorCodes.SESSION_NOT_FOUND,
-        "Session not found or revoked",
-        401
-      );
+    const sessionRows = await db
+      .select()
+      .from(sessionsTable)
+      .where(
+        and(
+          eq(sessionsTable.tokenId, payload.jti),
+          eq(sessionsTable.userId, payload.sub),
+          eq(sessionsTable.isActive, true)
+        )
+      )
+      .limit(1);
+
+    if (sessionRows.length === 0) {
+      return c.json({ error: ErrorCodes.SESSION_NOT_FOUND, message: "Session not found or revoked" }, 401);
     }
 
-    // Check if session has expired
+    const session = sessionRows[0];
+
     if (session.expiresAt < new Date()) {
-      session.isActive = false;
-      await session.save();
-      throw new ZeroAuthError(
-        ErrorCodes.SESSION_EXPIRED,
-        "Session has expired",
-        401
-      );
+      await db
+        .update(sessionsTable)
+        .set({ isActive: false })
+        .where(eq(sessionsTable.id, session.id));
+      return c.json({ error: ErrorCodes.SESSION_EXPIRED, message: "Session has expired" }, 401);
     }
 
-    // Check if session was revoked
     if (session.revokedAt) {
-      throw new ZeroAuthError(
-        ErrorCodes.TOKEN_REVOKED,
-        "Session has been revoked",
-        401
-      );
+      return c.json({ error: ErrorCodes.TOKEN_REVOKED, message: "Session has been revoked" }, 401);
     }
 
-    // Fetch user document
-    const user = await UserModel.findById(payload.sub);
-    if (!user) {
-      throw new ZeroAuthError(
-        ErrorCodes.USER_NOT_FOUND,
-        "User not found",
-        401
-      );
+    const userRows = await db
+      .select()
+      .from(usersTable)
+      .where(eq(usersTable.id, payload.sub))
+      .limit(1);
+
+    if (userRows.length === 0) {
+      return c.json({ error: ErrorCodes.USER_NOT_FOUND, message: "User not found" }, 401);
     }
 
-    // Check user status
-    if (user.status === "deleted") {
-      throw new ZeroAuthError(
-        ErrorCodes.USER_DELETED,
-        "User account has been deleted",
-        401
-      );
+    const userRow = userRows[0];
+
+    if (userRow.status === "deleted") {
+      return c.json({ error: ErrorCodes.USER_DELETED, message: "User account has been deleted" }, 401);
     }
 
-    if (user.status === "suspended") {
-      throw new ZeroAuthError(
-        ErrorCodes.USER_SUSPENDED,
-        "User account is suspended",
-        403
-      );
+    if (userRow.status === "suspended") {
+      return c.json({ error: ErrorCodes.USER_SUSPENDED, message: "User account is suspended" }, 403);
     }
 
-    // Attach to request
-    req.user = user;
-    req.session = { ...session.toObject(), _id: session._id.toString() };
-    req.token = payload;
-
-    // Update last activity timestamp
-    session.lastActivityAt = new Date();
-    await session.save();
-
-    logger.debug("✓ Token verified", {
-      userId: payload.sub,
-      sessionId: payload.sid,
+    // Set typed context variables
+    c.set("user", {
+      id: userRow.id,
+      email: userRow.email,
+      username: userRow.username,
+      passwordHash: userRow.passwordHash,
+      phone: userRow.phone,
+      displayName: userRow.displayName,
+      avatarUrl: userRow.avatarUrl,
+      roles: userRow.roles ?? [],
+      attributes: (userRow.attributes as any) ?? {},
+      mfa: (userRow.mfa as any) ?? { totp: { enabled: false, backupCodes: [] }, webauthn: { enabled: false } },
+      passkeys: (userRow.passkeys as any[]) ?? [],
+      oauthProviders: (userRow.oauthProviders as any[]) ?? [],
+      status: userRow.status as any,
+      parentUserId: userRow.parentUserId,
+      subUserIds: userRow.subUserIds ?? [],
+      sessionConfig: (userRow.sessionConfig as any) ?? {},
+      lastLoginAt: userRow.lastLoginAt,
+      metadata: userRow.metadata as any,
+      createdAt: userRow.createdAt,
+      updatedAt: userRow.updatedAt,
     });
 
-    next();
+    c.set("session", {
+      id: session.id,
+      userId: session.userId,
+      tokenId: session.tokenId,
+      deviceFingerprint: (session.deviceFingerprint as any) ?? {},
+      ipAddress: session.ipAddress,
+      country: session.country,
+      userAgent: session.userAgent,
+      expiresAt: session.expiresAt,
+      lastActivityAt: session.lastActivityAt,
+      isActive: session.isActive,
+      revokedAt: session.revokedAt,
+      revokedReason: session.revokedReason,
+      proofOfPossessionKey: session.proofOfPossessionKey,
+      continuousEvalResult: session.continuousEvalResult as any,
+      anomalyFlags: session.anomalyFlags as any,
+      createdAt: session.createdAt,
+      updatedAt: session.updatedAt,
+    });
+
+    c.set("token", payload);
+
+    // Update last activity
+    await db
+      .update(sessionsTable)
+      .set({ lastActivityAt: new Date() })
+      .where(eq(sessionsTable.id, session.id));
+
+    logger.debug("✓ Token verified", { userId: payload.sub, sessionId: payload.sid });
+    return next();
   } catch (error) {
     if (error instanceof ZeroAuthError) {
-      res.status(error.statusCode).json({
-        error: error.code,
-        message: error.message,
-      });
-    } else {
-      logger.error("Auth middleware error", error as Error);
-      res.status(500).json({
-        error: "INTERNAL_ERROR",
-        message: "Authentication failed",
-      });
+      return c.json({ error: error.code, message: error.message }, error.statusCode as any);
     }
+    logger.error("Auth middleware error", error as Error);
+    return c.json({ error: "INTERNAL_ERROR", message: "Authentication failed" }, 500);
   }
-}
+});
 
-/**
- * Optional authentication middleware
- * Does not fail if token is missing, but validates if present
- */
-export async function optionalAuthMiddleware(
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> {
+export const optionalAuthMiddleware = createMiddleware<HonoEnv>(async (c, next) => {
   try {
-    const authHeader = req.headers.authorization;
+    const authHeader = c.req.header("authorization");
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      // No token provided, continue without authentication
-      next();
+      await next();
       return;
     }
 
     const token = authHeader.substring(7);
-
-    // Attempt to verify (but don't fail)
     try {
       const payload = await tokenService.verifyAccessToken(token);
+      const db = getDb();
 
-      const session = await SessionModel.findOne({
-        tokenId: payload.jti,
-        userId: payload.sub,
-        isActive: true,
-      });
+      const sessionRows = await db
+        .select()
+        .from(sessionsTable)
+        .where(
+          and(
+            eq(sessionsTable.tokenId, payload.jti),
+            eq(sessionsTable.userId, payload.sub),
+            eq(sessionsTable.isActive, true)
+          )
+        )
+        .limit(1);
 
-      if (session && session.expiresAt >= new Date() && !session.revokedAt) {
-        const user = await UserModel.findById(payload.sub);
-        if (user && user.status === "active") {
-          req.user = user;
-          req.session = { ...session.toObject(), _id: session._id.toString() };
-          req.token = payload;
+      if (sessionRows.length > 0) {
+        const session = sessionRows[0];
+        if (session.expiresAt >= new Date() && !session.revokedAt) {
+          const userRows = await db
+            .select()
+            .from(usersTable)
+            .where(eq(usersTable.id, payload.sub))
+            .limit(1);
+
+          if (userRows.length > 0 && userRows[0].status === "active") {
+            const userRow = userRows[0];
+            c.set("user", { id: userRow.id, email: userRow.email, displayName: userRow.displayName, roles: userRow.roles ?? [], attributes: (userRow.attributes as any) ?? {}, mfa: (userRow.mfa as any) ?? {}, passkeys: (userRow.passkeys as any[]) ?? [], oauthProviders: (userRow.oauthProviders as any[]) ?? [], status: userRow.status as any, subUserIds: userRow.subUserIds ?? [], sessionConfig: (userRow.sessionConfig as any) ?? {}, lastLoginAt: userRow.lastLoginAt, createdAt: userRow.createdAt, updatedAt: userRow.updatedAt });
+            c.set("session", { id: session.id, userId: session.userId, tokenId: session.tokenId, deviceFingerprint: (session.deviceFingerprint as any) ?? {}, ipAddress: session.ipAddress, expiresAt: session.expiresAt, lastActivityAt: session.lastActivityAt, isActive: session.isActive });
+            c.set("token", payload);
+          }
         }
       }
     } catch {
-      // Token invalid or session doesn't exist, continue without user
+      // ignore — optional auth
     }
 
-    next();
+    await next();
   } catch (error) {
-    logger.warn("Optional auth middleware error", error as Error);
-    next();
+    logger.warn("Optional auth middleware error", { error: String(error) });
+    await next();
   }
-}
-
-/**
- * Require authentication (guards protected routes)
- */
-export function requireAuth(
-  req: Request,
-  res: Response,
-  next: NextFunction
-): void {
-  if (!req.user || !req.session || !req.token) {
-    res.status(401).json({
-      error: ErrorCodes.TOKEN_INVALID,
-      message: "Authentication required",
-    });
-    return;
-  }
-  next();
-}
-
-/**
- * Verify user has specific status
- */
-export function requireStatus(...statuses: string[]) {
-  return (req: Request, res: Response, next: NextFunction): void => {
-    if (!req.user || !statuses.includes(req.user.status)) {
-      res.status(403).json({
-        error: "STATUS_MISMATCH",
-        message: `User status must be one of: ${statuses.join(", ")}`,
-      });
-      return;
-    }
-    next();
-  };
-}
+});

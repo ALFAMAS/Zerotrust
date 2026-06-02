@@ -1,19 +1,24 @@
-/**
- * Environment-based configuration loader for ZeroAuth
- * Supports .env files, environment variables, and defaults
- */
-
 import type { ZeroAuthConfig } from "../shared/types";
 
-// Default configuration values
+function generateSecureKey(byteLength: number): string {
+  if (typeof crypto === "undefined") {
+    throw new Error("Crypto API not available. Node.js 15+ required.");
+  }
+  const bytes = crypto.getRandomValues(new Uint8Array(byteLength));
+  return Array.from(bytes)
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
 const DEFAULT_CONFIG: Partial<ZeroAuthConfig> = {
   database: {
-    mongoUri: process.env.MONGO_URI || "mongodb://localhost:27017/zeroauth",
-    connectionPoolSize: parseInt(process.env.MONGO_POOL_SIZE || "10"),
+    databaseUrl:
+      process.env.DATABASE_URL || "postgresql://zeroauth:password@localhost:5432/zeroauth",
+    connectionPoolSize: parseInt(process.env.DB_POOL_SIZE || "10"),
   },
   session: {
-    defaultTTL: parseInt(process.env.SESSION_TTL || "3600"), // 1 hour
-    refreshTokenTTL: parseInt(process.env.REFRESH_TOKEN_TTL || "604800"), // 7 days
+    defaultTTL: parseInt(process.env.SESSION_TTL || "3600"),
+    refreshTokenTTL: parseInt(process.env.REFRESH_TOKEN_TTL || "604800"),
     maxConcurrentDevices: parseInt(process.env.MAX_CONCURRENT_DEVICES || "5"),
   },
   security: {
@@ -27,28 +32,36 @@ const DEFAULT_CONFIG: Partial<ZeroAuthConfig> = {
       google: {
         clientId: process.env.OAUTH_GOOGLE_CLIENT_ID || "",
         clientSecret: process.env.OAUTH_GOOGLE_CLIENT_SECRET || "",
-        redirectUri: process.env.OAUTH_GOOGLE_REDIRECT_URI || "http://localhost:3000/auth/oauth/google/callback",
+        redirectUri:
+          process.env.OAUTH_GOOGLE_REDIRECT_URI ||
+          "http://localhost:3000/auth/oauth/google/callback",
       },
       facebook: {
         clientId: process.env.OAUTH_FACEBOOK_CLIENT_ID || "",
         clientSecret: process.env.OAUTH_FACEBOOK_CLIENT_SECRET || "",
-        redirectUri: process.env.OAUTH_FACEBOOK_REDIRECT_URI || "http://localhost:3000/auth/oauth/facebook/callback",
+        redirectUri:
+          process.env.OAUTH_FACEBOOK_REDIRECT_URI ||
+          "http://localhost:3000/auth/oauth/facebook/callback",
       },
       github: {
         clientId: process.env.OAUTH_GITHUB_CLIENT_ID || "",
         clientSecret: process.env.OAUTH_GITHUB_CLIENT_SECRET || "",
-        redirectUri: process.env.OAUTH_GITHUB_REDIRECT_URI || "http://localhost:3000/auth/oauth/github/callback",
+        redirectUri:
+          process.env.OAUTH_GITHUB_REDIRECT_URI ||
+          "http://localhost:3000/auth/oauth/github/callback",
       },
       apple: {
         clientId: process.env.OAUTH_APPLE_CLIENT_ID || "",
         clientSecret: process.env.OAUTH_APPLE_CLIENT_SECRET || "",
-        redirectUri: process.env.OAUTH_APPLE_REDIRECT_URI || "http://localhost:3000/auth/oauth/apple/callback",
+        redirectUri:
+          process.env.OAUTH_APPLE_REDIRECT_URI ||
+          "http://localhost:3000/auth/oauth/apple/callback",
       },
     },
   },
   mfa: {
     totpWindow: parseInt(process.env.TOTP_WINDOW || "1"),
-    otpExpirySecs: parseInt(process.env.OTP_EXPIRY_SECS || "900"), // 15 minutes
+    otpExpirySecs: parseInt(process.env.OTP_EXPIRY_SECS || "900"),
     maxOTPAttempts: parseInt(process.env.MAX_OTP_ATTEMPTS || "5"),
     channels: {
       email: { enabled: process.env.MFA_EMAIL_ENABLED !== "false" },
@@ -89,44 +102,19 @@ const DEFAULT_CONFIG: Partial<ZeroAuthConfig> = {
   },
 };
 
-/**
- * Generate a cryptographically secure random key as hex string
- */
-function generateSecureKey(byteLength: number): string {
-  if (typeof crypto === "undefined") {
-    throw new Error("Crypto API not available. Node.js 15+ required.");
-  }
-  const bytes = crypto.getRandomValues(new Uint8Array(byteLength));
-  return Array.from(bytes)
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
-}
-
-/**
- * Load configuration from environment
- * Validates required keys are present
- */
 export function loadConfig(): ZeroAuthConfig {
   const config = DEFAULT_CONFIG as ZeroAuthConfig;
-
-  // Validate critical configuration
   validateConfig(config);
-
   return config;
 }
 
-/**
- * Validate that all required config values are present
- */
 function validateConfig(config: ZeroAuthConfig): void {
   const errors: string[] = [];
 
-  // Database
-  if (!config.database.mongoUri) {
-    errors.push("MONGO_URI environment variable is required");
+  if (!config.database.databaseUrl) {
+    errors.push("DATABASE_URL environment variable is required");
   }
 
-  // Security
   if (!config.security.tokenSecretHex || config.security.tokenSecretHex.length < 64) {
     errors.push("TOKEN_SECRET_HEX must be at least 32 bytes (64 hex chars)");
   }
@@ -135,18 +123,18 @@ function validateConfig(config: ZeroAuthConfig): void {
     errors.push("CSFLE_MASTER_KEY_HEX must be at least 32 bytes (64 hex chars)");
   }
 
-  // OAuth
   let hasValidOAuth = false;
-  for (const [provider, creds] of Object.entries(config.oauth.providers)) {
+  for (const creds of Object.values(config.oauth.providers)) {
     if (creds.clientId && creds.clientSecret) {
       hasValidOAuth = true;
     }
   }
   if (!hasValidOAuth) {
-    console.warn("WARNING: No OAuth providers configured. Set OAUTH_*_CLIENT_ID and OAUTH_*_CLIENT_SECRET");
+    console.warn(
+      "WARNING: No OAuth providers configured. Set OAUTH_*_CLIENT_ID and OAUTH_*_CLIENT_SECRET"
+    );
   }
 
-  // MFA
   const mfaChannelsEnabled = Object.values(config.mfa.channels).filter((c) => c.enabled).length;
   if (mfaChannelsEnabled === 0) {
     errors.push("At least one MFA channel must be enabled");
@@ -161,9 +149,6 @@ function validateConfig(config: ZeroAuthConfig): void {
   }
 }
 
-/**
- * Get config instance (singleton pattern)
- */
 let configInstance: ZeroAuthConfig | null = null;
 
 export function getConfig(): ZeroAuthConfig {
@@ -173,9 +158,6 @@ export function getConfig(): ZeroAuthConfig {
   return configInstance;
 }
 
-/**
- * Reset config (mainly for testing)
- */
 export function resetConfig(): void {
   configInstance = null;
 }

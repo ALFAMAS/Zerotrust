@@ -1,63 +1,52 @@
 "use client";
-
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { api } from "@/lib/api";
-import { setTokens } from "@/lib/auth";
+import { api } from "../../../lib/api";
+import { setToken } from "../../../lib/auth";
 
-function getStrength(password: string): number {
+function passwordStrength(p: string): { score: number; label: string; color: string } {
   let score = 0;
-  if (password.length >= 8) score++;
-  if (password.length >= 12) score++;
-  if (/[A-Z]/.test(password)) score++;
-  if (/[0-9]/.test(password)) score++;
-  if (/[^A-Za-z0-9]/.test(password)) score++;
-  return Math.min(score, 4);
+  if (p.length >= 8) score++;
+  if (p.length >= 12) score++;
+  if (/[A-Z]/.test(p)) score++;
+  if (/[0-9]/.test(p)) score++;
+  if (/[^A-Za-z0-9]/.test(p)) score++;
+  const levels = [
+    { label: "Weak", color: "bg-red-500" },
+    { label: "Weak", color: "bg-red-500" },
+    { label: "Fair", color: "bg-yellow-500" },
+    { label: "Good", color: "bg-blue-500" },
+    { label: "Strong", color: "bg-emerald-500" },
+    { label: "Very Strong", color: "bg-emerald-400" },
+  ];
+  return { score, ...levels[score] };
 }
 
-const strengthColors = [
-  "bg-gray-700",
-  "bg-red-500",
-  "bg-orange-500",
-  "bg-yellow-500",
-  "bg-green-500",
-];
-const strengthLabels = ["", "Weak", "Fair", "Good", "Strong"];
-
 export default function RegisterPage() {
-  const router = useRouter();
-  const [displayName, setDisplayName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [agreed, setAgreed] = useState(false);
+  const [form, setForm] = useState({ displayName: "", email: "", password: "", confirm: "" });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const strength = getStrength(password);
+  const [error, setError] = useState("");
+  const strength = passwordStrength(form.password);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
-    if (password !== confirmPassword) {
+    setError("");
+    if (form.password !== form.confirm) {
       setError("Passwords do not match");
-      return;
-    }
-    if (!agreed) {
-      setError("You must agree to the Terms of Service");
       return;
     }
     setLoading(true);
     try {
-      const data = await api.post<{ accessToken: string; refreshToken: string }>(
-        "/auth/register",
-        { displayName, email, password }
-      );
-      setTokens(data.accessToken, data.refreshToken);
-      router.push("/dashboard");
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Registration failed");
+      await api.post("/auth/register", {
+        email: form.email,
+        password: form.password,
+        displayName: form.displayName,
+      }, true);
+      const data = await api.post<any>("/auth/login", { email: form.email, password: form.password }, true);
+      setToken(data.accessToken, data.refreshToken);
+      window.location.href = "/dashboard";
+    } catch (err: any) {
+      setError(err.message || "Registration failed");
     } finally {
       setLoading(false);
     }
@@ -65,139 +54,68 @@ export default function RegisterPage() {
 
   return (
     <>
-      <h1 className="text-2xl font-bold text-white mb-6">Create your account</h1>
+      <h1 className="text-2xl font-bold text-white mb-1">Create account</h1>
+      <p className="text-gray-400 text-sm mb-6">Start with ZeroAuth for free</p>
+
+      {error && (
+        <div className="mb-4 p-3 bg-red-950 border border-red-800 text-red-300 rounded-lg text-sm">{error}</div>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        {error && (
-          <div className="bg-red-500/10 border border-red-500/30 text-red-400 text-sm px-4 py-3 rounded-lg">
-            {error}
-          </div>
-        )}
-
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-1.5">
-            Display name
-          </label>
+          <label className="block text-sm text-gray-400 mb-1.5">Display Name</label>
           <input
-            type="text"
-            required
-            value={displayName}
-            onChange={(e) => setDisplayName(e.target.value)}
-            placeholder="Jane Doe"
-            className="w-full bg-gray-800 border border-gray-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-white placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm outline-none transition-colors"
+            type="text" required value={form.displayName} onChange={(e) => setForm({ ...form, displayName: e.target.value })}
+            className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500 transition-colors"
+            placeholder="Your Name"
           />
         </div>
-
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-1.5">
-            Email
-          </label>
+          <label className="block text-sm text-gray-400 mb-1.5">Email</label>
           <input
-            type="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            type="email" required autoComplete="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })}
+            className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500 transition-colors"
             placeholder="you@example.com"
-            className="w-full bg-gray-800 border border-gray-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-white placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm outline-none transition-colors"
           />
         </div>
-
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-1.5">
-            Password
-          </label>
+          <label className="block text-sm text-gray-400 mb-1.5">Password</label>
           <input
-            type="password"
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="••••••••"
-            className="w-full bg-gray-800 border border-gray-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-white placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm outline-none transition-colors"
+            type="password" required autoComplete="new-password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })}
+            className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500 transition-colors"
+            placeholder="At least 8 characters"
           />
-          {/* Password strength indicator */}
-          {password.length > 0 && (
+          {form.password && (
             <div className="mt-2">
-              <div className="flex gap-1 mb-1">
-                {[1, 2, 3, 4].map((bar) => (
-                  <div
-                    key={bar}
-                    className={`h-1 flex-1 rounded-full transition-colors ${
-                      bar <= strength ? strengthColors[strength] : "bg-gray-700"
-                    }`}
-                  />
+              <div className="flex gap-1">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <div key={i} className={`h-1 flex-1 rounded-full ${i <= strength.score ? strength.color : "bg-gray-700"}`} />
                 ))}
               </div>
-              <p className="text-xs text-gray-500">
-                Strength:{" "}
-                <span
-                  className={`font-medium ${
-                    strength === 4
-                      ? "text-green-400"
-                      : strength === 3
-                      ? "text-yellow-400"
-                      : strength === 2
-                      ? "text-orange-400"
-                      : "text-red-400"
-                  }`}
-                >
-                  {strengthLabels[strength]}
-                </span>
-              </p>
+              <span className="text-xs text-gray-400 mt-1 block">{strength.label}</span>
             </div>
           )}
         </div>
-
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-1.5">
-            Confirm password
-          </label>
+          <label className="block text-sm text-gray-400 mb-1.5">Confirm Password</label>
           <input
-            type="password"
-            required
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            placeholder="••••••••"
-            className="w-full bg-gray-800 border border-gray-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-white placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm outline-none transition-colors"
+            type="password" required value={form.confirm} onChange={(e) => setForm({ ...form, confirm: e.target.value })}
+            className={`w-full bg-gray-800 border rounded-lg px-3 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500 transition-colors ${form.confirm && form.confirm !== form.password ? "border-red-600" : "border-gray-700"}`}
+            placeholder="Repeat password"
           />
-        </div>
-
-        <div className="flex items-start gap-3">
-          <input
-            type="checkbox"
-            id="agree"
-            checked={agreed}
-            onChange={(e) => setAgreed(e.target.checked)}
-            className="mt-0.5 w-4 h-4 accent-indigo-500"
-          />
-          <label htmlFor="agree" className="text-sm text-gray-400">
-            I agree to the{" "}
-            <Link href="#" className="text-indigo-400 hover:text-indigo-300">
-              Terms of Service
-            </Link>{" "}
-            and{" "}
-            <Link href="#" className="text-indigo-400 hover:text-indigo-300">
-              Privacy Policy
-            </Link>
-          </label>
         </div>
 
         <button
-          type="submit"
-          disabled={loading}
-          className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-2.5 rounded-xl transition-colors text-sm"
+          type="submit" disabled={loading}
+          className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-semibold rounded-lg transition-colors mt-2"
         >
-          {loading ? "Creating account…" : "Create account"}
+          {loading ? "Creating account…" : "Create Account"}
         </button>
       </form>
 
       <p className="mt-6 text-center text-sm text-gray-500">
         Already have an account?{" "}
-        <Link
-          href="/login"
-          className="text-indigo-400 hover:text-indigo-300 transition-colors font-medium"
-        >
-          Sign in
-        </Link>
+        <Link href="/login" className="text-indigo-400 hover:text-indigo-300 font-medium">Sign in</Link>
       </p>
     </>
   );

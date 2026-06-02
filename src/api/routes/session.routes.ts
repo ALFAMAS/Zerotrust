@@ -1,25 +1,32 @@
-import express from "express";
+import { Hono } from "hono";
+import { eq, and } from "drizzle-orm";
+import { getDb } from "../../db";
+import { sessionsTable } from "../../db/schema";
 import { authMiddleware } from "../../middleware/auth";
-import { SessionModel } from "../../models";
 import { revokeSession, revokeAllSessionsForUser } from "../../middleware/sessionControl";
 import { getLogger } from "../../logger";
+import type { HonoEnv } from "../../shared/types";
 
-const router = express.Router();
+const router = new Hono<HonoEnv>();
 const logger = getLogger("session-routes");
 
-// All session routes require authentication
-router.use(authMiddleware);
+router.use("*", authMiddleware);
 
 // GET / — list user's own sessions
-router.get("/", async (req, res) => {
+router.get("/", async (c) => {
   try {
-    const userId = req.user!._id!.toString();
-    const sessions = await SessionModel.find({ userId })
-      .sort({ lastActivityAt: -1 })
-      .lean();
+    const userId = c.get("user").id;
+    const currentSessionId = c.get("session")?.id;
+    const db = getDb();
+
+    const sessions = await db
+      .select()
+      .from(sessionsTable)
+      .where(eq(sessionsTable.userId, userId))
+      .orderBy(sessionsTable.lastActivityAt);
 
     const sanitized = sessions.map((s) => ({
-      id: s._id.toString(),
+      id: s.id,
       ipAddress: s.ipAddress,
       country: s.country,
       userAgent: s.userAgent,
@@ -35,49 +42,51 @@ router.get("/", async (req, res) => {
       expiresAt: s.expiresAt,
       lastActivityAt: s.lastActivityAt,
       createdAt: s.createdAt,
-      isCurrent: req.session?._id === s._id.toString(),
+      isCurrent: currentSessionId === s.id,
     }));
 
-    return res.status(200).json({ sessions: sanitized, total: sanitized.length });
+    return c.json({ sessions: sanitized, total: sanitized.length });
   } catch (err) {
     logger.error("List sessions error", err as Error);
-    return res.status(500).json({ error: "INTERNAL_ERROR", message: "Failed to list sessions" });
+    return c.json({ error: "INTERNAL_ERROR", message: "Failed to list sessions" }, 500);
   }
 });
 
 // DELETE / — revoke ALL sessions except current
-router.delete("/", async (req, res) => {
+router.delete("/", async (c) => {
   try {
-    const userId = req.user!._id!.toString();
-    const currentSessionId = req.session?._id;
-
+    const userId = c.get("user").id;
+    const currentSessionId = c.get("session")?.id;
     const count = await revokeAllSessionsForUser(userId, currentSessionId);
-
-    return res.status(200).json({ revoked: count });
+    return c.json({ revoked: count });
   } catch (err) {
     logger.error("Revoke all sessions error", err as Error);
-    return res.status(500).json({ error: "INTERNAL_ERROR", message: "Failed to revoke sessions" });
+    return c.json({ error: "INTERNAL_ERROR", message: "Failed to revoke sessions" }, 500);
   }
 });
 
 // DELETE /:id — revoke a specific session (only own sessions)
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", async (c) => {
   try {
-    const userId = req.user!._id!.toString();
-    const sessionId = req.params.id;
+    const userId = c.get("user").id;
+    const sessionId = c.req.param("id");
+    const db = getDb();
 
-    // Verify the session belongs to this user
-    const session = await SessionModel.findOne({ _id: sessionId, userId });
-    if (!session) {
-      return res.status(404).json({ error: "SESSION_NOT_FOUND", message: "Session not found" });
+    const rows = await db
+      .select()
+      .from(sessionsTable)
+      .where(and(eq(sessionsTable.id, sessionId), eq(sessionsTable.userId, userId)))
+      .limit(1);
+
+    if (rows.length === 0) {
+      return c.json({ error: "SESSION_NOT_FOUND", message: "Session not found" }, 404);
     }
 
     await revokeSession(sessionId, "USER_REVOKED");
-
-    return res.status(200).json({ revoked: true });
+    return c.json({ revoked: true });
   } catch (err) {
     logger.error("Revoke session error", err as Error);
-    return res.status(500).json({ error: "INTERNAL_ERROR", message: "Failed to revoke session" });
+    return c.json({ error: "INTERNAL_ERROR", message: "Failed to revoke session" }, 500);
   }
 });
 

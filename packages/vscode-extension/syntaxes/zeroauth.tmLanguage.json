@@ -1,0 +1,73 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "ZeroAuth",
+  "scopeName": "source.zeroauth",
+  "patterns": [
+    { "include": "#comment" },
+    { "include": "#section" },
+    { "include": "#keyvalue" }
+  ],
+  "repository": {
+    "comment": {
+      "name": "comment.line.number-sign.zeroauth",
+      "match": "#.*$"
+    },
+    "section": {
+      "name": "entity.name.section.zeroauth",
+      "match": "^\\s*\\[([^\\]]+)\\]",
+      "captures": {
+        "1": { "name": "entity.name.section.zeroauth" }
+      }
+    },
+    "keyvalue": {
+      "patterns": [
+        { "include": "#secret-key" },
+        { "include": "#normal-key" }
+      ]
+    },
+    "secret-key": {
+      "match": "^\\s*([a-zA-Z_]*(secret|password|key|token)[a-zA-Z_]*)\\s*(=)\\s*(.+)$",
+      "captures": {
+        "1": { "name": "invalid.deprecated.secret-key.zeroauth" },
+        "3": { "name": "keyword.operator.assignment.zeroauth" },
+        "4": { "patterns": [{ "include": "#value" }] }
+      }
+    },
+    "normal-key": {
+      "match": "^\\s*([a-zA-Z_][a-zA-Z0-9_]*)\\s*(=)\\s*(.+)$",
+      "captures": {
+        "1": { "name": "variable.other.key.zeroauth" },
+        "2": { "name": "keyword.operator.assignment.zeroauth" },
+        "3": { "patterns": [{ "include": "#value" }] }
+      }
+    },
+    "value": {
+      "patterns": [
+        { "include": "#string" },
+        { "include": "#url" },
+        { "include": "#boolean" },
+        { "include": "#number" }
+      ]
+    },
+    "string": {
+      "name": "string.quoted.double.zeroauth",
+      "begin": "\"",
+      "end": "\"",
+      "patterns": [
+        { "name": "constant.character.escape.zeroauth", "match": "\\\\." }
+      ]
+    },
+    "url": {
+      "name": "markup.underline.link.zeroauth",
+      "match": "(https?|ldap|ldaps|mongodb|redis)://[^\\s\"']+"
+    },
+    "boolean": {
+      "name": "constant.language.boolean.zeroauth",
+      "match": "\\b(true|false|yes|no)\\b"
+    },
+    "number": {
+      "name": "constant.numeric.zeroauth",
+      "match": "\\b[0-9]+\\b"
+    }
+  }
+}

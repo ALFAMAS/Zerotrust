@@ -1,7 +1,7 @@
-import express from "express";
-import helmet from "helmet";
-import cors from "cors";
-import bodyParser from "body-parser";
+import { Hono } from "hono";
+import { cors } from "hono/cors";
+import { secureHeaders } from "hono/secure-headers";
+import { serve } from "@hono/node-server";
 import { initializeZeroAuth } from "..";
 import authRoutes from "./routes/auth.routes";
 import magicLinkRoutes from "./routes/magic-link.routes";
@@ -9,13 +9,13 @@ import mfaRoutes from "./routes/mfa.routes";
 import sessionRoutes from "./routes/session.routes";
 import adminRoutes from "./routes/admin.routes";
 import passkeyRoutes from "./routes/passkey.routes";
-import path from "path";
-import swaggerUi from "swagger-ui-express";
+import workloadRoutes from "./routes/workload.routes";
 import { rateLimit } from "../middleware/rateLimiting";
 import { geoFencingMiddleware } from "../middleware/geoFencing";
 import { temporalAccessMiddleware } from "../middleware/temporalAccess";
 import { authMiddleware } from "../middleware/auth";
 import { getLogger } from "../logger";
+import type { HonoEnv } from "../shared/types";
 
 const logger = getLogger("api-server");
 
@@ -23,113 +23,95 @@ export async function createServer() {
   const { logger: initLogger } = await initializeZeroAuth();
   initLogger.info("Starting API server setup");
 
-  const app = express();
-  app.use(helmet());
-  app.use(cors());
-  app.use(bodyParser.json());
+  const app = new Hono<HonoEnv>();
 
-  // ─── Auth routes ─────────────────────────────────────────────────────────
-  app.use("/auth", authRoutes);
-  app.use("/auth/magic-link", magicLinkRoutes);
+  app.use("*", cors());
+  app.use("*", secureHeaders());
 
-  // MFA routes (auth required — enforced inside the router)
-  app.use("/auth/mfa", mfaRoutes);
+  // ─── Auth routes ──────────────────────────────────────────────────────────
+  app.route("/auth", authRoutes);
+  app.route("/auth/magic-link", magicLinkRoutes);
+  app.route("/auth/mfa", mfaRoutes);
+  app.route("/auth/passkey", passkeyRoutes);
 
-  // Passkey routes (mixed auth — individual handlers enforce as needed)
-  app.use("/auth/passkey", passkeyRoutes);
+  // ─── Session routes ───────────────────────────────────────────────────────
+  app.route("/sessions", sessionRoutes);
 
-  // ─── Session routes (auth required — enforced inside the router) ─────────
-  app.use("/sessions", sessionRoutes);
+  // ─── Admin routes ─────────────────────────────────────────────────────────
+  app.route("/admin", adminRoutes);
 
-  // ─── Admin routes (auth + admin role — enforced inside the router) ───────
-  app.use("/admin", adminRoutes);
-
-  // ─── Swagger UI ──────────────────────────────────────────────────────────
-  try {
-    const spec = require(path.resolve(__dirname, "./openapi.json"));
-    app.use("/docs", swaggerUi.serve, swaggerUi.setup(spec));
-  } catch (e) {
-    logger.warn("Swagger UI not available", e as Error);
-  }
+  // ─── Workload routes ──────────────────────────────────────────────────────
+  app.route("/workload", workloadRoutes);
 
   // ─── SSF webhook endpoint ─────────────────────────────────────────────────
-  app.post("/ssf/events", async (req, res) => {
+  app.post("/ssf/events", async (c) => {
     try {
-      const signature = req.headers["x-ssf-signature"] as string | undefined;
-      const { verifySSFSignature } = await import("../ssf/verify");
-      const ok = verifySSFSignature(req.body, signature);
-      if (!ok) return res.status(401).json({ error: "INVALID_SIGNATURE" });
+      const signature = c.req.header("x-ssf-signature");
+      const body = await c.req.json();
+      const { verifySSFSignature } = await import("../ssf/verify.js");
+      const ok = verifySSFSignature(body, signature);
+      if (!ok) return c.json({ error: "INVALID_SIGNATURE" }, 401);
 
-      const { handleSSFEvent } = await import("../ssf/receiver");
-      const result = await handleSSFEvent(req.body);
-      res.json(result);
+      const { handleSSFEvent } = await import("../ssf/receiver.js");
+      const result = await handleSSFEvent(body);
+      return c.json(result);
     } catch (err) {
       logger.error("Failed to handle SSF event", err as Error);
-      res.status(500).json({ error: "INTERNAL_ERROR" });
+      return c.json({ error: "INTERNAL_ERROR" }, 500);
     }
   });
 
-  // ─── Workload credential routes ───────────────────────────────────────────
-  const workloadRoutes = await (async () => await import("./routes/workload.routes"));
-  app.use("/workload", (workloadRoutes as any).default);
-
-  // ─── Protected example route chain ───────────────────────────────────────
+  // ─── Protected example route ──────────────────────────────────────────────
   app.get(
     "/protected",
     rateLimit({ points: 200, windowSecs: 60 }),
     authMiddleware,
     geoFencingMiddleware(),
     temporalAccessMiddleware(),
-    (req, res) => {
-      res.json({ ok: true, user: req.user?._id });
+    (c) => {
+      return c.json({ ok: true, user: c.get("user")?.id });
     }
   );
 
   // ─── Health checks ────────────────────────────────────────────────────────
-  app.get("/health", async (_req, res) => {
-    const health: any = { status: "ok" };
+  app.get("/health", async (c) => {
+    const health: Record<string, unknown> = { status: "ok" };
     try {
-      const { pingRedis } = await import("../services/rateLimiter/redis");
-      const ok = await pingRedis();
-      health.redis = ok ? "ok" : "down";
-    } catch (_e) {
+      const { pingRedis } = await import("../services/rateLimiter/redis.js");
+      health.redis = (await pingRedis()) ? "ok" : "down";
+    } catch {
       health.redis = "unconfigured";
     }
-    res.json(health);
+    return c.json(health);
   });
 
-  app.get("/healthz", async (_req, res) => {
-    const health: any = { status: "ok", timestamp: new Date().toISOString() };
+  app.get("/healthz", async (c) => {
+    const health: Record<string, unknown> = { status: "ok", timestamp: new Date().toISOString() };
 
-    // Redis
     try {
-      const { pingRedis } = await import("../services/rateLimiter/redis");
+      const { pingRedis } = await import("../services/rateLimiter/redis.js");
       health.redis = (await pingRedis()) ? "ok" : "down";
-    } catch (_e) {
+    } catch {
       health.redis = "unconfigured";
     }
 
-    // MongoDB
     try {
-      const mongoose = await import("mongoose");
-      const state = mongoose.default.connection.readyState;
-      // 0=disconnected, 1=connected, 2=connecting, 3=disconnecting
-      health.mongo = state === 1 ? "ok" : state === 2 ? "connecting" : "down";
-    } catch (_e) {
-      health.mongo = "unknown";
+      const { isDbConnected } = await import("../db/index.js");
+      health.postgres = isDbConnected() ? "ok" : "down";
+    } catch {
+      health.postgres = "unknown";
     }
 
-    // Settings (SaaS config quick-check)
     try {
-      const { getSettings } = await import("../models/settings.model");
+      const { getSettings } = await import("../models/settings.model.js");
       const settings = await getSettings();
       health.settings = { appName: settings.appName };
-    } catch (_e) {
+    } catch {
       health.settings = "unavailable";
     }
 
-    const httpStatus = health.mongo === "ok" ? 200 : 503;
-    res.status(httpStatus).json(health);
+    const httpStatus = health.postgres === "ok" ? 200 : 503;
+    return c.json(health, httpStatus as any);
   });
 
   return app;
@@ -138,7 +120,9 @@ export async function createServer() {
 if (require.main === module) {
   (async () => {
     const app = await createServer();
-    const port = process.env.PORT || 3000;
-    app.listen(port, () => logger.info(`Server listening on http://localhost:${port}`));
+    const port = parseInt(process.env.PORT || "3000");
+    serve({ fetch: app.fetch, port }, (info) => {
+      logger.info(`Server listening on http://localhost:${info.port}`);
+    });
   })();
 }

@@ -1,136 +1,55 @@
 "use client";
-
 import { useEffect, useState } from "react";
-import Link from "next/link";
-import { api } from "@/lib/api";
-
-interface User {
-  email: string;
-  displayName?: string;
-  lastLoginAt?: string;
-  mfaEnabled?: boolean;
-  activeSessions?: number;
-}
-
-function greeting(): string {
-  const h = new Date().getHours();
-  if (h < 12) return "Good morning";
-  if (h < 18) return "Good afternoon";
-  return "Good evening";
-}
-
-const quickActions = [
-  {
-    title: "Edit Profile",
-    desc: "Update your name and personal details",
-    icon: "👤",
-    href: "/dashboard/profile",
-  },
-  {
-    title: "Security Settings",
-    desc: "Manage MFA, passkeys and password",
-    icon: "🔒",
-    href: "/dashboard/security",
-  },
-  {
-    title: "Connected Apps",
-    desc: "Manage OAuth providers",
-    icon: "🔗",
-    href: "/dashboard/settings",
-  },
-  {
-    title: "View Sessions",
-    desc: "See and manage active devices",
-    icon: "💻",
-    href: "/dashboard/sessions",
-  },
-];
+import { api } from "../../lib/api";
 
 export default function DashboardPage() {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<any>(null);
+  const [sessions, setSessions] = useState<any[]>([]);
 
   useEffect(() => {
-    api
-      .get<User>("/auth/me")
-      .then(setUser)
-      .finally(() => setLoading(false));
+    api.get<any>("/auth/me").then(setUser).catch(() => {});
+    api.get<any>("/sessions").then((d) => setSessions(d.sessions || d || [])).catch(() => {});
   }, []);
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-32">
-        <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
-
-  const name = user?.displayName || user?.email || "there";
-
   return (
-    <div className="space-y-8">
-      {/* Welcome */}
-      <div>
-        <h1 className="text-3xl font-bold text-white">
-          {greeting()}, {name.split(" ")[0]} 👋
+    <div>
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold text-white">
+          Welcome back, {user?.displayName || "…"}
         </h1>
-        <p className="text-gray-400 mt-1 text-sm">
-          Here&apos;s an overview of your account.
-        </p>
+        <p className="text-gray-400 mt-1">{user?.email}</p>
       </div>
 
-      {/* Stat cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
-          <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">
-            Last login
-          </p>
-          <p className="text-white font-semibold text-sm">
-            {user?.lastLoginAt
-              ? new Date(user.lastLoginAt).toLocaleString()
-              : "Just now"}
-          </p>
-        </div>
-        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
-          <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">
-            Active sessions
-          </p>
-          <p className="text-white font-semibold text-2xl">
-            {user?.activeSessions ?? 1}
-          </p>
-        </div>
-        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
-          <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">
-            MFA status
-          </p>
-          {user?.mfaEnabled ? (
-            <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-green-400">
-              <span className="w-2 h-2 rounded-full bg-green-400" /> Enabled
-            </span>
-          ) : (
-            <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-orange-400">
-              <span className="w-2 h-2 rounded-full bg-orange-400" /> Not enabled
-            </span>
-          )}
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        {[
+          { label: "Active Sessions", value: sessions.filter((s: any) => s.isActive).length, icon: "🔐" },
+          { label: "MFA Status", value: user?.mfa?.totp?.enabled ? "Enabled" : "Off", icon: "🛡️" },
+          { label: "Passkeys", value: user?.passkeys?.length ?? 0, icon: "🔑" },
+        ].map((stat) => (
+          <div key={stat.label} className="bg-gray-900 border border-gray-800 rounded-xl p-5 flex items-center gap-4">
+            <span className="text-2xl">{stat.icon}</span>
+            <div>
+              <div className="text-sm text-gray-400">{stat.label}</div>
+              <div className="text-xl font-bold text-white">{stat.value}</div>
+            </div>
+          </div>
+        ))}
       </div>
 
-      {/* Quick actions */}
-      <div>
-        <h2 className="text-lg font-semibold text-white mb-4">Quick actions</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {quickActions.map((action) => (
-            <Link
-              key={action.title}
-              href={action.href}
-              className="bg-gray-900 border border-gray-800 hover:border-indigo-500/50 rounded-2xl p-5 transition-colors group"
-            >
-              <div className="text-3xl mb-3">{action.icon}</div>
-              <h3 className="text-white font-semibold text-sm mb-1 group-hover:text-indigo-300 transition-colors">
-                {action.title}
-              </h3>
-              <p className="text-gray-500 text-xs">{action.desc}</p>
-            </Link>
+      <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+        <h2 className="font-semibold text-white mb-4">Quick Links</h2>
+        <div className="grid grid-cols-2 gap-3">
+          {[
+            { href: "/dashboard/security", label: "Set up MFA", desc: "Add a second factor" },
+            { href: "/dashboard/security", label: "Add Passkey", desc: "Register a hardware key" },
+            { href: "/dashboard/sessions", label: "View Sessions", desc: "Manage active devices" },
+            { href: "/dashboard/profile", label: "Edit Profile", desc: "Update your details" },
+          ].map((link) => (
+            <a key={link.href + link.label} href={link.href}
+              className="flex flex-col p-4 bg-gray-800 hover:bg-gray-700 rounded-xl transition-colors">
+              <span className="font-medium text-white text-sm">{link.label}</span>
+              <span className="text-xs text-gray-400 mt-0.5">{link.desc}</span>
+            </a>
           ))}
         </div>
       </div>

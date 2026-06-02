@@ -1,115 +1,102 @@
-import mongoose, { Schema, Document } from "mongoose";
+import { eq } from "drizzle-orm";
+import { getDb } from "../db";
+import { saasSettingsTable } from "../db/schema";
 
 export interface SaaSSettings {
-  // Auth methods
   emailPasswordEnabled: boolean;
   googleOAuthEnabled: boolean;
   githubOAuthEnabled: boolean;
   magicLinkEnabled: boolean;
   passkeyEnabled: boolean;
-
-  // MFA
   totpEnabled: boolean;
   emailOtpEnabled: boolean;
   smsOtpEnabled: boolean;
-
-  // Security
   requireMfaForAll: boolean;
   sessionTTLSeconds: number;
   maxConcurrentSessions: number;
   accountLockoutEnabled: boolean;
   accountLockoutThreshold: number;
   accountLockoutDurationMinutes: number;
-
-  // Registration
   registrationEnabled: boolean;
   requireEmailVerification: boolean;
   allowedEmailDomains: string[];
-
-  // Branding
   appName: string;
   appUrl: string;
   supportEmail: string;
   logoUrl: string;
-
   updatedAt: Date;
-  updatedBy?: string;
+  updatedBy?: string | null;
 }
 
 const SINGLETON_ID = "saas-settings";
 
-type SettingsDocument = SaaSSettings & Document;
-
-const SettingsSchema = new Schema<SettingsDocument>(
-  {
-    _id: { type: String, default: SINGLETON_ID },
-
-    // Auth methods
-    emailPasswordEnabled: { type: Boolean, default: true },
-    googleOAuthEnabled: { type: Boolean, default: false },
-    githubOAuthEnabled: { type: Boolean, default: false },
-    magicLinkEnabled: { type: Boolean, default: true },
-    passkeyEnabled: { type: Boolean, default: true },
-
-    // MFA
-    totpEnabled: { type: Boolean, default: true },
-    emailOtpEnabled: { type: Boolean, default: true },
-    smsOtpEnabled: { type: Boolean, default: false },
-
-    // Security
-    requireMfaForAll: { type: Boolean, default: false },
-    sessionTTLSeconds: { type: Number, default: 3600 },
-    maxConcurrentSessions: { type: Number, default: 5 },
-    accountLockoutEnabled: { type: Boolean, default: true },
-    accountLockoutThreshold: { type: Number, default: 5 },
-    accountLockoutDurationMinutes: { type: Number, default: 30 },
-
-    // Registration
-    registrationEnabled: { type: Boolean, default: true },
-    requireEmailVerification: { type: Boolean, default: false },
-    allowedEmailDomains: { type: [String], default: [] },
-
-    // Branding
-    appName: { type: String, default: "My SaaS App" },
-    appUrl: { type: String, default: "http://localhost:3002" },
-    supportEmail: { type: String, default: "" },
-    logoUrl: { type: String, default: "" },
-
-    updatedBy: { type: String },
-  },
-  {
-    timestamps: true,
-    _id: false,
-  }
-);
-
-export const SettingsModel = mongoose.model<SettingsDocument>("SaaSSettings", SettingsSchema);
-
-/**
- * Returns the singleton settings document, creating it with defaults if it doesn't exist.
- */
 export async function getSettings(): Promise<SaaSSettings> {
-  let doc = await SettingsModel.findById(SINGLETON_ID);
-  if (!doc) {
-    doc = await SettingsModel.create({ _id: SINGLETON_ID });
+  const db = getDb();
+  const rows = await db
+    .select()
+    .from(saasSettingsTable)
+    .where(eq(saasSettingsTable.id, SINGLETON_ID))
+    .limit(1);
+
+  if (rows.length > 0) {
+    const row = rows[0];
+    return {
+      emailPasswordEnabled: row.emailPasswordEnabled,
+      googleOAuthEnabled: row.googleOAuthEnabled,
+      githubOAuthEnabled: row.githubOAuthEnabled,
+      magicLinkEnabled: row.magicLinkEnabled,
+      passkeyEnabled: row.passkeyEnabled,
+      totpEnabled: row.totpEnabled,
+      emailOtpEnabled: row.emailOtpEnabled,
+      smsOtpEnabled: row.smsOtpEnabled,
+      requireMfaForAll: row.requireMfaForAll,
+      sessionTTLSeconds: row.sessionTTLSeconds,
+      maxConcurrentSessions: row.maxConcurrentSessions,
+      accountLockoutEnabled: row.accountLockoutEnabled,
+      accountLockoutThreshold: row.accountLockoutThreshold,
+      accountLockoutDurationMinutes: row.accountLockoutDurationMinutes,
+      registrationEnabled: row.registrationEnabled,
+      requireEmailVerification: row.requireEmailVerification,
+      allowedEmailDomains: row.allowedEmailDomains ?? [],
+      appName: row.appName,
+      appUrl: row.appUrl,
+      supportEmail: row.supportEmail,
+      logoUrl: row.logoUrl,
+      updatedAt: row.updatedAt,
+      updatedBy: row.updatedBy,
+    };
   }
-  return doc.toObject() as unknown as SaaSSettings;
+
+  // Create defaults if not found
+  const [inserted] = await db
+    .insert(saasSettingsTable)
+    .values({ id: SINGLETON_ID })
+    .onConflictDoNothing()
+    .returning();
+
+  if (inserted) {
+    return getSettings();
+  }
+
+  // Race condition — re-fetch
+  return getSettings();
 }
 
-/**
- * Partially updates the singleton settings document.
- */
 export async function updateSettings(
   partial: Partial<SaaSSettings>,
   updatedBy?: string
 ): Promise<SaaSSettings> {
-  const update: any = { ...partial, updatedAt: new Date() };
+  const db = getDb();
+  const update: Record<string, unknown> = { ...partial, updatedAt: new Date() };
   if (updatedBy) update.updatedBy = updatedBy;
 
-  const doc = await SettingsModel.findByIdAndUpdate(
-    SINGLETON_ID,
-    { $set: update },
-    { new: true, upsert: true, setDefaultsOnInsert: true }
-  );
-  return doc!.toObject() as unknown as SaaSSettings;
+  await db
+    .insert(saasSettingsTable)
+    .values({ id: SINGLETON_ID, ...update })
+    .onConflictDoUpdate({
+      target: saasSettingsTable.id,
+      set: { ...update },
+    });
+
+  return getSettings();
 }

@@ -1,0 +1,63 @@
+{
+  "name": "zeroauth",
+  "displayName": "ZeroAuth",
+  "description": "Syntax highlighting, snippets, and tooling for ZeroAuth configuration files",
+  "version": "0.1.0",
+  "publisher": "zeroauth",
+  "engines": { "vscode": "^1.85.0" },
+  "categories": ["Programming Languages", "Snippets", "Linters"],
+  "keywords": ["zeroauth", "authentication", "zero-trust", "passkey", "webauthn"],
+  "activationEvents": ["onLanguage:zeroauth", "workspaceContains:**/.zeroauthrc"],
+  "main": "./out/extension.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "zeroauth",
+        "aliases": ["ZeroAuth Config", "zeroauth"],
+        "extensions": [".zeroauth", ".zeroauthrc"],
+        "filenames": [".zeroauthrc"],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "zeroauth",
+        "scopeName": "source.zeroauth",
+        "path": "./syntaxes/zeroauth.tmLanguage.json"
+      }
+    ],
+    "snippets": [
+      { "language": "zeroauth", "path": "./snippets/zeroauth.json" },
+      { "language": "json", "path": "./snippets/zeroauth-json.json" }
+    ],
+    "commands": [
+      { "command": "zeroauth.generateKeys", "title": "ZeroAuth: Generate Keys", "icon": "$(key)" },
+      { "command": "zeroauth.validateConfig", "title": "ZeroAuth: Validate Config", "icon": "$(check)" },
+      { "command": "zeroauth.openDocs", "title": "ZeroAuth: Open Documentation", "icon": "$(book)" }
+    ],
+    "configuration": {
+      "title": "ZeroAuth",
+      "properties": {
+        "zeroauth.apiUrl": {
+          "type": "string",
+          "default": "http://localhost:3000",
+          "description": "ZeroAuth API base URL for local development"
+        },
+        "zeroauth.showSecretWarnings": {
+          "type": "boolean",
+          "default": true,
+          "description": "Warn when detected secrets are hardcoded in config files"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.85.0",
+    "typescript": "^5.3.3"
+  }
+}

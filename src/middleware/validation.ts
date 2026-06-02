@@ -1,32 +1,48 @@
-import type { Request, Response, NextFunction } from "express";
+import { createMiddleware } from "hono/factory";
+import type { HonoEnv } from "../shared/types";
 import { ErrorCodes } from "../shared/types";
 
-// Very small validation helpers — use Zod/Joi in production
 export function requireFields(...fields: string[]) {
-  return (req: Request, res: Response, next: NextFunction) => {
-    const body = req.body || {};
+  return createMiddleware<HonoEnv>(async (c, next) => {
+    const body = await c.req.json().catch(() => ({}));
     for (const f of fields) {
       if (body[f] === undefined || body[f] === null || body[f] === "") {
-        res.status(400).json({ error: ErrorCodes.INVALID_REQUEST, message: `Missing field: ${f}` });
-        return;
+        return c.json({ error: ErrorCodes.INVALID_REQUEST, message: `Missing field: ${f}` }, 400);
       }
     }
-    next();
-  };
+    return next();
+  });
 }
 
 export function allowOnlyMethods(...methods: string[]) {
   const allowed = methods.map((m) => m.toUpperCase());
-  return (req: Request, res: Response, next: NextFunction) => {
-    if (!allowed.includes(req.method.toUpperCase())) {
-      res
-        .status(405)
-        .json({
-          error: ErrorCodes.INVALID_REQUEST,
-          message: `Method not allowed. Allowed: ${allowed.join(", ")}`,
-        });
-      return;
+  return createMiddleware<HonoEnv>(async (c, next) => {
+    if (!allowed.includes(c.req.method.toUpperCase())) {
+      return c.json(
+        { error: ErrorCodes.INVALID_REQUEST, message: `Method not allowed. Allowed: ${allowed.join(", ")}` },
+        405
+      );
     }
-    next();
-  };
+    return next();
+  });
+}
+
+export function validate<T>(schema: { safeParse: (data: unknown) => { success: boolean; data?: T; error?: { issues: { path: (string | number)[]; message: string }[] } } }, source: "body" | "query" = "body") {
+  return createMiddleware<HonoEnv>(async (c, next) => {
+    let data: unknown;
+    if (source === "body") {
+      data = await c.req.json().catch(() => ({}));
+    } else {
+      data = c.req.query();
+    }
+    const result = schema.safeParse(data);
+    if (!result.success) {
+      const details = result.error!.issues.map((i) => ({
+        field: i.path.join("."),
+        message: i.message,
+      }));
+      return c.json({ error: ErrorCodes.INVALID_REQUEST, message: "Validation failed", details }, 400);
+    }
+    return next();
+  });
 }

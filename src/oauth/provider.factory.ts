@@ -41,7 +41,7 @@ export function getProviderAdapter(provider: string) {
   if (provider === "github") {
     return {
       async exchangeCode(code: string) {
-        const { exchangeCode: ghExchange } = await import("./providers/github");
+        const { exchangeCode: ghExchange } = await import("./providers/github.js");
         return await ghExchange(code, p.clientId, p.clientSecret, p.redirectUri);
       },
     };
@@ -49,7 +49,7 @@ export function getProviderAdapter(provider: string) {
 
   if (provider === "facebook") {
     return {
-      async exchangeCode(code: string, code_verifier?: string) {
+      async exchangeCode(code: string, _code_verifier?: string) {
         // Facebook token exchange
         const params = new URLSearchParams();
         params.set("client_id", p.clientId);
@@ -113,7 +113,7 @@ export function getProviderAdapter(provider: string) {
 
   // Default stub for other providers
   return {
-    async exchangeCode(code: string) {
+    async exchangeCode(_code: string) {
       logger.warn("Provider adapter not implemented for", { provider });
       return { tokens: null, profile: null };
     },

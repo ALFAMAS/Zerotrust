@@ -1,14 +1,17 @@
-import express from "express";
+import { Hono } from "hono";
+import crypto from "crypto";
+import { eq } from "drizzle-orm";
+import { getDb } from "../../db";
+import { usersTable, sessionsTable, refreshTokensTable } from "../../db/schema";
 import { rateLimit } from "../../middleware/rateLimiting";
 import { sendMagicLink, verifyMagicLink } from "../../services/magicLink.service";
 import { getSettings } from "../../models/settings.model";
-import { UserModel, SessionModel, RefreshTokenModel } from "../../models";
 import { TokenService } from "../../services/token.service";
 import { getConfig } from "../../config";
 import { getLogger } from "../../logger";
-import crypto from "crypto";
+import type { HonoEnv } from "../../shared/types";
 
-const router = express.Router();
+const router = new Hono<HonoEnv>();
 const logger = getLogger("magic-link-routes");
 
 let _tokenService: TokenService | null = null;
@@ -24,131 +27,131 @@ function hashToken(token: string): string {
   return crypto.createHash("sha256").update(token).digest("hex");
 }
 
-async function issueTokensForUser(
-  userId: string,
-  req: express.Request
-): Promise<{ accessToken: string; refreshToken: string; expiresIn: number }> {
+async function issueTokensForUser(userId: string, req: Request) {
   const cfg = getConfig();
   const tokenSvc = await getTokenService();
-  const user = await UserModel.findById(userId);
+  const db = getDb();
+
+  const userRows = await db.select().from(usersTable).where(eq(usersTable.id, userId)).limit(1);
+  const user = userRows[0];
   if (!user) throw new Error("User not found");
 
+  const sessionId = crypto.randomUUID();
   const accessToken = await tokenSvc.signAccessToken({
-    sub: user._id.toString(),
+    sub: user.id,
     email: user.email,
+    sid: sessionId,
     aud: "zeroauth",
     scope: ["openid"],
   });
   const payload = await tokenSvc.verifyAccessToken(accessToken);
 
-  const session = await SessionModel.create({
-    userId: user._id,
+  const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() || "";
+  const userAgent = req.headers.get("user-agent") || "";
+
+  const [session] = await db.insert(sessionsTable).values({
+    id: sessionId,
+    userId: user.id,
     tokenId: payload.jti,
     deviceFingerprint: {},
-    ipAddress: req.ip || "",
-    userAgent: req.headers["user-agent"] as string,
+    ipAddress: ip,
+    userAgent,
     expiresAt: new Date(payload.exp * 1000),
     lastActivityAt: new Date(),
     isActive: true,
-  });
+  }).returning();
 
   const refreshTokenPlain = await tokenSvc.signRefreshToken();
-  await RefreshTokenModel.create({
-    userId: user._id,
-    sessionId: session._id,
+  await db.insert(refreshTokensTable).values({
+    userId: user.id,
+    sessionId: session.id,
     tokenHash: hashToken(refreshTokenPlain),
     expiresAt: new Date(Date.now() + cfg.session.refreshTokenTTL * 1000),
   });
 
-  return {
-    accessToken,
-    refreshToken: refreshTokenPlain,
-    expiresIn: cfg.session.defaultTTL,
-  };
+  return { accessToken, refreshToken: refreshTokenPlain, expiresIn: cfg.session.defaultTTL };
 }
 
-// POST /send — always returns 200 { sent: true }
-router.post("/send", rateLimit({ points: 5, windowSecs: 60 }), async (req, res) => {
+// POST /send
+router.post("/send", rateLimit({ points: 5, windowSecs: 60 }), async (c) => {
   try {
     const settings = await getSettings();
     if (!settings.magicLinkEnabled) {
-      return res.status(403).json({ error: "FEATURE_DISABLED", message: "Magic link is disabled" });
+      return c.json({ error: "FEATURE_DISABLED", message: "Magic link is disabled" }, 403);
     }
 
-    const { email, redirectUrl } = req.body as { email?: string; redirectUrl?: string };
+    const { email, redirectUrl } = await c.req.json();
     if (!email) {
-      return res.status(400).json({ error: "INVALID_REQUEST", message: "email is required" });
+      return c.json({ error: "INVALID_REQUEST", message: "email is required" }, 400);
     }
 
     await sendMagicLink(email, redirectUrl);
-    return res.status(200).json({ sent: true });
+    return c.json({ sent: true });
   } catch (err) {
     logger.error("Magic link send error", err as Error);
-    return res.status(200).json({ sent: true }); // Anti-enumeration: always 200
+    return c.json({ sent: true }); // Anti-enumeration: always 200
   }
 });
 
-// GET /verify?email=&token= — issues tokens and redirects
-router.get("/verify", async (req, res) => {
+// GET /verify?email=&token=
+router.get("/verify", async (c) => {
   try {
     const settings = await getSettings();
     if (!settings.magicLinkEnabled) {
-      return res.status(403).json({ error: "FEATURE_DISABLED", message: "Magic link is disabled" });
+      return c.json({ error: "FEATURE_DISABLED", message: "Magic link is disabled" }, 403);
     }
 
-    const { email, token, redirect } = req.query as {
-      email?: string;
-      token?: string;
-      redirect?: string;
-    };
+    const email = c.req.query("email");
+    const token = c.req.query("token");
+    const redirect = c.req.query("redirect");
 
     if (!email || !token) {
-      return res.status(400).json({ error: "INVALID_REQUEST", message: "email and token required" });
+      return c.json({ error: "INVALID_REQUEST", message: "email and token required" }, 400);
     }
 
     const result = await verifyMagicLink(email, token);
     if (!result) {
-      return res.status(401).json({ error: "INVALID_TOKEN", message: "Invalid or expired magic link" });
+      return c.json({ error: "INVALID_TOKEN", message: "Invalid or expired magic link" }, 401);
     }
 
-    const tokens = await issueTokensForUser(result.userId, req);
+    const tokens = await issueTokensForUser(result.userId, c.req.raw);
 
-    const appUrl = settings.appUrl || "http://localhost:3002";
+    const appUrl = settings.appUrl || "http://localhost:3001";
     const callbackBase = redirect || `${appUrl}/auth/callback`;
     const callbackUrl =
       `${callbackBase}?accessToken=${encodeURIComponent(tokens.accessToken)}` +
       `&refreshToken=${encodeURIComponent(tokens.refreshToken)}`;
 
-    return res.redirect(302, callbackUrl);
+    return c.redirect(callbackUrl, 302);
   } catch (err) {
     logger.error("Magic link GET verify error", err as Error);
-    return res.status(500).json({ error: "INTERNAL_ERROR", message: "Verification failed" });
+    return c.json({ error: "INTERNAL_ERROR", message: "Verification failed" }, 500);
   }
 });
 
-// POST /verify — returns JSON tokens
-router.post("/verify", async (req, res) => {
+// POST /verify
+router.post("/verify", async (c) => {
   try {
     const settings = await getSettings();
     if (!settings.magicLinkEnabled) {
-      return res.status(403).json({ error: "FEATURE_DISABLED", message: "Magic link is disabled" });
+      return c.json({ error: "FEATURE_DISABLED", message: "Magic link is disabled" }, 403);
     }
 
-    const { email, token } = req.body as { email?: string; token?: string };
+    const { email, token } = await c.req.json();
     if (!email || !token) {
-      return res.status(400).json({ error: "INVALID_REQUEST", message: "email and token required" });
+      return c.json({ error: "INVALID_REQUEST", message: "email and token required" }, 400);
     }
 
     const result = await verifyMagicLink(email, token);
     if (!result) {
-      return res.status(401).json({ error: "INVALID_TOKEN", message: "Invalid or expired magic link" });
+      return c.json({ error: "INVALID_TOKEN", message: "Invalid or expired magic link" }, 401);
     }
 
-    const tokens = await issueTokensForUser(result.userId, req);
-    return res.status(200).json(tokens);
+    const tokens = await issueTokensForUser(result.userId, c.req.raw);
+    return c.json(tokens);
   } catch (err) {
     logger.error("Magic link POST verify error", err as Error);
-    return res.status(500).json({ error: "INTERNAL_ERROR", message: "Verification failed" });
+    return c.json({ error: "INTERNAL_ERROR", message: "Verification failed" }, 500);
   }
 });
 

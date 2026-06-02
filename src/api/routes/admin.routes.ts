@@ -1,276 +1,510 @@
-import express from "express";
-import type { Request, Response, NextFunction } from "express";
+import { Hono } from "hono";
+import { eq, and, ne, ilike, or, sql, desc, gt } from "drizzle-orm";
+import { getDb } from "../../db";
+import { usersTable, sessionsTable, auditLogsTable, rolesTable, jitAccessTable } from "../../db/schema";
 import { authMiddleware } from "../../middleware/auth";
 import { getSettings, updateSettings } from "../../models/settings.model";
-import { UserModel, SessionModel, AuditModel } from "../../models";
 import { revokeAllSessionsForUser, revokeSession } from "../../middleware/sessionControl";
 import { getLogger } from "../../logger";
+import type { HonoEnv } from "../../shared/types";
 
-const router = express.Router();
+const router = new Hono<HonoEnv>();
 const logger = getLogger("admin-routes");
 
-// ─── Admin guard ────────────────────────────────────────────────────────────
-
-function adminGuard(req: Request, res: Response, next: NextFunction): void {
-  if (!req.user) {
-    res.status(401).json({ error: "UNAUTHORIZED", message: "Authentication required" });
-    return;
+// Auth + admin guard on all admin routes
+router.use("*", authMiddleware);
+router.use("*", async (c, next) => {
+  const user = c.get("user");
+  if (!user) {
+    return c.json({ error: "UNAUTHORIZED", message: "Authentication required" }, 401);
   }
-  const roles: string[] = req.user.roles || [];
-  if (!roles.includes("admin")) {
-    res.status(403).json({ error: "FORBIDDEN", message: "Admin role required" });
-    return;
+  if (!user.roles?.includes("admin")) {
+    return c.json({ error: "FORBIDDEN", message: "Admin role required" }, 403);
   }
-  next();
-}
-
-// All admin routes require auth + admin role
-router.use(authMiddleware);
-router.use(adminGuard);
-
-// ─── Settings ────────────────────────────────────────────────────────────────
+  return next();
+});
 
 // GET /settings
-router.get("/settings", async (_req, res) => {
+router.get("/settings", async (c) => {
   try {
     const settings = await getSettings();
-    return res.status(200).json(settings);
+    return c.json(settings);
   } catch (err) {
     logger.error("Admin get settings error", err as Error);
-    return res.status(500).json({ error: "INTERNAL_ERROR", message: "Failed to retrieve settings" });
+    return c.json({ error: "INTERNAL_ERROR", message: "Failed to retrieve settings" }, 500);
   }
 });
 
 // PUT /settings
-router.put("/settings", async (req, res) => {
+router.put("/settings", async (c) => {
   try {
-    const adminId = req.user!._id!.toString();
-    const updated = await updateSettings(req.body, adminId);
-    return res.status(200).json(updated);
+    const body = await c.req.json();
+    const adminId = c.get("user").id;
+    const updated = await updateSettings(body, adminId);
+    return c.json(updated);
   } catch (err) {
     logger.error("Admin update settings error", err as Error);
-    return res.status(500).json({ error: "INTERNAL_ERROR", message: "Failed to update settings" });
+    return c.json({ error: "INTERNAL_ERROR", message: "Failed to update settings" }, 500);
   }
 });
 
-// ─── Users ───────────────────────────────────────────────────────────────────
-
 // GET /users?page=1&limit=20&search=&status=
-router.get("/users", async (req, res) => {
+router.get("/users", async (c) => {
   try {
-    const page = Math.max(1, parseInt((req.query.page as string) || "1"));
-    const limit = Math.min(100, Math.max(1, parseInt((req.query.limit as string) || "20")));
-    const search = (req.query.search as string) || "";
-    const status = (req.query.status as string) || "";
+    const page = Math.max(1, parseInt(c.req.query("page") || "1"));
+    const limit = Math.min(100, Math.max(1, parseInt(c.req.query("limit") || "20")));
+    const search = c.req.query("search") || "";
+    const status = c.req.query("status") || "";
 
-    const filter: any = {};
+    const db = getDb();
+    const conditions = [ne(usersTable.status, "deleted")];
+
     if (search) {
-      filter.$or = [
-        { email: { $regex: search, $options: "i" } },
-        { displayName: { $regex: search, $options: "i" } },
-      ];
+      conditions.push(
+        or(
+          ilike(usersTable.email, `%${search}%`),
+          ilike(usersTable.displayName, `%${search}%`)
+        )!
+      );
     }
     if (status) {
-      filter.status = status;
+      conditions.push(eq(usersTable.status, status));
     }
 
-    const [users, total] = await Promise.all([
-      UserModel.find(filter)
-        .select("-passwordHash -mfa.totp.secret -mfa.totp.backupCodes")
-        .sort({ createdAt: -1 })
-        .skip((page - 1) * limit)
-        .limit(limit)
-        .lean(),
-      UserModel.countDocuments(filter),
+    const where = and(...(conditions as [any, ...any[]]));
+
+    const [users, countResult] = await Promise.all([
+      db.select().from(usersTable).where(where).orderBy(desc(usersTable.createdAt)).offset((page - 1) * limit).limit(limit),
+      db.select({ count: sql<number>`count(*)::int` }).from(usersTable).where(where),
     ]);
 
-    return res.status(200).json({
-      users,
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit),
-      },
-    });
+    const sanitized = users.map((u) => ({
+      id: u.id,
+      email: u.email,
+      displayName: u.displayName,
+      status: u.status,
+      roles: u.roles,
+      createdAt: u.createdAt,
+      lastLoginAt: u.lastLoginAt,
+    }));
+
+    return c.json({ users: sanitized, total: countResult[0]?.count ?? 0, page, limit });
   } catch (err) {
     logger.error("Admin list users error", err as Error);
-    return res.status(500).json({ error: "INTERNAL_ERROR", message: "Failed to list users" });
+    return c.json({ error: "INTERNAL_ERROR", message: "Failed to list users" }, 500);
   }
 });
 
 // GET /users/:id
-router.get("/users/:id", async (req, res) => {
+router.get("/users/:id", async (c) => {
   try {
-    const user = await UserModel.findById(req.params.id)
-      .select("-passwordHash -mfa.totp.secret -mfa.totp.backupCodes")
-      .lean();
+    const id = c.req.param("id");
+    const db = getDb();
+    const rows = await db.select().from(usersTable).where(eq(usersTable.id, id)).limit(1);
 
-    if (!user) {
-      return res.status(404).json({ error: "USER_NOT_FOUND", message: "User not found" });
+    if (rows.length === 0) {
+      return c.json({ error: "USER_NOT_FOUND", message: "User not found" }, 404);
     }
 
-    const sessionCount = await SessionModel.countDocuments({
-      userId: req.params.id,
-      isActive: true,
+    const u = rows[0];
+    return c.json({
+      id: u.id,
+      email: u.email,
+      displayName: u.displayName,
+      status: u.status,
+      roles: u.roles,
+      createdAt: u.createdAt,
+      lastLoginAt: u.lastLoginAt,
     });
-
-    return res.status(200).json({ ...user, activeSessions: sessionCount });
   } catch (err) {
     logger.error("Admin get user error", err as Error);
-    return res.status(500).json({ error: "INTERNAL_ERROR", message: "Failed to get user" });
+    return c.json({ error: "INTERNAL_ERROR", message: "Failed to retrieve user" }, 500);
   }
 });
 
 // PATCH /users/:id
-router.patch("/users/:id", async (req, res) => {
+router.patch("/users/:id", async (c) => {
   try {
-    const allowed: Record<string, any> = {};
-    if (req.body.displayName !== undefined) allowed.displayName = req.body.displayName;
-    if (req.body.status !== undefined) {
+    const body = await c.req.json();
+    const allowed: Record<string, unknown> = {};
+
+    if (body.displayName !== undefined) allowed.displayName = body.displayName;
+    if (body.status !== undefined) {
       const validStatuses = ["active", "suspended", "pending", "deleted"];
-      if (!validStatuses.includes(req.body.status)) {
-        return res.status(400).json({ error: "INVALID_REQUEST", message: "Invalid status value" });
+      if (!validStatuses.includes(body.status)) {
+        return c.json({ error: "INVALID_REQUEST", message: "Invalid status value" }, 400);
       }
-      allowed.status = req.body.status;
+      allowed.status = body.status;
     }
 
-    const user = await UserModel.findByIdAndUpdate(
-      req.params.id,
-      { $set: allowed },
-      { new: true }
-    ).select("-passwordHash -mfa.totp.secret -mfa.totp.backupCodes");
-
-    if (!user) {
-      return res.status(404).json({ error: "USER_NOT_FOUND", message: "User not found" });
+    if (Object.keys(allowed).length === 0) {
+      return c.json({ error: "INVALID_REQUEST", message: "No updatable fields provided" }, 400);
     }
 
-    return res.status(200).json(user);
+    allowed.updatedAt = new Date();
+    const db = getDb();
+    const rows = await db
+      .update(usersTable)
+      .set(allowed)
+      .where(eq(usersTable.id, c.req.param("id")))
+      .returning({ id: usersTable.id, email: usersTable.email, displayName: usersTable.displayName, status: usersTable.status });
+
+    if (rows.length === 0) {
+      return c.json({ error: "USER_NOT_FOUND", message: "User not found" }, 404);
+    }
+    return c.json(rows[0]);
   } catch (err) {
     logger.error("Admin update user error", err as Error);
-    return res.status(500).json({ error: "INTERNAL_ERROR", message: "Failed to update user" });
+    return c.json({ error: "INTERNAL_ERROR", message: "Failed to update user" }, 500);
   }
 });
 
 // DELETE /users/:id
-router.delete("/users/:id", async (req, res) => {
+router.delete("/users/:id", async (c) => {
   try {
-    const user = await UserModel.findByIdAndUpdate(
-      req.params.id,
-      { $set: { status: "deleted" } },
-      { new: true }
-    );
+    const id = c.req.param("id");
+    const db = getDb();
+    const rows = await db
+      .update(usersTable)
+      .set({ status: "deleted", updatedAt: new Date() })
+      .where(eq(usersTable.id, id))
+      .returning({ id: usersTable.id });
 
-    if (!user) {
-      return res.status(404).json({ error: "USER_NOT_FOUND", message: "User not found" });
+    if (rows.length === 0) {
+      return c.json({ error: "USER_NOT_FOUND", message: "User not found" }, 404);
     }
 
-    // Revoke all sessions
-    await revokeAllSessionsForUser(req.params.id);
-
-    return res.status(200).json({ deleted: true, userId: req.params.id });
+    await revokeAllSessionsForUser(id);
+    return c.json({ deleted: true, userId: id });
   } catch (err) {
     logger.error("Admin delete user error", err as Error);
-    return res.status(500).json({ error: "INTERNAL_ERROR", message: "Failed to delete user" });
+    return c.json({ error: "INTERNAL_ERROR", message: "Failed to delete user" }, 500);
   }
 });
 
 // POST /users/:id/force-logout
-router.post("/users/:id/force-logout", async (req, res) => {
+router.post("/users/:id/force-logout", async (c) => {
   try {
-    const user = await UserModel.findById(req.params.id);
-    if (!user) {
-      return res.status(404).json({ error: "USER_NOT_FOUND", message: "User not found" });
+    const id = c.req.param("id");
+    const db = getDb();
+    const userRows = await db.select({ id: usersTable.id }).from(usersTable).where(eq(usersTable.id, id)).limit(1);
+
+    if (userRows.length === 0) {
+      return c.json({ error: "USER_NOT_FOUND", message: "User not found" }, 404);
     }
 
-    const count = await revokeAllSessionsForUser(req.params.id);
-
-    return res.status(200).json({ revoked: count });
+    const count = await revokeAllSessionsForUser(id);
+    return c.json({ success: true, revokedSessions: count });
   } catch (err) {
-    logger.error("Admin force-logout error", err as Error);
-    return res.status(500).json({ error: "INTERNAL_ERROR", message: "Failed to force logout" });
+    logger.error("Admin force logout error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR", message: "Failed to force logout" }, 500);
   }
 });
 
-// ─── Sessions ────────────────────────────────────────────────────────────────
-
-// GET /sessions?userId=&active=true
-router.get("/sessions", async (req, res) => {
+// GET /sessions?userId=&active=true&page=1&limit=20
+router.get("/sessions", async (c) => {
   try {
-    const filter: any = {};
-    if (req.query.userId) filter.userId = req.query.userId;
-    if (req.query.active !== undefined) {
-      filter.isActive = req.query.active === "true";
+    const page = Math.max(1, parseInt(c.req.query("page") || "1"));
+    const limit = Math.min(100, Math.max(1, parseInt(c.req.query("limit") || "20")));
+
+    const db = getDb();
+    const conditions: any[] = [];
+    if (c.req.query("userId")) conditions.push(eq(sessionsTable.userId, c.req.query("userId")!));
+    if (c.req.query("active") !== undefined) {
+      conditions.push(eq(sessionsTable.isActive, c.req.query("active") === "true"));
     }
 
-    const page = Math.max(1, parseInt((req.query.page as string) || "1"));
-    const limit = Math.min(100, Math.max(1, parseInt((req.query.limit as string) || "20")));
+    const whereClause = conditions.length > 0 ? and(...(conditions as [any, ...any[]])) : undefined;
 
-    const [sessions, total] = await Promise.all([
-      SessionModel.find(filter)
-        .sort({ lastActivityAt: -1 })
-        .skip((page - 1) * limit)
-        .limit(limit)
-        .lean(),
-      SessionModel.countDocuments(filter),
+    const [sessions, countResult] = await Promise.all([
+      db.select().from(sessionsTable).where(whereClause).orderBy(desc(sessionsTable.lastActivityAt)).offset((page - 1) * limit).limit(limit),
+      db.select({ count: sql<number>`count(*)::int` }).from(sessionsTable).where(whereClause),
     ]);
 
-    return res.status(200).json({
-      sessions,
-      pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
-    });
+    const total = countResult[0]?.count ?? 0;
+    return c.json({ sessions, pagination: { page, limit, total, totalPages: Math.ceil(total / limit) } });
   } catch (err) {
     logger.error("Admin list sessions error", err as Error);
-    return res.status(500).json({ error: "INTERNAL_ERROR", message: "Failed to list sessions" });
+    return c.json({ error: "INTERNAL_ERROR", message: "Failed to list sessions" }, 500);
   }
 });
 
 // DELETE /sessions/:id
-router.delete("/sessions/:id", async (req, res) => {
+router.delete("/sessions/:id", async (c) => {
   try {
-    const session = await SessionModel.findById(req.params.id);
-    if (!session) {
-      return res.status(404).json({ error: "SESSION_NOT_FOUND", message: "Session not found" });
+    const id = c.req.param("id");
+    const db = getDb();
+    const rows = await db.select({ id: sessionsTable.id }).from(sessionsTable).where(eq(sessionsTable.id, id)).limit(1);
+
+    if (rows.length === 0) {
+      return c.json({ error: "SESSION_NOT_FOUND", message: "Session not found" }, 404);
     }
 
-    await revokeSession(req.params.id, "ADMIN_REVOKED");
-
-    return res.status(200).json({ revoked: true });
+    await revokeSession(id, "ADMIN_REVOKED");
+    return c.json({ revoked: true });
   } catch (err) {
     logger.error("Admin revoke session error", err as Error);
-    return res.status(500).json({ error: "INTERNAL_ERROR", message: "Failed to revoke session" });
+    return c.json({ error: "INTERNAL_ERROR", message: "Failed to revoke session" }, 500);
   }
 });
 
-// ─── Stats ───────────────────────────────────────────────────────────────────
-
 // GET /stats
-router.get("/stats", async (_req, res) => {
+router.get("/stats", async (c) => {
   try {
     const now = new Date();
     const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
     const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    const db = getDb();
 
-    const [totalUsers, activeSessions, recentSessionUsers, totalLogins24h] = await Promise.all([
-      UserModel.countDocuments({ status: { $ne: "deleted" } }),
-      SessionModel.countDocuments({ isActive: true }),
-      // activeUsers: users with a session updated in the last 30 days
-      SessionModel.distinct("userId", {
-        lastActivityAt: { $gte: thirtyDaysAgo },
-      }),
-      // totalLogins24h: sessions created in last 24h (proxy for logins)
-      SessionModel.countDocuments({ createdAt: { $gte: twentyFourHoursAgo } }),
+    const [totalUsersRes, activeSessionsRes, activeUsersRes, logins24hRes] = await Promise.all([
+      db.select({ count: sql<number>`count(*)::int` }).from(usersTable).where(ne(usersTable.status, "deleted")),
+      db.select({ count: sql<number>`count(*)::int` }).from(sessionsTable).where(eq(sessionsTable.isActive, true)),
+      db.selectDistinct({ userId: sessionsTable.userId }).from(sessionsTable).where(gt(sessionsTable.lastActivityAt, thirtyDaysAgo)),
+      db.select({ count: sql<number>`count(*)::int` }).from(sessionsTable).where(gt(sessionsTable.createdAt, twentyFourHoursAgo)),
     ]);
 
-    return res.status(200).json({
-      totalUsers,
-      activeUsers: recentSessionUsers.length,
-      activeSessions,
-      totalLogins24h,
+    return c.json({
+      totalUsers: totalUsersRes[0]?.count ?? 0,
+      activeUsers: activeUsersRes.length,
+      activeSessions: activeSessionsRes[0]?.count ?? 0,
+      totalLogins24h: logins24hRes[0]?.count ?? 0,
     });
   } catch (err) {
     logger.error("Admin stats error", err as Error);
-    return res.status(500).json({ error: "INTERNAL_ERROR", message: "Failed to retrieve stats" });
+    return c.json({ error: "INTERNAL_ERROR", message: "Failed to retrieve stats" }, 500);
+  }
+});
+
+// ── Roles ────────────────────────────────────────────────────────────────────
+
+// GET /roles
+router.get("/roles", async (c) => {
+  try {
+    const db = getDb();
+    const roles = await db.select().from(rolesTable).orderBy(rolesTable.name);
+    return c.json({ roles });
+  } catch (err) {
+    logger.error("Admin list roles error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR", message: "Failed to list roles" }, 500);
+  }
+});
+
+// POST /roles
+router.post("/roles", async (c) => {
+  try {
+    const { name, displayName, description, parentRoleName, permissions } = await c.req.json();
+    if (!name || !displayName) {
+      return c.json({ error: "INVALID_REQUEST", message: "name and displayName are required" }, 400);
+    }
+
+    const db = getDb();
+    const existing = await db.select({ id: rolesTable.id }).from(rolesTable).where(eq(rolesTable.name, name)).limit(1);
+    if (existing.length > 0) {
+      return c.json({ error: "ROLE_EXISTS", message: "Role already exists" }, 409);
+    }
+
+    let parentRoleId: string | undefined;
+    if (parentRoleName) {
+      const parentRows = await db.select({ id: rolesTable.id }).from(rolesTable).where(eq(rolesTable.name, parentRoleName)).limit(1);
+      if (parentRows.length === 0) {
+        return c.json({ error: "PARENT_ROLE_NOT_FOUND", message: "Parent role not found" }, 404);
+      }
+      parentRoleId = parentRows[0].id;
+    }
+
+    const [role] = await db.insert(rolesTable).values({
+      name,
+      displayName,
+      description,
+      parentRoleId,
+      permissions: permissions || [],
+      isSystem: false,
+    }).returning();
+
+    return c.json({ role }, 201);
+  } catch (err) {
+    logger.error("Admin create role error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR", message: "Failed to create role" }, 500);
+  }
+});
+
+// POST /users/:id/roles — assign role to user
+router.post("/users/:id/roles", async (c) => {
+  try {
+    const userId = c.req.param("id");
+    const { roleName } = await c.req.json();
+    if (!roleName) {
+      return c.json({ error: "INVALID_REQUEST", message: "roleName is required" }, 400);
+    }
+
+    const db = getDb();
+    const roleRows = await db.select({ id: rolesTable.id }).from(rolesTable).where(eq(rolesTable.name, roleName)).limit(1);
+    if (roleRows.length === 0) {
+      return c.json({ error: "ROLE_NOT_FOUND", message: "Role not found" }, 404);
+    }
+
+    const userRows = await db.select({ id: usersTable.id, roles: usersTable.roles }).from(usersTable).where(eq(usersTable.id, userId)).limit(1);
+    if (userRows.length === 0) {
+      return c.json({ error: "USER_NOT_FOUND", message: "User not found" }, 404);
+    }
+
+    const currentRoles = (userRows[0].roles as string[]) || [];
+    if (!currentRoles.includes(roleName)) {
+      const updatedRoles = [...currentRoles, roleName];
+      await db.update(usersTable).set({ roles: updatedRoles, updatedAt: new Date() }).where(eq(usersTable.id, userId));
+      return c.json({ success: true, roles: updatedRoles });
+    }
+
+    return c.json({ success: true, roles: currentRoles });
+  } catch (err) {
+    logger.error("Admin assign role error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR", message: "Failed to assign role" }, 500);
+  }
+});
+
+// DELETE /users/:id/roles/:roleName — revoke role from user
+router.delete("/users/:id/roles/:roleName", async (c) => {
+  try {
+    const userId = c.req.param("id");
+    const roleName = c.req.param("roleName");
+
+    const db = getDb();
+    const userRows = await db.select({ id: usersTable.id, roles: usersTable.roles }).from(usersTable).where(eq(usersTable.id, userId)).limit(1);
+    if (userRows.length === 0) {
+      return c.json({ error: "USER_NOT_FOUND", message: "User not found" }, 404);
+    }
+
+    const currentRoles = (userRows[0].roles as string[]) || [];
+    const updatedRoles = currentRoles.filter((r) => r !== roleName);
+    await db.update(usersTable).set({ roles: updatedRoles, updatedAt: new Date() }).where(eq(usersTable.id, userId));
+    return c.json({ success: true, roles: updatedRoles });
+  } catch (err) {
+    logger.error("Admin revoke role error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR", message: "Failed to remove role" }, 500);
+  }
+});
+
+// ── JIT Grants ───────────────────────────────────────────────────────────────
+
+// GET /jit-grants?status=pending
+router.get("/jit-grants", async (c) => {
+  try {
+    const status = c.req.query("status");
+    const db = getDb();
+
+    const conditions: any[] = [];
+    if (status) conditions.push(eq(jitAccessTable.status, status));
+
+    const grants = await db
+      .select()
+      .from(jitAccessTable)
+      .where(conditions.length > 0 ? and(...(conditions as [any, ...any[]])) : undefined)
+      .orderBy(desc(jitAccessTable.requestedAt));
+
+    return c.json({ grants });
+  } catch (err) {
+    logger.error("Admin list JIT grants error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR", message: "Failed to list JIT grants" }, 500);
+  }
+});
+
+// POST /jit-grants/:id/approve
+router.post("/jit-grants/:id/approve", async (c) => {
+  try {
+    const id = c.req.param("id");
+    const adminId = c.get("user").id;
+    const db = getDb();
+
+    const rows = await db
+      .update(jitAccessTable)
+      .set({ status: "approved", approvedBy: adminId, approvedAt: new Date(), updatedAt: new Date() })
+      .where(and(eq(jitAccessTable.id, id), eq(jitAccessTable.status, "pending")))
+      .returning();
+
+    if (rows.length === 0) {
+      return c.json({ error: "JIT_NOT_FOUND", message: "JIT grant not found or already processed" }, 404);
+    }
+
+    return c.json({ success: true, grant: rows[0] });
+  } catch (err) {
+    logger.error("Admin approve JIT error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR", message: "Failed to approve JIT grant" }, 500);
+  }
+});
+
+// POST /jit-grants/:id/deny
+router.post("/jit-grants/:id/deny", async (c) => {
+  try {
+    const id = c.req.param("id");
+    const db = getDb();
+
+    const rows = await db
+      .update(jitAccessTable)
+      .set({ status: "denied", updatedAt: new Date() })
+      .where(and(eq(jitAccessTable.id, id), eq(jitAccessTable.status, "pending")))
+      .returning();
+
+    if (rows.length === 0) {
+      return c.json({ error: "JIT_NOT_FOUND", message: "JIT grant not found or already processed" }, 404);
+    }
+
+    return c.json({ success: true, grant: rows[0] });
+  } catch (err) {
+    logger.error("Admin deny JIT error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR", message: "Failed to deny JIT grant" }, 500);
+  }
+});
+
+// DELETE /jit-grants/:id — revoke an approved grant
+router.delete("/jit-grants/:id", async (c) => {
+  try {
+    const id = c.req.param("id");
+    const adminId = c.get("user").id;
+    const db = getDb();
+
+    const rows = await db
+      .update(jitAccessTable)
+      .set({ status: "revoked", revokedAt: new Date(), revokedBy: adminId, updatedAt: new Date() })
+      .where(and(eq(jitAccessTable.id, id)))
+      .returning({ id: jitAccessTable.id });
+
+    if (rows.length === 0) {
+      return c.json({ error: "JIT_NOT_FOUND", message: "JIT grant not found" }, 404);
+    }
+
+    return c.json({ success: true });
+  } catch (err) {
+    logger.error("Admin revoke JIT error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR", message: "Failed to revoke JIT grant" }, 500);
+  }
+});
+
+// ── Audit Logs ───────────────────────────────────────────────────────────────
+
+// GET /audit-logs?limit=50&offset=0&action=&actorId=
+router.get("/audit-logs", async (c) => {
+  try {
+    const limit = Math.min(parseInt(c.req.query("limit") || "50"), 200);
+    const offset = parseInt(c.req.query("offset") || "0");
+    const action = c.req.query("action");
+    const actorId = c.req.query("actorId");
+
+    const db = getDb();
+    const conditions: any[] = [];
+    if (action) conditions.push(ilike(auditLogsTable.action, `%${action}%`));
+    if (actorId) conditions.push(eq(auditLogsTable.actorId, actorId));
+
+    const whereClause = conditions.length > 0 ? and(...(conditions as [any, ...any[]])) : undefined;
+
+    const [logs, countResult] = await Promise.all([
+      db.select().from(auditLogsTable).where(whereClause).orderBy(desc(auditLogsTable.timestamp)).offset(offset).limit(limit),
+      db.select({ count: sql<number>`count(*)::int` }).from(auditLogsTable).where(whereClause),
+    ]);
+
+    return c.json({ logs, total: countResult[0]?.count ?? 0, limit, offset });
+  } catch (err) {
+    logger.error("Admin audit logs error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR", message: "Failed to fetch audit logs" }, 500);
   }
 });
 

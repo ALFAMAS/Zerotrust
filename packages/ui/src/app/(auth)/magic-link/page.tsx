@@ -1,24 +1,23 @@
 "use client";
-
 import { useState } from "react";
 import Link from "next/link";
-import { api } from "@/lib/api";
+import { api } from "../../../lib/api";
 
 export default function MagicLinkPage() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
+    setError("");
     setLoading(true);
     try {
-      await api.post("/auth/magic-link/send", { email });
+      await api.post("/auth/magic-link/send", { email, redirectUrl: "/dashboard" }, true);
       setSent(true);
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to send link");
+    } catch (err: any) {
+      setError(err.message || "Something went wrong");
     } finally {
       setLoading(false);
     }
@@ -27,67 +26,50 @@ export default function MagicLinkPage() {
   if (sent) {
     return (
       <div className="text-center py-4">
-        <div className="text-5xl mb-6">✉️</div>
-        <h1 className="text-2xl font-bold text-white mb-3">Check your inbox</h1>
-        <p className="text-gray-400 text-sm mb-2">
-          We sent a sign-in link to{" "}
-          <span className="text-white font-medium">{email}</span>
+        <div className="text-4xl mb-4">📬</div>
+        <h2 className="text-xl font-bold text-white mb-2">Check your inbox</h2>
+        <p className="text-gray-400 text-sm mb-6">
+          We sent a sign-in link to <strong className="text-white">{email}</strong>.
+          The link expires in 15 minutes.
         </p>
-        <p className="text-gray-600 text-xs mb-8">Link expires in 15 minutes</p>
-        <Link
-          href="/login"
-          className="text-sm text-indigo-400 hover:text-indigo-300 transition-colors"
-        >
-          ← Back to sign in
-        </Link>
+        <button onClick={() => setSent(false)} className="text-indigo-400 hover:text-indigo-300 text-sm">
+          Use a different email
+        </button>
       </div>
     );
   }
 
   return (
     <>
-      <h1 className="text-2xl font-bold text-white mb-2">
-        Sign in with magic link
-      </h1>
-      <p className="text-gray-400 text-sm mb-6">
-        Enter your email and we&apos;ll send you a sign-in link — no password needed.
-      </p>
+      <div className="text-center mb-6">
+        <div className="text-3xl mb-3">✉️</div>
+        <h1 className="text-2xl font-bold text-white mb-1">Magic link login</h1>
+        <p className="text-gray-400 text-sm">Get a secure one-click sign-in link via email. No password needed.</p>
+      </div>
+
+      {error && (
+        <div className="mb-4 p-3 bg-red-950 border border-red-800 text-red-300 rounded-lg text-sm">{error}</div>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        {error && (
-          <div className="bg-red-500/10 border border-red-500/30 text-red-400 text-sm px-4 py-3 rounded-lg">
-            {error}
-          </div>
-        )}
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-1.5">
-            Email
-          </label>
+          <label className="block text-sm text-gray-400 mb-1.5">Email</label>
           <input
-            type="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
+            className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500 transition-colors"
             placeholder="you@example.com"
-            className="w-full bg-gray-800 border border-gray-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-white placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm outline-none transition-colors"
           />
         </div>
         <button
-          type="submit"
-          disabled={loading}
-          className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-2.5 rounded-xl transition-colors text-sm"
+          type="submit" disabled={loading}
+          className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-semibold rounded-lg transition-colors"
         >
-          {loading ? "Sending…" : "Send link"}
+          {loading ? "Sending…" : "Send Magic Link"}
         </button>
       </form>
 
       <p className="mt-6 text-center text-sm text-gray-500">
-        <Link
-          href="/login"
-          className="text-indigo-400 hover:text-indigo-300 transition-colors"
-        >
-          ← Back to sign in
-        </Link>
+        <Link href="/login" className="text-indigo-400 hover:text-indigo-300">← Back to sign in</Link>
       </p>
     </>
   );
