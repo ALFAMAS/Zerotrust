@@ -38,7 +38,7 @@ ZeroAuth implements a full zero-trust security model where every request is veri
 | Dependency | Version | Purpose |
 |---|---|---|
 | Node.js or Bun | 18+ / 1.0+ | Runtime |
-| MongoDB | 5.0+ | Persistence |
+| PostgreSQL | 15+ | Primary database (via Drizzle ORM) |
 | Redis | 7.0+ | Distributed rate limiting |
 | Elasticsearch | 8.0+ | Audit log storage *(optional)* |
 
@@ -188,7 +188,7 @@ Services:
 |---|---|
 | ZeroAuth API | `http://localhost:3000` |
 | Swagger UI | `http://localhost:3000/docs` |
-| MongoDB | `mongodb://admin:password@localhost:27017` |
+| PostgreSQL | `postgresql://zeroauth:password@localhost:5432/zeroauth` |
 | Redis | `redis://localhost:6379` |
 | Elasticsearch | `http://localhost:9200` |
 | Kibana | `http://localhost:5601` |
@@ -226,7 +226,7 @@ ZeroAuth is organized as a monorepo with multiple packages:
 
 | Package | Path | Description |
 |---------|------|-------------|
-| `@zeroauth/core` | `./` | Core auth library (Express API, models, services) |
+| `@zeroauth/core` | `./` | Core auth library (Hono API, PostgreSQL/Drizzle ORM, services) |
 | `@zeroauth/cli` | `packages/cli/` | `npx zeroauth init` scaffold CLI |
 | `@zeroauth/sdk` | `packages/sdk/` | Typed JS/TS client for consuming ZeroAuth |
 | `@zeroauth/react` | `packages/react/` | React hooks + context provider built on `@zeroauth/sdk` |
@@ -303,12 +303,12 @@ SP metadata: `GET /saml/metadata`
 import { resolveTenant, requireTenant } from "@zeroauth/core";
 
 // Resolve tenant from X-Tenant-ID header, subdomain, or query param
-app.use(resolveTenant());
+app.use("*", resolveTenant());
 
 // Protect tenant-scoped routes
-app.get("/api/data", requireTenant, (req, res) => {
-  const { tenantId } = req; // set by resolveTenant()
-  // ...
+app.get("/api/data", requireTenant, (c) => {
+  const tenantId = c.get("tenantId"); // set by resolveTenant()
+  return c.json({ tenantId });
 });
 ```
 
@@ -412,14 +412,16 @@ OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
 ├── config/                  # Environment config loader + validation
 ├── crypto/
 │   └── csfle.ts             # AES-256-GCM field encryption, HKDF key derivation
-├── db/                      # MongoDB connection, health checks, pooling
+├── db/
+│   ├── index.ts             # PostgreSQL connection via Drizzle ORM, health checks, pooling
+│   └── schema.ts            # Drizzle table definitions (users, sessions, roles, JIT, audit…)
 ├── logger/                  # Structured JSON logging, correlation IDs, ES stream
 ├── shared/
 │   └── types.ts             # Canonical type definitions (User, Session, Token…)
 ├── models/
-│   ├── user.model.ts        # User schema with CSFLE hooks
+│   ├── settings.model.ts    # SaaS settings (feature flags, app config)
 │   ├── tenant.model.ts      # Tenant schema (slug, plan, OIDC/SAML config)
-│   └── index.ts             # Session, Role, JIT, AuditLog, RefreshToken, OTP
+│   └── index.ts             # Re-exports Drizzle tables as *Model aliases
 ├── services/
 │   ├── token.service.ts     # PASETO v4.local token issue/verify
 │   ├── authz.service.ts     # ABAC engine, role hierarchy, JIT evaluation
@@ -443,7 +445,7 @@ OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
 │   ├── mtls.ts              # Client certificate auth, SPIFFE workload identity
 │   └── tenant.ts            # X-Tenant-ID / subdomain resolution, requireTenant
 ├── api/
-│   ├── server.ts            # Express app factory
+│   ├── server.ts            # Hono app factory
 │   ├── openapi.json         # OpenAPI 3.1 specification (all routes)
 │   ├── auth/index.ts        # Auth request handlers
 │   ├── schemas/             # Zod schemas: auth, session, mfa, admin
@@ -526,6 +528,13 @@ tests/
 ## Configuration
 
 All configuration is environment-based. Copy `.env.example` and fill in values.
+
+### Database
+
+```env
+DATABASE_URL=postgresql://zeroauth:password@localhost:5432/zeroauth
+DB_POOL_SIZE=10
+```
 
 ### Critical Keys
 
@@ -656,13 +665,13 @@ Per Request
 
 ### CSFLE Field Encryption
 
-Sensitive fields encrypted transparently via Mongoose hooks:
+Sensitive fields are encrypted at the application layer before writing to PostgreSQL via Drizzle:
 
 - `email`, `phone`, `passwordHash`
 - `totp.secret`, OAuth access/refresh tokens
 - Custom `encryptedAttributes` map
 
-Encryption: AES-256-GCM with HKDF-derived per-field keys. Key version stored alongside ciphertext for rotation.
+Encryption: AES-256-GCM with HKDF-derived per-field keys. Key version stored alongside ciphertext for seamless rotation.
 
 ---
 
@@ -801,13 +810,15 @@ docker-compose exec redis redis-cli ping
 
 ### Production Checklist
 
-- [ ] Replace default MongoDB/Redis passwords in `docker-compose.yml`
+- [ ] Replace default PostgreSQL/Redis passwords in `docker-compose.yml`
 - [ ] Set `NODE_ENV=production`
+- [ ] Set `DATABASE_URL` to your production PostgreSQL connection string
+- [ ] Run database migrations: `npx drizzle-kit push` (or apply `drizzle/` migration files)
 - [ ] Configure TLS termination (nginx/Caddy in front of port 3000)
 - [ ] Set `ELASTICSEARCH_URL` for audit log shipping
 - [ ] Enable `CSFLE_KEY_ROTATION_DAYS` for key rotation schedule
 - [ ] Restrict Elasticsearch access to internal network only
-- [ ] Set Redis `requirepass` and update `REDIS_URL`
+- [ ] Set Redis `requirepass` and update `REDIS_URI`
 - [ ] Configure log retention policy in Elasticsearch ILM
 - [ ] Set `OAUTH_ALLOWED_REDIRECT_URIS` to your production domains only
 - [ ] Set `RP_ID`, `RP_NAME`, `RP_ORIGIN` for WebAuthn
@@ -907,11 +918,29 @@ Items are grouped by category. All v1 features are complete. Items below are v2 
 
 ## Troubleshooting
 
-### MongoDB connection errors
+### PostgreSQL connection errors
 
 ```bash
-docker-compose logs mongodb
-docker-compose exec mongodb mongosh -u admin -p password
+docker-compose logs postgres
+docker-compose exec postgres psql -U zeroauth -d zeroauth
+```
+
+Check `DATABASE_URL` in `.env` — it must match the container name:
+```
+DATABASE_URL=postgresql://zeroauth:password@postgres:5432/zeroauth
+```
+
+### Database migrations
+
+```bash
+# Push schema changes to the database (development)
+npx drizzle-kit push
+
+# Generate SQL migration files
+npx drizzle-kit generate
+
+# Apply migrations (production)
+npx drizzle-kit migrate
 ```
 
 ### CSFLE key errors
