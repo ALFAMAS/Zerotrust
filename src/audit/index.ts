@@ -4,7 +4,6 @@
  * Masks sensitive fields before shipping.
  */
 
-import { AuditModel } from "../models";
 import type { AuditLog } from "../shared/types";
 import { getConfig } from "../config";
 import { getLogger } from "../logger";

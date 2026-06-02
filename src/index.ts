@@ -235,10 +235,10 @@ export { createKEMProvider, generatePQKeyPair, hybridEncrypt, hybridDecrypt, Sim
 export type { KEMPublicKey, KEMPrivateKey, KEMEncapsulation, PQKEMProvider } from "./crypto/post-quantum";
 
 export async function initializeZeroAuth() {
-  const { getConfig } = await import("./config");
-  const { initializeDatabase } = await import("./db");
-  const { initializeCSFLE } = await import("./crypto/csfle");
-  const { initializeLogger } = await import("./logger");
+  const { getConfig } = await import("./config/index.js");
+  const { initializeDatabase } = await import("./db/index.js");
+  const { initializeCSFLE } = await import("./crypto/csfle.js");
+  const { initializeLogger } = await import("./logger/index.js");
 
   const config = getConfig();
   const logger = initializeLogger(config);
@@ -250,25 +250,25 @@ export async function initializeZeroAuth() {
   await initializeCSFLE(config);
 
   try {
-    const { initRateLimiter } = await import("./middleware/rateLimiting");
+    const { initRateLimiter } = await import("./middleware/rateLimiting.js");
     await initRateLimiter();
   } catch (err) {
-    logger.warn("Rate limiter initialization skipped or failed", err as Error);
+    logger.warn("Rate limiter initialization skipped or failed", { error: String(err) });
   }
 
   // Initialize Elasticsearch audit pipeline
   try {
-    const { initAuditPipeline } = await import("./audit");
+    const { initAuditPipeline } = await import("./audit/index.js");
     await initAuditPipeline();
   } catch (err) {
-    logger.warn("Audit pipeline initialization skipped or failed", err as Error);
+    logger.warn("Audit pipeline initialization skipped or failed", { error: String(err) });
   }
 
   try {
-    const { initAuthMiddleware } = await import("./middleware/auth");
+    const { initAuthMiddleware } = await import("./middleware/auth.js");
     await initAuthMiddleware();
   } catch (err) {
-    logger.warn("Auth middleware initialization skipped or failed", err as Error);
+    logger.warn("Auth middleware initialization skipped or failed", { error: String(err) });
   }
 
   logger.info("✓ ZeroAuth system initialized successfully");
@@ -276,14 +276,14 @@ export async function initializeZeroAuth() {
 }
 
 export async function shutdownZeroAuth() {
-  const { getLogger } = await import("./logger");
-  const { closeDatabase } = await import("./db");
+  const { getLogger } = await import("./logger/index.js");
+  const { closeDatabase } = await import("./db/index.js");
 
   const logger = getLogger();
   logger.info("Shutting down ZeroAuth system...");
 
   try {
-    const { shutdownAuditPipeline } = await import("./audit");
+    const { shutdownAuditPipeline } = await import("./audit/index.js");
     await shutdownAuditPipeline();
   } catch {
     // best effort

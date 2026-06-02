@@ -1,6 +1,6 @@
 import { createMiddleware } from "hono/factory";
 import type { HonoEnv } from "../shared/types";
-import geoip from "geoip-lite";
+const geoip = require("geoip-lite") as { lookup(ip: string): { country?: string } | null };
 import { getConfig } from "../config";
 import { getLogger } from "../logger";
 import { ErrorCodes } from "../shared/types";

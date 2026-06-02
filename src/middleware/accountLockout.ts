@@ -1,12 +1,9 @@
 import { createMiddleware } from "hono/factory";
 import type { HonoEnv } from "../shared/types";
 import { getLogger } from "../logger";
-import { ErrorCodes } from "../shared/types";
-
 const logger = getLogger("account-lockout");
 
 const MAX_ATTEMPTS = parseInt(process.env.MAX_LOGIN_ATTEMPTS || "5");
-const LOCKOUT_WINDOW_MS = parseInt(process.env.LOCKOUT_WINDOW_MS || String(15 * 60 * 1000));
 const LOCKOUT_DURATION_MS = parseInt(process.env.LOCKOUT_DURATION_MS || String(30 * 60 * 1000));
 
 interface AttemptRecord {

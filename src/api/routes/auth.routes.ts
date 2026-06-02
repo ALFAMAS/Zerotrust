@@ -11,13 +11,6 @@ import { getConfig } from "../../config";
 import { enforceMaxConcurrentDevices } from "../../middleware/sessionControl";
 import { rateLimit } from "../../middleware/rateLimiting";
 import { requireProofOfPossession } from "../../middleware/proofOfPossession";
-import { validate } from "../../middleware/validation";
-import { RegisterSchema, LoginSchema, RefreshTokenSchema } from "../schemas/auth.schema";
-import {
-  checkAccountLockout,
-  recordFailedLogin,
-  recordSuccessfulLogin,
-} from "../../middleware/accountLockout";
 import { getLogger } from "../../logger";
 import { getProviderAdapter } from "../../oauth/provider.factory";
 import type { HonoEnv } from "../../shared/types";
@@ -25,12 +18,12 @@ import type { HonoEnv } from "../../shared/types";
 const router = new Hono<HonoEnv>();
 const logger = getLogger("auth-routes");
 
-const oauthStateStore = new Map<string, number>();
+const oauthStateStore = new Map<string, { ts: number }>();
 const OAUTH_STATE_TTL_MS = 5 * 60 * 1000;
 
 function generateOAuthState() {
   const state = nanoid();
-  oauthStateStore.set(state, { ts: Date.now(), nonce, codeChallenge, redirectUri });
+  oauthStateStore.set(state, { ts: Date.now() });
   return state;
 }
 
@@ -99,7 +92,7 @@ router.post("/register", rateLimit({ points: 10, windowSecs: 60 }), async (c) =>
     logger.error("Registration error", err as Error);
     return c.json({ error: "INTERNAL_ERROR", message: "Registration failed" }, 500);
   }
-);
+});
 
 // POST /login
 router.post("/login", rateLimit({ points: 20, windowSecs: 60 }), async (c) => {
@@ -125,7 +118,7 @@ router.post("/login", rateLimit({ points: 20, windowSecs: 60 }), async (c) => {
       const tokenSvc = await getTokenService();
 
     const fpInput = FingerprintService.extractFromRequest({
-      headers: Object.fromEntries(c.req.raw.headers.entries()),
+      headers: Object.fromEntries(c.req.raw.headers as any),
       ip: c.req.header("x-forwarded-for")?.split(",")[0].trim(),
     });
     const fingerprint = FingerprintService.compute(fpInput);
@@ -178,7 +171,7 @@ router.post("/login", rateLimit({ points: 20, windowSecs: 60 }), async (c) => {
     logger.error("Login error", err as Error);
     return c.json({ error: "INTERNAL_ERROR", message: "Login failed" }, 500);
   }
-);
+});
 
 // POST /token/refresh
 router.post(

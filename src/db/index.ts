@@ -88,7 +88,6 @@ export async function dropAllTables(): Promise<void> {
     throw new Error("Cannot drop tables in production");
   }
 
-  const db = getDb();
   await sqlClient!`
     DO $$ DECLARE
       r RECORD;

@@ -264,7 +264,7 @@ export async function auditLog(
 ): Promise<void> {
   const logger = getLogger("audit");
 
-  const auditEntry = {
+  const auditEntry: Record<string, unknown> = {
     action,
     actor,
     target,

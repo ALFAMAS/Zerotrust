@@ -35,7 +35,7 @@ class CSFLEManager {
       // Import master key for key derivation
       this.masterKey = await crypto.subtle.importKey(
         "raw",
-        keyBytes,
+        keyBytes as unknown as ArrayBuffer,
         { name: "HKDF", hash: "SHA-256" },
         false,
         ["deriveKey"]
@@ -129,7 +129,7 @@ class CSFLEManager {
 
     return crypto.subtle.importKey(
       "raw",
-      keyVersion.keyMaterial,
+      keyVersion.keyMaterial as unknown as ArrayBuffer,
       { name: "AES-GCM" },
       false,
       ["encrypt", "decrypt"]
@@ -152,9 +152,9 @@ class CSFLEManager {
 
       // Encrypt
       const ciphertext = await crypto.subtle.encrypt(
-        { name: "AES-GCM", iv, additionalData: new TextEncoder().encode(this.currentKeyVersionId) },
+        { name: "AES-GCM", iv: iv as unknown as ArrayBuffer, additionalData: new TextEncoder().encode(this.currentKeyVersionId) },
         key,
-        data
+        data as unknown as ArrayBuffer
       );
 
       return {
@@ -184,7 +184,7 @@ class CSFLEManager {
 
       const key = await crypto.subtle.importKey(
         "raw",
-        keyVersionData.keyMaterial,
+        keyVersionData.keyMaterial as unknown as ArrayBuffer,
         { name: "AES-GCM" },
         false,
         ["decrypt"]
@@ -194,9 +194,9 @@ class CSFLEManager {
       const ciphertextBytes = this.base64urlToBytes(ciphertext);
 
       const plaintext = await crypto.subtle.decrypt(
-        { name: "AES-GCM", iv: ivBytes, additionalData: new TextEncoder().encode(keyVersion) },
+        { name: "AES-GCM", iv: ivBytes as unknown as ArrayBuffer, additionalData: new TextEncoder().encode(keyVersion) },
         key,
-        ciphertextBytes
+        ciphertextBytes as unknown as ArrayBuffer
       );
 
       return new TextDecoder().decode(plaintext);
@@ -285,7 +285,7 @@ export function csflEncryptionPlugin(schema: any, options: { fields: string[] })
   const fieldsToEncrypt = options.fields || [];
 
   // Pre-save: encrypt sensitive fields
-  schema.pre("save", async function (next: any) {
+  schema.pre("save", async function (this: any, next: any) {
     const csfle = getCSFLE();
     for (const field of fieldsToEncrypt) {
       if (this[field] && typeof this[field] === "string") {
@@ -305,7 +305,7 @@ export function csflEncryptionPlugin(schema: any, options: { fields: string[] })
   });
 
   // Post-retrieve: decrypt sensitive fields
-  schema.post("find", async function (docs: any[], next: any) {
+  schema.post("find", async function (this: any, docs: any[], next: any) {
     const csfle = getCSFLE();
     for (const doc of docs) {
       await decryptFieldsInDoc(doc, fieldsToEncrypt, csfle);

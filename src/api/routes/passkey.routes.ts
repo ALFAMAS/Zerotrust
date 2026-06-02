@@ -71,7 +71,7 @@ router.post("/register/options", authMiddleware, async (c) => {
     const options = await generateRegistrationOptions({
       rpName: settings.appName || "ZeroAuth",
       rpID: new URL(settings.appUrl || "http://localhost:3001").hostname,
-      userID: userId,
+      userID: Buffer.from(userId),
       userName: user.email,
       userDisplayName: user.displayName,
       attestationType: "none",
@@ -117,7 +117,7 @@ router.post("/register/verify", authMiddleware, async (c) => {
         expectedRPID: rpID,
       });
     } catch (verifyErr) {
-      logger.warn("Passkey registration verification failed", verifyErr as Error);
+      logger.warn("Passkey registration verification failed", { error: String(verifyErr) });
       return c.json({ error: "VERIFICATION_FAILED", message: "Registration verification failed" }, 400);
     }
 
@@ -240,15 +240,15 @@ router.post("/authenticate/verify", async (c) => {
         expectedChallenge,
         expectedOrigin: appUrl,
         expectedRPID: rpID,
-        credential: {
-          id: passkey.credentialId,
-          publicKey: Buffer.from(passkey.publicKey, "base64url"),
+        authenticator: {
+          credentialID: passkey.credentialId,
+          credentialPublicKey: Buffer.from(passkey.publicKey, "base64url") as unknown as Uint8Array,
           counter: passkey.counter,
           transports: passkey.transports,
         },
       });
     } catch (verifyErr) {
-      logger.warn("Passkey authentication verification failed", verifyErr as Error);
+      logger.warn("Passkey authentication verification failed", { error: String(verifyErr) });
       return c.json({ error: "VERIFICATION_FAILED", message: "Authentication verification failed" }, 401);
     }
 

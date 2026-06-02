@@ -145,7 +145,7 @@ export const authMiddleware = createMiddleware<HonoEnv>(async (c, next) => {
       .where(eq(sessionsTable.id, session.id));
 
     logger.debug("✓ Token verified", { userId: payload.sub, sessionId: payload.sid });
-    await next();
+    return next();
   } catch (error) {
     if (error instanceof ZeroAuthError) {
       return c.json({ error: error.code, message: error.message }, error.statusCode as any);
@@ -203,7 +203,7 @@ export const optionalAuthMiddleware = createMiddleware<HonoEnv>(async (c, next) 
 
     await next();
   } catch (error) {
-    logger.warn("Optional auth middleware error", error as Error);
+    logger.warn("Optional auth middleware error", { error: String(error) });
     await next();
   }
 });

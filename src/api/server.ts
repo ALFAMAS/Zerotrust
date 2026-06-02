@@ -48,11 +48,11 @@ export async function createServer() {
     try {
       const signature = c.req.header("x-ssf-signature");
       const body = await c.req.json();
-      const { verifySSFSignature } = await import("../ssf/verify");
+      const { verifySSFSignature } = await import("../ssf/verify.js");
       const ok = verifySSFSignature(body, signature);
       if (!ok) return c.json({ error: "INVALID_SIGNATURE" }, 401);
 
-      const { handleSSFEvent } = await import("../ssf/receiver");
+      const { handleSSFEvent } = await import("../ssf/receiver.js");
       const result = await handleSSFEvent(body);
       return c.json(result);
     } catch (err) {
@@ -77,7 +77,7 @@ export async function createServer() {
   app.get("/health", async (c) => {
     const health: Record<string, unknown> = { status: "ok" };
     try {
-      const { pingRedis } = await import("../services/rateLimiter/redis");
+      const { pingRedis } = await import("../services/rateLimiter/redis.js");
       health.redis = (await pingRedis()) ? "ok" : "down";
     } catch {
       health.redis = "unconfigured";
@@ -89,21 +89,21 @@ export async function createServer() {
     const health: Record<string, unknown> = { status: "ok", timestamp: new Date().toISOString() };
 
     try {
-      const { pingRedis } = await import("../services/rateLimiter/redis");
+      const { pingRedis } = await import("../services/rateLimiter/redis.js");
       health.redis = (await pingRedis()) ? "ok" : "down";
     } catch {
       health.redis = "unconfigured";
     }
 
     try {
-      const { isDbConnected } = await import("../db");
+      const { isDbConnected } = await import("../db/index.js");
       health.postgres = isDbConnected() ? "ok" : "down";
     } catch {
       health.postgres = "unknown";
     }
 
     try {
-      const { getSettings } = await import("../models/settings.model");
+      const { getSettings } = await import("../models/settings.model.js");
       const settings = await getSettings();
       health.settings = { appName: settings.appName };
     } catch {

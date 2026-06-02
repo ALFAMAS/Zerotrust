@@ -27,14 +27,14 @@ export async function initRateLimiter(): Promise<void> {
 
   if (cfg.rateLimiting.redisUri) {
     try {
-      const { initRedisRateLimiter, consumePoint } = await import("../services/rateLimiter/redis");
+      const { initRedisRateLimiter, consumePoint } = await import("../services/rateLimiter/redis.js");
       await initRedisRateLimiter(cfg.rateLimiting.redisUri!);
       redisConsume = consumePoint;
       useRedis = true;
       logger.info("Rate limiter initialized (redis-backed)");
       return;
     } catch (err) {
-      logger.warn("Failed to initialize redis rate limiter, falling back to in-memory", err as Error);
+      logger.warn("Failed to initialize redis rate limiter, falling back to in-memory", { error: String(err) });
     }
   }
 

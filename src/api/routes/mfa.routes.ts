@@ -7,7 +7,6 @@ import { authMiddleware } from "../../middleware/auth";
 import { getSettings } from "../../models/settings.model";
 import { sendOTP } from "../../mfa";
 import { getLogger } from "../../logger";
-import { nanoid } from "nanoid";
 import type { HonoEnv } from "../../shared/types";
 
 const router = new Hono<HonoEnv>();
