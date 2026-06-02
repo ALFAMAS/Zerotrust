@@ -25,12 +25,7 @@ export {
 } from "./db/schema";
 
 // ─── Encryption (CSFLE) ──────────────────────────────────────────────────────
-export {
-  initializeCSFLE,
-  getCSFLE,
-  resetCSFLE,
-  type EncryptionKeyVersion,
-} from "./crypto/csfle";
+export { initializeCSFLE, getCSFLE, resetCSFLE, type EncryptionKeyVersion } from "./crypto/csfle";
 
 // ─── Logging ─────────────────────────────────────────────────────────────────
 export {
@@ -134,12 +129,7 @@ export type {
 } from "./mfa/attestation";
 
 // ─── FIDO MDS3 ───────────────────────────────────────────────────────────────
-export {
-  initMDS3,
-  getMDS3Entry,
-  isFidoCertified,
-  getDeviceDescription,
-} from "./mfa/fido-mds3";
+export { initMDS3, getMDS3Entry, isFidoCertified, getDeviceDescription } from "./mfa/fido-mds3";
 export type { MDS3Entry, MDS3StatusReport, MDS3Cache } from "./mfa/fido-mds3";
 
 // ─── Attestation CA Pinning ───────────────────────────────────────────────────
@@ -165,8 +155,22 @@ export {
 export type { DiscoverableAuthenticator } from "./mfa/resident-keys";
 
 // ─── Multi-Tenant ────────────────────────────────────────────────────────────
-export { TenantModel } from "./models/tenant.model";
-export type { TenantDocument } from "./models/tenant.model";
+export {
+  getAllTenants,
+  getTenant,
+  getTenantBySlug,
+  createTenant,
+  updateTenant,
+  deleteTenant,
+} from "./models/tenant.model";
+export type {
+  Tenant,
+  TenantSettings,
+  OidcConfig,
+  SamlConfig,
+  CreateTenantData,
+  UpdateTenantData,
+} from "./models/tenant.model";
 export { resolveTenant, requireTenant, withTenant } from "./middleware/tenant";
 
 // ─── OIDC Provider ───────────────────────────────────────────────────────────
@@ -202,7 +206,11 @@ export type { SCIMUser, SCIMGroup } from "./scim";
 export { tenantRateLimit, configureTenantQuota, getTenantQuota } from "./middleware/rateLimiting";
 
 // ─── Cross-Tenant JIT ─────────────────────────────────────────────────────────
-export { crossTenantJITStore, requestCrossTenantAccess, requireCrossTenantJIT } from "./jit/cross-tenant";
+export {
+  crossTenantJITStore,
+  requestCrossTenantAccess,
+  requireCrossTenantJIT,
+} from "./jit/cross-tenant";
 export type { CrossTenantJITRequest } from "./jit/cross-tenant";
 
 // ─── LDAP / Active Directory ─────────────────────────────────────────────────
@@ -215,24 +223,59 @@ export { notificationDispatcher, initNotificationsFromEnv } from "./notification
 export type { NotificationEvent, NotificationChannel } from "./notifications/types";
 
 // ─── Token Binding ────────────────────────────────────────────────────────────
-export { verifyTokenBinding, attachTokenBinding, computeTokenBindingId, createTokenBindingConfig } from "./middleware/tokenBinding";
+export {
+  verifyTokenBinding,
+  attachTokenBinding,
+  computeTokenBindingId,
+  createTokenBindingConfig,
+} from "./middleware/tokenBinding";
 
 // ─── Hardware Key Storage ─────────────────────────────────────────────────────
-export { initHardwareKeyStore, SoftwareKeyProvider, TPMKeyProvider, SecureEnclaveProvider, PKCS11Provider } from "./crypto/hardware-key-store";
+export {
+  initHardwareKeyStore,
+  SoftwareKeyProvider,
+  TPMKeyProvider,
+  SecureEnclaveProvider,
+  PKCS11Provider,
+} from "./crypto/hardware-key-store";
 export type { HardwareKeyProvider } from "./crypto/hardware-key-store";
 
 // ─── Enterprise Attestation ───────────────────────────────────────────────────
-export { enterpriseCARegistry, verifyEnterpriseAttestation, requireEnterpriseAttestation, parseCertificate } from "./mfa/enterprise-attestation";
+export {
+  enterpriseCARegistry,
+  verifyEnterpriseAttestation,
+  requireEnterpriseAttestation,
+  parseCertificate,
+} from "./mfa/enterprise-attestation";
 export type { EnterpriseAttestationCA, EnterpriseCertificate } from "./mfa/enterprise-attestation";
 
 // ─── Decentralized Identity (DID) ─────────────────────────────────────────────
 export { resolveDID, resolveDIDKey, resolveDIDWeb } from "./did/resolver";
 export { createDIDChallenge, verifyDIDProof, provisionDIDUser } from "./did/verifier";
-export type { DIDDocument, DIDAuthChallenge, DIDProof, DIDAuthResult, VerificationMethod } from "./did/types";
+export type {
+  DIDDocument,
+  DIDAuthChallenge,
+  DIDProof,
+  DIDAuthResult,
+  VerificationMethod,
+} from "./did/types";
 
 // ─── Post-Quantum Cryptography ────────────────────────────────────────────────
-export { createKEMProvider, generatePQKeyPair, hybridEncrypt, hybridDecrypt, SimulatedMLKEM, NobleMLKEM, establishPQSessionKey } from "./crypto/post-quantum";
-export type { KEMPublicKey, KEMPrivateKey, KEMEncapsulation, PQKEMProvider } from "./crypto/post-quantum";
+export {
+  createKEMProvider,
+  generatePQKeyPair,
+  hybridEncrypt,
+  hybridDecrypt,
+  SimulatedMLKEM,
+  NobleMLKEM,
+  establishPQSessionKey,
+} from "./crypto/post-quantum";
+export type {
+  KEMPublicKey,
+  KEMPrivateKey,
+  KEMEncapsulation,
+  PQKEMProvider,
+} from "./crypto/post-quantum";
 
 export async function initializeZeroAuth() {
   const { getConfig } = await import("./config/index.js");
