@@ -1,5 +1,11 @@
 import crypto from "crypto";
-import type { NotificationChannel, NotificationEvent, SlackConfig, TeamsConfig, PagerDutyConfig } from "./types";
+import type {
+  NotificationChannel,
+  NotificationEvent,
+  SlackConfig,
+  TeamsConfig,
+  PagerDutyConfig,
+} from "./types";
 import { formatSlackMessage, formatTeamsMessage, formatPagerDutyPayload } from "./formatters";
 import { getLogger } from "../logger";
 
@@ -23,18 +29,20 @@ export class NotificationDispatcher {
 
   getChannels(tenantId?: string): NotificationChannel[] {
     const all = Array.from(this.channels.values());
-    return tenantId ? all.filter(c => !c.tenantId || c.tenantId === tenantId) : all;
+    return tenantId ? all.filter((c) => !c.tenantId || c.tenantId === tenantId) : all;
   }
 
-  async dispatch(event: NotificationEvent, data: Record<string, unknown>, tenantId?: string): Promise<void> {
+  async dispatch(
+    event: NotificationEvent,
+    data: Record<string, unknown>,
+    tenantId?: string
+  ): Promise<void> {
     const matching = this.getChannels(tenantId).filter(
-      c => c.enabled && c.events.includes(event)
+      (c) => c.enabled && c.events.includes(event)
     );
     if (matching.length === 0) return;
 
-    await Promise.allSettled(
-      matching.map(channel => this.sendToChannel(channel, event, data))
-    );
+    await Promise.allSettled(matching.map((channel) => this.sendToChannel(channel, event, data)));
   }
 
   private async sendToChannel(
@@ -49,15 +57,27 @@ export class NotificationDispatcher {
         await this.sendToTeams(channel.config as TeamsConfig, formatTeamsMessage(event, data));
       } else if (channel.type === "pagerduty") {
         const cfg = channel.config as PagerDutyConfig;
-        await this.sendToPagerDuty(cfg, formatPagerDutyPayload(event, data, cfg.integrationKey, cfg.severity));
+        await this.sendToPagerDuty(
+          cfg,
+          formatPagerDutyPayload(event, data, cfg.integrationKey, cfg.severity)
+        );
       }
     } catch (err) {
-      getLogger().warn("Notification delivery failed", { channel: channel.id, event, error: (err as Error).message });
+      getLogger().warn("Notification delivery failed", {
+        channel: channel.id,
+        event,
+        error: (err as Error).message,
+      });
     }
   }
 
   private async sendToSlack(config: SlackConfig, payload: object): Promise<void> {
-    const body = { ...payload, channel: config.channel, username: config.username, icon_emoji: config.iconEmoji };
+    const body = {
+      ...payload,
+      channel: config.channel,
+      username: config.username,
+      icon_emoji: config.iconEmoji,
+    };
     const res = await fetch(config.webhookUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -75,7 +95,7 @@ export class NotificationDispatcher {
     if (!res.ok) throw new Error(`Teams webhook returned ${res.status}`);
   }
 
-  private async sendToPagerDuty(config: PagerDutyConfig, payload: object): Promise<void> {
+  private async sendToPagerDuty(_config: PagerDutyConfig, payload: object): Promise<void> {
     const res = await fetch("https://events.pagerduty.com/v2/enqueue", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -89,14 +109,16 @@ export const notificationDispatcher = new NotificationDispatcher();
 
 export function initNotificationsFromEnv(): void {
   const parseEvents = (raw: string | undefined): NotificationEvent[] =>
-    raw ? (raw.split(",").map(e => e.trim()) as NotificationEvent[]) : [];
+    raw ? (raw.split(",").map((e) => e.trim()) as NotificationEvent[]) : [];
 
   if (process.env.SLACK_WEBHOOK_URL) {
     notificationDispatcher.addChannel({
       type: "slack",
       name: "Slack (env)",
       enabled: true,
-      events: parseEvents(process.env.SLACK_EVENTS) || (["anomaly.detected", "auth.brute_force", "user.locked"] as NotificationEvent[]),
+      events:
+        parseEvents(process.env.SLACK_EVENTS) ||
+        (["anomaly.detected", "auth.brute_force", "user.locked"] as NotificationEvent[]),
       config: {
         webhookUrl: process.env.SLACK_WEBHOOK_URL,
         channel: process.env.SLACK_CHANNEL,
@@ -111,7 +133,9 @@ export function initNotificationsFromEnv(): void {
       type: "teams",
       name: "Teams (env)",
       enabled: true,
-      events: parseEvents(process.env.TEAMS_EVENTS) || (["anomaly.detected", "auth.brute_force"] as NotificationEvent[]),
+      events:
+        parseEvents(process.env.TEAMS_EVENTS) ||
+        (["anomaly.detected", "auth.brute_force"] as NotificationEvent[]),
       config: { webhookUrl: process.env.TEAMS_WEBHOOK_URL },
     });
   }
@@ -121,7 +145,9 @@ export function initNotificationsFromEnv(): void {
       type: "pagerduty",
       name: "PagerDuty (env)",
       enabled: true,
-      events: parseEvents(process.env.PAGERDUTY_EVENTS) || (["anomaly.detected", "auth.brute_force"] as NotificationEvent[]),
+      events:
+        parseEvents(process.env.PAGERDUTY_EVENTS) ||
+        (["anomaly.detected", "auth.brute_force"] as NotificationEvent[]),
       config: {
         integrationKey: process.env.PAGERDUTY_KEY,
         severity: (process.env.PAGERDUTY_SEVERITY as "critical") ?? "error",

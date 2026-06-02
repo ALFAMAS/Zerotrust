@@ -196,7 +196,7 @@ export type { WebhookEventType, WebhookEndpoint, WebhookDelivery } from "./webho
 export { recordAuth, recordMFA, recordRateLimit, metricsRoute, metricsMiddleware } from "./metrics";
 
 // ─── Telemetry ───────────────────────────────────────────────────────────────
-export { initTelemetry, getTracer, withSpan, tracingMiddleware } from "./telemetry";
+export { initTelemetry, getTracer, withSpan, telemetryMiddleware } from "./telemetry";
 
 // ─── SCIM 2.0 ────────────────────────────────────────────────────────────────
 export { scimRoutes } from "./scim";

@@ -1,37 +1,31 @@
-import type { RequestHandler, Request, Response, NextFunction } from "express";
-import { metricsRegistry } from "./registry";
+import { createMiddleware } from "hono/factory";
+import type { Context } from "hono";
+import type { HonoEnv } from "../shared/types";
+import { register, collectDefaultMetrics } from "prom-client";
 import { requestDurationSeconds } from "./counters";
 
-export function metricsMiddleware(): RequestHandler {
-  return (req: Request, res: Response, next: NextFunction): void => {
-    const start = process.hrtime.bigint();
+collectDefaultMetrics({ register });
 
-    res.on("finish", () => {
-      const durationNs = process.hrtime.bigint() - start;
-      const durationSec = Number(durationNs) / 1e9;
-
-      const route = (req.route?.path as string | undefined) ?? req.path ?? "unknown";
-      const method = req.method ?? "unknown";
-      const statusCode = String(res.statusCode);
-
-      requestDurationSeconds.observe(
-        { method, route, status_code: statusCode },
-        durationSec
-      );
-    });
-
-    next();
-  };
+export function metricsMiddleware() {
+  return createMiddleware<HonoEnv>(async (c, next) => {
+    const start = Date.now();
+    await next();
+    const durationSec = (Date.now() - start) / 1000;
+    const route = c.req.routePath ?? c.req.path ?? "unknown";
+    const method = c.req.method ?? "unknown";
+    const statusCode = String(c.res.status);
+    requestDurationSeconds.observe({ method, route, status_code: statusCode }, durationSec);
+  });
 }
 
-export function metricsRoute(): RequestHandler {
-  return async (_req: Request, res: Response): Promise<void> => {
-    try {
-      const metrics = await metricsRegistry.metrics();
-      res.set("Content-Type", metricsRegistry.contentType);
-      res.end(metrics);
-    } catch (err) {
-      res.status(500).end(String(err));
-    }
-  };
+export async function metricsRoute(c: Context<HonoEnv>): Promise<Response> {
+  try {
+    const metrics = await register.metrics();
+    return new Response(metrics, {
+      status: 200,
+      headers: { "Content-Type": register.contentType },
+    });
+  } catch (err) {
+    return c.text(String(err), 500);
+  }
 }
