@@ -142,7 +142,7 @@ export {
 export type { AttestationCAPin } from "./mfa/attestation-ca-pin";
 
 // ─── mTLS Middleware ──────────────────────────────────────────────────────────
-export { requireMTLS, extractWorkloadIdentity } from "./middleware/mtls";
+export { mtlsMiddleware } from "./middleware/mtls";
 export type { mTLSOptions, WorkloadIdentity } from "./middleware/mtls";
 
 // ─── FIDO2 Discoverable Credentials ──────────────────────────────────────────
@@ -171,15 +171,15 @@ export type {
   CreateTenantData,
   UpdateTenantData,
 } from "./models/tenant.model";
-export { resolveTenant, requireTenant, withTenant } from "./middleware/tenant";
+export { resolveTenant, requireTenant } from "./middleware/tenant";
 
 // ─── OIDC Provider ───────────────────────────────────────────────────────────
 export {
   registerOIDCClient,
   getOIDCClient,
   validateAuthorizeRequest,
-  issueAuthCode,
-  exchangeCode as exchangeOIDCCode,
+  generateAuthCode,
+  exchangeAuthCode as exchangeOIDCCode,
   buildUserInfo,
   getDiscoveryDocument,
 } from "./oidc/provider";
@@ -223,12 +223,8 @@ export { notificationDispatcher, initNotificationsFromEnv } from "./notification
 export type { NotificationEvent, NotificationChannel } from "./notifications/types";
 
 // ─── Token Binding ────────────────────────────────────────────────────────────
-export {
-  verifyTokenBinding,
-  attachTokenBinding,
-  computeTokenBindingId,
-  createTokenBindingConfig,
-} from "./middleware/tokenBinding";
+export { tokenBindingMiddleware } from "./middleware/tokenBinding";
+export type { TokenBindingOptions } from "./middleware/tokenBinding";
 
 // ─── Hardware Key Storage ─────────────────────────────────────────────────────
 export {

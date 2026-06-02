@@ -363,6 +363,7 @@ export type HonoEnv = {
     token: TokenPayload;
     popVerified?: boolean;
     inferredCountry?: string;
+    tenantId?: string;
   };
 };
 

@@ -189,6 +189,8 @@ class Logger {
   }
 }
 
+export type { Logger };
+
 let loggerSingleton: Logger | null = null;
 
 /**
