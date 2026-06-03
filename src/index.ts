@@ -226,6 +226,44 @@ export type { NotificationEvent, NotificationChannel } from "./notifications/typ
 export { tokenBindingMiddleware } from "./middleware/tokenBinding";
 export type { TokenBindingOptions } from "./middleware/tokenBinding";
 
+// ─── Anomaly Detection ────────────────────────────────────────────────────────
+export { anomalyDetectionMiddleware } from "./middleware/anomalyMiddleware";
+export type { AnomalyMiddlewareOptions } from "./middleware/anomalyMiddleware";
+export {
+  scoreAnomaly,
+  updateBaseline,
+  getBaseline,
+  resetBaseline,
+  computeDeviceHash,
+} from "./services/anomalyDetection.service";
+export type { AnomalySignals, BehaviorObservation } from "./services/anomalyDetection.service";
+
+// ─── Continuous Verification ──────────────────────────────────────────────────
+export {
+  requireReverification,
+  recordVerification,
+  getVerification,
+} from "./middleware/continuousVerification";
+export type { ContinuousVerificationOptions } from "./middleware/continuousVerification";
+export { assessSessionRisk, computeRiskFactors } from "./services/sessionRisk.service";
+export type { RiskFactors, RiskAssessment } from "./services/sessionRisk.service";
+
+// ─── Cross-Tenant Federation ──────────────────────────────────────────────────
+export {
+  registerProvider as registerFederationProvider,
+  getProvider as getFederationProvider,
+  listProviders as listFederationProviders,
+  removeProvider as removeFederationProvider,
+  initFederationFromEnv,
+  exchangeToken as exchangeFederatedToken,
+  requireFederatedIdentity,
+} from "./federation/index";
+export type {
+  FederatedProvider,
+  FederationTokenRequest,
+  FederationTokenResponse,
+} from "./federation/index";
+
 // ─── Hardware Key Storage ─────────────────────────────────────────────────────
 export {
   initHardwareKeyStore,

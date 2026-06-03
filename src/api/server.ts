@@ -10,6 +10,9 @@ import sessionRoutes from "./routes/session.routes";
 import adminRoutes from "./routes/admin.routes";
 import passkeyRoutes from "./routes/passkey.routes";
 import workloadRoutes from "./routes/workload.routes";
+import verificationRoutes from "./routes/verification.routes";
+import anomalyRoutes from "./routes/anomaly.routes";
+import federationRoutes from "../federation/routes";
 import { rateLimit } from "../middleware/rateLimiting";
 import { geoFencingMiddleware } from "../middleware/geoFencing";
 import { temporalAccessMiddleware } from "../middleware/temporalAccess";
@@ -42,6 +45,15 @@ export async function createServer() {
 
   // ─── Workload routes ──────────────────────────────────────────────────────
   app.route("/workload", workloadRoutes);
+
+  // ─── Verification routes ──────────────────────────────────────────────────
+  app.route("/auth/verify", verificationRoutes);
+
+  // ─── Federation routes ────────────────────────────────────────────────────
+  app.route("/federation", federationRoutes);
+
+  // ─── Anomaly admin routes ─────────────────────────────────────────────────
+  app.route("/admin/anomaly", anomalyRoutes);
 
   // ─── SSF webhook endpoint ─────────────────────────────────────────────────
   app.post("/ssf/events", async (c) => {

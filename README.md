@@ -897,11 +897,17 @@ Items are grouped by category. All v1 features are complete. Items below are v2 
 | **OpenTelemetry tracing** | OTLP export, auto-instrumentation, `X-Trace-Id` on responses | `src/telemetry/` |
 | **`@zeroauth/react`** | `ZeroAuthProvider`, `useAuth`, `useSession`, `useMFA`, `usePasskey`, `useMagicLink`, `AuthGuard` | `packages/react/` |
 
+### ✅ Completed in v4
+
+| Feature | Description | Location |
+|---------|-------------|----------|
+| **Cross-tenant federation** | RFC 8693 token exchange — trust external ZeroAuth deployments; admin-managed provider registry; `POST /federation/token-exchange`, `GET /federation/discovery` | `src/federation/` |
+| **Biometric continuous auth** | Mid-session re-verification via passkey assertion, TOTP, or OTP; risk-factor assessment (idle time, location/device change, anomaly score); `POST /auth/verify/challenge`, `POST /auth/verify/respond` | `src/middleware/continuousVerification.ts`, `src/services/sessionRisk.service.ts`, `src/api/routes/verification.routes.ts` |
+| **AI-powered anomaly detection** | Welford online algorithm for per-user behavioral baselines (login hour, known IPs/countries/devices); z-score anomaly scoring; hard-block at 95% confidence; admin baseline management at `/admin/anomaly/*` | `src/services/anomalyDetection.service.ts`, `src/middleware/anomalyMiddleware.ts` |
+
 ### Future
 
-- [ ] **Cross-tenant federation** — federated identity across ZeroAuth deployments
-- [ ] **Biometric continuous auth** — re-verify identity mid-session using device sensors
-- [ ] **AI-powered anomaly detection** — ML-based behavioral baselines per user
+- No remaining items — all roadmap features are complete.
 
 ---
 
