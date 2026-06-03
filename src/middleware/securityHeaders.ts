@@ -1,4 +1,5 @@
-import type { Request, Response, NextFunction } from "express";
+import { createMiddleware } from "hono/factory";
+import type { HonoEnv } from "../shared/types";
 
 export interface SecurityHeadersOptions {
   cspDirectives?: Record<string, string | string[]>;
@@ -38,15 +39,14 @@ export function securityHeaders(opts: SecurityHeadersOptions = {}) {
 
   const hsts = `max-age=${hstsMaxAge}${hstsIncludeSubDomains ? "; includeSubDomains" : ""}; preload`;
 
-  return (req: Request, res: Response, next: NextFunction) => {
-    res.setHeader("Content-Security-Policy", csp);
-    res.setHeader("Strict-Transport-Security", hsts);
-    res.setHeader("X-Frame-Options", frameOptions);
-    res.setHeader("X-Content-Type-Options", "nosniff");
-    res.setHeader("Referrer-Policy", referrerPolicy);
-    res.setHeader("Permissions-Policy", permissionsPolicy);
-    res.setHeader("X-XSS-Protection", "0");
-    res.removeHeader("X-Powered-By");
-    next();
-  };
+  return createMiddleware<HonoEnv>(async (c, next) => {
+    c.header("Content-Security-Policy", csp);
+    c.header("Strict-Transport-Security", hsts);
+    c.header("X-Frame-Options", frameOptions);
+    c.header("X-Content-Type-Options", "nosniff");
+    c.header("Referrer-Policy", referrerPolicy);
+    c.header("Permissions-Policy", permissionsPolicy);
+    c.header("X-XSS-Protection", "0");
+    return next();
+  });
 }

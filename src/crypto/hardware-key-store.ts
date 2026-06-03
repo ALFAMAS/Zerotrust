@@ -315,7 +315,7 @@ export class SecureEnclaveProvider implements HardwareKeyProvider {
 export class PKCS11Provider implements HardwareKeyProvider {
   public name = "pkcs11";
 
-  constructor(private libraryPath: string, private pin: string) {}
+  constructor(private libraryPath: string, _pin: string) {}
 
   async isAvailable(): Promise<boolean> {
     return fs.existsSync(this.libraryPath);

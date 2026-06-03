@@ -1,392 +1,213 @@
-import express from "express";
-import * as OTPAuth from "otpauth";
-import QRCode from "qrcode";
+import { Hono } from "hono";
+import crypto from "crypto";
+import { eq, and, gt } from "drizzle-orm";
+import { getDb } from "../../db";
+import { usersTable, otpsTable } from "../../db/schema";
 import { authMiddleware } from "../../middleware/auth";
-import { rateLimit } from "../../middleware/rateLimiting";
-import { validate } from "../../middleware/validation";
-import {
-  TOTPVerifySchema,
-  BackupCodeRedeemSchema,
-  MFASendOTPSchema,
-  MFAVerifyOTPSchema,
-} from "../schemas/mfa.schema";
-import { UserModel, OTPModel } from "../../models";
+import { getSettings } from "../../models/settings.model";
 import { sendOTP } from "../../mfa";
-import { getConfig } from "../../config";
 import { getLogger } from "../../logger";
-import { ErrorCodes } from "../../shared/types";
-import * as crypto from "crypto";
+import type { HonoEnv } from "../../shared/types";
 
-const router = express.Router();
+const router = new Hono<HonoEnv>();
 const logger = getLogger("mfa-routes");
 
-function generateBackupCodes(count = 8): string[] {
-  return Array.from({ length: count }, () => crypto.randomBytes(5).toString("hex").toUpperCase());
-}
+router.use("*", authMiddleware);
 
-router.post(
-  "/totp/setup",
-  rateLimit({ points: 10, windowSecs: 60 }),
-  authMiddleware,
-  async (req, res) => {
+// POST /totp/setup
+router.post("/totp/setup", async (c) => {
+  try {
+    const settings = await getSettings();
+    if (!settings.totpEnabled) {
+      return c.json({ error: "FEATURE_DISABLED", message: "TOTP is disabled" }, 403);
+    }
+
+    const user = c.get("user");
+    const userId = user.id;
+    const userEmail = user.email;
+    const appName = settings.appName || "ZeroAuth";
+
+    let secret: string;
+    let qrCodeUrl: string;
+
     try {
-      const user = await UserModel.findById(req.user!._id);
-      if (!user)
-        return res
-          .status(404)
-          .json({ code: ErrorCodes.USER_NOT_FOUND, message: "User not found", details: [] });
-
-      if (user.mfa?.totp?.enabled) {
-        return res
-          .status(409)
-          .json({ code: "TOTP_ALREADY_ENABLED", message: "TOTP is already enabled", details: [] });
-      }
-
-      const secret = new OTPAuth.Secret({ size: 20 });
-      const totp = new OTPAuth.TOTP({
-        issuer: "ZeroAuth",
-        label: user.email,
+      const { TOTP, Secret, URI } = await import("otpauth");
+      const totpObj = new TOTP({
+        issuer: appName,
+        label: userEmail,
         algorithm: "SHA1",
         digits: 6,
         period: 30,
-        secret,
+        secret: new Secret({ size: 20 }),
       });
-
-      const otpAuthUrl = totp.toString();
-      const qrDataUrl = await QRCode.toDataURL(otpAuthUrl);
-
-      user.mfa = user.mfa || {
-        totp: { enabled: false, backupCodes: [] },
-        webauthn: { enabled: false },
-      };
-      user.mfa.totp.secret = secret.base32;
-      user.mfa.totp.enabled = false;
-      await user.save();
-
-      res.json({
-        secret: secret.base32,
-        otpAuthUrl,
-        qrDataUrl,
-        message: "Scan QR code and verify with /mfa/totp/verify to activate",
-      });
-    } catch (err) {
-      logger.error("TOTP setup error", err as Error);
-      res
-        .status(500)
-        .json({ code: ErrorCodes.INTERNAL_ERROR, message: "TOTP setup failed", details: [] });
+      secret = totpObj.secret.base32;
+      const otpauthUri = URI.stringify(totpObj);
+      const QRCode = await import("qrcode");
+      qrCodeUrl = await QRCode.toDataURL(otpauthUri);
+    } catch (libErr) {
+      logger.error("TOTP library error", libErr as Error);
+      return c.json({ error: "INTERNAL_ERROR", message: "TOTP setup failed" }, 500);
     }
-  }
-);
 
-router.post(
-  "/totp/verify",
-  rateLimit({ points: 10, windowSecs: 60 }),
-  authMiddleware,
-  validate(TOTPVerifySchema),
-  async (req, res) => {
+    const db = getDb();
+    const userRows = await db.select({ mfa: usersTable.mfa }).from(usersTable).where(eq(usersTable.id, userId)).limit(1);
+    const currentMfa = (userRows[0]?.mfa as any) ?? { totp: { enabled: false, backupCodes: [] }, webauthn: { enabled: false } };
+
+    await db.update(usersTable).set({
+      mfa: { ...currentMfa, totp: { ...currentMfa.totp, secret, enabled: false } },
+      updatedAt: new Date(),
+    }).where(eq(usersTable.id, userId));
+
+    return c.json({ secret, qrCodeUrl });
+  } catch (err) {
+    logger.error("TOTP setup error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR", message: "TOTP setup failed" }, 500);
+  }
+});
+
+// POST /totp/verify
+router.post("/totp/verify", async (c) => {
+  try {
+    const settings = await getSettings();
+    if (!settings.totpEnabled) {
+      return c.json({ error: "FEATURE_DISABLED", message: "TOTP is disabled" }, 403);
+    }
+
+    const { code } = await c.req.json();
+    if (!code) {
+      return c.json({ error: "INVALID_REQUEST", message: "code is required" }, 400);
+    }
+
+    const userId = c.get("user").id;
+    const db = getDb();
+    const userRows = await db.select({ mfa: usersTable.mfa }).from(usersTable).where(eq(usersTable.id, userId)).limit(1);
+    const user = userRows[0];
+    const mfa = user?.mfa as any;
+
+    if (!user || !mfa?.totp?.secret) {
+      return c.json({ error: "TOTP_NOT_SETUP", message: "TOTP not set up yet. Call /totp/setup first" }, 400);
+    }
+
+    let valid = false;
     try {
-      const { code } = req.body as any;
-      const user = await UserModel.findById(req.user!._id);
-      if (!user)
-        return res
-          .status(404)
-          .json({ code: ErrorCodes.USER_NOT_FOUND, message: "User not found", details: [] });
-
-      if (!user.mfa?.totp?.secret) {
-        return res.status(400).json({
-          code: "TOTP_NOT_SETUP",
-          message: "TOTP not configured. Call /mfa/totp/setup first",
-          details: [],
-        });
-      }
-
-      const cfg = getConfig();
-      const totp = new OTPAuth.TOTP({
-        issuer: "ZeroAuth",
-        label: user.email,
-        algorithm: "SHA1",
-        digits: 6,
-        period: 30,
-        secret: OTPAuth.Secret.fromBase32(user.mfa.totp.secret),
-      });
-
-      const delta = totp.validate({ token: code, window: cfg.mfa.totpWindow });
-      if (delta === null) {
-        return res
-          .status(400)
-          .json({ code: ErrorCodes.MFA_INVALID, message: "Invalid TOTP code", details: [] });
-      }
-
-      const backupCodes = generateBackupCodes(8);
-      const hashedCodes = backupCodes.map((c) =>
-        crypto.createHash("sha256").update(c).digest("hex")
-      );
-
-      user.mfa.totp.enabled = true;
-      user.mfa.totp.backupCodes = hashedCodes;
-      user.mfa.totp.verifiedAt = new Date();
-      await user.save();
-
-      res.json({
-        success: true,
-        backupCodes,
-        message: "TOTP enabled. Store backup codes securely — they will not be shown again.",
-      });
-    } catch (err) {
-      logger.error("TOTP verify error", err as Error);
-      res.status(500).json({
-        code: ErrorCodes.INTERNAL_ERROR,
-        message: "TOTP verification failed",
-        details: [],
-      });
+      const { TOTP, Secret } = await import("otpauth");
+      const totp = new TOTP({ algorithm: "SHA1", digits: 6, period: 30, secret: Secret.fromBase32(mfa.totp.secret) });
+      valid = totp.validate({ token: code, window: 1 }) !== null;
+    } catch (libErr) {
+      logger.error("TOTP verify library error", libErr as Error);
     }
-  }
-);
 
-router.post(
-  "/totp/disable",
-  rateLimit({ points: 5, windowSecs: 60 }),
-  authMiddleware,
-  validate(TOTPVerifySchema),
-  async (req, res) => {
-    try {
-      const { code } = req.body as any;
-      const user = await UserModel.findById(req.user!._id);
-      if (!user)
-        return res
-          .status(404)
-          .json({ code: ErrorCodes.USER_NOT_FOUND, message: "User not found", details: [] });
-
-      if (!user.mfa?.totp?.enabled) {
-        return res
-          .status(400)
-          .json({ code: "TOTP_NOT_ENABLED", message: "TOTP is not enabled", details: [] });
-      }
-
-      const cfg = getConfig();
-      const totp = new OTPAuth.TOTP({
-        issuer: "ZeroAuth",
-        label: user.email,
-        algorithm: "SHA1",
-        digits: 6,
-        period: 30,
-        secret: OTPAuth.Secret.fromBase32(user.mfa.totp.secret!),
-      });
-
-      const delta = totp.validate({ token: code, window: cfg.mfa.totpWindow });
-      if (delta === null) {
-        return res
-          .status(400)
-          .json({ code: ErrorCodes.MFA_INVALID, message: "Invalid TOTP code", details: [] });
-      }
-
-      user.mfa.totp.enabled = false;
-      user.mfa.totp.secret = undefined;
-      user.mfa.totp.backupCodes = [];
-      await user.save();
-
-      res.json({ success: true });
-    } catch (err) {
-      logger.error("TOTP disable error", err as Error);
-      res
-        .status(500)
-        .json({ code: ErrorCodes.INTERNAL_ERROR, message: "TOTP disable failed", details: [] });
+    if (!valid) {
+      return c.json({ error: "INVALID_CODE", message: "Invalid TOTP code" }, 401);
     }
+
+    await db.update(usersTable).set({
+      mfa: { ...mfa, totp: { ...mfa.totp, enabled: true, verifiedAt: new Date() } },
+      updatedAt: new Date(),
+    }).where(eq(usersTable.id, userId));
+
+    return c.json({ enabled: true });
+  } catch (err) {
+    logger.error("TOTP verify error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR", message: "TOTP verification failed" }, 500);
   }
-);
+});
 
-router.post(
-  "/backup-codes/regenerate",
-  rateLimit({ points: 5, windowSecs: 60 }),
-  authMiddleware,
-  validate(TOTPVerifySchema),
-  async (req, res) => {
-    try {
-      const { code } = req.body as any;
-      const user = await UserModel.findById(req.user!._id);
-      if (!user)
-        return res
-          .status(404)
-          .json({ code: ErrorCodes.USER_NOT_FOUND, message: "User not found", details: [] });
+// DELETE /totp
+router.delete("/totp", async (c) => {
+  try {
+    const userId = c.get("user").id;
+    const db = getDb();
+    const userRows = await db.select({ mfa: usersTable.mfa }).from(usersTable).where(eq(usersTable.id, userId)).limit(1);
+    const currentMfa = (userRows[0]?.mfa as any) ?? { totp: { enabled: false, backupCodes: [] }, webauthn: { enabled: false } };
 
-      if (!user.mfa?.totp?.enabled) {
-        return res.status(400).json({
-          code: "TOTP_NOT_ENABLED",
-          message: "TOTP must be enabled to regenerate backup codes",
-          details: [],
-        });
-      }
+    await db.update(usersTable).set({
+      mfa: { ...currentMfa, totp: { enabled: false, backupCodes: [], secret: undefined, verifiedAt: undefined } },
+      updatedAt: new Date(),
+    }).where(eq(usersTable.id, userId));
 
-      const cfg = getConfig();
-      const totp = new OTPAuth.TOTP({
-        issuer: "ZeroAuth",
-        label: user.email,
-        algorithm: "SHA1",
-        digits: 6,
-        period: 30,
-        secret: OTPAuth.Secret.fromBase32(user.mfa.totp.secret!),
-      });
+    return c.json({ disabled: true });
+  } catch (err) {
+    logger.error("TOTP disable error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR", message: "Failed to disable TOTP" }, 500);
+  }
+});
 
-      const delta = totp.validate({ token: code, window: cfg.mfa.totpWindow });
-      if (delta === null) {
-        return res
-          .status(400)
-          .json({ code: ErrorCodes.MFA_INVALID, message: "Invalid TOTP code", details: [] });
-      }
+// POST /otp/send
+router.post("/otp/send", async (c) => {
+  try {
+    const settings = await getSettings();
+    const { channel } = await c.req.json();
 
-      const backupCodes = generateBackupCodes(8);
-      const hashedCodes = backupCodes.map((c) =>
-        crypto.createHash("sha256").update(c).digest("hex")
-      );
-      user.mfa.totp.backupCodes = hashedCodes;
-      await user.save();
-
-      res.json({
-        backupCodes,
-        message: "New backup codes generated. Previous codes are now invalid.",
-      });
-    } catch (err) {
-      logger.error("Backup code regenerate error", err as Error);
-      res.status(500).json({
-        code: ErrorCodes.INTERNAL_ERROR,
-        message: "Failed to regenerate backup codes",
-        details: [],
-      });
+    if (!channel || !["email", "sms"].includes(channel)) {
+      return c.json({ error: "INVALID_REQUEST", message: "channel must be 'email' or 'sms'" }, 400);
     }
-  }
-);
-
-router.post(
-  "/backup-codes/redeem",
-  rateLimit({ points: 10, windowSecs: 60 }),
-  validate(BackupCodeRedeemSchema),
-  async (req, res) => {
-    try {
-      const { code } = req.body as any;
-      const authHeader = req.headers.authorization;
-      if (!authHeader?.startsWith("Bearer ")) {
-        return res
-          .status(401)
-          .json({ code: ErrorCodes.TOKEN_INVALID, message: "Authorization required", details: [] });
-      }
-
-      const codeHash = crypto.createHash("sha256").update(code).digest("hex");
-      const user = await UserModel.findOne({ "mfa.totp.backupCodes": codeHash });
-      if (!user) {
-        return res
-          .status(401)
-          .json({ code: ErrorCodes.MFA_INVALID, message: "Invalid backup code", details: [] });
-      }
-
-      user.mfa.totp.backupCodes = user.mfa.totp.backupCodes.filter((c) => c !== codeHash);
-      await user.save();
-
-      res.json({
-        success: true,
-        remainingCodes: user.mfa.totp.backupCodes.length,
-        message: "Backup code redeemed. You are now authenticated.",
-      });
-    } catch (err) {
-      logger.error("Backup code redeem error", err as Error);
-      res.status(500).json({
-        code: ErrorCodes.INTERNAL_ERROR,
-        message: "Failed to redeem backup code",
-        details: [],
-      });
+    if (channel === "email" && !settings.emailOtpEnabled) {
+      return c.json({ error: "FEATURE_DISABLED", message: "Email OTP is disabled" }, 403);
     }
-  }
-);
-
-router.post(
-  "/otp/send",
-  rateLimit({ points: 5, windowSecs: 60 }),
-  authMiddleware,
-  validate(MFASendOTPSchema),
-  async (req, res) => {
-    try {
-      const { channel, target } = req.body as any;
-      const cfg = getConfig();
-      const channelCfg = cfg.mfa.channels[channel as keyof typeof cfg.mfa.channels];
-      if (!channelCfg?.enabled) {
-        return res.status(400).json({
-          code: "CHANNEL_DISABLED",
-          message: `MFA channel ${channel} is not enabled`,
-          details: [],
-        });
-      }
-
-      const code = crypto.randomInt(100000, 999999).toString();
-      const expiresAt = new Date(Date.now() + cfg.mfa.otpExpirySecs * 1000);
-
-      await OTPModel.create({
-        userId: req.user!._id,
-        code: crypto.createHash("sha256").update(code).digest("hex"),
-        type: "login",
-        channel,
-        target,
-        expiresAt,
-        attempts: 0,
-      });
-
-      await sendOTP(channel, target, code);
-      res.json({ success: true, expiresIn: cfg.mfa.otpExpirySecs });
-    } catch (err) {
-      logger.error("OTP send error", err as Error);
-      res
-        .status(500)
-        .json({ code: ErrorCodes.INTERNAL_ERROR, message: "Failed to send OTP", details: [] });
+    if (channel === "sms" && !settings.smsOtpEnabled) {
+      return c.json({ error: "FEATURE_DISABLED", message: "SMS OTP is disabled" }, 403);
     }
-  }
-);
 
-router.post(
-  "/otp/verify",
-  rateLimit({ points: 10, windowSecs: 60 }),
-  authMiddleware,
-  validate(MFAVerifyOTPSchema),
-  async (req, res) => {
-    try {
-      const { code, channel } = req.body as any;
-      const cfg = getConfig();
+    const user = c.get("user");
+    const target = channel === "email" ? user.email : (user.phone || "");
 
-      const otp = await OTPModel.findOne({
-        userId: req.user!._id,
-        channel,
-        type: "login",
-        expiresAt: { $gt: new Date() },
-        usedAt: { $exists: false },
-        attempts: { $lt: cfg.mfa.maxOTPAttempts },
-      }).sort({ createdAt: -1 });
-
-      if (!otp) {
-        return res.status(400).json({
-          code: ErrorCodes.MFA_INVALID,
-          message: "No valid OTP found. Request a new one.",
-          details: [],
-        });
-      }
-
-      otp.attempts += 1;
-      const codeHash = crypto.createHash("sha256").update(code).digest("hex");
-
-      if (otp.code !== codeHash) {
-        await otp.save();
-        return res
-          .status(400)
-          .json({ code: ErrorCodes.MFA_INVALID, message: "Invalid OTP code", details: [] });
-      }
-
-      otp.usedAt = new Date();
-      await otp.save();
-
-      res.json({ success: true, verified: true });
-    } catch (err) {
-      logger.error("OTP verify error", err as Error);
-      res
-        .status(500)
-        .json({ code: ErrorCodes.INTERNAL_ERROR, message: "OTP verification failed", details: [] });
+    if (channel === "sms" && !target) {
+      return c.json({ error: "NO_PHONE", message: "No phone number on account" }, 400);
     }
+
+    const code = String(crypto.randomInt(100000, 999999));
+    const db = getDb();
+
+    await db.insert(otpsTable).values({
+      userId: user.id,
+      code,
+      type: "login",
+      channel,
+      target,
+      expiresAt: new Date(Date.now() + 15 * 60 * 1000),
+    });
+
+    await sendOTP(channel, target, code);
+    return c.json({ sent: true, channel });
+  } catch (err) {
+    logger.error("OTP send error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR", message: "Failed to send OTP" }, 500);
   }
-);
+});
+
+// POST /otp/verify
+router.post("/otp/verify", async (c) => {
+  try {
+    const { channel, code } = await c.req.json();
+    if (!channel || !code) {
+      return c.json({ error: "INVALID_REQUEST", message: "channel and code are required" }, 400);
+    }
+
+    const userId = c.get("user").id;
+    const db = getDb();
+    const now = new Date();
+
+    const records = await db.select().from(otpsTable).where(
+      and(
+        eq(otpsTable.userId, userId),
+        eq(otpsTable.channel, channel),
+        eq(otpsTable.type, "login"),
+        eq(otpsTable.code, code),
+        gt(otpsTable.expiresAt, now)
+      )
+    ).limit(1);
+
+    if (records.length === 0) {
+      return c.json({ error: "INVALID_CODE", message: "Invalid or expired OTP" }, 401);
+    }
+
+    await db.delete(otpsTable).where(eq(otpsTable.id, records[0].id));
+    return c.json({ verified: true });
+  } catch (err) {
+    logger.error("OTP verify error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR", message: "OTP verification failed" }, 500);
+  }
+});
 
 export default router;

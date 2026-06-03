@@ -1,5 +1,6 @@
 import crypto from "crypto";
-import type { Request, RequestHandler } from "express";
+import { createMiddleware } from "hono/factory";
+import type { HonoEnv } from "../shared/types";
 
 export interface EnterpriseCertificate {
   subject: { CN: string; O?: string; OU?: string; serialNumber?: string };
@@ -23,7 +24,11 @@ class EnterpriseCARegistry {
   private cas = new Map<string, EnterpriseAttestationCA>();
 
   register(ca: Omit<EnterpriseAttestationCA, "id" | "createdAt">): EnterpriseAttestationCA {
-    const record: EnterpriseAttestationCA = { ...ca, id: crypto.randomUUID(), createdAt: new Date() };
+    const record: EnterpriseAttestationCA = {
+      ...ca,
+      id: crypto.randomUUID(),
+      createdAt: new Date(),
+    };
     this.cas.set(record.id, record);
     return record;
   }
@@ -34,7 +39,7 @@ class EnterpriseCARegistry {
 
   list(tenantId?: string): EnterpriseAttestationCA[] {
     const all = Array.from(this.cas.values());
-    return tenantId ? all.filter(c => !c.tenantId || c.tenantId === tenantId) : all;
+    return tenantId ? all.filter((c) => !c.tenantId || c.tenantId === tenantId) : all;
   }
 
   get(id: string): EnterpriseAttestationCA | null {
@@ -76,7 +81,13 @@ export async function verifyEnterpriseAttestation(opts: {
   attestationCertPem: string;
   aaguid?: string;
   tenantId?: string;
-}): Promise<{ verified: boolean; caId?: string; caName?: string; deviceInfo?: EnterpriseCertificate; reason?: string }> {
+}): Promise<{
+  verified: boolean;
+  caId?: string;
+  caName?: string;
+  deviceInfo?: EnterpriseCertificate;
+  reason?: string;
+}> {
   let deviceInfo: EnterpriseCertificate;
   try {
     deviceInfo = parseCertificate(opts.attestationCertPem);
@@ -101,11 +112,23 @@ export async function verifyEnterpriseAttestation(opts: {
       if (!verified) continue;
 
       if (ca.allowedOUs?.length && !ca.allowedOUs.includes(deviceInfo.subject.OU ?? "")) {
-        return { verified: false, reason: "ou_not_allowed", caId: ca.id, caName: ca.name, deviceInfo };
+        return {
+          verified: false,
+          reason: "ou_not_allowed",
+          caId: ca.id,
+          caName: ca.name,
+          deviceInfo,
+        };
       }
 
       if (ca.requireDeviceSerial && !deviceInfo.subject.serialNumber) {
-        return { verified: false, reason: "device_serial_required", caId: ca.id, caName: ca.name, deviceInfo };
+        return {
+          verified: false,
+          reason: "device_serial_required",
+          caId: ca.id,
+          caName: ca.name,
+          deviceInfo,
+        };
       }
 
       return { verified: true, caId: ca.id, caName: ca.name, deviceInfo };
@@ -117,10 +140,12 @@ export async function verifyEnterpriseAttestation(opts: {
   return { verified: false, reason: "no_matching_ca", deviceInfo };
 }
 
-export function requireEnterpriseAttestation(tenantId?: string): RequestHandler {
-  return async (req: Request, res: any, next: any) => {
-    const certHeader = req.headers["x-attestation-cert"] as string | undefined;
-    if (!certHeader) return res.status(403).json({ error: "enterprise_attestation_required" });
+export function requireEnterpriseAttestation(tenantId?: string) {
+  return createMiddleware<HonoEnv>(async (c, next) => {
+    const certHeader = c.req.header("x-attestation-cert");
+    if (!certHeader) {
+      return c.json({ error: "enterprise_attestation_required" }, 403);
+    }
 
     const pem = certHeader.startsWith("-----")
       ? certHeader
@@ -128,10 +153,9 @@ export function requireEnterpriseAttestation(tenantId?: string): RequestHandler 
 
     const result = await verifyEnterpriseAttestation({ attestationCertPem: pem, tenantId });
     if (!result.verified) {
-      return res.status(403).json({ error: "enterprise_attestation_failed", reason: result.reason });
+      return c.json({ error: "enterprise_attestation_failed", reason: result.reason }, 403);
     }
 
-    (req as any).enterpriseAttestation = result;
-    next();
-  };
+    return next();
+  });
 }

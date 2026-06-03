@@ -1,2 +1,2 @@
 export { initTelemetry, getTracer, withSpan } from "./tracer";
-export { tracingMiddleware } from "./middleware";
+export { telemetryMiddleware } from "./middleware";

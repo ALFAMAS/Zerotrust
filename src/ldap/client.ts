@@ -10,16 +10,18 @@
  * routes can be registered.
  */
 
-import type { LDAPConfig, LDAPUser, LDAPGroup } from "./types";
-import { UserModel } from "../models/user.model";
-import { RoleModel } from "../models";
-import { getLogger } from "../logger";
+import type { LDAPConfig, LDAPUser, LDAPGroup } from "./types.js";
+import { getDb } from "../db/index.js";
+import { usersTable, rolesTable } from "../db/schema.js";
+import { eq, inArray } from "drizzle-orm";
+import { getLogger } from "../logger/index.js";
 
 const logger = getLogger("ldap-client");
 
 // ─── Default filter templates ─────────────────────────────────────────────────
 
-const DEFAULT_USER_FILTER = "(&(objectClass=person)(|(sAMAccountName={{username}})(userPrincipalName={{username}})))";
+const DEFAULT_USER_FILTER =
+  "(&(objectClass=person)(|(sAMAccountName={{username}})(userPrincipalName={{username}})))";
 const DEFAULT_GROUP_FILTER = "(&(objectClass=group)(member={{dn}}))";
 
 const DEFAULT_USER_ATTRS = [
@@ -47,7 +49,9 @@ try {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   LdaptsClient = require("ldapts").Client;
 } catch {
-  logger.warn("ldapts package not installed — LDAP client is in mock mode. Run: npm install ldapts");
+  logger.warn(
+    "ldapts package not installed — LDAP client is in mock mode. Run: npm install ldapts"
+  );
 }
 
 // ─── LDAPClient ───────────────────────────────────────────────────────────────
@@ -94,11 +98,7 @@ export class LDAPClient {
     const str = (v: any): string | undefined =>
       v === undefined || v === null ? undefined : Array.isArray(v) ? v[0] : String(v);
     const arr = (v: any): string[] | undefined =>
-      v === undefined || v === null
-        ? undefined
-        : Array.isArray(v)
-        ? v.map(String)
-        : [String(v)];
+      v === undefined || v === null ? undefined : Array.isArray(v) ? v.map(String) : [String(v)];
 
     return {
       dn: str(entry.dn) ?? "",
@@ -118,11 +118,7 @@ export class LDAPClient {
   private entryToLDAPGroup(entry: Record<string, any>): LDAPGroup {
     const str = (v: any): string => (Array.isArray(v) ? v[0] : String(v ?? ""));
     const arr = (v: any): string[] | undefined =>
-      v === undefined || v === null
-        ? undefined
-        : Array.isArray(v)
-        ? v.map(String)
-        : [String(v)];
+      v === undefined || v === null ? undefined : Array.isArray(v) ? v.map(String) : [String(v)];
 
     return {
       dn: str(entry.dn),
@@ -168,10 +164,7 @@ export class LDAPClient {
     try {
       await this.bind();
       const users = await this.searchUsers(
-        this.buildFilter(
-          this.config.userSearchFilter ?? DEFAULT_USER_FILTER,
-          { username }
-        )
+        this.buildFilter(this.config.userSearchFilter ?? DEFAULT_USER_FILTER, { username })
       );
 
       if (users.length === 0) {
@@ -240,10 +233,9 @@ export class LDAPClient {
 
     const client = this.getClient();
     const searchBase = this.config.groupSearchBase ?? this.config.baseDN;
-    const searchFilter = this.buildFilter(
-      this.config.groupSearchFilter ?? DEFAULT_GROUP_FILTER,
-      { dn: userDN }
-    );
+    const searchFilter = this.buildFilter(this.config.groupSearchFilter ?? DEFAULT_GROUP_FILTER, {
+      dn: userDN,
+    });
 
     const { searchEntries } = await client.search(searchBase, {
       scope: "sub",
@@ -267,62 +259,70 @@ export class LDAPClient {
       return;
     }
 
-    const displayName =
-      ldapUser.displayName ??
-      [ldapUser.givenName, ldapUser.sn].filter(Boolean).join(" ") ||
-      ldapUser.sAMAccountName ??
-      email;
+    const fullName = [ldapUser.givenName, ldapUser.sn].filter(Boolean).join(" ");
+    const displayName = ldapUser.displayName ?? (fullName || (ldapUser.sAMAccountName ?? email));
 
     // Resolve group CNs to ZeroAuth role names
     const memberOf = ldapUser.memberOf ?? [];
-    const groupCNs = memberOf.map((dn) => {
-      const match = dn.match(/^CN=([^,]+)/i);
-      return match ? match[1].toLowerCase() : null;
-    }).filter((cn): cn is string => cn !== null);
+    const groupCNs = memberOf
+      .map((dn) => {
+        const match = dn.match(/^CN=([^,]+)/i);
+        return match ? match[1].toLowerCase() : null;
+      })
+      .filter((cn): cn is string => cn !== null);
 
-    // Find matching roles in ZeroAuth
+    // Find matching roles in ZeroAuth via Drizzle
     let roles: string[] = [];
     if (groupCNs.length > 0) {
-      const matchedRoles = await RoleModel.find({
-        name: { $in: groupCNs },
-      }).lean();
+      const db = getDb();
+      const matchedRoles = await db
+        .select({ name: rolesTable.name })
+        .from(rolesTable)
+        .where(inArray(rolesTable.name, groupCNs));
       roles = matchedRoles.map((r) => r.name);
     }
 
-    const update: Record<string, unknown> = {
-      displayName,
-      status: "active",
-      roles,
-      "metadata.ldapDN": ldapUser.dn,
-      "metadata.ldapSyncedAt": new Date(),
+    const normalizedEmail = email.toLowerCase();
+    const metadata: Record<string, unknown> = {
+      ldapDN: ldapUser.dn,
+      ldapSyncedAt: new Date().toISOString(),
     };
+    if (tenantId) metadata["tenantId"] = tenantId;
 
-    if (ldapUser.givenName) update["attributes.department"] = ldapUser.givenName;
-    if (tenantId) update["metadata.tenantId"] = tenantId;
+    const attributes: Record<string, unknown> = {};
+    if (ldapUser.givenName) attributes["department"] = ldapUser.givenName;
 
-    await UserModel.findOneAndUpdate(
-      { email: email.toLowerCase() },
-      {
-        $set: update,
-        $setOnInsert: {
-          email: email.toLowerCase(),
+    const db = getDb();
+
+    // Check if user exists
+    const existing = await db
+      .select({ id: usersTable.id })
+      .from(usersTable)
+      .where(eq(usersTable.email, normalizedEmail))
+      .limit(1);
+
+    if (existing.length > 0) {
+      await db
+        .update(usersTable)
+        .set({
           displayName,
           status: "active",
-          mfa: { totp: { enabled: false, backupCodes: [] }, webauthn: { enabled: false } },
-          passkeys: [],
-          oauthProviders: [],
-          subUserIds: [],
-          sessionConfig: {
-            maxDevices: 5,
-            allowedCountries: [],
-            allowedIpRanges: [],
-            scheduleRestriction: { enabled: false, timezone: "UTC", allowedDays: [], allowedHoursStart: 0, allowedHoursEnd: 23 },
-          },
-          attributes: {},
-        },
-      },
-      { upsert: true, new: true }
-    );
+          roles,
+          metadata,
+          attributes,
+          updatedAt: new Date(),
+        })
+        .where(eq(usersTable.email, normalizedEmail));
+    } else {
+      await db.insert(usersTable).values({
+        email: normalizedEmail,
+        displayName,
+        status: "active",
+        roles,
+        metadata,
+        attributes,
+      });
+    }
 
     logger.debug("LDAP syncUser: upserted user", { email, roles });
   }
@@ -370,7 +370,9 @@ export function createLDAPClient(config?: Partial<LDAPConfig>): LDAPClient {
     userSearchFilter: config?.userSearchFilter ?? process.env.LDAP_USER_SEARCH_FILTER,
     groupSearchBase: config?.groupSearchBase ?? process.env.LDAP_GROUP_SEARCH_BASE,
     groupSearchFilter: config?.groupSearchFilter ?? process.env.LDAP_GROUP_SEARCH_FILTER,
-    timeout: config?.timeout ?? (process.env.LDAP_TIMEOUT_MS ? parseInt(process.env.LDAP_TIMEOUT_MS, 10) : 5000),
+    timeout:
+      config?.timeout ??
+      (process.env.LDAP_TIMEOUT_MS ? parseInt(process.env.LDAP_TIMEOUT_MS, 10) : 5000),
     tlsOptions: {
       rejectUnauthorized: process.env.LDAP_TLS_REJECT_UNAUTHORIZED !== "false",
       ...(config?.tlsOptions ?? {}),

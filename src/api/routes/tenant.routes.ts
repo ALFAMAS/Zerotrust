@@ -1,13 +1,23 @@
 /**
  * Tenant Management API — CRUD + SSO configuration + plan management
  * Mounted at /admin/tenants
+ * Uses an in-memory store (no tenants table in the DB schema yet).
  */
 
-import { Router, Request, Response } from "express";
-import mongoose from "mongoose";
-import { TenantModel } from "../../models/tenant.model";
+import { Hono } from "hono";
+import type { HonoEnv } from "../../shared/types";
+import {
+  getAllTenants,
+  getTenant,
+  getTenantBySlug,
+  createTenant,
+  updateTenant,
+  type OidcConfig,
+  type SamlConfig,
+  type TenantSettings,
+} from "../../models/tenant.model.js";
 
-const router = Router();
+const router = new Hono<HonoEnv>();
 
 const SLUG_RE = /^[a-z0-9-]+$/;
 
@@ -20,22 +30,27 @@ const PLAN_MAX_USERS: Record<string, number | null> = {
 
 // ─── Helper ───────────────────────────────────────────────────────────────────
 
-function isObjectId(value: string): boolean {
-  return mongoose.Types.ObjectId.isValid(value) && String(new mongoose.Types.ObjectId(value)) === value;
+function findByIdOrSlug(idOrSlug: string) {
+  // Try as UUID-shaped id first, then fall back to slug lookup
+  const byId = getTenant(idOrSlug);
+  return byId ?? getTenantBySlug(idOrSlug);
 }
 
-async function findTenantByIdOrSlug(idOrSlug: string) {
-  if (isObjectId(idOrSlug)) {
-    return TenantModel.findById(idOrSlug);
+// ─── Admin role guard ─────────────────────────────────────────────────────────
+
+router.use("/*", async (c, next) => {
+  const user = c.get("user");
+  if (!user || !user.roles.includes("admin")) {
+    return c.json({ code: "ACCESS_DENIED", message: "Admin role required", details: [] }, 403);
   }
-  return TenantModel.findOne({ slug: idOrSlug });
-}
+  return next();
+});
 
 // ─── POST / — Create tenant ───────────────────────────────────────────────────
 
-router.post("/", async (req: Request, res: Response): Promise<void> => {
+router.post("/", async (c) => {
   try {
-    const { slug, name, displayName, status, plan, settings } = req.body as {
+    const { slug, name, displayName, status, plan, settings } = (await c.req.json()) as {
       slug?: string;
       name?: string;
       displayName?: string;
@@ -45,86 +60,89 @@ router.post("/", async (req: Request, res: Response): Promise<void> => {
     };
 
     if (!slug || !name) {
-      res.status(400).json({ code: "VALIDATION_ERROR", message: "slug and name are required", details: [] });
-      return;
+      return c.json(
+        { code: "VALIDATION_ERROR", message: "slug and name are required", details: [] },
+        400
+      );
     }
 
     if (!SLUG_RE.test(slug)) {
-      res.status(400).json({
-        code: "VALIDATION_ERROR",
-        message: "slug must be lowercase alphanumeric characters and hyphens only",
-        details: [],
-      });
-      return;
+      return c.json(
+        {
+          code: "VALIDATION_ERROR",
+          message: "slug must be lowercase alphanumeric characters and hyphens only",
+          details: [],
+        },
+        400
+      );
     }
 
-    const existing = await TenantModel.findOne({ slug });
+    const existing = getTenantBySlug(slug);
     if (existing) {
-      res.status(409).json({ code: "CONFLICT", message: `Tenant with slug '${slug}' already exists`, details: [] });
-      return;
+      return c.json(
+        { code: "CONFLICT", message: `Tenant with slug '${slug}' already exists`, details: [] },
+        409
+      );
     }
 
-    const tenant = await TenantModel.create({
+    const tenant = createTenant({
       slug,
       name,
       displayName: displayName ?? name,
-      ...(status && { status }),
-      ...(plan && { plan }),
-      ...(settings && { settings }),
+      ...(status && { status: status as "active" | "suspended" | "trial" }),
+      ...(plan && { plan: plan as "free" | "starter" | "pro" | "enterprise" }),
+      ...(settings && { settings: settings as Partial<TenantSettings> }),
     });
 
-    res.status(201).json(tenant);
-  } catch (err) {
-    res.status(500).json({ code: "INTERNAL_ERROR", message: "Failed to create tenant", details: [] });
+    return c.json(tenant, 201);
+  } catch {
+    return c.json({ code: "INTERNAL_ERROR", message: "Failed to create tenant", details: [] }, 500);
   }
 });
 
 // ─── GET / — List tenants ─────────────────────────────────────────────────────
 
-router.get("/", async (req: Request, res: Response): Promise<void> => {
+router.get("/", async (c) => {
   try {
-    const { status, plan } = req.query as Record<string, string | undefined>;
-    const page = Math.max(1, parseInt((req.query.page as string) ?? "1", 10));
-    const limit = Math.min(100, Math.max(1, parseInt((req.query.limit as string) ?? "20", 10)));
+    const status = c.req.query("status");
+    const plan = c.req.query("plan");
+    const page = Math.max(1, parseInt(c.req.query("page") ?? "1", 10));
+    const limit = Math.min(100, Math.max(1, parseInt(c.req.query("limit") ?? "20", 10)));
 
-    const filter: Record<string, string> = {};
-    if (status) filter.status = status;
-    if (plan) filter.plan = plan;
+    let tenants = getAllTenants();
+    if (status) tenants = tenants.filter((t) => t.status === status);
+    if (plan) tenants = tenants.filter((t) => t.plan === plan);
 
-    const [tenants, total] = await Promise.all([
-      TenantModel.find(filter)
-        .skip((page - 1) * limit)
-        .limit(limit)
-        .sort({ createdAt: -1 }),
-      TenantModel.countDocuments(filter),
-    ]);
+    tenants.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 
-    res.json({ tenants, total, page, limit });
-  } catch (err) {
-    res.status(500).json({ code: "INTERNAL_ERROR", message: "Failed to list tenants", details: [] });
+    const total = tenants.length;
+    const paged = tenants.slice((page - 1) * limit, (page - 1) * limit + limit);
+
+    return c.json({ tenants: paged, total, page, limit });
+  } catch {
+    return c.json({ code: "INTERNAL_ERROR", message: "Failed to list tenants", details: [] }, 500);
   }
 });
 
 // ─── GET /:id — Get tenant ────────────────────────────────────────────────────
 
-router.get("/:id", async (req: Request, res: Response): Promise<void> => {
+router.get("/:id", async (c) => {
   try {
-    const tenant = await findTenantByIdOrSlug(req.params.id);
+    const tenant = findByIdOrSlug(c.req.param("id"));
     if (!tenant) {
-      res.status(404).json({ code: "NOT_FOUND", message: "Tenant not found", details: [] });
-      return;
+      return c.json({ code: "NOT_FOUND", message: "Tenant not found", details: [] }, 404);
     }
-    res.json(tenant);
-  } catch (err) {
-    res.status(500).json({ code: "INTERNAL_ERROR", message: "Failed to get tenant", details: [] });
+    return c.json(tenant);
+  } catch {
+    return c.json({ code: "INTERNAL_ERROR", message: "Failed to get tenant", details: [] }, 500);
   }
 });
 
 // ─── PUT /:id — Update tenant ─────────────────────────────────────────────────
 
-router.put("/:id", async (req: Request, res: Response): Promise<void> => {
+router.put("/:id", async (c) => {
   try {
-    const { name, displayName, status, plan, settings } = req.body as {
+    const { name, displayName, status, plan, settings } = (await c.req.json()) as {
       name?: string;
       displayName?: string;
       status?: string;
@@ -132,65 +150,52 @@ router.put("/:id", async (req: Request, res: Response): Promise<void> => {
       settings?: Record<string, unknown>;
     };
 
-    const update: Record<string, unknown> = {};
+    const existing = findByIdOrSlug(c.req.param("id"));
+    if (!existing) {
+      return c.json({ code: "NOT_FOUND", message: "Tenant not found", details: [] }, 404);
+    }
+
+    const update: Parameters<typeof updateTenant>[1] = {};
     if (name !== undefined) update.name = name;
     if (displayName !== undefined) update.displayName = displayName;
-    if (status !== undefined) update.status = status;
-    if (plan !== undefined) update.plan = plan;
-    if (settings !== undefined) update.settings = settings;
+    if (status !== undefined)
+      update.status = status as "active" | "suspended" | "trial" | "deleted";
+    if (plan !== undefined) update.plan = plan as "free" | "starter" | "pro" | "enterprise";
+    if (settings !== undefined) update.settings = settings as never;
 
-    let query;
-    if (isObjectId(req.params.id)) {
-      query = TenantModel.findByIdAndUpdate(req.params.id, { $set: update }, { new: true, runValidators: true });
-    } else {
-      query = TenantModel.findOneAndUpdate({ slug: req.params.id }, { $set: update }, { new: true, runValidators: true });
-    }
-
-    const tenant = await query;
-    if (!tenant) {
-      res.status(404).json({ code: "NOT_FOUND", message: "Tenant not found", details: [] });
-      return;
-    }
-    res.json(tenant);
-  } catch (err) {
-    res.status(500).json({ code: "INTERNAL_ERROR", message: "Failed to update tenant", details: [] });
+    const tenant = updateTenant(existing.id, update);
+    return c.json(tenant);
+  } catch {
+    return c.json({ code: "INTERNAL_ERROR", message: "Failed to update tenant", details: [] }, 500);
   }
 });
 
 // ─── DELETE /:id — Soft-delete tenant ────────────────────────────────────────
 
-router.delete("/:id", async (req: Request, res: Response): Promise<void> => {
+router.delete("/:id", async (c) => {
   try {
-    let tenant;
-    if (isObjectId(req.params.id)) {
-      tenant = await TenantModel.findByIdAndUpdate(
-        req.params.id,
-        { $set: { status: "deleted" } },
-        { new: true }
-      );
-    } else {
-      tenant = await TenantModel.findOneAndUpdate(
-        { slug: req.params.id },
-        { $set: { status: "deleted" } },
-        { new: true }
-      );
+    const existing = findByIdOrSlug(c.req.param("id"));
+    if (!existing) {
+      return c.json({ code: "NOT_FOUND", message: "Tenant not found", details: [] }, 404);
     }
 
-    if (!tenant) {
-      res.status(404).json({ code: "NOT_FOUND", message: "Tenant not found", details: [] });
-      return;
-    }
-    res.json({ message: "Tenant deleted", id: tenant._id });
-  } catch (err) {
-    res.status(500).json({ code: "INTERNAL_ERROR", message: "Failed to delete tenant", details: [] });
+    const tenant = updateTenant(existing.id, { status: "deleted" });
+    return c.json({ message: "Tenant deleted", id: tenant!.id });
+  } catch {
+    return c.json({ code: "INTERNAL_ERROR", message: "Failed to delete tenant", details: [] }, 500);
   }
 });
 
 // ─── POST /:id/sso/oidc — Configure OIDC SSO ─────────────────────────────────
 
-router.post("/:id/sso/oidc", async (req: Request, res: Response): Promise<void> => {
+router.post("/:id/sso/oidc", async (c) => {
   try {
-    const { clientId, clientSecret: _clientSecret, redirectUris, scopes } = req.body as {
+    const {
+      clientId,
+      clientSecret: _clientSecret,
+      redirectUris,
+      scopes,
+    } = (await c.req.json()) as {
       clientId?: string;
       clientSecret?: string;
       redirectUris?: string[];
@@ -198,68 +203,72 @@ router.post("/:id/sso/oidc", async (req: Request, res: Response): Promise<void> 
     };
 
     if (!clientId || !redirectUris?.length) {
-      res.status(400).json({ code: "VALIDATION_ERROR", message: "clientId and redirectUris are required", details: [] });
-      return;
+      return c.json(
+        {
+          code: "VALIDATION_ERROR",
+          message: "clientId and redirectUris are required",
+          details: [],
+        },
+        400
+      );
     }
 
-    const update = {
-      "oidcConfig.enabled": true,
-      "oidcConfig.clientId": clientId,
-      "oidcConfig.redirectUris": redirectUris,
-      "oidcConfig.scopes": scopes ?? ["openid", "profile", "email"],
+    const existing = findByIdOrSlug(c.req.param("id"));
+    if (!existing) {
+      return c.json({ code: "NOT_FOUND", message: "Tenant not found", details: [] }, 404);
+    }
+
+    const oidcConfig: OidcConfig = {
+      enabled: true,
+      clientId,
+      redirectUris,
+      scopes: scopes ?? ["openid", "profile", "email"],
     };
 
-    let tenant;
-    if (isObjectId(req.params.id)) {
-      tenant = await TenantModel.findByIdAndUpdate(req.params.id, { $set: update }, { new: true });
-    } else {
-      tenant = await TenantModel.findOneAndUpdate({ slug: req.params.id }, { $set: update }, { new: true });
-    }
-
-    if (!tenant) {
-      res.status(404).json({ code: "NOT_FOUND", message: "Tenant not found", details: [] });
-      return;
-    }
-    res.json(tenant);
-  } catch (err) {
-    res.status(500).json({ code: "INTERNAL_ERROR", message: "Failed to configure OIDC SSO", details: [] });
+    const tenant = updateTenant(existing.id, { oidcConfig });
+    return c.json(tenant);
+  } catch {
+    return c.json(
+      { code: "INTERNAL_ERROR", message: "Failed to configure OIDC SSO", details: [] },
+      500
+    );
   }
 });
 
 // ─── DELETE /:id/sso/oidc — Disable OIDC SSO ─────────────────────────────────
 
-router.delete("/:id/sso/oidc", async (req: Request, res: Response): Promise<void> => {
+router.delete("/:id/sso/oidc", async (c) => {
   try {
-    let tenant;
-    if (isObjectId(req.params.id)) {
-      tenant = await TenantModel.findByIdAndUpdate(
-        req.params.id,
-        { $set: { "oidcConfig.enabled": false } },
-        { new: true }
-      );
-    } else {
-      tenant = await TenantModel.findOneAndUpdate(
-        { slug: req.params.id },
-        { $set: { "oidcConfig.enabled": false } },
-        { new: true }
-      );
+    const existing = findByIdOrSlug(c.req.param("id"));
+    if (!existing) {
+      return c.json({ code: "NOT_FOUND", message: "Tenant not found", details: [] }, 404);
     }
 
-    if (!tenant) {
-      res.status(404).json({ code: "NOT_FOUND", message: "Tenant not found", details: [] });
-      return;
-    }
-    res.json(tenant);
-  } catch (err) {
-    res.status(500).json({ code: "INTERNAL_ERROR", message: "Failed to disable OIDC SSO", details: [] });
+    const oidcConfig: OidcConfig = {
+      ...(existing.oidcConfig ?? {
+        enabled: false,
+        clientId: "",
+        redirectUris: [],
+        scopes: [],
+      }),
+      enabled: false,
+    };
+
+    const tenant = updateTenant(existing.id, { oidcConfig });
+    return c.json(tenant);
+  } catch {
+    return c.json(
+      { code: "INTERNAL_ERROR", message: "Failed to disable OIDC SSO", details: [] },
+      500
+    );
   }
 });
 
 // ─── POST /:id/sso/saml — Configure SAML SSO ─────────────────────────────────
 
-router.post("/:id/sso/saml", async (req: Request, res: Response): Promise<void> => {
+router.post("/:id/sso/saml", async (c) => {
   try {
-    const { idpEntityId, idpSsoUrl, idpCert, spEntityId, attributeMap } = req.body as {
+    const { idpEntityId, idpSsoUrl, idpCert, spEntityId, attributeMap } = (await c.req.json()) as {
       idpEntityId?: string;
       idpSsoUrl?: string;
       idpCert?: string;
@@ -268,130 +277,125 @@ router.post("/:id/sso/saml", async (req: Request, res: Response): Promise<void> 
     };
 
     if (!idpEntityId || !idpSsoUrl || !idpCert) {
-      res.status(400).json({
-        code: "VALIDATION_ERROR",
-        message: "idpEntityId, idpSsoUrl, and idpCert are required",
-        details: [],
-      });
-      return;
+      return c.json(
+        {
+          code: "VALIDATION_ERROR",
+          message: "idpEntityId, idpSsoUrl, and idpCert are required",
+          details: [],
+        },
+        400
+      );
     }
 
-    const update: Record<string, unknown> = {
-      "samlConfig.enabled": true,
-      "samlConfig.idpEntityId": idpEntityId,
-      "samlConfig.idpSsoUrl": idpSsoUrl,
-      "samlConfig.idpCert": idpCert,
+    const existing = findByIdOrSlug(c.req.param("id"));
+    if (!existing) {
+      return c.json({ code: "NOT_FOUND", message: "Tenant not found", details: [] }, 404);
+    }
+
+    const samlConfig: SamlConfig = {
+      enabled: true,
+      idpEntityId,
+      idpSsoUrl,
+      idpCert,
+      spEntityId: spEntityId ?? "",
+      attributeMap: attributeMap ?? {},
     };
-    if (spEntityId) update["samlConfig.spEntityId"] = spEntityId;
-    if (attributeMap) update["samlConfig.attributeMap"] = attributeMap;
 
-    let tenant;
-    if (isObjectId(req.params.id)) {
-      tenant = await TenantModel.findByIdAndUpdate(req.params.id, { $set: update }, { new: true });
-    } else {
-      tenant = await TenantModel.findOneAndUpdate({ slug: req.params.id }, { $set: update }, { new: true });
-    }
-
-    if (!tenant) {
-      res.status(404).json({ code: "NOT_FOUND", message: "Tenant not found", details: [] });
-      return;
-    }
-    res.json(tenant);
-  } catch (err) {
-    res.status(500).json({ code: "INTERNAL_ERROR", message: "Failed to configure SAML SSO", details: [] });
+    const tenant = updateTenant(existing.id, { samlConfig });
+    return c.json(tenant);
+  } catch {
+    return c.json(
+      { code: "INTERNAL_ERROR", message: "Failed to configure SAML SSO", details: [] },
+      500
+    );
   }
 });
 
 // ─── DELETE /:id/sso/saml — Disable SAML SSO ─────────────────────────────────
 
-router.delete("/:id/sso/saml", async (req: Request, res: Response): Promise<void> => {
+router.delete("/:id/sso/saml", async (c) => {
   try {
-    let tenant;
-    if (isObjectId(req.params.id)) {
-      tenant = await TenantModel.findByIdAndUpdate(
-        req.params.id,
-        { $set: { "samlConfig.enabled": false } },
-        { new: true }
-      );
-    } else {
-      tenant = await TenantModel.findOneAndUpdate(
-        { slug: req.params.id },
-        { $set: { "samlConfig.enabled": false } },
-        { new: true }
-      );
+    const existing = findByIdOrSlug(c.req.param("id"));
+    if (!existing) {
+      return c.json({ code: "NOT_FOUND", message: "Tenant not found", details: [] }, 404);
     }
 
-    if (!tenant) {
-      res.status(404).json({ code: "NOT_FOUND", message: "Tenant not found", details: [] });
-      return;
-    }
-    res.json(tenant);
-  } catch (err) {
-    res.status(500).json({ code: "INTERNAL_ERROR", message: "Failed to disable SAML SSO", details: [] });
+    const samlConfig: SamlConfig = {
+      ...(existing.samlConfig ?? {
+        enabled: false,
+        idpEntityId: "",
+        idpSsoUrl: "",
+        idpCert: "",
+        spEntityId: "",
+        attributeMap: {},
+      }),
+      enabled: false,
+    };
+
+    const tenant = updateTenant(existing.id, { samlConfig });
+    return c.json(tenant);
+  } catch {
+    return c.json(
+      { code: "INTERNAL_ERROR", message: "Failed to disable SAML SSO", details: [] },
+      500
+    );
   }
 });
 
 // ─── POST /:id/plan — Upgrade/downgrade plan ──────────────────────────────────
 
-router.post("/:id/plan", async (req: Request, res: Response): Promise<void> => {
+router.post("/:id/plan", async (c) => {
   try {
-    const { plan } = req.body as { plan?: string };
+    const { plan } = (await c.req.json()) as { plan?: string };
 
     if (!plan || !Object.keys(PLAN_MAX_USERS).includes(plan)) {
-      res.status(400).json({
-        code: "VALIDATION_ERROR",
-        message: `plan must be one of: ${Object.keys(PLAN_MAX_USERS).join(", ")}`,
-        details: [],
-      });
-      return;
+      return c.json(
+        {
+          code: "VALIDATION_ERROR",
+          message: `plan must be one of: ${Object.keys(PLAN_MAX_USERS).join(", ")}`,
+          details: [],
+        },
+        400
+      );
     }
 
-    const maxUsers = PLAN_MAX_USERS[plan];
-    const update: Record<string, unknown> = { plan };
-    if (maxUsers !== null) {
-      update["settings.maxUsers"] = maxUsers;
-    } else {
-      // enterprise: remove the cap — set to a very large number to keep the field valid
-      update["settings.maxUsers"] = 2_147_483_647;
+    const existing = findByIdOrSlug(c.req.param("id"));
+    if (!existing) {
+      return c.json({ code: "NOT_FOUND", message: "Tenant not found", details: [] }, 404);
     }
 
-    let tenant;
-    if (isObjectId(req.params.id)) {
-      tenant = await TenantModel.findByIdAndUpdate(req.params.id, { $set: update }, { new: true, runValidators: true });
-    } else {
-      tenant = await TenantModel.findOneAndUpdate({ slug: req.params.id }, { $set: update }, { new: true, runValidators: true });
-    }
-
-    if (!tenant) {
-      res.status(404).json({ code: "NOT_FOUND", message: "Tenant not found", details: [] });
-      return;
-    }
-    res.json(tenant);
-  } catch (err) {
-    res.status(500).json({ code: "INTERNAL_ERROR", message: "Failed to update plan", details: [] });
+    const maxUsers = PLAN_MAX_USERS[plan] ?? 2_147_483_647;
+    const tenant = updateTenant(existing.id, {
+      plan: plan as "free" | "starter" | "pro" | "enterprise",
+      settings: { ...existing.settings, maxUsers },
+    });
+    return c.json(tenant);
+  } catch {
+    return c.json({ code: "INTERNAL_ERROR", message: "Failed to update plan", details: [] }, 500);
   }
 });
 
 // ─── GET /:id/stats — Tenant statistics ──────────────────────────────────────
 
-router.get("/:id/stats", async (req: Request, res: Response): Promise<void> => {
+router.get("/:id/stats", async (c) => {
   try {
-    const tenant = await findTenantByIdOrSlug(req.params.id);
+    const tenant = findByIdOrSlug(c.req.param("id"));
     if (!tenant) {
-      res.status(404).json({ code: "NOT_FOUND", message: "Tenant not found", details: [] });
-      return;
+      return c.json({ code: "NOT_FOUND", message: "Tenant not found", details: [] }, 404);
     }
 
-    // Placeholder — would query User, Session collections in production
-    res.json({
-      tenantId: tenant._id,
+    return c.json({
+      tenantId: tenant.id,
       slug: tenant.slug,
       userCount: 0,
       sessionCount: 0,
       lastActivityAt: null,
     });
-  } catch (err) {
-    res.status(500).json({ code: "INTERNAL_ERROR", message: "Failed to retrieve stats", details: [] });
+  } catch {
+    return c.json(
+      { code: "INTERNAL_ERROR", message: "Failed to retrieve stats", details: [] },
+      500
+    );
   }
 });
 

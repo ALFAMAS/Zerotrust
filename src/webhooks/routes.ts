@@ -1,29 +1,40 @@
-import { Router } from "express";
-import type { Request, Response } from "express";
+import { Hono } from "hono";
+import type { HonoEnv } from "../shared/types";
 import { webhookStore } from "./store";
 import { deliverWebhook } from "./delivery";
 import type { WebhookEventType } from "./types";
+import { authMiddleware } from "../middleware/auth";
 
-const router = Router();
+const app = new Hono<HonoEnv>();
+
+// Auth guard for all webhook admin routes
+app.use("*", authMiddleware);
+
+// GET / — list endpoints
+app.get("/", (c) => {
+  const tenantId = c.req.query("tenantId");
+  const endpoints = webhookStore.listEndpoints(tenantId);
+  return c.json(endpoints);
+});
 
 // POST / — register endpoint
-router.post("/", (req: Request, res: Response) => {
-  const { url, secret, events, tenantId, headers, retryPolicy } = req.body as {
+app.post("/", async (c) => {
+  const body = await c.req.json<{
     url: string;
     secret: string;
     events: WebhookEventType[];
     tenantId?: string;
     headers?: Record<string, string>;
     retryPolicy?: { maxRetries: number; backoffMs: number };
-  };
+  }>();
+
+  const { url, secret, events, tenantId, headers, retryPolicy } = body;
 
   if (!url || !secret || !Array.isArray(events) || events.length === 0) {
-    res.status(400).json({
-      code: "INVALID_INPUT",
-      message: "url, secret, and events[] are required",
-      details: [],
-    });
-    return;
+    return c.json(
+      { code: "INVALID_INPUT", message: "url, secret, and events[] are required", details: [] },
+      400
+    );
   }
 
   const endpoint = webhookStore.registerEndpoint({
@@ -36,63 +47,67 @@ router.post("/", (req: Request, res: Response) => {
     retryPolicy: retryPolicy ?? { maxRetries: 3, backoffMs: 1000 },
   });
 
-  res.status(201).json(endpoint);
+  return c.json(endpoint, 201);
 });
 
-// GET / — list endpoints
-router.get("/", (req: Request, res: Response) => {
-  const tenantId = req.query["tenantId"] as string | undefined;
-  const endpoints = webhookStore.listEndpoints(tenantId);
-  res.json(endpoints);
-});
-
-// PUT /:id — update endpoint
-router.put("/:id", (req: Request, res: Response) => {
-  const { id } = req.params as { id: string };
-  const updated = webhookStore.updateEndpoint(id, req.body as Record<string, unknown>);
-
-  if (!updated) {
-    res.status(404).json({
-      code: "NOT_FOUND",
-      message: `Webhook endpoint ${id} not found`,
-      details: [],
-    });
-    return;
-  }
-
-  res.json(updated);
-});
-
-// DELETE /:id — delete endpoint
-router.delete("/:id", (req: Request, res: Response) => {
-  const { id } = req.params as { id: string };
-  const deleted = webhookStore.deleteEndpoint(id);
-
-  if (!deleted) {
-    res.status(404).json({
-      code: "NOT_FOUND",
-      message: `Webhook endpoint ${id} not found`,
-      details: [],
-    });
-    return;
-  }
-
-  res.status(204).send();
-});
-
-// POST /test/:id — send a test ping to the endpoint
-router.post("/test/:id", async (req: Request, res: Response) => {
-  const { id } = req.params as { id: string };
+// GET /:id — get endpoint
+app.get("/:id", (c) => {
+  const id = c.req.param("id");
   const endpoints = webhookStore.listEndpoints();
   const endpoint = endpoints.find((ep) => ep.id === id);
 
   if (!endpoint) {
-    res.status(404).json({
-      code: "NOT_FOUND",
-      message: `Webhook endpoint ${id} not found`,
-      details: [],
-    });
-    return;
+    return c.json(
+      { code: "NOT_FOUND", message: `Webhook endpoint ${id} not found`, details: [] },
+      404
+    );
+  }
+
+  return c.json(endpoint);
+});
+
+// PATCH /:id — update endpoint
+app.patch("/:id", async (c) => {
+  const id = c.req.param("id");
+  const body = await c.req.json<Record<string, unknown>>();
+  const updated = webhookStore.updateEndpoint(id, body);
+
+  if (!updated) {
+    return c.json(
+      { code: "NOT_FOUND", message: `Webhook endpoint ${id} not found`, details: [] },
+      404
+    );
+  }
+
+  return c.json(updated);
+});
+
+// DELETE /:id — delete endpoint
+app.delete("/:id", (c) => {
+  const id = c.req.param("id");
+  const deleted = webhookStore.deleteEndpoint(id);
+
+  if (!deleted) {
+    return c.json(
+      { code: "NOT_FOUND", message: `Webhook endpoint ${id} not found`, details: [] },
+      404
+    );
+  }
+
+  return new Response(null, { status: 204 });
+});
+
+// POST /:id/ping — send test ping
+app.post("/:id/ping", async (c) => {
+  const id = c.req.param("id");
+  const endpoints = webhookStore.listEndpoints();
+  const endpoint = endpoints.find((ep) => ep.id === id);
+
+  if (!endpoint) {
+    return c.json(
+      { code: "NOT_FOUND", message: `Webhook endpoint ${id} not found`, details: [] },
+      404
+    );
   }
 
   try {
@@ -102,14 +117,13 @@ router.post("/test/:id", async (req: Request, res: Response) => {
       { test: true, message: "ZeroAuth webhook ping" },
       1
     );
-    res.json(delivery);
+    return c.json(delivery);
   } catch (err) {
-    res.status(500).json({
-      code: "DELIVERY_ERROR",
-      message: "Failed to send test webhook",
-      details: [String(err)],
-    });
+    return c.json(
+      { code: "DELIVERY_ERROR", message: "Failed to send test webhook", details: [String(err)] },
+      500
+    );
   }
 });
 
-export default router;
+export default app;

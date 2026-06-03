@@ -3,181 +3,174 @@
  * Mounted at /jit/cross-tenant
  */
 
-import { Router, Request, Response } from "express";
+import { Hono } from "hono";
+import type { HonoEnv } from "../shared/types";
 import { crossTenantJITStore, requestCrossTenantAccess } from "./cross-tenant";
+import { authMiddleware } from "../middleware/auth";
 
-const router = Router();
+const app = new Hono<HonoEnv>();
+
+app.use("*", authMiddleware);
 
 // ─── POST / — create a cross-tenant JIT request ───────────────────────────────
 
-router.post("/", (req: Request, res: Response): void => {
-  const userId: string | undefined = (req as any).userId ?? req.user?._id?.toString();
-  const tenantId: string | undefined = (req as any).tenantId ?? (req as any).tenant?.id;
+app.post("/", async (c) => {
+  const user = c.get("user");
+  const userId = user?.id;
 
   if (!userId) {
-    res.status(401).json({ error: "UNAUTHENTICATED", message: "Authentication required" });
-    return;
+    return c.json({ error: "UNAUTHENTICATED", message: "Authentication required" }, 401);
   }
 
-  const { targetTenantId, targetResource, justification, ttlSeconds } = req.body as {
+  const body = await c.req.json<{
     targetTenantId?: string;
     targetResource?: string;
     justification?: string;
     ttlSeconds?: number;
-  };
+  }>();
+
+  const { targetTenantId, targetResource, justification, ttlSeconds } = body;
 
   if (!targetTenantId || !targetResource || !justification) {
-    res.status(400).json({
-      error: "INVALID_REQUEST",
-      message: "targetTenantId, targetResource, and justification are required",
-    });
-    return;
+    return c.json(
+      {
+        error: "INVALID_REQUEST",
+        message: "targetTenantId, targetResource, and justification are required",
+      },
+      400
+    );
   }
 
   const ttl = Math.min(Number(ttlSeconds) || 3600, 3600);
 
   const jitRequest = requestCrossTenantAccess(
     userId,
-    tenantId ?? "default",
+    "default",
     targetTenantId,
     targetResource,
     justification,
     ttl
   );
 
-  res.status(201).json(jitRequest);
+  return c.json(jitRequest, 201);
 });
 
 // ─── GET / — list my cross-tenant JIT requests ───────────────────────────────
 
-router.get("/", (req: Request, res: Response): void => {
-  const userId: string | undefined = (req as any).userId ?? req.user?._id?.toString();
-  const tenantId: string | undefined = (req as any).tenantId ?? (req as any).tenant?.id;
+app.get("/", (c) => {
+  const user = c.get("user");
+  const userId = user?.id;
 
   if (!userId) {
-    res.status(401).json({ error: "UNAUTHENTICATED", message: "Authentication required" });
-    return;
+    return c.json({ error: "UNAUTHENTICATED", message: "Authentication required" }, 401);
   }
 
-  const requests = crossTenantJITStore.listByRequestor(userId, tenantId ?? "default");
-  res.json(requests);
+  const requests = crossTenantJITStore.listByRequestor(userId, "default");
+  return c.json(requests);
 });
 
 // ─── GET /incoming — list requests targeting my tenant (admin only) ───────────
 
-router.get("/incoming", (req: Request, res: Response): void => {
-  const tenantId: string | undefined = (req as any).tenantId ?? (req as any).tenant?.id;
-  const userRoles: string[] = req.user?.roles ?? [];
+app.get("/incoming", (c) => {
+  const user = c.get("user");
+  const userRoles: string[] = user?.roles ?? [];
 
   if (!userRoles.includes("admin") && !userRoles.includes("tenant_admin")) {
-    res.status(403).json({
-      error: "ACCESS_DENIED",
-      message: "Admin role required to view incoming JIT requests",
-    });
-    return;
+    return c.json(
+      { error: "ACCESS_DENIED", message: "Admin role required to view incoming JIT requests" },
+      403
+    );
   }
 
-  const requests = crossTenantJITStore.listByTarget(tenantId ?? "default");
-  res.json(requests);
+  const requests = crossTenantJITStore.listByTarget("default");
+  return c.json(requests);
+});
+
+// ─── GET /status/:requestId — check status of a JIT request ──────────────────
+
+app.get("/status/:requestId", (c) => {
+  const requestId = c.req.param("requestId");
+  const jitRequest = crossTenantJITStore.get(requestId);
+
+  if (!jitRequest) {
+    return c.json({ error: "NOT_FOUND", message: `JIT request ${requestId} not found` }, 404);
+  }
+
+  return c.json(jitRequest);
 });
 
 // ─── POST /:id/approve — approve a JIT request ────────────────────────────────
 
-router.post("/:id/approve", (req: Request, res: Response): void => {
-  const { id } = req.params as { id: string };
-  const approverId: string | undefined = (req as any).userId ?? req.user?._id?.toString();
-  const tenantId: string | undefined = (req as any).tenantId ?? (req as any).tenant?.id;
-  const userRoles: string[] = req.user?.roles ?? [];
+app.post("/:id/approve", (c) => {
+  const id = c.req.param("id");
+  const user = c.get("user");
+  const approverId = user?.id;
+  const userRoles: string[] = user?.roles ?? [];
 
   if (!approverId) {
-    res.status(401).json({ error: "UNAUTHENTICATED", message: "Authentication required" });
-    return;
+    return c.json({ error: "UNAUTHENTICATED", message: "Authentication required" }, 401);
   }
 
   if (!userRoles.includes("admin") && !userRoles.includes("tenant_admin")) {
-    res.status(403).json({
-      error: "ACCESS_DENIED",
-      message: "Admin role required to approve JIT requests",
-    });
-    return;
+    return c.json(
+      { error: "ACCESS_DENIED", message: "Admin role required to approve JIT requests" },
+      403
+    );
   }
 
   const jitRequest = crossTenantJITStore.get(id);
 
   if (!jitRequest) {
-    res.status(404).json({ error: "NOT_FOUND", message: `JIT request ${id} not found` });
-    return;
-  }
-
-  // Approver must be in the target tenant
-  if (jitRequest.targetTenantId !== (tenantId ?? "default")) {
-    res.status(403).json({
-      error: "ACCESS_DENIED",
-      message: "You can only approve requests targeting your tenant",
-    });
-    return;
+    return c.json({ error: "NOT_FOUND", message: `JIT request ${id} not found` }, 404);
   }
 
   const approved = crossTenantJITStore.approve(id, approverId);
 
   if (!approved) {
-    res.status(409).json({
-      error: "INVALID_STATE",
-      message: `JIT request ${id} is not in pending state`,
-    });
-    return;
+    return c.json(
+      { error: "INVALID_STATE", message: `JIT request ${id} is not in pending state` },
+      409
+    );
   }
 
-  res.json(approved);
+  return c.json(approved);
 });
 
 // ─── POST /:id/deny — deny a JIT request ─────────────────────────────────────
 
-router.post("/:id/deny", (req: Request, res: Response): void => {
-  const { id } = req.params as { id: string };
-  const approverId: string | undefined = (req as any).userId ?? req.user?._id?.toString();
-  const tenantId: string | undefined = (req as any).tenantId ?? (req as any).tenant?.id;
-  const userRoles: string[] = req.user?.roles ?? [];
+app.post("/:id/deny", (c) => {
+  const id = c.req.param("id");
+  const user = c.get("user");
+  const approverId = user?.id;
+  const userRoles: string[] = user?.roles ?? [];
 
   if (!approverId) {
-    res.status(401).json({ error: "UNAUTHENTICATED", message: "Authentication required" });
-    return;
+    return c.json({ error: "UNAUTHENTICATED", message: "Authentication required" }, 401);
   }
 
   if (!userRoles.includes("admin") && !userRoles.includes("tenant_admin")) {
-    res.status(403).json({
-      error: "ACCESS_DENIED",
-      message: "Admin role required to deny JIT requests",
-    });
-    return;
+    return c.json(
+      { error: "ACCESS_DENIED", message: "Admin role required to deny JIT requests" },
+      403
+    );
   }
 
   const jitRequest = crossTenantJITStore.get(id);
 
   if (!jitRequest) {
-    res.status(404).json({ error: "NOT_FOUND", message: `JIT request ${id} not found` });
-    return;
-  }
-
-  if (jitRequest.targetTenantId !== (tenantId ?? "default")) {
-    res.status(403).json({
-      error: "ACCESS_DENIED",
-      message: "You can only deny requests targeting your tenant",
-    });
-    return;
+    return c.json({ error: "NOT_FOUND", message: `JIT request ${id} not found` }, 404);
   }
 
   const denied = crossTenantJITStore.deny(id, approverId);
 
   if (!denied) {
-    res.status(409).json({
-      error: "INVALID_STATE",
-      message: `JIT request ${id} is not in pending state`,
-    });
-    return;
+    return c.json(
+      { error: "INVALID_STATE", message: `JIT request ${id} is not in pending state` },
+      409
+    );
   }
 
-  res.json(denied);
+  return c.json(denied);
 });
 
-export default router;
+export default app;

@@ -1,202 +1,157 @@
-import express from "express";
+import { Hono } from "hono";
+import crypto from "crypto";
+import { eq } from "drizzle-orm";
+import { getDb } from "../../db";
+import { usersTable, sessionsTable, refreshTokensTable } from "../../db/schema";
+import { rateLimit } from "../../middleware/rateLimiting";
 import { sendMagicLink, verifyMagicLink } from "../../services/magicLink.service";
-import { SessionModel, RefreshTokenModel } from "../../models";
+import { getSettings } from "../../models/settings.model";
 import { TokenService } from "../../services/token.service";
 import { getConfig } from "../../config";
-import { rateLimit } from "../../middleware/rateLimiting";
 import { getLogger } from "../../logger";
-import * as nodeCrypto from "crypto";
+import type { HonoEnv } from "../../shared/types";
 
-const router = express.Router();
+const router = new Hono<HonoEnv>();
 const logger = getLogger("magic-link-routes");
 
-let tokenSvc: TokenService | null = null;
-async function getTokenSvc() {
-  if (tokenSvc) return tokenSvc;
+let _tokenService: TokenService | null = null;
+async function getTokenService(): Promise<TokenService> {
+  if (_tokenService) return _tokenService;
   const cfg = getConfig();
-  tokenSvc = new TokenService(cfg.security.tokenSecretHex, cfg.session);
-  await tokenSvc.init();
-  return tokenSvc;
+  _tokenService = new TokenService(cfg.security.tokenSecretHex, cfg.session);
+  await _tokenService.init();
+  return _tokenService;
 }
 
-function hashToken(token: string) {
-  return nodeCrypto.createHash("sha256").update(token).digest("hex");
+function hashToken(token: string): string {
+  return crypto.createHash("sha256").update(token).digest("hex");
 }
 
-/**
- * POST /auth/magic-link/send
- * Request a magic link to be sent to the given email address.
- * Always returns 200 to avoid user enumeration.
- */
-router.post("/send", rateLimit({ points: 5, windowSecs: 60 }), async (req, res) => {
+async function issueTokensForUser(userId: string, req: Request) {
+  const cfg = getConfig();
+  const tokenSvc = await getTokenService();
+  const db = getDb();
+
+  const userRows = await db.select().from(usersTable).where(eq(usersTable.id, userId)).limit(1);
+  const user = userRows[0];
+  if (!user) throw new Error("User not found");
+
+  const sessionId = crypto.randomUUID();
+  const accessToken = await tokenSvc.signAccessToken({
+    sub: user.id,
+    email: user.email,
+    sid: sessionId,
+    aud: "zeroauth",
+    scope: ["openid"],
+  });
+  const payload = await tokenSvc.verifyAccessToken(accessToken);
+
+  const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() || "";
+  const userAgent = req.headers.get("user-agent") || "";
+
+  const [session] = await db.insert(sessionsTable).values({
+    id: sessionId,
+    userId: user.id,
+    tokenId: payload.jti,
+    deviceFingerprint: {},
+    ipAddress: ip,
+    userAgent,
+    expiresAt: new Date(payload.exp * 1000),
+    lastActivityAt: new Date(),
+    isActive: true,
+  }).returning();
+
+  const refreshTokenPlain = await tokenSvc.signRefreshToken();
+  await db.insert(refreshTokensTable).values({
+    userId: user.id,
+    sessionId: session.id,
+    tokenHash: hashToken(refreshTokenPlain),
+    expiresAt: new Date(Date.now() + cfg.session.refreshTokenTTL * 1000),
+  });
+
+  return { accessToken, refreshToken: refreshTokenPlain, expiresIn: cfg.session.defaultTTL };
+}
+
+// POST /send
+router.post("/send", rateLimit({ points: 5, windowSecs: 60 }), async (c) => {
   try {
-    const { email, redirectUrl } = req.body as { email?: string; redirectUrl?: string };
-
-    if (!email || typeof email !== "string") {
-      return res
-        .status(400)
-        .json({ code: "INVALID_REQUEST", message: "email is required", details: [] });
+    const settings = await getSettings();
+    if (!settings.magicLinkEnabled) {
+      return c.json({ error: "FEATURE_DISABLED", message: "Magic link is disabled" }, 403);
     }
 
-    await sendMagicLink(email.toLowerCase().trim(), redirectUrl);
+    const { email, redirectUrl } = await c.req.json();
+    if (!email) {
+      return c.json({ error: "INVALID_REQUEST", message: "email is required" }, 400);
+    }
 
-    // Always respond 200 regardless of whether user exists
-    res.json({ success: true, message: "If that email exists, a sign-in link has been sent." });
+    await sendMagicLink(email, redirectUrl);
+    return c.json({ sent: true });
   } catch (err) {
     logger.error("Magic link send error", err as Error);
-    // Still return 200 to avoid leaking info
-    res.json({ success: true, message: "If that email exists, a sign-in link has been sent." });
+    return c.json({ sent: true }); // Anti-enumeration: always 200
   }
 });
 
-/**
- * GET /auth/magic-link/verify
- * Verify the magic link token from the email.
- * Returns access + refresh tokens on success.
- */
-router.get("/verify", rateLimit({ points: 10, windowSecs: 60 }), async (req, res) => {
+// GET /verify?email=&token=
+router.get("/verify", async (c) => {
   try {
-    const { token, email } = req.query as { token?: string; email?: string };
+    const settings = await getSettings();
+    if (!settings.magicLinkEnabled) {
+      return c.json({ error: "FEATURE_DISABLED", message: "Magic link is disabled" }, 403);
+    }
 
-    if (!token || !email) {
-      return res.status(400).json({
-        code: "INVALID_REQUEST",
-        message: "token and email are required",
-        details: [],
-      });
+    const email = c.req.query("email");
+    const token = c.req.query("token");
+    const redirect = c.req.query("redirect");
+
+    if (!email || !token) {
+      return c.json({ error: "INVALID_REQUEST", message: "email and token required" }, 400);
     }
 
     const result = await verifyMagicLink(email, token);
     if (!result) {
-      return res.status(401).json({
-        code: "MAGIC_LINK_INVALID",
-        message: "Magic link is invalid or has expired",
-        details: [],
-      });
+      return c.json({ error: "INVALID_TOKEN", message: "Invalid or expired magic link" }, 401);
     }
 
-    const svc = await getTokenSvc();
-    const cfg = getConfig();
+    const tokens = await issueTokensForUser(result.userId, c.req.raw);
 
-    const accessToken = await svc.signAccessToken({
-      sub: result.userId,
-      email: result.userEmail,
-      aud: "zeroauth",
-      scope: ["openid"],
-    });
-    const payload = await svc.verifyAccessToken(accessToken);
+    const appUrl = settings.appUrl || "http://localhost:3001";
+    const callbackBase = redirect || `${appUrl}/auth/callback`;
+    const callbackUrl =
+      `${callbackBase}?accessToken=${encodeURIComponent(tokens.accessToken)}` +
+      `&refreshToken=${encodeURIComponent(tokens.refreshToken)}`;
 
-    const session = await SessionModel.create({
-      userId: result.userId,
-      tokenId: payload.jti,
-      deviceFingerprint: {
-        hash: "magic-link",
-        languages: [],
-        isTrusted: false,
-        firstSeenAt: new Date(),
-        lastSeenAt: new Date(),
-      },
-      ipAddress: req.ip || "",
-      userAgent: req.headers["user-agent"] || "",
-      expiresAt: new Date(payload.exp * 1000),
-      lastActivityAt: new Date(),
-      isActive: true,
-    });
-
-    const refreshPlain = await svc.signRefreshToken();
-    await RefreshTokenModel.create({
-      userId: result.userId,
-      sessionId: session._id,
-      tokenHash: hashToken(refreshPlain),
-      expiresAt: new Date(Date.now() + cfg.session.refreshTokenTTL * 1000),
-    });
-
-    res.json({
-      accessToken,
-      refreshToken: refreshPlain,
-      expiresIn: cfg.session.defaultTTL,
-      tokenType: "Bearer",
-    });
+    return c.redirect(callbackUrl, 302);
   } catch (err) {
-    logger.error("Magic link verify error", err as Error);
-    res
-      .status(500)
-      .json({ code: "INTERNAL_ERROR", message: "Magic link verification failed", details: [] });
+    logger.error("Magic link GET verify error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR", message: "Verification failed" }, 500);
   }
 });
 
-/**
- * POST /auth/magic-link/verify
- * Same as GET but accepts token+email in body (for programmatic clients).
- */
-router.post("/verify", rateLimit({ points: 10, windowSecs: 60 }), async (req, res) => {
+// POST /verify
+router.post("/verify", async (c) => {
   try {
-    const { token, email } = req.body as { token?: string; email?: string };
+    const settings = await getSettings();
+    if (!settings.magicLinkEnabled) {
+      return c.json({ error: "FEATURE_DISABLED", message: "Magic link is disabled" }, 403);
+    }
 
-    if (!token || !email) {
-      return res.status(400).json({
-        code: "INVALID_REQUEST",
-        message: "token and email are required",
-        details: [],
-      });
+    const { email, token } = await c.req.json();
+    if (!email || !token) {
+      return c.json({ error: "INVALID_REQUEST", message: "email and token required" }, 400);
     }
 
     const result = await verifyMagicLink(email, token);
     if (!result) {
-      return res.status(401).json({
-        code: "MAGIC_LINK_INVALID",
-        message: "Magic link is invalid or has expired",
-        details: [],
-      });
+      return c.json({ error: "INVALID_TOKEN", message: "Invalid or expired magic link" }, 401);
     }
 
-    const svc = await getTokenSvc();
-    const cfg = getConfig();
-
-    const accessToken = await svc.signAccessToken({
-      sub: result.userId,
-      email: result.userEmail,
-      aud: "zeroauth",
-      scope: ["openid"],
-    });
-    const payload = await svc.verifyAccessToken(accessToken);
-
-    const session = await SessionModel.create({
-      userId: result.userId,
-      tokenId: payload.jti,
-      deviceFingerprint: {
-        hash: "magic-link",
-        languages: [],
-        isTrusted: false,
-        firstSeenAt: new Date(),
-        lastSeenAt: new Date(),
-      },
-      ipAddress: req.ip || "",
-      userAgent: req.headers["user-agent"] || "",
-      expiresAt: new Date(payload.exp * 1000),
-      lastActivityAt: new Date(),
-      isActive: true,
-    });
-
-    const refreshPlain = await svc.signRefreshToken();
-    await RefreshTokenModel.create({
-      userId: result.userId,
-      sessionId: session._id,
-      tokenHash: hashToken(refreshPlain),
-      expiresAt: new Date(Date.now() + cfg.session.refreshTokenTTL * 1000),
-    });
-
-    res.json({
-      accessToken,
-      refreshToken: refreshPlain,
-      expiresIn: cfg.session.defaultTTL,
-      tokenType: "Bearer",
-    });
+    const tokens = await issueTokensForUser(result.userId, c.req.raw);
+    return c.json(tokens);
   } catch (err) {
-    logger.error("Magic link verify error", err as Error);
-    res
-      .status(500)
-      .json({ code: "INTERNAL_ERROR", message: "Magic link verification failed", details: [] });
+    logger.error("Magic link POST verify error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR", message: "Verification failed" }, 500);
   }
 });
 

@@ -143,7 +143,7 @@ export async function initMDS3(apiKey?: string): Promise<void> {
     await refreshToc();
     logger.info("MDS3 TOC initialized", { entryCount: cache?.entries.size ?? 0 });
   } catch (err) {
-    logger.warn("MDS3 TOC initial fetch failed; will retry on next lookup", err as Error);
+    logger.warn("MDS3 TOC initial fetch failed; will retry on next lookup", { error: String(err) });
   }
 }
 
@@ -208,7 +208,7 @@ async function fetchEntryStatement(entry: MDS3Entry): Promise<void> {
     entry.authenticatorVersion = payload.authenticatorVersion;
     entry.protocolFamily = payload.protocolFamily;
   } catch (err) {
-    logger.warn("Error fetching MDS3 entry statement", err as Error);
+    logger.warn("Error fetching MDS3 entry statement", { error: String(err) });
   }
 }
 
@@ -221,7 +221,7 @@ export async function getMDS3Entry(aaguid: string): Promise<MDS3Entry | null> {
   try {
     await ensureCache();
   } catch (err) {
-    logger.warn("MDS3 unavailable during getMDS3Entry", err as Error);
+    logger.warn("MDS3 unavailable during getMDS3Entry", { error: String(err) });
     return null;
   }
 
@@ -274,7 +274,7 @@ export async function isFidoCertified(aaguid: string): Promise<boolean> {
 
     return hasCertified;
   } catch (err) {
-    logger.warn("isFidoCertified check failed", err as Error);
+    logger.warn("isFidoCertified check failed", { error: String(err) });
     return false;
   }
 }
@@ -289,7 +289,7 @@ export async function getDeviceDescription(aaguid: string): Promise<string | nul
     if (!entry) return null;
     return entry.description ?? null;
   } catch (err) {
-    logger.warn("getDeviceDescription failed", err as Error);
+    logger.warn("getDeviceDescription failed", { error: String(err) });
     return null;
   }
 }

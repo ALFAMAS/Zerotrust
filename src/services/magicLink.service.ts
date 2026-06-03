@@ -1,122 +1,123 @@
 import crypto from "crypto";
-import { UserModel, OTPModel } from "../models";
-import { sendEmailOTP } from "../mfa/channels/email";
+import nodemailer from "nodemailer";
+import { eq, and, gt } from "drizzle-orm";
+import { getDb } from "../db";
+import { usersTable, otpsTable } from "../db/schema";
+import { getSettings } from "../models/settings.model";
 import { getLogger } from "../logger";
 
 const logger = getLogger("magic-link");
 
-const MAGIC_LINK_TTL_SECS = 15 * 60; // 15 minutes
-const BASE_URL = process.env.APP_BASE_URL || "http://localhost:3000";
+const MAGIC_LINK_TTL_MS = 15 * 60 * 1000;
 
-export interface MagicLinkResult {
-  sent: boolean;
-  expiresIn: number;
+function hashToken(token: string): string {
+  return crypto.createHash("sha256").update(token).digest("hex");
 }
 
-/**
- * Send a passwordless magic-link login email to the given address.
- * Creates a single-use OTP token and emails a signed link.
- */
-export async function sendMagicLink(
-  email: string,
-  redirectUrl?: string
-): Promise<MagicLinkResult> {
-  const user = await UserModel.findOne({ email: email.toLowerCase().trim() });
-
-  // Always return success to avoid user enumeration
-  if (!user || user.status !== "active") {
-    logger.warn("Magic link requested for unknown/inactive user", { email });
-    return { sent: false, expiresIn: MAGIC_LINK_TTL_SECS };
+let _transporter: nodemailer.Transporter | null = null;
+function getTransporter(): nodemailer.Transporter {
+  if (_transporter) return _transporter;
+  const host = process.env.SMTP_HOST || process.env.MAIL_HOST;
+  if (host) {
+    _transporter = nodemailer.createTransport({
+      host,
+      port: parseInt(process.env.SMTP_PORT || process.env.MAIL_PORT || "587"),
+      secure: process.env.SMTP_SECURE === "true",
+      auth:
+        process.env.SMTP_USER || process.env.MAIL_USER
+          ? { user: process.env.SMTP_USER || process.env.MAIL_USER, pass: process.env.SMTP_PASS || process.env.MAIL_PASS }
+          : undefined,
+    } as any);
+  } else {
+    _transporter = nodemailer.createTransport({ jsonTransport: true } as any);
   }
-
-  // Revoke any existing magic-link OTPs for this user
-  await OTPModel.deleteMany({ userId: user._id, type: "login", channel: "email" });
-
-  const token = crypto.randomBytes(32).toString("hex");
-  const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
-
-  await OTPModel.create({
-    userId: user._id,
-    code: tokenHash,
-    type: "login",
-    channel: "email",
-    target: email,
-    expiresAt: new Date(Date.now() + MAGIC_LINK_TTL_SECS * 1000),
-    attempts: 0,
-  });
-
-  const verifyUrl = new URL("/auth/magic-link/verify", BASE_URL);
-  verifyUrl.searchParams.set("token", token);
-  verifyUrl.searchParams.set("email", email);
-  if (redirectUrl) verifyUrl.searchParams.set("redirect", redirectUrl);
-
-  const html = buildMagicLinkEmail(user.displayName, verifyUrl.toString());
-  await sendEmailOTP(email, "Your ZeroAuth sign-in link", html);
-
-  logger.info("Magic link sent", { userId: user._id.toString() });
-  return { sent: true, expiresIn: MAGIC_LINK_TTL_SECS };
+  return _transporter;
 }
 
-/**
- * Verify a magic-link token and return the userId if valid.
- * Consumes the token (single-use).
- */
-export async function verifyMagicLink(
-  email: string,
-  token: string
-): Promise<{ userId: string; userEmail: string } | null> {
-  const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
+export async function sendMagicLink(email: string, redirectUrl?: string): Promise<{ sent: boolean }> {
+  try {
+    const db = getDb();
+    const userRows = await db.select({ id: usersTable.id }).from(usersTable).where(eq(usersTable.email, email.toLowerCase())).limit(1);
 
-  const otp = await OTPModel.findOne({
-    target: email.toLowerCase().trim(),
-    code: tokenHash,
-    type: "login",
-    channel: "email",
-    usedAt: null,
-  });
+    if (userRows.length === 0) {
+      logger.debug("Magic link requested for unknown email (silently ignored)", { email });
+      return { sent: true };
+    }
 
-  if (!otp) {
-    logger.warn("Magic link verification failed: token not found", { email });
-    return null;
+    const user = userRows[0];
+    const rawToken = crypto.randomBytes(32).toString("hex");
+    const tokenHash = hashToken(rawToken);
+
+    await db.insert(otpsTable).values({
+      userId: user.id,
+      code: tokenHash,
+      type: "login",
+      channel: "email",
+      target: email,
+      expiresAt: new Date(Date.now() + MAGIC_LINK_TTL_MS),
+    });
+
+    const settings = await getSettings();
+    const appUrl = settings.appUrl || process.env.APP_URL || "http://localhost:3001";
+    const verifyUrl =
+      `${appUrl}/auth/magic-link/verify` +
+      `?token=${encodeURIComponent(rawToken)}&email=${encodeURIComponent(email)}` +
+      (redirectUrl ? `&redirect=${encodeURIComponent(redirectUrl)}` : "");
+
+    const hasMailConfig = !!(process.env.SMTP_HOST || process.env.MAIL_HOST);
+    if (hasMailConfig) {
+      const t = getTransporter();
+      await t.sendMail({
+        from: process.env.SMTP_FROM || `no-reply@${process.env.AUTH_DOMAIN || "zeroauth.local"}`,
+        to: email,
+        subject: `Sign in to ${settings.appName}`,
+        text: `Click this link to sign in (expires in 15 minutes):\n\n${verifyUrl}\n\nIf you didn't request this, you can ignore this email.`,
+        html: `<p>Click the link below to sign in (expires in 15 minutes):</p><p><a href="${verifyUrl}">${verifyUrl}</a></p><p>If you didn't request this, you can ignore this email.</p>`,
+      });
+      logger.info("Magic link email sent", { email });
+    } else {
+      logger.info("Magic link (no mail transport — logging to console)", { email, verifyUrl });
+      console.log(`[MAGIC LINK] ${email} → ${verifyUrl}`);
+    }
+  } catch (err) {
+    logger.error("sendMagicLink error", err as Error);
   }
-
-  if (otp.expiresAt < new Date()) {
-    await otp.deleteOne();
-    logger.warn("Magic link verification failed: token expired", { email });
-    return null;
-  }
-
-  const user = await UserModel.findById(otp.userId);
-  if (!user || user.status !== "active") {
-    await otp.deleteOne();
-    return null;
-  }
-
-  // Consume the token
-  await otp.deleteOne();
-
-  logger.info("Magic link verified", { userId: user._id.toString() });
-  return { userId: user._id.toString(), userEmail: user.email };
+  return { sent: true };
 }
 
-function buildMagicLinkEmail(displayName: string, link: string): string {
-  return `
-<!DOCTYPE html>
-<html>
-<head><meta charset="utf-8"></head>
-<body style="font-family:system-ui,sans-serif;background:#f4f4f5;padding:32px;">
-  <div style="max-width:480px;margin:0 auto;background:#fff;border-radius:12px;padding:32px;box-shadow:0 2px 8px rgba(0,0,0,.08);">
-    <h2 style="margin-top:0;color:#1a1a2e;">Sign in to ZeroAuth</h2>
-    <p style="color:#444;">Hi ${displayName},</p>
-    <p style="color:#444;">Click the button below to sign in. This link expires in <strong>15 minutes</strong> and can only be used once.</p>
-    <a href="${link}"
-       style="display:inline-block;margin:16px 0;padding:12px 28px;background:#6366f1;color:#fff;text-decoration:none;border-radius:8px;font-weight:600;">
-      Sign In to ZeroAuth
-    </a>
-    <p style="color:#888;font-size:13px;">If you didn't request this link, you can safely ignore this email.</p>
-    <hr style="border:none;border-top:1px solid #eee;margin:24px 0;">
-    <p style="color:#aaa;font-size:12px;">ZeroAuth — Zero Trust Authentication</p>
-  </div>
-</body>
-</html>`.trim();
+export async function verifyMagicLink(email: string, token: string): Promise<{ userId: string; userEmail: string } | null> {
+  try {
+    const tokenHash = hashToken(token);
+    const db = getDb();
+    const now = new Date();
+
+    const records = await db.select().from(otpsTable).where(
+      and(
+        eq(otpsTable.target, email),
+        eq(otpsTable.channel, "email"),
+        eq(otpsTable.type, "login"),
+        eq(otpsTable.code, tokenHash),
+        gt(otpsTable.expiresAt, now)
+      )
+    ).limit(1);
+
+    if (records.length === 0) {
+      logger.warn("Magic link verification failed — record not found or expired", { email });
+      return null;
+    }
+
+    const record = records[0];
+    await db.delete(otpsTable).where(eq(otpsTable.id, record.id));
+
+    const userRows = await db.select({ id: usersTable.id, email: usersTable.email }).from(usersTable).where(eq(usersTable.id, record.userId)).limit(1);
+    if (userRows.length === 0) {
+      logger.warn("Magic link user not found after record lookup", { userId: record.userId });
+      return null;
+    }
+
+    return { userId: userRows[0].id, userEmail: userRows[0].email };
+  } catch (err) {
+    logger.error("verifyMagicLink error", err as Error);
+    return null;
+  }
 }

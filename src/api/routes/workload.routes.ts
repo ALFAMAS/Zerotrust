@@ -1,43 +1,38 @@
-import express from "express";
+import { Hono } from "hono";
 import { createWorkloadCredential, validateWorkloadCredential } from "../../workload";
 import { getLogger } from "../../logger";
+import type { HonoEnv } from "../../shared/types";
 
-const router = express.Router();
+const router = new Hono<HonoEnv>();
 const logger = getLogger("workload-routes");
 
-// Simple issuance endpoint protected by WORKLOAD_ISSUE_KEY env var
-router.post("/issue", async (req, res) => {
+router.post("/issue", async (c) => {
   try {
-    const key = req.headers["x-workload-key"] as string | undefined;
+    const key = c.req.header("x-workload-key");
     if (!process.env.WORKLOAD_ISSUE_KEY || key !== process.env.WORKLOAD_ISSUE_KEY) {
-      return res.status(403).json({ error: "FORBIDDEN" });
+      return c.json({ error: "FORBIDDEN" }, 403);
     }
 
-    const { workloadId, scopes, ttl } = req.body as any;
-    if (!workloadId) return res.status(400).json({ error: "INVALID_REQUEST" });
+    const { workloadId, scopes, ttl } = await c.req.json();
+    if (!workloadId) return c.json({ error: "INVALID_REQUEST" }, 400);
 
-    const created = await createWorkloadCredential(
-      workloadId,
-      undefined,
-      scopes || [],
-      ttl || 3600
-    );
-    res.json({ created });
+    const created = await createWorkloadCredential(workloadId, undefined, scopes || [], ttl || 3600);
+    return c.json({ created });
   } catch (err) {
     logger.error("Issue workload credential failed", err as Error);
-    res.status(500).json({ error: "INTERNAL_ERROR" });
+    return c.json({ error: "INTERNAL_ERROR" }, 500);
   }
 });
 
-router.post("/validate", async (req, res) => {
+router.post("/validate", async (c) => {
   try {
-    const { workloadId, secret } = req.body as any;
-    if (!workloadId || !secret) return res.status(400).json({ error: "INVALID_REQUEST" });
+    const { workloadId, secret } = await c.req.json();
+    if (!workloadId || !secret) return c.json({ error: "INVALID_REQUEST" }, 400);
     const ok = await validateWorkloadCredential(workloadId, secret);
-    res.json({ valid: ok });
+    return c.json({ valid: ok });
   } catch (err) {
     logger.error("Validate workload credential failed", err as Error);
-    res.status(500).json({ error: "INTERNAL_ERROR" });
+    return c.json({ error: "INTERNAL_ERROR" }, 500);
   }
 });
 

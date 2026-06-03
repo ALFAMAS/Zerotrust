@@ -189,6 +189,8 @@ class Logger {
   }
 }
 
+export type { Logger };
+
 let loggerSingleton: Logger | null = null;
 
 /**
@@ -264,7 +266,7 @@ export async function auditLog(
 ): Promise<void> {
   const logger = getLogger("audit");
 
-  const auditEntry = {
+  const auditEntry: Record<string, unknown> = {
     action,
     actor,
     target,

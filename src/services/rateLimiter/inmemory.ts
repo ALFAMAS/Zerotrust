@@ -21,7 +21,6 @@ const buckets = new Map<string, Bucket>();
 const banList = new Map<string, BanEntry>();
 
 const DEFAULT_CAPACITY = 100;
-const DEFAULT_REFILL_RATE = 100;
 const DEFAULT_WINDOW_SECS = 60;
 const BAN_THRESHOLD = 5;
 const DEFAULT_BAN_SECS = 300;

@@ -5,7 +5,6 @@
  * Verifies that the authenticator is a genuine hardware security key
  * using FIDO MDS3 (Metadata Service) trust anchors.
  */
-import crypto from "crypto";
 import { getLogger } from "../logger";
 
 const logger = getLogger("attestation");
@@ -169,7 +168,7 @@ export function verifyAttestation(
   }
 
   // Direct attestation required
-  if (policy.level === "direct" && fmt !== "packed" && fmt !== "tpm" && fmt !== "fido-u2f" && fmt !== "android-key" && fmt !== "attCA" && fmt !== "anonCA") {
+  if (policy.level === "direct" && (fmt as string) !== "packed" && (fmt as string) !== "tpm" && (fmt as string) !== "fido-u2f" && (fmt as string) !== "android-key" && fmt !== "attCA" && fmt !== "anonCA") {
     if (fmt !== "none" && fmt !== "self") {
       // unknown format — warn but pass
       logger.warn("Unknown attestation format", { fmt, aaguid });
@@ -267,7 +266,7 @@ export async function verifyAttestationWithMDS3(
   if (aaguid) {
     try {
       // Dynamic import avoids a hard circular dependency at module load time
-      const { isFidoCertified, getDeviceDescription } = await import("./fido-mds3");
+      const { isFidoCertified, getDeviceDescription } = await import("./fido-mds3.js");
 
       if (policy.requireFidoCertified) {
         const certified = await isFidoCertified(aaguid);
@@ -287,7 +286,7 @@ export async function verifyAttestationWithMDS3(
       const desc = await getDeviceDescription(aaguid);
       if (desc) deviceDescription = desc;
     } catch (err) {
-      logger.warn("MDS3 lookup failed during verifyAttestationWithMDS3; continuing without it", err as Error);
+      logger.warn("MDS3 lookup failed during verifyAttestationWithMDS3; continuing without it", { error: String(err) });
     }
   }
 

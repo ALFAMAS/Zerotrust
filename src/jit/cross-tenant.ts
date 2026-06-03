@@ -5,7 +5,8 @@
  * in tenant B. Requires approval from an admin in tenant B.
  */
 
-import type { Request, Response, NextFunction } from "express";
+import { createMiddleware } from "hono/factory";
+import type { HonoEnv } from "../shared/types";
 import { randomUUID } from "crypto";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -15,11 +16,11 @@ export interface CrossTenantJITRequest {
   requestorUserId: string;
   requestorTenantId: string;
   targetTenantId: string;
-  targetResource: string;       // e.g. "admin:users:read"
+  targetResource: string; // e.g. "admin:users:read"
   justification: string;
-  ttlSeconds: number;           // max 3600 (1 hour)
+  ttlSeconds: number; // max 3600 (1 hour)
   status: "pending" | "approved" | "denied" | "expired";
-  approvedBy?: string;          // userId of approver in target tenant
+  approvedBy?: string; // userId of approver in target tenant
   approvedAt?: Date;
   expiresAt?: Date;
   createdAt: Date;
@@ -34,9 +35,7 @@ class CrossTenantJITStore {
   /**
    * Create a new cross-tenant JIT request.
    */
-  create(
-    req: Omit<CrossTenantJITRequest, "id" | "status" | "createdAt">
-  ): CrossTenantJITRequest {
+  create(req: Omit<CrossTenantJITRequest, "id" | "status" | "createdAt">): CrossTenantJITRequest {
     const ttl = Math.min(req.ttlSeconds ?? 3600, 3600);
     const entry: CrossTenantJITRequest = {
       ...req,
@@ -118,9 +117,7 @@ class CrossTenantJITStore {
    * List all requests targeting a specific tenant.
    */
   listByTarget(tenantId: string): CrossTenantJITRequest[] {
-    return Array.from(this.requests.values()).filter(
-      (r) => r.targetTenantId === tenantId
-    );
+    return Array.from(this.requests.values()).filter((r) => r.targetTenantId === tenantId);
   }
 
   /**
@@ -139,62 +136,60 @@ export const crossTenantJITStore = new CrossTenantJITStore();
 // ─── Middleware ────────────────────────────────────────────────────────────────
 
 /**
- * Express middleware that validates the caller has an active cross-tenant
+ * Hono middleware that validates the caller has an active cross-tenant
  * JIT grant for the given target tenant and resource.
  *
  * Reads the grant ID from the X-JIT-Grant-ID request header.
  */
-export function requireCrossTenantJIT(
-  targetTenantId: string,
-  resource: string
-): (req: Request, res: Response, next: NextFunction) => void {
-  return (req: Request, res: Response, next: NextFunction): void => {
-    const grantId = req.headers["x-jit-grant-id"] as string | undefined;
+export function requireCrossTenantJIT(targetTenantId: string, resource: string) {
+  return createMiddleware<HonoEnv>(async (c, next) => {
+    const grantId = c.req.header("x-jit-grant-id");
 
     if (!grantId) {
-      res.status(403).json({
-        error: "JIT_GRANT_REQUIRED",
-        message: "X-JIT-Grant-ID header is required for cross-tenant access",
-      });
-      return;
+      return c.json(
+        {
+          error: "JIT_GRANT_REQUIRED",
+          message: "X-JIT-Grant-ID header is required for cross-tenant access",
+        },
+        403
+      );
     }
 
     const grant = crossTenantJITStore.get(grantId);
 
     if (!grant) {
-      res.status(403).json({
-        error: "JIT_GRANT_NOT_FOUND",
-        message: "JIT grant not found",
-      });
-      return;
+      return c.json({ error: "JIT_GRANT_NOT_FOUND", message: "JIT grant not found" }, 403);
     }
 
     if (!crossTenantJITStore.isActive(grantId)) {
-      res.status(403).json({
-        error: "JIT_GRANT_INACTIVE",
-        message: `JIT grant is not active (status: ${grant.status})`,
-      });
-      return;
+      return c.json(
+        {
+          error: "JIT_GRANT_INACTIVE",
+          message: `JIT grant is not active (status: ${grant.status})`,
+        },
+        403
+      );
     }
 
     if (grant.targetTenantId !== targetTenantId) {
-      res.status(403).json({
-        error: "JIT_GRANT_TENANT_MISMATCH",
-        message: "JIT grant targets a different tenant",
-      });
-      return;
+      return c.json(
+        { error: "JIT_GRANT_TENANT_MISMATCH", message: "JIT grant targets a different tenant" },
+        403
+      );
     }
 
     if (grant.targetResource !== resource) {
-      res.status(403).json({
-        error: "JIT_GRANT_RESOURCE_MISMATCH",
-        message: `JIT grant is for resource "${grant.targetResource}", not "${resource}"`,
-      });
-      return;
+      return c.json(
+        {
+          error: "JIT_GRANT_RESOURCE_MISMATCH",
+          message: `JIT grant is for resource "${grant.targetResource}", not "${resource}"`,
+        },
+        403
+      );
     }
 
-    next();
-  };
+    return next();
+  });
 }
 
 // ─── Request Helper ───────────────────────────────────────────────────────────

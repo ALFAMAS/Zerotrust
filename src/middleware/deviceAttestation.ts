@@ -1,227 +1,87 @@
-/**
- * Device Attestation Middleware
- * Validates device fingerprint, detects compromised endpoints, and manages device trust
- */
-
-import type { Request, Response, NextFunction } from "express";
+import { createMiddleware } from "hono/factory";
+import type { HonoEnv } from "../shared/types";
 import { FingerprintService } from "../services/fingerprint.service";
-import { SessionModel } from "../models";
+import { getDb } from "../db";
+import { sessionsTable } from "../db/schema";
+import { eq } from "drizzle-orm";
 import { ErrorCodes, ZeroAuthError } from "../shared/types";
 import { getLogger } from "../logger";
 
 const logger = getLogger("device-attestation");
 
-/**
- * Input interface for device data from client
- */
-export interface DeviceAttestation {
-  screenResolution?: string;
-  timezone?: string;
-  platform?: string;
-  acceptLanguage?: string;
-}
-
-/**
- * Device attestation middleware
- * Compares current device fingerprint with session fingerprint
- * Flags anomalies for further verification
- */
-export async function deviceAttestationMiddleware(
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> {
+export const deviceAttestationMiddleware = createMiddleware<HonoEnv>(async (c, next) => {
   try {
-    // Skip if no user or session
-    if (!req.user || !req.session) {
-      next();
-      return;
-    }
+    const user = c.get("user");
+    const session = c.get("session");
+    if (!user || !session) return next();
 
-    // Extract device data from headers
-    const deviceAttestation: DeviceAttestation = {
-      screenResolution: req.headers["x-screen-resolution"] as string | undefined,
-      timezone: req.headers["x-timezone"] as string | undefined,
-      platform: req.headers["x-platform"] as string | undefined,
-      acceptLanguage: req.headers["accept-language"] as string | undefined,
-    };
-
-    // Compute current device fingerprint
     const currentFingerprint = FingerprintService.compute({
-      userAgent: req.headers["user-agent"] || "",
-      ip: req.ip || req.connection.remoteAddress || "",
-      ...deviceAttestation,
+      userAgent: c.req.header("user-agent") || "",
+      ip: c.req.header("x-forwarded-for")?.split(",")[0].trim() || "",
+      screenResolution: c.req.header("x-screen-resolution"),
+      timezone: c.req.header("x-timezone"),
+      platform: c.req.header("x-platform"),
+      acceptLanguage: c.req.header("accept-language"),
     });
 
-    const sessionFingerprint = req.session.deviceFingerprint;
-
-    // Compare fingerprints
-    const fingerprintMatch = currentFingerprint.hash === sessionFingerprint.hash;
+    const sessionFingerprint = session.deviceFingerprint;
+    const fingerprintMatch = currentFingerprint.hash === sessionFingerprint?.hash;
 
     if (!fingerprintMatch) {
-      logger.warn("Device fingerprint mismatch", {
-        userId: req.user._id,
-        sessionId: req.session._id,
-        previousHash: sessionFingerprint.hash,
-        currentHash: currentFingerprint.hash,
-      });
+      logger.warn("Device fingerprint mismatch", { userId: user.id, sessionId: session.id });
 
-      // Mark anomaly in session
-      if (!req.session.anomalyFlags) {
-        req.session.anomalyFlags = {
-          deviceChangeDetected: false,
-          locationChangeDetected: false,
-          timeAnomalyDetected: false,
-        };
-      }
-      req.session.anomalyFlags.deviceChangeDetected = true;
+      const anomalyFlags = {
+        ...((session.anomalyFlags as any) || { deviceChangeDetected: false, locationChangeDetected: false, timeAnomalyDetected: false }),
+        deviceChangeDetected: true,
+      };
 
-      // Update session with anomaly flag
-      const session = await SessionModel.findByIdAndUpdate(
-        req.session._id,
-        {
-          anomalyFlags: req.session.anomalyFlags,
-        },
-        { new: true }
-      );
+      const db = getDb();
+      await db.update(sessionsTable).set({ anomalyFlags, updatedAt: new Date() }).where(eq(sessionsTable.id, session.id));
 
-      if (session) {
-        req.session = { ...session.toObject(), _id: session._id.toString() };
-      }
-
-      // Log detailed device change for audit
-      logger.warn("Device change detected - potential compromise or multi-device access", {
-        userId: req.user._id,
-        sessionId: req.session._id,
-        previousDevice: {
-          browser: sessionFingerprint.browser,
-          os: sessionFingerprint.os,
-          platform: sessionFingerprint.platform,
-        },
-        currentDevice: {
-          browser: currentFingerprint.browser,
-          os: currentFingerprint.os,
-          platform: currentFingerprint.platform,
-        },
-      });
-
-      // In strict mode, challenge the user
-      if (req.headers["x-device-attestation-strict"] === "true") {
-        throw new ZeroAuthError(
-          ErrorCodes.DEVICE_NOT_TRUSTED,
-          "Device fingerprint has changed. Please re-authenticate.",
-          403,
-          { previousFingerprint: sessionFingerprint.hash, currentFingerprint: currentFingerprint.hash }
-        );
+      if (c.req.header("x-device-attestation-strict") === "true") {
+        throw new ZeroAuthError(ErrorCodes.DEVICE_NOT_TRUSTED, "Device fingerprint has changed. Please re-authenticate.", 403);
       }
     }
 
-    // Update device fingerprint last seen
-    if (sessionFingerprint) {
-      sessionFingerprint.lastSeenAt = new Date();
-    }
-
-    next();
+    return next();
   } catch (error) {
     if (error instanceof ZeroAuthError) {
-      res.status(error.statusCode).json({
-        error: error.code,
-        message: error.message,
-        details: error.details,
-      });
-    } else {
-      logger.error("Device attestation error", error as Error);
-      res.status(500).json({
-        error: "ATTESTATION_ERROR",
-        message: "Device verification failed",
-      });
+      return c.json({ error: error.code, message: error.message }, error.statusCode as any);
     }
+    logger.error("Device attestation error", error as Error);
+    return c.json({ error: "ATTESTATION_ERROR", message: "Device verification failed" }, 500);
   }
-}
+});
 
-/**
- * Require device to be marked as trusted
- * Device becomes trusted after successful biometric/MFA verification
- */
-export async function requireTrustedDevice(
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> {
+export const requireTrustedDevice = createMiddleware<HonoEnv>(async (c, next) => {
+  const session = c.get("session");
+  if (!(session?.deviceFingerprint as any)?.isTrusted) {
+    return c.json({ error: ErrorCodes.DEVICE_NOT_TRUSTED, message: "This operation requires a trusted device" }, 403);
+  }
+  return next();
+});
+
+export const markDeviceAsTrusted = createMiddleware<HonoEnv>(async (c, next) => {
   try {
-    if (!req.session?.deviceFingerprint?.isTrusted) {
-      throw new ZeroAuthError(
-        ErrorCodes.DEVICE_NOT_TRUSTED,
-        "This operation requires a trusted device",
-        403
-      );
+    const session = c.get("session");
+    if (!session) {
+      return c.json({ error: ErrorCodes.SESSION_NOT_FOUND, message: "No active session" }, 401);
     }
-    next();
+
+    const db = getDb();
+    const currentFingerprint = (session.deviceFingerprint as any) || {};
+    await db.update(sessionsTable).set({
+      deviceFingerprint: { ...currentFingerprint, isTrusted: true, lastSeenAt: new Date() },
+      updatedAt: new Date(),
+    }).where(eq(sessionsTable.id, session.id));
+
+    logger.info("Device marked as trusted", { userId: c.get("user")?.id, sessionId: session.id });
+    return next();
   } catch (error) {
     if (error instanceof ZeroAuthError) {
-      res.status(error.statusCode).json({
-        error: error.code,
-        message: error.message,
-      });
-    } else {
-      res.status(500).json({
-        error: "DEVICE_CHECK_ERROR",
-        message: "Device trust check failed",
-      });
+      return c.json({ error: error.code, message: error.message }, error.statusCode as any);
     }
+    logger.error("Error marking device as trusted", error as Error);
+    return c.json({ error: "DEVICE_TRUST_ERROR", message: "Failed to mark device as trusted" }, 500);
   }
-}
-
-/**
- * Mark current device as trusted
- * Called after successful biometric/MFA/identity verification
- */
-export async function markDeviceAsTrusted(
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> {
-  try {
-    if (!req.session) {
-      throw new ZeroAuthError(
-        ErrorCodes.SESSION_NOT_FOUND,
-        "No active session",
-        401
-      );
-    }
-
-    // Update session to mark device as trusted
-    const session = await SessionModel.findByIdAndUpdate(
-      req.session._id,
-      {
-        "deviceFingerprint.isTrusted": true,
-        "deviceFingerprint.lastSeenAt": new Date(),
-      },
-      { new: true }
-    );
-
-    if (session) {
-      req.session = { ...session.toObject(), _id: session._id.toString() };
-    }
-
-    logger.info("Device marked as trusted", {
-      userId: req.user?._id,
-      sessionId: req.session._id,
-    });
-
-    next();
-  } catch (error) {
-    if (error instanceof ZeroAuthError) {
-      res.status(error.statusCode).json({
-        error: error.code,
-        message: error.message,
-      });
-    } else {
-      logger.error("Error marking device as trusted", error as Error);
-      res.status(500).json({
-        error: "DEVICE_TRUST_ERROR",
-        message: "Failed to mark device as trusted",
-      });
-    }
-  }
-}
+});

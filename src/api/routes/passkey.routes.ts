@@ -1,363 +1,306 @@
-import express from "express";
-import {
-  generateRegistrationOptions,
-  verifyRegistrationResponse,
-  generateAuthenticationOptions,
-  verifyAuthenticationResponse,
-} from "@simplewebauthn/server";
-import type { AuthenticatorTransportFuture } from "@simplewebauthn/types";
+import { Hono } from "hono";
+import crypto from "crypto";
+import { eq } from "drizzle-orm";
+import { getDb } from "../../db";
+import { usersTable, sessionsTable, refreshTokensTable } from "../../db/schema";
 import { authMiddleware } from "../../middleware/auth";
-import { rateLimit } from "../../middleware/rateLimiting";
-import { UserModel, SessionModel, RefreshTokenModel } from "../../models";
+import { getSettings } from "../../models/settings.model";
 import { TokenService } from "../../services/token.service";
 import { getConfig } from "../../config";
 import { getLogger } from "../../logger";
-import { ErrorCodes } from "../../shared/types";
-import { nanoid } from "nanoid";
-import * as nodeCrypto from "crypto";
+import type { HonoEnv } from "../../shared/types";
 
-const router = express.Router();
+const router = new Hono<HonoEnv>();
 const logger = getLogger("passkey-routes");
 
-const challengeStore = new Map<string, { challenge: string; userId?: string; expiresAt: number }>();
+let _tokenService: TokenService | null = null;
+async function getTokenService(): Promise<TokenService> {
+  if (_tokenService) return _tokenService;
+  const cfg = getConfig();
+  _tokenService = new TokenService(cfg.security.tokenSecretHex, cfg.session);
+  await _tokenService.init();
+  return _tokenService;
+}
+
+function hashToken(token: string): string {
+  return crypto.createHash("sha256").update(token).digest("hex");
+}
+
+const challengeStore = new Map<string, { challenge: string; expiresAt: number }>();
 const CHALLENGE_TTL_MS = 5 * 60 * 1000;
 
-function storeChallenge(key: string, challenge: string, userId?: string) {
-  challengeStore.set(key, { challenge, userId, expiresAt: Date.now() + CHALLENGE_TTL_MS });
+function storeChallenge(key: string, challenge: string): void {
+  challengeStore.set(key, { challenge, expiresAt: Date.now() + CHALLENGE_TTL_MS });
 }
 
-function popChallenge(key: string) {
+function consumeChallenge(key: string): string | null {
   const entry = challengeStore.get(key);
+  if (!entry) return null;
+  if (Date.now() > entry.expiresAt) { challengeStore.delete(key); return null; }
   challengeStore.delete(key);
-  if (!entry || Date.now() > entry.expiresAt) return null;
-  return entry;
+  return entry.challenge;
 }
 
-const RP_ID = process.env.RP_ID || "localhost";
-const RP_NAME = process.env.RP_NAME || "ZeroAuth";
-const RP_ORIGIN = process.env.RP_ORIGIN || "http://localhost:3000";
-
-let tokenSvc: TokenService | null = null;
-async function getTokenSvc() {
-  if (tokenSvc) return tokenSvc;
-  const cfg = getConfig();
-  tokenSvc = new TokenService(cfg.security.tokenSecretHex, cfg.session);
-  await tokenSvc.init();
-  return tokenSvc;
+function storeAuthChallenge(key: string, challenge: string): void {
+  challengeStore.set(`auth:${key}`, { challenge, expiresAt: Date.now() + CHALLENGE_TTL_MS });
 }
 
-function hashToken(token: string) {
-  return nodeCrypto.createHash("sha256").update(token).digest("hex");
+function consumeAuthChallenge(key: string): string | null {
+  return consumeChallenge(`auth:${key}`);
 }
 
-router.post(
-  "/register/options",
-  rateLimit({ points: 10, windowSecs: 60 }),
-  authMiddleware,
-  async (req, res): Promise<void> => {
-    try {
-      const user = await UserModel.findById(req.user!._id);
-      if (!user) {
-        res
-          .status(404)
-          .json({ code: ErrorCodes.USER_NOT_FOUND, message: "User not found", details: [] });
-        return;
-      }
-
-      const existingPasskeys = (user.passkeys || []) as any[];
-      const options = await generateRegistrationOptions({
-        rpName: RP_NAME,
-        rpID: RP_ID,
-        userName: user.email,
-        userDisplayName: user.displayName || user.email,
-        attestationType: "none",
-        excludeCredentials: existingPasskeys.map((pk: any) => ({
-          id: pk.credentialId,
-          transports: pk.transports as AuthenticatorTransportFuture[],
-        })),
-        authenticatorSelection: {
-          residentKey: "preferred",
-          userVerification: "preferred",
-        },
-      });
-
-      storeChallenge(`reg:${user._id}`, options.challenge, user._id!.toString());
-      res.json(options);
-    } catch (err) {
-      logger.error("Passkey register options error", err as Error);
-      res.status(500).json({
-        code: ErrorCodes.INTERNAL_ERROR,
-        message: "Failed to generate registration options",
-        details: [],
-      });
+// POST /register/options — auth required
+router.post("/register/options", authMiddleware, async (c) => {
+  try {
+    const settings = await getSettings();
+    if (!settings.passkeyEnabled) {
+      return c.json({ error: "FEATURE_DISABLED", message: "Passkeys are disabled" }, 403);
     }
+
+    const user = c.get("user");
+    const userId = user.id;
+    const { generateRegistrationOptions } = await import("@simplewebauthn/server");
+
+    const existingPasskeys = user.passkeys || [];
+    const excludeCredentials = existingPasskeys.map((pk) => ({
+      id: pk.credentialId,
+      type: "public-key" as const,
+      transports: pk.transports as any[],
+    }));
+
+    const options = await generateRegistrationOptions({
+      rpName: settings.appName || "ZeroAuth",
+      rpID: new URL(settings.appUrl || "http://localhost:3001").hostname,
+      userID: Buffer.from(userId),
+      userName: user.email,
+      userDisplayName: user.displayName,
+      attestationType: "none",
+      excludeCredentials,
+      authenticatorSelection: { residentKey: "preferred", userVerification: "preferred" },
+    });
+
+    storeChallenge(userId, options.challenge);
+    return c.json(options);
+  } catch (err) {
+    logger.error("Passkey register options error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR", message: "Failed to generate options" }, 500);
   }
-);
+});
 
-router.post(
-  "/register",
-  rateLimit({ points: 10, windowSecs: 60 }),
-  authMiddleware,
-  async (req, res): Promise<void> => {
+// POST /register/verify — auth required
+router.post("/register/verify", authMiddleware, async (c) => {
+  try {
+    const settings = await getSettings();
+    if (!settings.passkeyEnabled) {
+      return c.json({ error: "FEATURE_DISABLED", message: "Passkeys are disabled" }, 403);
+    }
+
+    const user = c.get("user");
+    const userId = user.id;
+    const body = await c.req.json();
+
+    const expectedChallenge = consumeChallenge(userId);
+    if (!expectedChallenge) {
+      return c.json({ error: "CHALLENGE_EXPIRED", message: "Registration challenge expired or not found" }, 400);
+    }
+
+    const { verifyRegistrationResponse } = await import("@simplewebauthn/server");
+    const appUrl = settings.appUrl || "http://localhost:3001";
+    const rpID = new URL(appUrl).hostname;
+
+    let verification: any;
     try {
-      const user = await UserModel.findById(req.user!._id);
-      if (!user) {
-        res
-          .status(404)
-          .json({ code: ErrorCodes.USER_NOT_FOUND, message: "User not found", details: [] });
-        return;
-      }
-
-      const stored = popChallenge(`reg:${user._id}`);
-      if (!stored) {
-        res.status(400).json({
-          code: "CHALLENGE_EXPIRED",
-          message: "Registration challenge expired. Request new options.",
-          details: [],
-        });
-        return;
-      }
-
-      const { body, name } = req.body as any;
-      const verification = await verifyRegistrationResponse({
+      verification = await verifyRegistrationResponse({
         response: body,
-        expectedChallenge: stored.challenge,
-        expectedOrigin: RP_ORIGIN,
-        expectedRPID: RP_ID,
+        expectedChallenge,
+        expectedOrigin: appUrl,
+        expectedRPID: rpID,
       });
-
-      if (!verification.verified || !verification.registrationInfo) {
-        res.status(400).json({
-          code: "PASSKEY_VERIFICATION_FAILED",
-          message: "Passkey registration verification failed",
-          details: [],
-        });
-        return;
-      }
-
-      const info = verification.registrationInfo;
-      const newPasskey = {
-        credentialId: Buffer.from(info.credentialID).toString("base64url"),
-        publicKey: Buffer.from(info.credentialPublicKey).toString("base64url"),
-        counter: info.counter,
-        deviceType: info.credentialDeviceType,
-        backedUp: info.credentialBackedUp,
-        transports: (body.response?.transports as string[]) || [],
-        name: name || "Passkey",
-        createdAt: new Date(),
-      };
-
-      user.passkeys = [...(user.passkeys || []), newPasskey];
-      user.mfa.webauthn.enabled = true;
-      await user.save();
-
-      res.json({ success: true, credentialId: newPasskey.credentialId });
-    } catch (err) {
-      logger.error("Passkey register error", err as Error);
-      res.status(500).json({
-        code: ErrorCodes.INTERNAL_ERROR,
-        message: "Passkey registration failed",
-        details: [],
-      });
+    } catch (verifyErr) {
+      logger.warn("Passkey registration verification failed", { error: String(verifyErr) });
+      return c.json({ error: "VERIFICATION_FAILED", message: "Registration verification failed" }, 400);
     }
-  }
-);
 
-router.post(
-  "/authenticate/options",
-  rateLimit({ points: 20, windowSecs: 60 }),
-  async (req, res): Promise<void> => {
-    try {
-      const { email } = req.body as any;
-      let allowCredentials: any[] = [];
-
-      if (email) {
-        const user = await UserModel.findOne({ email });
-        if (user && user.passkeys?.length) {
-          allowCredentials = (user.passkeys as any[]).map((pk: any) => ({
-            id: pk.credentialId,
-            transports: pk.transports as AuthenticatorTransportFuture[],
-          }));
-        }
-      }
-
-      const challengeKey = `auth:${email || nanoid()}`;
-      const options = await generateAuthenticationOptions({
-        rpID: RP_ID,
-        allowCredentials,
-        userVerification: "preferred",
-      });
-
-      storeChallenge(challengeKey, options.challenge);
-      res.json({ ...options, challengeKey });
-    } catch (err) {
-      logger.error("Passkey auth options error", err as Error);
-      res.status(500).json({
-        code: ErrorCodes.INTERNAL_ERROR,
-        message: "Failed to generate authentication options",
-        details: [],
-      });
+    if (!verification.verified || !verification.registrationInfo) {
+      return c.json({ error: "VERIFICATION_FAILED", message: "Registration not verified" }, 400);
     }
+
+    const { registrationInfo } = verification;
+    const { credential, credentialDeviceType, credentialBackedUp } = registrationInfo;
+
+    const newPasskey = {
+      credentialId: Buffer.from(credential.id).toString("base64url"),
+      publicKey: Buffer.from(credential.publicKey).toString("base64url"),
+      counter: credential.counter,
+      deviceType: credentialDeviceType,
+      backedUp: credentialBackedUp,
+      transports: body?.response?.transports || [],
+      name: body.name || "Passkey",
+      createdAt: new Date(),
+    };
+
+    const db = getDb();
+    const userRows = await db.select({ passkeys: usersTable.passkeys, mfa: usersTable.mfa }).from(usersTable).where(eq(usersTable.id, userId)).limit(1);
+    const existingPasskeysList = (userRows[0]?.passkeys as any[]) || [];
+    const currentMfa = (userRows[0]?.mfa as any) ?? { totp: { enabled: false, backupCodes: [] }, webauthn: { enabled: false } };
+
+    await db.update(usersTable).set({
+      passkeys: [...existingPasskeysList, newPasskey],
+      mfa: { ...currentMfa, webauthn: { enabled: true } },
+      updatedAt: new Date(),
+    }).where(eq(usersTable.id, userId));
+
+    return c.json({ verified: true });
+  } catch (err) {
+    logger.error("Passkey register verify error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR", message: "Registration verification failed" }, 500);
   }
-);
+});
 
-router.post(
-  "/authenticate",
-  rateLimit({ points: 20, windowSecs: 60 }),
-  async (req, res): Promise<void> => {
+// POST /authenticate/options — public
+router.post("/authenticate/options", async (c) => {
+  try {
+    const settings = await getSettings();
+    if (!settings.passkeyEnabled) {
+      return c.json({ error: "FEATURE_DISABLED", message: "Passkeys are disabled" }, 403);
+    }
+
+    const { email } = await c.req.json();
+    const { generateAuthenticationOptions } = await import("@simplewebauthn/server");
+    const appUrl = settings.appUrl || "http://localhost:3001";
+    const rpID = new URL(appUrl).hostname;
+
+    let allowCredentials: any[] = [];
+    if (email) {
+      const db = getDb();
+      const userRows = await db.select({ passkeys: usersTable.passkeys }).from(usersTable).where(eq(usersTable.email, email)).limit(1);
+      const passkeys = (userRows[0]?.passkeys as any[]) || [];
+      allowCredentials = passkeys.map((pk) => ({ id: pk.credentialId, type: "public-key" as const, transports: pk.transports }));
+    }
+
+    const options = await generateAuthenticationOptions({ rpID, userVerification: "preferred", allowCredentials });
+    const challengeKey = email || `anon:${crypto.randomBytes(8).toString("hex")}`;
+    storeAuthChallenge(challengeKey, options.challenge);
+
+    return c.json({ ...options, _challengeKey: challengeKey });
+  } catch (err) {
+    logger.error("Passkey auth options error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR", message: "Failed to generate options" }, 500);
+  }
+});
+
+// POST /authenticate/verify — public
+router.post("/authenticate/verify", async (c) => {
+  try {
+    const settings = await getSettings();
+    if (!settings.passkeyEnabled) {
+      return c.json({ error: "FEATURE_DISABLED", message: "Passkeys are disabled" }, 403);
+    }
+
+    const body = await c.req.json();
+    const { email, challengeKey } = body;
+    const key = challengeKey || email;
+    if (!key) {
+      return c.json({ error: "INVALID_REQUEST", message: "email or challengeKey required" }, 400);
+    }
+
+    const expectedChallenge = consumeAuthChallenge(key);
+    if (!expectedChallenge) {
+      return c.json({ error: "CHALLENGE_EXPIRED", message: "Authentication challenge expired" }, 400);
+    }
+
+    const { verifyAuthenticationResponse } = await import("@simplewebauthn/server");
+    const appUrl = settings.appUrl || "http://localhost:3001";
+    const rpID = new URL(appUrl).hostname;
+    const credentialId = body?.id || body?.rawId;
+
+    if (!credentialId) {
+      return c.json({ error: "INVALID_REQUEST", message: "credentialId required" }, 400);
+    }
+
+    const db = getDb();
+    const allUsers = await db.select().from(usersTable);
+    let user: (typeof allUsers)[0] | null = null;
+    let passkey: any = null;
+
+    for (const u of allUsers) {
+      const pks = (u.passkeys as any[]) || [];
+      const pk = pks.find((p: any) => p.credentialId === credentialId);
+      if (pk) { user = u; passkey = pk; break; }
+    }
+
+    if (!user || !passkey) {
+      return c.json({ error: "PASSKEY_NOT_FOUND", message: "No user found for this passkey" }, 401);
+    }
+
+    let verification: any;
     try {
-      const { body, challengeKey } = req.body as any;
-      if (!challengeKey) {
-        res.status(400).json({
-          code: ErrorCodes.INVALID_REQUEST,
-          message: "challengeKey is required",
-          details: [],
-        });
-        return;
-      }
-
-      const stored = popChallenge(challengeKey);
-      if (!stored) {
-        res.status(400).json({
-          code: "CHALLENGE_EXPIRED",
-          message: "Authentication challenge expired",
-          details: [],
-        });
-        return;
-      }
-
-      const credentialId = body?.id;
-      const user = await UserModel.findOne({ "passkeys.credentialId": credentialId });
-      if (!user) {
-        res
-          .status(401)
-          .json({ code: ErrorCodes.PASSKEY_NOT_FOUND, message: "Passkey not found", details: [] });
-        return;
-      }
-
-      const passkey = (user.passkeys as any[]).find((pk: any) => pk.credentialId === credentialId);
-      if (!passkey) {
-        res
-          .status(401)
-          .json({ code: ErrorCodes.PASSKEY_NOT_FOUND, message: "Passkey not found", details: [] });
-        return;
-      }
-
-      const verification = await verifyAuthenticationResponse({
+      verification = await verifyAuthenticationResponse({
         response: body,
-        expectedChallenge: stored.challenge,
-        expectedOrigin: RP_ORIGIN,
-        expectedRPID: RP_ID,
+        expectedChallenge,
+        expectedOrigin: appUrl,
+        expectedRPID: rpID,
         authenticator: {
-          credentialID: passkey.credentialId as string,
-          credentialPublicKey: new Uint8Array(Buffer.from(passkey.publicKey, "base64url")),
+          credentialID: passkey.credentialId,
+          credentialPublicKey: Buffer.from(passkey.publicKey, "base64url") as unknown as Uint8Array,
           counter: passkey.counter,
-          transports: passkey.transports as AuthenticatorTransportFuture[],
+          transports: passkey.transports,
         },
       });
-
-      if (!verification.verified) {
-        res.status(401).json({
-          code: "PASSKEY_VERIFICATION_FAILED",
-          message: "Passkey authentication failed",
-          details: [],
-        });
-        return;
-      }
-
-      passkey.counter = verification.authenticationInfo.newCounter;
-      passkey.lastUsedAt = new Date();
-      await user.save();
-
-      const cfg = getConfig();
-      const svc = await getTokenSvc();
-      const accessToken = await svc.signAccessToken({
-        sub: user._id!.toString(),
-        email: user.email,
-        aud: "zeroauth",
-        scope: ["openid"],
-      });
-      const payload = await svc.verifyAccessToken(accessToken);
-
-      const session = await SessionModel.create({
-        userId: user._id,
-        tokenId: payload.jti,
-        deviceFingerprint: {
-          hash: "passkey",
-          languages: [],
-          isTrusted: true,
-          firstSeenAt: new Date(),
-          lastSeenAt: new Date(),
-        },
-        ipAddress: req.ip || "",
-        userAgent: req.headers["user-agent"] as string,
-        expiresAt: new Date(payload.exp * 1000),
-        lastActivityAt: new Date(),
-        isActive: true,
-      });
-
-      const refreshPlain = await svc.signRefreshToken();
-      await RefreshTokenModel.create({
-        userId: user._id,
-        sessionId: session._id,
-        tokenHash: hashToken(refreshPlain),
-        expiresAt: new Date(Date.now() + cfg.session.refreshTokenTTL * 1000),
-      });
-
-      res.json({
-        accessToken,
-        refreshToken: refreshPlain,
-        expiresIn: cfg.session.defaultTTL,
-        tokenType: "Bearer",
-      });
-    } catch (err) {
-      logger.error("Passkey authenticate error", err as Error);
-      res.status(500).json({
-        code: ErrorCodes.INTERNAL_ERROR,
-        message: "Passkey authentication failed",
-        details: [],
-      });
+    } catch (verifyErr) {
+      logger.warn("Passkey authentication verification failed", { error: String(verifyErr) });
+      return c.json({ error: "VERIFICATION_FAILED", message: "Authentication verification failed" }, 401);
     }
-  }
-);
 
-router.delete(
-  "/:credentialId",
-  rateLimit({ points: 10, windowSecs: 60 }),
-  authMiddleware,
-  async (req, res): Promise<void> => {
-    try {
-      const user = await UserModel.findById(req.user!._id);
-      if (!user) {
-        res
-          .status(404)
-          .json({ code: ErrorCodes.USER_NOT_FOUND, message: "User not found", details: [] });
-        return;
-      }
-
-      const before = user.passkeys.length;
-      user.passkeys = (user.passkeys as any[]).filter(
-        (pk: any) => pk.credentialId !== req.params.credentialId
-      );
-      if (user.passkeys.length === before) {
-        res
-          .status(404)
-          .json({ code: ErrorCodes.PASSKEY_NOT_FOUND, message: "Passkey not found", details: [] });
-        return;
-      }
-      if (user.passkeys.length === 0) user.mfa.webauthn.enabled = false;
-      await user.save();
-
-      res.json({ success: true });
-    } catch (err) {
-      logger.error("Passkey delete error", err as Error);
-      res.status(500).json({
-        code: ErrorCodes.INTERNAL_ERROR,
-        message: "Failed to remove passkey",
-        details: [],
-      });
+    if (!verification.verified) {
+      return c.json({ error: "VERIFICATION_FAILED", message: "Authentication not verified" }, 401);
     }
+
+    const updatedPasskeys = ((user.passkeys as any[]) || []).map((pk: any) =>
+      pk.credentialId === credentialId
+        ? { ...pk, counter: verification.authenticationInfo.newCounter, lastUsedAt: new Date() }
+        : pk
+    );
+    await db.update(usersTable).set({ passkeys: updatedPasskeys, updatedAt: new Date() }).where(eq(usersTable.id, user.id));
+
+    const cfg = getConfig();
+    const tokenSvc = await getTokenService();
+    const sessionId = crypto.randomUUID();
+
+    const accessToken = await tokenSvc.signAccessToken({
+      sub: user.id,
+      email: user.email,
+      sid: sessionId,
+      aud: "zeroauth",
+      scope: ["openid"],
+    });
+    const payload = await tokenSvc.verifyAccessToken(accessToken);
+
+    const [session] = await db.insert(sessionsTable).values({
+      id: sessionId,
+      userId: user.id,
+      tokenId: payload.jti,
+      deviceFingerprint: {},
+      ipAddress: c.req.header("x-forwarded-for")?.split(",")[0].trim() || "",
+      userAgent: c.req.header("user-agent"),
+      expiresAt: new Date(payload.exp * 1000),
+      lastActivityAt: new Date(),
+      isActive: true,
+    }).returning();
+
+    const refreshTokenPlain = await tokenSvc.signRefreshToken();
+    await db.insert(refreshTokensTable).values({
+      userId: user.id,
+      sessionId: session.id,
+      tokenHash: hashToken(refreshTokenPlain),
+      expiresAt: new Date(Date.now() + cfg.session.refreshTokenTTL * 1000),
+    });
+
+    return c.json({ accessToken, refreshToken: refreshTokenPlain, expiresIn: cfg.session.defaultTTL, tokenType: "Bearer" });
+  } catch (err) {
+    logger.error("Passkey auth verify error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR", message: "Authentication verification failed" }, 500);
   }
-);
+});
 
 export default router;

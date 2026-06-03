@@ -1,138 +1,133 @@
-import express from "express";
+import { Hono } from "hono";
 import bcrypt from "bcryptjs";
-import * as crypto from "crypto";
-import { rateLimit } from "../../middleware/rateLimiting";
-import { validate } from "../../middleware/validation";
-import { PasswordResetRequestSchema, PasswordResetConfirmSchema } from "../schemas/auth.schema";
-import { UserModel, OTPModel } from "../../models";
+import crypto from "crypto";
+import { eq, and, gt } from "drizzle-orm";
+import { getDb } from "../../db";
+import { usersTable, otpsTable } from "../../db/schema";
 import { sendOTP } from "../../mfa";
 import { getConfig } from "../../config";
 import { getLogger } from "../../logger";
 import { ErrorCodes } from "../../shared/types";
+import type { HonoEnv } from "../../shared/types";
 
-const router = express.Router();
+const router = new Hono<HonoEnv>();
 const logger = getLogger("password-reset-routes");
 
-router.post(
-  "/request",
-  rateLimit({ points: 5, windowSecs: 60 }),
-  validate(PasswordResetRequestSchema),
-  async (req, res) => {
-    try {
-      const { email, channel } = req.body as any;
+// POST /request — send a password-reset OTP
+router.post("/request", async (c) => {
+  try {
+    const { email } = (await c.req.json()) as { email: string };
 
-      const user = await UserModel.findOne({ email });
-      if (!user) {
-        return res.json({ success: true, message: "If that email exists, a reset code was sent." });
-      }
+    const db = getDb();
+    const users = await db
+      .select({ id: usersTable.id, email: usersTable.email })
+      .from(usersTable)
+      .where(eq(usersTable.email, email))
+      .limit(1);
 
-      const cfg = getConfig();
-      const channelCfg = cfg.mfa.channels[channel as keyof typeof cfg.mfa.channels];
-      if (!channelCfg?.enabled) {
-        return res.status(400).json({
-          code: "CHANNEL_DISABLED",
-          message: `Channel ${channel} is not enabled`,
-          details: [],
-        });
-      }
+    // Anti-enumeration: always return the same response whether user exists or not
+    if (users.length === 0) {
+      return c.json({ sent: true });
+    }
 
-      await OTPModel.deleteMany({ userId: user._id, type: "password_reset" });
+    const user = users[0];
 
-      const code = crypto.randomInt(100000, 999999).toString();
-      const codeHash = crypto.createHash("sha256").update(code).digest("hex");
-      const expiresAt = new Date(Date.now() + cfg.mfa.otpExpirySecs * 1000);
+    const code = crypto.randomInt(100000, 999999).toString();
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
 
-      await OTPModel.create({
-        userId: user._id,
-        code: codeHash,
-        type: "password_reset",
-        channel,
-        target: channel === "email" ? user.email : req.body.target || user.email,
-        expiresAt,
-        attempts: 0,
-      });
+    await db.insert(otpsTable).values({
+      userId: user.id,
+      code,
+      type: "password_reset",
+      channel: "email",
+      target: user.email,
+      expiresAt,
+    });
 
-      await sendOTP(channel, channel === "email" ? user.email : req.body.target, code);
+    await sendOTP("email", user.email, code);
 
-      res.json({
-        success: true,
-        message: "If that email exists, a reset code was sent.",
-        expiresIn: cfg.mfa.otpExpirySecs,
-      });
-    } catch (err) {
-      logger.error("Password reset request error", err as Error);
-      res.status(500).json({
+    return c.json({ sent: true });
+  } catch (err) {
+    logger.error("Password reset request error", err as Error);
+    return c.json(
+      {
         code: ErrorCodes.INTERNAL_ERROR,
         message: "Failed to process password reset request",
         details: [],
-      });
-    }
+      },
+      500
+    );
   }
-);
+});
 
-router.post(
-  "/confirm",
-  rateLimit({ points: 10, windowSecs: 60 }),
-  validate(PasswordResetConfirmSchema),
-  async (req, res) => {
-    try {
-      const { email, code, newPassword } = req.body as any;
+// POST /confirm — verify OTP and update password
+router.post("/confirm", async (c) => {
+  try {
+    const { email, code, newPassword } = (await c.req.json()) as {
+      email: string;
+      code: string;
+      newPassword: string;
+    };
 
-      const user = await UserModel.findOne({ email });
-      if (!user) {
-        return res.status(400).json({
-          code: ErrorCodes.INVALID_REQUEST,
-          message: "Invalid email or code",
-          details: [],
-        });
-      }
+    const db = getDb();
 
-      const cfg = getConfig();
-      const otp = await OTPModel.findOne({
-        userId: user._id,
-        type: "password_reset",
-        expiresAt: { $gt: new Date() },
-        usedAt: { $exists: false },
-        attempts: { $lt: cfg.mfa.maxOTPAttempts },
-      }).sort({ createdAt: -1 });
+    const users = await db
+      .select({ id: usersTable.id })
+      .from(usersTable)
+      .where(eq(usersTable.email, email))
+      .limit(1);
 
-      if (!otp) {
-        return res.status(400).json({
-          code: ErrorCodes.INVALID_REQUEST,
-          message: "Invalid or expired reset code",
-          details: [],
-        });
-      }
-
-      otp.attempts += 1;
-      const codeHash = crypto.createHash("sha256").update(code).digest("hex");
-
-      if (otp.code !== codeHash) {
-        await otp.save();
-        return res
-          .status(400)
-          .json({ code: ErrorCodes.INVALID_REQUEST, message: "Invalid reset code", details: [] });
-      }
-
-      otp.usedAt = new Date();
-      await otp.save();
-
-      const passwordHash = await bcrypt.hash(newPassword, cfg.security.bcryptRounds);
-      await UserModel.findByIdAndUpdate(user._id, { passwordHash });
-
-      res.json({
-        success: true,
-        message: "Password updated successfully. Please log in with your new password.",
-      });
-    } catch (err) {
-      logger.error("Password reset confirm error", err as Error);
-      res.status(500).json({
-        code: ErrorCodes.INTERNAL_ERROR,
-        message: "Failed to reset password",
-        details: [],
-      });
+    if (users.length === 0) {
+      return c.json(
+        { code: ErrorCodes.INVALID_REQUEST, message: "Invalid email or code", details: [] },
+        400
+      );
     }
+
+    const user = users[0];
+    const now = new Date();
+
+    // Find a matching, unexpired, unused OTP with the correct code
+    const otps = await db
+      .select()
+      .from(otpsTable)
+      .where(
+        and(
+          eq(otpsTable.userId, user.id),
+          eq(otpsTable.code, code),
+          eq(otpsTable.type, "password_reset"),
+          gt(otpsTable.expiresAt, now)
+        )
+      )
+      .limit(1);
+
+    const otp = otps.find((o) => o.usedAt === null);
+
+    if (!otp) {
+      return c.json(
+        { code: ErrorCodes.INVALID_REQUEST, message: "Invalid or expired reset code", details: [] },
+        400
+      );
+    }
+
+    const cfg = getConfig();
+    const passwordHash = await bcrypt.hash(newPassword, cfg.security.bcryptRounds);
+
+    await db
+      .update(usersTable)
+      .set({ passwordHash, updatedAt: new Date() })
+      .where(eq(usersTable.id, user.id));
+
+    await db.delete(otpsTable).where(eq(otpsTable.id, otp.id));
+
+    return c.json({ success: true });
+  } catch (err) {
+    logger.error("Password reset confirm error", err as Error);
+    return c.json(
+      { code: ErrorCodes.INTERNAL_ERROR, message: "Failed to reset password", details: [] },
+      500
+    );
   }
-);
+});
 
 export default router;

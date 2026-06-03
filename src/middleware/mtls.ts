@@ -5,47 +5,21 @@
  * service-to-service authentication.
  *
  * Supports two deployment modes:
- *   1. Direct TLS termination in Node.js: reads from `req.socket.getPeerCertificate()`.
- *   2. TLS-terminating proxy (Nginx, Envoy, AWS ALB): reads CN from the
+ *   1. TLS-terminating proxy (Nginx, Envoy, AWS ALB): reads CN from the
  *      `X-Client-Cert-CN` header forwarded by the proxy.
+ *   2. X-Forwarded-Client-Cert Envoy XFCC format.
+ *   3. X-SSL-Client-Cert header (raw PEM forwarded by proxy).
  */
 
-import type { Request, Response, NextFunction, RequestHandler } from "express";
+import { createMiddleware } from "hono/factory";
+import type { HonoEnv } from "../shared/types";
 import { getLogger } from "../logger";
 
 const logger = getLogger("mtls");
 
-// ─── Express Namespace Augmentation ──────────────────────────────────────────
-
-declare global {
-  namespace Express {
-    interface Request {
-      /** Common Name extracted from the mTLS client certificate */
-      clientCertCN?: string;
-      /**
-       * Full subject of the mTLS client certificate as a key=value record.
-       * Example: `{ CN: "spiffe://cluster/ns/app", O: "Acme Corp" }`
-       */
-      clientCertSubject?: Record<string, string>;
-    }
-  }
-}
-
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export interface mTLSOptions {
-  /**
-   * Path to the CA certificate file (PEM) used to validate the client cert.
-   * When running behind a proxy this is typically handled by the proxy and
-   * this option can be omitted.
-   */
-  caPath?: string;
-
-  /**
-   * Inline PEM string for the CA certificate (alternative to caPath).
-   */
-  caCert?: string;
-
   /**
    * Whether a client certificate is mandatory.
    * Defaults to `true`.
@@ -72,10 +46,8 @@ export interface WorkloadIdentity {
  * Parse the subject of a TLS peer certificate object (from Node.js tls module)
  * into a plain Record.
  *
- * The `subject` field on a Node.js `PeerCertificate` is already a flat object:
- * `{ CN: '...', O: '...', OU: '...', ... }`.
- * This function normalises it and handles both the object form and a raw
- * subject string (e.g. from a proxy header like "CN=foo, O=bar").
+ * Handles both the object form and a raw subject string
+ * (e.g. from a proxy header like "CN=foo, O=bar").
  */
 function parseSubject(
   raw: Record<string, string | string[]> | string | undefined | null
@@ -96,57 +68,51 @@ function parseSubject(
   // Node.js TLS subject object — values can be arrays for multi-value fields
   const result: Record<string, string> = {};
   for (const [key, value] of Object.entries(raw)) {
-    result[key] = Array.isArray(value) ? value[0] : String(value);
+    result[key] = Array.isArray(value) ? (value[0] ?? "") : String(value);
   }
   return result;
 }
 
 /**
- * Attempt to retrieve the client certificate CN from various sources:
- *   1. Node TLS socket peer certificate (direct TLS termination)
- *   2. `X-Client-Cert-CN` header (proxy forwarding)
- *   3. `X-Forwarded-Client-Cert` Envoy-style header (CN part)
+ * Attempt to retrieve the client certificate CN from proxy-forwarded headers:
+ *   1. `x-client-cert-cn` header (Nginx/Envoy proxy forwarding)
+ *   2. `x-forwarded-client-cert` Envoy-style XFCC header (Subject= part)
+ *   3. `x-ssl-client-cert` raw PEM forwarded by proxy (CN extracted from subject)
  *
  * Returns `{ cn, subject }` or `null` if no certificate is present.
  */
 function extractCertInfo(
-  req: Request
+  getHeader: (name: string) => string | undefined
 ): { cn: string; subject: Record<string, string> } | null {
-  // 1. Direct TLS peer certificate
-  const socket = req.socket as any;
-  if (typeof socket?.getPeerCertificate === "function") {
-    try {
-      const cert = socket.getPeerCertificate(false);
-      if (cert && cert.subject && Object.keys(cert.subject).length > 0) {
-        const subject = parseSubject(cert.subject as Record<string, string>);
-        const cn = subject["CN"] ?? "";
-        if (cn) {
-          return { cn, subject };
-        }
-      }
-    } catch {
-      // Socket may not support getPeerCertificate in this environment
-    }
-  }
-
-  // 2. X-Client-Cert-CN header (Nginx/Envoy proxy forwarding)
-  const headerCN = req.headers["x-client-cert-cn"];
-  if (headerCN && typeof headerCN === "string" && headerCN.trim()) {
+  // 1. X-Client-Cert-CN header (Nginx/Envoy proxy forwarding)
+  const headerCN = getHeader("x-client-cert-cn");
+  if (headerCN?.trim()) {
     const cn = headerCN.trim();
     return { cn, subject: { CN: cn } };
   }
 
-  // 3. X-Forwarded-Client-Cert (Envoy XFCC header, contains Subject=...)
-  const xfcc = req.headers["x-forwarded-client-cert"];
-  if (xfcc && typeof xfcc === "string") {
+  // 2. X-Forwarded-Client-Cert (Envoy XFCC header, contains Subject=...)
+  const xfcc = getHeader("x-forwarded-client-cert");
+  if (xfcc) {
     // XFCC format: By=<>;Hash=<>;Subject="CN=...,O=..."
     const subjectMatch = xfcc.match(/Subject="([^"]+)"/i);
-    if (subjectMatch) {
+    if (subjectMatch?.[1]) {
       const subject = parseSubject(subjectMatch[1]);
       const cn = subject["CN"] ?? "";
       if (cn) {
         return { cn, subject };
       }
+    }
+  }
+
+  // 3. X-SSL-Client-Cert (raw PEM or DN string from proxy)
+  const sslCert = getHeader("x-ssl-client-cert");
+  if (sslCert?.trim()) {
+    // Try to parse as a DN string (CN=...,O=...)
+    const subject = parseSubject(sslCert.trim());
+    const cn = subject["CN"] ?? "";
+    if (cn) {
+      return { cn, subject };
     }
   }
 
@@ -156,71 +122,51 @@ function extractCertInfo(
 // ─── Middleware Factory ───────────────────────────────────────────────────────
 
 /**
- * Express middleware that enforces mutual TLS authentication.
+ * Hono middleware that enforces mutual TLS authentication.
+ *
+ * Reads client certificate information from proxy-forwarded headers and
+ * optionally validates the CN against an allowlist.
+ *
+ * The resolved CN is logged; use downstream handlers to enforce identity.
  *
  * Usage:
  * ```ts
- * app.use('/api/internal', requireMTLS({ allowedCNs: ['service-a', 'service-b'] }));
+ * app.use('/api/internal', mtlsMiddleware({ allowedCNs: ['service-a', 'service-b'] }));
  * ```
  */
-export function requireMTLS(options?: mTLSOptions): RequestHandler {
+export function mtlsMiddleware(options?: mTLSOptions) {
   const required = options?.required !== false; // default true
   const allowedCNs = options?.allowedCNs ?? [];
 
-  return (req: Request, res: Response, next: NextFunction): void => {
-    const certInfo = extractCertInfo(req);
+  return createMiddleware<HonoEnv>(async (c, next) => {
+    const certInfo = extractCertInfo((name) => c.req.header(name));
 
     if (!certInfo) {
       if (required) {
-        logger.warn("mTLS: missing client certificate", { ip: req.ip, path: req.path });
-        res.status(401).json({ error: "client_certificate_required" });
-        return;
+        logger.warn("mTLS: missing client certificate", {
+          path: c.req.path,
+        });
+        return c.json({ error: "client_certificate_required" }, 401);
       }
-      // Certificate not required — continue without setting cert fields
-      next();
-      return;
+      // Certificate not required — continue without cert context
+      return next();
     }
 
-    const { cn, subject } = certInfo;
+    const { cn } = certInfo;
 
     // CN allow-list check
     if (allowedCNs.length > 0 && !allowedCNs.includes(cn)) {
       logger.warn("mTLS: client CN not in allowed list", { cn, allowedCNs });
-      res.status(403).json({
-        error: "client_certificate_not_authorized",
-        cn,
-      });
-      return;
+      return c.json(
+        {
+          error: "client_certificate_not_authorized",
+          cn,
+        },
+        403
+      );
     }
 
-    // Attach certificate info to request
-    req.clientCertCN = cn;
-    req.clientCertSubject = subject;
-
     logger.debug("mTLS: client certificate accepted", { cn });
-    next();
-  };
-}
-
-// ─── Workload Identity Extraction ─────────────────────────────────────────────
-
-/**
- * Extract a structured workload identity from the client certificate.
- *
- * Parses SPIFFE-style SVIDs in the CN field (e.g.
- * `spiffe://cluster.local/ns/default/sa/my-service`) as well as plain CNs.
- *
- * Returns `null` if no client certificate is attached to the request.
- */
-export function extractWorkloadIdentity(req: Request): WorkloadIdentity | null {
-  const cn = req.clientCertCN;
-  if (!cn) return null;
-
-  const subject = req.clientCertSubject ?? {};
-
-  return {
-    cn,
-    organization: subject["O"] || subject["organization"] || undefined,
-    organizationalUnit: subject["OU"] || subject["organizationalUnit"] || undefined,
-  };
+    return next();
+  });
 }
