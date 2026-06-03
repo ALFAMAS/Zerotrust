@@ -30,11 +30,11 @@ A production-ready SaaS boilerplate. Drop in your business logic and ship. Built
 
 | Service | URL |
 |---------|-----|
-| API (Express) | http://localhost:3000 |
+| API (Hono) | http://localhost:3000 |
 | App + Admin (Next.js) | http://localhost:3001 |
 | Admin panel | http://localhost:3001/admin |
 | API docs (Swagger) | http://localhost:3000/docs |
-| MongoDB | localhost:27017 |
+| PostgreSQL | localhost:5432 |
 | Redis | localhost:6379 |
 | Elasticsearch | http://localhost:9200 |
 | Kibana | http://localhost:5601 |
@@ -79,26 +79,23 @@ To wipe data: `docker compose down -v`
 
 **Prerequisites:**
 - Node.js 18+ (check: `node -v`) — or Bun 1.0+
-- MongoDB 7 running locally (`mongod`) — or use MongoDB Atlas
+- PostgreSQL 15+ running locally — or use a hosted database (Supabase, Neon, etc.)
 - Redis 7 running locally (optional, falls back to in-memory rate limiting)
 
 ```bash
 # 1. Clone
-git clone https://github.com/ALFAMAS/zeroauth -b saas-starter my-saas
+git clone https://github.com/ALFAMAS/zeroauth my-saas
 cd my-saas
 
-# 2. Install all dependencies
-npm install
-# (installs root deps + registers packages/ui via workspace)
+# 2. Install all dependencies (installs root deps + packages/ui workspace)
+bun install
+# or: npm install
 
-# 3. Also install the UI's own deps
-cd packages/ui && npm install && cd ../..
-
-# 4. Generate secrets
+# 3. Generate secrets
 openssl rand -hex 32   # → TOKEN_SECRET_HEX
 openssl rand -hex 32   # → CSFLE_MASTER_KEY_HEX
 
-# 5. Create .env
+# 4. Create .env
 cp .env.example .env
 ```
 
@@ -106,7 +103,7 @@ Edit `.env` — minimum required:
 ```bash
 TOKEN_SECRET_HEX=<your-key>
 CSFLE_MASTER_KEY_HEX=<your-key>
-MONGO_URI=mongodb://localhost:27017/zeroauth
+DATABASE_URL=postgresql://user:password@localhost:5432/zeroauth
 ```
 
 ```bash
@@ -133,20 +130,17 @@ curl -X POST http://localhost:3000/auth/register \
   -d '{"email":"admin@example.com","password":"Admin123!","displayName":"Admin"}'
 ```
 
-Grant admin role in MongoDB:
+Grant admin role in PostgreSQL:
 ```bash
 # If using Docker:
-docker exec -it zeroauth-mongodb mongosh -u admin -p password
+docker exec -it zeroauth-postgres psql -U zeroauth -d zeroauth
 
 # If local:
-mongosh
+psql -U postgres -d zeroauth
 
 # Then in the shell:
-use zeroauth
-db.users.updateOne(
-  { email: "admin@example.com" },
-  { $addToSet: { roles: "admin" } }
-)
+UPDATE users SET roles = array_append(roles, 'admin')
+WHERE email = 'admin@example.com';
 ```
 
 Now log in at http://localhost:3001/login — the admin panel is at http://localhost:3001/admin.
@@ -168,7 +162,7 @@ Now log in at http://localhost:3001/login — the admin panel is at http://local
 # ── Required ───────────────────────────────────────────────────────────────────
 TOKEN_SECRET_HEX=           # openssl rand -hex 32
 CSFLE_MASTER_KEY_HEX=       # openssl rand -hex 32
-MONGO_URI=mongodb://localhost:27017/zeroauth
+DATABASE_URL=postgresql://zeroauth:password@localhost:5432/zeroauth
 
 # ── OAuth (leave blank to disable) ─────────────────────────────────────────────
 OAUTH_GOOGLE_CLIENT_ID=
@@ -207,9 +201,9 @@ NODE_ENV=development
 
 ```
 .
-├── src/                            # API backend (Express + TypeScript)
+├── src/                            # API backend (Hono + TypeScript)
 │   ├── api/
-│   │   ├── server.ts               # Express app entry point
+│   │   ├── server.ts               # Hono app entry point
 │   │   └── routes/
 │   │       ├── auth.routes.ts      # Register, login, OAuth, token refresh
 │   │       ├── magic-link.routes.ts
@@ -217,10 +211,9 @@ NODE_ENV=development
 │   │       ├── passkey.routes.ts   # WebAuthn register + authenticate
 │   │       ├── session.routes.ts   # List + revoke sessions
 │   │       └── admin.routes.ts     # Users CRUD, settings, stats
-│   ├── models/
-│   │   ├── settings.model.ts       # ⭐ Feature flags singleton (SaaSSettings)
-│   │   ├── user.model.ts
-│   │   └── index.ts                # Session, Role, OTP, AuditLog, RefreshToken
+│   ├── db/
+│   │   ├── schema.ts               # Drizzle ORM schema (PostgreSQL)
+│   │   └── index.ts                # Database connection
 │   ├── services/
 │   │   └── magicLink.service.ts
 │   └── middleware/
@@ -233,7 +226,7 @@ NODE_ENV=development
 │           ├── page.tsx            # Landing page (hero, features, pricing)
 │           ├── (auth)/             # /login /register /magic-link /callback
 │           ├── dashboard/          # /dashboard + profile, security, sessions
-│           └── admin/              # /admin — admin panel
+│           └── admin/              # /admin — admin panel (same app, route-guarded)
 │               ├── page.tsx        # Stats dashboard
 │               ├── users/          # User management + detail view
 │               ├── sessions/       # Active session browser

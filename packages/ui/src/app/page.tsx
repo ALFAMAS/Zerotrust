@@ -107,9 +107,9 @@ export default function LandingPage() {
         <h2 className="text-3xl font-bold text-white text-center mb-12">Get running in minutes</h2>
         <div className="space-y-6">
           {[
-            { step: "1", title: "Scaffold with CLI", code: "npx zeroauth init my-app" },
+            { step: "1", title: "Clone & configure", code: "cp .env.example .env  # add your secrets" },
             { step: "2", title: "Start the stack", code: "docker compose up -d" },
-            { step: "3", title: "Integrate the SDK", code: 'import { ZeroAuthClient } from "@zeroauth/sdk"' },
+            { step: "3", title: "Open the app", code: "open http://localhost:3001" },
           ].map((s) => (
             <div key={s.step} className="flex gap-4 items-start">
               <div className="w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-sm flex-shrink-0 mt-0.5">
