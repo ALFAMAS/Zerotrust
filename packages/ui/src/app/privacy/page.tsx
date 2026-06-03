@@ -1,9 +1,11 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { brand } from "@/config/brand";
+import { legal } from "@/config/legal";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy — ZeroAuth",
-  description: "Learn how ZeroAuth collects, uses, and protects your personal data.",
+  title: `Privacy Policy — ${brand.name}`,
+  description: `Learn how ${brand.name} collects, uses, and protects your personal data.`,
 };
 
 export default function PrivacyPage() {
@@ -12,11 +14,14 @@ export default function PrivacyPage() {
       {/* Nav */}
       <nav className="border-b border-gray-800 px-6 py-4 max-w-7xl mx-auto flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2 group">
-          <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold text-sm">
-            Z
+          <div
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-sm"
+            style={{ backgroundColor: brand.logoColor }}
+          >
+            {brand.logoLetter}
           </div>
           <span className="font-bold text-white text-lg group-hover:text-indigo-300 transition-colors">
-            ZeroAuth
+            {brand.name}
           </span>
         </Link>
         <Link href="/" className="text-sm text-gray-400 hover:text-white transition-colors">
@@ -27,7 +32,7 @@ export default function PrivacyPage() {
       {/* Content */}
       <main className="max-w-3xl mx-auto px-6 py-16">
         <h1 className="text-4xl font-bold text-white mb-3">Privacy Policy</h1>
-        <p className="text-gray-500 text-sm mb-12">Last updated: June 3, 2026</p>
+        <p className="text-gray-500 text-sm mb-12">Last updated: {legal.privacyEffectiveDate}</p>
 
         <div className="space-y-12 text-gray-300 leading-relaxed">
 
@@ -37,7 +42,7 @@ export default function PrivacyPage() {
               1. Data We Collect
             </h2>
             <p className="mb-3">
-              When you use ZeroAuth we may collect the following categories of information:
+              When you use {legal.companyName} we may collect the following categories of information:
             </p>
             <ul className="list-disc list-inside space-y-2 text-gray-400">
               <li>
@@ -79,12 +84,12 @@ export default function PrivacyPage() {
               3. Data Sharing
             </h2>
             <p className="mb-3">
-              ZeroAuth is a self-hosted platform. When you run ZeroAuth on your own infrastructure, all
-              data remains on your servers and is never transmitted to Anthropic or the ZeroAuth
+              {legal.companyName} is a self-hosted platform. When you run {legal.companyName} on your own infrastructure, all
+              data remains on your servers and is never transmitted to the {legal.companyName}{" "}
               maintainers.
             </p>
             <p className="text-gray-400">
-              If you use a managed ZeroAuth cloud offering, we may share limited data with trusted
+              If you use a managed {legal.companyName} cloud offering, we may share limited data with trusted
               sub-processors (e.g., cloud hosting providers, email delivery services) solely to operate
               the service. All sub-processors are contractually bound to protect your data under terms
               no less protective than this policy.
@@ -116,7 +121,7 @@ export default function PrivacyPage() {
             <h2 className="text-xl font-semibold text-white mb-4 pb-2 border-b border-gray-800">
               5. Cookies &amp; Local Storage
             </h2>
-            <p className="mb-3">ZeroAuth uses the following types of browser storage:</p>
+            <p className="mb-3">{legal.companyName} uses the following types of browser storage:</p>
             <div className="overflow-x-auto">
               <table className="w-full text-sm text-gray-400 border border-gray-800 rounded-lg overflow-hidden">
                 <thead>
@@ -158,7 +163,7 @@ export default function PrivacyPage() {
             <ul className="list-disc list-inside space-y-2 text-gray-400">
               <li><span className="text-gray-300 font-medium">Access</span> — request a copy of the data we hold about you.</li>
               <li><span className="text-gray-300 font-medium">Rectification</span> — correct inaccurate or incomplete data.</li>
-              <li><span className="text-gray-300 font-medium">Erasure</span> — request deletion of your personal data ("right to be forgotten").</li>
+              <li><span className="text-gray-300 font-medium">Erasure</span> — request deletion of your personal data (&ldquo;right to be forgotten&rdquo;).</li>
               <li><span className="text-gray-300 font-medium">Portability</span> — receive your data in a machine-readable format.</li>
               <li><span className="text-gray-300 font-medium">Objection</span> — object to certain processing activities.</li>
               <li><span className="text-gray-300 font-medium">Withdraw consent</span> — revoke any consent you have given at any time.</li>
@@ -177,11 +182,14 @@ export default function PrivacyPage() {
             <p className="text-gray-400">
               Questions about this policy or your data? Reach us at{" "}
               <a
-                href="mailto:privacy@zeroauth.dev"
+                href={`mailto:${legal.privacyEmail}`}
                 className="text-indigo-400 hover:text-indigo-300 underline underline-offset-2 transition-colors"
               >
-                privacy@zeroauth.dev
+                {legal.privacyEmail}
               </a>
+              {legal.companyAddress ? (
+                <>, or write to us at {legal.companyAddress}</>
+              ) : null}
               .
             </p>
           </section>
@@ -191,7 +199,7 @@ export default function PrivacyPage() {
 
       {/* Footer */}
       <footer className="border-t border-gray-800 px-6 py-8 max-w-7xl mx-auto flex items-center justify-between flex-wrap gap-4">
-        <div className="text-gray-500 text-sm">© 2026 ZeroAuth. Open source under MIT.</div>
+        <div className="text-gray-500 text-sm">© {brand.copyrightYear} {brand.name}. Open source under {brand.license}.</div>
         <div className="flex gap-6 text-sm text-gray-500">
           <Link href="/privacy" className="text-indigo-400 hover:text-indigo-300 transition-colors">Privacy</Link>
           <Link href="/terms" className="hover:text-white transition-colors">Terms</Link>

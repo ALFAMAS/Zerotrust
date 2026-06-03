@@ -22,7 +22,7 @@ A production-ready SaaS boilerplate. Drop in your business logic and ship. Built
 | ✅ | Feature flag toggles | Every auth method on/off from the admin UI |
 | ✅ | Audit log | Immutable event trail to Elasticsearch |
 | ✅ | Dark landing page | Hero, features, pricing sections — ready to customize |
-| ✅ | Docker Compose | One command: API + UI + MongoDB + Redis + Elasticsearch + Kibana |
+| ✅ | Docker Compose | One command: API + UI + PostgreSQL + Redis + Elasticsearch |
 
 ---
 
@@ -243,23 +243,19 @@ NODE_ENV=development
 
 ## Customizing the app
 
-### Rename from "Acme" to your brand
+### Set your brand
 
-Search for `Acme` across `packages/ui/src/` and replace with your company name. Key files:
-- `src/app/page.tsx` — landing page hero + navbar
-- `src/app/layout.tsx` — `<title>` metadata
-- `src/app/dashboard/layout.tsx` — nav logo
+All branding is driven by `NEXT_PUBLIC_*` env vars in `packages/ui/.env.local`. No code changes needed:
 
-### Change the brand color
-
-Edit `packages/ui/tailwind.config.js`:
-```js
-colors: {
-  brand: "#your-hex-color",  // default: #6366f1 (indigo)
-}
+```bash
+NEXT_PUBLIC_APP_NAME=MyStartup
+NEXT_PUBLIC_APP_LOGO_LETTER=M
+NEXT_PUBLIC_APP_LOGO_COLOR=#6366f1
+NEXT_PUBLIC_HERO_TITLE="Ship your SaaS"
+NEXT_PUBLIC_HERO_SUBTITLE="in days, not months"
 ```
 
-Then replace `indigo-` with `brand-` across the UI files.
+See the full list in `packages/ui/.env.example`.
 
 ### Customize the landing page
 
@@ -278,7 +274,7 @@ app.use("/api/my-feature", authMiddleware, myRoutes);
 
 ```typescript
 // inside any route handler after authMiddleware
-const userId = req.user._id;
+const userId = req.user.id;
 const email = req.user.email;
 const isAdmin = req.user.roles.includes("admin");
 ```
@@ -327,6 +323,17 @@ PUT    /admin/settings                     (admin only)
 GET    /healthz
 GET    /docs                               (Swagger UI — dev only)
 ```
+
+---
+
+## Git hooks
+
+| Hook | Runs | What it does |
+|---|---|---|
+| `pre-commit` | Before every commit | Prettier format, ESLint fix, TypeScript type-check, secret scan, graphify update |
+| `commit-msg` | After message entered | Validates conventional commit format |
+| `pre-push` | Before git push | Runs full test suite, warns on console.log |
+| `post-commit` | After commit | Shows commit summary, reminds to push |
 
 ---
 
@@ -492,10 +499,10 @@ The items below should be tackled before anything else. They cover the foundatio
 
 ### In-app Notifications
 
-- [ ] **Notification model** — store notifications per user with `read`/`unread` state
-- [ ] **Bell icon + dropdown** — notification center UI in the dashboard nav
-- [ ] **Mark as read** — single and bulk mark-read
-- [ ] **Real-time delivery** — Server-Sent Events (SSE) or WebSocket push
+- [x] **Notification model** — store notifications per user with `read`/`unread` state
+- [x] **Bell icon + dropdown** — notification center UI in the dashboard nav
+- [x] **Mark as read** — single and bulk mark-read
+- [x] **Real-time delivery** — Server-Sent Events (SSE) push
 - [ ] **Email fallback** — deliver via email if user hasn't visited in N days
 
 ### Developer API Keys
@@ -549,34 +556,34 @@ The items below should be tackled before anything else. They cover the foundatio
 ### SEO & Marketing
 
 - [ ] **Blog or changelog** — MDX-based pages under `/blog` and `/changelog`
-- [ ] **Proper meta tags** — `<title>`, `<meta description>`, Open Graph, Twitter cards on every page
-- [ ] **Sitemap.xml + robots.txt** — generated at build time from Next.js
-- [ ] **Cookie consent banner** — GDPR-compliant banner with accept/reject (use `react-cookie-consent`)
+- [x] **Proper meta tags** — `<title>`, `<meta description>`, Open Graph, Twitter cards on every page
+- [x] **Sitemap.xml + robots.txt** — generated at build time from Next.js
+- [x] **Cookie consent banner** — GDPR-compliant accept/reject banner
 - [ ] **Analytics script** — Plausible or Google Analytics with consent gate
 
 ### Legal & Compliance
 
-- [ ] **Privacy policy page** — `/privacy` with your actual policy (not placeholder)
-- [ ] **Terms of service page** — `/terms`
+- [x] **Privacy policy page** — `/privacy` (content driven by `NEXT_PUBLIC_*` env vars)
+- [x] **Terms of service page** — `/terms` (content driven by `NEXT_PUBLIC_*` env vars)
 - [ ] **GDPR data export** — `/dashboard/settings` → "Export my data" downloads JSON zip
 - [ ] **Account deletion** — 30-day soft-delete grace period, then purge all PII
 - [ ] **Data retention policy** — auto-purge audit logs and old sessions after N days
 
 ### CI/CD & Deployment
 
-- [ ] **GitHub Actions** — lint + type-check + test on every PR
+- [x] **GitHub Actions** — lint + type-check + test + UI build on every PR
 - [ ] **Docker production build** — multi-stage Dockerfile, push to ghcr.io or Docker Hub
 - [ ] **One-click deploy** — Railway / Render / Fly.io deploy button in this README
 - [ ] **Environment parity** — staging environment that mirrors production config
-- [ ] **DB backup** — daily MongoDB dump to S3 with 30-day retention
-- [ ] **Secret rotation** — document how to rotate TOKEN_SECRET_HEX without downtime
+- [ ] **DB backup** — daily PostgreSQL dump to S3 with 30-day retention
+- [x] **Secret rotation** — documented in README with zero-downtime procedure
 
 ### UI & UX
 
-- [ ] **Dark / light mode toggle** — system preference detection + manual override, persisted
-- [ ] **Toast notification system** — global toast context for success/error feedback
-- [ ] **Loading skeletons** — skeleton screens instead of spinners for better perceived performance
-- [ ] **Mobile-responsive dashboard** — all pages usable on phone (currently desktop-first)
+- [x] **Dark / light mode toggle** — system preference detection + manual override, persisted
+- [x] **Toast notification system** — global toast context for success/error feedback
+- [x] **Loading skeletons** — skeleton screens instead of spinners for better perceived performance
+- [x] **Mobile-responsive dashboard** — all pages usable on phone
 - [ ] **Keyboard navigation** — focus rings, skip-to-main, ARIA roles on modals and dropdowns
 - [ ] **Internationalization (i18n)** — next-intl setup with English as default, ready for translations
 

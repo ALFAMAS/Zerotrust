@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { clearToken } from "../../lib/auth";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { NotificationBell } from "@/components/NotificationBell";
 import { brand } from "@/config/brand";
 
 const navItems = [
@@ -55,9 +56,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </div>
           </div>
 
-          {/* Right: ThemeToggle + sign out + hamburger */}
+          {/* Right: ThemeToggle + NotificationBell + sign out + hamburger */}
           <div className="flex items-center gap-2">
             <ThemeToggle />
+            <NotificationBell />
             <button
               onClick={handleSignOut}
               className="hidden md:block text-sm text-gray-400 hover:text-white transition-colors"

@@ -3,6 +3,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { api } from "../../../lib/api";
 import { setToken } from "../../../lib/auth";
+import { useToast } from "@/lib/toast";
+import { brand } from "@/config/brand";
 
 function passwordStrength(p: string): { score: number; label: string; color: string } {
   let score = 0;
@@ -25,14 +27,13 @@ function passwordStrength(p: string): { score: number; label: string; color: str
 export default function RegisterPage() {
   const [form, setForm] = useState({ displayName: "", email: "", password: "", confirm: "" });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const { toast } = useToast();
   const strength = passwordStrength(form.password);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
     if (form.password !== form.confirm) {
-      setError("Passwords do not match");
+      toast({ message: "Passwords do not match", type: "error" });
       return;
     }
     setLoading(true);
@@ -44,9 +45,10 @@ export default function RegisterPage() {
       }, true);
       const data = await api.post<any>("/auth/login", { email: form.email, password: form.password }, true);
       setToken(data.accessToken, data.refreshToken);
+      toast({ message: "Account created! Welcome aboard.", type: "success" });
       window.location.href = "/dashboard";
     } catch (err: any) {
-      setError(err.message || "Registration failed");
+      toast({ message: err.message || "Registration failed", type: "error" });
     } finally {
       setLoading(false);
     }
@@ -55,11 +57,7 @@ export default function RegisterPage() {
   return (
     <>
       <h1 className="text-2xl font-bold text-white mb-1">Create account</h1>
-      <p className="text-gray-400 text-sm mb-6">Start with ZeroAuth for free</p>
-
-      {error && (
-        <div className="mb-4 p-3 bg-red-950 border border-red-800 text-red-300 rounded-lg text-sm">{error}</div>
-      )}
+      <p className="text-gray-400 text-sm mb-6">Start with {brand.name} for free</p>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>

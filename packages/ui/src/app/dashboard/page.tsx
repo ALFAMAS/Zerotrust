@@ -1,15 +1,36 @@
 "use client";
 import { useEffect, useState } from "react";
 import { api } from "../../lib/api";
+import { SkeletonCard, SkeletonText } from "@/components/Skeleton";
 
 export default function DashboardPage() {
   const [user, setUser] = useState<any>(null);
   const [sessions, setSessions] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.get<any>("/auth/me").then(setUser).catch(() => {});
-    api.get<any>("/sessions").then((d) => setSessions(d.sessions || d || [])).catch(() => {});
+    Promise.all([
+      api.get<any>("/auth/me").then(setUser).catch(() => {}),
+      api.get<any>("/sessions").then((d) => setSessions(d.sessions || d || [])).catch(() => {}),
+    ]).finally(() => setLoading(false));
   }, []);
+
+  if (loading) {
+    return (
+      <div>
+        <div className="mb-8 space-y-2">
+          <SkeletonText className="h-7 w-64" />
+          <SkeletonText className="h-4 w-48" />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <SkeletonCard />
+          <SkeletonCard />
+          <SkeletonCard />
+        </div>
+        <SkeletonCard className="h-48" />
+      </div>
+    );
+  }
 
   return (
     <div>

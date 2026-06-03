@@ -3,22 +3,23 @@ import { useState } from "react";
 import Link from "next/link";
 import { api } from "../../../lib/api";
 import { setToken } from "../../../lib/auth";
+import { useToast } from "@/lib/toast";
 
 export default function LoginPage() {
   const [form, setForm] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
     setLoading(true);
     try {
       const data = await api.post<any>("/auth/login", form, true);
       setToken(data.accessToken, data.refreshToken);
+      toast({ message: "Welcome back!", type: "success" });
       window.location.href = "/dashboard";
     } catch (err: any) {
-      setError(err.message || "Login failed. Please check your credentials.");
+      toast({ message: err.message || "Login failed. Please check your credentials.", type: "error" });
     } finally {
       setLoading(false);
     }
@@ -28,10 +29,6 @@ export default function LoginPage() {
     <>
       <h1 className="text-2xl font-bold text-white mb-1">Welcome back</h1>
       <p className="text-gray-400 text-sm mb-6">Sign in to your account</p>
-
-      {error && (
-        <div className="mb-4 p-3 bg-red-950 border border-red-800 text-red-300 rounded-lg text-sm">{error}</div>
-      )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>

@@ -1,9 +1,11 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { brand } from "@/config/brand";
+import { legal } from "@/config/legal";
 
 export const metadata: Metadata = {
-  title: "Terms of Service — ZeroAuth",
-  description: "Read the terms and conditions governing your use of ZeroAuth.",
+  title: `Terms of Service — ${brand.name}`,
+  description: `Read the terms and conditions governing your use of ${brand.name}.`,
 };
 
 export default function TermsPage() {
@@ -12,11 +14,14 @@ export default function TermsPage() {
       {/* Nav */}
       <nav className="border-b border-gray-800 px-6 py-4 max-w-7xl mx-auto flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2 group">
-          <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold text-sm">
-            Z
+          <div
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-sm"
+            style={{ backgroundColor: brand.logoColor }}
+          >
+            {brand.logoLetter}
           </div>
           <span className="font-bold text-white text-lg group-hover:text-indigo-300 transition-colors">
-            ZeroAuth
+            {brand.name}
           </span>
         </Link>
         <Link href="/" className="text-sm text-gray-400 hover:text-white transition-colors">
@@ -27,7 +32,7 @@ export default function TermsPage() {
       {/* Content */}
       <main className="max-w-3xl mx-auto px-6 py-16">
         <h1 className="text-4xl font-bold text-white mb-3">Terms of Service</h1>
-        <p className="text-gray-500 text-sm mb-12">Last updated: June 3, 2026</p>
+        <p className="text-gray-500 text-sm mb-12">Last updated: {legal.termsEffectiveDate}</p>
 
         <div className="space-y-12 text-gray-300 leading-relaxed">
 
@@ -37,7 +42,7 @@ export default function TermsPage() {
               1. Acceptance of Terms
             </h2>
             <p className="mb-3">
-              By accessing or using ZeroAuth (the &ldquo;Service&rdquo;) — whether through our hosted
+              By accessing or using {legal.companyName} (the &ldquo;Service&rdquo;) — whether through our hosted
               offering or a self-hosted deployment — you agree to be bound by these Terms of Service
               (&ldquo;Terms&rdquo;). If you do not agree, do not use the Service.
             </p>
@@ -54,7 +59,7 @@ export default function TermsPage() {
               2. Service Description
             </h2>
             <p className="mb-3">
-              ZeroAuth is an open-source, self-hosted authentication platform that provides:
+              {legal.companyName} is an open-source, self-hosted authentication platform that provides:
             </p>
             <ul className="list-disc list-inside space-y-2 text-gray-400">
               <li>PASETO-based session management and token issuance.</li>
@@ -80,10 +85,10 @@ export default function TermsPage() {
               <li>Keep your credentials confidential and not share them with third parties.</li>
               <li>Notify us immediately at{" "}
                 <a
-                  href="mailto:security@zeroauth.dev"
+                  href={`mailto:${legal.supportEmail}`}
                   className="text-indigo-400 hover:text-indigo-300 underline underline-offset-2 transition-colors"
                 >
-                  security@zeroauth.dev
+                  {legal.supportEmail}
                 </a>
                 {" "}if you suspect unauthorized use of your account.
               </li>
@@ -101,7 +106,7 @@ export default function TermsPage() {
               <li>Violate any applicable law or regulation.</li>
               <li>Conduct unauthorized penetration testing or vulnerability scanning of third-party systems.</li>
               <li>Distribute malware, spyware, or any malicious code.</li>
-              <li>Attempt to reverse-engineer, decompile, or tamper with the platform's security mechanisms.</li>
+              <li>Attempt to reverse-engineer, decompile, or tamper with the platform&apos;s security mechanisms.</li>
               <li>Impersonate any person or entity or misrepresent your affiliation.</li>
               <li>Send unsolicited commercial communications (spam).</li>
             </ul>
@@ -143,7 +148,7 @@ export default function TermsPage() {
               fitness for a particular purpose, or non-infringement.
             </p>
             <p className="text-gray-400">
-              In no event shall the ZeroAuth contributors or maintainers be liable for any indirect,
+              In no event shall the {legal.companyLegalName} contributors or maintainers be liable for any indirect,
               incidental, special, consequential, or punitive damages — including loss of profits, data,
               goodwill, or business interruption — arising out of or relating to your use of or
               inability to use the Service, even if advised of the possibility of such damages.
@@ -156,10 +161,9 @@ export default function TermsPage() {
               7. Governing Law
             </h2>
             <p className="text-gray-400">
-              These Terms are governed by and construed in accordance with the laws of the jurisdiction
-              in which the primary maintainer is domiciled, without regard to conflict-of-law
-              principles. Any disputes arising under these Terms shall be subject to the exclusive
-              jurisdiction of the courts in that jurisdiction.
+              These Terms are governed by and construed in accordance with {legal.jurisdiction},
+              without regard to conflict-of-law principles. Any disputes arising under these Terms
+              shall be subject to the exclusive jurisdiction of the courts in that jurisdiction.
             </p>
           </section>
 
@@ -171,11 +175,14 @@ export default function TermsPage() {
             <p className="text-gray-400">
               Questions about these Terms? Email us at{" "}
               <a
-                href="mailto:legal@zeroauth.dev"
+                href={`mailto:${legal.supportEmail}`}
                 className="text-indigo-400 hover:text-indigo-300 underline underline-offset-2 transition-colors"
               >
-                legal@zeroauth.dev
+                {legal.supportEmail}
               </a>
+              {legal.companyAddress ? (
+                <>, or write to {legal.companyLegalName}, {legal.companyAddress}</>
+              ) : null}
               .
             </p>
           </section>
@@ -185,7 +192,7 @@ export default function TermsPage() {
 
       {/* Footer */}
       <footer className="border-t border-gray-800 px-6 py-8 max-w-7xl mx-auto flex items-center justify-between flex-wrap gap-4">
-        <div className="text-gray-500 text-sm">© 2026 ZeroAuth. Open source under MIT.</div>
+        <div className="text-gray-500 text-sm">© {brand.copyrightYear} {brand.name}. Open source under {brand.license}.</div>
         <div className="flex gap-6 text-sm text-gray-500">
           <Link href="/privacy" className="hover:text-white transition-colors">Privacy</Link>
           <Link href="/terms" className="text-indigo-400 hover:text-indigo-300 transition-colors">Terms</Link>

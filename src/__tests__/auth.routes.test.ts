@@ -606,7 +606,7 @@ describe("Account lockout after failed login attempts", () => {
 
     // Under the threshold (default MAX_ATTEMPTS = 5)
     for (let i = 0; i < 3; i++) recordFailedLogin(email);
-    expect(isAccountLocked(email)).toBe(false);
+    expect(isAccountLocked(email).locked).toBe(false);
   });
 
   it("locks account after exceeding attempt threshold", async () => {
@@ -614,7 +614,7 @@ describe("Account lockout after failed login attempts", () => {
     const email = `lock-test-${Date.now()}@example.com`;
 
     for (let i = 0; i < 5; i++) recordFailedLogin(email);
-    expect(isAccountLocked(email)).toBe(true);
+    expect(isAccountLocked(email).locked).toBe(true);
   });
 
   it("remains locked until lockout duration expires", async () => {
@@ -623,7 +623,7 @@ describe("Account lockout after failed login attempts", () => {
 
     for (let i = 0; i < 5; i++) recordFailedLogin(email);
     // Still locked immediately after
-    expect(isAccountLocked(email)).toBe(true);
+    expect(isAccountLocked(email).locked).toBe(true);
   });
 
   it("clears lockout on successful login", async () => {
@@ -632,9 +632,9 @@ describe("Account lockout after failed login attempts", () => {
     const email = `unlock-test-${Date.now()}@example.com`;
 
     for (let i = 0; i < 5; i++) recordFailedLogin(email);
-    expect(isAccountLocked(email)).toBe(true);
+    expect(isAccountLocked(email).locked).toBe(true);
 
     recordSuccessfulLogin(email);
-    expect(isAccountLocked(email)).toBe(false);
+    expect(isAccountLocked(email).locked).toBe(false);
   });
 });

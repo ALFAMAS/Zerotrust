@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { api } from "../../../lib/api";
+import { SkeletonCard } from "@/components/Skeleton";
 
 interface Session {
   _id: string;
@@ -41,7 +42,11 @@ export default function SessionsPage() {
       </div>
 
       {loading ? (
-        <p className="text-gray-400">Loading…</p>
+        <div className="space-y-3">
+          <SkeletonCard />
+          <SkeletonCard />
+          <SkeletonCard />
+        </div>
       ) : sessions.length === 0 ? (
         <p className="text-gray-500">No active sessions found.</p>
       ) : (

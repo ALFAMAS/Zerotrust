@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { brand } from "@/config/brand";
 
 const CONSENT_KEY = "za_cookie_consent";
 
@@ -46,7 +47,7 @@ export default function CookieBanner() {
     >
       <div className="bg-gray-900 border-t border-gray-800 px-6 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 max-w-7xl mx-auto w-full">
         <p className="text-sm text-gray-400 leading-relaxed">
-          We use cookies to improve your experience. By continuing, you accept our{" "}
+          {brand.name} uses cookies to improve your experience. By continuing, you accept our{" "}
           <Link href="/privacy" className="text-indigo-400 hover:text-indigo-300 underline underline-offset-2 transition-colors">
             Privacy Policy
           </Link>{" "}

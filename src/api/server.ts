@@ -12,6 +12,7 @@ import passkeyRoutes from "./routes/passkey.routes";
 import workloadRoutes from "./routes/workload.routes";
 import verificationRoutes from "./routes/verification.routes";
 import anomalyRoutes from "./routes/anomaly.routes";
+import notificationRoutes from "./routes/notification.routes";
 import federationRoutes from "../federation/routes";
 import { rateLimit } from "../middleware/rateLimiting";
 import { geoFencingMiddleware } from "../middleware/geoFencing";
@@ -54,6 +55,9 @@ export async function createServer() {
 
   // ─── Anomaly admin routes ─────────────────────────────────────────────────
   app.route("/admin/anomaly", anomalyRoutes);
+
+  // ─── Notification routes ──────────────────────────────────────────────────
+  app.route("/notifications", notificationRoutes);
 
   // ─── SSF webhook endpoint ─────────────────────────────────────────────────
   app.post("/ssf/events", async (c) => {

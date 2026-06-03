@@ -30,15 +30,15 @@ setInterval(() => {
   }
 }, 10 * 60 * 1000).unref();
 
-export function isAccountLocked(email: string): boolean {
+export function isAccountLocked(email: string): { locked: boolean; lockedUntil?: string } {
   const key = email.toLowerCase();
   const entry = failedAttempts.get(key);
-  if (!entry?.lockedUntil) return false;
-  if (entry.lockedUntil > new Date()) return true;
+  if (!entry?.lockedUntil) return { locked: false };
+  if (entry.lockedUntil > new Date()) return { locked: true, lockedUntil: entry.lockedUntil.toISOString() };
   entry.lockedUntil = undefined;
   entry.count = 0;
   failedAttempts.set(key, entry);
-  return false;
+  return { locked: false };
 }
 
 export function recordFailedLogin(
