@@ -339,23 +339,23 @@ This starter handles auth end-to-end. Everything below is what a real SaaS produ
 The items below should be tackled before anything else. They cover the foundational UX, compliance, and infrastructure every SaaS needs regardless of niche.
 
 **UI & UX**
-- [ ] Dark / light mode toggle — system preference detection + manual override, persisted
-- [ ] Toast notification system — global toast context for success/error feedback
-- [ ] Loading skeletons — skeleton screens instead of spinners
-- [ ] Mobile-responsive dashboard — all pages usable on phone
+- [x] Dark / light mode toggle — system preference detection + manual override, persisted
+- [x] Toast notification system — global toast context for success/error feedback
+- [x] Loading skeletons — skeleton screens instead of spinners
+- [x] Mobile-responsive dashboard — all pages usable on phone
 - [ ] Keyboard navigation — focus rings, skip-to-main, ARIA roles on modals and dropdowns
 - [ ] Internationalization (i18n) — next-intl with English default, ready for translations
 
 **Mobile & PWA**
-- [ ] Progressive Web App (PWA) — `manifest.json`, service worker, "Add to Home Screen"
+- [x] Progressive Web App (PWA) — `manifest.json`, service worker, "Add to Home Screen"
 - [ ] Offline support — cache dashboard shell; queue writes offline, sync on reconnect
 - [ ] Deep linking — invite and magic-link URLs open correctly in web and native app
 
 **In-app Notifications**
-- [ ] Notification model — per-user with `read`/`unread` state
-- [ ] Bell icon + dropdown — notification center UI in dashboard nav
-- [ ] Mark as read — single and bulk
-- [ ] Real-time delivery — Server-Sent Events (SSE) or WebSocket push
+- [x] Notification model — per-user with `read`/`unread` state
+- [x] Bell icon + dropdown — notification center UI in dashboard nav
+- [x] Mark as read — single and bulk
+- [x] Real-time delivery — Server-Sent Events (SSE) push
 - [ ] Email fallback — deliver via email if user hasn't visited in N days
 
 **File Storage & Uploads**
@@ -374,7 +374,7 @@ The items below should be tackled before anything else. They cover the foundatio
 - [ ] Per-org billing — one Stripe subscription per organization
 - [ ] Remove / leave org — with safety checks (can't remove last owner)
 - [ ] Custom org roles & permissions — fine-grained resource permissions defined per org
-- [ ] Per-tenant branding — org logo, brand color, app name replace defaults
+- [x] Per-tenant branding — all UI strings/colors configurable via `NEXT_PUBLIC_*` env vars
 
 **Email**
 - [ ] Transactional email templates — welcome, verify, invite, receipt, password reset, trial expiry
@@ -397,25 +397,25 @@ The items below should be tackled before anything else. They cover the foundatio
 
 **SEO & Marketing**
 - [ ] Blog or changelog — MDX pages under `/blog` and `/changelog`
-- [ ] Proper meta tags — `<title>`, Open Graph, Twitter cards on every page
-- [ ] Sitemap.xml + robots.txt — generated at build time from Next.js
-- [ ] Cookie consent banner — GDPR-compliant accept/reject
+- [x] Proper meta tags — `<title>`, Open Graph, Twitter cards on every page
+- [x] Sitemap.xml + robots.txt — generated at build time from Next.js
+- [x] Cookie consent banner — GDPR-compliant accept/reject
 - [ ] Analytics script — Plausible or Google Analytics with consent gate
 
 **Legal & Compliance**
-- [ ] Privacy policy page — `/privacy`
-- [ ] Terms of service page — `/terms`
+- [x] Privacy policy page — `/privacy` (content driven by `NEXT_PUBLIC_*` env vars)
+- [x] Terms of service page — `/terms` (content driven by `NEXT_PUBLIC_*` env vars)
 - [ ] GDPR data export — "Export my data" downloads JSON zip
 - [ ] Account deletion — 30-day soft-delete grace period, then purge all PII
 - [ ] Data retention policy — auto-purge audit logs and old sessions after N days
 
 **CI/CD & Deployment**
-- [ ] GitHub Actions — lint + type-check + test on every PR
+- [x] GitHub Actions — lint + type-check + test + UI build on every PR
 - [ ] Docker production build — multi-stage Dockerfile, push to ghcr.io
-- [ ] One-click deploy — Railway / Render / Fly.io deploy button in this README
+- [ ] One-click deploy — Railway / Render / Fly.io deploy button in README
 - [ ] Environment parity — staging environment that mirrors production
-- [ ] DB backup — daily MongoDB dump to S3 with 30-day retention
-- [ ] Secret rotation — document how to rotate TOKEN_SECRET_HEX without downtime
+- [ ] DB backup — daily PostgreSQL dump to S3 with 30-day retention
+- [x] Secret rotation — documented in README with zero-downtime procedure
 
 **Multi-language (i18n)**
 - [ ] i18n foundation — install next-intl (or react-i18next); define message namespaces; wrap app in provider
