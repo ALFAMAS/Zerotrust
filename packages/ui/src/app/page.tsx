@@ -141,9 +141,11 @@ export default function LandingPage() {
       <footer className="border-t border-gray-800 px-6 py-8 max-w-7xl mx-auto flex items-center justify-between flex-wrap gap-4">
         <div className="text-gray-500 text-sm">© 2026 ZeroAuth. Open source under MIT.</div>
         <div className="flex gap-6 text-sm text-gray-500">
-          <a href="#" className="hover:text-white transition-colors">GitHub</a>
-          <a href="#" className="hover:text-white transition-colors">Docs</a>
-          <a href="#" className="hover:text-white transition-colors">Security</a>
+          <a href="https://github.com/ALFAMAS/zeroauth" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">GitHub</a>
+          <a href="http://localhost:3000/docs" className="hover:text-white transition-colors">Docs</a>
+          <Link href="/security" className="hover:text-white transition-colors">Security</Link>
+          <Link href="/privacy" className="hover:text-white transition-colors">Privacy</Link>
+          <Link href="/terms" className="hover:text-white transition-colors">Terms</Link>
         </div>
       </footer>
     </div>
