@@ -1,0 +1,26 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "🚀 Running pre-push checks..."
+
+# 1. Run tests before pushing
+echo "🧪 Running test suite..."
+bun run test --run
+if [ $? -ne 0 ]; then
+  echo "❌ Tests failed — push blocked"
+  echo "Fix failing tests or use git push --no-verify to bypass"
+  exit 1
+fi
+
+# 2. Warn about console.log/debugger in non-test source files
+PUSHED_FILES=$(git diff --name-only @{u} 2>/dev/null || git diff --name-only HEAD~1 2>/dev/null || true)
+if [ -n "$PUSHED_FILES" ]; then
+  DEBUG_FOUND=$(echo "$PUSHED_FILES" | grep -E '\.(ts|tsx)$' | grep -v '__tests__\|\.test\.\|\.spec\.' | xargs grep -l 'console\.log\|debugger;' 2>/dev/null || true)
+  if [ -n "$DEBUG_FOUND" ]; then
+    echo "⚠️  Debug statements found in:"
+    echo "$DEBUG_FOUND"
+    echo "Consider removing console.log/debugger before pushing to main"
+  fi
+fi
+
+echo "✅ Pre-push checks passed"

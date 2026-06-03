@@ -6,6 +6,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { isAuthenticated, clearToken } from "@/lib/auth";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { brand } from "@/config/brand";
 
 const navLinks = [
   { href: "/admin", icon: "📊", label: "Dashboard", exact: true },
@@ -39,7 +40,7 @@ function AdminSidebar({ open, onClose }: AdminSidebarProps) {
     <aside className="flex h-full w-60 flex-col bg-gray-900 border-r border-gray-800">
       <div className="flex h-16 items-center px-6 border-b border-gray-800">
         <Link href="/admin" className="text-lg font-bold text-indigo-400 tracking-tight" onClick={onClose}>
-          Admin Panel
+          {brand.name} Admin
         </Link>
       </div>
       <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
@@ -153,7 +154,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </>
           )}
         </button>
-        <span className="font-bold text-indigo-400">Admin Panel</span>
+        <span className="font-bold text-indigo-400">{brand.name} Admin</span>
       </div>
 
       {/* Main content: offset by sidebar width on desktop, full-width on mobile */}

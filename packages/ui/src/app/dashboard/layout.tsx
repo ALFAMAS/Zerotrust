@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { clearToken } from "../../lib/auth";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { brand } from "@/config/brand";
 
 const navItems = [
   { href: "/dashboard", label: "Overview" },
@@ -28,10 +29,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           {/* Left: logo + desktop nav links */}
           <div className="flex items-center gap-6">
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold text-xs">
-                Z
+              <div
+                className="w-7 h-7 rounded-lg flex items-center justify-center text-white font-bold text-xs"
+                style={{ backgroundColor: brand.logoColor }}
+              >
+                {brand.logoLetter}
               </div>
-              <span className="font-bold text-white">ZeroAuth</span>
+              <span className="font-bold text-white">{brand.name}</span>
             </div>
             {/* Desktop nav links */}
             <div className="hidden md:flex gap-1">

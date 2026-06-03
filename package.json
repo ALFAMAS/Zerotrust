@@ -2,7 +2,9 @@
   "name": "zeroauth",
   "version": "1.0.0",
   "private": true,
-  "workspaces": ["packages/ui"],
+  "workspaces": [
+    "packages/ui"
+  ],
   "scripts": {
     "dev": "concurrently --kill-others-on-fail -n API,UI -c cyan,magenta \"tsx watch src/api/server.ts\" \"cd packages/ui && next dev -p 3001\"",
     "dev:api": "tsx watch src/api/server.ts",
@@ -27,6 +29,13 @@
   },
   "lint-staged": {
     "src/**/*.ts": [
+      "prettier --write",
+      "eslint --fix --max-warnings=0"
+    ],
+    "packages/ui/src/**/*.{ts,tsx}": [
+      "prettier --write"
+    ],
+    "*.{json,md}": [
       "prettier --write"
     ]
   },

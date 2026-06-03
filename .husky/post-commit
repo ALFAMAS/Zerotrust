@@ -1,0 +1,16 @@
+#!/usr/bin/env sh
+
+# Post-commit: informational only, never blocks
+COMMIT_HASH=$(git rev-parse --short HEAD 2>/dev/null)
+COMMIT_MSG=$(git log -1 --pretty=%B 2>/dev/null | head -1)
+BRANCH=$(git branch --show-current 2>/dev/null)
+
+echo ""
+echo "✓ Committed: $COMMIT_HASH on $BRANCH"
+echo "  $COMMIT_MSG"
+
+# Remind to push
+UNPUSHED=$(git log @{u}..HEAD --oneline 2>/dev/null | wc -l | tr -d ' ')
+if [ "$UNPUSHED" -gt "0" ]; then
+  echo "  ↑ $UNPUSHED commit(s) ahead of origin/$BRANCH — don't forget to push"
+fi

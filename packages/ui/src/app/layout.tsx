@@ -2,28 +2,28 @@ import type { Metadata } from "next";
 import { ThemeProvider } from "next-themes";
 import { ToastProvider } from "../context/ToastContext";
 import CookieBanner from "@/components/CookieBanner";
+import { brand } from "@/config/brand";
 import "./globals.css";
 
-const title = "ZeroAuth — Zero Trust Authentication";
-const description =
-  "Enterprise-grade authentication for modern applications. PASETO tokens, WebAuthn passkeys, MFA, RBAC, and more.";
+const title = `${brand.name} — ${brand.tagline}`;
+const description = brand.description;
 
 export const metadata: Metadata = {
   title,
   description,
   keywords: ["authentication", "zero trust", "passkeys", "webauthn", "mfa", "security"],
   manifest: "/manifest.json",
-  themeColor: "#6366f1",
+  themeColor: brand.color,
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "ZeroAuth",
+    title: brand.name,
   },
   openGraph: {
     title,
     description,
     type: "website",
-    siteName: "ZeroAuth",
+    siteName: brand.name,
   },
   twitter: {
     card: "summary_large_image",

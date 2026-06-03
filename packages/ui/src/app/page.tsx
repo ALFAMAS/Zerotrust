@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { brand } from "@/config/brand";
 
 const features = [
   {
@@ -34,7 +35,7 @@ const features = [
   {
     icon: "🌐",
     title: "OIDC Provider",
-    desc: "Expose ZeroAuth as a standards-compliant OpenID Connect identity provider.",
+    desc: `Expose ${brand.name} as a standards-compliant OpenID Connect identity provider.`,
   },
   {
     icon: "🏢",
@@ -49,11 +50,16 @@ export default function LandingPage() {
       {/* Nav */}
       <nav className="border-b border-gray-800 px-6 py-4 flex items-center justify-between max-w-7xl mx-auto">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold text-sm">Z</div>
-          <span className="font-bold text-white text-lg">ZeroAuth</span>
+          <div
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-sm"
+            style={{ backgroundColor: brand.logoColor }}
+          >
+            {brand.logoLetter}
+          </div>
+          <span className="font-bold text-white text-lg">{brand.name}</span>
         </div>
         <div className="flex items-center gap-4">
-          <a href="http://localhost:3000/docs" className="text-gray-400 hover:text-white text-sm transition-colors">Docs</a>
+          <a href={`${brand.apiUrl}/docs`} className="text-gray-400 hover:text-white text-sm transition-colors">Docs</a>
           <Link href="/login" className="text-gray-400 hover:text-white text-sm transition-colors">Sign In</Link>
           <Link href="/register" className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium rounded-lg transition-colors">
             Get Started
@@ -65,23 +71,22 @@ export default function LandingPage() {
       <section className="max-w-7xl mx-auto px-6 pt-24 pb-16 text-center">
         <div className="inline-flex items-center gap-2 bg-indigo-950 border border-indigo-800 text-indigo-300 px-3 py-1.5 rounded-full text-xs font-medium mb-6">
           <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
-          Now with OIDC provider + SAML 2.0
+          {brand.announcementBadge}
         </div>
         <h1 className="text-5xl md:text-6xl font-bold text-white mb-6 leading-tight">
-          Zero Trust Authentication<br />
+          {brand.heroTitle}<br />
           <span className="bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
-            for Modern Apps
+            {brand.heroSubtitle}
           </span>
         </h1>
         <p className="text-xl text-gray-400 mb-10 max-w-2xl mx-auto leading-relaxed">
-          Enterprise-grade auth without the enterprise complexity. PASETO tokens, WebAuthn passkeys,
-          multi-factor auth, RBAC/ABAC, and real-time anomaly detection — all in one self-hosted platform.
+          {brand.heroDescription}
         </p>
         <div className="flex items-center justify-center gap-4 flex-wrap">
           <Link href="/register" className="px-8 py-3.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl transition-colors text-lg">
             Start Free →
           </Link>
-          <a href="http://localhost:3000/docs" className="px-8 py-3.5 border border-gray-700 hover:border-gray-500 text-gray-300 hover:text-white font-semibold rounded-xl transition-colors text-lg">
+          <a href={`${brand.apiUrl}/docs`} className="px-8 py-3.5 border border-gray-700 hover:border-gray-500 text-gray-300 hover:text-white font-semibold rounded-xl transition-colors text-lg">
             View API Docs
           </a>
         </div>
@@ -109,7 +114,7 @@ export default function LandingPage() {
           {[
             { step: "1", title: "Clone & configure", code: "cp .env.example .env  # add your secrets" },
             { step: "2", title: "Start the stack", code: "docker compose up -d" },
-            { step: "3", title: "Open the app", code: "open http://localhost:3001" },
+            { step: "3", title: "Open the app", code: `open ${brand.url}` },
           ].map((s) => (
             <div key={s.step} className="flex gap-4 items-start">
               <div className="w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-sm flex-shrink-0 mt-0.5">
@@ -139,10 +144,10 @@ export default function LandingPage() {
 
       {/* Footer */}
       <footer className="border-t border-gray-800 px-6 py-8 max-w-7xl mx-auto flex items-center justify-between flex-wrap gap-4">
-        <div className="text-gray-500 text-sm">© 2026 ZeroAuth. Open source under MIT.</div>
+        <div className="text-gray-500 text-sm">© {brand.copyrightYear} {brand.name}. Open source under {brand.license}.</div>
         <div className="flex gap-6 text-sm text-gray-500">
-          <a href="https://github.com/ALFAMAS/zeroauth" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">GitHub</a>
-          <a href="http://localhost:3000/docs" className="hover:text-white transition-colors">Docs</a>
+          <a href={brand.githubUrl} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">GitHub</a>
+          <a href={`${brand.apiUrl}/docs`} className="hover:text-white transition-colors">Docs</a>
           <Link href="/security" className="hover:text-white transition-colors">Security</Link>
           <Link href="/privacy" className="hover:text-white transition-colors">Privacy</Link>
           <Link href="/terms" className="hover:text-white transition-colors">Terms</Link>

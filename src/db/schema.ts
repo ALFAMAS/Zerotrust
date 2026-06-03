@@ -280,3 +280,15 @@ export const saasSettingsTable = pgTable("saas_settings", {
     .default(sql`now()`),
   updatedBy: text("updated_by"),
 });
+
+export const notificationsTable = pgTable("notifications", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: uuid("user_id").notNull().references(() => usersTable.id, { onDelete: "cascade" }),
+  type: text("type").notNull(),        // "info" | "success" | "warning" | "error" | "security"
+  title: text("title").notNull(),
+  body: text("body").notNull(),
+  link: text("link"),                  // optional deep-link
+  read: boolean("read").notNull().default(false),
+  readAt: timestamp("read_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
+});
