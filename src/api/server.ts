@@ -20,6 +20,7 @@ import { geoFencingMiddleware } from "../middleware/geoFencing";
 import { temporalAccessMiddleware } from "../middleware/temporalAccess";
 import { authMiddleware } from "../middleware/auth";
 import { getLogger } from "../logger";
+import { initEmailQueue } from "../services/emailQueue";
 import type { HonoEnv } from "../shared/types";
 
 const logger = getLogger("api-server");
@@ -29,6 +30,13 @@ export async function createServer() {
   initLogger.info("Starting API server setup");
 
   const app = new Hono<HonoEnv>();
+
+  // Start email queue worker when Redis is available
+  if (process.env.REDIS_URI) {
+    initEmailQueue(process.env.REDIS_URI).catch((err: Error) =>
+      initLogger.error("Email queue init failed", err)
+    );
+  }
 
   app.use("*", cors());
   app.use("*", secureHeaders());

@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { ThemeProvider } from "next-themes";
+import { NextIntlClientProvider } from "next-intl";
+import { getMessages } from "next-intl/server";
 import { ToastProvider } from "../context/ToastContext";
 import CookieBanner from "@/components/CookieBanner";
 import { brand } from "@/config/brand";
@@ -32,19 +34,22 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const messages = await getMessages();
   return (
     <html lang="en" suppressHydrationWarning>
       <body className="bg-gray-950 dark:bg-gray-950 text-gray-100 antialiased">
         <a href="#main-content" className="skip-to-main">
           Skip to main content
         </a>
-        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-          <ToastProvider>
-            {children}
-            <CookieBanner />
-          </ToastProvider>
-        </ThemeProvider>
+        <NextIntlClientProvider messages={messages}>
+          <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+            <ToastProvider>
+              {children}
+              <CookieBanner />
+            </ToastProvider>
+          </ThemeProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

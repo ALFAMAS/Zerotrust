@@ -1,0 +1,46 @@
+# Dependencies
+node_modules
+packages/*/node_modules
+.bun
+
+# Build outputs (rebuilt inside container)
+dist
+packages/ui/.next
+packages/ui/out
+
+# Development files
+*.log
+*.log.*
+.env
+.env.*
+!.env.example
+
+# Test artifacts
+coverage
+.nyc_output
+
+# Version control
+.git
+.gitignore
+
+# Editor
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# CI
+.github
+
+# Docker (no recursive Docker builds)
+Dockerfile*
+docker-compose*
+.dockerignore
+
+# TypeScript source maps
+*.js.map
+*.d.ts.map

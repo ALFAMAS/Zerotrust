@@ -355,8 +355,8 @@ The items below should be tackled before anything else. They cover the foundatio
 - [x] Toast notification system — global toast context for success/error feedback
 - [x] Loading skeletons — skeleton screens instead of spinners
 - [x] Mobile-responsive dashboard — all pages usable on phone
-- [ ] Keyboard navigation — focus rings, skip-to-main, ARIA roles on modals and dropdowns
-- [ ] Internationalization (i18n) — next-intl with English default, ready for translations
+- [x] Keyboard navigation — focus rings, skip-to-main, ARIA roles on modals and dropdowns
+- [x] Internationalization (i18n) — next-intl with English default, ready for translations
 
 **Mobile & PWA**
 
@@ -396,7 +396,7 @@ The items below should be tackled before anything else. They cover the foundatio
 
 - [x] Transactional email templates — welcome, verify, invite, receipt, password reset, trial expiry
 - [x] Inline-styled HTML email templates
-- [ ] Email queue — Bull/BullMQ so sending never blocks a request
+- [x] Email queue — Bull/BullMQ so sending never blocks a request
 - [ ] Notification preferences — users choose which emails they receive
 - [ ] Unsubscribe tokens — one-click unsubscribe with signed tokens (CAN-SPAM)
 
@@ -433,7 +433,7 @@ The items below should be tackled before anything else. They cover the foundatio
 **CI/CD & Deployment**
 
 - [x] GitHub Actions — lint + type-check + test + UI build on every PR
-- [ ] Docker production build — multi-stage Dockerfile, push to ghcr.io
+- [x] Docker production build — multi-stage Dockerfile, push to ghcr.io
 - [ ] One-click deploy — Railway / Render / Fly.io deploy button in README
 - [ ] Environment parity — staging environment that mirrors production
 - [ ] DB backup — daily PostgreSQL dump to S3 with 30-day retention
@@ -441,7 +441,7 @@ The items below should be tackled before anything else. They cover the foundatio
 
 **Multi-language (i18n)**
 
-- [ ] i18n foundation — install next-intl (or react-i18next); define message namespaces; wrap app in provider
+- [x] i18n foundation — install next-intl (or react-i18next); define message namespaces; wrap app in provider
 - [ ] Translation file structure — JSON files per locale under `/messages/{locale}.json`; enforce no hardcoded UI strings
 - [ ] Locale detection — read `Accept-Language` header on first visit; fallback to stored preference on user profile; cookie-persist choice
 - [ ] Language switcher — dropdown in nav and settings page; persists to user profile via API
