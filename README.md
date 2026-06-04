@@ -9,50 +9,61 @@ A production-ready SaaS boilerplate with enterprise-grade authentication built i
 
 ## What's built
 
-| | Feature |
-|---|---|
-| ✅ | Email + password auth with account lockout |
-| ✅ | Google, GitHub, Apple, Facebook OAuth |
-| ✅ | Magic link (passwordless, 15-min TTL) |
-| ✅ | Passkeys / WebAuthn (FIDO2) |
-| ✅ | TOTP (Google Authenticator, Authy, 1Password) |
-| ✅ | Email OTP, SMS OTP (Twilio), WhatsApp, Telegram MFA |
-| ✅ | Session management — list, revoke, device tracking |
-| ✅ | PASETO v4 tokens (AES-256-GCM, no JWT footguns) |
-| ✅ | RBAC + ABAC with JIT privilege escalation |
-| ✅ | Continuous access evaluation + anomaly detection |
-| ✅ | Rate limiting (Redis-backed, in-memory fallback) |
-| ✅ | OIDC provider + SAML 2.0 SSO |
-| ✅ | SCIM 2.0 user provisioning |
-| ✅ | LDAP / Active Directory sync |
-| ✅ | User dashboard — profile, security, sessions |
-| ✅ | Admin panel at `/admin` — users, sessions, audit log, feature toggles |
-| ✅ | Dark mode toggle (system preference + manual, persisted) |
-| ✅ | Toast notification system |
-| ✅ | Loading skeletons |
-| ✅ | Mobile-responsive layouts |
-| ✅ | PWA manifest (installable on mobile) |
-| ✅ | Cookie consent banner (GDPR) |
-| ✅ | Privacy policy + Terms of service pages |
-| ✅ | Immutable audit log (Elasticsearch) |
-| ✅ | Prometheus metrics + OpenTelemetry tracing |
-| ✅ | Docker Compose — full stack in one command |
-| ✅ | GitHub Actions CI (lint + type-check + test + UI build) |
+|     | Feature                                                               |
+| --- | --------------------------------------------------------------------- |
+| ✅  | Email + password auth with account lockout                            |
+| ✅  | Google, GitHub, Apple, Facebook OAuth                                 |
+| ✅  | Magic link (passwordless, 15-min TTL)                                 |
+| ✅  | Passkeys / WebAuthn (FIDO2)                                           |
+| ✅  | TOTP (Google Authenticator, Authy, 1Password)                         |
+| ✅  | Email OTP, SMS OTP (Twilio), WhatsApp, Telegram MFA                   |
+| ✅  | Session management — list, revoke, device tracking                    |
+| ✅  | PASETO v4 tokens (AES-256-GCM, no JWT footguns)                       |
+| ✅  | RBAC + ABAC with JIT privilege escalation                             |
+| ✅  | Continuous access evaluation + anomaly detection                      |
+| ✅  | Rate limiting (Redis-backed, in-memory fallback)                      |
+| ✅  | OIDC provider + SAML 2.0 SSO                                          |
+| ✅  | SCIM 2.0 user provisioning                                            |
+| ✅  | LDAP / Active Directory sync                                          |
+| ✅  | User dashboard — profile, security, sessions                          |
+| ✅  | Admin panel at `/admin` — users, sessions, audit log, feature toggles |
+| ✅  | Dark mode toggle (system preference + manual, persisted)              |
+| ✅  | Toast notification system                                             |
+| ✅  | Loading skeletons                                                     |
+| ✅  | Mobile-responsive layouts                                             |
+| ✅  | PWA manifest (installable on mobile)                                  |
+| ✅  | Cookie consent banner (GDPR)                                          |
+| ✅  | Privacy policy + Terms of service pages                               |
+| ✅  | Immutable audit log (Elasticsearch)                                   |
+| ✅  | Prometheus metrics + OpenTelemetry tracing                            |
+| ✅  | Docker Compose — full stack in one command                            |
+| ✅  | GitHub Actions CI (lint + type-check + test + UI build)               |
 
 ---
 
 ## Ports
 
-| Service | URL |
-|---------|-----|
-| API | http://localhost:3000 |
-| App + Admin | http://localhost:3001 |
-| Admin panel | http://localhost:3001/admin |
-| API docs | http://localhost:3000/docs |
-| PostgreSQL | localhost:5432 |
-| Redis | localhost:6379 |
-| Elasticsearch | http://localhost:9200 |
-| Kibana | http://localhost:5601 |
+| Service       | URL                         |
+| ------------- | --------------------------- |
+| API           | http://localhost:3000       |
+| App + Admin   | http://localhost:3001       |
+| Admin panel   | http://localhost:3001/admin |
+| API docs      | http://localhost:3000/docs  |
+| PostgreSQL    | localhost:5432              |
+| Redis         | localhost:6379              |
+| Elasticsearch | http://localhost:9200       |
+| Kibana        | http://localhost:5601       |
+
+---
+
+## One-click deploy
+
+| Platform    | Button                                                                                                                                           |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Railway** | [![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new/template?template=https://github.com/ALFAMAS/zeroauth)            |
+| **Render**  | [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/ALFAMAS/zeroauth) |
+
+Both platforms auto-detect Docker and provision a managed PostgreSQL + Redis. Set the required env vars (`TOKEN_SECRET_HEX`, `CSFLE_MASTER_KEY_HEX`, `DATABASE_URL`, `REDIS_URI`) during the deploy wizard.
 
 ---
 
@@ -429,30 +440,30 @@ bun run dev:ui     # UI only
 
 ## Environment variables
 
-| Variable | Required | Default | Description |
-|---|---|---|---|
-| `TOKEN_SECRET_HEX` | ✅ | — | 32-byte hex for PASETO tokens |
-| `CSFLE_MASTER_KEY_HEX` | ✅ | — | 32-byte hex for field encryption |
-| `DATABASE_URL` | ✅ | — | PostgreSQL connection string |
-| `REDIS_URI` | | — | Redis URL (falls back to in-memory) |
-| `PORT` | | 3000 | API listen port |
-| `NODE_ENV` | | development | `development` or `production` |
-| `API_BASE_URL` | | http://localhost:3000 | Public API URL |
-| `OAUTH_GOOGLE_CLIENT_ID` | | — | Google OAuth |
-| `OAUTH_GOOGLE_CLIENT_SECRET` | | — | Google OAuth |
-| `OAUTH_GITHUB_CLIENT_ID` | | — | GitHub OAuth |
-| `OAUTH_GITHUB_CLIENT_SECRET` | | — | GitHub OAuth |
-| `MAIL_HOST` | | — | SMTP host |
-| `MAIL_PORT` | | 587 | SMTP port |
-| `MAIL_USER` | | — | SMTP username |
-| `MAIL_PASSWORD` | | — | SMTP password |
-| `MAIL_FROM` | | — | Sender address |
-| `TWILIO_ACCOUNT_SID` | | — | SMS / WhatsApp OTP |
-| `TWILIO_AUTH_TOKEN` | | — | SMS / WhatsApp OTP |
-| `WEBAUTHN_RP_ID` | | localhost | Must match your domain in production |
-| `WEBAUTHN_RP_ORIGINS` | | http://localhost:3000 | Allowed origins |
-| `ELASTICSEARCH_HOST` | | localhost | Audit log storage |
-| `LOG_LEVEL` | | info | debug / info / warn / error |
+| Variable                     | Required | Default               | Description                          |
+| ---------------------------- | -------- | --------------------- | ------------------------------------ |
+| `TOKEN_SECRET_HEX`           | ✅       | —                     | 32-byte hex for PASETO tokens        |
+| `CSFLE_MASTER_KEY_HEX`       | ✅       | —                     | 32-byte hex for field encryption     |
+| `DATABASE_URL`               | ✅       | —                     | PostgreSQL connection string         |
+| `REDIS_URI`                  |          | —                     | Redis URL (falls back to in-memory)  |
+| `PORT`                       |          | 3000                  | API listen port                      |
+| `NODE_ENV`                   |          | development           | `development` or `production`        |
+| `API_BASE_URL`               |          | http://localhost:3000 | Public API URL                       |
+| `OAUTH_GOOGLE_CLIENT_ID`     |          | —                     | Google OAuth                         |
+| `OAUTH_GOOGLE_CLIENT_SECRET` |          | —                     | Google OAuth                         |
+| `OAUTH_GITHUB_CLIENT_ID`     |          | —                     | GitHub OAuth                         |
+| `OAUTH_GITHUB_CLIENT_SECRET` |          | —                     | GitHub OAuth                         |
+| `MAIL_HOST`                  |          | —                     | SMTP host                            |
+| `MAIL_PORT`                  |          | 587                   | SMTP port                            |
+| `MAIL_USER`                  |          | —                     | SMTP username                        |
+| `MAIL_PASSWORD`              |          | —                     | SMTP password                        |
+| `MAIL_FROM`                  |          | —                     | Sender address                       |
+| `TWILIO_ACCOUNT_SID`         |          | —                     | SMS / WhatsApp OTP                   |
+| `TWILIO_AUTH_TOKEN`          |          | —                     | SMS / WhatsApp OTP                   |
+| `WEBAUTHN_RP_ID`             |          | localhost             | Must match your domain in production |
+| `WEBAUTHN_RP_ORIGINS`        |          | http://localhost:3000 | Allowed origins                      |
+| `ELASTICSEARCH_HOST`         |          | localhost             | Audit log storage                    |
+| `LOG_LEVEL`                  |          | info                  | debug / info / warn / error          |
 
 Full list with comments: [`.env.example`](./.env.example)
 

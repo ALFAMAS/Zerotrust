@@ -370,7 +370,7 @@ The items below should be tackled before anything else. They cover the foundatio
 - [x] Bell icon + dropdown — notification center UI in dashboard nav
 - [x] Mark as read — single and bulk
 - [x] Real-time delivery — Server-Sent Events (SSE) push
-- [ ] Email fallback — deliver via email if user hasn't visited in N days
+- [x] Email fallback — deliver via email if user hasn't visited in N days
 
 **File Storage & Uploads**
 
@@ -397,7 +397,7 @@ The items below should be tackled before anything else. They cover the foundatio
 - [x] Transactional email templates — welcome, verify, invite, receipt, password reset, trial expiry
 - [x] Inline-styled HTML email templates
 - [x] Email queue — Bull/BullMQ so sending never blocks a request
-- [ ] Notification preferences — users choose which emails they receive
+- [x] Notification preferences — users choose which emails they receive
 - [ ] Unsubscribe tokens — one-click unsubscribe with signed tokens (CAN-SPAM)
 
 **Customer Support**
@@ -434,7 +434,7 @@ The items below should be tackled before anything else. They cover the foundatio
 
 - [x] GitHub Actions — lint + type-check + test + UI build on every PR
 - [x] Docker production build — multi-stage Dockerfile, push to ghcr.io
-- [ ] One-click deploy — Railway / Render / Fly.io deploy button in README
+- [x] One-click deploy — Railway / Render / Fly.io deploy button in README
 - [ ] Environment parity — staging environment that mirrors production
 - [ ] DB backup — daily PostgreSQL dump to S3 with 30-day retention
 - [x] Secret rotation — documented in README with zero-downtime procedure

@@ -1,11 +1,17 @@
 import { Hono } from "hono";
 import { eq, desc, and } from "drizzle-orm";
+import { z } from "zod";
 import { getDb } from "../../db";
 import { notificationsTable, usersTable } from "../../db/schema";
 import { authMiddleware } from "../../middleware/auth";
 import { getLogger } from "../../logger";
 import { sendNotificationEmail } from "../../services/email.service";
 import type { HonoEnv } from "../../shared/types";
+
+export interface NotificationPreferences {
+  emailFallback: boolean;
+  emailFallbackDays: number;
+}
 
 const router = new Hono<HonoEnv>();
 const logger = getLogger("notification-routes");
@@ -229,6 +235,74 @@ router.get("/sse", (c) => {
       "X-Accel-Buffering": "no",
     },
   });
+});
+
+// ── GET /notifications/preferences ───────────────────────────────────────────
+
+router.get("/preferences", async (c) => {
+  const user = c.get("user");
+  try {
+    const db = getDb();
+    const [row] = await db
+      .select({ metadata: usersTable.metadata })
+      .from(usersTable)
+      .where(eq(usersTable.id, user.id))
+      .limit(1);
+    const prefs: NotificationPreferences = {
+      emailFallback: true,
+      emailFallbackDays: 3,
+      ...(((row?.metadata as any)?.notificationPreferences as Partial<NotificationPreferences>) ??
+        {}),
+    };
+    return c.json(prefs);
+  } catch (err) {
+    logger.error("Get notification preferences error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR" }, 500);
+  }
+});
+
+// ── PUT /notifications/preferences ───────────────────────────────────────────
+
+const prefsSchema = z.object({
+  emailFallback: z.boolean().optional(),
+  emailFallbackDays: z.number().int().min(1).max(30).optional(),
+});
+
+router.put("/preferences", async (c) => {
+  const user = c.get("user");
+  const body = await c.req.json().catch(() => ({}));
+  const parsed = prefsSchema.safeParse(body);
+  if (!parsed.success)
+    return c.json({ error: "INVALID_REQUEST", issues: parsed.error.issues }, 400);
+
+  try {
+    const db = getDb();
+    const [row] = await db
+      .select({ metadata: usersTable.metadata })
+      .from(usersTable)
+      .where(eq(usersTable.id, user.id))
+      .limit(1);
+
+    const existingMeta = (row?.metadata as Record<string, unknown>) ?? {};
+    const existingPrefs =
+      (existingMeta.notificationPreferences as Partial<NotificationPreferences>) ?? {};
+
+    await db
+      .update(usersTable)
+      .set({
+        metadata: {
+          ...existingMeta,
+          notificationPreferences: { ...existingPrefs, ...parsed.data },
+        },
+        updatedAt: new Date(),
+      })
+      .where(eq(usersTable.id, user.id));
+
+    return c.json({ ...existingPrefs, ...parsed.data });
+  } catch (err) {
+    logger.error("Update notification preferences error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR" }, 500);
+  }
 });
 
 export default router;
