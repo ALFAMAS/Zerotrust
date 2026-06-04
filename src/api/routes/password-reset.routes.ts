@@ -7,6 +7,7 @@ import { usersTable, otpsTable } from "../../db/schema";
 import { sendOTP } from "../../mfa";
 import { getConfig } from "../../config";
 import { getLogger } from "../../logger";
+import { sendPasswordResetEmail } from "../../services/email.service";
 import { ErrorCodes } from "../../shared/types";
 import type { HonoEnv } from "../../shared/types";
 
@@ -20,7 +21,7 @@ router.post("/request", async (c) => {
 
     const db = getDb();
     const users = await db
-      .select({ id: usersTable.id, email: usersTable.email })
+      .select({ id: usersTable.id, email: usersTable.email, displayName: usersTable.displayName })
       .from(usersTable)
       .where(eq(usersTable.email, email))
       .limit(1);
@@ -45,6 +46,14 @@ router.post("/request", async (c) => {
     });
 
     await sendOTP("email", user.email, code);
+
+    const appUrl = process.env.APP_URL ?? "http://localhost:3001";
+    const resetUrl = `${appUrl}/reset-password?email=${encodeURIComponent(user.email)}&code=${encodeURIComponent(code)}`;
+    void sendPasswordResetEmail(user.email, {
+      name: user.displayName ?? user.email,
+      resetUrl,
+      expiresInMinutes: 30,
+    });
 
     return c.json({ sent: true });
   } catch (err) {

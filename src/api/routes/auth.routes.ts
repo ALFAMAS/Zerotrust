@@ -13,6 +13,7 @@ import { rateLimit } from "../../middleware/rateLimiting";
 import { requireProofOfPossession } from "../../middleware/proofOfPossession";
 import { getLogger } from "../../logger";
 import { getProviderAdapter } from "../../oauth/provider.factory";
+import { sendWelcomeEmail } from "../../services/email.service";
 import type { HonoEnv } from "../../shared/types";
 
 const router = new Hono<HonoEnv>();
@@ -61,31 +62,50 @@ router.post("/register", rateLimit({ points: 10, windowSecs: 60 }), async (c) =>
     }
 
     const db = getDb();
-    const existing = await db.select().from(usersTable).where(eq(usersTable.email, email.toLowerCase())).limit(1);
+    const existing = await db
+      .select()
+      .from(usersTable)
+      .where(eq(usersTable.email, email.toLowerCase()))
+      .limit(1);
     if (existing.length > 0) {
       return c.json({ error: "USER_ALREADY_EXISTS", message: "User already exists" }, 409);
     }
 
-      const cfg = getConfig();
-      const passwordHash = await bcrypt.hash(password, cfg.security.bcryptRounds);
+    const cfg = getConfig();
+    const passwordHash = await bcrypt.hash(password, cfg.security.bcryptRounds);
 
-    const [user] = await db.insert(usersTable).values({
-      email: email.toLowerCase().trim(),
-      passwordHash,
-      displayName: displayName || email.split("@")[0],
-      roles: ["user"],
-      attributes: {},
-      mfa: { totp: { enabled: false, backupCodes: [] }, webauthn: { enabled: false } },
-      passkeys: [],
-      oauthProviders: [],
-      status: "active",
-      sessionConfig: {
-        maxDevices: cfg.session.maxConcurrentDevices,
-        allowedCountries: cfg.geofencing.allowedCountries,
-        allowedIpRanges: cfg.geofencing.allowedIpRanges,
-        scheduleRestriction: { enabled: false, timezone: "UTC", allowedDays: [], allowedHoursStart: 0, allowedHoursEnd: 23 },
-      },
-    }).returning();
+    const [user] = await db
+      .insert(usersTable)
+      .values({
+        email: email.toLowerCase().trim(),
+        passwordHash,
+        displayName: displayName || email.split("@")[0],
+        roles: ["user"],
+        attributes: {},
+        mfa: { totp: { enabled: false, backupCodes: [] }, webauthn: { enabled: false } },
+        passkeys: [],
+        oauthProviders: [],
+        status: "active",
+        sessionConfig: {
+          maxDevices: cfg.session.maxConcurrentDevices,
+          allowedCountries: cfg.geofencing.allowedCountries,
+          allowedIpRanges: cfg.geofencing.allowedIpRanges,
+          scheduleRestriction: {
+            enabled: false,
+            timezone: "UTC",
+            allowedDays: [],
+            allowedHoursStart: 0,
+            allowedHoursEnd: 23,
+          },
+        },
+      })
+      .returning();
+
+    const loginUrl = `${process.env.APP_URL ?? "http://localhost:3001"}/login`;
+    void sendWelcomeEmail(user.email, {
+      name: user.displayName ?? user.email,
+      loginUrl,
+    });
 
     return c.json({ success: true, userId: user.id }, 201);
   } catch (err) {
@@ -103,7 +123,11 @@ router.post("/login", rateLimit({ points: 20, windowSecs: 60 }), async (c) => {
     }
 
     const db = getDb();
-    const users = await db.select().from(usersTable).where(eq(usersTable.email, email.toLowerCase())).limit(1);
+    const users = await db
+      .select()
+      .from(usersTable)
+      .where(eq(usersTable.email, email.toLowerCase()))
+      .limit(1);
     const user = users[0];
     if (!user || !user.passwordHash) {
       return c.json({ error: "INVALID_CREDENTIALS", message: "Invalid credentials" }, 401);
@@ -114,8 +138,8 @@ router.post("/login", rateLimit({ points: 20, windowSecs: 60 }), async (c) => {
       return c.json({ error: "INVALID_CREDENTIALS", message: "Invalid credentials" }, 401);
     }
 
-      const cfg = getConfig();
-      const tokenSvc = await getTokenService();
+    const cfg = getConfig();
+    const tokenSvc = await getTokenService();
 
     const fpInput = FingerprintService.extractFromRequest({
       headers: Object.fromEntries(c.req.raw.headers as any),
@@ -136,19 +160,27 @@ router.post("/login", rateLimit({ points: 20, windowSecs: 60 }), async (c) => {
     });
     const payload = await tokenSvc.verifyAccessToken(accessToken);
 
-    const [session] = await db.insert(sessionsTable).values({
-      id: sessionId,
-      userId: user.id,
-      tokenId: payload.jti,
-      deviceFingerprint: { ...fingerprint, isTrusted: false, firstSeenAt: new Date(), lastSeenAt: new Date() },
-      ipAddress: fpInput.ip,
-      country: c.get("inferredCountry") || undefined,
-      userAgent: c.req.header("user-agent"),
-      expiresAt: new Date(payload.exp * 1000),
-      lastActivityAt: new Date(),
-      isActive: true,
-      proofOfPossessionKey: payload.pop_key,
-    }).returning();
+    const [session] = await db
+      .insert(sessionsTable)
+      .values({
+        id: sessionId,
+        userId: user.id,
+        tokenId: payload.jti,
+        deviceFingerprint: {
+          ...fingerprint,
+          isTrusted: false,
+          firstSeenAt: new Date(),
+          lastSeenAt: new Date(),
+        },
+        ipAddress: fpInput.ip,
+        country: c.get("inferredCountry") || undefined,
+        userAgent: c.req.header("user-agent"),
+        expiresAt: new Date(payload.exp * 1000),
+        lastActivityAt: new Date(),
+        isActive: true,
+        proofOfPossessionKey: payload.pop_key,
+      })
+      .returning();
 
     const refreshTokenPlain = await tokenSvc.signRefreshToken();
     const refreshTokenHash = hashToken(refreshTokenPlain);
@@ -188,18 +220,29 @@ router.post(
       const tokenHash = hashToken(refreshToken);
       const db = getDb();
 
-      const rtRows = await db.select().from(refreshTokensTable).where(eq(refreshTokensTable.tokenHash, tokenHash)).limit(1);
+      const rtRows = await db
+        .select()
+        .from(refreshTokensTable)
+        .where(eq(refreshTokensTable.tokenHash, tokenHash))
+        .limit(1);
       const rt = rtRows[0];
       if (!rt || rt.isRevoked || rt.expiresAt < new Date()) {
         return c.json({ error: "TOKEN_INVALID", message: "Invalid refresh token" }, 401);
       }
 
-      await db.update(refreshTokensTable).set({ isRevoked: true, usedAt: new Date() }).where(eq(refreshTokensTable.id, rt.id));
+      await db
+        .update(refreshTokensTable)
+        .set({ isRevoked: true, usedAt: new Date() })
+        .where(eq(refreshTokensTable.id, rt.id));
 
       const cfg = getConfig();
       const tokenSvc = await getTokenService();
 
-      const userRows = await db.select().from(usersTable).where(eq(usersTable.id, rt.userId)).limit(1);
+      const userRows = await db
+        .select()
+        .from(usersTable)
+        .where(eq(usersTable.id, rt.userId))
+        .limit(1);
       const user = userRows[0];
       if (!user) {
         return c.json({ error: "USER_NOT_FOUND", message: "User not found" }, 404);
@@ -218,17 +261,20 @@ router.post(
       });
       const payload = await tokenSvc.verifyAccessToken(accessToken);
 
-      const [session] = await db.insert(sessionsTable).values({
-        id: newSessionId,
-        userId: user.id,
-        tokenId: payload.jti,
-        deviceFingerprint: {},
-        ipAddress: c.req.header("x-forwarded-for")?.split(",")[0].trim() || "",
-        userAgent: c.req.header("user-agent"),
-        expiresAt: new Date(payload.exp * 1000),
-        lastActivityAt: new Date(),
-        isActive: true,
-      }).returning();
+      const [session] = await db
+        .insert(sessionsTable)
+        .values({
+          id: newSessionId,
+          userId: user.id,
+          tokenId: payload.jti,
+          deviceFingerprint: {},
+          ipAddress: c.req.header("x-forwarded-for")?.split(",")[0].trim() || "",
+          userAgent: c.req.header("user-agent"),
+          expiresAt: new Date(payload.exp * 1000),
+          lastActivityAt: new Date(),
+          isActive: true,
+        })
+        .returning();
 
       const newRefreshPlain = await tokenSvc.signRefreshToken();
       const newRefreshHash = hashToken(newRefreshPlain);
@@ -259,73 +305,81 @@ router.post("/oauth/state", rateLimit({ points: 20, windowSecs: 60 }), (c) => {
 });
 
 // GET /oauth/:provider/callback
-router.get(
-  "/oauth/:provider/callback",
-  rateLimit({ points: 20, windowSecs: 60 }),
-  async (c) => {
-    try {
-      const provider = c.req.param("provider");
-      const code = c.req.query("code");
-      const state = c.req.query("state");
-      const codeVerifier = c.req.query("code_verifier");
+router.get("/oauth/:provider/callback", rateLimit({ points: 20, windowSecs: 60 }), async (c) => {
+  try {
+    const provider = c.req.param("provider");
+    const code = c.req.query("code");
+    const state = c.req.query("state");
+    const codeVerifier = c.req.query("code_verifier");
 
-      if (!code) {
-        return c.json({ error: "INVALID_REQUEST", message: "code is required" }, 400);
-      }
-      if (!verifyOAuthState(state)) {
-        return c.json({ error: "INVALID_STATE", message: "Invalid or expired state" }, 400);
-      }
+    if (!code) {
+      return c.json({ error: "INVALID_REQUEST", message: "code is required" }, 400);
+    }
+    if (!verifyOAuthState(state)) {
+      return c.json({ error: "INVALID_STATE", message: "Invalid or expired state" }, 400);
+    }
 
-      const adapter = getProviderAdapter(provider);
-      const result = await adapter.exchangeCode(code, codeVerifier);
-      if (!result?.profile) {
-        return c.json({ error: "PROVIDER_ERROR", message: "Provider token exchange failed" }, 502);
-      }
+    const adapter = getProviderAdapter(provider);
+    const result = await adapter.exchangeCode(code, codeVerifier);
+    if (!result?.profile) {
+      return c.json({ error: "PROVIDER_ERROR", message: "Provider token exchange failed" }, 502);
+    }
 
-      const profile: any = result.profile;
-      const email = profile.email || profile.emails?.[0]?.value;
-      if (!email) {
-        return c.json({ error: "NO_EMAIL", message: "Provider did not return email" }, 400);
-      }
+    const profile: any = result.profile;
+    const email = profile.email || profile.emails?.[0]?.value;
+    if (!email) {
+      return c.json({ error: "NO_EMAIL", message: "Provider did not return email" }, 400);
+    }
 
-      const db = getDb();
-      let userRows = await db.select().from(usersTable).where(eq(usersTable.email, email)).limit(1);
-      let user = userRows[0];
+    const db = getDb();
+    const userRows = await db.select().from(usersTable).where(eq(usersTable.email, email)).limit(1);
+    let user = userRows[0];
 
-      if (!user) {
-        const [created] = await db.insert(usersTable).values({
+    if (!user) {
+      const [created] = await db
+        .insert(usersTable)
+        .values({
           email,
           displayName: profile.name || email.split("@")[0],
           roles: ["user"],
           oauthProviders: [{ provider, providerId: profile.id, connectedAt: new Date() }],
           status: "active",
-        } as any).returning();
-        user = created;
-      } else {
-        const providers: any[] = (user.oauthProviders as any[]) || [];
-        const has = providers.some((p) => p.provider === provider && p.providerId === profile.id);
-        if (!has) {
-          await db.update(usersTable)
-            .set({ oauthProviders: [...providers, { provider, providerId: profile.id, connectedAt: new Date() }] })
-            .where(eq(usersTable.id, user.id));
-        }
+        } as any)
+        .returning();
+      user = created;
+    } else {
+      const providers: any[] = (user.oauthProviders as any[]) || [];
+      const has = providers.some((p) => p.provider === provider && p.providerId === profile.id);
+      if (!has) {
+        await db
+          .update(usersTable)
+          .set({
+            oauthProviders: [
+              ...providers,
+              { provider, providerId: profile.id, connectedAt: new Date() },
+            ],
+          })
+          .where(eq(usersTable.id, user.id));
       }
+    }
 
-      const tokenSvc = await getTokenService();
-      const popKey = c.req.header("x-pop-key") || undefined;
-      const sessionId = crypto.randomUUID();
+    const tokenSvc = await getTokenService();
+    const popKey = c.req.header("x-pop-key") || undefined;
+    const sessionId = crypto.randomUUID();
 
-      const accessToken = await tokenSvc.signAccessToken({
-        sub: user.id,
-        email: user.email,
-        sid: sessionId,
-        aud: "zeroauth",
-        scope: ["openid"],
-        pop_key: popKey,
-      });
-      const payload = await tokenSvc.verifyAccessToken(accessToken);
+    const accessToken = await tokenSvc.signAccessToken({
+      sub: user.id,
+      email: user.email,
+      sid: sessionId,
+      aud: "zeroauth",
+      scope: ["openid"],
+      pop_key: popKey,
+    });
+    const payload = await tokenSvc.verifyAccessToken(accessToken);
 
-      const [session] = await db.insert(sessionsTable).values({
+    const [session] = await db
+      .insert(sessionsTable)
+      .values({
         id: sessionId,
         userId: user.id,
         tokenId: payload.jti,
@@ -335,26 +389,26 @@ router.get(
         expiresAt: new Date(payload.exp * 1000),
         lastActivityAt: new Date(),
         isActive: true,
-      }).returning();
+      })
+      .returning();
 
-      const refreshPlain = await tokenSvc.signRefreshToken();
-      await db.insert(refreshTokensTable).values({
-        userId: user.id,
-        sessionId: session.id,
-        tokenHash: hashToken(refreshPlain),
-        expiresAt: new Date(Date.now() + getConfig().session.refreshTokenTTL * 1000),
-      });
+    const refreshPlain = await tokenSvc.signRefreshToken();
+    await db.insert(refreshTokensTable).values({
+      userId: user.id,
+      sessionId: session.id,
+      tokenHash: hashToken(refreshPlain),
+      expiresAt: new Date(Date.now() + getConfig().session.refreshTokenTTL * 1000),
+    });
 
-      return c.json({
-        accessToken,
-        refreshToken: refreshPlain,
-        expiresIn: getConfig().session.defaultTTL,
-      });
-    } catch (err) {
-      logger.error("OAuth callback error", err as Error);
-      return c.json({ error: "INTERNAL_ERROR", message: "OAuth callback failed" }, 500);
-    }
+    return c.json({
+      accessToken,
+      refreshToken: refreshPlain,
+      expiresIn: getConfig().session.defaultTTL,
+    });
+  } catch (err) {
+    logger.error("OAuth callback error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR", message: "OAuth callback failed" }, 500);
   }
-);
+});
 
 export default router;

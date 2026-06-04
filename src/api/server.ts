@@ -13,6 +13,7 @@ import workloadRoutes from "./routes/workload.routes";
 import verificationRoutes from "./routes/verification.routes";
 import anomalyRoutes from "./routes/anomaly.routes";
 import notificationRoutes from "./routes/notification.routes";
+import orgRoutes from "./routes/org.routes";
 import federationRoutes from "../federation/routes";
 import { rateLimit } from "../middleware/rateLimiting";
 import { geoFencingMiddleware } from "../middleware/geoFencing";
@@ -58,6 +59,9 @@ export async function createServer() {
 
   // ─── Notification routes ──────────────────────────────────────────────────
   app.route("/notifications", notificationRoutes);
+
+  // ─── Organization routes ──────────────────────────────────────────────────
+  app.route("/orgs", orgRoutes);
 
   // ─── SSF webhook endpoint ─────────────────────────────────────────────────
   app.post("/ssf/events", async (c) => {
@@ -140,5 +144,8 @@ if (require.main === module) {
     serve({ fetch: app.fetch, port }, (info) => {
       logger.info(`Server listening on http://localhost:${info.port}`);
     });
-  })();
+  })().catch((err: Error) => {
+    logger.error("Server startup failed", err);
+    process.exit(1);
+  });
 }

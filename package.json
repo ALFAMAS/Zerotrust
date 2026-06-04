@@ -29,7 +29,9 @@
   },
   "lint-staged": {
     "src/**/*.ts": [
-      "prettier --write",
+      "prettier --write"
+    ],
+    "src/**/!(*.test|*.spec).ts": [
       "eslint --fix --max-warnings=0"
     ],
     "packages/ui/src/**/*.{ts,tsx}": [
@@ -48,8 +50,10 @@
     "@opentelemetry/sdk-node": "^0.57.0",
     "@opentelemetry/semantic-conventions": "^1.28.0",
     "@simplewebauthn/server": "^10.0.0",
+    "@simplewebauthn/types": "^12.0.0",
     "bcryptjs": "^2.4.3",
     "drizzle-orm": "^0.32.0",
+    "esbuild": "0.21.5",
     "geoip-lite": "^1.4.10",
     "hono": "^4.4.0",
     "ioredis": "^5.3.2",
@@ -95,5 +99,8 @@
     "tsx": "^4.6.0",
     "typescript": "^5.4.0",
     "vitest": "^1.0.0"
+  },
+  "optionalDependencies": {
+    "@esbuild/linux-x64": "0.21.5"
   }
 }

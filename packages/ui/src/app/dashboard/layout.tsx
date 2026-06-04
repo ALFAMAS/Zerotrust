@@ -12,6 +12,7 @@ const navItems = [
   { href: "/dashboard/profile", label: "Profile" },
   { href: "/dashboard/security", label: "Security" },
   { href: "/dashboard/sessions", label: "Sessions" },
+  { href: "/dashboard/organizations", label: "Organizations" },
 ];
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -34,7 +35,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="min-h-screen bg-gray-950">
-      <nav className="border-b border-gray-800 px-6 py-4" role="navigation" aria-label="Main navigation">
+      <nav
+        className="border-b border-gray-800 px-6 py-4"
+        role="navigation"
+        aria-label="Main navigation"
+      >
         <div className="max-w-5xl mx-auto flex items-center justify-between">
           {/* Left: logo + desktop nav links */}
           <div className="flex items-center gap-6">
@@ -85,7 +90,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               className="md:hidden w-8 h-8 flex flex-col items-center justify-center gap-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
             >
               {mobileOpen ? (
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" className="w-5 h-5">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  strokeLinecap="round"
+                  className="w-5 h-5"
+                >
                   <path d="M18 6 6 18M6 6l12 12" />
                 </svg>
               ) : (
@@ -124,7 +137,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             ))}
             <button
               role="menuitem"
-              onClick={() => { setMobileOpen(false); handleSignOut(); }}
+              onClick={() => {
+                setMobileOpen(false);
+                handleSignOut();
+              }}
               className="mt-2 px-3 py-2.5 rounded-lg text-sm text-gray-400 hover:text-white hover:bg-gray-800 transition-colors text-left"
             >
               Sign Out
@@ -133,7 +149,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         )}
       </nav>
 
-      <main id="main-content" className="max-w-5xl mx-auto px-6 py-8">{children}</main>
+      <main id="main-content" className="max-w-5xl mx-auto px-6 py-8">
+        {children}
+      </main>
     </div>
   );
 }

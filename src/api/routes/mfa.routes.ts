@@ -7,6 +7,7 @@ import { authMiddleware } from "../../middleware/auth";
 import { getSettings } from "../../models/settings.model";
 import { sendOTP } from "../../mfa";
 import { getLogger } from "../../logger";
+import { sendOtpEmail } from "../../services/email.service";
 import type { HonoEnv } from "../../shared/types";
 
 const router = new Hono<HonoEnv>();
@@ -50,13 +51,23 @@ router.post("/totp/setup", async (c) => {
     }
 
     const db = getDb();
-    const userRows = await db.select({ mfa: usersTable.mfa }).from(usersTable).where(eq(usersTable.id, userId)).limit(1);
-    const currentMfa = (userRows[0]?.mfa as any) ?? { totp: { enabled: false, backupCodes: [] }, webauthn: { enabled: false } };
+    const userRows = await db
+      .select({ mfa: usersTable.mfa })
+      .from(usersTable)
+      .where(eq(usersTable.id, userId))
+      .limit(1);
+    const currentMfa = (userRows[0]?.mfa as any) ?? {
+      totp: { enabled: false, backupCodes: [] },
+      webauthn: { enabled: false },
+    };
 
-    await db.update(usersTable).set({
-      mfa: { ...currentMfa, totp: { ...currentMfa.totp, secret, enabled: false } },
-      updatedAt: new Date(),
-    }).where(eq(usersTable.id, userId));
+    await db
+      .update(usersTable)
+      .set({
+        mfa: { ...currentMfa, totp: { ...currentMfa.totp, secret, enabled: false } },
+        updatedAt: new Date(),
+      })
+      .where(eq(usersTable.id, userId));
 
     return c.json({ secret, qrCodeUrl });
   } catch (err) {
@@ -80,18 +91,30 @@ router.post("/totp/verify", async (c) => {
 
     const userId = c.get("user").id;
     const db = getDb();
-    const userRows = await db.select({ mfa: usersTable.mfa }).from(usersTable).where(eq(usersTable.id, userId)).limit(1);
+    const userRows = await db
+      .select({ mfa: usersTable.mfa })
+      .from(usersTable)
+      .where(eq(usersTable.id, userId))
+      .limit(1);
     const user = userRows[0];
     const mfa = user?.mfa as any;
 
     if (!user || !mfa?.totp?.secret) {
-      return c.json({ error: "TOTP_NOT_SETUP", message: "TOTP not set up yet. Call /totp/setup first" }, 400);
+      return c.json(
+        { error: "TOTP_NOT_SETUP", message: "TOTP not set up yet. Call /totp/setup first" },
+        400
+      );
     }
 
     let valid = false;
     try {
       const { TOTP, Secret } = await import("otpauth");
-      const totp = new TOTP({ algorithm: "SHA1", digits: 6, period: 30, secret: Secret.fromBase32(mfa.totp.secret) });
+      const totp = new TOTP({
+        algorithm: "SHA1",
+        digits: 6,
+        period: 30,
+        secret: Secret.fromBase32(mfa.totp.secret),
+      });
       valid = totp.validate({ token: code, window: 1 }) !== null;
     } catch (libErr) {
       logger.error("TOTP verify library error", libErr as Error);
@@ -101,10 +124,13 @@ router.post("/totp/verify", async (c) => {
       return c.json({ error: "INVALID_CODE", message: "Invalid TOTP code" }, 401);
     }
 
-    await db.update(usersTable).set({
-      mfa: { ...mfa, totp: { ...mfa.totp, enabled: true, verifiedAt: new Date() } },
-      updatedAt: new Date(),
-    }).where(eq(usersTable.id, userId));
+    await db
+      .update(usersTable)
+      .set({
+        mfa: { ...mfa, totp: { ...mfa.totp, enabled: true, verifiedAt: new Date() } },
+        updatedAt: new Date(),
+      })
+      .where(eq(usersTable.id, userId));
 
     return c.json({ enabled: true });
   } catch (err) {
@@ -118,13 +144,26 @@ router.delete("/totp", async (c) => {
   try {
     const userId = c.get("user").id;
     const db = getDb();
-    const userRows = await db.select({ mfa: usersTable.mfa }).from(usersTable).where(eq(usersTable.id, userId)).limit(1);
-    const currentMfa = (userRows[0]?.mfa as any) ?? { totp: { enabled: false, backupCodes: [] }, webauthn: { enabled: false } };
+    const userRows = await db
+      .select({ mfa: usersTable.mfa })
+      .from(usersTable)
+      .where(eq(usersTable.id, userId))
+      .limit(1);
+    const currentMfa = (userRows[0]?.mfa as any) ?? {
+      totp: { enabled: false, backupCodes: [] },
+      webauthn: { enabled: false },
+    };
 
-    await db.update(usersTable).set({
-      mfa: { ...currentMfa, totp: { enabled: false, backupCodes: [], secret: undefined, verifiedAt: undefined } },
-      updatedAt: new Date(),
-    }).where(eq(usersTable.id, userId));
+    await db
+      .update(usersTable)
+      .set({
+        mfa: {
+          ...currentMfa,
+          totp: { enabled: false, backupCodes: [], secret: undefined, verifiedAt: undefined },
+        },
+        updatedAt: new Date(),
+      })
+      .where(eq(usersTable.id, userId));
 
     return c.json({ disabled: true });
   } catch (err) {
@@ -150,7 +189,7 @@ router.post("/otp/send", async (c) => {
     }
 
     const user = c.get("user");
-    const target = channel === "email" ? user.email : (user.phone || "");
+    const target = channel === "email" ? user.email : user.phone || "";
 
     if (channel === "sms" && !target) {
       return c.json({ error: "NO_PHONE", message: "No phone number on account" }, 400);
@@ -169,6 +208,15 @@ router.post("/otp/send", async (c) => {
     });
 
     await sendOTP(channel, target, code);
+
+    if (channel === "email") {
+      void sendOtpEmail(target, {
+        name: user.displayName ?? user.email,
+        code,
+        expiresInMinutes: 10,
+      });
+    }
+
     return c.json({ sent: true, channel });
   } catch (err) {
     logger.error("OTP send error", err as Error);
@@ -188,15 +236,19 @@ router.post("/otp/verify", async (c) => {
     const db = getDb();
     const now = new Date();
 
-    const records = await db.select().from(otpsTable).where(
-      and(
-        eq(otpsTable.userId, userId),
-        eq(otpsTable.channel, channel),
-        eq(otpsTable.type, "login"),
-        eq(otpsTable.code, code),
-        gt(otpsTable.expiresAt, now)
+    const records = await db
+      .select()
+      .from(otpsTable)
+      .where(
+        and(
+          eq(otpsTable.userId, userId),
+          eq(otpsTable.channel, channel),
+          eq(otpsTable.type, "login"),
+          eq(otpsTable.code, code),
+          gt(otpsTable.expiresAt, now)
+        )
       )
-    ).limit(1);
+      .limit(1);
 
     if (records.length === 0) {
       return c.json({ error: "INVALID_CODE", message: "Invalid or expired OTP" }, 401);

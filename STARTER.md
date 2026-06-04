@@ -6,38 +6,38 @@ A production-ready SaaS boilerplate. Drop in your business logic and ship. Built
 
 ## What's already built
 
-| | Feature | Notes |
-|---|---|---|
-| ✅ | Email + password auth | Register, login, forgot password |
-| ✅ | Google & GitHub OAuth | Toggle on/off from admin panel |
-| ✅ | Magic links | Passwordless email login (15-min TTL) |
-| ✅ | Passkeys / WebAuthn | Biometric and hardware key support |
-| ✅ | TOTP (authenticator app) | Google Authenticator, 1Password, Authy |
-| ✅ | Email OTP | One-time codes delivered via email |
-| ✅ | Session management | List active sessions, revoke any, device tracking |
-| ✅ | Account lockout | Configurable threshold + auto-unlock duration |
-| ✅ | Rate limiting | Per-IP, Redis-backed with in-memory fallback |
-| ✅ | User dashboard | Profile, security settings, active sessions |
-| ✅ | Admin panel | Users, sessions, audit log, auth toggles — at `/admin` |
-| ✅ | Feature flag toggles | Every auth method on/off from the admin UI |
-| ✅ | Audit log | Immutable event trail to Elasticsearch |
-| ✅ | Dark landing page | Hero, features, pricing sections — ready to customize |
-| ✅ | Docker Compose | One command: API + UI + PostgreSQL + Redis + Elasticsearch |
+|     | Feature                  | Notes                                                      |
+| --- | ------------------------ | ---------------------------------------------------------- |
+| ✅  | Email + password auth    | Register, login, forgot password                           |
+| ✅  | Google & GitHub OAuth    | Toggle on/off from admin panel                             |
+| ✅  | Magic links              | Passwordless email login (15-min TTL)                      |
+| ✅  | Passkeys / WebAuthn      | Biometric and hardware key support                         |
+| ✅  | TOTP (authenticator app) | Google Authenticator, 1Password, Authy                     |
+| ✅  | Email OTP                | One-time codes delivered via email                         |
+| ✅  | Session management       | List active sessions, revoke any, device tracking          |
+| ✅  | Account lockout          | Configurable threshold + auto-unlock duration              |
+| ✅  | Rate limiting            | Per-IP, Redis-backed with in-memory fallback               |
+| ✅  | User dashboard           | Profile, security settings, active sessions                |
+| ✅  | Admin panel              | Users, sessions, audit log, auth toggles — at `/admin`     |
+| ✅  | Feature flag toggles     | Every auth method on/off from the admin UI                 |
+| ✅  | Audit log                | Immutable event trail to Elasticsearch                     |
+| ✅  | Dark landing page        | Hero, features, pricing sections — ready to customize      |
+| ✅  | Docker Compose           | One command: API + UI + PostgreSQL + Redis + Elasticsearch |
 
 ---
 
 ## Ports at a glance
 
-| Service | URL |
-|---------|-----|
-| API (Hono) | http://localhost:3000 |
-| App + Admin (Next.js) | http://localhost:3001 |
-| Admin panel | http://localhost:3001/admin |
-| API docs (Swagger) | http://localhost:3000/docs |
-| PostgreSQL | localhost:5432 |
-| Redis | localhost:6379 |
-| Elasticsearch | http://localhost:9200 |
-| Kibana | http://localhost:5601 |
+| Service               | URL                         |
+| --------------------- | --------------------------- |
+| API (Hono)            | http://localhost:3000       |
+| App + Admin (Next.js) | http://localhost:3001       |
+| Admin panel           | http://localhost:3001/admin |
+| API docs (Swagger)    | http://localhost:3000/docs  |
+| PostgreSQL            | localhost:5432              |
+| Redis                 | localhost:6379              |
+| Elasticsearch         | http://localhost:9200       |
+| Kibana                | http://localhost:5601       |
 
 ---
 
@@ -78,6 +78,7 @@ To wipe data: `docker compose down -v`
 ### Option B — Local development (no Docker)
 
 **Prerequisites:**
+
 - Node.js 18+ (check: `node -v`) — or Bun 1.0+
 - PostgreSQL 15+ running locally — or use a hosted database (Supabase, Neon, etc.)
 - Redis 7 running locally (optional, falls back to in-memory rate limiting)
@@ -100,6 +101,7 @@ cp .env.example .env
 ```
 
 Edit `.env` — minimum required:
+
 ```bash
 TOKEN_SECRET_HEX=<your-key>
 CSFLE_MASTER_KEY_HEX=<your-key>
@@ -112,6 +114,7 @@ npm run dev
 ```
 
 This starts:
+
 - **API** on http://localhost:3000 (with hot reload)
 - **UI** on http://localhost:3001 (with hot reload)
 
@@ -131,6 +134,7 @@ curl -X POST http://localhost:3000/auth/register \
 ```
 
 Grant admin role in PostgreSQL:
+
 ```bash
 # If using Docker:
 docker exec -it zeroauth-postgres psql -U zeroauth -d zeroauth
@@ -328,12 +332,12 @@ GET    /docs                               (Swagger UI — dev only)
 
 ## Git hooks
 
-| Hook | Runs | What it does |
-|---|---|---|
-| `pre-commit` | Before every commit | Prettier format, ESLint fix, TypeScript type-check, secret scan, graphify update |
-| `commit-msg` | After message entered | Validates conventional commit format |
-| `pre-push` | Before git push | Runs full test suite, warns on console.log |
-| `post-commit` | After commit | Shows commit summary, reminds to push |
+| Hook          | Runs                  | What it does                                                                     |
+| ------------- | --------------------- | -------------------------------------------------------------------------------- |
+| `pre-commit`  | Before every commit   | Prettier format, ESLint fix, TypeScript type-check, secret scan, graphify update |
+| `commit-msg`  | After message entered | Validates conventional commit format                                             |
+| `pre-push`    | Before git push       | Runs full test suite, warns on console.log                                       |
+| `post-commit` | After commit          | Shows commit summary, reminds to push                                            |
 
 ---
 
@@ -346,6 +350,7 @@ This starter handles auth end-to-end. Everything below is what a real SaaS produ
 The items below should be tackled before anything else. They cover the foundational UX, compliance, and infrastructure every SaaS needs regardless of niche.
 
 **UI & UX**
+
 - [x] Dark / light mode toggle — system preference detection + manual override, persisted
 - [x] Toast notification system — global toast context for success/error feedback
 - [x] Loading skeletons — skeleton screens instead of spinners
@@ -354,11 +359,13 @@ The items below should be tackled before anything else. They cover the foundatio
 - [ ] Internationalization (i18n) — next-intl with English default, ready for translations
 
 **Mobile & PWA**
+
 - [x] Progressive Web App (PWA) — `manifest.json`, service worker, "Add to Home Screen"
 - [ ] Offline support — cache dashboard shell; queue writes offline, sync on reconnect
 - [ ] Deep linking — invite and magic-link URLs open correctly in web and native app
 
 **In-app Notifications**
+
 - [x] Notification model — per-user with `read`/`unread` state
 - [x] Bell icon + dropdown — notification center UI in dashboard nav
 - [x] Mark as read — single and bulk
@@ -366,6 +373,7 @@ The items below should be tackled before anything else. They cover the foundatio
 - [ ] Email fallback — deliver via email if user hasn't visited in N days
 
 **File Storage & Uploads**
+
 - [ ] Avatar upload — resize + optimize, store to S3/R2
 - [ ] File attachments — per-feature uploads with type/size validation
 - [ ] S3-compatible storage — AWS S3, Cloudflare R2, or MinIO for local dev
@@ -373,36 +381,41 @@ The items below should be tackled before anything else. They cover the foundatio
 - [ ] CDN delivery — serve files from edge for fast global access
 
 **Organizations & Teams**
-- [ ] Workspace model — one org → many members, one user → many orgs
-- [ ] Invite by email — time-limited signed invite links
-- [ ] Org roles — owner, admin, member, viewer with permission checks
-- [ ] Transfer ownership — reassign org owner with confirmation flow
-- [ ] Org settings page — name, logo, slug, billing contact
+
+- [x] Workspace model — one org → many members, one user → many orgs
+- [x] Invite by email — time-limited signed invite links
+- [x] Org roles — owner, admin, member, viewer with permission checks
+- [x] Transfer ownership — reassign org owner with confirmation flow
+- [x] Org settings page — name, logo, slug, billing contact
 - [ ] Per-org billing — one Stripe subscription per organization
-- [ ] Remove / leave org — with safety checks (can't remove last owner)
+- [x] Remove / leave org — with safety checks (can't remove last owner)
 - [ ] Custom org roles & permissions — fine-grained resource permissions defined per org
 - [x] Per-tenant branding — all UI strings/colors configurable via `NEXT_PUBLIC_*` env vars
 
 **Email**
-- [ ] Transactional email templates — welcome, verify, invite, receipt, password reset, trial expiry
-- [ ] React Email or MJML — proper HTML templates, not raw strings
+
+- [x] Transactional email templates — welcome, verify, invite, receipt, password reset, trial expiry
+- [x] Inline-styled HTML email templates
 - [ ] Email queue — Bull/BullMQ so sending never blocks a request
 - [ ] Notification preferences — users choose which emails they receive
 - [ ] Unsubscribe tokens — one-click unsubscribe with signed tokens (CAN-SPAM)
 
 **Customer Support**
+
 - [ ] Live chat widget — Crisp, Intercom, or Tawk.to embed in dashboard layout
 - [ ] Help center — `/help` searchable FAQ (Mintlify, GitBook, or plain MDX)
 - [ ] In-app feedback — thumbs up/down or NPS survey after key actions
 - [ ] Support ticket model — lightweight tickets if you don't want a third-party tool
 
 **Error Monitoring & Observability**
+
 - [ ] Sentry — client-side error boundaries + server-side exception capture
 - [ ] Health status page — public `status.yourapp.com` uptime check
 - [ ] Alerting — Elasticsearch watcher or PagerDuty/Slack on error spike or latency breach
 - [ ] Distributed tracing — OpenTelemetry already wired; add Jaeger/Tempo trace viewer
 
 **SEO & Marketing**
+
 - [ ] Blog or changelog — MDX pages under `/blog` and `/changelog`
 - [x] Proper meta tags — `<title>`, Open Graph, Twitter cards on every page
 - [x] Sitemap.xml + robots.txt — generated at build time from Next.js
@@ -410,6 +423,7 @@ The items below should be tackled before anything else. They cover the foundatio
 - [ ] Analytics script — Plausible or Google Analytics with consent gate
 
 **Legal & Compliance**
+
 - [x] Privacy policy page — `/privacy` (content driven by `NEXT_PUBLIC_*` env vars)
 - [x] Terms of service page — `/terms` (content driven by `NEXT_PUBLIC_*` env vars)
 - [ ] GDPR data export — "Export my data" downloads JSON zip
@@ -417,6 +431,7 @@ The items below should be tackled before anything else. They cover the foundatio
 - [ ] Data retention policy — auto-purge audit logs and old sessions after N days
 
 **CI/CD & Deployment**
+
 - [x] GitHub Actions — lint + type-check + test + UI build on every PR
 - [ ] Docker production build — multi-stage Dockerfile, push to ghcr.io
 - [ ] One-click deploy — Railway / Render / Fly.io deploy button in README
@@ -425,6 +440,7 @@ The items below should be tackled before anything else. They cover the foundatio
 - [x] Secret rotation — documented in README with zero-downtime procedure
 
 **Multi-language (i18n)**
+
 - [ ] i18n foundation — install next-intl (or react-i18next); define message namespaces; wrap app in provider
 - [ ] Translation file structure — JSON files per locale under `/messages/{locale}.json`; enforce no hardcoded UI strings
 - [ ] Locale detection — read `Accept-Language` header on first visit; fallback to stored preference on user profile; cookie-persist choice
@@ -437,6 +453,7 @@ The items below should be tackled before anything else. They cover the foundatio
 - [ ] Missing translation fallback — always fall back to English rather than showing a key string; log missing keys in dev mode
 
 **Multi-currency & Pricing**
+
 - [ ] Currency detection — infer from IP geolocation on first visit; allow manual override; store preference on user/org profile
 - [ ] Currency switcher UI — dropdown in pricing page, checkout, and billing settings; updates all prices instantly client-side
 - [ ] Stripe multi-currency price objects — create one `Price` per currency per plan in Stripe dashboard; select correct price at checkout by stored currency
@@ -465,18 +482,18 @@ The items below should be tackled before anything else. They cover the foundatio
 
 ### Organizations & Teams
 
-- [ ] **Workspace model** — one org can have many members, one user can belong to many orgs
-- [ ] **Invite by email** — time-limited invite links (signed tokens)
-- [ ] **Org roles** — owner, admin, member, viewer with permission checks
-- [ ] **Transfer ownership** — reassign org owner with confirmation flow
-- [ ] **Org settings page** — name, logo, slug, billing contact
+- [x] **Workspace model** — one org can have many members, one user can belong to many orgs
+- [x] **Invite by email** — time-limited invite links (signed tokens)
+- [x] **Org roles** — owner, admin, member, viewer with permission checks
+- [x] **Transfer ownership** — reassign org owner with confirmation flow
+- [x] **Org settings page** — name, logo, slug, billing contact
 - [ ] **Per-org billing** — one Stripe subscription per organization
-- [ ] **Remove / leave org** — with safety checks (can't remove last owner)
+- [x] **Remove / leave org** — with safety checks (can't remove last owner)
 
 ### Email
 
-- [ ] **Transactional email templates** — welcome, email verify, invite, receipt, password reset, trial expiry
-- [ ] **React Email or MJML** — proper HTML email templates, not raw HTML strings
+- [x] **Transactional email templates** — welcome, email verify, invite, receipt, password reset, trial expiry
+- [x] **Inline-styled HTML email templates**
 - [ ] **Email queue** — queue + retry with Bull/BullMQ so sending never blocks a request
 - [ ] **Notification preferences** — users choose which emails they receive
 - [ ] **Unsubscribe tokens** — one-click unsubscribe with signed tokens (CAN-SPAM)

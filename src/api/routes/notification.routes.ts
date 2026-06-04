@@ -1,9 +1,10 @@
 import { Hono } from "hono";
 import { eq, desc, and } from "drizzle-orm";
 import { getDb } from "../../db";
-import { notificationsTable } from "../../db/schema";
+import { notificationsTable, usersTable } from "../../db/schema";
 import { authMiddleware } from "../../middleware/auth";
 import { getLogger } from "../../logger";
+import { sendNotificationEmail } from "../../services/email.service";
 import type { HonoEnv } from "../../shared/types";
 
 const router = new Hono<HonoEnv>();
@@ -20,14 +21,38 @@ const sseClients = new Map<string, Set<SSEController>>();
 
 /**
  * Broadcast a notification to all open SSE connections for a user.
+ * Falls back to email if the user has no active SSE connections.
  * Called from other route files after creating a notification row.
  */
-export function broadcastNotification(
-  userId: string,
-  notification: Record<string, unknown>
-): void {
+export function broadcastNotification(userId: string, notification: Record<string, unknown>): void {
   const clients = sseClients.get(userId);
-  if (!clients || clients.size === 0) return;
+
+  if (!clients || clients.size === 0) {
+    // No active SSE connections — try to deliver via email
+    void (async () => {
+      try {
+        const db = getDb();
+        const userRows = await db
+          .select({ email: usersTable.email, displayName: usersTable.displayName })
+          .from(usersTable)
+          .where(eq(usersTable.id, userId))
+          .limit(1);
+        const user = userRows[0];
+        if (user?.email) {
+          void sendNotificationEmail(user.email, {
+            name: user.displayName ?? user.email,
+            title: String(notification.title ?? "New notification"),
+            body: String(notification.body ?? notification.message ?? ""),
+            link: notification.link ? String(notification.link) : undefined,
+          });
+        }
+      } catch {
+        // non-blocking — ignore errors
+      }
+    })();
+    return;
+  }
+
   const payload = JSON.stringify(notification);
   for (const ctrl of clients) {
     try {
@@ -76,12 +101,7 @@ router.get("/unread-count", async (c) => {
     const rows = await db
       .select()
       .from(notificationsTable)
-      .where(
-        and(
-          eq(notificationsTable.userId, user.id),
-          eq(notificationsTable.read, false)
-        )
-      );
+      .where(and(eq(notificationsTable.userId, user.id), eq(notificationsTable.read, false)));
     return c.json({ count: rows.length });
   } catch (err) {
     logger.error("Get unread count error", err as Error);
@@ -102,12 +122,7 @@ router.post("/:id/read", async (c) => {
     const updated = await db
       .update(notificationsTable)
       .set({ read: true, readAt: new Date() })
-      .where(
-        and(
-          eq(notificationsTable.id, id),
-          eq(notificationsTable.userId, user.id)
-        )
-      )
+      .where(and(eq(notificationsTable.id, id), eq(notificationsTable.userId, user.id)))
       .returning();
     if (updated.length === 0) {
       return c.json({ error: "NOT_FOUND", message: "Notification not found" }, 404);
@@ -131,16 +146,14 @@ router.post("/read-all", async (c) => {
     await db
       .update(notificationsTable)
       .set({ read: true, readAt: new Date() })
-      .where(
-        and(
-          eq(notificationsTable.userId, user.id),
-          eq(notificationsTable.read, false)
-        )
-      );
+      .where(and(eq(notificationsTable.userId, user.id), eq(notificationsTable.read, false)));
     return c.json({ success: true });
   } catch (err) {
     logger.error("Mark all notifications read error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR", message: "Failed to mark all notifications as read" }, 500);
+    return c.json(
+      { error: "INTERNAL_ERROR", message: "Failed to mark all notifications as read" },
+      500
+    );
   }
 });
 

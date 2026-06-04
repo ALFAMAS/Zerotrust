@@ -1,0 +1,213 @@
+"use client";
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { api } from "../../../lib/api";
+import { SkeletonCard } from "@/components/Skeleton";
+import { useToast } from "@/context/ToastContext";
+
+interface OrgMember {
+  member: {
+    id: string;
+    orgId: string;
+    userId: string;
+    role: string;
+    joinedAt: string | null;
+    createdAt: string;
+  };
+  org: {
+    id: string;
+    name: string;
+    slug: string;
+    logoUrl: string | null;
+    billingEmail: string | null;
+    ownerId: string | null;
+    createdAt: string;
+    updatedAt: string;
+  };
+}
+
+const ROLE_COLORS: Record<string, string> = {
+  owner: "bg-indigo-900 text-indigo-200 border border-indigo-700",
+  admin: "bg-blue-900 text-blue-200 border border-blue-700",
+  member: "bg-gray-800 text-gray-300 border border-gray-700",
+  viewer: "bg-gray-900 text-gray-400 border border-gray-700",
+};
+
+export default function OrganizationsPage() {
+  const { toast } = useToast();
+  const [orgs, setOrgs] = useState<OrgMember[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [orgName, setOrgName] = useState("");
+  const [orgSlug, setOrgSlug] = useState("");
+  const [slugManual, setSlugManual] = useState(false);
+
+  const fetchOrgs = () => {
+    setLoading(true);
+    api
+      .get<{ orgs: OrgMember[] }>("/orgs")
+      .then((d) => setOrgs(d.orgs || []))
+      .catch(() => setOrgs([]))
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    fetchOrgs();
+  }, []);
+
+  function autoSlug(name: string): string {
+    return name
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9\s-]/g, "")
+      .replace(/[\s]+/g, "-")
+      .replace(/-+/g, "-")
+      .replace(/^-|-$/g, "");
+  }
+
+  function handleNameChange(v: string) {
+    setOrgName(v);
+    if (!slugManual) {
+      setOrgSlug(autoSlug(v));
+    }
+  }
+
+  async function handleCreate(e: React.FormEvent) {
+    e.preventDefault();
+    if (!orgName.trim()) return;
+    setCreating(true);
+    try {
+      await api.post("/orgs", {
+        name: orgName.trim(),
+        slug: orgSlug || undefined,
+      });
+      setOrgName("");
+      setOrgSlug("");
+      setSlugManual(false);
+      setShowCreateForm(false);
+      toast({ message: "Organization created!", type: "success" });
+      fetchOrgs();
+    } catch (err: any) {
+      toast({ message: err.message || "Failed to create organization", type: "error" });
+    } finally {
+      setCreating(false);
+    }
+  }
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold text-white">Organizations</h1>
+        <button
+          onClick={() => setShowCreateForm((v) => !v)}
+          className="text-sm bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg transition-colors"
+        >
+          {showCreateForm ? "Cancel" : "Create organization"}
+        </button>
+      </div>
+
+      {showCreateForm && (
+        <form
+          onSubmit={handleCreate}
+          className="mb-6 bg-gray-900 border border-gray-700 rounded-xl p-5 space-y-4"
+        >
+          <h2 className="text-sm font-semibold text-white">New organization</h2>
+          <div className="space-y-1">
+            <label className="text-xs text-gray-400">Name</label>
+            <input
+              value={orgName}
+              onChange={(e) => handleNameChange(e.target.value)}
+              required
+              placeholder="Acme Corp"
+              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500"
+            />
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs text-gray-400">
+              Slug (optional — auto-generated from name)
+            </label>
+            <input
+              value={orgSlug}
+              onChange={(e) => {
+                setSlugManual(true);
+                setOrgSlug(e.target.value);
+              }}
+              placeholder={autoSlug(orgName) || "acme-corp"}
+              pattern="[a-z0-9-]{3,50}"
+              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500 font-mono"
+            />
+            {orgSlug && (
+              <p className="text-xs text-gray-500">
+                Preview: <span className="text-indigo-400">{orgSlug}</span>
+              </p>
+            )}
+          </div>
+          <button
+            type="submit"
+            disabled={creating || !orgName.trim()}
+            className="bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white text-sm px-4 py-2 rounded-lg transition-colors"
+          >
+            {creating ? "Creating…" : "Create"}
+          </button>
+        </form>
+      )}
+
+      {loading ? (
+        <div className="space-y-3">
+          <SkeletonCard />
+          <SkeletonCard />
+          <SkeletonCard />
+        </div>
+      ) : orgs.length === 0 ? (
+        <div className="text-center py-16 text-gray-500">
+          <p className="mb-3">You don&apos;t belong to any organizations yet.</p>
+          <button
+            onClick={() => setShowCreateForm(true)}
+            className="text-sm text-indigo-400 hover:text-indigo-300 underline"
+          >
+            Create your first organization
+          </button>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {orgs.map(({ org, member }) => (
+            <Link
+              key={org.id}
+              href={`/dashboard/organizations/${org.id}`}
+              className="block bg-gray-900 border border-gray-800 rounded-xl p-5 hover:border-gray-600 transition-colors"
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-white">{org.name}</span>
+                    <span
+                      className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                        ROLE_COLORS[member.role] ?? ROLE_COLORS.member
+                      }`}
+                    >
+                      {member.role}
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-0.5 font-mono">{org.slug}</p>
+                </div>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="w-4 h-4 text-gray-600"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="m9 18 6-6-6-6" />
+                </svg>
+              </div>
+            </Link>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
