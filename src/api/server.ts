@@ -14,6 +14,7 @@ import verificationRoutes from "./routes/verification.routes";
 import anomalyRoutes from "./routes/anomaly.routes";
 import notificationRoutes from "./routes/notification.routes";
 import orgRoutes from "./routes/org.routes";
+import gdprRoutes from "./routes/gdpr.routes";
 import federationRoutes from "../federation/routes";
 import { rateLimit } from "../middleware/rateLimiting";
 import { geoFencingMiddleware } from "../middleware/geoFencing";
@@ -70,6 +71,9 @@ export async function createServer() {
 
   // ─── Organization routes ──────────────────────────────────────────────────
   app.route("/orgs", orgRoutes);
+
+  // ─── GDPR routes ──────────────────────────────────────────────────────────
+  app.route("/gdpr", gdprRoutes);
 
   // ─── SSF webhook endpoint ─────────────────────────────────────────────────
   app.post("/ssf/events", async (c) => {
