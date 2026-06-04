@@ -13,9 +13,9 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           </div>
           <span className="font-bold text-white text-xl">{brand.name}</span>
         </div>
-        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-8">
+        <main id="main-content" className="bg-gray-900 border border-gray-800 rounded-2xl p-8">
           {children}
-        </div>
+        </main>
       </div>
     </div>
   );

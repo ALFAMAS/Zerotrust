@@ -36,6 +36,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" suppressHydrationWarning>
       <body className="bg-gray-950 dark:bg-gray-950 text-gray-100 antialiased">
+        <a href="#main-content" className="skip-to-main">
+          Skip to main content
+        </a>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
           <ToastProvider>
             {children}

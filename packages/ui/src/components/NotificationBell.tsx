@@ -67,7 +67,7 @@ export function NotificationBell() {
     return () => clearInterval(interval);
   }, []);
 
-  // Close dropdown when clicking outside
+  // Close dropdown on click-outside or Escape
   useEffect(() => {
     if (!open) return;
     function handleClick(e: MouseEvent) {
@@ -75,8 +75,15 @@ export function NotificationBell() {
         setOpen(false);
       }
     }
+    function handleKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setOpen(false);
+    }
     document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
+    document.addEventListener("keydown", handleKey);
+    return () => {
+      document.removeEventListener("mousedown", handleClick);
+      document.removeEventListener("keydown", handleKey);
+    };
   }, [open]);
 
   // Fetch notifications when dropdown opens
@@ -114,6 +121,8 @@ export function NotificationBell() {
       {/* Bell button */}
       <button
         aria-label="Notifications"
+        aria-haspopup="dialog"
+        aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
         className="relative w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
       >
@@ -139,7 +148,12 @@ export function NotificationBell() {
 
       {/* Dropdown */}
       {open && (
-        <div className="absolute right-0 mt-2 w-80 bg-gray-900 border border-gray-800 rounded-xl shadow-2xl z-50 overflow-hidden">
+        <div
+          role="dialog"
+          aria-label="Notifications"
+          aria-modal="false"
+          className="absolute right-0 mt-2 w-80 bg-gray-900 border border-gray-800 rounded-xl shadow-2xl z-50 overflow-hidden"
+        >
           <div className="flex items-center justify-between px-4 py-3 border-b border-gray-800">
             <span className="text-sm font-semibold text-white">Notifications</span>
             {unreadCount > 0 && (

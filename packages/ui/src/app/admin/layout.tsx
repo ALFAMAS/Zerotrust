@@ -97,14 +97,18 @@ function AdminSidebar({ open, onClose }: AdminSidebarProps) {
       {/* Mobile: overlay sidebar */}
       {open && (
         <>
-          {/* Dark backdrop */}
           <div
             className="md:hidden fixed inset-0 z-40 bg-black/60"
             aria-hidden="true"
             onClick={onClose}
           />
-          {/* Sidebar panel */}
-          <div className="md:hidden fixed inset-y-0 left-0 z-50 w-60 flex flex-col">
+          <div
+            id="admin-sidebar"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Admin navigation"
+            className="md:hidden fixed inset-y-0 left-0 z-50 w-60 flex flex-col"
+          >
             {sidebarContent}
           </div>
         </>
@@ -123,6 +127,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     }
   }, [router]);
 
+  useEffect(() => {
+    if (!sidebarOpen) return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setSidebarOpen(false);
+    }
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [sidebarOpen]);
+
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100">
       <AdminSidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
@@ -131,19 +144,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <div className="md:hidden flex items-center gap-3 px-4 py-3 border-b border-gray-800 bg-gray-900">
         <button
           aria-label={sidebarOpen ? "Close sidebar" : "Open sidebar"}
+          aria-expanded={sidebarOpen}
+          aria-controls="admin-sidebar"
           onClick={() => setSidebarOpen((v) => !v)}
           className="w-8 h-8 flex flex-col items-center justify-center gap-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
         >
           {sidebarOpen ? (
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={2}
-              strokeLinecap="round"
-              className="w-5 h-5"
-            >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" className="w-5 h-5">
               <path d="M18 6 6 18M6 6l12 12" />
             </svg>
           ) : (
@@ -158,7 +165,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </div>
 
       {/* Main content: offset by sidebar width on desktop, full-width on mobile */}
-      <main className="md:ml-60 min-h-screen p-8">{children}</main>
+      <main id="main-content" className="md:ml-60 min-h-screen p-8">{children}</main>
     </div>
   );
 }
