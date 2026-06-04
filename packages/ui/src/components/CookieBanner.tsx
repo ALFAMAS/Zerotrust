@@ -3,37 +3,30 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { brand } from "@/config/brand";
-
-const CONSENT_KEY = "za_cookie_consent";
+import { getConsent, setConsent } from "@/lib/consent";
 
 export default function CookieBanner() {
   const [visible, setVisible] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    const stored = localStorage.getItem(CONSENT_KEY);
-    if (!stored) {
-      // Delay slightly so the slide-in transition is visible
+    setMounted(true);
+    if (!getConsent()) {
       const timer = setTimeout(() => setVisible(true), 300);
       return () => clearTimeout(timer);
     }
   }, []);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
   function handleAccept() {
-    localStorage.setItem(CONSENT_KEY, "accepted");
+    setConsent("accepted");
     setVisible(false);
   }
 
   function handleDecline() {
-    localStorage.setItem(CONSENT_KEY, "declined");
+    setConsent("declined");
     setVisible(false);
   }
 
-  // Avoid SSR mismatch — render nothing until mounted on client
   if (!mounted) return null;
 
   return (
@@ -48,11 +41,17 @@ export default function CookieBanner() {
       <div className="bg-gray-900 border-t border-gray-800 px-6 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 max-w-7xl mx-auto w-full">
         <p className="text-sm text-gray-400 leading-relaxed">
           {brand.name} uses cookies to improve your experience. By continuing, you accept our{" "}
-          <Link href="/privacy" className="text-indigo-400 hover:text-indigo-300 underline underline-offset-2 transition-colors">
+          <Link
+            href="/privacy"
+            className="text-indigo-400 hover:text-indigo-300 underline underline-offset-2 transition-colors"
+          >
             Privacy Policy
           </Link>{" "}
           and{" "}
-          <Link href="/terms" className="text-indigo-400 hover:text-indigo-300 underline underline-offset-2 transition-colors">
+          <Link
+            href="/terms"
+            className="text-indigo-400 hover:text-indigo-300 underline underline-offset-2 transition-colors"
+          >
             Terms of Service
           </Link>
           .

@@ -4,6 +4,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
 import { ToastProvider } from "../context/ToastContext";
 import CookieBanner from "@/components/CookieBanner";
+import AnalyticsScript from "@/components/AnalyticsScript";
 import { brand } from "@/config/brand";
 import "./globals.css";
 
@@ -47,6 +48,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <ToastProvider>
               {children}
               <CookieBanner />
+              <AnalyticsScript />
             </ToastProvider>
           </ThemeProvider>
         </NextIntlClientProvider>

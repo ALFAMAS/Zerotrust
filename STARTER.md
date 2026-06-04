@@ -374,7 +374,7 @@ The items below should be tackled before anything else. They cover the foundatio
 
 **File Storage & Uploads**
 
-- [ ] Avatar upload — resize + optimize, store to S3/R2
+- [x] Avatar upload — resize + optimize, store to S3/R2
 - [ ] File attachments — per-feature uploads with type/size validation
 - [ ] S3-compatible storage — AWS S3, Cloudflare R2, or MinIO for local dev
 - [ ] Pre-signed URLs — secure direct-to-storage uploads from the browser
@@ -398,7 +398,7 @@ The items below should be tackled before anything else. They cover the foundatio
 - [x] Inline-styled HTML email templates
 - [x] Email queue — Bull/BullMQ so sending never blocks a request
 - [x] Notification preferences — users choose which emails they receive
-- [ ] Unsubscribe tokens — one-click unsubscribe with signed tokens (CAN-SPAM)
+- [x] Unsubscribe tokens — one-click unsubscribe with signed tokens (CAN-SPAM)
 
 **Customer Support**
 
@@ -420,7 +420,7 @@ The items below should be tackled before anything else. They cover the foundatio
 - [x] Proper meta tags — `<title>`, Open Graph, Twitter cards on every page
 - [x] Sitemap.xml + robots.txt — generated at build time from Next.js
 - [x] Cookie consent banner — GDPR-compliant accept/reject
-- [ ] Analytics script — Plausible or Google Analytics with consent gate
+- [x] Analytics script — Plausible or Google Analytics with consent gate
 
 **Legal & Compliance**
 

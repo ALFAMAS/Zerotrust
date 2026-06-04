@@ -3,6 +3,7 @@ export interface NotificationEmailData {
   title: string;
   body: string;
   link?: string;
+  unsubscribeUrl?: string;
   appName: string;
   appUrl: string;
 }
@@ -12,7 +13,7 @@ export function notificationEmailTemplate(data: NotificationEmailData): {
   html: string;
   text: string;
 } {
-  const { name, title, body, link, appName, appUrl } = data;
+  const { name, title, body, link, unsubscribeUrl, appName, appUrl } = data;
 
   const subject = `${title} — ${appName}`;
 
@@ -57,6 +58,11 @@ export function notificationEmailTemplate(data: NotificationEmailData): {
               <p style="margin:0 0 8px;font-size:13px;color:#9ca3af;">
                 This notification was sent from <a href="${appUrl}" style="color:#6366f1;">${appName}</a>.
               </p>
+              ${
+                unsubscribeUrl
+                  ? `<p style="margin:0;font-size:12px;color:#9ca3af;">Don't want these emails? <a href="${unsubscribeUrl}" style="color:#9ca3af;text-decoration:underline;">Unsubscribe</a></p>`
+                  : ""
+              }
             </td>
           </tr>
         </table>
@@ -66,6 +72,8 @@ export function notificationEmailTemplate(data: NotificationEmailData): {
 </body>
 </html>`;
 
+  const unsubLine = unsubscribeUrl ? `\nTo unsubscribe: ${unsubscribeUrl}\n` : "";
+
   const text = `${title}
 
 Hi ${name},
@@ -73,7 +81,8 @@ Hi ${name},
 ${body}
 ${ctaText}
 — The ${appName} Team
-${appUrl}`;
+${appUrl}
+${unsubLine}`;
 
   return { subject, html, text };
 }

@@ -2,7 +2,10 @@ import { Hono } from "hono";
 import bcrypt from "bcryptjs";
 import { nanoid } from "nanoid";
 import * as nodeCrypto from "crypto";
+import * as fs from "fs/promises";
+import * as path from "path";
 import { eq } from "drizzle-orm";
+import { z } from "zod";
 import { getDb } from "../../db";
 import { usersTable, sessionsTable, refreshTokensTable } from "../../db/schema";
 import { FingerprintService } from "../../services/fingerprint.service";
@@ -11,6 +14,7 @@ import { getConfig } from "../../config";
 import { enforceMaxConcurrentDevices } from "../../middleware/sessionControl";
 import { rateLimit } from "../../middleware/rateLimiting";
 import { requireProofOfPossession } from "../../middleware/proofOfPossession";
+import { authMiddleware } from "../../middleware/auth";
 import { getLogger } from "../../logger";
 import { getProviderAdapter } from "../../oauth/provider.factory";
 import { sendWelcomeEmail } from "../../services/email.service";
@@ -408,6 +412,139 @@ router.get("/oauth/:provider/callback", rateLimit({ points: 20, windowSecs: 60 }
   } catch (err) {
     logger.error("OAuth callback error", err as Error);
     return c.json({ error: "INTERNAL_ERROR", message: "OAuth callback failed" }, 500);
+  }
+});
+
+// ── GET /auth/me ──────────────────────────────────────────────────────────────
+
+router.get("/me", authMiddleware, async (c) => {
+  try {
+    const user = c.get("user");
+    const db = getDb();
+    const [row] = await db
+      .select({
+        id: usersTable.id,
+        email: usersTable.email,
+        username: usersTable.username,
+        displayName: usersTable.displayName,
+        avatarUrl: usersTable.avatarUrl,
+        roles: usersTable.roles,
+        status: usersTable.status,
+        phone: usersTable.phone,
+        createdAt: usersTable.createdAt,
+        lastLoginAt: usersTable.lastLoginAt,
+        metadata: usersTable.metadata,
+      })
+      .from(usersTable)
+      .where(eq(usersTable.id, user.id))
+      .limit(1);
+    if (!row) return c.json({ error: "USER_NOT_FOUND" }, 404);
+    return c.json(row);
+  } catch (err) {
+    logger.error("Get current user error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR" }, 500);
+  }
+});
+
+// ── PATCH /auth/me ────────────────────────────────────────────────────────────
+
+const patchMeSchema = z.object({
+  displayName: z.string().min(1).max(100).optional(),
+  avatarUrl: z.string().url().nullable().optional(),
+  phone: z.string().max(30).nullable().optional(),
+  username: z
+    .string()
+    .min(3)
+    .max(50)
+    .regex(/^[a-z0-9_-]+$/, "lowercase letters, digits, hyphens, underscores only")
+    .nullable()
+    .optional(),
+});
+
+router.patch("/me", authMiddleware, async (c) => {
+  try {
+    const user = c.get("user");
+    const body = await c.req.json().catch(() => ({}));
+    const parsed = patchMeSchema.safeParse(body);
+    if (!parsed.success)
+      return c.json({ error: "INVALID_REQUEST", issues: parsed.error.issues }, 400);
+
+    const db = getDb();
+    const [updated] = await db
+      .update(usersTable)
+      .set({ ...parsed.data, updatedAt: new Date() })
+      .where(eq(usersTable.id, user.id))
+      .returning({
+        id: usersTable.id,
+        email: usersTable.email,
+        username: usersTable.username,
+        displayName: usersTable.displayName,
+        avatarUrl: usersTable.avatarUrl,
+        roles: usersTable.roles,
+        status: usersTable.status,
+        phone: usersTable.phone,
+        updatedAt: usersTable.updatedAt,
+      });
+    if (!updated) return c.json({ error: "USER_NOT_FOUND" }, 404);
+    return c.json(updated);
+  } catch (err) {
+    logger.error("Patch current user error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR" }, 500);
+  }
+});
+
+// ── POST /auth/me/avatar ──────────────────────────────────────────────────────
+
+const ALLOWED_AVATAR_TYPES: Record<string, string> = {
+  "image/jpeg": "jpg",
+  "image/png": "png",
+  "image/gif": "gif",
+  "image/webp": "webp",
+};
+const MAX_AVATAR_BYTES = 5 * 1024 * 1024; // 5 MB
+
+router.post("/me/avatar", authMiddleware, async (c) => {
+  try {
+    const user = c.get("user");
+    const formData = await c.req.formData();
+    const file = formData.get("avatar");
+
+    if (!file || !(file instanceof File)) {
+      return c.json({ error: "INVALID_REQUEST", message: "avatar file required" }, 400);
+    }
+
+    const ext = ALLOWED_AVATAR_TYPES[file.type];
+    if (!ext) {
+      return c.json(
+        { error: "INVALID_TYPE", message: "Only JPEG, PNG, GIF, WebP images are allowed" },
+        400
+      );
+    }
+
+    if (file.size > MAX_AVATAR_BYTES) {
+      return c.json({ error: "FILE_TOO_LARGE", message: "Avatar must be under 5 MB" }, 400);
+    }
+
+    const uploadsDir = path.join(process.cwd(), "uploads", "avatars");
+    await fs.mkdir(uploadsDir, { recursive: true });
+
+    const filename = `${user.id}-${Date.now()}.${ext}`;
+    const filepath = path.join(uploadsDir, filename);
+    await fs.writeFile(filepath, Buffer.from(await file.arrayBuffer()));
+
+    const appUrl = process.env.APP_URL ?? "http://localhost:3000";
+    const avatarUrl = `${appUrl}/uploads/avatars/${filename}`;
+
+    const db = getDb();
+    await db
+      .update(usersTable)
+      .set({ avatarUrl, updatedAt: new Date() })
+      .where(eq(usersTable.id, user.id));
+
+    return c.json({ avatarUrl });
+  } catch (err) {
+    logger.error("Avatar upload error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR" }, 500);
   }
 });
 

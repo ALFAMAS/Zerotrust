@@ -2,6 +2,7 @@ import { lt, eq, and } from "drizzle-orm";
 import { getDb } from "../db";
 import { usersTable, notificationsTable } from "../db/schema";
 import { sendNotificationEmail } from "./email.service";
+import { generateUnsubscribeToken } from "./unsubscribe";
 import { getLogger } from "../logger";
 
 const logger = getLogger("notification-fallback");
@@ -52,6 +53,8 @@ export async function sendNotificationEmailFallbacks(defaultInactiveDays = 3): P
       // Send summary email
       const count = unread.length;
       const latest = unread[0];
+      const apiUrl = process.env.API_URL ?? process.env.APP_URL ?? "http://localhost:3000";
+      const unsubToken = generateUnsubscribeToken(user.id, "notification");
       await sendNotificationEmail(user.email, {
         name: user.displayName ?? user.email,
         title: `You have ${count} unread notification${count > 1 ? "s" : ""}`,
@@ -60,6 +63,7 @@ export async function sendNotificationEmailFallbacks(defaultInactiveDays = 3): P
             ? latest.title
             : `Most recent: ${latest.title}. Log in to view all ${count} notifications.`,
         link: process.env.APP_URL ? `${process.env.APP_URL}/dashboard` : undefined,
+        unsubscribeUrl: `${apiUrl}/auth/unsubscribe?token=${unsubToken}`,
       });
 
       sent++;

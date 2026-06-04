@@ -139,13 +139,14 @@ export async function sendSecurityAlertEmail(
 
 export async function sendNotificationEmail(
   to: string,
-  data: { name: string; title: string; body: string; link?: string }
+  data: { name: string; title: string; body: string; link?: string; unsubscribeUrl?: string }
 ): Promise<void> {
   const { subject, html, text } = notificationEmailTemplate({
     name: data.name,
     title: data.title,
     body: data.body,
     link: data.link,
+    unsubscribeUrl: data.unsubscribeUrl,
     appName: APP_NAME,
     appUrl: APP_URL,
   });

@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { secureHeaders } from "hono/secure-headers";
 import { serve } from "@hono/node-server";
+import { serveStatic } from "@hono/node-server/serve-static";
 import { initializeZeroAuth } from "..";
 import authRoutes from "./routes/auth.routes";
 import magicLinkRoutes from "./routes/magic-link.routes";
@@ -15,6 +16,7 @@ import anomalyRoutes from "./routes/anomaly.routes";
 import notificationRoutes from "./routes/notification.routes";
 import orgRoutes from "./routes/org.routes";
 import gdprRoutes from "./routes/gdpr.routes";
+import unsubscribeRoutes from "./routes/unsubscribe.routes";
 import federationRoutes from "../federation/routes";
 import { rateLimit } from "../middleware/rateLimiting";
 import { geoFencingMiddleware } from "../middleware/geoFencing";
@@ -50,8 +52,12 @@ export async function createServer() {
   app.use("*", cors());
   app.use("*", secureHeaders());
 
+  // ─── Static uploads (avatars, etc.) ──────────────────────────────────────
+  app.use("/uploads/*", serveStatic({ root: "./" }));
+
   // ─── Auth routes ──────────────────────────────────────────────────────────
   app.route("/auth", authRoutes);
+  app.route("/auth", unsubscribeRoutes);
   app.route("/auth/magic-link", magicLinkRoutes);
   app.route("/auth/mfa", mfaRoutes);
   app.route("/auth/passkey", passkeyRoutes);
