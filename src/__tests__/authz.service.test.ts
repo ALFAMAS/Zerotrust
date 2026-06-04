@@ -2,25 +2,35 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { AuthorizationEngine } from "../services/authz.service";
 import type { AuthzContext, User, Session } from "../shared/types";
 
-let findOneResult: any = null;
-let findByIdResult: any = null;
-let jitResult: any[] = [];
+const { mockDb, enqueueDb, resetDb } = vi.hoisted(() => {
+  const results: any[][] = [];
+  let idx = 0;
 
-vi.mock("../models/index", () => ({
-  RoleModel: {
-    findOne: vi.fn().mockImplementation(() => ({ lean: () => Promise.resolve(findOneResult) })),
-    findById: vi.fn().mockImplementation(() => ({ lean: () => Promise.resolve(findByIdResult) })),
-  },
-  JITModel: {
-    find: vi.fn().mockImplementation(() => ({
-      populate: vi.fn().mockReturnThis(),
-      lean: () => Promise.resolve(jitResult),
-    })),
-  },
-}));
+  const next = () => results[idx++] ?? [];
+
+  const makeChain = (): any => {
+    const c: any = {};
+    c.from = () => c;
+    c.where = () => c;
+    c.limit = () => Promise.resolve(next());
+    c.then = (res: any, rej?: any) => Promise.resolve(next()).then(res, rej);
+    return c;
+  };
+
+  return {
+    mockDb: { select: () => makeChain() },
+    enqueueDb: (rows: any[]) => results.push(rows),
+    resetDb: () => {
+      results.length = 0;
+      idx = 0;
+    },
+  };
+});
+
+vi.mock("../db", () => ({ getDb: () => mockDb }));
 
 const mockUser: User = {
-  _id: "user1" as any,
+  id: "user1",
   email: "user@test.com",
   displayName: "Test User",
   roles: ["viewer"],
@@ -45,8 +55,8 @@ const mockUser: User = {
 };
 
 const mockSession: Session = {
-  _id: "sess1" as any,
-  userId: "user1" as any,
+  id: "sess1",
+  userId: "user1",
   tokenId: "jti1",
   deviceFingerprint: {
     hash: "h1",
@@ -56,7 +66,6 @@ const mockSession: Session = {
     lastSeenAt: new Date(),
   },
   ipAddress: "127.0.0.1",
-  userAgent: "test",
   expiresAt: new Date(Date.now() + 3600000),
   lastActivityAt: new Date(),
   isActive: true,
@@ -75,77 +84,78 @@ const baseCtx: AuthzContext = {
   },
 };
 
+const viewerRole = {
+  id: "role-viewer",
+  name: "viewer",
+  permissions: [{ resource: "documents", actions: ["read"], conditions: [] }],
+  parentRoleId: null,
+};
+
+const editorRole = {
+  id: "role-editor",
+  name: "editor",
+  permissions: [{ resource: "documents", actions: ["write"], conditions: [] }],
+  parentRoleId: null,
+};
+
 const engine = new AuthorizationEngine();
 
 describe("AuthorizationEngine", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
-    findOneResult = null;
-    findByIdResult = null;
-    jitResult = [];
+    resetDb();
   });
 
   it("allows when role has matching permission", async () => {
-    const role = {
-      _id: "role1",
-      name: "viewer",
-      permissions: [{ resource: "documents", actions: ["read"], conditions: [] }],
-      parentRoleId: null,
-    };
-    findOneResult = role;
-    findByIdResult = role;
+    enqueueDb([]); // JIT grants (none)
+    enqueueDb([viewerRole]); // role by name "viewer"
+    enqueueDb([viewerRole]); // role by id in hierarchy traversal
 
     const result = await engine.evaluate(baseCtx);
-    expect(result.allowed).toBe(true);
+    expect(result.decision).toBe("allow");
   });
 
   it("denies when no matching permission", async () => {
-    const role = {
-      _id: "role1",
-      name: "viewer",
+    const usersRole = {
+      ...viewerRole,
       permissions: [{ resource: "users", actions: ["read"], conditions: [] }],
-      parentRoleId: null,
     };
-    findOneResult = role;
-    findByIdResult = role;
+    enqueueDb([]);
+    enqueueDb([usersRole]);
+    enqueueDb([usersRole]);
 
     const result = await engine.evaluate(baseCtx);
-    expect(result.allowed).toBe(false);
+    expect(result.decision).toBe("deny");
   });
 
   it("allows wildcard action", async () => {
-    const role = {
-      _id: "role1",
-      name: "viewer",
+    const wildcardRole = {
+      ...viewerRole,
       permissions: [{ resource: "documents", actions: ["*"], conditions: [] }],
-      parentRoleId: null,
     };
-    findOneResult = role;
-    findByIdResult = role;
+    enqueueDb([]);
+    enqueueDb([wildcardRole]);
+    enqueueDb([wildcardRole]);
 
     const result = await engine.evaluate({ ...baseCtx, action: "delete" });
-    expect(result.allowed).toBe(true);
+    expect(result.decision).toBe("allow");
   });
 
   it("allows wildcard resource prefix", async () => {
-    const role = {
-      _id: "role1",
-      name: "viewer",
+    const wildcardRole = {
+      ...viewerRole,
       permissions: [{ resource: "documents:*", actions: ["read"], conditions: [] }],
-      parentRoleId: null,
     };
-    findOneResult = role;
-    findByIdResult = role;
+    enqueueDb([]);
+    enqueueDb([wildcardRole]);
+    enqueueDb([wildcardRole]);
 
     const result = await engine.evaluate({ ...baseCtx, resource: "documents:drafts" });
-    expect(result.allowed).toBe(true);
+    expect(result.decision).toBe("allow");
   });
 
   it("evaluates ABAC eq condition — match", async () => {
-    const user = { ...mockUser, attributes: { department: "engineering" } };
-    const role = {
-      _id: "role1",
-      name: "viewer",
+    const abacRole = {
+      ...viewerRole,
       permissions: [
         {
           resource: "documents",
@@ -155,20 +165,19 @@ describe("AuthorizationEngine", () => {
           ],
         },
       ],
-      parentRoleId: null,
     };
-    findOneResult = role;
-    findByIdResult = role;
+    const user = { ...mockUser, attributes: { department: "engineering" } };
+    enqueueDb([]);
+    enqueueDb([abacRole]);
+    enqueueDb([abacRole]);
 
     const result = await engine.evaluate({ ...baseCtx, user });
-    expect(result.allowed).toBe(true);
+    expect(result.decision).toBe("allow");
   });
 
   it("evaluates ABAC eq condition — no match", async () => {
-    const user = { ...mockUser, attributes: { department: "sales" } };
-    const role = {
-      _id: "role1",
-      name: "viewer",
+    const abacRole = {
+      ...viewerRole,
       permissions: [
         {
           resource: "documents",
@@ -178,28 +187,33 @@ describe("AuthorizationEngine", () => {
           ],
         },
       ],
-      parentRoleId: null,
     };
-    findOneResult = role;
-    findByIdResult = role;
+    const user = { ...mockUser, attributes: { department: "sales" } };
+    enqueueDb([]);
+    enqueueDb([abacRole]);
+    enqueueDb([abacRole]);
 
     const result = await engine.evaluate({ ...baseCtx, user });
-    expect(result.allowed).toBe(false);
+    expect(result.decision).toBe("deny");
   });
 
   it("includes JIT-granted roles in evaluation", async () => {
-    const editorRole = {
-      _id: "editor-role",
-      name: "editor",
-      permissions: [{ resource: "documents", actions: ["write"], conditions: [] }],
-      parentRoleId: null,
+    const jitGrant = {
+      id: "jit1",
+      userId: "user1",
+      roleId: "role-editor",
+      status: "approved",
+      expiresAt: new Date(Date.now() + 3600000),
     };
-    jitResult = [{ roleId: { _id: "editor-role", name: "editor" } }];
-    findOneResult = editorRole;
-    findByIdResult = editorRole;
+    enqueueDb([jitGrant]); // JIT grants
+    enqueueDb([{ name: "editor" }]); // role name lookup for JIT roleId
+    enqueueDb([viewerRole]); // viewer role by name
+    enqueueDb([viewerRole]); // viewer role by id (hierarchy)
+    enqueueDb([editorRole]); // editor role by name
+    enqueueDb([editorRole]); // editor role by id (hierarchy)
 
     const result = await engine.evaluate({ ...baseCtx, action: "write" });
-    expect(result.allowed).toBe(true);
+    expect(result.decision).toBe("allow");
   });
 
   it("blocks access outside schedule restriction", async () => {
@@ -223,15 +237,13 @@ describe("AuthorizationEngine", () => {
       environment: { ...baseCtx.environment, currentTime: lateNight },
     };
     const result = await engine.evaluate(ctx);
-    expect(result.allowed).toBe(false);
+    expect(result.decision).toBe("deny");
     expect(result.reason).toContain("SCHEDULE");
   });
 
-  it("handles in operator in ABAC conditions", async () => {
-    const user = { ...mockUser, attributes: { clearanceLevel: 3 } };
-    const role = {
-      _id: "role1",
-      name: "viewer",
+  it("handles gte operator in ABAC conditions", async () => {
+    const abacRole = {
+      ...viewerRole,
       permissions: [
         {
           resource: "documents",
@@ -239,12 +251,13 @@ describe("AuthorizationEngine", () => {
           conditions: [{ attribute: "user.attributes.clearanceLevel", operator: "gte", value: 2 }],
         },
       ],
-      parentRoleId: null,
     };
-    findOneResult = role;
-    findByIdResult = role;
+    const user = { ...mockUser, attributes: { clearanceLevel: 3 } };
+    enqueueDb([]);
+    enqueueDb([abacRole]);
+    enqueueDb([abacRole]);
 
     const result = await engine.evaluate({ ...baseCtx, user });
-    expect(result.allowed).toBe(true);
+    expect(result.decision).toBe("allow");
   });
 });

@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { Hono } from "hono";
 
 vi.mock("../models/index", () => ({
   AuditModel: { create: vi.fn().mockResolvedValue({}) },
@@ -142,17 +143,11 @@ describe("Account Lockout Middleware", () => {
 describe("Geo-Fencing Middleware", () => {
   it("passes through when geo-fencing is disabled", async () => {
     const { geoFencingMiddleware } = await import("../middleware/geoFencing");
-    const middleware = geoFencingMiddleware();
-    const req: any = {
-      ip: "8.8.8.8",
-      headers: {},
-      user: { sessionConfig: { allowedCountries: [], allowedIpRanges: [] } },
-      session: {},
-    };
-    const res: any = { status: vi.fn().mockReturnThis(), json: vi.fn() };
-    const next = vi.fn();
-    middleware(req, res, next);
-    expect(next).toHaveBeenCalled();
+    const app = new Hono();
+    app.use("*", geoFencingMiddleware());
+    app.get("/test", (c) => c.json({ ok: true }));
+    const res = await app.request("/test");
+    expect(res.status).toBe(200);
   });
 });
 
@@ -161,19 +156,18 @@ describe("Geo-Fencing Middleware", () => {
 describe("Temporal Access Middleware", () => {
   it("allows access when no schedule restriction is set", async () => {
     const { temporalAccessMiddleware } = await import("../middleware/temporalAccess");
-    const middleware = temporalAccessMiddleware();
-    const req: any = {
-      user: {
-        sessionConfig: {
-          scheduleRestriction: { enabled: false },
-        },
-      },
-      session: { continuousEvalResult: null },
-    };
-    const res: any = { status: vi.fn().mockReturnThis(), json: vi.fn() };
-    const next = vi.fn();
-    middleware(req, res, next);
-    expect(next).toHaveBeenCalled();
+    const app = new Hono<any>();
+    app.use("*", async (c, next) => {
+      c.set("user", {
+        id: "u1",
+        sessionConfig: { scheduleRestriction: { enabled: false } },
+      });
+      await next();
+    });
+    app.use("*", temporalAccessMiddleware());
+    app.get("/test", (c) => c.json({ ok: true }));
+    const res = await app.request("/test");
+    expect(res.status).toBe(200);
   });
 });
 
@@ -182,58 +176,39 @@ describe("Temporal Access Middleware", () => {
 describe("Security Headers Middleware", () => {
   it("sets required security headers", async () => {
     const { securityHeaders } = await import("../middleware/securityHeaders");
-    const middleware = securityHeaders();
-    const headers: Record<string, string> = {};
-    const req: any = {};
-    const res: any = {
-      setHeader: (k: string, v: string) => {
-        headers[k] = v;
-      },
-      removeHeader: vi.fn(),
-    };
-    const next = vi.fn();
-    middleware(req, res, next);
-    expect(headers["Content-Security-Policy"]).toBeTruthy();
-    expect(headers["Strict-Transport-Security"]).toMatch(/max-age/);
-    expect(headers["X-Frame-Options"]).toBe("DENY");
-    expect(headers["X-Content-Type-Options"]).toBe("nosniff");
-    expect(headers["Referrer-Policy"]).toBeTruthy();
-    expect(next).toHaveBeenCalled();
+    const app = new Hono();
+    app.use("*", securityHeaders());
+    app.get("/test", (c) => c.json({ ok: true }));
+    const res = await app.request("/test");
+    expect(res.headers.get("content-security-policy")).toBeTruthy();
+    expect(res.headers.get("strict-transport-security")).toMatch(/max-age/);
+    expect(res.headers.get("x-frame-options")).toBe("DENY");
+    expect(res.headers.get("x-content-type-options")).toBe("nosniff");
+    expect(res.headers.get("referrer-policy")).toBeTruthy();
   });
 
   it("allows custom CSP directives", async () => {
     const { securityHeaders } = await import("../middleware/securityHeaders");
-    const middleware = securityHeaders({
-      cspDirectives: { "default-src": "'self'", "img-src": ["'self'", "data:"] },
-    });
-    const headers: Record<string, string> = {};
-    const req: any = {};
-    const res: any = {
-      setHeader: (k: string, v: string) => {
-        headers[k] = v;
-      },
-      removeHeader: vi.fn(),
-    };
-    const next = vi.fn();
-    middleware(req, res, next);
-    expect(headers["Content-Security-Policy"]).toContain("default-src");
-    expect(headers["Content-Security-Policy"]).toContain("img-src");
+    const app = new Hono();
+    app.use(
+      "*",
+      securityHeaders({
+        cspDirectives: { "default-src": "'self'", "img-src": ["'self'", "data:"] },
+      })
+    );
+    app.get("/test", (c) => c.json({ ok: true }));
+    const res = await app.request("/test");
+    expect(res.headers.get("content-security-policy")).toContain("default-src");
+    expect(res.headers.get("content-security-policy")).toContain("img-src");
   });
 
   it("allows SAMEORIGIN frame option", async () => {
     const { securityHeaders } = await import("../middleware/securityHeaders");
-    const middleware = securityHeaders({ frameOptions: "SAMEORIGIN" });
-    const headers: Record<string, string> = {};
-    const req: any = {};
-    const res: any = {
-      setHeader: (k: string, v: string) => {
-        headers[k] = v;
-      },
-      removeHeader: vi.fn(),
-    };
-    const next = vi.fn();
-    middleware(req, res, next);
-    expect(headers["X-Frame-Options"]).toBe("SAMEORIGIN");
+    const app = new Hono();
+    app.use("*", securityHeaders({ frameOptions: "SAMEORIGIN" }));
+    app.get("/test", (c) => c.json({ ok: true }));
+    const res = await app.request("/test");
+    expect(res.headers.get("x-frame-options")).toBe("SAMEORIGIN");
   });
 });
 
