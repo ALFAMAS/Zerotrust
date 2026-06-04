@@ -118,7 +118,8 @@ describe("In-Memory Rate Limiter — consumeInMemory", () => {
   });
 
   it("clearInMemoryBuckets resets all buckets", async () => {
-    const { consumeInMemory, clearInMemoryBuckets } = await import("../services/rateLimiter/inmemory");
+    const { consumeInMemory, clearInMemoryBuckets } =
+      await import("../services/rateLimiter/inmemory");
     const key = `imrl-clear-${Date.now()}`;
     const capacity = 1;
     consumeInMemory(key, 1, capacity, 60);
@@ -311,8 +312,40 @@ describe("Redis Rate Limiter — consumePoint", () => {
 
 // ── Hono rateLimit Middleware ──────────────────────────────────────────────
 
+// Shared config factory — re-used in beforeEach so each test starts clean
+const enabledRateLimitConfig = () => ({
+  getConfig: () => ({
+    rateLimiting: { enabled: true, perIpLimit: 10, windowSecs: 60 },
+    session: { defaultTTL: 3600, refreshTokenTTL: 604800, maxConcurrentDevices: 5 },
+    security: {
+      bcryptRounds: 4,
+      tokenSecretHex: "a".repeat(64),
+      csfleMasterKeyHex: "b".repeat(64),
+      csflekeyRotationIntervalDays: 90,
+    },
+    geofencing: { enabled: false, allowedCountries: [], allowedIpRanges: [] },
+    mfa: {
+      totpWindow: 1,
+      otpExpirySecs: 900,
+      maxOTPAttempts: 5,
+      channels: {
+        email: { enabled: true },
+        sms: { enabled: false, provider: "twilio" },
+        whatsapp: { enabled: false, provider: "twilio" },
+        telegram: { enabled: false, botToken: "" },
+      },
+    },
+    oauth: { providers: {} },
+    elasticsearch: { enabled: false, host: "localhost", port: 9200, indexPrefix: "zeroauth" },
+    logging: { level: "error", format: "json" },
+  }),
+});
+
 describe("rateLimit Hono middleware", () => {
   beforeEach(async () => {
+    // Always re-register the enabled mock BEFORE resetting modules so every
+    // fresh import gets a predictable config.
+    vi.doMock("../config", enabledRateLimitConfig);
     vi.resetModules();
     const { clearRateLimiter } = await import("../middleware/rateLimiting");
     clearRateLimiter();
@@ -323,18 +356,36 @@ describe("rateLimit Hono middleware", () => {
   });
 
   it("passes through when rate limiting is disabled in config", async () => {
+    // Override mock to disabled, then reset modules so the fresh import
+    // picks up the disabled version.
     vi.doMock("../config", () => ({
       getConfig: () => ({
         rateLimiting: { enabled: false, perIpLimit: 3, windowSecs: 60 },
         session: { defaultTTL: 3600, refreshTokenTTL: 604800, maxConcurrentDevices: 5 },
-        security: { bcryptRounds: 4, tokenSecretHex: "a".repeat(64), csfleMasterKeyHex: "b".repeat(64), csflekeyRotationIntervalDays: 90 },
+        security: {
+          bcryptRounds: 4,
+          tokenSecretHex: "a".repeat(64),
+          csfleMasterKeyHex: "b".repeat(64),
+          csflekeyRotationIntervalDays: 90,
+        },
         geofencing: { enabled: false, allowedCountries: [], allowedIpRanges: [] },
-        mfa: { totpWindow: 1, otpExpirySecs: 900, maxOTPAttempts: 5, channels: { email: { enabled: true }, sms: { enabled: false, provider: "twilio" }, whatsapp: { enabled: false, provider: "twilio" }, telegram: { enabled: false, botToken: "" } } },
+        mfa: {
+          totpWindow: 1,
+          otpExpirySecs: 900,
+          maxOTPAttempts: 5,
+          channels: {
+            email: { enabled: true },
+            sms: { enabled: false, provider: "twilio" },
+            whatsapp: { enabled: false, provider: "twilio" },
+            telegram: { enabled: false, botToken: "" },
+          },
+        },
         oauth: { providers: {} },
         elasticsearch: { enabled: false, host: "localhost", port: 9200, indexPrefix: "zeroauth" },
         logging: { level: "error", format: "json" },
       }),
     }));
+    vi.resetModules();
 
     const { Hono } = await import("hono");
     const { rateLimit } = await import("../middleware/rateLimiting");
@@ -346,8 +397,7 @@ describe("rateLimit Hono middleware", () => {
     await app.request("/test", { headers: { "x-forwarded-for": "1.2.3.4" } });
     const res = await app.request("/test", { headers: { "x-forwarded-for": "1.2.3.4" } });
     expect(res.status).toBe(200);
-
-    vi.doUnmock("../config");
+    // No vi.doUnmock — next beforeEach re-registers the enabled mock
   });
 
   it("allows requests within the window limit", async () => {

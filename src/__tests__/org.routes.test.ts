@@ -249,8 +249,8 @@ describe("GET / (list user orgs)", () => {
   it("returns only orgs the current user is a member of", async () => {
     const db = makeDbChain([]);
     const rows = [{ org: makeOrg(), member: makeOrgMember() }];
-    // The select chain terminates without a .limit call — use a resolved select
-    db.innerJoin.mockResolvedValueOnce(rows);
+    // GET / query: .select().from().innerJoin().where() — terminal call is .where()
+    db.where.mockResolvedValueOnce(rows);
 
     const app = await getApp(db);
     const res = await app.request("/");
@@ -261,7 +261,8 @@ describe("GET / (list user orgs)", () => {
 
   it("returns empty list when user has no orgs", async () => {
     const db = makeDbChain([]);
-    db.innerJoin.mockResolvedValueOnce([]);
+    // GET / query terminates at .where()
+    db.where.mockResolvedValueOnce([]);
 
     const app = await getApp(db);
     const res = await app.request("/");
