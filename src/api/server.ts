@@ -22,6 +22,7 @@ import { temporalAccessMiddleware } from "../middleware/temporalAccess";
 import { authMiddleware } from "../middleware/auth";
 import { getLogger } from "../logger";
 import { initEmailQueue } from "../services/emailQueue";
+import { startRetentionScheduler } from "../services/dataRetention";
 import type { HonoEnv } from "../shared/types";
 
 const logger = getLogger("api-server");
@@ -38,6 +39,9 @@ export async function createServer() {
       initLogger.error("Email queue init failed", err)
     );
   }
+
+  // Start data retention scheduler (runs once every 24h)
+  startRetentionScheduler(24);
 
   app.use("*", cors());
   app.use("*", secureHeaders());

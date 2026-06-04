@@ -428,7 +428,7 @@ The items below should be tackled before anything else. They cover the foundatio
 - [x] Terms of service page — `/terms` (content driven by `NEXT_PUBLIC_*` env vars)
 - [x] GDPR data export — "Export my data" downloads JSON zip
 - [x] Account deletion — 30-day soft-delete grace period, then purge all PII
-- [ ] Data retention policy — auto-purge audit logs and old sessions after N days
+- [x] Data retention policy — auto-purge audit logs and old sessions after N days
 
 **CI/CD & Deployment**
 
