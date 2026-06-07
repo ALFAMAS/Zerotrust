@@ -1,203 +1,196 @@
-# ZeroAuth SaaS Starter
+# ZeroAuth — SaaS Starter
 
-A production-ready SaaS boilerplate. Drop in your business logic and ship. Built on a zero-trust auth backend — every session verified, every request audited.
+A production-ready SaaS boilerplate with enterprise-grade authentication, billing, and developer tools built in. Drop in your business logic and ship.
+
+**Stack:** Hono + TypeScript + PostgreSQL (Drizzle ORM) + Redis · Next.js 15.3 + React 19 + Tailwind CSS
 
 ---
 
 ## What's already built
 
-|     | Feature                  | Notes                                                      |
-| --- | ------------------------ | ---------------------------------------------------------- |
-| ✅  | Email + password auth    | Register, login, forgot password                           |
-| ✅  | Google & GitHub OAuth    | Toggle on/off from admin panel                             |
-| ✅  | Magic links              | Passwordless email login (15-min TTL)                      |
-| ✅  | Passkeys / WebAuthn      | Biometric and hardware key support                         |
-| ✅  | TOTP (authenticator app) | Google Authenticator, 1Password, Authy                     |
-| ✅  | Email OTP                | One-time codes delivered via email                         |
-| ✅  | Session management       | List active sessions, revoke any, device tracking          |
-| ✅  | Account lockout          | Configurable threshold + auto-unlock duration              |
-| ✅  | Rate limiting            | Per-IP, Redis-backed with in-memory fallback               |
-| ✅  | User dashboard           | Profile, security settings, active sessions                |
-| ✅  | Admin panel              | Users, sessions, audit log, auth toggles — at `/admin`     |
-| ✅  | Feature flag toggles     | Every auth method on/off from the admin UI                 |
-| ✅  | Audit log                | Immutable event trail to Elasticsearch                     |
-| ✅  | Dark landing page        | Hero, features, pricing sections — ready to customize      |
-| ✅  | Docker Compose           | One command: API + UI + PostgreSQL + Redis + Elasticsearch |
+|     | Feature                      | Notes                                                              |
+| --- | ---------------------------- | ------------------------------------------------------------------ |
+| ✅  | Email + password auth        | Register, login, forgot password, account lockout                  |
+| ✅  | Google & GitHub OAuth        | Toggle on/off from admin panel                                     |
+| ✅  | Apple & Facebook OAuth       | Toggle on/off from admin panel                                     |
+| ✅  | Magic links                  | Passwordless email login (15-min TTL)                              |
+| ✅  | Passkeys / WebAuthn (FIDO2)  | Biometric and hardware key support, resident keys                  |
+| ✅  | TOTP (authenticator app)     | Google Authenticator, 1Password, Authy                             |
+| ✅  | Email OTP                    | One-time codes delivered via email                                 |
+| ✅  | SMS OTP                      | Twilio-backed                                                      |
+| ✅  | WhatsApp & Telegram OTP      | Via Twilio                                                         |
+| ✅  | Session management           | List active sessions, revoke any, device fingerprinting            |
+| ✅  | PASETO v4 access tokens      | AES-256-GCM signed; no JWT footguns                                |
+| ✅  | Refresh tokens               | Long-lived, hashed, rotated on use                                 |
+| ✅  | RBAC + ABAC                  | Roles, permissions, JIT privilege escalation                       |
+| ✅  | Continuous access evaluation | Re-verification challenges, session re-check after sensitive ops   |
+| ✅  | Anomaly detection            | Flag unusual login location, time, device                          |
+| ✅  | Rate limiting                | Per-IP, Redis-backed with in-memory fallback                       |
+| ✅  | OIDC provider                | Full OpenID Connect server                                         |
+| ✅  | SAML 2.0 SSO                 | SP-initiated SSO for Okta, Azure AD, Google Workspace              |
+| ✅  | SCIM 2.0                     | Auto-provision/deprovision users from IdP                          |
+| ✅  | LDAP / Active Directory sync |                                                                    |
+| ✅  | Organizations & teams        | Workspaces, invite flows, org roles, transfer ownership            |
+| ✅  | Custom org roles             | Fine-grained resource permissions defined per org                  |
+| ✅  | API key management           | Named keys, SHA-256 hashed, scopes, per-user or per-org, revoke    |
+| ✅  | Stripe billing               | Checkout, customer portal, webhook handler                         |
+| ✅  | Plan feature gates           | `requirePlan()` middleware (free / pro / enterprise)               |
+| ✅  | Billing dashboard            | Plan cards, Stripe checkout, manage subscription button            |
+| ✅  | User dashboard               | Profile, security, sessions, orgs, API keys, billing               |
+| ✅  | Admin panel                  | Users, sessions, audit log, auth toggles — at `/admin`             |
+| ✅  | Notification center          | Bell icon, SSE real-time delivery                                  |
+| ✅  | Notification preferences     | Users choose which notifications they receive                      |
+| ✅  | Unsubscribe tokens           | One-click CAN-SPAM unsubscribe with HMAC-SHA256 tokens             |
+| ✅  | Email queue                  | BullMQ + Redis — non-blocking transactional delivery               |
+| ✅  | Avatar upload                | JPEG / PNG / GIF / WebP, 5 MB limit                                |
+| ✅  | In-app NPS / feedback widget | Thumbs up/down with per-feature context                            |
+| ✅  | Help center                  | `/help` searchable FAQ with category filter                        |
+| ✅  | Onboarding setup checklist   | Dismissable progress widget on dashboard                           |
+| ✅  | Blog + Changelog             | Static pages at `/blog` and `/changelog`                           |
+| ✅  | Analytics                    | Plausible and GA4 with consent gate                                |
+| ✅  | Sentry                       | Error boundaries + server-side exception capture                   |
+| ✅  | i18n                         | next-intl, locale detection, language switcher (EN / ES / FR)      |
+| ✅  | Data retention               | Auto-purge audit logs, sessions, OTPs after configurable intervals |
+| ✅  | Audit log                    | Immutable event trail to Elasticsearch                             |
+| ✅  | Prometheus metrics           | `/metrics` endpoint                                                |
+| ✅  | OpenTelemetry tracing        | OTLP exporter, auto-instrumentation                                |
+| ✅  | Dark mode                    | System preference + manual override, persisted                     |
+| ✅  | Toast notifications          | Global context for success / error feedback                        |
+| ✅  | Loading skeletons            | Skeleton screens for better perceived performance                  |
+| ✅  | Mobile-responsive            | All pages usable on phone                                          |
+| ✅  | PWA manifest                 | `manifest.json`, service worker, installable on mobile             |
+| ✅  | Cookie consent               | GDPR-compliant accept / reject banner                              |
+| ✅  | Privacy policy + Terms       | Content driven by `NEXT_PUBLIC_*` env vars                         |
+| ✅  | GDPR export + deletion       | "Export my data" JSON + 30-day soft-delete grace period            |
+| ✅  | Docker Compose               | Full stack in one command                                          |
+| ✅  | GitHub Actions CI            | Lint + type-check + test + UI build on every push                  |
+| ✅  | Railway / Render deploy      | One-click deploy buttons in README                                 |
+| ✅  | Secret rotation              | Zero-downtime procedure documented in README                       |
 
 ---
 
-## Ports at a glance
+## Quick start
 
-| Service               | URL                         |
-| --------------------- | --------------------------- |
-| API (Hono)            | http://localhost:3000       |
-| App + Admin (Next.js) | http://localhost:3001       |
-| Admin panel           | http://localhost:3001/admin |
-| API docs (Swagger)    | http://localhost:3000/docs  |
-| PostgreSQL            | localhost:5432              |
-| Redis                 | localhost:6379              |
-| Elasticsearch         | http://localhost:9200       |
-| Kibana                | http://localhost:5601       |
-
----
-
-## Step-by-step: running the project
-
-### Option A — Docker (recommended, zero setup)
+### Option A — Docker (recommended, zero local setup)
 
 **Prerequisites:** Docker Desktop installed and running.
 
 ```bash
-# 1. Clone the saas-starter branch
-git clone https://github.com/ALFAMAS/zeroauth -b saas-starter my-saas
-cd my-saas
+# Clone
+git clone https://github.com/ALFAMAS/zeroauth my-saas && cd my-saas
 
-# 2. Generate two random 32-byte secrets
+# Generate secrets
 openssl rand -hex 32   # copy → TOKEN_SECRET_HEX
 openssl rand -hex 32   # copy → CSFLE_MASTER_KEY_HEX
 
-# 3. Create your .env file
+# Configure
 cp .env.example .env
-# Open .env and fill in the two keys above + any OAuth credentials
+nano .env   # paste in the two secrets above
 
-# 4. Start everything
+# Start full stack
 docker compose up -d
 
-# 5. Watch the logs until the API is healthy
+# Tail logs until healthy
 docker compose logs -f zeroauth
-# You should see: "Server listening on http://localhost:3000"
+# Look for: Server listening on http://localhost:3000
 ```
 
-Then open http://localhost:3001 — you'll see the landing page.
+App: http://localhost:3001 · API: http://localhost:3000 · Admin: http://localhost:3001/admin
 
-To stop: `docker compose down`
-To wipe data: `docker compose down -v`
+Stop: `docker compose down` · Wipe all data: `docker compose down -v`
 
 ---
 
-### Option B — Local development (no Docker)
+### Option B — Local dev (no Docker)
 
-**Prerequisites:**
-
-- Node.js 18+ (check: `node -v`) — or Bun 1.0+
-- PostgreSQL 15+ running locally — or use a hosted database (Supabase, Neon, etc.)
-- Redis 7 running locally (optional, falls back to in-memory rate limiting)
+**Prerequisites:** Node.js 20+ or Bun 1.x · PostgreSQL 15+ · Redis 7 (optional, falls back to in-memory rate limiting)
 
 ```bash
-# 1. Clone
-git clone https://github.com/ALFAMAS/zeroauth my-saas
-cd my-saas
-
-# 2. Install all dependencies (installs root deps + packages/ui workspace)
+git clone https://github.com/ALFAMAS/zeroauth my-saas && cd my-saas
 bun install
-# or: npm install
-
-# 3. Generate secrets
-openssl rand -hex 32   # → TOKEN_SECRET_HEX
-openssl rand -hex 32   # → CSFLE_MASTER_KEY_HEX
-
-# 4. Create .env
 cp .env.example .env
+# Edit .env — minimum required: DATABASE_URL, TOKEN_SECRET_HEX, CSFLE_MASTER_KEY_HEX
+bun run db:migrate
+bun run dev        # starts API (port 3000) + UI (port 3001) with hot reload
 ```
 
-Edit `.env` — minimum required:
-
-```bash
-TOKEN_SECRET_HEX=<your-key>
-CSFLE_MASTER_KEY_HEX=<your-key>
-DATABASE_URL=postgresql://user:password@localhost:5432/zeroauth
-```
-
-```bash
-# 6. Start API + UI together
-npm run dev
-```
-
-This starts:
-
-- **API** on http://localhost:3000 (with hot reload)
-- **UI** on http://localhost:3001 (with hot reload)
-
-To run them separately: `npm run dev:api` / `npm run dev:ui`
+Individual processes: `bun run dev:api` · `bun run dev:ui`
 
 ---
 
-### Step 7 — Create your first admin user
-
-Once the API is running:
+### Create your first admin
 
 ```bash
-# Register an account
+# Register
 curl -X POST http://localhost:3000/auth/register \
   -H "Content-Type: application/json" \
   -d '{"email":"admin@example.com","password":"Admin123!","displayName":"Admin"}'
+
+# Grant admin role (Docker)
+docker exec -it zeroauth-postgres psql -U zeroauth -d zeroauth \
+  -c "UPDATE users SET roles = array_append(roles, 'admin') WHERE email = 'admin@example.com';"
+
+# Grant admin role (local)
+psql -U postgres -d zeroauth \
+  -c "UPDATE users SET roles = array_append(roles, 'admin') WHERE email = 'admin@example.com';"
 ```
 
-Grant admin role in PostgreSQL:
-
-```bash
-# If using Docker:
-docker exec -it zeroauth-postgres psql -U zeroauth -d zeroauth
-
-# If local:
-psql -U postgres -d zeroauth
-
-# Then in the shell:
-UPDATE users SET roles = array_append(roles, 'admin')
-WHERE email = 'admin@example.com';
-```
-
-Now log in at http://localhost:3001/login — the admin panel is at http://localhost:3001/admin.
-
----
-
-### Step 8 — Enable auth methods from the admin panel
-
-1. Go to http://localhost:3001/admin/settings/auth
-2. Toggle on any auth methods you want (Google, GitHub, Magic Links, Passkeys, TOTP)
-3. For OAuth: add credentials to `.env` and restart the API
-4. For email features (magic links, OTP): set `MAIL_*` vars in `.env`
+Log in at http://localhost:3001/login · Admin panel: http://localhost:3001/admin
 
 ---
 
 ## Environment variables
 
-```bash
-# ── Required ───────────────────────────────────────────────────────────────────
-TOKEN_SECRET_HEX=           # openssl rand -hex 32
-CSFLE_MASTER_KEY_HEX=       # openssl rand -hex 32
-DATABASE_URL=postgresql://zeroauth:password@localhost:5432/zeroauth
+### API (`/.env`)
 
-# ── OAuth (leave blank to disable) ─────────────────────────────────────────────
-OAUTH_GOOGLE_CLIENT_ID=
-OAUTH_GOOGLE_CLIENT_SECRET=
-OAUTH_GOOGLE_REDIRECT_URI=http://localhost:3000/auth/oauth/google/callback
+| Variable                      | Required | Default               | Description                                            |
+| ----------------------------- | -------- | --------------------- | ------------------------------------------------------ |
+| `TOKEN_SECRET_HEX`            | ✅       | —                     | 32-byte hex for PASETO tokens (`openssl rand -hex 32`) |
+| `CSFLE_MASTER_KEY_HEX`        | ✅       | —                     | 32-byte hex for field encryption                       |
+| `DATABASE_URL`                | ✅       | —                     | PostgreSQL connection string                           |
+| `REDIS_URI`                   |          | —                     | Redis URL (falls back to in-memory)                    |
+| `PORT`                        |          | 3000                  | API listen port                                        |
+| `NODE_ENV`                    |          | development           | `development` or `production`                          |
+| `API_BASE_URL`                |          | http://localhost:3000 | Public API URL                                         |
+| `APP_URL`                     |          | http://localhost:3001 | Public frontend URL                                    |
+| `UNSUBSCRIBE_SECRET`          |          | —                     | 32+ char secret for CAN-SPAM unsubscribe tokens        |
+| `SENTRY_DSN`                  |          | —                     | Sentry DSN for server-side error capture               |
+| `STRIPE_SECRET_KEY`           |          | —                     | Stripe secret key (`sk_live_…` or `sk_test_…`)         |
+| `STRIPE_WEBHOOK_SECRET`       |          | —                     | Stripe webhook signing secret (`whsec_…`)              |
+| `STRIPE_PRODUCT_PRO`          |          | —                     | Stripe product ID for the Pro plan                     |
+| `STRIPE_PRODUCT_ENTERPRISE`   |          | —                     | Stripe product ID for the Enterprise plan              |
+| `OAUTH_GOOGLE_CLIENT_ID`      |          | —                     | Google OAuth app client ID                             |
+| `OAUTH_GOOGLE_CLIENT_SECRET`  |          | —                     | Google OAuth app client secret                         |
+| `OAUTH_GITHUB_CLIENT_ID`      |          | —                     | GitHub OAuth app client ID                             |
+| `OAUTH_GITHUB_CLIENT_SECRET`  |          | —                     | GitHub OAuth app client secret                         |
+| `MAIL_HOST`                   |          | —                     | SMTP host (e.g. `smtp.gmail.com`)                      |
+| `MAIL_PORT`                   |          | 587                   | SMTP port                                              |
+| `MAIL_USER`                   |          | —                     | SMTP username                                          |
+| `MAIL_PASSWORD`               |          | —                     | SMTP password                                          |
+| `MAIL_FROM`                   |          | —                     | Sender address (`noreply@yourapp.com`)                 |
+| `TWILIO_ACCOUNT_SID`          |          | —                     | SMS / WhatsApp / Telegram OTP                          |
+| `TWILIO_AUTH_TOKEN`           |          | —                     | SMS / WhatsApp / Telegram OTP                          |
+| `TWILIO_PHONE_NUMBER`         |          | —                     | Twilio sender number                                   |
+| `WEBAUTHN_RP_ID`              |          | localhost             | Must match your domain in production                   |
+| `WEBAUTHN_RP_ORIGINS`         |          | http://localhost:3000 | Allowed WebAuthn origins                               |
+| `ELASTICSEARCH_HOST`          |          | localhost             | Audit log storage                                      |
+| `OTEL_ENABLED`                |          | true                  | Set `false` to disable OpenTelemetry                   |
+| `OTEL_EXPORTER_OTLP_ENDPOINT` |          | http://localhost:4318 | OTLP trace exporter endpoint                           |
+| `LOG_LEVEL`                   |          | info                  | `debug` / `info` / `warn` / `error`                    |
 
-OAUTH_GITHUB_CLIENT_ID=
-OAUTH_GITHUB_CLIENT_SECRET=
-OAUTH_GITHUB_REDIRECT_URI=http://localhost:3000/auth/oauth/github/callback
+### Frontend (`/packages/ui/.env.local`)
 
-# ── Email — magic links + OTP (uses nodemailer) ─────────────────────────────────
-MAIL_HOST=smtp.gmail.com
-MAIL_PORT=587
-MAIL_USER=
-MAIL_PASSWORD=
-MAIL_FROM=noreply@yourapp.com
+| Variable                        | Description                                       |
+| ------------------------------- | ------------------------------------------------- |
+| `NEXT_PUBLIC_ZEROAUTH_URL`      | Backend API base URL — no trailing slash          |
+| `NEXT_PUBLIC_APP_NAME`          | App name shown in UI, emails, and meta tags       |
+| `NEXT_PUBLIC_PLAUSIBLE_DOMAIN`  | Plausible Analytics domain (consent-gated)        |
+| `NEXT_PUBLIC_GA_MEASUREMENT_ID` | Google Analytics 4 measurement ID (consent-gated) |
+| `NEXT_PUBLIC_SENTRY_DSN`        | Sentry DSN for browser error capture              |
+| `SENTRY_DSN`                    | Sentry DSN for Next.js server components          |
+| `NEXT_PUBLIC_STRIPE_PRICE_PRO`  | Stripe price ID displayed on the billing page     |
 
-# ── SMS OTP (requires Twilio account) ──────────────────────────────────────────
-TWILIO_ACCOUNT_SID=
-TWILIO_AUTH_TOKEN=
-TWILIO_PHONE_NUMBER=
-
-# ── Redis — distributed rate limiting ──────────────────────────────────────────
-REDIS_URI=redis://localhost:6379
-
-# ── App ────────────────────────────────────────────────────────────────────────
-APP_NAME=My SaaS
-APP_URL=http://localhost:3001
-PORT=3000
-NODE_ENV=development
-```
+Full list with comments: [`.env.example`](./.env.example) · [`packages/ui/.env.example`](./packages/ui/.env.example)
 
 ---
 
@@ -205,558 +198,768 @@ NODE_ENV=development
 
 ```
 .
-├── src/                            # API backend (Hono + TypeScript)
+├── src/                                    # API backend (Hono + TypeScript)
 │   ├── api/
-│   │   ├── server.ts               # Hono app entry point
+│   │   ├── server.ts                       # Hono app entry point, route mounting
 │   │   └── routes/
-│   │       ├── auth.routes.ts      # Register, login, OAuth, token refresh
-│   │       ├── magic-link.routes.ts
-│   │       ├── mfa.routes.ts       # TOTP, email/SMS OTP
-│   │       ├── passkey.routes.ts   # WebAuthn register + authenticate
-│   │       ├── session.routes.ts   # List + revoke sessions
-│   │       └── admin.routes.ts     # Users CRUD, settings, stats
+│   │       ├── auth.routes.ts              # Register, login, OAuth, token refresh
+│   │       ├── magic-link.routes.ts        # Magic link send + verify
+│   │       ├── password-reset.routes.ts    # Forgot / reset password
+│   │       ├── mfa.routes.ts               # TOTP, email/SMS OTP
+│   │       ├── passkey.routes.ts           # WebAuthn register + authenticate
+│   │       ├── session.routes.ts           # List + revoke sessions
+│   │       ├── notification.routes.ts      # Notification center + SSE + preferences
+│   │       ├── unsubscribe.routes.ts       # Email unsubscribe (CAN-SPAM)
+│   │       ├── org.routes.ts               # Organizations, members, invites, roles
+│   │       ├── api-keys.routes.ts          # API key CRUD
+│   │       ├── billing.routes.ts           # Stripe checkout + portal + subscription
+│   │       ├── gdpr.routes.ts              # Data export + account deletion
+│   │       ├── feedback.routes.ts          # In-app NPS / thumbs feedback
+│   │       ├── tenant.routes.ts            # Tenant / workspace management
+│   │       ├── anomaly.routes.ts           # Anomaly detection events
+│   │       ├── verification.routes.ts      # Continuous re-verification challenges
+│   │       ├── workload.routes.ts          # Background job status
+│   │       └── admin.routes.ts             # Users CRUD, settings, stats (admin only)
 │   ├── db/
-│   │   ├── schema.ts               # Drizzle ORM schema (PostgreSQL)
-│   │   └── index.ts                # Database connection
+│   │   ├── schema.ts                       # Drizzle ORM schema (all tables)
+│   │   └── index.ts                        # PostgreSQL connection pool
+│   ├── middleware/
+│   │   ├── auth.ts                         # Token verification, c.set("user")
+│   │   ├── apiKeyAuth.ts                   # API key Bearer / X-API-Key auth
+│   │   ├── requirePlan.ts                  # Plan feature gate middleware
+│   │   ├── accountLockout.ts               # Failed-login tracking + auto-unlock
+│   │   ├── rateLimiting.ts                 # Per-IP sliding window (Redis / memory)
+│   │   └── continuousVerification.ts       # Re-verification session tracking
 │   ├── services/
-│   │   └── magicLink.service.ts
-│   └── middleware/
-│       ├── auth.ts                 # Token verification, req.user
-│       ├── accountLockout.ts       # Failed-login tracking
-│       └── rateLimiting.ts         # Per-IP sliding window
+│   │   ├── token.service.ts                # PASETO sign + verify
+│   │   ├── magicLink.service.ts            # Magic link generation + delivery
+│   │   ├── anomalyDetection.ts             # Login anomaly scoring
+│   │   └── unsubscribe.service.ts          # HMAC unsubscribe token logic
+│   ├── models/
+│   │   └── settings.model.ts               # App settings (cached from DB)
+│   ├── mfa/
+│   │   ├── totp.ts                         # TOTP helpers (otpauth)
+│   │   └── resident-keys.ts                # FIDO2 discoverable credential helpers
+│   ├── shared/
+│   │   ├── plans.ts                        # Plan config (free/pro/enterprise) + feature gates
+│   │   ├── permissions.ts                  # Org permission constants
+│   │   └── types.ts                        # HonoEnv and shared TypeScript types
+│   ├── telemetry/
+│   │   └── tracer.ts                       # OpenTelemetry SDK init + withSpan helper
+│   └── logger/
+│       └── index.ts                        # Structured logger
 ├── packages/
-│   └── ui/                         # Single Next.js app (port 3001)
-│       └── src/app/
-│           ├── page.tsx            # Landing page (hero, features, pricing)
-│           ├── (auth)/             # /login /register /magic-link /callback
-│           ├── dashboard/          # /dashboard + profile, security, sessions
-│           └── admin/              # /admin — admin panel (same app, route-guarded)
-│               ├── page.tsx        # Stats dashboard
-│               ├── users/          # User management + detail view
-│               ├── sessions/       # Active session browser
-│               ├── audit/          # Audit log viewer
-│               └── settings/
-│                   ├── auth/       # ⭐ Auth method toggle panel
-│                   └── general/    # App name, URL, branding
-├── docker-compose.yml
-├── .env.example
-└── STARTER.md                      # This file
+│   └── ui/                                 # Next.js 15.3 / React 19 (port 3001)
+│       ├── messages/                       # i18n JSON files (en.json, es.json, fr.json)
+│       ├── sentry.client.config.ts         # Sentry browser config
+│       ├── sentry.server.config.ts         # Sentry server config
+│       ├── sentry.edge.config.ts           # Sentry edge config
+│       └── src/
+│           ├── app/
+│           │   ├── layout.tsx              # Root layout — fonts, providers, Sentry
+│           │   ├── page.tsx                # Landing page (hero, features, pricing)
+│           │   ├── (auth)/                 # /login /register /forgot-password /callback
+│           │   ├── invite/[token]/         # Org invite acceptance
+│           │   ├── dashboard/              # /dashboard — user-facing pages
+│           │   │   ├── page.tsx            # Dashboard overview + SetupChecklist
+│           │   │   ├── profile/            # Display name, avatar, language
+│           │   │   ├── security/           # Password, MFA, passkeys
+│           │   │   ├── sessions/           # Active sessions list + revoke
+│           │   │   ├── account/            # GDPR export + account deletion
+│           │   │   ├── settings/           # Notification preferences
+│           │   │   ├── organizations/      # Org list + org detail + settings
+│           │   │   ├── api-keys/           # API key management UI
+│           │   │   └── billing/            # Plan cards, checkout, manage subscription
+│           │   ├── admin/                  # /admin — guarded by admin role
+│           │   │   ├── page.tsx            # Stats dashboard
+│           │   │   ├── users/              # User list + detail view
+│           │   │   ├── sessions/           # Active session browser
+│           │   │   ├── audit/              # Audit log viewer
+│           │   │   └── settings/
+│           │   │       ├── auth/           # Auth method toggle panel
+│           │   │       └── general/        # App name, URL, branding
+│           │   ├── blog/                   # /blog — index + post pages
+│           │   ├── changelog/              # /changelog — versioned release notes
+│           │   ├── help/                   # /help — searchable FAQ
+│           │   ├── privacy/                # /privacy
+│           │   └── terms/                  # /terms
+│           ├── components/
+│           │   ├── SetupChecklist.tsx      # Onboarding progress widget
+│           │   ├── FeedbackWidget.tsx      # NPS / thumbs feedback
+│           │   ├── LocaleSwitcher.tsx      # Language dropdown
+│           │   ├── NotificationBell.tsx    # Bell icon + dropdown
+│           │   ├── CookieConsent.tsx       # GDPR consent banner
+│           │   └── ErrorBoundary.tsx       # React error boundary (Sentry)
+│           └── data/
+│               ├── blog-posts.ts           # Blog post metadata + content
+│               ├── changelog.ts            # Release notes entries
+│               └── faq.ts                  # Help center FAQ items
+├── src/__tests__/                          # Vitest unit + integration tests
+├── .github/workflows/ci.yml               # CI — lint, type-check, test, UI build
+├── docker-compose.yml                      # Full stack (API + UI + PG + Redis + ES)
+├── Dockerfile                              # Multi-stage production image
+├── drizzle.config.ts                       # Drizzle ORM config
+├── .env.example                            # All API env vars with descriptions
+└── README.md                               # Deployment guide + API reference
 ```
 
 ---
 
-## Customizing the app
+## Customizing
 
-### Set your brand
+### Rename the app
 
-All branding is driven by `NEXT_PUBLIC_*` env vars in `packages/ui/.env.local`. No code changes needed:
+Replace `ZeroAuth` in these files:
 
-```bash
-NEXT_PUBLIC_APP_NAME=MyStartup
-NEXT_PUBLIC_APP_LOGO_LETTER=M
-NEXT_PUBLIC_APP_LOGO_COLOR=#6366f1
-NEXT_PUBLIC_HERO_TITLE="Ship your SaaS"
-NEXT_PUBLIC_HERO_SUBTITLE="in days, not months"
+```
+packages/ui/src/app/layout.tsx               ← <title> and metadata
+packages/ui/src/app/page.tsx                 ← landing page hero + navbar
+packages/ui/src/app/dashboard/layout.tsx
+packages/ui/src/app/admin/layout.tsx
 ```
 
-See the full list in `packages/ui/.env.example`.
+Or set `NEXT_PUBLIC_APP_NAME` in `packages/ui/.env.local` — most UI strings read from this.
 
-### Customize the landing page
+### Change the brand color
 
-Edit `packages/ui/src/app/page.tsx` — it's plain Tailwind, no component library.
-Change the hero headline, feature cards, pricing tiers, and footer.
+Edit `packages/ui/tailwind.config.js`:
 
-### Add your own API routes
+```js
+colors: {
+  brand: "#your-hex",   // default: #6366f1 (indigo)
+}
+```
+
+Then replace `indigo-` with `brand-` across the UI files.
+
+### Add an API route
 
 ```typescript
 // src/api/server.ts
 import myRoutes from "./routes/my.routes";
-app.use("/api/my-feature", authMiddleware, myRoutes);
+app.route("/my-feature", authMiddleware, myRoutes);
 ```
 
-### Access the logged-in user
+### Read the current user in a route
 
 ```typescript
-// inside any route handler after authMiddleware
-const userId = req.user.id;
-const email = req.user.email;
-const isAdmin = req.user.roles.includes("admin");
+// Any handler after authMiddleware or apiKeyAuth
+const user = c.get("user");
+const isAdmin = user.roles.includes("admin");
+const session = c.get("session");
 ```
+
+### Gate a route by plan
+
+```typescript
+import { requirePlan } from "../../middleware/requirePlan";
+
+// Blocks free-tier users with 403 PLAN_REQUIRED
+router.get("/advanced-feature", authMiddleware, requirePlan("advancedAnalytics"), async (c) => {
+  // ...
+});
+```
+
+Plans and their feature flags live in `src/shared/plans.ts`.
+
+### Add a custom org role
+
+```
+POST /orgs/:orgId/roles
+{
+  "name": "Billing Manager",
+  "permissions": ["billing:view", "billing:manage"]
+}
+```
+
+Available permissions: `members:read`, `members:invite`, `members:manage`, `billing:view`, `billing:manage`, `settings:view`, `settings:manage`, `audit:view`, `roles:manage`, `invites:manage`.
+
+### Add a language
+
+1. Create `packages/ui/messages/{locale}.json` (copy from `en.json`)
+2. Add the locale to `SUPPORTED_LOCALES` in `src/i18n/request.ts`
+3. Add the entry to the `LOCALES` array in `components/LocaleSwitcher.tsx`
+
+### Toggle auth methods
+
+Admin panel → **Auth Settings** → flip any toggle. Changes are live immediately — no restart needed.
+
+### Enable error monitoring
+
+Set `SENTRY_DSN` (backend) and `NEXT_PUBLIC_SENTRY_DSN` (frontend). The `ErrorBoundary` in `layout.tsx` automatically captures unhandled React errors.
 
 ---
 
-## Key API endpoints
+## Tests
 
+```bash
+bun run test              # run all tests (Vitest)
+bun run test:watch        # watch mode
+bun run test:coverage     # with V8 coverage report
 ```
-POST   /auth/register
-POST   /auth/login
-POST   /auth/token/refresh
-POST   /auth/logout
-GET    /auth/me                             (auth required)
 
-GET    /auth/oauth/google                  → redirects to Google
-GET    /auth/oauth/google/callback
-GET    /auth/oauth/github
-GET    /auth/oauth/github/callback
-
-POST   /auth/magic-link/send
-POST   /auth/magic-link/verify
-
-POST   /auth/passkey/register/options      (auth required)
-POST   /auth/passkey/register/verify       (auth required)
-POST   /auth/passkey/authenticate/options
-POST   /auth/passkey/authenticate/verify
-
-POST   /auth/mfa/totp/setup                (auth required)
-POST   /auth/mfa/totp/verify               (auth required)
-POST   /auth/mfa/otp/send                  (auth required)
-POST   /auth/mfa/otp/verify                (auth required)
-
-GET    /sessions                           (auth required)
-DELETE /sessions/:id                       (auth required)
-
-GET    /admin/stats                        (admin only)
-GET    /admin/users                        (admin only)
-GET    /admin/users/:id                    (admin only)
-PUT    /admin/users/:id                    (admin only)
-DELETE /admin/users/:id                    (admin only)
-POST   /admin/users/:id/logout             (admin only)
-GET    /admin/settings                     (admin only)
-PUT    /admin/settings                     (admin only)
-
-GET    /healthz
-GET    /docs                               (Swagger UI — dev only)
-```
+Tests live in `src/__tests__/`. CI runs them on every push to `main`.
 
 ---
 
-## Git hooks
+## Update log
 
-| Hook          | Runs                  | What it does                                                                     |
-| ------------- | --------------------- | -------------------------------------------------------------------------------- |
-| `pre-commit`  | Before every commit   | Prettier format, ESLint fix, TypeScript type-check, secret scan, graphify update |
-| `commit-msg`  | After message entered | Validates conventional commit format                                             |
-| `pre-push`    | Before git push       | Runs full test suite, warns on console.log                                       |
-| `post-commit` | After commit          | Shows commit summary, reminds to push                                            |
+| Version | Date    | What changed                                                                                                |
+| ------- | ------- | ----------------------------------------------------------------------------------------------------------- |
+| 1.0     | 2025-01 | Email/password, OAuth (Google/GitHub), magic links, TOTP, session management, admin panel                   |
+| 1.1     | 2025-02 | Passkeys / WebAuthn, RBAC/ABAC, continuous access evaluation, anomaly detection                             |
+| 1.2     | 2025-03 | Notification center (SSE), NPS feedback widget, BullMQ email queue, unsubscribe tokens                      |
+| 1.3     | 2025-04 | SAML 2.0 SSO, SCIM 2.0, LDAP sync, OIDC provider, org custom roles                                          |
+| 1.4     | 2025-05 | i18n (next-intl EN/ES/FR), Sentry, blog/changelog, analytics consent, PWA manifest                          |
+| 1.5     | 2025-06 | API key management, Stripe billing + webhooks, plan feature gates, help center, onboarding checklist        |
+| 1.6     | 2025-06 | Package upgrades: Next.js 15.3, React 19, @simplewebauthn/server v13, OTel resources v2, Stripe v22, Zod v4 |
 
 ---
 
-## SaaS roadmap — what to build next
+## Roadmap
 
-This starter handles auth end-to-end. Everything below is what a real SaaS product needs on top of it.
+Items are sorted by business impact and urgency. Complete P0 before launch; P1 within the first month; P2 within the first quarter.
 
-### 🔥 Priority — Build These First
+---
 
-The items below should be tackled before anything else. They cover the foundational UX, compliance, and infrastructure every SaaS needs regardless of niche.
+### P0 — Launch blockers
 
-**UI & UX**
+Must complete before going live with paying customers.
 
-- [x] Dark / light mode toggle — system preference detection + manual override, persisted
-- [x] Toast notification system — global toast context for success/error feedback
-- [x] Loading skeletons — skeleton screens instead of spinners
-- [x] Mobile-responsive dashboard — all pages usable on phone
-- [x] Keyboard navigation — focus rings, skip-to-main, ARIA roles on modals and dropdowns
-- [x] Internationalization (i18n) — next-intl with English default, ready for translations
+**Infrastructure**
 
-**Mobile & PWA**
+- [ ] DB backup — daily PostgreSQL dump to S3 with 30-day retention
+- [ ] Environment parity — staging environment that mirrors production config
+- [ ] Health status page — public `status.yourapp.com` powered by a simple uptime check
 
-- [x] Progressive Web App (PWA) — `manifest.json`, service worker, "Add to Home Screen"
-- [ ] Offline support — cache dashboard shell; queue writes offline, sync on reconnect
-- [ ] Deep linking — invite and magic-link URLs open correctly in web and native app
+**Security**
 
-**In-app Notifications**
+- [ ] HaveIBeenPwned check — query HIBP k-anonymity API on register and password change; warn or block compromised passwords
+- [ ] Login notification email — send email on new-device login with "Not you? Revoke this session" CTA
+- [ ] Account takeover detection — flag password reset + email change within a short window; require re-auth
 
-- [x] Notification model — per-user with `read`/`unread` state
-- [x] Bell icon + dropdown — notification center UI in dashboard nav
-- [x] Mark as read — single and bulk
-- [x] Real-time delivery — Server-Sent Events (SSE) push
-- [x] Email fallback — deliver via email if user hasn't visited in N days
+**Billing**
 
-**File Storage & Uploads**
+- [ ] Per-org billing — one Stripe subscription per organization (not just per user)
+- [ ] Trial period — 14-day free trial with automated expiry email and upgrade prompt
 
-- [x] Avatar upload — resize + optimize, store to S3/R2
-- [ ] File attachments — per-feature uploads with type/size validation
-- [ ] S3-compatible storage — AWS S3, Cloudflare R2, or MinIO for local dev
-- [ ] Pre-signed URLs — secure direct-to-storage uploads from the browser
-- [ ] CDN delivery — serve files from edge for fast global access
+---
 
-**Organizations & Teams**
+### P1 — Core growth
 
-- [x] Workspace model — one org → many members, one user → many orgs
-- [x] Invite by email — time-limited signed invite links
-- [x] Org roles — owner, admin, member, viewer with permission checks
-- [x] Transfer ownership — reassign org owner with confirmation flow
-- [x] Org settings page — name, logo, slug, billing contact
-- [ ] Per-org billing — one Stripe subscription per organization
-- [x] Remove / leave org — with safety checks (can't remove last owner)
-- [x] Custom org roles & permissions — fine-grained resource permissions defined per org
-- [x] Per-tenant branding — all UI strings/colors configurable via `NEXT_PUBLIC_*` env vars
+Complete within the first month after launch.
 
-**Email**
+**Billing & Revenue**
 
-- [x] Transactional email templates — welcome, verify, invite, receipt, password reset, trial expiry
-- [x] Inline-styled HTML email templates
-- [x] Email queue — Bull/BullMQ so sending never blocks a request
-- [x] Notification preferences — users choose which emails they receive
-- [x] Unsubscribe tokens — one-click unsubscribe with signed tokens (CAN-SPAM)
+- [ ] Upgrade/downgrade flows — proration, immediate vs end-of-cycle; confirm what user gains/loses
+- [ ] Usage counters — track seats, API calls, storage per billing period against plan limits
+- [ ] Dunning management — retry failed payments on D3 / D7 / D14; escalating email sequence with payment link
+- [ ] Cancellation flow — offboarding survey before cancel (reason, competitor?); offer pause or discount; gather churn data
+- [ ] Win-back campaign — automated email to churned users at D7 / D30 / D90; time-limited discount code
+
+**Admin**
+
+- [ ] Impersonate user — admin can log in as any user for support (creates audit log entry)
+- [ ] Manual plan override — bump a user to Pro, add trial days, apply coupon from admin panel
+- [ ] Revenue dashboard — MRR, ARR, churn rate, failed payments in admin panel
+- [ ] Broadcast email — admin sends announcements to all users or filtered segments
+
+**Observability**
+
+- [ ] Distributed tracing viewer — wire existing OTel instrumentation to Jaeger or Grafana Tempo
+- [ ] Alerting — Slack / PagerDuty alert on error spike or latency breach
+
+---
+
+### P2 — Quality & scale
+
+Complete within the first quarter.
+
+**Developer Experience**
+
+- [ ] User-facing webhooks — endpoint management UI, signed HMAC payloads, delivery logs with retry on 5xx
+- [ ] Upgrade prompt component — consistent "upgrade to Pro" modal / banner shown whenever a plan gate blocks an action
+- [ ] Feature flag management UI — admin can toggle rollout flags per-user or globally
+- [ ] CSV export — every admin list/table has an Export button; stream large exports
+
+**PWA & Mobile**
+
+- [ ] Offline support — service worker caches dashboard shell; queue writes when offline, sync on reconnect
+- [ ] Deep linking — `/invite/:token` and `/magic-link/verify` open correctly in both browser and PWA contexts
+- [ ] Web push notifications — service worker + Push API; prompt at the right moment
+
+**Onboarding & UX**
+
+- [ ] Empty states — every list/table has a helpful empty state with a clear CTA
+- [ ] Product tour — lightweight tooltip walkthrough on first login (Shepherd.js or Driver.js)
+- [ ] Welcome email — sent immediately after registration with quick-start links
+
+**i18n Completeness**
+
+- [ ] Locale-aware formatting — use `Intl.DateTimeFormat`, `Intl.NumberFormat`, `Intl.RelativeTimeFormat` everywhere; no manual date string building
+- [ ] Locale-aware email templates — send transactional emails in the user's stored locale
+- [ ] RTL layout support — `dir="rtl"` on `<html>`; audit CSS for absolute positioning that breaks in RTL
+- [ ] Missing-translation fallback — always fall back to English rather than showing a key string; log missing keys in dev
 
 **Customer Support**
 
 - [ ] Live chat widget — Crisp, Intercom, or Tawk.to embed in dashboard layout
-- [x] Help center — `/help` searchable FAQ with category filter and full-text search
-- [x] In-app feedback — thumbs up/down or NPS survey after key actions
 - [ ] Support ticket model — lightweight tickets if you don't want a third-party tool
-
-**Error Monitoring & Observability**
-
-- [x] Sentry — client-side error boundaries + server-side exception capture
-- [ ] Health status page — public `status.yourapp.com` uptime check
-- [ ] Alerting — Elasticsearch watcher or PagerDuty/Slack on error spike or latency breach
-- [ ] Distributed tracing — OpenTelemetry already wired; add Jaeger/Tempo trace viewer
-
-**SEO & Marketing**
-
-- [x] Blog or changelog — MDX pages under `/blog` and `/changelog`
-- [x] Proper meta tags — `<title>`, Open Graph, Twitter cards on every page
-- [x] Sitemap.xml + robots.txt — generated at build time from Next.js
-- [x] Cookie consent banner — GDPR-compliant accept/reject
-- [x] Analytics script — Plausible or Google Analytics with consent gate
-
-**Legal & Compliance**
-
-- [x] Privacy policy page — `/privacy` (content driven by `NEXT_PUBLIC_*` env vars)
-- [x] Terms of service page — `/terms` (content driven by `NEXT_PUBLIC_*` env vars)
-- [x] GDPR data export — "Export my data" downloads JSON zip
-- [x] Account deletion — 30-day soft-delete grace period, then purge all PII
-- [x] Data retention policy — auto-purge audit logs and old sessions after N days
-
-**CI/CD & Deployment**
-
-- [x] GitHub Actions — lint + type-check + test + UI build on every PR
-- [x] Docker production build — multi-stage Dockerfile, push to ghcr.io
-- [x] One-click deploy — Railway / Render / Fly.io deploy button in README
-- [ ] Environment parity — staging environment that mirrors production
-- [ ] DB backup — daily PostgreSQL dump to S3 with 30-day retention
-- [x] Secret rotation — documented in README with zero-downtime procedure
-
-**Multi-language (i18n)**
-
-- [x] i18n foundation — install next-intl (or react-i18next); define message namespaces; wrap app in provider
-- [x] Translation file structure — JSON files per locale under `/messages/{locale}.json`; enforce no hardcoded UI strings
-- [x] Locale detection — read `Accept-Language` header on first visit; fallback to stored preference on user profile; cookie-persist choice
-- [x] Language switcher — dropdown in nav and settings page; persists to user profile via API
-- [ ] Locale-aware formatting — use `Intl.DateTimeFormat`, `Intl.NumberFormat`, `Intl.RelativeTimeFormat` everywhere; no manual date string building
-- [ ] RTL layout support — `dir="rtl"` toggle on `<html>`; audit CSS for absolute positioning that breaks in RTL; test with Arabic
-- [ ] Locale-aware email templates — send emails in the user's stored locale; translate subject lines and body
-- [ ] hreflang tags — add `<link rel="alternate" hreflang="…">` to all marketing pages for multilingual SEO
-- [ ] Translation management workflow — Crowdin or Lokalise for translator-facing UI; or keep JSON files in-repo with a contribution guide
-- [ ] Missing translation fallback — always fall back to English rather than showing a key string; log missing keys in dev mode
-
-**Multi-currency & Pricing**
-
-- [ ] Currency detection — infer from IP geolocation on first visit; allow manual override; store preference on user/org profile
-- [ ] Currency switcher UI — dropdown in pricing page, checkout, and billing settings; updates all prices instantly client-side
-- [ ] Stripe multi-currency price objects — create one `Price` per currency per plan in Stripe dashboard; select correct price at checkout by stored currency
-- [ ] Exchange rate integration — fetch daily rates from Open Exchange Rates, Fixer.io, or ECB; cache in Redis with 24 h TTL; never call live on each request
-- [ ] `Intl.NumberFormat` everywhere — format all money values with locale + currency code; no manual `$` prefixes or hardcoded decimal points
-- [ ] Purchasing Power Parity (PPP) — apply automatic regional discount % based on country; show "Local pricing available" banner; use `ppp` npm package or own table
-- [ ] Presentment currency vs settlement — show user their local currency but settle in your base currency (USD/EUR); communicate clearly on invoice
-- [ ] Invoice in customer's currency — generate PDF invoices with the currency and amount the customer actually paid, not the base currency equivalent
-- [ ] Multi-currency admin dashboard — convert all plan values to base currency for MRR/ARR charts using stored exchange rates; show raw currency breakdown table
-- [ ] Currency on org profile — orgs on annual plans lock their currency at signup to prevent arbitrage on renewals
 
 ---
 
-### All Features by Category
+### P3 — Differentiation
+
+Nice-to-have; tackle when the core product is stable and growing.
+
+**Revenue Expansion**
+
+- [ ] Per-org Stripe billing (one subscription per tenant, not per user)
+- [ ] Usage-based upsell nudges — "You've used 80% of your API quota" → in-app + email upgrade prompt
+- [ ] Lifetime deal (LTD) plan type — one payment, no subscription, with usage cap enforcement
+- [ ] Multi-currency pricing — display in user's local currency; Stripe FX handling
+- [ ] Purchasing Power Parity (PPP) — automatic regional discounts by country
+- [ ] Stripe Tax — auto-calculate VAT / GST / sales tax by customer location
+
+**White-labeling & Enterprise**
+
+- [ ] Custom domain per tenant — orgs map `app.theirdomain.com` to the platform
+- [ ] Per-tenant branding — org logo, brand color, and app name override defaults
+- [ ] Custom email domain — org sends transactional email from `noreply@theirdomain.com`
+- [ ] IP allowlist per org — restrict API + dashboard access to specific CIDR ranges
+- [ ] SOC 2 Type II readiness — access control evidence, change management, incident response
+
+**Integrations**
+
+- [ ] Zapier integration — triggers (new user, new payment) and actions (create user, update plan)
+- [ ] Make (Integromat) — share OpenAPI spec to auto-generate module
+- [ ] Slack app — slash commands + DM notifications for key events
+- [ ] HubSpot / Salesforce CRM sync — push signups and plan changes, sync contacts back
+- [ ] Segment.io or Rudderstack — server-side analytics pipeline to any downstream tool
+
+**Loyalty & Growth**
+
+- [ ] Loyalty / rewards system — points, tiers (Bronze → Platinum), redemption catalog
+- [ ] Referral program — unique signed links, attribution, rewards for referrer and referee
+- [ ] Gamification — badges, streak tracking, progress bars, challenges
+- [ ] AI-powered onboarding assistant — chat widget guiding new users through setup
+
+**Mobile**
+
+- [ ] React Native / Expo app — shared auth logic; biometric login (Face ID / fingerprint) via passkeys
+- [ ] Deep universal links — iOS App Clips / Android Instant Apps for invite and magic-link flows
+
+**Analytics & Search**
+
+- [ ] Product analytics dashboard — PostHog or Plausible for feature usage + funnel tracking
+- [ ] Churn prediction score — logistic regression on usage signals; at-risk score in admin
+- [ ] Global command palette — `Cmd+K` search across users, settings, docs, and recent actions
+- [ ] Elasticsearch full-text search — index user content, surface results with highlighting
+
+**Collaboration**
+
+- [ ] Team activity feed — per-org timeline of who did what
+- [ ] @mentions — trigger in-app + email notification
+- [ ] Real-time presence — show which team members are online (WebSocket heartbeat)
+
+---
+
+## All features by category
+
+Comprehensive checklist. Items marked `[x]` are production-ready in the current codebase.
+
+---
+
+### Auth & Identity
+
+- [x] Email + password with account lockout (configurable threshold + auto-unlock)
+- [x] Google, GitHub, Apple, Facebook OAuth (toggle per method from admin)
+- [x] Magic link (passwordless, 15-min TTL, delivered via email)
+- [x] Passkeys / WebAuthn FIDO2 (register, authenticate, resident keys)
+- [x] TOTP (Google Authenticator, Authy, 1Password compatible)
+- [x] Email OTP
+- [x] SMS OTP (Twilio)
+- [x] WhatsApp OTP (Twilio)
+- [x] Telegram OTP (Twilio)
+- [x] PASETO v4 access tokens (AES-256-GCM, 1-hour TTL)
+- [x] Refresh tokens (hashed, rotated on use, long-lived)
+- [x] Session management — list, revoke, device fingerprinting
+- [x] RBAC + ABAC with JIT privilege escalation
+- [x] Continuous access evaluation — re-verification challenges after sensitive ops
+- [x] Anomaly detection — flag unusual login location / time / device
+- [x] Rate limiting — per-IP sliding window, Redis-backed with in-memory fallback
+- [x] OIDC provider — full OpenID Connect server
+- [x] SAML 2.0 SSO — SP-initiated for Okta, Azure AD, Google Workspace
+- [x] SCIM 2.0 — auto-provision / deprovision users from IdP
+- [x] LDAP / Active Directory sync
+- [ ] HaveIBeenPwned check on register / password change
+- [ ] Login notification email — new-device alert with revoke link
+- [ ] Account takeover detection — flag sensitive changes in short window
+
+---
 
 ### Billing & Subscriptions
 
-- [x] **Stripe integration** — subscriptions, checkout session, customer portal, webhook handler
-- [x] **Pricing tier model** — free, pro, enterprise stored per user/org with `subscriptionsTable`
-- [x] **Feature gates** — `requirePlan(feature)` middleware; blocks with `PLAN_REQUIRED` error
-- [ ] **Usage counters** — track seats, API calls, storage, etc. per billing period
-- [x] **Stripe Customer Portal** — let users manage cards, cancel, download invoices
-- [x] **Stripe webhook handler** — react to `subscription.updated`, `invoice.payment_failed`, `customer.subscription.deleted`
-- [ ] **Trial period** — 14-day trial with automated expiry and upgrade prompt
-- [ ] **Upgrade/downgrade flows** — proration, immediate vs end-of-cycle
+- [x] Stripe checkout — creates Stripe Checkout Session, returns URL
+- [x] Stripe customer portal — manage cards, cancel, download invoices
+- [x] Stripe webhook handler — `subscription.updated`, `invoice.payment_failed`, `subscription.deleted`
+- [x] `subscriptionsTable` — stores plan, status, period dates per user
+- [x] `requirePlan()` middleware — blocks with `403 PLAN_REQUIRED` when feature not on plan
+- [x] `PLAN_CONFIGS` in `src/shared/plans.ts` — free / pro / enterprise feature matrix
+- [x] Billing dashboard — plan cards, upgrade CTA, manage subscription button
+- [ ] Per-org billing — one subscription per organization
+- [ ] Trial period — 14-day trial with expiry email and upgrade prompt
+- [ ] Upgrade / downgrade flows — proration, confirm gain/loss
+- [ ] Usage counters — seats, API calls, storage per billing period
+- [ ] Dunning management — retry failed payments D3 / D7 / D14
+- [ ] Cancellation flow — survey, offer pause / discount
+- [ ] Win-back campaign — automated emails to churned users
+- [ ] Stripe Tax — auto VAT / GST / sales tax by location
+- [ ] Multi-currency pricing with PPP discounts
+- [ ] Lifetime deal (LTD) plan type
+
+---
 
 ### Organizations & Teams
 
-- [x] **Workspace model** — one org can have many members, one user can belong to many orgs
-- [x] **Invite by email** — time-limited invite links (signed tokens)
-- [x] **Org roles** — owner, admin, member, viewer with permission checks
-- [x] **Transfer ownership** — reassign org owner with confirmation flow
-- [x] **Org settings page** — name, logo, slug, billing contact
-- [ ] **Per-org billing** — one Stripe subscription per organization
-- [x] **Remove / leave org** — with safety checks (can't remove last owner)
+- [x] Workspace model — one org → many members, one user → many orgs
+- [x] Invite by email — time-limited signed invite links
+- [x] Org roles — owner, admin, member, viewer with permission checks
+- [x] Transfer ownership — reassign with confirmation flow
+- [x] Org settings page — name, logo, slug, billing contact
+- [x] Remove / leave org — safety checks (can't remove last owner)
+- [x] Custom org roles & permissions — fine-grained resource permissions per org
+- [ ] Per-org Stripe billing
+- [ ] Per-org branding — logo, color, app name override
+- [ ] Custom domain per tenant
+
+---
+
+### API Keys (developer API)
+
+- [x] API key model — named keys, SHA-256 hashed (never store plain), scopes, per-user or per-org
+- [x] Key creation UI — generate key, show plaintext once, copy to clipboard
+- [x] Usage tracking — `lastUsedAt` timestamp updated on every request
+- [x] Revoke — instant revocation via `revokedAt` timestamp
+- [x] Key scopes — `read:data`, `write:data`, etc. stored and enforced in middleware
+- [x] `apiKeyAuth` middleware — `Bearer <key>` or `X-API-Key` header
+- [ ] Scope enforcement per route (gate routes by required scope)
+- [ ] Key rotation policy — force rotation after N days
+- [ ] Rate limiting per key
+
+---
 
 ### Email
 
-- [x] **Transactional email templates** — welcome, email verify, invite, receipt, password reset, trial expiry
-- [x] **Inline-styled HTML email templates**
-- [ ] **Email queue** — queue + retry with Bull/BullMQ so sending never blocks a request
-- [ ] **Notification preferences** — users choose which emails they receive
-- [ ] **Unsubscribe tokens** — one-click unsubscribe with signed tokens (CAN-SPAM)
+- [x] BullMQ email queue — sending never blocks a request; Redis-backed with retry
+- [x] Nodemailer SMTP transport — configurable host / port / credentials
+- [x] Transactional email templates — welcome, verify, invite, receipt, magic link, password reset
+- [x] Inline-styled HTML email templates
+- [x] Notification preferences — users choose which emails they receive
+- [x] Unsubscribe tokens — HMAC-SHA256 signed, one-click unsubscribe (CAN-SPAM)
+- [ ] Locale-aware email templates — send in user's stored locale
+- [ ] Welcome email sent on registration
+- [ ] Trial expiry warning emails
+- [ ] Dunning emails — failed payment escalation sequence
+
+---
+
+### Notifications
+
+- [x] Notification model — per-user with `read` / `unread` state
+- [x] Bell icon + dropdown — notification center UI in dashboard nav
+- [x] Mark as read — single and bulk
+- [x] Real-time delivery — Server-Sent Events (SSE) push
+- [x] Notification preferences — granular per-channel per-category control
+- [ ] Email fallback — deliver via email if user hasn't visited in N days
+- [ ] Web push notifications — service worker + Push API
+
+---
 
 ### File Storage & Uploads
 
-- [ ] **Avatar upload** — profile pictures, resize + optimize, store to S3/R2
-- [ ] **File attachments** — per-feature file uploads with type/size validation
-- [ ] **S3-compatible storage** — AWS S3, Cloudflare R2, or MinIO (local dev)
-- [ ] **Pre-signed URLs** — secure direct-to-storage uploads from the browser
-- [ ] **CDN delivery** — serve files from edge for fast global access
+- [x] Avatar upload — JPEG/PNG/GIF/WebP, 5 MB limit, stored and served
+- [ ] S3-compatible storage — AWS S3, Cloudflare R2, or MinIO adapter
+- [ ] Pre-signed upload URLs — secure direct-to-storage uploads from browser
+- [ ] File attachments — per-feature uploads with type / size validation
+- [ ] CDN delivery — serve files from edge for fast global access
+
+---
 
 ### Onboarding
 
-- [ ] **Welcome email** — sent immediately after registration
-- [x] **Setup checklist** — "complete your profile", "invite a teammate", "add billing" with progress tracking
-- [ ] **Empty states** — every list/table has a helpful empty state with a CTA
-- [ ] **Product tour** — lightweight tooltip walkthrough on first login (Shepherd.js or Driver.js)
-- [ ] **Onboarding completion event** — fire analytics event + notify sales/Slack on new signups
+- [x] Setup checklist — "complete your profile", "enable MFA", etc. with progress tracking
+- [ ] Welcome email sent immediately after registration
+- [ ] Empty states — every list/table has a helpful empty state with CTA
+- [ ] Product tour — lightweight tooltip walkthrough on first login (Shepherd.js or Driver.js)
+- [ ] Onboarding completion event — fire analytics event + notify sales/Slack on new signups
 
-### In-app Notifications
+---
 
-- [x] **Notification model** — store notifications per user with `read`/`unread` state
-- [x] **Bell icon + dropdown** — notification center UI in the dashboard nav
-- [x] **Mark as read** — single and bulk mark-read
-- [x] **Real-time delivery** — Server-Sent Events (SSE) push
-- [ ] **Email fallback** — deliver via email if user hasn't visited in N days
+### User Dashboard
 
-### Developer API Keys
+- [x] Profile — display name, avatar, language preference
+- [x] Security — password change, MFA (TOTP + passkeys), active sessions
+- [x] Sessions — list all active sessions with device info, revoke any
+- [x] Account — GDPR data export, account deletion (30-day soft-delete)
+- [x] Notification settings — per-channel per-category preferences
+- [x] Organizations — org list, create org, view members
+- [x] API Keys — create, list (prefix only), revoke
+- [x] Billing — plan cards, upgrade CTA, manage subscription
 
-- [x] **API key model** — named keys, hashed (never store plain), scopes, per-user or per-org
-- [x] **Key creation UI** — generate key, show once, copy to clipboard
-- [x] **Usage tracking** — count requests per key, show last-used timestamp
-- [x] **Rotate / revoke** — instant revocation, forced rotation policy
-- [x] **Key scopes** — e.g. `read:data`, `write:data`, `admin` — enforced in middleware
+---
 
-### Webhooks (user-facing)
+### Admin Panel
 
-- [ ] **Webhook endpoint management** — users add/edit/delete their own webhook URLs
-- [ ] **Event catalog** — define all events your platform emits (`user.created`, `payment.succeeded`, etc.)
-- [ ] **Signed payloads** — HMAC-SHA256 signature header so receivers can verify
-- [ ] **Delivery logs** — show each attempt, response status, retry count
-- [ ] **Retry with backoff** — automatic retry on 5xx or timeout, up to 3 days
+- [x] Stats dashboard — user count, active sessions, recent registrations
+- [x] User management — list, search, view detail, edit roles, force logout, delete
+- [x] Session browser — view all active sessions, revoke any
+- [x] Audit log viewer — searchable immutable event trail
+- [x] Auth settings — toggle every auth method on/off live
+- [x] General settings — app name, URL, branding
+- [ ] Impersonate user — log in as any user (audit-logged)
+- [ ] Manual plan override — bump user to Pro, add trial days
+- [ ] Broadcast email — send announcement to all or filtered users
+- [ ] Revenue metrics — MRR, ARR, failed payments at a glance
+- [ ] Feature flag management UI
 
-### Feature Flags & Plan Limits
+---
 
-- [ ] **Entitlement table** — map plan → features + limits (e.g. free: 3 projects, pro: unlimited)
-- [ ] **Gate middleware** — `requirePlan("pro")` or `requireEntitlement("feature_x")`
-- [ ] **Upgrade prompt component** — consistent "upgrade to Pro" modal/banner across the UI
-- [ ] **Gradual rollout flags** — enable features for a % of users or specific accounts
-- [ ] **Override flags** — admin can force-enable for specific users (for trials, support, etc.)
+### GDPR & Compliance
 
-### Analytics & Reporting
+- [x] GDPR data export — "Export my data" downloads JSON of all user data
+- [x] Account deletion — 30-day soft-delete, then full PII purge
+- [x] Data retention — auto-purge audit logs, sessions, OTPs after configurable intervals
+- [x] Cookie consent banner — GDPR-compliant accept / reject
+- [x] Privacy policy page — `/privacy`
+- [x] Terms of service page — `/terms`
+- [x] CAN-SPAM unsubscribe — one-click signed unsubscribe tokens
 
-- [ ] **Product analytics** — PostHog or Plausible for page views + feature usage events
-- [ ] **Revenue dashboard** — MRR, ARR, churn rate, LTV in the admin panel
-- [ ] **Funnel tracking** — signup → activation → paid conversion
-- [ ] **Per-user usage stats** — API calls, storage used, seats, etc. on the user's billing page
-- [ ] **Export to CSV** — admin can export user list, revenue data
+---
 
-### Admin Enhancements
+### Observability
 
-- [ ] **Impersonate user** — admin can log in as any user for support (with audit log entry)
-- [ ] **Broadcast email** — send announcement to all users or filtered segments
-- [ ] **Manual plan override** — bump a user to pro, add trial days, apply coupon
-- [ ] **Feature flag management UI** — toggle rollout flags per-user or globally from admin
-- [ ] **Revenue metrics** — MRR, active subscriptions, failed payments at a glance
+- [x] Prometheus metrics — `/metrics` endpoint (prom-client)
+- [x] OpenTelemetry tracing — `NodeSDK` with OTLP exporter, `withSpan()` helper, auto-instrumentation
+- [x] Sentry — `@sentry/node` server capture + `@sentry/nextjs` React error boundaries
+- [x] Structured logging — `getLogger()` with log levels
+- [x] Audit log — immutable event trail written to Elasticsearch
+- [ ] Distributed tracing viewer — wire OTel to Jaeger or Grafana Tempo
+- [ ] Health status page — public status page
+- [ ] Alerting — Slack / PagerDuty on error spike or latency breach
 
-### Error Monitoring & Observability
-
-- [x] **Sentry** — client-side error boundaries + server-side exception capture
-- [ ] **Structured logging** — already have Elasticsearch; add dashboards for error rate, latency
-- [ ] **Health status page** — public status.yourapp.com using a simple uptime check
-- [ ] **Alerting** — Elasticsearch watcher or PagerDuty/Slack alert on error spike or latency breach
-- [ ] **Distributed tracing** — already have OpenTelemetry; wire up a trace viewer (Jaeger/Tempo)
+---
 
 ### SEO & Marketing
 
-- [ ] **Blog or changelog** — MDX-based pages under `/blog` and `/changelog`
-- [x] **Proper meta tags** — `<title>`, `<meta description>`, Open Graph, Twitter cards on every page
-- [x] **Sitemap.xml + robots.txt** — generated at build time from Next.js
-- [x] **Cookie consent banner** — GDPR-compliant accept/reject banner
-- [ ] **Analytics script** — Plausible or Google Analytics with consent gate
+- [x] Landing page — hero, features, pricing sections (plain Tailwind, no component library)
+- [x] Blog — MDX-powered posts at `/blog`
+- [x] Changelog — versioned release notes at `/changelog`
+- [x] Proper meta tags — `<title>`, `<meta description>`, Open Graph, Twitter cards
+- [x] Sitemap.xml + robots.txt — generated at build time by Next.js
+- [x] Cookie consent banner with consent-gated analytics
+- [x] Plausible Analytics — `NEXT_PUBLIC_PLAUSIBLE_DOMAIN`
+- [x] Google Analytics 4 — `NEXT_PUBLIC_GA_MEASUREMENT_ID`
 
-### Legal & Compliance
+---
 
-- [x] **Privacy policy page** — `/privacy` (content driven by `NEXT_PUBLIC_*` env vars)
-- [x] **Terms of service page** — `/terms` (content driven by `NEXT_PUBLIC_*` env vars)
-- [ ] **GDPR data export** — `/dashboard/settings` → "Export my data" downloads JSON zip
-- [ ] **Account deletion** — 30-day soft-delete grace period, then purge all PII
-- [ ] **Data retention policy** — auto-purge audit logs and old sessions after N days
+### i18n
+
+- [x] Foundation — next-intl installed, `NextIntlClientProvider` wrapping app
+- [x] Translation files — `/messages/{locale}.json` (en, es, fr)
+- [x] Locale detection — `Accept-Language` on first visit, cookie-persisted
+- [x] Language switcher — dropdown in nav and settings, persists to profile
+- [ ] Locale-aware formatting — `Intl.*` everywhere; no manual date string building
+- [ ] RTL layout support — `dir="rtl"` toggle on `<html>`
+- [ ] Locale-aware email templates
+- [ ] hreflang tags on marketing pages
+- [ ] Missing-translation fallback — always fall back to English, log missing keys
+
+---
 
 ### CI/CD & Deployment
 
-- [x] **GitHub Actions** — lint + type-check + test + UI build on every PR
-- [ ] **Docker production build** — multi-stage Dockerfile, push to ghcr.io or Docker Hub
-- [ ] **One-click deploy** — Railway / Render / Fly.io deploy button in this README
-- [ ] **Environment parity** — staging environment that mirrors production config
-- [ ] **DB backup** — daily PostgreSQL dump to S3 with 30-day retention
-- [x] **Secret rotation** — documented in README with zero-downtime procedure
+- [x] GitHub Actions CI — lint + type-check + test + UI build on every push / PR
+- [x] Docker Compose — full development stack in one command
+- [x] Dockerfile — multi-stage production image
+- [x] Railway one-click deploy button
+- [x] Render one-click deploy button
+- [x] Secret rotation — zero-downtime procedure documented in README
+- [ ] Environment parity — staging environment mirroring production
+- [ ] DB backup — daily PostgreSQL dump to S3 with 30-day retention
 
-### UI & UX
+---
 
-- [x] **Dark / light mode toggle** — system preference detection + manual override, persisted
-- [x] **Toast notification system** — global toast context for success/error feedback
-- [x] **Loading skeletons** — skeleton screens instead of spinners for better perceived performance
-- [x] **Mobile-responsive dashboard** — all pages usable on phone
-- [ ] **Keyboard navigation** — focus rings, skip-to-main, ARIA roles on modals and dropdowns
-- [ ] **Internationalization (i18n)** — next-intl setup with English as default, ready for translations
+### Security
 
-### Customer Support
+- [x] PASETO v4 tokens — AES-256-GCM, no JWT footguns
+- [x] Refresh tokens — SHA-256 hashed, rotated on use
+- [x] Rate limiting — per-IP sliding window
+- [x] Account lockout — configurable threshold + auto-unlock
+- [x] RBAC + ABAC — roles, permissions, JIT escalation
+- [x] API keys — SHA-256 hashed, never stored plain
+- [x] Unsubscribe tokens — HMAC-SHA256 signed
+- [ ] HaveIBeenPwned password check
+- [ ] Login notification emails — new-device alert with revoke link
+- [ ] Account takeover detection
+- [ ] Security headers — CSP, HSTS, COOP, CORP (Helmet)
+- [ ] Bug bounty / responsible disclosure page at `/security`
 
-- [ ] **Live chat widget** — Crisp, Intercom, or Tawk.to embed in dashboard layout
-- [x] **Help center** — `/help` with searchable FAQ, category filter, and full-text search
-- [x] **In-app feedback** — thumbs up/down or NPS survey triggered after key actions
-- [ ] **Support ticket model** — lightweight ticket system if you don't want a third-party tool
+---
 
-### Loyalty & Rewards System
+### Webhooks (user-facing)
 
-- [ ] **Points model** — `UserPoints` collection: balance, lifetime total, expiry date per user
-- [ ] **Earning rules engine** — configurable rules: daily login (+10 pts), referral signup (+200 pts), first payment (+500 pts), plan anniversary (+250 pts), profile complete (+50 pts), leaving a review (+100 pts)
-- [ ] **Tier system** — Bronze (0–999), Silver (1 000–4 999), Gold (5 000–19 999), Platinum (20 000+); tier stored on user, re-evaluated on every points change
-- [ ] **Tier benefits** — each tier unlocks perks: extra API rate limit quota, storage bonus, priority support badge, discount percentage, extended session TTL
-- [ ] **Redemption catalog** — users spend points on: account credit (100 pts = $1), feature unlock (e.g. unlock dark mode early), extended trial, swag/merch codes, one-month plan upgrade
-- [ ] **Points history page** — timestamped ledger showing every earn and spend event with source label
-- [ ] **Expiry policy** — points expire after 12 months of account inactivity; warning email sent at 30 days before expiry
-- [ ] **Birthday & anniversary bonuses** — auto-award on account creation anniversary and user birthday (if collected)
-- [ ] **Referral multiplier** — referred users earn 1.5× points on their first 90 days
-- [ ] **Admin controls** — manually award/deduct points with reason, bulk-award to a segment, adjust tier thresholds from admin panel
-- [ ] **Leaderboard** — opt-in public leaderboard of top point earners (anonymized option)
-- [ ] **Points badge on profile** — show tier badge and point count in dashboard nav and public profile
+- [ ] Webhook endpoint management — users add / edit / delete their own webhook URLs
+- [ ] Event catalog — define all events your platform emits
+- [ ] Signed payloads — HMAC-SHA256 signature header so receivers can verify
+- [ ] Delivery logs — show each attempt, response status, retry count
+- [ ] Retry with backoff — automatic retry on 5xx or timeout, up to 3 days
 
-### Referral & Affiliate Program
+---
 
-- [ ] **Referral link generator** — unique signed short-link per user (`yourapp.com/r/abc123`)
-- [ ] **Referral tracking** — cookie + UTM attribution, link referrer to signup, store `referredBy` on new user
-- [ ] **Referral rewards** — referrer gets account credit or points when referee converts to paid; referee gets trial extension or discount
-- [ ] **Referral dashboard** — show user how many clicks, signups, and conversions their link produced
-- [ ] **Multi-tier referral** — optional: referrer earns a % when their referral also refers someone (1 level deep only to avoid pyramid schemes)
-- [ ] **Affiliate portal** — separate `/affiliate` section for external promoters: unique codes, commission rate, payout history, payment threshold
-- [ ] **Payout integration** — trigger payouts via Stripe Connect, PayPal Payouts, or Wise on the 1st of each month
-- [ ] **Fraud detection** — flag self-referrals (same IP/device), same-email patterns, and referrals that churn within 7 days
+### Analytics & Reporting
 
-### Gamification & Engagement
+- [ ] Product analytics — PostHog or Plausible for feature usage events
+- [ ] Revenue dashboard — MRR, ARR, churn rate, LTV in admin panel
+- [ ] Funnel tracking — signup → activation → paid conversion
+- [ ] Per-user usage stats — API calls, storage, seats on billing page
+- [ ] CSV export — admin can export user list and revenue data
+- [ ] Churn prediction score — at-risk score from usage signals in admin
 
-- [ ] **Achievement badges** — unlock badges for milestones: "First Login", "Power User" (30-day streak), "Team Player" (invited 5 members), "Early Adopter", "Completionist" (100% profile)
-- [ ] **Streak tracking** — daily login streak counter with grace period (miss 1 day = streak paused, not reset); streak shown in dashboard
-- [ ] **Progress bars** — onboarding completion %, profile completeness %, plan usage %; visual motivation to fill gaps
-- [ ] **Challenges** — weekly/monthly opt-in challenges (e.g. "Invite a teammate this week") with point rewards on completion
-- [ ] **Activity points feed** — live mini-feed in dashboard: "You earned 50 pts for completing your profile" with confetti animation
-- [ ] **Social sharing** — "I just reached Gold tier on [App]!" share card generated as OG image (Satori/`@vercel/og`)
-- [ ] **Level-up notifications** — in-app + email when a user crosses a tier threshold
-
-### White-labeling & Custom Domains
-
-- [ ] **Custom domain per tenant** — orgs can map `app.theirdomain.com` to your platform (Cloudflare for SaaS / Vercel domains API)
-- [ ] **Custom subdomain** — auto-provision `theirorg.yourapp.com` on org creation (wildcard DNS + TLS)
-- [ ] **Per-tenant branding** — org logo, brand color, and app name replace defaults in the UI
-- [ ] **Custom email domain** — org sends transactional emails from `noreply@theirdomain.com` via SendGrid / Resend domain auth
-- [ ] **Remove "Powered by" badge** — white-label tier hides all ZeroAuth / starter branding
-- [ ] **Custom login page** — org-specific login URL with their logo, colors, and SSO button
-
-### Integrations & Automation
-
-- [ ] **Zapier integration** — publish a Zapier app with triggers (new user, new payment) and actions (create user, update plan)
-- [ ] **Make (Integromat) integration** — same as Zapier; share the OpenAPI spec to auto-generate module
-- [ ] **Slack app** — slash commands (`/myapp status`, `/myapp users`) + DM notifications for key events
-- [ ] **Native integration marketplace** — `/integrations` page listing available connections; per-user OAuth flows to connect third-party accounts
-- [ ] **IFTTT / n8n support** — webhook-in + webhook-out enough to support these; document the patterns
-- [ ] **HubSpot / Salesforce sync** — push new signups and plan changes to CRM; sync contact properties back
-- [ ] **Segment.io or Rudderstack** — server-side analytics pipeline: track every business event to any downstream tool
+---
 
 ### Revenue Recovery & Retention
 
-- [ ] **Dunning management** — retry failed payments on days 3, 7, 14; send escalating email sequence with payment link
-- [ ] **Pause subscription** — users can pause (not cancel) for up to 3 months; billing pauses, access restricted
-- [ ] **Cancellation flow** — offboarding survey before cancel (reason, competitor?), offer discount or pause as alternatives, gather churn insight
-- [ ] **Win-back campaign** — automated email sequence to churned users at 7, 30, 90 days; offer time-limited discount code
-- [ ] **Usage-based upsell nudges** — "You've used 80% of your storage quota" → upgrade prompt in-app and via email
-- [ ] **Plan downgrade warnings** — when a user tries to downgrade, show what they'll lose (features, team seats, storage)
-- [ ] **Lifetime deal (LTD) support** — special plan type: one payment, no subscription, with usage cap enforcement
+- [ ] Dunning management — retry D3 / D7 / D14, escalating email sequence
+- [ ] Pause subscription — users can pause for up to 3 months
+- [ ] Cancellation flow — survey, offer pause / discount, gather churn insight
+- [ ] Win-back campaign — automated D7 / D30 / D90 emails with discount codes
+- [ ] Usage-based upsell nudges — "80% of quota used" → upgrade prompt in-app + email
+- [ ] Plan downgrade warnings — show what will be lost before confirming
 
-### Enterprise Features
+---
 
-- [ ] **SAML 2.0 SSO** — SP-initiated SSO for Okta, Azure AD, Google Workspace; per-org identity provider config
-- [ ] **SCIM provisioning** — auto-create/deactivate users from Azure AD / Okta via SCIM 2.0 (RFC 7644)
-- [ ] **Custom org roles & permissions** — admins define roles with fine-grained resource permissions, assign to members
-- [ ] **Audit log export** — download audit events as CSV or stream to customer's SIEM (Splunk, Datadog, Elastic)
-- [ ] **Data residency** — choose storage region (EU / US / APAC) per org to satisfy GDPR / data sovereignty
-- [ ] **SLA tiers** — 99.9% uptime SLA for Pro, 99.99% for Enterprise; SLA credit automation on breach
-- [ ] **Dedicated instance** — single-tenant deployment option: own MongoDB, own Redis, own subdomain
-- [ ] **Security questionnaire** — pre-filled VSA / CAIQ security questionnaire document for enterprise procurement
-- [ ] **SOC 2 Type II readiness** — access control evidence, change management, incident response, vendor review checklist
-- [ ] **IP allowlist per org** — restrict API + dashboard access to specific CIDR ranges
+### Enterprise
+
+- [x] SAML 2.0 SSO — SP-initiated for Okta, Azure AD, Google Workspace
+- [x] SCIM 2.0 provisioning — auto-create / deactivate users from IdP (RFC 7644)
+- [x] LDAP / Active Directory sync
+- [x] Custom org roles & permissions
+- [ ] Audit log export — CSV download or SIEM stream (Splunk, Datadog, Elastic)
+- [ ] IP allowlist per org — restrict to specific CIDR ranges
+- [ ] Data residency — choose storage region per org (EU / US / APAC)
+- [ ] SOC 2 Type II readiness checklist
+
+---
+
+### Loyalty & Rewards
+
+- [ ] Points model — balance, lifetime total, expiry per user
+- [ ] Earning rules engine — daily login, referral, first payment, profile complete, etc.
+- [ ] Tier system — Bronze / Silver / Gold / Platinum with perks per tier
+- [ ] Redemption catalog — account credit, feature unlock, extended trial, swag codes
+- [ ] Points history page — timestamped ledger
+- [ ] Expiry policy — points expire after 12 months of inactivity
+
+---
+
+### Referral & Affiliate
+
+- [ ] Referral link generator — unique signed short-link per user
+- [ ] Referral tracking — cookie + UTM attribution, `referredBy` on new user
+- [ ] Referral rewards — credit or points when referee converts to paid
+- [ ] Referral dashboard — clicks, signups, conversions per link
+- [ ] Affiliate portal — commissions, payout history, payment threshold
+- [ ] Fraud detection — flag self-referrals, same-IP patterns
+
+---
+
+### Gamification & Engagement
+
+- [ ] Achievement badges — milestones: "First Login", "Power User", "Early Adopter"
+- [ ] Streak tracking — daily login streak with grace period
+- [ ] Progress bars — onboarding %, profile completeness %, plan usage %
+- [ ] Weekly / monthly challenges with point rewards
+- [ ] Social sharing — tier achievement share card (Satori OG image)
+- [ ] Level-up notifications — in-app + email on tier change
+
+---
+
+### White-labeling & Custom Domains
+
+- [ ] Custom domain per tenant — Cloudflare for SaaS / Vercel Domains API
+- [ ] Custom subdomain — auto-provision `theirorg.yourapp.com` on org creation
+- [ ] Per-tenant branding — logo, brand color, app name
+- [ ] Custom email domain — tenant sends from their own domain
+- [ ] Remove "Powered by" badge — white-label tier hides all starter branding
+- [ ] Custom login page — org-specific login URL with their branding
+
+---
+
+### Integrations & Automation
+
+- [ ] Zapier integration — triggers (new user, payment) + actions (create user, update plan)
+- [ ] Make (Integromat) — share OpenAPI spec to auto-generate module
+- [ ] Slack app — slash commands + DM notifications for key events
+- [ ] Native integration marketplace — `/integrations` with per-user OAuth flows
+- [ ] HubSpot / Salesforce sync — push signups, plan changes; sync contacts back
+- [ ] Segment.io or Rudderstack — server-side analytics pipeline
+
+---
 
 ### Mobile & Offline
 
-- [ ] **React Native / Expo app** — shared auth logic with the web app; biometric login (Face ID / fingerprint) via passkeys
-- [ ] **Web push notifications** — service worker + Push API; browser permission prompt at the right moment
-- [ ] **Progressive Web App (PWA)** — `manifest.json`, service worker, "Add to Home Screen" prompt on mobile
-- [ ] **Offline support** — service worker caches dashboard shell; queue writes when offline, sync on reconnect
-- [ ] **Deep linking** — `/invite/:token` and `/magic-link/verify` links open correctly in both web and native app
+- [x] PWA manifest — `manifest.json`, service worker, "Add to Home Screen"
+- [ ] Offline support — cache dashboard shell; queue writes offline, sync on reconnect
+- [ ] Deep linking — invite and magic-link URLs open correctly in web and native
+- [ ] Web push notifications — service worker + Push API
+- [ ] React Native / Expo app — biometric login via passkeys
+
+---
 
 ### AI & Smart Features
 
-- [ ] **AI-powered onboarding assistant** — chat widget that guides new users through setup using Claude / GPT-4o
-- [ ] **Smart search** — Elasticsearch semantic search or OpenAI embeddings for natural language queries across user data
-- [ ] **Anomaly detection** — ML model on login patterns: flag unusual login time, location, device; already have the signals
-- [ ] **Churn prediction score** — logistic regression on usage signals (logins, feature depth, team activity) → at-risk score shown in admin
-- [ ] **Auto-generated reports** — weekly digest email: "Here's what happened in your account this week" built with LLM summary
-- [ ] **AI support bot** — trained on your help docs; deflects tier-1 support before escalating to human
-- [ ] **Usage recommendations** — "Teams that use feature X retain 30% longer. You haven't tried it yet." — personalized suggestions
+- [ ] AI-powered onboarding assistant — chat widget using Claude / GPT-4o
+- [ ] Smart search — semantic search or embeddings across user data
+- [ ] Churn prediction score — logistic regression on usage signals
+- [ ] Auto-generated weekly digest email — LLM summary of account activity
+- [ ] AI support bot — trained on help docs, escalates to human
+- [ ] Usage recommendations — personalized feature suggestions
 
-### Tax, Multi-currency & Global
+---
 
-- [ ] **Stripe Tax** — auto-calculate and collect VAT / GST / sales tax by customer location; one line of config
-- [ ] **Tax exemption certificates** — nonprofits and B2B EU orgs submit VAT ID or exemption cert to remove tax
-- [ ] **Multi-currency pricing** — display prices in user's local currency; Stripe handles FX; lock local price per region
-- [ ] **Purchasing Power Parity (PPP)** — automatic regional discounts based on country GDP (use `ppp` npm package)
-- [ ] **Invoice localization** — invoice language, currency, and legal address match customer's country
-- [ ] **EU VAT compliance** — collect and validate EU VAT numbers via VIES; reverse-charge on B2B EU invoices
+### Advanced Search
 
-### Advanced Search & Discovery
+- [ ] Global command palette — `Cmd+K` across users, settings, docs, recent actions
+- [ ] Elasticsearch full-text search — index content, surface with highlighting
+- [ ] Faceted filters — type, date, plan, status with instant counts
+- [ ] Search analytics — log zero-result queries
 
-- [ ] **Global search bar** — `Cmd+K` / `Ctrl+K` command palette searching users, settings, docs, and recent actions
-- [ ] **Elasticsearch full-text search** — already have ES running; index user content and surface results with highlighting
-- [ ] **Faceted filters** — filter search results by type, date, plan, status with instant counts
-- [ ] **Search analytics** — log queries with no results → identify docs/features to build
-- [ ] **Autocomplete suggestions** — debounced type-ahead suggestions from a search-suggest endpoint
+---
 
 ### Collaboration & Activity
 
-- [ ] **Team activity feed** — per-org timeline of who did what: "Alice invited Bob", "Charlie upgraded to Pro"
-- [ ] **@mentions** — `@username` in comments or notes triggers in-app + email notification
-- [ ] **Threaded comments** — attach comments to any resource (file, project, record) with reply threading
-- [ ] **Emoji reactions** — lightweight engagement on activity feed items and comments
-- [ ] **Real-time presence** — show which team members are currently online (WebSocket `online` heartbeat)
-- [ ] **Shared notes / docs** — lightweight collaborative notes per org (Tiptap or plain textarea + autosave)
+- [ ] Team activity feed — per-org timeline of who did what
+- [ ] @mentions — trigger in-app + email notification
+- [ ] Real-time presence — show online team members (WebSocket heartbeat)
+- [ ] Shared notes — lightweight collaborative notes per org (Tiptap)
 
-### Data, Import & Export
-
-- [ ] **CSV import** — bulk-create users, records, or contacts from a CSV with column mapping UI
-- [ ] **CSV / JSON export** — every list/table has an "Export" button; streams large exports instead of loading all into memory
-- [ ] **Data migration wizard** — guided flow to import data from common competitors or spreadsheets
-- [ ] **Scheduled exports** — daily/weekly automated export to S3 bucket or email attachment
-- [ ] **API-first data access** — every piece of user data accessible via a paginated REST or GraphQL API so power users can self-serve exports
-- [ ] **Bulk operations** — select all → bulk delete, bulk status change, bulk assign tag
-
-### Security & Trust
-
-- [ ] **HaveIBeenPwned check** — on register/password change, check the password hash prefix against HIBP API; warn or block compromised passwords
-- [ ] **Security headers audit** — A+ on securityheaders.com; CSP, HSTS, COOP, CORP configured in Helmet
-- [ ] **Dependency vulnerability scanning** — `npm audit` in CI; Dependabot or Renovate for automated PRs
-- [ ] **Bug bounty program** — responsible disclosure policy page at `/security`; HackerOne or Bugcrowd listing
-- [ ] **Pen test report** — annual third-party penetration test; publish summary to enterprise prospects
-- [ ] **Login notification emails** — email user on new device login with "Not you? Revoke this session" link (already have session data)
-- [ ] **Account takeover detection** — flag password reset + email change within short window; require re-auth for sensitive changes
+---
 
 ### Customer Success
 
-- [ ] **Health score per account** — composite score from: login frequency, feature depth, team size, support tickets, payment history
-- [ ] **At-risk account alerts** — Slack/email alert to CS team when an account's health score drops below threshold
-- [ ] **Automated lifecycle emails** — day 1 welcome, day 3 "have you tried X", day 7 check-in, day 14 trial expiry warning
-- [ ] **NPS survey automation** — in-app NPS prompt after 30 days, quarterly thereafter; store score + comment; export to CSV
-- [ ] **Customer segments** — tag accounts as "champion", "at-risk", "expansion candidate"; use segments to target campaigns
-- [ ] **Usage benchmarking** — show user how their usage compares to similar accounts ("You're in the top 20% of teams your size")
+- [ ] Health score per account — composite score from login frequency, feature depth, team size
+- [ ] At-risk account alerts — Slack / email to CS team when score drops
+- [ ] Automated lifecycle emails — D1 welcome, D3 tips, D7 check-in, D14 trial expiry
+- [ ] NPS survey automation — in-app prompt after 30 days, quarterly thereafter
+- [ ] Customer segments — tag accounts as "champion", "at-risk", "expansion candidate"
+
+---
+
+### Tax, Multi-currency & Global
+
+- [ ] Stripe Tax — auto-calculate VAT / GST / sales tax by customer location
+- [ ] Tax exemption certificates — nonprofits and B2B EU orgs submit VAT ID
+- [ ] Multi-currency pricing — display in user's local currency; Stripe FX
+- [ ] Purchasing Power Parity (PPP) — automatic regional discounts by country GDP
+- [ ] EU VAT compliance — collect and validate EU VAT numbers via VIES

@@ -3,7 +3,7 @@
 A production-ready SaaS boilerplate with enterprise-grade authentication built in. Clone it, add your business logic, and ship.
 
 **Backend:** Hono + TypeScript + PostgreSQL (Drizzle ORM) + Redis  
-**Frontend:** Next.js 14 + Tailwind CSS — landing page, user dashboard, and admin panel in one app
+**Frontend:** Next.js 15.3 + Tailwind CSS — landing page, user dashboard, and admin panel in one app
 
 ---
 
@@ -525,7 +525,7 @@ Full list with comments: [`.env.example`](./.env.example) and [`packages/ui/.env
 │   │   └── permissions.ts          # Org permission constants
 │   └── middleware/                 # auth, rateLimiting, apiKeyAuth, requirePlan, ...
 ├── packages/
-│   └── ui/                         # Next.js 14 (port 3001)
+│   └── ui/                         # Next.js 15.3 (port 3001)
 │       ├── messages/               # i18n JSON files (en, es, fr)
 │       ├── sentry.*.config.ts      # Sentry client / server / edge config
 │       └── src/
@@ -735,14 +735,30 @@ Tests live in `src/__tests__/`. CI runs them on every push and pull request to `
 
 ## Roadmap
 
-See [STARTER.md](./STARTER.md) for the full feature list. Top remaining priorities:
+See [STARTER.md](./STARTER.md) for the full feature catalog with priority tiers.
 
-- **Stripe billing** — per-org subscriptions, usage limits, customer portal
-- **File storage** — S3/R2/MinIO adapter, pre-signed upload URLs, CDN delivery
-- **Help center** — `/help` searchable FAQ (MDX or Mintlify)
-- **Deep linking** — magic-link and invite URLs work in all PWA contexts
-- **Offline support** — cache dashboard shell, queue writes offline
-- **DB backup** — daily PostgreSQL dump to S3 with 30-day retention
+**P0 — Launch blockers**
+
+- Per-org Stripe subscriptions — one subscription per organization
+- File storage — S3/R2/MinIO adapter, pre-signed upload URLs, CDN delivery
+- DB backup — daily PostgreSQL dump to S3 with 30-day retention
+- Environment parity — staging env that mirrors production
+- HaveIBeenPwned password check on register and password change
+- Login notification email — new-device alert with one-click session revoke
+
+**P1 — Core growth (first month)**
+
+- Trial period — 14-day trial with automated expiry email and upgrade prompt
+- Dunning management — retry failed payments D3/D7/D14 with escalating emails
+- Cancellation flow — offboarding survey, offer pause or discount
+- Admin: impersonate user, revenue dashboard (MRR/ARR/churn)
+
+**P2 — Quality & scale (2–3 months)**
+
+- PWA completion — offline support, deep linking for invite and magic-link URLs
+- User-facing webhooks — endpoint management, signed payloads, delivery logs
+- Win-back campaign — automated emails to churned users at D7/D30/D90
+- Distributed tracing viewer — wire OTel to Jaeger or Grafana Tempo
 
 ---
 
