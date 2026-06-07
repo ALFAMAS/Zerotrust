@@ -1,0 +1,117 @@
+{
+  "common": {
+    "loading": "Chargement...",
+    "save": "Enregistrer",
+    "saving": "Enregistrement...",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "confirm": "Confirmer",
+    "back": "Retour",
+    "next": "Suivant",
+    "submit": "Soumettre",
+    "close": "Fermer",
+    "search": "Rechercher",
+    "filter": "Filtrer",
+    "refresh": "Actualiser",
+    "copy": "Copier",
+    "copied": "Copié !",
+    "error": "Une erreur s'est produite",
+    "success": "Succès",
+    "required": "Requis",
+    "optional": "Facultatif",
+    "viewAll": "Voir tout",
+    "showMore": "Voir plus",
+    "showLess": "Voir moins"
+  },
+  "nav": {
+    "dashboard": "Tableau de bord",
+    "profile": "Profil",
+    "security": "Sécurité",
+    "sessions": "Sessions",
+    "organizations": "Organisations",
+    "settings": "Paramètres",
+    "signOut": "Se déconnecter",
+    "signIn": "Se connecter",
+    "admin": "Administration"
+  },
+  "auth": {
+    "emailLabel": "Adresse e-mail",
+    "emailPlaceholder": "vous@exemple.com",
+    "passwordLabel": "Mot de passe",
+    "passwordPlaceholder": "8 caractères minimum",
+    "displayNameLabel": "Nom d'affichage",
+    "signInTitle": "Bon retour",
+    "signInSubtitle": "Connectez-vous à votre compte",
+    "signInButton": "Se connecter",
+    "signUpTitle": "Créer un compte",
+    "signUpSubtitle": "Commencez gratuitement",
+    "signUpButton": "Créer un compte",
+    "forgotPassword": "Mot de passe oublié ?",
+    "resetPassword": "Réinitialiser le mot de passe",
+    "alreadyHaveAccount": "Vous avez déjà un compte ?",
+    "dontHaveAccount": "Pas encore de compte ?",
+    "orContinueWith": "Ou continuer avec",
+    "invalidCredentials": "Identifiants invalides. Veuillez réessayer.",
+    "accountLocked": "Compte bloqué. Réessayez plus tard."
+  },
+  "dashboard": {
+    "welcomeBack": "Bon retour",
+    "overview": "Aperçu",
+    "recentActivity": "Activité récente",
+    "quickActions": "Actions rapides"
+  },
+  "profile": {
+    "title": "Paramètres du profil",
+    "personalInfo": "Informations personnelles",
+    "displayName": "Nom d'affichage",
+    "email": "Adresse e-mail",
+    "phone": "Téléphone",
+    "username": "Nom d'utilisateur",
+    "avatarUpload": "Télécharger un avatar",
+    "saveChanges": "Enregistrer les modifications",
+    "updateSuccess": "Profil mis à jour avec succès.",
+    "dangerZone": "Zone dangereuse",
+    "deleteAccount": "Supprimer le compte"
+  },
+  "security": {
+    "title": "Sécurité",
+    "mfa": "Authentification multifacteur",
+    "passkeys": "Clés d'accès",
+    "sessions": "Sessions actives",
+    "changePassword": "Changer le mot de passe"
+  },
+  "organizations": {
+    "title": "Organisations",
+    "createOrg": "Créer une organisation",
+    "orgName": "Nom de l'organisation",
+    "members": "Membres",
+    "settings": "Paramètres",
+    "invite": "Inviter des membres",
+    "roles": "Rôles",
+    "leave": "Quitter l'organisation"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "markAllRead": "Tout marquer comme lu",
+    "noNotifications": "Aucune notification",
+    "preferences": "Préférences de notifications"
+  },
+  "errors": {
+    "notFound": "Page introuvable",
+    "unauthorized": "Non autorisé",
+    "serverError": "Erreur serveur",
+    "networkError": "Erreur réseau. Vérifiez votre connexion."
+  },
+  "cookie": {
+    "message": "nous utilisons des cookies pour améliorer votre expérience.",
+    "accept": "Accepter",
+    "decline": "Refuser"
+  },
+  "theme": {
+    "toggle": "Changer de thème",
+    "light": "Clair",
+    "dark": "Sombre",
+    "system": "Système"
+  }
+}

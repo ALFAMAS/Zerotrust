@@ -389,7 +389,7 @@ The items below should be tackled before anything else. They cover the foundatio
 - [x] Org settings page — name, logo, slug, billing contact
 - [ ] Per-org billing — one Stripe subscription per organization
 - [x] Remove / leave org — with safety checks (can't remove last owner)
-- [ ] Custom org roles & permissions — fine-grained resource permissions defined per org
+- [x] Custom org roles & permissions — fine-grained resource permissions defined per org
 - [x] Per-tenant branding — all UI strings/colors configurable via `NEXT_PUBLIC_*` env vars
 
 **Email**
@@ -404,19 +404,19 @@ The items below should be tackled before anything else. They cover the foundatio
 
 - [ ] Live chat widget — Crisp, Intercom, or Tawk.to embed in dashboard layout
 - [ ] Help center — `/help` searchable FAQ (Mintlify, GitBook, or plain MDX)
-- [ ] In-app feedback — thumbs up/down or NPS survey after key actions
+- [x] In-app feedback — thumbs up/down or NPS survey after key actions
 - [ ] Support ticket model — lightweight tickets if you don't want a third-party tool
 
 **Error Monitoring & Observability**
 
-- [ ] Sentry — client-side error boundaries + server-side exception capture
+- [x] Sentry — client-side error boundaries + server-side exception capture
 - [ ] Health status page — public `status.yourapp.com` uptime check
 - [ ] Alerting — Elasticsearch watcher or PagerDuty/Slack on error spike or latency breach
 - [ ] Distributed tracing — OpenTelemetry already wired; add Jaeger/Tempo trace viewer
 
 **SEO & Marketing**
 
-- [ ] Blog or changelog — MDX pages under `/blog` and `/changelog`
+- [x] Blog or changelog — MDX pages under `/blog` and `/changelog`
 - [x] Proper meta tags — `<title>`, Open Graph, Twitter cards on every page
 - [x] Sitemap.xml + robots.txt — generated at build time from Next.js
 - [x] Cookie consent banner — GDPR-compliant accept/reject
@@ -442,9 +442,9 @@ The items below should be tackled before anything else. They cover the foundatio
 **Multi-language (i18n)**
 
 - [x] i18n foundation — install next-intl (or react-i18next); define message namespaces; wrap app in provider
-- [ ] Translation file structure — JSON files per locale under `/messages/{locale}.json`; enforce no hardcoded UI strings
-- [ ] Locale detection — read `Accept-Language` header on first visit; fallback to stored preference on user profile; cookie-persist choice
-- [ ] Language switcher — dropdown in nav and settings page; persists to user profile via API
+- [x] Translation file structure — JSON files per locale under `/messages/{locale}.json`; enforce no hardcoded UI strings
+- [x] Locale detection — read `Accept-Language` header on first visit; fallback to stored preference on user profile; cookie-persist choice
+- [x] Language switcher — dropdown in nav and settings page; persists to user profile via API
 - [ ] Locale-aware formatting — use `Intl.DateTimeFormat`, `Intl.NumberFormat`, `Intl.RelativeTimeFormat` everywhere; no manual date string building
 - [ ] RTL layout support — `dir="rtl"` toggle on `<html>`; audit CSS for absolute positioning that breaks in RTL; test with Arabic
 - [ ] Locale-aware email templates — send emails in the user's stored locale; translate subject lines and body

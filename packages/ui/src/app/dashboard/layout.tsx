@@ -6,6 +6,8 @@ import { clearToken } from "../../lib/auth";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { NotificationBell } from "@/components/NotificationBell";
 import { brand } from "@/config/brand";
+import FeedbackWidget from "@/components/FeedbackWidget";
+import LocaleSwitcher from "@/components/LocaleSwitcher";
 
 const navItems = [
   { href: "/dashboard", label: "Overview" },
@@ -71,8 +73,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </div>
           </div>
 
-          {/* Right: ThemeToggle + NotificationBell + sign out + hamburger */}
+          {/* Right: LocaleSwitcher + ThemeToggle + NotificationBell + sign out + hamburger */}
           <div className="flex items-center gap-2">
+            <LocaleSwitcher />
             <ThemeToggle />
             <NotificationBell />
             <button
@@ -152,6 +155,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <main id="main-content" className="max-w-5xl mx-auto px-6 py-8">
         {children}
       </main>
+
+      <FeedbackWidget type="nps" context="dashboard" delay={45_000} />
     </div>
   );
 }

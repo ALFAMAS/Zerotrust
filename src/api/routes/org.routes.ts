@@ -8,8 +8,10 @@ import {
   organizationsTable,
   organizationMembersTable,
   organizationInvitesTable,
+  orgCustomRolesTable,
   usersTable,
 } from "../../db/schema";
+import { ORG_PERMISSIONS } from "../../shared/permissions";
 import { authMiddleware } from "../../middleware/auth";
 import { getLogger } from "../../logger";
 import type { HonoEnv } from "../../shared/types";
@@ -705,6 +707,181 @@ router.post("/invites/accept", async (c) => {
     if (err instanceof HTTPException) throw err;
     logger.error("Accept invite error", err as Error);
     return c.json({ error: "INTERNAL_ERROR", message: "Failed to accept invite" }, 500);
+  }
+});
+
+// ── GET /orgs/:orgId/roles ────────────────────────────────────────────────────
+
+router.get("/:orgId/roles", async (c) => {
+  const user = c.get("user");
+  const orgId = c.req.param("orgId");
+
+  try {
+    const db = getDb();
+    const [member] = await db
+      .select({ role: organizationMembersTable.role })
+      .from(organizationMembersTable)
+      .where(
+        and(eq(organizationMembersTable.orgId, orgId), eq(organizationMembersTable.userId, user.id))
+      )
+      .limit(1);
+
+    if (!member) return c.json({ error: "FORBIDDEN" }, 403);
+
+    const custom = await db
+      .select()
+      .from(orgCustomRolesTable)
+      .where(eq(orgCustomRolesTable.orgId, orgId));
+
+    return c.json({
+      system: ["owner", "admin", "member", "viewer"],
+      permissions: ORG_PERMISSIONS,
+      custom,
+    });
+  } catch (err) {
+    logger.error("List org roles error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR" }, 500);
+  }
+});
+
+// ── POST /orgs/:orgId/roles ───────────────────────────────────────────────────
+
+const customRoleSchema = z.object({
+  name: z.string().min(1).max(50),
+  description: z.string().max(200).optional(),
+  permissions: z.array(z.string()).default([]),
+  isDefault: z.boolean().optional().default(false),
+});
+
+router.post("/:orgId/roles", async (c) => {
+  const user = c.get("user");
+  const orgId = c.req.param("orgId");
+
+  try {
+    const db = getDb();
+    const [member] = await db
+      .select({ role: organizationMembersTable.role })
+      .from(organizationMembersTable)
+      .where(
+        and(eq(organizationMembersTable.orgId, orgId), eq(organizationMembersTable.userId, user.id))
+      )
+      .limit(1);
+
+    if (!member || !["owner", "admin"].includes(member.role)) {
+      return c.json(
+        { error: "FORBIDDEN", message: "Only owners and admins can manage roles" },
+        403
+      );
+    }
+
+    const body = await c.req.json().catch(() => ({}));
+    const parsed = customRoleSchema.safeParse(body);
+    if (!parsed.success)
+      return c.json({ error: "INVALID_REQUEST", issues: parsed.error.issues }, 400);
+
+    const validPerms = parsed.data.permissions.filter((p) =>
+      (ORG_PERMISSIONS as readonly string[]).includes(p)
+    );
+
+    const [role] = await db
+      .insert(orgCustomRolesTable)
+      .values({
+        orgId,
+        name: parsed.data.name,
+        description: parsed.data.description ?? null,
+        permissions: validPerms,
+        isDefault: parsed.data.isDefault,
+      })
+      .returning();
+
+    return c.json(role, 201);
+  } catch (err) {
+    logger.error("Create org role error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR" }, 500);
+  }
+});
+
+// ── PUT /orgs/:orgId/roles/:roleId ────────────────────────────────────────────
+
+router.put("/:orgId/roles/:roleId", async (c) => {
+  const user = c.get("user");
+  const orgId = c.req.param("orgId");
+  const roleId = c.req.param("roleId");
+
+  try {
+    const db = getDb();
+    const [member] = await db
+      .select({ role: organizationMembersTable.role })
+      .from(organizationMembersTable)
+      .where(
+        and(eq(organizationMembersTable.orgId, orgId), eq(organizationMembersTable.userId, user.id))
+      )
+      .limit(1);
+
+    if (!member || !["owner", "admin"].includes(member.role)) {
+      return c.json({ error: "FORBIDDEN" }, 403);
+    }
+
+    const body = await c.req.json().catch(() => ({}));
+    const parsed = customRoleSchema.partial().safeParse(body);
+    if (!parsed.success)
+      return c.json({ error: "INVALID_REQUEST", issues: parsed.error.issues }, 400);
+
+    const update: Record<string, unknown> = { updatedAt: new Date() };
+    if (parsed.data.name !== undefined) update.name = parsed.data.name;
+    if (parsed.data.description !== undefined) update.description = parsed.data.description;
+    if (parsed.data.isDefault !== undefined) update.isDefault = parsed.data.isDefault;
+    if (parsed.data.permissions !== undefined) {
+      update.permissions = parsed.data.permissions.filter((p) =>
+        (ORG_PERMISSIONS as readonly string[]).includes(p)
+      );
+    }
+
+    const [updated] = await db
+      .update(orgCustomRolesTable)
+      .set(update)
+      .where(and(eq(orgCustomRolesTable.id, roleId), eq(orgCustomRolesTable.orgId, orgId)))
+      .returning();
+
+    if (!updated) return c.json({ error: "NOT_FOUND" }, 404);
+    return c.json(updated);
+  } catch (err) {
+    logger.error("Update org role error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR" }, 500);
+  }
+});
+
+// ── DELETE /orgs/:orgId/roles/:roleId ─────────────────────────────────────────
+
+router.delete("/:orgId/roles/:roleId", async (c) => {
+  const user = c.get("user");
+  const orgId = c.req.param("orgId");
+  const roleId = c.req.param("roleId");
+
+  try {
+    const db = getDb();
+    const [member] = await db
+      .select({ role: organizationMembersTable.role })
+      .from(organizationMembersTable)
+      .where(
+        and(eq(organizationMembersTable.orgId, orgId), eq(organizationMembersTable.userId, user.id))
+      )
+      .limit(1);
+
+    if (!member || !["owner", "admin"].includes(member.role)) {
+      return c.json({ error: "FORBIDDEN" }, 403);
+    }
+
+    const deleted = await db
+      .delete(orgCustomRolesTable)
+      .where(and(eq(orgCustomRolesTable.id, roleId), eq(orgCustomRolesTable.orgId, orgId)))
+      .returning();
+
+    if (deleted.length === 0) return c.json({ error: "NOT_FOUND" }, 404);
+    return c.json({ success: true });
+  } catch (err) {
+    logger.error("Delete org role error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR" }, 500);
   }
 });
 

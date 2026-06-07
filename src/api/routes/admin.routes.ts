@@ -1,7 +1,14 @@
 import { Hono } from "hono";
 import { eq, and, ne, ilike, or, sql, desc, gt } from "drizzle-orm";
 import { getDb } from "../../db";
-import { usersTable, sessionsTable, auditLogsTable, rolesTable, jitAccessTable } from "../../db/schema";
+import {
+  usersTable,
+  sessionsTable,
+  auditLogsTable,
+  rolesTable,
+  jitAccessTable,
+  feedbackTable,
+} from "../../db/schema";
 import { authMiddleware } from "../../middleware/auth";
 import { getSettings, updateSettings } from "../../models/settings.model";
 import { revokeAllSessionsForUser, revokeSession } from "../../middleware/sessionControl";
@@ -61,10 +68,7 @@ router.get("/users", async (c) => {
 
     if (search) {
       conditions.push(
-        or(
-          ilike(usersTable.email, `%${search}%`),
-          ilike(usersTable.displayName, `%${search}%`)
-        )!
+        or(ilike(usersTable.email, `%${search}%`), ilike(usersTable.displayName, `%${search}%`))!
       );
     }
     if (status) {
@@ -74,8 +78,17 @@ router.get("/users", async (c) => {
     const where = and(...(conditions as [any, ...any[]]));
 
     const [users, countResult] = await Promise.all([
-      db.select().from(usersTable).where(where).orderBy(desc(usersTable.createdAt)).offset((page - 1) * limit).limit(limit),
-      db.select({ count: sql<number>`count(*)::int` }).from(usersTable).where(where),
+      db
+        .select()
+        .from(usersTable)
+        .where(where)
+        .orderBy(desc(usersTable.createdAt))
+        .offset((page - 1) * limit)
+        .limit(limit),
+      db
+        .select({ count: sql<number>`count(*)::int` })
+        .from(usersTable)
+        .where(where),
     ]);
 
     const sanitized = users.map((u) => ({
@@ -147,7 +160,12 @@ router.patch("/users/:id", async (c) => {
       .update(usersTable)
       .set(allowed)
       .where(eq(usersTable.id, c.req.param("id")))
-      .returning({ id: usersTable.id, email: usersTable.email, displayName: usersTable.displayName, status: usersTable.status });
+      .returning({
+        id: usersTable.id,
+        email: usersTable.email,
+        displayName: usersTable.displayName,
+        status: usersTable.status,
+      });
 
     if (rows.length === 0) {
       return c.json({ error: "USER_NOT_FOUND", message: "User not found" }, 404);
@@ -187,7 +205,11 @@ router.post("/users/:id/force-logout", async (c) => {
   try {
     const id = c.req.param("id");
     const db = getDb();
-    const userRows = await db.select({ id: usersTable.id }).from(usersTable).where(eq(usersTable.id, id)).limit(1);
+    const userRows = await db
+      .select({ id: usersTable.id })
+      .from(usersTable)
+      .where(eq(usersTable.id, id))
+      .limit(1);
 
     if (userRows.length === 0) {
       return c.json({ error: "USER_NOT_FOUND", message: "User not found" }, 404);
@@ -217,12 +239,24 @@ router.get("/sessions", async (c) => {
     const whereClause = conditions.length > 0 ? and(...(conditions as [any, ...any[]])) : undefined;
 
     const [sessions, countResult] = await Promise.all([
-      db.select().from(sessionsTable).where(whereClause).orderBy(desc(sessionsTable.lastActivityAt)).offset((page - 1) * limit).limit(limit),
-      db.select({ count: sql<number>`count(*)::int` }).from(sessionsTable).where(whereClause),
+      db
+        .select()
+        .from(sessionsTable)
+        .where(whereClause)
+        .orderBy(desc(sessionsTable.lastActivityAt))
+        .offset((page - 1) * limit)
+        .limit(limit),
+      db
+        .select({ count: sql<number>`count(*)::int` })
+        .from(sessionsTable)
+        .where(whereClause),
     ]);
 
     const total = countResult[0]?.count ?? 0;
-    return c.json({ sessions, pagination: { page, limit, total, totalPages: Math.ceil(total / limit) } });
+    return c.json({
+      sessions,
+      pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+    });
   } catch (err) {
     logger.error("Admin list sessions error", err as Error);
     return c.json({ error: "INTERNAL_ERROR", message: "Failed to list sessions" }, 500);
@@ -234,7 +268,11 @@ router.delete("/sessions/:id", async (c) => {
   try {
     const id = c.req.param("id");
     const db = getDb();
-    const rows = await db.select({ id: sessionsTable.id }).from(sessionsTable).where(eq(sessionsTable.id, id)).limit(1);
+    const rows = await db
+      .select({ id: sessionsTable.id })
+      .from(sessionsTable)
+      .where(eq(sessionsTable.id, id))
+      .limit(1);
 
     if (rows.length === 0) {
       return c.json({ error: "SESSION_NOT_FOUND", message: "Session not found" }, 404);
@@ -257,10 +295,22 @@ router.get("/stats", async (c) => {
     const db = getDb();
 
     const [totalUsersRes, activeSessionsRes, activeUsersRes, logins24hRes] = await Promise.all([
-      db.select({ count: sql<number>`count(*)::int` }).from(usersTable).where(ne(usersTable.status, "deleted")),
-      db.select({ count: sql<number>`count(*)::int` }).from(sessionsTable).where(eq(sessionsTable.isActive, true)),
-      db.selectDistinct({ userId: sessionsTable.userId }).from(sessionsTable).where(gt(sessionsTable.lastActivityAt, thirtyDaysAgo)),
-      db.select({ count: sql<number>`count(*)::int` }).from(sessionsTable).where(gt(sessionsTable.createdAt, twentyFourHoursAgo)),
+      db
+        .select({ count: sql<number>`count(*)::int` })
+        .from(usersTable)
+        .where(ne(usersTable.status, "deleted")),
+      db
+        .select({ count: sql<number>`count(*)::int` })
+        .from(sessionsTable)
+        .where(eq(sessionsTable.isActive, true)),
+      db
+        .selectDistinct({ userId: sessionsTable.userId })
+        .from(sessionsTable)
+        .where(gt(sessionsTable.lastActivityAt, thirtyDaysAgo)),
+      db
+        .select({ count: sql<number>`count(*)::int` })
+        .from(sessionsTable)
+        .where(gt(sessionsTable.createdAt, twentyFourHoursAgo)),
     ]);
 
     return c.json({
@@ -294,32 +344,46 @@ router.post("/roles", async (c) => {
   try {
     const { name, displayName, description, parentRoleName, permissions } = await c.req.json();
     if (!name || !displayName) {
-      return c.json({ error: "INVALID_REQUEST", message: "name and displayName are required" }, 400);
+      return c.json(
+        { error: "INVALID_REQUEST", message: "name and displayName are required" },
+        400
+      );
     }
 
     const db = getDb();
-    const existing = await db.select({ id: rolesTable.id }).from(rolesTable).where(eq(rolesTable.name, name)).limit(1);
+    const existing = await db
+      .select({ id: rolesTable.id })
+      .from(rolesTable)
+      .where(eq(rolesTable.name, name))
+      .limit(1);
     if (existing.length > 0) {
       return c.json({ error: "ROLE_EXISTS", message: "Role already exists" }, 409);
     }
 
     let parentRoleId: string | undefined;
     if (parentRoleName) {
-      const parentRows = await db.select({ id: rolesTable.id }).from(rolesTable).where(eq(rolesTable.name, parentRoleName)).limit(1);
+      const parentRows = await db
+        .select({ id: rolesTable.id })
+        .from(rolesTable)
+        .where(eq(rolesTable.name, parentRoleName))
+        .limit(1);
       if (parentRows.length === 0) {
         return c.json({ error: "PARENT_ROLE_NOT_FOUND", message: "Parent role not found" }, 404);
       }
       parentRoleId = parentRows[0].id;
     }
 
-    const [role] = await db.insert(rolesTable).values({
-      name,
-      displayName,
-      description,
-      parentRoleId,
-      permissions: permissions || [],
-      isSystem: false,
-    }).returning();
+    const [role] = await db
+      .insert(rolesTable)
+      .values({
+        name,
+        displayName,
+        description,
+        parentRoleId,
+        permissions: permissions || [],
+        isSystem: false,
+      })
+      .returning();
 
     return c.json({ role }, 201);
   } catch (err) {
@@ -338,12 +402,20 @@ router.post("/users/:id/roles", async (c) => {
     }
 
     const db = getDb();
-    const roleRows = await db.select({ id: rolesTable.id }).from(rolesTable).where(eq(rolesTable.name, roleName)).limit(1);
+    const roleRows = await db
+      .select({ id: rolesTable.id })
+      .from(rolesTable)
+      .where(eq(rolesTable.name, roleName))
+      .limit(1);
     if (roleRows.length === 0) {
       return c.json({ error: "ROLE_NOT_FOUND", message: "Role not found" }, 404);
     }
 
-    const userRows = await db.select({ id: usersTable.id, roles: usersTable.roles }).from(usersTable).where(eq(usersTable.id, userId)).limit(1);
+    const userRows = await db
+      .select({ id: usersTable.id, roles: usersTable.roles })
+      .from(usersTable)
+      .where(eq(usersTable.id, userId))
+      .limit(1);
     if (userRows.length === 0) {
       return c.json({ error: "USER_NOT_FOUND", message: "User not found" }, 404);
     }
@@ -351,7 +423,10 @@ router.post("/users/:id/roles", async (c) => {
     const currentRoles = (userRows[0].roles as string[]) || [];
     if (!currentRoles.includes(roleName)) {
       const updatedRoles = [...currentRoles, roleName];
-      await db.update(usersTable).set({ roles: updatedRoles, updatedAt: new Date() }).where(eq(usersTable.id, userId));
+      await db
+        .update(usersTable)
+        .set({ roles: updatedRoles, updatedAt: new Date() })
+        .where(eq(usersTable.id, userId));
       return c.json({ success: true, roles: updatedRoles });
     }
 
@@ -369,14 +444,21 @@ router.delete("/users/:id/roles/:roleName", async (c) => {
     const roleName = c.req.param("roleName");
 
     const db = getDb();
-    const userRows = await db.select({ id: usersTable.id, roles: usersTable.roles }).from(usersTable).where(eq(usersTable.id, userId)).limit(1);
+    const userRows = await db
+      .select({ id: usersTable.id, roles: usersTable.roles })
+      .from(usersTable)
+      .where(eq(usersTable.id, userId))
+      .limit(1);
     if (userRows.length === 0) {
       return c.json({ error: "USER_NOT_FOUND", message: "User not found" }, 404);
     }
 
     const currentRoles = (userRows[0].roles as string[]) || [];
     const updatedRoles = currentRoles.filter((r) => r !== roleName);
-    await db.update(usersTable).set({ roles: updatedRoles, updatedAt: new Date() }).where(eq(usersTable.id, userId));
+    await db
+      .update(usersTable)
+      .set({ roles: updatedRoles, updatedAt: new Date() })
+      .where(eq(usersTable.id, userId));
     return c.json({ success: true, roles: updatedRoles });
   } catch (err) {
     logger.error("Admin revoke role error", err as Error);
@@ -417,12 +499,20 @@ router.post("/jit-grants/:id/approve", async (c) => {
 
     const rows = await db
       .update(jitAccessTable)
-      .set({ status: "approved", approvedBy: adminId, approvedAt: new Date(), updatedAt: new Date() })
+      .set({
+        status: "approved",
+        approvedBy: adminId,
+        approvedAt: new Date(),
+        updatedAt: new Date(),
+      })
       .where(and(eq(jitAccessTable.id, id), eq(jitAccessTable.status, "pending")))
       .returning();
 
     if (rows.length === 0) {
-      return c.json({ error: "JIT_NOT_FOUND", message: "JIT grant not found or already processed" }, 404);
+      return c.json(
+        { error: "JIT_NOT_FOUND", message: "JIT grant not found or already processed" },
+        404
+      );
     }
 
     return c.json({ success: true, grant: rows[0] });
@@ -445,7 +535,10 @@ router.post("/jit-grants/:id/deny", async (c) => {
       .returning();
 
     if (rows.length === 0) {
-      return c.json({ error: "JIT_NOT_FOUND", message: "JIT grant not found or already processed" }, 404);
+      return c.json(
+        { error: "JIT_NOT_FOUND", message: "JIT grant not found or already processed" },
+        404
+      );
     }
 
     return c.json({ success: true, grant: rows[0] });
@@ -497,14 +590,53 @@ router.get("/audit-logs", async (c) => {
     const whereClause = conditions.length > 0 ? and(...(conditions as [any, ...any[]])) : undefined;
 
     const [logs, countResult] = await Promise.all([
-      db.select().from(auditLogsTable).where(whereClause).orderBy(desc(auditLogsTable.timestamp)).offset(offset).limit(limit),
-      db.select({ count: sql<number>`count(*)::int` }).from(auditLogsTable).where(whereClause),
+      db
+        .select()
+        .from(auditLogsTable)
+        .where(whereClause)
+        .orderBy(desc(auditLogsTable.timestamp))
+        .offset(offset)
+        .limit(limit),
+      db
+        .select({ count: sql<number>`count(*)::int` })
+        .from(auditLogsTable)
+        .where(whereClause),
     ]);
 
     return c.json({ logs, total: countResult[0]?.count ?? 0, limit, offset });
   } catch (err) {
     logger.error("Admin audit logs error", err as Error);
     return c.json({ error: "INTERNAL_ERROR", message: "Failed to fetch audit logs" }, 500);
+  }
+});
+
+// ── GET /admin/feedback ───────────────────────────────────────────────────────
+
+router.get("/feedback", async (c) => {
+  try {
+    const limit = Math.min(parseInt(c.req.query("limit") ?? "50"), 200);
+    const offset = parseInt(c.req.query("offset") ?? "0");
+    const type = c.req.query("type");
+
+    const db = getDb();
+    const where = type ? eq(feedbackTable.type, type) : undefined;
+    const rows = await db
+      .select()
+      .from(feedbackTable)
+      .where(where)
+      .orderBy(desc(feedbackTable.createdAt))
+      .limit(limit)
+      .offset(offset);
+
+    const [countResult] = await db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(feedbackTable)
+      .where(where);
+
+    return c.json({ feedback: rows, total: countResult?.count ?? 0, limit, offset });
+  } catch (err) {
+    logger.error("Admin feedback error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR" }, 500);
   }
 });
 

@@ -34,10 +34,24 @@ A production-ready SaaS boilerplate with enterprise-grade authentication built i
 | ✅  | PWA manifest (installable on mobile)                                  |
 | ✅  | Cookie consent banner (GDPR)                                          |
 | ✅  | Privacy policy + Terms of service pages                               |
+| ✅  | GDPR data export + 30-day soft-delete account deletion                |
+| ✅  | Organizations & teams — workspaces, invite flows, org roles           |
+| ✅  | Custom org roles with fine-grained permission sets                    |
+| ✅  | Notification center — bell icon, SSE real-time, email fallback digest |
+| ✅  | Notification preferences + CAN-SPAM unsubscribe tokens                |
+| ✅  | Avatar upload (JPEG/PNG/GIF/WebP, 5 MB limit)                         |
+| ✅  | In-app NPS / thumbs feedback widget                                   |
+| ✅  | Analytics — Plausible and GA4 with consent gate                       |
+| ✅  | Blog + Changelog pages                                                |
+| ✅  | Sentry error monitoring — error boundaries + optional server capture  |
+| ✅  | i18n — next-intl, locale detection, language switcher (EN/ES/FR)      |
+| ✅  | BullMQ email queue — non-blocking transactional delivery              |
+| ✅  | Data retention — auto-purge audit logs, sessions, OTPs                |
 | ✅  | Immutable audit log (Elasticsearch)                                   |
 | ✅  | Prometheus metrics + OpenTelemetry tracing                            |
 | ✅  | Docker Compose — full stack in one command                            |
 | ✅  | GitHub Actions CI (lint + type-check + test + UI build)               |
+| ✅  | One-click deploy — Railway and Render buttons                         |
 
 ---
 
@@ -440,32 +454,46 @@ bun run dev:ui     # UI only
 
 ## Environment variables
 
-| Variable                     | Required | Default               | Description                          |
-| ---------------------------- | -------- | --------------------- | ------------------------------------ |
-| `TOKEN_SECRET_HEX`           | ✅       | —                     | 32-byte hex for PASETO tokens        |
-| `CSFLE_MASTER_KEY_HEX`       | ✅       | —                     | 32-byte hex for field encryption     |
-| `DATABASE_URL`               | ✅       | —                     | PostgreSQL connection string         |
-| `REDIS_URI`                  |          | —                     | Redis URL (falls back to in-memory)  |
-| `PORT`                       |          | 3000                  | API listen port                      |
-| `NODE_ENV`                   |          | development           | `development` or `production`        |
-| `API_BASE_URL`               |          | http://localhost:3000 | Public API URL                       |
-| `OAUTH_GOOGLE_CLIENT_ID`     |          | —                     | Google OAuth                         |
-| `OAUTH_GOOGLE_CLIENT_SECRET` |          | —                     | Google OAuth                         |
-| `OAUTH_GITHUB_CLIENT_ID`     |          | —                     | GitHub OAuth                         |
-| `OAUTH_GITHUB_CLIENT_SECRET` |          | —                     | GitHub OAuth                         |
-| `MAIL_HOST`                  |          | —                     | SMTP host                            |
-| `MAIL_PORT`                  |          | 587                   | SMTP port                            |
-| `MAIL_USER`                  |          | —                     | SMTP username                        |
-| `MAIL_PASSWORD`              |          | —                     | SMTP password                        |
-| `MAIL_FROM`                  |          | —                     | Sender address                       |
-| `TWILIO_ACCOUNT_SID`         |          | —                     | SMS / WhatsApp OTP                   |
-| `TWILIO_AUTH_TOKEN`          |          | —                     | SMS / WhatsApp OTP                   |
-| `WEBAUTHN_RP_ID`             |          | localhost             | Must match your domain in production |
-| `WEBAUTHN_RP_ORIGINS`        |          | http://localhost:3000 | Allowed origins                      |
-| `ELASTICSEARCH_HOST`         |          | localhost             | Audit log storage                    |
-| `LOG_LEVEL`                  |          | info                  | debug / info / warn / error          |
+| Variable                     | Required | Default               | Description                              |
+| ---------------------------- | -------- | --------------------- | ---------------------------------------- |
+| `TOKEN_SECRET_HEX`           | ✅       | —                     | 32-byte hex for PASETO tokens            |
+| `CSFLE_MASTER_KEY_HEX`       | ✅       | —                     | 32-byte hex for field encryption         |
+| `DATABASE_URL`               | ✅       | —                     | PostgreSQL connection string             |
+| `REDIS_URI`                  |          | —                     | Redis URL (falls back to in-memory)      |
+| `PORT`                       |          | 3000                  | API listen port                          |
+| `NODE_ENV`                   |          | development           | `development` or `production`            |
+| `API_BASE_URL`               |          | http://localhost:3000 | Public API URL                           |
+| `APP_URL`                    |          | http://localhost:3001 | Public frontend URL                      |
+| `UNSUBSCRIBE_SECRET`         |          | —                     | 32+ char secret for unsubscribe tokens   |
+| `SENTRY_DSN`                 |          | —                     | Sentry DSN for server-side error capture |
+| `OAUTH_GOOGLE_CLIENT_ID`     |          | —                     | Google OAuth                             |
+| `OAUTH_GOOGLE_CLIENT_SECRET` |          | —                     | Google OAuth                             |
+| `OAUTH_GITHUB_CLIENT_ID`     |          | —                     | GitHub OAuth                             |
+| `OAUTH_GITHUB_CLIENT_SECRET` |          | —                     | GitHub OAuth                             |
+| `MAIL_HOST`                  |          | —                     | SMTP host                                |
+| `MAIL_PORT`                  |          | 587                   | SMTP port                                |
+| `MAIL_USER`                  |          | —                     | SMTP username                            |
+| `MAIL_PASSWORD`              |          | —                     | SMTP password                            |
+| `MAIL_FROM`                  |          | —                     | Sender address                           |
+| `TWILIO_ACCOUNT_SID`         |          | —                     | SMS / WhatsApp OTP                       |
+| `TWILIO_AUTH_TOKEN`          |          | —                     | SMS / WhatsApp OTP                       |
+| `WEBAUTHN_RP_ID`             |          | localhost             | Must match your domain in production     |
+| `WEBAUTHN_RP_ORIGINS`        |          | http://localhost:3000 | Allowed origins                          |
+| `ELASTICSEARCH_HOST`         |          | localhost             | Audit log storage                        |
+| `LOG_LEVEL`                  |          | info                  | debug / info / warn / error              |
 
-Full list with comments: [`.env.example`](./.env.example)
+**Frontend env vars** (`packages/ui/.env.local`):
+
+| Variable                        | Description                                 |
+| ------------------------------- | ------------------------------------------- |
+| `NEXT_PUBLIC_ZEROAUTH_URL`      | Backend API base URL (no trailing slash)    |
+| `NEXT_PUBLIC_APP_NAME`          | App name shown in UI, emails, and meta tags |
+| `NEXT_PUBLIC_PLAUSIBLE_DOMAIN`  | Plausible Analytics domain (consent-gated)  |
+| `NEXT_PUBLIC_GA_MEASUREMENT_ID` | Google Analytics 4 ID (consent-gated)       |
+| `NEXT_PUBLIC_SENTRY_DSN`        | Sentry DSN for browser error capture        |
+| `SENTRY_DSN`                    | Sentry DSN for Next.js server components    |
+
+Full list with comments: [`.env.example`](./.env.example) and [`packages/ui/.env.example`](./packages/ui/.env.example)
 
 ---
 
@@ -484,13 +512,20 @@ Full list with comments: [`.env.example`](./.env.example)
 │   └── middleware/                 # auth, rateLimiting, accountLockout, ...
 ├── packages/
 │   └── ui/                         # Next.js 14 (port 3001)
-│       └── src/app/
-│           ├── page.tsx            # Landing page
-│           ├── (auth)/             # /login /register /magic-link /callback
-│           ├── dashboard/          # /dashboard — profile, security, sessions
-│           ├── admin/              # /admin — admin panel (same app, guarded)
-│           ├── privacy/            # /privacy
-│           └── terms/              # /terms
+│       ├── messages/               # i18n JSON files (en, es, fr)
+│       ├── sentry.*.config.ts      # Sentry client / server / edge config
+│       └── src/
+│           ├── app/
+│           │   ├── page.tsx        # Landing page
+│           │   ├── (auth)/         # /login /register /magic-link /callback
+│           │   ├── dashboard/      # /dashboard — profile, security, sessions, orgs
+│           │   ├── admin/          # /admin — admin panel (same app, guarded)
+│           │   ├── blog/           # /blog — blog index + post pages
+│           │   ├── changelog/      # /changelog — versioned release notes
+│           │   ├── privacy/        # /privacy
+│           │   └── terms/          # /terms
+│           ├── components/         # Shared components incl. FeedbackWidget, LocaleSwitcher
+│           └── data/               # blog-posts.ts, changelog.ts
 ├── .github/workflows/ci.yml        # CI — lint + type-check + test + UI build
 ├── docker-compose.yml              # Full stack
 ├── drizzle.config.ts               # Drizzle ORM config
@@ -541,6 +576,33 @@ const user = c.get("user");
 const isAdmin = user.roles.includes("admin");
 ```
 
+### Add a custom org role
+
+```bash
+POST /orgs/:orgId/roles
+{
+  "name": "Billing Manager",
+  "description": "Can view and manage billing only",
+  "permissions": ["billing:view", "billing:manage"]
+}
+```
+
+Available permissions: `members:read`, `members:invite`, `members:manage`, `billing:view`, `billing:manage`, `settings:view`, `settings:manage`, `audit:view`, `roles:manage`, `invites:manage`.
+
+### Enable error monitoring
+
+Set `SENTRY_DSN` (backend) and `NEXT_PUBLIC_SENTRY_DSN` (frontend) in your env files. The `ErrorBoundary` component in `layout.tsx` automatically captures and reports unhandled React errors with a user-visible retry screen.
+
+### Configure analytics
+
+Set `NEXT_PUBLIC_PLAUSIBLE_DOMAIN` or `NEXT_PUBLIC_GA_MEASUREMENT_ID`. Scripts are injected only after cookie consent is accepted — fully GDPR-compliant with no changes needed.
+
+### Add a language
+
+1. Create `packages/ui/messages/{locale}.json` (copy from `en.json`)
+2. Add the locale to `SUPPORTED_LOCALES` in `src/i18n/request.ts`
+3. Add the entry to the `LOCALES` array in `components/LocaleSwitcher.tsx`
+
 ### Toggle auth methods
 
 Admin panel → **Auth Settings** → flip any toggle.  
@@ -555,7 +617,10 @@ POST   /auth/register
 POST   /auth/login
 POST   /auth/token/refresh
 POST   /auth/logout
-GET    /auth/me                            (auth required)
+GET    /auth/me                                 (auth required)
+PATCH  /auth/me                                 (auth required)
+POST   /auth/me/avatar                          (auth required, multipart)
+GET    /auth/unsubscribe?token=...              (email unsubscribe, no auth)
 
 GET    /auth/oauth/google
 GET    /auth/oauth/google/callback
@@ -565,29 +630,53 @@ GET    /auth/oauth/github/callback
 POST   /auth/magic-link/send
 POST   /auth/magic-link/verify
 
-POST   /auth/passkey/register/options     (auth required)
-POST   /auth/passkey/register/verify      (auth required)
+POST   /auth/passkey/register/options           (auth required)
+POST   /auth/passkey/register/verify            (auth required)
 POST   /auth/passkey/authenticate/options
 POST   /auth/passkey/authenticate/verify
 
-POST   /auth/mfa/totp/setup               (auth required)
+POST   /auth/mfa/totp/setup                     (auth required)
 POST   /auth/mfa/totp/verify
 POST   /auth/mfa/otp/send
 POST   /auth/mfa/otp/verify
 
-GET    /sessions                          (auth required)
-DELETE /sessions/:id                      (auth required)
+GET    /sessions                                (auth required)
+DELETE /sessions/:id                            (auth required)
 
-GET    /admin/stats                       (admin only)
-GET    /admin/users                       (admin only)
-PUT    /admin/users/:id                   (admin only)
-DELETE /admin/users/:id                   (admin only)
-GET    /admin/settings                    (admin only)
-PUT    /admin/settings                    (admin only)
+GET    /notifications                           (auth required)
+GET    /notifications/unread-count              (auth required)
+POST   /notifications/:id/read                  (auth required)
+POST   /notifications/read-all                  (auth required)
+GET    /notifications/sse                       (auth required, SSE stream)
+GET    /notifications/preferences               (auth required)
+PUT    /notifications/preferences               (auth required)
+
+GET    /orgs                                    (auth required)
+POST   /orgs                                    (auth required)
+GET    /orgs/:orgId/members
+POST   /orgs/:orgId/invites
+GET    /orgs/:orgId/roles                       (auth required)
+POST   /orgs/:orgId/roles                       (owner / admin)
+PUT    /orgs/:orgId/roles/:roleId               (owner / admin)
+DELETE /orgs/:orgId/roles/:roleId               (owner / admin)
+
+POST   /feedback                                (auth required)
+
+GET    /gdpr/export                             (auth required)
+DELETE /gdpr/account                            (auth required)
+POST   /gdpr/account/deletion/cancel            (auth required)
+
+GET    /admin/stats                             (admin only)
+GET    /admin/users                             (admin only)
+PUT    /admin/users/:id                         (admin only)
+DELETE /admin/users/:id                         (admin only)
+GET    /admin/settings                          (admin only)
+PUT    /admin/settings                          (admin only)
+GET    /admin/feedback                          (admin only)
 
 GET    /healthz
-GET    /metrics                           (Prometheus)
-GET    /docs                              (Swagger — dev only)
+GET    /metrics                                 (Prometheus)
+GET    /docs                                    (Swagger — dev only)
 ```
 
 ---
@@ -621,14 +710,14 @@ Tests live in `src/__tests__/`. CI runs them on every push and pull request to `
 
 ## Roadmap
 
-See [STARTER.md](./STARTER.md) for 200+ prioritized features. Top priorities:
+See [STARTER.md](./STARTER.md) for the full feature list. Top remaining priorities:
 
-- **Stripe billing** — subscriptions, usage limits, customer portal
-- **Organizations / teams** — workspaces, invite links, org roles
-- **Transactional emails** — React Email templates, BullMQ queue
-- **In-app notifications** — bell icon, SSE real-time delivery
-- **File uploads** — avatar upload, S3/R2 storage, pre-signed URLs
-- **Sentry** — error monitoring on client + server
+- **Stripe billing** — per-org subscriptions, usage limits, customer portal
+- **File storage** — S3/R2/MinIO adapter, pre-signed upload URLs, CDN delivery
+- **Help center** — `/help` searchable FAQ (MDX or Mintlify)
+- **Deep linking** — magic-link and invite URLs work in all PWA contexts
+- **Offline support** — cache dashboard shell, queue writes offline
+- **DB backup** — daily PostgreSQL dump to S3 with 30-day retention
 
 ---
 

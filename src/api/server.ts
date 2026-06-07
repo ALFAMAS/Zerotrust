@@ -17,12 +17,14 @@ import notificationRoutes from "./routes/notification.routes";
 import orgRoutes from "./routes/org.routes";
 import gdprRoutes from "./routes/gdpr.routes";
 import unsubscribeRoutes from "./routes/unsubscribe.routes";
+import feedbackRoutes from "./routes/feedback.routes";
 import federationRoutes from "../federation/routes";
 import { rateLimit } from "../middleware/rateLimiting";
 import { geoFencingMiddleware } from "../middleware/geoFencing";
 import { temporalAccessMiddleware } from "../middleware/temporalAccess";
 import { authMiddleware } from "../middleware/auth";
 import { getLogger } from "../logger";
+import { initSentry } from "../instrument";
 import { initEmailQueue } from "../services/emailQueue";
 import { startRetentionScheduler } from "../services/dataRetention";
 import { startNotificationEmailFallbackScheduler } from "../services/notificationEmailFallback";
@@ -31,6 +33,7 @@ import type { HonoEnv } from "../shared/types";
 const logger = getLogger("api-server");
 
 export async function createServer() {
+  initSentry();
   const { logger: initLogger } = await initializeZeroAuth();
   initLogger.info("Starting API server setup");
 
@@ -88,6 +91,9 @@ export async function createServer() {
 
   // ─── GDPR routes ──────────────────────────────────────────────────────────
   app.route("/gdpr", gdprRoutes);
+
+  // ─── Feedback routes ──────────────────────────────────────────────────────
+  app.route("/feedback", feedbackRoutes);
 
   // ─── SSF webhook endpoint ─────────────────────────────────────────────────
   app.post("/ssf/events", async (c) => {

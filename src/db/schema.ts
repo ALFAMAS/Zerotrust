@@ -329,7 +329,8 @@ export const organizationMembersTable = pgTable(
     userId: uuid("user_id")
       .notNull()
       .references(() => usersTable.id, { onDelete: "cascade" }),
-    role: text("role").notNull().default("member"), // owner | admin | member | viewer
+    role: text("role").notNull().default("member"), // owner | admin | member | viewer | custom
+    customRoleId: uuid("custom_role_id"), // populated when role = "custom"
     invitedBy: uuid("invited_by").references(() => usersTable.id, { onDelete: "set null" }),
     joinedAt: timestamp("joined_at"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -350,5 +351,41 @@ export const organizationInvitesTable = pgTable("organization_invites", {
   invitedBy: uuid("invited_by").references(() => usersTable.id, { onDelete: "set null" }),
   expiresAt: timestamp("expires_at").notNull(),
   usedAt: timestamp("used_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// ── Custom org roles ──────────────────────────────────────────────────────────
+
+export const orgCustomRolesTable = pgTable(
+  "org_custom_roles",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    orgId: uuid("org_id")
+      .notNull()
+      .references(() => organizationsTable.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    description: text("description"),
+    permissions: text("permissions")
+      .array()
+      .notNull()
+      .default(sql`ARRAY[]::text[]`),
+    isDefault: boolean("is_default").notNull().default(false),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (t) => ({ uniqNamePerOrg: unique().on(t.orgId, t.name) })
+);
+
+// ── In-app feedback ───────────────────────────────────────────────────────────
+
+export const feedbackTable = pgTable("feedback", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id").references(() => usersTable.id, { onDelete: "set null" }),
+  orgId: uuid("org_id").references(() => organizationsTable.id, { onDelete: "set null" }),
+  type: text("type").notNull(), // "nps" | "csat" | "thumbs"
+  score: integer("score"), // 0-10 for NPS, 1/-1 for thumbs
+  comment: text("comment"),
+  context: text("context"), // page or feature slug where widget was shown
+  metadata: jsonb("metadata"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
