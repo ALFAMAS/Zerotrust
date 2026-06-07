@@ -1,14 +1,18 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 vi.mock("bullmq", () => ({
-  Queue: vi.fn().mockImplementation(() => ({
-    add: vi.fn().mockResolvedValue({ id: "job-1" }),
-    close: vi.fn().mockResolvedValue(undefined),
-  })),
-  Worker: vi.fn().mockImplementation(() => ({
-    on: vi.fn().mockReturnThis(),
-    close: vi.fn().mockResolvedValue(undefined),
-  })),
+  Queue: vi.fn().mockImplementation(function () {
+    return {
+      add: vi.fn().mockResolvedValue({ id: "job-1" }),
+      close: vi.fn().mockResolvedValue(undefined),
+    };
+  }),
+  Worker: vi.fn().mockImplementation(function () {
+    return {
+      on: vi.fn().mockReturnThis(),
+      close: vi.fn().mockResolvedValue(undefined),
+    };
+  }),
 }));
 
 vi.mock("../config", () => ({

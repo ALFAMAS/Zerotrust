@@ -207,7 +207,9 @@ describe("Redis Rate Limiter — consumePoint", () => {
     };
 
     vi.doMock("ioredis", () => ({
-      default: vi.fn().mockImplementation(() => redisMock),
+      default: vi.fn().mockImplementation(function () {
+        return redisMock;
+      }),
     }));
   });
 
