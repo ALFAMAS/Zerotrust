@@ -138,9 +138,9 @@ export async function verifyDiscoverableAuthentication(
     expectedChallenge,
     expectedOrigin,
     expectedRPID,
-    authenticator: {
-      credentialID: authenticator.credentialID,
-      credentialPublicKey: authenticator.credentialPublicKey,
+    credential: {
+      id: Buffer.from(authenticator.credentialID).toString("base64url"),
+      publicKey: authenticator.credentialPublicKey as unknown as Uint8Array<ArrayBuffer>,
       counter: authenticator.counter,
       transports: authenticator.transports,
     },

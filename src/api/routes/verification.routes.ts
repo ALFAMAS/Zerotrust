@@ -128,12 +128,9 @@ router.post("/respond", async (c) => {
           expectedChallenge,
           expectedOrigin: appUrl,
           expectedRPID: rpID,
-          authenticator: {
-            credentialID: passkey.credentialId,
-            credentialPublicKey: Buffer.from(
-              passkey.publicKey,
-              "base64url"
-            ) as unknown as Uint8Array,
+          credential: {
+            id: passkey.credentialId,
+            publicKey: new Uint8Array(Buffer.from(passkey.publicKey, "base64url")),
             counter: passkey.counter,
             transports: passkey.transports as any,
           },

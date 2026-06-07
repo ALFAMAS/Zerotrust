@@ -36,7 +36,10 @@ function storeChallenge(key: string, challenge: string): void {
 function consumeChallenge(key: string): string | null {
   const entry = challengeStore.get(key);
   if (!entry) return null;
-  if (Date.now() > entry.expiresAt) { challengeStore.delete(key); return null; }
+  if (Date.now() > entry.expiresAt) {
+    challengeStore.delete(key);
+    return null;
+  }
   challengeStore.delete(key);
   return entry.challenge;
 }
@@ -101,7 +104,10 @@ router.post("/register/verify", authMiddleware, async (c) => {
 
     const expectedChallenge = consumeChallenge(userId);
     if (!expectedChallenge) {
-      return c.json({ error: "CHALLENGE_EXPIRED", message: "Registration challenge expired or not found" }, 400);
+      return c.json(
+        { error: "CHALLENGE_EXPIRED", message: "Registration challenge expired or not found" },
+        400
+      );
     }
 
     const { verifyRegistrationResponse } = await import("@simplewebauthn/server");
@@ -118,7 +124,10 @@ router.post("/register/verify", authMiddleware, async (c) => {
       });
     } catch (verifyErr) {
       logger.warn("Passkey registration verification failed", { error: String(verifyErr) });
-      return c.json({ error: "VERIFICATION_FAILED", message: "Registration verification failed" }, 400);
+      return c.json(
+        { error: "VERIFICATION_FAILED", message: "Registration verification failed" },
+        400
+      );
     }
 
     if (!verification.verified || !verification.registrationInfo) {
@@ -140,15 +149,25 @@ router.post("/register/verify", authMiddleware, async (c) => {
     };
 
     const db = getDb();
-    const userRows = await db.select({ passkeys: usersTable.passkeys, mfa: usersTable.mfa }).from(usersTable).where(eq(usersTable.id, userId)).limit(1);
+    const userRows = await db
+      .select({ passkeys: usersTable.passkeys, mfa: usersTable.mfa })
+      .from(usersTable)
+      .where(eq(usersTable.id, userId))
+      .limit(1);
     const existingPasskeysList = (userRows[0]?.passkeys as any[]) || [];
-    const currentMfa = (userRows[0]?.mfa as any) ?? { totp: { enabled: false, backupCodes: [] }, webauthn: { enabled: false } };
+    const currentMfa = (userRows[0]?.mfa as any) ?? {
+      totp: { enabled: false, backupCodes: [] },
+      webauthn: { enabled: false },
+    };
 
-    await db.update(usersTable).set({
-      passkeys: [...existingPasskeysList, newPasskey],
-      mfa: { ...currentMfa, webauthn: { enabled: true } },
-      updatedAt: new Date(),
-    }).where(eq(usersTable.id, userId));
+    await db
+      .update(usersTable)
+      .set({
+        passkeys: [...existingPasskeysList, newPasskey],
+        mfa: { ...currentMfa, webauthn: { enabled: true } },
+        updatedAt: new Date(),
+      })
+      .where(eq(usersTable.id, userId));
 
     return c.json({ verified: true });
   } catch (err) {
@@ -173,12 +192,24 @@ router.post("/authenticate/options", async (c) => {
     let allowCredentials: any[] = [];
     if (email) {
       const db = getDb();
-      const userRows = await db.select({ passkeys: usersTable.passkeys }).from(usersTable).where(eq(usersTable.email, email)).limit(1);
+      const userRows = await db
+        .select({ passkeys: usersTable.passkeys })
+        .from(usersTable)
+        .where(eq(usersTable.email, email))
+        .limit(1);
       const passkeys = (userRows[0]?.passkeys as any[]) || [];
-      allowCredentials = passkeys.map((pk) => ({ id: pk.credentialId, type: "public-key" as const, transports: pk.transports }));
+      allowCredentials = passkeys.map((pk) => ({
+        id: pk.credentialId,
+        type: "public-key" as const,
+        transports: pk.transports,
+      }));
     }
 
-    const options = await generateAuthenticationOptions({ rpID, userVerification: "preferred", allowCredentials });
+    const options = await generateAuthenticationOptions({
+      rpID,
+      userVerification: "preferred",
+      allowCredentials,
+    });
     const challengeKey = email || `anon:${crypto.randomBytes(8).toString("hex")}`;
     storeAuthChallenge(challengeKey, options.challenge);
 
@@ -206,7 +237,10 @@ router.post("/authenticate/verify", async (c) => {
 
     const expectedChallenge = consumeAuthChallenge(key);
     if (!expectedChallenge) {
-      return c.json({ error: "CHALLENGE_EXPIRED", message: "Authentication challenge expired" }, 400);
+      return c.json(
+        { error: "CHALLENGE_EXPIRED", message: "Authentication challenge expired" },
+        400
+      );
     }
 
     const { verifyAuthenticationResponse } = await import("@simplewebauthn/server");
@@ -226,7 +260,11 @@ router.post("/authenticate/verify", async (c) => {
     for (const u of allUsers) {
       const pks = (u.passkeys as any[]) || [];
       const pk = pks.find((p: any) => p.credentialId === credentialId);
-      if (pk) { user = u; passkey = pk; break; }
+      if (pk) {
+        user = u;
+        passkey = pk;
+        break;
+      }
     }
 
     if (!user || !passkey) {
@@ -240,16 +278,19 @@ router.post("/authenticate/verify", async (c) => {
         expectedChallenge,
         expectedOrigin: appUrl,
         expectedRPID: rpID,
-        authenticator: {
-          credentialID: passkey.credentialId,
-          credentialPublicKey: Buffer.from(passkey.publicKey, "base64url") as unknown as Uint8Array,
+        credential: {
+          id: passkey.credentialId,
+          publicKey: new Uint8Array(Buffer.from(passkey.publicKey, "base64url")),
           counter: passkey.counter,
           transports: passkey.transports,
         },
       });
     } catch (verifyErr) {
       logger.warn("Passkey authentication verification failed", { error: String(verifyErr) });
-      return c.json({ error: "VERIFICATION_FAILED", message: "Authentication verification failed" }, 401);
+      return c.json(
+        { error: "VERIFICATION_FAILED", message: "Authentication verification failed" },
+        401
+      );
     }
 
     if (!verification.verified) {
@@ -261,7 +302,10 @@ router.post("/authenticate/verify", async (c) => {
         ? { ...pk, counter: verification.authenticationInfo.newCounter, lastUsedAt: new Date() }
         : pk
     );
-    await db.update(usersTable).set({ passkeys: updatedPasskeys, updatedAt: new Date() }).where(eq(usersTable.id, user.id));
+    await db
+      .update(usersTable)
+      .set({ passkeys: updatedPasskeys, updatedAt: new Date() })
+      .where(eq(usersTable.id, user.id));
 
     const cfg = getConfig();
     const tokenSvc = await getTokenService();
@@ -276,17 +320,20 @@ router.post("/authenticate/verify", async (c) => {
     });
     const payload = await tokenSvc.verifyAccessToken(accessToken);
 
-    const [session] = await db.insert(sessionsTable).values({
-      id: sessionId,
-      userId: user.id,
-      tokenId: payload.jti,
-      deviceFingerprint: {},
-      ipAddress: c.req.header("x-forwarded-for")?.split(",")[0].trim() || "",
-      userAgent: c.req.header("user-agent"),
-      expiresAt: new Date(payload.exp * 1000),
-      lastActivityAt: new Date(),
-      isActive: true,
-    }).returning();
+    const [session] = await db
+      .insert(sessionsTable)
+      .values({
+        id: sessionId,
+        userId: user.id,
+        tokenId: payload.jti,
+        deviceFingerprint: {},
+        ipAddress: c.req.header("x-forwarded-for")?.split(",")[0].trim() || "",
+        userAgent: c.req.header("user-agent"),
+        expiresAt: new Date(payload.exp * 1000),
+        lastActivityAt: new Date(),
+        isActive: true,
+      })
+      .returning();
 
     const refreshTokenPlain = await tokenSvc.signRefreshToken();
     await db.insert(refreshTokensTable).values({
@@ -296,7 +343,12 @@ router.post("/authenticate/verify", async (c) => {
       expiresAt: new Date(Date.now() + cfg.session.refreshTokenTTL * 1000),
     });
 
-    return c.json({ accessToken, refreshToken: refreshTokenPlain, expiresIn: cfg.session.defaultTTL, tokenType: "Bearer" });
+    return c.json({
+      accessToken,
+      refreshToken: refreshTokenPlain,
+      expiresIn: cfg.session.defaultTTL,
+      tokenType: "Bearer",
+    });
   } catch (err) {
     logger.error("Passkey auth verify error", err as Error);
     return c.json({ error: "INTERNAL_ERROR", message: "Authentication verification failed" }, 500);
