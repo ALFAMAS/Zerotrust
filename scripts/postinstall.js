@@ -58,3 +58,42 @@ if (swcDir) {
     }
   }
 }
+
+// ── 3. @esbuild/linux-x64 for drizzle-kit's bundled esbuild ─────────────────
+// bun installs drizzle-kit with a nested esbuild whose minor version may differ
+// from the top-level @esbuild/linux-x64 binary installed for vite/vitest.
+// The esbuild service refuses to start when the JS host and native binary
+// versions don't match. Fix: install the matching binary into esbuild's own
+// bun bundle directory so it is found before the top-level binary.
+function findBunEsbuildBundleDir() {
+  try {
+    // Resolve via drizzle-kit's dependency chain
+    const dkDir = dirname(require.resolve("drizzle-kit"));
+    const esbuildPkg = join(dkDir, "..", "esbuild", "package.json");
+    if (!existsSync(esbuildPkg)) return null;
+    const { readFileSync } = require("fs");
+    const { version } = JSON.parse(readFileSync(esbuildPkg, "utf8"));
+    // The real (non-symlink) directory for this esbuild version
+    const { realpathSync } = require("fs");
+    const esbuildDir = realpathSync(join(dkDir, "..", "esbuild"));
+    return { version, esbuildDir };
+  } catch {
+    return null;
+  }
+}
+
+const esbuildInfo = findBunEsbuildBundleDir();
+if (esbuildInfo) {
+  const { version, esbuildDir } = esbuildInfo;
+  const binaryDest = join(esbuildDir, "..", "@esbuild", "linux-x64");
+  if (!existsSync(binaryDest)) {
+    spawnSync(
+      "npm",
+      ["install", "--no-save", "--ignore-scripts", `@esbuild/linux-x64@${version}`],
+      { cwd: dirname(esbuildDir), stdio: "inherit", shell: true }
+    );
+    if (existsSync(binaryDest)) {
+      console.log(`✓ @esbuild/linux-x64@${version} placed for drizzle-kit`);
+    }
+  }
+}
