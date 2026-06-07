@@ -52,6 +52,12 @@ A production-ready SaaS boilerplate with enterprise-grade authentication built i
 | ✅  | Docker Compose — full stack in one command                            |
 | ✅  | GitHub Actions CI (lint + type-check + test + UI build)               |
 | ✅  | One-click deploy — Railway and Render buttons                         |
+| ✅  | API key management — named keys, SHA-256 hashed, scopes, revoke       |
+| ✅  | Stripe billing — checkout, customer portal, webhook handler           |
+| ✅  | Plan feature gates — `requirePlan()` middleware (free/pro/enterprise) |
+| ✅  | Billing dashboard — plan cards, Stripe checkout, manage subscription  |
+| ✅  | Help center — `/help` searchable FAQ with category filter             |
+| ✅  | Onboarding setup checklist — dismissable progress widget on dashboard |
 
 ---
 
@@ -466,6 +472,10 @@ bun run dev:ui     # UI only
 | `APP_URL`                    |          | http://localhost:3001 | Public frontend URL                      |
 | `UNSUBSCRIBE_SECRET`         |          | —                     | 32+ char secret for unsubscribe tokens   |
 | `SENTRY_DSN`                 |          | —                     | Sentry DSN for server-side error capture |
+| `STRIPE_SECRET_KEY`          |          | —                     | Stripe secret key (starts with `sk_`)    |
+| `STRIPE_WEBHOOK_SECRET`      |          | —                     | Stripe webhook signing secret            |
+| `STRIPE_PRODUCT_PRO`         |          | —                     | Stripe product ID for Pro plan           |
+| `STRIPE_PRODUCT_ENTERPRISE`  |          | —                     | Stripe product ID for Enterprise plan    |
 | `OAUTH_GOOGLE_CLIENT_ID`     |          | —                     | Google OAuth                             |
 | `OAUTH_GOOGLE_CLIENT_SECRET` |          | —                     | Google OAuth                             |
 | `OAUTH_GITHUB_CLIENT_ID`     |          | —                     | GitHub OAuth                             |
@@ -492,6 +502,7 @@ bun run dev:ui     # UI only
 | `NEXT_PUBLIC_GA_MEASUREMENT_ID` | Google Analytics 4 ID (consent-gated)       |
 | `NEXT_PUBLIC_SENTRY_DSN`        | Sentry DSN for browser error capture        |
 | `SENTRY_DSN`                    | Sentry DSN for Next.js server components    |
+| `NEXT_PUBLIC_STRIPE_PRICE_PRO`  | Stripe price ID shown on the billing page   |
 
 Full list with comments: [`.env.example`](./.env.example) and [`packages/ui/.env.example`](./packages/ui/.env.example)
 
@@ -508,8 +519,11 @@ Full list with comments: [`.env.example`](./.env.example) and [`packages/ui/.env
 │   ├── db/
 │   │   ├── schema.ts               # Drizzle ORM schema (PostgreSQL)
 │   │   └── index.ts                # DB connection pool
-│   ├── services/                   # token, magicLink, anomalyDetection, ...
-│   └── middleware/                 # auth, rateLimiting, accountLockout, ...
+│   ├── services/                   # token, magicLink, anomalyDetection, unsubscribe, ...
+│   ├── shared/
+│   │   ├── plans.ts                # Plan config (free/pro/enterprise) + feature gates
+│   │   └── permissions.ts          # Org permission constants
+│   └── middleware/                 # auth, rateLimiting, apiKeyAuth, requirePlan, ...
 ├── packages/
 │   └── ui/                         # Next.js 14 (port 3001)
 │       ├── messages/               # i18n JSON files (en, es, fr)
@@ -518,14 +532,16 @@ Full list with comments: [`.env.example`](./.env.example) and [`packages/ui/.env
 │           ├── app/
 │           │   ├── page.tsx        # Landing page
 │           │   ├── (auth)/         # /login /register /magic-link /callback
-│           │   ├── dashboard/      # /dashboard — profile, security, sessions, orgs
+│           │   ├── dashboard/      # /dashboard — profile, security, sessions, orgs,
+│           │   │                   #   api-keys, billing
 │           │   ├── admin/          # /admin — admin panel (same app, guarded)
 │           │   ├── blog/           # /blog — blog index + post pages
 │           │   ├── changelog/      # /changelog — versioned release notes
+│           │   ├── help/           # /help — searchable FAQ
 │           │   ├── privacy/        # /privacy
 │           │   └── terms/          # /terms
-│           ├── components/         # Shared components incl. FeedbackWidget, LocaleSwitcher
-│           └── data/               # blog-posts.ts, changelog.ts
+│           ├── components/         # FeedbackWidget, LocaleSwitcher, SetupChecklist, ...
+│           └── data/               # blog-posts.ts, changelog.ts, faq.ts
 ├── .github/workflows/ci.yml        # CI — lint + type-check + test + UI build
 ├── docker-compose.yml              # Full stack
 ├── drizzle.config.ts               # Drizzle ORM config
@@ -661,6 +677,15 @@ PUT    /orgs/:orgId/roles/:roleId               (owner / admin)
 DELETE /orgs/:orgId/roles/:roleId               (owner / admin)
 
 POST   /feedback                                (auth required)
+
+GET    /api-keys                                (auth required)
+POST   /api-keys                                (auth required)
+DELETE /api-keys/:id                            (auth required)
+
+GET    /billing/subscription                    (auth required)
+POST   /billing/checkout                        (auth required)
+POST   /billing/portal                          (auth required)
+POST   /billing/webhook                         (Stripe webhook — no auth)
 
 GET    /gdpr/export                             (auth required)
 DELETE /gdpr/account                            (auth required)

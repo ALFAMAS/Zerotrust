@@ -15,6 +15,8 @@ const navItems = [
   { href: "/dashboard/security", label: "Security" },
   { href: "/dashboard/sessions", label: "Sessions" },
   { href: "/dashboard/organizations", label: "Organizations" },
+  { href: "/dashboard/api-keys", label: "API Keys" },
+  { href: "/dashboard/billing", label: "Billing" },
 ];
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {

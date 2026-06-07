@@ -18,6 +18,9 @@ import orgRoutes from "./routes/org.routes";
 import gdprRoutes from "./routes/gdpr.routes";
 import unsubscribeRoutes from "./routes/unsubscribe.routes";
 import feedbackRoutes from "./routes/feedback.routes";
+import apiKeyRoutes from "./routes/api-keys.routes";
+import billingRoutes from "./routes/billing.routes";
+import billingWebhookRoutes from "./routes/billing.webhooks";
 import federationRoutes from "../federation/routes";
 import { rateLimit } from "../middleware/rateLimiting";
 import { geoFencingMiddleware } from "../middleware/geoFencing";
@@ -94,6 +97,13 @@ export async function createServer() {
 
   // ─── Feedback routes ──────────────────────────────────────────────────────
   app.route("/feedback", feedbackRoutes);
+
+  // ─── API key routes ───────────────────────────────────────────────────────
+  app.route("/api-keys", apiKeyRoutes);
+
+  // ─── Billing routes ───────────────────────────────────────────────────────
+  app.route("/billing", billingRoutes);
+  app.route("/billing", billingWebhookRoutes);
 
   // ─── SSF webhook endpoint ─────────────────────────────────────────────────
   app.post("/ssf/events", async (c) => {

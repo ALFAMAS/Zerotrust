@@ -403,7 +403,7 @@ The items below should be tackled before anything else. They cover the foundatio
 **Customer Support**
 
 - [ ] Live chat widget — Crisp, Intercom, or Tawk.to embed in dashboard layout
-- [ ] Help center — `/help` searchable FAQ (Mintlify, GitBook, or plain MDX)
+- [x] Help center — `/help` searchable FAQ with category filter and full-text search
 - [x] In-app feedback — thumbs up/down or NPS survey after key actions
 - [ ] Support ticket model — lightweight tickets if you don't want a third-party tool
 
@@ -471,12 +471,12 @@ The items below should be tackled before anything else. They cover the foundatio
 
 ### Billing & Subscriptions
 
-- [ ] **Stripe integration** — subscriptions, one-time charges, setup intents
-- [ ] **Pricing tier model** — free, pro, enterprise stored per user/org
-- [ ] **Feature gates** — check plan before allowing access to paid features
+- [x] **Stripe integration** — subscriptions, checkout session, customer portal, webhook handler
+- [x] **Pricing tier model** — free, pro, enterprise stored per user/org with `subscriptionsTable`
+- [x] **Feature gates** — `requirePlan(feature)` middleware; blocks with `PLAN_REQUIRED` error
 - [ ] **Usage counters** — track seats, API calls, storage, etc. per billing period
-- [ ] **Stripe Customer Portal** — let users manage cards, cancel, download invoices
-- [ ] **Stripe webhook handler** — react to `subscription.updated`, `invoice.payment_failed`, `customer.subscription.deleted`
+- [x] **Stripe Customer Portal** — let users manage cards, cancel, download invoices
+- [x] **Stripe webhook handler** — react to `subscription.updated`, `invoice.payment_failed`, `customer.subscription.deleted`
 - [ ] **Trial period** — 14-day trial with automated expiry and upgrade prompt
 - [ ] **Upgrade/downgrade flows** — proration, immediate vs end-of-cycle
 
@@ -509,7 +509,7 @@ The items below should be tackled before anything else. They cover the foundatio
 ### Onboarding
 
 - [ ] **Welcome email** — sent immediately after registration
-- [ ] **Setup checklist** — "complete your profile", "invite a teammate", "add billing" with progress tracking
+- [x] **Setup checklist** — "complete your profile", "invite a teammate", "add billing" with progress tracking
 - [ ] **Empty states** — every list/table has a helpful empty state with a CTA
 - [ ] **Product tour** — lightweight tooltip walkthrough on first login (Shepherd.js or Driver.js)
 - [ ] **Onboarding completion event** — fire analytics event + notify sales/Slack on new signups
@@ -524,11 +524,11 @@ The items below should be tackled before anything else. They cover the foundatio
 
 ### Developer API Keys
 
-- [ ] **API key model** — named keys, hashed (never store plain), scopes, per-user or per-org
-- [ ] **Key creation UI** — generate key, show once, copy to clipboard
-- [ ] **Usage tracking** — count requests per key, show last-used timestamp
-- [ ] **Rotate / revoke** — instant revocation, forced rotation policy
-- [ ] **Key scopes** — e.g. `read:data`, `write:data`, `admin` — enforced in middleware
+- [x] **API key model** — named keys, hashed (never store plain), scopes, per-user or per-org
+- [x] **Key creation UI** — generate key, show once, copy to clipboard
+- [x] **Usage tracking** — count requests per key, show last-used timestamp
+- [x] **Rotate / revoke** — instant revocation, forced rotation policy
+- [x] **Key scopes** — e.g. `read:data`, `write:data`, `admin` — enforced in middleware
 
 ### Webhooks (user-facing)
 
@@ -564,7 +564,7 @@ The items below should be tackled before anything else. They cover the foundatio
 
 ### Error Monitoring & Observability
 
-- [ ] **Sentry** — client-side error boundaries + server-side exception capture
+- [x] **Sentry** — client-side error boundaries + server-side exception capture
 - [ ] **Structured logging** — already have Elasticsearch; add dashboards for error rate, latency
 - [ ] **Health status page** — public status.yourapp.com using a simple uptime check
 - [ ] **Alerting** — Elasticsearch watcher or PagerDuty/Slack alert on error spike or latency breach
@@ -607,8 +607,8 @@ The items below should be tackled before anything else. They cover the foundatio
 ### Customer Support
 
 - [ ] **Live chat widget** — Crisp, Intercom, or Tawk.to embed in dashboard layout
-- [ ] **Help center** — `/help` with searchable FAQ (Mintlify, GitBook, or plain MDX)
-- [ ] **In-app feedback** — thumbs up/down or NPS survey triggered after key actions
+- [x] **Help center** — `/help` with searchable FAQ, category filter, and full-text search
+- [x] **In-app feedback** — thumbs up/down or NPS survey triggered after key actions
 - [ ] **Support ticket model** — lightweight ticket system if you don't want a third-party tool
 
 ### Loyalty & Rewards System

@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { api } from "../../lib/api";
 import { SkeletonCard, SkeletonText } from "@/components/Skeleton";
+import SetupChecklist from "@/components/SetupChecklist";
 
 export default function DashboardPage() {
   const [user, setUser] = useState<any>(null);
@@ -10,8 +11,14 @@ export default function DashboardPage() {
 
   useEffect(() => {
     Promise.all([
-      api.get<any>("/auth/me").then(setUser).catch(() => {}),
-      api.get<any>("/sessions").then((d) => setSessions(d.sessions || d || [])).catch(() => {}),
+      api
+        .get<any>("/auth/me")
+        .then(setUser)
+        .catch(() => {}),
+      api
+        .get<any>("/sessions")
+        .then((d) => setSessions(d.sessions || d || []))
+        .catch(() => {}),
     ]).finally(() => setLoading(false));
   }, []);
 
@@ -35,19 +42,26 @@ export default function DashboardPage() {
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-white">
-          Welcome back, {user?.displayName || "…"}
-        </h1>
+        <h1 className="text-2xl font-bold text-white">Welcome back, {user?.displayName || "…"}</h1>
         <p className="text-gray-400 mt-1">{user?.email}</p>
       </div>
 
+      <SetupChecklist user={user} />
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
         {[
-          { label: "Active Sessions", value: sessions.filter((s: any) => s.isActive).length, icon: "🔐" },
+          {
+            label: "Active Sessions",
+            value: sessions.filter((s: any) => s.isActive).length,
+            icon: "🔐",
+          },
           { label: "MFA Status", value: user?.mfa?.totp?.enabled ? "Enabled" : "Off", icon: "🛡️" },
           { label: "Passkeys", value: user?.passkeys?.length ?? 0, icon: "🔑" },
         ].map((stat) => (
-          <div key={stat.label} className="bg-gray-900 border border-gray-800 rounded-xl p-5 flex items-center gap-4">
+          <div
+            key={stat.label}
+            className="bg-gray-900 border border-gray-800 rounded-xl p-5 flex items-center gap-4"
+          >
             <span className="text-2xl">{stat.icon}</span>
             <div>
               <div className="text-sm text-gray-400">{stat.label}</div>
@@ -66,8 +80,11 @@ export default function DashboardPage() {
             { href: "/dashboard/sessions", label: "View Sessions", desc: "Manage active devices" },
             { href: "/dashboard/profile", label: "Edit Profile", desc: "Update your details" },
           ].map((link) => (
-            <a key={link.href + link.label} href={link.href}
-              className="flex flex-col p-4 bg-gray-800 hover:bg-gray-700 rounded-xl transition-colors">
+            <a
+              key={link.href + link.label}
+              href={link.href}
+              className="flex flex-col p-4 bg-gray-800 hover:bg-gray-700 rounded-xl transition-colors"
+            >
               <span className="font-medium text-white text-sm">{link.label}</span>
               <span className="text-xs text-gray-400 mt-0.5">{link.desc}</span>
             </a>
