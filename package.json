@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "workspaces": [
-    "packages/ui"
+    "packages/*"
   ],
   "scripts": {
     "postinstall": "node scripts/postinstall.js",
@@ -52,6 +52,8 @@
     "@opentelemetry/semantic-conventions": "^1.41.1",
     "@sentry/node": "^10.56.0",
     "@simplewebauthn/server": "^13.3.1",
+    "@simplewebauthn/types": "^12.0.0",
+    "@swc/core-win32-x64-msvc": "^1.15.40",
     "bcryptjs": "^3.0.3",
     "bullmq": "^5.78.0",
     "drizzle-orm": "^0.45.2",
@@ -108,6 +110,11 @@
   "optionalDependencies": {
     "@esbuild/linux-x64": "0.27.7",
     "@parcel/watcher-linux-x64-glibc": "2.5.6",
-    "@swc/core-linux-x64-gnu": "1.15.40"
+    "@swc/core-linux-x64-gnu": "1.15.40",
+    "@next/swc-win32-x64-msvc": "^16.2.7",
+    "@next/swc-wasm-nodejs": "^16.2.7",
+    "@next/swc-wasm-web": "^16.2.4",
+    "@parcel/watcher-win32-x64": "^2.5.6",
+    "@swc/core-win32-x64-msvc": "^1.15.40"
   }
 }

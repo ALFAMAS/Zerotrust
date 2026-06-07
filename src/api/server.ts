@@ -182,7 +182,7 @@ export async function createServer() {
 if (require.main === module) {
   (async () => {
     const app = await createServer();
-    const port = parseInt(process.env.PORT || "3000");
+    const port = parseInt(process.env.PORT || "1337");
     serve({ fetch: app.fetch, port }, (info) => {
       logger.info(`Server listening on http://localhost:${info.port}`);
     });

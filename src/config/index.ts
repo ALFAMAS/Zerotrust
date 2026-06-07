@@ -13,7 +13,8 @@ function generateSecureKey(byteLength: number): string {
 const DEFAULT_CONFIG: Partial<ZeroAuthConfig> = {
   database: {
     databaseUrl:
-      process.env.DATABASE_URL || "postgresql://zeroauth:password@localhost:5432/zeroauth",
+      process.env.DATABASE_URL ||
+      "postgresql://neon_owner:3J6RcaLXeGwO@ep-noisy-hill-a1hjd9xk-pooler.ap-southeast-1.aws.neon.tech/neon?sslmode=require&channel_binding=require",
     connectionPoolSize: parseInt(process.env.DB_POOL_SIZE || "10"),
   },
   session: {
@@ -54,8 +55,7 @@ const DEFAULT_CONFIG: Partial<ZeroAuthConfig> = {
         clientId: process.env.OAUTH_APPLE_CLIENT_ID || "",
         clientSecret: process.env.OAUTH_APPLE_CLIENT_SECRET || "",
         redirectUri:
-          process.env.OAUTH_APPLE_REDIRECT_URI ||
-          "http://localhost:3000/auth/oauth/apple/callback",
+          process.env.OAUTH_APPLE_REDIRECT_URI || "http://localhost:3000/auth/oauth/apple/callback",
       },
     },
   },
