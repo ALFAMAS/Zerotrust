@@ -56,6 +56,7 @@
     "@swc/core-win32-x64-msvc": "^1.15.40",
     "bcryptjs": "^3.0.3",
     "bullmq": "^5.78.0",
+    "dotenv": "^17.4.2",
     "drizzle-orm": "^0.45.2",
     "geoip-lite": "^2.0.2",
     "hono": "^4.12.23",

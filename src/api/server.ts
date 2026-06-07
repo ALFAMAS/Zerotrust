@@ -31,10 +31,13 @@ import { initSentry } from "../instrument";
 import { initEmailQueue } from "../services/emailQueue";
 import { startRetentionScheduler } from "../services/dataRetention";
 import { startNotificationEmailFallbackScheduler } from "../services/notificationEmailFallback";
+import dotenv from "dotenv";
+
+dotenv.config();
+
 import type { HonoEnv } from "../shared/types";
 
 const logger = getLogger("api-server");
-
 export async function createServer() {
   initSentry();
   const { logger: initLogger } = await initializeZeroAuth();
