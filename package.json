@@ -101,6 +101,10 @@
     "typescript": "^5.4.0",
     "vitest": "4.1.8"
   },
+  "overrides": {
+    "postcss": "^8.5.10",
+    "esbuild": "^0.25.0"
+  },
   "optionalDependencies": {
     "@esbuild/linux-x64": "0.27.7",
     "@parcel/watcher-linux-x64-glibc": "2.5.6",
