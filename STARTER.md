@@ -2,7 +2,7 @@
 
 A production-ready SaaS boilerplate with enterprise-grade authentication, billing, and developer tools built in. Drop in your business logic and ship.
 
-**Stack:** Hono + TypeScript + PostgreSQL (Drizzle ORM) + Redis · Next.js 15.3 + React 19 + Tailwind CSS
+**Stack:** Hono + TypeScript + PostgreSQL (Drizzle ORM) + Redis · Next.js 16.2 + React 19 + Tailwind CSS
 
 ---
 
@@ -249,7 +249,7 @@ Full list with comments: [`.env.example`](./.env.example) · [`packages/ui/.env.
 │   └── logger/
 │       └── index.ts                        # Structured logger
 ├── packages/
-│   └── ui/                                 # Next.js 15.3 / React 19 (port 3001)
+│   └── ui/                                 # Next.js 16.2 / React 19 (port 3001)
 │       ├── messages/                       # i18n JSON files (en.json, es.json, fr.json)
 │       ├── sentry.client.config.ts         # Sentry browser config
 │       ├── sentry.server.config.ts         # Sentry server config
@@ -412,7 +412,7 @@ Tests live in `src/__tests__/`. CI runs them on every push to `main`.
 | 1.3     | 2025-04 | SAML 2.0 SSO, SCIM 2.0, LDAP sync, OIDC provider, org custom roles                                          |
 | 1.4     | 2025-05 | i18n (next-intl EN/ES/FR), Sentry, blog/changelog, analytics consent, PWA manifest                          |
 | 1.5     | 2025-06 | API key management, Stripe billing + webhooks, plan feature gates, help center, onboarding checklist        |
-| 1.6     | 2025-06 | Package upgrades: Next.js 15.3, React 19, @simplewebauthn/server v13, OTel resources v2, Stripe v22, Zod v4 |
+| 1.6     | 2025-06 | Package upgrades: Next.js 16.2, React 19, @simplewebauthn/server v13, OTel resources v2, Stripe v22, Zod v4 |
 
 ---
 

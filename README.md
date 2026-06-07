@@ -3,7 +3,7 @@
 A production-ready SaaS boilerplate with enterprise-grade authentication built in. Clone it, add your business logic, and ship.
 
 **Backend:** Hono + TypeScript + PostgreSQL (Drizzle ORM) + Redis  
-**Frontend:** Next.js 15.3 + Tailwind CSS — landing page, user dashboard, and admin panel in one app
+**Frontend:** Next.js 16.2 + Tailwind CSS — landing page, user dashboard, and admin panel in one app
 
 ---
 
@@ -525,7 +525,7 @@ Full list with comments: [`.env.example`](./.env.example) and [`packages/ui/.env
 │   │   └── permissions.ts          # Org permission constants
 │   └── middleware/                 # auth, rateLimiting, apiKeyAuth, requirePlan, ...
 ├── packages/
-│   └── ui/                         # Next.js 15.3 (port 3001)
+│   └── ui/                         # Next.js 16.2 (port 3001)
 │       ├── messages/               # i18n JSON files (en, es, fr)
 │       ├── sentry.*.config.ts      # Sentry client / server / edge config
 │       └── src/

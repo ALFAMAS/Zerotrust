@@ -6,6 +6,7 @@
     "packages/ui"
   ],
   "scripts": {
+    "postinstall": "node scripts/postinstall.js",
     "dev": "concurrently --kill-others-on-fail -n API,UI -c cyan,magenta \"tsx watch src/api/server.ts\" \"cd packages/ui && next dev -p 3001\"",
     "dev:api": "tsx watch src/api/server.ts",
     "dev:ui": "cd packages/ui && next dev -p 3001",
@@ -102,6 +103,8 @@
     "vitest": "^3.2.6"
   },
   "optionalDependencies": {
-    "@esbuild/linux-x64": "0.27.7"
+    "@esbuild/linux-x64": "0.27.7",
+    "@parcel/watcher-linux-x64-glibc": "2.5.6",
+    "@swc/core-linux-x64-gnu": "1.15.40"
   }
 }

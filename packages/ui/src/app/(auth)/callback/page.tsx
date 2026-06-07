@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { setTokens } from "@/lib/auth";
+import { setToken } from "@/lib/auth";
 import { Suspense } from "react";
 
 function CallbackInner() {
@@ -13,7 +13,7 @@ function CallbackInner() {
     const accessToken = params.get("accessToken");
     const refreshToken = params.get("refreshToken");
     if (accessToken && refreshToken) {
-      setTokens(accessToken, refreshToken);
+      setToken(accessToken, refreshToken);
     }
     router.replace("/dashboard");
   }, [params, router]);

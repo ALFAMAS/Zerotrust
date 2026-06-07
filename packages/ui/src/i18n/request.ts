@@ -5,16 +5,16 @@ const SUPPORTED_LOCALES = ["en", "es", "fr"] as const;
 type Locale = (typeof SUPPORTED_LOCALES)[number];
 const DEFAULT_LOCALE: Locale = "en";
 
-function detectLocale(): Locale {
+async function detectLocale(): Promise<Locale> {
   // 1. Cookie takes highest priority (explicit user preference)
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   const cookieLocale = cookieStore.get("za_locale")?.value as Locale | undefined;
   if (cookieLocale && (SUPPORTED_LOCALES as readonly string[]).includes(cookieLocale)) {
     return cookieLocale;
   }
 
   // 2. Accept-Language header (browser preference)
-  const acceptLanguage = headers().get("accept-language") ?? "";
+  const acceptLanguage = (await headers()).get("accept-language") ?? "";
   for (const part of acceptLanguage.split(",")) {
     const lang = part.split(";")[0].trim().toLowerCase().slice(0, 2) as Locale;
     if ((SUPPORTED_LOCALES as readonly string[]).includes(lang)) {
@@ -26,7 +26,7 @@ function detectLocale(): Locale {
 }
 
 export default getRequestConfig(async () => {
-  const locale = detectLocale();
+  const locale = await detectLocale();
   return {
     locale,
     messages: (await import(`../../messages/${locale}.json`)).default,
