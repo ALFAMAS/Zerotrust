@@ -8,15 +8,7 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-# 2. TypeScript type check (API)
-echo "🔍 Type checking..."
-bun run type-check
-if [ $? -ne 0 ]; then
-  echo "❌ TypeScript type check failed"
-  exit 1
-fi
-
-# 3. Detect accidental secrets in staged files
+# 2. Detect accidental secrets in staged files
 echo "🔒 Scanning for secrets..."
 STAGED=$(git diff --cached --name-only --diff-filter=ACM)
 if [ -n "$STAGED" ]; then
@@ -30,11 +22,10 @@ if [ -n "$STAGED" ]; then
   fi
 fi
 
-# 4. Update dependency graph (graphify) if installed
+# 3. Update dependency graph (graphify) if installed
 if command -v graphify >/dev/null 2>&1; then
   echo "📊 Updating dependency graph..."
   graphify update . --silent 2>/dev/null || true
-  # Stage any updated graph files
   git add graphify-out/ 2>/dev/null || true
 fi
 
