@@ -30,16 +30,16 @@
   },
   "lint-staged": {
     "src/**/*.ts": [
-      "prettier --write"
+      "bunx prettier --write"
     ],
     "src/**/!(*.test|*.spec).ts": [
-      "eslint --fix --max-warnings=0"
+      "bunx eslint --fix --max-warnings=0"
     ],
     "packages/ui/src/**/*.{ts,tsx}": [
-      "prettier --write"
+      "bunx prettier --write"
     ],
     "*.{json,md}": [
-      "prettier --write"
+      "bunx prettier --write"
     ]
   },
   "dependencies": {
