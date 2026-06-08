@@ -7,9 +7,9 @@
   ],
   "scripts": {
     "postinstall": "node scripts/postinstall.js",
-    "dev": "concurrently --kill-others-on-fail -n API,UI -c cyan,magenta \"tsx watch src/api/server.ts\" \"bun --cwd packages/ui run dev\"",
-    "dev:api": "tsx watch src/api/server.ts",
-    "dev:ui": "bun --cwd packages/ui run dev",
+    "dev": "concurrently --kill-others-on-fail -n API,UI -c cyan,magenta \"bun --watch src/api/server.ts\" \"bun run --cwd packages/ui dev\"",
+    "dev:api": "bun --watch src/api/server.ts",
+    "dev:ui": "bun run --cwd packages/ui dev",
     "build": "tsc",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
