@@ -1,3 +1,4 @@
+#!/usr/bin/env sh
 echo "🚀 Running pre-push checks..."
 
 # 1. Run tests before pushing

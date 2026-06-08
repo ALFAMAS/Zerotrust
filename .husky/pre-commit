@@ -1,3 +1,4 @@
+#!/usr/bin/env sh
 echo "⚙️  Running pre-commit checks..."
 
 # 1. Format + lint staged files
