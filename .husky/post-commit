@@ -2,15 +2,15 @@
 
 # Post-commit: informational only, never blocks
 COMMIT_HASH=$(git rev-parse --short HEAD 2>/dev/null)
-COMMIT_MSG=$(git log -1 --pretty=%B 2>/dev/null | head -1)
+COMMIT_MSG=$(git log -1 --pretty=format:%s 2>/dev/null)
 BRANCH=$(git branch --show-current 2>/dev/null)
 
 echo ""
 echo "✓ Committed: $COMMIT_HASH on $BRANCH"
 echo "  $COMMIT_MSG"
 
-# Remind to push
-UNPUSHED=$(git log @{u}..HEAD --oneline 2>/dev/null | wc -l | tr -d ' ')
+# Remind to push (git rev-list --count avoids wc/tr which aren't on Windows)
+UNPUSHED=$(git rev-list --count @{u}..HEAD 2>/dev/null || echo 0)
 if [ "$UNPUSHED" -gt "0" ]; then
   echo "  ↑ $UNPUSHED commit(s) ahead of origin/$BRANCH — don't forget to push"
 fi
