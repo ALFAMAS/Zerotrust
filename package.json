@@ -106,6 +106,9 @@
   },
   "optionalDependencies": {
     "@parcel/watcher-linux-x64-glibc": "2.5.6",
+    "@parcel/watcher-win32-x64": "2.5.6",
+    "@rolldown/binding-linux-x64-gnu": "1.1.0",
+    "@rolldown/binding-win32-x64-msvc": "1.1.0",
     "@swc/core-linux-x64-gnu": "1.15.40"
   }
 }
