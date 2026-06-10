@@ -15,6 +15,7 @@
     "db:migrate": "bunx drizzle-kit migrate",
     "db:push": "bunx drizzle-kit push",
     "db:studio": "bunx drizzle-kit studio",
+    "db:backup": "node scripts/db-backup.js",
     "start": "node dist/api/server.js",
     "test": "bunx vitest",
     "test:watch": "bunx vitest --watch",

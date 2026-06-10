@@ -18,6 +18,9 @@ import { authMiddleware } from "../../middleware/auth";
 import { getLogger } from "../../logger";
 import { getProviderAdapter } from "../../oauth/provider.factory";
 import { sendWelcomeEmail } from "../../services/email.service";
+import { rejectIfBreached } from "../../services/passwordBreach.service";
+import { notifyIfNewDevice } from "../../services/loginNotification.service";
+import { recordAndRespond } from "../../services/accountTakeover.service";
 import type { HonoEnv } from "../../shared/types";
 
 const router = new Hono<HonoEnv>();
@@ -73,6 +76,12 @@ router.post("/register", rateLimit({ points: 10, windowSecs: 60 }), async (c) =>
       .limit(1);
     if (existing.length > 0) {
       return c.json({ error: "USER_ALREADY_EXISTS", message: "User already exists" }, 409);
+    }
+
+    // HaveIBeenPwned breach check (k-anonymity — fails open on network errors)
+    const breachMessage = await rejectIfBreached(password);
+    if (breachMessage) {
+      return c.json({ error: "PASSWORD_BREACHED", message: breachMessage }, 400);
     }
 
     const cfg = getConfig();
@@ -196,6 +205,20 @@ router.post("/login", rateLimit({ points: 20, windowSecs: 60 }), async (c) => {
     });
 
     await enforceMaxConcurrentDevices(user.id);
+
+    await db.update(usersTable).set({ lastLoginAt: new Date() }).where(eq(usersTable.id, user.id));
+
+    // New-device alert email — fire and forget, never blocks the response
+    void notifyIfNewDevice({
+      userId: user.id,
+      email: user.email,
+      displayName: user.displayName ?? user.email,
+      sessionId: session.id,
+      fingerprintHash: fingerprint.hash,
+      ipAddress: fpInput.ip,
+      country: c.get("inferredCountry") || undefined,
+      userAgent: c.req.header("user-agent"),
+    });
 
     return c.json({
       accessToken,
@@ -489,6 +512,61 @@ router.patch("/me", authMiddleware, async (c) => {
     return c.json(updated);
   } catch (err) {
     logger.error("Patch current user error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR" }, 500);
+  }
+});
+
+// ── POST /auth/me/email — change email (requires current password) ───────────
+
+router.post("/me/email", authMiddleware, rateLimit({ points: 5, windowSecs: 60 }), async (c) => {
+  try {
+    const user = c.get("user");
+    const { newEmail, password } = await c.req.json().catch(() => ({}));
+    if (!newEmail || !password) {
+      return c.json({ error: "INVALID_REQUEST", message: "newEmail and password required" }, 400);
+    }
+
+    const db = getDb();
+    const [row] = await db.select().from(usersTable).where(eq(usersTable.id, user.id)).limit(1);
+    if (!row?.passwordHash) {
+      return c.json({ error: "REAUTH_REQUIRED", message: "Password verification required" }, 403);
+    }
+
+    const valid = await bcrypt.compare(password, row.passwordHash);
+    if (!valid) {
+      return c.json({ error: "INVALID_CREDENTIALS", message: "Incorrect password" }, 401);
+    }
+
+    const normalized = String(newEmail).toLowerCase().trim();
+    const [taken] = await db
+      .select({ id: usersTable.id })
+      .from(usersTable)
+      .where(eq(usersTable.email, normalized))
+      .limit(1);
+    if (taken) {
+      return c.json({ error: "EMAIL_TAKEN", message: "Email already in use" }, 409);
+    }
+
+    const previousEmail = row.email;
+    await db
+      .update(usersTable)
+      .set({ email: normalized, updatedAt: new Date() })
+      .where(eq(usersTable.id, user.id));
+
+    // Account takeover detection: email change shortly after a password
+    // reset (or other sensitive change) revokes other sessions and alerts
+    // both the old and new address.
+    void recordAndRespond(user.id, "email_change", {
+      email: normalized,
+      previousEmail,
+      displayName: row.displayName ?? normalized,
+      ipAddress: c.req.header("x-forwarded-for")?.split(",")[0].trim(),
+      userAgent: c.req.header("user-agent"),
+    });
+
+    return c.json({ success: true, email: normalized });
+  } catch (err) {
+    logger.error("Email change error", err as Error);
     return c.json({ error: "INTERNAL_ERROR" }, 500);
   }
 });

@@ -8,6 +8,8 @@ import { sendOTP } from "../../mfa";
 import { getConfig } from "../../config";
 import { getLogger } from "../../logger";
 import { sendPasswordResetEmail } from "../../services/email.service";
+import { rejectIfBreached } from "../../services/passwordBreach.service";
+import { recordAndRespond } from "../../services/accountTakeover.service";
 import { ErrorCodes } from "../../shared/types";
 import type { HonoEnv } from "../../shared/types";
 
@@ -81,7 +83,11 @@ router.post("/confirm", async (c) => {
     const db = getDb();
 
     const users = await db
-      .select({ id: usersTable.id })
+      .select({
+        id: usersTable.id,
+        email: usersTable.email,
+        displayName: usersTable.displayName,
+      })
       .from(usersTable)
       .where(eq(usersTable.email, email))
       .limit(1);
@@ -119,6 +125,12 @@ router.post("/confirm", async (c) => {
       );
     }
 
+    // HaveIBeenPwned breach check (k-anonymity — fails open on network errors)
+    const breachMessage = await rejectIfBreached(newPassword);
+    if (breachMessage) {
+      return c.json({ code: "PASSWORD_BREACHED", message: breachMessage, details: [] }, 400);
+    }
+
     const cfg = getConfig();
     const passwordHash = await bcrypt.hash(newPassword, cfg.security.bcryptRounds);
 
@@ -128,6 +140,15 @@ router.post("/confirm", async (c) => {
       .where(eq(usersTable.id, user.id));
 
     await db.delete(otpsTable).where(eq(otpsTable.id, otp.id));
+
+    // Account takeover detection: password reset is a sensitive change —
+    // combined with a recent email change it triggers session revocation.
+    void recordAndRespond(user.id, "password_reset", {
+      email: user.email,
+      displayName: user.displayName ?? user.email,
+      ipAddress: c.req.header("x-forwarded-for")?.split(",")[0].trim(),
+      userAgent: c.req.header("user-agent"),
+    });
 
     return c.json({ success: true });
   } catch (err) {
