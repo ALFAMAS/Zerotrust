@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { api } from "../../../lib/api";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
+import Modal from "../../../components/Modal";
 
 interface Subscription {
   plan: string;
@@ -12,6 +13,15 @@ interface Subscription {
   cancelAtPeriodEnd: boolean;
   trialEnd: string | null;
 }
+
+const CANCEL_REASONS = [
+  "Too expensive",
+  "Missing features I need",
+  "Switching to another product",
+  "No longer needed",
+  "Too hard to use",
+  "Other",
+];
 
 const PLANS = [
   {
@@ -55,14 +65,48 @@ function BillingContent() {
   const [loading, setLoading] = useState(true);
   const [portalLoading, setPortalLoading] = useState(false);
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
+  const [cancelOpen, setCancelOpen] = useState(false);
+  const [cancelReason, setCancelReason] = useState("");
+  const [cancelComment, setCancelComment] = useState("");
+  const [cancelBusy, setCancelBusy] = useState(false);
+  const [retentionOffer, setRetentionOffer] = useState<string | null>(null);
 
-  useEffect(() => {
+  function loadSubscription() {
     api
       .get<Subscription>("/billing/subscription")
       .then(setSub)
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, []);
+  }
+
+  useEffect(loadSubscription, []);
+
+  async function handleCancel(action: "cancel" | "pause") {
+    setCancelBusy(true);
+    try {
+      const res = await api.post<{ offer?: { code: string } }>("/billing/cancel", {
+        action,
+        reason: cancelReason,
+        comment: cancelComment,
+      });
+      if (res.offer?.code) setRetentionOffer(res.offer.code);
+      setCancelOpen(false);
+      loadSubscription();
+    } catch {
+      alert("Failed to update subscription. Please try again.");
+    } finally {
+      setCancelBusy(false);
+    }
+  }
+
+  async function handleReactivate() {
+    try {
+      await api.post("/billing/reactivate", {});
+      loadSubscription();
+    } catch {
+      alert("Failed to reactivate subscription.");
+    }
+  }
 
   async function handleCheckout(priceId: string) {
     setCheckoutLoading(priceId);
@@ -106,6 +150,14 @@ function BillingContent() {
         </div>
       )}
 
+      {retentionOffer && (
+        <div className="mb-6 bg-indigo-900/30 border border-indigo-700 rounded-xl p-4 text-indigo-200 text-sm">
+          Sorry to see you go! Use code{" "}
+          <span className="font-mono font-bold">{retentionOffer}</span> for a discount if you change
+          your mind.
+        </div>
+      )}
+
       {!loading && sub && sub.plan !== "free" && (
         <div className="mb-8 bg-gray-900 border border-gray-800 rounded-xl p-6">
           <div className="flex items-center justify-between">
@@ -114,6 +166,11 @@ function BillingContent() {
               <p className="text-lg font-bold text-white capitalize mt-0.5">{sub.plan}</p>
               <p className="text-sm text-gray-500 mt-1">
                 Status: <span className="capitalize text-gray-300">{sub.status}</span>
+                {sub.trialEnd && new Date(sub.trialEnd) > new Date() && (
+                  <span className="ml-2 text-blue-400">
+                    Trial ends {new Date(sub.trialEnd).toLocaleDateString()}
+                  </span>
+                )}
                 {sub.currentPeriodEnd && (
                   <> · Renews {new Date(sub.currentPeriodEnd).toLocaleDateString()}</>
                 )}
@@ -122,15 +179,83 @@ function BillingContent() {
                 )}
               </p>
             </div>
-            <button
-              onClick={handlePortal}
-              disabled={portalLoading}
-              className="px-4 py-2 bg-gray-700 hover:bg-gray-600 disabled:opacity-50 text-white text-sm rounded-lg transition-colors"
-            >
-              {portalLoading ? "Loading…" : "Manage billing"}
-            </button>
+            <div className="flex items-center gap-2">
+              {sub.cancelAtPeriodEnd ? (
+                <button
+                  onClick={handleReactivate}
+                  className="px-4 py-2 bg-green-700 hover:bg-green-600 text-white text-sm rounded-lg transition-colors"
+                >
+                  Reactivate
+                </button>
+              ) : (
+                <button
+                  onClick={() => setCancelOpen(true)}
+                  className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm rounded-lg transition-colors"
+                >
+                  Cancel plan
+                </button>
+              )}
+              <button
+                onClick={handlePortal}
+                disabled={portalLoading}
+                className="px-4 py-2 bg-gray-700 hover:bg-gray-600 disabled:opacity-50 text-white text-sm rounded-lg transition-colors"
+              >
+                {portalLoading ? "Loading…" : "Manage billing"}
+              </button>
+            </div>
           </div>
         </div>
+      )}
+
+      {cancelOpen && (
+        <Modal title="Before you go…" onClose={() => setCancelOpen(false)}>
+          <div className="space-y-4">
+            <p className="text-sm text-gray-400">Help us improve — why are you canceling?</p>
+            <div className="space-y-2">
+              {CANCEL_REASONS.map((r) => (
+                <label key={r} className="flex items-center gap-2 text-sm text-gray-300">
+                  <input
+                    type="radio"
+                    name="cancel-reason"
+                    checked={cancelReason === r}
+                    onChange={() => setCancelReason(r)}
+                    className="border-gray-600 bg-gray-800"
+                  />
+                  {r}
+                </label>
+              ))}
+            </div>
+            <textarea
+              value={cancelComment}
+              onChange={(e) => setCancelComment(e.target.value)}
+              placeholder="Anything else you'd like us to know? (optional)"
+              rows={2}
+              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500"
+            />
+            <div className="bg-gray-800/60 border border-gray-700 rounded-lg p-3">
+              <p className="text-sm text-gray-300">
+                💡 Need a break instead? Pause your subscription — no charges until you resume, and
+                your data stays put.
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => handleCancel("pause")}
+                disabled={cancelBusy}
+                className="flex-1 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
+              >
+                Pause instead
+              </button>
+              <button
+                onClick={() => handleCancel("cancel")}
+                disabled={cancelBusy || !cancelReason}
+                className="flex-1 py-2 bg-red-900/60 hover:bg-red-900 disabled:opacity-50 text-red-200 text-sm font-medium rounded-lg transition-colors"
+              >
+                {cancelBusy ? "Working…" : "Cancel at period end"}
+              </button>
+            </div>
+          </div>
+        </Modal>
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
