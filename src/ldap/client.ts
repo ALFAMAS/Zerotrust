@@ -46,7 +46,7 @@ let LdaptsClient: any = null;
 
 try {
   // Dynamic require so the module still loads when ldapts is absent
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   LdaptsClient = require("ldapts").Client;
 } catch {
   logger.warn(

@@ -101,7 +101,7 @@ export function getProviderAdapter(provider: string) {
             const parts = tok.id_token.split(".");
             const payload = JSON.parse(Buffer.from(parts[1], "base64").toString("utf8"));
             profile = { id: payload.sub, email: payload.email, name: payload.name };
-          } catch (e) {
+          } catch {
             profile = null;
           }
         }

@@ -9,9 +9,8 @@ export async function sendSmsOTP(to: string, body: string) {
   if (accountSid && authToken && from) {
     try {
       // Lazy import to avoid hard dependency when not configured
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const Twilio = require("twilio");
-      const client = new Twilio(accountSid, authToken);
+      const { default: twilio } = await import("twilio");
+      const client = twilio(accountSid, authToken);
       await client.messages.create({ to, from, body });
       logger.info("SMS OTP sent via Twilio", { to });
       return true;

@@ -32,7 +32,7 @@ export async function shutdownRedisRateLimiter() {
   if (client) {
     try {
       await client.quit();
-    } catch (e) {
+    } catch {
       client.disconnect();
     }
     client = null;
@@ -44,7 +44,7 @@ export async function pingRedis(): Promise<boolean> {
   try {
     const res = await client.ping();
     return res === "PONG" || res === "OK";
-  } catch (e) {
+  } catch {
     return false;
   }
 }
