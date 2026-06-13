@@ -313,7 +313,7 @@ export type {
 
 export async function initializeZeroAuth() {
   const { getConfig } = await import("./config/index.js");
-  const { initializeDatabase } = await import("./db/index.js");
+  const { initializeDatabase, checkPendingMigrations } = await import("./db/index.js");
   const { initializeCSFLE } = await import("./crypto/csfle.js");
   const { initializeLogger } = await import("./logger/index.js");
 
@@ -323,6 +323,7 @@ export async function initializeZeroAuth() {
   logger.info("Initializing ZeroAuth system...");
 
   await initializeDatabase();
+  await checkPendingMigrations();
 
   await initializeCSFLE(config);
 

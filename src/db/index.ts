@@ -1,5 +1,7 @@
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
+import { is, getTableColumns, getTableName } from "drizzle-orm";
+import { PgTable } from "drizzle-orm/pg-core";
 import * as schema from "./schema";
 import { getConfig } from "../config";
 
@@ -40,6 +42,72 @@ export async function initializeDatabase(): Promise<void> {
   } catch (error) {
     console.error("✗ Failed to connect to database:", error);
     throw error;
+  }
+}
+
+/**
+ * Startup migration check.
+ *
+ * Compares the schema the running code expects (every pgTable defined in
+ * `./schema`) against the columns actually present in the database, and warns
+ * loudly when tables or columns are missing — i.e. when migrations have not
+ * been applied. This is workflow-agnostic: it works whether the database is
+ * kept in sync with `db:migrate` (which records `drizzle.__drizzle_migrations`)
+ * or with `db:push` (which does not), so it catches schema drift either way.
+ *
+ * Best-effort: any failure is logged but never blocks startup.
+ */
+export async function checkPendingMigrations(): Promise<void> {
+  if (!isConnected || !sqlClient) return;
+
+  try {
+    const tables = Object.values(schema).filter((v) => is(v, PgTable)) as PgTable[];
+    if (tables.length === 0) return;
+
+    // Single round-trip: every column currently present in the public schema.
+    const rows = await sqlClient<{ table_name: string; column_name: string }[]>`
+      SELECT table_name, column_name
+      FROM information_schema.columns
+      WHERE table_schema = 'public'
+    `;
+
+    const actual = new Map<string, Set<string>>();
+    for (const r of rows) {
+      if (!actual.has(r.table_name)) actual.set(r.table_name, new Set());
+      actual.get(r.table_name)!.add(r.column_name);
+    }
+
+    const missingTables: string[] = [];
+    const missingColumns: string[] = [];
+
+    for (const table of tables) {
+      const name = getTableName(table);
+      const cols = actual.get(name);
+      if (!cols) {
+        missingTables.push(name);
+        continue;
+      }
+      for (const col of Object.values(getTableColumns(table))) {
+        if (!cols.has(col.name)) missingColumns.push(`${name}.${col.name}`);
+      }
+    }
+
+    if (missingTables.length === 0 && missingColumns.length === 0) {
+      console.log(`✓ Database schema is up to date (${tables.length} tables verified)`);
+      return;
+    }
+
+    console.warn("⚠ Database schema is out of date — pending migrations detected:");
+    if (missingTables.length > 0) {
+      console.warn(`  Missing tables: ${missingTables.join(", ")}`);
+    }
+    if (missingColumns.length > 0) {
+      console.warn(`  Missing columns: ${missingColumns.join(", ")}`);
+    }
+    console.warn('  Run "bun run db:migrate" (or "bun run db:push") to update the database.');
+  } catch (error) {
+    // The check must never prevent the server from starting.
+    console.warn("⚠ Could not verify database migrations:", (error as Error).message);
   }
 }
 
