@@ -5,9 +5,17 @@
 // Handles: Linux x64, Windows x64, macOS x64, macOS arm64.
 
 const { spawnSync } = require("child_process");
-const { existsSync, copyFileSync, readFileSync, readdirSync, realpathSync } = require("fs");
+const {
+  existsSync,
+  cpSync,
+  mkdtempSync,
+  rmSync,
+  readFileSync,
+  readdirSync,
+  realpathSync,
+} = require("fs");
 const { join, dirname } = require("path");
-const { homedir } = require("os");
+const { homedir, tmpdir } = require("os");
 
 const platform = process.platform; // 'linux' | 'darwin' | 'win32'
 const arch = process.arch; // 'x64' | 'arm64'
@@ -18,9 +26,86 @@ if (!SUPPORTED.includes(key)) process.exit(0);
 
 const root = join(__dirname, "..");
 
+// Locate a package directory inside bun's isolated install store
+// (node_modules/.bun/<pkg>@<version>/node_modules/<subpath...>). Bun keeps
+// transitive deps here rather than hoisting them to a node_modules root, so a
+// plain require.resolve() from the repo root can't find them.
+function bunStorePkgDir(entryPrefix, ...subpath) {
+  const bunStore = join(root, "node_modules", ".bun");
+  if (!existsSync(bunStore)) return null;
+  const entry = readdirSync(bunStore).find((d) => d.startsWith(entryPrefix));
+  if (!entry) return null;
+  const dir = join(bunStore, entry, "node_modules", ...subpath);
+  return existsSync(dir) ? dir : null;
+}
+
+// Ensure a platform-specific binding *package* exists at destPkgDir.
+// 1. Copy the whole package from bun's global cache when present (no network).
+// 2. Otherwise fetch it with npm into a pristine temp dir and copy it over.
+//    The temp dir avoids the npm optional-dependencies bug (npm/cli#4828) that
+//    makes `npm install` throw when run inside a workspace package directory.
+// Always best-effort — never aborts the install.
+function ensureBindingPackage(fullName, destPkgDir, version) {
+  if (existsSync(destPkgDir)) return;
+
+  const slash = fullName.indexOf("/");
+  const scope = slash === -1 ? null : fullName.slice(0, slash); // e.g. "@parcel"
+  const short = slash === -1 ? fullName : fullName.slice(slash + 1);
+
+  // 1. Copy from bun's global package cache, if bun happened to download it.
+  const cacheScopeDir = scope
+    ? join(homedir(), ".bun", "install", "cache", scope)
+    : join(homedir(), ".bun", "install", "cache");
+  if (existsSync(cacheScopeDir)) {
+    const match = readdirSync(cacheScopeDir).find(
+      (d) => d === short || d.startsWith(`${short}@`)
+    );
+    if (match) {
+      try {
+        cpSync(join(cacheScopeDir, match), destPkgDir, { recursive: true });
+        console.log(`✓ ${fullName} placed from bun cache`);
+        return;
+      } catch {
+        // fall through to npm
+      }
+    }
+  }
+
+  // 2. Fetch via npm into a clean temp dir, then copy into place.
+  let tmp;
+  try {
+    tmp = mkdtempSync(join(tmpdir(), "zeroauth-binding-"));
+    const spec = version ? `${fullName}@${version}` : fullName;
+    spawnSync(
+      "npm",
+      ["install", "--no-save", "--ignore-scripts", "--no-package-lock", "--prefix", tmp, spec],
+      { cwd: tmp, stdio: "inherit", shell: true }
+    );
+    const installed = join(tmp, "node_modules", ...fullName.split("/"));
+    if (existsSync(installed)) {
+      cpSync(installed, destPkgDir, { recursive: true });
+      console.log(`✓ ${fullName} placed via npm`);
+    } else {
+      console.warn(`⚠ ${fullName} could not be fetched`);
+    }
+  } catch (err) {
+    console.warn(`⚠ could not place ${fullName}: ${err && err.message}`);
+  } finally {
+    if (tmp) {
+      try {
+        rmSync(tmp, { recursive: true, force: true });
+      } catch {
+        /* ignore temp cleanup failures */
+      }
+    }
+  }
+}
+
 // ── 1. @parcel/watcher native binding ────────────────────────────────────────
-// Next.js 16 Turbopack requires @parcel/watcher; bun doesn't hoist its native
-// binding into the packages/ui node_modules where @parcel/watcher can find it.
+// Next.js 16 Turbopack requires @parcel/watcher, which at runtime does
+// require('@parcel/watcher-<platform>'). Bun installs @parcel/watcher into its
+// isolated store but doesn't place that optional platform package next to it,
+// so the binding must be dropped in as a sibling of @parcel/watcher.
 const parcelBindingName = {
   "linux-x64": "watcher-linux-x64-glibc",
   "darwin-x64": "watcher-darwin-x64",
@@ -28,82 +113,53 @@ const parcelBindingName = {
   "win32-x64": "watcher-win32-x64",
 }[key];
 
-const uiDir = join(root, "packages", "ui");
-const parcelDest = join(uiDir, "node_modules", "@parcel", parcelBindingName);
-if (!existsSync(parcelDest)) {
-  spawnSync(
-    "npm",
-    ["install", "--no-save", "--ignore-scripts", `@parcel/${parcelBindingName}@2.5.6`],
-    { cwd: uiDir, stdio: "inherit", shell: true }
-  );
+const parcelWatcherDir =
+  bunStorePkgDir("@parcel+watcher@", "@parcel", "watcher") ||
+  (() => {
+    try {
+      return dirname(require.resolve("@parcel/watcher/package.json"));
+    } catch {
+      return null;
+    }
+  })();
+
+if (parcelBindingName && parcelWatcherDir) {
+  // Place as a sibling: <store>/@parcel/watcher-<platform>
+  const parcelDest = join(dirname(parcelWatcherDir), parcelBindingName);
+  ensureBindingPackage(`@parcel/${parcelBindingName}`, parcelDest, "2.5.6");
 }
 
 // ── 2. @swc/core native binding ───────────────────────────────────────────────
-// next-intl@4.13+ uses @swc/core; its .node binary must sit next to binding.js.
-// Bun downloads the platform package but doesn't place it where @swc/core looks.
-const swcPkgName = {
-  "linux-x64": "@swc/core-linux-x64-gnu",
-  "darwin-x64": "@swc/core-darwin-x64",
-  "darwin-arm64": "@swc/core-darwin-arm64",
+// next-intl@4.13+ uses @swc/core, whose binding.js does
+// require('@swc/core-<platform>'). Bun installs @swc/core into its isolated
+// store without that optional platform package, so drop it in as a sibling.
+const swcPlatformName = {
+  "linux-x64": "core-linux-x64-gnu",
+  "darwin-x64": "core-darwin-x64",
+  "darwin-arm64": "core-darwin-arm64",
   // Windows: bun installs the binding correctly, no manual fix needed
 }[key];
 
-const swcBinaryName = {
-  "linux-x64": "swc.linux-x64-gnu.node",
-  "darwin-x64": "swc.darwin-x64.node",
-  "darwin-arm64": "swc.darwin-arm64.node",
-}[key];
-
-if (swcPkgName && swcBinaryName) {
-  let swcBindingDir = null;
-  try {
-    swcBindingDir = dirname(require.resolve("@swc/core/binding"));
-  } catch {}
-
-  if (swcBindingDir) {
-    const dest = join(swcBindingDir, swcBinaryName);
-    if (!existsSync(dest)) {
-      // Try bun's global package cache first (fastest — no network)
-      const pkgDirName = swcPkgName.replace("/", "+").replace("@", "");
-      const bunCacheDir = join(homedir(), ".bun", "install", "cache", "@swc");
-      let copied = false;
-
-      if (existsSync(bunCacheDir)) {
-        const shortName = swcPkgName.replace("@swc/", "");
-        const match = readdirSync(bunCacheDir).find((d) => d.startsWith(`${shortName}@`));
-        if (match) {
-          const src = join(bunCacheDir, match, swcBinaryName);
-          if (existsSync(src)) {
-            copyFileSync(src, dest);
-            console.log(`✓ ${swcBinaryName} placed from bun cache`);
-            copied = true;
-          }
-        }
-      }
-
-      // Fallback: npm install the platform package next to @swc/core
-      if (!copied) {
-        const swcVersion = (() => {
-          try {
-            return JSON.parse(readFileSync(join(swcBindingDir, "..", "package.json"), "utf8")).version;
-          } catch {
-            return "1.15.40";
-          }
-        })();
-        spawnSync(
-          "npm",
-          ["install", "--no-save", "--ignore-scripts", `${swcPkgName}@${swcVersion}`],
-          { cwd: join(swcBindingDir, ".."), stdio: "inherit", shell: true }
-        );
-        // After npm install, the .node file should be resolvable — copy it over
-        const installedBinary = join(swcBindingDir, "..", "node_modules", swcPkgName, swcBinaryName);
-        if (existsSync(installedBinary)) {
-          copyFileSync(installedBinary, dest);
-          console.log(`✓ ${swcBinaryName} placed via npm install`);
-        }
-      }
+const swcCoreDir =
+  bunStorePkgDir("@swc+core@", "@swc", "core") ||
+  (() => {
+    try {
+      return dirname(require.resolve("@swc/core/package.json"));
+    } catch {
+      return null;
     }
+  })();
+
+if (swcPlatformName && swcCoreDir) {
+  let swcVersion;
+  try {
+    swcVersion = JSON.parse(readFileSync(join(swcCoreDir, "package.json"), "utf8")).version;
+  } catch {
+    swcVersion = undefined;
   }
+  // Place as a sibling: <store>/@swc/core-<platform>
+  const dest = join(dirname(swcCoreDir), swcPlatformName);
+  ensureBindingPackage(`@swc/${swcPlatformName}`, dest, swcVersion);
 }
 
 // ── 3. @esbuild platform binding for drizzle-kit's bundled esbuild ───────────
@@ -145,5 +201,41 @@ if (esbuildInfo && esbuildBindingName) {
     if (existsSync(binaryDest)) {
       console.log(`✓ @esbuild/${esbuildBindingName}@${version} placed for drizzle-kit`);
     }
+  }
+}
+
+// ── 4. @rolldown/binding native binding (vitest 4) ───────────────────────────
+// vitest 4 is built on rolldown, which requires a platform-specific
+// @rolldown/binding-* package. Bun caches it but doesn't hoist it next to
+// rolldown, so `require('@rolldown/binding-...')` fails at vitest startup.
+const rolldownBindingName = {
+  "linux-x64": "binding-linux-x64-gnu",
+  "darwin-x64": "binding-darwin-x64",
+  "darwin-arm64": "binding-darwin-arm64",
+  "win32-x64": "binding-win32-x64-msvc",
+}[key];
+
+const rolldownDir =
+  bunStorePkgDir("rolldown@", "rolldown") ||
+  (() => {
+    try {
+      return dirname(require.resolve("rolldown/package.json"));
+    } catch {
+      return null;
+    }
+  })();
+
+if (rolldownBindingName && rolldownDir) {
+  try {
+    const rolldownVersion = JSON.parse(
+      readFileSync(join(rolldownDir, "package.json"), "utf8")
+    ).version;
+    const fullName = `@rolldown/${rolldownBindingName}`;
+    // rolldown resolves the binding walking up from its own dir, so its own
+    // node_modules/@rolldown is the canonical place to drop it.
+    const dest = join(rolldownDir, "node_modules", "@rolldown", rolldownBindingName);
+    ensureBindingPackage(fullName, dest, rolldownVersion);
+  } catch {
+    // rolldown not installed (e.g. production install) — nothing to do.
   }
 }
