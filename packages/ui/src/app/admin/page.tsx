@@ -50,15 +50,15 @@ export default function DashboardPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-white">Dashboard</h1>
-        <p className="mt-1 text-sm text-gray-400">Overview of your authentication platform</p>
+        <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
+        <p className="mt-1 text-sm text-muted-foreground">Overview of your authentication platform</p>
       </div>
 
       {/* Stat Cards */}
       {loading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
           {[...Array(4)].map((_, i) => (
-            <div key={i} className="h-28 rounded-xl bg-gray-900 animate-pulse" />
+            <div key={i} className="h-28 rounded-xl bg-card animate-pulse" />
           ))}
         </div>
       ) : (
@@ -93,28 +93,28 @@ export default function DashboardPage() {
       {/* Two-column section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent Users */}
-        <div className="rounded-xl bg-gray-900 border border-gray-800 overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-gray-800">
-            <h2 className="font-semibold text-white">Recent Users</h2>
-            <Link href="/admin/users" className="text-xs text-indigo-400 hover:text-indigo-300">
+        <div className="rounded-xl bg-card border border-border overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-border">
+            <h2 className="font-semibold text-foreground">Recent Users</h2>
+            <Link href="/admin/users" className="text-xs text-primary hover:text-primary/80">
               View all →
             </Link>
           </div>
           <div className="divide-y divide-gray-800">
             {recentUsers.length === 0 && !loading && (
-              <p className="px-5 py-6 text-sm text-gray-500">No users found.</p>
+              <p className="px-5 py-6 text-sm text-muted-foreground">No users found.</p>
             )}
             {recentUsers.map((u) => (
               <div key={u.id} className="flex items-center gap-3 px-5 py-3">
-                <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-indigo-900/60 text-sm font-medium text-indigo-300">
+                <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-indigo-900/60 text-sm font-medium text-primary">
                   {(u.name?.[0] ?? u.email[0]).toUpperCase()}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="truncate text-sm font-medium text-white">
+                  <p className="truncate text-sm font-medium text-foreground">
                     {u.name ?? u.email}
                   </p>
                   {u.name && (
-                    <p className="truncate text-xs text-gray-500">{u.email}</p>
+                    <p className="truncate text-xs text-muted-foreground">{u.email}</p>
                   )}
                 </div>
                 <Badge status={u.status} />
@@ -124,42 +124,42 @@ export default function DashboardPage() {
         </div>
 
         {/* Quick Actions */}
-        <div className="rounded-xl bg-gray-900 border border-gray-800 overflow-hidden">
-          <div className="px-5 py-4 border-b border-gray-800">
-            <h2 className="font-semibold text-white">Quick Actions</h2>
+        <div className="rounded-xl bg-card border border-border overflow-hidden">
+          <div className="px-5 py-4 border-b border-border">
+            <h2 className="font-semibold text-foreground">Quick Actions</h2>
           </div>
           <div className="p-5 grid grid-cols-2 gap-3">
             <Link
               href="/admin/users"
-              className="flex flex-col items-start gap-2 rounded-lg bg-gray-800 hover:bg-gray-750 border border-gray-700 p-4 transition-colors hover:border-indigo-500/50"
+              className="flex flex-col items-start gap-2 rounded-lg bg-muted hover:bg-gray-750 border border-border p-4 transition-colors hover:border-primary/50"
             >
               <span className="text-xl">➕</span>
-              <span className="text-sm font-medium text-white">Add User</span>
-              <span className="text-xs text-gray-500">Invite a new member</span>
+              <span className="text-sm font-medium text-foreground">Add User</span>
+              <span className="text-xs text-muted-foreground">Invite a new member</span>
             </Link>
             <Link
               href="/admin/sessions"
-              className="flex flex-col items-start gap-2 rounded-lg bg-gray-800 border border-gray-700 p-4 transition-colors hover:border-indigo-500/50"
+              className="flex flex-col items-start gap-2 rounded-lg bg-muted border border-border p-4 transition-colors hover:border-primary/50"
             >
               <span className="text-xl">🔐</span>
-              <span className="text-sm font-medium text-white">View Sessions</span>
-              <span className="text-xs text-gray-500">Active user sessions</span>
+              <span className="text-sm font-medium text-foreground">View Sessions</span>
+              <span className="text-xs text-muted-foreground">Active user sessions</span>
             </Link>
             <Link
               href="/admin/settings/auth"
-              className="flex flex-col items-start gap-2 rounded-lg bg-gray-800 border border-gray-700 p-4 transition-colors hover:border-indigo-500/50"
+              className="flex flex-col items-start gap-2 rounded-lg bg-muted border border-border p-4 transition-colors hover:border-primary/50"
             >
               <span className="text-xl">🔑</span>
-              <span className="text-sm font-medium text-white">Auth Settings</span>
-              <span className="text-xs text-gray-500">Configure auth methods</span>
+              <span className="text-sm font-medium text-foreground">Auth Settings</span>
+              <span className="text-xs text-muted-foreground">Configure auth methods</span>
             </Link>
             <button
               onClick={() => alert("Export triggered")}
-              className="flex flex-col items-start gap-2 rounded-lg bg-gray-800 border border-gray-700 p-4 transition-colors hover:border-indigo-500/50 text-left"
+              className="flex flex-col items-start gap-2 rounded-lg bg-muted border border-border p-4 transition-colors hover:border-primary/50 text-left"
             >
               <span className="text-xl">📤</span>
-              <span className="text-sm font-medium text-white">Export Users</span>
-              <span className="text-xs text-gray-500">Download CSV</span>
+              <span className="text-sm font-medium text-foreground">Export Users</span>
+              <span className="text-xs text-muted-foreground">Download CSV</span>
             </button>
           </div>
         </div>

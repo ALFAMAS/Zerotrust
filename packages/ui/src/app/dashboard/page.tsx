@@ -42,8 +42,8 @@ export default function DashboardPage() {
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-white">Welcome back, {user?.displayName || "…"}</h1>
-        <p className="text-gray-400 mt-1">{user?.email}</p>
+        <h1 className="text-2xl font-bold text-foreground">Welcome back, {user?.displayName || "…"}</h1>
+        <p className="text-muted-foreground mt-1">{user?.email}</p>
       </div>
 
       <SetupChecklist user={user} />
@@ -60,19 +60,19 @@ export default function DashboardPage() {
         ].map((stat) => (
           <div
             key={stat.label}
-            className="bg-gray-900 border border-gray-800 rounded-xl p-5 flex items-center gap-4"
+            className="bg-card border border-border rounded-xl p-5 flex items-center gap-4"
           >
             <span className="text-2xl">{stat.icon}</span>
             <div>
-              <div className="text-sm text-gray-400">{stat.label}</div>
-              <div className="text-xl font-bold text-white">{stat.value}</div>
+              <div className="text-sm text-muted-foreground">{stat.label}</div>
+              <div className="text-xl font-bold text-foreground">{stat.value}</div>
             </div>
           </div>
         ))}
       </div>
 
-      <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-        <h2 className="font-semibold text-white mb-4">Quick Links</h2>
+      <div className="bg-card border border-border rounded-xl p-6">
+        <h2 className="font-semibold text-foreground mb-4">Quick Links</h2>
         <div className="grid grid-cols-2 gap-3">
           {[
             { href: "/dashboard/security", label: "Set up MFA", desc: "Add a second factor" },
@@ -83,10 +83,10 @@ export default function DashboardPage() {
             <a
               key={link.href + link.label}
               href={link.href}
-              className="flex flex-col p-4 bg-gray-800 hover:bg-gray-700 rounded-xl transition-colors"
+              className="flex flex-col p-4 bg-muted hover:bg-accent rounded-xl transition-colors"
             >
-              <span className="font-medium text-white text-sm">{link.label}</span>
-              <span className="text-xs text-gray-400 mt-0.5">{link.desc}</span>
+              <span className="font-medium text-foreground text-sm">{link.label}</span>
+              <span className="text-xs text-muted-foreground mt-0.5">{link.desc}</span>
             </a>
           ))}
         </div>

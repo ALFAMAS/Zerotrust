@@ -49,7 +49,6 @@ function VerifyEmailInner() {
       autoTried.current = true;
       void verify(qEmail, qCode);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params]);
 
   if (status === "success") {
@@ -74,7 +73,7 @@ function VerifyEmailInner() {
       <form
         onSubmit={(e) => {
           e.preventDefault();
-          verify(email, code);
+          void verify(email, code);
         }}
         className="space-y-4"
       >

@@ -53,7 +53,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <div className="flex items-center gap-6">
             <div className="flex items-center gap-2">
               <div
-                className="flex h-7 w-7 items-center justify-center rounded-lg text-xs font-bold text-white"
+                className="flex h-7 w-7 items-center justify-center rounded-lg text-xs font-bold text-foreground"
                 style={{ backgroundColor: brand.logoColor }}
               >
                 {brand.logoLetter}

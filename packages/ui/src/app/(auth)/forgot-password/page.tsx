@@ -2,6 +2,9 @@
 import { useState } from "react";
 import Link from "next/link";
 import { api } from "../../../lib/api";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -18,34 +21,43 @@ export default function ForgotPasswordPage() {
 
   if (sent) {
     return (
-      <div className="text-center py-4">
-        <div className="text-4xl mb-4">📬</div>
-        <h2 className="text-xl font-bold text-white mb-2">Check your email</h2>
-        <p className="text-gray-400 text-sm mb-6">If an account with that email exists, a password reset link has been sent.</p>
-        <Link href="/login" className="text-indigo-400 hover:text-indigo-300 text-sm">← Back to login</Link>
+      <div className="py-4 text-center">
+        <div className="mb-4 text-4xl">📬</div>
+        <h2 className="mb-2 text-xl font-bold text-foreground">Check your email</h2>
+        <p className="mb-6 text-sm text-muted-foreground">
+          If an account with that email exists, a password reset link has been sent.
+        </p>
+        <Link href="/login" className="text-sm text-primary hover:text-primary/80">
+          ← Back to login
+        </Link>
       </div>
     );
   }
 
   return (
     <>
-      <h1 className="text-2xl font-bold text-white mb-1">Reset password</h1>
-      <p className="text-gray-400 text-sm mb-6">We'll send a reset link to your email.</p>
+      <h1 className="mb-1 text-2xl font-bold text-foreground">Reset password</h1>
+      <p className="mb-6 text-sm text-muted-foreground">We&apos;ll send a reset link to your email.</p>
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-sm text-gray-400 mb-1.5">Email</label>
-          <input
-            type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
-            className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500 transition-colors"
+        <div className="space-y-1.5">
+          <Label htmlFor="email">Email</Label>
+          <Input
+            id="email"
+            type="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             placeholder="you@example.com"
           />
         </div>
-        <button type="submit" disabled={loading} className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-semibold rounded-lg transition-colors">
+        <Button type="submit" disabled={loading} className="w-full">
           {loading ? "Sending…" : "Send Reset Link"}
-        </button>
+        </Button>
       </form>
-      <p className="mt-6 text-center text-sm text-gray-500">
-        <Link href="/login" className="text-indigo-400 hover:text-indigo-300">← Back to login</Link>
+      <p className="mt-6 text-center text-sm text-muted-foreground">
+        <Link href="/login" className="text-primary hover:text-primary/80">
+          ← Back to login
+        </Link>
       </p>
     </>
   );

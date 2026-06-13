@@ -66,8 +66,8 @@ export default function SettingsPage() {
   return (
     <div className="max-w-2xl space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-white">Connected Apps</h1>
-        <p className="text-gray-400 text-sm mt-1">
+        <h1 className="text-2xl font-bold text-foreground">Connected Apps</h1>
+        <p className="text-muted-foreground text-sm mt-1">
           Manage OAuth providers linked to your account.
         </p>
       </div>
@@ -78,10 +78,10 @@ export default function SettingsPage() {
         </div>
       )}
 
-      <div className="bg-gray-900 border border-gray-800 rounded-2xl divide-y divide-gray-800">
+      <div className="bg-card border border-border rounded-2xl divide-y divide-gray-800">
         {loading ? (
           <div className="flex items-center justify-center py-12">
-            <div className="w-6 h-6 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+            <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
           </div>
         ) : (
           oauthProviders.map((provider) => {
@@ -92,12 +92,12 @@ export default function SettingsPage() {
                 className="flex items-center justify-between px-6 py-4"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 bg-gray-800 rounded-lg flex items-center justify-center">
+                  <div className="w-9 h-9 bg-muted rounded-lg flex items-center justify-center">
                     {provider.icon}
                   </div>
                   <div>
-                    <p className="text-white font-medium text-sm">{provider.name}</p>
-                    <p className="text-gray-500 text-xs">
+                    <p className="text-foreground font-medium text-sm">{provider.name}</p>
+                    <p className="text-muted-foreground text-xs">
                       {isConnected ? "Connected" : "Not connected"}
                     </p>
                   </div>
@@ -107,14 +107,14 @@ export default function SettingsPage() {
                     <button
                       onClick={() => handleDisconnect(provider.id)}
                       disabled={actionLoading === provider.id}
-                      className="border border-gray-700 hover:border-red-700 text-gray-400 hover:text-red-400 px-3 py-1.5 rounded-lg text-xs transition-colors disabled:opacity-50"
+                      className="border border-border hover:border-red-700 text-muted-foreground hover:text-red-400 px-3 py-1.5 rounded-lg text-xs transition-colors disabled:opacity-50"
                     >
                       {actionLoading === provider.id ? "Disconnecting…" : "Disconnect"}
                     </button>
                   ) : (
                     <a
                       href={provider.connectUrl}
-                      className="border border-indigo-600 hover:bg-indigo-600/10 text-indigo-400 hover:text-indigo-300 px-3 py-1.5 rounded-lg text-xs transition-colors"
+                      className="border border-primary hover:bg-primary/90/10 text-primary hover:text-primary/80 px-3 py-1.5 rounded-lg text-xs transition-colors"
                     >
                       Connect
                     </a>

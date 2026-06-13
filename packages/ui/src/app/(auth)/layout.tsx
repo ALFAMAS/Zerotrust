@@ -2,18 +2,21 @@ import { brand } from "@/config/brand";
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen bg-gray-950 flex flex-col items-center justify-center p-4">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4">
       <div className="w-full max-w-md">
-        <div className="flex items-center justify-center gap-2 mb-8">
+        <div className="mb-8 flex items-center justify-center gap-2">
           <div
-            className="w-9 h-9 rounded-xl flex items-center justify-center text-white font-bold"
+            className="flex h-9 w-9 items-center justify-center rounded-xl font-bold text-foreground"
             style={{ backgroundColor: brand.logoColor }}
           >
             {brand.logoLetter}
           </div>
-          <span className="font-bold text-white text-xl">{brand.name}</span>
+          <span className="text-xl font-bold text-foreground">{brand.name}</span>
         </div>
-        <main id="main-content" className="bg-gray-900 border border-gray-800 rounded-2xl p-8">
+        <main
+          id="main-content"
+          className="rounded-2xl border border-border bg-card p-8 text-card-foreground shadow"
+        >
           {children}
         </main>
       </div>
