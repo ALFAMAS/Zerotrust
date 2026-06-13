@@ -5,6 +5,7 @@ import { otpEmailTemplate } from "../templates/emails/otp";
 import { passwordResetEmailTemplate } from "../templates/emails/password-reset";
 import { securityAlertEmailTemplate } from "../templates/emails/security-alert";
 import { notificationEmailTemplate } from "../templates/emails/notification";
+import { billingEventEmailTemplate } from "../templates/emails/billing-event";
 import { getLogger } from "../logger";
 
 const logger = getLogger("email-service");
@@ -131,6 +132,18 @@ export async function sendSecurityAlertEmail(
     location: data.location,
     time: data.time,
     revokeSessionUrl: data.revokeSessionUrl,
+    appName: APP_NAME,
+    appUrl: APP_URL,
+  });
+  await sendEmail({ to, subject, html, text });
+}
+
+export async function sendBillingEventEmail(
+  to: string,
+  data: { name: string; title: string; body: string; ctaLabel?: string; ctaUrl?: string }
+): Promise<void> {
+  const { subject, html, text } = billingEventEmailTemplate({
+    ...data,
     appName: APP_NAME,
     appUrl: APP_URL,
   });

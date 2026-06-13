@@ -83,5 +83,7 @@ export function scheduleLDAPSync(intervalMs: number, tenantId?: string): NodeJS.
     }
   };
 
-  return setInterval(run, intervalMs);
+  return setInterval(() => {
+    void run();
+  }, intervalMs);
 }

@@ -3,15 +3,20 @@ export type Plan = (typeof PLANS)[number];
 
 export interface PlanConfig {
   name: string;
+  /** Monthly price in USD — used by the admin revenue dashboard (MRR/ARR). */
+  priceMonthly: number;
   features: Record<string, boolean | number>;
 }
 
 export const PLAN_CONFIGS: Record<Plan, PlanConfig> = {
   free: {
     name: "Free",
+    priceMonthly: 0,
     features: {
       apiKeys: 2,
       orgMembers: 5,
+      apiCallsPerMonth: 10_000,
+      storageBytes: 100 * 1024 * 1024, // 100 MB
       customRoles: false,
       auditLog: false,
       ssoSaml: false,
@@ -21,9 +26,12 @@ export const PLAN_CONFIGS: Record<Plan, PlanConfig> = {
   },
   pro: {
     name: "Pro",
+    priceMonthly: parseInt(process.env.PLAN_PRO_PRICE_MONTHLY ?? "29"),
     features: {
       apiKeys: 20,
       orgMembers: 50,
+      apiCallsPerMonth: 1_000_000,
+      storageBytes: 10 * 1024 * 1024 * 1024, // 10 GB
       customRoles: true,
       auditLog: true,
       ssoSaml: false,
@@ -33,9 +41,12 @@ export const PLAN_CONFIGS: Record<Plan, PlanConfig> = {
   },
   enterprise: {
     name: "Enterprise",
+    priceMonthly: parseInt(process.env.PLAN_ENTERPRISE_PRICE_MONTHLY ?? "99"),
     features: {
       apiKeys: -1, // unlimited
       orgMembers: -1,
+      apiCallsPerMonth: -1,
+      storageBytes: -1,
       customRoles: true,
       auditLog: true,
       ssoSaml: true,

@@ -415,19 +415,77 @@ export const apiKeysTable = pgTable("api_keys", {
 
 export const subscriptionsTable = pgTable("subscriptions", {
   id: uuid("id").primaryKey().defaultRandom(),
-  userId: uuid("user_id").references(() => usersTable.id, { onDelete: "set null" }),
-  orgId: uuid("org_id").references(() => organizationsTable.id, { onDelete: "set null" }),
+  // unique: one subscription per user / per org (multiple NULLs allowed)
+  userId: uuid("user_id")
+    .references(() => usersTable.id, { onDelete: "set null" })
+    .unique(),
+  orgId: uuid("org_id")
+    .references(() => organizationsTable.id, { onDelete: "set null" })
+    .unique(),
   stripeCustomerId: text("stripe_customer_id").unique(),
   stripeSubscriptionId: text("stripe_subscription_id").unique(),
   stripePriceId: text("stripe_price_id"),
   stripeProductId: text("stripe_product_id"),
   plan: text("plan").notNull().default("free"), // "free" | "pro" | "enterprise"
-  status: text("status").notNull().default("active"), // "active" | "canceled" | "past_due" | "trialing"
+  status: text("status").notNull().default("active"), // "active" | "canceled" | "past_due" | "trialing" | "paused"
   currentPeriodStart: timestamp("current_period_start"),
   currentPeriodEnd: timestamp("current_period_end"),
   cancelAtPeriodEnd: boolean("cancel_at_period_end").notNull().default(false),
   trialEnd: timestamp("trial_end"),
+  canceledAt: timestamp("canceled_at"),
   metadata: jsonb("metadata"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// ── Security events (account takeover detection) ──────────────────────────────
+
+export const securityEventsTable = pgTable("security_events", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => usersTable.id, { onDelete: "cascade" }),
+  type: text("type").notNull(), // "password_reset" | "email_change" | "mfa_disabled" | ...
+  ipAddress: text("ip_address"),
+  userAgent: text("user_agent"),
+  metadata: jsonb("metadata"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// ── Usage counters (per billing period) ───────────────────────────────────────
+
+export const usageCountersTable = pgTable(
+  "usage_counters",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id").references(() => usersTable.id, { onDelete: "cascade" }),
+    orgId: uuid("org_id").references(() => organizationsTable.id, { onDelete: "cascade" }),
+    period: text("period").notNull(), // "YYYY-MM" billing period bucket
+    metric: text("metric").notNull(), // "api_calls" | "seats" | "storage_bytes"
+    value: integer("value").notNull().default(0),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (t) => ({
+    // NULLS NOT DISTINCT so the upsert conflicts correctly when userId or
+    // orgId is NULL (Postgres 15+)
+    uniqUserMetric: unique().on(t.userId, t.orgId, t.period, t.metric).nullsNotDistinct(),
+  })
+);
+
+// ── Feature flags ─────────────────────────────────────────────────────────────
+
+export const featureFlagsTable = pgTable("feature_flags", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  key: text("key").notNull().unique(),
+  description: text("description"),
+  enabled: boolean("enabled").notNull().default(false),
+  // Optional per-user rollout: list of user IDs the flag is force-enabled for
+  enabledForUsers: text("enabled_for_users")
+    .array()
+    .notNull()
+    .default(sql`ARRAY[]::text[]`),
+  // Percentage rollout 0-100 (applies when enabled = false)
+  rolloutPercent: integer("rollout_percent").notNull().default(0),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

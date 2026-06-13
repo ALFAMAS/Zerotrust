@@ -3,6 +3,7 @@ import type { HonoEnv } from "../shared/types";
 import { getConfig } from "../config";
 import { getLogger } from "../logger";
 import { ErrorCodes } from "../shared/types";
+import { clearInMemoryBuckets } from "../services/rateLimiter/inmemory";
 
 let useRedis = false as boolean;
 let redisConsume:
@@ -27,14 +28,17 @@ export async function initRateLimiter(): Promise<void> {
 
   if (cfg.rateLimiting.redisUri) {
     try {
-      const { initRedisRateLimiter, consumePoint } = await import("../services/rateLimiter/redis.js");
+      const { initRedisRateLimiter, consumePoint } =
+        await import("../services/rateLimiter/redis.js");
       await initRedisRateLimiter(cfg.rateLimiting.redisUri!);
       redisConsume = consumePoint;
       useRedis = true;
       logger.info("Rate limiter initialized (redis-backed)");
       return;
     } catch (err) {
-      logger.warn("Failed to initialize redis rate limiter, falling back to in-memory", { error: String(err) });
+      logger.warn("Failed to initialize redis rate limiter, falling back to in-memory", {
+        error: String(err),
+      });
     }
   }
 
@@ -60,7 +64,10 @@ export function rateLimit(options?: { points?: number; windowSecs?: number }) {
         if (!allowed) {
           logger.warn("Rate limit exceeded (redis)", { ip, path: c.req.path });
           c.header("Retry-After", String(windowSecs));
-          return c.json({ error: ErrorCodes.RATE_LIMIT_EXCEEDED, message: "Too many requests" }, 429);
+          return c.json(
+            { error: ErrorCodes.RATE_LIMIT_EXCEEDED, message: "Too many requests" },
+            429
+          );
         }
         return next();
       }
@@ -96,12 +103,7 @@ export function rateLimit(options?: { points?: number; windowSecs?: number }) {
 
 export function clearRateLimiter(): void {
   ipBuckets.clear();
-  try {
-    const { clearInMemoryBuckets } = require("../services/rateLimiter/inmemory");
-    clearInMemoryBuckets();
-  } catch {
-    // inmemory module may not exist
-  }
+  clearInMemoryBuckets();
 }
 
 // ─── Multi-Tenant Rate Limiting ───────────────────────────────────────────────

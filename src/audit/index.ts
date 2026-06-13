@@ -17,7 +17,7 @@ interface ESBulkItem {
 }
 
 let flushInterval: ReturnType<typeof setInterval> | null = null;
-let pendingDocs: AuditLog[] = [];
+const pendingDocs: AuditLog[] = [];
 let esClient: any = null;
 
 function maskSensitiveFields(doc: Record<string, unknown>): Record<string, unknown> {
@@ -82,7 +82,7 @@ async function buildEsClient() {
         });
         const data = (await response.json()) as any;
         return { status: data.status || "unknown", available: response.ok };
-      } catch (err) {
+      } catch {
         return { status: "unreachable", available: false };
       }
     },
@@ -156,7 +156,9 @@ export async function initAuditPipeline(flushIntervalMs = 5000): Promise<void> {
   }
 
   if (flushInterval) clearInterval(flushInterval);
-  flushInterval = setInterval(flushPendingDocs, flushIntervalMs);
+  flushInterval = setInterval(() => {
+    void flushPendingDocs();
+  }, flushIntervalMs);
   if (flushInterval.unref) flushInterval.unref();
 
   logger.info("Elasticsearch audit pipeline initialized", { flushIntervalMs });
@@ -175,7 +177,7 @@ export async function getElasticsearchHealth(): Promise<{ status: string; availa
     if (!esClient) esClient = await buildEsClient();
     if (!esClient) return { status: "disabled", available: false };
     return await esClient.health();
-  } catch (err) {
+  } catch {
     return { status: "error", available: false };
   }
 }

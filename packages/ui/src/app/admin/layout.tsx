@@ -11,6 +11,7 @@ import { brand } from "@/config/brand";
 const navLinks = [
   { href: "/admin", icon: "📊", label: "Dashboard", exact: true },
   { href: "/admin/users", icon: "👥", label: "Users" },
+  { href: "/admin/revenue", icon: "💰", label: "Revenue" },
   { href: "/admin/sessions", icon: "🔐", label: "Sessions" },
   { href: "/admin/settings/auth", icon: "🔑", label: "Auth Settings" },
   { href: "/admin/settings/general", icon: "⚙️", label: "General" },
@@ -39,7 +40,11 @@ function AdminSidebar({ open, onClose }: AdminSidebarProps) {
   const sidebarContent = (
     <aside className="flex h-full w-60 flex-col bg-gray-900 border-r border-gray-800">
       <div className="flex h-16 items-center px-6 border-b border-gray-800">
-        <Link href="/admin" className="text-lg font-bold text-indigo-400 tracking-tight" onClick={onClose}>
+        <Link
+          href="/admin"
+          className="text-lg font-bold text-indigo-400 tracking-tight"
+          onClick={onClose}
+        >
           {brand.name} Admin
         </Link>
       </div>
@@ -150,7 +155,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           className="w-8 h-8 flex flex-col items-center justify-center gap-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
         >
           {sidebarOpen ? (
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" className="w-5 h-5">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              strokeLinecap="round"
+              className="w-5 h-5"
+            >
               <path d="M18 6 6 18M6 6l12 12" />
             </svg>
           ) : (
@@ -165,7 +178,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </div>
 
       {/* Main content: offset by sidebar width on desktop, full-width on mobile */}
-      <main id="main-content" className="md:ml-60 min-h-screen p-8">{children}</main>
+      <main id="main-content" className="md:ml-60 min-h-screen p-8">
+        {children}
+      </main>
     </div>
   );
 }

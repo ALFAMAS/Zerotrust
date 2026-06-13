@@ -5,6 +5,7 @@ import { serve } from "@hono/node-server";
 import { serveStatic } from "@hono/node-server/serve-static";
 import { initializeZeroAuth } from "..";
 import authRoutes from "./routes/auth.routes";
+import passwordResetRoutes from "./routes/password-reset.routes";
 import magicLinkRoutes from "./routes/magic-link.routes";
 import mfaRoutes from "./routes/mfa.routes";
 import sessionRoutes from "./routes/session.routes";
@@ -21,6 +22,8 @@ import feedbackRoutes from "./routes/feedback.routes";
 import apiKeyRoutes from "./routes/api-keys.routes";
 import billingRoutes from "./routes/billing.routes";
 import billingWebhookRoutes from "./routes/billing.webhooks";
+import adminToolsRoutes from "./routes/admin-tools.routes";
+import webhookManagementRoutes from "../webhooks/routes";
 import federationRoutes from "../federation/routes";
 import { rateLimit } from "../middleware/rateLimiting";
 import { geoFencingMiddleware } from "../middleware/geoFencing";
@@ -31,6 +34,9 @@ import { initSentry } from "../instrument";
 import { initEmailQueue } from "../services/emailQueue";
 import { startRetentionScheduler } from "../services/dataRetention";
 import { startNotificationEmailFallbackScheduler } from "../services/notificationEmailFallback";
+import { startBillingLifecycleScheduler } from "../services/billingLifecycle.service";
+import { startBackupScheduler } from "../services/dbBackup.service";
+import { alertingMiddleware } from "../services/alerting.service";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -58,8 +64,17 @@ export async function createServer() {
   // Send notification email fallbacks to inactive users (runs every 24h)
   startNotificationEmailFallbackScheduler(24);
 
+  // Trial expiry, dunning (D3/D7/D14) and win-back (D7/D30/D90) emails
+  startBillingLifecycleScheduler(24);
+
+  // Daily pg_dump backup when BACKUP_ENABLED=true
+  startBackupScheduler(24);
+
   app.use("*", cors());
   app.use("*", secureHeaders());
+
+  // Error-spike + latency alerting (Slack / Teams / PagerDuty)
+  app.use("*", alertingMiddleware());
 
   // ─── Static uploads (avatars, etc.) ──────────────────────────────────────
   app.use("/uploads/*", serveStatic({ root: "./" }));
@@ -67,6 +82,7 @@ export async function createServer() {
   // ─── Auth routes ──────────────────────────────────────────────────────────
   app.route("/auth", authRoutes);
   app.route("/auth", unsubscribeRoutes);
+  app.route("/auth/password-reset", passwordResetRoutes);
   app.route("/auth/magic-link", magicLinkRoutes);
   app.route("/auth/mfa", mfaRoutes);
   app.route("/auth/passkey", passkeyRoutes);
@@ -76,6 +92,7 @@ export async function createServer() {
 
   // ─── Admin routes ─────────────────────────────────────────────────────────
   app.route("/admin", adminRoutes);
+  app.route("/admin", adminToolsRoutes);
 
   // ─── Workload routes ──────────────────────────────────────────────────────
   app.route("/workload", workloadRoutes);
@@ -107,6 +124,9 @@ export async function createServer() {
   // ─── Billing routes ───────────────────────────────────────────────────────
   app.route("/billing", billingRoutes);
   app.route("/billing", billingWebhookRoutes);
+
+  // ─── User-facing webhook management (developer feature) ──────────────────
+  app.route("/webhooks", webhookManagementRoutes);
 
   // ─── SSF webhook endpoint ─────────────────────────────────────────────────
   app.post("/ssf/events", async (c) => {
@@ -148,6 +168,39 @@ export async function createServer() {
       health.redis = "unconfigured";
     }
     return c.json(health);
+  });
+
+  // Public status page data — safe to expose (no internals, just up/down)
+  const serverStartedAt = Date.now();
+  app.get("/status", async (c) => {
+    const components: Record<string, "operational" | "degraded" | "down"> = { api: "operational" };
+
+    try {
+      const { isDbConnected } = await import("../db/index.js");
+      components.database = isDbConnected() ? "operational" : "down";
+    } catch {
+      components.database = "down";
+    }
+
+    try {
+      const { pingRedis } = await import("../services/rateLimiter/redis.js");
+      components.cache = (await pingRedis()) ? "operational" : "degraded";
+    } catch {
+      components.cache = "degraded";
+    }
+
+    const overall = Object.values(components).includes("down")
+      ? "down"
+      : Object.values(components).includes("degraded")
+        ? "degraded"
+        : "operational";
+
+    return c.json({
+      status: overall,
+      components,
+      uptimeSeconds: Math.floor((Date.now() - serverStartedAt) / 1000),
+      timestamp: new Date().toISOString(),
+    });
   });
 
   app.get("/healthz", async (c) => {

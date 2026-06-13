@@ -1,6 +1,6 @@
 import { createMiddleware } from "hono/factory";
 import type { HonoEnv } from "../shared/types";
-const geoip = require("geoip-lite") as { lookup(ip: string): { country?: string } | null };
+import geoip from "geoip-lite";
 import { getConfig } from "../config";
 import { getLogger } from "../logger";
 import { ErrorCodes } from "../shared/types";
@@ -24,11 +24,8 @@ export function geoFencingMiddleware() {
       const cfg = getConfig();
       if (!cfg.geofencing.enabled) return next();
 
-      const ipRaw = (
-        c.req.header("x-forwarded-for")?.split(",")[0].trim() ||
-        c.req.header("x-real-ip") ||
-        ""
-      );
+      const ipRaw =
+        c.req.header("x-forwarded-for")?.split(",")[0].trim() || c.req.header("x-real-ip") || "";
       if (!ipRaw) return next();
 
       const geo = geoip.lookup(ipRaw);
@@ -47,7 +44,10 @@ export function geoFencingMiddleware() {
       if (allowed.size > 0 && !allowed.has(country.toUpperCase())) {
         logger.warn("Access denied by geofencing (country)", { ip: ipRaw, country });
         return c.json(
-          { error: ErrorCodes.ACCESS_DENIED_LOCATION, message: "Access from this country is not allowed" },
+          {
+            error: ErrorCodes.ACCESS_DENIED_LOCATION,
+            message: "Access from this country is not allowed",
+          },
           403
         );
       }
@@ -57,8 +57,13 @@ export function geoFencingMiddleware() {
         let inRange = false;
         for (const r of allowedRanges) {
           try {
-            if (cidrContains(r, ipRaw)) { inRange = true; break; }
-          } catch {}
+            if (cidrContains(r, ipRaw)) {
+              inRange = true;
+              break;
+            }
+          } catch {
+            // malformed CIDR entry — skip it
+          }
         }
         if (!inRange) {
           logger.warn("Access denied by geofencing (ip range)", { ip: ipRaw });

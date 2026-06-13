@@ -9,7 +9,9 @@ export type NotificationEvent =
   | "mfa.failed_multiple"
   | "auth.brute_force"
   | "session.mass_revocation"
-  | "scim.provision_error";
+  | "scim.provision_error"
+  | "error.spike"
+  | "latency.breach";
 
 export interface SlackConfig {
   webhookUrl: string;

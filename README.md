@@ -682,10 +682,24 @@ GET    /api-keys                                (auth required)
 POST   /api-keys                                (auth required)
 DELETE /api-keys/:id                            (auth required)
 
-GET    /billing/subscription                    (auth required)
-POST   /billing/checkout                        (auth required)
+GET    /billing/subscription?orgId=             (auth required — per-user or per-org)
+GET    /billing/usage?orgId=                    (auth required — usage vs plan limits)
+POST   /billing/checkout                        (auth required — orgId for per-org billing, 14-day trial)
+POST   /billing/change-plan                     (auth required — upgrade/downgrade with proration)
+POST   /billing/cancel                          (auth required — survey + pause option)
+POST   /billing/reactivate                      (auth required)
 POST   /billing/portal                          (auth required)
 POST   /billing/webhook                         (Stripe webhook — no auth)
+
+POST   /auth/password-reset/request
+POST   /auth/password-reset/confirm             (HIBP breach check)
+POST   /auth/me/email                           (auth required — password re-auth)
+
+GET    /webhooks                                (auth required — endpoint management)
+POST   /webhooks                                (auth required)
+PATCH  /webhooks/:id                            (auth required)
+DELETE /webhooks/:id                            (auth required)
+POST   /webhooks/:id/ping                       (auth required — test delivery)
 
 GET    /gdpr/export                             (auth required)
 DELETE /gdpr/account                            (auth required)
@@ -695,10 +709,20 @@ GET    /admin/stats                             (admin only)
 GET    /admin/users                             (admin only)
 PUT    /admin/users/:id                         (admin only)
 DELETE /admin/users/:id                         (admin only)
+POST   /admin/users/:id/impersonate             (admin only — 30-min support session)
+PUT    /admin/users/:id/plan                    (admin only — manual plan override)
+GET    /admin/revenue                           (admin only — MRR/ARR/churn)
+POST   /admin/broadcast                         (admin only — announce to segments)
+GET    /admin/users/export                      (admin only — CSV)
+GET    /admin/audit/export                      (admin only — CSV)
+GET    /admin/feature-flags                     (admin only)
+PUT    /admin/feature-flags/:key                (admin only)
+DELETE /admin/feature-flags/:key                (admin only)
 GET    /admin/settings                          (admin only)
 PUT    /admin/settings                          (admin only)
 GET    /admin/feedback                          (admin only)
 
+GET    /status                                  (public — status page data)
 GET    /healthz
 GET    /metrics                                 (Prometheus)
 GET    /docs                                    (Swagger — dev only)
@@ -737,28 +761,38 @@ Tests live in `src/__tests__/`. CI runs them on every push and pull request to `
 
 See [STARTER.md](./STARTER.md) for the full feature catalog with priority tiers.
 
-**P0 — Launch blockers**
+**✅ Shipped in 1.7**
 
 - Per-org Stripe subscriptions — one subscription per organization
-- File storage — S3/R2/MinIO adapter, pre-signed upload URLs, CDN delivery
-- DB backup — daily PostgreSQL dump to S3 with 30-day retention
-- Environment parity — staging env that mirrors production
+- DB backup — `bun run db:backup` (pg_dump, 30-day retention, optional S3) + daily scheduler
+- Environment parity — `.env.staging.example` staging template
 - HaveIBeenPwned password check on register and password change
 - Login notification email — new-device alert with one-click session revoke
+- Account takeover detection — sensitive-change pattern revokes sessions + alerts
+- Trial period — 14-day trial with expiry warning and upgrade emails
+- Dunning management — D3/D7/D14 escalating payment-failure emails
+- Cancellation flow — offboarding survey, pause option, retention coupon
+- Win-back campaign — D7/D30/D90 emails to churned subscribers
+- Admin: impersonate user, manual plan override, revenue dashboard (MRR/ARR/churn), broadcast email, CSV exports
+- Usage counters — metered API calls per billing period vs plan limits
+- User-facing webhooks — endpoint management UI, HMAC-signed payloads, test ping
+- Feature flags — admin-managed flags with percentage rollout
+- Status page — public `/status` page + endpoint
+- Alerting — error-spike and latency alerts to Slack/Teams/PagerDuty
+- Distributed tracing viewer — `docker-compose.tracing.yml` (Jaeger) for the existing OTel setup
 
-**P1 — Core growth (first month)**
+**P1 — Next up**
 
-- Trial period — 14-day trial with automated expiry email and upgrade prompt
-- Dunning management — retry failed payments D3/D7/D14 with escalating emails
-- Cancellation flow — offboarding survey, offer pause or discount
-- Admin: impersonate user, revenue dashboard (MRR/ARR/churn)
+- File storage — S3/R2/MinIO adapter, pre-signed upload URLs, CDN delivery
+- Upgrade prompt rollout — wire the `UpgradePrompt` component into every plan gate
+- Scope enforcement per API-key route + per-key rate limiting
 
 **P2 — Quality & scale (2–3 months)**
 
 - PWA completion — offline support, deep linking for invite and magic-link URLs
-- User-facing webhooks — endpoint management, signed payloads, delivery logs
-- Win-back campaign — automated emails to churned users at D7/D30/D90
-- Distributed tracing viewer — wire OTel to Jaeger or Grafana Tempo
+- Web push notifications
+- Locale-aware email templates (send transactional email in the user's language)
+- Product tour, welcome checklist polish, RTL layout support
 
 ---
 

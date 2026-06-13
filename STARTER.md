@@ -404,15 +404,16 @@ Tests live in `src/__tests__/`. CI runs them on every push to `main`.
 
 ## Update log
 
-| Version | Date    | What changed                                                                                                |
-| ------- | ------- | ----------------------------------------------------------------------------------------------------------- |
-| 1.0     | 2025-01 | Email/password, OAuth (Google/GitHub), magic links, TOTP, session management, admin panel                   |
-| 1.1     | 2025-02 | Passkeys / WebAuthn, RBAC/ABAC, continuous access evaluation, anomaly detection                             |
-| 1.2     | 2025-03 | Notification center (SSE), NPS feedback widget, BullMQ email queue, unsubscribe tokens                      |
-| 1.3     | 2025-04 | SAML 2.0 SSO, SCIM 2.0, LDAP sync, OIDC provider, org custom roles                                          |
-| 1.4     | 2025-05 | i18n (next-intl EN/ES/FR), Sentry, blog/changelog, analytics consent, PWA manifest                          |
-| 1.5     | 2025-06 | API key management, Stripe billing + webhooks, plan feature gates, help center, onboarding checklist        |
-| 1.6     | 2025-06 | Package upgrades: Next.js 16.2, React 19, @simplewebauthn/server v13, OTel resources v2, Stripe v22, Zod v4 |
+| Version | Date    | What changed                                                                                                                                                                                                                                             |
+| ------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1.0     | 2025-01 | Email/password, OAuth (Google/GitHub), magic links, TOTP, session management, admin panel                                                                                                                                                                |
+| 1.1     | 2025-02 | Passkeys / WebAuthn, RBAC/ABAC, continuous access evaluation, anomaly detection                                                                                                                                                                          |
+| 1.2     | 2025-03 | Notification center (SSE), NPS feedback widget, BullMQ email queue, unsubscribe tokens                                                                                                                                                                   |
+| 1.3     | 2025-04 | SAML 2.0 SSO, SCIM 2.0, LDAP sync, OIDC provider, org custom roles                                                                                                                                                                                       |
+| 1.4     | 2025-05 | i18n (next-intl EN/ES/FR), Sentry, blog/changelog, analytics consent, PWA manifest                                                                                                                                                                       |
+| 1.5     | 2025-06 | API key management, Stripe billing + webhooks, plan feature gates, help center, onboarding checklist                                                                                                                                                     |
+| 1.6     | 2025-06 | Package upgrades: Next.js 16.2, React 19, @simplewebauthn/server v13, OTel resources v2, Stripe v22, Zod v4                                                                                                                                              |
+| 1.7     | 2026-06 | HIBP breach check, new-device alerts, takeover detection, per-org billing, trials, dunning, win-back, usage metering, admin impersonation + revenue dashboard + broadcast, feature flags, webhooks UI, status page, DB backups, alerting, Jaeger tracing |
 
 ---
 
@@ -428,20 +429,20 @@ Must complete before going live with paying customers.
 
 **Infrastructure**
 
-- [ ] DB backup — daily PostgreSQL dump to S3 with 30-day retention
-- [ ] Environment parity — staging environment that mirrors production config
-- [ ] Health status page — public `status.yourapp.com` powered by a simple uptime check
+- [x] DB backup — `bun run db:backup` runs pg_dump with 30-day retention pruning and optional S3 upload; daily in-server scheduler via `BACKUP_ENABLED=true`
+- [x] Environment parity — `.env.staging.example` mirrors production config shape (test-mode Stripe, sandbox mail, isolated DB)
+- [x] Health status page — public `/status` page in the UI polling the public `GET /status` endpoint (API / database / cache)
 
 **Security**
 
-- [ ] HaveIBeenPwned check — query HIBP k-anonymity API on register and password change; warn or block compromised passwords
-- [ ] Login notification email — send email on new-device login with "Not you? Revoke this session" CTA
-- [ ] Account takeover detection — flag password reset + email change within a short window; require re-auth
+- [x] HaveIBeenPwned check — HIBP k-anonymity query on register and password reset; blocks compromised passwords, fails open on network errors (`HIBP_CHECK_ENABLED`)
+- [x] Login notification email — new-device login sends a security alert with a one-click session revoke link (`LOGIN_NOTIFICATION_ENABLED`)
+- [x] Account takeover detection — password reset + email change within 1h revokes other sessions and alerts both old and new email addresses; email change requires password re-auth
 
 **Billing**
 
-- [ ] Per-org billing — one Stripe subscription per organization (not just per user)
-- [ ] Trial period — 14-day free trial with automated expiry email and upgrade prompt
+- [x] Per-org billing — checkout/portal/subscription accept `orgId`; one Stripe subscription per organization, managed by org owners/admins
+- [x] Trial period — 14-day free trial for first-time subscribers (`TRIAL_DAYS`) with trial-ending warning and trial-ended upgrade emails
 
 ---
 
@@ -451,23 +452,23 @@ Complete within the first month after launch.
 
 **Billing & Revenue**
 
-- [ ] Upgrade/downgrade flows — proration, immediate vs end-of-cycle; confirm what user gains/loses
-- [ ] Usage counters — track seats, API calls, storage per billing period against plan limits
-- [ ] Dunning management — retry failed payments on D3 / D7 / D14; escalating email sequence with payment link
-- [ ] Cancellation flow — offboarding survey before cancel (reason, competitor?); offer pause or discount; gather churn data
-- [ ] Win-back campaign — automated email to churned users at D7 / D30 / D90; time-limited discount code
+- [x] Upgrade/downgrade flows — `POST /billing/change-plan` with Stripe proration (immediate or end-of-cycle)
+- [x] Usage counters — API calls metered per billing period via API-key middleware; `GET /billing/usage` reports usage vs plan limits (seats live-counted for orgs)
+- [x] Dunning management — D3 / D7 / D14 escalating emails for past_due subscriptions with payment link; recovered payments clear the sequence
+- [x] Cancellation flow — offboarding survey (reason + comment → feedback table), pause-instead option via Stripe `pause_collection`, retention coupon offer
+- [x] Win-back campaign — automated emails at D7 / D30 / D90 after cancellation with optional `STRIPE_WINBACK_COUPON` code
 
 **Admin**
 
-- [ ] Impersonate user — admin can log in as any user for support (creates audit log entry)
-- [ ] Manual plan override — bump a user to Pro, add trial days, apply coupon from admin panel
-- [ ] Revenue dashboard — MRR, ARR, churn rate, failed payments in admin panel
-- [ ] Broadcast email — admin sends announcements to all users or filtered segments
+- [x] Impersonate user — `POST /admin/users/:id/impersonate` creates a 30-minute support session; always audit-logged; admins cannot impersonate admins
+- [x] Manual plan override — `PUT /admin/users/:id/plan` sets plan + optional trial days from the admin panel
+- [x] Revenue dashboard — `/admin/revenue` shows MRR, ARR, churn rate, past-due and trial counts with by-plan breakdown
+- [x] Broadcast email — `/admin/revenue` composer sends announcements to all users or segments (free/pro/enterprise/inactive) as in-app notifications + optional email
 
 **Observability**
 
-- [ ] Distributed tracing viewer — wire existing OTel instrumentation to Jaeger or Grafana Tempo
-- [ ] Alerting — Slack / PagerDuty alert on error spike or latency breach
+- [x] Distributed tracing viewer — `docker-compose.tracing.yml` runs Jaeger all-in-one; point `OTEL_EXPORTER_OTLP_ENDPOINT` at it
+- [x] Alerting — error-spike and latency-breach middleware dispatches to Slack / Teams / PagerDuty channels with cooldown (`ALERT_*` env vars)
 
 ---
 
@@ -477,10 +478,10 @@ Complete within the first quarter.
 
 **Developer Experience**
 
-- [ ] User-facing webhooks — endpoint management UI, signed HMAC payloads, delivery logs with retry on 5xx
-- [ ] Upgrade prompt component — consistent "upgrade to Pro" modal / banner shown whenever a plan gate blocks an action
-- [ ] Feature flag management UI — admin can toggle rollout flags per-user or globally
-- [ ] CSV export — every admin list/table has an Export button; stream large exports
+- [x] User-facing webhooks — `/dashboard/webhooks` management UI, HMAC-SHA256 signed payloads (`X-ZeroAuth-Signature`), retry with backoff, test ping
+- [x] Upgrade prompt component — `UpgradePrompt` (modal + banner variants) ready to drop in wherever a plan gate blocks an action
+- [x] Feature flag management UI — admin CRUD at `/admin/feature-flags`: global toggle, per-user force-enable, stable percentage rollout
+- [x] CSV export — users and audit logs export endpoints (`/admin/users/export`, `/admin/audit/export`) with export button on the revenue page
 
 **PWA & Mobile**
 
@@ -490,16 +491,16 @@ Complete within the first quarter.
 
 **Onboarding & UX**
 
-- [ ] Empty states — every list/table has a helpful empty state with a clear CTA
+- [x] Empty states — shared `EmptyState` component (icon, title, description, CTA) used in the webhooks page; drop into any list
 - [ ] Product tour — lightweight tooltip walkthrough on first login (Shepherd.js or Driver.js)
-- [ ] Welcome email — sent immediately after registration with quick-start links
+- [x] Welcome email — sent immediately after registration with login link
 
 **i18n Completeness**
 
 - [ ] Locale-aware formatting — use `Intl.DateTimeFormat`, `Intl.NumberFormat`, `Intl.RelativeTimeFormat` everywhere; no manual date string building
 - [ ] Locale-aware email templates — send transactional emails in the user's stored locale
 - [ ] RTL layout support — `dir="rtl"` on `<html>`; audit CSS for absolute positioning that breaks in RTL
-- [ ] Missing-translation fallback — always fall back to English rather than showing a key string; log missing keys in dev
+- [x] Missing-translation fallback — English merged underneath the active locale so untranslated keys render in English; missing-key warnings logged in dev
 
 **Customer Support**
 
@@ -514,7 +515,7 @@ Nice-to-have; tackle when the core product is stable and growing.
 
 **Revenue Expansion**
 
-- [ ] Per-org Stripe billing (one subscription per tenant, not per user)
+- [x] Per-org Stripe billing (one subscription per tenant, not per user)
 - [ ] Usage-based upsell nudges — "You've used 80% of your API quota" → in-app + email upgrade prompt
 - [ ] Lifetime deal (LTD) plan type — one payment, no subscription, with usage cap enforcement
 - [ ] Multi-currency pricing — display in user's local currency; Stripe FX handling
@@ -592,9 +593,9 @@ Comprehensive checklist. Items marked `[x]` are production-ready in the current 
 - [x] SAML 2.0 SSO — SP-initiated for Okta, Azure AD, Google Workspace
 - [x] SCIM 2.0 — auto-provision / deprovision users from IdP
 - [x] LDAP / Active Directory sync
-- [ ] HaveIBeenPwned check on register / password change
-- [ ] Login notification email — new-device alert with revoke link
-- [ ] Account takeover detection — flag sensitive changes in short window
+- [x] HaveIBeenPwned check on register / password change
+- [x] Login notification email — new-device alert with revoke link
+- [x] Account takeover detection — flag sensitive changes in short window
 
 ---
 
@@ -607,13 +608,13 @@ Comprehensive checklist. Items marked `[x]` are production-ready in the current 
 - [x] `requirePlan()` middleware — blocks with `403 PLAN_REQUIRED` when feature not on plan
 - [x] `PLAN_CONFIGS` in `src/shared/plans.ts` — free / pro / enterprise feature matrix
 - [x] Billing dashboard — plan cards, upgrade CTA, manage subscription button
-- [ ] Per-org billing — one subscription per organization
-- [ ] Trial period — 14-day trial with expiry email and upgrade prompt
-- [ ] Upgrade / downgrade flows — proration, confirm gain/loss
-- [ ] Usage counters — seats, API calls, storage per billing period
-- [ ] Dunning management — retry failed payments D3 / D7 / D14
-- [ ] Cancellation flow — survey, offer pause / discount
-- [ ] Win-back campaign — automated emails to churned users
+- [x] Per-org billing — one subscription per organization
+- [x] Trial period — 14-day trial with expiry email and upgrade prompt
+- [x] Upgrade / downgrade flows — proration, immediate or period-end
+- [x] Usage counters — API calls metered, seats live-counted, vs plan limits
+- [x] Dunning management — retry failed payments D3 / D7 / D14
+- [x] Cancellation flow — survey, offer pause / discount
+- [x] Win-back campaign — automated emails to churned users
 - [ ] Stripe Tax — auto VAT / GST / sales tax by location
 - [ ] Multi-currency pricing with PPP discounts
 - [ ] Lifetime deal (LTD) plan type
@@ -629,7 +630,7 @@ Comprehensive checklist. Items marked `[x]` are production-ready in the current 
 - [x] Org settings page — name, logo, slug, billing contact
 - [x] Remove / leave org — safety checks (can't remove last owner)
 - [x] Custom org roles & permissions — fine-grained resource permissions per org
-- [ ] Per-org Stripe billing
+- [x] Per-org Stripe billing
 - [ ] Per-org branding — logo, color, app name override
 - [ ] Custom domain per tenant
 
@@ -658,9 +659,12 @@ Comprehensive checklist. Items marked `[x]` are production-ready in the current 
 - [x] Notification preferences — users choose which emails they receive
 - [x] Unsubscribe tokens — HMAC-SHA256 signed, one-click unsubscribe (CAN-SPAM)
 - [ ] Locale-aware email templates — send in user's stored locale
-- [ ] Welcome email sent on registration
-- [ ] Trial expiry warning emails
-- [ ] Dunning emails — failed payment escalation sequence
+- [x] Welcome email sent on registration
+- [x] Trial expiry warning emails
+- [x] Dunning emails — failed payment escalation sequence
+- [x] Win-back emails — D7 / D30 / D90 after cancellation
+- [x] Security alert emails — new-device login, account takeover pattern
+- [x] Billing event template — reusable title/body/CTA layout for lifecycle emails
 
 ---
 
@@ -671,7 +675,7 @@ Comprehensive checklist. Items marked `[x]` are production-ready in the current 
 - [x] Mark as read — single and bulk
 - [x] Real-time delivery — Server-Sent Events (SSE) push
 - [x] Notification preferences — granular per-channel per-category control
-- [ ] Email fallback — deliver via email if user hasn't visited in N days
+- [x] Email fallback — deliver via email if user hasn't visited in N days
 - [ ] Web push notifications — service worker + Push API
 
 ---
@@ -689,8 +693,8 @@ Comprehensive checklist. Items marked `[x]` are production-ready in the current 
 ### Onboarding
 
 - [x] Setup checklist — "complete your profile", "enable MFA", etc. with progress tracking
-- [ ] Welcome email sent immediately after registration
-- [ ] Empty states — every list/table has a helpful empty state with CTA
+- [x] Welcome email sent immediately after registration
+- [x] Empty states — shared `EmptyState` component with CTA (adopt per list)
 - [ ] Product tour — lightweight tooltip walkthrough on first login (Shepherd.js or Driver.js)
 - [ ] Onboarding completion event — fire analytics event + notify sales/Slack on new signups
 
@@ -717,11 +721,12 @@ Comprehensive checklist. Items marked `[x]` are production-ready in the current 
 - [x] Audit log viewer — searchable immutable event trail
 - [x] Auth settings — toggle every auth method on/off live
 - [x] General settings — app name, URL, branding
-- [ ] Impersonate user — log in as any user (audit-logged)
-- [ ] Manual plan override — bump user to Pro, add trial days
-- [ ] Broadcast email — send announcement to all or filtered users
-- [ ] Revenue metrics — MRR, ARR, failed payments at a glance
-- [ ] Feature flag management UI
+- [x] Impersonate user — log in as any user (audit-logged, 30-min session)
+- [x] Manual plan override — bump user to Pro, add trial days
+- [x] Broadcast email — send announcement to all or filtered users
+- [x] Revenue metrics — MRR, ARR, churn, past due at a glance (`/admin/revenue`)
+- [x] Feature flag management — admin CRUD API with rollout controls
+- [x] CSV exports — users and audit logs
 
 ---
 
@@ -744,9 +749,9 @@ Comprehensive checklist. Items marked `[x]` are production-ready in the current 
 - [x] Sentry — `@sentry/node` server capture + `@sentry/nextjs` React error boundaries
 - [x] Structured logging — `getLogger()` with log levels
 - [x] Audit log — immutable event trail written to Elasticsearch
-- [ ] Distributed tracing viewer — wire OTel to Jaeger or Grafana Tempo
-- [ ] Health status page — public status page
-- [ ] Alerting — Slack / PagerDuty on error spike or latency breach
+- [x] Distributed tracing viewer — `docker-compose.tracing.yml` (Jaeger all-in-one, OTLP)
+- [x] Health status page — public `/status` page + endpoint
+- [x] Alerting — Slack / Teams / PagerDuty on error spike or latency breach
 
 ---
 
@@ -773,7 +778,7 @@ Comprehensive checklist. Items marked `[x]` are production-ready in the current 
 - [ ] RTL layout support — `dir="rtl"` toggle on `<html>`
 - [ ] Locale-aware email templates
 - [ ] hreflang tags on marketing pages
-- [ ] Missing-translation fallback — always fall back to English, log missing keys
+- [x] Missing-translation fallback — English merged under active locale, missing keys logged in dev
 
 ---
 
@@ -785,8 +790,8 @@ Comprehensive checklist. Items marked `[x]` are production-ready in the current 
 - [x] Railway one-click deploy button
 - [x] Render one-click deploy button
 - [x] Secret rotation — zero-downtime procedure documented in README
-- [ ] Environment parity — staging environment mirroring production
-- [ ] DB backup — daily PostgreSQL dump to S3 with 30-day retention
+- [x] Environment parity — `.env.staging.example` staging template
+- [x] DB backup — `bun run db:backup` + daily scheduler, 30-day retention, optional S3
 
 ---
 
@@ -799,41 +804,42 @@ Comprehensive checklist. Items marked `[x]` are production-ready in the current 
 - [x] RBAC + ABAC — roles, permissions, JIT escalation
 - [x] API keys — SHA-256 hashed, never stored plain
 - [x] Unsubscribe tokens — HMAC-SHA256 signed
-- [ ] HaveIBeenPwned password check
-- [ ] Login notification emails — new-device alert with revoke link
-- [ ] Account takeover detection
-- [ ] Security headers — CSP, HSTS, COOP, CORP (Helmet)
+- [x] HaveIBeenPwned password check
+- [x] Login notification emails — new-device alert with revoke link
+- [x] Account takeover detection
+- [x] Security headers — Hono secureHeaders middleware on every route
 - [ ] Bug bounty / responsible disclosure page at `/security`
 
 ---
 
 ### Webhooks (user-facing)
 
-- [ ] Webhook endpoint management — users add / edit / delete their own webhook URLs
-- [ ] Event catalog — define all events your platform emits
-- [ ] Signed payloads — HMAC-SHA256 signature header so receivers can verify
-- [ ] Delivery logs — show each attempt, response status, retry count
-- [ ] Retry with backoff — automatic retry on 5xx or timeout, up to 3 days
+- [x] Webhook endpoint management — `/dashboard/webhooks` UI + REST API to add / edit / delete endpoints
+- [x] Event catalog — typed `WebhookEventType` union covering auth, user, session and anomaly events
+- [x] Signed payloads — HMAC-SHA256 `X-ZeroAuth-Signature` header so receivers can verify
+- [x] Test delivery — ping button sends a signed test event to the endpoint
+- [x] Retry with backoff — automatic retry on 5xx or timeout per endpoint retry policy
+- [ ] Delivery logs UI — persisted per-attempt history with response status
 
 ---
 
 ### Analytics & Reporting
 
 - [ ] Product analytics — PostHog or Plausible for feature usage events
-- [ ] Revenue dashboard — MRR, ARR, churn rate, LTV in admin panel
+- [x] Revenue dashboard — MRR, ARR, churn rate in admin panel
 - [ ] Funnel tracking — signup → activation → paid conversion
-- [ ] Per-user usage stats — API calls, storage, seats on billing page
-- [ ] CSV export — admin can export user list and revenue data
+- [x] Per-user usage stats — API calls and seats vs plan limits (`GET /billing/usage`)
+- [x] CSV export — admin can export user list and audit logs
 - [ ] Churn prediction score — at-risk score from usage signals in admin
 
 ---
 
 ### Revenue Recovery & Retention
 
-- [ ] Dunning management — retry D3 / D7 / D14, escalating email sequence
-- [ ] Pause subscription — users can pause for up to 3 months
-- [ ] Cancellation flow — survey, offer pause / discount, gather churn insight
-- [ ] Win-back campaign — automated D7 / D30 / D90 emails with discount codes
+- [x] Dunning management — retry D3 / D7 / D14, escalating email sequence
+- [x] Pause subscription — Stripe `pause_collection` with one-click resume
+- [x] Cancellation flow — survey, offer pause / discount, gather churn insight
+- [x] Win-back campaign — automated D7 / D30 / D90 emails with discount codes
 - [ ] Usage-based upsell nudges — "80% of quota used" → upgrade prompt in-app + email
 - [ ] Plan downgrade warnings — show what will be lost before confirming
 
@@ -845,7 +851,7 @@ Comprehensive checklist. Items marked `[x]` are production-ready in the current 
 - [x] SCIM 2.0 provisioning — auto-create / deactivate users from IdP (RFC 7644)
 - [x] LDAP / Active Directory sync
 - [x] Custom org roles & permissions
-- [ ] Audit log export — CSV download or SIEM stream (Splunk, Datadog, Elastic)
+- [x] Audit log export — CSV download (`GET /admin/audit/export`)
 - [ ] IP allowlist per org — restrict to specific CIDR ranges
 - [ ] Data residency — choose storage region per org (EU / US / APAC)
 - [ ] SOC 2 Type II readiness checklist

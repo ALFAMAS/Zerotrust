@@ -8,10 +8,9 @@ export async function sendWhatsAppOTP(to: string, body: string) {
 
   if (accountSid && authToken && from) {
     try {
-      // Lazy require
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const Twilio = require("twilio");
-      const client = new Twilio(accountSid, authToken);
+      // Lazy import to avoid hard dependency when not configured
+      const { default: twilio } = await import("twilio");
+      const client = twilio(accountSid, authToken);
       await client.messages.create({ to: `whatsapp:${to}`, from: `whatsapp:${from}`, body });
       logger.info("WhatsApp OTP sent via Twilio", { to });
       return true;

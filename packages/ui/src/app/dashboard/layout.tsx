@@ -16,6 +16,7 @@ const navItems = [
   { href: "/dashboard/sessions", label: "Sessions" },
   { href: "/dashboard/organizations", label: "Organizations" },
   { href: "/dashboard/api-keys", label: "API Keys" },
+  { href: "/dashboard/webhooks", label: "Webhooks" },
   { href: "/dashboard/billing", label: "Billing" },
 ];
 

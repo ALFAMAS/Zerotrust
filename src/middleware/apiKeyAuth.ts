@@ -3,6 +3,7 @@ import { createHash } from "crypto";
 import { eq, and, isNull } from "drizzle-orm";
 import { getDb } from "../db";
 import { apiKeysTable, usersTable } from "../db/schema";
+import { incrementUsage } from "../services/usage.service";
 import type { HonoEnv, User } from "../shared/types";
 
 export const apiKeyAuth = createMiddleware<HonoEnv>(async (c, next) => {
@@ -38,6 +39,12 @@ export const apiKeyAuth = createMiddleware<HonoEnv>(async (c, next) => {
     .set({ lastUsedAt: new Date() })
     .where(eq(apiKeysTable.id, key.id))
     .catch(() => {});
+
+  // Metered usage: count this API call against the billing period
+  void incrementUsage("api_calls", {
+    userId: key.orgId ? undefined : key.userId,
+    orgId: key.orgId ?? undefined,
+  });
 
   c.set("user", user as unknown as User);
   return next();

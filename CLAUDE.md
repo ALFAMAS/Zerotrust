@@ -16,7 +16,8 @@ Monorepo: Node/Hono API (`src/`) + Next.js 16 UI (`packages/ui/`).
 bun dev          # starts API + UI concurrently
 bun dev:api      # API only
 bun dev:ui       # UI only (also starts MCP server)
-bun run test     # vitest test suite (203 tests)
+bun run test     # vitest test suite (236 tests)
+bun run db:backup # one-shot pg_dump backup with retention pruning
 bun run build    # tsc for API; next build for UI
 ```
 

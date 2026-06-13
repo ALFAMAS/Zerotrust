@@ -30,10 +30,14 @@ export class SimulatedMLKEM implements PQKEMProvider {
   name = "simulated-ml-kem";
   algorithm = "ML-KEM-768-SIM";
 
-  async isAvailable(): Promise<boolean> { return true; }
+  async isAvailable(): Promise<boolean> {
+    return true;
+  }
 
   async generateKeyPair(): Promise<{ publicKey: KEMPublicKey; privateKey: KEMPrivateKey }> {
-    const { privateKey: privKey, publicKey: pubKey } = crypto.generateKeyPairSync("ec", { namedCurve: "P-256" });
+    const { privateKey: privKey, publicKey: pubKey } = crypto.generateKeyPairSync("ec", {
+      namedCurve: "P-256",
+    });
     const pubDer = pubKey.export({ type: "spki", format: "der" }) as Buffer;
     const privDer = privKey.export({ type: "pkcs8", format: "der" }) as Buffer;
     const publicKey: KEMPublicKey = { algorithm: "ML-KEM-768", keyData: pubDer };
@@ -42,8 +46,14 @@ export class SimulatedMLKEM implements PQKEMProvider {
   }
 
   async encapsulate(publicKey: KEMPublicKey): Promise<KEMEncapsulation> {
-    const { privateKey: ephPriv, publicKey: ephPub } = crypto.generateKeyPairSync("ec", { namedCurve: "P-256" });
-    const recipientPub = crypto.createPublicKey({ key: publicKey.keyData, format: "der", type: "spki" });
+    const { privateKey: ephPriv, publicKey: ephPub } = crypto.generateKeyPairSync("ec", {
+      namedCurve: "P-256",
+    });
+    const recipientPub = crypto.createPublicKey({
+      key: publicKey.keyData,
+      format: "der",
+      type: "spki",
+    });
     const sharedSecret = crypto.diffieHellman({ privateKey: ephPriv, publicKey: recipientPub });
     const ciphertext = ephPub.export({ type: "spki", format: "der" }) as Buffer;
     return { ciphertext, sharedSecret: Buffer.from(sharedSecret).subarray(0, 32) };
@@ -63,7 +73,12 @@ export class NobleMLKEM implements PQKEMProvider {
   algorithm = "ML-KEM-768";
 
   async isAvailable(): Promise<boolean> {
-    try { require("@noble/post-quantum/ml-kem"); return true; } catch { return false; }
+    try {
+      await import("@noble/post-quantum/ml-kem");
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   async generateKeyPair(): Promise<never> {
@@ -85,7 +100,11 @@ export async function createKEMProvider(): Promise<PQKEMProvider> {
   return new SimulatedMLKEM();
 }
 
-export async function generatePQKeyPair(): Promise<{ publicKeyHex: string; privateKeyHex: string; algorithm: string }> {
+export async function generatePQKeyPair(): Promise<{
+  publicKeyHex: string;
+  privateKeyHex: string;
+  algorithm: string;
+}> {
   const provider = await createKEMProvider();
   const { publicKey, privateKey } = await provider.generateKeyPair();
   return {

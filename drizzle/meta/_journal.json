@@ -8,6 +8,13 @@
       "when": 1780849548699,
       "tag": "0000_wealthy_zarda",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1781102756300,
+      "tag": "0001_awesome_multiple_man",
+      "breakpoints": true
     }
   ]
 }
