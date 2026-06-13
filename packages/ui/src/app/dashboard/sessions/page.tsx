@@ -4,7 +4,7 @@ import { api } from "../../../lib/api";
 import { SkeletonCard } from "@/components/Skeleton";
 
 interface Session {
-  _id: string;
+  id: string;
   ipAddress: string;
   country?: string;
   deviceFingerprint?: { browser?: string; os?: string };
@@ -52,7 +52,7 @@ export default function SessionsPage() {
       ) : (
         <div className="space-y-3">
           {sessions.map((session) => (
-            <div key={session._id} className="bg-gray-900 border border-gray-800 rounded-xl p-4 flex items-center justify-between">
+            <div key={session.id} className="bg-gray-900 border border-gray-800 rounded-xl p-4 flex items-center justify-between">
               <div className="flex items-start gap-3">
                 <div className="text-2xl mt-0.5">💻</div>
                 <div>
@@ -68,7 +68,7 @@ export default function SessionsPage() {
                 </div>
               </div>
               {session.isActive && (
-                <button onClick={() => revoke(session._id)} className="text-xs text-red-400 hover:text-red-300 border border-red-800 px-2.5 py-1 rounded-lg hover:bg-red-950 transition-colors">
+                <button onClick={() => revoke(session.id)} className="text-xs text-red-400 hover:text-red-300 border border-red-800 px-2.5 py-1 rounded-lg hover:bg-red-950 transition-colors">
                   Revoke
                 </button>
               )}
