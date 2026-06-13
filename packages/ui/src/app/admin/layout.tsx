@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { isAuthenticated, clearToken } from "@/lib/auth";
+import { api } from "@/lib/api";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { brand } from "@/config/brand";
 
@@ -125,11 +126,35 @@ function AdminSidebar({ open, onClose }: AdminSidebarProps) {
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  // null = still checking, false = not an admin, true = authorized
+  const [authorized, setAuthorized] = useState<boolean | null>(null);
 
   useEffect(() => {
     if (!isAuthenticated()) {
       router.replace("/login");
+      return;
     }
+    let active = true;
+    api
+      .get<{ roles?: string[] }>("/auth/me")
+      .then((me) => {
+        if (!active) return;
+        if (me?.roles?.includes("admin")) {
+          setAuthorized(true);
+        } else {
+          // Authenticated but not an admin — keep them out of the admin area.
+          setAuthorized(false);
+          router.replace("/dashboard");
+        }
+      })
+      .catch(() => {
+        if (!active) return;
+        setAuthorized(false);
+        router.replace("/login");
+      });
+    return () => {
+      active = false;
+    };
   }, [router]);
 
   useEffect(() => {
@@ -140,6 +165,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, [sidebarOpen]);
+
+  // Until the admin role is confirmed, don't render the admin shell or its
+  // children (which would otherwise fire admin API calls and 403).
+  if (authorized !== true) {
+    return (
+      <div className="min-h-screen bg-gray-950 text-gray-100 flex items-center justify-center">
+        <p className="text-sm text-gray-400">
+          {authorized === false ? "Access denied. Redirecting…" : "Checking access…"}
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100">
