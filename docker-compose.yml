@@ -31,7 +31,8 @@ services:
     container_name: zeroauth-redis
     ports:
       - "6379:6379"
-    command: redis-server --appendonly yes --requirepass redispass
+    # noeviction is required by BullMQ — other policies can evict queued jobs
+    command: redis-server --appendonly yes --requirepass redispass --maxmemory-policy noeviction
     volumes:
       - redis_data:/data
     healthcheck:
