@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { ThemeProvider } from "next-themes";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
@@ -17,7 +17,6 @@ export const metadata: Metadata = {
   description,
   keywords: ["authentication", "zero trust", "passkeys", "webauthn", "mfa", "security"],
   manifest: "/manifest.json",
-  themeColor: brand.color,
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
@@ -34,6 +33,10 @@ export const metadata: Metadata = {
     title,
     description,
   },
+};
+
+export const viewport: Viewport = {
+  themeColor: brand.color,
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
