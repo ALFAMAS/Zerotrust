@@ -17,7 +17,8 @@ export interface EmailJobData {
   payload: Record<string, unknown>;
 }
 
-const QUEUE_NAME = "zeroauth:email";
+// BullMQ v5 disallows ":" in queue names (it's the Redis key separator).
+const QUEUE_NAME = "zeroauth-email";
 
 let _queue: Queue<EmailJobData> | null = null;
 let _worker: Worker<EmailJobData> | null = null;
