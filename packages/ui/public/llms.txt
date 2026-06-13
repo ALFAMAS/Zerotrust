@@ -1,0 +1,51 @@
+# ZeroAuth
+
+> Zero Trust Authentication for Modern Apps. Enterprise-grade authentication for modern applications: PASETO tokens, WebAuthn passkeys, MFA, RBAC, and more.
+
+ZeroAuth is a self-hostable authentication platform with a Node/Hono REST API and a Next.js dashboard. It provides end-user auth flows (password, magic link, OAuth, SAML SSO, passkeys), multi-factor authentication, session and device management, organizations with role-based access control, API keys, webhooks, Stripe billing, GDPR tooling, and login-anomaly detection.
+
+## Authentication
+
+- [Login](/login): Sign in with email/password, magic link, OAuth, or a passkey.
+- [Register](/register): Create a new account.
+- [Magic link](/magic-link): Passwordless sign-in via a one-time email link.
+- [Forgot password](/forgot-password): Request a password-reset email.
+- [Reset password](/reset-password): Set a new password from a reset link.
+- [Accept invite](/invite/[token]): Join an organization from an invitation link.
+
+## Dashboard
+
+- [Dashboard](/dashboard): Account overview and recent activity.
+- [Profile](/dashboard/profile): Manage display name, avatar, and contact details.
+- [Account](/dashboard/account): Account settings and data/privacy controls.
+- [Security](/dashboard/security): Configure MFA (TOTP), passkeys (WebAuthn), and password.
+- [Sessions](/dashboard/sessions): View and revoke active sessions across devices.
+- [API keys](/dashboard/api-keys): Create and revoke programmatic API keys.
+- [Webhooks](/dashboard/webhooks): Subscribe to and manage event webhooks.
+- [Billing](/dashboard/billing): Manage subscription plans and Stripe billing.
+- [Organizations](/dashboard/organizations): Create organizations, invite members, and assign roles.
+- [Settings](/dashboard/settings): User preferences and configuration.
+
+## Capabilities
+
+- Authentication methods: password, magic link, OAuth providers, SAML SSO, and WebAuthn passkeys.
+- Multi-factor authentication: TOTP authenticator apps and backup codes.
+- Tokens: stateless PASETO access tokens with server-side session tracking and revocation.
+- Access control: organizations, members, invitations, and role-based access control (RBAC).
+- Account security: login-anomaly detection, geo/temporal access policies, and account-takeover protection.
+- Operations: rate limiting, audit logs, GDPR export/deletion, and Stripe-backed billing lifecycle.
+
+## Admin
+
+- [Admin](/admin): Administrative dashboard for user management, settings, and revenue/analytics tooling (restricted to admins).
+
+## Info
+
+- [Status](/status): Live service and component health.
+- [Changelog](/changelog): Product updates and release notes.
+- [Help](/help): Support and documentation.
+
+## Optional
+
+- [Privacy policy](/privacy): How user data is collected and handled.
+- [Terms of service](/terms): Terms governing use of the service.
