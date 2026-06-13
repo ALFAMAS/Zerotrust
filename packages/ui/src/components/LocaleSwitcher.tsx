@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { ChevronDown } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const LOCALES = [
   { code: "en", label: "English", flag: "🇺🇸" },
@@ -45,22 +47,20 @@ export default function LocaleSwitcher() {
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-sm text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
+        className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
         aria-label="Switch language"
         aria-expanded={open}
         aria-haspopup="listbox"
       >
         <span>{active.flag}</span>
         <span className="hidden sm:inline">{active.label}</span>
-        <svg className="w-3 h-3 opacity-60" viewBox="0 0 12 12" fill="currentColor">
-          <path d="M6 8L1 3h10z" />
-        </svg>
+        <ChevronDown className="h-3 w-3 opacity-60" />
       </button>
 
       {open && (
         <div
           role="listbox"
-          className="absolute right-0 mt-1 w-36 bg-gray-900 border border-gray-700 rounded-xl shadow-xl z-50 py-1 overflow-hidden"
+          className="absolute right-0 z-50 mt-1 w-36 overflow-hidden rounded-xl border border-border bg-popover py-1 shadow-xl"
         >
           {LOCALES.map((locale) => (
             <button
@@ -68,11 +68,12 @@ export default function LocaleSwitcher() {
               role="option"
               aria-selected={locale.code === current}
               onClick={() => switchLocale(locale.code)}
-              className={`w-full flex items-center gap-2.5 px-3 py-2 text-sm transition-colors ${
+              className={cn(
+                "flex w-full items-center gap-2.5 px-3 py-2 text-sm transition-colors",
                 locale.code === current
-                  ? "text-white bg-gray-800"
-                  : "text-gray-400 hover:text-white hover:bg-gray-800"
-              }`}
+                  ? "bg-accent text-foreground"
+                  : "text-muted-foreground hover:bg-accent hover:text-foreground"
+              )}
             >
               <span>{locale.flag}</span>
               {locale.label}

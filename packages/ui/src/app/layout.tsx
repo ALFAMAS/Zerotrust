@@ -43,7 +43,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const messages = await getMessages();
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="bg-gray-950 dark:bg-gray-950 text-gray-100 antialiased">
+      <body className="bg-background text-foreground antialiased">
         <a href="#main-content" className="skip-to-main">
           Skip to main content
         </a>

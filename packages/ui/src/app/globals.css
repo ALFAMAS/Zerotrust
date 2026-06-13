@@ -2,6 +2,55 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * shadcn/ui design tokens — dark + indigo.
+ * The app is dark-first, so :root carries the dark palette; .dark repeats it
+ * so an explicit `class="dark"` (next-themes default) stays consistent.
+ */
+@layer base {
+  :root,
+  .dark {
+    --background: 224 71% 4%;
+    --foreground: 210 20% 96%;
+
+    --card: 221 39% 11%;
+    --card-foreground: 210 20% 96%;
+
+    --popover: 221 39% 11%;
+    --popover-foreground: 210 20% 96%;
+
+    --primary: 239 84% 67%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 215 28% 17%;
+    --secondary-foreground: 210 20% 96%;
+
+    --muted: 215 28% 17%;
+    --muted-foreground: 218 11% 65%;
+
+    --accent: 215 28% 17%;
+    --accent-foreground: 210 20% 96%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 210 20% 98%;
+
+    --border: 215 28% 17%;
+    --input: 215 28% 17%;
+    --ring: 239 84% 67%;
+
+    --radius: 0.5rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
 :root {
   --brand: #6366f1;
   --brand-dark: #4f46e5;
