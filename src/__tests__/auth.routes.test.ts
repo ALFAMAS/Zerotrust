@@ -52,6 +52,16 @@ vi.mock("../oauth/provider.factory", () => ({
   getProviderAdapter: vi.fn(),
 }));
 
+// The breach check performs a network call to HaveIBeenPwned and fails open on
+// network errors. Mock it so these route tests are deterministic and do not
+// depend on network access or on whether the test password happens to appear in
+// a real breach corpus.
+vi.mock("../services/passwordBreach.service", () => ({
+  isBreachCheckEnabled: () => false,
+  checkPasswordBreached: vi.fn().mockResolvedValue({ breached: false, count: 0 }),
+  rejectIfBreached: vi.fn().mockResolvedValue(null),
+}));
+
 // ── Helpers ────────────────────────────────────────────────────────────────
 
 const USER_ID = "00000000-0000-0000-0000-000000000001";
