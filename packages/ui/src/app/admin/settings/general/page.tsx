@@ -62,7 +62,7 @@ export default function GeneralSettingsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-gray-500">Loading…</div>
+        <div className="text-muted-foreground">Loading…</div>
       </div>
     );
   }
@@ -70,72 +70,72 @@ export default function GeneralSettingsPage() {
   return (
     <div className="space-y-6 max-w-2xl">
       {toast && (
-        <div className="fixed top-4 right-4 z-50 rounded-lg bg-indigo-600 px-4 py-3 text-sm text-white shadow-lg">
+        <div className="fixed top-4 right-4 z-50 rounded-lg bg-primary px-4 py-3 text-sm text-foreground shadow-lg">
           {toast}
         </div>
       )}
 
       <div>
-        <h1 className="text-2xl font-bold text-white">General Settings</h1>
-        <p className="mt-1 text-sm text-gray-400">Branding and contact information</p>
+        <h1 className="text-2xl font-bold text-foreground">General Settings</h1>
+        <p className="mt-1 text-sm text-muted-foreground">Branding and contact information</p>
       </div>
 
-      <form onSubmit={handleSave} className="rounded-xl bg-gray-900 border border-gray-800 p-6 space-y-5">
+      <form onSubmit={handleSave} className="rounded-xl bg-card border border-border p-6 space-y-5">
         {/* App Name */}
         <div>
-          <label className="block text-sm font-medium text-white mb-1">App Name</label>
+          <label className="block text-sm font-medium text-foreground mb-1">App Name</label>
           <input
             type="text"
             value={settings.appName}
             onChange={(e) => set("appName", e.target.value)}
             placeholder="Acme Corp"
-            className="w-full rounded-lg bg-gray-800 border border-gray-700 px-3 py-2 text-sm text-white placeholder-gray-500 focus:border-indigo-500 focus:outline-none"
+            className="w-full rounded-lg bg-muted border border-border px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none"
           />
-          <p className="mt-1 text-xs text-gray-500">Shown on the sign-in page and emails</p>
+          <p className="mt-1 text-xs text-muted-foreground">Shown on the sign-in page and emails</p>
         </div>
 
         {/* App URL */}
         <div>
-          <label className="block text-sm font-medium text-white mb-1">App URL</label>
+          <label className="block text-sm font-medium text-foreground mb-1">App URL</label>
           <input
             type="url"
             value={settings.appUrl}
             onChange={(e) => set("appUrl", e.target.value)}
             placeholder="https://app.acme.com"
-            className="w-full rounded-lg bg-gray-800 border border-gray-700 px-3 py-2 text-sm text-white placeholder-gray-500 focus:border-indigo-500 focus:outline-none"
+            className="w-full rounded-lg bg-muted border border-border px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none"
           />
-          <p className="mt-1 text-xs text-gray-500">Used for redirect URLs and email links</p>
+          <p className="mt-1 text-xs text-muted-foreground">Used for redirect URLs and email links</p>
         </div>
 
         {/* Support Email */}
         <div>
-          <label className="block text-sm font-medium text-white mb-1">Support Email</label>
+          <label className="block text-sm font-medium text-foreground mb-1">Support Email</label>
           <input
             type="email"
             value={settings.supportEmail}
             onChange={(e) => set("supportEmail", e.target.value)}
             placeholder="support@acme.com"
-            className="w-full rounded-lg bg-gray-800 border border-gray-700 px-3 py-2 text-sm text-white placeholder-gray-500 focus:border-indigo-500 focus:outline-none"
+            className="w-full rounded-lg bg-muted border border-border px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none"
           />
-          <p className="mt-1 text-xs text-gray-500">Contact email shown in system-generated emails</p>
+          <p className="mt-1 text-xs text-muted-foreground">Contact email shown in system-generated emails</p>
         </div>
 
         {/* Logo URL */}
         <div>
-          <label className="block text-sm font-medium text-white mb-1">Logo URL</label>
+          <label className="block text-sm font-medium text-foreground mb-1">Logo URL</label>
           <input
             type="text"
             value={settings.logoUrl}
             onChange={(e) => set("logoUrl", e.target.value)}
             placeholder="https://acme.com/logo.png"
-            className="w-full rounded-lg bg-gray-800 border border-gray-700 px-3 py-2 text-sm text-white placeholder-gray-500 focus:border-indigo-500 focus:outline-none"
+            className="w-full rounded-lg bg-muted border border-border px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none"
           />
-          <p className="mt-1 text-xs text-gray-500">Link to your logo image (PNG or SVG recommended)</p>
+          <p className="mt-1 text-xs text-muted-foreground">Link to your logo image (PNG or SVG recommended)</p>
 
           {/* Logo preview */}
           {settings.logoUrl && (
             <div className="mt-3 flex items-center gap-3">
-              <div className="rounded-lg bg-gray-800 border border-gray-700 p-3 flex items-center justify-center">
+              <div className="rounded-lg bg-muted border border-border p-3 flex items-center justify-center">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={settings.logoUrl}
@@ -146,7 +146,7 @@ export default function GeneralSettingsPage() {
                   }}
                 />
               </div>
-              <p className="text-xs text-gray-500">Preview</p>
+              <p className="text-xs text-muted-foreground">Preview</p>
             </div>
           )}
         </div>
@@ -156,7 +156,7 @@ export default function GeneralSettingsPage() {
           <button
             type="submit"
             disabled={saving}
-            className="flex items-center gap-2 rounded-lg bg-indigo-600 px-6 py-2.5 text-sm font-medium text-white hover:bg-indigo-500 disabled:opacity-50 transition-colors min-w-[140px] justify-center"
+            className="flex items-center gap-2 rounded-lg bg-primary px-6 py-2.5 text-sm font-medium text-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors min-w-[140px] justify-center"
           >
             {saving ? (
               <>

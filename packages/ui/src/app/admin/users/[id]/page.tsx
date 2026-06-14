@@ -95,14 +95,14 @@ export default function UserDetailPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-gray-500">Loading…</div>
+        <div className="text-muted-foreground">Loading…</div>
       </div>
     );
   }
 
   if (!user) {
     return (
-      <div className="text-center py-16 text-gray-500">User not found.</div>
+      <div className="text-center py-16 text-muted-foreground">User not found.</div>
     );
   }
 
@@ -112,7 +112,7 @@ export default function UserDetailPage() {
     <div className="space-y-6 max-w-3xl">
       {/* Toast */}
       {toast && (
-        <div className="fixed top-4 right-4 z-50 rounded-lg bg-indigo-600 px-4 py-3 text-sm text-white shadow-lg">
+        <div className="fixed top-4 right-4 z-50 rounded-lg bg-primary px-4 py-3 text-sm text-foreground shadow-lg">
           {toast}
         </div>
       )}
@@ -120,28 +120,28 @@ export default function UserDetailPage() {
       <div className="flex items-center gap-3">
         <button
           onClick={() => router.back()}
-          className="text-sm text-gray-400 hover:text-white transition-colors"
+          className="text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           ← Back
         </button>
-        <h1 className="text-2xl font-bold text-white">User Detail</h1>
+        <h1 className="text-2xl font-bold text-foreground">User Detail</h1>
       </div>
 
       {/* Profile Card */}
-      <div className="rounded-xl bg-gray-900 border border-gray-800 p-6">
+      <div className="rounded-xl bg-card border border-border p-6">
         <div className="flex items-center gap-5">
-          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-indigo-900/60 text-2xl font-bold text-indigo-300">
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-indigo-900/60 text-2xl font-bold text-primary">
             {(user.name?.[0] ?? user.email[0]).toUpperCase()}
           </div>
           <div className="flex-1">
             <div className="flex items-center gap-3">
-              <h2 className="text-xl font-semibold text-white">{user.name ?? user.email}</h2>
+              <h2 className="text-xl font-semibold text-foreground">{user.name ?? user.email}</h2>
               <Badge status={user.status} />
             </div>
             {user.name && (
-              <p className="text-sm text-gray-400 mt-0.5">{user.email}</p>
+              <p className="text-sm text-muted-foreground mt-0.5">{user.email}</p>
             )}
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-muted-foreground mt-1">
               Created {user.createdAt ? new Date(user.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }) : "—"}
             </p>
           </div>
@@ -149,20 +149,20 @@ export default function UserDetailPage() {
       </div>
 
       {/* MFA Status */}
-      <div className="rounded-xl bg-gray-900 border border-gray-800 p-6 space-y-4">
-        <h3 className="font-semibold text-white">Multi-Factor Authentication</h3>
+      <div className="rounded-xl bg-card border border-border p-6 space-y-4">
+        <h3 className="font-semibold text-foreground">Multi-Factor Authentication</h3>
         <div className="grid grid-cols-3 gap-4">
           {[
             { label: "Authenticator App (TOTP)", enabled: user.mfa?.totpEnabled },
             { label: "Email OTP", enabled: user.mfa?.emailOtpEnabled },
             { label: "SMS OTP", enabled: user.mfa?.smsOtpEnabled },
           ].map((item) => (
-            <div key={item.label} className="rounded-lg bg-gray-800 p-3 text-center">
-              <div className={`text-lg mb-1 ${item.enabled ? "text-green-400" : "text-gray-600"}`}>
+            <div key={item.label} className="rounded-lg bg-muted p-3 text-center">
+              <div className={`text-lg mb-1 ${item.enabled ? "text-green-400" : "text-muted-foreground"}`}>
                 {item.enabled ? "✓" : "✗"}
               </div>
-              <p className="text-xs text-gray-400">{item.label}</p>
-              <p className={`text-xs font-medium mt-0.5 ${item.enabled ? "text-green-400" : "text-gray-600"}`}>
+              <p className="text-xs text-muted-foreground">{item.label}</p>
+              <p className={`text-xs font-medium mt-0.5 ${item.enabled ? "text-green-400" : "text-muted-foreground"}`}>
                 {item.enabled ? "Enabled" : "Disabled"}
               </p>
             </div>
@@ -171,11 +171,11 @@ export default function UserDetailPage() {
       </div>
 
       {/* Sessions */}
-      <div className="rounded-xl bg-gray-900 border border-gray-800 p-6">
+      <div className="rounded-xl bg-card border border-border p-6">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="font-semibold text-white">Active Sessions</h3>
-            <p className="text-sm text-gray-400 mt-0.5">
+            <h3 className="font-semibold text-foreground">Active Sessions</h3>
+            <p className="text-sm text-muted-foreground mt-0.5">
               {sessionCount} session{sessionCount !== 1 ? "s" : ""} active
             </p>
           </div>
@@ -190,7 +190,7 @@ export default function UserDetailPage() {
       </div>
 
       {/* Danger Zone */}
-      <div className="rounded-xl bg-gray-900 border border-red-900/40 p-6 space-y-4">
+      <div className="rounded-xl bg-card border border-red-900/40 p-6 space-y-4">
         <h3 className="font-semibold text-red-400">Danger Zone</h3>
         <div className="flex flex-wrap gap-3">
           <button

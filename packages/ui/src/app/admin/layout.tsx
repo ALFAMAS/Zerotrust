@@ -39,11 +39,11 @@ function AdminSidebar({ open, onClose }: AdminSidebarProps) {
   }
 
   const sidebarContent = (
-    <aside className="flex h-full w-60 flex-col bg-gray-900 border-r border-gray-800">
-      <div className="flex h-16 items-center px-6 border-b border-gray-800">
+    <aside className="flex h-full w-60 flex-col bg-card border-r border-border">
+      <div className="flex h-16 items-center px-6 border-b border-border">
         <Link
           href="/admin"
-          className="text-lg font-bold text-indigo-400 tracking-tight"
+          className="text-lg font-bold text-primary tracking-tight"
           onClick={onClose}
         >
           {brand.name} Admin
@@ -60,8 +60,8 @@ function AdminSidebar({ open, onClose }: AdminSidebarProps) {
               className={[
                 "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
                 active
-                  ? "bg-indigo-600 text-white"
-                  : "text-gray-400 hover:bg-gray-800 hover:text-white",
+                  ? "bg-primary text-foreground"
+                  : "text-muted-foreground hover:bg-accent hover:text-foreground",
               ].join(" ")}
             >
               <span className="text-base leading-none">{link.icon}</span>
@@ -70,22 +70,22 @@ function AdminSidebar({ open, onClose }: AdminSidebarProps) {
           );
         })}
       </nav>
-      <div className="border-t border-gray-800 px-4 py-4 space-y-1">
+      <div className="border-t border-border px-4 py-4 space-y-1">
         <Link
           href="/dashboard"
           onClick={onClose}
-          className="block w-full rounded-lg px-3 py-2 text-sm text-gray-400 hover:bg-gray-800 hover:text-white transition-colors"
+          className="block w-full rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
         >
           ← User Dashboard
         </Link>
         {/* ThemeToggle row */}
         <div className="flex items-center gap-2 px-3 py-2">
-          <span className="text-sm text-gray-400 flex-1">Theme</span>
+          <span className="text-sm text-muted-foreground flex-1">Theme</span>
           <ThemeToggle />
         </div>
         <button
           onClick={handleSignOut}
-          className="w-full rounded-lg px-3 py-2 text-sm text-gray-400 hover:bg-gray-800 hover:text-white transition-colors text-left"
+          className="w-full rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-foreground transition-colors text-left"
         >
           Sign out
         </button>
@@ -170,8 +170,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   // children (which would otherwise fire admin API calls and 403).
   if (authorized !== true) {
     return (
-      <div className="min-h-screen bg-gray-950 text-gray-100 flex items-center justify-center">
-        <p className="text-sm text-gray-400">
+      <div className="min-h-screen bg-background text-foreground flex items-center justify-center">
+        <p className="text-sm text-muted-foreground">
           {authorized === false ? "Access denied. Redirecting…" : "Checking access…"}
         </p>
       </div>
@@ -179,17 +179,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 text-gray-100">
+    <div className="min-h-screen bg-background text-foreground">
       <AdminSidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       {/* Mobile top bar with hamburger */}
-      <div className="md:hidden flex items-center gap-3 px-4 py-3 border-b border-gray-800 bg-gray-900">
+      <div className="md:hidden flex items-center gap-3 px-4 py-3 border-b border-border bg-card">
         <button
           aria-label={sidebarOpen ? "Close sidebar" : "Open sidebar"}
           aria-expanded={sidebarOpen}
           aria-controls="admin-sidebar"
           onClick={() => setSidebarOpen((v) => !v)}
-          className="w-8 h-8 flex flex-col items-center justify-center gap-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
+          className="w-8 h-8 flex flex-col items-center justify-center gap-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
         >
           {sidebarOpen ? (
             <svg
@@ -211,7 +211,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </>
           )}
         </button>
-        <span className="font-bold text-indigo-400">{brand.name} Admin</span>
+        <span className="font-bold text-primary">{brand.name} Admin</span>
       </div>
 
       {/* Main content: offset by sidebar width on desktop, full-width on mobile */}

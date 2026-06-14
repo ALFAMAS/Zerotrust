@@ -1,9 +1,17 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { setToken } from "@/lib/auth";
-import { Suspense } from "react";
+
+function Spinner({ label }: { label: string }) {
+  return (
+    <div className="py-8 text-center">
+      <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+      <p className="text-sm text-muted-foreground">{label}</p>
+    </div>
+  );
+}
 
 function CallbackInner() {
   const router = useRouter();
@@ -18,24 +26,12 @@ function CallbackInner() {
     router.replace("/dashboard");
   }, [params, router]);
 
-  return (
-    <div className="text-center py-8">
-      <div className="w-10 h-10 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-      <p className="text-gray-400 text-sm">Signing you in…</p>
-    </div>
-  );
+  return <Spinner label="Signing you in…" />;
 }
 
 export default function CallbackPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="text-center py-8">
-          <div className="w-10 h-10 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-gray-400 text-sm">Loading…</p>
-        </div>
-      }
-    >
+    <Suspense fallback={<Spinner label="Loading…" />}>
       <CallbackInner />
     </Suspense>
   );

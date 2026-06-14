@@ -648,3 +648,69 @@ describe("Account lockout after failed login attempts", () => {
     expect(isAccountLocked(email).locked).toBe(false);
   });
 });
+
+// ── POST /verify-email ──────────────────────────────────────────────────────
+
+describe("POST /verify-email", () => {
+  let db: ReturnType<typeof makeDbChain>;
+
+  beforeEach(async () => {
+    vi.resetModules();
+    db = makeDbChain([]);
+    const { getDb } = await import("../db");
+    vi.mocked(getDb).mockReturnValue(db as any);
+  });
+
+  afterEach(() => vi.clearAllMocks());
+
+  async function post(body: unknown) {
+    const router = await getRouter();
+    const app = new Hono().route("/", router);
+    return app.request("/verify-email", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+  }
+
+  it("returns 400 when email or code is missing", async () => {
+    const res = await post({ email: "alice@example.com" });
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toBe("INVALID_REQUEST");
+  });
+
+  it("returns 400 INVALID_CODE for an unknown account (no enumeration)", async () => {
+    db.limit.mockResolvedValueOnce([]); // user lookup → none
+    const res = await post({ email: "ghost@example.com", code: "123456" });
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toBe("INVALID_CODE");
+  });
+
+  it("verifies on a valid, unexpired code (happy path)", async () => {
+    db.limit
+      .mockResolvedValueOnce([makeActiveUser({ emailVerifiedAt: null })]) // user lookup
+      .mockResolvedValueOnce([{ id: "otp-1", userId: USER_ID, code: "123456" }]); // otp lookup
+    const res = await post({ email: "alice@example.com", code: "123456" });
+    expect(res.status).toBe(200);
+    expect((await res.json()).success).toBe(true);
+    expect(db.update).toHaveBeenCalled();
+  });
+
+  it("returns 400 INVALID_CODE when the code is wrong or expired", async () => {
+    db.limit
+      .mockResolvedValueOnce([makeActiveUser({ emailVerifiedAt: null })]) // user lookup
+      .mockResolvedValueOnce([]); // otp lookup → no match
+    const res = await post({ email: "alice@example.com", code: "000000" });
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toBe("INVALID_CODE");
+  });
+
+  it("is idempotent for an already-verified account", async () => {
+    db.limit.mockResolvedValueOnce([makeActiveUser({ emailVerifiedAt: new Date() })]);
+    const res = await post({ email: "alice@example.com", code: "123456" });
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.success).toBe(true);
+    expect(body.alreadyVerified).toBe(true);
+  });
+});

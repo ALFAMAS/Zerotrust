@@ -67,8 +67,8 @@ export default function ApiKeysPage() {
 
   return (
     <div className="max-w-3xl">
-      <h1 className="text-2xl font-bold text-white mb-1">API Keys</h1>
-      <p className="text-gray-400 text-sm mb-8">
+      <h1 className="text-2xl font-bold text-foreground mb-1">API Keys</h1>
+      <p className="text-muted-foreground text-sm mb-8">
         Use API keys to authenticate programmatic access to your account.
       </p>
 
@@ -78,39 +78,39 @@ export default function ApiKeysPage() {
             API key created — copy it now, you won't see it again.
           </p>
           <div className="flex items-center gap-2">
-            <code className="flex-1 bg-gray-950 text-green-300 text-xs p-2 rounded-lg font-mono break-all">
+            <code className="flex-1 bg-background text-green-300 text-xs p-2 rounded-lg font-mono break-all">
               {newKey}
             </code>
             <button
               onClick={() => copy(newKey)}
-              className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 text-white text-xs rounded-lg transition-colors whitespace-nowrap"
+              className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 text-foreground text-xs rounded-lg transition-colors whitespace-nowrap"
             >
               {copied ? "Copied!" : "Copy"}
             </button>
           </div>
           <button
             onClick={() => setNewKey(null)}
-            className="mt-3 text-xs text-gray-500 hover:text-gray-300"
+            className="mt-3 text-xs text-muted-foreground hover:text-foreground/80"
           >
             Dismiss
           </button>
         </div>
       )}
 
-      <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 mb-6">
-        <h2 className="font-semibold text-white mb-4">Create new key</h2>
+      <div className="bg-card border border-border rounded-xl p-6 mb-6">
+        <h2 className="font-semibold text-foreground mb-4">Create new key</h2>
         <form onSubmit={handleCreate} className="flex flex-col gap-3">
           <div className="flex gap-3">
             <input
               value={form.name}
               onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
               placeholder="Key name (e.g. CI/CD pipeline)"
-              className="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-indigo-500"
+              className="flex-1 bg-muted border border-border rounded-lg px-3 py-2 text-foreground text-sm focus:outline-none focus:border-ring"
             />
             <select
               value={form.expiresInDays}
               onChange={(e) => setForm((f) => ({ ...f, expiresInDays: e.target.value }))}
-              className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-indigo-500"
+              className="bg-muted border border-border rounded-lg px-3 py-2 text-foreground text-sm focus:outline-none focus:border-ring"
             >
               <option value="">No expiry</option>
               <option value="30">30 days</option>
@@ -122,34 +122,34 @@ export default function ApiKeysPage() {
           <button
             type="submit"
             disabled={creating}
-            className="self-start px-4 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white text-sm rounded-lg transition-colors"
+            className="self-start px-4 py-2 bg-primary hover:bg-primary/90 disabled:opacity-50 text-foreground text-sm rounded-lg transition-colors"
           >
             {creating ? "Creating…" : "Create key"}
           </button>
         </form>
       </div>
 
-      <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-800">
-          <h2 className="font-semibold text-white">Active keys</h2>
+      <div className="bg-card border border-border rounded-xl overflow-hidden">
+        <div className="px-6 py-4 border-b border-border">
+          <h2 className="font-semibold text-foreground">Active keys</h2>
         </div>
         {loading ? (
-          <div className="p-6 text-gray-500 text-sm">Loading…</div>
+          <div className="p-6 text-muted-foreground text-sm">Loading…</div>
         ) : keys.length === 0 ? (
-          <div className="p-6 text-gray-500 text-sm">No active API keys. Create one above.</div>
+          <div className="p-6 text-muted-foreground text-sm">No active API keys. Create one above.</div>
         ) : (
           <ul className="divide-y divide-gray-800">
             {keys.map((key) => (
               <li key={key.id} className="flex items-center justify-between px-6 py-4">
                 <div>
-                  <p className="text-white text-sm font-medium">{key.name}</p>
-                  <p className="text-gray-500 text-xs mt-0.5 font-mono">{key.keyPrefix}…</p>
+                  <p className="text-foreground text-sm font-medium">{key.name}</p>
+                  <p className="text-muted-foreground text-xs mt-0.5 font-mono">{key.keyPrefix}…</p>
                   {key.lastUsedAt ? (
-                    <p className="text-gray-600 text-xs mt-0.5">
+                    <p className="text-muted-foreground text-xs mt-0.5">
                       Last used {new Date(key.lastUsedAt).toLocaleDateString()}
                     </p>
                   ) : (
-                    <p className="text-gray-600 text-xs mt-0.5">Never used</p>
+                    <p className="text-muted-foreground text-xs mt-0.5">Never used</p>
                   )}
                   {key.expiresAt && (
                     <p className="text-yellow-600 text-xs mt-0.5">

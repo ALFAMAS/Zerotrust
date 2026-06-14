@@ -145,13 +145,13 @@ export default function OrgSettingsPage() {
   }
 
   if (!org) {
-    return <div className="text-gray-500 py-16 text-center">Organization not found.</div>;
+    return <div className="text-muted-foreground py-16 text-center">Organization not found.</div>;
   }
 
   if (myRole !== "admin" && myRole !== "owner") {
     return (
-      <div className="text-gray-500 py-16 text-center">
-        <p className="font-semibold text-white mb-1">Access denied</p>
+      <div className="text-muted-foreground py-16 text-center">
+        <p className="font-semibold text-foreground mb-1">Access denied</p>
         <p>You need admin or owner access to view settings.</p>
       </div>
     );
@@ -162,48 +162,48 @@ export default function OrgSettingsPage() {
   return (
     <div className="space-y-8 max-w-xl">
       <div>
-        <h1 className="text-2xl font-bold text-white">{org.name} — Settings</h1>
-        <p className="text-sm text-gray-500 mt-0.5 font-mono">{org.slug}</p>
+        <h1 className="text-2xl font-bold text-foreground">{org.name} — Settings</h1>
+        <p className="text-sm text-muted-foreground mt-0.5 font-mono">{org.slug}</p>
       </div>
 
       {/* General settings */}
       <form
         onSubmit={handleSave}
-        className="bg-gray-900 border border-gray-800 rounded-xl p-5 space-y-4"
+        className="bg-card border border-border rounded-xl p-5 space-y-4"
       >
-        <h2 className="font-semibold text-white">General</h2>
+        <h2 className="font-semibold text-foreground">General</h2>
         <div className="space-y-1">
-          <label className="text-xs text-gray-400">Organization name</label>
+          <label className="text-xs text-muted-foreground">Organization name</label>
           <input
             value={editName}
             onChange={(e) => setEditName(e.target.value)}
-            className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+            className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:border-ring"
           />
         </div>
         <div className="space-y-1">
-          <label className="text-xs text-gray-400">Billing email</label>
+          <label className="text-xs text-muted-foreground">Billing email</label>
           <input
             type="email"
             value={editBillingEmail}
             onChange={(e) => setEditBillingEmail(e.target.value)}
             placeholder="billing@example.com"
-            className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500"
+            className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-ring"
           />
         </div>
         <div className="space-y-1">
-          <label className="text-xs text-gray-400">Logo URL</label>
+          <label className="text-xs text-muted-foreground">Logo URL</label>
           <input
             type="url"
             value={editLogoUrl}
             onChange={(e) => setEditLogoUrl(e.target.value)}
             placeholder="https://example.com/logo.png"
-            className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500"
+            className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-ring"
           />
         </div>
         <button
           type="submit"
           disabled={saving}
-          className="bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white text-sm px-4 py-2 rounded-lg transition-colors"
+          className="bg-primary hover:bg-primary/90 disabled:opacity-50 text-foreground text-sm px-4 py-2 rounded-lg transition-colors"
         >
           {saving ? "Saving…" : "Save changes"}
         </button>
@@ -213,19 +213,19 @@ export default function OrgSettingsPage() {
       {myRole === "owner" && nonOwnerMembers.length > 0 && (
         <form
           onSubmit={handleTransfer}
-          className="bg-gray-900 border border-gray-800 rounded-xl p-5 space-y-4"
+          className="bg-card border border-border rounded-xl p-5 space-y-4"
         >
-          <h2 className="font-semibold text-white">Transfer ownership</h2>
-          <p className="text-sm text-gray-400">
+          <h2 className="font-semibold text-foreground">Transfer ownership</h2>
+          <p className="text-sm text-muted-foreground">
             You will become an admin after transferring ownership.
           </p>
           <div className="space-y-1">
-            <label className="text-xs text-gray-400">New owner</label>
+            <label className="text-xs text-muted-foreground">New owner</label>
             <select
               value={transferTo}
               onChange={(e) => setTransferTo(e.target.value)}
               required
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+              className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:border-ring"
             >
               <option value="">Select a member…</option>
               {nonOwnerMembers.map(({ member, user }) => (
@@ -238,7 +238,7 @@ export default function OrgSettingsPage() {
           <button
             type="submit"
             disabled={!transferTo || transferring}
-            className="bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-white text-sm px-4 py-2 rounded-lg transition-colors"
+            className="bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-foreground text-sm px-4 py-2 rounded-lg transition-colors"
           >
             {transferring ? "Transferring…" : "Transfer ownership"}
           </button>
@@ -249,28 +249,28 @@ export default function OrgSettingsPage() {
       {myRole === "owner" && (
         <form
           onSubmit={handleDelete}
-          className="bg-gray-900 border border-red-900 rounded-xl p-5 space-y-4"
+          className="bg-card border border-red-900 rounded-xl p-5 space-y-4"
         >
           <h2 className="font-semibold text-red-400">Delete organization</h2>
-          <p className="text-sm text-gray-400">
+          <p className="text-sm text-muted-foreground">
             This is irreversible. All members and invites will be removed. Type the organization
             name to confirm.
           </p>
           <div className="space-y-1">
-            <label className="text-xs text-gray-400">
-              Type <span className="font-mono text-white">{org.name}</span> to confirm
+            <label className="text-xs text-muted-foreground">
+              Type <span className="font-mono text-foreground">{org.name}</span> to confirm
             </label>
             <input
               value={deleteConfirm}
               onChange={(e) => setDeleteConfirm(e.target.value)}
               placeholder={org.name}
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-red-500"
+              className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm text-foreground placeholder-gray-600 focus:outline-none focus:border-red-500"
             />
           </div>
           <button
             type="submit"
             disabled={deleteConfirm !== org.name || deleting}
-            className="bg-red-700 hover:bg-red-600 disabled:opacity-50 text-white text-sm px-4 py-2 rounded-lg transition-colors"
+            className="bg-red-700 hover:bg-red-600 disabled:opacity-50 text-foreground text-sm px-4 py-2 rounded-lg transition-colors"
           >
             {deleting ? "Deleting…" : "Delete organization"}
           </button>

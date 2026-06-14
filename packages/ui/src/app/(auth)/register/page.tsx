@@ -5,6 +5,10 @@ import { api } from "../../../lib/api";
 import { setToken } from "../../../lib/auth";
 import { useToast } from "@/lib/toast";
 import { brand } from "@/config/brand";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
 
 function passwordStrength(p: string): { score: number; label: string; color: string } {
   let score = 0;
@@ -38,14 +42,22 @@ export default function RegisterPage() {
     }
     setLoading(true);
     try {
-      await api.post("/auth/register", {
-        email: form.email,
-        password: form.password,
-        displayName: form.displayName,
-      }, true);
-      const data = await api.post<any>("/auth/login", { email: form.email, password: form.password }, true);
+      await api.post(
+        "/auth/register",
+        {
+          email: form.email,
+          password: form.password,
+          displayName: form.displayName,
+        },
+        true
+      );
+      const data = await api.post<any>(
+        "/auth/login",
+        { email: form.email, password: form.password },
+        true
+      );
       setToken(data.accessToken, data.refreshToken);
-      toast({ message: "Account created! Welcome aboard.", type: "success" });
+      toast({ message: "Account created! Check your email to verify.", type: "success" });
       window.location.href = "/dashboard";
     } catch (err: any) {
       toast({ message: err.message || "Registration failed", type: "error" });
@@ -56,64 +68,84 @@ export default function RegisterPage() {
 
   return (
     <>
-      <h1 className="text-2xl font-bold text-white mb-1">Create account</h1>
-      <p className="text-gray-400 text-sm mb-6">Start with {brand.name} for free</p>
+      <h1 className="mb-1 text-2xl font-bold text-foreground">Create account</h1>
+      <p className="mb-6 text-sm text-muted-foreground">Start with {brand.name} for free</p>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-sm text-gray-400 mb-1.5">Display Name</label>
-          <input
-            type="text" required value={form.displayName} onChange={(e) => setForm({ ...form, displayName: e.target.value })}
-            className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500 transition-colors"
+        <div className="space-y-1.5">
+          <Label htmlFor="displayName">Display Name</Label>
+          <Input
+            id="displayName"
+            type="text"
+            required
+            value={form.displayName}
+            onChange={(e) => setForm({ ...form, displayName: e.target.value })}
             placeholder="Your Name"
           />
         </div>
-        <div>
-          <label className="block text-sm text-gray-400 mb-1.5">Email</label>
-          <input
-            type="email" required autoComplete="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })}
-            className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500 transition-colors"
+        <div className="space-y-1.5">
+          <Label htmlFor="email">Email</Label>
+          <Input
+            id="email"
+            type="email"
+            required
+            autoComplete="email"
+            value={form.email}
+            onChange={(e) => setForm({ ...form, email: e.target.value })}
             placeholder="you@example.com"
           />
         </div>
-        <div>
-          <label className="block text-sm text-gray-400 mb-1.5">Password</label>
-          <input
-            type="password" required autoComplete="new-password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })}
-            className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500 transition-colors"
+        <div className="space-y-1.5">
+          <Label htmlFor="password">Password</Label>
+          <Input
+            id="password"
+            type="password"
+            required
+            autoComplete="new-password"
+            value={form.password}
+            onChange={(e) => setForm({ ...form, password: e.target.value })}
             placeholder="At least 8 characters"
           />
           {form.password && (
             <div className="mt-2">
               <div className="flex gap-1">
                 {[1, 2, 3, 4, 5].map((i) => (
-                  <div key={i} className={`h-1 flex-1 rounded-full ${i <= strength.score ? strength.color : "bg-gray-700"}`} />
+                  <div
+                    key={i}
+                    className={cn(
+                      "h-1 flex-1 rounded-full",
+                      i <= strength.score ? strength.color : "bg-muted"
+                    )}
+                  />
                 ))}
               </div>
-              <span className="text-xs text-gray-400 mt-1 block">{strength.label}</span>
+              <span className="mt-1 block text-xs text-muted-foreground">{strength.label}</span>
             </div>
           )}
         </div>
-        <div>
-          <label className="block text-sm text-gray-400 mb-1.5">Confirm Password</label>
-          <input
-            type="password" required value={form.confirm} onChange={(e) => setForm({ ...form, confirm: e.target.value })}
-            className={`w-full bg-gray-800 border rounded-lg px-3 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500 transition-colors ${form.confirm && form.confirm !== form.password ? "border-red-600" : "border-gray-700"}`}
+        <div className="space-y-1.5">
+          <Label htmlFor="confirm">Confirm Password</Label>
+          <Input
+            id="confirm"
+            type="password"
+            required
+            value={form.confirm}
+            onChange={(e) => setForm({ ...form, confirm: e.target.value })}
             placeholder="Repeat password"
+            className={cn(form.confirm && form.confirm !== form.password && "border-destructive")}
           />
         </div>
 
-        <button
-          type="submit" disabled={loading}
-          className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-semibold rounded-lg transition-colors mt-2"
-        >
+        <Button type="submit" disabled={loading} className="mt-2 w-full">
           {loading ? "Creating account…" : "Create Account"}
-        </button>
+        </Button>
       </form>
 
-      <p className="mt-6 text-center text-sm text-gray-500">
+      <p className="mt-6 text-center text-sm text-muted-foreground">
         Already have an account?{" "}
-        <Link href="/login" className="text-indigo-400 hover:text-indigo-300 font-medium">Sign in</Link>
+        <Link href="/login" className="font-medium text-primary hover:text-primary/80">
+          Sign in
+        </Link>
       </p>
     </>
   );

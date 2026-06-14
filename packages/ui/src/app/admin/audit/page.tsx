@@ -75,49 +75,49 @@ export default function AuditPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-white">Audit Logs</h1>
-        <p className="mt-1 text-sm text-gray-400">Recent authentication and admin events</p>
+        <h1 className="text-2xl font-bold text-foreground">Audit Logs</h1>
+        <p className="mt-1 text-sm text-muted-foreground">Recent authentication and admin events</p>
       </div>
 
-      <div className="rounded-xl bg-gray-900 border border-gray-800 overflow-hidden">
+      <div className="rounded-xl bg-card border border-border overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-800 bg-gray-900/80">
-                <th className="px-5 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Timestamp</th>
-                <th className="px-5 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">User</th>
-                <th className="px-5 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Action</th>
-                <th className="px-5 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">IP</th>
-                <th className="px-5 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Status</th>
+              <tr className="border-b border-border bg-card/80">
+                <th className="px-5 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Timestamp</th>
+                <th className="px-5 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">User</th>
+                <th className="px-5 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Action</th>
+                <th className="px-5 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">IP</th>
+                <th className="px-5 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Status</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-800">
               {loading && (
                 <tr>
-                  <td colSpan={5} className="px-5 py-8 text-center text-gray-500">Loading…</td>
+                  <td colSpan={5} className="px-5 py-8 text-center text-muted-foreground">Loading…</td>
                 </tr>
               )}
               {!loading && entries.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-5 py-8 text-center text-gray-500">No audit entries found.</td>
+                  <td colSpan={5} className="px-5 py-8 text-center text-muted-foreground">No audit entries found.</td>
                 </tr>
               )}
               {!loading && entries.map((entry) => (
                 <tr
                   key={entry.id}
                   onClick={() => setSelected(entry)}
-                  className="hover:bg-gray-800/50 cursor-pointer transition-colors"
+                  className="hover:bg-accent/50 cursor-pointer transition-colors"
                 >
-                  <td className="px-5 py-4 text-gray-400 text-xs whitespace-nowrap">
+                  <td className="px-5 py-4 text-muted-foreground text-xs whitespace-nowrap">
                     {getTimestamp(entry)}
                   </td>
-                  <td className="px-5 py-4 text-white">{getUser(entry)}</td>
+                  <td className="px-5 py-4 text-foreground">{getUser(entry)}</td>
                   <td className="px-5 py-4">
-                    <code className="rounded bg-gray-800 px-1.5 py-0.5 text-xs text-indigo-300">
+                    <code className="rounded bg-muted px-1.5 py-0.5 text-xs text-primary">
                       {entry.action}
                     </code>
                   </td>
-                  <td className="px-5 py-4 text-gray-400 font-mono text-xs">{getIp(entry)}</td>
+                  <td className="px-5 py-4 text-muted-foreground font-mono text-xs">{getIp(entry)}</td>
                   <td className="px-5 py-4">
                     <Badge
                       status={getStatus(entry) === "failure" || getStatus(entry) === "error" ? "error" : "success"}
@@ -137,23 +137,23 @@ export default function AuditPage() {
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-3 text-sm">
               <div>
-                <p className="text-xs text-gray-500 mb-0.5">Timestamp</p>
-                <p className="text-white">{getTimestamp(selected)}</p>
+                <p className="text-xs text-muted-foreground mb-0.5">Timestamp</p>
+                <p className="text-foreground">{getTimestamp(selected)}</p>
               </div>
               <div>
-                <p className="text-xs text-gray-500 mb-0.5">User</p>
-                <p className="text-white">{getUser(selected)}</p>
+                <p className="text-xs text-muted-foreground mb-0.5">User</p>
+                <p className="text-foreground">{getUser(selected)}</p>
               </div>
               <div>
-                <p className="text-xs text-gray-500 mb-0.5">Action</p>
-                <code className="text-indigo-300 text-xs bg-gray-800 rounded px-1.5 py-0.5">{selected.action}</code>
+                <p className="text-xs text-muted-foreground mb-0.5">Action</p>
+                <code className="text-primary text-xs bg-muted rounded px-1.5 py-0.5">{selected.action}</code>
               </div>
               <div>
-                <p className="text-xs text-gray-500 mb-0.5">IP Address</p>
-                <p className="text-white font-mono text-xs">{getIp(selected)}</p>
+                <p className="text-xs text-muted-foreground mb-0.5">IP Address</p>
+                <p className="text-foreground font-mono text-xs">{getIp(selected)}</p>
               </div>
               <div>
-                <p className="text-xs text-gray-500 mb-0.5">Status</p>
+                <p className="text-xs text-muted-foreground mb-0.5">Status</p>
                 <Badge
                   status={getStatus(selected) === "failure" || getStatus(selected) === "error" ? "error" : "success"}
                   label={getStatus(selected)}
@@ -162,8 +162,8 @@ export default function AuditPage() {
             </div>
             {Object.keys(getDetail(selected)).length > 0 && (
               <div>
-                <p className="text-xs text-gray-500 mb-2">Details</p>
-                <pre className="rounded-lg bg-gray-800 p-3 text-xs text-gray-300 overflow-auto max-h-48">
+                <p className="text-xs text-muted-foreground mb-2">Details</p>
+                <pre className="rounded-lg bg-muted p-3 text-xs text-foreground/80 overflow-auto max-h-48">
                   {JSON.stringify(getDetail(selected), null, 2)}
                 </pre>
               </div>

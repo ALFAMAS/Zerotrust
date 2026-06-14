@@ -52,10 +52,10 @@ export default function StatusPage() {
   const style = STATUS_STYLES[overall];
 
   return (
-    <main className="min-h-screen bg-gray-950 text-white">
+    <main className="min-h-screen bg-background text-foreground">
       <div className="max-w-2xl mx-auto px-4 py-20">
         <h1 className="text-2xl font-bold mb-2">System status</h1>
-        <p className="text-sm text-gray-400 mb-10">
+        <p className="text-sm text-muted-foreground mb-10">
           Live status of all platform components. Updates every 30 seconds.
         </p>
 
@@ -81,7 +81,7 @@ export default function StatusPage() {
                     : "Major outage"}
             </p>
             {lastChecked && (
-              <p className="text-xs text-gray-500 mt-0.5">
+              <p className="text-xs text-muted-foreground mt-0.5">
                 Last checked {lastChecked.toLocaleTimeString()}
               </p>
             )}
@@ -89,10 +89,10 @@ export default function StatusPage() {
         </div>
 
         {/* Components */}
-        <div className="bg-gray-900 border border-gray-800 rounded-xl divide-y divide-gray-800">
+        <div className="bg-card border border-border rounded-xl divide-y divide-gray-800">
           {error && (
             <div className="px-6 py-4 flex items-center justify-between">
-              <span className="text-sm text-gray-300">API</span>
+              <span className="text-sm text-foreground/80">API</span>
               <span className="flex items-center gap-2 text-sm text-red-400">
                 <span className="h-2 w-2 rounded-full bg-red-500" />
                 Unreachable
@@ -104,7 +104,7 @@ export default function StatusPage() {
               const s = STATUS_STYLES[value];
               return (
                 <div key={key} className="px-6 py-4 flex items-center justify-between">
-                  <span className="text-sm text-gray-300">{COMPONENT_LABELS[key] ?? key}</span>
+                  <span className="text-sm text-foreground/80">{COMPONENT_LABELS[key] ?? key}</span>
                   <span className={`flex items-center gap-2 text-sm ${s.text}`}>
                     <span className={`h-2 w-2 rounded-full ${s.dot}`} />
                     {s.label}
@@ -115,7 +115,7 @@ export default function StatusPage() {
         </div>
 
         {data && (
-          <p className="mt-6 text-xs text-gray-500 text-center">
+          <p className="mt-6 text-xs text-muted-foreground text-center">
             API uptime: {Math.floor(data.uptimeSeconds / 3600)}h{" "}
             {Math.floor((data.uptimeSeconds % 3600) / 60)}m
           </p>

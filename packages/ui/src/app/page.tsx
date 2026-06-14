@@ -46,22 +46,22 @@ const features = [
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-gray-950">
+    <div className="min-h-screen bg-background">
       {/* Nav */}
-      <nav className="border-b border-gray-800 px-6 py-4 flex items-center justify-between max-w-7xl mx-auto">
+      <nav className="border-b border-border px-6 py-4 flex items-center justify-between max-w-7xl mx-auto">
         <div className="flex items-center gap-2">
           <div
-            className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-sm"
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-foreground font-bold text-sm"
             style={{ backgroundColor: brand.logoColor }}
           >
             {brand.logoLetter}
           </div>
-          <span className="font-bold text-white text-lg">{brand.name}</span>
+          <span className="font-bold text-foreground text-lg">{brand.name}</span>
         </div>
         <div className="flex items-center gap-4">
-          <a href={`${brand.apiUrl}/docs`} className="text-gray-400 hover:text-white text-sm transition-colors">Docs</a>
-          <Link href="/login" className="text-gray-400 hover:text-white text-sm transition-colors">Sign In</Link>
-          <Link href="/register" className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium rounded-lg transition-colors">
+          <a href={`${brand.apiUrl}/docs`} className="text-muted-foreground hover:text-foreground text-sm transition-colors">Docs</a>
+          <Link href="/login" className="text-muted-foreground hover:text-foreground text-sm transition-colors">Sign In</Link>
+          <Link href="/register" className="px-4 py-2 bg-primary hover:bg-primary/90 text-foreground text-sm font-medium rounded-lg transition-colors">
             Get Started
           </Link>
         </div>
@@ -69,24 +69,24 @@ export default function LandingPage() {
 
       {/* Hero */}
       <section className="max-w-7xl mx-auto px-6 pt-24 pb-16 text-center">
-        <div className="inline-flex items-center gap-2 bg-indigo-950 border border-indigo-800 text-indigo-300 px-3 py-1.5 rounded-full text-xs font-medium mb-6">
+        <div className="inline-flex items-center gap-2 bg-indigo-950 border border-primary/40 text-primary px-3 py-1.5 rounded-full text-xs font-medium mb-6">
           <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
           {brand.announcementBadge}
         </div>
-        <h1 className="text-5xl md:text-6xl font-bold text-white mb-6 leading-tight">
+        <h1 className="text-5xl md:text-6xl font-bold text-foreground mb-6 leading-tight">
           {brand.heroTitle}<br />
           <span className="bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
             {brand.heroSubtitle}
           </span>
         </h1>
-        <p className="text-xl text-gray-400 mb-10 max-w-2xl mx-auto leading-relaxed">
+        <p className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed">
           {brand.heroDescription}
         </p>
         <div className="flex items-center justify-center gap-4 flex-wrap">
-          <Link href="/register" className="px-8 py-3.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl transition-colors text-lg">
+          <Link href="/register" className="px-8 py-3.5 bg-primary hover:bg-primary/90 text-foreground font-semibold rounded-xl transition-colors text-lg">
             Start Free →
           </Link>
-          <a href={`${brand.apiUrl}/docs`} className="px-8 py-3.5 border border-gray-700 hover:border-gray-500 text-gray-300 hover:text-white font-semibold rounded-xl transition-colors text-lg">
+          <a href={`${brand.apiUrl}/docs`} className="px-8 py-3.5 border border-border hover:border-border text-foreground/80 hover:text-foreground font-semibold rounded-xl transition-colors text-lg">
             View API Docs
           </a>
         </div>
@@ -94,14 +94,14 @@ export default function LandingPage() {
 
       {/* Features grid */}
       <section className="max-w-7xl mx-auto px-6 py-16">
-        <h2 className="text-3xl font-bold text-white text-center mb-3">Everything you need to ship secure auth</h2>
-        <p className="text-gray-400 text-center mb-12">No third-party dependency on your critical auth path.</p>
+        <h2 className="text-3xl font-bold text-foreground text-center mb-3">Everything you need to ship secure auth</h2>
+        <p className="text-muted-foreground text-center mb-12">No third-party dependency on your critical auth path.</p>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {features.map((f) => (
-            <div key={f.title} className="bg-gray-900 border border-gray-800 rounded-xl p-5 hover:border-indigo-800 transition-colors">
+            <div key={f.title} className="bg-card border border-border rounded-xl p-5 hover:border-primary/40 transition-colors">
               <div className="text-2xl mb-3">{f.icon}</div>
-              <h3 className="font-semibold text-white mb-2">{f.title}</h3>
-              <p className="text-gray-400 text-sm leading-relaxed">{f.desc}</p>
+              <h3 className="font-semibold text-foreground mb-2">{f.title}</h3>
+              <p className="text-muted-foreground text-sm leading-relaxed">{f.desc}</p>
             </div>
           ))}
         </div>
@@ -109,7 +109,7 @@ export default function LandingPage() {
 
       {/* How it works */}
       <section className="max-w-4xl mx-auto px-6 py-16">
-        <h2 className="text-3xl font-bold text-white text-center mb-12">Get running in minutes</h2>
+        <h2 className="text-3xl font-bold text-foreground text-center mb-12">Get running in minutes</h2>
         <div className="space-y-6">
           {[
             { step: "1", title: "Clone & configure", code: "cp .env.example .env  # add your secrets" },
@@ -117,12 +117,12 @@ export default function LandingPage() {
             { step: "3", title: "Open the app", code: `open ${brand.url}` },
           ].map((s) => (
             <div key={s.step} className="flex gap-4 items-start">
-              <div className="w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-sm flex-shrink-0 mt-0.5">
+              <div className="w-10 h-10 rounded-full bg-primary text-foreground flex items-center justify-center font-bold text-sm flex-shrink-0 mt-0.5">
                 {s.step}
               </div>
               <div>
-                <h3 className="font-semibold text-white mb-2">{s.title}</h3>
-                <code className="block bg-gray-900 border border-gray-800 text-indigo-300 px-4 py-2.5 rounded-lg text-sm font-mono">
+                <h3 className="font-semibold text-foreground mb-2">{s.title}</h3>
+                <code className="block bg-card border border-border text-primary px-4 py-2.5 rounded-lg text-sm font-mono">
                   {s.code}
                 </code>
               </div>
@@ -134,7 +134,7 @@ export default function LandingPage() {
       {/* CTA */}
       <section className="max-w-4xl mx-auto px-6 py-16 text-center">
         <div className="bg-gradient-to-br from-indigo-900 to-purple-900 border border-indigo-700 rounded-2xl p-12">
-          <h2 className="text-3xl font-bold text-white mb-4">Ready to get started?</h2>
+          <h2 className="text-3xl font-bold text-foreground mb-4">Ready to get started?</h2>
           <p className="text-indigo-200 mb-8">Self-hosted. Open source. No vendor lock-in.</p>
           <Link href="/register" className="px-8 py-3.5 bg-white text-indigo-700 hover:bg-gray-100 font-semibold rounded-xl transition-colors inline-block">
             Create your account →
@@ -143,14 +143,14 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-gray-800 px-6 py-8 max-w-7xl mx-auto flex items-center justify-between flex-wrap gap-4">
-        <div className="text-gray-500 text-sm">© {brand.copyrightYear} {brand.name}. Open source under {brand.license}.</div>
-        <div className="flex gap-6 text-sm text-gray-500">
-          <a href={brand.githubUrl} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">GitHub</a>
-          <a href={`${brand.apiUrl}/docs`} className="hover:text-white transition-colors">Docs</a>
-          <Link href="/security" className="hover:text-white transition-colors">Security</Link>
-          <Link href="/privacy" className="hover:text-white transition-colors">Privacy</Link>
-          <Link href="/terms" className="hover:text-white transition-colors">Terms</Link>
+      <footer className="border-t border-border px-6 py-8 max-w-7xl mx-auto flex items-center justify-between flex-wrap gap-4">
+        <div className="text-muted-foreground text-sm">© {brand.copyrightYear} {brand.name}. Open source under {brand.license}.</div>
+        <div className="flex gap-6 text-sm text-muted-foreground">
+          <a href={brand.githubUrl} target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">GitHub</a>
+          <a href={`${brand.apiUrl}/docs`} className="hover:text-foreground transition-colors">Docs</a>
+          <Link href="/security" className="hover:text-foreground transition-colors">Security</Link>
+          <Link href="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>
+          <Link href="/terms" className="hover:text-foreground transition-colors">Terms</Link>
         </div>
       </footer>
     </div>

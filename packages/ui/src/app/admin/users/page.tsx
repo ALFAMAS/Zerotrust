@@ -116,19 +116,19 @@ export default function UsersPage() {
     <div className="space-y-6">
       {/* Toast */}
       {toast && (
-        <div className="fixed top-4 right-4 z-50 rounded-lg bg-indigo-600 px-4 py-3 text-sm text-white shadow-lg">
+        <div className="fixed top-4 right-4 z-50 rounded-lg bg-primary px-4 py-3 text-sm text-foreground shadow-lg">
           {toast}
         </div>
       )}
 
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Users</h1>
-          <p className="mt-1 text-sm text-gray-400">{total} total users</p>
+          <h1 className="text-2xl font-bold text-foreground">Users</h1>
+          <p className="mt-1 text-sm text-muted-foreground">{total} total users</p>
         </div>
         <button
           onClick={() => setShowInviteModal(true)}
-          className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500 transition-colors"
+          className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-foreground hover:bg-primary/90 transition-colors"
         >
           Invite user
         </button>
@@ -141,12 +141,12 @@ export default function UsersPage() {
           placeholder="Search by email or name..."
           value={search}
           onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-          className="rounded-lg bg-gray-900 border border-gray-700 px-3 py-2 text-sm text-white placeholder-gray-500 focus:border-indigo-500 focus:outline-none w-64"
+          className="rounded-lg bg-card border border-border px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none w-64"
         />
         <select
           value={statusFilter}
           onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
-          className="rounded-lg bg-gray-900 border border-gray-700 px-3 py-2 text-sm text-white focus:border-indigo-500 focus:outline-none"
+          className="rounded-lg bg-card border border-border px-3 py-2 text-sm text-foreground focus:border-ring focus:outline-none"
         >
           <option value="all">All Status</option>
           <option value="active">Active</option>
@@ -155,56 +155,56 @@ export default function UsersPage() {
       </div>
 
       {/* Table */}
-      <div className="rounded-xl bg-gray-900 border border-gray-800 overflow-hidden">
+      <div className="rounded-xl bg-card border border-border overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-800 bg-gray-900/80">
-                <th className="px-5 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">User</th>
-                <th className="px-5 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Status</th>
-                <th className="px-5 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Created</th>
-                <th className="px-5 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Last Login</th>
-                <th className="px-5 py-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wider">Actions</th>
+              <tr className="border-b border-border bg-card/80">
+                <th className="px-5 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">User</th>
+                <th className="px-5 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Status</th>
+                <th className="px-5 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Created</th>
+                <th className="px-5 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Last Login</th>
+                <th className="px-5 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-800">
               {loading && (
                 <tr>
-                  <td colSpan={5} className="px-5 py-8 text-center text-gray-500">Loading…</td>
+                  <td colSpan={5} className="px-5 py-8 text-center text-muted-foreground">Loading…</td>
                 </tr>
               )}
               {!loading && users.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-5 py-8 text-center text-gray-500">No users found.</td>
+                  <td colSpan={5} className="px-5 py-8 text-center text-muted-foreground">No users found.</td>
                 </tr>
               )}
               {!loading && users.map((u) => (
-                <tr key={u.id} className="hover:bg-gray-800/50 transition-colors">
+                <tr key={u.id} className="hover:bg-accent/50 transition-colors">
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-indigo-900/60 text-xs font-medium text-indigo-300">
+                      <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-indigo-900/60 text-xs font-medium text-primary">
                         {(u.name?.[0] ?? u.email[0]).toUpperCase()}
                       </div>
                       <div>
-                        <p className="font-medium text-white">{u.name ?? u.email}</p>
-                        {u.name && <p className="text-xs text-gray-500">{u.email}</p>}
+                        <p className="font-medium text-foreground">{u.name ?? u.email}</p>
+                        {u.name && <p className="text-xs text-muted-foreground">{u.email}</p>}
                       </div>
                     </div>
                   </td>
                   <td className="px-5 py-4">
                     <Badge status={u.status} />
                   </td>
-                  <td className="px-5 py-4 text-gray-400">
+                  <td className="px-5 py-4 text-muted-foreground">
                     {u.createdAt ? new Date(u.createdAt).toLocaleDateString() : "—"}
                   </td>
-                  <td className="px-5 py-4 text-gray-400">
+                  <td className="px-5 py-4 text-muted-foreground">
                     {u.lastLoginAt ? new Date(u.lastLoginAt).toLocaleDateString() : "Never"}
                   </td>
                   <td className="px-5 py-4 text-right">
                     <div className="flex items-center justify-end gap-2">
                       <Link
                         href={`/admin/users/${u.id}`}
-                        className="rounded px-2 py-1 text-xs text-indigo-400 hover:bg-indigo-900/30 transition-colors"
+                        className="rounded px-2 py-1 text-xs text-primary hover:bg-indigo-900/30 transition-colors"
                       >
                         View
                       </Link>
@@ -234,7 +234,7 @@ export default function UsersPage() {
       </div>
 
       {/* Pagination */}
-      <div className="flex items-center justify-between text-sm text-gray-400">
+      <div className="flex items-center justify-between text-sm text-muted-foreground">
         <span>
           Page {page} of {totalPages}
         </span>
@@ -242,14 +242,14 @@ export default function UsersPage() {
           <button
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page <= 1}
-            className="rounded px-3 py-1.5 bg-gray-800 border border-gray-700 disabled:opacity-40 hover:bg-gray-700 transition-colors"
+            className="rounded px-3 py-1.5 bg-muted border border-border disabled:opacity-40 hover:bg-accent transition-colors"
           >
             Previous
           </button>
           <button
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page >= totalPages}
-            className="rounded px-3 py-1.5 bg-gray-800 border border-gray-700 disabled:opacity-40 hover:bg-gray-700 transition-colors"
+            className="rounded px-3 py-1.5 bg-muted border border-border disabled:opacity-40 hover:bg-accent transition-colors"
           >
             Next
           </button>
@@ -261,7 +261,7 @@ export default function UsersPage() {
         <Modal title="Invite User" onClose={() => setShowInviteModal(false)}>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1">
+              <label className="block text-sm font-medium text-foreground/80 mb-1">
                 Email address
               </label>
               <input
@@ -271,20 +271,20 @@ export default function UsersPage() {
                 onChange={(e) => setInviteEmail(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleInvite()}
                 autoFocus
-                className="w-full rounded-lg bg-gray-800 border border-gray-700 px-3 py-2 text-sm text-white placeholder-gray-500 focus:border-indigo-500 focus:outline-none"
+                className="w-full rounded-lg bg-muted border border-border px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none"
               />
             </div>
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => setShowInviteModal(false)}
-                className="rounded-lg px-4 py-2 text-sm text-gray-400 hover:text-white transition-colors"
+                className="rounded-lg px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={handleInvite}
                 disabled={inviting || !inviteEmail.trim()}
-                className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500 disabled:opacity-50 transition-colors"
+                className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors"
               >
                 {inviting ? "Sending…" : "Send invite"}
               </button>

@@ -4,10 +4,10 @@ import { nanoid } from "nanoid";
 import * as nodeCrypto from "crypto";
 import * as fs from "fs/promises";
 import * as path from "path";
-import { eq } from "drizzle-orm";
+import { eq, and, gt } from "drizzle-orm";
 import { z } from "zod";
 import { getDb } from "../../db";
-import { usersTable, sessionsTable, refreshTokensTable } from "../../db/schema";
+import { usersTable, sessionsTable, refreshTokensTable, otpsTable } from "../../db/schema";
 import { FingerprintService } from "../../services/fingerprint.service";
 import { TokenService } from "../../services/token.service";
 import { getConfig } from "../../config";
@@ -17,7 +17,7 @@ import { requireProofOfPossession } from "../../middleware/proofOfPossession";
 import { authMiddleware } from "../../middleware/auth";
 import { getLogger } from "../../logger";
 import { getProviderAdapter } from "../../oauth/provider.factory";
-import { sendWelcomeEmail } from "../../services/email.service";
+import { sendWelcomeEmail, sendVerificationEmail } from "../../services/email.service";
 import { rejectIfBreached } from "../../services/passwordBreach.service";
 import { notifyIfNewDevice } from "../../services/loginNotification.service";
 import { recordAndRespond } from "../../services/accountTakeover.service";
@@ -58,6 +58,41 @@ async function getTokenService() {
 
 function hashToken(token: string) {
   return nodeCrypto.createHash("sha256").update(token).digest("hex");
+}
+
+const EMAIL_VERIFICATION_TTL_MIN = 30;
+
+/**
+ * Generate a fresh 6-digit email-verification code, persist it (replacing any
+ * prior one for the user), and send the verification email. The email contains
+ * both the code and a magic link to /verify-email carrying email + code.
+ */
+async function issueVerification(user: {
+  id: string;
+  email: string;
+  displayName?: string | null;
+}) {
+  const db = getDb();
+  const code = Math.floor(100000 + Math.random() * 900000).toString();
+  await db
+    .delete(otpsTable)
+    .where(and(eq(otpsTable.userId, user.id), eq(otpsTable.type, "email_verification")));
+  await db.insert(otpsTable).values({
+    userId: user.id,
+    code,
+    type: "email_verification",
+    channel: "email",
+    target: user.email,
+    expiresAt: new Date(Date.now() + EMAIL_VERIFICATION_TTL_MIN * 60 * 1000),
+  });
+  const appUrl = process.env.APP_URL ?? "http://localhost:3001";
+  const verifyUrl = `${appUrl}/verify-email?email=${encodeURIComponent(user.email)}&code=${code}`;
+  void sendVerificationEmail(user.email, {
+    name: user.displayName ?? user.email,
+    code,
+    verifyUrl,
+    expiresInMinutes: EMAIL_VERIFICATION_TTL_MIN,
+  });
 }
 
 // POST /register
@@ -120,12 +155,104 @@ router.post("/register", rateLimit({ points: 10, windowSecs: 60 }), async (c) =>
       loginUrl,
     });
 
+    // Kick off email verification (code + magic link). Non-fatal on failure.
+    try {
+      await issueVerification(user);
+    } catch (e) {
+      logger.warn("Failed to issue email verification on register", { error: String(e) });
+    }
+
     return c.json({ success: true, userId: user.id }, 201);
   } catch (err) {
     logger.error("Registration error", err as Error);
     return c.json({ error: "INTERNAL_ERROR", message: "Registration failed" }, 500);
   }
 });
+
+// POST /verify-email — confirm ownership via emailed code or magic link (public)
+router.post("/verify-email", rateLimit({ points: 10, windowSecs: 60 }), async (c) => {
+  try {
+    const { email, code } = await c.req.json();
+    if (!email || !code) {
+      return c.json({ error: "INVALID_REQUEST", message: "email and code required" }, 400);
+    }
+
+    const db = getDb();
+    const normEmail = String(email).toLowerCase().trim();
+    const [user] = await db
+      .select()
+      .from(usersTable)
+      .where(eq(usersTable.email, normEmail))
+      .limit(1);
+    // Don't reveal whether the account exists.
+    if (!user) {
+      return c.json({ error: "INVALID_CODE", message: "Invalid or expired code" }, 400);
+    }
+    if (user.emailVerifiedAt) {
+      return c.json({ success: true, alreadyVerified: true });
+    }
+
+    const [otp] = await db
+      .select()
+      .from(otpsTable)
+      .where(
+        and(
+          eq(otpsTable.userId, user.id),
+          eq(otpsTable.type, "email_verification"),
+          eq(otpsTable.code, String(code).trim()),
+          gt(otpsTable.expiresAt, new Date())
+        )
+      )
+      .limit(1);
+    if (!otp) {
+      return c.json({ error: "INVALID_CODE", message: "Invalid or expired code" }, 400);
+    }
+
+    await db
+      .update(usersTable)
+      .set({ emailVerifiedAt: new Date(), updatedAt: new Date() })
+      .where(eq(usersTable.id, user.id));
+    await db
+      .delete(otpsTable)
+      .where(and(eq(otpsTable.userId, user.id), eq(otpsTable.type, "email_verification")));
+
+    return c.json({ success: true });
+  } catch (err) {
+    logger.error("Email verification error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR", message: "Verification failed" }, 500);
+  }
+});
+
+// POST /verify-email/resend — re-issue a verification email for the current user
+router.post(
+  "/verify-email/resend",
+  authMiddleware,
+  rateLimit({ points: 5, windowSecs: 300 }),
+  async (c) => {
+    try {
+      const user = c.get("user");
+      const db = getDb();
+      const [row] = await db
+        .select({
+          id: usersTable.id,
+          email: usersTable.email,
+          displayName: usersTable.displayName,
+          emailVerifiedAt: usersTable.emailVerifiedAt,
+        })
+        .from(usersTable)
+        .where(eq(usersTable.id, user.id))
+        .limit(1);
+      if (!row) return c.json({ error: "USER_NOT_FOUND" }, 404);
+      if (row.emailVerifiedAt) return c.json({ success: true, alreadyVerified: true });
+
+      await issueVerification(row);
+      return c.json({ success: true });
+    } catch (err) {
+      logger.error("Resend verification error", err as Error);
+      return c.json({ error: "INTERNAL_ERROR" }, 500);
+    }
+  }
+);
 
 // POST /login
 router.post("/login", rateLimit({ points: 20, windowSecs: 60 }), async (c) => {
@@ -456,13 +583,14 @@ router.get("/me", authMiddleware, async (c) => {
         phone: usersTable.phone,
         createdAt: usersTable.createdAt,
         lastLoginAt: usersTable.lastLoginAt,
+        emailVerifiedAt: usersTable.emailVerifiedAt,
         metadata: usersTable.metadata,
       })
       .from(usersTable)
       .where(eq(usersTable.id, user.id))
       .limit(1);
     if (!row) return c.json({ error: "USER_NOT_FOUND" }, 404);
-    return c.json(row);
+    return c.json({ ...row, emailVerified: row.emailVerifiedAt != null });
   } catch (err) {
     logger.error("Get current user error", err as Error);
     return c.json({ error: "INTERNAL_ERROR" }, 500);

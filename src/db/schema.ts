@@ -50,6 +50,7 @@ export const usersTable = pgTable("users", {
       sql`'{"maxDevices":5,"allowedCountries":[],"allowedIpRanges":[],"scheduleRestriction":{"enabled":false,"timezone":"UTC","allowedDays":[],"allowedHoursStart":0,"allowedHoursEnd":23}}'::jsonb`
     ),
   lastLoginAt: timestamp("last_login_at", { withTimezone: true }),
+  emailVerifiedAt: timestamp("email_verified_at", { withTimezone: true }),
   metadata: jsonb("metadata"),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()

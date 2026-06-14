@@ -1,7 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { X } from "lucide-react";
 import { brand } from "@/config/brand";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 type FeedbackType = "nps" | "thumbs";
 
@@ -88,28 +91,30 @@ export default function FeedbackWidget({
 
   return (
     <div
-      className="fixed bottom-20 right-4 z-40 w-80 bg-gray-900 border border-gray-700 rounded-xl shadow-2xl p-5 transition-all"
+      className="fixed bottom-20 right-4 z-40 w-80 rounded-xl border border-border bg-popover p-5 shadow-2xl transition-all"
       role="dialog"
       aria-label="Feedback"
     >
       <button
         onClick={dismiss}
-        className="absolute top-3 right-3 text-gray-500 hover:text-gray-300 text-lg leading-none"
+        className="absolute right-3 top-3 text-muted-foreground transition-colors hover:text-foreground"
         aria-label="Close"
       >
-        ×
+        <X className="h-4 w-4" />
       </button>
 
       {step === "prompt" && type === "nps" && (
         <>
-          <p className="text-sm font-medium text-white mb-1">How likely are you to recommend us?</p>
-          <p className="text-xs text-gray-500 mb-4">0 = not at all · 10 = extremely likely</p>
-          <div className="flex gap-1 flex-wrap">
+          <p className="mb-1 text-sm font-medium text-foreground">
+            How likely are you to recommend us?
+          </p>
+          <p className="mb-4 text-xs text-muted-foreground">0 = not at all · 10 = extremely likely</p>
+          <div className="flex flex-wrap gap-1">
             {Array.from({ length: 11 }, (_, i) => (
               <button
                 key={i}
                 onClick={() => handleScore(i)}
-                className="w-8 h-8 text-xs rounded-md border border-gray-600 hover:border-indigo-500 hover:bg-indigo-600 text-gray-300 hover:text-white transition-colors"
+                className="h-8 w-8 rounded-md border border-border text-xs text-muted-foreground transition-colors hover:border-primary hover:bg-primary hover:text-primary-foreground"
               >
                 {i}
               </button>
@@ -120,18 +125,18 @@ export default function FeedbackWidget({
 
       {step === "prompt" && type === "thumbs" && (
         <>
-          <p className="text-sm font-medium text-white mb-4">Was this page helpful?</p>
+          <p className="mb-4 text-sm font-medium text-foreground">Was this page helpful?</p>
           <div className="flex gap-3">
             <button
               onClick={() => handleScore(1)}
-              className="flex-1 py-2 rounded-lg border border-gray-600 hover:border-emerald-500 hover:bg-emerald-900/30 text-gray-300 hover:text-emerald-300 transition-colors text-xl"
+              className="flex-1 rounded-lg border border-border py-2 text-xl text-muted-foreground transition-colors hover:border-emerald-500 hover:bg-emerald-900/30 hover:text-emerald-300"
               aria-label="Thumbs up"
             >
               👍
             </button>
             <button
               onClick={() => handleScore(-1)}
-              className="flex-1 py-2 rounded-lg border border-gray-600 hover:border-red-500 hover:bg-red-900/30 text-gray-300 hover:text-red-300 transition-colors text-xl"
+              className="flex-1 rounded-lg border border-border py-2 text-xl text-muted-foreground transition-colors hover:border-red-500 hover:bg-red-900/30 hover:text-red-300"
               aria-label="Thumbs down"
             >
               👎
@@ -142,7 +147,7 @@ export default function FeedbackWidget({
 
       {step === "comment" && (
         <>
-          <p className="text-sm font-medium text-white mb-3">
+          <p className="mb-3 text-sm font-medium text-foreground">
             {score !== null && score >= 9
               ? "Great! What do you love most?"
               : score !== null && score >= 7
@@ -154,28 +159,21 @@ export default function FeedbackWidget({
             onChange={(e) => setComment(e.target.value)}
             placeholder="Optional comment…"
             rows={3}
-            className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500 resize-none mb-3"
+            className="mb-3 w-full resize-none rounded-lg border border-input bg-transparent px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
           />
           <div className="flex gap-2">
-            <button
-              onClick={handleSubmit}
-              disabled={submitting}
-              className="flex-1 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white text-sm rounded-lg transition-colors"
-            >
+            <Button onClick={handleSubmit} disabled={submitting} className="flex-1">
               {submitting ? "Sending…" : "Send"}
-            </button>
-            <button
-              onClick={dismiss}
-              className="px-3 py-2 border border-gray-600 text-gray-400 text-sm rounded-lg hover:border-gray-400 transition-colors"
-            >
+            </Button>
+            <Button variant="outline" onClick={dismiss}>
               Skip
-            </button>
+            </Button>
           </div>
         </>
       )}
 
       {step === "done" && (
-        <p className="text-sm text-center text-emerald-400 py-2">Thanks for your feedback!</p>
+        <p className="py-2 text-center text-sm text-emerald-400">Thanks for your feedback!</p>
       )}
     </div>
   );

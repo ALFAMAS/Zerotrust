@@ -1,5 +1,7 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+
 interface EmptyStateProps {
   icon?: string;
   title: string;
@@ -18,27 +20,23 @@ export default function EmptyState({
   actionHref,
 }: EmptyStateProps) {
   return (
-    <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
-      <span className="text-4xl mb-4" aria-hidden>
+    <div className="flex flex-col items-center justify-center px-4 py-16 text-center">
+      <span className="mb-4 text-4xl" aria-hidden>
         {icon}
       </span>
-      <h3 className="text-lg font-semibold text-white">{title}</h3>
-      {description && <p className="mt-1 text-sm text-gray-400 max-w-sm">{description}</p>}
+      <h3 className="text-lg font-semibold text-foreground">{title}</h3>
+      {description && (
+        <p className="mt-1 max-w-sm text-sm text-muted-foreground">{description}</p>
+      )}
       {actionLabel &&
         (actionHref ? (
-          <a
-            href={actionHref}
-            className="mt-5 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium rounded-lg transition-colors"
-          >
-            {actionLabel}
-          </a>
+          <Button asChild className="mt-5">
+            <a href={actionHref}>{actionLabel}</a>
+          </Button>
         ) : (
-          <button
-            onClick={onAction}
-            className="mt-5 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium rounded-lg transition-colors"
-          >
+          <Button onClick={onAction} className="mt-5">
             {actionLabel}
-          </button>
+          </Button>
         ))}
     </div>
   );

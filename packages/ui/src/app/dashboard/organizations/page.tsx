@@ -29,8 +29,8 @@ interface OrgMember {
 const ROLE_COLORS: Record<string, string> = {
   owner: "bg-indigo-900 text-indigo-200 border border-indigo-700",
   admin: "bg-blue-900 text-blue-200 border border-blue-700",
-  member: "bg-gray-800 text-gray-300 border border-gray-700",
-  viewer: "bg-gray-900 text-gray-400 border border-gray-700",
+  member: "bg-muted text-foreground/80 border border-border",
+  viewer: "bg-card text-muted-foreground border border-border",
 };
 
 export default function OrganizationsPage() {
@@ -98,10 +98,10 @@ export default function OrganizationsPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-white">Organizations</h1>
+        <h1 className="text-2xl font-bold text-foreground">Organizations</h1>
         <button
           onClick={() => setShowCreateForm((v) => !v)}
-          className="text-sm bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg transition-colors"
+          className="text-sm bg-primary hover:bg-primary/90 text-foreground px-4 py-2 rounded-lg transition-colors"
         >
           {showCreateForm ? "Cancel" : "Create organization"}
         </button>
@@ -110,21 +110,21 @@ export default function OrganizationsPage() {
       {showCreateForm && (
         <form
           onSubmit={handleCreate}
-          className="mb-6 bg-gray-900 border border-gray-700 rounded-xl p-5 space-y-4"
+          className="mb-6 bg-card border border-border rounded-xl p-5 space-y-4"
         >
-          <h2 className="text-sm font-semibold text-white">New organization</h2>
+          <h2 className="text-sm font-semibold text-foreground">New organization</h2>
           <div className="space-y-1">
-            <label className="text-xs text-gray-400">Name</label>
+            <label className="text-xs text-muted-foreground">Name</label>
             <input
               value={orgName}
               onChange={(e) => handleNameChange(e.target.value)}
               required
               placeholder="Acme Corp"
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500"
+              className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-ring"
             />
           </div>
           <div className="space-y-1">
-            <label className="text-xs text-gray-400">
+            <label className="text-xs text-muted-foreground">
               Slug (optional — auto-generated from name)
             </label>
             <input
@@ -135,18 +135,18 @@ export default function OrganizationsPage() {
               }}
               placeholder={autoSlug(orgName) || "acme-corp"}
               pattern="[a-z0-9-]{3,50}"
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500 font-mono"
+              className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-ring font-mono"
             />
             {orgSlug && (
-              <p className="text-xs text-gray-500">
-                Preview: <span className="text-indigo-400">{orgSlug}</span>
+              <p className="text-xs text-muted-foreground">
+                Preview: <span className="text-primary">{orgSlug}</span>
               </p>
             )}
           </div>
           <button
             type="submit"
             disabled={creating || !orgName.trim()}
-            className="bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white text-sm px-4 py-2 rounded-lg transition-colors"
+            className="bg-primary hover:bg-primary/90 disabled:opacity-50 text-foreground text-sm px-4 py-2 rounded-lg transition-colors"
           >
             {creating ? "Creating…" : "Create"}
           </button>
@@ -160,11 +160,11 @@ export default function OrganizationsPage() {
           <SkeletonCard />
         </div>
       ) : orgs.length === 0 ? (
-        <div className="text-center py-16 text-gray-500">
+        <div className="text-center py-16 text-muted-foreground">
           <p className="mb-3">You don&apos;t belong to any organizations yet.</p>
           <button
             onClick={() => setShowCreateForm(true)}
-            className="text-sm text-indigo-400 hover:text-indigo-300 underline"
+            className="text-sm text-primary hover:text-primary/80 underline"
           >
             Create your first organization
           </button>
@@ -175,12 +175,12 @@ export default function OrganizationsPage() {
             <Link
               key={org.id}
               href={`/dashboard/organizations/${org.id}`}
-              className="block bg-gray-900 border border-gray-800 rounded-xl p-5 hover:border-gray-600 transition-colors"
+              className="block bg-card border border-border rounded-xl p-5 hover:border-border transition-colors"
             >
               <div className="flex items-center justify-between">
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="font-semibold text-white">{org.name}</span>
+                    <span className="font-semibold text-foreground">{org.name}</span>
                     <span
                       className={`text-xs px-2 py-0.5 rounded-full font-medium ${
                         ROLE_COLORS[member.role] ?? ROLE_COLORS.member
@@ -189,11 +189,11 @@ export default function OrganizationsPage() {
                       {member.role}
                     </span>
                   </div>
-                  <p className="text-xs text-gray-500 mt-0.5 font-mono">{org.slug}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5 font-mono">{org.slug}</p>
                 </div>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="w-4 h-4 text-gray-600"
+                  className="w-4 h-4 text-muted-foreground"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"

@@ -53,8 +53,8 @@ interface CurrentUser {
 const ROLE_COLORS: Record<string, string> = {
   owner: "bg-indigo-900 text-indigo-200 border border-indigo-700",
   admin: "bg-blue-900 text-blue-200 border border-blue-700",
-  member: "bg-gray-800 text-gray-300 border border-gray-700",
-  viewer: "bg-gray-900 text-gray-400 border border-gray-700",
+  member: "bg-muted text-foreground/80 border border-border",
+  viewer: "bg-card text-muted-foreground border border-border",
 };
 
 export default function OrgDetailPage() {
@@ -161,7 +161,7 @@ export default function OrgDetailPage() {
 
   if (!org) {
     return (
-      <div className="text-gray-500 py-16 text-center">
+      <div className="text-muted-foreground py-16 text-center">
         Organization not found or you do not have access.
       </div>
     );
@@ -173,7 +173,7 @@ export default function OrgDetailPage() {
       <div className="flex items-start justify-between">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold text-white">{org.name}</h1>
+            <h1 className="text-2xl font-bold text-foreground">{org.name}</h1>
             <span
               className={`text-xs px-2 py-0.5 rounded-full font-medium ${
                 ROLE_COLORS[myRole] ?? ROLE_COLORS.member
@@ -182,8 +182,8 @@ export default function OrgDetailPage() {
               {myRole}
             </span>
           </div>
-          <p className="text-xs text-gray-500 mt-0.5 font-mono">{org.slug}</p>
-          <p className="text-sm text-gray-400 mt-1">
+          <p className="text-xs text-muted-foreground mt-0.5 font-mono">{org.slug}</p>
+          <p className="text-sm text-muted-foreground mt-1">
             {memberCount} member{memberCount !== 1 ? "s" : ""}
           </p>
         </div>
@@ -191,7 +191,7 @@ export default function OrgDetailPage() {
           {isAdminOrOwner && (
             <Link
               href={`/dashboard/organizations/${orgId}/settings`}
-              className="text-sm text-gray-400 hover:text-white border border-gray-700 px-3 py-1.5 rounded-lg hover:bg-gray-800 transition-colors"
+              className="text-sm text-muted-foreground hover:text-foreground border border-border px-3 py-1.5 rounded-lg hover:bg-accent transition-colors"
             >
               Settings
             </Link>
@@ -209,29 +209,29 @@ export default function OrgDetailPage() {
 
       {/* Members table */}
       <div>
-        <h2 className="text-base font-semibold text-white mb-3">Members</h2>
-        <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
-          <div className="grid grid-cols-[auto_1fr_auto_auto] gap-4 px-4 py-2 border-b border-gray-800 text-xs text-gray-500 font-medium uppercase tracking-wide">
+        <h2 className="text-base font-semibold text-foreground mb-3">Members</h2>
+        <div className="bg-card border border-border rounded-xl overflow-hidden">
+          <div className="grid grid-cols-[auto_1fr_auto_auto] gap-4 px-4 py-2 border-b border-border text-xs text-muted-foreground font-medium uppercase tracking-wide">
             <span>Avatar</span>
             <span>Name / Email</span>
             <span>Role</span>
             <span>Joined</span>
           </div>
           {members.length === 0 ? (
-            <p className="px-4 py-6 text-gray-500 text-sm">No members found.</p>
+            <p className="px-4 py-6 text-muted-foreground text-sm">No members found.</p>
           ) : (
             members.map(({ member, user }) => (
               <div
                 key={member.id}
-                className="grid grid-cols-[auto_1fr_auto_auto] gap-4 px-4 py-3 items-center border-b border-gray-800 last:border-b-0"
+                className="grid grid-cols-[auto_1fr_auto_auto] gap-4 px-4 py-3 items-center border-b border-border last:border-b-0"
               >
                 {/* Avatar placeholder */}
-                <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-xs text-white font-medium flex-shrink-0">
+                <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-xs text-foreground font-medium flex-shrink-0">
                   {(user.displayName || user.email)[0]?.toUpperCase()}
                 </div>
                 <div className="min-w-0">
-                  <div className="text-sm text-white truncate">{user.displayName}</div>
-                  <div className="text-xs text-gray-500 truncate">{user.email}</div>
+                  <div className="text-sm text-foreground truncate">{user.displayName}</div>
+                  <div className="text-xs text-muted-foreground truncate">{user.email}</div>
                 </div>
                 <span
                   className={`text-xs px-2 py-0.5 rounded-full font-medium whitespace-nowrap ${
@@ -240,7 +240,7 @@ export default function OrgDetailPage() {
                 >
                   {member.role}
                 </span>
-                <span className="text-xs text-gray-500 whitespace-nowrap">
+                <span className="text-xs text-muted-foreground whitespace-nowrap">
                   {member.joinedAt ? new Date(member.joinedAt).toLocaleDateString() : "—"}
                 </span>
               </div>
@@ -252,28 +252,28 @@ export default function OrgDetailPage() {
       {/* Invite section — admin/owner only */}
       {isAdminOrOwner && (
         <div>
-          <h2 className="text-base font-semibold text-white mb-3">Invite member</h2>
+          <h2 className="text-base font-semibold text-foreground mb-3">Invite member</h2>
           <form
             onSubmit={handleInvite}
-            className="bg-gray-900 border border-gray-800 rounded-xl p-4 flex flex-wrap gap-3 items-end"
+            className="bg-card border border-border rounded-xl p-4 flex flex-wrap gap-3 items-end"
           >
             <div className="flex-1 min-w-48 space-y-1">
-              <label className="text-xs text-gray-400">Email</label>
+              <label className="text-xs text-muted-foreground">Email</label>
               <input
                 type="email"
                 value={inviteEmail}
                 onChange={(e) => setInviteEmail(e.target.value)}
                 required
                 placeholder="colleague@example.com"
-                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500"
+                className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-ring"
               />
             </div>
             <div className="space-y-1">
-              <label className="text-xs text-gray-400">Role</label>
+              <label className="text-xs text-muted-foreground">Role</label>
               <select
                 value={inviteRole}
                 onChange={(e) => setInviteRole(e.target.value)}
-                className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                className="bg-muted border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:border-ring"
               >
                 <option value="viewer">Viewer</option>
                 <option value="member">Member</option>
@@ -283,7 +283,7 @@ export default function OrgDetailPage() {
             <button
               type="submit"
               disabled={inviting}
-              className="bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white text-sm px-4 py-2 rounded-lg transition-colors"
+              className="bg-primary hover:bg-primary/90 disabled:opacity-50 text-foreground text-sm px-4 py-2 rounded-lg transition-colors"
             >
               {inviting ? "Sending…" : "Send invite"}
             </button>
@@ -294,9 +294,9 @@ export default function OrgDetailPage() {
       {/* Pending invites table — admin/owner only */}
       {isAdminOrOwner && invites.length > 0 && (
         <div>
-          <h2 className="text-base font-semibold text-white mb-3">Pending invites</h2>
-          <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
-            <div className="grid grid-cols-[1fr_auto_auto_auto] gap-4 px-4 py-2 border-b border-gray-800 text-xs text-gray-500 font-medium uppercase tracking-wide">
+          <h2 className="text-base font-semibold text-foreground mb-3">Pending invites</h2>
+          <div className="bg-card border border-border rounded-xl overflow-hidden">
+            <div className="grid grid-cols-[1fr_auto_auto_auto] gap-4 px-4 py-2 border-b border-border text-xs text-muted-foreground font-medium uppercase tracking-wide">
               <span>Email</span>
               <span>Role</span>
               <span>Expires</span>
@@ -305,9 +305,9 @@ export default function OrgDetailPage() {
             {invites.map((invite) => (
               <div
                 key={invite.id}
-                className="grid grid-cols-[1fr_auto_auto_auto] gap-4 px-4 py-3 items-center border-b border-gray-800 last:border-b-0"
+                className="grid grid-cols-[1fr_auto_auto_auto] gap-4 px-4 py-3 items-center border-b border-border last:border-b-0"
               >
-                <span className="text-sm text-white truncate">{invite.email}</span>
+                <span className="text-sm text-foreground truncate">{invite.email}</span>
                 <span
                   className={`text-xs px-2 py-0.5 rounded-full font-medium whitespace-nowrap ${
                     ROLE_COLORS[invite.role] ?? ROLE_COLORS.member
@@ -315,7 +315,7 @@ export default function OrgDetailPage() {
                 >
                   {invite.role}
                 </span>
-                <span className="text-xs text-gray-500 whitespace-nowrap">
+                <span className="text-xs text-muted-foreground whitespace-nowrap">
                   {new Date(invite.expiresAt).toLocaleDateString()}
                 </span>
                 <button

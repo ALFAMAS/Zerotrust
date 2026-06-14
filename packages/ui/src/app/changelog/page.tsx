@@ -13,33 +13,33 @@ const TYPE_STYLES: Record<string, { label: string; classes: string }> = {
   changed: { label: "Changed", classes: "bg-blue-950 text-blue-400 border-blue-900" },
   fixed: { label: "Fixed", classes: "bg-amber-950 text-amber-400 border-amber-900" },
   security: { label: "Security", classes: "bg-red-950 text-red-400 border-red-900" },
-  removed: { label: "Removed", classes: "bg-gray-800 text-gray-400 border-gray-700" },
+  removed: { label: "Removed", classes: "bg-muted text-muted-foreground border-border" },
 };
 
 export default function ChangelogPage() {
   return (
     <div className="max-w-3xl mx-auto px-6 py-16">
       <div className="mb-12">
-        <Link href="/" className="text-sm text-indigo-400 hover:text-indigo-300 mb-6 block">
+        <Link href="/" className="text-sm text-primary hover:text-primary/80 mb-6 block">
           ← {brand.name}
         </Link>
-        <h1 className="text-4xl font-bold text-white mb-3">Changelog</h1>
-        <p className="text-gray-400">All notable changes to {brand.name}, newest first.</p>
+        <h1 className="text-4xl font-bold text-foreground mb-3">Changelog</h1>
+        <p className="text-muted-foreground">All notable changes to {brand.name}, newest first.</p>
       </div>
 
       <div className="relative">
         {/* Timeline line */}
-        <div className="absolute left-4 top-0 bottom-0 w-px bg-gray-800" />
+        <div className="absolute left-4 top-0 bottom-0 w-px bg-muted" />
 
         <div className="space-y-12">
           {changelog.map((entry) => (
             <div key={entry.version} className="relative pl-12">
               {/* Timeline dot */}
-              <div className="absolute left-2.5 top-1.5 w-3 h-3 rounded-full border-2 border-indigo-500 bg-gray-950" />
+              <div className="absolute left-2.5 top-1.5 w-3 h-3 rounded-full border-2 border-primary bg-background" />
 
               <div className="flex items-baseline gap-4 mb-4">
-                <h2 className="text-xl font-bold text-white">v{entry.version}</h2>
-                <time className="text-sm text-gray-500">
+                <h2 className="text-xl font-bold text-foreground">v{entry.version}</h2>
+                <time className="text-sm text-muted-foreground">
                   {new Date(entry.date).toLocaleDateString("en-US", {
                     year: "numeric",
                     month: "long",
@@ -60,7 +60,7 @@ export default function ChangelogPage() {
                       </span>
                       <ul className="space-y-1">
                         {section.items.map((item, ii) => (
-                          <li key={ii} className="flex items-start gap-2 text-sm text-gray-300">
+                          <li key={ii} className="flex items-start gap-2 text-sm text-foreground/80">
                             <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-gray-600 flex-shrink-0" />
                             {item}
                           </li>

@@ -1,5 +1,17 @@
+import { Badge as UIBadge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
+
 interface BadgeProps {
-  status: "active" | "suspended" | "deleted" | "pending" | "warning" | "error" | "success" | "expired" | string;
+  status:
+    | "active"
+    | "suspended"
+    | "deleted"
+    | "pending"
+    | "warning"
+    | "error"
+    | "success"
+    | "expired"
+    | string;
   label?: string;
 }
 
@@ -11,14 +23,18 @@ const colorMap: Record<string, string> = {
   deleted: "bg-red-900/50 text-red-400 ring-1 ring-red-500/30",
   error: "bg-red-900/50 text-red-400 ring-1 ring-red-500/30",
   pending: "bg-yellow-900/50 text-yellow-400 ring-1 ring-yellow-500/30",
-  expired: "bg-gray-800 text-gray-400 ring-1 ring-gray-600/30",
+  expired: "bg-muted text-muted-foreground ring-1 ring-border",
 };
 
+/** Status pill — wraps the shadcn Badge primitive with status-specific colors. */
 export default function Badge({ status, label }: BadgeProps) {
-  const cls = colorMap[status] ?? "bg-gray-800 text-gray-400 ring-1 ring-gray-600/30";
+  const cls = colorMap[status] ?? "bg-muted text-muted-foreground ring-1 ring-border";
   return (
-    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${cls}`}>
+    <UIBadge
+      variant="outline"
+      className={cn("rounded-full border-transparent font-medium", cls)}
+    >
       {label ?? status}
-    </span>
+    </UIBadge>
   );
 }

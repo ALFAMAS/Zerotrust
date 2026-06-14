@@ -2,6 +2,12 @@
 import { useEffect, useRef, useState } from "react";
 import { api } from "../../../lib/api";
 import { brand } from "@/config/brand";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function ProfilePage() {
   const [user, setUser] = useState<any>(null);
@@ -96,123 +102,115 @@ export default function ProfilePage() {
 
   return (
     <div className="max-w-lg">
-      <h1 className="text-2xl font-bold text-white mb-6">Profile Settings</h1>
+      <h1 className="mb-6 text-2xl font-bold text-foreground">Profile Settings</h1>
 
       {/* Avatar */}
-      <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 mb-6">
-        <h2 className="font-semibold text-white mb-4">Avatar</h2>
-        <div className="flex items-center gap-5">
-          <div className="relative flex-shrink-0">
-            {form.avatarUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={form.avatarUrl}
-                alt="Avatar"
-                className="w-20 h-20 rounded-full object-cover border-2 border-gray-700"
-              />
-            ) : (
-              <div className="w-20 h-20 rounded-full bg-indigo-600 flex items-center justify-center text-white text-2xl font-bold border-2 border-gray-700">
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle>Avatar</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center gap-5">
+            <Avatar className="h-20 w-20 border-2 border-border">
+              {form.avatarUrl ? (
+                <AvatarImage src={form.avatarUrl} alt="Avatar" />
+              ) : null}
+              <AvatarFallback className="bg-primary text-2xl font-bold text-primary-foreground">
                 {initials}
-              </div>
-            )}
+              </AvatarFallback>
+            </Avatar>
+            <div className="min-w-0 flex-1">
+              <p className="mb-3 text-sm text-muted-foreground">
+                Upload a JPEG, PNG, GIF, or WebP image (max 5 MB).
+              </p>
+              <input
+                ref={fileRef}
+                type="file"
+                accept="image/jpeg,image/png,image/gif,image/webp"
+                className="hidden"
+                onChange={handleAvatarUpload}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                disabled={uploading}
+                onClick={() => fileRef.current?.click()}
+              >
+                {uploading ? "Uploading…" : "Choose file"}
+              </Button>
+            </div>
           </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm text-gray-400 mb-3">
-              Upload a JPEG, PNG, GIF, or WebP image (max 5 MB).
-            </p>
-            <input
-              ref={fileRef}
-              type="file"
-              accept="image/jpeg,image/png,image/gif,image/webp"
-              className="hidden"
-              onChange={handleAvatarUpload}
-            />
-            <button
-              type="button"
-              disabled={uploading}
-              onClick={() => fileRef.current?.click()}
-              className="px-4 py-2 text-sm border border-gray-600 hover:border-gray-400 text-gray-300 hover:text-white rounded-lg transition-colors disabled:opacity-50"
-            >
-              {uploading ? "Uploading…" : "Choose file"}
-            </button>
-          </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
       {/* Personal info */}
-      <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 mb-6">
-        <h2 className="font-semibold text-white mb-4">Personal Info</h2>
-        {msg && (
-          <div
-            className={`mb-4 p-3 rounded-lg text-sm border ${
-              msgType === "success"
-                ? "bg-emerald-950 border-emerald-800 text-emerald-300"
-                : "bg-red-950 border-red-800 text-red-300"
-            }`}
-          >
-            {msg}
-          </div>
-        )}
-        <form onSubmit={handleSave} className="space-y-4">
-          <div>
-            <label className="block text-sm text-gray-400 mb-1.5">Display Name</label>
-            <input
-              value={form.displayName}
-              onChange={(e) => setForm({ ...form, displayName: e.target.value })}
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-white focus:outline-none focus:border-indigo-500 transition-colors"
-            />
-          </div>
-          <div>
-            <label className="block text-sm text-gray-400 mb-1.5">Username</label>
-            <input
-              value={form.username}
-              onChange={(e) => setForm({ ...form, username: e.target.value })}
-              placeholder="lowercase, hyphens, underscores"
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-white focus:outline-none focus:border-indigo-500 transition-colors"
-            />
-          </div>
-          <div>
-            <label className="block text-sm text-gray-400 mb-1.5">Email</label>
-            <input
-              value={user?.email || ""}
-              disabled
-              className="w-full bg-gray-800/50 border border-gray-700 rounded-lg px-3 py-2.5 text-gray-500 cursor-not-allowed"
-            />
-          </div>
-          <div>
-            <label className="block text-sm text-gray-400 mb-1.5">Phone</label>
-            <input
-              value={form.phone}
-              onChange={(e) => setForm({ ...form, phone: e.target.value })}
-              placeholder="+1 555 000 0000"
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-white focus:outline-none focus:border-indigo-500 transition-colors"
-            />
-          </div>
-          <button
-            type="submit"
-            disabled={saving}
-            className="px-5 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
-          >
-            {saving ? "Saving…" : "Save Changes"}
-          </button>
-        </form>
-      </div>
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle>Personal Info</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {msg && (
+            <Alert variant={msgType === "error" ? "destructive" : "default"} className="mb-4">
+              <AlertDescription>{msg}</AlertDescription>
+            </Alert>
+          )}
+          <form onSubmit={handleSave} className="space-y-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="displayName">Display Name</Label>
+              <Input
+                id="displayName"
+                value={form.displayName}
+                onChange={(e) => setForm({ ...form, displayName: e.target.value })}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="username">Username</Label>
+              <Input
+                id="username"
+                value={form.username}
+                onChange={(e) => setForm({ ...form, username: e.target.value })}
+                placeholder="lowercase, hyphens, underscores"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="email">Email</Label>
+              <Input id="email" value={user?.email || ""} disabled />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="phone">Phone</Label>
+              <Input
+                id="phone"
+                value={form.phone}
+                onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                placeholder="+1 555 000 0000"
+              />
+            </div>
+            <Button type="submit" disabled={saving}>
+              {saving ? "Saving…" : "Save Changes"}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
 
-      <div className="bg-gray-900 border border-red-900/50 rounded-xl p-6">
-        <h2 className="font-semibold text-red-400 mb-2">Danger Zone</h2>
-        <p className="text-sm text-gray-400 mb-4">
-          Permanently delete your account. This cannot be undone.
-        </p>
-        <button
-          onClick={() =>
-            confirm("Are you absolutely sure?") &&
-            alert("Contact an administrator to delete your account.")
-          }
-          className="px-4 py-2 border border-red-700 text-red-400 hover:bg-red-900/30 text-sm rounded-lg transition-colors"
-        >
-          Delete Account
-        </button>
-      </div>
+      <Card className="border-destructive/50">
+        <CardHeader>
+          <CardTitle className="text-destructive">Danger Zone</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="mb-4 text-sm text-muted-foreground">
+            Permanently delete your account. This cannot be undone.
+          </p>
+          <Button
+            variant="destructive"
+            onClick={() =>
+              confirm("Are you absolutely sure?") &&
+              alert("Contact an administrator to delete your account.")
+            }
+          >
+            Delete Account
+          </Button>
+        </CardContent>
+      </Card>
     </div>
   );
 }

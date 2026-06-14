@@ -62,8 +62,8 @@ function ToggleRow({ label, description, checked, onChange }: ToggleRowProps) {
   return (
     <div className="flex items-center justify-between py-3">
       <div className="flex-1 pr-6">
-        <p className="text-sm font-medium text-white">{label}</p>
-        <p className="text-xs text-gray-500 mt-0.5">{description}</p>
+        <p className="text-sm font-medium text-foreground">{label}</p>
+        <p className="text-xs text-muted-foreground mt-0.5">{description}</p>
       </div>
       <Toggle checked={checked} onChange={onChange} />
     </div>
@@ -81,7 +81,7 @@ interface NumberInputProps {
 function NumberInput({ label, value, onChange, min, max }: NumberInputProps) {
   return (
     <div className="flex items-center justify-between py-3">
-      <label className="text-sm font-medium text-white">{label}</label>
+      <label className="text-sm font-medium text-foreground">{label}</label>
       <input
         type="number"
         min={min}
@@ -91,7 +91,7 @@ function NumberInput({ label, value, onChange, min, max }: NumberInputProps) {
           const n = Number(e.target.value);
           if (!isNaN(n)) onChange(Math.min(max, Math.max(min, n)));
         }}
-        className="w-28 rounded-lg bg-gray-800 border border-gray-700 px-3 py-1.5 text-sm text-white text-right focus:border-indigo-500 focus:outline-none"
+        className="w-28 rounded-lg bg-muted border border-border px-3 py-1.5 text-sm text-foreground text-right focus:border-ring focus:outline-none"
       />
     </div>
   );
@@ -141,7 +141,7 @@ export default function AuthSettingsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-gray-500">Loading…</div>
+        <div className="text-muted-foreground">Loading…</div>
       </div>
     );
   }
@@ -150,23 +150,23 @@ export default function AuthSettingsPage() {
     <div className="space-y-6 max-w-4xl">
       {/* Toast */}
       {toast && (
-        <div className="fixed top-4 right-4 z-50 rounded-lg bg-indigo-600 px-4 py-3 text-sm text-white shadow-lg">
+        <div className="fixed top-4 right-4 z-50 rounded-lg bg-primary px-4 py-3 text-sm text-foreground shadow-lg">
           {toast}
         </div>
       )}
 
       <div>
-        <h1 className="text-2xl font-bold text-white">Auth Settings</h1>
-        <p className="mt-1 text-sm text-gray-400">Configure authentication methods, MFA, and security policy</p>
+        <h1 className="text-2xl font-bold text-foreground">Auth Settings</h1>
+        <p className="mt-1 text-sm text-muted-foreground">Configure authentication methods, MFA, and security policy</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Column 1 */}
         <div className="space-y-6">
           {/* Card 1: Authentication Methods */}
-          <div className="rounded-xl bg-gray-900 border border-gray-800 p-5">
-            <h2 className="font-semibold text-white mb-1">Authentication Methods</h2>
-            <p className="text-xs text-gray-500 mb-4">Choose how users can sign in to your app</p>
+          <div className="rounded-xl bg-card border border-border p-5">
+            <h2 className="font-semibold text-foreground mb-1">Authentication Methods</h2>
+            <p className="text-xs text-muted-foreground mb-4">Choose how users can sign in to your app</p>
             <div className="divide-y divide-gray-800">
               <ToggleRow
                 label="Email & Password"
@@ -202,9 +202,9 @@ export default function AuthSettingsPage() {
           </div>
 
           {/* Card 4: Registration */}
-          <div className="rounded-xl bg-gray-900 border border-gray-800 p-5">
-            <h2 className="font-semibold text-white mb-1">Registration</h2>
-            <p className="text-xs text-gray-500 mb-4">Control who can create new accounts</p>
+          <div className="rounded-xl bg-card border border-border p-5">
+            <h2 className="font-semibold text-foreground mb-1">Registration</h2>
+            <p className="text-xs text-muted-foreground mb-4">Control who can create new accounts</p>
             <div className="divide-y divide-gray-800">
               <ToggleRow
                 label="Allow new registrations"
@@ -220,7 +220,7 @@ export default function AuthSettingsPage() {
               />
             </div>
             <div className="mt-4">
-              <label className="block text-sm font-medium text-white mb-1">
+              <label className="block text-sm font-medium text-foreground mb-1">
                 Allowed Email Domains
               </label>
               <input
@@ -228,9 +228,9 @@ export default function AuthSettingsPage() {
                 placeholder="acme.com, corp.com (leave blank for all)"
                 value={settings.allowedEmailDomains}
                 onChange={(e) => set("allowedEmailDomains", e.target.value)}
-                className="w-full rounded-lg bg-gray-800 border border-gray-700 px-3 py-2 text-sm text-white placeholder-gray-500 focus:border-indigo-500 focus:outline-none"
+                className="w-full rounded-lg bg-muted border border-border px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none"
               />
-              <p className="mt-1 text-xs text-gray-500">Comma-separated. Leave blank to allow all domains.</p>
+              <p className="mt-1 text-xs text-muted-foreground">Comma-separated. Leave blank to allow all domains.</p>
             </div>
           </div>
         </div>
@@ -238,9 +238,9 @@ export default function AuthSettingsPage() {
         {/* Column 2 */}
         <div className="space-y-6">
           {/* Card 2: MFA */}
-          <div className="rounded-xl bg-gray-900 border border-gray-800 p-5">
-            <h2 className="font-semibold text-white mb-1">Multi-Factor Authentication</h2>
-            <p className="text-xs text-gray-500 mb-4">Second-factor options available to users</p>
+          <div className="rounded-xl bg-card border border-border p-5">
+            <h2 className="font-semibold text-foreground mb-1">Multi-Factor Authentication</h2>
+            <p className="text-xs text-muted-foreground mb-4">Second-factor options available to users</p>
             <div className="divide-y divide-gray-800">
               <ToggleRow
                 label="Authenticator App (TOTP)"
@@ -270,9 +270,9 @@ export default function AuthSettingsPage() {
           </div>
 
           {/* Card 3: Security */}
-          <div className="rounded-xl bg-gray-900 border border-gray-800 p-5">
-            <h2 className="font-semibold text-white mb-1">Security Settings</h2>
-            <p className="text-xs text-gray-500 mb-4">Session and account lockout configuration</p>
+          <div className="rounded-xl bg-card border border-border p-5">
+            <h2 className="font-semibold text-foreground mb-1">Security Settings</h2>
+            <p className="text-xs text-muted-foreground mb-4">Session and account lockout configuration</p>
             <div className="divide-y divide-gray-800">
               <NumberInput
                 label="Session Duration (seconds)"
@@ -318,7 +318,7 @@ export default function AuthSettingsPage() {
         <button
           onClick={handleSave}
           disabled={saving}
-          className="flex items-center gap-2 rounded-lg bg-indigo-600 px-6 py-2.5 text-sm font-medium text-white hover:bg-indigo-500 disabled:opacity-50 transition-colors min-w-[140px] justify-center"
+          className="flex items-center gap-2 rounded-lg bg-primary px-6 py-2.5 text-sm font-medium text-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors min-w-[140px] justify-center"
         >
           {saving ? (
             <>

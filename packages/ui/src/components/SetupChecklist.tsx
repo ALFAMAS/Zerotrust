@@ -2,6 +2,9 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { Check } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 interface ChecklistItem {
   id: string;
@@ -14,8 +17,8 @@ const ITEMS: ChecklistItem[] = [
   {
     id: "email_verified",
     label: "Verify your email",
-    href: "/dashboard/profile",
-    check: (u) => u?.attributes?.emailVerified === true,
+    href: "/verify-email",
+    check: (u) => u?.emailVerified === true || u?.attributes?.emailVerified === true,
   },
   {
     id: "display_name",
@@ -60,20 +63,23 @@ export default function SetupChecklist({ user }: { user: any }) {
   }
 
   return (
-    <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 mb-6">
-      <div className="flex items-center justify-between mb-1">
-        <h2 className="font-semibold text-white text-sm">Get started</h2>
-        <button onClick={dismiss} className="text-gray-600 hover:text-gray-400 text-xs">
+    <Card className="mb-6 p-6">
+      <div className="mb-1 flex items-center justify-between">
+        <h2 className="text-sm font-semibold text-foreground">Get started</h2>
+        <button
+          onClick={dismiss}
+          className="text-xs text-muted-foreground transition-colors hover:text-foreground"
+        >
           Dismiss
         </button>
       </div>
-      <p className="text-gray-500 text-xs mb-4">
+      <p className="mb-4 text-xs text-muted-foreground">
         {completed.length}/{total} steps completed
       </p>
 
-      <div className="h-1.5 bg-gray-800 rounded-full mb-5">
+      <div className="mb-5 h-1.5 rounded-full bg-muted">
         <div
-          className="h-1.5 bg-indigo-500 rounded-full transition-all"
+          className="h-1.5 rounded-full bg-primary transition-all"
           style={{ width: `${pct}%` }}
         />
       </div>
@@ -84,16 +90,16 @@ export default function SetupChecklist({ user }: { user: any }) {
           return (
             <li key={item.id}>
               {done ? (
-                <div className="flex items-center gap-3 text-sm text-gray-500 line-through">
-                  <span className="text-green-500 w-4 flex-shrink-0">✓</span>
+                <div className="flex items-center gap-3 text-sm text-muted-foreground line-through">
+                  <Check className="h-4 w-4 flex-shrink-0 text-green-500" />
                   {item.label}
                 </div>
               ) : (
                 <Link
                   href={item.href}
-                  className="flex items-center gap-3 text-sm text-gray-300 hover:text-white transition-colors"
+                  className="flex items-center gap-3 text-sm text-foreground/80 transition-colors hover:text-foreground"
                 >
-                  <span className="w-4 h-4 rounded-full border border-gray-600 flex-shrink-0" />
+                  <span className="h-4 w-4 flex-shrink-0 rounded-full border border-border" />
                   {item.label}
                 </Link>
               )}
@@ -101,6 +107,6 @@ export default function SetupChecklist({ user }: { user: any }) {
           );
         })}
       </ul>
-    </div>
+    </Card>
   );
 }

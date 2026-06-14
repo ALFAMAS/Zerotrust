@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { brand } from "@/config/brand";
 import { getConsent, setConsent } from "@/lib/consent";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 export default function CookieBanner() {
   const [visible, setVisible] = useState(false);
@@ -31,44 +33,38 @@ export default function CookieBanner() {
 
   return (
     <div
-      className={[
+      className={cn(
         "fixed bottom-0 left-0 right-0 z-50 transition-transform duration-500 ease-out",
-        visible ? "translate-y-0" : "translate-y-full",
-      ].join(" ")}
+        visible ? "translate-y-0" : "translate-y-full"
+      )}
       role="dialog"
       aria-label="Cookie consent"
     >
-      <div className="bg-gray-900 border-t border-gray-800 px-6 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 max-w-7xl mx-auto w-full">
-        <p className="text-sm text-gray-400 leading-relaxed">
+      <div className="mx-auto flex w-full max-w-7xl flex-col items-start justify-between gap-4 border-t border-border bg-card px-6 py-4 sm:flex-row sm:items-center">
+        <p className="text-sm leading-relaxed text-muted-foreground">
           {brand.name} uses cookies to improve your experience. By continuing, you accept our{" "}
           <Link
             href="/privacy"
-            className="text-indigo-400 hover:text-indigo-300 underline underline-offset-2 transition-colors"
+            className="text-primary underline underline-offset-2 transition-colors hover:text-primary/80"
           >
             Privacy Policy
           </Link>{" "}
           and{" "}
           <Link
             href="/terms"
-            className="text-indigo-400 hover:text-indigo-300 underline underline-offset-2 transition-colors"
+            className="text-primary underline underline-offset-2 transition-colors hover:text-primary/80"
           >
             Terms of Service
           </Link>
           .
         </p>
-        <div className="flex items-center gap-3 flex-shrink-0">
-          <button
-            onClick={handleDecline}
-            className="px-4 py-2 text-sm text-gray-400 hover:text-white border border-gray-700 hover:border-gray-500 rounded-lg transition-colors"
-          >
+        <div className="flex flex-shrink-0 items-center gap-3">
+          <Button variant="outline" size="sm" onClick={handleDecline}>
             Decline
-          </button>
-          <button
-            onClick={handleAccept}
-            className="px-4 py-2 text-sm font-medium bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg transition-colors"
-          >
+          </Button>
+          <Button size="sm" onClick={handleAccept}>
             Accept All
-          </button>
+          </Button>
         </div>
       </div>
     </div>

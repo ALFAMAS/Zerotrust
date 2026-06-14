@@ -1,5 +1,7 @@
 import { type HTMLAttributes } from "react";
 
+import { cn } from "@/lib/utils";
+
 interface SkeletonProps extends HTMLAttributes<HTMLDivElement> {
   rounded?: "none" | "sm" | "md" | "lg" | "full";
 }
@@ -13,20 +15,9 @@ const roundedMap = {
 };
 
 /** Base skeleton block — animated pulse placeholder */
-export function Skeleton({
-  className = "",
-  rounded = "md",
-  ...props
-}: SkeletonProps) {
+export function Skeleton({ className = "", rounded = "md", ...props }: SkeletonProps) {
   return (
-    <div
-      className={[
-        "bg-gray-800 animate-pulse",
-        roundedMap[rounded],
-        className,
-      ].join(" ")}
-      {...props}
-    />
+    <div className={cn("animate-pulse bg-muted", roundedMap[rounded], className)} {...props} />
   );
 }
 
@@ -39,24 +30,14 @@ export function SkeletonText({
   width?: string;
 }) {
   return (
-    <Skeleton
-      rounded="md"
-      className={["h-4", width === "full" ? "w-full" : width, className].join(
-        " "
-      )}
-    />
+    <Skeleton rounded="md" className={cn("h-4", width === "full" ? "w-full" : width, className)} />
   );
 }
 
 /** Card-shaped placeholder block */
 export function SkeletonCard({ className = "" }: { className?: string }) {
   return (
-    <div
-      className={[
-        "bg-gray-900 border border-gray-800 rounded-xl p-5 space-y-3",
-        className,
-      ].join(" ")}
-    >
+    <div className={cn("space-y-3 rounded-xl border border-border bg-card p-5", className)}>
       <Skeleton rounded="md" className="h-5 w-2/3" />
       <Skeleton rounded="md" className="h-4 w-full" />
       <Skeleton rounded="md" className="h-4 w-4/5" />
@@ -71,34 +52,20 @@ interface SkeletonTableProps {
 }
 
 /** Table-shaped placeholder with configurable rows and columns */
-export function SkeletonTable({
-  rows = 4,
-  columns = 4,
-  className = "",
-}: SkeletonTableProps) {
+export function SkeletonTable({ rows = 4, columns = 4, className = "" }: SkeletonTableProps) {
   return (
-    <div
-      className={[
-        "bg-gray-900 border border-gray-800 rounded-xl overflow-hidden",
-        className,
-      ].join(" ")}
-    >
+    <div className={cn("overflow-hidden rounded-xl border border-border bg-card", className)}>
       {/* Header row */}
-      <div className="border-b border-gray-800 px-4 py-3 flex gap-4">
+      <div className="flex gap-4 border-b border-border px-4 py-3">
         {Array.from({ length: columns }).map((_, i) => (
-          <Skeleton
-            key={i}
-            rounded="md"
-            className="h-3 flex-1"
-            style={{ opacity: 0.6 }}
-          />
+          <Skeleton key={i} rounded="md" className="h-3 flex-1" style={{ opacity: 0.6 }} />
         ))}
       </div>
       {/* Body rows */}
       {Array.from({ length: rows }).map((_, rowIdx) => (
         <div
           key={rowIdx}
-          className="flex gap-4 px-4 py-3 border-b border-gray-800 last:border-b-0"
+          className="flex gap-4 border-b border-border px-4 py-3 last:border-b-0"
         >
           {Array.from({ length: columns }).map((_, colIdx) => (
             <Skeleton key={colIdx} rounded="md" className="h-4 flex-1" />

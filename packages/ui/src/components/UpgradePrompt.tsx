@@ -1,6 +1,8 @@
 "use client";
 
 import Modal from "./Modal";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 /**
  * Consistent "upgrade to Pro" prompt shown whenever a plan gate blocks an
@@ -29,30 +31,25 @@ export default function UpgradePrompt({
   const body = (
     <div className={variant === "banner" ? "flex items-center justify-between gap-4" : ""}>
       <div>
-        <p className="text-sm text-gray-300">
-          <span className="font-semibold text-white">{feature}</span> is available on the{" "}
-          <span className="font-semibold text-indigo-400">{requiredPlan}</span> plan.
+        <p className="text-sm text-muted-foreground">
+          <span className="font-semibold text-foreground">{feature}</span> is available on the{" "}
+          <span className="font-semibold text-primary">{requiredPlan}</span> plan.
         </p>
         {variant === "modal" && (
-          <p className="mt-2 text-sm text-gray-400">
+          <p className="mt-2 text-sm text-muted-foreground">
             Upgrade to unlock {feature.toLowerCase()} plus everything else in {requiredPlan} —
             cancel anytime.
           </p>
         )}
       </div>
-      <a
-        href="/dashboard/billing"
-        className={`${
-          variant === "modal" ? "mt-5 w-full text-center block" : "shrink-0"
-        } px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium rounded-lg transition-colors`}
-      >
-        Upgrade to {requiredPlan}
-      </a>
+      <Button asChild className={cn(variant === "modal" ? "mt-5 w-full" : "shrink-0")}>
+        <a href="/dashboard/billing">Upgrade to {requiredPlan}</a>
+      </Button>
     </div>
   );
 
   if (variant === "banner") {
-    return <div className="bg-indigo-950/50 border border-indigo-800 rounded-xl p-4">{body}</div>;
+    return <div className="rounded-xl border border-primary/30 bg-primary/10 p-4">{body}</div>;
   }
 
   return (

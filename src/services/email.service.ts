@@ -2,6 +2,7 @@ import nodemailer from "nodemailer";
 import { welcomeEmailTemplate, type WelcomeEmailData } from "../templates/emails/welcome";
 import { magicLinkEmailTemplate } from "../templates/emails/magic-link";
 import { otpEmailTemplate } from "../templates/emails/otp";
+import { verifyEmailTemplate } from "../templates/emails/verify-email";
 import { passwordResetEmailTemplate } from "../templates/emails/password-reset";
 import { securityAlertEmailTemplate } from "../templates/emails/security-alert";
 import { notificationEmailTemplate } from "../templates/emails/notification";
@@ -95,6 +96,20 @@ export async function sendOtpEmail(
     name: data.name,
     code: data.code,
     expiresInMinutes: data.expiresInMinutes ?? 10,
+    appName: APP_NAME,
+  });
+  await sendEmail({ to, subject, html, text });
+}
+
+export async function sendVerificationEmail(
+  to: string,
+  data: { name: string; code: string; verifyUrl: string; expiresInMinutes?: number }
+): Promise<void> {
+  const { subject, html, text } = verifyEmailTemplate({
+    name: data.name,
+    code: data.code,
+    verifyUrl: data.verifyUrl,
+    expiresInMinutes: data.expiresInMinutes ?? 30,
     appName: APP_NAME,
   });
   await sendEmail({ to, subject, html, text });
