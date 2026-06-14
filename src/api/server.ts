@@ -25,6 +25,8 @@ import billingWebhookRoutes from "./routes/billing.webhooks";
 import adminToolsRoutes from "./routes/admin-tools.routes";
 import webhookManagementRoutes from "../webhooks/routes";
 import federationRoutes from "../federation/routes";
+import didRoutes from "../did/routes";
+import jitRoutes from "../jit/routes";
 import { rateLimit } from "../middleware/rateLimiting";
 import { geoFencingMiddleware } from "../middleware/geoFencing";
 import { temporalAccessMiddleware } from "../middleware/temporalAccess";
@@ -102,6 +104,14 @@ export async function createServer() {
 
   // ─── Federation routes ────────────────────────────────────────────────────
   app.route("/federation", federationRoutes);
+
+  // ─── Decentralized Identifier (DID) routes ────────────────────────────────
+  // did:key + did:web resolver, challenge/verify proof-of-control.
+  app.route("/auth/did", didRoutes);
+
+  // ─── Cross-tenant JIT access routes ───────────────────────────────────────
+  // Request + admin approval for temporary elevated access across tenants.
+  app.route("/jit/cross-tenant", jitRoutes);
 
   // ─── Anomaly admin routes ─────────────────────────────────────────────────
   app.route("/admin/anomaly", anomalyRoutes);

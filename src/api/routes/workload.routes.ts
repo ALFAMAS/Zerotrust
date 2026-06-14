@@ -1,10 +1,25 @@
 import { Hono } from "hono";
-import { createWorkloadCredential, validateWorkloadCredential } from "../../workload";
+import {
+  createWorkloadCredential,
+  getValidWorkloadCredential,
+  validateWorkloadCredential,
+} from "../../workload";
+import { getConfig } from "../../config";
 import { getLogger } from "../../logger";
+import { TokenService } from "../../services/token.service";
 import type { HonoEnv } from "../../shared/types";
 
 const router = new Hono<HonoEnv>();
 const logger = getLogger("workload-routes");
+
+let tokenServiceInstance: TokenService | null = null;
+async function getTokenService() {
+  if (tokenServiceInstance) return tokenServiceInstance;
+  const cfg = getConfig();
+  tokenServiceInstance = new TokenService(cfg.security.tokenSecretHex, cfg.session);
+  await tokenServiceInstance.init();
+  return tokenServiceInstance;
+}
 
 router.post("/issue", async (c) => {
   try {
@@ -32,6 +47,52 @@ router.post("/validate", async (c) => {
     return c.json({ valid: ok });
   } catch (err) {
     logger.error("Validate workload credential failed", err as Error);
+    return c.json({ error: "INTERNAL_ERROR" }, 500);
+  }
+});
+
+router.post("/token", async (c) => {
+  try {
+    const { workloadId, secret, scopes, ttl } = await c.req.json();
+    if (!workloadId || !secret) return c.json({ error: "INVALID_REQUEST" }, 400);
+
+    const credential = await getValidWorkloadCredential(workloadId, secret);
+    if (!credential) {
+      return c.json({ error: "INVALID_WORKLOAD_CREDENTIAL" }, 401);
+    }
+
+    const allowedScopes = new Set((credential.scopes as string[]) ?? []);
+    const requestedScopes = Array.isArray(scopes) ? scopes.map(String) : Array.from(allowedScopes);
+    const grantedScopes = requestedScopes.filter((scope) => allowedScopes.has(scope));
+    if (requestedScopes.length > 0 && grantedScopes.length !== requestedScopes.length) {
+      return c.json({ error: "INVALID_SCOPE" }, 403);
+    }
+
+    const tokenTtl = Math.min(Number.isInteger(ttl) ? ttl : credential.ttl || 3600, credential.ttl || 3600);
+    const tokenSvc = await getTokenService();
+    const accessToken = await tokenSvc.signAccessToken(
+      {
+        sub: `workload:${credential.workloadId}`,
+        email: `${credential.workloadId}@workload.zeroauth.local`,
+        sid: crypto.randomUUID(),
+        aud: "zeroauth",
+        scope: grantedScopes,
+        principal_type: "agent",
+        workload_id: credential.workloadId,
+      } as any,
+      tokenTtl
+    );
+
+    return c.json({
+      accessToken,
+      expiresIn: tokenTtl,
+      tokenType: "Bearer",
+      principalType: "agent",
+      workloadId: credential.workloadId,
+      scopes: grantedScopes,
+    });
+  } catch (err) {
+    logger.error("Issue workload token failed", err as Error);
     return c.json({ error: "INTERNAL_ERROR" }, 500);
   }
 });

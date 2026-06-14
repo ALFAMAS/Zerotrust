@@ -320,6 +320,24 @@ export const organizationsTable = pgTable("organizations", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+export const orgSecurityPoliciesTable = pgTable("org_security_policies", {
+  orgId: uuid("org_id")
+    .primaryKey()
+    .references(() => organizationsTable.id, { onDelete: "cascade" }),
+  requirePasskeyAttestation: boolean("require_passkey_attestation").notNull().default(false),
+  requireHardwarePasskey: boolean("require_hardware_passkey").notNull().default(false),
+  allowedPasskeyAaguids: text("allowed_passkey_aaguids")
+    .array()
+    .notNull()
+    .default(sql`ARRAY[]::text[]`),
+  deniedPasskeyAaguids: text("denied_passkey_aaguids")
+    .array()
+    .notNull()
+    .default(sql`ARRAY[]::text[]`),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  updatedBy: uuid("updated_by").references(() => usersTable.id, { onDelete: "set null" }),
+});
+
 export const organizationMembersTable = pgTable(
   "organization_members",
   {
@@ -406,6 +424,8 @@ export const apiKeysTable = pgTable("api_keys", {
     .array()
     .notNull()
     .default(sql`ARRAY[]::text[]`),
+  rateLimitPerMinute: integer("rate_limit_per_minute"),
+  monthlyQuota: integer("monthly_quota"),
   expiresAt: timestamp("expires_at"),
   lastUsedAt: timestamp("last_used_at"),
   revokedAt: timestamp("revoked_at"),

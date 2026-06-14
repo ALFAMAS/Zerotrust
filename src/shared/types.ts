@@ -142,6 +142,9 @@ export interface Passkey {
   backedUp: boolean;
   transports: string[];
   name?: string;
+  orgId?: string;
+  aaguid?: string;
+  attestationFormat?: string;
   createdAt: Date;
   lastUsedAt?: Date;
 }

@@ -11,7 +11,11 @@ import { getLogger } from "../logger";
 
 const logger = getLogger("usage");
 
-export type UsageMetric = "api_calls" | "seats" | "storage_bytes";
+export type UsageMetric = "api_calls" | "seats" | "storage_bytes" | `api_key:${string}:api_calls`;
+
+export function apiKeyUsageMetric(apiKeyId: string): UsageMetric {
+  return `api_key:${apiKeyId}:api_calls`;
+}
 
 /** Current billing period bucket: "YYYY-MM". */
 export function currentPeriod(now = new Date()): string {

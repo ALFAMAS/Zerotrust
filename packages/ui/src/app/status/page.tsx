@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import SiteHeader from "@/components/SiteHeader";
+import SiteFooter from "@/components/SiteFooter";
 
 const API_URL = process.env.NEXT_PUBLIC_ZEROAUTH_URL || "http://localhost:3000";
 
@@ -12,8 +14,8 @@ interface StatusData {
 }
 
 const STATUS_STYLES: Record<string, { dot: string; label: string; text: string }> = {
-  operational: { dot: "bg-green-400", label: "Operational", text: "text-green-400" },
-  degraded: { dot: "bg-yellow-400", label: "Degraded", text: "text-yellow-400" },
+  operational: { dot: "bg-emerald-400", label: "Operational", text: "text-emerald-400" },
+  degraded: { dot: "bg-amber-400", label: "Degraded", text: "text-amber-400" },
   down: { dot: "bg-red-500", label: "Down", text: "text-red-400" },
 };
 
@@ -52,26 +54,27 @@ export default function StatusPage() {
   const style = STATUS_STYLES[overall];
 
   return (
-    <main className="min-h-screen bg-background text-foreground">
-      <div className="max-w-2xl mx-auto px-4 py-20">
-        <h1 className="text-2xl font-bold mb-2">System status</h1>
-        <p className="text-sm text-muted-foreground mb-10">
+    <div className="flex min-h-screen flex-col bg-background text-foreground">
+      <SiteHeader />
+      <main className="mx-auto w-full max-w-2xl flex-1 px-6 py-16">
+        <h1 className="font-display text-3xl font-semibold tracking-tight">System status</h1>
+        <p className="mt-2 text-sm text-muted-foreground">
           Live status of all platform components. Updates every 30 seconds.
         </p>
 
         {/* Overall banner */}
         <div
-          className={`rounded-xl border p-6 mb-8 flex items-center gap-4 ${
+          className={`mb-8 mt-10 flex items-center gap-4 rounded-xl border p-6 ${
             overall === "operational"
-              ? "bg-green-950/40 border-green-800"
+              ? "border-emerald-800/60 bg-emerald-950/30"
               : overall === "degraded"
-                ? "bg-yellow-950/40 border-yellow-800"
-                : "bg-red-950/40 border-red-800"
+                ? "border-amber-800/60 bg-amber-950/30"
+                : "border-red-800/60 bg-red-950/30"
           }`}
         >
           <span className={`h-3.5 w-3.5 rounded-full ${style.dot} animate-pulse`} />
           <div>
-            <p className={`font-semibold ${style.text}`}>
+            <p className={`font-medium ${style.text}`}>
               {error
                 ? "API unreachable"
                 : overall === "operational"
@@ -81,7 +84,7 @@ export default function StatusPage() {
                     : "Major outage"}
             </p>
             {lastChecked && (
-              <p className="text-xs text-muted-foreground mt-0.5">
+              <p className="mt-0.5 text-xs text-muted-foreground">
                 Last checked {lastChecked.toLocaleTimeString()}
               </p>
             )}
@@ -89,9 +92,9 @@ export default function StatusPage() {
         </div>
 
         {/* Components */}
-        <div className="bg-card border border-border rounded-xl divide-y divide-gray-800">
+        <div className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card">
           {error && (
-            <div className="px-6 py-4 flex items-center justify-between">
+            <div className="flex items-center justify-between px-6 py-4">
               <span className="text-sm text-foreground/80">API</span>
               <span className="flex items-center gap-2 text-sm text-red-400">
                 <span className="h-2 w-2 rounded-full bg-red-500" />
@@ -103,7 +106,7 @@ export default function StatusPage() {
             Object.entries(data.components).map(([key, value]) => {
               const s = STATUS_STYLES[value];
               return (
-                <div key={key} className="px-6 py-4 flex items-center justify-between">
+                <div key={key} className="flex items-center justify-between px-6 py-4">
                   <span className="text-sm text-foreground/80">{COMPONENT_LABELS[key] ?? key}</span>
                   <span className={`flex items-center gap-2 text-sm ${s.text}`}>
                     <span className={`h-2 w-2 rounded-full ${s.dot}`} />
@@ -115,12 +118,13 @@ export default function StatusPage() {
         </div>
 
         {data && (
-          <p className="mt-6 text-xs text-muted-foreground text-center">
+          <p className="mt-6 text-center text-xs text-muted-foreground">
             API uptime: {Math.floor(data.uptimeSeconds / 3600)}h{" "}
             {Math.floor((data.uptimeSeconds % 3600) / 60)}m
           </p>
         )}
-      </div>
-    </main>
+      </main>
+      <SiteFooter />
+    </div>
   );
 }

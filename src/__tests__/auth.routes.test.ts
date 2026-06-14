@@ -39,6 +39,25 @@ vi.mock("../middleware/sessionControl", () => ({
   enforceMaxConcurrentDevices: vi.fn().mockResolvedValue(undefined),
 }));
 
+// Stub auth so routes behind `authMiddleware` are testable without minting real
+// tokens. A request authenticates by sending `x-test-user-id`; omitting it
+// simulates an unauthenticated caller (401), mirroring the real middleware.
+vi.mock("../middleware/auth", () => ({
+  initAuthMiddleware: vi.fn().mockResolvedValue(undefined),
+  authMiddleware: async (c: any, next: any) => {
+    const uid = c.req.header("x-test-user-id");
+    if (!uid) {
+      return c.json(
+        { error: "TOKEN_INVALID", message: "Missing or malformed Authorization header" },
+        401
+      );
+    }
+    c.set("user", { id: uid, email: "alice@example.com", roles: ["user"] });
+    return next();
+  },
+  optionalAuthMiddleware: async (_c: any, next: any) => next(),
+}));
+
 vi.mock("../logger", () => ({
   getLogger: () => ({
     info: vi.fn(),
@@ -96,7 +115,12 @@ function makeActiveUser(overrides: Record<string, unknown> = {}) {
     oauthProviders: [],
     status: "active",
     subUserIds: [],
-    sessionConfig: { maxDevices: 5, allowedCountries: [], allowedIpRanges: [], scheduleRestriction: { enabled: false } },
+    sessionConfig: {
+      maxDevices: 5,
+      allowedCountries: [],
+      allowedIpRanges: [],
+      scheduleRestriction: { enabled: false },
+    },
     createdAt: new Date(),
     updatedAt: new Date(),
     ...overrides,
@@ -178,6 +202,20 @@ describe("POST /register", () => {
     expect(res.status).toBe(409);
     const body = await res.json();
     expect(body.error).toBe("USER_ALREADY_EXISTS");
+  });
+
+  it("returns 422 for disposable email domains", async () => {
+    const router = await getRouter();
+    const app = new Hono().route("/", router);
+    const res = await app.request("/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: "alice@mailinator.com", password: "pass123" }),
+    });
+    expect(res.status).toBe(422);
+    const body = await res.json();
+    expect(body.error).toBe("DISPOSABLE_EMAIL");
+    expect(db.select).not.toHaveBeenCalled();
   });
 
   it("returns 201 with userId on successful registration", async () => {
@@ -384,14 +422,16 @@ describe("POST /token/refresh", () => {
   });
 
   it("returns 401 when refresh token is revoked", async () => {
-    db.limit.mockResolvedValueOnce([{
-      id: "rt-1",
-      userId: USER_ID,
-      sessionId: SESSION_ID,
-      tokenHash: "hash",
-      isRevoked: true,
-      expiresAt: new Date(Date.now() + 3_600_000),
-    }]);
+    db.limit.mockResolvedValueOnce([
+      {
+        id: "rt-1",
+        userId: USER_ID,
+        sessionId: SESSION_ID,
+        tokenHash: "hash",
+        isRevoked: true,
+        expiresAt: new Date(Date.now() + 3_600_000),
+      },
+    ]);
     const router = await getRouter();
     const app = new Hono().route("/", router);
     const res = await app.request("/token/refresh", {
@@ -405,14 +445,16 @@ describe("POST /token/refresh", () => {
   });
 
   it("returns 401 when refresh token is expired", async () => {
-    db.limit.mockResolvedValueOnce([{
-      id: "rt-1",
-      userId: USER_ID,
-      sessionId: SESSION_ID,
-      tokenHash: "hash",
-      isRevoked: false,
-      expiresAt: new Date(Date.now() - 1000),
-    }]);
+    db.limit.mockResolvedValueOnce([
+      {
+        id: "rt-1",
+        userId: USER_ID,
+        sessionId: SESSION_ID,
+        tokenHash: "hash",
+        isRevoked: false,
+        expiresAt: new Date(Date.now() - 1000),
+      },
+    ]);
     const router = await getRouter();
     const app = new Hono().route("/", router);
     const res = await app.request("/token/refresh", {
@@ -425,14 +467,16 @@ describe("POST /token/refresh", () => {
 
   it("returns 200 with new token pair on valid refresh", async () => {
     // 1) refresh token lookup
-    db.limit.mockResolvedValueOnce([{
-      id: "rt-1",
-      userId: USER_ID,
-      sessionId: SESSION_ID,
-      tokenHash: "hash",
-      isRevoked: false,
-      expiresAt: new Date(Date.now() + 3_600_000),
-    }]);
+    db.limit.mockResolvedValueOnce([
+      {
+        id: "rt-1",
+        userId: USER_ID,
+        sessionId: SESSION_ID,
+        tokenHash: "hash",
+        isRevoked: false,
+        expiresAt: new Date(Date.now() + 3_600_000),
+      },
+    ]);
     // 2) update (revoke old RT) — no return needed
     db.returning.mockResolvedValueOnce([{ id: "rt-1" }]);
     // 3) user lookup
@@ -588,7 +632,8 @@ describe("Route-level rate limiting", () => {
 
     // Exhaust the limit of 10 (register route uses points: 10)
     // We use the in-memory bucket logic from rateLimiting middleware directly
-    const { consumeInMemory, clearInMemoryBuckets } = await import("../services/rateLimiter/inmemory");
+    const { consumeInMemory, clearInMemoryBuckets } =
+      await import("../services/rateLimiter/inmemory");
     clearInMemoryBuckets();
 
     const key = `rl-route-test-${Date.now()}`;
@@ -663,51 +708,70 @@ describe("POST /verify-email", () => {
 
   afterEach(() => vi.clearAllMocks());
 
-  async function post(body: unknown) {
+  // `auth` defaults to true → send the test auth header; pass false to simulate
+  // an unauthenticated caller.
+  async function post(body: unknown, auth = true) {
     const router = await getRouter();
     const app = new Hono().route("/", router);
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    if (auth) headers["x-test-user-id"] = USER_ID;
     return app.request("/verify-email", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers,
       body: JSON.stringify(body),
     });
   }
 
-  it("returns 400 when email or code is missing", async () => {
-    const res = await post({ email: "alice@example.com" });
+  it("returns 401 when the caller is not authenticated", async () => {
+    const res = await post({ code: "123456" }, false);
+    expect(res.status).toBe(401);
+  });
+
+  it("returns 400 when the code is missing", async () => {
+    const res = await post({});
     expect(res.status).toBe(400);
     expect((await res.json()).error).toBe("INVALID_REQUEST");
   });
 
-  it("returns 400 INVALID_CODE for an unknown account (no enumeration)", async () => {
+  it("returns 404 when the authenticated user no longer exists", async () => {
     db.limit.mockResolvedValueOnce([]); // user lookup → none
-    const res = await post({ email: "ghost@example.com", code: "123456" });
-    expect(res.status).toBe(400);
-    expect((await res.json()).error).toBe("INVALID_CODE");
+    const res = await post({ code: "123456" });
+    expect(res.status).toBe(404);
+    expect((await res.json()).error).toBe("USER_NOT_FOUND");
   });
 
   it("verifies on a valid, unexpired code (happy path)", async () => {
     db.limit
       .mockResolvedValueOnce([makeActiveUser({ emailVerifiedAt: null })]) // user lookup
       .mockResolvedValueOnce([{ id: "otp-1", userId: USER_ID, code: "123456" }]); // otp lookup
-    const res = await post({ email: "alice@example.com", code: "123456" });
+    const res = await post({ code: "123456" });
     expect(res.status).toBe(200);
     expect((await res.json()).success).toBe(true);
     expect(db.update).toHaveBeenCalled();
+  });
+
+  it("looks the user up by session id, never the request body", async () => {
+    db.limit
+      .mockResolvedValueOnce([makeActiveUser({ emailVerifiedAt: null })])
+      .mockResolvedValueOnce([{ id: "otp-1", userId: USER_ID, code: "123456" }]);
+    // Even if a different email is smuggled in the body, it is ignored.
+    const res = await post({ code: "123456", email: "attacker@example.com" });
+    expect(res.status).toBe(200);
+    expect((await res.json()).success).toBe(true);
   });
 
   it("returns 400 INVALID_CODE when the code is wrong or expired", async () => {
     db.limit
       .mockResolvedValueOnce([makeActiveUser({ emailVerifiedAt: null })]) // user lookup
       .mockResolvedValueOnce([]); // otp lookup → no match
-    const res = await post({ email: "alice@example.com", code: "000000" });
+    const res = await post({ code: "000000" });
     expect(res.status).toBe(400);
     expect((await res.json()).error).toBe("INVALID_CODE");
   });
 
   it("is idempotent for an already-verified account", async () => {
     db.limit.mockResolvedValueOnce([makeActiveUser({ emailVerifiedAt: new Date() })]);
-    const res = await post({ email: "alice@example.com", code: "123456" });
+    const res = await post({ code: "123456" });
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.success).toBe(true);

@@ -9,6 +9,7 @@ import {
   organizationMembersTable,
   organizationInvitesTable,
   orgCustomRolesTable,
+  orgSecurityPoliciesTable,
   usersTable,
 } from "../../db/schema";
 import { ORG_PERMISSIONS } from "../../shared/permissions";
@@ -113,6 +114,13 @@ const TransferOwnershipSchema = z.object({
   newOwnerId: z.string().uuid(),
 });
 
+const UpdateSecurityPolicySchema = z.object({
+  requirePasskeyAttestation: z.boolean().optional(),
+  requireHardwarePasskey: z.boolean().optional(),
+  allowedPasskeyAaguids: z.array(z.string().uuid()).max(100).optional(),
+  deniedPasskeyAaguids: z.array(z.string().uuid()).max(100).optional(),
+});
+
 // ── POST / ────────────────────────────────────────────────────────────────────
 // Create organization
 router.post("/", async (c) => {
@@ -198,6 +206,88 @@ router.get("/", async (c) => {
   } catch (err) {
     logger.error("List orgs error", err as Error);
     return c.json({ error: "INTERNAL_ERROR", message: "Failed to list organizations" }, 500);
+  }
+});
+
+// ── GET /:orgId/security/policy ───────────────────────────────────────────────
+// Read org-level passkey attestation policy (viewer+)
+router.get("/:orgId/security/policy", async (c) => {
+  try {
+    const user = c.get("user");
+    const { orgId } = c.req.param();
+    const db = getDb();
+
+    await requireOrgRole(orgId, user.id, db, "viewer");
+
+    const [policy] = await db
+      .select()
+      .from(orgSecurityPoliciesTable)
+      .where(eq(orgSecurityPoliciesTable.orgId, orgId))
+      .limit(1);
+
+    return c.json({
+      policy: policy ?? {
+        orgId,
+        requirePasskeyAttestation: false,
+        requireHardwarePasskey: false,
+        allowedPasskeyAaguids: [],
+        deniedPasskeyAaguids: [],
+      },
+    });
+  } catch (err) {
+    if (err instanceof HTTPException) throw err;
+    logger.error("Get org security policy error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR", message: "Failed to get security policy" }, 500);
+  }
+});
+
+// ── PUT /:orgId/security/policy ───────────────────────────────────────────────
+// Update org-level passkey attestation policy (admin+)
+router.put("/:orgId/security/policy", async (c) => {
+  try {
+    const user = c.get("user");
+    const { orgId } = c.req.param();
+    const db = getDb();
+
+    await requireOrgRole(orgId, user.id, db, "admin");
+
+    const body = (await c.req.json()) as Record<string, unknown>;
+    const parsed = UpdateSecurityPolicySchema.safeParse(body);
+    if (!parsed.success) {
+      return c.json({ error: "INVALID_REQUEST", issues: parsed.error.issues }, 400);
+    }
+
+    const values = {
+      orgId,
+      requirePasskeyAttestation: parsed.data.requirePasskeyAttestation ?? false,
+      requireHardwarePasskey: parsed.data.requireHardwarePasskey ?? false,
+      allowedPasskeyAaguids: parsed.data.allowedPasskeyAaguids ?? [],
+      deniedPasskeyAaguids: parsed.data.deniedPasskeyAaguids ?? [],
+      updatedAt: new Date(),
+      updatedBy: user.id,
+    };
+
+    const [policy] = await db
+      .insert(orgSecurityPoliciesTable)
+      .values(values)
+      .onConflictDoUpdate({
+        target: orgSecurityPoliciesTable.orgId,
+        set: {
+          requirePasskeyAttestation: values.requirePasskeyAttestation,
+          requireHardwarePasskey: values.requireHardwarePasskey,
+          allowedPasskeyAaguids: values.allowedPasskeyAaguids,
+          deniedPasskeyAaguids: values.deniedPasskeyAaguids,
+          updatedAt: values.updatedAt,
+          updatedBy: values.updatedBy,
+        },
+      })
+      .returning();
+
+    return c.json({ policy });
+  } catch (err) {
+    if (err instanceof HTTPException) throw err;
+    logger.error("Update org security policy error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR", message: "Failed to update security policy" }, 500);
   }
 });
 

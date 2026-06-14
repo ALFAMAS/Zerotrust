@@ -15,6 +15,13 @@
       "when": 1781102756300,
       "tag": "0001_awesome_multiple_man",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1781458800000,
+      "tag": "0002_backend_roadmap_security",
+      "breakpoints": true
     }
   ]
 }

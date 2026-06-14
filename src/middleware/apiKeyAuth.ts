@@ -3,7 +3,8 @@ import { createHash } from "crypto";
 import { eq, and, isNull } from "drizzle-orm";
 import { getDb } from "../db";
 import { apiKeysTable, usersTable } from "../db/schema";
-import { incrementUsage } from "../services/usage.service";
+import { apiKeyUsageMetric, getUsage, incrementUsage } from "../services/usage.service";
+import { consumeRateLimit } from "./rateLimiting";
 import type { HonoEnv, User } from "../shared/types";
 
 export const apiKeyAuth = createMiddleware<HonoEnv>(async (c, next) => {
@@ -34,6 +35,34 @@ export const apiKeyAuth = createMiddleware<HonoEnv>(async (c, next) => {
     return c.json({ error: "API_KEY_EXPIRED" }, 401);
   }
 
+  if (key.rateLimitPerMinute && key.rateLimitPerMinute > 0) {
+    const result = await consumeRateLimit(`api-key:${key.id}`, key.rateLimitPerMinute, 60);
+    if (!result.allowed) {
+      c.header("Retry-After", String(result.retryAfterSecs));
+      return c.json({ error: "RATE_LIMIT_EXCEEDED", message: "API key rate limit exceeded" }, 429);
+    }
+  }
+
+  const scope = {
+    userId: key.orgId ? undefined : key.userId,
+    orgId: key.orgId ?? undefined,
+  };
+  const keyMetric = apiKeyUsageMetric(key.id);
+  if (key.monthlyQuota && key.monthlyQuota > 0) {
+    const used = await getUsage(keyMetric, scope);
+    if (used >= key.monthlyQuota) {
+      return c.json(
+        {
+          error: "API_KEY_QUOTA_EXCEEDED",
+          message: "API key monthly quota exceeded",
+          used,
+          quota: key.monthlyQuota,
+        },
+        429
+      );
+    }
+  }
+
   // Update last used timestamp (fire-and-forget)
   db.update(apiKeysTable)
     .set({ lastUsedAt: new Date() })
@@ -41,10 +70,8 @@ export const apiKeyAuth = createMiddleware<HonoEnv>(async (c, next) => {
     .catch(() => {});
 
   // Metered usage: count this API call against the billing period
-  void incrementUsage("api_calls", {
-    userId: key.orgId ? undefined : key.userId,
-    orgId: key.orgId ?? undefined,
-  });
+  void incrementUsage("api_calls", scope);
+  void incrementUsage(keyMetric, scope);
 
   c.set("user", user as unknown as User);
   return next();

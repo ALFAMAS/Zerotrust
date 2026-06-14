@@ -21,6 +21,19 @@ bun run db:backup # one-shot pg_dump backup with retention pruning
 bun run build    # tsc for API; next build for UI
 ```
 
+## Shipping work
+
+Do **not** push directly to `main`. When work is ready to ship:
+
+1. Refresh the knowledge graph: `/graphify . --update` (incremental — `graphify-out/`
+   already has an AST cache; use full `/graphify .` only if the graph is missing).
+2. Commit on a **feature branch**.
+3. Open a **PR to `main`** (`gh pr create`).
+
+graphify's full pipeline needs an agent to run it (it dispatches extraction
+subagents), so it can't be wired into a git/CI hook — run it as the first step
+of shipping, not on push.
+
 ## Next.js MCP Server for Coding Agents
 
 When `bun dev:ui` (or `bun dev`) is running, the built-in Next.js MCP
@@ -66,3 +79,31 @@ packages/ui/src/
 - **Redis**: Required for sessions, rate limiting, and email queue
 - **Env**: copy `.env.example` to `.env` and fill in required values
 - **Lint**: `bun run lint:fix` — ESLint + Prettier run automatically on commit via husky
+
+## MCP servers
+
+Only one MCP is needed for this repo, already registered in `.mcp.json`:
+
+- **`nextjs`** — routes, build/runtime errors, and dev-server logs (see section above).
+  Auto-connects when `bun dev:ui` / `bun dev` is running.
+
+Postgres/Redis/Elasticsearch are runtime services, not MCPs. For ad-hoc DB
+inspection use the `postgres` skill (read-only SQL, no config) rather than wiring
+a DB MCP — this project's DB holds auth credentials and sessions.
+
+## Recommended skills
+
+These global skills map to the work this repo involves (invoke with `/<name>`):
+
+| Skill                      | Use it for                                                               |
+| -------------------------- | ------------------------------------------------------------------------ |
+| `/security-review`         | Auth-critical changes (OAuth, SAML, MFA, WebAuthn, CSFLE, breach checks) |
+| `/code-review`             | Review the current diff before opening a PR                              |
+| `/test-driven-development` | New API routes/services — write the vitest first                         |
+| `/test-fixing`             | Triage and fix failing vitest runs                                       |
+| `/postgres`                | Read-only queries against the Drizzle/Postgres DB                        |
+| `/frontend-design`         | Next.js UI work (shadcn redesign in progress)                            |
+| `/webapp-testing`          | Drive/verify the UI with Playwright                                      |
+| `/verify` · `/run`         | Confirm a change works in the running app, not just in tests             |
+| `/changelog-generator`     | Release notes (repo uses semantic-release + conventional commits)        |
+| `/graphify`                | Refresh the knowledge graph (`graphify-out/`) — first step of shipping   |

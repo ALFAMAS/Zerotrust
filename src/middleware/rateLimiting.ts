@@ -106,6 +106,41 @@ export function clearRateLimiter(): void {
   clearInMemoryBuckets();
 }
 
+export async function consumeRateLimit(
+  key: string,
+  points: number,
+  windowSecs: number
+): Promise<{ allowed: boolean; retryAfterSecs: number; remaining?: number }> {
+  if (useRedis && redisConsume) {
+    const { allowed, remaining } = await redisConsume(key, points, windowSecs);
+    return { allowed, retryAfterSecs: windowSecs, remaining };
+  }
+
+  const now = Math.floor(Date.now() / 1000);
+  const bucket = ipBuckets.get(key);
+
+  if (!bucket || now - bucket.windowStart >= windowSecs) {
+    ipBuckets.set(key, { count: 1, windowStart: now });
+    return { allowed: true, retryAfterSecs: windowSecs, remaining: Math.max(points - 1, 0) };
+  }
+
+  if (bucket.count + 1 > points) {
+    return {
+      allowed: false,
+      retryAfterSecs: windowSecs - (now - bucket.windowStart),
+      remaining: 0,
+    };
+  }
+
+  bucket.count += 1;
+  ipBuckets.set(key, bucket);
+  return {
+    allowed: true,
+    retryAfterSecs: windowSecs - (now - bucket.windowStart),
+    remaining: points - bucket.count,
+  };
+}
+
 // ─── Multi-Tenant Rate Limiting ───────────────────────────────────────────────
 
 interface TenantQuota {

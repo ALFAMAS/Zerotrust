@@ -1,128 +1,295 @@
 import Link from "next/link";
+import {
+  Activity,
+  ArrowRight,
+  Building2,
+  CreditCard,
+  Fingerprint,
+  Globe,
+  KeyRound,
+  Lock,
+  Mail,
+  RadioTower,
+  ScrollText,
+  ShieldAlert,
+  ShieldCheck,
+  Smartphone,
+  Star,
+  UserCog,
+  Users,
+  Webhook,
+} from "lucide-react";
 import { brand } from "@/config/brand";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 const features = [
   {
-    icon: "🔐",
-    title: "PASETO Tokens",
-    desc: "Platform-Agnostic Security Tokens with AES-256-GCM encryption. No JWT footguns.",
+    icon: KeyRound,
+    title: "PASETO tokens",
+    desc: "Platform-agnostic security tokens with AES-256-GCM. None of the JWT algorithm footguns.",
   },
   {
-    icon: "🔑",
-    title: "WebAuthn Passkeys",
-    desc: "Phishing-resistant hardware key and biometric authentication. FIDO2 compliant.",
+    icon: Fingerprint,
+    title: "WebAuthn passkeys",
+    desc: "Phishing-resistant biometric and hardware-key sign-in. Fully FIDO2 compliant.",
   },
   {
-    icon: "📱",
-    title: "Multi-Factor Auth",
-    desc: "TOTP, Email OTP, SMS, WhatsApp, and Telegram channels out of the box.",
+    icon: Smartphone,
+    title: "Multi-factor auth",
+    desc: "TOTP, email OTP, SMS, WhatsApp and Telegram challenges — adaptive and built in.",
   },
   {
-    icon: "🛡️",
-    title: "Zero-Trust Sessions",
-    desc: "Continuous access evaluation, device binding, and anomaly detection on every request.",
+    icon: ShieldCheck,
+    title: "Zero-trust sessions",
+    desc: "Continuous access evaluation, device binding and proof-of-possession on every request.",
   },
   {
-    icon: "🏗️",
+    icon: Activity,
+    title: "Anomaly detection",
+    desc: "Real-time risk scoring that can step-up, revoke or quarantine a session automatically.",
+  },
+  {
+    icon: UserCog,
     title: "RBAC + ABAC",
-    desc: "Role hierarchy with attribute-based conditions, JIT privilege escalation, and geo-fencing.",
+    desc: "Role hierarchies, attribute conditions, just-in-time escalation and geo-fencing.",
   },
   {
-    icon: "🔗",
-    title: "Magic Links",
-    desc: "Passwordless email login with secure single-use tokens. No password required.",
+    icon: Mail,
+    title: "Magic links",
+    desc: "Passwordless single-use email sign-in — no password to phish or leak.",
   },
   {
-    icon: "🌐",
-    title: "OIDC Provider",
+    icon: Globe,
+    title: "Social & OAuth",
+    desc: "Google, GitHub, Apple and Facebook providers wired up out of the box.",
+  },
+  {
+    icon: RadioTower,
+    title: "OIDC provider",
     desc: `Expose ${brand.name} as a standards-compliant OpenID Connect identity provider.`,
   },
   {
-    icon: "🏢",
-    title: "SAML 2.0",
-    desc: "SP-initiated SSO for enterprise IdP integrations with Azure AD, Okta, and more.",
+    icon: Building2,
+    title: "SAML 2.0 SSO",
+    desc: "SP-initiated single sign-on for enterprise IdPs — Okta, Azure AD, Google Workspace.",
   },
+  {
+    icon: Users,
+    title: "Organizations & teams",
+    desc: "Multi-tenant orgs with roles, seats, invitations and custom permission sets.",
+  },
+  {
+    icon: Webhook,
+    title: "API keys & webhooks",
+    desc: "Scoped API keys and signed, retryable event webhooks for every integration.",
+  },
+];
+
+const alsoIncluded = [
+  { icon: ScrollText, label: "Tamper-aware audit logs (Elasticsearch)" },
+  { icon: CreditCard, label: "Stripe billing, trials & MRR/ARR dashboards" },
+  { icon: ShieldAlert, label: "HaveIBeenPwned breach checks" },
+  { icon: RadioTower, label: "Shared Signals Framework (SSF)" },
+];
+
+const standards = ["PASETO", "FIDO2 / WebAuthn", "OAuth 2.1", "OpenID Connect", "SAML 2.0", "SCIM-ready"];
+
+const steps = [
+  { step: "01", title: "Clone & configure", code: "cp .env.example .env   # add your secrets" },
+  { step: "02", title: "Start the stack", code: "docker compose up -d" },
+  { step: "03", title: "Open the app", code: `open ${brand.url}` },
 ];
 
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-background">
-      {/* Nav */}
-      <nav className="border-b border-border px-6 py-4 flex items-center justify-between max-w-7xl mx-auto">
-        <div className="flex items-center gap-2">
-          <div
-            className="w-8 h-8 rounded-lg flex items-center justify-center text-foreground font-bold text-sm"
-            style={{ backgroundColor: brand.logoColor }}
-          >
-            {brand.logoLetter}
-          </div>
-          <span className="font-bold text-foreground text-lg">{brand.name}</span>
-        </div>
-        <div className="flex items-center gap-4">
-          <a href={`${brand.apiUrl}/docs`} className="text-muted-foreground hover:text-foreground text-sm transition-colors">Docs</a>
-          <Link href="/login" className="text-muted-foreground hover:text-foreground text-sm transition-colors">Sign In</Link>
-          <Link href="/register" className="px-4 py-2 bg-primary hover:bg-primary/90 text-foreground text-sm font-medium rounded-lg transition-colors">
-            Get Started
+      {/* ── Nav ──────────────────────────────────────────────────────────── */}
+      <nav className="sticky top-0 z-50 border-b border-border/60 bg-background/80 backdrop-blur-md">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3.5">
+          <Link href="/" className="flex items-center gap-2.5">
+            <div
+              className="flex h-8 w-8 items-center justify-center rounded-lg font-display text-sm font-bold text-white"
+              style={{ backgroundColor: brand.logoColor }}
+            >
+              {brand.logoLetter}
+            </div>
+            <span className="font-display text-lg font-semibold tracking-tight text-foreground">
+              {brand.name}
+            </span>
           </Link>
+          <div className="flex items-center gap-1 sm:gap-2">
+            <a
+              href="#features"
+              className="hidden rounded-md px-3 py-2 text-sm text-muted-foreground transition-colors hover:text-foreground sm:block"
+            >
+              Features
+            </a>
+            <a
+              href={`${brand.apiUrl}/docs`}
+              className="hidden rounded-md px-3 py-2 text-sm text-muted-foreground transition-colors hover:text-foreground sm:block"
+            >
+              Docs
+            </a>
+            <Link
+              href="/login"
+              className="rounded-md px-3 py-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
+            >
+              Sign in
+            </Link>
+            <Link href="/register" className={cn(buttonVariants({ size: "sm" }))}>
+              Get started
+            </Link>
+          </div>
         </div>
       </nav>
 
-      {/* Hero */}
-      <section className="max-w-7xl mx-auto px-6 pt-24 pb-16 text-center">
-        <div className="inline-flex items-center gap-2 bg-indigo-950 border border-primary/40 text-primary px-3 py-1.5 rounded-full text-xs font-medium mb-6">
-          <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
-          {brand.announcementBadge}
-        </div>
-        <h1 className="text-5xl md:text-6xl font-bold text-foreground mb-6 leading-tight">
-          {brand.heroTitle}<br />
-          <span className="bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
-            {brand.heroSubtitle}
-          </span>
-        </h1>
-        <p className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed">
-          {brand.heroDescription}
-        </p>
-        <div className="flex items-center justify-center gap-4 flex-wrap">
-          <Link href="/register" className="px-8 py-3.5 bg-primary hover:bg-primary/90 text-foreground font-semibold rounded-xl transition-colors text-lg">
-            Start Free →
-          </Link>
-          <a href={`${brand.apiUrl}/docs`} className="px-8 py-3.5 border border-border hover:border-border text-foreground/80 hover:text-foreground font-semibold rounded-xl transition-colors text-lg">
-            View API Docs
-          </a>
+      {/* ── Hero ─────────────────────────────────────────────────────────── */}
+      <section className="relative overflow-hidden">
+        <div className="bg-grid mask-fade pointer-events-none absolute inset-0 opacity-60" aria-hidden />
+        <div
+          className="pointer-events-none absolute left-1/2 top-[-10rem] h-[32rem] w-[32rem] -translate-x-1/2 rounded-full opacity-30 blur-[160px]"
+          style={{ background: brand.color }}
+          aria-hidden
+        />
+        <div className="relative mx-auto max-w-3xl px-6 pb-20 pt-24 text-center sm:pt-28">
+          <div className="animate-fade-up mb-6 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3.5 py-1.5 text-xs font-medium text-primary">
+            <span className="relative flex h-1.5 w-1.5">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
+              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-primary" />
+            </span>
+            {brand.announcementBadge}
+          </div>
+
+          <h1
+            className="animate-fade-up font-display text-5xl font-semibold leading-[1.05] tracking-tight text-foreground sm:text-6xl"
+            style={{ animationDelay: "80ms" }}
+          >
+            {brand.heroTitle}
+            <br />
+            <span className="text-primary">{brand.heroSubtitle}</span>
+          </h1>
+
+          <p
+            className="animate-fade-up mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground"
+            style={{ animationDelay: "160ms" }}
+          >
+            {brand.heroDescription}
+          </p>
+
+          <div
+            className="animate-fade-up mt-10 flex flex-wrap items-center justify-center gap-3"
+            style={{ animationDelay: "240ms" }}
+          >
+            <Link href="/register" className={cn(buttonVariants({ size: "lg" }), "px-8 text-base")}>
+              Start free
+              <ArrowRight />
+            </Link>
+            <a
+              href={`${brand.apiUrl}/docs`}
+              className={cn(buttonVariants({ variant: "outline", size: "lg" }), "px-8 text-base")}
+            >
+              View API docs
+            </a>
+          </div>
+
+          {/* Quick request preview */}
+          <div
+            className="animate-fade-up mx-auto mt-14 max-w-2xl overflow-hidden rounded-xl border border-border bg-card/70 text-left shadow-2xl backdrop-blur-sm"
+            style={{ animationDelay: "320ms" }}
+          >
+            <div className="flex items-center gap-1.5 border-b border-border px-4 py-3">
+              <span className="h-3 w-3 rounded-full bg-destructive/70" />
+              <span className="h-3 w-3 rounded-full bg-yellow-500/70" />
+              <span className="h-3 w-3 rounded-full bg-emerald-500/70" />
+              <span className="ml-2 font-mono text-xs text-muted-foreground">authenticate.sh</span>
+            </div>
+            <pre className="overflow-x-auto p-4 font-mono text-[13px] leading-relaxed text-muted-foreground">
+              <code>
+                <span className="text-primary">curl</span> -X POST {brand.apiUrl}/auth/login \{"\n"}
+                {"  "}-H <span className="text-emerald-400">&apos;Content-Type: application/json&apos;</span> \{"\n"}
+                {"  "}-d <span className="text-emerald-400">&apos;{`{"email":"you@example.com","password":"••••"}`}&apos;</span>
+                {"\n\n"}
+                <span className="text-muted-foreground/60"># → 200 OK</span>
+                {"\n"}
+                {`{ `}<span className="text-foreground">&quot;accessToken&quot;</span>: <span className="text-emerald-400">&quot;v4.local.…&quot;</span>, <span className="text-foreground">&quot;mfaRequired&quot;</span>: <span className="text-primary">false</span> {`}`}
+              </code>
+            </pre>
+          </div>
         </div>
       </section>
 
-      {/* Features grid */}
-      <section className="max-w-7xl mx-auto px-6 py-16">
-        <h2 className="text-3xl font-bold text-foreground text-center mb-3">Everything you need to ship secure auth</h2>
-        <p className="text-muted-foreground text-center mb-12">No third-party dependency on your critical auth path.</p>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* ── Features ─────────────────────────────────────────────────────── */}
+      <section id="features" className="mx-auto max-w-7xl scroll-mt-20 px-6 py-20">
+        <div className="mx-auto mb-14 max-w-2xl text-center">
+          <h2 className="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+            Everything you need to ship secure auth
+          </h2>
+          <p className="mt-3 text-muted-foreground">
+            One self-hosted platform — no third-party dependency on your critical auth path.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {features.map((f) => (
-            <div key={f.title} className="bg-card border border-border rounded-xl p-5 hover:border-primary/40 transition-colors">
-              <div className="text-2xl mb-3">{f.icon}</div>
-              <h3 className="font-semibold text-foreground mb-2">{f.title}</h3>
-              <p className="text-muted-foreground text-sm leading-relaxed">{f.desc}</p>
+            <div
+              key={f.title}
+              className="group rounded-xl border border-border bg-card p-5 transition-colors hover:border-primary/40"
+            >
+              <span className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-background text-primary transition-colors group-hover:border-primary/40">
+                <f.icon className="h-5 w-5" />
+              </span>
+              <h3 className="font-medium text-foreground">{f.title}</h3>
+              <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{f.desc}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Also included */}
+        <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {alsoIncluded.map((a) => (
+            <div
+              key={a.label}
+              className="flex items-center gap-3 rounded-lg border border-border/60 bg-card/40 px-4 py-3"
+            >
+              <a.icon className="h-4 w-4 shrink-0 text-primary" />
+              <span className="text-sm text-muted-foreground">{a.label}</span>
             </div>
           ))}
         </div>
       </section>
 
-      {/* How it works */}
-      <section className="max-w-4xl mx-auto px-6 py-16">
-        <h2 className="text-3xl font-bold text-foreground text-center mb-12">Get running in minutes</h2>
-        <div className="space-y-6">
-          {[
-            { step: "1", title: "Clone & configure", code: "cp .env.example .env  # add your secrets" },
-            { step: "2", title: "Start the stack", code: "docker compose up -d" },
-            { step: "3", title: "Open the app", code: `open ${brand.url}` },
-          ].map((s) => (
-            <div key={s.step} className="flex gap-4 items-start">
-              <div className="w-10 h-10 rounded-full bg-primary text-foreground flex items-center justify-center font-bold text-sm flex-shrink-0 mt-0.5">
+      {/* ── Standards strip ──────────────────────────────────────────────── */}
+      <section className="border-y border-border/60 bg-card/30">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-x-8 gap-y-3 px-6 py-6">
+          <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground/70">
+            Standards-first
+          </span>
+          {standards.map((s) => (
+            <span key={s} className="font-mono text-sm text-foreground/80">
+              {s}
+            </span>
+          ))}
+        </div>
+      </section>
+
+      {/* ── Quickstart ───────────────────────────────────────────────────── */}
+      <section className="mx-auto max-w-3xl px-6 py-20">
+        <div className="mb-12 text-center">
+          <h2 className="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+            Running in minutes
+          </h2>
+          <p className="mt-3 text-muted-foreground">Self-host the whole stack with three commands.</p>
+        </div>
+        <div className="space-y-5">
+          {steps.map((s) => (
+            <div key={s.step} className="flex items-start gap-4">
+              <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-border bg-card font-mono text-sm font-semibold text-primary">
                 {s.step}
               </div>
-              <div>
-                <h3 className="font-semibold text-foreground mb-2">{s.title}</h3>
-                <code className="block bg-card border border-border text-primary px-4 py-2.5 rounded-lg text-sm font-mono">
+              <div className="min-w-0 flex-1">
+                <h3 className="font-medium text-foreground">{s.title}</h3>
+                <code className="mt-2 block overflow-x-auto rounded-lg border border-border bg-card px-4 py-2.5 font-mono text-sm text-foreground/90">
                   {s.code}
                 </code>
               </div>
@@ -131,26 +298,92 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="max-w-4xl mx-auto px-6 py-16 text-center">
-        <div className="bg-gradient-to-br from-indigo-900 to-purple-900 border border-indigo-700 rounded-2xl p-12">
-          <h2 className="text-3xl font-bold text-foreground mb-4">Ready to get started?</h2>
-          <p className="text-indigo-200 mb-8">Self-hosted. Open source. No vendor lock-in.</p>
-          <Link href="/register" className="px-8 py-3.5 bg-white text-indigo-700 hover:bg-gray-100 font-semibold rounded-xl transition-colors inline-block">
-            Create your account →
-          </Link>
+      {/* ── CTA ──────────────────────────────────────────────────────────── */}
+      <section className="mx-auto max-w-5xl px-6 pb-24">
+        <div className="relative overflow-hidden rounded-2xl border border-border bg-card p-10 text-center sm:p-16">
+          <div className="bg-grid mask-fade pointer-events-none absolute inset-0 opacity-50" aria-hidden />
+          <div
+            className="pointer-events-none absolute bottom-[-8rem] left-1/2 h-72 w-72 -translate-x-1/2 rounded-full opacity-30 blur-[120px]"
+            style={{ background: brand.color }}
+            aria-hidden
+          />
+          <div className="relative">
+            <h2 className="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+              Own your auth stack
+            </h2>
+            <p className="mx-auto mt-3 max-w-md text-muted-foreground">
+              Self-hosted. Open source. No vendor lock-in, no per-MAU surprises.
+            </p>
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+              <Link href="/register" className={cn(buttonVariants({ size: "lg" }), "px-8 text-base")}>
+                Create your account
+                <ArrowRight />
+              </Link>
+              <a
+                href={brand.githubUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={cn(buttonVariants({ variant: "outline", size: "lg" }), "px-8 text-base")}
+              >
+                <Star />
+                Star on GitHub
+              </a>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-border px-6 py-8 max-w-7xl mx-auto flex items-center justify-between flex-wrap gap-4">
-        <div className="text-muted-foreground text-sm">© {brand.copyrightYear} {brand.name}. Open source under {brand.license}.</div>
-        <div className="flex gap-6 text-sm text-muted-foreground">
-          <a href={brand.githubUrl} target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">GitHub</a>
-          <a href={`${brand.apiUrl}/docs`} className="hover:text-foreground transition-colors">Docs</a>
-          <Link href="/security" className="hover:text-foreground transition-colors">Security</Link>
-          <Link href="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>
-          <Link href="/terms" className="hover:text-foreground transition-colors">Terms</Link>
+      {/* ── Footer ───────────────────────────────────────────────────────── */}
+      <footer className="border-t border-border">
+        <div className="mx-auto max-w-7xl px-6 py-12">
+          <div className="flex flex-col justify-between gap-10 md:flex-row">
+            <div className="max-w-xs">
+              <div className="flex items-center gap-2.5">
+                <div
+                  className="flex h-8 w-8 items-center justify-center rounded-lg font-display text-sm font-bold text-white"
+                  style={{ backgroundColor: brand.logoColor }}
+                >
+                  {brand.logoLetter}
+                </div>
+                <span className="font-display text-lg font-semibold text-foreground">{brand.name}</span>
+              </div>
+              <p className="mt-3 flex items-center gap-1.5 text-sm text-muted-foreground">
+                <Lock className="h-3.5 w-3.5" />
+                Self-hosted, open source under {brand.license}.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-8 sm:grid-cols-3">
+              <div>
+                <h4 className="text-sm font-medium text-foreground">Product</h4>
+                <ul className="mt-3 space-y-2 text-sm">
+                  <li><a href="#features" className="text-muted-foreground transition-colors hover:text-foreground">Features</a></li>
+                  <li><Link href="/changelog" className="text-muted-foreground transition-colors hover:text-foreground">Changelog</Link></li>
+                  <li><Link href="/status" className="text-muted-foreground transition-colors hover:text-foreground">Status</Link></li>
+                </ul>
+              </div>
+              <div>
+                <h4 className="text-sm font-medium text-foreground">Resources</h4>
+                <ul className="mt-3 space-y-2 text-sm">
+                  <li><a href={`${brand.apiUrl}/docs`} className="text-muted-foreground transition-colors hover:text-foreground">Docs</a></li>
+                  <li><Link href="/blog" className="text-muted-foreground transition-colors hover:text-foreground">Blog</Link></li>
+                  <li><Link href="/help" className="text-muted-foreground transition-colors hover:text-foreground">Help</Link></li>
+                </ul>
+              </div>
+              <div>
+                <h4 className="text-sm font-medium text-foreground">Legal</h4>
+                <ul className="mt-3 space-y-2 text-sm">
+                  <li><Link href="/privacy" className="text-muted-foreground transition-colors hover:text-foreground">Privacy</Link></li>
+                  <li><Link href="/terms" className="text-muted-foreground transition-colors hover:text-foreground">Terms</Link></li>
+                  <li><a href={brand.githubUrl} target="_blank" rel="noopener noreferrer" className="text-muted-foreground transition-colors hover:text-foreground">GitHub</a></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-10 border-t border-border/60 pt-6 text-sm text-muted-foreground">
+            © {brand.copyrightYear} {brand.name}. All rights reserved.
+          </div>
         </div>
       </footer>
     </div>

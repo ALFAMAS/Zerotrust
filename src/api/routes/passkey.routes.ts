@@ -1,13 +1,23 @@
 import { Hono } from "hono";
 import crypto from "crypto";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { getDb } from "../../db";
-import { usersTable, sessionsTable, refreshTokensTable } from "../../db/schema";
+import {
+  organizationMembersTable,
+  usersTable,
+  sessionsTable,
+  refreshTokensTable,
+} from "../../db/schema";
 import { authMiddleware } from "../../middleware/auth";
 import { getSettings } from "../../models/settings.model";
 import { TokenService } from "../../services/token.service";
 import { getConfig } from "../../config";
 import { getLogger } from "../../logger";
+import { KNOWN_HARDWARE_KEY_AAGUIDS, verifyAttestation } from "../../mfa/attestation";
+import {
+  getOrgSecurityPolicy,
+  toAttestationPolicy,
+} from "../../services/orgSecurityPolicy.service";
 import type { HonoEnv } from "../../shared/types";
 
 const router = new Hono<HonoEnv>();
@@ -52,6 +62,24 @@ function consumeAuthChallenge(key: string): string | null {
   return consumeChallenge(`auth:${key}`);
 }
 
+function registrationChallengeKey(userId: string, orgId?: string): string {
+  return orgId ? `${userId}:${orgId}` : userId;
+}
+
+async function assertOrgMembership(orgId: string, userId: string): Promise<void> {
+  const db = getDb();
+  const [member] = await db
+    .select({ id: organizationMembersTable.id })
+    .from(organizationMembersTable)
+    .where(
+      and(eq(organizationMembersTable.orgId, orgId), eq(organizationMembersTable.userId, userId))
+    )
+    .limit(1);
+  if (!member) {
+    throw new Error("ORG_MEMBERSHIP_REQUIRED");
+  }
+}
+
 // POST /register/options — auth required
 router.post("/register/options", authMiddleware, async (c) => {
   try {
@@ -62,6 +90,11 @@ router.post("/register/options", authMiddleware, async (c) => {
 
     const user = c.get("user");
     const userId = user.id;
+    const { orgId } = await c.req.json().catch(() => ({}));
+    if (orgId) {
+      await assertOrgMembership(orgId, userId);
+    }
+    const policy = orgId ? await getOrgSecurityPolicy(orgId) : null;
     const { generateRegistrationOptions } = await import("@simplewebauthn/server");
 
     const existingPasskeys = user.passkeys || [];
@@ -77,14 +110,17 @@ router.post("/register/options", authMiddleware, async (c) => {
       userID: Buffer.from(userId),
       userName: user.email,
       userDisplayName: user.displayName,
-      attestationType: "none",
+      attestationType: policy?.requirePasskeyAttestation ? "direct" : "none",
       excludeCredentials,
       authenticatorSelection: { residentKey: "preferred", userVerification: "preferred" },
     });
 
-    storeChallenge(userId, options.challenge);
+    storeChallenge(registrationChallengeKey(userId, orgId), options.challenge);
     return c.json(options);
   } catch (err) {
+    if ((err as Error).message === "ORG_MEMBERSHIP_REQUIRED") {
+      return c.json({ error: "FORBIDDEN", message: "Not a member of this organization" }, 403);
+    }
     logger.error("Passkey register options error", err as Error);
     return c.json({ error: "INTERNAL_ERROR", message: "Failed to generate options" }, 500);
   }
@@ -101,8 +137,13 @@ router.post("/register/verify", authMiddleware, async (c) => {
     const user = c.get("user");
     const userId = user.id;
     const body = await c.req.json();
+    const orgId = typeof body?.orgId === "string" ? body.orgId : undefined;
+    if (orgId) {
+      await assertOrgMembership(orgId, userId);
+    }
+    const policy = orgId ? await getOrgSecurityPolicy(orgId) : null;
 
-    const expectedChallenge = consumeChallenge(userId);
+    const expectedChallenge = consumeChallenge(registrationChallengeKey(userId, orgId));
     if (!expectedChallenge) {
       return c.json(
         { error: "CHALLENGE_EXPIRED", message: "Registration challenge expired or not found" },
@@ -136,6 +177,31 @@ router.post("/register/verify", authMiddleware, async (c) => {
 
     const { registrationInfo } = verification;
     const { credential, credentialDeviceType, credentialBackedUp } = registrationInfo;
+    const aaguid = registrationInfo.aaguid
+      ? String(registrationInfo.aaguid).toLowerCase()
+      : undefined;
+
+    if (policy) {
+      const attestationResult = verifyAttestation(
+        {
+          fmt: registrationInfo.fmt ?? "none",
+          aaguid,
+          userVerified: Boolean(registrationInfo.userVerified),
+        },
+        toAttestationPolicy(policy)
+      );
+      const isKnownHardware = aaguid ? KNOWN_HARDWARE_KEY_AAGUIDS[aaguid] !== undefined : false;
+      if (!attestationResult.passed || (policy.requireHardwarePasskey && !isKnownHardware)) {
+        return c.json(
+          {
+            error: "PASSKEY_POLICY_FAILED",
+            message: attestationResult.reason ?? "Passkey does not satisfy organization policy",
+            aaguid,
+          },
+          400
+        );
+      }
+    }
 
     const newPasskey = {
       credentialId: Buffer.from(credential.id).toString("base64url"),
@@ -145,6 +211,9 @@ router.post("/register/verify", authMiddleware, async (c) => {
       backedUp: credentialBackedUp,
       transports: body?.response?.transports || [],
       name: body.name || "Passkey",
+      orgId,
+      aaguid,
+      attestationFormat: registrationInfo.fmt,
       createdAt: new Date(),
     };
 
@@ -171,6 +240,9 @@ router.post("/register/verify", authMiddleware, async (c) => {
 
     return c.json({ verified: true });
   } catch (err) {
+    if ((err as Error).message === "ORG_MEMBERSHIP_REQUIRED") {
+      return c.json({ error: "FORBIDDEN", message: "Not a member of this organization" }, 403);
+    }
     logger.error("Passkey register verify error", err as Error);
     return c.json({ error: "INTERNAL_ERROR", message: "Registration verification failed" }, 500);
   }

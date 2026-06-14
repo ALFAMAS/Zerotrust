@@ -68,8 +68,14 @@ export default function RegisterPage() {
 
   return (
     <>
-      <h1 className="mb-1 text-2xl font-bold text-foreground">Create account</h1>
-      <p className="mb-6 text-sm text-muted-foreground">Start with {brand.name} for free</p>
+      <div className="mb-6">
+        <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
+          Create your account
+        </h1>
+        <p className="mt-1.5 text-sm text-muted-foreground">
+          Start building with {brand.name} — free, no card required
+        </p>
+      </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-1.5">
@@ -137,7 +143,7 @@ export default function RegisterPage() {
         </div>
 
         <Button type="submit" disabled={loading} className="mt-2 w-full">
-          {loading ? "Creating account…" : "Create Account"}
+          {loading ? "Creating account…" : "Create account"}
         </Button>
       </form>
 

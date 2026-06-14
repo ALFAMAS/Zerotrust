@@ -3,7 +3,7 @@ import { createHash, randomBytes } from "crypto";
 import { z } from "zod";
 import { eq, and, isNull } from "drizzle-orm";
 import { getDb } from "../../db";
-import { apiKeysTable } from "../../db/schema";
+import { apiKeysTable, organizationMembersTable } from "../../db/schema";
 import { authMiddleware } from "../../middleware/auth";
 import { rateLimit } from "../../middleware/rateLimiting";
 import { getLogger } from "../../logger";
@@ -17,6 +17,8 @@ const createSchema = z.object({
   scopes: z.array(z.string().max(50)).max(50).optional(),
   expiresInDays: z.number().int().min(1).max(3650).optional(),
   orgId: z.string().uuid().optional(),
+  rateLimitPerMinute: z.number().int().min(1).max(60_000).optional(),
+  monthlyQuota: z.number().int().min(1).max(2_000_000_000).optional(),
 });
 
 // GET /api-keys
@@ -31,6 +33,8 @@ router.get("/", authMiddleware, async (c) => {
       keyPrefix: apiKeysTable.keyPrefix,
       scopes: apiKeysTable.scopes,
       orgId: apiKeysTable.orgId,
+      rateLimitPerMinute: apiKeysTable.rateLimitPerMinute,
+      monthlyQuota: apiKeysTable.monthlyQuota,
       expiresAt: apiKeysTable.expiresAt,
       lastUsedAt: apiKeysTable.lastUsedAt,
       createdAt: apiKeysTable.createdAt,
@@ -59,6 +63,25 @@ router.post("/", authMiddleware, rateLimit({ points: 20, windowSecs: 3600 }), as
 
   try {
     const db = getDb();
+    if (parsed.data.orgId) {
+      const [member] = await db
+        .select({ role: organizationMembersTable.role })
+        .from(organizationMembersTable)
+        .where(
+          and(
+            eq(organizationMembersTable.orgId, parsed.data.orgId),
+            eq(organizationMembersTable.userId, user.id)
+          )
+        )
+        .limit(1);
+      if (!member || !["owner", "admin"].includes(member.role)) {
+        return c.json(
+          { error: "FORBIDDEN", message: "Only org admins can create org API keys" },
+          403
+        );
+      }
+    }
+
     const [entry] = await db
       .insert(apiKeysTable)
       .values({
@@ -68,6 +91,8 @@ router.post("/", authMiddleware, rateLimit({ points: 20, windowSecs: 3600 }), as
         keyHash,
         keyPrefix,
         scopes: parsed.data.scopes ?? [],
+        rateLimitPerMinute: parsed.data.rateLimitPerMinute ?? null,
+        monthlyQuota: parsed.data.monthlyQuota ?? null,
         expiresAt,
       })
       .returning();

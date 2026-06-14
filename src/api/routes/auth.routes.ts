@@ -21,6 +21,7 @@ import { sendWelcomeEmail, sendVerificationEmail } from "../../services/email.se
 import { rejectIfBreached } from "../../services/passwordBreach.service";
 import { notifyIfNewDevice } from "../../services/loginNotification.service";
 import { recordAndRespond } from "../../services/accountTakeover.service";
+import { validateSignupEmail } from "../../services/disposableEmail.service";
 import type { HonoEnv } from "../../shared/types";
 
 const router = new Hono<HonoEnv>();
@@ -65,7 +66,8 @@ const EMAIL_VERIFICATION_TTL_MIN = 30;
 /**
  * Generate a fresh 6-digit email-verification code, persist it (replacing any
  * prior one for the user), and send the verification email. The email contains
- * both the code and a magic link to /verify-email carrying email + code.
+ * both the code and a magic link to /verify-email carrying the code (the verify
+ * page is authenticated and reads the email from the session).
  */
 async function issueVerification(user: { id: string; email: string; displayName?: string | null }) {
   const db = getDb();
@@ -82,7 +84,9 @@ async function issueVerification(user: { id: string; email: string; displayName?
     expiresAt: new Date(Date.now() + EMAIL_VERIFICATION_TTL_MIN * 60 * 1000),
   });
   const appUrl = process.env.APP_URL ?? "http://localhost:3000";
-  const verifyUrl = `${appUrl}/verify-email?email=${encodeURIComponent(user.email)}&code=${code}`;
+  // The verify page is authenticated and reads the email from the session, so the
+  // magic link only needs to carry the code.
+  const verifyUrl = `${appUrl}/verify-email?code=${code}`;
   void sendVerificationEmail(user.email, {
     name: user.displayName ?? user.email,
     code,
@@ -99,11 +103,20 @@ router.post("/register", rateLimit({ points: 10, windowSecs: 60 }), async (c) =>
       return c.json({ error: "INVALID_REQUEST", message: "email and password required" }, 400);
     }
 
+    const normalizedEmail = String(email).toLowerCase().trim();
+    const emailValidation = await validateSignupEmail(normalizedEmail);
+    if (!emailValidation.allowed) {
+      return c.json(
+        { error: emailValidation.code, message: emailValidation.message },
+        emailValidation.code === "INVALID_EMAIL" ? 400 : 422
+      );
+    }
+
     const db = getDb();
     const existing = await db
       .select()
       .from(usersTable)
-      .where(eq(usersTable.email, email.toLowerCase()))
+      .where(eq(usersTable.email, normalizedEmail))
       .limit(1);
     if (existing.length > 0) {
       return c.json({ error: "USER_ALREADY_EXISTS", message: "User already exists" }, 409);
@@ -121,9 +134,9 @@ router.post("/register", rateLimit({ points: 10, windowSecs: 60 }), async (c) =>
     const [user] = await db
       .insert(usersTable)
       .values({
-        email: email.toLowerCase().trim(),
+        email: normalizedEmail,
         passwordHash,
-        displayName: displayName || email.split("@")[0],
+        displayName: displayName || normalizedEmail.split("@")[0],
         roles: ["user"],
         attributes: {},
         mfa: { totp: { enabled: false, backupCodes: [] }, webauthn: { enabled: false } },
@@ -165,59 +178,67 @@ router.post("/register", rateLimit({ points: 10, windowSecs: 60 }), async (c) =>
   }
 });
 
-// POST /verify-email — confirm ownership via emailed code or magic link (public)
-router.post("/verify-email", rateLimit({ points: 10, windowSecs: 60 }), async (c) => {
-  try {
-    const { email, code } = await c.req.json();
-    if (!email || !code) {
-      return c.json({ error: "INVALID_REQUEST", message: "email and code required" }, 400);
-    }
+// POST /verify-email — confirm ownership via emailed code (requires auth)
+//
+// Verification always happens for the currently signed-in user — registration
+// auto-logs them in — so the email is taken from the session, never the request
+// body. This prevents one account from being used to probe or verify another.
+router.post(
+  "/verify-email",
+  authMiddleware,
+  rateLimit({ points: 10, windowSecs: 60 }),
+  async (c) => {
+    try {
+      const { code } = await c.req.json().catch(() => ({}));
+      if (!code) {
+        return c.json({ error: "INVALID_REQUEST", message: "code required" }, 400);
+      }
 
-    const db = getDb();
-    const normEmail = String(email).toLowerCase().trim();
-    const [user] = await db
-      .select()
-      .from(usersTable)
-      .where(eq(usersTable.email, normEmail))
-      .limit(1);
-    // Don't reveal whether the account exists.
-    if (!user) {
-      return c.json({ error: "INVALID_CODE", message: "Invalid or expired code" }, 400);
-    }
-    if (user.emailVerifiedAt) {
-      return c.json({ success: true, alreadyVerified: true });
-    }
+      const authUser = c.get("user");
+      const db = getDb();
+      const [user] = await db
+        .select()
+        .from(usersTable)
+        .where(eq(usersTable.id, authUser.id))
+        .limit(1);
+      if (!user) {
+        return c.json({ error: "USER_NOT_FOUND", message: "User not found" }, 404);
+      }
+      if (user.emailVerifiedAt) {
+        return c.json({ success: true, alreadyVerified: true });
+      }
 
-    const [otp] = await db
-      .select()
-      .from(otpsTable)
-      .where(
-        and(
-          eq(otpsTable.userId, user.id),
-          eq(otpsTable.type, "email_verification"),
-          eq(otpsTable.code, String(code).trim()),
-          gt(otpsTable.expiresAt, new Date())
+      const [otp] = await db
+        .select()
+        .from(otpsTable)
+        .where(
+          and(
+            eq(otpsTable.userId, user.id),
+            eq(otpsTable.type, "email_verification"),
+            eq(otpsTable.code, String(code).trim()),
+            gt(otpsTable.expiresAt, new Date())
+          )
         )
-      )
-      .limit(1);
-    if (!otp) {
-      return c.json({ error: "INVALID_CODE", message: "Invalid or expired code" }, 400);
+        .limit(1);
+      if (!otp) {
+        return c.json({ error: "INVALID_CODE", message: "Invalid or expired code" }, 400);
+      }
+
+      await db
+        .update(usersTable)
+        .set({ emailVerifiedAt: new Date(), updatedAt: new Date() })
+        .where(eq(usersTable.id, user.id));
+      await db
+        .delete(otpsTable)
+        .where(and(eq(otpsTable.userId, user.id), eq(otpsTable.type, "email_verification")));
+
+      return c.json({ success: true });
+    } catch (err) {
+      logger.error("Email verification error", err as Error);
+      return c.json({ error: "INTERNAL_ERROR", message: "Verification failed" }, 500);
     }
-
-    await db
-      .update(usersTable)
-      .set({ emailVerifiedAt: new Date(), updatedAt: new Date() })
-      .where(eq(usersTable.id, user.id));
-    await db
-      .delete(otpsTable)
-      .where(and(eq(otpsTable.userId, user.id), eq(otpsTable.type, "email_verification")));
-
-    return c.json({ success: true });
-  } catch (err) {
-    logger.error("Email verification error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR", message: "Verification failed" }, 500);
   }
-});
+);
 
 // POST /verify-email/resend — re-issue a verification email for the current user
 router.post(

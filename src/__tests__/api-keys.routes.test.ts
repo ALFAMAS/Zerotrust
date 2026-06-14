@@ -57,6 +57,8 @@ describe("GET /api-keys", () => {
         keyPrefix: "zak_ABCD",
         scopes: [],
         orgId: null,
+        rateLimitPerMinute: 120,
+        monthlyQuota: 1000,
         expiresAt: null,
         lastUsedAt: null,
         createdAt: new Date(),
@@ -88,6 +90,8 @@ describe("POST /api-keys", () => {
       keyHash: "hashhash",
       scopes: [],
       orgId: null,
+      rateLimitPerMinute: null,
+      monthlyQuota: null,
       expiresAt: null,
       lastUsedAt: null,
       revokedAt: null,
@@ -109,6 +113,68 @@ describe("POST /api-keys", () => {
     expect(body.name).toBe("CI Key");
     expect(typeof body.key).toBe("string");
     expect(body.key).toMatch(/^zak_/);
+  });
+
+  it("persists per-key rate limit and monthly quota settings", async () => {
+    const captured: any[] = [];
+    mockDb.insert.mockReturnValue({
+      values: (value: any) => {
+        captured.push(value);
+        return {
+          returning: () =>
+            Promise.resolve([
+              {
+                id: "k3",
+                userId: "user-uuid-1",
+                name: "Metered Key",
+                keyPrefix: "zak_IJKL",
+                keyHash: "hashhash",
+                scopes: [],
+                orgId: null,
+                rateLimitPerMinute: value.rateLimitPerMinute,
+                monthlyQuota: value.monthlyQuota,
+                expiresAt: null,
+                lastUsedAt: null,
+                revokedAt: null,
+                createdAt: new Date(),
+              },
+            ]),
+        };
+      },
+    });
+
+    const res = await app.request("/api-keys", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: "Metered Key",
+        rateLimitPerMinute: 60,
+        monthlyQuota: 10_000,
+      }),
+    });
+    expect(res.status).toBe(201);
+    expect(captured[0].rateLimitPerMinute).toBe(60);
+    expect(captured[0].monthlyQuota).toBe(10_000);
+  });
+
+  it("requires org admin role before creating org-scoped keys", async () => {
+    mockDb.select.mockReturnValue({
+      from: () => ({
+        where: () => ({
+          limit: () => Promise.resolve([{ role: "member" }]),
+        }),
+      }),
+    });
+
+    const res = await app.request("/api-keys", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: "Org Key",
+        orgId: "11111111-1111-4111-8111-111111111111",
+      }),
+    });
+    expect(res.status).toBe(403);
   });
 
   it("rejects missing name", async () => {

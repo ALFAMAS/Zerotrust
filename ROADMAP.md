@@ -10,8 +10,8 @@ This roadmap has two parts:
    **already-built-but-undocumented** capabilities, which directly informed the new
    ideas below.
 
-**Legend:** `[x]` shipped · `[ ]` pending · 🆕 net-new idea (not in `STARTER.md`)
-· ⚡ backend exists, needs surfacing/finishing.
+**Legend:** `[x]` shipped · `[~]` partially shipped · `[ ]` pending · 🆕 net-new
+idea (not in `STARTER.md`) · ⚡ backend exists, needs surfacing/finishing.
 
 Priority bands: **P0** before launch · **P1** first month · **P2** first quarter ·
 **P3** differentiation.
@@ -111,9 +111,13 @@ The code-graph pass (`graphify-out/GRAPH_REPORT.md`) found shipped subsystems th
 **never made it into the feature list or docs**. Documenting and exposing these is
 the cheapest, highest-impact work available — the engineering is largely done.
 
-- ⚡ [ ] **Decentralized Identifiers (DID)** — `resolveDID()`, `resolveDIDWeb()`,
+- ⚡ [~] **Decentralized Identifiers (DID)** — `resolveDID()`, `resolveDIDWeb()`,
   `resolveDIDKey()`, base58 codec already exist (`Did Module`). Document the
   resolver, add `did:web` support for orgs, and expose a verify endpoint.
+  _2026-06-15: router mounted at `/auth/did` — `GET /resolve`, `POST /challenge`,
+  `POST /verify` (proof-of-control). Login-via-DID deferred: `provisionDIDUser()`
+  was a stub against a Mongoose API and the users table has no `did` column — needs
+  a schema migration + Drizzle-backed upsert first._
 - ⚡ [ ] **Post-quantum crypto** — hybrid KEM is implemented (`createKEMProvider()`,
   `generatePQKeyPair()`, `establishPQSessionKey()`, `hybridEncrypt/Decrypt` in
   `Crypto Post`). Productize: PQ-protected token/session option behind a flag,
@@ -125,8 +129,11 @@ the cheapest, highest-impact work available — the engineering is largely done.
   `KNOWN_HARDWARE_KEY_AAGUIDS`, MDS3 verification, CA-pin store all exist
   (`Mfa Attestation`). Expose as an **org-level passkey policy** ("hardware keys only",
   "require attestation").
-- ⚡ [ ] **Cross-tenant JIT access** — `requestCrossTenantAccess()`,
+- ⚡ [~] **Cross-tenant JIT access** — `requestCrossTenantAccess()`,
   `CrossTenantJITStore` exist (`Jit Cross`). Build the approval-inbox UI and audit view.
+  _2026-06-15: router mounted at `/jit/cross-tenant` — request/list/status + admin
+  approve/deny/incoming with role guards. Store is in-memory (grants are ≤1h);
+  approval-inbox UI + durable audit view still pending._
 - ⚡ [ ] **CSFLE field encryption** — `CSFLEManager`, key versioning, encrypt/decrypt
   plugin exist (`Crypto Csfle`). Document which fields are encrypted and add a
   key-rotation runbook.

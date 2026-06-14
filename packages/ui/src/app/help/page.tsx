@@ -1,8 +1,12 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { FAQ_ITEMS } from "../../data/faq";
 import Link from "next/link";
+import { LifeBuoy, Mail, Minus, Plus, Search } from "lucide-react";
+import { FAQ_ITEMS } from "../../data/faq";
+import { brand } from "@/config/brand";
+import SiteHeader from "@/components/SiteHeader";
+import SiteFooter from "@/components/SiteFooter";
 
 const CATEGORIES = Array.from(new Set(FAQ_ITEMS.map((i) => i.category)));
 
@@ -27,39 +31,33 @@ export default function HelpPage() {
   }, [query, activeCategory]);
 
   return (
-    <div className="min-h-screen bg-background px-4 py-16">
-      <div className="max-w-3xl mx-auto">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-foreground mb-3">Help Center</h1>
-          <p className="text-muted-foreground text-lg mb-8">Find answers to common questions.</p>
-          <div className="relative">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path
-                  d="M6.5 12a5.5 5.5 0 1 0 0-11 5.5 5.5 0 0 0 0 11ZM14 14l-3-3"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                />
-              </svg>
-            </span>
+    <div className="flex min-h-screen flex-col bg-background">
+      <SiteHeader />
+      <main className="mx-auto w-full max-w-3xl flex-1 px-6 py-16">
+        <div className="mb-12 text-center">
+          <h1 className="font-display text-4xl font-semibold tracking-tight text-foreground">
+            Help center
+          </h1>
+          <p className="mt-3 text-lg text-muted-foreground">Find answers to common questions.</p>
+          <div className="relative mt-8">
+            <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <input
               type="search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search FAQs…"
-              className="w-full bg-card border border-border rounded-xl pl-10 pr-4 py-3 text-foreground text-sm focus:outline-none focus:border-ring"
+              className="w-full rounded-xl border border-border bg-card py-3 pl-11 pr-4 text-sm text-foreground transition-colors focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
             />
           </div>
         </div>
 
         {!query && (
-          <div className="flex flex-wrap gap-2 mb-8">
+          <div className="mb-8 flex flex-wrap justify-center gap-2">
             <button
               onClick={() => setActiveCategory(null)}
-              className={`px-3 py-1.5 rounded-full text-sm transition-colors ${
+              className={`rounded-full px-3 py-1.5 text-sm transition-colors ${
                 activeCategory === null
-                  ? "bg-primary text-foreground"
+                  ? "bg-primary text-primary-foreground"
                   : "bg-muted text-muted-foreground hover:text-foreground"
               }`}
             >
@@ -69,9 +67,9 @@ export default function HelpPage() {
               <button
                 key={cat}
                 onClick={() => setActiveCategory(cat === activeCategory ? null : cat)}
-                className={`px-3 py-1.5 rounded-full text-sm transition-colors ${
+                className={`rounded-full px-3 py-1.5 text-sm transition-colors ${
                   activeCategory === cat
-                    ? "bg-primary text-foreground"
+                    ? "bg-primary text-primary-foreground"
                     : "bg-muted text-muted-foreground hover:text-foreground"
                 }`}
               >
@@ -82,59 +80,60 @@ export default function HelpPage() {
         )}
 
         {filtered.length === 0 ? (
-          <div className="text-center py-16">
-            <p className="text-muted-foreground text-sm">No results for "{query}".</p>
+          <div className="py-16 text-center">
+            <p className="text-sm text-muted-foreground">No results for &ldquo;{query}&rdquo;.</p>
             <button
               onClick={() => {
                 setQuery("");
                 setActiveCategory(null);
               }}
-              className="mt-3 text-primary text-sm hover:underline"
+              className="mt-3 text-sm text-primary hover:underline"
             >
               Clear search
             </button>
           </div>
         ) : (
           <div className="space-y-2">
-            {filtered.map((item) => (
-              <div
-                key={item.id}
-                className="bg-card border border-border rounded-xl overflow-hidden"
-              >
-                <button
-                  onClick={() => setOpenId(openId === item.id ? null : item.id)}
-                  className="w-full flex items-center justify-between px-6 py-4 text-left hover:bg-accent/50 transition-colors"
-                >
-                  <div>
-                    <span className="text-xs text-primary font-medium mr-3">
-                      {item.category}
+            {filtered.map((item) => {
+              const isOpen = openId === item.id;
+              return (
+                <div key={item.id} className="overflow-hidden rounded-xl border border-border bg-card">
+                  <button
+                    onClick={() => setOpenId(isOpen ? null : item.id)}
+                    className="flex w-full items-center justify-between gap-4 px-6 py-4 text-left transition-colors hover:bg-accent/50"
+                  >
+                    <div className="min-w-0">
+                      <span className="mr-3 text-xs font-medium text-primary">{item.category}</span>
+                      <span className="text-sm font-medium text-foreground">{item.question}</span>
+                    </div>
+                    <span className="flex-shrink-0 text-muted-foreground">
+                      {isOpen ? <Minus className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
                     </span>
-                    <span className="text-foreground text-sm font-medium">{item.question}</span>
-                  </div>
-                  <span className="text-muted-foreground ml-4 flex-shrink-0">
-                    {openId === item.id ? "−" : "+"}
-                  </span>
-                </button>
-                {openId === item.id && (
-                  <div className="px-6 pb-5">
-                    <p className="text-muted-foreground text-sm leading-relaxed">{item.answer}</p>
-                  </div>
-                )}
-              </div>
-            ))}
+                  </button>
+                  {isOpen && (
+                    <div className="px-6 pb-5">
+                      <p className="text-sm leading-relaxed text-muted-foreground">{item.answer}</p>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
 
-        <div className="mt-16 text-center">
-          <p className="text-muted-foreground text-sm mb-2">Still have questions?</p>
+        <div className="mt-16 rounded-2xl border border-border bg-card/50 p-8 text-center">
+          <LifeBuoy className="mx-auto h-7 w-7 text-primary" />
+          <p className="mt-3 text-sm text-muted-foreground">Still have questions?</p>
           <Link
-            href="mailto:support@example.com"
-            className="inline-block px-5 py-2.5 bg-primary hover:bg-primary/90 text-foreground text-sm rounded-lg transition-colors"
+            href={`mailto:${brand.supportEmail}`}
+            className="mt-4 inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
           >
+            <Mail className="h-4 w-4" />
             Contact support
           </Link>
         </div>
-      </div>
+      </main>
+      <SiteFooter />
     </div>
   );
 }

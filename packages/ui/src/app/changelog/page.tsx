@@ -1,7 +1,8 @@
-import Link from "next/link";
 import type { Metadata } from "next";
 import { changelog } from "@/data/changelog";
 import { brand } from "@/config/brand";
+import SiteHeader from "@/components/SiteHeader";
+import SiteFooter from "@/components/SiteFooter";
 
 export const metadata: Metadata = {
   title: `Changelog — ${process.env.NEXT_PUBLIC_APP_NAME ?? "ZeroAuth"}`,
@@ -9,71 +10,76 @@ export const metadata: Metadata = {
 };
 
 const TYPE_STYLES: Record<string, { label: string; classes: string }> = {
-  added: { label: "Added", classes: "bg-emerald-950 text-emerald-400 border-emerald-900" },
-  changed: { label: "Changed", classes: "bg-blue-950 text-blue-400 border-blue-900" },
-  fixed: { label: "Fixed", classes: "bg-amber-950 text-amber-400 border-amber-900" },
-  security: { label: "Security", classes: "bg-red-950 text-red-400 border-red-900" },
+  added: { label: "Added", classes: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" },
+  changed: { label: "Changed", classes: "bg-blue-500/10 text-blue-400 border-blue-500/20" },
+  fixed: { label: "Fixed", classes: "bg-amber-500/10 text-amber-400 border-amber-500/20" },
+  security: { label: "Security", classes: "bg-red-500/10 text-red-400 border-red-500/20" },
   removed: { label: "Removed", classes: "bg-muted text-muted-foreground border-border" },
 };
 
 export default function ChangelogPage() {
   return (
-    <div className="max-w-3xl mx-auto px-6 py-16">
-      <div className="mb-12">
-        <Link href="/" className="text-sm text-primary hover:text-primary/80 mb-6 block">
-          ← {brand.name}
-        </Link>
-        <h1 className="text-4xl font-bold text-foreground mb-3">Changelog</h1>
-        <p className="text-muted-foreground">All notable changes to {brand.name}, newest first.</p>
-      </div>
+    <div className="flex min-h-screen flex-col bg-background">
+      <SiteHeader />
+      <main className="mx-auto w-full max-w-3xl flex-1 px-6 py-16">
+        <header className="mb-12">
+          <h1 className="font-display text-4xl font-semibold tracking-tight text-foreground">Changelog</h1>
+          <p className="mt-3 text-muted-foreground">
+            All notable changes to {brand.name}, newest first.
+          </p>
+        </header>
 
-      <div className="relative">
-        {/* Timeline line */}
-        <div className="absolute left-4 top-0 bottom-0 w-px bg-muted" />
+        <div className="relative">
+          {/* Timeline line */}
+          <div className="absolute bottom-1 left-4 top-1 w-px bg-border" />
 
-        <div className="space-y-12">
-          {changelog.map((entry) => (
-            <div key={entry.version} className="relative pl-12">
-              {/* Timeline dot */}
-              <div className="absolute left-2.5 top-1.5 w-3 h-3 rounded-full border-2 border-primary bg-background" />
+          <div className="space-y-12">
+            {changelog.map((entry) => (
+              <div key={entry.version} className="relative pl-12">
+                {/* Timeline dot */}
+                <div className="absolute left-2.5 top-1.5 h-3 w-3 rounded-full border-2 border-primary bg-background" />
 
-              <div className="flex items-baseline gap-4 mb-4">
-                <h2 className="text-xl font-bold text-foreground">v{entry.version}</h2>
-                <time className="text-sm text-muted-foreground">
-                  {new Date(entry.date).toLocaleDateString("en-US", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
+                <div className="mb-4 flex items-baseline gap-4">
+                  <h2 className="font-display text-xl font-semibold tracking-tight text-foreground">
+                    v{entry.version}
+                  </h2>
+                  <time className="text-sm text-muted-foreground">
+                    {new Date(entry.date).toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
+                  </time>
+                </div>
+
+                <div className="space-y-4">
+                  {entry.sections.map((section, si) => {
+                    const style = TYPE_STYLES[section.type] ?? TYPE_STYLES.changed;
+                    return (
+                      <div key={si}>
+                        <span
+                          className={`mb-2 inline-block rounded-full border px-2 py-0.5 text-xs font-semibold ${style.classes}`}
+                        >
+                          {style.label}
+                        </span>
+                        <ul className="space-y-1">
+                          {section.items.map((item, ii) => (
+                            <li key={ii} className="flex items-start gap-2 text-sm text-foreground/80">
+                              <span className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-muted-foreground/50" />
+                              {item}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    );
                   })}
-                </time>
+                </div>
               </div>
-
-              <div className="space-y-4">
-                {entry.sections.map((section, si) => {
-                  const style = TYPE_STYLES[section.type] ?? TYPE_STYLES.changed;
-                  return (
-                    <div key={si}>
-                      <span
-                        className={`inline-block text-xs font-semibold px-2 py-0.5 rounded-full border mb-2 ${style.classes}`}
-                      >
-                        {style.label}
-                      </span>
-                      <ul className="space-y-1">
-                        {section.items.map((item, ii) => (
-                          <li key={ii} className="flex items-start gap-2 text-sm text-foreground/80">
-                            <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-gray-600 flex-shrink-0" />
-                            {item}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
+      </main>
+      <SiteFooter />
     </div>
   );
 }
