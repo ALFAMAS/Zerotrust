@@ -2,7 +2,7 @@
   "mcpServers": {
     "nextjs": {
       "type": "http",
-      "url": "http://localhost:3001/_next/mcp"
+      "url": "http://localhost:3000/_next/mcp"
     }
   }
 }

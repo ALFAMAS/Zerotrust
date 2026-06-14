@@ -10,7 +10,7 @@ const router = new Hono<HonoEnv>();
 const logger = getLogger("unsubscribe-routes");
 
 const APP_NAME = process.env.APP_NAME ?? "ZeroAuth";
-const APP_URL = process.env.APP_URL ?? "http://localhost:3001";
+const APP_URL = process.env.APP_URL ?? "http://localhost:3000";
 
 function successPage(message: string): string {
   return `<!DOCTYPE html>

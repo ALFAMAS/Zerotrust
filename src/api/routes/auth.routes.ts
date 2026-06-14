@@ -67,11 +67,7 @@ const EMAIL_VERIFICATION_TTL_MIN = 30;
  * prior one for the user), and send the verification email. The email contains
  * both the code and a magic link to /verify-email carrying email + code.
  */
-async function issueVerification(user: {
-  id: string;
-  email: string;
-  displayName?: string | null;
-}) {
+async function issueVerification(user: { id: string; email: string; displayName?: string | null }) {
   const db = getDb();
   const code = Math.floor(100000 + Math.random() * 900000).toString();
   await db
@@ -85,7 +81,7 @@ async function issueVerification(user: {
     target: user.email,
     expiresAt: new Date(Date.now() + EMAIL_VERIFICATION_TTL_MIN * 60 * 1000),
   });
-  const appUrl = process.env.APP_URL ?? "http://localhost:3001";
+  const appUrl = process.env.APP_URL ?? "http://localhost:3000";
   const verifyUrl = `${appUrl}/verify-email?email=${encodeURIComponent(user.email)}&code=${code}`;
   void sendVerificationEmail(user.email, {
     name: user.displayName ?? user.email,
@@ -149,7 +145,7 @@ router.post("/register", rateLimit({ points: 10, windowSecs: 60 }), async (c) =>
       })
       .returning();
 
-    const loginUrl = `${process.env.APP_URL ?? "http://localhost:3001"}/login`;
+    const loginUrl = `${process.env.APP_URL ?? "http://localhost:3000"}/login`;
     void sendWelcomeEmail(user.email, {
       name: user.displayName ?? user.email,
       loginUrl,

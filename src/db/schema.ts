@@ -282,7 +282,7 @@ export const saasSettingsTable = pgTable("saas_settings", {
     .notNull()
     .default(sql`ARRAY[]::text[]`),
   appName: text("app_name").notNull().default("My SaaS App"),
-  appUrl: text("app_url").notNull().default("http://localhost:3001"),
+  appUrl: text("app_url").notNull().default("http://localhost:3000"),
   supportEmail: text("support_email").notNull().default(""),
   logoUrl: text("logo_url").notNull().default(""),
   updatedAt: timestamp("updated_at", { withTimezone: true })

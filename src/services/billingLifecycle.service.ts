@@ -22,7 +22,7 @@ import { getLogger } from "../logger";
 const logger = getLogger("billing-lifecycle");
 
 const DAY_MS = 24 * 60 * 60 * 1000;
-const APP_URL = () => process.env.APP_URL ?? "http://localhost:3001";
+const APP_URL = () => process.env.APP_URL ?? "http://localhost:3000";
 
 export const DUNNING_DAYS = [3, 7, 14];
 export const WINBACK_DAYS = [7, 30, 90];

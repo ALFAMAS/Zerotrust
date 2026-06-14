@@ -49,7 +49,7 @@ router.post("/request", async (c) => {
 
     await sendOTP("email", user.email, code);
 
-    const appUrl = process.env.APP_URL ?? "http://localhost:3001";
+    const appUrl = process.env.APP_URL ?? "http://localhost:3000";
     const resetUrl = `${appUrl}/reset-password?email=${encodeURIComponent(user.email)}&code=${encodeURIComponent(code)}`;
     void sendPasswordResetEmail(user.email, {
       name: user.displayName ?? user.email,

@@ -182,7 +182,7 @@ CREATE TABLE "saas_settings" (
 	"require_email_verification" boolean DEFAULT false NOT NULL,
 	"allowed_email_domains" text[] DEFAULT ARRAY[]::text[] NOT NULL,
 	"app_name" text DEFAULT 'My SaaS App' NOT NULL,
-	"app_url" text DEFAULT 'http://localhost:3001' NOT NULL,
+	"app_url" text DEFAULT 'http://localhost:3000' NOT NULL,
 	"support_email" text DEFAULT '' NOT NULL,
 	"logo_url" text DEFAULT '' NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,

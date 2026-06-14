@@ -108,7 +108,7 @@ export async function recordAndRespond(
       .where(eq(sessionsTable.id, s.id));
   }
 
-  const appUrl = process.env.APP_URL ?? "http://localhost:3001";
+  const appUrl = process.env.APP_URL ?? "http://localhost:3000";
   const recipients = [...new Set([opts.email, opts.previousEmail].filter(Boolean))] as string[];
   const alert = {
     name: opts.displayName || opts.email,

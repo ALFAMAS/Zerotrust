@@ -49,17 +49,20 @@ async function issueTokensForUser(userId: string, req: Request) {
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() || "";
   const userAgent = req.headers.get("user-agent") || "";
 
-  const [session] = await db.insert(sessionsTable).values({
-    id: sessionId,
-    userId: user.id,
-    tokenId: payload.jti,
-    deviceFingerprint: {},
-    ipAddress: ip,
-    userAgent,
-    expiresAt: new Date(payload.exp * 1000),
-    lastActivityAt: new Date(),
-    isActive: true,
-  }).returning();
+  const [session] = await db
+    .insert(sessionsTable)
+    .values({
+      id: sessionId,
+      userId: user.id,
+      tokenId: payload.jti,
+      deviceFingerprint: {},
+      ipAddress: ip,
+      userAgent,
+      expiresAt: new Date(payload.exp * 1000),
+      lastActivityAt: new Date(),
+      isActive: true,
+    })
+    .returning();
 
   const refreshTokenPlain = await tokenSvc.signRefreshToken();
   await db.insert(refreshTokensTable).values({
@@ -116,7 +119,7 @@ router.get("/verify", async (c) => {
 
     const tokens = await issueTokensForUser(result.userId, c.req.raw);
 
-    const appUrl = settings.appUrl || "http://localhost:3001";
+    const appUrl = settings.appUrl || "http://localhost:3000";
     const callbackBase = redirect || `${appUrl}/auth/callback`;
     const callbackUrl =
       `${callbackBase}?accessToken=${encodeURIComponent(tokens.accessToken)}` +

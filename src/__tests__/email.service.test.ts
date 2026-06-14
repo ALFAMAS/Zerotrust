@@ -33,7 +33,7 @@ describe("email.service", () => {
     const { sendWelcomeEmail } = await import("../services/email.service");
     await sendWelcomeEmail("alice@example.com", {
       name: "Alice",
-      loginUrl: "http://localhost:3001/login",
+      loginUrl: "http://localhost:3000/login",
     });
 
     expect(mockSendMail).toHaveBeenCalledTimes(1);
@@ -45,7 +45,7 @@ describe("email.service", () => {
 
   it("sendMagicLinkEmail: html contains the magic link URL", async () => {
     const { sendMagicLinkEmail } = await import("../services/email.service");
-    const magicLinkUrl = "http://localhost:3001/auth/magic-link/verify?token=abc123";
+    const magicLinkUrl = "http://localhost:3000/auth/magic-link/verify?token=abc123";
     await sendMagicLinkEmail("bob@example.com", {
       name: "Bob",
       magicLinkUrl,
@@ -74,7 +74,7 @@ describe("email.service", () => {
 
   it("sendPasswordResetEmail: html contains the reset URL", async () => {
     const { sendPasswordResetEmail } = await import("../services/email.service");
-    const resetUrl = "http://localhost:3001/reset-password?token=xyz";
+    const resetUrl = "http://localhost:3000/reset-password?token=xyz";
     await sendPasswordResetEmail("dave@example.com", {
       name: "Dave",
       resetUrl,
@@ -113,7 +113,7 @@ describe("email.service", () => {
     await expect(
       sendWelcomeEmail("frank@example.com", {
         name: "Frank",
-        loginUrl: "http://localhost:3001/login",
+        loginUrl: "http://localhost:3000/login",
       })
     ).resolves.toBeUndefined();
   });

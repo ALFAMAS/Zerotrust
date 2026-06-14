@@ -95,7 +95,7 @@ docker compose logs -f zeroauth
 # Look for: Server listening on http://localhost:3000
 ```
 
-App: http://localhost:3001 · API: http://localhost:3000 · Admin: http://localhost:3001/admin
+App: http://localhost:3000 · API: http://localhost:3000 · Admin: http://localhost:3000/admin
 
 Stop: `docker compose down` · Wipe all data: `docker compose down -v`
 
@@ -111,7 +111,7 @@ bun install
 cp .env.example .env
 # Edit .env — minimum required: DATABASE_URL, TOKEN_SECRET_HEX, CSFLE_MASTER_KEY_HEX
 bun run db:migrate
-bun run dev        # starts API (port 3000) + UI (port 3001) with hot reload
+bun run dev        # starts API (port 3000) + UI (port 3000) with hot reload
 ```
 
 Individual processes: `bun run dev:api` · `bun run dev:ui`
@@ -135,7 +135,7 @@ psql -U postgres -d zeroauth \
   -c "UPDATE users SET roles = array_append(roles, 'admin') WHERE email = 'admin@example.com';"
 ```
 
-Log in at http://localhost:3001/login · Admin panel: http://localhost:3001/admin
+Log in at http://localhost:3000/login · Admin panel: http://localhost:3000/admin
 
 ---
 
@@ -152,7 +152,7 @@ Log in at http://localhost:3001/login · Admin panel: http://localhost:3001/admi
 | `PORT`                        |          | 3000                  | API listen port                                        |
 | `NODE_ENV`                    |          | development           | `development` or `production`                          |
 | `API_BASE_URL`                |          | http://localhost:3000 | Public API URL                                         |
-| `APP_URL`                     |          | http://localhost:3001 | Public frontend URL                                    |
+| `APP_URL`                     |          | http://localhost:3000 | Public frontend URL                                    |
 | `UNSUBSCRIBE_SECRET`          |          | —                     | 32+ char secret for CAN-SPAM unsubscribe tokens        |
 | `SENTRY_DSN`                  |          | —                     | Sentry DSN for server-side error capture               |
 | `STRIPE_SECRET_KEY`           |          | —                     | Stripe secret key (`sk_live_…` or `sk_test_…`)         |
@@ -249,7 +249,7 @@ Full list with comments: [`.env.example`](./.env.example) · [`packages/ui/.env.
 │   └── logger/
 │       └── index.ts                        # Structured logger
 ├── packages/
-│   └── ui/                                 # Next.js 16.2 / React 19 (port 3001)
+│   └── ui/                                 # Next.js 16.2 / React 19 (port 3000)
 │       ├── messages/                       # i18n JSON files (en.json, es.json, fr.json)
 │       ├── sentry.client.config.ts         # Sentry browser config
 │       ├── sentry.server.config.ts         # Sentry server config

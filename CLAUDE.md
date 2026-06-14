@@ -6,9 +6,9 @@ Monorepo: Node/Hono API (`src/`) + Next.js 16 UI (`packages/ui/`).
 
 | Layer        | Path                            | Port                              |
 | ------------ | ------------------------------- | --------------------------------- |
-| API server   | `src/api/server.ts`             | 3000                              |
-| UI (Next.js) | `packages/ui/`                  | 3001                              |
-| MCP server   | auto-started with UI dev server | `http://localhost:3001/_next/mcp` |
+| API server   | `src/api/server.ts`             | 1337                              |
+| UI (Next.js) | `packages/ui/`                  | 3000                              |
+| MCP server   | auto-started with UI dev server | `http://localhost:3000/_next/mcp` |
 
 ## Running the project
 
@@ -24,7 +24,7 @@ bun run build    # tsc for API; next build for UI
 ## Next.js MCP Server for Coding Agents
 
 When `bun dev:ui` (or `bun dev`) is running, the built-in Next.js MCP
-server is available at `http://localhost:3001/_next/mcp`.
+server is available at `http://localhost:3000/_next/mcp`.
 
 The `.mcp.json` in this repo root registers it as the `nextjs` MCP server
 so Claude Code connects automatically. Available tools:

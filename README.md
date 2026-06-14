@@ -66,8 +66,8 @@ A production-ready SaaS boilerplate with enterprise-grade authentication built i
 | Service       | URL                         |
 | ------------- | --------------------------- |
 | API           | http://localhost:3000       |
-| App + Admin   | http://localhost:3001       |
-| Admin panel   | http://localhost:3001/admin |
+| App + Admin   | http://localhost:3000       |
+| Admin panel   | http://localhost:3000/admin |
 | API docs      | http://localhost:3000/docs  |
 | PostgreSQL    | localhost:5432              |
 | Redis         | localhost:6379              |
@@ -143,7 +143,7 @@ npm install
 npm run dev
 ```
 
-Open **http://localhost:3001** to see the landing page.
+Open **http://localhost:3000** to see the landing page.
 
 ### 6. Create your first admin account
 
@@ -158,7 +158,7 @@ docker exec -it zeroauth-postgres psql -U zeroauth -d zeroauth \
   -c "UPDATE users SET roles = array_append(roles, 'admin') WHERE email = 'admin@example.com';"
 ```
 
-Log in at **http://localhost:3001/login**. Admin panel: **http://localhost:3001/admin**.
+Log in at **http://localhost:3000/login**. Admin panel: **http://localhost:3000/admin**.
 
 ### Manage the stack
 
@@ -365,7 +365,7 @@ cat > /etc/nginx/sites-available/zeroauth-ui << 'NGINX'
 server {
     server_name yourdomain.com www.yourdomain.com;
     location / {
-        proxy_pass http://127.0.0.1:3001;
+        proxy_pass http://127.0.0.1:3000;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection 'upgrade';
@@ -449,7 +449,7 @@ bun run dev
 ```
 
 API → http://localhost:3000  
-UI → http://localhost:3001
+UI → http://localhost:3000
 
 ```bash
 bun run dev:api    # API only
@@ -469,7 +469,7 @@ bun run dev:ui     # UI only
 | `PORT`                       |          | 3000                  | API listen port                          |
 | `NODE_ENV`                   |          | development           | `development` or `production`            |
 | `API_BASE_URL`               |          | http://localhost:3000 | Public API URL                           |
-| `APP_URL`                    |          | http://localhost:3001 | Public frontend URL                      |
+| `APP_URL`                    |          | http://localhost:3000 | Public frontend URL                      |
 | `UNSUBSCRIBE_SECRET`         |          | —                     | 32+ char secret for unsubscribe tokens   |
 | `SENTRY_DSN`                 |          | —                     | Sentry DSN for server-side error capture |
 | `STRIPE_SECRET_KEY`          |          | —                     | Stripe secret key (starts with `sk_`)    |
@@ -525,7 +525,7 @@ Full list with comments: [`.env.example`](./.env.example) and [`packages/ui/.env
 │   │   └── permissions.ts          # Org permission constants
 │   └── middleware/                 # auth, rateLimiting, apiKeyAuth, requirePlan, ...
 ├── packages/
-│   └── ui/                         # Next.js 16.2 (port 3001)
+│   └── ui/                         # Next.js 16.2 (port 3000)
 │       ├── messages/               # i18n JSON files (en, es, fr)
 │       ├── sentry.*.config.ts      # Sentry client / server / edge config
 │       └── src/

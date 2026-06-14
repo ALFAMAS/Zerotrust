@@ -84,7 +84,7 @@ router.post("/checkout", authMiddleware, async (c) => {
     return c.json({ error: "FORBIDDEN", message: "Org owner or admin required" }, 403);
   }
 
-  const appUrl = process.env.APP_URL || "http://localhost:3001";
+  const appUrl = process.env.APP_URL || "http://localhost:3000";
 
   try {
     const stripe = getStripe();
@@ -274,7 +274,7 @@ router.post("/portal", authMiddleware, async (c) => {
   const user = c.get("user");
   const body = await c.req.json().catch(() => ({}));
   const orgId = body.orgId as string | undefined;
-  const appUrl = process.env.APP_URL || "http://localhost:3001";
+  const appUrl = process.env.APP_URL || "http://localhost:3000";
 
   if (orgId && !(await canManageOrgBilling(orgId, user.id))) {
     return c.json({ error: "FORBIDDEN", message: "Org owner or admin required" }, 403);

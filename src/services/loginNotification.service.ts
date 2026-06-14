@@ -54,7 +54,7 @@ export async function notifyIfNewDevice(params: NotifyParams): Promise<boolean> 
     // First session ever (fresh signup) — skip the alert to avoid noise.
     if (previous.length === 0) return false;
 
-    const appUrl = process.env.APP_URL ?? "http://localhost:3001";
+    const appUrl = process.env.APP_URL ?? "http://localhost:3000";
     const revokeSessionUrl = `${appUrl}/dashboard/sessions?revoke=${encodeURIComponent(params.sessionId)}`;
 
     await sendSecurityAlertEmail(params.email, {

@@ -73,7 +73,7 @@ router.post("/register/options", authMiddleware, async (c) => {
 
     const options = await generateRegistrationOptions({
       rpName: settings.appName || "ZeroAuth",
-      rpID: new URL(settings.appUrl || "http://localhost:3001").hostname,
+      rpID: new URL(settings.appUrl || "http://localhost:3000").hostname,
       userID: Buffer.from(userId),
       userName: user.email,
       userDisplayName: user.displayName,
@@ -111,7 +111,7 @@ router.post("/register/verify", authMiddleware, async (c) => {
     }
 
     const { verifyRegistrationResponse } = await import("@simplewebauthn/server");
-    const appUrl = settings.appUrl || "http://localhost:3001";
+    const appUrl = settings.appUrl || "http://localhost:3000";
     const rpID = new URL(appUrl).hostname;
 
     let verification: any;
@@ -186,7 +186,7 @@ router.post("/authenticate/options", async (c) => {
 
     const { email } = await c.req.json();
     const { generateAuthenticationOptions } = await import("@simplewebauthn/server");
-    const appUrl = settings.appUrl || "http://localhost:3001";
+    const appUrl = settings.appUrl || "http://localhost:3000";
     const rpID = new URL(appUrl).hostname;
 
     let allowCredentials: any[] = [];
@@ -244,7 +244,7 @@ router.post("/authenticate/verify", async (c) => {
     }
 
     const { verifyAuthenticationResponse } = await import("@simplewebauthn/server");
-    const appUrl = settings.appUrl || "http://localhost:3001";
+    const appUrl = settings.appUrl || "http://localhost:3000";
     const rpID = new URL(appUrl).hostname;
     const credentialId = body?.id || body?.rawId;
 

@@ -43,7 +43,7 @@ router.post("/challenge", async (c) => {
       const { generateAuthenticationOptions } = await import("@simplewebauthn/server");
       const { getSettings } = await import("../../models/settings.model.js");
       const settings = await getSettings();
-      const rpID = new URL(settings.appUrl || "http://localhost:3001").hostname;
+      const rpID = new URL(settings.appUrl || "http://localhost:3000").hostname;
       const allowCredentials = passkeys.map((pk) => ({
         id: pk.credentialId,
         type: "public-key" as const,
@@ -104,7 +104,7 @@ router.post("/respond", async (c) => {
       const { verifyAuthenticationResponse } = await import("@simplewebauthn/server");
       const { getSettings } = await import("../../models/settings.model.js");
       const settings = await getSettings();
-      const appUrl = settings.appUrl || "http://localhost:3001";
+      const appUrl = settings.appUrl || "http://localhost:3000";
       const rpID = new URL(appUrl).hostname;
 
       const credentialId = (body.response as any)?.id ?? (body.response as any)?.rawId;

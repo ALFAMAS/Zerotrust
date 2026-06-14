@@ -46,7 +46,7 @@ vi.mock("../logger", () => ({
 vi.mock("../models/settings.model", () => ({
   getSettings: vi.fn().mockResolvedValue({
     appName: "ZeroAuth Test",
-    appUrl: "http://localhost:3001",
+    appUrl: "http://localhost:3000",
     magicLinkEnabled: true,
   }),
 }));
