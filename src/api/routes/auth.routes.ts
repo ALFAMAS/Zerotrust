@@ -492,7 +492,18 @@ router.get("/oauth/:provider/callback", rateLimit({ points: 20, windowSecs: 60 }
     }
 
     const adapter = getProviderAdapter(provider);
-    const result = await adapter.exchangeCode(code, codeVerifier);
+    let result;
+    try {
+      result = await adapter.exchangeCode(code, codeVerifier);
+    } catch (err) {
+      if (err instanceof Error && err.message.startsWith("UNSUPPORTED_OAUTH_PROVIDER")) {
+        return c.json(
+          { error: "UNSUPPORTED_PROVIDER", message: `Provider '${provider}' is not supported` },
+          501
+        );
+      }
+      throw err;
+    }
     if (!result?.profile) {
       return c.json({ error: "PROVIDER_ERROR", message: "Provider token exchange failed" }, 502);
     }

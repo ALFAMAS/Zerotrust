@@ -20,6 +20,14 @@ export async function sendWhatsAppOTP(to: string, body: string) {
     }
   }
 
-  logger.info("WhatsApp OTP (stub) sent", { to, body });
-  return true;
+  // Not configured: do not fake delivery and do not log the code.
+  if (process.env.MFA_DEV_STUB === "true") {
+    logger.warn("WhatsApp OTP NOT delivered — MFA_DEV_STUB enabled, Twilio not configured", { to });
+    return true;
+  }
+  logger.error(
+    "WhatsApp OTP not sent: Twilio not configured (set TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_WHATSAPP_FROM)",
+    { to }
+  );
+  return false;
 }

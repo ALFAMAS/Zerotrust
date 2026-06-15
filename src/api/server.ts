@@ -27,6 +27,11 @@ import webhookManagementRoutes from "../webhooks/routes";
 import federationRoutes from "../federation/routes";
 import didRoutes from "../did/routes";
 import jitRoutes from "../jit/routes";
+import scimRoutes from "../scim/routes";
+import ldapRoutes from "../ldap/routes";
+import oidcRoutes from "../oidc/routes";
+import samlRoutes from "../saml/routes";
+import tenantRoutes from "./routes/tenant.routes";
 import { rateLimit } from "../middleware/rateLimiting";
 import { geoFencingMiddleware } from "../middleware/geoFencing";
 import { temporalAccessMiddleware } from "../middleware/temporalAccess";
@@ -112,6 +117,18 @@ export async function createServer() {
   // ─── Cross-tenant JIT access routes ───────────────────────────────────────
   // Request + admin approval for temporary elevated access across tenants.
   app.route("/jit/cross-tenant", jitRoutes);
+
+  // ─── Enterprise SSO & provisioning ────────────────────────────────────────
+  // SCIM 2.0 user provisioning (Azure AD / Okta), routes are /Users, /Groups…
+  app.route("/scim/v2", scimRoutes);
+  // LDAP directory sync admin endpoints (/ldap/test, /ldap/sync…)
+  app.route("/ldap", ldapRoutes);
+  // OIDC provider: paths are self-prefixed (/.well-known/…, /oidc/…) → mount at root.
+  app.route("/", oidcRoutes);
+  // SAML SP: paths are self-prefixed (/saml/metadata, /saml/acs…) → mount at root.
+  app.route("/", samlRoutes);
+  // Tenant management (CRUD + per-tenant SSO config + plans).
+  app.route("/admin/tenants", tenantRoutes);
 
   // ─── Anomaly admin routes ─────────────────────────────────────────────────
   app.route("/admin/anomaly", anomalyRoutes);

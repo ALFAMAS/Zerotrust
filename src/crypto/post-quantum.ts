@@ -1,7 +1,10 @@
 import crypto from "crypto";
+import { getLogger } from "../logger";
 
 export interface KEMPublicKey {
-  algorithm: "ML-KEM-768" | "ML-KEM-1024" | "X25519-ML-KEM-768";
+  // "ML-KEM-768-SIM" is a CLASSICAL ECDH P-256 simulation — NOT quantum-safe.
+  // The "ML-KEM-*" values denote genuine ML-KEM keys (NobleMLKEM).
+  algorithm: "ML-KEM-768" | "ML-KEM-1024" | "X25519-ML-KEM-768" | "ML-KEM-768-SIM";
   keyData: Buffer;
 }
 
@@ -40,7 +43,9 @@ export class SimulatedMLKEM implements PQKEMProvider {
     });
     const pubDer = pubKey.export({ type: "spki", format: "der" }) as Buffer;
     const privDer = privKey.export({ type: "pkcs8", format: "der" }) as Buffer;
-    const publicKey: KEMPublicKey = { algorithm: "ML-KEM-768", keyData: pubDer };
+    // Label honestly: these are classical ECDH keys, not ML-KEM. Stamping them
+    // "ML-KEM-768" previously made non-quantum-safe keys look quantum-safe.
+    const publicKey: KEMPublicKey = { algorithm: "ML-KEM-768-SIM", keyData: pubDer };
     const privateKey: KEMPrivateKey = { algorithm: this.algorithm, keyData: privDer, publicKey };
     return { publicKey, privateKey };
   }
@@ -74,29 +79,56 @@ export class NobleMLKEM implements PQKEMProvider {
 
   async isAvailable(): Promise<boolean> {
     try {
-      await import("@noble/post-quantum/ml-kem");
-      return true;
+      const m = await import("@noble/post-quantum/ml-kem.js");
+      return typeof m.ml_kem768?.keygen === "function";
     } catch {
       return false;
     }
   }
 
-  async generateKeyPair(): Promise<never> {
-    throw new Error("Install @noble/post-quantum: npm install @noble/post-quantum");
+  async generateKeyPair(): Promise<{ publicKey: KEMPublicKey; privateKey: KEMPrivateKey }> {
+    const { ml_kem768 } = await import("@noble/post-quantum/ml-kem.js");
+    const { publicKey: pk, secretKey: sk } = ml_kem768.keygen();
+    const publicKey: KEMPublicKey = { algorithm: "ML-KEM-768", keyData: Buffer.from(pk) };
+    const privateKey: KEMPrivateKey = {
+      algorithm: this.algorithm,
+      keyData: Buffer.from(sk),
+      publicKey,
+    };
+    return { publicKey, privateKey };
   }
 
-  async encapsulate(): Promise<never> {
-    throw new Error("Install @noble/post-quantum: npm install @noble/post-quantum");
+  async encapsulate(publicKey: KEMPublicKey): Promise<KEMEncapsulation> {
+    const { ml_kem768 } = await import("@noble/post-quantum/ml-kem.js");
+    const { cipherText, sharedSecret } = ml_kem768.encapsulate(new Uint8Array(publicKey.keyData));
+    return { ciphertext: Buffer.from(cipherText), sharedSecret: Buffer.from(sharedSecret) };
   }
 
-  async decapsulate(): Promise<never> {
-    throw new Error("Install @noble/post-quantum: npm install @noble/post-quantum");
+  async decapsulate(privateKey: KEMPrivateKey, ciphertext: Buffer): Promise<Buffer> {
+    const { ml_kem768 } = await import("@noble/post-quantum/ml-kem.js");
+    const sharedSecret = ml_kem768.decapsulate(
+      new Uint8Array(ciphertext),
+      new Uint8Array(privateKey.keyData)
+    );
+    return Buffer.from(sharedSecret);
   }
 }
 
 export async function createKEMProvider(): Promise<PQKEMProvider> {
   const noble = new NobleMLKEM();
   if (await noble.isAvailable()) return noble;
+  // Fall back to the classical simulation, but make the downgrade loud: a
+  // caller asking for "post-quantum" protection is silently getting ECDH.
+  if (process.env.PQ_REQUIRE_REAL === "true") {
+    throw new Error(
+      "Real ML-KEM required (PQ_REQUIRE_REAL=true) but @noble/post-quantum is not installed. " +
+        "Run: npm install @noble/post-quantum"
+    );
+  }
+  getLogger("post-quantum").warn(
+    "ML-KEM unavailable — falling back to ML-KEM-768-SIM (classical ECDH P-256, NOT quantum-safe). " +
+      "Install @noble/post-quantum for real PQC."
+  );
   return new SimulatedMLKEM();
 }
 

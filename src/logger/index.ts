@@ -148,8 +148,8 @@ class Logger {
    * Stream log to Elasticsearch
    */
   private async streamToElasticsearch(logEntry: Record<string, unknown>): Promise<void> {
-    // This will be implemented when Elasticsearch client is initialized
-    // For now, we'll queue it for later
+    // Streaming is best-effort: when no Elasticsearch client is configured we
+    // simply skip (logs still go to the console/file transports).
     if (!this.elasticsearchClient) {
       return;
     }

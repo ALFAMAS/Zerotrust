@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeAll } from "vitest";
 import { TokenService } from "../services/token.service";
+import { encrypt } from "../crypto/paseto-v4";
 
 const SECRET_HEX = "a".repeat(64);
 const SESSION_CONFIG = { defaultTTL: 3600, refreshTokenTTL: 604800, maxConcurrentDevices: 5 };
@@ -63,6 +64,23 @@ describe("TokenService", () => {
 
   it("throws TOKEN_INVALID on wrong format", async () => {
     await expect(svc.verifyAccessToken("not.a.valid.token")).rejects.toThrow("TOKEN_INVALID");
+  });
+
+  it("throws TOKEN_INVALID on an authenticated token whose payload is not valid JSON", async () => {
+    // Forge an otherwise-valid v4.local token (same key) carrying non-JSON bytes.
+    const key = new Uint8Array(SECRET_HEX.length / 2);
+    for (let i = 0; i < SECRET_HEX.length; i += 2)
+      key[i / 2] = parseInt(SECRET_HEX.substr(i, 2), 16);
+    const token = encrypt(key, new TextEncoder().encode("not json"));
+    await expect(svc.verifyAccessToken(token)).rejects.toThrow("TOKEN_INVALID");
+  });
+
+  it("throws TOKEN_INVALID when the payload lacks a numeric exp", async () => {
+    const key = new Uint8Array(SECRET_HEX.length / 2);
+    for (let i = 0; i < SECRET_HEX.length; i += 2)
+      key[i / 2] = parseInt(SECRET_HEX.substr(i, 2), 16);
+    const token = encrypt(key, new TextEncoder().encode(JSON.stringify({ sub: "u" })));
+    await expect(svc.verifyAccessToken(token)).rejects.toThrow("TOKEN_INVALID");
   });
 
   it("issues a random refresh token of expected length", async () => {

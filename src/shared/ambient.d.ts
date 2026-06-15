@@ -13,9 +13,3 @@ declare module "geoip-lite" {
   const geoip: { lookup(ip: string): GeoLookup | null };
   export default geoip;
 }
-
-// Optional peer — only present when the user installs @noble/post-quantum.
-declare module "@noble/post-quantum/ml-kem" {
-  const mod: unknown;
-  export default mod;
-}

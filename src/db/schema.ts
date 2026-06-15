@@ -9,6 +9,7 @@ import {
   unique,
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
+import type { TenantSettings, OidcConfig, SamlConfig } from "../models/tenant.model";
 
 export const usersTable = pgTable("users", {
   id: uuid("id")
@@ -529,6 +530,33 @@ export const usageCountersTable = pgTable(
     uniqUserMetric: unique().on(t.userId, t.orgId, t.period, t.metric).nullsNotDistinct(),
   })
 );
+
+// ── Tenants (multi-tenancy: CRUD + per-tenant SSO config + plans) ──────────────
+
+export const tenantsTable = pgTable("tenants", {
+  id: uuid("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  slug: text("slug").notNull().unique(),
+  name: text("name").notNull(),
+  displayName: text("display_name").notNull(),
+  status: text("status").notNull().default("active"),
+  plan: text("plan").notNull().default("free"),
+  settings: jsonb("settings")
+    .$type<TenantSettings>()
+    .notNull()
+    .default(
+      sql`'{"allowedDomains":[],"enforceSSO":false,"mfaRequired":false,"sessionTTL":3600,"maxUsers":100,"allowedCountries":[]}'::jsonb`
+    ),
+  oidcConfig: jsonb("oidc_config").$type<OidcConfig>(),
+  samlConfig: jsonb("saml_config").$type<SamlConfig>(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .default(sql`now()`),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .default(sql`now()`),
+});
 
 // ── Feature flags ─────────────────────────────────────────────────────────────
 

@@ -111,11 +111,13 @@ export function getProviderAdapter(provider: string) {
     };
   }
 
-  // Default stub for other providers
+  // No adapter implemented for this (configured) provider. Fail loudly rather
+  // than returning a null profile that the caller misreports as a generic
+  // "token exchange failed".
   return {
     async exchangeCode(_code: string) {
-      logger.warn("Provider adapter not implemented for", { provider });
-      return { tokens: null, profile: null };
+      logger.error("No OAuth adapter implemented for provider", { provider });
+      throw new Error(`UNSUPPORTED_OAUTH_PROVIDER: ${provider}`);
     },
   };
 }

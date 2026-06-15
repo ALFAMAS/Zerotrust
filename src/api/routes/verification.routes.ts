@@ -4,6 +4,7 @@ import { getDb } from "../../db/index.js";
 import { usersTable, otpsTable } from "../../db/schema.js";
 import { authMiddleware } from "../../middleware/auth.js";
 import { recordVerification, getVerification } from "../../middleware/continuousVerification.js";
+import { sendOtpEmail } from "../../services/email.service.js";
 import { getLogger } from "../../logger/index.js";
 import type { HonoEnv } from "../../shared/types.js";
 
@@ -72,8 +73,15 @@ router.post("/challenge", async (c) => {
         target: user.email,
         expiresAt: new Date(Date.now() + 10 * 60 * 1000),
       });
-      // In production, send email/SMS here
-      logger.warn("Re-verification OTP generated (not sent in dev)", { userId: user.id });
+      // Deliver the code to the user's registered email. sendOtpEmail is
+      // best-effort (it never throws); in dev/test the no-op mail transport
+      // simply logs instead of sending.
+      await sendOtpEmail(user.email, {
+        name: (user.displayName as string) || user.email,
+        code,
+        expiresInMinutes: 10,
+      });
+      logger.info("Re-verification OTP sent", { userId: user.id });
       return c.json({
         type: "otp",
         channel: "email",

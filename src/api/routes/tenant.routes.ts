@@ -1,7 +1,6 @@
 /**
  * Tenant Management API — CRUD + SSO configuration + plan management
- * Mounted at /admin/tenants
- * Uses an in-memory store (no tenants table in the DB schema yet).
+ * Mounted at /admin/tenants. Persisted in the `tenants` table via Drizzle.
  */
 
 import { Hono } from "hono";
@@ -30,10 +29,11 @@ const PLAN_MAX_USERS: Record<string, number | null> = {
 
 // ─── Helper ───────────────────────────────────────────────────────────────────
 
-function findByIdOrSlug(idOrSlug: string) {
-  // Try as UUID-shaped id first, then fall back to slug lookup
-  const byId = getTenant(idOrSlug);
-  return byId ?? getTenantBySlug(idOrSlug);
+async function findByIdOrSlug(idOrSlug: string) {
+  // Try as UUID-shaped id first (getTenant safely returns undefined for
+  // non-uuid input), then fall back to slug lookup.
+  const byId = await getTenant(idOrSlug);
+  return byId ?? (await getTenantBySlug(idOrSlug));
 }
 
 // ─── Admin role guard ─────────────────────────────────────────────────────────
@@ -77,7 +77,7 @@ router.post("/", async (c) => {
       );
     }
 
-    const existing = getTenantBySlug(slug);
+    const existing = await getTenantBySlug(slug);
     if (existing) {
       return c.json(
         { code: "CONFLICT", message: `Tenant with slug '${slug}' already exists`, details: [] },
@@ -85,7 +85,7 @@ router.post("/", async (c) => {
       );
     }
 
-    const tenant = createTenant({
+    const tenant = await createTenant({
       slug,
       name,
       displayName: displayName ?? name,
@@ -109,7 +109,7 @@ router.get("/", async (c) => {
     const page = Math.max(1, parseInt(c.req.query("page") ?? "1", 10));
     const limit = Math.min(100, Math.max(1, parseInt(c.req.query("limit") ?? "20", 10)));
 
-    let tenants = getAllTenants();
+    let tenants = await getAllTenants();
     if (status) tenants = tenants.filter((t) => t.status === status);
     if (plan) tenants = tenants.filter((t) => t.plan === plan);
 
@@ -128,7 +128,7 @@ router.get("/", async (c) => {
 
 router.get("/:id", async (c) => {
   try {
-    const tenant = findByIdOrSlug(c.req.param("id"));
+    const tenant = await findByIdOrSlug(c.req.param("id"));
     if (!tenant) {
       return c.json({ code: "NOT_FOUND", message: "Tenant not found", details: [] }, 404);
     }
@@ -150,7 +150,7 @@ router.put("/:id", async (c) => {
       settings?: Record<string, unknown>;
     };
 
-    const existing = findByIdOrSlug(c.req.param("id"));
+    const existing = await findByIdOrSlug(c.req.param("id"));
     if (!existing) {
       return c.json({ code: "NOT_FOUND", message: "Tenant not found", details: [] }, 404);
     }
@@ -163,7 +163,7 @@ router.put("/:id", async (c) => {
     if (plan !== undefined) update.plan = plan as "free" | "starter" | "pro" | "enterprise";
     if (settings !== undefined) update.settings = settings as never;
 
-    const tenant = updateTenant(existing.id, update);
+    const tenant = await updateTenant(existing.id, update);
     return c.json(tenant);
   } catch {
     return c.json({ code: "INTERNAL_ERROR", message: "Failed to update tenant", details: [] }, 500);
@@ -174,12 +174,12 @@ router.put("/:id", async (c) => {
 
 router.delete("/:id", async (c) => {
   try {
-    const existing = findByIdOrSlug(c.req.param("id"));
+    const existing = await findByIdOrSlug(c.req.param("id"));
     if (!existing) {
       return c.json({ code: "NOT_FOUND", message: "Tenant not found", details: [] }, 404);
     }
 
-    const tenant = updateTenant(existing.id, { status: "deleted" });
+    const tenant = await updateTenant(existing.id, { status: "deleted" });
     return c.json({ message: "Tenant deleted", id: tenant!.id });
   } catch {
     return c.json({ code: "INTERNAL_ERROR", message: "Failed to delete tenant", details: [] }, 500);
@@ -213,7 +213,7 @@ router.post("/:id/sso/oidc", async (c) => {
       );
     }
 
-    const existing = findByIdOrSlug(c.req.param("id"));
+    const existing = await findByIdOrSlug(c.req.param("id"));
     if (!existing) {
       return c.json({ code: "NOT_FOUND", message: "Tenant not found", details: [] }, 404);
     }
@@ -225,7 +225,7 @@ router.post("/:id/sso/oidc", async (c) => {
       scopes: scopes ?? ["openid", "profile", "email"],
     };
 
-    const tenant = updateTenant(existing.id, { oidcConfig });
+    const tenant = await updateTenant(existing.id, { oidcConfig });
     return c.json(tenant);
   } catch {
     return c.json(
@@ -239,7 +239,7 @@ router.post("/:id/sso/oidc", async (c) => {
 
 router.delete("/:id/sso/oidc", async (c) => {
   try {
-    const existing = findByIdOrSlug(c.req.param("id"));
+    const existing = await findByIdOrSlug(c.req.param("id"));
     if (!existing) {
       return c.json({ code: "NOT_FOUND", message: "Tenant not found", details: [] }, 404);
     }
@@ -254,7 +254,7 @@ router.delete("/:id/sso/oidc", async (c) => {
       enabled: false,
     };
 
-    const tenant = updateTenant(existing.id, { oidcConfig });
+    const tenant = await updateTenant(existing.id, { oidcConfig });
     return c.json(tenant);
   } catch {
     return c.json(
@@ -287,7 +287,7 @@ router.post("/:id/sso/saml", async (c) => {
       );
     }
 
-    const existing = findByIdOrSlug(c.req.param("id"));
+    const existing = await findByIdOrSlug(c.req.param("id"));
     if (!existing) {
       return c.json({ code: "NOT_FOUND", message: "Tenant not found", details: [] }, 404);
     }
@@ -301,7 +301,7 @@ router.post("/:id/sso/saml", async (c) => {
       attributeMap: attributeMap ?? {},
     };
 
-    const tenant = updateTenant(existing.id, { samlConfig });
+    const tenant = await updateTenant(existing.id, { samlConfig });
     return c.json(tenant);
   } catch {
     return c.json(
@@ -315,7 +315,7 @@ router.post("/:id/sso/saml", async (c) => {
 
 router.delete("/:id/sso/saml", async (c) => {
   try {
-    const existing = findByIdOrSlug(c.req.param("id"));
+    const existing = await findByIdOrSlug(c.req.param("id"));
     if (!existing) {
       return c.json({ code: "NOT_FOUND", message: "Tenant not found", details: [] }, 404);
     }
@@ -332,7 +332,7 @@ router.delete("/:id/sso/saml", async (c) => {
       enabled: false,
     };
 
-    const tenant = updateTenant(existing.id, { samlConfig });
+    const tenant = await updateTenant(existing.id, { samlConfig });
     return c.json(tenant);
   } catch {
     return c.json(
@@ -359,13 +359,13 @@ router.post("/:id/plan", async (c) => {
       );
     }
 
-    const existing = findByIdOrSlug(c.req.param("id"));
+    const existing = await findByIdOrSlug(c.req.param("id"));
     if (!existing) {
       return c.json({ code: "NOT_FOUND", message: "Tenant not found", details: [] }, 404);
     }
 
     const maxUsers = PLAN_MAX_USERS[plan] ?? 2_147_483_647;
-    const tenant = updateTenant(existing.id, {
+    const tenant = await updateTenant(existing.id, {
       plan: plan as "free" | "starter" | "pro" | "enterprise",
       settings: { ...existing.settings, maxUsers },
     });
@@ -379,7 +379,7 @@ router.post("/:id/plan", async (c) => {
 
 router.get("/:id/stats", async (c) => {
   try {
-    const tenant = findByIdOrSlug(c.req.param("id"));
+    const tenant = await findByIdOrSlug(c.req.param("id"));
     if (!tenant) {
       return c.json({ code: "NOT_FOUND", message: "Tenant not found", details: [] }, 404);
     }

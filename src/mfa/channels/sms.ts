@@ -4,7 +4,7 @@ const logger = getLogger("mfa-sms");
 export async function sendSmsOTP(to: string, body: string) {
   const accountSid = process.env.TWILIO_ACCOUNT_SID;
   const authToken = process.env.TWILIO_AUTH_TOKEN;
-  const from = process.env.TWILIO_FROM;
+  const from = process.env.TWILIO_FROM ?? process.env.TWILIO_SMS_FROM;
 
   if (accountSid && authToken && from) {
     try {
@@ -20,6 +20,16 @@ export async function sendSmsOTP(to: string, body: string) {
     }
   }
 
-  logger.info("SMS OTP (stub) sent", { to, body });
-  return true;
+  // Not configured. Never log the OTP code, and never report success for a
+  // message that was not delivered — that would let an MFA challenge "pass"
+  // while the user receives nothing. Opt into a no-send dev stub explicitly.
+  if (process.env.MFA_DEV_STUB === "true") {
+    logger.warn("SMS OTP NOT delivered — MFA_DEV_STUB enabled, Twilio not configured", { to });
+    return true;
+  }
+  logger.error(
+    "SMS OTP not sent: Twilio not configured (set TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_FROM)",
+    { to }
+  );
+  return false;
 }

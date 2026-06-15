@@ -4,13 +4,14 @@
  * Provides device certification lookup against the FIDO Alliance
  * Metadata Service 3 (https://mds3.fidoalliance.org/).
  *
- * The MDS3 TOC is a JWT-signed blob. This implementation performs
- * a simplified parse (base64url-decode the payload) without full
- * JWT signature verification, suitable for metadata lookups.
- * For production use, validate the JWT signature against the
- * FIDO Alliance root CA.
+ * The MDS3 TOC is a JWT-signed blob. The TOC signature is verified against
+ * the certificate chain embedded in the JWT `x5c` header: chain linkage and
+ * certificate validity are checked, the leaf signs the token, and — when
+ * `FIDO_MDS3_ROOT_CERT` is configured — the chain is pinned to the FIDO
+ * Alliance root CA. Set `FIDO_MDS3_ALLOW_UNSIGNED=true` only for offline tests.
  */
 
+import { X509Certificate, createVerify, constants } from "crypto";
 import { getLogger } from "../logger";
 
 const logger = getLogger("fido-mds3");
@@ -79,6 +80,98 @@ function base64urlDecode(input: string): string {
   return Buffer.from(base64, "base64").toString("utf8");
 }
 
+function base64urlToBuffer(input: string): Buffer {
+  const padded = input.replace(/-/g, "+").replace(/_/g, "/");
+  const padding = (4 - (padded.length % 4)) % 4;
+  return Buffer.from(padded + "=".repeat(padding), "base64");
+}
+
+/**
+ * Verify the MDS3 TOC JWT signature against its embedded x5c certificate chain.
+ * Throws if the token is unsigned, the chain is broken/expired, the configured
+ * FIDO root pin does not match, or the leaf signature is invalid.
+ */
+function verifyTocSignature(jwtString: string): void {
+  const parts = jwtString.trim().split(".");
+  if (parts.length !== 3) {
+    throw new Error("MDS3 JWT rejected: expected a 3-part signed token");
+  }
+
+  const header = JSON.parse(base64urlDecode(parts[0])) as { alg?: string; x5c?: string[] };
+  const alg = header.alg;
+  if (!alg || alg === "none") {
+    throw new Error("MDS3 JWT rejected: missing or 'none' algorithm");
+  }
+
+  if (!header.x5c || header.x5c.length === 0) {
+    if (process.env.FIDO_MDS3_ALLOW_UNSIGNED === "true") {
+      logger.warn("MDS3 TOC has no x5c chain — skipping verification (FIDO_MDS3_ALLOW_UNSIGNED=true)");
+      return;
+    }
+    throw new Error("MDS3 JWT rejected: no x5c certificate chain to verify against");
+  }
+
+  const chain = header.x5c.map((b64) => new X509Certificate(Buffer.from(b64, "base64")));
+
+  // 1. Validity window of every certificate in the chain.
+  const now = Date.now();
+  for (const cert of chain) {
+    if (Date.parse(cert.validFrom) > now || Date.parse(cert.validTo) < now) {
+      throw new Error("MDS3 JWT rejected: a certificate in the chain is expired or not yet valid");
+    }
+  }
+
+  // 2. Chain linkage: each cert must be signed by the next one up.
+  for (let i = 0; i < chain.length - 1; i++) {
+    if (!chain[i].verify(chain[i + 1].publicKey)) {
+      throw new Error("MDS3 JWT rejected: broken certificate chain");
+    }
+  }
+
+  // 3. Root trust: pin to the configured FIDO Alliance root CA when available.
+  const rootPem = process.env.FIDO_MDS3_ROOT_CERT;
+  if (rootPem) {
+    const root = new X509Certificate(rootPem);
+    const top = chain[chain.length - 1];
+    if (top.fingerprint256 !== root.fingerprint256 && !top.verify(root.publicKey)) {
+      throw new Error("MDS3 JWT rejected: chain does not terminate at the configured FIDO root CA");
+    }
+  } else {
+    logger.warn(
+      "FIDO_MDS3_ROOT_CERT not set — TOC signature + chain are verified, but not pinned to the FIDO root CA"
+    );
+  }
+
+  // 4. The leaf certificate must have signed the JWT.
+  const signingInput = `${parts[0]}.${parts[1]}`;
+  const signature = base64urlToBuffer(parts[2]);
+  const leafKey = chain[0].publicKey;
+
+  let ok = false;
+  if (alg === "RS256") {
+    ok = createVerify("RSA-SHA256").update(signingInput).verify(leafKey, signature);
+  } else if (alg === "PS256") {
+    ok = createVerify("RSA-SHA256")
+      .update(signingInput)
+      .verify(
+        {
+          key: leafKey,
+          padding: constants.RSA_PKCS1_PSS_PADDING,
+          saltLength: constants.RSA_PSS_SALTLEN_DIGEST,
+        },
+        signature
+      );
+  } else if (alg === "ES256") {
+    ok = createVerify("SHA256")
+      .update(signingInput)
+      .verify({ key: leafKey, dsaEncoding: "ieee-p1363" }, signature);
+  } else {
+    throw new Error(`MDS3 JWT rejected: unsupported signature algorithm ${alg}`);
+  }
+
+  if (!ok) throw new Error("MDS3 JWT rejected: signature verification failed");
+}
+
 function isCacheFresh(): boolean {
   if (!cache) return false;
   return Date.now() - cache.fetchedAt < CACHE_TTL_MS;
@@ -94,6 +187,9 @@ function parseTocJwt(jwtString: string): MDS3Cache {
   if (parts.length < 2) {
     throw new Error("Invalid MDS3 JWT: expected at least 2 parts");
   }
+
+  // Authenticate the TOC before trusting any entry inside it.
+  verifyTocSignature(jwtString);
 
   const payloadJson = base64urlDecode(parts[1]);
   const payload = JSON.parse(payloadJson) as {

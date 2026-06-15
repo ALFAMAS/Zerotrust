@@ -39,6 +39,19 @@ describe("MFA channels", () => {
       const result = await sendSmsOTP("+12025550123", "Your code: 456789");
       expect(typeof result).toBe("boolean");
     });
+
+    it("fails closed (returns false) when Twilio is not configured", async () => {
+      delete process.env.TWILIO_ACCOUNT_SID;
+      delete process.env.TWILIO_AUTH_TOKEN;
+      delete process.env.TWILIO_FROM;
+      delete process.env.TWILIO_SMS_FROM;
+      delete process.env.MFA_DEV_STUB;
+
+      const { sendSmsOTP } = await import("../mfa/channels/sms");
+      const result = await sendSmsOTP("+12025550123", "Your code: 456789");
+      // Must NOT fake success — an undelivered OTP cannot let MFA pass.
+      expect(result).toBe(false);
+    });
   });
 
   describe("OTP dispatcher", () => {

@@ -1,9 +1,12 @@
 /**
- * Tenant model — in-memory store (no database table yet).
- * Replaces the previous Mongoose model.
+ * Tenant model — PostgreSQL (Drizzle) backed.
+ * Persists tenants in the `tenants` table so multi-tenancy, per-tenant SSO
+ * config, and plan changes survive restarts.
  */
 
-import crypto from "crypto";
+import { eq } from "drizzle-orm";
+import { getDb } from "../db/index.js";
+import { tenantsTable } from "../db/schema.js";
 
 export interface TenantSettings {
   allowedDomains: string[];
@@ -67,57 +70,91 @@ const DEFAULT_SETTINGS: TenantSettings = {
   allowedCountries: [],
 };
 
-// In-memory store keyed by tenant id
-const store = new Map<string, Tenant>();
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-export function getTenant(id: string): Tenant | undefined {
-  return store.get(id);
-}
-
-export function getTenantBySlug(slug: string): Tenant | undefined {
-  for (const tenant of store.values()) {
-    if (tenant.slug === slug) return tenant;
-  }
-  return undefined;
-}
-
-export function getAllTenants(): Tenant[] {
-  return Array.from(store.values());
-}
-
-export function createTenant(data: CreateTenantData): Tenant {
-  const now = new Date();
-  const tenant: Tenant = {
-    id: crypto.randomUUID(),
-    slug: data.slug,
-    name: data.name,
-    displayName: data.displayName,
-    status: data.status ?? "active",
-    plan: data.plan ?? "free",
-    settings: { ...DEFAULT_SETTINGS, ...data.settings },
-    oidcConfig: data.oidcConfig,
-    samlConfig: data.samlConfig,
-    createdAt: now,
-    updatedAt: now,
+function rowToTenant(row: typeof tenantsTable.$inferSelect): Tenant {
+  return {
+    id: row.id,
+    slug: row.slug,
+    name: row.name,
+    displayName: row.displayName,
+    status: row.status as Tenant["status"],
+    plan: row.plan as Tenant["plan"],
+    settings: row.settings,
+    oidcConfig: row.oidcConfig ?? undefined,
+    samlConfig: row.samlConfig ?? undefined,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
   };
-  store.set(tenant.id, tenant);
-  return tenant;
 }
 
-export function updateTenant(id: string, data: UpdateTenantData): Tenant | undefined {
-  const existing = store.get(id);
+export async function getTenant(id: string): Promise<Tenant | undefined> {
+  // Guard: querying a uuid column with a non-uuid string errors in Postgres.
+  if (!UUID_RE.test(id)) return undefined;
+  const rows = await getDb().select().from(tenantsTable).where(eq(tenantsTable.id, id)).limit(1);
+  return rows[0] ? rowToTenant(rows[0]) : undefined;
+}
+
+export async function getTenantBySlug(slug: string): Promise<Tenant | undefined> {
+  const rows = await getDb()
+    .select()
+    .from(tenantsTable)
+    .where(eq(tenantsTable.slug, slug))
+    .limit(1);
+  return rows[0] ? rowToTenant(rows[0]) : undefined;
+}
+
+export async function getAllTenants(): Promise<Tenant[]> {
+  const rows = await getDb().select().from(tenantsTable);
+  return rows.map(rowToTenant);
+}
+
+export async function createTenant(data: CreateTenantData): Promise<Tenant> {
+  const [row] = await getDb()
+    .insert(tenantsTable)
+    .values({
+      slug: data.slug,
+      name: data.name,
+      displayName: data.displayName,
+      status: data.status ?? "active",
+      plan: data.plan ?? "free",
+      settings: { ...DEFAULT_SETTINGS, ...data.settings },
+      oidcConfig: data.oidcConfig ?? null,
+      samlConfig: data.samlConfig ?? null,
+    })
+    .returning();
+  return rowToTenant(row);
+}
+
+export async function updateTenant(
+  id: string,
+  data: UpdateTenantData
+): Promise<Tenant | undefined> {
+  const existing = await getTenant(id);
   if (!existing) return undefined;
-  const updated: Tenant = {
-    ...existing,
-    ...data,
-    settings:
-      data.settings !== undefined ? { ...existing.settings, ...data.settings } : existing.settings,
-    updatedAt: new Date(),
-  };
-  store.set(id, updated);
-  return updated;
+
+  const patch: Partial<typeof tenantsTable.$inferInsert> = { updatedAt: new Date() };
+  if (data.name !== undefined) patch.name = data.name;
+  if (data.displayName !== undefined) patch.displayName = data.displayName;
+  if (data.status !== undefined) patch.status = data.status;
+  if (data.plan !== undefined) patch.plan = data.plan;
+  if (data.settings !== undefined) patch.settings = { ...existing.settings, ...data.settings };
+  if (data.oidcConfig !== undefined) patch.oidcConfig = data.oidcConfig;
+  if (data.samlConfig !== undefined) patch.samlConfig = data.samlConfig;
+
+  const [row] = await getDb()
+    .update(tenantsTable)
+    .set(patch)
+    .where(eq(tenantsTable.id, id))
+    .returning();
+  return row ? rowToTenant(row) : undefined;
 }
 
-export function deleteTenant(id: string): boolean {
-  return store.delete(id);
+export async function deleteTenant(id: string): Promise<boolean> {
+  if (!UUID_RE.test(id)) return false;
+  const rows = await getDb()
+    .delete(tenantsTable)
+    .where(eq(tenantsTable.id, id))
+    .returning({ id: tenantsTable.id });
+  return rows.length > 0;
 }

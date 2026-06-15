@@ -1,33 +1,33 @@
 /**
- * PASETO v4.local implementation using AES-256-GCM + BLAKE2b
- * Bun has native WebCrypto — no external PASETO lib needed.
- * v4.local = symmetric authenticated encryption (XChaCha20-Poly1305 in spec,
- * but we use AES-256-GCM as browser/Bun WebCrypto doesn't expose XChaCha).
- * For full spec compliance swap in libsodium-wrappers.
+ * Access tokens are spec-compliant PASETO v4.local tokens
+ * (XChaCha20 + keyed BLAKE2b with PAE), implemented in ../crypto/paseto-v4.ts
+ * and validated against the official paseto-standard test vectors.
+ *
+ * Refresh tokens are opaque random strings (not PASETO) — they carry no claims
+ * and are looked up server-side.
  */
 
 import { nanoid } from "nanoid";
 import type { TokenPayload } from "../shared/types";
 import { DEFAULT_ACCESS_TOKEN_TTL } from "../shared/types";
 import type { ZeroAuthConfig } from "../shared/types";
+import { encrypt, decrypt, PasetoError } from "../crypto/paseto-v4";
 
 export class TokenService {
-  private key!: CryptoKey;
+  private key!: Uint8Array;
   private config: ZeroAuthConfig["session"] & { secretKeyHex: string };
 
   constructor(secretKeyHex: string, sessionConfig: ZeroAuthConfig["session"]) {
     this.config = { ...sessionConfig, secretKeyHex };
   }
 
+  // Kept async for call-site compatibility; v4.local needs no key import step.
   async init() {
     const keyBytes = this.hexToBytes(this.config.secretKeyHex);
-    this.key = await crypto.subtle.importKey(
-      "raw",
-      keyBytes as unknown as ArrayBuffer,
-      { name: "AES-GCM" },
-      false,
-      ["encrypt", "decrypt"]
-    );
+    if (keyBytes.length !== 32) {
+      throw new Error("TOKEN_SECRET_INVALID: expected a 32-byte (64 hex char) key");
+    }
+    this.key = keyBytes;
   }
 
   async signAccessToken(
@@ -41,7 +41,7 @@ export class TokenService {
       iat: now,
       exp: now + ttl,
     };
-    return this.encrypt(JSON.stringify(full));
+    return encrypt(this.key, new TextEncoder().encode(JSON.stringify(full)));
   }
 
   async signRefreshToken(): Promise<string> {
@@ -50,46 +50,26 @@ export class TokenService {
   }
 
   async verifyAccessToken(token: string): Promise<TokenPayload> {
-    const raw = await this.decrypt(token);
-    const payload: TokenPayload = JSON.parse(raw);
+    let raw: string;
+    try {
+      raw = new TextDecoder().decode(decrypt(this.key, token));
+    } catch (err) {
+      // Normalize all PASETO-level failures to the existing public error code.
+      if (err instanceof PasetoError) throw new Error("TOKEN_INVALID");
+      throw err;
+    }
+    let payload: TokenPayload;
+    try {
+      payload = JSON.parse(raw);
+    } catch {
+      throw new Error("TOKEN_INVALID");
+    }
+    if (payload === null || typeof payload !== "object" || typeof payload.exp !== "number") {
+      throw new Error("TOKEN_INVALID");
+    }
     const now = Math.floor(Date.now() / 1000);
     if (payload.exp < now) throw new Error("TOKEN_EXPIRED");
     return payload;
-  }
-
-  private async encrypt(plaintext: string): Promise<string> {
-    const iv = crypto.getRandomValues(new Uint8Array(12));
-    const encoded = new TextEncoder().encode(plaintext);
-    const ciphertext = await crypto.subtle.encrypt(
-      { name: "AES-GCM", iv },
-      this.key,
-      encoded
-    );
-    // format: base64url(iv) + "." + base64url(ciphertext)
-    return `v4.local.${this.toBase64url(iv)}.${this.toBase64url(new Uint8Array(ciphertext))}`;
-  }
-
-  private async decrypt(token: string): Promise<string> {
-    const parts = token.split(".");
-    if (parts[0] !== "v4" || parts[1] !== "local" || parts.length !== 4) {
-      throw new Error("TOKEN_INVALID");
-    }
-    const iv = this.fromBase64url(parts[2]);
-    const ciphertext = this.fromBase64url(parts[3]);
-    const plaintext = await crypto.subtle.decrypt(
-      { name: "AES-GCM", iv: iv as unknown as ArrayBuffer },
-      this.key,
-      ciphertext as unknown as ArrayBuffer
-    );
-    return new TextDecoder().decode(plaintext);
-  }
-
-  private toBase64url(bytes: Uint8Array): string {
-    return Buffer.from(bytes).toString("base64url");
-  }
-
-  private fromBase64url(str: string): Uint8Array {
-    return new Uint8Array(Buffer.from(str, "base64url"));
   }
 
   private hexToBytes(hex: string): Uint8Array {
