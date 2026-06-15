@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import type { Context } from "hono";
 import crypto from "crypto";
 import { eq } from "drizzle-orm";
 import { getDb } from "../../db";
@@ -9,6 +10,7 @@ import { getSettings } from "../../models/settings.model";
 import { TokenService } from "../../services/token.service";
 import { getConfig } from "../../config";
 import { getLogger } from "../../logger";
+import { getClientIp } from "../../shared/clientIp";
 import type { HonoEnv } from "../../shared/types";
 
 const router = new Hono<HonoEnv>();
@@ -27,7 +29,7 @@ function hashToken(token: string): string {
   return crypto.createHash("sha256").update(token).digest("hex");
 }
 
-async function issueTokensForUser(userId: string, req: Request) {
+async function issueTokensForUser(userId: string, c: Context<HonoEnv>) {
   const cfg = getConfig();
   const tokenSvc = await getTokenService();
   const db = getDb();
@@ -46,8 +48,8 @@ async function issueTokensForUser(userId: string, req: Request) {
   });
   const payload = await tokenSvc.verifyAccessToken(accessToken);
 
-  const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() || "";
-  const userAgent = req.headers.get("user-agent") || "";
+  const ip = getClientIp(c);
+  const userAgent = c.req.header("user-agent") || "";
 
   const [session] = await db
     .insert(sessionsTable)
@@ -117,7 +119,7 @@ router.get("/verify", async (c) => {
       return c.json({ error: "INVALID_TOKEN", message: "Invalid or expired magic link" }, 401);
     }
 
-    const tokens = await issueTokensForUser(result.userId, c.req.raw);
+    const tokens = await issueTokensForUser(result.userId, c);
 
     const appUrl = settings.appUrl || "http://localhost:3000";
     const callbackBase = redirect || `${appUrl}/auth/callback`;
@@ -150,7 +152,7 @@ router.post("/verify", async (c) => {
       return c.json({ error: "INVALID_TOKEN", message: "Invalid or expired magic link" }, 401);
     }
 
-    const tokens = await issueTokensForUser(result.userId, c.req.raw);
+    const tokens = await issueTokensForUser(result.userId, c);
     return c.json(tokens);
   } catch (err) {
     logger.error("Magic link POST verify error", err as Error);

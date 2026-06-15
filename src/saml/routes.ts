@@ -8,6 +8,7 @@ import { getConfig } from "../config/index.js";
 import { rateLimit } from "../middleware/rateLimiting.js";
 import { getLogger } from "../logger/index.js";
 import type { HonoEnv } from "../shared/types.js";
+import { getClientIp } from "../shared/clientIp.js";
 import * as nodeCrypto from "crypto";
 import { nanoid } from "nanoid";
 
@@ -197,7 +198,7 @@ router.post("/saml/acs", rateLimit({ points: 20, windowSecs: 60 }), async (c) =>
         firstSeenAt: new Date(),
         lastSeenAt: new Date(),
       },
-      ipAddress: c.req.header("x-forwarded-for") ?? "unknown",
+      ipAddress: getClientIp(c) || "unknown",
       userAgent: c.req.header("user-agent") ?? "",
       expiresAt: new Date(tokenPayload.exp * 1000),
       isActive: true,

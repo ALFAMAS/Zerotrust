@@ -11,6 +11,7 @@ import { sendPasswordResetEmail } from "../../services/email.service";
 import { rejectIfBreached } from "../../services/passwordBreach.service";
 import { recordAndRespond } from "../../services/accountTakeover.service";
 import { ErrorCodes } from "../../shared/types";
+import { getClientIp } from "../../shared/clientIp";
 import type { HonoEnv } from "../../shared/types";
 
 const router = new Hono<HonoEnv>();
@@ -146,7 +147,7 @@ router.post("/confirm", async (c) => {
     void recordAndRespond(user.id, "password_reset", {
       email: user.email,
       displayName: user.displayName ?? user.email,
-      ipAddress: c.req.header("x-forwarded-for")?.split(",")[0].trim(),
+      ipAddress: getClientIp(c),
       userAgent: c.req.header("user-agent"),
     });
 

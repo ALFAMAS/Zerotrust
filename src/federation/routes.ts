@@ -5,6 +5,7 @@ import { registerProvider, listProviders, removeProvider } from "./registry.js";
 import { exchangeToken } from "./exchange.js";
 import type { FederationTokenRequest } from "./types.js";
 import { getLogger } from "../logger/index.js";
+import { getClientIp } from "../shared/clientIp.js";
 import type { HonoEnv } from "../shared/types.js";
 
 const router = new Hono<HonoEnv>();
@@ -22,10 +23,7 @@ router.post("/token-exchange", rateLimit({ points: 20, windowSecs: 60 }), async 
         400
       );
     }
-    const ip =
-      c.req.header("x-forwarded-for")?.split(",")[0].trim() ||
-      c.req.header("x-real-ip") ||
-      "unknown";
+    const ip = getClientIp(c) || "unknown";
     const result = await exchangeToken(body, ip);
     return c.json(result);
   } catch (err) {

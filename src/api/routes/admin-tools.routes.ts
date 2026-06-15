@@ -27,6 +27,7 @@ import {
   clearFlagCache,
 } from "../../services/featureFlags.service";
 import { auditLog, getLogger } from "../../logger";
+import { getClientIp } from "../../shared/clientIp";
 import type { HonoEnv } from "../../shared/types";
 
 const router = new Hono<HonoEnv>();
@@ -89,7 +90,7 @@ router.post("/users/:id/impersonate", async (c) => {
         impersonatedBy: admin.id,
         impersonatorEmail: admin.email,
       },
-      ipAddress: c.req.header("x-forwarded-for")?.split(",")[0].trim() || "admin-console",
+      ipAddress: getClientIp(c) || "admin-console",
       userAgent: `impersonation by ${admin.email}`,
       // Impersonation sessions are deliberately short: 30 minutes
       expiresAt: new Date(Date.now() + 30 * 60 * 1000),

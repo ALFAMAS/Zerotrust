@@ -22,6 +22,7 @@ import { rejectIfBreached } from "../../services/passwordBreach.service";
 import { notifyIfNewDevice } from "../../services/loginNotification.service";
 import { recordAndRespond } from "../../services/accountTakeover.service";
 import { validateSignupEmail } from "../../services/disposableEmail.service";
+import { getClientIp } from "../../shared/clientIp";
 import type { HonoEnv } from "../../shared/types";
 
 const router = new Hono<HonoEnv>();
@@ -300,7 +301,7 @@ router.post("/login", rateLimit({ points: 20, windowSecs: 60 }), async (c) => {
 
     const fpInput = FingerprintService.extractFromRequest({
       headers: Object.fromEntries(c.req.raw.headers as any),
-      ip: c.req.header("x-forwarded-for")?.split(",")[0].trim(),
+      ip: getClientIp(c),
     });
     const fingerprint = FingerprintService.compute(fpInput);
 
@@ -439,7 +440,7 @@ router.post(
           userId: user.id,
           tokenId: payload.jti,
           deviceFingerprint: {},
-          ipAddress: c.req.header("x-forwarded-for")?.split(",")[0].trim() || "",
+          ipAddress: getClientIp(c),
           userAgent: c.req.header("user-agent"),
           expiresAt: new Date(payload.exp * 1000),
           lastActivityAt: new Date(),
@@ -555,7 +556,7 @@ router.get("/oauth/:provider/callback", rateLimit({ points: 20, windowSecs: 60 }
         userId: user.id,
         tokenId: payload.jti,
         deviceFingerprint: {},
-        ipAddress: c.req.header("x-forwarded-for")?.split(",")[0].trim() || "",
+        ipAddress: getClientIp(c),
         userAgent: c.req.header("user-agent"),
         expiresAt: new Date(payload.exp * 1000),
         lastActivityAt: new Date(),
@@ -705,7 +706,7 @@ router.post("/me/email", authMiddleware, rateLimit({ points: 5, windowSecs: 60 }
       email: normalized,
       previousEmail,
       displayName: row.displayName ?? normalized,
-      ipAddress: c.req.header("x-forwarded-for")?.split(",")[0].trim(),
+      ipAddress: getClientIp(c),
       userAgent: c.req.header("user-agent"),
     });
 

@@ -18,6 +18,7 @@ import {
   getOrgSecurityPolicy,
   toAttestationPolicy,
 } from "../../services/orgSecurityPolicy.service";
+import { getClientIp } from "../../shared/clientIp";
 import type { HonoEnv } from "../../shared/types";
 
 const router = new Hono<HonoEnv>();
@@ -399,7 +400,7 @@ router.post("/authenticate/verify", async (c) => {
         userId: user.id,
         tokenId: payload.jti,
         deviceFingerprint: {},
-        ipAddress: c.req.header("x-forwarded-for")?.split(",")[0].trim() || "",
+        ipAddress: getClientIp(c),
         userAgent: c.req.header("user-agent"),
         expiresAt: new Date(payload.exp * 1000),
         lastActivityAt: new Date(),
