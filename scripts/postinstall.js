@@ -10,6 +10,9 @@ const {
   cpSync,
   mkdtempSync,
   rmSync,
+  rmdirSync,
+  symlinkSync,
+  lstatSync,
   readFileSync,
   readdirSync,
   realpathSync,
@@ -21,10 +24,157 @@ const platform = process.platform; // 'linux' | 'darwin' | 'win32'
 const arch = process.arch; // 'x64' | 'arm64'
 const key = `${platform}-${arch}`;
 
+const root = join(__dirname, "..");
+
+// ── 0. Repair dead junctions left by bun on Windows ──────────────────────────
+// On Windows, bun links each dependency from its isolated store
+// (node_modules/.bun/<pkg>@<ver>+<hash>/node_modules/<pkg>) into the consuming
+// node_modules via a directory junction. A flaky `bun install` / `bun add` can
+// leave those junctions as dead reparse points: the target is gone but the link
+// remains, so Node throws "Cannot find module ..." / "Cannot find package ..."
+// even though the package still sits in .bun. git-bash `ls` follows the junction
+// so it looks fine, which makes this hard to spot. Detect every dead junction in
+// the repo's node_modules trees and relink it to its store directory. The .bun
+// store itself stays intact, so this is non-destructive — we only ever recreate
+// the link, never touch package contents, and skip any link we can't resolve.
+function repairWindowsJunctions() {
+  if (platform !== "win32") return;
+  const bunStore = join(root, "node_modules", ".bun");
+  if (!existsSync(bunStore)) return;
+
+  const storeEntries = readdirSync(bunStore, { withFileTypes: true })
+    .filter((e) => e.isDirectory())
+    .map((e) => e.name);
+
+  const verOf = (entry, prefix) => entry.slice(prefix.length).split("+")[0];
+  const semverMax = (a, b) => {
+    const pa = a.split(".").map((n) => parseInt(n, 10) || 0);
+    const pb = b.split(".").map((n) => parseInt(n, 10) || 0);
+    for (let i = 0; i < 3; i++) {
+      if ((pa[i] || 0) !== (pb[i] || 0)) return (pa[i] || 0) > (pb[i] || 0) ? a : b;
+    }
+    return a;
+  };
+
+  // Authoritative root-hoisted version for an ambiguous name, read from the
+  // bare-name key in bun.lock: `"<name>": ["<name>@<ver>", ...]`.
+  let lockText = "";
+  try {
+    lockText = readFileSync(join(root, "bun.lock"), "utf8");
+  } catch {
+    /* no lockfile — fall back to highest semver below */
+  }
+  const lockVersion = (name) => {
+    const esc = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const m = lockText.match(new RegExp(`"${esc}":\\s*\\["${esc}@([^"+]+)`));
+    return m ? m[1] : null;
+  };
+
+  // Resolve the store package dir that a link named `name` should point to.
+  const storeTargetFor = (name) => {
+    const prefix = name.replace(/\//g, "+") + "@";
+    const sub = name.split("/");
+    const cands = storeEntries
+      .filter((d) => d.startsWith(prefix))
+      .map((d) => ({
+        ver: verOf(d, prefix),
+        dir: join(bunStore, d, "node_modules", ...sub),
+      }))
+      .filter((c) => existsSync(join(c.dir, "package.json")));
+    if (cands.length === 0) return null;
+    if (cands.length === 1) return cands[0].dir;
+    const want = lockVersion(name);
+    const filtered = want ? cands.filter((c) => c.ver === want) : cands;
+    const pool = filtered.length ? filtered : cands;
+    // Prefer the highest semver; same-version/different-hash variants are
+    // interchangeable peer-dep contexts, so any is fine — take the first.
+    const best = pool.reduce((a, b) => (semverMax(a.ver, b.ver) === a.ver ? a : b));
+    return best.dir;
+  };
+
+  const isDeadJunction = (p) => {
+    let st;
+    try {
+      st = lstatSync(p);
+    } catch {
+      return false;
+    }
+    if (!st.isSymbolicLink()) return false; // junctions report as symlinks
+    return !existsSync(join(p, "package.json")); // existsSync follows → false if dead
+  };
+
+  const relink = (link, name, fixed) => {
+    const target = storeTargetFor(name);
+    if (!target) return; // can't resolve — leave it alone rather than break things
+    try {
+      rmdirSync(link); // removes the reparse point only, not the store contents
+    } catch {
+      try {
+        rmSync(link, { force: true });
+      } catch {
+        return;
+      }
+    }
+    try {
+      symlinkSync(target, link, "junction");
+      fixed.push(name);
+    } catch (err) {
+      console.warn(`⚠ could not relink ${name}: ${err && err.message}`);
+    }
+  };
+
+  // node_modules roots to scan: repo root + every workspace package.
+  const roots = [join(root, "node_modules")];
+  try {
+    const pkg = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
+    for (const glob of pkg.workspaces || []) {
+      const baseRel = glob.replace(/\/\*$/, "");
+      const baseDir = join(root, baseRel);
+      if (glob.endsWith("/*") && existsSync(baseDir)) {
+        for (const ws of readdirSync(baseDir)) {
+          roots.push(join(baseDir, ws, "node_modules"));
+        }
+      } else if (existsSync(baseDir)) {
+        roots.push(join(baseDir, "node_modules"));
+      }
+    }
+  } catch {
+    /* fall back to root-only scan */
+  }
+
+  const fixed = [];
+  for (const nm of roots) {
+    if (!existsSync(nm)) continue;
+    for (const entry of readdirSync(nm)) {
+      if (entry === ".bin" || entry === ".bun" || entry === ".cache") continue;
+      const p = join(nm, entry);
+      if (entry.startsWith("@")) {
+        // scope dir is a real folder of per-package junctions — descend one level
+        let kids;
+        try {
+          kids = readdirSync(p);
+        } catch {
+          continue;
+        }
+        for (const kid of kids) {
+          const kp = join(p, kid);
+          if (isDeadJunction(kp)) relink(kp, `${entry}/${kid}`, fixed);
+        }
+      } else if (isDeadJunction(p)) {
+        relink(p, entry, fixed);
+      }
+    }
+  }
+
+  if (fixed.length) {
+    console.log(`✓ repaired ${fixed.length} dead bun junction(s): ${fixed.join(", ")}`);
+  }
+}
+
+repairWindowsJunctions();
+
 const SUPPORTED = ["linux-x64", "darwin-x64", "darwin-arm64", "win32-x64"];
 if (!SUPPORTED.includes(key)) process.exit(0);
-
-const root = join(__dirname, "..");
 
 // Locate a package directory inside bun's isolated install store
 // (node_modules/.bun/<pkg>@<version>/node_modules/<subpath...>). Bun keeps
