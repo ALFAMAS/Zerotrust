@@ -24,7 +24,11 @@ export default function LoginPage() {
       const data = await api.post<any>("/auth/login", form, true);
       setToken(data.accessToken, data.refreshToken);
       toast({ message: "Welcome back!", type: "success" });
-      window.location.href = "/dashboard";
+      // Honor a ?next= redirect-back target (set by the API client when an
+      // expired session bounced the user here), but only same-origin paths.
+      const next = new URLSearchParams(window.location.search).get("next");
+      const dest = next && next.startsWith("/") && !next.startsWith("//") ? next : "/dashboard";
+      window.location.href = dest;
     } catch (err: any) {
       toast({
         message: err.message || "Login failed. Please check your credentials.",

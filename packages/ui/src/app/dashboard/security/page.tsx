@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { KeyRound } from "lucide-react";
 
 export default function SecurityPage() {
   const [user, setUser] = useState<any>(null);
@@ -44,7 +45,7 @@ export default function SecurityPage() {
 
   return (
     <div className="max-w-2xl space-y-6">
-      <h1 className="text-2xl font-bold text-foreground">Security Settings</h1>
+      <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">Security Settings</h1>
 
       {msg && (
         <Alert>
@@ -123,7 +124,7 @@ export default function SecurityPage() {
                       Added {new Date(pk.createdAt).toLocaleDateString()}
                     </div>
                   </div>
-                  <span className="text-xs text-muted-foreground">🔑</span>
+                  <KeyRound className="h-4 w-4 text-muted-foreground" />
                 </div>
               ))}
             </div>
@@ -139,7 +140,8 @@ export default function SecurityPage() {
               )
             }
           >
-            + Add Passkey
+            <KeyRound />
+            Add passkey
           </Button>
         </CardContent>
       </Card>

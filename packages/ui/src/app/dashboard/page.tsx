@@ -1,5 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
+import Link from "next/link";
+import { KeyRound, Monitor, ShieldCheck, User } from "lucide-react";
 import { api } from "../../lib/api";
 import { SkeletonCard, SkeletonText } from "@/components/Skeleton";
 import SetupChecklist from "@/components/SetupChecklist";
@@ -29,7 +31,7 @@ export default function DashboardPage() {
           <SkeletonText className="h-7 w-64" />
           <SkeletonText className="h-4 w-48" />
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-3">
           <SkeletonCard />
           <SkeletonCard />
           <SkeletonCard />
@@ -39,55 +41,59 @@ export default function DashboardPage() {
     );
   }
 
+  const stats = [
+    { label: "Active sessions", value: sessions.filter((s: any) => s.isActive).length, icon: Monitor },
+    { label: "MFA", value: user?.mfa?.totp?.enabled ? "Enabled" : "Off", icon: ShieldCheck },
+    { label: "Passkeys", value: user?.passkeys?.length ?? 0, icon: KeyRound },
+  ];
+
+  const quickLinks = [
+    { href: "/dashboard/security", label: "Set up MFA", desc: "Add a second factor", icon: ShieldCheck },
+    { href: "/dashboard/security", label: "Add passkey", desc: "Register a hardware key", icon: KeyRound },
+    { href: "/dashboard/sessions", label: "View sessions", desc: "Manage active devices", icon: Monitor },
+    { href: "/dashboard/profile", label: "Edit profile", desc: "Update your details", icon: User },
+  ];
+
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-foreground">Welcome back, {user?.displayName || "…"}</h1>
-        <p className="text-muted-foreground mt-1">{user?.email}</p>
+        <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
+          Welcome back, {user?.displayName || "…"}
+        </h1>
+        <p className="mt-1 text-muted-foreground">{user?.email}</p>
       </div>
 
       <SetupChecklist user={user} />
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-        {[
-          {
-            label: "Active Sessions",
-            value: sessions.filter((s: any) => s.isActive).length,
-            icon: "🔐",
-          },
-          { label: "MFA Status", value: user?.mfa?.totp?.enabled ? "Enabled" : "Off", icon: "🛡️" },
-          { label: "Passkeys", value: user?.passkeys?.length ?? 0, icon: "🔑" },
-        ].map((stat) => (
-          <div
-            key={stat.label}
-            className="bg-card border border-border rounded-xl p-5 flex items-center gap-4"
-          >
-            <span className="text-2xl">{stat.icon}</span>
+      <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-3">
+        {stats.map((stat) => (
+          <div key={stat.label} className="flex items-center gap-4 rounded-xl border border-border bg-card p-5">
+            <span className="flex h-11 w-11 items-center justify-center rounded-lg border border-border bg-background text-primary">
+              <stat.icon className="h-5 w-5" />
+            </span>
             <div>
               <div className="text-sm text-muted-foreground">{stat.label}</div>
-              <div className="text-xl font-bold text-foreground">{stat.value}</div>
+              <div className="font-display text-xl font-semibold text-foreground">{stat.value}</div>
             </div>
           </div>
         ))}
       </div>
 
-      <div className="bg-card border border-border rounded-xl p-6">
-        <h2 className="font-semibold text-foreground mb-4">Quick Links</h2>
-        <div className="grid grid-cols-2 gap-3">
-          {[
-            { href: "/dashboard/security", label: "Set up MFA", desc: "Add a second factor" },
-            { href: "/dashboard/security", label: "Add Passkey", desc: "Register a hardware key" },
-            { href: "/dashboard/sessions", label: "View Sessions", desc: "Manage active devices" },
-            { href: "/dashboard/profile", label: "Edit Profile", desc: "Update your details" },
-          ].map((link) => (
-            <a
+      <div className="rounded-xl border border-border bg-card p-6">
+        <h2 className="mb-4 font-medium text-foreground">Quick links</h2>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          {quickLinks.map((link) => (
+            <Link
               key={link.href + link.label}
               href={link.href}
-              className="flex flex-col p-4 bg-muted hover:bg-accent rounded-xl transition-colors"
+              className="flex items-start gap-3 rounded-xl border border-border bg-background p-4 transition-colors hover:border-primary/50"
             >
-              <span className="font-medium text-foreground text-sm">{link.label}</span>
-              <span className="text-xs text-muted-foreground mt-0.5">{link.desc}</span>
-            </a>
+              <link.icon className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+              <div>
+                <span className="block text-sm font-medium text-foreground">{link.label}</span>
+                <span className="mt-0.5 block text-xs text-muted-foreground">{link.desc}</span>
+              </div>
+            </Link>
           ))}
         </div>
       </div>

@@ -43,7 +43,7 @@ app.post("/", async (c) => {
 
   const ttl = Math.min(Number(ttlSeconds) || 3600, 3600);
 
-  const jitRequest = requestCrossTenantAccess(
+  const jitRequest = await requestCrossTenantAccess(
     userId,
     "default",
     targetTenantId,
@@ -57,7 +57,7 @@ app.post("/", async (c) => {
 
 // ─── GET / — list my cross-tenant JIT requests ───────────────────────────────
 
-app.get("/", (c) => {
+app.get("/", async (c) => {
   const user = c.get("user");
   const userId = user?.id;
 
@@ -65,13 +65,13 @@ app.get("/", (c) => {
     return c.json({ error: "UNAUTHENTICATED", message: "Authentication required" }, 401);
   }
 
-  const requests = crossTenantJITStore.listByRequestor(userId, "default");
+  const requests = await crossTenantJITStore.listByRequestor(userId, "default");
   return c.json(requests);
 });
 
 // ─── GET /incoming — list requests targeting my tenant (admin only) ───────────
 
-app.get("/incoming", (c) => {
+app.get("/incoming", async (c) => {
   const user = c.get("user");
   const userRoles: string[] = user?.roles ?? [];
 
@@ -82,15 +82,15 @@ app.get("/incoming", (c) => {
     );
   }
 
-  const requests = crossTenantJITStore.listByTarget("default");
+  const requests = await crossTenantJITStore.listByTarget("default");
   return c.json(requests);
 });
 
 // ─── GET /status/:requestId — check status of a JIT request ──────────────────
 
-app.get("/status/:requestId", (c) => {
+app.get("/status/:requestId", async (c) => {
   const requestId = c.req.param("requestId");
-  const jitRequest = crossTenantJITStore.get(requestId);
+  const jitRequest = await crossTenantJITStore.get(requestId);
 
   if (!jitRequest) {
     return c.json({ error: "NOT_FOUND", message: `JIT request ${requestId} not found` }, 404);
@@ -101,7 +101,7 @@ app.get("/status/:requestId", (c) => {
 
 // ─── POST /:id/approve — approve a JIT request ────────────────────────────────
 
-app.post("/:id/approve", (c) => {
+app.post("/:id/approve", async (c) => {
   const id = c.req.param("id");
   const user = c.get("user");
   const approverId = user?.id;
@@ -118,13 +118,13 @@ app.post("/:id/approve", (c) => {
     );
   }
 
-  const jitRequest = crossTenantJITStore.get(id);
+  const jitRequest = await crossTenantJITStore.get(id);
 
   if (!jitRequest) {
     return c.json({ error: "NOT_FOUND", message: `JIT request ${id} not found` }, 404);
   }
 
-  const approved = crossTenantJITStore.approve(id, approverId);
+  const approved = await crossTenantJITStore.approve(id, approverId);
 
   if (!approved) {
     return c.json(
@@ -138,7 +138,7 @@ app.post("/:id/approve", (c) => {
 
 // ─── POST /:id/deny — deny a JIT request ─────────────────────────────────────
 
-app.post("/:id/deny", (c) => {
+app.post("/:id/deny", async (c) => {
   const id = c.req.param("id");
   const user = c.get("user");
   const approverId = user?.id;
@@ -155,13 +155,13 @@ app.post("/:id/deny", (c) => {
     );
   }
 
-  const jitRequest = crossTenantJITStore.get(id);
+  const jitRequest = await crossTenantJITStore.get(id);
 
   if (!jitRequest) {
     return c.json({ error: "NOT_FOUND", message: `JIT request ${id} not found` }, 404);
   }
 
-  const denied = crossTenantJITStore.deny(id, approverId);
+  const denied = await crossTenantJITStore.deny(id, approverId);
 
   if (!denied) {
     return c.json(

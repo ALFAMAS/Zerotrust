@@ -35,23 +35,22 @@ router.post("/token-exchange", rateLimit({ points: 20, windowSecs: 60 }), async 
 });
 
 // GET /federation/discovery — public
-router.get("/discovery", (c) => {
+router.get("/discovery", async (c) => {
+  const providers = await listProviders();
   return c.json({
     issuer: ISSUER,
     tokenExchangeEndpoint: `${ISSUER}/federation/token-exchange`,
-    supportedProviders: listProviders()
-      .filter((p) => p.enabled)
-      .map((p) => p.id),
+    supportedProviders: providers.filter((p) => p.enabled).map((p) => p.id),
   });
 });
 
 // GET /federation/providers — admin only
-router.get("/providers", authMiddleware, (c) => {
+router.get("/providers", authMiddleware, async (c) => {
   const user = c.get("user");
   if (!Array.isArray(user?.roles) || !user.roles.includes("admin")) {
     return c.json({ error: "FORBIDDEN" }, 403);
   }
-  return c.json({ providers: listProviders() });
+  return c.json({ providers: await listProviders() });
 });
 
 // POST /federation/providers — admin only
@@ -72,7 +71,7 @@ router.post("/providers", authMiddleware, async (c) => {
     if (!body.id || !body.name || !body.issuerUrl) {
       return c.json({ error: "INVALID_REQUEST", message: "id, name, issuerUrl required" }, 400);
     }
-    const provider = registerProvider({ enabled: true, ...body });
+    const provider = await registerProvider({ enabled: true, ...body });
     return c.json(provider, 201);
   } catch (err) {
     logger.warn("Provider registration failed", { error: String(err) });
@@ -81,12 +80,12 @@ router.post("/providers", authMiddleware, async (c) => {
 });
 
 // DELETE /federation/providers/:id — admin only
-router.delete("/providers/:id", authMiddleware, (c) => {
+router.delete("/providers/:id", authMiddleware, async (c) => {
   const user = c.get("user");
   if (!Array.isArray(user?.roles) || !user.roles.includes("admin")) {
     return c.json({ error: "FORBIDDEN" }, 403);
   }
-  const removed = removeProvider(c.req.param("id"));
+  const removed = await removeProvider(c.req.param("id"));
   return c.json({ success: removed });
 });
 

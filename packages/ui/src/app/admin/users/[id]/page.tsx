@@ -124,13 +124,13 @@ export default function UserDetailPage() {
         >
           ← Back
         </button>
-        <h1 className="text-2xl font-bold text-foreground">User Detail</h1>
+        <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">User Detail</h1>
       </div>
 
       {/* Profile Card */}
       <div className="rounded-xl bg-card border border-border p-6">
         <div className="flex items-center gap-5">
-          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-indigo-900/60 text-2xl font-bold text-primary">
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/15 text-2xl font-bold text-primary">
             {(user.name?.[0] ?? user.email[0]).toUpperCase()}
           </div>
           <div className="flex-1">

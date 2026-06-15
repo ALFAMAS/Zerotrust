@@ -5,6 +5,7 @@ import { api } from "../../../lib/api";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import Modal from "../../../components/Modal";
+import { Check } from "lucide-react";
 
 interface Subscription {
   plan: string;
@@ -136,7 +137,7 @@ function BillingContent() {
 
   return (
     <div className="max-w-4xl">
-      <h1 className="text-2xl font-bold text-foreground mb-1">Billing</h1>
+      <h1 className="mb-1 font-display text-2xl font-semibold tracking-tight text-foreground">Billing</h1>
       <p className="text-muted-foreground text-sm mb-8">Manage your subscription and payment details.</p>
 
       {params.get("success") === "1" && (
@@ -198,7 +199,7 @@ function BillingContent() {
               <button
                 onClick={handlePortal}
                 disabled={portalLoading}
-                className="px-4 py-2 bg-gray-700 hover:bg-gray-600 disabled:opacity-50 text-foreground text-sm rounded-lg transition-colors"
+                className="px-4 py-2 bg-secondary hover:bg-secondary/80 disabled:opacity-50 text-foreground text-sm rounded-lg transition-colors"
               >
                 {portalLoading ? "Loading…" : "Manage billing"}
               </button>
@@ -271,7 +272,7 @@ function BillingContent() {
               {plan.highlighted && (
                 <span className="text-xs font-medium text-primary mb-3">Most popular</span>
               )}
-              <p className="font-bold text-foreground text-lg">{plan.name}</p>
+              <p className="font-display text-lg font-semibold text-foreground">{plan.name}</p>
               <p className="mt-1 mb-4">
                 <span className="text-3xl font-bold text-foreground">{plan.price}</span>
                 {plan.period && <span className="text-muted-foreground text-sm ml-1">{plan.period}</span>}
@@ -279,7 +280,7 @@ function BillingContent() {
               <ul className="space-y-2 mb-6 flex-1">
                 {plan.features.map((f) => (
                   <li key={f} className="text-sm text-foreground/80 flex items-start gap-2">
-                    <span className="text-green-400 mt-0.5">✓</span>
+                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" />
                     {f}
                   </li>
                 ))}
@@ -287,14 +288,14 @@ function BillingContent() {
               {isCurrent ? (
                 <button
                   disabled
-                  className="py-2 rounded-lg text-sm font-medium bg-gray-700 text-muted-foreground cursor-default"
+                  className="py-2 rounded-lg text-sm font-medium bg-secondary text-muted-foreground cursor-default"
                 >
                   Current plan
                 </button>
               ) : plan.cta ? (
                 <a
                   href="mailto:hello@example.com"
-                  className="py-2 rounded-lg text-sm font-medium text-center bg-gray-700 hover:bg-gray-600 text-foreground transition-colors"
+                  className="py-2 rounded-lg text-sm font-medium text-center bg-secondary hover:bg-secondary/80 text-foreground transition-colors"
                 >
                   {plan.cta}
                 </a>
@@ -305,7 +306,7 @@ function BillingContent() {
                   className={`py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 ${
                     plan.highlighted
                       ? "bg-primary hover:bg-primary/90 text-foreground"
-                      : "bg-gray-700 hover:bg-gray-600 text-foreground"
+                      : "bg-secondary hover:bg-secondary/80 text-foreground"
                   }`}
                 >
                   {checkoutLoading === plan.priceId ? "Loading…" : `Upgrade to ${plan.name}`}
@@ -313,7 +314,7 @@ function BillingContent() {
               ) : (
                 <button
                   disabled
-                  className="py-2 rounded-lg text-sm font-medium bg-gray-700 text-muted-foreground cursor-default"
+                  className="py-2 rounded-lg text-sm font-medium bg-secondary text-muted-foreground cursor-default"
                 >
                   Free forever
                 </button>

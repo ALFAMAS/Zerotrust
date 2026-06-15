@@ -414,6 +414,10 @@ Tests live in `src/__tests__/`. CI runs them on every push to `main`.
 | 1.5     | 2025-06 | API key management, Stripe billing + webhooks, plan feature gates, help center, onboarding checklist                                                                                                                                                     |
 | 1.6     | 2025-06 | Package upgrades: Next.js 16.2, React 19, @simplewebauthn/server v13, OTel resources v2, Stripe v22, Zod v4                                                                                                                                              |
 | 1.7     | 2026-06 | HIBP breach check, new-device alerts, takeover detection, per-org billing, trials, dunning, win-back, usage metering, admin impersonation + revenue dashboard + broadcast, feature flags, webhooks UI, status page, DB backups, alerting, Jaeger tracing |
+| 1.8     | 2026-06 | Frontend↔backend wiring: dashboard route guard + silent token refresh (`/auth/token/refresh`), GDPR export/delete pages wired to Bearer auth and linked in nav, disposable-email blocking confirmed live                                                |
+| 1.9     | 2026-06 | Advanced-backend UIs: DID resolver/challenge (`/admin/did`), cross-tenant JIT request + approval inbox (`/dashboard/jit`, `/admin/jit`), workload/agent identity (`/admin/workload`), federation provider registry (`/admin/federation`)                  |
+| 1.10    | 2026-06 | Shared responsive app shell (`components/app-shell/`) for dashboard + admin — collapsible sidebar + sticky topbar + footer, mobile drawer; workload credential list + revoke endpoints (`GET /workload/credentials`, `POST /workload/credentials/:id/revoke`) |
+| 1.11    | 2026-06 | Durable cross-tenant JIT + federation: new `cross_tenant_jit_requests` and `federated_providers` tables (migration `0003`); both stores rewritten DB-backed (async) so grants, approvals and trusted providers survive restarts                          |
 
 ---
 
@@ -596,6 +600,10 @@ Comprehensive checklist. Items marked `[x]` are production-ready in the current 
 - [x] HaveIBeenPwned check on register / password change
 - [x] Login notification email — new-device alert with revoke link
 - [x] Account takeover detection — flag sensitive changes in short window
+- [x] Decentralized identity — `did:key` / `did:web` resolver + proof-of-control challenge (`/admin/did`)
+- [x] Identity federation — RFC 8693 token exchange + trusted-provider registry (`/admin/federation`)
+- [x] Workload / agent identity — scoped client-credential tokens with `principal_type: agent` (`/admin/workload`)
+- [x] Cross-tenant JIT access — request + admin approval inbox, auto-expiring grants (`/dashboard/jit`, `/admin/jit`)
 
 ---
 
@@ -799,6 +807,9 @@ Comprehensive checklist. Items marked `[x]` are production-ready in the current 
 
 - [x] PASETO v4 tokens — AES-256-GCM, no JWT footguns
 - [x] Refresh tokens — SHA-256 hashed, rotated on use
+- [x] Silent token refresh — UI replays a 401 via the refresh token, else redirects to login
+- [x] Protected routes — client guards on `/dashboard` + `/admin`, redirect signed-out users
+- [x] Disposable-email blocking — block/allow lists + optional MX check on register
 - [x] Rate limiting — per-IP sliding window
 - [x] Account lockout — configurable threshold + auto-unlock
 - [x] RBAC + ABAC — roles, permissions, JIT escalation

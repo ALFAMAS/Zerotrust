@@ -94,7 +94,7 @@ export default function WebhooksPage() {
     <div className="max-w-4xl">
       <div className="flex items-start justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-foreground mb-1">Webhooks</h1>
+          <h1 className="mb-1 font-display text-2xl font-semibold tracking-tight text-foreground">Webhooks</h1>
           <p className="text-muted-foreground text-sm">
             Receive signed HTTP callbacks when events happen in your account. Payloads are signed
             with HMAC-SHA256 in the <code className="text-primary">X-ZeroAuth-Signature</code>{" "}
@@ -147,13 +147,13 @@ export default function WebhooksPage() {
               <div className="flex items-center gap-2 shrink-0">
                 <button
                   onClick={() => pingEndpoint(ep.id)}
-                  className="px-3 py-1.5 bg-muted hover:bg-accent text-gray-200 text-xs rounded-lg transition-colors"
+                  className="px-3 py-1.5 bg-muted hover:bg-accent text-foreground/80 text-xs rounded-lg transition-colors"
                 >
                   Test
                 </button>
                 <button
                   onClick={() => toggleActive(ep)}
-                  className="px-3 py-1.5 bg-muted hover:bg-accent text-gray-200 text-xs rounded-lg transition-colors"
+                  className="px-3 py-1.5 bg-muted hover:bg-accent text-foreground/80 text-xs rounded-lg transition-colors"
                 >
                   {ep.active ? "Disable" : "Enable"}
                 </button>

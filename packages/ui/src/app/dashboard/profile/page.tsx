@@ -102,7 +102,7 @@ export default function ProfilePage() {
 
   return (
     <div className="max-w-lg">
-      <h1 className="mb-6 text-2xl font-bold text-foreground">Profile Settings</h1>
+      <h1 className="mb-6 font-display text-2xl font-semibold tracking-tight text-foreground">Profile Settings</h1>
 
       {/* Avatar */}
       <Card className="mb-6">

@@ -224,6 +224,43 @@ export const workloadCredentialsTable = pgTable("workload_credentials", {
     .default(sql`now()`),
 });
 
+// Cross-tenant JIT (just-in-time) privilege-escalation requests. Durable so
+// approvals + grants survive restarts and provide an audit trail.
+export const crossTenantJITRequestsTable = pgTable("cross_tenant_jit_requests", {
+  id: uuid("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  requestorUserId: uuid("requestor_user_id").notNull(),
+  requestorTenantId: text("requestor_tenant_id").notNull().default("default"),
+  targetTenantId: text("target_tenant_id").notNull(),
+  targetResource: text("target_resource").notNull(),
+  justification: text("justification").notNull(),
+  ttlSeconds: integer("ttl_seconds").notNull(),
+  // pending | approved | denied | expired
+  status: text("status").notNull().default("pending"),
+  approvedBy: uuid("approved_by"),
+  approvedAt: timestamp("approved_at", { withTimezone: true }),
+  expiresAt: timestamp("expires_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .default(sql`now()`),
+});
+
+// Trusted federation (RFC 8693 token-exchange) providers. Durable registry so
+// providers configured via the admin UI persist across restarts.
+export const federatedProvidersTable = pgTable("federated_providers", {
+  // Provider id is a caller-supplied slug (e.g. "okta-prod"), not a uuid.
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  issuerUrl: text("issuer_url").notNull(),
+  jwksUri: text("jwks_uri"),
+  trustedTenantId: text("trusted_tenant_id"),
+  enabled: boolean("enabled").notNull().default(true),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .default(sql`now()`),
+});
+
 export const userBehaviorBaselinesTable = pgTable("user_behavior_baselines", {
   id: uuid("id")
     .primaryKey()

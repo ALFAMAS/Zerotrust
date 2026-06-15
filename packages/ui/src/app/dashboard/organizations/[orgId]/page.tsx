@@ -173,7 +173,7 @@ export default function OrgDetailPage() {
       <div className="flex items-start justify-between">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold text-foreground">{org.name}</h1>
+            <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">{org.name}</h1>
             <span
               className={`text-xs px-2 py-0.5 rounded-full font-medium ${
                 ROLE_COLORS[myRole] ?? ROLE_COLORS.member
@@ -226,7 +226,7 @@ export default function OrgDetailPage() {
                 className="grid grid-cols-[auto_1fr_auto_auto] gap-4 px-4 py-3 items-center border-b border-border last:border-b-0"
               >
                 {/* Avatar placeholder */}
-                <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-xs text-foreground font-medium flex-shrink-0">
+                <div className="w-8 h-8 rounded-full bg-primary/15 flex items-center justify-center text-xs text-primary font-medium flex-shrink-0">
                   {(user.displayName || user.email)[0]?.toUpperCase()}
                 </div>
                 <div className="min-w-0">
@@ -283,7 +283,7 @@ export default function OrgDetailPage() {
             <button
               type="submit"
               disabled={inviting}
-              className="bg-primary hover:bg-primary/90 disabled:opacity-50 text-foreground text-sm px-4 py-2 rounded-lg transition-colors"
+              className="bg-primary hover:bg-primary/90 disabled:opacity-50 text-primary-foreground text-sm px-4 py-2 rounded-lg transition-colors"
             >
               {inviting ? "Sending…" : "Send invite"}
             </button>

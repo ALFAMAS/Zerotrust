@@ -52,7 +52,7 @@ so Claude Code connects automatically. Available tools:
 | `get_server_action_by_id` | Resolve a server action by its action ID                                                           |
 
 Browser console output (`console.log`, errors, warnings) is forwarded to
-the terminal via `experimental.browserDebugInfoInTerminal: true` in
+the terminal via `logging.browserToTerminal: true` in
 `next.config.ts` — no devtools needed.
 
 ## Key source locations

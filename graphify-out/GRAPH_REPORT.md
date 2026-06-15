@@ -1,617 +1,687 @@
-# Graph Report - .  (2026-06-14)
+# Graph Report - .  (2026-06-15)
 
 ## Corpus Check
-- 307 files · ~144,477 words
+- 351 files · ~162,635 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 3466 nodes · 4825 edges · 271 communities (258 shown, 13 thin omitted)
-- Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 38 edges (avg confidence: 0.82)
-- Token cost: 1,200 input · 420 output
+- 3794 nodes · 5420 edges · 293 communities (268 shown, 25 thin omitted)
+- Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 65 edges (avg confidence: 0.8)
+- Token cost: 58,000 input · 5,512 output
 
 ## Community Hubs (Navigation)
-- [[_COMMUNITY_Security Events & Email Templates|Security Events & Email Templates]]
-- [[_COMMUNITY_Authorization & Audit Logging|Authorization & Audit Logging]]
-- [[_COMMUNITY_DB Schema Migrations|DB Schema Migrations]]
-- [[_COMMUNITY_Auth API Routes|Auth API Routes]]
-- [[_COMMUNITY_Notification Channels (EmailSMS)|Notification Channels (Email/SMS)]]
-- [[_COMMUNITY_Configuration & Secrets|Configuration & Secrets]]
-- [[_COMMUNITY_TypeScript Config|TypeScript Config]]
-- [[_COMMUNITY_Crypto & Key Management|Crypto & Key Management]]
-- [[_COMMUNITY_OIDC Provider|OIDC Provider]]
-- [[_COMMUNITY_Session & Token Management|Session & Token Management]]
-- [[_COMMUNITY_UI Components|UI Components]]
-- [[_COMMUNITY_Admin & Billing Plans|Admin & Billing Plans]]
-- [[_COMMUNITY_UI Package Dependencies|UI Package Dependencies]]
-- [[_COMMUNITY_API Keys & Token Storage|API Keys & Token Storage]]
-- [[_COMMUNITY_Feature Flags & DB|Feature Flags & DB]]
-- [[_COMMUNITY_Continuous Verification|Continuous Verification]]
-- [[_COMMUNITY_Org Management & Invites|Org Management & Invites]]
-- [[_COMMUNITY_Multi-Tenant Model|Multi-Tenant Model]]
-- [[_COMMUNITY_SCIM Provisioning|SCIM Provisioning]]
-- [[_COMMUNITY_Org Members & Billing|Org Members & Billing]]
-- [[_COMMUNITY_Notification Dispatcher|Notification Dispatcher]]
-- [[_COMMUNITY_Federation & Token Exchange|Federation & Token Exchange]]
-- [[_COMMUNITY_i18n Translations|i18n Translations]]
-- [[_COMMUNITY_Audit Log Pipeline (ES)|Audit Log Pipeline (ES)]]
-- [[_COMMUNITY_LDAP Integration|LDAP Integration]]
-- [[_COMMUNITY_Mfa Attestation|Mfa Attestation]]
-- [[_COMMUNITY_App Module|App Module]]
-- [[_COMMUNITY_Meta 0000|Meta 0000]]
-- [[_COMMUNITY_Meta 0001|Meta 0001]]
-- [[_COMMUNITY_Api Module|Api Module]]
-- [[_COMMUNITY_Messages En|Messages En]]
-- [[_COMMUNITY_Zeroauth Package|Zeroauth Package]]
-- [[_COMMUNITY_Db Module|Db Module]]
-- [[_COMMUNITY_Db Module|Db Module]]
-- [[_COMMUNITY_Audit Module|Audit Module]]
-- [[_COMMUNITY_Messages En|Messages En]]
-- [[_COMMUNITY_Meta 0001|Meta 0001]]
-- [[_COMMUNITY_Services Authz|Services Authz]]
-- [[_COMMUNITY_Crypto Csfle|Crypto Csfle]]
-- [[_COMMUNITY_Meta 0001|Meta 0001]]
-- [[_COMMUNITY_Meta 0001|Meta 0001]]
-- [[_COMMUNITY_Saml Routes|Saml Routes]]
-- [[_COMMUNITY_Did Module|Did Module]]
-- [[_COMMUNITY_Api Module|Api Module]]
-- [[_COMMUNITY_Db Module|Db Module]]
-- [[_COMMUNITY_Src Module|Src Module]]
-- [[_COMMUNITY_Api Openapi|Api Openapi]]
-- [[_COMMUNITY_Messages Es|Messages Es]]
-- [[_COMMUNITY_Messages Fr|Messages Fr]]
-- [[_COMMUNITY_Routes Admin|Routes Admin]]
-- [[_COMMUNITY_Admin Module|Admin Module]]
-- [[_COMMUNITY_Jit Cross|Jit Cross]]
-- [[_COMMUNITY_Zeroauth Package|Zeroauth Package]]
-- [[_COMMUNITY_Api Openapi|Api Openapi]]
-- [[_COMMUNITY_Messages En|Messages En]]
-- [[_COMMUNITY_Meta 0000|Meta 0000]]
-- [[_COMMUNITY_Meta 0001|Meta 0001]]
-- [[_COMMUNITY_Meta 0000|Meta 0000]]
-- [[_COMMUNITY_Meta 0000|Meta 0000]]
-- [[_COMMUNITY_Meta 0000|Meta 0000]]
-- [[_COMMUNITY_Packages Module|Packages Module]]
-- [[_COMMUNITY_Components Feedbackwidget|Components Feedbackwidget]]
-- [[_COMMUNITY_Crypto Post|Crypto Post]]
-- [[_COMMUNITY_Metrics Counters|Metrics Counters]]
-- [[_COMMUNITY_Routes Passkey|Routes Passkey]]
-- [[_COMMUNITY_Messages Es|Messages Es]]
-- [[_COMMUNITY_Messages Fr|Messages Fr]]
-- [[_COMMUNITY_Drizzle Module|Drizzle Module]]
-- [[_COMMUNITY_Meta 0000|Meta 0000]]
-- [[_COMMUNITY_Meta 0001|Meta 0001]]
-- [[_COMMUNITY_Meta 0001|Meta 0001]]
-- [[_COMMUNITY_Meta 0001|Meta 0001]]
-- [[_COMMUNITY_Db Index|Db Index]]
-- [[_COMMUNITY_Eslintrc Module|Eslintrc Module]]
-- [[_COMMUNITY_Api Openapi|Api Openapi]]
-- [[_COMMUNITY_Zeroauth Package|Zeroauth Package]]
-- [[_COMMUNITY_Api Openapi|Api Openapi]]
-- [[_COMMUNITY_Readme Module|Readme Module]]
-- [[_COMMUNITY_Messages En|Messages En]]
-- [[_COMMUNITY_Messages En|Messages En]]
-- [[_COMMUNITY_Scripts Postinstall|Scripts Postinstall]]
-- [[_COMMUNITY_Routes Notification|Routes Notification]]
-- [[_COMMUNITY_Middleware Accountlockout|Middleware Accountlockout]]
-- [[_COMMUNITY_Src Module|Src Module]]
-- [[_COMMUNITY_Blog Module|Blog Module]]
-- [[_COMMUNITY_I18N Request|I18N Request]]
-- [[_COMMUNITY_Messages En|Messages En]]
-- [[_COMMUNITY_Messages En|Messages En]]
-- [[_COMMUNITY_Meta 0000|Meta 0000]]
-- [[_COMMUNITY_Src Module|Src Module]]
-- [[_COMMUNITY_Schemas Auth|Schemas Auth]]
-- [[_COMMUNITY_Services Fingerprint|Services Fingerprint]]
-- [[_COMMUNITY_Api Openapi|Api Openapi]]
-- [[_COMMUNITY_Admin Module|Admin Module]]
-- [[_COMMUNITY_Messages En|Messages En]]
-- [[_COMMUNITY_Messages Es|Messages Es]]
-- [[_COMMUNITY_Messages Fr|Messages Fr]]
-- [[_COMMUNITY_Package Module|Package Module]]
-- [[_COMMUNITY_Middleware Module|Middleware Module]]
-- [[_COMMUNITY_Services Alerting|Services Alerting]]
-- [[_COMMUNITY_Api Openapi|Api Openapi]]
-- [[_COMMUNITY_Auth Page|Auth Page]]
-- [[_COMMUNITY_Messages En|Messages En]]
-- [[_COMMUNITY_Mfa Enterprise|Mfa Enterprise]]
-- [[_COMMUNITY_Services Passwordbreach|Services Passwordbreach]]
-- [[_COMMUNITY_Schemas Admin|Schemas Admin]]
-- [[_COMMUNITY_Services Module|Services Module]]
-- [[_COMMUNITY_Load Login|Load Login]]
-- [[_COMMUNITY_Messages Es|Messages Es]]
-- [[_COMMUNITY_Messages Es|Messages Es]]
-- [[_COMMUNITY_Messages Fr|Messages Fr]]
-- [[_COMMUNITY_Messages Fr|Messages Fr]]
-- [[_COMMUNITY_Meta 0000|Meta 0000]]
-- [[_COMMUNITY_Meta 0001|Meta 0001]]
-- [[_COMMUNITY_Mfa Attestation|Mfa Attestation]]
-- [[_COMMUNITY_Packages Module|Packages Module]]
-- [[_COMMUNITY_Scripts Db|Scripts Db]]
-- [[_COMMUNITY_Src Module|Src Module]]
-- [[_COMMUNITY_Api Openapi|Api Openapi]]
-- [[_COMMUNITY_Kibana Module|Kibana Module]]
-- [[_COMMUNITY_Messages En|Messages En]]
-- [[_COMMUNITY_Messages Es|Messages Es]]
-- [[_COMMUNITY_Messages Fr|Messages Fr]]
-- [[_COMMUNITY_Meta 0000|Meta 0000]]
-- [[_COMMUNITY_Meta 0000|Meta 0000]]
-- [[_COMMUNITY_Meta 0000|Meta 0000]]
-- [[_COMMUNITY_Meta 0000|Meta 0000]]
-- [[_COMMUNITY_Meta 0000|Meta 0000]]
-- [[_COMMUNITY_Meta 0000|Meta 0000]]
-- [[_COMMUNITY_Meta 0000|Meta 0000]]
-- [[_COMMUNITY_Services Dbbackup|Services Dbbackup]]
-- [[_COMMUNITY_Schemas Mfa|Schemas Mfa]]
-- [[_COMMUNITY_Src Module|Src Module]]
-- [[_COMMUNITY_Src Module|Src Module]]
-- [[_COMMUNITY_Src Module|Src Module]]
-- [[_COMMUNITY_Api Openapi|Api Openapi]]
-- [[_COMMUNITY_Perf Module|Perf Module]]
-- [[_COMMUNITY_Components Errorboundary|Components Errorboundary]]
-- [[_COMMUNITY_Meta 0000|Meta 0000]]
-- [[_COMMUNITY_Prettierrc Module|Prettierrc Module]]
-- [[_COMMUNITY_Providers Apple|Providers Apple]]
-- [[_COMMUNITY_Changelog Module|Changelog Module]]
-- [[_COMMUNITY_Claude Module|Claude Module]]
-- [[_COMMUNITY_Readme Module|Readme Module]]
-- [[_COMMUNITY_Components Module|Components Module]]
-- [[_COMMUNITY_Changelog Module|Changelog Module]]
-- [[_COMMUNITY_Load Chaos|Load Chaos]]
-- [[_COMMUNITY_Src Module|Src Module]]
-- [[_COMMUNITY_Api Openapi|Api Openapi]]
-- [[_COMMUNITY_Api Openapi|Api Openapi]]
-- [[_COMMUNITY_Ci Module|Ci Module]]
-- [[_COMMUNITY_Kibana Module|Kibana Module]]
-- [[_COMMUNITY_Icon512 Module|Icon512 Module]]
-- [[_COMMUNITY_Messages En|Messages En]]
-- [[_COMMUNITY_Messages Es|Messages Es]]
-- [[_COMMUNITY_Messages Fr|Messages Fr]]
-- [[_COMMUNITY_Meta 0000|Meta 0000]]
-- [[_COMMUNITY_Meta 0000|Meta 0000]]
-- [[_COMMUNITY_Meta 0000|Meta 0000]]
-- [[_COMMUNITY_Meta 0000|Meta 0000]]
-- [[_COMMUNITY_Meta 0000|Meta 0000]]
-- [[_COMMUNITY_Meta 0000|Meta 0000]]
-- [[_COMMUNITY_Meta 0000|Meta 0000]]
-- [[_COMMUNITY_Meta 0000|Meta 0000]]
-- [[_COMMUNITY_Drizzle Module|Drizzle Module]]
-- [[_COMMUNITY_Meta 0001|Meta 0001]]
-- [[_COMMUNITY_Meta 0001|Meta 0001]]
-- [[_COMMUNITY_Meta 0001|Meta 0001]]
-- [[_COMMUNITY_Meta 0001|Meta 0001]]
-- [[_COMMUNITY_Meta 0001|Meta 0001]]
-- [[_COMMUNITY_Meta 0001|Meta 0001]]
-- [[_COMMUNITY_Mfa Resident|Mfa Resident]]
-- [[_COMMUNITY_Data Module|Data Module]]
-- [[_COMMUNITY_Providers Facebook|Providers Facebook]]
-- [[_COMMUNITY_Src Module|Src Module]]
-- [[_COMMUNITY_Src Module|Src Module]]
-- [[_COMMUNITY_Api Openapi|Api Openapi]]
-- [[_COMMUNITY_Api Openapi|Api Openapi]]
-- [[_COMMUNITY_Docker Compose|Docker Compose]]
-- [[_COMMUNITY_Messages Es|Messages Es]]
-- [[_COMMUNITY_Messages Es|Messages Es]]
-- [[_COMMUNITY_Messages Es|Messages Es]]
-- [[_COMMUNITY_Messages Fr|Messages Fr]]
-- [[_COMMUNITY_Messages Fr|Messages Fr]]
-- [[_COMMUNITY_Messages Fr|Messages Fr]]
-- [[_COMMUNITY_Meta 0000|Meta 0000]]
-- [[_COMMUNITY_Meta 0000|Meta 0000]]
-- [[_COMMUNITY_Meta 0000|Meta 0000]]
-- [[_COMMUNITY_Meta 0000|Meta 0000]]
-- [[_COMMUNITY_Meta 0000|Meta 0000]]
-- [[_COMMUNITY_Meta 0000|Meta 0000]]
-- [[_COMMUNITY_Meta 0000|Meta 0000]]
-- [[_COMMUNITY_Meta 0000|Meta 0000]]
-- [[_COMMUNITY_Meta 0000|Meta 0000]]
-- [[_COMMUNITY_Meta 0000|Meta 0000]]
-- [[_COMMUNITY_Meta 0000|Meta 0000]]
-- [[_COMMUNITY_Meta 0000|Meta 0000]]
-- [[_COMMUNITY_Meta 0000|Meta 0000]]
-- [[_COMMUNITY_Meta 0000|Meta 0000]]
-- [[_COMMUNITY_Meta 0000|Meta 0000]]
-- [[_COMMUNITY_Meta 0000|Meta 0000]]
-- [[_COMMUNITY_Meta 0000|Meta 0000]]
-- [[_COMMUNITY_Meta 0000|Meta 0000]]
-- [[_COMMUNITY_Meta 0000|Meta 0000]]
-- [[_COMMUNITY_Meta 0000|Meta 0000]]
-- [[_COMMUNITY_Meta 0000|Meta 0000]]
-- [[_COMMUNITY_Meta 0000|Meta 0000]]
-- [[_COMMUNITY_Meta 0001|Meta 0001]]
-- [[_COMMUNITY_Meta 0001|Meta 0001]]
-- [[_COMMUNITY_Meta 0001|Meta 0001]]
-- [[_COMMUNITY_Meta 0001|Meta 0001]]
-- [[_COMMUNITY_Meta 0001|Meta 0001]]
-- [[_COMMUNITY_Meta 0001|Meta 0001]]
-- [[_COMMUNITY_Meta 0001|Meta 0001]]
-- [[_COMMUNITY_Meta 0001|Meta 0001]]
-- [[_COMMUNITY_Meta 0001|Meta 0001]]
-- [[_COMMUNITY_Meta 0001|Meta 0001]]
-- [[_COMMUNITY_Meta 0001|Meta 0001]]
-- [[_COMMUNITY_Meta 0001|Meta 0001]]
-- [[_COMMUNITY_Meta 0001|Meta 0001]]
-- [[_COMMUNITY_Meta 0001|Meta 0001]]
-- [[_COMMUNITY_Meta 0001|Meta 0001]]
-- [[_COMMUNITY_Meta 0001|Meta 0001]]
-- [[_COMMUNITY_Meta 0001|Meta 0001]]
-- [[_COMMUNITY_Meta 0001|Meta 0001]]
-- [[_COMMUNITY_Meta 0001|Meta 0001]]
-- [[_COMMUNITY_Meta 0001|Meta 0001]]
-- [[_COMMUNITY_Shared Module|Shared Module]]
-- [[_COMMUNITY_Schemas Module|Schemas Module]]
-- [[_COMMUNITY_Src Module|Src Module]]
-- [[_COMMUNITY_Packages Module|Packages Module]]
-- [[_COMMUNITY_Src Module|Src Module]]
-- [[_COMMUNITY_Mcp Module|Mcp Module]]
-- [[_COMMUNITY_Drizzle Module|Drizzle Module]]
-- [[_COMMUNITY_Icon192 Module|Icon192 Module]]
-- [[_COMMUNITY_Packages Module|Packages Module]]
-- [[_COMMUNITY_Api Openapi|Api Openapi]]
-- [[_COMMUNITY_Claude Settings|Claude Settings]]
-- [[_COMMUNITY_Vscode Launch|Vscode Launch]]
-- [[_COMMUNITY_Releaserc Module|Releaserc Module]]
-- [[_COMMUNITY_Routes Org|Routes Org]]
-- [[_COMMUNITY_Shared Module|Shared Module]]
-- [[_COMMUNITY_Src Module|Src Module]]
-- [[_COMMUNITY_Src Module|Src Module]]
-- [[_COMMUNITY_Src Module|Src Module]]
-- [[_COMMUNITY_Readme Nginx|Readme Nginx]]
-- [[_COMMUNITY_Readme Pm2|Readme Pm2]]
-- [[_COMMUNITY_Claude Md|Claude Md]]
-- [[_COMMUNITY_Security Md|Security Md]]
+- [[_COMMUNITY_Community 0|Community 0]]
+- [[_COMMUNITY_Community 1|Community 1]]
+- [[_COMMUNITY_Community 2|Community 2]]
+- [[_COMMUNITY_Community 3|Community 3]]
+- [[_COMMUNITY_Community 4|Community 4]]
+- [[_COMMUNITY_Community 5|Community 5]]
+- [[_COMMUNITY_Community 6|Community 6]]
+- [[_COMMUNITY_Community 7|Community 7]]
+- [[_COMMUNITY_Community 8|Community 8]]
+- [[_COMMUNITY_Community 9|Community 9]]
+- [[_COMMUNITY_Community 10|Community 10]]
+- [[_COMMUNITY_Community 11|Community 11]]
+- [[_COMMUNITY_Community 12|Community 12]]
+- [[_COMMUNITY_Community 13|Community 13]]
+- [[_COMMUNITY_Community 14|Community 14]]
+- [[_COMMUNITY_Community 15|Community 15]]
+- [[_COMMUNITY_Community 16|Community 16]]
+- [[_COMMUNITY_Community 17|Community 17]]
+- [[_COMMUNITY_Community 18|Community 18]]
+- [[_COMMUNITY_Community 19|Community 19]]
+- [[_COMMUNITY_Community 20|Community 20]]
+- [[_COMMUNITY_Community 21|Community 21]]
+- [[_COMMUNITY_Community 22|Community 22]]
+- [[_COMMUNITY_Community 23|Community 23]]
+- [[_COMMUNITY_Community 24|Community 24]]
+- [[_COMMUNITY_Community 25|Community 25]]
+- [[_COMMUNITY_Community 26|Community 26]]
+- [[_COMMUNITY_Community 27|Community 27]]
+- [[_COMMUNITY_Community 28|Community 28]]
+- [[_COMMUNITY_Community 29|Community 29]]
+- [[_COMMUNITY_Community 30|Community 30]]
+- [[_COMMUNITY_Community 31|Community 31]]
+- [[_COMMUNITY_Community 32|Community 32]]
+- [[_COMMUNITY_Community 33|Community 33]]
+- [[_COMMUNITY_Community 34|Community 34]]
+- [[_COMMUNITY_Community 35|Community 35]]
+- [[_COMMUNITY_Community 36|Community 36]]
+- [[_COMMUNITY_Community 37|Community 37]]
+- [[_COMMUNITY_Community 38|Community 38]]
+- [[_COMMUNITY_Community 39|Community 39]]
+- [[_COMMUNITY_Community 40|Community 40]]
+- [[_COMMUNITY_Community 41|Community 41]]
+- [[_COMMUNITY_Community 42|Community 42]]
+- [[_COMMUNITY_Community 43|Community 43]]
+- [[_COMMUNITY_Community 44|Community 44]]
+- [[_COMMUNITY_Community 45|Community 45]]
+- [[_COMMUNITY_Community 46|Community 46]]
+- [[_COMMUNITY_Community 47|Community 47]]
+- [[_COMMUNITY_Community 48|Community 48]]
+- [[_COMMUNITY_Community 49|Community 49]]
+- [[_COMMUNITY_Community 50|Community 50]]
+- [[_COMMUNITY_Community 51|Community 51]]
+- [[_COMMUNITY_Community 52|Community 52]]
+- [[_COMMUNITY_Community 53|Community 53]]
+- [[_COMMUNITY_Community 54|Community 54]]
+- [[_COMMUNITY_Community 55|Community 55]]
+- [[_COMMUNITY_Community 56|Community 56]]
+- [[_COMMUNITY_Community 57|Community 57]]
+- [[_COMMUNITY_Community 58|Community 58]]
+- [[_COMMUNITY_Community 59|Community 59]]
+- [[_COMMUNITY_Community 60|Community 60]]
+- [[_COMMUNITY_Community 61|Community 61]]
+- [[_COMMUNITY_Community 62|Community 62]]
+- [[_COMMUNITY_Community 63|Community 63]]
+- [[_COMMUNITY_Community 64|Community 64]]
+- [[_COMMUNITY_Community 65|Community 65]]
+- [[_COMMUNITY_Community 66|Community 66]]
+- [[_COMMUNITY_Community 67|Community 67]]
+- [[_COMMUNITY_Community 68|Community 68]]
+- [[_COMMUNITY_Community 69|Community 69]]
+- [[_COMMUNITY_Community 70|Community 70]]
+- [[_COMMUNITY_Community 71|Community 71]]
+- [[_COMMUNITY_Community 72|Community 72]]
+- [[_COMMUNITY_Community 73|Community 73]]
+- [[_COMMUNITY_Community 74|Community 74]]
+- [[_COMMUNITY_Community 75|Community 75]]
+- [[_COMMUNITY_Community 76|Community 76]]
+- [[_COMMUNITY_Community 77|Community 77]]
+- [[_COMMUNITY_Community 78|Community 78]]
+- [[_COMMUNITY_Community 79|Community 79]]
+- [[_COMMUNITY_Community 80|Community 80]]
+- [[_COMMUNITY_Community 81|Community 81]]
+- [[_COMMUNITY_Community 82|Community 82]]
+- [[_COMMUNITY_Community 83|Community 83]]
+- [[_COMMUNITY_Community 84|Community 84]]
+- [[_COMMUNITY_Community 85|Community 85]]
+- [[_COMMUNITY_Community 86|Community 86]]
+- [[_COMMUNITY_Community 87|Community 87]]
+- [[_COMMUNITY_Community 88|Community 88]]
+- [[_COMMUNITY_Community 89|Community 89]]
+- [[_COMMUNITY_Community 90|Community 90]]
+- [[_COMMUNITY_Community 91|Community 91]]
+- [[_COMMUNITY_Community 92|Community 92]]
+- [[_COMMUNITY_Community 93|Community 93]]
+- [[_COMMUNITY_Community 94|Community 94]]
+- [[_COMMUNITY_Community 95|Community 95]]
+- [[_COMMUNITY_Community 96|Community 96]]
+- [[_COMMUNITY_Community 97|Community 97]]
+- [[_COMMUNITY_Community 98|Community 98]]
+- [[_COMMUNITY_Community 99|Community 99]]
+- [[_COMMUNITY_Community 100|Community 100]]
+- [[_COMMUNITY_Community 101|Community 101]]
+- [[_COMMUNITY_Community 102|Community 102]]
+- [[_COMMUNITY_Community 103|Community 103]]
+- [[_COMMUNITY_Community 104|Community 104]]
+- [[_COMMUNITY_Community 105|Community 105]]
+- [[_COMMUNITY_Community 106|Community 106]]
+- [[_COMMUNITY_Community 107|Community 107]]
+- [[_COMMUNITY_Community 108|Community 108]]
+- [[_COMMUNITY_Community 109|Community 109]]
+- [[_COMMUNITY_Community 110|Community 110]]
+- [[_COMMUNITY_Community 111|Community 111]]
+- [[_COMMUNITY_Community 112|Community 112]]
+- [[_COMMUNITY_Community 113|Community 113]]
+- [[_COMMUNITY_Community 114|Community 114]]
+- [[_COMMUNITY_Community 115|Community 115]]
+- [[_COMMUNITY_Community 116|Community 116]]
+- [[_COMMUNITY_Community 117|Community 117]]
+- [[_COMMUNITY_Community 118|Community 118]]
+- [[_COMMUNITY_Community 119|Community 119]]
+- [[_COMMUNITY_Community 120|Community 120]]
+- [[_COMMUNITY_Community 121|Community 121]]
+- [[_COMMUNITY_Community 122|Community 122]]
+- [[_COMMUNITY_Community 123|Community 123]]
+- [[_COMMUNITY_Community 124|Community 124]]
+- [[_COMMUNITY_Community 125|Community 125]]
+- [[_COMMUNITY_Community 126|Community 126]]
+- [[_COMMUNITY_Community 127|Community 127]]
+- [[_COMMUNITY_Community 128|Community 128]]
+- [[_COMMUNITY_Community 129|Community 129]]
+- [[_COMMUNITY_Community 130|Community 130]]
+- [[_COMMUNITY_Community 131|Community 131]]
+- [[_COMMUNITY_Community 132|Community 132]]
+- [[_COMMUNITY_Community 133|Community 133]]
+- [[_COMMUNITY_Community 134|Community 134]]
+- [[_COMMUNITY_Community 135|Community 135]]
+- [[_COMMUNITY_Community 136|Community 136]]
+- [[_COMMUNITY_Community 137|Community 137]]
+- [[_COMMUNITY_Community 138|Community 138]]
+- [[_COMMUNITY_Community 139|Community 139]]
+- [[_COMMUNITY_Community 140|Community 140]]
+- [[_COMMUNITY_Community 141|Community 141]]
+- [[_COMMUNITY_Community 142|Community 142]]
+- [[_COMMUNITY_Community 143|Community 143]]
+- [[_COMMUNITY_Community 144|Community 144]]
+- [[_COMMUNITY_Community 145|Community 145]]
+- [[_COMMUNITY_Community 146|Community 146]]
+- [[_COMMUNITY_Community 147|Community 147]]
+- [[_COMMUNITY_Community 148|Community 148]]
+- [[_COMMUNITY_Community 149|Community 149]]
+- [[_COMMUNITY_Community 150|Community 150]]
+- [[_COMMUNITY_Community 151|Community 151]]
+- [[_COMMUNITY_Community 152|Community 152]]
+- [[_COMMUNITY_Community 153|Community 153]]
+- [[_COMMUNITY_Community 154|Community 154]]
+- [[_COMMUNITY_Community 155|Community 155]]
+- [[_COMMUNITY_Community 156|Community 156]]
+- [[_COMMUNITY_Community 157|Community 157]]
+- [[_COMMUNITY_Community 158|Community 158]]
+- [[_COMMUNITY_Community 159|Community 159]]
+- [[_COMMUNITY_Community 160|Community 160]]
+- [[_COMMUNITY_Community 161|Community 161]]
+- [[_COMMUNITY_Community 162|Community 162]]
+- [[_COMMUNITY_Community 163|Community 163]]
+- [[_COMMUNITY_Community 164|Community 164]]
+- [[_COMMUNITY_Community 165|Community 165]]
+- [[_COMMUNITY_Community 166|Community 166]]
+- [[_COMMUNITY_Community 167|Community 167]]
+- [[_COMMUNITY_Community 168|Community 168]]
+- [[_COMMUNITY_Community 169|Community 169]]
+- [[_COMMUNITY_Community 170|Community 170]]
+- [[_COMMUNITY_Community 171|Community 171]]
+- [[_COMMUNITY_Community 172|Community 172]]
+- [[_COMMUNITY_Community 173|Community 173]]
+- [[_COMMUNITY_Community 174|Community 174]]
+- [[_COMMUNITY_Community 175|Community 175]]
+- [[_COMMUNITY_Community 176|Community 176]]
+- [[_COMMUNITY_Community 177|Community 177]]
+- [[_COMMUNITY_Community 178|Community 178]]
+- [[_COMMUNITY_Community 179|Community 179]]
+- [[_COMMUNITY_Community 180|Community 180]]
+- [[_COMMUNITY_Community 181|Community 181]]
+- [[_COMMUNITY_Community 182|Community 182]]
+- [[_COMMUNITY_Community 183|Community 183]]
+- [[_COMMUNITY_Community 184|Community 184]]
+- [[_COMMUNITY_Community 185|Community 185]]
+- [[_COMMUNITY_Community 186|Community 186]]
+- [[_COMMUNITY_Community 187|Community 187]]
+- [[_COMMUNITY_Community 188|Community 188]]
+- [[_COMMUNITY_Community 189|Community 189]]
+- [[_COMMUNITY_Community 190|Community 190]]
+- [[_COMMUNITY_Community 191|Community 191]]
+- [[_COMMUNITY_Community 192|Community 192]]
+- [[_COMMUNITY_Community 193|Community 193]]
+- [[_COMMUNITY_Community 194|Community 194]]
+- [[_COMMUNITY_Community 195|Community 195]]
+- [[_COMMUNITY_Community 196|Community 196]]
+- [[_COMMUNITY_Community 197|Community 197]]
+- [[_COMMUNITY_Community 198|Community 198]]
+- [[_COMMUNITY_Community 199|Community 199]]
+- [[_COMMUNITY_Community 200|Community 200]]
+- [[_COMMUNITY_Community 201|Community 201]]
+- [[_COMMUNITY_Community 202|Community 202]]
+- [[_COMMUNITY_Community 203|Community 203]]
+- [[_COMMUNITY_Community 204|Community 204]]
+- [[_COMMUNITY_Community 205|Community 205]]
+- [[_COMMUNITY_Community 206|Community 206]]
+- [[_COMMUNITY_Community 207|Community 207]]
+- [[_COMMUNITY_Community 208|Community 208]]
+- [[_COMMUNITY_Community 209|Community 209]]
+- [[_COMMUNITY_Community 210|Community 210]]
+- [[_COMMUNITY_Community 211|Community 211]]
+- [[_COMMUNITY_Community 212|Community 212]]
+- [[_COMMUNITY_Community 213|Community 213]]
+- [[_COMMUNITY_Community 214|Community 214]]
+- [[_COMMUNITY_Community 215|Community 215]]
+- [[_COMMUNITY_Community 216|Community 216]]
+- [[_COMMUNITY_Community 217|Community 217]]
+- [[_COMMUNITY_Community 218|Community 218]]
+- [[_COMMUNITY_Community 219|Community 219]]
+- [[_COMMUNITY_Community 220|Community 220]]
+- [[_COMMUNITY_Community 221|Community 221]]
+- [[_COMMUNITY_Community 222|Community 222]]
+- [[_COMMUNITY_Community 223|Community 223]]
+- [[_COMMUNITY_Community 224|Community 224]]
+- [[_COMMUNITY_Community 225|Community 225]]
+- [[_COMMUNITY_Community 226|Community 226]]
+- [[_COMMUNITY_Community 227|Community 227]]
+- [[_COMMUNITY_Community 228|Community 228]]
+- [[_COMMUNITY_Community 229|Community 229]]
+- [[_COMMUNITY_Community 230|Community 230]]
+- [[_COMMUNITY_Community 231|Community 231]]
+- [[_COMMUNITY_Community 232|Community 232]]
+- [[_COMMUNITY_Community 233|Community 233]]
+- [[_COMMUNITY_Community 234|Community 234]]
+- [[_COMMUNITY_Community 235|Community 235]]
+- [[_COMMUNITY_Community 236|Community 236]]
+- [[_COMMUNITY_Community 237|Community 237]]
+- [[_COMMUNITY_Community 238|Community 238]]
+- [[_COMMUNITY_Community 239|Community 239]]
+- [[_COMMUNITY_Community 240|Community 240]]
+- [[_COMMUNITY_Community 241|Community 241]]
+- [[_COMMUNITY_Community 242|Community 242]]
+- [[_COMMUNITY_Community 243|Community 243]]
+- [[_COMMUNITY_Community 244|Community 244]]
+- [[_COMMUNITY_Community 245|Community 245]]
+- [[_COMMUNITY_Community 246|Community 246]]
+- [[_COMMUNITY_Community 247|Community 247]]
+- [[_COMMUNITY_Community 248|Community 248]]
+- [[_COMMUNITY_Community 249|Community 249]]
+- [[_COMMUNITY_Community 250|Community 250]]
+- [[_COMMUNITY_Community 251|Community 251]]
+- [[_COMMUNITY_Community 252|Community 252]]
+- [[_COMMUNITY_Community 253|Community 253]]
+- [[_COMMUNITY_Community 254|Community 254]]
+- [[_COMMUNITY_Community 255|Community 255]]
+- [[_COMMUNITY_Community 256|Community 256]]
+- [[_COMMUNITY_Community 257|Community 257]]
+- [[_COMMUNITY_Community 258|Community 258]]
+- [[_COMMUNITY_Community 261|Community 261]]
+- [[_COMMUNITY_Community 262|Community 262]]
+- [[_COMMUNITY_Community 264|Community 264]]
+- [[_COMMUNITY_Community 265|Community 265]]
+- [[_COMMUNITY_Community 266|Community 266]]
+- [[_COMMUNITY_Community 267|Community 267]]
+- [[_COMMUNITY_Community 285|Community 285]]
+- [[_COMMUNITY_Community 286|Community 286]]
+- [[_COMMUNITY_Community 287|Community 287]]
+- [[_COMMUNITY_Community 288|Community 288]]
+- [[_COMMUNITY_Community 289|Community 289]]
+- [[_COMMUNITY_Community 290|Community 290]]
+- [[_COMMUNITY_Community 291|Community 291]]
+- [[_COMMUNITY_Community 292|Community 292]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `getDb()` - 89 edges
 2. `getLogger()` - 87 edges
 3. `HonoEnv` - 53 edges
-4. `getConfig()` - 43 edges
-5. `compilerOptions` - 32 edges
-6. `common` - 30 edges
-7. `paths` - 29 edges
-8. `responses` - 29 edges
-9. `organizations` - 28 edges
-10. `api` - 28 edges
+4. `cn()` - 47 edges
+5. `getConfig()` - 43 edges
+6. `compilerOptions` - 32 edges
+7. `api` - 31 edges
+8. `common` - 30 edges
+9. `paths` - 29 edges
+10. `responses` - 29 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `Client-Side Field Level Encryption (CSFLE)` --semantically_similar_to--> `PASETO v4 Access Tokens`  [INFERRED] [semantically similar]
-  CHANGELOG.md → README.md
-- `Login Anomaly Detection` --semantically_similar_to--> `Continuous Access Evaluation`  [INFERRED] [semantically similar]
+- `PASETO v4 Tokens` --semantically_similar_to--> `Client-Side Field Level Encryption (CSFLE)`  [INFERRED] [semantically similar]
+  README.md → CHANGELOG.md
+- `Anomaly Detection` --semantically_similar_to--> `Continuous Access Evaluation`  [INFERRED] [semantically similar]
   README.md → STARTER.md
-- `initializeDatabase()` --calls--> `postgres`  [INFERRED]
-  src/db/index.ts → package.json
-- `purgeExpiredRefreshTokens()` --calls--> `or`  [INFERRED]
-  src/services/dataRetention.ts → packages/ui/messages/en.json
-- `Why Not gRPC (Monolith Rationale)` --rationale_for--> `Hono API Server`  [EXTRACTED]
-  docs/performance-analysis.md → README.md
+- `User-facing Webhooks` --semantically_similar_to--> `Notification Center (SSE)`  [INFERRED] [semantically similar]
+  STARTER.md → README.md
+- `Passkeys / WebAuthn (FIDO2)` --semantically_similar_to--> `Decentralized Identifiers (DID)`  [INFERRED] [semantically similar]
+  README.md → ROADMAP.md
+- `postgres` --calls--> `initializeDatabase()`  [INFERRED]
+  package.json → src/db/index.ts
 
 ## Hyperedges (group relationships)
-- **Observability Stack (OpenTelemetry + Jaeger + Prometheus + Elasticsearch + Kibana)** — readme_opentelemetry, tracing_jaeger, readme_prometheus_metrics, readme_elasticsearch, kibana_readme [EXTRACTED 1.00]
-- **Core Authentication and Security (PASETO + RBAC/ABAC + MFA + WebAuthn + Anomaly Detection)** — readme_paseto_tokens, readme_rbac_abac, readme_mfa, readme_webauthn_passkeys, readme_anomaly_detection [EXTRACTED 1.00]
-- **Infrastructure Services (PostgreSQL + Redis + Elasticsearch)** — docker_compose_postgres_service, docker_compose_redis_service, docker_compose_elasticsearch_service [EXTRACTED 1.00]
+- **Durable JIT + federation via migration 0003** — roadmap_migration_0003, roadmap_cross_tenant_jit_requests_table, roadmap_federated_providers_table, roadmap_db_backed_jit_store, roadmap_db_backed_federation_registry, roadmap_durable_persistence [INFERRED 0.85]
 
-## Communities (271 total, 13 thin omitted)
+## Communities (293 total, 25 thin omitted)
 
-### Community 0 - "Security Events & Email Templates"
-Cohesion: 0.06
-Nodes (49): securityEventsTable, BillingEventEmailData, billingEventEmailTemplate(), MagicLinkEmailData, magicLinkEmailTemplate(), NotificationEmailData, notificationEmailTemplate(), OtpEmailData (+41 more)
+### Community 0 - "Community 0"
+Cohesion: 0.04
+Nodes (49): AuditEntry, MOCK_ENTRIES, Badge(), BadgeProps, colorMap, LOCALES, ChecklistItem, ITEMS (+41 more)
 
-### Community 1 - "Authorization & Audit Logging"
+### Community 1 - "Community 1"
 Cohesion: 0.05
-Nodes (37): auditLogsTable, jitAccessTable, rolesTable, authzEngine, ContinuousEvalConfig, DEFAULT_CONFIG, logger, deviceAttestationMiddleware (+29 more)
+Nodes (36): ApiKey, roundedMap, SkeletonCard(), SkeletonProps, SkeletonTable(), SkeletonTableProps, SkeletonText(), VerifyEmailBanner() (+28 more)
 
-### Community 2 - "DB Schema Migrations"
+### Community 2 - "Community 2"
+Cohesion: 0.06
+Nodes (30): alsoIncluded, features, LandingPage(), standards, steps, highlights, metadata, metadata (+22 more)
+
+### Community 3 - "Community 3"
+Cohesion: 0.05
+Nodes (31): jitAccessTable, authzEngine, ContinuousEvalConfig, DEFAULT_CONFIG, logger, logger, nonceCache, requireProofOfPossession() (+23 more)
+
+### Community 4 - "Community 4"
+Cohesion: 0.11
+Nodes (51): description, post, post, post, post, post, post, post (+43 more)
+
+### Community 5 - "Community 5"
 Cohesion: 0.04
 Nodes (49): description, enabled, enabled_for_users, key, rollout_percent, updated_at, name, notNull (+41 more)
 
-### Community 3 - "Auth API Routes"
-Cohesion: 0.10
-Nodes (48): post, post, post, post, post, post, post, post (+40 more)
-
-### Community 4 - "Notification Channels (Email/SMS)"
-Cohesion: 0.05
-Nodes (41): getTransporter(), logger, sendEmailOTP(), logger, sendSmsOTP(), logger, sendTelegramOTP(), logger (+33 more)
-
-### Community 5 - "Configuration & Secrets"
+### Community 6 - "Community 6"
 Cohesion: 0.07
-Nodes (30): DEFAULT_CONFIG, getConfig(), loadConfig(), validateConfig(), initializeCSFLE(), initializeDatabase(), createChildLogger(), initializeLogger() (+22 more)
+Nodes (35): buildEsClient(), ESBulkItem, flushAuditPipeline(), flushPendingDocs(), getElasticsearchHealth(), getIndexName(), indexAuditLogToES(), initAuditPipeline() (+27 more)
 
-### Community 6 - "TypeScript Config"
+### Community 7 - "Community 7"
+Cohesion: 0.06
+Nodes (42): otpsTable, refreshTokensTable, saasSettingsTable, getSettings(), SaaSSettings, updateSettings(), action, actorId (+34 more)
+
+### Community 8 - "Community 8"
+Cohesion: 0.11
+Nodes (21): passwordStrength(), RegisterPage(), Alert, AlertDescription, AlertTitle, alertVariants, Avatar, AvatarFallback (+13 more)
+
+### Community 9 - "Community 9"
 Cohesion: 0.05
 Nodes (43): compilerOptions, allowImportingTsExtensions, allowSyntheticDefaultImports, alwaysStrict, declaration, declarationMap, esModuleInterop, forceConsistentCasingInFileNames (+35 more)
 
-### Community 7 - "Crypto & Key Management"
+### Community 10 - "Community 10"
 Cohesion: 0.05
 Nodes (9): createHardwareKeyStore(), HardwareKeyProvider, initHardwareKeyStore(), logger, NotImplementedError, PKCS11Provider, SecureEnclaveProvider, SoftwareKeyProvider (+1 more)
 
-### Community 8 - "OIDC Provider"
+### Community 11 - "Community 11"
+Cohesion: 0.08
+Nodes (33): getDb(), featureFlagsTable, securityEventsTable, or, assessTakeoverRisk(), logger, recordAndRespond(), recordSensitiveChange() (+25 more)
+
+### Community 12 - "Community 12"
 Cohesion: 0.05
-Nodes (38): AuthCodeEntry, authCodes, AuthorizeParams, buildUserInfo(), clientStore, exchangeAuthCode(), generateAuthCode(), getDiscoveryDocument() (+30 more)
+Nodes (37): AcceptInviteSchema, body, CreateInviteSchema, CreateOrgSchema, currentUser, customRoleSchema, db, DrizzleDB (+29 more)
 
-### Community 9 - "Session & Token Management"
-Cohesion: 0.05
-Nodes (34): sessionsTable, logger, nonceCache, requireProofOfPossession(), adapter, ALLOWED_AVATAR_TYPES, cfg, code (+26 more)
+### Community 13 - "Community 13"
+Cohesion: 0.08
+Nodes (31): base58Decode(), resolveDID(), resolveDIDKey(), resolveDIDWeb(), app, body, ch, config (+23 more)
 
-### Community 10 - "UI Components"
-Cohesion: 0.07
-Nodes (30): ChecklistItem, ITEMS, roundedMap, SkeletonCard(), SkeletonProps, SkeletonTable(), SkeletonTableProps, SkeletonText() (+22 more)
-
-### Community 11 - "Admin & Billing Plans"
-Cohesion: 0.06
-Nodes (32): subscriptionsTable, admin, billable, byPlan, csv, db, ids, key (+24 more)
-
-### Community 12 - "UI Package Dependencies"
-Cohesion: 0.05
-Nodes (36): dependencies, next, next-intl, @next/swc-wasm-nodejs, @next/swc-wasm-web, next-themes, @parcel/watcher-win32-x64, react (+28 more)
-
-### Community 13 - "API Keys & Token Storage"
+### Community 14 - "Community 14"
 Cohesion: 0.09
-Nodes (31): apiKeysTable, otpsTable, refreshTokensTable, saasSettingsTable, usersTable, apiKeyAuth, getSettings(), SaaSSettings (+23 more)
+Nodes (30): federatedProvidersTable, usersTable, exchangeToken(), getTokenService(), logger, FederatedIdentityOptions, logger, fromRow() (+22 more)
 
-### Community 14 - "Feature Flags & DB"
-Cohesion: 0.10
-Nodes (28): getDb(), featureFlagsTable, or, enforceMaxConcurrentDevices(), logger, revokeAllSessionsForUser(), revokeSession(), daysAgo() (+20 more)
-
-### Community 15 - "Continuous Verification"
+### Community 15 - "Community 15"
 Cohesion: 0.07
 Nodes (29): ContinuousVerificationOptions, getVerification(), logger, now, recordVerification(), VerificationRecord, verificationStore, allowCredentials (+21 more)
 
-### Community 16 - "Org Management & Invites"
-Cohesion: 0.06
-Nodes (33): organizationInvitesTable, organizationsTable, orgCustomRolesTable, AcceptInviteSchema, body, CreateInviteSchema, CreateOrgSchema, currentUser (+25 more)
-
-### Community 17 - "Multi-Tenant Model"
+### Community 16 - "Community 16"
 Cohesion: 0.07
 Nodes (32): createTenant(), CreateTenantData, DEFAULT_SETTINGS, getAllTenants(), getTenant(), getTenantBySlug(), OidcConfig, SamlConfig (+24 more)
 
-### Community 18 - "SCIM Provisioning"
+### Community 17 - "Community 17"
 Cohesion: 0.07
 Nodes (31): baseUrl, body, count, currentParts, db, fields, filterStr, id (+23 more)
 
-### Community 19 - "Org Members & Billing"
-Cohesion: 0.07
-Nodes (29): organizationMembersTable, usageCountersTable, canManageOrgBilling(), db, findSubscription(), logger, orgId, priceId (+21 more)
+### Community 18 - "Community 18"
+Cohesion: 0.09
+Nodes (25): getTransporter(), logger, sendEmailOTP(), logger, sendSmsOTP(), logger, sendTelegramOTP(), logger (+17 more)
 
-### Community 20 - "Notification Dispatcher"
+### Community 19 - "Community 19"
 Cohesion: 0.10
 Nodes (20): initNotificationsFromEnv(), NotificationDispatcher, COLORS, EMOJIS, formatFields(), formatPagerDutyPayload(), formatSlackMessage(), formatTeamsMessage() (+12 more)
 
-### Community 21 - "Federation & Token Exchange"
-Cohesion: 0.11
-Nodes (26): exchangeToken(), getTokenService(), logger, FederatedIdentityOptions, logger, getProvider(), initFederationFromEnv(), listProviders() (+18 more)
+### Community 20 - "Community 20"
+Cohesion: 0.07
+Nodes (22): feedbackTable, client, filter, logger, router, user, scheduleLDAPSync(), syncAllUsers() (+14 more)
 
-### Community 22 - "i18n Translations"
+### Community 21 - "Community 21"
 Cohesion: 0.06
 Nodes (32): organizations, billingEmail, create, delete, deleteConfirm, deleted, invite, inviteEmail (+24 more)
 
-### Community 23 - "Audit Log Pipeline (ES)"
+### Community 22 - "Community 22"
+Cohesion: 0.06
+Nodes (32): dependencies, apexcharts, class-variance-authority, clsx, lucide-react, next, next-intl, @next/swc-wasm-nodejs (+24 more)
+
+### Community 23 - "Community 23"
 Cohesion: 0.09
-Nodes (16): buildEsClient(), ESBulkItem, flushAuditPipeline(), flushPendingDocs(), getElasticsearchHealth(), getIndexName(), indexAuditLogToES(), initAuditPipeline() (+8 more)
+Nodes (14): AdminLayout(), AdminSidebar(), AdminSidebarProps, navItems, navLinks, links, AppShellProps, AppSidebarProps (+6 more)
 
-### Community 24 - "LDAP Integration"
-Cohesion: 0.10
-Nodes (16): createLDAPClient(), DEFAULT_GROUP_ATTRS, DEFAULT_USER_ATTRS, LDAPClient, logger, client, filter, logger (+8 more)
+### Community 24 - "Community 24"
+Cohesion: 0.08
+Nodes (31): ZeroAuth SaaS Starter, Admin Area, /admin/workload UI, AppFooter (Global), Shared Responsive App Shell, AppSidebar (Collapsible + Mobile Drawer), AppTopbar (Sticky), Cross-tenant JIT access (+23 more)
 
-### Community 25 - "Mfa Attestation"
+### Community 25 - "Community 25"
+Cohesion: 0.06
+Nodes (28): adapter, ALLOWED_AVATAR_TYPES, authUser, cfg, code, codeVerifier, db, file (+20 more)
+
+### Community 26 - "Community 26"
 Cohesion: 0.09
 Nodes (28): AttestationPolicy, AttestationType, AttestationVerificationResult, AttestationVerificationResultWithMDS3, AuthenticatorStatus, DEFAULT_POLICY, HIGH_ASSURANCE_POLICY, KNOWN_HARDWARE_KEY_AAGUIDS (+20 more)
 
-### Community 26 - "App Module"
-Cohesion: 0.10
-Nodes (11): metadata, viewport, features, brand, legal, ToastProvider(), ConsentValue, getConsent() (+3 more)
-
-### Community 27 - "Meta 0000"
+### Community 27 - "Community 27"
 Cohesion: 0.07
 Nodes (30): columns, name, nullsNotDistinct, columnsFrom, columnsTo, name, onDelete, onUpdate (+22 more)
 
-### Community 28 - "Meta 0001"
+### Community 28 - "Community 28"
 Cohesion: 0.07
 Nodes (30): columns, name, nullsNotDistinct, columnsFrom, columnsTo, name, onDelete, onUpdate (+22 more)
 
-### Community 29 - "Api Module"
-Cohesion: 0.10
-Nodes (21): createServer(), logger, port, notificationsTable, geoFencingMiddleware(), rateLimit(), temporalAccessMiddleware(), alertingMiddleware() (+13 more)
+### Community 29 - "Community 29"
+Cohesion: 0.08
+Nodes (18): Bucket, clearRateLimiter(), initRateLimiter(), ipBuckets, logger, TenantQuota, tenantQuotaMap, useRedis (+10 more)
 
-### Community 30 - "Messages En"
+### Community 30 - "Community 30"
 Cohesion: 0.07
 Nodes (29): common, actions, back, cancel, close, confirm, copied, copy (+21 more)
 
-### Community 31 - "Zeroauth Package"
+### Community 31 - "Community 31"
+Cohesion: 0.09
+Nodes (24): apiKeysTable, organizationMembersTable, usageCountersTable, apiKeyAuth, consumeRateLimit(), canManageOrgBilling(), db, findSubscription() (+16 more)
+
+### Community 32 - "Community 32"
+Cohesion: 0.08
+Nodes (24): subscriptionsTable, admin, billable, byPlan, csv, db, ids, key (+16 more)
+
+### Community 33 - "Community 33"
+Cohesion: 0.07
+Nodes (29): dependencies, bcryptjs, bullmq, dotenv, drizzle-orm, geoip-lite, hono, @hono/node-server (+21 more)
+
+### Community 34 - "Community 34"
 Cohesion: 0.07
 Nodes (29): devDependencies, @commitlint/cli, @commitlint/config-conventional, concurrently, conventional-changelog-conventionalcommits, drizzle-kit, eslint, husky (+21 more)
 
-### Community 32 - "Db Module"
-Cohesion: 0.08
-Nodes (18): workloadCredentialsTable, getLogger(), extractCertInfo(), logger, mTLSOptions, parseSubject(), WorkloadIdentity, GoogleProfile (+10 more)
+### Community 35 - "Community 35"
+Cohesion: 0.11
+Nodes (13): CSFLEManager, csflEncryptionPlugin(), decryptFieldsInDoc(), EncryptionKeyVersion, getCSFLE(), initializeCSFLE(), resetCSFLE(), ZeroAuthConfig (+5 more)
 
-### Community 33 - "Db Module"
-Cohesion: 0.08
-Nodes (25): feedbackTable, authMiddleware, logger, optionalAuthMiddleware, createSchema, db, id, keyHash (+17 more)
+### Community 36 - "Community 36"
+Cohesion: 0.11
+Nodes (20): createServer(), logger, port, cidrContains(), geoFencingMiddleware(), ipToLong(), logger, rateLimit() (+12 more)
 
-### Community 34 - "Audit Module"
+### Community 37 - "Community 37"
 Cohesion: 0.08
-Nodes (12): AuditEntry, MOCK_ENTRIES, CANCEL_REASONS, PLANS, Subscription, BadgeProps, colorMap, ModalProps (+4 more)
+Nodes (21): orgSecurityPoliciesTable, allowCredentials, attestationResult, cfg, challengeStore, consumeAuthChallenge(), consumeChallenge(), db (+13 more)
 
-### Community 35 - "Messages En"
+### Community 38 - "Community 38"
 Cohesion: 0.07
-Nodes (27): auth, confirmPassword, email, enterCode, forgotPassword, haveAccount, invalidCode, magicLink (+19 more)
+Nodes (27): content, description, content, description, content, content, description, content (+19 more)
 
-### Community 36 - "Meta 0001"
-Cohesion: 0.07
-Nodes (27): key_hash, last_used_at, name, revoked_at, scopes, name, notNull, primaryKey (+19 more)
-
-### Community 37 - "Services Authz"
+### Community 39 - "Community 39"
 Cohesion: 0.10
 Nodes (17): AuthorizationEngine, Session, abacRole, baseCtx, ctx, editorRole, engine, jitGrant (+9 more)
 
-### Community 38 - "Crypto Csfle"
-Cohesion: 0.11
-Nodes (11): CSFLEManager, csflEncryptionPlugin(), decryptFieldsInDoc(), EncryptionKeyVersion, getCSFLE(), resetCSFLE(), m2, MASTER_KEY_HEX (+3 more)
+### Community 40 - "Community 40"
+Cohesion: 0.07
+Nodes (27): auth, confirmPassword, email, enterCode, forgotPassword, haveAccount, invalidCode, magicLink (+19 more)
 
-### Community 39 - "Meta 0001"
+### Community 41 - "Community 41"
+Cohesion: 0.07
+Nodes (27): key_hash, last_used_at, name, revoked_at, scopes, name, notNull, primaryKey (+19 more)
+
+### Community 42 - "Community 42"
+Cohesion: 0.09
+Nodes (19): fontDisplay, fontMono, fontSans, metadata, viewport, CookieBanner(), ToastContext, ToastContextValue (+11 more)
+
+### Community 43 - "Community 43"
+Cohesion: 0.11
+Nodes (16): crossTenantJITRequestsTable, CrossTenantJITRequest, CrossTenantJITStore, fromRow(), JITRow, requestCrossTenantAccess(), app, approved (+8 more)
+
+### Community 44 - "Community 44"
 Cohesion: 0.08
 Nodes (26): name, notNull, primaryKey, type, name, notNull, primaryKey, type (+18 more)
 
-### Community 40 - "Meta 0001"
+### Community 45 - "Community 45"
 Cohesion: 0.08
 Nodes (26): comment, context, metadata, score, type, name, notNull, primaryKey (+18 more)
 
-### Community 41 - "Saml Routes"
+### Community 46 - "Community 46"
+Cohesion: 0.09
+Nodes (26): Authorization Engine (ABAC + JIT), API Key Management, Drizzle ORM, Feature Flag Management, GDPR Tooling (Export and Deletion), Hono API Server, MFA (TOTP / Email / SMS / WhatsApp / Telegram OTP), Notification Center (SSE) (+18 more)
+
+### Community 47 - "Community 47"
+Cohesion: 0.08
+Nodes (24): body, callbackUrl, cfg, client, code, code_challenge, code_challenge_method, codeData (+16 more)
+
+### Community 48 - "Community 48"
 Cohesion: 0.09
 Nodes (23): body, cfg, db, getTokenService(), idpConfig, logger, normalizedEmail, redirect (+15 more)
 
-### Community 42 - "Did Module"
-Cohesion: 0.14
-Nodes (21): base58Decode(), resolveDID(), resolveDIDKey(), resolveDIDWeb(), app, body, ch, config (+13 more)
+### Community 49 - "Community 49"
+Cohesion: 0.13
+Nodes (20): NotificationEmailData, notificationEmailTemplate(), OtpEmailData, otpEmailTemplate(), SecurityAlertEmailData, securityAlertEmailTemplate(), VerifyEmailData, verifyEmailTemplate() (+12 more)
 
-### Community 43 - "Api Module"
-Cohesion: 0.09
-Nodes (8): ApiKey, DEFAULTS, GeneralSettings, api, Session, SessionsPage(), TabFilter, ConnectedProviders
-
-### Community 44 - "Db Module"
+### Community 50 - "Community 50"
 Cohesion: 0.12
 Nodes (20): userBehaviorBaselinesTable, AnomalyMiddlewareOptions, logger, body, db, limit, logger, offset (+12 more)
 
-### Community 45 - "Src Module"
+### Community 51 - "Community 51"
+Cohesion: 0.11
+Nodes (20): auditLogsTable, organizationInvitesTable, organizationsTable, orgCustomRolesTable, sessionsTable, enforceMaxConcurrentDevices(), logger, revokeAllSessionsForUser() (+12 more)
+
+### Community 52 - "Community 52"
 Cohesion: 0.13
 Nodes (15): deliverWebhook(), retryDelivery(), signPayload(), app, body, deleted, endpoint, endpoints (+7 more)
 
-### Community 46 - "Api Openapi"
-Cohesion: 0.11
-Nodes (24): content, description, content, description, content, description, content, description (+16 more)
-
-### Community 47 - "Messages Es"
+### Community 53 - "Community 53"
 Cohesion: 0.08
 Nodes (24): common, back, cancel, close, confirm, copied, copy, delete (+16 more)
 
-### Community 48 - "Messages Fr"
+### Community 54 - "Community 54"
 Cohesion: 0.08
 Nodes (24): common, back, cancel, close, confirm, copied, copy, delete (+16 more)
 
-### Community 49 - "Routes Admin"
-Cohesion: 0.08
-Nodes (23): action, actorId, allowed, conditions, db, id, limit, logger (+15 more)
+### Community 55 - "Community 55"
+Cohesion: 0.18
+Nodes (11): AccountPage(), DashboardLayout(), navItems, redirectToLogin(), refreshAccessToken(), request(), clearToken(), getRefreshToken() (+3 more)
 
-### Community 50 - "Admin Module"
-Cohesion: 0.15
-Nodes (9): AdminSidebarProps, navLinks, clearToken(), getToken(), isAuthenticated(), setToken(), passwordStrength(), RegisterPage() (+1 more)
+### Community 56 - "Community 56"
+Cohesion: 0.10
+Nodes (13): CANCEL_REASONS, PLANS, Subscription, EmptyStateProps, ModalProps, DialogContent, DialogDescription, DialogFooter() (+5 more)
 
-### Community 51 - "Jit Cross"
-Cohesion: 0.11
-Nodes (13): CrossTenantJITRequest, CrossTenantJITStore, requestCrossTenantAccess(), app, approved, body, denied, id (+5 more)
-
-### Community 52 - "Zeroauth Package"
+### Community 57 - "Community 57"
 Cohesion: 0.09
 Nodes (23): scripts, build, db:backup, db:generate, db:migrate, db:push, db:studio, dev (+15 more)
 
-### Community 53 - "Api Openapi"
-Cohesion: 0.15
-Nodes (22): description, content, description, content, description, get, get, get (+14 more)
-
-### Community 54 - "Messages En"
+### Community 58 - "Community 58"
 Cohesion: 0.09
 Nodes (22): security, addPasskey, changePassword, currentPassword, currentSession, disableMfa, mfa, mfaDisabled (+14 more)
 
-### Community 55 - "Meta 0000"
+### Community 59 - "Community 59"
 Cohesion: 0.09
 Nodes (22): name, notNull, primaryKey, type, body, link, read, title (+14 more)
 
-### Community 56 - "Meta 0001"
+### Community 60 - "Community 60"
 Cohesion: 0.09
 Nodes (22): id, link, title, user_id, default, name, notNull, primaryKey (+14 more)
 
-### Community 57 - "Meta 0000"
+### Community 61 - "Community 61"
+Cohesion: 0.18
+Nodes (17): APP_URL(), DUNNING_DAYS, emailOwner(), LifecycleMeta, logger, meta(), processDunning(), processTrialExpiry() (+9 more)
+
+### Community 62 - "Community 62"
+Cohesion: 0.15
+Nodes (9): rolesTable, createLDAPClient(), DEFAULT_GROUP_ATTRS, DEFAULT_USER_ATTRS, LDAPClient, logger, LDAPConfig, LDAPGroup (+1 more)
+
+### Community 63 - "Community 63"
+Cohesion: 0.15
+Nodes (8): auditLog(), Logger, DEFAULT_DISPOSABLE_DOMAINS, EmailValidationResult, envList(), isDisposableEmailDomain(), normalizeEmailDomain(), validateSignupEmail()
+
+### Community 64 - "Community 64"
 Cohesion: 0.10
 Nodes (21): name, notNull, primaryKey, type, name, notNull, primaryKey, type (+13 more)
 
-### Community 58 - "Meta 0000"
+### Community 65 - "Community 65"
 Cohesion: 0.10
 Nodes (21): comment, metadata, score, type, name, notNull, primaryKey, type (+13 more)
 
-### Community 59 - "Meta 0000"
-Cohesion: 0.10
-Nodes (21): key_hash, key_prefix, last_used_at, name, name, notNull, primaryKey, type (+13 more)
-
-### Community 60 - "Packages Module"
+### Community 66 - "Community 66"
 Cohesion: 0.10
 Nodes (20): compilerOptions, allowJs, esModuleInterop, forceConsistentCasingInFileNames, incremental, isolatedModules, jsx, lib (+12 more)
 
-### Community 61 - "Components Feedbackwidget"
-Cohesion: 0.12
-Nodes (9): FeedbackType, getToken(), Props, submitFeedback(), LOCALES, Notification, NotificationBell(), ThemeToggle() (+1 more)
-
-### Community 62 - "Crypto Post"
+### Community 67 - "Community 67"
 Cohesion: 0.15
 Nodes (11): createKEMProvider(), establishPQSessionKey(), generatePQKeyPair(), hybridDecrypt(), hybridEncrypt(), KEMEncapsulation, KEMPrivateKey, KEMPublicKey (+3 more)
 
-### Community 63 - "Metrics Counters"
+### Community 68 - "Community 68"
 Cohesion: 0.13
 Nodes (11): activeSessions, activeUsers, anomalyEventsTotal, authAttemptsTotal, authDurationSeconds, mfaEventsTotal, rateLimitHitsTotal, requestDurationSeconds (+3 more)
 
-### Community 64 - "Routes Passkey"
-Cohesion: 0.11
-Nodes (16): allowCredentials, cfg, challengeStore, consumeAuthChallenge(), consumeChallenge(), db, excludeCredentials, expectedChallenge (+8 more)
-
-### Community 65 - "Messages Es"
+### Community 69 - "Community 69"
 Cohesion: 0.11
 Nodes (19): auth, accountLocked, alreadyHaveAccount, displayNameLabel, dontHaveAccount, emailLabel, emailPlaceholder, forgotPassword (+11 more)
 
-### Community 66 - "Messages Fr"
+### Community 70 - "Community 70"
 Cohesion: 0.11
 Nodes (19): auth, accountLocked, alreadyHaveAccount, displayNameLabel, dontHaveAccount, emailLabel, emailPlaceholder, forgotPassword (+11 more)
 
-### Community 67 - "Drizzle Module"
+### Community 71 - "Community 71"
 Cohesion: 0.11
 Nodes (18): dialect, id, prevId, checkConstraints, compositePrimaryKeys, indexes, isRLSEnabled, name (+10 more)
 
-### Community 68 - "Meta 0000"
-Cohesion: 0.11
-Nodes (18): description, is_default, permissions, name, notNull, primaryKey, type, default (+10 more)
+### Community 72 - "Community 72"
+Cohesion: 0.13
+Nodes (12): deviceAttestationMiddleware, logger, markDeviceAsTrusted, requireTrustedDevice, FingerprintInput, FingerprintService, DeviceFingerprint, a (+4 more)
 
-### Community 69 - "Meta 0001"
+### Community 73 - "Community 73"
 Cohesion: 0.11
 Nodes (18): notifications_user_id_users_id_fk, columnsFrom, columnsTo, name, onDelete, onUpdate, tableFrom, tableTo (+10 more)
 
-### Community 70 - "Meta 0001"
+### Community 74 - "Community 74"
 Cohesion: 0.11
 Nodes (18): jit_access_user_id_users_id_fk, columnsFrom, columnsTo, name, onDelete, onUpdate, tableFrom, tableTo (+10 more)
 
-### Community 71 - "Meta 0001"
+### Community 75 - "Community 75"
+Cohesion: 0.11
+Nodes (17): aliases, components, hooks, lib, ui, utils, iconLibrary, rsc (+9 more)
+
+### Community 76 - "Community 76"
+Cohesion: 0.12
+Nodes (14): createSchema, db, id, keyHash, keyPrefix, logger, parsed, router (+6 more)
+
+### Community 77 - "Community 77"
+Cohesion: 0.16
+Nodes (14): workloadCredentialsTable, allowedScopes, grantedScopes, key, logger, router, tokenTtl, user (+6 more)
+
+### Community 78 - "Community 78"
+Cohesion: 0.12
+Nodes (17): description, name, updated_at, name, notNull, primaryKey, type, name (+9 more)
+
+### Community 79 - "Community 79"
 Cohesion: 0.12
 Nodes (17): columnsFrom, columnsTo, name, onDelete, onUpdate, tableFrom, tableTo, columnsFrom (+9 more)
 
-### Community 72 - "Db Index"
-Cohesion: 0.12
-Nodes (9): checkPendingMigrations(), closeDatabase(), DrizzleDb, data, db, logger, router, token (+1 more)
+### Community 80 - "Community 80"
+Cohesion: 0.17
+Nodes (13): notificationsTable, daysAgo(), logger, sendNotificationEmailFallbacks(), generateUnsubscribeToken(), SECRET(), UnsubscribeEmailType, verifyUnsubscribeToken() (+5 more)
 
-### Community 73 - "Eslintrc Module"
+### Community 81 - "Community 81"
 Cohesion: 0.12
 Nodes (16): extends, ignorePatterns, parser, parserOptions, ecmaVersion, project, sourceType, rules (+8 more)
 
-### Community 74 - "Api Openapi"
+### Community 82 - "Community 82"
 Cohesion: 0.12
 Nodes (16): type, format, type, type, type, type, type, country (+8 more)
 
-### Community 75 - "Zeroauth Package"
+### Community 83 - "Community 83"
+Cohesion: 0.24
+Nodes (16): description, get, get, get, get, parameters, responses, security (+8 more)
+
+### Community 84 - "Community 84"
+Cohesion: 0.12
+Nodes (16): key_hash, key_prefix, last_used_at, name, notNull, primaryKey, type, name (+8 more)
+
+### Community 85 - "Community 85"
 Cohesion: 0.12
 Nodes (16): optionalDependencies, @next/swc-wasm-nodejs, @next/swc-wasm-web, @next/swc-win32-x64-msvc, @parcel/watcher-darwin-arm64, @parcel/watcher-darwin-x64, @parcel/watcher-linux-x64-glibc, @parcel/watcher-win32-x64 (+8 more)
 
-### Community 76 - "Api Openapi"
+### Community 86 - "Community 86"
 Cohesion: 0.21
 Nodes (15): content, description, delete, delete, parameters, responses, security, summary (+7 more)
 
-### Community 77 - "Readme Module"
+### Community 87 - "Community 87"
 Cohesion: 0.13
-Nodes (15): API Key Management, Drizzle ORM, Feature Flag Management, GDPR Tooling (Export and Deletion), Hono API Server, Multi-Factor Authentication (MFA), OAuth Providers (Google, GitHub, Apple, Facebook), OIDC Provider (+7 more)
+Nodes (13): db, {
+        deletionRequestedAt: _a,
+        deletionScheduledFor: _b,
+        ...restMeta
+      }, exportData, logger, now, purgeScheduledDeletions(), router, scheduledFor (+5 more)
 
-### Community 78 - "Messages En"
+### Community 88 - "Community 88"
 Cohesion: 0.13
 Nodes (15): billing, cancelSubscription, currentPlan, downgrade, enterprisePlan, freePlan, invoices, noInvoices (+7 more)
 
-### Community 79 - "Messages En"
+### Community 89 - "Community 89"
+Cohesion: 0.14
+Nodes (8): attemptMap, AttemptRecord, failedAttempts, LOCKOUT_DURATION_MS, LockoutEntry, logger, MAX_ATTEMPTS, now
+
+### Community 90 - "Community 90"
 Cohesion: 0.14
 Nodes (14): admin, activateUser, anomalies, audit, deleteUser, noUsers, roles, searchUsers (+6 more)
 
-### Community 80 - "Scripts Postinstall"
+### Community 91 - "Community 91"
 Cohesion: 0.14
 Nodes (10): binaryDest, dest, esbuildInfo, {
   existsSync,
@@ -623,649 +693,653 @@ Nodes (10): binaryDest, dest, esbuildInfo, {
   realpathSync,
 }, { homedir, tmpdir }, { join, dirname }, parcelDest, root (+2 more)
 
-### Community 81 - "Routes Notification"
+### Community 92 - "Community 92"
 Cohesion: 0.14
 Nodes (12): db, id, logger, NotificationPreferences, parsed, prefs, prefsSchema, router (+4 more)
 
-### Community 82 - "Middleware Accountlockout"
-Cohesion: 0.14
-Nodes (8): attemptMap, AttemptRecord, failedAttempts, LOCKOUT_DURATION_MS, LockoutEntry, logger, MAX_ATTEMPTS, now
-
-### Community 83 - "Src Module"
+### Community 93 - "Community 93"
 Cohesion: 0.14
 Nodes (12): afterClear, allowedKey2, app, ban, blocked, blockedKey1, quota, r1 (+4 more)
 
-### Community 84 - "Blog Module"
-Cohesion: 0.23
-Nodes (8): metadata, BlogPost, blogPosts, getBlogPost(), BlogPostPage(), generateMetadata(), Props, renderContent()
-
-### Community 85 - "I18N Request"
-Cohesion: 0.15
-Nodes (8): detectLocale(), Locale, SUPPORTED_LOCALES, data, headers, options, revokeRes, sessionsRes
-
-### Community 86 - "Messages En"
-Cohesion: 0.15
-Nodes (13): errors, forbidden, forbiddenSubtitle, goHome, networkError, notFound, notFoundSubtitle, serverError (+5 more)
-
-### Community 87 - "Messages En"
-Cohesion: 0.15
-Nodes (13): nav, admin, billing, closeMenu, dashboard, logout, markAllRead, notifications (+5 more)
-
-### Community 88 - "Meta 0000"
+### Community 94 - "Community 94"
 Cohesion: 0.15
 Nodes (13): columns, name, nullsNotDistinct, checkConstraints, compositePrimaryKeys, indexes, isRLSEnabled, name (+5 more)
 
-### Community 89 - "Src Module"
+### Community 95 - "Community 95"
+Cohesion: 0.15
+Nodes (13): errors, forbidden, forbiddenSubtitle, goHome, networkError, notFound, notFoundSubtitle, serverError (+5 more)
+
+### Community 96 - "Community 96"
+Cohesion: 0.15
+Nodes (13): nav, admin, billing, closeMenu, dashboard, logout, markAllRead, notifications (+5 more)
+
+### Community 97 - "Community 97"
+Cohesion: 0.17
+Nodes (6): AuthSettings, DEFAULTS, NumberInputProps, ToggleRowProps, ToggleProps, Switch
+
+### Community 98 - "Community 98"
+Cohesion: 0.15
+Nodes (6): MetricCardProps, quickActions, Stats, User, RadialGaugeProps, ReactApexChart
+
+### Community 99 - "Community 99"
+Cohesion: 0.15
+Nodes (13): CI Build UI Job (Next.js), GitHub Actions CI Pipeline, CI Lint and Type Check Job, CI Test Job (Vitest with Postgres and Redis), Next.js MCP Server for Coding Agents, ZeroAuth Monorepo Structure, Vitest Test Suite, ZeroAuth LLM Index (llms.txt) (+5 more)
+
+### Community 100 - "Community 100"
+Cohesion: 0.18
+Nodes (13): Client-Side Field Level Encryption (CSFLE), Fingerprint Service (Device Fingerprinting), Token Service (PASETO v4 local), Changelog v1.0.0 Foundation Release, Immutable Audit Log (Elasticsearch), Bearer Token Auth, Cookie Consent (GDPR), CSFLE Field Encryption (+5 more)
+
+### Community 101 - "Community 101"
 Cohesion: 0.15
 Nodes (8): capturedValues, db, expiredInvite, getApp(), invite, rows, usedInvite, validInvite
 
-### Community 90 - "Schemas Auth"
+### Community 102 - "Community 102"
 Cohesion: 0.15
 Nodes (12): LoginInput, LoginSchema, LogoutSchema, PasswordResetConfirmInput, PasswordResetConfirmSchema, PasswordResetRequestInput, PasswordResetRequestSchema, passwordSchema (+4 more)
 
-### Community 91 - "Services Fingerprint"
-Cohesion: 0.18
-Nodes (8): FingerprintInput, FingerprintService, DeviceFingerprint, a, b, input, out, req
+### Community 103 - "Community 103"
+Cohesion: 0.15
+Nodes (11): AuthCodeEntry, authCodes, AuthorizeParams, buildUserInfo(), clientStore, exchangeAuthCode(), getDiscoveryDocument(), getOIDCClient() (+3 more)
 
-### Community 92 - "Api Openapi"
+### Community 104 - "Community 104"
+Cohesion: 0.15
+Nodes (8): detectLocale(), Locale, SUPPORTED_LOCALES, data, headers, options, revokeRes, sessionsRes
+
+### Community 105 - "Community 105"
 Cohesion: 0.17
 Nodes (12): description, type, description, type, accessToken, expiresIn, refreshToken, tokenType (+4 more)
 
-### Community 93 - "Admin Module"
+### Community 106 - "Community 106"
 Cohesion: 0.17
-Nodes (6): Stats, User, borderColorMap, iconBgMap, StatCardProps, RevenueData
+Nodes (9): db, invoice, logger, router, session, sig, stripe, sub (+1 more)
 
-### Community 94 - "Messages En"
-Cohesion: 0.17
-Nodes (12): profile, avatar, changeAvatar, displayName, email, phone, removeAvatar, saved (+4 more)
-
-### Community 95 - "Messages Es"
-Cohesion: 0.17
-Nodes (12): profile, avatarUpload, dangerZone, deleteAccount, displayName, email, personalInfo, phone (+4 more)
-
-### Community 96 - "Messages Fr"
-Cohesion: 0.17
-Nodes (12): profile, avatarUpload, dangerZone, deleteAccount, displayName, email, personalInfo, phone (+4 more)
-
-### Community 97 - "Package Module"
-Cohesion: 0.17
-Nodes (11): lint-staged, *.{json,md}, packages/ui/src/**/*.{ts,tsx}, src/**/!(*.test|*.spec).ts, src/**/*.ts, name, overrides, postcss (+3 more)
-
-### Community 98 - "Middleware Module"
-Cohesion: 0.18
-Nodes (9): clearRateLimiter(), BanEntry, banList, Bucket, buckets, clearInMemoryBuckets(), consumeInMemory(), logger (+1 more)
-
-### Community 99 - "Services Alerting"
+### Community 107 - "Community 107"
 Cohesion: 0.27
 Nodes (9): cfg(), errorTimestamps, logger, prune(), recordServerError(), recordSlowRequest(), resetAlertingState(), slowTimestamps (+1 more)
 
-### Community 100 - "Api Openapi"
+### Community 108 - "Community 108"
+Cohesion: 0.17
+Nodes (12): profile, avatar, changeAvatar, displayName, email, phone, removeAvatar, saved (+4 more)
+
+### Community 109 - "Community 109"
+Cohesion: 0.17
+Nodes (12): profile, avatarUpload, dangerZone, deleteAccount, displayName, email, personalInfo, phone (+4 more)
+
+### Community 110 - "Community 110"
+Cohesion: 0.17
+Nodes (12): profile, avatarUpload, dangerZone, deleteAccount, displayName, email, personalInfo, phone (+4 more)
+
+### Community 111 - "Community 111"
+Cohesion: 0.17
+Nodes (11): lint-staged, *.{json,md}, packages/ui/src/**/*.{ts,tsx}, src/**/!(*.test|*.spec).ts, src/**/*.ts, name, overrides, postcss (+3 more)
+
+### Community 112 - "Community 112"
 Cohesion: 0.18
 Nodes (11): content, description, patch, parameters, requestBody, responses, security, summary (+3 more)
 
-### Community 101 - "Auth Page"
-Cohesion: 0.18
-Nodes (5): AuthSettings, DEFAULTS, NumberInputProps, ToggleRowProps, ToggleProps
-
-### Community 102 - "Messages En"
+### Community 113 - "Community 113"
 Cohesion: 0.18
 Nodes (10): cookie, accept, decline, learnMore, message, theme, dark, light (+2 more)
 
-### Community 103 - "Mfa Enterprise"
+### Community 114 - "Community 114"
 Cohesion: 0.22
 Nodes (5): EnterpriseAttestationCA, EnterpriseCARegistry, EnterpriseCertificate, parseCertificate(), verifyEnterpriseAttestation()
 
-### Community 104 - "Services Passwordbreach"
+### Community 115 - "Community 115"
+Cohesion: 0.20
+Nodes (11): Elasticsearch Docker Service, Kibana Docker Service, PostgreSQL Docker Service, Redis Docker Service, ZeroAuth API Docker Service, Auth Success/Failure Rates Dashboard, Denied Access Patterns Dashboard, MFA Adoption Dashboard (+3 more)
+
+### Community 116 - "Community 116"
+Cohesion: 0.20
+Nodes (7): app, capturedValues, getRouter(), post(), r, uid, user
+
+### Community 117 - "Community 117"
 Cohesion: 0.25
 Nodes (8): BreachCheckResult, checkPasswordBreached(), isBreachCheckEnabled(), logger, rejectIfBreached(), fetchMock, sha1, url
 
-### Community 105 - "Schemas Admin"
+### Community 118 - "Community 118"
 Cohesion: 0.18
 Nodes (10): AdminAssignRoleSchema, AdminRevokeRoleSchema, AdminUpdateUserInput, AdminUpdateUserSchema, CreateRoleInput, CreateRoleSchema, JITApproveInput, JITApproveSchema (+2 more)
 
-### Community 106 - "Services Module"
-Cohesion: 0.25
-Nodes (9): generateUnsubscribeToken(), SECRET(), UnsubscribeEmailType, verifyUnsubscribeToken(), parts, result, t1, t2 (+1 more)
-
-### Community 107 - "Load Login"
-Cohesion: 0.20
-Nodes (9): body, errorRate, loginDuration, loginOk, loginRes, loginStart, options, refreshRes (+1 more)
-
-### Community 108 - "Messages Es"
-Cohesion: 0.20
-Nodes (9): cookie, accept, decline, message, dashboard, overview, quickActions, recentActivity (+1 more)
-
-### Community 109 - "Messages Es"
-Cohesion: 0.20
-Nodes (10): nav, admin, dashboard, organizations, profile, security, sessions, settings (+2 more)
-
-### Community 110 - "Messages Fr"
-Cohesion: 0.20
-Nodes (9): cookie, accept, decline, message, dashboard, overview, quickActions, recentActivity (+1 more)
-
-### Community 111 - "Messages Fr"
-Cohesion: 0.20
-Nodes (10): nav, admin, dashboard, organizations, profile, security, sessions, settings (+2 more)
-
-### Community 112 - "Meta 0000"
+### Community 119 - "Community 119"
 Cohesion: 0.20
 Nodes (10): checkConstraints, compositePrimaryKeys, foreignKeys, indexes, isRLSEnabled, name, policies, schema (+2 more)
 
-### Community 113 - "Meta 0001"
-Cohesion: 0.20
-Nodes (10): checkConstraints, compositePrimaryKeys, foreignKeys, indexes, isRLSEnabled, name, policies, schema (+2 more)
-
-### Community 114 - "Mfa Attestation"
+### Community 120 - "Community 120"
 Cohesion: 0.24
 Nodes (6): AttestationCAPin, computeCertificatePin(), extractCommonNameFromPem(), logger, pinStore, verifyAttestationCAPin()
 
-### Community 115 - "Packages Module"
+### Community 121 - "Community 121"
+Cohesion: 0.20
+Nodes (9): cookie, accept, decline, message, dashboard, overview, quickActions, recentActivity (+1 more)
+
+### Community 122 - "Community 122"
+Cohesion: 0.20
+Nodes (10): nav, admin, dashboard, organizations, profile, security, sessions, settings (+2 more)
+
+### Community 123 - "Community 123"
+Cohesion: 0.20
+Nodes (9): cookie, accept, decline, message, dashboard, overview, quickActions, recentActivity (+1 more)
+
+### Community 124 - "Community 124"
+Cohesion: 0.20
+Nodes (10): nav, admin, dashboard, organizations, profile, security, sessions, settings (+2 more)
+
+### Community 125 - "Community 125"
+Cohesion: 0.20
+Nodes (10): checkConstraints, compositePrimaryKeys, foreignKeys, indexes, isRLSEnabled, name, policies, schema (+2 more)
+
+### Community 126 - "Community 126"
 Cohesion: 0.20
 Nodes (9): background_color, description, display, icons, name, orientation, short_name, start_url (+1 more)
 
-### Community 116 - "Scripts Db"
+### Community 127 - "Community 127"
 Cohesion: 0.20
 Nodes (8): dir, file, full, { mkdirSync, readdirSync, statSync, unlinkSync, existsSync }, path, retentionDays, { spawn }, stamp
 
-### Community 117 - "Src Module"
+### Community 128 - "Community 128"
 Cohesion: 0.20
 Nodes (7): after, before, capturedValues, db, deleteMock, expiresMs, tokenHash
 
-### Community 118 - "Api Openapi"
+### Community 129 - "Community 129"
+Cohesion: 0.20
+Nodes (9): body, errorRate, loginDuration, loginOk, loginRes, loginStart, options, refreshRes (+1 more)
+
+### Community 130 - "Community 130"
 Cohesion: 0.22
 Nodes (8): email, info, contact, description, title, version, openapi, servers
 
-### Community 119 - "Kibana Module"
-Cohesion: 0.25
-Nodes (9): Device Anomaly Alerts Dashboard, Auth Success/Failure Rates Dashboard, Denied Access Patterns Dashboard, MFA Adoption Dashboard, ZeroAuth Overview Dashboard, ZeroAuth Kibana Dashboards, Login Anomaly Detection, Elasticsearch Audit Log Store (+1 more)
-
-### Community 120 - "Messages En"
-Cohesion: 0.22
-Nodes (9): notifications, empty, emptySubtitle, inviteReceived, markAllRead, markRead, newLogin, noMore (+1 more)
-
-### Community 121 - "Messages Es"
-Cohesion: 0.22
-Nodes (9): organizations, createOrg, invite, leave, members, orgName, roles, settings (+1 more)
-
-### Community 122 - "Messages Fr"
-Cohesion: 0.22
-Nodes (9): organizations, createOrg, invite, leave, members, orgName, roles, settings (+1 more)
-
-### Community 123 - "Meta 0000"
+### Community 131 - "Community 131"
 Cohesion: 0.22
 Nodes (9): columnsFrom, columnsTo, name, onDelete, onUpdate, tableFrom, tableTo, feedback_org_id_organizations_id_fk (+1 more)
 
-### Community 124 - "Meta 0000"
+### Community 132 - "Community 132"
 Cohesion: 0.22
 Nodes (9): jit_access_user_id_users_id_fk, columnsFrom, columnsTo, name, onDelete, onUpdate, tableFrom, tableTo (+1 more)
 
-### Community 125 - "Meta 0000"
+### Community 133 - "Community 133"
 Cohesion: 0.22
 Nodes (9): notifications_user_id_users_id_fk, columnsFrom, columnsTo, name, onDelete, onUpdate, tableFrom, tableTo (+1 more)
 
-### Community 126 - "Meta 0000"
+### Community 134 - "Community 134"
 Cohesion: 0.22
 Nodes (9): org_custom_roles_org_id_organizations_id_fk, columnsFrom, columnsTo, name, onDelete, onUpdate, tableFrom, tableTo (+1 more)
 
-### Community 127 - "Meta 0000"
+### Community 135 - "Community 135"
 Cohesion: 0.22
 Nodes (9): checkConstraints, compositePrimaryKeys, indexes, isRLSEnabled, name, policies, schema, uniqueConstraints (+1 more)
 
-### Community 128 - "Meta 0000"
+### Community 136 - "Community 136"
 Cohesion: 0.22
 Nodes (9): checkConstraints, compositePrimaryKeys, indexes, isRLSEnabled, name, policies, schema, uniqueConstraints (+1 more)
 
-### Community 129 - "Meta 0000"
+### Community 137 - "Community 137"
 Cohesion: 0.22
 Nodes (9): checkConstraints, compositePrimaryKeys, indexes, isRLSEnabled, name, policies, schema, uniqueConstraints (+1 more)
 
-### Community 130 - "Services Dbbackup"
+### Community 138 - "Community 138"
 Cohesion: 0.36
 Nodes (7): backupDir(), BackupResult, logger, pruneOldBackups(), retentionDays(), run(), runBackup()
 
-### Community 131 - "Schemas Mfa"
+### Community 139 - "Community 139"
+Cohesion: 0.22
+Nodes (9): notifications, empty, emptySubtitle, inviteReceived, markAllRead, markRead, newLogin, noMore (+1 more)
+
+### Community 140 - "Community 140"
+Cohesion: 0.22
+Nodes (9): organizations, createOrg, invite, leave, members, orgName, roles, settings (+1 more)
+
+### Community 141 - "Community 141"
+Cohesion: 0.22
+Nodes (9): organizations, createOrg, invite, leave, members, orgName, roles, settings (+1 more)
+
+### Community 142 - "Community 142"
 Cohesion: 0.22
 Nodes (8): BackupCodeRedeemInput, BackupCodeRedeemSchema, MFASendOTPInput, MFASendOTPSchema, MFAVerifyOTPInput, MFAVerifyOTPSchema, TOTPVerifyInput, TOTPVerifySchema
 
-### Community 132 - "Src Module"
-Cohesion: 0.22
-Nodes (5): app, capturedValues, getRouter(), r, user
-
-### Community 133 - "Src Module"
-Cohesion: 0.22
-Nodes (8): adapter, encodedPayload, idTokenPayload, mockFetch, profile, profileRaw, refreshed, tokens
-
-### Community 134 - "Src Module"
+### Community 143 - "Community 143"
 Cohesion: 0.25
 Nodes (7): db, getApp(), getUnauthApp(), makeDbChain(), notifications, readNotif, unreadNotifs
 
-### Community 135 - "Api Openapi"
+### Community 144 - "Community 144"
+Cohesion: 0.22
+Nodes (8): adapter, encodedPayload, idTokenPayload, mockFetch, profile, profileRaw, refreshed, tokens
+
+### Community 145 - "Community 145"
+Cohesion: 0.22
+Nodes (8): name, private, scripts, build, dev, lint, start, version
+
+### Community 146 - "Community 146"
 Cohesion: 0.25
 Nodes (8): type, properties, required, type, type, code, message, ErrorEnvelope
 
-### Community 136 - "Perf Module"
-Cohesion: 0.25
-Nodes (8): Performance Analysis Report, Billing Lifecycle Sequential Email Issue, Why Not gRPC (Monolith Rationale), Missing DB Indexes (sessions, subscriptions, notifications, auditLogs, apiKeys), Passkey Auth N+1 Table Scan Issue, Passkey Table Normalization Plan (Perf Fix B), UI 30s Polling Instead of SSE, WebAuthn Passkeys (FIDO2)
-
-### Community 137 - "Components Errorboundary"
+### Community 147 - "Community 147"
 Cohesion: 0.25
 Nodes (3): ErrorBoundary, Props, State
 
-### Community 138 - "Meta 0000"
+### Community 148 - "Community 148"
 Cohesion: 0.25
 Nodes (8): columnsFrom, columnsTo, name, onDelete, onUpdate, tableFrom, tableTo, feedback_user_id_users_id_fk
 
-### Community 139 - "Prettierrc Module"
+### Community 149 - "Community 149"
+Cohesion: 0.36
+Nodes (6): AdminWorkloadPage(), CopyButton(), CreatedCredential, CRED_STATUS_STYLES, IssuedToken, WorkloadCredential
+
+### Community 150 - "Community 150"
+Cohesion: 0.25
+Nodes (8): Performance Analysis Report, Billing Lifecycle Sequential Email Issue, Why Not gRPC (Monolith Rationale), Missing DB Indexes (sessions, subscriptions, notifications, auditLogs, apiKeys), Passkey Auth N+1 Table Scan Issue, Passkey Table Normalization Plan (Perf Fix B), UI 30s Polling Instead of SSE, WebAuthn Passkeys (FIDO2)
+
+### Community 151 - "Community 151"
+Cohesion: 0.29
+Nodes (8): Rate Limit Heatmap Dashboard, Redis Session Cache Plan (Perf Fix A), Session Validation DB Round-Trips Issue, Dashboard Route Guard, Protected Routes (client guards), Rate Limiting (Redis-backed), Redis Cache and Queue, Session Management
+
+### Community 152 - "Community 152"
 Cohesion: 0.25
 Nodes (7): arrowParens, bracketSpacing, printWidth, semi, singleQuote, tabWidth, trailingComma
 
-### Community 140 - "Providers Apple"
+### Community 153 - "Community 153"
 Cohesion: 0.29
 Nodes (6): AppleIDTokenPayload, AppleProfile, AppleTokens, decodeIdToken(), exchangeCode(), logger
 
-### Community 141 - "Changelog Module"
+### Community 154 - "Community 154"
+Cohesion: 0.25
+Nodes (5): data, db, logger, router, token
+
+### Community 155 - "Community 155"
+Cohesion: 0.25
+Nodes (8): devDependencies, autoprefixer, postcss, tailwindcss, @types/node, @types/react, @types/react-dom, typescript
+
+### Community 156 - "Community 156"
+Cohesion: 0.25
+Nodes (8): optionalDependencies, @next/swc-wasm-nodejs, @next/swc-wasm-web, @next/swc-win32-x64-msvc, @parcel/watcher-linux-x64-glibc, @parcel/watcher-win32-x64, @swc/core-linux-x64-gnu, @swc/core-win32-x64-msvc
+
+### Community 157 - "Community 157"
 Cohesion: 0.33
-Nodes (7): Authorization Engine (ABAC + JIT), Client-Side Field Level Encryption (CSFLE), Fingerprint Service (Device Fingerprinting), Token Service (PASETO v4 local), Changelog v1.0.0 Foundation Release, PASETO v4 Access Tokens, RBAC and ABAC Authorization
+Nodes (5): extractCertInfo(), logger, mTLSOptions, parseSubject(), WorkloadIdentity
 
-### Community 142 - "Claude Module"
-Cohesion: 0.29
-Nodes (7): Next.js MCP Server for Coding Agents, ZeroAuth Monorepo Structure, ZeroAuth LLM Index (llms.txt), Internationalization (next-intl), Next.js UI (packages/ui), Sentry Error Monitoring, ZeroAuth Project
-
-### Community 143 - "Readme Module"
+### Community 158 - "Community 158"
 Cohesion: 0.33
-Nodes (7): BullMQ Email Queue, Stripe Billing Integration, Dunning Management (Failed Payment Emails), HaveIBeenPwned Password Check, requirePlan() Middleware (Plan Feature Gates), ZeroAuth SaaS Starter Guide, Win-Back Email Campaign
+Nodes (7): Device Anomaly Alerts Dashboard, Account Lockout, Account Takeover Detection, Anomaly Detection, Disposable-Email Blocking, HaveIBeenPwned Breach Check, Continuous Access Evaluation
 
-### Community 144 - "Components Module"
-Cohesion: 0.29
-Nodes (3): EmptyStateProps, EVENT_OPTIONS, WebhookEndpoint
-
-### Community 145 - "Changelog Module"
-Cohesion: 0.33
-Nodes (4): metadata, TYPE_STYLES, changelog, ChangelogEntry
-
-### Community 146 - "Load Chaos"
-Cohesion: 0.29
-Nodes (5): degradedErrorRate, healthRes, loginRes, ok, options
-
-### Community 147 - "Src Module"
+### Community 159 - "Community 159"
 Cohesion: 0.29
 Nodes (6): app, ban, { locked }, r, r1, r2
 
-### Community 148 - "Api Openapi"
+### Community 160 - "Community 160"
+Cohesion: 0.29
+Nodes (5): degradedErrorRate, healthRes, loginRes, ok, options
+
+### Community 161 - "Community 161"
+Cohesion: 0.33
+Nodes (4): ChallengeResponse, DIDDocument, ResolveResponse, VerificationMethod
+
+### Community 162 - "Community 162"
 Cohesion: 0.33
 Nodes (6): bearerFormat, scheme, type, components, securitySchemes, BearerAuth
 
-### Community 149 - "Api Openapi"
+### Community 163 - "Community 163"
 Cohesion: 0.33
 Nodes (6): properties, type, browser, deviceFingerprint, os, platform
 
-### Community 150 - "Ci Module"
-Cohesion: 0.33
-Nodes (6): CI Build UI Job (Next.js), GitHub Actions CI Pipeline, CI Lint and Type Check Job, CI Test Job (Vitest with Postgres and Redis), Vitest Test Suite, PostgreSQL Database
-
-### Community 151 - "Kibana Module"
-Cohesion: 0.40
-Nodes (6): Rate Limit Heatmap Dashboard, Redis Session Cache Plan (Perf Fix A), Session Validation DB Round-Trips Issue, Rate Limiting Middleware, Redis Cache and Queue, Session Management
-
-### Community 152 - "Icon512 Module"
-Cohesion: 0.60
-Nodes (6): App Icon (512px), Outdoor Public Space, Person (Young Male), Personal Profile Photo, Sydney Opera House, ZeroAuth UI Public Assets
-
-### Community 153 - "Messages En"
-Cohesion: 0.33
-Nodes (6): dashboard, noActivity, overview, quickActions, recentActivity, welcome
-
-### Community 154 - "Messages Es"
-Cohesion: 0.33
-Nodes (6): security, changePassword, mfa, passkeys, sessions, title
-
-### Community 155 - "Messages Fr"
-Cohesion: 0.33
-Nodes (6): security, changePassword, mfa, passkeys, sessions, title
-
-### Community 156 - "Meta 0000"
-Cohesion: 0.33
-Nodes (6): timestamp, default, name, notNull, primaryKey, type
-
-### Community 157 - "Meta 0000"
-Cohesion: 0.33
-Nodes (6): target_type, columns, name, notNull, primaryKey, type
-
-### Community 158 - "Meta 0000"
-Cohesion: 0.33
-Nodes (6): created_at, default, name, notNull, primaryKey, type
-
-### Community 159 - "Meta 0000"
-Cohesion: 0.33
-Nodes (6): updated_at, default, name, notNull, primaryKey, type
-
-### Community 160 - "Meta 0000"
-Cohesion: 0.33
-Nodes (6): id, default, name, notNull, primaryKey, type
-
-### Community 161 - "Meta 0000"
-Cohesion: 0.33
-Nodes (6): requested_at, default, name, notNull, primaryKey, type
-
-### Community 162 - "Meta 0000"
-Cohesion: 0.33
-Nodes (6): scopes, default, name, notNull, primaryKey, type
-
-### Community 163 - "Meta 0000"
-Cohesion: 0.33
-Nodes (6): status, default, name, notNull, primaryKey, type
-
-### Community 164 - "Drizzle Module"
+### Community 165 - "Community 165"
 Cohesion: 0.33
 Nodes (5): dialect, id, prevId, tables, version
 
-### Community 165 - "Meta 0001"
-Cohesion: 0.33
-Nodes (6): timestamp, default, name, notNull, primaryKey, type
+### Community 166 - "Community 166"
+Cohesion: 0.60
+Nodes (6): App Icon (512px), Outdoor Public Space, Person (Young Male), Personal Profile Photo, Sydney Opera House, ZeroAuth UI Public Assets
 
-### Community 166 - "Meta 0001"
-Cohesion: 0.33
-Nodes (6): target_type, columns, name, notNull, primaryKey, type
-
-### Community 167 - "Meta 0001"
-Cohesion: 0.33
-Nodes (6): created_at, default, name, notNull, primaryKey, type
-
-### Community 168 - "Meta 0001"
-Cohesion: 0.33
-Nodes (6): read, default, name, notNull, primaryKey, type
-
-### Community 169 - "Meta 0001"
-Cohesion: 0.33
-Nodes (6): requested_at, default, name, notNull, primaryKey, type
-
-### Community 170 - "Meta 0001"
-Cohesion: 0.33
-Nodes (6): status, default, name, notNull, primaryKey, type
-
-### Community 172 - "Data Module"
-Cohesion: 0.40
-Nodes (3): FAQ_ITEMS, FaqItem, CATEGORIES
-
-### Community 173 - "Providers Facebook"
+### Community 167 - "Community 167"
 Cohesion: 0.33
 Nodes (3): FacebookProfile, FacebookTokens, logger
 
-### Community 174 - "Src Module"
+### Community 168 - "Community 168"
 Cohesion: 0.33
-Nodes (4): app, created, keys, mockDb
+Nodes (6): dashboard, noActivity, overview, quickActions, recentActivity, welcome
 
-### Community 175 - "Src Module"
+### Community 169 - "Community 169"
+Cohesion: 0.33
+Nodes (6): security, changePassword, mfa, passkeys, sessions, title
+
+### Community 170 - "Community 170"
+Cohesion: 0.33
+Nodes (6): security, changePassword, mfa, passkeys, sessions, title
+
+### Community 171 - "Community 171"
+Cohesion: 0.33
+Nodes (6): name, notNull, primaryKey, type, action, columns
+
+### Community 172 - "Community 172"
+Cohesion: 0.33
+Nodes (6): timestamp, default, name, notNull, primaryKey, type
+
+### Community 173 - "Community 173"
+Cohesion: 0.33
+Nodes (6): created_at, default, name, notNull, primaryKey, type
+
+### Community 174 - "Community 174"
+Cohesion: 0.33
+Nodes (6): id, default, name, notNull, primaryKey, type
+
+### Community 175 - "Community 175"
+Cohesion: 0.33
+Nodes (6): is_default, default, name, notNull, primaryKey, type
+
+### Community 176 - "Community 176"
+Cohesion: 0.33
+Nodes (6): permissions, default, name, notNull, primaryKey, type
+
+### Community 177 - "Community 177"
+Cohesion: 0.33
+Nodes (6): requested_at, default, name, notNull, primaryKey, type
+
+### Community 178 - "Community 178"
+Cohesion: 0.33
+Nodes (6): scopes, default, name, notNull, primaryKey, type
+
+### Community 179 - "Community 179"
+Cohesion: 0.33
+Nodes (6): status, default, name, notNull, primaryKey, type
+
+### Community 180 - "Community 180"
+Cohesion: 0.33
+Nodes (6): timestamp, default, name, notNull, primaryKey, type
+
+### Community 181 - "Community 181"
+Cohesion: 0.33
+Nodes (6): target_type, columns, name, notNull, primaryKey, type
+
+### Community 182 - "Community 182"
+Cohesion: 0.33
+Nodes (6): created_at, default, name, notNull, primaryKey, type
+
+### Community 183 - "Community 183"
+Cohesion: 0.33
+Nodes (6): read, default, name, notNull, primaryKey, type
+
+### Community 184 - "Community 184"
+Cohesion: 0.33
+Nodes (6): requested_at, default, name, notNull, primaryKey, type
+
+### Community 185 - "Community 185"
+Cohesion: 0.33
+Nodes (6): status, default, name, notNull, primaryKey, type
+
+### Community 186 - "Community 186"
+Cohesion: 0.40
+Nodes (4): FeedbackType, getToken(), Props, submitFeedback()
+
+### Community 188 - "Community 188"
 Cohesion: 0.33
 Nodes (3): r1, result, svc
 
-### Community 176 - "Api Openapi"
+### Community 189 - "Community 189"
+Cohesion: 0.40
+Nodes (5): app(), req(), roles, uid, validBody
+
+### Community 190 - "Community 190"
 Cohesion: 0.40
 Nodes (5): items, type, properties, type, details
 
-### Community 177 - "Api Openapi"
+### Community 191 - "Community 191"
 Cohesion: 0.40
 Nodes (5): schemas, Session, TokenResponse, type, type
 
-### Community 178 - "Docker Compose"
-Cohesion: 0.40
-Nodes (5): Elasticsearch Docker Service, Kibana Docker Service, PostgreSQL Docker Service, Redis Docker Service, ZeroAuth API Docker Service
-
-### Community 179 - "Messages Es"
+### Community 193 - "Community 193"
 Cohesion: 0.40
 Nodes (5): errors, networkError, notFound, serverError, unauthorized
 
-### Community 180 - "Messages Es"
+### Community 194 - "Community 194"
 Cohesion: 0.40
 Nodes (5): notifications, markAllRead, noNotifications, preferences, title
 
-### Community 181 - "Messages Es"
+### Community 195 - "Community 195"
 Cohesion: 0.40
 Nodes (5): theme, dark, light, system, toggle
 
-### Community 182 - "Messages Fr"
+### Community 196 - "Community 196"
 Cohesion: 0.40
 Nodes (5): errors, networkError, notFound, serverError, unauthorized
 
-### Community 183 - "Messages Fr"
+### Community 197 - "Community 197"
 Cohesion: 0.40
 Nodes (5): notifications, markAllRead, noNotifications, preferences, title
 
-### Community 184 - "Messages Fr"
+### Community 198 - "Community 198"
 Cohesion: 0.40
 Nodes (5): theme, dark, light, system, toggle
 
-### Community 185 - "Meta 0000"
-Cohesion: 0.40
-Nodes (5): name, notNull, primaryKey, type, action
-
-### Community 186 - "Meta 0000"
+### Community 199 - "Community 199"
 Cohesion: 0.40
 Nodes (5): name, notNull, primaryKey, type, actor_email
 
-### Community 187 - "Meta 0000"
+### Community 200 - "Community 200"
 Cohesion: 0.40
 Nodes (5): name, notNull, primaryKey, type, actor_id
 
-### Community 188 - "Meta 0000"
+### Community 201 - "Community 201"
 Cohesion: 0.40
 Nodes (5): country, name, notNull, primaryKey, type
 
-### Community 189 - "Meta 0000"
+### Community 202 - "Community 202"
 Cohesion: 0.40
 Nodes (5): device_hash, name, notNull, primaryKey, type
 
-### Community 190 - "Meta 0000"
+### Community 203 - "Community 203"
 Cohesion: 0.40
 Nodes (5): duration, name, notNull, primaryKey, type
 
-### Community 191 - "Meta 0000"
+### Community 204 - "Community 204"
 Cohesion: 0.40
 Nodes (5): error_code, name, notNull, primaryKey, type
 
-### Community 192 - "Meta 0000"
+### Community 205 - "Community 205"
 Cohesion: 0.40
 Nodes (5): resource_details, name, notNull, primaryKey, type
 
-### Community 193 - "Meta 0000"
+### Community 206 - "Community 206"
 Cohesion: 0.40
 Nodes (5): risk_score, name, notNull, primaryKey, type
 
-### Community 194 - "Meta 0000"
+### Community 207 - "Community 207"
 Cohesion: 0.40
 Nodes (5): session_id, name, notNull, primaryKey, type
 
-### Community 195 - "Meta 0000"
+### Community 208 - "Community 208"
 Cohesion: 0.40
 Nodes (5): success, name, notNull, primaryKey, type
 
-### Community 196 - "Meta 0000"
+### Community 209 - "Community 209"
 Cohesion: 0.40
 Nodes (5): target_id, name, notNull, primaryKey, type
 
-### Community 197 - "Meta 0000"
+### Community 210 - "Community 210"
 Cohesion: 0.40
 Nodes (5): user_agent, name, notNull, primaryKey, type
 
-### Community 198 - "Meta 0000"
+### Community 211 - "Community 211"
 Cohesion: 0.40
 Nodes (5): continuous_eval_context, name, notNull, primaryKey, type
 
-### Community 199 - "Meta 0000"
+### Community 212 - "Community 212"
 Cohesion: 0.40
 Nodes (5): ip_address, name, notNull, primaryKey, type
 
-### Community 200 - "Meta 0000"
+### Community 213 - "Community 213"
+Cohesion: 0.40
+Nodes (5): target_type, name, notNull, primaryKey, type
+
+### Community 214 - "Community 214"
 Cohesion: 0.40
 Nodes (5): context, name, notNull, primaryKey, type
 
-### Community 201 - "Meta 0000"
+### Community 215 - "Community 215"
 Cohesion: 0.40
 Nodes (5): org_id, name, notNull, primaryKey, type
 
-### Community 202 - "Meta 0000"
+### Community 216 - "Community 216"
 Cohesion: 0.40
 Nodes (5): read_at, name, notNull, primaryKey, type
 
-### Community 203 - "Meta 0000"
+### Community 217 - "Community 217"
 Cohesion: 0.40
 Nodes (5): reason, name, notNull, primaryKey, type
 
-### Community 204 - "Meta 0000"
+### Community 218 - "Community 218"
 Cohesion: 0.40
 Nodes (5): revoked_at, name, notNull, primaryKey, type
 
-### Community 205 - "Meta 0000"
+### Community 219 - "Community 219"
 Cohesion: 0.40
 Nodes (5): user_id, name, notNull, primaryKey, type
 
-### Community 206 - "Meta 0000"
+### Community 220 - "Community 220"
 Cohesion: 0.40
 Nodes (5): expires_at, name, notNull, primaryKey, type
 
-### Community 207 - "Meta 0001"
+### Community 221 - "Community 221"
 Cohesion: 0.40
 Nodes (5): name, notNull, primaryKey, type, action
 
-### Community 208 - "Meta 0001"
+### Community 222 - "Community 222"
 Cohesion: 0.40
 Nodes (5): name, notNull, primaryKey, type, actor_email
 
-### Community 209 - "Meta 0001"
+### Community 223 - "Community 223"
 Cohesion: 0.40
 Nodes (5): name, notNull, primaryKey, type, actor_id
 
-### Community 210 - "Meta 0001"
+### Community 224 - "Community 224"
 Cohesion: 0.40
 Nodes (5): country, name, notNull, primaryKey, type
 
-### Community 211 - "Meta 0001"
+### Community 225 - "Community 225"
 Cohesion: 0.40
 Nodes (5): device_hash, name, notNull, primaryKey, type
 
-### Community 212 - "Meta 0001"
+### Community 226 - "Community 226"
 Cohesion: 0.40
 Nodes (5): duration, name, notNull, primaryKey, type
 
-### Community 213 - "Meta 0001"
+### Community 227 - "Community 227"
 Cohesion: 0.40
 Nodes (5): error_code, name, notNull, primaryKey, type
 
-### Community 214 - "Meta 0001"
+### Community 228 - "Community 228"
 Cohesion: 0.40
 Nodes (5): resource_details, name, notNull, primaryKey, type
 
-### Community 215 - "Meta 0001"
+### Community 229 - "Community 229"
 Cohesion: 0.40
 Nodes (5): risk_score, name, notNull, primaryKey, type
 
-### Community 216 - "Meta 0001"
+### Community 230 - "Community 230"
 Cohesion: 0.40
 Nodes (5): session_id, name, notNull, primaryKey, type
 
-### Community 217 - "Meta 0001"
+### Community 231 - "Community 231"
 Cohesion: 0.40
 Nodes (5): success, name, notNull, primaryKey, type
 
-### Community 218 - "Meta 0001"
+### Community 232 - "Community 232"
 Cohesion: 0.40
 Nodes (5): target_id, name, notNull, primaryKey, type
 
-### Community 219 - "Meta 0001"
+### Community 233 - "Community 233"
 Cohesion: 0.40
 Nodes (5): user_agent, name, notNull, primaryKey, type
 
-### Community 220 - "Meta 0001"
+### Community 234 - "Community 234"
 Cohesion: 0.40
 Nodes (5): continuous_eval_context, name, notNull, primaryKey, type
 
-### Community 221 - "Meta 0001"
+### Community 235 - "Community 235"
 Cohesion: 0.40
 Nodes (5): ip_address, name, notNull, primaryKey, type
 
-### Community 222 - "Meta 0001"
+### Community 236 - "Community 236"
 Cohesion: 0.40
 Nodes (5): name, notNull, primaryKey, type, body
 
-### Community 223 - "Meta 0001"
+### Community 237 - "Community 237"
 Cohesion: 0.40
 Nodes (5): key_prefix, name, notNull, primaryKey, type
 
-### Community 224 - "Meta 0001"
+### Community 238 - "Community 238"
 Cohesion: 0.40
 Nodes (5): org_id, name, notNull, primaryKey, type
 
-### Community 225 - "Meta 0001"
+### Community 239 - "Community 239"
 Cohesion: 0.40
 Nodes (5): expires_at, name, notNull, primaryKey, type
 
-### Community 226 - "Meta 0001"
+### Community 240 - "Community 240"
 Cohesion: 0.40
 Nodes (5): read_at, name, notNull, primaryKey, type
 
-### Community 227 - "Shared Module"
-Cohesion: 0.40
-Nodes (3): ORG_PERMISSIONS, OrgPermission, SYSTEM_ROLE_PERMISSIONS
+### Community 241 - "Community 241"
+Cohesion: 0.50
+Nodes (5): BullMQ Email Queue, Dunning Management (Failed Payment Emails), HaveIBeenPwned Password Check, ZeroAuth SaaS Starter Guide, Win-Back Email Campaign
 
-### Community 228 - "Schemas Module"
+### Community 242 - "Community 242"
 Cohesion: 0.40
 Nodes (4): ListSessionsQuery, ListSessionsQuerySchema, RevokeSessionInput, RevokeSessionSchema
 
-### Community 229 - "Src Module"
-Cohesion: 0.40
-Nodes (4): buildApp(), { mockDb, enqueueDb, resetDb }, mockProfile, profileWithDeletion
-
-### Community 230 - "Packages Module"
-Cohesion: 0.40
-Nodes (3): COMPONENT_LABELS, STATUS_STYLES, StatusData
-
-### Community 231 - "Src Module"
+### Community 243 - "Community 243"
 Cohesion: 0.50
 Nodes (3): getTracer(), InitTelemetryOptions, withSpan()
 
-### Community 232 - "Mcp Module"
+### Community 244 - "Community 244"
 Cohesion: 0.40
 Nodes (4): mcpServers, nextjs, type, url
 
-### Community 233 - "Drizzle Module"
-Cohesion: 0.50
-Nodes (3): dialect, entries, version
-
-### Community 234 - "Icon192 Module"
+### Community 245 - "Community 245"
 Cohesion: 0.67
 Nodes (4): App Icon (192px), Personal Portrait Photo, PWA / Web App Manifest Icon Asset, Sydney Opera House (Background Location)
 
-### Community 235 - "Packages Module"
+### Community 246 - "Community 246"
+Cohesion: 0.50
+Nodes (3): dialect, entries, version
+
+### Community 248 - "Community 248"
 Cohesion: 0.67
 Nodes (3): buildConfig(), nextConfig, withNextIntl
 
-### Community 236 - "Api Openapi"
+### Community 250 - "Community 250"
 Cohesion: 0.67
 Nodes (3): format, type, lastActivityAt
+
+### Community 252 - "Community 252"
+Cohesion: 0.67
+Nodes (3): Passkeys / WebAuthn (FIDO2), Decentralized Identifiers (DID), FIDO Attestation & MDS3
+
+### Community 254 - "Community 254"
+Cohesion: 0.67
+Nodes (3): generateAuthCode(), generateOAuthState(), nanoid
 
 ## Ambiguous Edges - Review These
 - `App Icon (512px)` → `Person (Young Male)`  [AMBIGUOUS]
   packages/ui/public/icon-512.png · relation: not_a_branded_logo_but_personal_photo_of
 
 ## Knowledge Gaps
-- **2115 isolated node(s):** `parser`, `ecmaVersion`, `sourceType`, `project`, `extends` (+2110 more)
+- **2260 isolated node(s):** `parser`, `ecmaVersion`, `sourceType`, `project`, `extends` (+2255 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **13 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **25 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **What is the exact relationship between `App Icon (512px)` and `Person (Young Male)`?**
   _Edge tagged AMBIGUOUS (relation: not_a_branded_logo_but_personal_photo_of) - confidence is low._
-- **Why does `common` connect `Messages En` to `Messages En`, `Feature Flags & DB`?**
-  _High betweenness centrality (0.052) - this node is a cross-community bridge._
-- **Why does `or` connect `Feature Flags & DB` to `Messages En`?**
-  _High betweenness centrality (0.051) - this node is a cross-community bridge._
+- **Why does `common` connect `Community 30` to `Community 113`, `Community 11`?**
+  _High betweenness centrality (0.046) - this node is a cross-community bridge._
+- **Why does `or` connect `Community 11` to `Community 30`?**
+  _High betweenness centrality (0.046) - this node is a cross-community bridge._
 - **What connects `parser`, `ecmaVersion`, `sourceType` to the rest of the system?**
-  _2118 weakly-connected nodes found - possible documentation gaps or missing edges._
-- **Should `Security Events & Email Templates` be split into smaller, more focused modules?**
-  _Cohesion score 0.05555555555555555 - nodes in this community are weakly interconnected._
-- **Should `Authorization & Audit Logging` be split into smaller, more focused modules?**
-  _Cohesion score 0.04576271186440678 - nodes in this community are weakly interconnected._
-- **Should `DB Schema Migrations` be split into smaller, more focused modules?**
-  _Cohesion score 0.04081632653061224 - nodes in this community are weakly interconnected._
+  _2265 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **Should `Community 0` be split into smaller, more focused modules?**
+  _Cohesion score 0.03906935908691835 - nodes in this community are weakly interconnected._
+- **Should `Community 1` be split into smaller, more focused modules?**
+  _Cohesion score 0.0519774011299435 - nodes in this community are weakly interconnected._
+- **Should `Community 2` be split into smaller, more focused modules?**
+  _Cohesion score 0.06060606060606061 - nodes in this community are weakly interconnected._

@@ -16,14 +16,18 @@ const nextConfig: NextConfig = {
     // resolveAlias: { "some-package": "./src/mocks/some-package.ts" },
   },
 
+  // Forward browser console output to the terminal so agents can read
+  // runtime errors and warnings without a browser devtools session.
+  // (Moved out of `experimental` in Next 16 → top-level `logging`.)
+  logging: {
+    browserToTerminal: true,
+  },
+
   experimental: {
     // Serves the built-in MCP server at /_next/mcp during `next dev`.
     // Coding agents can call get_routes, get_errors, get_logs,
     // get_page_metadata, and get_project_metadata via this endpoint.
     mcpServer: true,
-    // Forward browser console output to the terminal so agents can read
-    // runtime errors and warnings without a browser devtools session.
-    browserDebugInfoInTerminal: true,
   },
 };
 

@@ -162,7 +162,7 @@ export default function OrgSettingsPage() {
   return (
     <div className="space-y-8 max-w-xl">
       <div>
-        <h1 className="text-2xl font-bold text-foreground">{org.name} — Settings</h1>
+        <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">{org.name} — Settings</h1>
         <p className="text-sm text-muted-foreground mt-0.5 font-mono">{org.slug}</p>
       </div>
 
@@ -203,7 +203,7 @@ export default function OrgSettingsPage() {
         <button
           type="submit"
           disabled={saving}
-          className="bg-primary hover:bg-primary/90 disabled:opacity-50 text-foreground text-sm px-4 py-2 rounded-lg transition-colors"
+          className="bg-primary hover:bg-primary/90 disabled:opacity-50 text-primary-foreground text-sm px-4 py-2 rounded-lg transition-colors"
         >
           {saving ? "Saving…" : "Save changes"}
         </button>
@@ -264,7 +264,7 @@ export default function OrgSettingsPage() {
               value={deleteConfirm}
               onChange={(e) => setDeleteConfirm(e.target.value)}
               placeholder={org.name}
-              className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm text-foreground placeholder-gray-600 focus:outline-none focus:border-red-500"
+              className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-red-500"
             />
           </div>
           <button

@@ -22,6 +22,13 @@
       "when": 1781458800000,
       "tag": "0002_backend_roadmap_security",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1781560800000,
+      "tag": "0003_durable_jit_federation",
+      "breakpoints": true
     }
   ]
 }

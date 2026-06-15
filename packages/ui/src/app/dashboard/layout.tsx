@@ -1,154 +1,98 @@
 "use client";
 import { useEffect, useState } from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Menu, X } from "lucide-react";
-import { clearToken } from "../../lib/auth";
+import { useRouter } from "next/navigation";
+import {
+  Building2,
+  CreditCard,
+  KeyRound,
+  LayoutDashboard,
+  Monitor,
+  Plug,
+  ShieldCheck,
+  ShieldQuestion,
+  User,
+  UserCog,
+  Webhook,
+} from "lucide-react";
+import { clearToken, isAuthenticated } from "../../lib/auth";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { NotificationBell } from "@/components/NotificationBell";
-import { brand } from "@/config/brand";
 import FeedbackWidget from "@/components/FeedbackWidget";
 import LocaleSwitcher from "@/components/LocaleSwitcher";
 import VerifyEmailBanner from "@/components/VerifyEmailBanner";
-import { cn } from "@/lib/utils";
+import AppShell from "@/components/app-shell/AppShell";
+import type { NavItem } from "@/components/app-shell/AppSidebar";
 
-const navItems = [
-  { href: "/dashboard", label: "Overview" },
-  { href: "/dashboard/profile", label: "Profile" },
-  { href: "/dashboard/security", label: "Security" },
-  { href: "/dashboard/sessions", label: "Sessions" },
-  { href: "/dashboard/organizations", label: "Organizations" },
-  { href: "/dashboard/api-keys", label: "API Keys" },
-  { href: "/dashboard/webhooks", label: "Webhooks" },
-  { href: "/dashboard/billing", label: "Billing" },
+const navItems: NavItem[] = [
+  { href: "/dashboard", label: "Overview", icon: LayoutDashboard, exact: true },
+  { href: "/dashboard/profile", label: "Profile", icon: User },
+  { href: "/dashboard/security", label: "Security", icon: ShieldCheck },
+  { href: "/dashboard/sessions", label: "Sessions", icon: Monitor },
+  { href: "/dashboard/organizations", label: "Organizations", icon: Building2 },
+  { href: "/dashboard/api-keys", label: "API Keys", icon: KeyRound },
+  { href: "/dashboard/webhooks", label: "Webhooks", icon: Webhook },
+  { href: "/dashboard/billing", label: "Billing", icon: CreditCard },
+  { href: "/dashboard/jit", label: "Cross-tenant", icon: ShieldQuestion },
+  { href: "/dashboard/settings", label: "Connected Apps", icon: Plug },
+  { href: "/dashboard/account", label: "Account", icon: UserCog },
 ];
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const router = useRouter();
+  // null = still checking, true = authenticated. We never render the dashboard
+  // shell (or let children fire authenticated API calls) until a token is present.
+  const [authed, setAuthed] = useState<boolean | null>(null);
 
   useEffect(() => {
-    if (!mobileOpen) return;
-    function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") setMobileOpen(false);
+    if (!isAuthenticated()) {
+      router.replace("/login");
+      return;
     }
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [mobileOpen]);
+    setAuthed(true);
+  }, [router]);
+
+  // Redirect this/other tabs when the token is cleared elsewhere
+  // (sign-out, session revocation, or token expiry handled by the API client).
+  useEffect(() => {
+    function onStorage(e: StorageEvent) {
+      if (e.key === "za_access_token" && e.newValue === null) {
+        router.replace("/login");
+      }
+    }
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, [router]);
 
   function handleSignOut() {
     clearToken();
     window.location.href = "/login";
   }
 
+  // Until a token is confirmed, render a placeholder so the dashboard shell and
+  // its data-fetching children never flash for a signed-out user.
+  if (authed !== true) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background text-foreground">
+        <p className="text-sm text-muted-foreground">Checking session…</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-background">
-      <nav
-        className="border-b border-border px-6 py-4"
-        role="navigation"
-        aria-label="Main navigation"
-      >
-        <div className="mx-auto flex max-w-5xl items-center justify-between">
-          {/* Left: logo + desktop nav links */}
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-2">
-              <div
-                className="flex h-7 w-7 items-center justify-center rounded-lg text-xs font-bold text-foreground"
-                style={{ backgroundColor: brand.logoColor }}
-              >
-                {brand.logoLetter}
-              </div>
-              <span className="font-bold text-foreground">{brand.name}</span>
-            </div>
-            {/* Desktop nav links */}
-            <div className="hidden gap-1 md:flex" role="menubar">
-              {navItems.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  role="menuitem"
-                  className={cn(
-                    "rounded-lg px-3 py-1.5 text-sm transition-colors",
-                    pathname === item.href
-                      ? "bg-accent text-foreground"
-                      : "text-muted-foreground hover:bg-accent hover:text-foreground"
-                  )}
-                >
-                  {item.label}
-                </Link>
-              ))}
-            </div>
-          </div>
-
-          {/* Right: LocaleSwitcher + ThemeToggle + NotificationBell + sign out + hamburger */}
-          <div className="flex items-center gap-2">
-            <LocaleSwitcher />
-            <ThemeToggle />
-            <NotificationBell />
-            <button
-              onClick={handleSignOut}
-              className="hidden text-sm text-muted-foreground transition-colors hover:text-foreground md:block"
-            >
-              Sign Out
-            </button>
-            {/* Hamburger — mobile only */}
-            <button
-              aria-label={mobileOpen ? "Close menu" : "Open menu"}
-              aria-expanded={mobileOpen}
-              aria-controls="mobile-nav-menu"
-              onClick={() => setMobileOpen((v) => !v)}
-              className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-foreground md:hidden"
-            >
-              {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-            </button>
-          </div>
-        </div>
-
-        {/* Mobile slide-down menu */}
-        {mobileOpen && (
-          <div
-            id="mobile-nav-menu"
-            role="menu"
-            aria-label="Mobile navigation"
-            className="mx-auto mt-4 flex max-w-5xl flex-col gap-1 border-t border-border pb-2 pt-4 md:hidden"
-          >
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                role="menuitem"
-                onClick={() => setMobileOpen(false)}
-                className={cn(
-                  "rounded-lg px-3 py-2.5 text-sm transition-colors",
-                  pathname === item.href
-                    ? "bg-accent text-foreground"
-                    : "text-muted-foreground hover:bg-accent hover:text-foreground"
-                )}
-              >
-                {item.label}
-              </Link>
-            ))}
-            <button
-              role="menuitem"
-              onClick={() => {
-                setMobileOpen(false);
-                handleSignOut();
-              }}
-              className="mt-2 rounded-lg px-3 py-2.5 text-left text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-            >
-              Sign Out
-            </button>
-          </div>
-        )}
-      </nav>
-
-      <VerifyEmailBanner />
-
-      <main id="main-content" className="mx-auto max-w-5xl px-6 py-8">
-        {children}
-      </main>
-
+    <AppShell
+      navItems={navItems}
+      onSignOut={handleSignOut}
+      banner={<VerifyEmailBanner />}
+      actions={
+        <>
+          <LocaleSwitcher />
+          <ThemeToggle />
+          <NotificationBell />
+        </>
+      }
+    >
+      {children}
       <FeedbackWidget type="nps" context="dashboard" delay={45_000} />
-    </div>
+    </AppShell>
   );
 }

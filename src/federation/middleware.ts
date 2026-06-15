@@ -33,7 +33,7 @@ export function requireFederatedIdentity(opts: FederatedIdentityOptions = {}) {
     }
     const token = authHeader.slice(7);
 
-    const provider = getProvider(providerId);
+    const provider = await getProvider(providerId);
     if (!provider || !provider.enabled) {
       return c.json(
         { error: "UNKNOWN_PROVIDER", message: "Federation provider not found or disabled" },

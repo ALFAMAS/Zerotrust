@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { api } from "@/lib/api";
+import { getToken } from "@/lib/auth";
 
 const API = process.env.NEXT_PUBLIC_ZEROAUTH_URL ?? "http://localhost:3000";
 
@@ -18,8 +20,12 @@ export default function AccountPage() {
   async function handleExport() {
     setExportLoading(true);
     try {
+      // The GDPR routes are protected by Bearer-token authMiddleware, so we must
+      // send the access token. Export streams a file, so we fetch directly (the
+      // api client parses JSON) but attach the same Authorization header.
+      const token = getToken();
       const res = await fetch(`${API}/gdpr/export`, {
-        credentials: "include",
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
       });
       if (!res.ok) throw new Error("Export failed");
       const blob = await res.blob();
@@ -40,22 +46,16 @@ export default function AccountPage() {
     if (deleteConfirm !== "DELETE") return;
     setDeleteLoading(true);
     try {
-      const res = await fetch(`${API}/gdpr/account`, {
-        method: "DELETE",
-        credentials: "include",
+      const data = await api.delete<{ scheduledFor?: string; message?: string }>("/gdpr/account");
+      setDeleteStatus({
+        scheduled: true,
+        scheduledFor: data.scheduledFor,
+        message: data.message,
       });
-      const data = await res.json();
-      if (!res.ok) {
-        setDeleteStatus({ error: data.error ?? "Request failed" });
-      } else {
-        setDeleteStatus({
-          scheduled: true,
-          scheduledFor: data.scheduledFor,
-          message: data.message,
-        });
-      }
-    } catch {
-      setDeleteStatus({ error: "Network error. Please try again." });
+    } catch (err: unknown) {
+      setDeleteStatus({
+        error: err instanceof Error ? err.message : "Request failed",
+      });
     } finally {
       setDeleteLoading(false);
     }
@@ -63,14 +63,9 @@ export default function AccountPage() {
 
   async function handleCancelDeletion() {
     try {
-      const res = await fetch(`${API}/gdpr/account/deletion/cancel`, {
-        method: "POST",
-        credentials: "include",
-      });
-      if (res.ok) {
-        setDeleteStatus(null);
-        setDeleteConfirm("");
-      }
+      await api.post("/gdpr/account/deletion/cancel");
+      setDeleteStatus(null);
+      setDeleteConfirm("");
     } catch {
       alert("Failed to cancel deletion. Please try again.");
     }
@@ -79,7 +74,7 @@ export default function AccountPage() {
   return (
     <div className="max-w-2xl mx-auto space-y-10 p-6">
       <div>
-        <h1 className="text-2xl font-bold text-foreground">Account</h1>
+        <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">Account</h1>
         <p className="mt-1 text-sm text-muted-foreground">Manage your data and account status</p>
       </div>
 
@@ -93,7 +88,7 @@ export default function AccountPage() {
         <button
           onClick={handleExport}
           disabled={exportLoading}
-          className="px-4 py-2 rounded-lg bg-primary hover:bg-primary/90 text-foreground text-sm font-medium disabled:opacity-50 transition-colors"
+          className="px-4 py-2 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-medium disabled:opacity-50 transition-colors"
         >
           {exportLoading ? "Preparing export…" : "Download my data"}
         </button>

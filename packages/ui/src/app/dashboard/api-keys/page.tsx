@@ -67,7 +67,7 @@ export default function ApiKeysPage() {
 
   return (
     <div className="max-w-3xl">
-      <h1 className="text-2xl font-bold text-foreground mb-1">API Keys</h1>
+      <h1 className="mb-1 font-display text-2xl font-semibold tracking-tight text-foreground">API Keys</h1>
       <p className="text-muted-foreground text-sm mb-8">
         Use API keys to authenticate programmatic access to your account.
       </p>
@@ -83,7 +83,7 @@ export default function ApiKeysPage() {
             </code>
             <button
               onClick={() => copy(newKey)}
-              className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 text-foreground text-xs rounded-lg transition-colors whitespace-nowrap"
+              className="px-3 py-1.5 bg-secondary hover:bg-secondary/80 text-secondary-foreground text-xs rounded-lg transition-colors whitespace-nowrap"
             >
               {copied ? "Copied!" : "Copy"}
             </button>
@@ -122,7 +122,7 @@ export default function ApiKeysPage() {
           <button
             type="submit"
             disabled={creating}
-            className="self-start px-4 py-2 bg-primary hover:bg-primary/90 disabled:opacity-50 text-foreground text-sm rounded-lg transition-colors"
+            className="self-start px-4 py-2 bg-primary hover:bg-primary/90 disabled:opacity-50 text-primary-foreground text-sm rounded-lg transition-colors"
           >
             {creating ? "Creating…" : "Create key"}
           </button>
@@ -138,7 +138,7 @@ export default function ApiKeysPage() {
         ) : keys.length === 0 ? (
           <div className="p-6 text-muted-foreground text-sm">No active API keys. Create one above.</div>
         ) : (
-          <ul className="divide-y divide-gray-800">
+          <ul className="divide-y divide-border">
             {keys.map((key) => (
               <li key={key.id} className="flex items-center justify-between px-6 py-4">
                 <div>

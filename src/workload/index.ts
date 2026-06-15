@@ -1,10 +1,58 @@
 import crypto from "crypto";
-import { eq, and, gt } from "drizzle-orm";
+import { eq, and, gt, desc } from "drizzle-orm";
 import { getDb } from "../db";
 import { workloadCredentialsTable } from "../db/schema";
 import { getLogger } from "../logger";
 
 const logger = getLogger("workload");
+
+/**
+ * List workload credentials without exposing the (hashed) secret. Ordered
+ * newest-first. Powers the admin workload-identity management UI.
+ */
+export async function listWorkloadCredentials() {
+  const db = getDb();
+  const rows = await db
+    .select({
+      id: workloadCredentialsTable.id,
+      workloadId: workloadCredentialsTable.workloadId,
+      scopes: workloadCredentialsTable.scopes,
+      ttl: workloadCredentialsTable.ttl,
+      expiresAt: workloadCredentialsTable.expiresAt,
+      isRevoked: workloadCredentialsTable.isRevoked,
+      createdAt: workloadCredentialsTable.createdAt,
+    })
+    .from(workloadCredentialsTable)
+    .orderBy(desc(workloadCredentialsTable.createdAt));
+
+  const now = new Date();
+  return rows.map((r) => ({
+    ...r,
+    // Derived status so the UI doesn't have to reconcile revoked + expired.
+    status: r.isRevoked
+      ? "revoked"
+      : r.expiresAt && r.expiresAt < now
+        ? "expired"
+        : "active",
+  }));
+}
+
+/**
+ * Revoke a workload credential by id. Returns true if a row was updated.
+ * Revocation is immediate — `getValidWorkloadCredential` filters on isRevoked.
+ */
+export async function revokeWorkloadCredential(id: string): Promise<boolean> {
+  const db = getDb();
+  const updated = await db
+    .update(workloadCredentialsTable)
+    .set({ isRevoked: true })
+    .where(eq(workloadCredentialsTable.id, id))
+    .returning({ id: workloadCredentialsTable.id });
+  if (updated.length > 0) {
+    logger.info("Workload credential revoked", { id });
+  }
+  return updated.length > 0;
+}
 
 export async function createWorkloadCredential(
   workloadId: string,

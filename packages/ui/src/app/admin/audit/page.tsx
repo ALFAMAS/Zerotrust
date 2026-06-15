@@ -75,7 +75,7 @@ export default function AuditPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-foreground">Audit Logs</h1>
+        <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">Audit Logs</h1>
         <p className="mt-1 text-sm text-muted-foreground">Recent authentication and admin events</p>
       </div>
 
@@ -91,7 +91,7 @@ export default function AuditPage() {
                 <th className="px-5 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Status</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-800">
+            <tbody className="divide-y divide-border">
               {loading && (
                 <tr>
                   <td colSpan={5} className="px-5 py-8 text-center text-muted-foreground">Loading…</td>

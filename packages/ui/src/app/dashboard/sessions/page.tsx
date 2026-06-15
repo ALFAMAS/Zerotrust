@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { api } from "../../../lib/api";
 import { SkeletonCard } from "@/components/Skeleton";
+import { Laptop } from "lucide-react";
 
 interface Session {
   id: string;
@@ -32,7 +33,7 @@ export default function SessionsPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Active Sessions</h1>
+        <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">Active Sessions</h1>
         <button
           onClick={() => { if (confirm("Revoke all other sessions?")) api.post("/auth/logout/all").then(() => { fetchSessions(); window.location.href = "/login"; }).catch(() => {}); }}
           className="text-sm text-red-400 hover:text-red-300 border border-red-800 px-3 py-1.5 rounded-lg hover:bg-red-950 transition-colors"
@@ -54,7 +55,9 @@ export default function SessionsPage() {
           {sessions.map((session) => (
             <div key={session.id} className="bg-card border border-border rounded-xl p-4 flex items-center justify-between">
               <div className="flex items-start gap-3">
-                <div className="text-2xl mt-0.5">💻</div>
+                <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border bg-background text-primary">
+                  <Laptop className="h-4 w-4" />
+                </span>
                 <div>
                   <div className="text-sm font-medium text-foreground">
                     {session.deviceFingerprint?.browser || "Unknown browser"} on {session.deviceFingerprint?.os || "Unknown OS"}

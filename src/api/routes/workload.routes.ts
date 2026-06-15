@@ -3,10 +3,13 @@ import {
   createWorkloadCredential,
   getValidWorkloadCredential,
   validateWorkloadCredential,
+  listWorkloadCredentials,
+  revokeWorkloadCredential,
 } from "../../workload";
 import { getConfig } from "../../config";
 import { getLogger } from "../../logger";
 import { TokenService } from "../../services/token.service";
+import { authMiddleware } from "../../middleware/auth";
 import type { HonoEnv } from "../../shared/types";
 
 const router = new Hono<HonoEnv>();
@@ -93,6 +96,37 @@ router.post("/token", async (c) => {
     });
   } catch (err) {
     logger.error("Issue workload token failed", err as Error);
+    return c.json({ error: "INTERNAL_ERROR" }, 500);
+  }
+});
+
+// GET /credentials — list workload credentials (admin only, no secrets returned)
+router.get("/credentials", authMiddleware, async (c) => {
+  const user = c.get("user");
+  if (!Array.isArray(user?.roles) || !user.roles.includes("admin")) {
+    return c.json({ error: "FORBIDDEN" }, 403);
+  }
+  try {
+    const credentials = await listWorkloadCredentials();
+    return c.json({ credentials });
+  } catch (err) {
+    logger.error("List workload credentials failed", err as Error);
+    return c.json({ error: "INTERNAL_ERROR" }, 500);
+  }
+});
+
+// POST /credentials/:id/revoke — revoke a workload credential (admin only)
+router.post("/credentials/:id/revoke", authMiddleware, async (c) => {
+  const user = c.get("user");
+  if (!Array.isArray(user?.roles) || !user.roles.includes("admin")) {
+    return c.json({ error: "FORBIDDEN" }, 403);
+  }
+  try {
+    const ok = await revokeWorkloadCredential(c.req.param("id"));
+    if (!ok) return c.json({ error: "NOT_FOUND" }, 404);
+    return c.json({ success: true });
+  } catch (err) {
+    logger.error("Revoke workload credential failed", err as Error);
     return c.json({ error: "INTERNAL_ERROR" }, 500);
   }
 });

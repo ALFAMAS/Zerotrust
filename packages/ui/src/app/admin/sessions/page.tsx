@@ -86,7 +86,7 @@ export default function SessionsPage() {
       )}
 
       <div>
-        <h1 className="text-2xl font-bold text-foreground">Sessions</h1>
+        <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">Sessions</h1>
         <p className="mt-1 text-sm text-muted-foreground">{sessions.length} total sessions</p>
       </div>
 
@@ -123,7 +123,7 @@ export default function SessionsPage() {
                 <th className="px-5 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-800">
+            <tbody className="divide-y divide-border">
               {loading && (
                 <tr>
                   <td colSpan={7} className="px-5 py-8 text-center text-muted-foreground">Loading…</td>

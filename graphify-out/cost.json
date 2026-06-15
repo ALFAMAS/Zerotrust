@@ -5,8 +5,32 @@
       "input_tokens": 1200,
       "output_tokens": 420,
       "files": 307
+    },
+    {
+      "date": "2026-06-15T07:19:56.950632+00:00",
+      "input_tokens": 80000,
+      "output_tokens": 6602,
+      "files": 8
+    },
+    {
+      "date": "2026-06-15T07:34:11.013924+00:00",
+      "input_tokens": 72000,
+      "output_tokens": 6712,
+      "files": 10
+    },
+    {
+      "date": "2026-06-15T07:50:20.143829+00:00",
+      "input_tokens": 58000,
+      "output_tokens": 5162,
+      "files": 11
+    },
+    {
+      "date": "2026-06-15T08:08:57.713445+00:00",
+      "input_tokens": 58000,
+      "output_tokens": 5512,
+      "files": 11
     }
   ],
-  "total_input_tokens": 1200,
-  "total_output_tokens": 420
+  "total_input_tokens": 269200,
+  "total_output_tokens": 24408
 }

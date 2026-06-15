@@ -18,11 +18,17 @@ A production-ready SaaS boilerplate with enterprise-grade authentication built i
 | ✅  | TOTP (Google Authenticator, Authy, 1Password)                         |
 | ✅  | Email OTP, SMS OTP (Twilio), WhatsApp, Telegram MFA                   |
 | ✅  | Session management — list, revoke, device tracking                    |
+| ✅  | Protected routes — client-side dashboard/admin guards, redirect to login |
+| ✅  | Silent token refresh — auto-replays a 401 via the refresh token        |
 | ✅  | PASETO v4 tokens (AES-256-GCM, no JWT footguns)                       |
 | ✅  | RBAC + ABAC with JIT privilege escalation                             |
 | ✅  | Continuous access evaluation + anomaly detection                      |
 | ✅  | Rate limiting (Redis-backed, in-memory fallback)                      |
 | ✅  | OIDC provider + SAML 2.0 SSO                                          |
+| ✅  | Decentralized identity — did:key / did:web resolver + proof-of-control |
+| ✅  | Identity federation (RFC 8693 token exchange) — admin provider registry |
+| ✅  | Workload / agent identity — scoped client-credential tokens (agent claim) |
+| ✅  | Cross-tenant JIT access — request + admin approval inbox, auto-expiring |
 | ✅  | SCIM 2.0 user provisioning                                            |
 | ✅  | LDAP / Active Directory sync                                          |
 | ✅  | User dashboard — profile, security, sessions                          |

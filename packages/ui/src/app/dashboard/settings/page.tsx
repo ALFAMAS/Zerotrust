@@ -66,7 +66,7 @@ export default function SettingsPage() {
   return (
     <div className="max-w-2xl space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-foreground">Connected Apps</h1>
+        <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">Connected Apps</h1>
         <p className="text-muted-foreground text-sm mt-1">
           Manage OAuth providers linked to your account.
         </p>
@@ -78,7 +78,7 @@ export default function SettingsPage() {
         </div>
       )}
 
-      <div className="bg-card border border-border rounded-2xl divide-y divide-gray-800">
+      <div className="bg-card border border-border rounded-2xl divide-y divide-border">
         {loading ? (
           <div className="flex items-center justify-center py-12">
             <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
@@ -114,7 +114,7 @@ export default function SettingsPage() {
                   ) : (
                     <a
                       href={provider.connectUrl}
-                      className="border border-primary hover:bg-primary/90/10 text-primary hover:text-primary/80 px-3 py-1.5 rounded-lg text-xs transition-colors"
+                      className="border border-primary hover:bg-primary/10 text-primary hover:text-primary/80 px-3 py-1.5 rounded-lg text-xs transition-colors"
                     >
                       Connect
                     </a>

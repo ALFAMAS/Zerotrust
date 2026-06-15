@@ -1,7 +1,8 @@
-import Link from "next/link";
 import type { Metadata } from "next";
 import { brand } from "@/config/brand";
 import { legal } from "@/config/legal";
+import SiteHeader from "@/components/SiteHeader";
+import SiteFooter from "@/components/SiteFooter";
 
 export const metadata: Metadata = {
   title: `Terms of Service — ${brand.name}`,
@@ -10,29 +11,12 @@ export const metadata: Metadata = {
 
 export default function TermsPage() {
   return (
-    <div className="min-h-screen bg-background">
-      {/* Nav */}
-      <nav className="border-b border-border px-6 py-4 max-w-7xl mx-auto flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2 group">
-          <div
-            className="w-8 h-8 rounded-lg flex items-center justify-center text-foreground font-bold text-sm"
-            style={{ backgroundColor: brand.logoColor }}
-          >
-            {brand.logoLetter}
-          </div>
-          <span className="font-bold text-foreground text-lg group-hover:text-primary/80 transition-colors">
-            {brand.name}
-          </span>
-        </Link>
-        <Link href="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-          ← Back to Home
-        </Link>
-      </nav>
+    <div className="flex min-h-screen flex-col bg-background">
+      <SiteHeader />
 
-      {/* Content */}
-      <main className="max-w-3xl mx-auto px-6 py-16">
-        <h1 className="text-4xl font-bold text-foreground mb-3">Terms of Service</h1>
-        <p className="text-muted-foreground text-sm mb-12">Last updated: {legal.termsEffectiveDate}</p>
+      <main className="mx-auto w-full max-w-3xl flex-1 px-6 py-16">
+        <h1 className="font-display text-4xl font-semibold tracking-tight text-foreground">Terms of Service</h1>
+        <p className="mb-12 mt-3 text-sm text-muted-foreground">Last updated: {legal.termsEffectiveDate}</p>
 
         <div className="space-y-12 text-foreground/80 leading-relaxed">
 
@@ -190,14 +174,7 @@ export default function TermsPage() {
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-border px-6 py-8 max-w-7xl mx-auto flex items-center justify-between flex-wrap gap-4">
-        <div className="text-muted-foreground text-sm">© {brand.copyrightYear} {brand.name}. Open source under {brand.license}.</div>
-        <div className="flex gap-6 text-sm text-muted-foreground">
-          <Link href="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>
-          <Link href="/terms" className="text-primary hover:text-primary/80 transition-colors">Terms</Link>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

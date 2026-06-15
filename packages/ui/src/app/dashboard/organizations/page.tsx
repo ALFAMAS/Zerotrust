@@ -98,10 +98,10 @@ export default function OrganizationsPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Organizations</h1>
+        <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">Organizations</h1>
         <button
           onClick={() => setShowCreateForm((v) => !v)}
-          className="text-sm bg-primary hover:bg-primary/90 text-foreground px-4 py-2 rounded-lg transition-colors"
+          className="text-sm bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-lg transition-colors"
         >
           {showCreateForm ? "Cancel" : "Create organization"}
         </button>
@@ -146,7 +146,7 @@ export default function OrganizationsPage() {
           <button
             type="submit"
             disabled={creating || !orgName.trim()}
-            className="bg-primary hover:bg-primary/90 disabled:opacity-50 text-foreground text-sm px-4 py-2 rounded-lg transition-colors"
+            className="bg-primary hover:bg-primary/90 disabled:opacity-50 text-primary-foreground text-sm px-4 py-2 rounded-lg transition-colors"
           >
             {creating ? "Creating…" : "Create"}
           </button>
@@ -175,7 +175,7 @@ export default function OrganizationsPage() {
             <Link
               key={org.id}
               href={`/dashboard/organizations/${org.id}`}
-              className="block bg-card border border-border rounded-xl p-5 hover:border-border transition-colors"
+              className="block bg-card border border-border rounded-xl p-5 hover:border-primary/40 transition-colors"
             >
               <div className="flex items-center justify-between">
                 <div>

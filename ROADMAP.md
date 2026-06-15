@@ -18,6 +18,40 @@ Priority bands: **P0** before launch · **P1** first month · **P2** first quart
 
 ---
 
+## Latest context (2026-06-15)
+
+Session focused on closing **frontend ↔ backend wiring gaps** surfaced while testing
+the dashboard:
+
+- **Dashboard auth guard** — `/dashboard/*` now redirects signed-out users to `/login`
+  (mirrors the admin guard). Previously the shell rendered after sign-out because only
+  the API calls 401'd, leaving a broken "logged-in" layout. Also reacts to cross-tab
+  token clears via the `storage` event.
+- **Silent token refresh** — the API client (`packages/ui/src/lib/api.ts`) now replays a
+  single 401 through `POST /auth/token/refresh` and, on failure, bounces to
+  `/login?next=…`. This is the first time the refresh-token endpoint is wired into the UI.
+- **GDPR self-serve wired** — the data-export / account-deletion page (`/dashboard/account`)
+  and Connected-Apps page (`/dashboard/settings`) existed but were **unreachable** (missing
+  from nav) and the export/delete calls used cookie auth against Bearer-protected routes.
+  Both pages are now linked in the dashboard nav and use the access token.
+- **Disposable-email blocking** confirmed shipped (see 2.3) — roadmap status corrected.
+
+Follow-up pass (same day): the four advanced backends that were mounted with **no UI**
+now have admin/dashboard surfaces — see §2.0/§2.1 for status:
+
+- **DID** → `/admin/did` (resolve + proof-of-control challenge)
+- **Cross-tenant JIT** → `/dashboard/jit` (request) + `/admin/jit` (approval inbox)
+- **Workload/agent identity** → `/admin/workload` (issue credential + mint agent token)
+- **Federation (RFC 8693)** → `/admin/federation` (trusted-provider registry)
+
+Same-day shell refactor: the dashboard and admin areas now share one **responsive app
+shell** (`components/app-shell/` — `AppShell` + `AppSidebar` + `AppTopbar` + `AppFooter`).
+The dashboard's cramped 11-item horizontal navbar is replaced by a collapsible sidebar
+(slide-over drawer on mobile), every authenticated page gets a sticky topbar + footer, and
+workload credentials are now listable/revocable from `/admin/workload`.
+
+---
+
 ## Part 1 — Core roadmap (from STARTER.md)
 
 ### P0 — Launch blockers
@@ -111,29 +145,43 @@ The code-graph pass (`graphify-out/GRAPH_REPORT.md`) found shipped subsystems th
 **never made it into the feature list or docs**. Documenting and exposing these is
 the cheapest, highest-impact work available — the engineering is largely done.
 
-- ⚡ [~] **Decentralized Identifiers (DID)** — `resolveDID()`, `resolveDIDWeb()`,
+- ⚡ [x] **Decentralized Identifiers (DID)** — `resolveDID()`, `resolveDIDWeb()`,
   `resolveDIDKey()`, base58 codec already exist (`Did Module`). Document the
   resolver, add `did:web` support for orgs, and expose a verify endpoint.
   _2026-06-15: router mounted at `/auth/did` — `GET /resolve`, `POST /challenge`,
-  `POST /verify` (proof-of-control). Login-via-DID deferred: `provisionDIDUser()`
-  was a stub against a Mongoose API and the users table has no `did` column — needs
-  a schema migration + Drizzle-backed upsert first._
+  `POST /verify` (proof-of-control)._
+  _2026-06-15 (UI): admin tool at `/admin/did` — resolve a `did:key`/`did:web` to its
+  document and generate a proof-of-control challenge. Login-via-DID still deferred:
+  `provisionDIDUser()` is a stub and the users table has no `did` column — needs a
+  schema migration + Drizzle-backed upsert first._
 - ⚡ [ ] **Post-quantum crypto** — hybrid KEM is implemented (`createKEMProvider()`,
   `generatePQKeyPair()`, `establishPQSessionKey()`, `hybridEncrypt/Decrypt` in
   `Crypto Post`). Productize: PQ-protected token/session option behind a flag,
   document the threat model, add a "crypto agility" config switch.
-- ⚡ [ ] **Token exchange / identity federation (RFC 8693)** — `exchangeToken()`,
+- ⚡ [~] **Token exchange / identity federation (RFC 8693)** — `exchangeToken()`,
   `initFederationFromEnv()`, `listProviders()` exist (`Federation & Token Exchange`).
   Surface a federation admin UI and document the on-behalf-of / impersonation flows.
+  _2026-06-15 (UI): admin provider registry at `/admin/federation` — list / register /
+  remove trusted providers backing `POST /federation/token-exchange`._
+  _2026-06-15 (durable): the in-memory provider Map is replaced by the
+  `federated_providers` table (migration `0003`, upsert on provider id). Providers
+  registered via the admin UI now persist across restarts; `initFederationFromEnv()`
+  reconciles env-declared providers on boot without clobbering UI-added ones. On-behalf-of /
+  "act-as" actor-claim flow still to be documented (see 2.1)._
 - ⚡ [ ] **FIDO attestation & MDS3** — `AttestationPolicy`, `AttestationType`,
   `KNOWN_HARDWARE_KEY_AAGUIDS`, MDS3 verification, CA-pin store all exist
   (`Mfa Attestation`). Expose as an **org-level passkey policy** ("hardware keys only",
   "require attestation").
-- ⚡ [~] **Cross-tenant JIT access** — `requestCrossTenantAccess()`,
+- ⚡ [x] **Cross-tenant JIT access** — `requestCrossTenantAccess()`,
   `CrossTenantJITStore` exist (`Jit Cross`). Build the approval-inbox UI and audit view.
   _2026-06-15: router mounted at `/jit/cross-tenant` — request/list/status + admin
-  approve/deny/incoming with role guards. Store is in-memory (grants are ≤1h);
-  approval-inbox UI + durable audit view still pending._
+  approve/deny/incoming with role guards._
+  _2026-06-15 (UI): requester page at `/dashboard/jit` (submit + track requests) and
+  admin approval inbox at `/admin/jit` (approve/deny + history)._
+  _2026-06-15 (durable): the in-memory store is replaced by the
+  `cross_tenant_jit_requests` table (migration `0003`). Requests, approvals and grants
+  now survive restarts and form a queryable audit trail; expiry is computed read-time
+  (an approved grant past its TTL reads as `expired`)._
 - ⚡ [ ] **CSFLE field encryption** — `CSFLEManager`, key versioning, encrypt/decrypt
   plugin exist (`Crypto Csfle`). Document which fields are encrypted and add a
   key-rotation runbook.
@@ -143,9 +191,17 @@ the cheapest, highest-impact work available — the engineering is largely done.
 The frontier for an auth platform in 2026. ZeroAuth already has an OIDC provider,
 RFC 8693 token exchange, and scoped API keys — the foundation is in place.
 
-- 🆕 [ ] **Agent / workload identity** — issue short-lived, narrowly-scoped tokens to
+- 🆕 [~] **Agent / workload identity** — issue short-lived, narrowly-scoped tokens to
   AI agents and services (client-credentials + token exchange). Distinguish agent
   principals from human users.
+  _2026-06-15: `/workload` routes exist (`issue` gated by `WORKLOAD_ISSUE_KEY`,
+  `validate`, `token`). Tokens carry a `principal_type: agent` + `workload_id` claim._
+  _2026-06-15 (UI): admin tool at `/admin/workload` — issue a credential (secret shown
+  once) and mint an agent token._
+  _2026-06-15 (durable mgmt): added `GET /workload/credentials` + `POST
+  /workload/credentials/:id/revoke` (admin-only, secrets never returned, derived
+  active/expired/revoked status). The admin UI now lists every issued credential and
+  revokes it in place — closing the no-list/no-revoke gap._
 - 🆕 [ ] **MCP authorization server** — implement the MCP auth spec on top of the
   existing OIDC provider so MCP clients can obtain scoped tokens.
 - 🆕 [ ] **On-behalf-of / "act-as" delegation** — actor claims via the existing
@@ -175,7 +231,10 @@ Today SAML/OIDC/SCIM are env-driven (one IdP per deployment). Making them
 
 Builds on HIBP + lockout + anomaly detection + device fingerprinting already shipped.
 
-- 🆕 [ ] **Disposable-email blocking** — reject throwaway domains + MX validation on register.
+- 🆕 [x] **Disposable-email blocking** — reject throwaway domains + optional MX validation on
+  register (`disposableEmail.service.ts`, wired into `POST /register`). Block/allow lists are
+  env-driven (`DISPOSABLE_EMAIL_BLOCKLIST` / `_ALLOWLIST`); set `DISPOSABLE_EMAIL_VALIDATE_MX=true`
+  to also require a resolvable MX record.
 - 🆕 [ ] **Bot / abuse signals** — proof-of-work or CAPTCHA fallback on suspicious signups.
 - 🆕 [ ] **Credential-stuffing defense** — IP reputation + global velocity limits layered
   on the per-IP rate limiter.

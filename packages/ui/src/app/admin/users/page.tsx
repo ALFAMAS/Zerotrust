@@ -123,7 +123,7 @@ export default function UsersPage() {
 
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Users</h1>
+          <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">Users</h1>
           <p className="mt-1 text-sm text-muted-foreground">{total} total users</p>
         </div>
         <button
@@ -167,7 +167,7 @@ export default function UsersPage() {
                 <th className="px-5 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-800">
+            <tbody className="divide-y divide-border">
               {loading && (
                 <tr>
                   <td colSpan={5} className="px-5 py-8 text-center text-muted-foreground">Loading…</td>
@@ -182,7 +182,7 @@ export default function UsersPage() {
                 <tr key={u.id} className="hover:bg-accent/50 transition-colors">
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-indigo-900/60 text-xs font-medium text-primary">
+                      <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-primary/15 text-xs font-medium text-primary">
                         {(u.name?.[0] ?? u.email[0]).toUpperCase()}
                       </div>
                       <div>
@@ -204,7 +204,7 @@ export default function UsersPage() {
                     <div className="flex items-center justify-end gap-2">
                       <Link
                         href={`/admin/users/${u.id}`}
-                        className="rounded px-2 py-1 text-xs text-primary hover:bg-indigo-900/30 transition-colors"
+                        className="rounded px-2 py-1 text-xs text-primary hover:bg-primary/10 transition-colors"
                       >
                         View
                       </Link>

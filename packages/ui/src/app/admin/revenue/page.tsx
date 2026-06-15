@@ -1,8 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Banknote, CheckCircle2, Download, Megaphone, Send, TrendingDown, TrendingUp } from "lucide-react";
 import { api } from "@/lib/api";
-import StatCard from "@/components/StatCard";
+import { Button } from "@/components/ui/button";
+import MetricCard from "@/components/admin/MetricCard";
+import DonutChart from "@/components/admin/DonutChart";
 
 interface RevenueData {
   mrr: number;
@@ -15,6 +18,8 @@ interface RevenueData {
   canceledLast30Days: number;
   churnRatePercent: number;
 }
+
+const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
 export default function RevenuePage() {
   const [data, setData] = useState<RevenueData | null>(null);
@@ -45,53 +50,55 @@ export default function RevenuePage() {
   }
 
   const fmt = (n: number) => `$${n.toLocaleString()}`;
+  const oauthBase = process.env.NEXT_PUBLIC_ZEROAUTH_URL || "http://localhost:3000";
+
+  const inputClasses =
+    "w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring";
 
   return (
     <div className="space-y-8">
-      <div className="flex items-start justify-between">
+      <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Revenue</h1>
+          <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">Revenue</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             MRR, churn and subscription health at a glance
           </p>
         </div>
         <div className="flex gap-2">
-          <a
-            href={`${process.env.NEXT_PUBLIC_ZEROAUTH_URL || "http://localhost:3000"}/admin/users/export`}
-            className="px-3 py-2 bg-muted hover:bg-accent text-gray-200 text-sm rounded-lg transition-colors"
-          >
-            Export users CSV
-          </a>
-          <button
-            onClick={() => setBroadcastOpen((v) => !v)}
-            className="px-3 py-2 bg-primary hover:bg-primary/90 text-foreground text-sm rounded-lg transition-colors"
-          >
+          <Button asChild variant="outline" size="sm">
+            <a href={`${oauthBase}/admin/users/export`}>
+              <Download />
+              Export CSV
+            </a>
+          </Button>
+          <Button size="sm" onClick={() => setBroadcastOpen((v) => !v)}>
+            <Megaphone />
             Broadcast
-          </button>
+          </Button>
         </div>
       </div>
 
       {broadcastOpen && (
-        <div className="bg-card border border-border rounded-xl p-6 space-y-4">
-          <h2 className="font-semibold text-foreground">Send announcement</h2>
+        <div className="space-y-4 rounded-xl border border-border bg-card p-6">
+          <h2 className="font-medium text-foreground">Send announcement</h2>
           <input
             value={broadcast.title}
             onChange={(e) => setBroadcast({ ...broadcast, title: e.target.value })}
             placeholder="Title"
-            className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground"
+            className={inputClasses}
           />
           <textarea
             value={broadcast.message}
             onChange={(e) => setBroadcast({ ...broadcast, message: e.target.value })}
             placeholder="Message"
             rows={3}
-            className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground"
+            className={inputClasses}
           />
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <select
               value={broadcast.segment}
               onChange={(e) => setBroadcast({ ...broadcast, segment: e.target.value })}
-              className="bg-muted border border-border rounded-lg px-3 py-2 text-sm text-foreground"
+              className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-ring focus:outline-none"
             >
               <option value="all">All users</option>
               <option value="free">Free plan</option>
@@ -99,61 +106,44 @@ export default function RevenuePage() {
               <option value="enterprise">Enterprise plan</option>
               <option value="inactive">Inactive 30+ days</option>
             </select>
-            <button
-              onClick={sendBroadcast}
-              disabled={!broadcast.title || !broadcast.message}
-              className="px-4 py-2 bg-primary hover:bg-primary/90 disabled:opacity-50 text-foreground text-sm rounded-lg transition-colors"
-            >
+            <Button onClick={sendBroadcast} disabled={!broadcast.title || !broadcast.message} size="sm">
+              <Send />
               Send
-            </button>
-            {broadcastResult && <span className="text-sm text-muted-foreground">{broadcastResult}</span>}
+            </Button>
+            {broadcastResult && (
+              <span className="text-sm text-muted-foreground">{broadcastResult}</span>
+            )}
           </div>
         </div>
       )}
 
       {loading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {[...Array(4)].map((_, i) => (
-            <div key={i} className="h-28 rounded-xl bg-card animate-pulse" />
+            <div key={i} className="h-32 animate-pulse rounded-xl border border-border bg-card" />
           ))}
         </div>
       ) : data ? (
         <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-            <StatCard title="MRR" value={fmt(data.mrr)} icon="💰" color="green" />
-            <StatCard title="ARR" value={fmt(data.arr)} icon="📈" color="blue" />
-            <StatCard
-              title="Active subscriptions"
-              value={data.activeSubscriptions}
-              icon="✅"
-              color="indigo"
-            />
-            <StatCard
-              title="Churn (30d)"
-              value={`${data.churnRatePercent}%`}
-              icon="📉"
-              color="red"
-            />
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <MetricCard icon={Banknote} label="MRR" value={fmt(data.mrr)} hint={data.currency?.toUpperCase()} />
+            <MetricCard icon={TrendingUp} label="ARR" value={fmt(data.arr)} />
+            <MetricCard icon={CheckCircle2} label="Active subscriptions" value={data.activeSubscriptions} />
+            <MetricCard icon={TrendingDown} label="Churn (30d)" value={`${data.churnRatePercent}%`} />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-card border border-border rounded-xl p-6">
-              <h2 className="font-semibold text-foreground mb-4">Subscriptions by plan</h2>
-              <div className="space-y-3">
-                {Object.entries(data.byPlan).map(([plan, count]) => (
-                  <div key={plan} className="flex items-center justify-between">
-                    <span className="text-sm text-foreground/80 capitalize">{plan}</span>
-                    <span className="text-sm font-semibold text-foreground">{count}</span>
-                  </div>
-                ))}
-                {Object.keys(data.byPlan).length === 0 && (
-                  <p className="text-sm text-muted-foreground">No subscriptions yet</p>
-                )}
-              </div>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div className="rounded-xl border border-border bg-card p-6">
+              <h2 className="mb-4 font-medium text-foreground">Subscriptions by plan</h2>
+              {Object.keys(data.byPlan).length === 0 ? (
+                <p className="text-sm text-muted-foreground">No subscriptions yet</p>
+              ) : (
+                <DonutChart labels={Object.keys(data.byPlan).map(cap)} series={Object.values(data.byPlan)} />
+              )}
             </div>
 
-            <div className="bg-card border border-border rounded-xl p-6">
-              <h2 className="font-semibold text-foreground mb-4">Health</h2>
+            <div className="rounded-xl border border-border bg-card p-6">
+              <h2 className="mb-4 font-medium text-foreground">Health</h2>
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-foreground/80">In trial</span>
@@ -161,13 +151,11 @@ export default function RevenuePage() {
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-foreground/80">Past due (dunning)</span>
-                  <span className="text-sm font-semibold text-yellow-400">{data.pastDue}</span>
+                  <span className="text-sm font-semibold text-amber-400">{data.pastDue}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-foreground/80">Canceled (last 30 days)</span>
-                  <span className="text-sm font-semibold text-red-400">
-                    {data.canceledLast30Days}
-                  </span>
+                  <span className="text-sm font-semibold text-red-400">{data.canceledLast30Days}</span>
                 </div>
               </div>
             </div>

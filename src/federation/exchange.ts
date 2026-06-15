@@ -24,7 +24,7 @@ export async function exchangeToken(
   req: FederationTokenRequest,
   remoteIp: string
 ): Promise<FederationTokenResponse> {
-  const provider = getProvider(req.providerId);
+  const provider = await getProvider(req.providerId);
   if (!provider) throw new Error(`Unknown federation provider: ${req.providerId}`);
   if (!provider.enabled) throw new Error(`Federation provider ${req.providerId} is disabled`);
 

@@ -156,7 +156,7 @@ export default function AuthSettingsPage() {
       )}
 
       <div>
-        <h1 className="text-2xl font-bold text-foreground">Auth Settings</h1>
+        <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">Auth Settings</h1>
         <p className="mt-1 text-sm text-muted-foreground">Configure authentication methods, MFA, and security policy</p>
       </div>
 
@@ -167,7 +167,7 @@ export default function AuthSettingsPage() {
           <div className="rounded-xl bg-card border border-border p-5">
             <h2 className="font-semibold text-foreground mb-1">Authentication Methods</h2>
             <p className="text-xs text-muted-foreground mb-4">Choose how users can sign in to your app</p>
-            <div className="divide-y divide-gray-800">
+            <div className="divide-y divide-border">
               <ToggleRow
                 label="Email & Password"
                 description="Users can register and sign in with email/password"
@@ -205,7 +205,7 @@ export default function AuthSettingsPage() {
           <div className="rounded-xl bg-card border border-border p-5">
             <h2 className="font-semibold text-foreground mb-1">Registration</h2>
             <p className="text-xs text-muted-foreground mb-4">Control who can create new accounts</p>
-            <div className="divide-y divide-gray-800">
+            <div className="divide-y divide-border">
               <ToggleRow
                 label="Allow new registrations"
                 description="If off, only existing users can sign in"
@@ -241,7 +241,7 @@ export default function AuthSettingsPage() {
           <div className="rounded-xl bg-card border border-border p-5">
             <h2 className="font-semibold text-foreground mb-1">Multi-Factor Authentication</h2>
             <p className="text-xs text-muted-foreground mb-4">Second-factor options available to users</p>
-            <div className="divide-y divide-gray-800">
+            <div className="divide-y divide-border">
               <ToggleRow
                 label="Authenticator App (TOTP)"
                 description="Google Authenticator, 1Password, etc."
@@ -273,7 +273,7 @@ export default function AuthSettingsPage() {
           <div className="rounded-xl bg-card border border-border p-5">
             <h2 className="font-semibold text-foreground mb-1">Security Settings</h2>
             <p className="text-xs text-muted-foreground mb-4">Session and account lockout configuration</p>
-            <div className="divide-y divide-gray-800">
+            <div className="divide-y divide-border">
               <NumberInput
                 label="Session Duration (seconds)"
                 value={settings.sessionTTLSeconds}

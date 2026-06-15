@@ -2,15 +2,17 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { Download, KeyRound, LogIn, Monitor, UserCheck, UserPlus, Users } from "lucide-react";
 import { api } from "@/lib/api";
-import StatCard from "@/components/StatCard";
 import Badge from "@/components/Badge";
+import MetricCard from "@/components/admin/MetricCard";
+import RadialGauge from "@/components/admin/RadialGauge";
 
 interface Stats {
   totalUsers: number;
+  activeUsers: number;
   activeSessions: number;
-  loginsLast24h: number;
-  authMethodsEnabled: number;
+  totalLogins24h: number;
 }
 
 interface User {
@@ -22,7 +24,13 @@ interface User {
   lastLoginAt?: string;
 }
 
-export default function DashboardPage() {
+const quickActions = [
+  { href: "/admin/users", icon: UserPlus, title: "Add user", desc: "Invite a new member" },
+  { href: "/admin/sessions", icon: Monitor, title: "View sessions", desc: "Active user sessions" },
+  { href: "/admin/settings/auth", icon: KeyRound, title: "Auth settings", desc: "Configure auth methods" },
+];
+
+export default function AdminOverviewPage() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [recentUsers, setRecentUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -38,7 +46,7 @@ export default function DashboardPage() {
         if (statsData.status === "fulfilled") setStats(statsData.value);
         if (usersData.status === "fulfilled") {
           const v = usersData.value;
-          setRecentUsers(Array.isArray(v) ? v : v.users ?? []);
+          setRecentUsers(Array.isArray(v) ? v : (v.users ?? []));
         }
       } finally {
         setLoading(false);
@@ -47,121 +55,99 @@ export default function DashboardPage() {
     load();
   }, []);
 
+  const activePct =
+    stats && stats.totalUsers > 0 ? Math.round((stats.activeUsers / stats.totalUsers) * 100) : 0;
+
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
+        <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">Dashboard</h1>
         <p className="mt-1 text-sm text-muted-foreground">Overview of your authentication platform</p>
       </div>
 
-      {/* Stat Cards */}
+      {/* Metric tiles */}
       {loading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {[...Array(4)].map((_, i) => (
-            <div key={i} className="h-28 rounded-xl bg-card animate-pulse" />
+            <div key={i} className="h-32 animate-pulse rounded-xl border border-border bg-card" />
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-          <StatCard
-            title="Total Users"
-            value={stats?.totalUsers ?? "—"}
-            icon="👤"
-            color="blue"
-          />
-          <StatCard
-            title="Active Sessions"
-            value={stats?.activeSessions ?? "—"}
-            icon="🟢"
-            color="green"
-          />
-          <StatCard
-            title="Logins (last 24h)"
-            value={stats?.loginsLast24h ?? "—"}
-            icon="🔓"
-            color="indigo"
-          />
-          <StatCard
-            title="Auth Methods Enabled"
-            value={stats?.authMethodsEnabled ?? "—"}
-            icon="🛡️"
-            color="purple"
-          />
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <MetricCard icon={Users} label="Total users" value={stats?.totalUsers ?? "—"} />
+          <MetricCard icon={UserCheck} label="Active users (30d)" value={stats?.activeUsers ?? "—"} />
+          <MetricCard icon={Monitor} label="Active sessions" value={stats?.activeSessions ?? "—"} />
+          <MetricCard icon={LogIn} label="Logins (24h)" value={stats?.totalLogins24h ?? "—"} />
         </div>
       )}
 
-      {/* Two-column section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Recent Users */}
-        <div className="rounded-xl bg-card border border-border overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-border">
-            <h2 className="font-semibold text-foreground">Recent Users</h2>
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        {/* Activity gauge (real active/total ratio) */}
+        <div className="rounded-xl border border-border bg-card p-5">
+          <h2 className="font-medium text-foreground">User activity</h2>
+          <p className="text-xs text-muted-foreground">Active in the last 30 days</p>
+          <div className="mt-4">
+            <RadialGauge
+              value={activePct}
+              label="Active"
+              caption={stats ? `${stats.activeUsers} of ${stats.totalUsers} users` : undefined}
+            />
+          </div>
+        </div>
+
+        {/* Recent users */}
+        <div className="overflow-hidden rounded-xl border border-border bg-card lg:col-span-2">
+          <div className="flex items-center justify-between border-b border-border px-5 py-4">
+            <h2 className="font-medium text-foreground">Recent users</h2>
             <Link href="/admin/users" className="text-xs text-primary hover:text-primary/80">
               View all →
             </Link>
           </div>
-          <div className="divide-y divide-gray-800">
+          <div className="divide-y divide-border">
             {recentUsers.length === 0 && !loading && (
               <p className="px-5 py-6 text-sm text-muted-foreground">No users found.</p>
             )}
             {recentUsers.map((u) => (
               <div key={u.id} className="flex items-center gap-3 px-5 py-3">
-                <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-indigo-900/60 text-sm font-medium text-primary">
+                <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-primary/15 text-sm font-medium text-primary">
                   {(u.name?.[0] ?? u.email[0]).toUpperCase()}
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="truncate text-sm font-medium text-foreground">
-                    {u.name ?? u.email}
-                  </p>
-                  {u.name && (
-                    <p className="truncate text-xs text-muted-foreground">{u.email}</p>
-                  )}
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-medium text-foreground">{u.name ?? u.email}</p>
+                  {u.name && <p className="truncate text-xs text-muted-foreground">{u.email}</p>}
                 </div>
                 <Badge status={u.status} />
               </div>
             ))}
           </div>
         </div>
+      </div>
 
-        {/* Quick Actions */}
-        <div className="rounded-xl bg-card border border-border overflow-hidden">
-          <div className="px-5 py-4 border-b border-border">
-            <h2 className="font-semibold text-foreground">Quick Actions</h2>
-          </div>
-          <div className="p-5 grid grid-cols-2 gap-3">
+      {/* Quick actions */}
+      <div className="overflow-hidden rounded-xl border border-border bg-card">
+        <div className="border-b border-border px-5 py-4">
+          <h2 className="font-medium text-foreground">Quick actions</h2>
+        </div>
+        <div className="grid grid-cols-2 gap-3 p-5 lg:grid-cols-4">
+          {quickActions.map((a) => (
             <Link
-              href="/admin/users"
-              className="flex flex-col items-start gap-2 rounded-lg bg-muted hover:bg-gray-750 border border-border p-4 transition-colors hover:border-primary/50"
+              key={a.href}
+              href={a.href}
+              className="flex flex-col items-start gap-2 rounded-lg border border-border bg-background p-4 transition-colors hover:border-primary/50"
             >
-              <span className="text-xl">➕</span>
-              <span className="text-sm font-medium text-foreground">Add User</span>
-              <span className="text-xs text-muted-foreground">Invite a new member</span>
+              <a.icon className="h-5 w-5 text-primary" />
+              <span className="text-sm font-medium text-foreground">{a.title}</span>
+              <span className="text-xs text-muted-foreground">{a.desc}</span>
             </Link>
-            <Link
-              href="/admin/sessions"
-              className="flex flex-col items-start gap-2 rounded-lg bg-muted border border-border p-4 transition-colors hover:border-primary/50"
-            >
-              <span className="text-xl">🔐</span>
-              <span className="text-sm font-medium text-foreground">View Sessions</span>
-              <span className="text-xs text-muted-foreground">Active user sessions</span>
-            </Link>
-            <Link
-              href="/admin/settings/auth"
-              className="flex flex-col items-start gap-2 rounded-lg bg-muted border border-border p-4 transition-colors hover:border-primary/50"
-            >
-              <span className="text-xl">🔑</span>
-              <span className="text-sm font-medium text-foreground">Auth Settings</span>
-              <span className="text-xs text-muted-foreground">Configure auth methods</span>
-            </Link>
-            <button
-              onClick={() => alert("Export triggered")}
-              className="flex flex-col items-start gap-2 rounded-lg bg-muted border border-border p-4 transition-colors hover:border-primary/50 text-left"
-            >
-              <span className="text-xl">📤</span>
-              <span className="text-sm font-medium text-foreground">Export Users</span>
-              <span className="text-xs text-muted-foreground">Download CSV</span>
-            </button>
-          </div>
+          ))}
+          <button
+            onClick={() => alert("Export triggered")}
+            className="flex flex-col items-start gap-2 rounded-lg border border-border bg-background p-4 text-left transition-colors hover:border-primary/50"
+          >
+            <Download className="h-5 w-5 text-primary" />
+            <span className="text-sm font-medium text-foreground">Export users</span>
+            <span className="text-xs text-muted-foreground">Download CSV</span>
+          </button>
         </div>
       </div>
     </div>
