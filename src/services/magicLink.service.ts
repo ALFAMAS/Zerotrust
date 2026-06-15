@@ -47,7 +47,7 @@ export async function sendMagicLink(
     const settings = await getSettings();
     const appUrl = settings.appUrl || process.env.APP_URL || "http://localhost:3000";
     const magicLinkUrl =
-      `${appUrl}/auth/magic-link/verify` +
+      `${appUrl}/magic-link/verify` +
       `?token=${encodeURIComponent(rawToken)}&email=${encodeURIComponent(email)}` +
       (redirectUrl ? `&redirect=${encodeURIComponent(redirectUrl)}` : "");
 
