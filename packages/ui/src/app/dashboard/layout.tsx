@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
+  Bell,
   Building2,
   CreditCard,
   KeyRound,
@@ -21,6 +22,7 @@ import FeedbackWidget from "@/components/FeedbackWidget";
 import LocaleSwitcher from "@/components/LocaleSwitcher";
 import VerifyEmailBanner from "@/components/VerifyEmailBanner";
 import AppShell from "@/components/app-shell/AppShell";
+import ProductTour from "@/components/ProductTour";
 import type { NavItem } from "@/components/app-shell/AppSidebar";
 
 const navItems: NavItem[] = [
@@ -28,6 +30,7 @@ const navItems: NavItem[] = [
   { href: "/dashboard/profile", label: "Profile", icon: User },
   { href: "/dashboard/security", label: "Security", icon: ShieldCheck },
   { href: "/dashboard/sessions", label: "Sessions", icon: Monitor },
+  { href: "/dashboard/notifications", label: "Notifications", icon: Bell },
   { href: "/dashboard/organizations", label: "Organizations", icon: Building2 },
   { href: "/dashboard/api-keys", label: "API Keys", icon: KeyRound },
   { href: "/dashboard/webhooks", label: "Webhooks", icon: Webhook },
@@ -93,6 +96,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     >
       {children}
       <FeedbackWidget type="nps" context="dashboard" delay={45_000} />
+      <ProductTour />
     </AppShell>
   );
 }

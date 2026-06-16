@@ -37,7 +37,10 @@ A production-ready SaaS boilerplate with enterprise-grade authentication built i
 | ✅  | Toast notification system                                             |
 | ✅  | Loading skeletons                                                     |
 | ✅  | Mobile-responsive layouts                                             |
-| ✅  | PWA manifest (installable on mobile)                                  |
+| ✅  | PWA — installable, offline app-shell + IndexedDB write queue (Background Sync) |
+| ✅  | Web push notifications — service worker + Push API (VAPID), per-device opt-in |
+| ✅  | First-login product tour — dependency-free spotlight walkthrough      |
+| ✅  | Locale-aware formatting — `Intl.*` dates/numbers/relative-time via `useFormat()` |
 | ✅  | Cookie consent banner (GDPR)                                          |
 | ✅  | Privacy policy + Terms of service pages                               |
 | ✅  | GDPR data export + 30-day soft-delete account deletion                |
@@ -672,6 +675,9 @@ POST   /notifications/read-all                  (auth required)
 GET    /notifications/sse                       (auth required, SSE stream)
 GET    /notifications/preferences               (auth required)
 PUT    /notifications/preferences               (auth required)
+GET    /notifications/push/public-key            (auth required, VAPID key)
+POST   /notifications/push/subscribe             (auth required)
+POST   /notifications/push/unsubscribe           (auth required)
 
 GET    /orgs                                    (auth required)
 POST   /orgs                                    (auth required)
@@ -795,10 +801,12 @@ See [STARTER.md](./STARTER.md) for the full feature catalog with priority tiers.
 
 **P2 — Quality & scale (2–3 months)**
 
-- PWA completion — offline support, deep linking for invite and magic-link URLs
-- Web push notifications
 - Locale-aware email templates (send transactional email in the user's language)
-- Product tour, welcome checklist polish, RTL layout support
+- RTL layout support
+- Live chat widget + support ticket model
+
+_Shipped in 2026-06: PWA offline support, deep linking, web push notifications,
+first-login product tour, and locale-aware `Intl.*` formatting._
 
 ---
 

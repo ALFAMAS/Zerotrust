@@ -560,6 +560,26 @@ export const tenantsTable = pgTable("tenants", {
 
 // ── Feature flags ─────────────────────────────────────────────────────────────
 
+// Web Push subscriptions (RFC 8030/8291). One row per browser/device push
+// endpoint a user has opted into. Used by the notification fan-out to deliver
+// push even when no SSE connection is open (e.g. the PWA is closed).
+export const pushSubscriptionsTable = pgTable("push_subscriptions", {
+  id: uuid("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => usersTable.id, { onDelete: "cascade" }),
+  endpoint: text("endpoint").notNull().unique(),
+  p256dh: text("p256dh").notNull(),
+  auth: text("auth").notNull(),
+  userAgent: text("user_agent"),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .default(sql`now()`),
+  lastUsedAt: timestamp("last_used_at", { withTimezone: true }),
+});
+
 export const featureFlagsTable = pgTable("feature_flags", {
   id: uuid("id").primaryKey().defaultRandom(),
   key: text("key").notNull().unique(),

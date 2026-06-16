@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { Bell } from "lucide-react";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/utils";
+import { useFormat } from "@/lib/format";
 
 interface Notification {
   id: string;
@@ -29,18 +30,8 @@ function typeIcon(type: Notification["type"]): string {
   }
 }
 
-function relativeTime(iso: string): string {
-  const diff = Date.now() - new Date(iso).getTime();
-  const secs = Math.floor(diff / 1000);
-  if (secs < 60) return "just now";
-  const mins = Math.floor(secs / 60);
-  if (mins < 60) return `${mins}m ago`;
-  const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h ago`;
-  return `${Math.floor(hrs / 24)}d ago`;
-}
-
 export function NotificationBell() {
+  const fmt = useFormat();
   const [unreadCount, setUnreadCount] = useState(0);
   const [open, setOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -183,7 +174,7 @@ export function NotificationBell() {
                       {n.body.length > 80 ? n.body.slice(0, 80) + "…" : n.body}
                     </div>
                     <div className="mt-1 text-[11px] text-muted-foreground/70">
-                      {relativeTime(n.createdAt)}
+                      {fmt.relativeTime(n.createdAt)}
                     </div>
                   </div>
                   {!n.read && (

@@ -6,6 +6,12 @@ import { notificationsTable, usersTable } from "../../db/schema";
 import { authMiddleware } from "../../middleware/auth";
 import { getLogger } from "../../logger";
 import { sendNotificationEmail } from "../../services/email.service";
+import {
+  getVapidPublicKey,
+  saveSubscription,
+  removeSubscription,
+  sendWebPush,
+} from "../../services/webPush.service";
 import type { HonoEnv } from "../../shared/types";
 
 export interface NotificationPreferences {
@@ -32,6 +38,18 @@ const sseClients = new Map<string, Set<SSEController>>();
  */
 export function broadcastNotification(userId: string, notification: Record<string, unknown>): void {
   const clients = sseClients.get(userId);
+
+  // Web push is delivered regardless of SSE state — it's the channel that works
+  // when the app/PWA is closed. Best-effort and non-blocking; a no-op when VAPID
+  // keys aren't configured.
+  void sendWebPush(userId, {
+    title: String(notification.title ?? "New notification"),
+    body: String(notification.body ?? notification.message ?? ""),
+    link: notification.link ? String(notification.link) : undefined,
+    type: notification.type ? String(notification.type) : undefined,
+  }).catch(() => {
+    // non-blocking — ignore errors
+  });
 
   if (!clients || clients.size === 0) {
     // No active SSE connections — try to deliver via email
@@ -302,6 +320,62 @@ router.put("/preferences", async (c) => {
   } catch (err) {
     logger.error("Update notification preferences error", err as Error);
     return c.json({ error: "INTERNAL_ERROR" }, 500);
+  }
+});
+
+// ── Web Push subscription management ──────────────────────────────────────────
+
+// GET /notifications/push/public-key — VAPID public key for the client to
+// subscribe with. Returns null when push isn't configured on this deployment.
+router.get("/push/public-key", (c) => {
+  return c.json({ publicKey: getVapidPublicKey() });
+});
+
+const subscribeSchema = z.object({
+  endpoint: z.string().url(),
+  keys: z.object({
+    p256dh: z.string().min(1),
+    auth: z.string().min(1),
+  }),
+});
+
+// POST /notifications/push/subscribe — store a browser push subscription.
+router.post("/push/subscribe", async (c) => {
+  const user = c.get("user");
+  if (!user) {
+    return c.json({ error: "UNAUTHORIZED", message: "Authentication required" }, 401);
+  }
+  const body = await c.req.json().catch(() => ({}));
+  const parsed = subscribeSchema.safeParse(body);
+  if (!parsed.success) {
+    return c.json({ error: "INVALID_REQUEST", issues: parsed.error.issues }, 400);
+  }
+  try {
+    await saveSubscription(user.id, parsed.data, c.req.header("user-agent") ?? undefined);
+    return c.json({ success: true });
+  } catch (err) {
+    logger.error("Save push subscription error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR", message: "Failed to save subscription" }, 500);
+  }
+});
+
+// POST /notifications/push/unsubscribe — remove a browser push subscription.
+router.post("/push/unsubscribe", async (c) => {
+  const user = c.get("user");
+  if (!user) {
+    return c.json({ error: "UNAUTHORIZED", message: "Authentication required" }, 401);
+  }
+  const body = await c.req.json().catch(() => ({}));
+  const endpoint = typeof body.endpoint === "string" ? body.endpoint : null;
+  if (!endpoint) {
+    return c.json({ error: "INVALID_REQUEST", message: "endpoint is required" }, 400);
+  }
+  try {
+    await removeSubscription(user.id, endpoint);
+    return c.json({ success: true });
+  } catch (err) {
+    logger.error("Remove push subscription error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR", message: "Failed to remove subscription" }, 500);
   }
 });
 
