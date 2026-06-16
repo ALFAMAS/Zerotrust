@@ -36,6 +36,13 @@
       "when": 1781647200000,
       "tag": "0004_persistent_tenants",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1781733600000,
+      "tag": "0005_push_subscriptions",
+      "breakpoints": true
     }
   ]
 }

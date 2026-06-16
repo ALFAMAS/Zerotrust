@@ -7,6 +7,7 @@ import { ToastProvider } from "../context/ToastContext";
 import CookieBanner from "@/components/CookieBanner";
 import AnalyticsScript from "@/components/AnalyticsScript";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import ServiceWorkerRegistrar from "@/components/ServiceWorkerRegistrar";
 import { brand } from "@/config/brand";
 import "./globals.css";
 
@@ -75,6 +76,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 {children}
                 <CookieBanner />
                 <AnalyticsScript />
+                <ServiceWorkerRegistrar />
               </ToastProvider>
             </ErrorBoundary>
           </ThemeProvider>

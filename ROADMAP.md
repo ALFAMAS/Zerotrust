@@ -18,6 +18,31 @@ Priority bands: **P0** before launch · **P1** first month · **P2** first quart
 
 ---
 
+## Latest context (2026-06-16)
+
+Shipped the **PWA & Mobile** P2 epic plus the adjacent onboarding/i18n items:
+
+- **Offline support** — `public/sw.js` precaches the app shell, falls back to a
+  branded `offline.html` for failed navigations, and queues mutating API requests
+  in IndexedDB (`lib/offlineQueue.ts`), replaying them through Background Sync on
+  reconnect. `lib/api.ts` enqueues writes on network failure and throws a typed
+  `OfflineQueuedError`. SW is registered (production only) by `ServiceWorkerRegistrar`.
+- **Web push** — new `push_subscriptions` table (migration `0005`),
+  `services/webPush.service.ts` (VAPID via `web-push`), and
+  `/notifications/push/{public-key,subscribe,unsubscribe}`. `broadcastNotification`
+  now fans out to push (works when the PWA is closed) in addition to SSE + email.
+  Per-device opt-in lives on the new `/dashboard/notifications` page.
+- **Deep linking** — manifest gains `scope`/`launch_handler`/`shortcuts`; existing
+  invite + magic-link flows already preserve `next`/`redirect`, so they resolve in
+  both browser and installed-PWA contexts.
+- **Product tour** — dependency-free first-login spotlight (`ProductTour.tsx`).
+- **Locale-aware formatting** — `lib/format.ts` + `useFormat()` over `Intl.*`.
+
+VAPID keys are optional: with them unset push degrades to a no-op and the rest of
+the notification pipeline is unaffected.
+
+---
+
 ## Latest context (2026-06-15)
 
 Session focused on closing **frontend ↔ backend wiring gaps** surfaced while testing
@@ -106,19 +131,33 @@ workload credentials are now listable/revocable from `/admin/workload`.
 
 **PWA & Mobile**
 
-- [ ] Offline support — cache shell, queue writes, sync on reconnect
-- [ ] Deep linking — invite + magic-link in browser and PWA
-- [ ] Web push notifications — service worker + Push API
+- [x] Offline support — service worker (`public/sw.js`) precaches the app shell,
+  serves a branded `offline.html` for navigations, and queues mutating API calls
+  in IndexedDB, replaying them via Background Sync (with an `online`-event fallback)
+  on reconnect. Registered via `ServiceWorkerRegistrar` (production only).
+- [x] Deep linking — invite (`/invite/:token`) + magic-link (`/magic-link/verify`)
+  preserve `next`/`redirect` and open inside the installed PWA via manifest
+  `scope: "/"` + `launch_handler: navigate-existing`.
+- [x] Web push notifications — service worker `push`/`notificationclick` handlers,
+  VAPID-backed `webPush.service.ts`, durable `push_subscriptions` table (migration
+  `0005`), and `/notifications/push/{public-key,subscribe,unsubscribe}`. Wired into
+  `broadcastNotification` so push fires even when the PWA is closed; per-device
+  opt-in toggle on `/dashboard/notifications`. No-ops gracefully when VAPID keys
+  are unset (SSE + email fallback unaffected).
 
 **Onboarding & UX**
 
 - [x] Empty states — shared `EmptyState` component
-- [ ] Product tour — Shepherd.js / Driver.js first-login walkthrough
+- [x] Product tour — dependency-free first-login spotlight walkthrough
+  (`ProductTour.tsx`) anchored to `[data-tour]` nav items, persisted in
+  localStorage under a versioned key; mounted in the dashboard shell.
 - [x] Welcome email on registration
 
 **i18n Completeness**
 
-- [ ] Locale-aware formatting — `Intl.*` everywhere
+- [x] Locale-aware formatting — `lib/format.ts` wraps `Intl.DateTimeFormat` /
+  `NumberFormat` / `RelativeTimeFormat` and a `useFormat()` hook bound to the active
+  next-intl locale; `NotificationBell` timestamps now localize through it.
 - [ ] Locale-aware email templates
 - [ ] RTL layout support
 - [x] Missing-translation fallback to English

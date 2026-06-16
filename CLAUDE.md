@@ -78,6 +78,9 @@ packages/ui/src/
 - **Database**: PostgreSQL via Drizzle ORM — `bun run db:push` to sync schema
 - **Redis**: Required for sessions, rate limiting, and email queue
 - **Env**: copy `.env.example` to `.env` and fill in required values
+- **Web push (PWA)**: optional — set `VAPID_PUBLIC_KEY`/`VAPID_PRIVATE_KEY` (generate
+  with `npx web-push generate-vapid-keys`) to enable push; unset = graceful no-op.
+  The service worker (`packages/ui/public/sw.js`) only registers in production builds.
 - **Lint**: `bun run lint:fix` — ESLint + Prettier run automatically on commit via husky
 
 ## MCP servers

@@ -489,19 +489,19 @@ Complete within the first quarter.
 
 **PWA & Mobile**
 
-- [ ] Offline support — service worker caches dashboard shell; queue writes when offline, sync on reconnect
-- [ ] Deep linking — `/invite/:token` and `/magic-link/verify` open correctly in both browser and PWA contexts
-- [ ] Web push notifications — service worker + Push API; prompt at the right moment
+- [x] Offline support — `public/sw.js` precaches the app shell + `offline.html`; mutating API calls queue in IndexedDB (`lib/offlineQueue.ts`) and replay via Background Sync on reconnect. Registered by `ServiceWorkerRegistrar` (production only)
+- [x] Deep linking — `/invite/:token` and `/magic-link/verify` preserve `next`/`redirect` and open in the installed PWA via manifest `scope` + `launch_handler: navigate-existing`
+- [x] Web push notifications — VAPID `webPush.service.ts`, `push_subscriptions` table (migration `0005`), `/notifications/push/*` endpoints, SW `push` handler; per-device opt-in on `/dashboard/notifications`. Fires from `broadcastNotification` even when the PWA is closed; no-ops without VAPID keys
 
 **Onboarding & UX**
 
 - [x] Empty states — shared `EmptyState` component (icon, title, description, CTA) used in the webhooks page; drop into any list
-- [ ] Product tour — lightweight tooltip walkthrough on first login (Shepherd.js or Driver.js)
+- [x] Product tour — dependency-free first-login spotlight walkthrough (`ProductTour.tsx`) anchored to `[data-tour]` nav items; shown once via a versioned localStorage key
 - [x] Welcome email — sent immediately after registration with login link
 
 **i18n Completeness**
 
-- [ ] Locale-aware formatting — use `Intl.DateTimeFormat`, `Intl.NumberFormat`, `Intl.RelativeTimeFormat` everywhere; no manual date string building
+- [x] Locale-aware formatting — `lib/format.ts` wraps `Intl.DateTimeFormat` / `NumberFormat` / `RelativeTimeFormat`; `useFormat()` binds to the active next-intl locale (used by `NotificationBell`)
 - [ ] Locale-aware email templates — send transactional emails in the user's stored locale
 - [ ] RTL layout support — `dir="rtl"` on `<html>`; audit CSS for absolute positioning that breaks in RTL
 - [x] Missing-translation fallback — English merged underneath the active locale so untranslated keys render in English; missing-key warnings logged in dev
@@ -684,7 +684,7 @@ Comprehensive checklist. Items marked `[x]` are production-ready in the current 
 - [x] Real-time delivery — Server-Sent Events (SSE) push
 - [x] Notification preferences — granular per-channel per-category control
 - [x] Email fallback — deliver via email if user hasn't visited in N days
-- [ ] Web push notifications — service worker + Push API
+- [x] Web push notifications — service worker + Push API (VAPID), `push_subscriptions` table, per-device opt-in
 
 ---
 
@@ -703,7 +703,7 @@ Comprehensive checklist. Items marked `[x]` are production-ready in the current 
 - [x] Setup checklist — "complete your profile", "enable MFA", etc. with progress tracking
 - [x] Welcome email sent immediately after registration
 - [x] Empty states — shared `EmptyState` component with CTA (adopt per list)
-- [ ] Product tour — lightweight tooltip walkthrough on first login (Shepherd.js or Driver.js)
+- [x] Product tour — dependency-free first-login spotlight walkthrough (`ProductTour.tsx`)
 - [ ] Onboarding completion event — fire analytics event + notify sales/Slack on new signups
 
 ---
@@ -782,7 +782,7 @@ Comprehensive checklist. Items marked `[x]` are production-ready in the current 
 - [x] Translation files — `/messages/{locale}.json` (en, es, fr)
 - [x] Locale detection — `Accept-Language` on first visit, cookie-persisted
 - [x] Language switcher — dropdown in nav and settings, persists to profile
-- [ ] Locale-aware formatting — `Intl.*` everywhere; no manual date string building
+- [x] Locale-aware formatting — `lib/format.ts` + `useFormat()` over `Intl.*` (date/number/currency/relative-time)
 - [ ] RTL layout support — `dir="rtl"` toggle on `<html>`
 - [ ] Locale-aware email templates
 - [ ] hreflang tags on marketing pages
@@ -927,9 +927,9 @@ Comprehensive checklist. Items marked `[x]` are production-ready in the current 
 ### Mobile & Offline
 
 - [x] PWA manifest — `manifest.json`, service worker, "Add to Home Screen"
-- [ ] Offline support — cache dashboard shell; queue writes offline, sync on reconnect
-- [ ] Deep linking — invite and magic-link URLs open correctly in web and native
-- [ ] Web push notifications — service worker + Push API
+- [x] Offline support — service worker app-shell cache + IndexedDB write queue with Background Sync
+- [x] Deep linking — invite and magic-link URLs open correctly in browser and installed PWA
+- [x] Web push notifications — service worker + Push API (VAPID), per-device opt-in
 - [ ] React Native / Expo app — biometric login via passkeys
 
 ---

@@ -1,4 +1,14 @@
 import { getToken, getRefreshToken, setToken, clearToken } from "./auth";
+import { enqueueWrite, isQueueableMethod } from "./offlineQueue";
+
+/** Thrown when a mutation is queued offline instead of reaching the server. */
+export class OfflineQueuedError extends Error {
+  queued = true;
+  constructor() {
+    super("You're offline — this change was queued and will sync when you reconnect.");
+    this.name = "OfflineQueuedError";
+  }
+}
 
 const BASE_URL = process.env.NEXT_PUBLIC_ZEROAUTH_URL || "http://localhost:3000";
 
@@ -44,12 +54,35 @@ async function request<T>(
   const token = getToken();
   const headers: Record<string, string> = { "Content-Type": "application/json" };
   if (token && !skipAuth) headers["Authorization"] = `Bearer ${token}`;
+  const serializedBody = body !== undefined ? JSON.stringify(body) : undefined;
 
-  const res = await fetch(`${BASE_URL}${path}`, {
-    method,
-    headers,
-    body: body !== undefined ? JSON.stringify(body) : undefined,
-  });
+  let res: Response;
+  try {
+    res = await fetch(`${BASE_URL}${path}`, {
+      method,
+      headers,
+      body: serializedBody,
+    });
+  } catch (networkErr) {
+    // Network failure (offline). Queue mutations for background sync so the
+    // change isn't lost; reads simply propagate the error to the caller.
+    if (
+      typeof navigator !== "undefined" &&
+      !navigator.onLine &&
+      isQueueableMethod(method) &&
+      !isRetry
+    ) {
+      await enqueueWrite({
+        url: `${BASE_URL}${path}`,
+        method,
+        headers,
+        body: serializedBody,
+        queuedAt: Date.now(),
+      }).catch(() => {});
+      throw new OfflineQueuedError();
+    }
+    throw networkErr;
+  }
 
   // Access token likely expired — attempt one silent refresh + replay.
   if (res.status === 401 && !skipAuth && !isRetry && getRefreshToken()) {
