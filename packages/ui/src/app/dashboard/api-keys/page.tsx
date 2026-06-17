@@ -6,6 +6,7 @@ import { api } from "../../../lib/api";
 interface ApiKey {
   id: string;
   name: string;
+  environment?: "live" | "test";
   keyPrefix: string;
   scopes: string[];
   expiresAt: string | null;
@@ -18,7 +19,7 @@ export default function ApiKeysPage() {
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
   const [newKey, setNewKey] = useState<string | null>(null);
-  const [form, setForm] = useState({ name: "", expiresInDays: "" });
+  const [form, setForm] = useState({ name: "", expiresInDays: "", environment: "live" });
   const [error, setError] = useState("");
   const [copied, setCopied] = useState(false);
 
@@ -39,11 +40,11 @@ export default function ApiKeysPage() {
     setError("");
     setCreating(true);
     try {
-      const body: any = { name: form.name.trim() };
+      const body: any = { name: form.name.trim(), environment: form.environment };
       if (form.expiresInDays) body.expiresInDays = parseInt(form.expiresInDays);
       const res = await api.post<any>("/api-keys", body);
       setNewKey(res.key);
-      setForm({ name: "", expiresInDays: "" });
+      setForm({ name: "", expiresInDays: "", environment: form.environment });
       load();
     } catch {
       setError("Failed to create API key");
@@ -108,6 +109,14 @@ export default function ApiKeysPage() {
               className="flex-1 bg-muted border border-border rounded-lg px-3 py-2 text-foreground text-sm focus:outline-none focus:border-ring"
             />
             <select
+              value={form.environment}
+              onChange={(e) => setForm((f) => ({ ...f, environment: e.target.value }))}
+              className="bg-muted border border-border rounded-lg px-3 py-2 text-foreground text-sm focus:outline-none focus:border-ring"
+            >
+              <option value="live">Live</option>
+              <option value="test">Test</option>
+            </select>
+            <select
               value={form.expiresInDays}
               onChange={(e) => setForm((f) => ({ ...f, expiresInDays: e.target.value }))}
               className="bg-muted border border-border rounded-lg px-3 py-2 text-foreground text-sm focus:outline-none focus:border-ring"
@@ -118,6 +127,10 @@ export default function ApiKeysPage() {
               <option value="365">1 year</option>
             </select>
           </div>
+          <p className="text-muted-foreground text-xs">
+            Test keys are prefixed <span className="font-mono">zak_test_</span> and meant for
+            sandbox/non-production use.
+          </p>
           {error && <p className="text-red-400 text-xs">{error}</p>}
           <button
             type="submit"
@@ -142,7 +155,14 @@ export default function ApiKeysPage() {
             {keys.map((key) => (
               <li key={key.id} className="flex items-center justify-between px-6 py-4">
                 <div>
-                  <p className="text-foreground text-sm font-medium">{key.name}</p>
+                  <p className="text-foreground text-sm font-medium flex items-center gap-2">
+                    {key.name}
+                    {key.environment === "test" && (
+                      <span className="rounded bg-yellow-900/40 text-yellow-400 text-[10px] font-semibold uppercase px-1.5 py-0.5 tracking-wide">
+                        Test
+                      </span>
+                    )}
+                  </p>
                   <p className="text-muted-foreground text-xs mt-0.5 font-mono">{key.keyPrefix}…</p>
                   {key.lastUsedAt ? (
                     <p className="text-muted-foreground text-xs mt-0.5">

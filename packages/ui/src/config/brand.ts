@@ -22,4 +22,15 @@ export const brand = {
     "Enterprise-grade auth without the enterprise complexity. PASETO tokens, WebAuthn passkeys, multi-factor auth, RBAC/ABAC, and real-time anomaly detection — all in one self-hosted platform.",
   copyrightYear: process.env.NEXT_PUBLIC_COPYRIGHT_YEAR ?? new Date().getFullYear().toString(),
   license: process.env.NEXT_PUBLIC_LICENSE ?? "MIT",
+  // Live chat (optional). Set the provider + its site/app id to enable an
+  // embedded chat widget in the dashboard. Unset = no widget (graceful no-op).
+  //   crisp    → NEXT_PUBLIC_CHAT_ID = Crisp Website ID
+  //   intercom → NEXT_PUBLIC_CHAT_ID = Intercom App ID
+  //   tawk     → NEXT_PUBLIC_CHAT_ID = "<propertyId>/<widgetId>"
+  chatProvider: (process.env.NEXT_PUBLIC_CHAT_PROVIDER ?? "none") as
+    | "none"
+    | "crisp"
+    | "intercom"
+    | "tawk",
+  chatId: process.env.NEXT_PUBLIC_CHAT_ID ?? "",
 } as const;

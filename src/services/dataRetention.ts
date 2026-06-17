@@ -1,6 +1,7 @@
-import { lt, and, eq, or } from "drizzle-orm";
+import { lt, and, eq, or, notInArray } from "drizzle-orm";
 import { getDb } from "../db";
 import { auditLogsTable, sessionsTable, refreshTokensTable, otpsTable } from "../db/schema";
+import { getHeldUserIds } from "./legalHold.service";
 import { getLogger } from "../logger";
 
 const logger = getLogger("data-retention");
@@ -28,9 +29,15 @@ export async function purgeOldAuditLogs(retentionDays?: number): Promise<number>
   const cutoff = daysAgo(days);
   try {
     const db = getDb();
-    const result = await db.delete(auditLogsTable).where(lt(auditLogsTable.timestamp, cutoff));
+    // Accounts under legal hold keep their audit trail regardless of age.
+    const heldUserIds = await getHeldUserIds();
+    const where =
+      heldUserIds.length > 0
+        ? and(lt(auditLogsTable.timestamp, cutoff), notInArray(auditLogsTable.actorId, heldUserIds))
+        : lt(auditLogsTable.timestamp, cutoff);
+    const result = await db.delete(auditLogsTable).where(where);
     const count = (result as any).rowCount ?? 0;
-    logger.info("Purged old audit logs", { count, cutoffDays: days });
+    logger.info("Purged old audit logs", { count, cutoffDays: days, legalHolds: heldUserIds.length });
     return count;
   } catch (err) {
     logger.error("Failed to purge audit logs", err as Error);

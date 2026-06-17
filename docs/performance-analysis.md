@@ -9,62 +9,34 @@ browser client** (`packages/ui/`). The real performance ceiling is set by
 **database round-trips on hot auth paths**, not by transport or
 serialization.
 
-**gRPC is not a good fit here** and is not recommended — see
-[Why not gRPC](#why-not-grpc). The highest-leverage work is Redis session
-caching and fixing an O(n) passkey lookup. Those two changes will outperform
-any transport-layer rewrite.
-
----
-
-## Why not gRPC
-
-gRPC pays off for chatty **service-to-service** traffic between separate
-processes, where Protobuf + HTTP/2 multiplexing cut real latency. ZeroAuth has
-neither precondition:
-
-- **It's a monolith.** Services in `src/services/` call each other as
-  in-process async functions. There is no internal network hop for gRPC to
-  optimize — adding it would _introduce_ serialization cost where none exists.
-- **The client is a browser.** `packages/ui/src/lib/api.ts` speaks REST/JSON.
-  Browsers cannot use gRPC natively; you'd need grpc-web plus an Envoy-style
-  proxy translation layer for an auth app that makes a handful of calls per
-  page.
-- **Transport is not the bottleneck.** Nothing in the profile points to JSON
-  (de)serialization cost. The hot paths are DB queries and sequential loops.
-
-If the system is ever split into independently deployed services, revisit
-this. Until then, gRPC is net-negative complexity.
-
----
-
 ## Findings (verified against source)
 
 Ranked by impact-to-effort.
 
 ### Tier 1 — auth-path scaling (highest ROI)
 
-| # | Issue | Location | Impact |
-|---|-------|----------|--------|
-| 1 | **Passkey auth N+1** — loads the entire `users` table and scans in JS to match `credentialId` | `src/api/routes/passkey.routes.ts:256-268`; `passkeys` is a `jsonb` column with no index (`src/db/schema.ts:35`) | O(n) over all users per passkey login; degrades linearly with user count |
-| 2 | **Session validation hits Postgres on every protected request** — 3 sequential queries: session select, user select, `lastActivityAt` update | `src/middleware/auth.ts:45`, `:75`, `:142` | 3 DB round-trips × every authenticated request; the dominant throughput limiter |
-| 3 | **Sequential session revocation** — one `UPDATE` per session in a loop | `src/middleware/sessionControl.ts:25-32` | N round-trips when enforcing max-device limits |
+| #   | Issue                                                                                                                                        | Location                                                                                                         | Impact                                                                          |
+| --- | -------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| 1   | **Passkey auth N+1** — loads the entire `users` table and scans in JS to match `credentialId`                                                | `src/api/routes/passkey.routes.ts:256-268`; `passkeys` is a `jsonb` column with no index (`src/db/schema.ts:35`) | O(n) over all users per passkey login; degrades linearly with user count        |
+| 2   | **Session validation hits Postgres on every protected request** — 3 sequential queries: session select, user select, `lastActivityAt` update | `src/middleware/auth.ts:45`, `:75`, `:142`                                                                       | 3 DB round-trips × every authenticated request; the dominant throughput limiter |
+| 3   | **Sequential session revocation** — one `UPDATE` per session in a loop                                                                       | `src/middleware/sessionControl.ts:25-32`                                                                         | N round-trips when enforcing max-device limits                                  |
 
 ### Tier 2 — batch / index cleanups
 
-| # | Issue | Location |
-|---|-------|----------|
-| 4 | Billing lifecycle does per-subscription DB lookup + **direct** email send in a loop (bypasses the BullMQ queue) | `src/services/billingLifecycle.service.ts:83-112` |
-| 5 | Admin broadcast sends emails sequentially | `src/api/routes/admin-tools.routes.ts:295-302` |
-| 6 | Missing indexes: `sessions(userId, isActive)`, `sessions(expiresAt, isActive)`, `subscriptions(status)`, `notifications(userId, read)`, `auditLogs(timestamp)`, `apiKeys(userId)` | `src/db/schema.ts` |
-| 7 | OAuth state held in an unbounded in-memory `Map`; TTL cleanup only on access | `src/api/routes/auth.routes.ts` |
+| #   | Issue                                                                                                                                                                             | Location                                          |
+| --- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------- |
+| 4   | Billing lifecycle does per-subscription DB lookup + **direct** email send in a loop (bypasses the BullMQ queue)                                                                   | `src/services/billingLifecycle.service.ts:83-112` |
+| 5   | Admin broadcast sends emails sequentially                                                                                                                                         | `src/api/routes/admin-tools.routes.ts:295-302`    |
+| 6   | Missing indexes: `sessions(userId, isActive)`, `sessions(expiresAt, isActive)`, `subscriptions(status)`, `notifications(userId, read)`, `auditLogs(timestamp)`, `apiKeys(userId)` | `src/db/schema.ts`                                |
+| 7   | OAuth state held in an unbounded in-memory `Map`; TTL cleanup only on access                                                                                                      | `src/api/routes/auth.routes.ts`                   |
 
 ### Tier 3 — client / UI
 
-| # | Issue | Location |
-|---|-------|----------|
-| 8 | 30s polling for notifications and status, even though the API already exposes WebSocket/SSE notifications | `packages/ui/.../NotificationBell.tsx`, `status/page.tsx`; server side `src/api/routes/notification.routes.ts` |
-| 9 | No client-side request dedup/caching (no SWR/React Query); each component refetches on mount | `packages/ui/src/lib/api.ts` |
-| 10 | No retry/backoff or timeout in the fetch wrapper | `packages/ui/src/lib/api.ts` |
+| #   | Issue                                                                                                     | Location                                                                                                       |
+| --- | --------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| 8   | 30s polling for notifications and status, even though the API already exposes WebSocket/SSE notifications | `packages/ui/.../NotificationBell.tsx`, `status/page.tsx`; server side `src/api/routes/notification.routes.ts` |
+| 9   | No client-side request dedup/caching (no SWR/React Query); each component refetches on mount              | `packages/ui/src/lib/api.ts`                                                                                   |
+| 10  | No retry/backoff or timeout in the fetch wrapper                                                          | `packages/ui/src/lib/api.ts`                                                                                   |
 
 ---
 
@@ -102,7 +74,7 @@ revoke-then-request and expiry.
 **Goal:** Turn the O(n) table scan into an indexed point lookup.
 
 1. Add a `passkeys` table: `(id, userId FK, credentialId UNIQUE, publicKey,
-   counter, transports, createdAt)`, indexed on `credentialId`.
+counter, transports, createdAt)`, indexed on `credentialId`.
 2. Migration to backfill from the existing `users.passkeys` jsonb arrays.
 3. Rewrite authentication to `SELECT ... WHERE credentialId = ?` (one indexed
    row) instead of scanning all users (`passkey.routes.ts:256`).

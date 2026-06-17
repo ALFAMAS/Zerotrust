@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Download, KeyRound, LogIn, Monitor, UserCheck, UserPlus, Users } from "lucide-react";
 import { api } from "@/lib/api";
+import { getToken } from "@/lib/auth";
+import { brand } from "@/config/brand";
 import Badge from "@/components/Badge";
 import MetricCard from "@/components/admin/MetricCard";
 import RadialGauge from "@/components/admin/RadialGauge";
@@ -54,6 +56,32 @@ export default function AdminOverviewPage() {
     }
     load();
   }, []);
+
+  const [exporting, setExporting] = useState(false);
+
+  async function exportUsers() {
+    setExporting(true);
+    try {
+      const token = getToken();
+      const res = await fetch(`${brand.apiUrl}/admin/users/export`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (!res.ok) throw new Error(`Export failed (${res.status})`);
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `users-${new Date().toISOString().slice(0, 10)}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch {
+      alert("Export failed. Please try again.");
+    } finally {
+      setExporting(false);
+    }
+  }
 
   const activePct =
     stats && stats.totalUsers > 0 ? Math.round((stats.activeUsers / stats.totalUsers) * 100) : 0;
@@ -141,12 +169,15 @@ export default function AdminOverviewPage() {
             </Link>
           ))}
           <button
-            onClick={() => alert("Export triggered")}
-            className="flex flex-col items-start gap-2 rounded-lg border border-border bg-background p-4 text-left transition-colors hover:border-primary/50"
+            onClick={exportUsers}
+            disabled={exporting}
+            className="flex flex-col items-start gap-2 rounded-lg border border-border bg-background p-4 text-left transition-colors hover:border-primary/50 disabled:opacity-50"
           >
             <Download className="h-5 w-5 text-primary" />
             <span className="text-sm font-medium text-foreground">Export users</span>
-            <span className="text-xs text-muted-foreground">Download CSV</span>
+            <span className="text-xs text-muted-foreground">
+              {exporting ? "Preparing…" : "Download CSV"}
+            </span>
           </button>
         </div>
       </div>

@@ -21,6 +21,14 @@ export const usersTable = pgTable("users", {
   phone: text("phone"),
   displayName: text("display_name").notNull(),
   avatarUrl: text("avatar_url"),
+  // Preferred UI/email locale (BCP-47 base tag). Captured from Accept-Language
+  // at registration; editable via PATCH /auth/me. Drives localized emails.
+  locale: text("locale").notNull().default("en"),
+  // Legal hold: when true, this account's data is exempt from retention
+  // auto-purge (e.g. audit logs are preserved for legal defensibility).
+  legalHold: boolean("legal_hold").notNull().default(false),
+  legalHoldReason: text("legal_hold_reason"),
+  legalHoldAt: timestamp("legal_hold_at", { withTimezone: true }),
   roles: text("roles")
     .array()
     .notNull()
@@ -372,6 +380,12 @@ export const orgSecurityPoliciesTable = pgTable("org_security_policies", {
     .array()
     .notNull()
     .default(sql`ARRAY[]::text[]`),
+  // IPv4 CIDR allowlist. Empty = no restriction; non-empty restricts org-scoped
+  // API access to callers whose IP matches one of the ranges.
+  ipAllowlist: text("ip_allowlist")
+    .array()
+    .notNull()
+    .default(sql`ARRAY[]::text[]`),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
   updatedBy: uuid("updated_by").references(() => usersTable.id, { onDelete: "set null" }),
 });
@@ -447,6 +461,44 @@ export const feedbackTable = pgTable("feedback", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// ── Email suppression list ──────────────────────────────────────────────────────
+// Addresses we must stop emailing (hard bounces, spam complaints, manual). The
+// central sendEmail() path skips any recipient listed here to protect sender
+// reputation for the BullMQ email queue.
+export const emailSuppressionsTable = pgTable("email_suppressions", {
+  email: text("email").primaryKey(),
+  reason: text("reason").notNull(), // bounce | complaint | manual | unsubscribe
+  detail: text("detail"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// ── Support tickets ─────────────────────────────────────────────────────────────
+// Lightweight, self-hosted support inbox (alternative to a third-party tool).
+// A ticket is a threaded conversation between a user and support agents.
+export const supportTicketsTable = pgTable("support_tickets", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => usersTable.id, { onDelete: "cascade" }),
+  orgId: uuid("org_id").references(() => organizationsTable.id, { onDelete: "set null" }),
+  subject: text("subject").notNull(),
+  status: text("status").notNull().default("open"), // open | pending | closed
+  priority: text("priority").notNull().default("normal"), // low | normal | high
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const supportTicketMessagesTable = pgTable("support_ticket_messages", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  ticketId: uuid("ticket_id")
+    .notNull()
+    .references(() => supportTicketsTable.id, { onDelete: "cascade" }),
+  authorId: uuid("author_id").references(() => usersTable.id, { onDelete: "set null" }),
+  authorRole: text("author_role").notNull(), // user | agent
+  body: text("body").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 // ── API Keys ──────────────────────────────────────────────────────────────────
 
 export const apiKeysTable = pgTable("api_keys", {
@@ -456,6 +508,9 @@ export const apiKeysTable = pgTable("api_keys", {
     .references(() => usersTable.id, { onDelete: "cascade" }),
   orgId: uuid("org_id").references(() => organizationsTable.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
+  // "live" or "test" — test-mode keys mirror Stripe: they authenticate but are
+  // intended to hit sandbox/non-production data paths and are visually flagged.
+  environment: text("environment").notNull().default("live"),
   keyHash: text("key_hash").notNull().unique(),
   keyPrefix: text("key_prefix").notNull(), // first 8 chars for display
   scopes: text("scopes")

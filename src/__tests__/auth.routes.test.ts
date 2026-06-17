@@ -81,6 +81,14 @@ vi.mock("../services/passwordBreach.service", () => ({
   rejectIfBreached: vi.fn().mockResolvedValue(null),
 }));
 
+// Account-takeover detection fires (fire-and-forget) on sensitive changes such
+// as unlinking an OAuth provider; stub it so route tests don't hit its DB/email.
+vi.mock("../services/accountTakeover.service", () => ({
+  recordAndRespond: vi.fn().mockResolvedValue(false),
+  recordSensitiveChange: vi.fn().mockResolvedValue(undefined),
+  assessTakeoverRisk: vi.fn().mockResolvedValue({ flagged: false, recentEvents: [] }),
+}));
+
 // ── Helpers ────────────────────────────────────────────────────────────────
 
 const USER_ID = "00000000-0000-0000-0000-000000000001";
@@ -375,6 +383,346 @@ describe("POST /login", () => {
       body: JSON.stringify({ email: "alice@example.com", password: "pass" }),
     });
     expect(res.status).toBe(500);
+  });
+});
+
+// ── Credential-stuffing defense (per-IP) ─────────────────────────────────────
+
+describe("POST /login credential-stuffing defense", () => {
+  let db: ReturnType<typeof makeDbChain>;
+
+  beforeEach(async () => {
+    vi.resetModules();
+    db = makeDbChain([]); // every login → user not found
+    const { getDb } = await import("../db");
+    vi.mocked(getDb).mockReturnValue(db as any);
+  });
+
+  afterEach(() => vi.clearAllMocks());
+
+  it("blocks the source IP after failures across many accounts, with 429", async () => {
+    const router = await getRouter();
+    const app = new Hono().route("/", router);
+    const ip = "203.0.113.99";
+    const attempt = (email: string) =>
+      app.request("/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-forwarded-for": ip },
+        body: JSON.stringify({ email, password: "wrong" }),
+      });
+
+    // Default distinct-accounts threshold is 10 → 10 failed distinct logins trip it.
+    for (let i = 0; i < 10; i++) {
+      const res = await attempt(`victim${i}@example.com`);
+      expect(res.status).toBe(401);
+    }
+
+    const blocked = await attempt("victim10@example.com");
+    expect(blocked.status).toBe(429);
+    expect((await blocked.json()).error).toBe("TOO_MANY_ATTEMPTS");
+  });
+
+  it("does not penalize a different source IP", async () => {
+    const router = await getRouter();
+    const app = new Hono().route("/", router);
+    for (let i = 0; i < 10; i++) {
+      await app.request("/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-forwarded-for": "203.0.113.99" },
+        body: JSON.stringify({ email: `v${i}@example.com`, password: "wrong" }),
+      });
+    }
+    // A clean IP is unaffected (still just invalid credentials, not 429).
+    const res = await app.request("/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-forwarded-for": "198.51.100.7" },
+      body: JSON.stringify({ email: "v0@example.com", password: "wrong" }),
+    });
+    expect(res.status).toBe(401);
+  });
+});
+
+// ── MFA enforcement at login ─────────────────────────────────────────────────
+
+describe("POST /login with MFA enabled + POST /login/mfa", () => {
+  let db: ReturnType<typeof makeDbChain>;
+
+  beforeEach(async () => {
+    vi.resetModules();
+    db = makeDbChain([]);
+    const { getDb } = await import("../db");
+    vi.mocked(getDb).mockReturnValue(db as any);
+  });
+
+  afterEach(() => vi.clearAllMocks());
+
+  async function mfaUser(password: string) {
+    const bcrypt = await import("bcryptjs");
+    const { Secret } = await import("otpauth");
+    const hash = await bcrypt.hash(password, 4);
+    const secret = new Secret({ size: 20 }).base32;
+    const user = makeActiveUser({
+      passwordHash: hash,
+      mfa: { totp: { enabled: true, secret, backupCodes: [] }, webauthn: { enabled: false } },
+    });
+    return { user, secret };
+  }
+
+  it("returns mfaRequired (no tokens) when TOTP is enabled", async () => {
+    const { user } = await mfaUser("pass123");
+    db.limit.mockResolvedValueOnce([user]);
+    const router = await getRouter();
+    const app = new Hono().route("/", router);
+    const res = await app.request("/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: "alice@example.com", password: "pass123" }),
+    });
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.mfaRequired).toBe(true);
+    expect(body.mfaToken).toBeTruthy();
+    expect(body.accessToken).toBeUndefined();
+    expect(body.refreshToken).toBeUndefined();
+  });
+
+  it("completes login when a valid TOTP code is supplied", async () => {
+    const { user, secret } = await mfaUser("pass123");
+    const { TOTP, Secret } = await import("otpauth");
+
+    // 1) /login → mfaRequired
+    db.limit.mockResolvedValueOnce([user]);
+    const router = await getRouter();
+    const app = new Hono().route("/", router);
+    const loginRes = await app.request("/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: "alice@example.com", password: "pass123" }),
+    });
+    const { mfaToken } = await loginRes.json();
+
+    // 2) /login/mfa → tokens
+    db.limit.mockResolvedValueOnce([user]); // user lookup by id
+    db.returning.mockResolvedValueOnce([makeSession()]); // session insert
+    db.returning.mockResolvedValueOnce([{ id: "rt-1" }]); // refresh token insert
+    const code = new TOTP({
+      algorithm: "SHA1",
+      digits: 6,
+      period: 30,
+      secret: Secret.fromBase32(secret),
+    }).generate();
+
+    const res = await app.request("/login/mfa", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ mfaToken, code }),
+    });
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.accessToken).toBeTruthy();
+    expect(body.refreshToken).toBeTruthy();
+    expect(body.tokenType).toBe("Bearer");
+  });
+
+  it("rejects an invalid TOTP code at /login/mfa", async () => {
+    const { user } = await mfaUser("pass123");
+    db.limit.mockResolvedValueOnce([user]);
+    const router = await getRouter();
+    const app = new Hono().route("/", router);
+    const loginRes = await app.request("/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: "alice@example.com", password: "pass123" }),
+    });
+    const { mfaToken } = await loginRes.json();
+
+    db.limit.mockResolvedValueOnce([user]); // user lookup by id
+    const res = await app.request("/login/mfa", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ mfaToken, code: "000000" }),
+    });
+    expect(res.status).toBe(401);
+    expect((await res.json()).error).toBe("INVALID_CODE");
+  });
+
+  it("rejects a forged MFA token (wrong audience/scope) at /login/mfa", async () => {
+    const router = await getRouter();
+    const app = new Hono().route("/", router);
+    // A plausible-looking but non-challenge token: just sign a normal access token.
+    const { TokenService } = await import("../services/token.service");
+    const svc = new TokenService("a".repeat(64), {
+      defaultTTL: 3600,
+      refreshTokenTTL: 604800,
+      maxConcurrentDevices: 5,
+    } as any);
+    await svc.init();
+    const forged = await svc.signAccessToken({
+      sub: USER_ID,
+      email: "alice@example.com",
+      sid: "x",
+      aud: "zeroauth",
+      scope: ["openid"],
+    });
+    const res = await app.request("/login/mfa", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ mfaToken: forged, code: "123456" }),
+    });
+    expect(res.status).toBe(401);
+    expect((await res.json()).error).toBe("MFA_TOKEN_INVALID");
+  });
+});
+
+// ── GET /me ──────────────────────────────────────────────────────────────────
+
+describe("GET /me", () => {
+  let db: ReturnType<typeof makeDbChain>;
+
+  beforeEach(async () => {
+    vi.resetModules();
+    db = makeDbChain([]);
+    const { getDb } = await import("../db");
+    vi.mocked(getDb).mockReturnValue(db as any);
+  });
+
+  afterEach(() => vi.clearAllMocks());
+
+  it("reports TOTP as enabled and strips secrets/backup-code hashes", async () => {
+    db.limit.mockResolvedValueOnce([
+      {
+        id: USER_ID,
+        email: "alice@example.com",
+        emailVerifiedAt: new Date(),
+        mfa: {
+          totp: {
+            enabled: true,
+            secret: "SUPERSECRETBASE32",
+            backupCodes: ["hash1", "hash2", "hash3"],
+            verifiedAt: new Date(),
+          },
+          webauthn: { enabled: false },
+        },
+        passkeys: [
+          { credentialId: "cred-1", name: "YubiKey", publicKey: "PUBKEYDONOTLEAK", createdAt: new Date() },
+        ],
+        oauthProviders: [{ provider: "google", email: "alice@example.com", connectedAt: new Date() }],
+      },
+    ]);
+
+    const router = await getRouter();
+    const app = new Hono().route("/", router);
+    const res = await app.request("/me", { headers: { "x-test-user-id": USER_ID } });
+    expect(res.status).toBe(200);
+    const body = await res.json();
+
+    // The bug: mfa was omitted from the select, so the profile always showed "disabled".
+    expect(body.mfa.totp.enabled).toBe(true);
+    expect(body.mfa.totp.backupCodesRemaining).toBe(3);
+    // Secrets must never reach the client.
+    expect(body.mfa.totp.secret).toBeUndefined();
+    expect(body.mfa.totp.backupCodes).toBeUndefined();
+    expect(JSON.stringify(body)).not.toContain("SUPERSECRETBASE32");
+    expect(JSON.stringify(body)).not.toContain("PUBKEYDONOTLEAK");
+    // Non-secret profile data is still surfaced.
+    expect(body.passkeys[0].name).toBe("YubiKey");
+    expect(body.oauthProviders[0].provider).toBe("google");
+  });
+
+  it("returns disabled MFA defaults when the user has no mfa object", async () => {
+    db.limit.mockResolvedValueOnce([
+      { id: USER_ID, email: "alice@example.com", emailVerifiedAt: null, mfa: null, passkeys: null, oauthProviders: null },
+    ]);
+    const router = await getRouter();
+    const app = new Hono().route("/", router);
+    const res = await app.request("/me", { headers: { "x-test-user-id": USER_ID } });
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.mfa.totp.enabled).toBe(false);
+    expect(body.passkeys).toEqual([]);
+    expect(body.oauthProviders).toEqual([]);
+  });
+});
+
+// ── DELETE /oauth/:provider (unlink) ─────────────────────────────────────────
+
+describe("DELETE /oauth/:provider", () => {
+  let db: ReturnType<typeof makeDbChain>;
+
+  beforeEach(async () => {
+    vi.resetModules();
+    db = makeDbChain([]);
+    const { getDb } = await import("../db");
+    vi.mocked(getDb).mockReturnValue(db as any);
+  });
+
+  afterEach(() => vi.clearAllMocks());
+
+  async function del(provider: string, auth = true) {
+    const router = await getRouter();
+    const app = new Hono().route("/", router);
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    if (auth) headers["x-test-user-id"] = USER_ID;
+    return app.request(`/oauth/${provider}`, { method: "DELETE", headers });
+  }
+
+  it("returns 401 when unauthenticated", async () => {
+    const res = await del("google", false);
+    expect(res.status).toBe(401);
+  });
+
+  it("unlinks a provider when the user still has a password", async () => {
+    db.limit.mockResolvedValueOnce([
+      {
+        passwordHash: "$2a$04$hash",
+        oauthProviders: [
+          { provider: "google", providerId: "g1" },
+          { provider: "github", providerId: "h1" },
+        ],
+      },
+    ]);
+    const res = await del("google");
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.unlinked).toBe(true);
+    expect(body.provider).toBe("google");
+    // The remaining provider list is persisted without google.
+    const setArg = db.set.mock.calls.at(-1)?.[0];
+    expect(setArg.oauthProviders).toEqual([{ provider: "github", providerId: "h1" }]);
+  });
+
+  it("returns 404 when the provider is not linked", async () => {
+    db.limit.mockResolvedValueOnce([
+      { passwordHash: "$2a$04$hash", oauthProviders: [{ provider: "github", providerId: "h1" }] },
+    ]);
+    const res = await del("google");
+    expect(res.status).toBe(404);
+    expect((await res.json()).error).toBe("NOT_LINKED");
+  });
+
+  it("refuses to remove the only login method (no password, last provider)", async () => {
+    db.limit.mockResolvedValueOnce([
+      { passwordHash: null, oauthProviders: [{ provider: "google", providerId: "g1" }] },
+    ]);
+    const res = await del("google");
+    expect(res.status).toBe(409);
+    expect((await res.json()).error).toBe("LAST_CREDENTIAL");
+    expect(db.update).not.toHaveBeenCalled();
+  });
+
+  it("allows removing a passwordless user's provider when another remains", async () => {
+    db.limit.mockResolvedValueOnce([
+      {
+        passwordHash: null,
+        oauthProviders: [
+          { provider: "google", providerId: "g1" },
+          { provider: "github", providerId: "h1" },
+        ],
+      },
+    ]);
+    const res = await del("google");
+    expect(res.status).toBe(200);
+    expect((await res.json()).unlinked).toBe(true);
   });
 });
 

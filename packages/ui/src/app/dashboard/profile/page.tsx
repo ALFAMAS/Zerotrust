@@ -1,11 +1,13 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { api } from "../../../lib/api";
 import { brand } from "@/config/brand";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
@@ -88,6 +90,26 @@ export default function ProfilePage() {
     } finally {
       setUploading(false);
       if (fileRef.current) fileRef.current.value = "";
+    }
+  };
+
+  const disableTOTP = async () => {
+    if (
+      !confirm(
+        "Disable two-factor authentication? Your account will be protected by password only."
+      )
+    )
+      return;
+    setMsg("");
+    try {
+      await api.delete("/auth/mfa/totp");
+      const u = await api.get<any>("/auth/me");
+      setUser(u);
+      setMsg("Two-factor authentication disabled.");
+      setMsgType("success");
+    } catch (err: any) {
+      setMsg(err.message || "Failed to disable two-factor authentication");
+      setMsgType("error");
     }
   };
 
@@ -189,6 +211,42 @@ export default function ProfilePage() {
               {saving ? "Saving…" : "Save Changes"}
             </Button>
           </form>
+        </CardContent>
+      </Card>
+
+      {/* Two-factor authentication */}
+      <Card className="mb-6">
+        <CardHeader>
+          <div className="flex items-start justify-between">
+            <CardTitle>Two-Factor Authentication</CardTitle>
+            <Badge variant={user?.mfa?.totp?.enabled ? "success" : "secondary"}>
+              {user?.mfa?.totp?.enabled ? "Enabled" : "Disabled"}
+            </Badge>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {user?.mfa?.totp?.enabled ? (
+            <div className="space-y-3">
+              <p className="text-sm text-muted-foreground">
+                An authenticator app is required at login.
+                {typeof user?.mfa?.totp?.backupCodesRemaining === "number" && (
+                  <> {user.mfa.totp.backupCodesRemaining} backup code(s) remaining.</>
+                )}
+              </p>
+              <Button variant="destructive" onClick={disableTOTP}>
+                Disable two-factor authentication
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <p className="text-sm text-muted-foreground">
+                Add an authenticator app for an extra layer of security at login.
+              </p>
+              <Button asChild variant="outline">
+                <Link href="/dashboard/security">Set up in Security settings</Link>
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
 

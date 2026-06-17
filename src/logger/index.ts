@@ -5,6 +5,8 @@
 
 import type { ZeroAuthConfig } from "../shared/types";
 import { getConfig } from "../config";
+import { type AuditPrincipal, principalAuditFields } from "../shared/principal";
+import { streamToSiem } from "../services/siem.service";
 
 export interface LogContext {
   correlationId?: string;
@@ -262,7 +264,8 @@ export async function auditLog(
   target: string,
   success: boolean,
   details?: Record<string, unknown>,
-  error?: Error
+  error?: Error,
+  principal?: AuditPrincipal
 ): Promise<void> {
   const logger = getLogger("audit");
 
@@ -272,6 +275,9 @@ export async function auditLog(
     target,
     success,
     timestamp: new Date().toISOString(),
+    // Tag every event human-vs-agent (+ delegation chain) when a principal is
+    // supplied; defaults to human so existing call sites stay valid.
+    ...principalAuditFields(principal ?? { type: "human", id: actor }),
     ...details,
   };
 
@@ -288,6 +294,9 @@ export async function auditLog(
   } else {
     logger.warn(`AUDIT FAILED: ${action} by ${actor}`, auditEntry);
   }
+
+  // Fan out to an external SIEM when configured (fire-and-forget, never throws).
+  void streamToSiem(auditEntry);
 
   // Stream to Elasticsearch
   if (getConfig().elasticsearch.enabled) {

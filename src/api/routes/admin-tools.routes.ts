@@ -27,6 +27,7 @@ import {
   clearFlagCache,
 } from "../../services/featureFlags.service";
 import { auditLog, getLogger } from "../../logger";
+import { setLegalHold } from "../../services/legalHold.service";
 import { getClientIp } from "../../shared/clientIp";
 import type { HonoEnv } from "../../shared/types";
 
@@ -435,6 +436,28 @@ router.delete("/feature-flags/:key", async (c) => {
   const ok = await deleteFlag(key);
   clearFlagCache();
   return ok ? c.json({ success: true }) : c.json({ error: "NOT_FOUND" }, 404);
+});
+
+// POST /users/:id/legal-hold — place or lift a legal hold (admin only)
+router.post("/users/:id/legal-hold", async (c) => {
+  const id = c.req.param("id");
+  const admin = c.get("user");
+  const body = (await c.req.json().catch(() => ({}))) as { hold?: boolean; reason?: string };
+  if (typeof body.hold !== "boolean") {
+    return c.json({ error: "INVALID_REQUEST", message: "hold (boolean) is required" }, 400);
+  }
+
+  const ok = await setLegalHold(id, body.hold, { reason: body.reason, by: admin.id });
+  if (!ok) return c.json({ error: "NOT_FOUND", message: "User not found" }, 404);
+
+  void auditLog(
+    body.hold ? "admin.legal_hold.placed" : "admin.legal_hold.lifted",
+    admin.id,
+    id,
+    true,
+    { reason: body.reason }
+  );
+  return c.json({ success: true, userId: id, legalHold: body.hold });
 });
 
 export default router;

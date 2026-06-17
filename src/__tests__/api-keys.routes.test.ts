@@ -157,6 +157,57 @@ describe("POST /api-keys", () => {
     expect(captured[0].monthlyQuota).toBe(10_000);
   });
 
+  it("defaults to a live key when no environment is given", async () => {
+    const captured: any[] = [];
+    mockDb.insert.mockReturnValue({
+      values: (value: any) => {
+        captured.push(value);
+        return { returning: () => Promise.resolve([{ id: "k4", ...value, createdAt: new Date() }]) };
+      },
+    });
+
+    const res = await app.request("/api-keys", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: "Default Key" }),
+    });
+    expect(res.status).toBe(201);
+    const body = await res.json();
+    expect(captured[0].environment).toBe("live");
+    expect(body.key).toMatch(/^zak_live_/);
+  });
+
+  it("creates a test-mode key with a zak_test_ prefix", async () => {
+    const captured: any[] = [];
+    mockDb.insert.mockReturnValue({
+      values: (value: any) => {
+        captured.push(value);
+        return { returning: () => Promise.resolve([{ id: "k5", ...value, createdAt: new Date() }]) };
+      },
+    });
+
+    const res = await app.request("/api-keys", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: "Sandbox Key", environment: "test" }),
+    });
+    expect(res.status).toBe(201);
+    const body = await res.json();
+    expect(captured[0].environment).toBe("test");
+    expect(body.key).toMatch(/^zak_test_/);
+    expect(captured[0].keyPrefix.startsWith("zak_test_")).toBe(true);
+  });
+
+  it("rejects an invalid environment value", async () => {
+    const res = await app.request("/api-keys", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: "Bad", environment: "staging" }),
+    });
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toBe("INVALID_REQUEST");
+  });
+
   it("requires org admin role before creating org-scoped keys", async () => {
     mockDb.select.mockReturnValue({
       from: () => ({

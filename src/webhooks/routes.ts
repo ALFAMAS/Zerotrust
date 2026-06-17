@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import type { HonoEnv } from "../shared/types";
 import { webhookStore } from "./store";
 import { deliverWebhook } from "./delivery";
+import { webhookDeliveryLog } from "./deliveryLog";
 import type { WebhookEventType } from "./types";
 import { authMiddleware } from "../middleware/auth";
 
@@ -94,7 +95,36 @@ app.delete("/:id", (c) => {
     );
   }
 
+  webhookDeliveryLog.clear(id);
   return new Response(null, { status: 204 });
+});
+
+// GET /:id/deliveries — per-attempt delivery history (most recent first)
+app.get("/:id/deliveries", (c) => {
+  const id = c.req.param("id");
+  const endpoint = webhookStore.listEndpoints().find((ep) => ep.id === id);
+  if (!endpoint) {
+    return c.json(
+      { code: "NOT_FOUND", message: `Webhook endpoint ${id} not found`, details: [] },
+      404
+    );
+  }
+
+  const limitRaw = parseInt(c.req.query("limit") ?? "50", 10);
+  const limit = Number.isFinite(limitRaw) ? Math.min(Math.max(limitRaw, 1), 100) : 50;
+
+  const deliveries = webhookDeliveryLog.list(id, limit).map((d) => ({
+    id: d.id,
+    event: d.event,
+    status: d.status,
+    attempt: d.attempt,
+    responseStatus: d.responseStatus ?? null,
+    error: d.error ?? null,
+    deliveredAt: d.deliveredAt ?? null,
+    recordedAt: d.recordedAt,
+  }));
+
+  return c.json({ deliveries });
 });
 
 // POST /:id/ping — send test ping

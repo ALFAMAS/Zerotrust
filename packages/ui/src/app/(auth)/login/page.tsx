@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Fingerprint } from "lucide-react";
 import { api } from "../../../lib/api";
 import { setToken } from "../../../lib/auth";
+import { isWebAuthnAvailable, startAuthentication } from "../../../lib/webauthn";
 import { useToast } from "@/lib/toast";
 import { brand } from "@/config/brand";
 import { Button } from "@/components/ui/button";
@@ -13,22 +14,35 @@ import { Label } from "@/components/ui/label";
 export default function LoginPage() {
   const [form, setForm] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
+  // Second-factor challenge state: when /auth/login returns mfaRequired we hold
+  // the short-lived challenge token and prompt for the authenticator code.
+  const [mfaToken, setMfaToken] = useState<string | null>(null);
+  const [mfaCode, setMfaCode] = useState("");
   const { toast } = useToast();
 
   const oauthBase = process.env.NEXT_PUBLIC_ZEROAUTH_URL || "http://localhost:3000";
+
+  const finishLogin = (data: { accessToken: string; refreshToken: string }) => {
+    setToken(data.accessToken, data.refreshToken);
+    toast({ message: "Welcome back!", type: "success" });
+    // Honor a ?next= redirect-back target (set by the API client when an
+    // expired session bounced the user here), but only same-origin paths.
+    const next = new URLSearchParams(window.location.search).get("next");
+    const dest = next && next.startsWith("/") && !next.startsWith("//") ? next : "/dashboard";
+    window.location.href = dest;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
       const data = await api.post<any>("/auth/login", form, true);
-      setToken(data.accessToken, data.refreshToken);
-      toast({ message: "Welcome back!", type: "success" });
-      // Honor a ?next= redirect-back target (set by the API client when an
-      // expired session bounced the user here), but only same-origin paths.
-      const next = new URLSearchParams(window.location.search).get("next");
-      const dest = next && next.startsWith("/") && !next.startsWith("//") ? next : "/dashboard";
-      window.location.href = dest;
+      if (data.mfaRequired) {
+        setMfaToken(data.mfaToken);
+        toast({ message: "Enter your authenticator code to continue.", type: "info" });
+        return;
+      }
+      finishLogin(data);
     } catch (err: any) {
       toast({
         message: err.message || "Login failed. Please check your credentials.",
@@ -38,6 +52,102 @@ export default function LoginPage() {
       setLoading(false);
     }
   };
+
+  const handlePasskeyLogin = async () => {
+    if (!isWebAuthnAvailable()) {
+      toast({ message: "This browser does not support passkeys.", type: "error" });
+      return;
+    }
+    setLoading(true);
+    try {
+      // email is optional — when blank the authenticator offers any resident key.
+      const options = await api.post<any>(
+        "/auth/passkey/authenticate/options",
+        { email: form.email || undefined },
+        true
+      );
+      const assertion = await startAuthentication(options);
+      const data = await api.post<any>(
+        "/auth/passkey/authenticate/verify",
+        { ...assertion, challengeKey: options._challengeKey, email: form.email || undefined },
+        true
+      );
+      finishLogin(data);
+    } catch (err: any) {
+      if (err?.name === "NotAllowedError") {
+        toast({ message: "Passkey sign-in was cancelled.", type: "error" });
+      } else {
+        toast({ message: err?.message || "Passkey sign-in failed.", type: "error" });
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleMfaSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const data = await api.post<any>(
+        "/auth/login/mfa",
+        { mfaToken, code: mfaCode.trim() },
+        true
+      );
+      finishLogin(data);
+    } catch (err: any) {
+      toast({
+        message: err.message || "Invalid code. Please try again.",
+        type: "error",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (mfaToken) {
+    return (
+      <>
+        <div className="mb-6">
+          <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
+            Two-factor authentication
+          </h1>
+          <p className="mt-1.5 text-sm text-muted-foreground">
+            Enter the 6-digit code from your authenticator app, or a backup code.
+          </p>
+        </div>
+
+        <form onSubmit={handleMfaSubmit} className="space-y-4">
+          <div className="space-y-1.5">
+            <Label htmlFor="mfa-code">Authentication code</Label>
+            <Input
+              id="mfa-code"
+              inputMode="text"
+              autoComplete="one-time-code"
+              autoFocus
+              required
+              value={mfaCode}
+              onChange={(e) => setMfaCode(e.target.value)}
+              placeholder="123456"
+            />
+          </div>
+          <Button type="submit" disabled={loading} className="w-full">
+            {loading ? "Verifying…" : "Verify"}
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            className="w-full"
+            onClick={() => {
+              setMfaToken(null);
+              setMfaCode("");
+            }}
+          >
+            Back to sign in
+          </Button>
+        </form>
+      </>
+    );
+  }
 
   return (
     <>
@@ -133,9 +243,8 @@ export default function LoginPage() {
           type="button"
           variant="outline"
           className="w-full"
-          onClick={() =>
-            alert("Passkey authentication — requires @simplewebauthn/browser in the browser.")
-          }
+          disabled={loading}
+          onClick={handlePasskeyLogin}
         >
           <Fingerprint />
           Sign in with a passkey

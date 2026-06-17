@@ -16,6 +16,7 @@
     "db:push": "bunx drizzle-kit push",
     "db:studio": "bunx drizzle-kit studio",
     "db:backup": "node scripts/db-backup.js",
+    "db:restore": "node scripts/db-restore.js",
     "start": "node dist/api/server.js",
     "test": "bunx vitest",
     "test:watch": "bunx vitest --watch",

@@ -19,7 +19,11 @@ import { auditLog, getLogger } from "../logger";
 
 const logger = getLogger("account-takeover");
 
-export type SensitiveChangeType = "password_reset" | "email_change" | "mfa_disabled";
+export type SensitiveChangeType =
+  | "password_reset"
+  | "email_change"
+  | "mfa_disabled"
+  | "oauth_unlink";
 
 /** Window in which combined sensitive changes are considered suspicious. */
 const TAKEOVER_WINDOW_MS = parseInt(process.env.TAKEOVER_WINDOW_MS ?? String(60 * 60 * 1000));

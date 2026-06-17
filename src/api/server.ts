@@ -19,6 +19,8 @@ import orgRoutes from "./routes/org.routes";
 import gdprRoutes from "./routes/gdpr.routes";
 import unsubscribeRoutes from "./routes/unsubscribe.routes";
 import feedbackRoutes from "./routes/feedback.routes";
+import supportRoutes from "./routes/support.routes";
+import emailEventRoutes from "./routes/email-events.routes";
 import apiKeyRoutes from "./routes/api-keys.routes";
 import billingRoutes from "./routes/billing.routes";
 import billingWebhookRoutes from "./routes/billing.webhooks";
@@ -34,6 +36,7 @@ import samlRoutes from "../saml/routes";
 import tenantRoutes from "./routes/tenant.routes";
 import { rateLimit } from "../middleware/rateLimiting";
 import { geoFencingMiddleware } from "../middleware/geoFencing";
+import { apiVersioning, API_VERSIONS, CURRENT_API_VERSION } from "../middleware/apiVersioning";
 import { temporalAccessMiddleware } from "../middleware/temporalAccess";
 import { authMiddleware } from "../middleware/auth";
 import { getLogger } from "../logger";
@@ -79,6 +82,14 @@ export async function createServer() {
 
   app.use("*", cors());
   app.use("*", secureHeaders());
+
+  // API version negotiation + deprecation/sunset headers
+  app.use("*", apiVersioning());
+
+  // Public registry of supported API versions and their lifecycle status
+  app.get("/api/versions", (c) =>
+    c.json({ current: CURRENT_API_VERSION, versions: API_VERSIONS })
+  );
 
   // Error-spike + latency alerting (Slack / Teams / PagerDuty)
   app.use("*", alertingMiddleware());
@@ -144,6 +155,8 @@ export async function createServer() {
 
   // ─── Feedback routes ──────────────────────────────────────────────────────
   app.route("/feedback", feedbackRoutes);
+  app.route("/support", supportRoutes);
+  app.route("/webhooks/email", emailEventRoutes);
 
   // ─── API key routes ───────────────────────────────────────────────────────
   app.route("/api-keys", apiKeyRoutes);
@@ -184,6 +197,22 @@ export async function createServer() {
       return c.json({ ok: true, user: c.get("user")?.id });
     }
   );
+
+  // ─── Responsible disclosure (RFC 9116) ──────────────────────────────────────
+  const securityTxt = () => {
+    const contact = process.env.SECURITY_CONTACT ?? "mailto:security@example.com";
+    const appUrl = process.env.APP_URL ?? "http://localhost:3000";
+    const expires = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString();
+    return [
+      `Contact: ${contact}`,
+      `Expires: ${expires}`,
+      `Policy: ${appUrl}/security`,
+      "Preferred-Languages: en",
+      "",
+    ].join("\n");
+  };
+  app.get("/.well-known/security.txt", (c) => c.text(securityTxt()));
+  app.get("/security.txt", (c) => c.text(securityTxt()));
 
   // ─── Health checks ────────────────────────────────────────────────────────
   app.get("/health", async (c) => {

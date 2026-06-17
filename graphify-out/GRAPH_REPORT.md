@@ -1,51 +1,51 @@
-# Graph Report - .  (2026-06-16)
+# Graph Report - .  (2026-06-18)
 
 ## Corpus Check
-- 0 files · ~99,999 words
+- 10 files · ~15,000 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 4004 nodes · 5728 edges · 306 communities (277 shown, 29 thin omitted)
-- Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 87 edges (avg confidence: 0.8)
-- Token cost: 0 input · 0 output
+- 4067 nodes · 5798 edges · 314 communities (285 shown, 29 thin omitted)
+- Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 100 edges (avg confidence: 0.81)
+- Token cost: 62,820 input · 2,000 output
 
 ## Community Hubs (Navigation)
-- [[_COMMUNITY_Authorization & Continuous Eval|Authorization & Continuous Eval]]
-- [[_COMMUNITY_Audit & UI Primitives|Audit & UI Primitives]]
-- [[_COMMUNITY_Marketing & Landing Pages|Marketing & Landing Pages]]
-- [[_COMMUNITY_Onboarding & Auth Pages|Onboarding & Auth Pages]]
-- [[_COMMUNITY_Feature Flags Schema|Feature Flags Schema]]
-- [[_COMMUNITY_API Server & Geo-fencing|API Server & Geo-fencing]]
-- [[_COMMUNITY_Route Handlers|Route Handlers]]
-- [[_COMMUNITY_Email Templates & Security Events|Email Templates & Security Events]]
-- [[_COMMUNITY_Admin & App Shell Layout|Admin & App Shell Layout]]
-- [[_COMMUNITY_Loading Skeletons & Banners|Loading Skeletons & Banners]]
+- [[_COMMUNITY_Community 0|Community 0]]
+- [[_COMMUNITY_Community 1|Community 1]]
+- [[_COMMUNITY_Community 2|Community 2]]
+- [[_COMMUNITY_Community 3|Community 3]]
+- [[_COMMUNITY_Community 4|Community 4]]
+- [[_COMMUNITY_Community 5|Community 5]]
+- [[_COMMUNITY_OpenAPI Spec|OpenAPI Spec]]
+- [[_COMMUNITY_Auth Routes & Sessions|Auth Routes & Sessions]]
+- [[_COMMUNITY_Community 8|Community 8]]
+- [[_COMMUNITY_Community 9|Community 9]]
+- [[_COMMUNITY_Community 10|Community 10]]
 - [[_COMMUNITY_TypeScript Config|TypeScript Config]]
-- [[_COMMUNITY_Hardware Key  PKCS11 Store|Hardware Key / PKCS11 Store]]
-- [[_COMMUNITY_Feature Flags & Billing Plans|Feature Flags & Billing Plans]]
-- [[_COMMUNITY_Sessions & Auth Middleware|Sessions & Auth Middleware]]
-- [[_COMMUNITY_Decentralized Identifiers (DID)|Decentralized Identifiers (DID)]]
-- [[_COMMUNITY_Tenant Management|Tenant Management]]
-- [[_COMMUNITY_Organizations & Invites|Organizations & Invites]]
-- [[_COMMUNITY_DB Tokens & SaaS Settings|DB Tokens & SaaS Settings]]
+- [[_COMMUNITY_Community 12|Community 12]]
+- [[_COMMUNITY_Community 13|Community 13]]
+- [[_COMMUNITY_Community 14|Community 14]]
+- [[_COMMUNITY_Community 15|Community 15]]
+- [[_COMMUNITY_Community 16|Community 16]]
+- [[_COMMUNITY_Community 17|Community 17]]
 - [[_COMMUNITY_Community 18|Community 18]]
 - [[_COMMUNITY_Community 19|Community 19]]
 - [[_COMMUNITY_Community 20|Community 20]]
 - [[_COMMUNITY_Community 21|Community 21]]
 - [[_COMMUNITY_Community 22|Community 22]]
-- [[_COMMUNITY_Community 23|Community 23]]
+- [[_COMMUNITY_Runtime Dependencies|Runtime Dependencies]]
 - [[_COMMUNITY_Community 24|Community 24]]
-- [[_COMMUNITY_Community 25|Community 25]]
+- [[_COMMUNITY_MFA Attestation Engine|MFA Attestation Engine]]
 - [[_COMMUNITY_Community 26|Community 26]]
 - [[_COMMUNITY_Community 27|Community 27]]
 - [[_COMMUNITY_Community 28|Community 28]]
 - [[_COMMUNITY_Community 29|Community 29]]
 - [[_COMMUNITY_Community 30|Community 30]]
-- [[_COMMUNITY_Community 31|Community 31]]
-- [[_COMMUNITY_Community 32|Community 32]]
+- [[_COMMUNITY_API Keys Schema (snapshot 0000)|API Keys Schema (snapshot 0000)]]
+- [[_COMMUNITY_API Keys Schema (snapshot 0001)|API Keys Schema (snapshot 0001)]]
 - [[_COMMUNITY_Community 33|Community 33]]
 - [[_COMMUNITY_Community 34|Community 34]]
-- [[_COMMUNITY_Community 35|Community 35]]
+- [[_COMMUNITY_Dev Dependencies|Dev Dependencies]]
 - [[_COMMUNITY_Community 36|Community 36]]
 - [[_COMMUNITY_Community 37|Community 37]]
 - [[_COMMUNITY_Community 38|Community 38]]
@@ -279,23 +279,31 @@
 - [[_COMMUNITY_Community 266|Community 266]]
 - [[_COMMUNITY_Community 267|Community 267]]
 - [[_COMMUNITY_Community 268|Community 268]]
+- [[_COMMUNITY_Community 269|Community 269]]
 - [[_COMMUNITY_Community 270|Community 270]]
+- [[_COMMUNITY_Community 271|Community 271]]
 - [[_COMMUNITY_Community 272|Community 272]]
+- [[_COMMUNITY_Community 273|Community 273]]
 - [[_COMMUNITY_Community 274|Community 274]]
-- [[_COMMUNITY_Community 275|Community 275]]
 - [[_COMMUNITY_Community 276|Community 276]]
-- [[_COMMUNITY_Community 277|Community 277]]
 - [[_COMMUNITY_Community 278|Community 278]]
 - [[_COMMUNITY_Community 279|Community 279]]
 - [[_COMMUNITY_Community 280|Community 280]]
-- [[_COMMUNITY_Community 298|Community 298]]
-- [[_COMMUNITY_Community 299|Community 299]]
-- [[_COMMUNITY_Community 300|Community 300]]
-- [[_COMMUNITY_Community 301|Community 301]]
-- [[_COMMUNITY_Community 302|Community 302]]
-- [[_COMMUNITY_Community 303|Community 303]]
+- [[_COMMUNITY_Community 281|Community 281]]
+- [[_COMMUNITY_Community 283|Community 283]]
+- [[_COMMUNITY_Community 284|Community 284]]
+- [[_COMMUNITY_Community 285|Community 285]]
+- [[_COMMUNITY_Community 286|Community 286]]
 - [[_COMMUNITY_Community 304|Community 304]]
 - [[_COMMUNITY_Community 305|Community 305]]
+- [[_COMMUNITY_Community 306|Community 306]]
+- [[_COMMUNITY_Community 307|Community 307]]
+- [[_COMMUNITY_Community 308|Community 308]]
+- [[_COMMUNITY_Community 309|Community 309]]
+- [[_COMMUNITY_Community 310|Community 310]]
+- [[_COMMUNITY_Community 311|Community 311]]
+- [[_COMMUNITY_Community 312|Community 312]]
+- [[_COMMUNITY_Community 313|Community 313]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `getLogger()` - 90 edges
@@ -310,101 +318,90 @@
 10. `responses` - 29 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `Post-quantum crypto initiative` --semantically_similar_to--> `Post-quantum KEM tests`  [INFERRED] [semantically similar]
-  ROADMAP.md → src/__tests__/post-quantum.test.ts
+- `Post-quantum KEM tests` --semantically_similar_to--> `Post-quantum crypto initiative`  [INFERRED] [semantically similar]
+  src/__tests__/post-quantum.test.ts → ROADMAP.md
 - `PASETO v4 Tokens` --semantically_similar_to--> `Client-Side Field Level Encryption (CSFLE)`  [INFERRED] [semantically similar]
   README.md → CHANGELOG.md
 - `Anomaly Detection` --semantically_similar_to--> `Continuous Access Evaluation`  [INFERRED] [semantically similar]
   README.md → STARTER.md
+- `POST /auth/login/mfa (second factor)` --references--> `ZeroAuth MFA/auth capability concept`  [INFERRED]
+  src/api/routes/auth.routes.ts → CLAUDE.md
 - `User-facing Webhooks` --semantically_similar_to--> `Notification Center (SSE)`  [INFERRED] [semantically similar]
   STARTER.md → README.md
-- `Passkeys / WebAuthn (FIDO2)` --semantically_similar_to--> `Decentralized Identifiers (DID)`  [INFERRED] [semantically similar]
-  README.md → ROADMAP.md
 
-## Hyperedges (group relationships)
-- **** — push_subscribeToPush, notificationroutes_broadcastNotification, sw_serviceWorker, drizzle_pushSubscriptionsTable [INFERRED 0.85]
-- **** — api_apiClient, offlinequeue_enqueueWrite, sw_replayQueue, serviceworkerregistrar_ServiceWorkerRegistrar [INFERRED 0.90]
-- **** — sms_sendSmsOTP, whatsapp_sendWhatsAppOTP, telegram_sendTelegramOTP [INFERRED 0.85]
-- **** — tenantmodel_TenantModel, schema_tenantsTable, tenantroutestest_TenantRoutesTests [INFERRED 0.85]
+## Communities (314 total, 29 thin omitted)
 
-## Communities (306 total, 29 thin omitted)
-
-### Community 0 - "Authorization & Continuous Eval"
+### Community 0 - "Community 0"
 Cohesion: 0.04
-Nodes (43): jitAccessTable, authzEngine, ContinuousEvalConfig, DEFAULT_CONFIG, logger, logger, nonceCache, requireProofOfPossession() (+35 more)
+Nodes (46): jitAccessTable, authzEngine, ContinuousEvalConfig, DEFAULT_CONFIG, logger, logger, nonceCache, requireProofOfPossession() (+38 more)
 
-### Community 1 - "Audit & UI Primitives"
+### Community 1 - "Community 1"
 Cohesion: 0.04
-Nodes (43): AuditEntry, MOCK_ENTRIES, Badge(), BadgeProps, colorMap, ModalProps, UpgradePrompt(), UserDetail (+35 more)
+Nodes (47): LOCALES, ModalProps, ChecklistItem, ITEMS, borderColorMap, iconBgMap, StatCard(), StatCardProps (+39 more)
 
-### Community 2 - "Marketing & Landing Pages"
-Cohesion: 0.06
-Nodes (30): alsoIncluded, features, LandingPage(), standards, steps, highlights, metadata, metadata (+22 more)
+### Community 2 - "Community 2"
+Cohesion: 0.05
+Nodes (35): getTransporter(), logger, sendEmailOTP(), logger, sendSmsOTP(), logger, sendTelegramOTP(), logger (+27 more)
 
-### Community 3 - "Onboarding & Auth Pages"
-Cohesion: 0.10
-Nodes (24): ChecklistItem, ITEMS, UpgradePromptProps, passwordStrength(), RegisterPage(), Alert, AlertDescription, AlertTitle (+16 more)
+### Community 3 - "Community 3"
+Cohesion: 0.08
+Nodes (26): highlights, brand, FAQ_ITEMS, FaqItem, CATEGORIES, passwordStrength(), RegisterPage(), Alert (+18 more)
 
-### Community 4 - "Feature Flags Schema"
+### Community 4 - "Community 4"
 Cohesion: 0.04
 Nodes (49): description, enabled, enabled_for_users, key, rollout_percent, updated_at, name, notNull (+41 more)
 
-### Community 5 - "API Server & Geo-fencing"
+### Community 5 - "Community 5"
 Cohesion: 0.06
-Nodes (39): createServer(), logger, port, feedbackTable, cidrContains(), geoFencingMiddleware(), ipToLong(), logger (+31 more)
+Nodes (23): createKEMProvider(), establishPQSessionKey(), generatePQKeyPair(), hybridDecrypt(), hybridEncrypt(), KEMEncapsulation, KEMPrivateKey, KEMPublicKey (+15 more)
 
-### Community 6 - "Route Handlers"
+### Community 6 - "OpenAPI Spec"
 Cohesion: 0.10
 Nodes (48): post, post, post, post, post, post, post, post (+40 more)
 
-### Community 7 - "Email Templates & Security Events"
+### Community 7 - "Auth Routes & Sessions"
+Cohesion: 0.05
+Nodes (42): adapter, ALLOWED_AVATAR_TYPES, authUser, cfg, code, codeVerifier, db, file (+34 more)
+
+### Community 8 - "Community 8"
+Cohesion: 0.06
+Nodes (39): auditLogsTable, saasSettingsTable, sessionsTable, logger, revokeAllSessionsForUser(), revokeSession(), getSettings(), SaaSSettings (+31 more)
+
+### Community 9 - "Community 9"
 Cohesion: 0.07
-Nodes (35): securityEventsTable, BillingEventEmailData, billingEventEmailTemplate(), MagicLinkEmailData, magicLinkEmailTemplate(), NotificationEmailData, notificationEmailTemplate(), OtpEmailData (+27 more)
+Nodes (33): buildEsClient(), ESBulkItem, flushAuditPipeline(), flushPendingDocs(), getElasticsearchHealth(), getIndexName(), indexAuditLogToES(), initAuditPipeline() (+25 more)
 
-### Community 8 - "Admin & App Shell Layout"
-Cohesion: 0.06
-Nodes (21): AdminLayout(), AdminSidebar(), AdminSidebarProps, navItems, navLinks, links, AppShellProps, AppSidebarProps (+13 more)
+### Community 10 - "Community 10"
+Cohesion: 0.07
+Nodes (32): roundedMap, Skeleton(), SkeletonCard(), SkeletonProps, SkeletonTable(), SkeletonTableProps, SkeletonText(), VerifyEmailBanner() (+24 more)
 
-### Community 9 - "Loading Skeletons & Banners"
-Cohesion: 0.06
-Nodes (34): roundedMap, Skeleton(), SkeletonCard(), SkeletonProps, SkeletonTable(), SkeletonTableProps, SkeletonText(), VerifyEmailBanner() (+26 more)
-
-### Community 10 - "TypeScript Config"
+### Community 11 - "TypeScript Config"
 Cohesion: 0.05
 Nodes (43): compilerOptions, allowImportingTsExtensions, allowSyntheticDefaultImports, alwaysStrict, declaration, declarationMap, esModuleInterop, forceConsistentCasingInFileNames (+35 more)
 
-### Community 11 - "Hardware Key / PKCS11 Store"
+### Community 12 - "Community 12"
 Cohesion: 0.05
 Nodes (9): createHardwareKeyStore(), HardwareKeyProvider, initHardwareKeyStore(), logger, NotImplementedError, PKCS11Provider, SecureEnclaveProvider, SoftwareKeyProvider (+1 more)
 
-### Community 12 - "Feature Flags & Billing Plans"
+### Community 13 - "Community 13"
 Cohesion: 0.06
-Nodes (33): featureFlagsTable, admin, billable, byPlan, csv, db, ids, key (+25 more)
+Nodes (32): subscriptionsTable, admin, billable, byPlan, csv, db, ids, key (+24 more)
 
-### Community 13 - "Sessions & Auth Middleware"
-Cohesion: 0.06
-Nodes (30): sessionsTable, client, filter, logger, router, user, authMiddleware, logger (+22 more)
-
-### Community 14 - "Decentralized Identifiers (DID)"
+### Community 14 - "Community 14"
 Cohesion: 0.08
 Nodes (31): base58Decode(), resolveDID(), resolveDIDKey(), resolveDIDWeb(), app, body, ch, config (+23 more)
 
-### Community 15 - "Tenant Management"
-Cohesion: 0.06
-Nodes (28): createTenant(), getAllTenants(), getTenant(), getTenantBySlug(), rowToTenant(), updateTenant(), {
-      clientId,
-      clientSecret: _clientSecret,
-      redirectUris,
-      scopes,
-    }, existing (+20 more)
+### Community 15 - "Community 15"
+Cohesion: 0.07
+Nodes (33): refreshTokensTable, email, getTokenService(), hashToken(), issueTokensForUser(), logger, redirect, router (+25 more)
 
-### Community 16 - "Organizations & Invites"
+### Community 16 - "Community 16"
+Cohesion: 0.09
+Nodes (27): createServer(), logger, port, cidrContains(), geoFencingMiddleware(), ipToLong(), logger, rateLimit() (+19 more)
+
+### Community 17 - "Community 17"
 Cohesion: 0.05
 Nodes (35): organizationInvitesTable, organizationsTable, orgCustomRolesTable, AcceptInviteSchema, body, CreateInviteSchema, CreateOrgSchema, currentUser (+27 more)
-
-### Community 17 - "DB Tokens & SaaS Settings"
-Cohesion: 0.11
-Nodes (30): getDb(), otpsTable, refreshTokensTable, or, getSettings(), SaaSSettings, updateSettings(), email (+22 more)
 
 ### Community 18 - "Community 18"
 Cohesion: 0.07
@@ -415,276 +412,281 @@ Cohesion: 0.07
 Nodes (29): ContinuousVerificationOptions, getVerification(), logger, now, recordVerification(), VerificationRecord, verificationStore, allowCredentials (+21 more)
 
 ### Community 20 - "Community 20"
+Cohesion: 0.11
+Nodes (17): AccountPage(), ApiKey, OfflineQueuedError, redirectToLogin(), refreshAccessToken(), request(), clearToken(), getRefreshToken() (+9 more)
+
+### Community 21 - "Community 21"
 Cohesion: 0.07
 Nodes (31): baseUrl, body, count, currentParts, db, fields, filterStr, id (+23 more)
 
-### Community 21 - "Community 21"
-Cohesion: 0.06
-Nodes (30): getProviderAdapter(), logger, adapter, ALLOWED_AVATAR_TYPES, authUser, cfg, code, codeVerifier (+22 more)
-
 ### Community 22 - "Community 22"
+Cohesion: 0.08
+Nodes (17): AdminLayout(), AdminSidebar(), AdminSidebarProps, navItems, navLinks, links, AppShellProps, AppSidebarProps (+9 more)
+
+### Community 23 - "Runtime Dependencies"
 Cohesion: 0.06
 Nodes (34): dependencies, bcryptjs, bullmq, dotenv, drizzle-orm, geoip-lite, hono, @hono/node-server (+26 more)
 
-### Community 23 - "Community 23"
-Cohesion: 0.08
-Nodes (17): scheduleLDAPSync(), syncAllUsers(), syncModifiedUsers(), getLogger(), LOG_LEVELS, LogContext, LogLevel, logger (+9 more)
-
 ### Community 24 - "Community 24"
-Cohesion: 0.10
-Nodes (20): initNotificationsFromEnv(), NotificationDispatcher, COLORS, EMOJIS, formatFields(), formatPagerDutyPayload(), formatSlackMessage(), formatTeamsMessage() (+12 more)
-
-### Community 25 - "Community 25"
 Cohesion: 0.08
 Nodes (33): ZeroAuth Claude Code guide, FIDO MDS3 metadata service, Logger class, auditLog, getLogger, streamToElasticsearch, MFA channels tests, PWA offline fallback page (+25 more)
 
-### Community 26 - "Community 26"
-Cohesion: 0.07
-Nodes (30): auditLogsTable, enforceMaxConcurrentDevices(), logger, revokeAllSessionsForUser(), revokeSession(), action, actorId, allowed (+22 more)
-
-### Community 27 - "Community 27"
-Cohesion: 0.09
-Nodes (29): buildEsClient(), ESBulkItem, flushAuditPipeline(), flushPendingDocs(), getElasticsearchHealth(), getIndexName(), indexAuditLogToES(), initAuditPipeline() (+21 more)
-
-### Community 28 - "Community 28"
+### Community 25 - "MFA Attestation Engine"
 Cohesion: 0.09
 Nodes (30): AttestationPolicy, AttestationType, AttestationVerificationResult, AttestationVerificationResultWithMDS3, AuthenticatorStatus, DEFAULT_POLICY, HIGH_ASSURANCE_POLICY, KNOWN_HARDWARE_KEY_AAGUIDS (+22 more)
 
-### Community 29 - "Community 29"
-Cohesion: 0.11
-Nodes (27): federatedProvidersTable, exchangeToken(), getTokenService(), logger, fromRow(), getProvider(), initFederationFromEnv(), listProviders() (+19 more)
+### Community 26 - "Community 26"
+Cohesion: 0.10
+Nodes (20): initNotificationsFromEnv(), NotificationDispatcher, COLORS, EMOJIS, formatFields(), formatPagerDutyPayload(), formatSlackMessage(), formatTeamsMessage() (+12 more)
 
-### Community 30 - "Community 30"
+### Community 27 - "Community 27"
 Cohesion: 0.06
 Nodes (32): organizations, billingEmail, create, delete, deleteConfirm, deleted, invite, inviteEmail (+24 more)
 
-### Community 31 - "Community 31"
-Cohesion: 0.07
-Nodes (24): orgSecurityPoliciesTable, allowCredentials, attestationResult, cfg, challengeStore, consumeAuthChallenge(), consumeChallenge(), db (+16 more)
-
-### Community 32 - "Community 32"
-Cohesion: 0.09
-Nodes (18): ApiKey, CANCEL_REASONS, PLANS, Subscription, DEFAULTS, GeneralSettings, api, getPushPermission() (+10 more)
-
-### Community 33 - "Community 33"
+### Community 28 - "Community 28"
 Cohesion: 0.06
 Nodes (32): dependencies, apexcharts, class-variance-authority, clsx, lucide-react, next, next-intl, @next/swc-wasm-nodejs (+24 more)
 
-### Community 34 - "Community 34"
+### Community 29 - "Community 29"
 Cohesion: 0.10
 Nodes (25): assertKey(), AUTH_KEY_INFO, base64UrlDecode(), base64UrlEncode(), concat(), constantTimeEqual(), decrypt(), ENC_KEY_INFO (+17 more)
 
-### Community 35 - "Community 35"
+### Community 30 - "Community 30"
 Cohesion: 0.08
 Nodes (31): ZeroAuth SaaS Starter, Admin Area, /admin/workload UI, AppFooter (Global), Shared Responsive App Shell, AppSidebar (Collapsible + Mobile Drawer), AppTopbar (Sticky), Cross-tenant JIT access (+23 more)
 
-### Community 36 - "Community 36"
+### Community 31 - "API Keys Schema (snapshot 0000)"
 Cohesion: 0.07
 Nodes (30): columns, name, nullsNotDistinct, columnsFrom, columnsTo, name, onDelete, onUpdate (+22 more)
 
-### Community 37 - "Community 37"
+### Community 32 - "API Keys Schema (snapshot 0001)"
 Cohesion: 0.07
 Nodes (30): columns, name, nullsNotDistinct, columnsFrom, columnsTo, name, onDelete, onUpdate (+22 more)
 
-### Community 38 - "Community 38"
+### Community 33 - "Community 33"
+Cohesion: 0.07
+Nodes (26): feedbackTable, client, filter, logger, router, user, authMiddleware, logger (+18 more)
+
+### Community 34 - "Community 34"
 Cohesion: 0.09
-Nodes (25): apiKeysTable, organizationMembersTable, usageCountersTable, apiKeyAuth, consumeRateLimit(), canManageOrgBilling(), db, findSubscription() (+17 more)
+Nodes (25): apiKeysTable, organizationMembersTable, usageCountersTable, usersTable, apiKeyAuth, consumeRateLimit(), canManageOrgBilling(), db (+17 more)
 
-### Community 39 - "Community 39"
-Cohesion: 0.07
-Nodes (29): common, actions, back, cancel, close, confirm, copied, copy (+21 more)
-
-### Community 40 - "Community 40"
-Cohesion: 0.07
-Nodes (19): DrizzleDb, usersTable, FederatedIdentityOptions, logger, code, db, logger, mfa (+11 more)
-
-### Community 41 - "Community 41"
-Cohesion: 0.15
-Nodes (15): AccountPage(), OfflineQueuedError, redirectToLogin(), refreshAccessToken(), request(), clearToken(), getRefreshToken(), getToken() (+7 more)
-
-### Community 42 - "Community 42"
+### Community 35 - "Dev Dependencies"
 Cohesion: 0.07
 Nodes (29): devDependencies, @commitlint/cli, @commitlint/config-conventional, concurrently, conventional-changelog-conventionalcommits, drizzle-kit, eslint, husky (+21 more)
 
-### Community 43 - "Community 43"
+### Community 36 - "Community 36"
+Cohesion: 0.08
+Nodes (19): fontDisplay, fontMono, fontSans, metadata, viewport, CookieBanner(), ToastContext, ToastContextValue (+11 more)
+
+### Community 37 - "Community 37"
+Cohesion: 0.08
+Nodes (17): alsoIncluded, features, LandingPage(), standards, steps, metadata, TYPE_STYLES, SiteHeader() (+9 more)
+
+### Community 38 - "Community 38"
+Cohesion: 0.07
+Nodes (29): common, actions, back, cancel, close, confirm, copied, copy (+21 more)
+
+### Community 39 - "Community 39"
 Cohesion: 0.11
 Nodes (13): CSFLEManager, csflEncryptionPlugin(), decryptFieldsInDoc(), EncryptionKeyVersion, getCSFLE(), initializeCSFLE(), resetCSFLE(), ZeroAuthConfig (+5 more)
 
-### Community 44 - "Community 44"
-Cohesion: 0.10
-Nodes (27): api client (request wrapper), refreshAccessToken (silent token refresh), AppSidebar, issueVerification, Auth Routes, DashboardLayout, Dashboard navItems, push_subscriptions Table (migration 0005) (+19 more)
+### Community 40 - "Community 40"
+Cohesion: 0.08
+Nodes (21): orgSecurityPoliciesTable, allowCredentials, attestationResult, cfg, challengeStore, consumeAuthChallenge(), consumeChallenge(), db (+13 more)
 
-### Community 45 - "Community 45"
+### Community 41 - "Community 41"
 Cohesion: 0.07
 Nodes (27): auth, confirmPassword, email, enterCode, forgotPassword, haveAccount, invalidCode, magicLink (+19 more)
 
-### Community 46 - "Community 46"
+### Community 42 - "Community 42"
 Cohesion: 0.07
-Nodes (27): key_hash, last_used_at, name, revoked_at, scopes, name, notNull, primaryKey (+19 more)
+Nodes (27): expires_at, key_hash, last_used_at, name, scopes, name, notNull, primaryKey (+19 more)
 
-### Community 47 - "Community 47"
-Cohesion: 0.09
-Nodes (26): Authorization Engine (ABAC + JIT), API Key Management, Drizzle ORM, Feature Flag Management, GDPR Tooling (Export and Deletion), Hono API Server, MFA (TOTP / Email / SMS / WhatsApp / Telegram OTP), Notification Center (SSE) (+18 more)
+### Community 43 - "Community 43"
+Cohesion: 0.10
+Nodes (27): api client (request wrapper), refreshAccessToken (silent token refresh), AppSidebar, issueVerification, Auth Routes, DashboardLayout, Dashboard navItems, push_subscriptions Table (migration 0005) (+19 more)
 
-### Community 48 - "Community 48"
-Cohesion: 0.11
-Nodes (16): crossTenantJITRequestsTable, CrossTenantJITRequest, CrossTenantJITStore, fromRow(), JITRow, requestCrossTenantAccess(), app, approved (+8 more)
-
-### Community 49 - "Community 49"
+### Community 44 - "Community 44"
 Cohesion: 0.08
 Nodes (26): name, notNull, primaryKey, type, name, notNull, primaryKey, type (+18 more)
 
-### Community 50 - "Community 50"
+### Community 45 - "Community 45"
 Cohesion: 0.08
 Nodes (26): comment, context, metadata, score, type, name, notNull, primaryKey (+18 more)
 
-### Community 51 - "Community 51"
+### Community 46 - "Community 46"
 Cohesion: 0.09
-Nodes (23): body, cfg, db, getTokenService(), idpConfig, logger, normalizedEmail, redirect (+15 more)
+Nodes (26): Authorization Engine (ABAC + JIT), API Key Management, Drizzle ORM, Feature Flag Management, GDPR Tooling (Export and Deletion), Hono API Server, MFA (TOTP / Email / SMS / WhatsApp / Telegram OTP), Notification Center (SSE) (+18 more)
 
-### Community 52 - "Community 52"
-Cohesion: 0.08
-Nodes (13): DonutChartProps, ReactApexChart, MetricCardProps, quickActions, Stats, User, RadialGaugeProps, ReactApexChart (+5 more)
+### Community 47 - "Community 47"
+Cohesion: 0.11
+Nodes (16): crossTenantJITRequestsTable, CrossTenantJITRequest, CrossTenantJITStore, fromRow(), JITRow, requestCrossTenantAccess(), app, approved (+8 more)
 
-### Community 53 - "Community 53"
-Cohesion: 0.12
-Nodes (20): userBehaviorBaselinesTable, AnomalyMiddlewareOptions, logger, body, db, limit, logger, offset (+12 more)
+### Community 48 - "Community 48"
+Cohesion: 0.13
+Nodes (19): BillingEventEmailData, billingEventEmailTemplate(), OtpEmailData, otpEmailTemplate(), SecurityAlertEmailData, securityAlertEmailTemplate(), VerifyEmailData, verifyEmailTemplate() (+11 more)
 
-### Community 54 - "Community 54"
+### Community 49 - "Community 49"
+Cohesion: 0.10
+Nodes (24): createTenant(), getTenant(), getTenantBySlug(), rowToTenant(), updateTenant(), {
+      clientId,
+      clientSecret: _clientSecret,
+      redirectUris,
+      scopes,
+    }, existing, findByIdOrSlug() (+16 more)
+
+### Community 50 - "Community 50"
 Cohesion: 0.08
 Nodes (23): body, callbackUrl, cfg, client, code, code_challenge, code_challenge_method, codeData (+15 more)
 
-### Community 55 - "Community 55"
+### Community 51 - "Community 51"
+Cohesion: 0.12
+Nodes (20): userBehaviorBaselinesTable, AnomalyMiddlewareOptions, logger, body, db, limit, logger, offset (+12 more)
+
+### Community 52 - "Community 52"
 Cohesion: 0.13
 Nodes (15): deliverWebhook(), retryDelivery(), signPayload(), app, body, deleted, endpoint, endpoints (+7 more)
 
-### Community 56 - "Community 56"
+### Community 53 - "Community 53"
 Cohesion: 0.11
 Nodes (24): content, description, content, description, content, description, content, description (+16 more)
 
-### Community 57 - "Community 57"
+### Community 54 - "Community 54"
 Cohesion: 0.08
 Nodes (24): common, back, cancel, close, confirm, copied, copy, delete (+16 more)
 
-### Community 58 - "Community 58"
+### Community 55 - "Community 55"
 Cohesion: 0.08
 Nodes (24): common, back, cancel, close, confirm, copied, copy, delete (+16 more)
 
-### Community 59 - "Community 59"
-Cohesion: 0.14
-Nodes (13): createKEMProvider(), establishPQSessionKey(), generatePQKeyPair(), hybridDecrypt(), hybridEncrypt(), KEMEncapsulation, KEMPrivateKey, KEMPublicKey (+5 more)
-
-### Community 60 - "Community 60"
+### Community 56 - "Community 56"
 Cohesion: 0.09
 Nodes (23): scripts, build, db:backup, db:generate, db:migrate, db:push, db:studio, dev (+15 more)
 
-### Community 61 - "Community 61"
+### Community 57 - "Community 57"
 Cohesion: 0.15
 Nodes (22): description, content, description, content, description, get, get, get (+14 more)
 
-### Community 62 - "Community 62"
+### Community 58 - "Community 58"
 Cohesion: 0.09
 Nodes (22): security, addPasskey, changePassword, currentPassword, currentSession, disableMfa, mfa, mfaDisabled (+14 more)
 
-### Community 63 - "Community 63"
-Cohesion: 0.09
-Nodes (22): name, notNull, primaryKey, type, body, link, read, title (+14 more)
-
-### Community 64 - "Community 64"
+### Community 59 - "Community 59"
 Cohesion: 0.09
 Nodes (22): id, link, title, user_id, default, name, notNull, primaryKey (+14 more)
 
-### Community 65 - "Community 65"
+### Community 60 - "Community 60"
 Cohesion: 0.18
 Nodes (17): APP_URL(), DUNNING_DAYS, emailOwner(), LifecycleMeta, logger, meta(), processDunning(), processTrialExpiry() (+9 more)
 
-### Community 66 - "Community 66"
+### Community 61 - "Community 61"
 Cohesion: 0.10
 Nodes (21): name, notNull, primaryKey, type, name, notNull, primaryKey, type (+13 more)
 
-### Community 67 - "Community 67"
+### Community 62 - "Community 62"
 Cohesion: 0.10
-Nodes (21): comment, metadata, score, type, name, notNull, primaryKey, type (+13 more)
+Nodes (21): comment, context, metadata, org_id, name, notNull, primaryKey, type (+13 more)
 
-### Community 68 - "Community 68"
+### Community 63 - "Community 63"
 Cohesion: 0.10
-Nodes (21): key_hash, key_prefix, last_used_at, name, name, notNull, primaryKey, type (+13 more)
+Nodes (21): name, notNull, primaryKey, type, body, link, read_at, title (+13 more)
 
-### Community 69 - "Community 69"
+### Community 64 - "Community 64"
+Cohesion: 0.10
+Nodes (9): DonutChartProps, ReactApexChart, MetricCardProps, quickActions, Stats, User, RadialGaugeProps, ReactApexChart (+1 more)
+
+### Community 65 - "Community 65"
+Cohesion: 0.13
+Nodes (17): federatedProvidersTable, FederatedIdentityOptions, logger, fromRow(), getProvider(), initFederationFromEnv(), listProviders(), ProviderRow (+9 more)
+
+### Community 66 - "Community 66"
 Cohesion: 0.10
 Nodes (20): compilerOptions, allowJs, esModuleInterop, forceConsistentCasingInFileNames, incremental, isolatedModules, jsx, lib (+12 more)
 
-### Community 70 - "Community 70"
-Cohesion: 0.14
-Nodes (15): notificationsTable, saasSettingsTable, tenantsTable, CreateTenantData, DEFAULT_SETTINGS, OidcConfig, SamlConfig, store (+7 more)
-
-### Community 71 - "Community 71"
+### Community 67 - "Community 67"
 Cohesion: 0.13
 Nodes (11): activeSessions, activeUsers, anomalyEventsTotal, authAttemptsTotal, authDurationSeconds, mfaEventsTotal, rateLimitHitsTotal, requestDurationSeconds (+3 more)
 
+### Community 68 - "Community 68"
+Cohesion: 0.13
+Nodes (14): data, db, logger, router, token, generateUnsubscribeToken(), SECRET(), UnsubscribeEmailType (+6 more)
+
+### Community 69 - "Community 69"
+Cohesion: 0.13
+Nodes (18): GET /auth/me (sanitized profile), hashToken() (sha256 hex), issueAuthenticatedSession() (shared session mint), issueMfaChallengeToken() (short-lived mfa:challenge token), POST /auth/login (MFA gate), POST /auth/login/mfa (second factor), auth.routes test: GET /me sanitization, auth.routes test: MFA login + /login/mfa (+10 more)
+
+### Community 70 - "Community 70"
+Cohesion: 0.11
+Nodes (19): auth, accountLocked, alreadyHaveAccount, displayNameLabel, dontHaveAccount, emailLabel, emailPlaceholder, forgotPassword (+11 more)
+
+### Community 71 - "Community 71"
+Cohesion: 0.11
+Nodes (19): auth, accountLocked, alreadyHaveAccount, displayNameLabel, dontHaveAccount, emailLabel, emailPlaceholder, forgotPassword (+11 more)
+
 ### Community 72 - "Community 72"
-Cohesion: 0.11
-Nodes (19): auth, accountLocked, alreadyHaveAccount, displayNameLabel, dontHaveAccount, emailLabel, emailPlaceholder, forgotPassword (+11 more)
-
-### Community 73 - "Community 73"
-Cohesion: 0.11
-Nodes (19): auth, accountLocked, alreadyHaveAccount, displayNameLabel, dontHaveAccount, emailLabel, emailPlaceholder, forgotPassword (+11 more)
-
-### Community 74 - "Community 74"
 Cohesion: 0.11
 Nodes (18): dialect, id, prevId, checkConstraints, compositePrimaryKeys, indexes, isRLSEnabled, name (+10 more)
 
-### Community 75 - "Community 75"
+### Community 73 - "Community 73"
+Cohesion: 0.12
+Nodes (11): Bucket, clearRateLimiter(), initRateLimiter(), ipBuckets, logger, TenantQuota, tenantQuotaMap, useRedis (+3 more)
+
+### Community 74 - "Community 74"
 Cohesion: 0.11
 Nodes (18): background_color, categories, description, dir, display, display_override, icons, id (+10 more)
 
-### Community 76 - "Community 76"
-Cohesion: 0.11
-Nodes (18): description, is_default, permissions, name, notNull, primaryKey, type, default (+10 more)
+### Community 75 - "Community 75"
+Cohesion: 0.12
+Nodes (11): AuditEntry, MOCK_ENTRIES, Badge(), BadgeProps, colorMap, UserDetail, Badge(), BadgeProps (+3 more)
 
-### Community 77 - "Community 77"
+### Community 76 - "Community 76"
 Cohesion: 0.11
 Nodes (18): notifications_user_id_users_id_fk, columnsFrom, columnsTo, name, onDelete, onUpdate, tableFrom, tableTo (+10 more)
 
-### Community 78 - "Community 78"
+### Community 77 - "Community 77"
 Cohesion: 0.11
 Nodes (18): jit_access_user_id_users_id_fk, columnsFrom, columnsTo, name, onDelete, onUpdate, tableFrom, tableTo (+10 more)
+
+### Community 78 - "Community 78"
+Cohesion: 0.13
+Nodes (12): deviceAttestationMiddleware, logger, markDeviceAsTrusted, requireTrustedDevice, FingerprintInput, FingerprintService, DeviceFingerprint, a (+4 more)
 
 ### Community 79 - "Community 79"
 Cohesion: 0.11
 Nodes (17): aliases, components, hooks, lib, ui, utils, iconLibrary, rsc (+9 more)
 
 ### Community 80 - "Community 80"
-Cohesion: 0.13
-Nodes (12): deviceAttestationMiddleware, logger, markDeviceAsTrusted, requireTrustedDevice, FingerprintInput, FingerprintService, DeviceFingerprint, a (+4 more)
-
-### Community 81 - "Community 81"
-Cohesion: 0.14
-Nodes (10): fontDisplay, fontMono, fontSans, metadata, viewport, CookieBanner(), ToastProvider(), ConsentValue (+2 more)
-
-### Community 82 - "Community 82"
-Cohesion: 0.19
-Nodes (12): getTransporter(), logger, sendEmailOTP(), logger, sendSmsOTP(), logger, sendTelegramOTP(), logger (+4 more)
-
-### Community 83 - "Community 83"
-Cohesion: 0.16
-Nodes (14): workloadCredentialsTable, allowedScopes, grantedScopes, key, logger, router, tokenTtl, user (+6 more)
-
-### Community 84 - "Community 84"
 Cohesion: 0.12
 Nodes (16): extends, ignorePatterns, parser, parserOptions, ecmaVersion, project, sourceType, rules (+8 more)
 
-### Community 85 - "Community 85"
+### Community 81 - "Community 81"
 Cohesion: 0.12
-Nodes (16): cookie, accept, decline, learnMore, message, dashboard, noActivity, overview (+8 more)
+Nodes (17): description, is_default, name, name, notNull, primaryKey, type, default (+9 more)
 
-### Community 86 - "Community 86"
+### Community 82 - "Community 82"
 Cohesion: 0.12
 Nodes (17): columnsFrom, columnsTo, name, onDelete, onUpdate, tableFrom, tableTo, columnsFrom (+9 more)
 
-### Community 87 - "Community 87"
+### Community 83 - "Community 83"
+Cohesion: 0.12
+Nodes (14): createSchema, db, id, keyHash, keyPrefix, logger, parsed, router (+6 more)
+
+### Community 84 - "Community 84"
+Cohesion: 0.16
+Nodes (14): workloadCredentialsTable, allowedScopes, grantedScopes, key, logger, router, tokenTtl, user (+6 more)
+
+### Community 85 - "Community 85"
 Cohesion: 0.12
 Nodes (16): type, format, type, type, type, type, type, country (+8 more)
+
+### Community 86 - "Community 86"
+Cohesion: 0.12
+Nodes (16): key_hash, key_prefix, last_used_at, name, notNull, primaryKey, type, name (+8 more)
+
+### Community 87 - "Community 87"
+Cohesion: 0.12
+Nodes (16): optionalDependencies, @next/swc-wasm-nodejs, @next/swc-wasm-web, @next/swc-win32-x64-msvc, @parcel/watcher-darwin-arm64, @parcel/watcher-darwin-x64, @parcel/watcher-linux-x64-glibc, @parcel/watcher-win32-x64 (+8 more)
 
 ### Community 88 - "Community 88"
 Cohesion: 0.12
@@ -710,8 +712,8 @@ Nodes (11): binaryDest, dest, esbuildInfo, {
 }, { homedir, tmpdir }, { join, dirname }, parcelDest (+3 more)
 
 ### Community 89 - "Community 89"
-Cohesion: 0.12
-Nodes (16): optionalDependencies, @next/swc-wasm-nodejs, @next/swc-wasm-web, @next/swc-win32-x64-msvc, @parcel/watcher-darwin-arm64, @parcel/watcher-darwin-x64, @parcel/watcher-linux-x64-glibc, @parcel/watcher-win32-x64 (+8 more)
+Cohesion: 0.20
+Nodes (12): getDb(), featureFlagsTable, bucketFor(), cache, clearFlagCache(), deleteFlag(), FlagRow, isFeatureEnabled() (+4 more)
 
 ### Community 90 - "Community 90"
 Cohesion: 0.21
@@ -721,337 +723,345 @@ Nodes (15): content, description, delete, delete, parameters, responses, securit
 Cohesion: 0.13
 Nodes (15): billing, cancelSubscription, currentPlan, downgrade, enterprisePlan, freePlan, invoices, noInvoices (+7 more)
 
+### Community 92 - "Community 92"
+Cohesion: 0.13
+Nodes (13): db, {
+        deletionRequestedAt: _a,
+        deletionScheduledFor: _b,
+        ...restMeta
+      }, exportData, logger, now, purgeScheduledDeletions(), router, scheduledFor (+5 more)
+
 ### Community 93 - "Community 93"
-Cohesion: 0.14
-Nodes (8): attemptMap, AttemptRecord, failedAttempts, LOCKOUT_DURATION_MS, LockoutEntry, logger, MAX_ATTEMPTS, now
+Cohesion: 0.22
+Nodes (12): exchangeToken(), getTokenService(), logger, FederatedClaim, FederatedProvider, FederationTokenRequest, FederationTokenResponse, fetchJwks() (+4 more)
 
 ### Community 94 - "Community 94"
+Cohesion: 0.18
+Nodes (12): securityEventsTable, assessTakeoverRisk(), logger, recordAndRespond(), recordSensitiveChange(), SensitiveChangeType, TAKEOVER_WINDOW_MS, TakeoverAssessment (+4 more)
+
+### Community 95 - "Community 95"
+Cohesion: 0.16
+Nodes (12): app, capturedValues, code, del(), getRouter(), makeActiveUser(), mfaUser(), post() (+4 more)
+
+### Community 96 - "Community 96"
 Cohesion: 0.14
 Nodes (14): admin, activateUser, anomalies, audit, deleteUser, noUsers, roles, searchUsers (+6 more)
 
-### Community 95 - "Community 95"
+### Community 97 - "Community 97"
+Cohesion: 0.14
+Nodes (8): attemptMap, AttemptRecord, failedAttempts, LOCKOUT_DURATION_MS, LockoutEntry, logger, MAX_ATTEMPTS, now
+
+### Community 98 - "Community 98"
 Cohesion: 0.14
 Nodes (12): afterClear, allowedKey2, app, ban, blocked, blockedKey1, quota, r1 (+4 more)
 
-### Community 96 - "Community 96"
-Cohesion: 0.15
-Nodes (13): CI Build UI Job (Next.js), GitHub Actions CI Pipeline, CI Lint and Type Check Job, CI Test Job (Vitest with Postgres and Redis), Next.js MCP Server for Coding Agents, ZeroAuth Monorepo Structure, Vitest Test Suite, ZeroAuth LLM Index (llms.txt) (+5 more)
-
-### Community 97 - "Community 97"
-Cohesion: 0.18
-Nodes (13): Client-Side Field Level Encryption (CSFLE), Fingerprint Service (Device Fingerprinting), Token Service (PASETO v4 local), Changelog v1.0.0 Foundation Release, Immutable Audit Log (Elasticsearch), Bearer Token Auth, Cookie Consent (GDPR), CSFLE Field Encryption (+5 more)
-
-### Community 98 - "Community 98"
+### Community 99 - "Community 99"
 Cohesion: 0.15
 Nodes (8): detectLocale(), Locale, SUPPORTED_LOCALES, data, headers, options, revokeRes, sessionsRes
 
-### Community 99 - "Community 99"
+### Community 100 - "Community 100"
 Cohesion: 0.15
 Nodes (13): errors, forbidden, forbiddenSubtitle, goHome, networkError, notFound, notFoundSubtitle, serverError (+5 more)
 
-### Community 100 - "Community 100"
+### Community 101 - "Community 101"
 Cohesion: 0.15
 Nodes (13): nav, admin, billing, closeMenu, dashboard, logout, markAllRead, notifications (+5 more)
 
-### Community 101 - "Community 101"
+### Community 102 - "Community 102"
 Cohesion: 0.15
 Nodes (13): columns, name, nullsNotDistinct, checkConstraints, compositePrimaryKeys, indexes, isRLSEnabled, name (+5 more)
 
-### Community 102 - "Community 102"
-Cohesion: 0.15
-Nodes (10): subscriptionsTable, db, invoice, logger, router, session, sig, stripe (+2 more)
-
 ### Community 103 - "Community 103"
-Cohesion: 0.15
-Nodes (8): capturedValues, db, expiredInvite, getApp(), invite, rows, usedInvite, validInvite
+Cohesion: 0.19
+Nodes (6): Notification, NotificationBell(), formatDate(), formatDateTime(), RELATIVE_DIVISIONS, useFormat()
 
 ### Community 104 - "Community 104"
-Cohesion: 0.15
-Nodes (12): LoginInput, LoginSchema, LogoutSchema, PasswordResetConfirmInput, PasswordResetConfirmSchema, PasswordResetRequestInput, PasswordResetRequestSchema, passwordSchema (+4 more)
+Cohesion: 0.23
+Nodes (8): metadata, BlogPost, blogPosts, getBlogPost(), BlogPostPage(), generateMetadata(), Props, renderContent()
 
 ### Community 105 - "Community 105"
-Cohesion: 0.15
-Nodes (11): AuthCodeEntry, authCodes, AuthorizeParams, buildUserInfo(), clientStore, exchangeAuthCode(), getDiscoveryDocument(), getOIDCClient() (+3 more)
-
-### Community 106 - "Community 106"
 Cohesion: 0.17
 Nodes (6): AuthSettings, DEFAULTS, NumberInputProps, ToggleRowProps, ToggleProps, Switch
 
+### Community 106 - "Community 106"
+Cohesion: 0.15
+Nodes (13): CI Build UI Job (Next.js), GitHub Actions CI Pipeline, CI Lint and Type Check Job, CI Test Job (Vitest with Postgres and Redis), Next.js MCP Server for Coding Agents, ZeroAuth Monorepo Structure, Vitest Test Suite, ZeroAuth LLM Index (llms.txt) (+5 more)
+
 ### Community 107 - "Community 107"
+Cohesion: 0.18
+Nodes (13): Client-Side Field Level Encryption (CSFLE), Fingerprint Service (Device Fingerprinting), Token Service (PASETO v4 local), Changelog v1.0.0 Foundation Release, Immutable Audit Log (Elasticsearch), Bearer Token Auth, Cookie Consent (GDPR), CSFLE Field Encryption (+5 more)
+
+### Community 108 - "Community 108"
+Cohesion: 0.15
+Nodes (8): capturedValues, db, expiredInvite, getApp(), invite, rows, usedInvite, validInvite
+
+### Community 109 - "Community 109"
+Cohesion: 0.15
+Nodes (12): LoginInput, LoginSchema, LogoutSchema, PasswordResetConfirmInput, PasswordResetConfirmSchema, PasswordResetRequestInput, PasswordResetRequestSchema, passwordSchema (+4 more)
+
+### Community 110 - "Community 110"
+Cohesion: 0.21
+Nodes (10): tenantsTable, CreateTenantData, DEFAULT_SETTINGS, getAllTenants(), OidcConfig, SamlConfig, store, Tenant (+2 more)
+
+### Community 111 - "Community 111"
+Cohesion: 0.15
+Nodes (11): AuthCodeEntry, authCodes, AuthorizeParams, buildUserInfo(), clientStore, exchangeAuthCode(), getDiscoveryDocument(), getOIDCClient() (+3 more)
+
+### Community 112 - "Community 112"
 Cohesion: 0.17
 Nodes (12): description, type, description, type, accessToken, expiresIn, refreshToken, tokenType (+4 more)
 
-### Community 109 - "Community 109"
+### Community 113 - "Community 113"
 Cohesion: 0.17
 Nodes (12): profile, avatar, changeAvatar, displayName, email, phone, removeAvatar, saved (+4 more)
 
-### Community 110 - "Community 110"
+### Community 114 - "Community 114"
 Cohesion: 0.17
 Nodes (12): profile, avatarUpload, dangerZone, deleteAccount, displayName, email, personalInfo, phone (+4 more)
 
-### Community 111 - "Community 111"
+### Community 115 - "Community 115"
 Cohesion: 0.17
 Nodes (12): profile, avatarUpload, dangerZone, deleteAccount, displayName, email, personalInfo, phone (+4 more)
 
-### Community 112 - "Community 112"
-Cohesion: 0.27
-Nodes (9): cfg(), errorTimestamps, logger, prune(), recordServerError(), recordSlowRequest(), resetAlertingState(), slowTimestamps (+1 more)
-
-### Community 113 - "Community 113"
+### Community 116 - "Community 116"
 Cohesion: 0.17
 Nodes (11): lint-staged, *.{json,md}, packages/ui/src/**/*.{ts,tsx}, src/**/!(*.test|*.spec).ts, src/**/*.ts, name, overrides, postcss (+3 more)
 
-### Community 114 - "Community 114"
+### Community 117 - "Community 117"
+Cohesion: 0.21
+Nodes (12): Migration 0006: api_keys.environment column, createSchema (environment: live|test enum), GET /api-keys handler (selects environment), POST /api-keys handler (zak_live_/zak_test_ prefix), api-keys.routes test suite (test-mode key tests), apiKeyAuth middleware, ApiKeysPage dashboard component, ApiKeysPage handleCreate (Live/Test selector) (+4 more)
+
+### Community 118 - "Community 118"
+Cohesion: 0.27
+Nodes (9): cfg(), errorTimestamps, logger, prune(), recordServerError(), recordSlowRequest(), resetAlertingState(), slowTimestamps (+1 more)
+
+### Community 120 - "Community 120"
+Cohesion: 0.17
+Nodes (3): a, DEFAULTS, T
+
+### Community 121 - "Community 121"
+Cohesion: 0.29
+Nodes (10): or, daysAgo(), DEFAULT_POLICY, logger, purgeExpiredOtps(), purgeExpiredRefreshTokens(), purgeExpiredSessions(), purgeOldAuditLogs() (+2 more)
+
+### Community 122 - "Community 122"
 Cohesion: 0.18
 Nodes (11): content, description, patch, parameters, requestBody, responses, security, summary (+3 more)
 
-### Community 115 - "Community 115"
-Cohesion: 0.20
-Nodes (11): Elasticsearch Docker Service, Kibana Docker Service, PostgreSQL Docker Service, Redis Docker Service, ZeroAuth API Docker Service, Auth Success/Failure Rates Dashboard, Denied Access Patterns Dashboard, MFA Adoption Dashboard (+3 more)
-
-### Community 116 - "Community 116"
-Cohesion: 0.25
-Nodes (9): generateUnsubscribeToken(), SECRET(), UnsubscribeEmailType, verifyUnsubscribeToken(), parts, result, t1, t2 (+1 more)
-
-### Community 117 - "Community 117"
-Cohesion: 0.18
-Nodes (10): AdminAssignRoleSchema, AdminRevokeRoleSchema, AdminUpdateUserInput, AdminUpdateUserSchema, CreateRoleInput, CreateRoleSchema, JITApproveInput, JITApproveSchema (+2 more)
-
-### Community 118 - "Community 118"
+### Community 123 - "Community 123"
 Cohesion: 0.25
 Nodes (8): BreachCheckResult, checkPasswordBreached(), isBreachCheckEnabled(), logger, rejectIfBreached(), fetchMock, sha1, url
 
-### Community 119 - "Community 119"
-Cohesion: 0.20
-Nodes (7): app, capturedValues, getRouter(), post(), r, uid, user
-
-### Community 120 - "Community 120"
-Cohesion: 0.22
-Nodes (5): EnterpriseAttestationCA, EnterpriseCARegistry, EnterpriseCertificate, parseCertificate(), verifyEnterpriseAttestation()
-
-### Community 121 - "Community 121"
-Cohesion: 0.24
-Nodes (6): AttestationCAPin, computeCertificatePin(), extractCommonNameFromPem(), logger, pinStore, verifyAttestationCAPin()
-
-### Community 122 - "Community 122"
-Cohesion: 0.22
-Nodes (7): BanEntry, banList, Bucket, buckets, consumeInMemory(), logger, refillTokens()
-
-### Community 123 - "Community 123"
-Cohesion: 0.20
-Nodes (9): body, errorRate, loginDuration, loginOk, loginRes, loginStart, options, refreshRes (+1 more)
-
 ### Community 124 - "Community 124"
-Cohesion: 0.20
-Nodes (9): cookie, accept, decline, message, dashboard, overview, quickActions, recentActivity (+1 more)
+Cohesion: 0.18
+Nodes (10): cookie, accept, decline, learnMore, message, theme, dark, light (+2 more)
 
 ### Community 125 - "Community 125"
 Cohesion: 0.20
-Nodes (10): nav, admin, dashboard, organizations, profile, security, sessions, settings (+2 more)
+Nodes (11): Elasticsearch Docker Service, Kibana Docker Service, PostgreSQL Docker Service, Redis Docker Service, ZeroAuth API Docker Service, Auth Success/Failure Rates Dashboard, Denied Access Patterns Dashboard, MFA Adoption Dashboard (+3 more)
 
 ### Community 126 - "Community 126"
+Cohesion: 0.18
+Nodes (10): AdminAssignRoleSchema, AdminRevokeRoleSchema, AdminUpdateUserInput, AdminUpdateUserSchema, CreateRoleInput, CreateRoleSchema, JITApproveInput, JITApproveSchema (+2 more)
+
+### Community 127 - "Community 127"
+Cohesion: 0.22
+Nodes (5): EnterpriseAttestationCA, EnterpriseCARegistry, EnterpriseCertificate, parseCertificate(), verifyEnterpriseAttestation()
+
+### Community 128 - "Community 128"
+Cohesion: 0.27
+Nodes (8): otpsTable, MagicLinkEmailData, magicLinkEmailTemplate(), sendMagicLinkEmail(), hashToken(), logger, sendMagicLink(), verifyMagicLink()
+
+### Community 129 - "Community 129"
+Cohesion: 0.24
+Nodes (7): notificationsTable, NotificationEmailData, notificationEmailTemplate(), sendNotificationEmail(), daysAgo(), logger, sendNotificationEmailFallbacks()
+
+### Community 130 - "Community 130"
 Cohesion: 0.20
 Nodes (9): cookie, accept, decline, message, dashboard, overview, quickActions, recentActivity (+1 more)
 
-### Community 127 - "Community 127"
+### Community 131 - "Community 131"
 Cohesion: 0.20
 Nodes (10): nav, admin, dashboard, organizations, profile, security, sessions, settings (+2 more)
 
-### Community 128 - "Community 128"
+### Community 132 - "Community 132"
 Cohesion: 0.20
-Nodes (10): checkConstraints, compositePrimaryKeys, foreignKeys, indexes, isRLSEnabled, name, policies, schema (+2 more)
-
-### Community 129 - "Community 129"
-Cohesion: 0.20
-Nodes (10): checkConstraints, compositePrimaryKeys, foreignKeys, indexes, isRLSEnabled, name, policies, schema (+2 more)
-
-### Community 130 - "Community 130"
-Cohesion: 0.24
-Nodes (9): copy, data, deleteFromQueue(), network, openDB(), options, PRECACHE_URLS, replayQueue() (+1 more)
-
-### Community 131 - "Community 131"
-Cohesion: 0.20
-Nodes (8): dir, file, full, { mkdirSync, readdirSync, statSync, unlinkSync, existsSync }, path, retentionDays, { spawn }, stamp
+Nodes (9): cookie, accept, decline, message, dashboard, overview, quickActions, recentActivity (+1 more)
 
 ### Community 133 - "Community 133"
-Cohesion: 0.27
-Nodes (8): rolesTable, createLDAPClient(), DEFAULT_GROUP_ATTRS, DEFAULT_USER_ATTRS, logger, LDAPConfig, LDAPGroup, LDAPUser
+Cohesion: 0.20
+Nodes (10): nav, admin, dashboard, organizations, profile, security, sessions, settings (+2 more)
 
 ### Community 134 - "Community 134"
 Cohesion: 0.20
-Nodes (7): after, before, capturedValues, db, deleteMock, expiresMs, tokenHash
+Nodes (10): checkConstraints, compositePrimaryKeys, foreignKeys, indexes, isRLSEnabled, name, policies, schema (+2 more)
 
 ### Community 135 - "Community 135"
-Cohesion: 0.22
-Nodes (8): email, info, contact, description, title, version, openapi, servers
+Cohesion: 0.20
+Nodes (10): checkConstraints, compositePrimaryKeys, foreignKeys, indexes, isRLSEnabled, name, policies, schema (+2 more)
 
 ### Community 136 - "Community 136"
-Cohesion: 0.36
-Nodes (7): backupDir(), BackupResult, logger, pruneOldBackups(), retentionDays(), run(), runBackup()
-
-### Community 137 - "Community 137"
-Cohesion: 0.25
-Nodes (5): EmailJobData, EmailJobType, initEmailQueue(), logger, parseRedisUri()
+Cohesion: 0.24
+Nodes (6): AttestationCAPin, computeCertificatePin(), extractCommonNameFromPem(), logger, pinStore, verifyAttestationCAPin()
 
 ### Community 138 - "Community 138"
-Cohesion: 0.22
-Nodes (9): notifications, empty, emptySubtitle, inviteReceived, markAllRead, markRead, newLogin, noMore (+1 more)
+Cohesion: 0.24
+Nodes (9): copy, data, deleteFromQueue(), network, openDB(), options, PRECACHE_URLS, replayQueue() (+1 more)
 
 ### Community 139 - "Community 139"
-Cohesion: 0.22
-Nodes (9): organizations, createOrg, invite, leave, members, orgName, roles, settings (+1 more)
+Cohesion: 0.40
+Nodes (7): getPushPermission(), isPushSupported(), isSubscribed(), subscribeToPush(), unsubscribeFromPush(), urlBase64ToUint8Array(), NotificationPreferences
 
 ### Community 140 - "Community 140"
-Cohesion: 0.22
-Nodes (9): organizations, createOrg, invite, leave, members, orgName, roles, settings (+1 more)
+Cohesion: 0.20
+Nodes (8): dir, file, full, { mkdirSync, readdirSync, statSync, unlinkSync, existsSync }, path, retentionDays, { spawn }, stamp
 
 ### Community 141 - "Community 141"
-Cohesion: 0.22
-Nodes (9): columnsFrom, columnsTo, name, onDelete, onUpdate, tableFrom, tableTo, feedback_org_id_organizations_id_fk (+1 more)
+Cohesion: 0.27
+Nodes (8): rolesTable, createLDAPClient(), DEFAULT_GROUP_ATTRS, DEFAULT_USER_ATTRS, logger, LDAPConfig, LDAPGroup, LDAPUser
 
 ### Community 142 - "Community 142"
-Cohesion: 0.22
-Nodes (9): jit_access_user_id_users_id_fk, columnsFrom, columnsTo, name, onDelete, onUpdate, tableFrom, tableTo (+1 more)
+Cohesion: 0.20
+Nodes (7): after, before, capturedValues, db, deleteMock, expiresMs, tokenHash
 
 ### Community 143 - "Community 143"
-Cohesion: 0.22
-Nodes (9): notifications_user_id_users_id_fk, columnsFrom, columnsTo, name, onDelete, onUpdate, tableFrom, tableTo (+1 more)
+Cohesion: 0.20
+Nodes (9): body, errorRate, loginDuration, loginOk, loginRes, loginStart, options, refreshRes (+1 more)
 
 ### Community 144 - "Community 144"
 Cohesion: 0.22
-Nodes (9): org_custom_roles_org_id_organizations_id_fk, columnsFrom, columnsTo, name, onDelete, onUpdate, tableFrom, tableTo (+1 more)
+Nodes (8): email, info, contact, description, title, version, openapi, servers
 
 ### Community 145 - "Community 145"
 Cohesion: 0.22
-Nodes (9): checkConstraints, compositePrimaryKeys, indexes, isRLSEnabled, name, policies, schema, uniqueConstraints (+1 more)
+Nodes (9): notifications, empty, emptySubtitle, inviteReceived, markAllRead, markRead, newLogin, noMore (+1 more)
 
 ### Community 146 - "Community 146"
 Cohesion: 0.22
-Nodes (9): checkConstraints, compositePrimaryKeys, indexes, isRLSEnabled, name, policies, schema, uniqueConstraints (+1 more)
+Nodes (9): organizations, createOrg, invite, leave, members, orgName, roles, settings (+1 more)
 
 ### Community 147 - "Community 147"
 Cohesion: 0.22
-Nodes (9): checkConstraints, compositePrimaryKeys, indexes, isRLSEnabled, name, policies, schema, uniqueConstraints (+1 more)
+Nodes (9): organizations, createOrg, invite, leave, members, orgName, roles, settings (+1 more)
 
 ### Community 148 - "Community 148"
 Cohesion: 0.22
-Nodes (8): BackupCodeRedeemInput, BackupCodeRedeemSchema, MFASendOTPInput, MFASendOTPSchema, MFAVerifyOTPInput, MFAVerifyOTPSchema, TOTPVerifyInput, TOTPVerifySchema
+Nodes (9): columnsFrom, columnsTo, name, onDelete, onUpdate, tableFrom, tableTo, feedback_org_id_organizations_id_fk (+1 more)
 
 ### Community 149 - "Community 149"
 Cohesion: 0.22
-Nodes (8): adapter, encodedPayload, idTokenPayload, mockFetch, profile, profileRaw, refreshed, tokens
+Nodes (9): jit_access_user_id_users_id_fk, columnsFrom, columnsTo, name, onDelete, onUpdate, tableFrom, tableTo (+1 more)
 
 ### Community 150 - "Community 150"
 Cohesion: 0.22
-Nodes (8): name, private, scripts, build, dev, lint, start, version
+Nodes (9): notifications_user_id_users_id_fk, columnsFrom, columnsTo, name, onDelete, onUpdate, tableFrom, tableTo (+1 more)
 
 ### Community 151 - "Community 151"
+Cohesion: 0.22
+Nodes (9): org_custom_roles_org_id_organizations_id_fk, columnsFrom, columnsTo, name, onDelete, onUpdate, tableFrom, tableTo (+1 more)
+
+### Community 152 - "Community 152"
+Cohesion: 0.22
+Nodes (9): checkConstraints, compositePrimaryKeys, indexes, isRLSEnabled, name, policies, schema, uniqueConstraints (+1 more)
+
+### Community 153 - "Community 153"
+Cohesion: 0.22
+Nodes (9): checkConstraints, compositePrimaryKeys, indexes, isRLSEnabled, name, policies, schema, uniqueConstraints (+1 more)
+
+### Community 154 - "Community 154"
+Cohesion: 0.22
+Nodes (9): checkConstraints, compositePrimaryKeys, indexes, isRLSEnabled, name, policies, schema, uniqueConstraints (+1 more)
+
+### Community 155 - "Community 155"
+Cohesion: 0.22
+Nodes (8): BackupCodeRedeemInput, BackupCodeRedeemSchema, MFASendOTPInput, MFASendOTPSchema, MFAVerifyOTPInput, MFAVerifyOTPSchema, TOTPVerifyInput, TOTPVerifySchema
+
+### Community 156 - "Community 156"
+Cohesion: 0.22
+Nodes (8): adapter, encodedPayload, idTokenPayload, mockFetch, profile, profileRaw, refreshed, tokens
+
+### Community 157 - "Community 157"
+Cohesion: 0.22
+Nodes (8): name, private, scripts, build, dev, lint, start, version
+
+### Community 158 - "Community 158"
+Cohesion: 0.29
+Nodes (6): SensitiveChangeType (incl. oauth_unlink), recordAndRespond() (revoke sessions + alert), POST /auth/me/email (change email), DELETE /auth/oauth/:provider (unlink), auth.routes test: DELETE /oauth/:provider, disconnectOAuth (DELETE /auth/oauth/:provider)
+
+### Community 159 - "Community 159"
 Cohesion: 0.36
 Nodes (6): AdminWorkloadPage(), CopyButton(), CreatedCredential, CRED_STATUS_STYLES, IssuedToken, WorkloadCredential
 
-### Community 152 - "Community 152"
+### Community 160 - "Community 160"
 Cohesion: 0.25
 Nodes (8): type, properties, required, type, type, code, message, ErrorEnvelope
 
-### Community 153 - "Community 153"
-Cohesion: 0.25
-Nodes (8): Performance Analysis Report, Billing Lifecycle Sequential Email Issue, Why Not gRPC (Monolith Rationale), Missing DB Indexes (sessions, subscriptions, notifications, auditLogs, apiKeys), Passkey Auth N+1 Table Scan Issue, Passkey Table Normalization Plan (Perf Fix B), UI 30s Polling Instead of SSE, WebAuthn Passkeys (FIDO2)
-
-### Community 154 - "Community 154"
-Cohesion: 0.29
-Nodes (8): Rate Limit Heatmap Dashboard, Redis Session Cache Plan (Perf Fix A), Session Validation DB Round-Trips Issue, Dashboard Route Guard, Protected Routes (client guards), Rate Limiting (Redis-backed), Redis Cache and Queue, Session Management
-
-### Community 155 - "Community 155"
-Cohesion: 0.29
-Nodes (6): AppleIDTokenPayload, AppleProfile, AppleTokens, decodeIdToken(), exchangeCode(), logger
-
-### Community 156 - "Community 156"
+### Community 161 - "Community 161"
 Cohesion: 0.25
 Nodes (8): columnsFrom, columnsTo, name, onDelete, onUpdate, tableFrom, tableTo, feedback_user_id_users_id_fk
 
-### Community 157 - "Community 157"
-Cohesion: 0.25
-Nodes (7): arrowParens, bracketSpacing, printWidth, semi, singleQuote, tabWidth, trailingComma
-
-### Community 158 - "Community 158"
+### Community 162 - "Community 162"
 Cohesion: 0.25
 Nodes (3): ErrorBoundary, Props, State
 
-### Community 159 - "Community 159"
+### Community 163 - "Community 163"
 Cohesion: 0.25
-Nodes (7): SelectContent, SelectItem, SelectLabel, SelectScrollDownButton, SelectScrollUpButton, SelectSeparator, SelectTrigger
+Nodes (7): arrowParens, bracketSpacing, printWidth, semi, singleQuote, tabWidth, trailingComma
 
-### Community 160 - "Community 160"
+### Community 164 - "Community 164"
+Cohesion: 0.29
+Nodes (6): AppleIDTokenPayload, AppleProfile, AppleTokens, decodeIdToken(), exchangeCode(), logger
+
+### Community 165 - "Community 165"
+Cohesion: 0.25
+Nodes (8): Performance Analysis Report, Billing Lifecycle Sequential Email Issue, Why Not gRPC (Monolith Rationale), Missing DB Indexes (sessions, subscriptions, notifications, auditLogs, apiKeys), Passkey Auth N+1 Table Scan Issue, Passkey Table Normalization Plan (Perf Fix B), UI 30s Polling Instead of SSE, WebAuthn Passkeys (FIDO2)
+
+### Community 166 - "Community 166"
+Cohesion: 0.29
+Nodes (8): Rate Limit Heatmap Dashboard, Redis Session Cache Plan (Perf Fix A), Session Validation DB Round-Trips Issue, Dashboard Route Guard, Protected Routes (client guards), Rate Limiting (Redis-backed), Redis Cache and Queue, Session Management
+
+### Community 167 - "Community 167"
 Cohesion: 0.25
 Nodes (8): devDependencies, autoprefixer, postcss, tailwindcss, @types/node, @types/react, @types/react-dom, typescript
 
-### Community 161 - "Community 161"
+### Community 168 - "Community 168"
 Cohesion: 0.25
 Nodes (8): optionalDependencies, @next/swc-wasm-nodejs, @next/swc-wasm-web, @next/swc-win32-x64-msvc, @parcel/watcher-linux-x64-glibc, @parcel/watcher-win32-x64, @swc/core-linux-x64-gnu, @swc/core-win32-x64-msvc
 
-### Community 162 - "Community 162"
-Cohesion: 0.29
-Nodes (5): app, captured, created, keys, mockDb
-
-### Community 163 - "Community 163"
-Cohesion: 0.33
-Nodes (7): Device Anomaly Alerts Dashboard, Account Lockout, Account Takeover Detection, Anomaly Detection, Disposable-Email Blocking, HaveIBeenPwned Breach Check, Continuous Access Evaluation
-
-### Community 164 - "Community 164"
-Cohesion: 0.33
-Nodes (5): extractCertInfo(), logger, mTLSOptions, parseSubject(), WorkloadIdentity
-
-### Community 165 - "Community 165"
-Cohesion: 0.33
-Nodes (3): initRateLimiter(), initRedisRateLimiter(), logger
-
-### Community 166 - "Community 166"
-Cohesion: 0.33
-Nodes (3): formatDate(), formatDateTime(), RELATIVE_DIVISIONS
-
-### Community 167 - "Community 167"
+### Community 169 - "Community 169"
 Cohesion: 0.43
 Nodes (6): DEFAULT_DISPOSABLE_DOMAINS, EmailValidationResult, envList(), isDisposableEmailDomain(), normalizeEmailDomain(), validateSignupEmail()
 
-### Community 168 - "Community 168"
-Cohesion: 0.29
-Nodes (6): app, ban, { locked }, r, r1, r2
-
-### Community 169 - "Community 169"
-Cohesion: 0.29
-Nodes (5): degradedErrorRate, healthRes, loginRes, ok, options
-
 ### Community 170 - "Community 170"
+Cohesion: 0.33
+Nodes (5): extractCertInfo(), logger, mTLSOptions, parseSubject(), WorkloadIdentity
+
+### Community 171 - "Community 171"
 Cohesion: 0.29
 Nodes (3): EmptyStateProps, EVENT_OPTIONS, WebhookEndpoint
 
-### Community 171 - "Community 171"
+### Community 172 - "Community 172"
+Cohesion: 0.33
+Nodes (7): Device Anomaly Alerts Dashboard, Account Lockout, Account Takeover Detection, Anomaly Detection, Disposable-Email Blocking, HaveIBeenPwned Breach Check, Continuous Access Evaluation
+
+### Community 173 - "Community 173"
+Cohesion: 0.29
+Nodes (6): app, ban, { locked }, r, r1, r2
+
+### Community 174 - "Community 174"
+Cohesion: 0.29
+Nodes (5): degradedErrorRate, healthRes, loginRes, ok, options
+
+### Community 175 - "Community 175"
 Cohesion: 0.33
 Nodes (4): ChallengeResponse, DIDDocument, ResolveResponse, VerificationMethod
 
-### Community 172 - "Community 172"
+### Community 176 - "Community 176"
 Cohesion: 0.33
 Nodes (6): bearerFormat, scheme, type, components, securitySchemes, BearerAuth
 
-### Community 173 - "Community 173"
-Cohesion: 0.33
-Nodes (6): properties, type, browser, deviceFingerprint, os, platform
-
-### Community 174 - "Community 174"
-Cohesion: 0.60
-Nodes (6): App Icon (512px), Outdoor Public Space, Person (Young Male), Personal Profile Photo, Sydney Opera House, ZeroAuth UI Public Assets
-
-### Community 176 - "Community 176"
-Cohesion: 0.33
-Nodes (6): security, changePassword, mfa, passkeys, sessions, title
-
 ### Community 177 - "Community 177"
 Cohesion: 0.33
-Nodes (6): security, changePassword, mfa, passkeys, sessions, title
-
-### Community 178 - "Community 178"
-Cohesion: 0.33
-Nodes (6): name, notNull, primaryKey, type, action, columns
+Nodes (6): properties, type, browser, deviceFingerprint, os, platform
 
 ### Community 179 - "Community 179"
 Cohesion: 0.33
@@ -1059,325 +1069,353 @@ Nodes (6): timestamp, default, name, notNull, primaryKey, type
 
 ### Community 180 - "Community 180"
 Cohesion: 0.33
-Nodes (6): created_at, default, name, notNull, primaryKey, type
+Nodes (6): target_type, columns, name, notNull, primaryKey, type
 
 ### Community 181 - "Community 181"
-Cohesion: 0.33
-Nodes (6): updated_at, default, name, notNull, primaryKey, type
+Cohesion: 0.60
+Nodes (6): App Icon (512px), Outdoor Public Space, Person (Young Male), Personal Profile Photo, Sydney Opera House, ZeroAuth UI Public Assets
 
 ### Community 182 - "Community 182"
 Cohesion: 0.33
-Nodes (6): id, default, name, notNull, primaryKey, type
+Nodes (6): dashboard, noActivity, overview, quickActions, recentActivity, welcome
 
 ### Community 183 - "Community 183"
 Cohesion: 0.33
-Nodes (6): requested_at, default, name, notNull, primaryKey, type
+Nodes (6): security, changePassword, mfa, passkeys, sessions, title
 
 ### Community 184 - "Community 184"
 Cohesion: 0.33
-Nodes (6): scopes, default, name, notNull, primaryKey, type
+Nodes (6): security, changePassword, mfa, passkeys, sessions, title
 
 ### Community 185 - "Community 185"
 Cohesion: 0.33
-Nodes (6): status, default, name, notNull, primaryKey, type
+Nodes (6): created_at, default, name, notNull, primaryKey, type
 
 ### Community 186 - "Community 186"
 Cohesion: 0.33
-Nodes (5): dialect, id, prevId, tables, version
+Nodes (6): id, default, name, notNull, primaryKey, type
 
 ### Community 187 - "Community 187"
 Cohesion: 0.33
-Nodes (6): name, notNull, primaryKey, type, action, columns
+Nodes (6): permissions, default, name, notNull, primaryKey, type
 
 ### Community 188 - "Community 188"
 Cohesion: 0.33
-Nodes (6): timestamp, default, name, notNull, primaryKey, type
+Nodes (6): requested_at, default, name, notNull, primaryKey, type
 
 ### Community 189 - "Community 189"
 Cohesion: 0.33
-Nodes (6): created_at, default, name, notNull, primaryKey, type
+Nodes (6): scopes, default, name, notNull, primaryKey, type
 
 ### Community 190 - "Community 190"
 Cohesion: 0.33
-Nodes (6): read, default, name, notNull, primaryKey, type
+Nodes (6): status, default, name, notNull, primaryKey, type
 
 ### Community 191 - "Community 191"
 Cohesion: 0.33
-Nodes (6): requested_at, default, name, notNull, primaryKey, type
+Nodes (6): updated_at, default, name, notNull, primaryKey, type
 
 ### Community 192 - "Community 192"
 Cohesion: 0.33
-Nodes (6): status, default, name, notNull, primaryKey, type
+Nodes (6): read, default, name, notNull, primaryKey, type
 
 ### Community 193 - "Community 193"
-Cohesion: 0.40
-Nodes (3): DEFAULT_CONFIG, loadConfig(), validateConfig()
+Cohesion: 0.33
+Nodes (6): timestamp, default, name, notNull, primaryKey, type
+
+### Community 194 - "Community 194"
+Cohesion: 0.33
+Nodes (6): target_type, columns, name, notNull, primaryKey, type
 
 ### Community 195 - "Community 195"
 Cohesion: 0.33
-Nodes (6): tenantsTable, OidcConfig interface, SamlConfig interface, Tenant model (Drizzle-backed), TenantSettings interface, Tenant routes tests
+Nodes (5): dialect, id, prevId, tables, version
 
 ### Community 196 - "Community 196"
 Cohesion: 0.33
-Nodes (3): r1, result, svc
+Nodes (6): created_at, default, name, notNull, primaryKey, type
 
 ### Community 197 - "Community 197"
-Cohesion: 0.40
-Nodes (5): app(), req(), roles, uid, validBody
+Cohesion: 0.33
+Nodes (6): read, default, name, notNull, primaryKey, type
 
 ### Community 198 - "Community 198"
-Cohesion: 0.40
-Nodes (4): FeedbackType, getToken(), Props, submitFeedback()
+Cohesion: 0.33
+Nodes (6): requested_at, default, name, notNull, primaryKey, type
 
-### Community 200 - "Community 200"
-Cohesion: 0.40
-Nodes (5): items, type, properties, type, details
+### Community 199 - "Community 199"
+Cohesion: 0.33
+Nodes (6): status, default, name, notNull, primaryKey, type
 
 ### Community 201 - "Community 201"
 Cohesion: 0.40
-Nodes (5): schemas, Session, TokenResponse, type, type
+Nodes (4): FeedbackType, getToken(), Props, submitFeedback()
 
 ### Community 202 - "Community 202"
-Cohesion: 0.50
-Nodes (5): BullMQ Email Queue, Dunning Management (Failed Payment Emails), HaveIBeenPwned Password Check, ZeroAuth SaaS Starter Guide, Win-Back Email Campaign
+Cohesion: 0.33
+Nodes (3): CANCEL_REASONS, PLANS, Subscription
 
 ### Community 204 - "Community 204"
-Cohesion: 0.40
-Nodes (5): getMDS3Entry, isFidoCertified, parseTocJwt, refreshToc, verifyTocSignature
+Cohesion: 0.33
+Nodes (6): tenantsTable, OidcConfig interface, SamlConfig interface, Tenant model (Drizzle-backed), TenantSettings interface, Tenant routes tests
 
 ### Community 205 - "Community 205"
-Cohesion: 0.40
-Nodes (5): errors, networkError, notFound, serverError, unauthorized
+Cohesion: 0.33
+Nodes (3): r1, result, svc
 
 ### Community 206 - "Community 206"
 Cohesion: 0.40
-Nodes (5): notifications, markAllRead, noNotifications, preferences, title
+Nodes (5): app(), req(), roles, uid, validBody
 
 ### Community 207 - "Community 207"
 Cohesion: 0.40
-Nodes (5): theme, dark, light, system, toggle
+Nodes (5): items, type, properties, type, details
 
 ### Community 208 - "Community 208"
 Cohesion: 0.40
-Nodes (5): errors, networkError, notFound, serverError, unauthorized
+Nodes (5): schemas, Session, TokenResponse, type, type
 
 ### Community 209 - "Community 209"
 Cohesion: 0.40
-Nodes (5): notifications, markAllRead, noNotifications, preferences, title
+Nodes (5): name, notNull, primaryKey, type, action
 
 ### Community 210 - "Community 210"
 Cohesion: 0.40
-Nodes (5): theme, dark, light, system, toggle
+Nodes (5): name, notNull, primaryKey, type, actor_email
 
 ### Community 211 - "Community 211"
 Cohesion: 0.40
-Nodes (5): name, notNull, primaryKey, type, actor_email
+Nodes (5): name, notNull, primaryKey, type, actor_id
 
 ### Community 212 - "Community 212"
 Cohesion: 0.40
-Nodes (5): name, notNull, primaryKey, type, actor_id
+Nodes (5): country, name, notNull, primaryKey, type
 
 ### Community 213 - "Community 213"
 Cohesion: 0.40
-Nodes (5): country, name, notNull, primaryKey, type
+Nodes (5): device_hash, name, notNull, primaryKey, type
 
 ### Community 214 - "Community 214"
 Cohesion: 0.40
-Nodes (5): device_hash, name, notNull, primaryKey, type
+Nodes (5): duration, name, notNull, primaryKey, type
 
 ### Community 215 - "Community 215"
 Cohesion: 0.40
-Nodes (5): duration, name, notNull, primaryKey, type
+Nodes (5): error_code, name, notNull, primaryKey, type
 
 ### Community 216 - "Community 216"
 Cohesion: 0.40
-Nodes (5): error_code, name, notNull, primaryKey, type
+Nodes (5): resource_details, name, notNull, primaryKey, type
 
 ### Community 217 - "Community 217"
 Cohesion: 0.40
-Nodes (5): resource_details, name, notNull, primaryKey, type
+Nodes (5): risk_score, name, notNull, primaryKey, type
 
 ### Community 218 - "Community 218"
 Cohesion: 0.40
-Nodes (5): risk_score, name, notNull, primaryKey, type
+Nodes (5): session_id, name, notNull, primaryKey, type
 
 ### Community 219 - "Community 219"
 Cohesion: 0.40
-Nodes (5): session_id, name, notNull, primaryKey, type
+Nodes (5): success, name, notNull, primaryKey, type
 
 ### Community 220 - "Community 220"
 Cohesion: 0.40
-Nodes (5): success, name, notNull, primaryKey, type
+Nodes (5): target_id, name, notNull, primaryKey, type
 
 ### Community 221 - "Community 221"
 Cohesion: 0.40
-Nodes (5): target_id, name, notNull, primaryKey, type
+Nodes (5): user_agent, name, notNull, primaryKey, type
 
 ### Community 222 - "Community 222"
 Cohesion: 0.40
-Nodes (5): user_agent, name, notNull, primaryKey, type
+Nodes (5): continuous_eval_context, name, notNull, primaryKey, type
 
 ### Community 223 - "Community 223"
 Cohesion: 0.40
-Nodes (5): continuous_eval_context, name, notNull, primaryKey, type
+Nodes (5): ip_address, name, notNull, primaryKey, type
 
 ### Community 224 - "Community 224"
 Cohesion: 0.40
-Nodes (5): ip_address, name, notNull, primaryKey, type
+Nodes (5): getMDS3Entry, isFidoCertified, parseTocJwt, refreshToc, verifyTocSignature
 
 ### Community 225 - "Community 225"
 Cohesion: 0.40
-Nodes (5): target_type, name, notNull, primaryKey, type
+Nodes (5): errors, networkError, notFound, serverError, unauthorized
 
 ### Community 226 - "Community 226"
 Cohesion: 0.40
-Nodes (5): context, name, notNull, primaryKey, type
+Nodes (5): notifications, markAllRead, noNotifications, preferences, title
 
 ### Community 227 - "Community 227"
 Cohesion: 0.40
-Nodes (5): org_id, name, notNull, primaryKey, type
+Nodes (5): theme, dark, light, system, toggle
 
 ### Community 228 - "Community 228"
 Cohesion: 0.40
-Nodes (5): read_at, name, notNull, primaryKey, type
+Nodes (5): errors, networkError, notFound, serverError, unauthorized
 
 ### Community 229 - "Community 229"
 Cohesion: 0.40
-Nodes (5): reason, name, notNull, primaryKey, type
+Nodes (5): notifications, markAllRead, noNotifications, preferences, title
 
 ### Community 230 - "Community 230"
 Cohesion: 0.40
-Nodes (5): revoked_at, name, notNull, primaryKey, type
+Nodes (5): theme, dark, light, system, toggle
 
 ### Community 231 - "Community 231"
 Cohesion: 0.40
-Nodes (5): user_id, name, notNull, primaryKey, type
+Nodes (5): revoked_at, name, notNull, primaryKey, type
 
 ### Community 232 - "Community 232"
 Cohesion: 0.40
-Nodes (5): expires_at, name, notNull, primaryKey, type
+Nodes (5): reason, name, notNull, primaryKey, type
 
 ### Community 233 - "Community 233"
 Cohesion: 0.40
-Nodes (5): name, notNull, primaryKey, type, actor_email
+Nodes (5): score, name, notNull, primaryKey, type
 
 ### Community 234 - "Community 234"
 Cohesion: 0.40
-Nodes (5): name, notNull, primaryKey, type, actor_id
+Nodes (5): user_id, name, notNull, primaryKey, type
 
 ### Community 235 - "Community 235"
 Cohesion: 0.40
-Nodes (5): country, name, notNull, primaryKey, type
+Nodes (5): expires_at, name, notNull, primaryKey, type
 
 ### Community 236 - "Community 236"
 Cohesion: 0.40
-Nodes (5): device_hash, name, notNull, primaryKey, type
+Nodes (5): type, name, notNull, primaryKey, type
 
 ### Community 237 - "Community 237"
 Cohesion: 0.40
-Nodes (5): duration, name, notNull, primaryKey, type
+Nodes (5): name, notNull, primaryKey, type, action
 
 ### Community 238 - "Community 238"
 Cohesion: 0.40
-Nodes (5): error_code, name, notNull, primaryKey, type
+Nodes (5): name, notNull, primaryKey, type, actor_email
 
 ### Community 239 - "Community 239"
 Cohesion: 0.40
-Nodes (5): resource_details, name, notNull, primaryKey, type
+Nodes (5): name, notNull, primaryKey, type, actor_id
 
 ### Community 240 - "Community 240"
 Cohesion: 0.40
-Nodes (5): risk_score, name, notNull, primaryKey, type
+Nodes (5): country, name, notNull, primaryKey, type
 
 ### Community 241 - "Community 241"
 Cohesion: 0.40
-Nodes (5): session_id, name, notNull, primaryKey, type
+Nodes (5): device_hash, name, notNull, primaryKey, type
 
 ### Community 242 - "Community 242"
 Cohesion: 0.40
-Nodes (5): success, name, notNull, primaryKey, type
+Nodes (5): duration, name, notNull, primaryKey, type
 
 ### Community 243 - "Community 243"
 Cohesion: 0.40
-Nodes (5): target_id, name, notNull, primaryKey, type
+Nodes (5): error_code, name, notNull, primaryKey, type
 
 ### Community 244 - "Community 244"
 Cohesion: 0.40
-Nodes (5): user_agent, name, notNull, primaryKey, type
+Nodes (5): resource_details, name, notNull, primaryKey, type
 
 ### Community 245 - "Community 245"
 Cohesion: 0.40
-Nodes (5): continuous_eval_context, name, notNull, primaryKey, type
+Nodes (5): risk_score, name, notNull, primaryKey, type
 
 ### Community 246 - "Community 246"
 Cohesion: 0.40
-Nodes (5): ip_address, name, notNull, primaryKey, type
+Nodes (5): session_id, name, notNull, primaryKey, type
 
 ### Community 247 - "Community 247"
 Cohesion: 0.40
-Nodes (5): target_type, name, notNull, primaryKey, type
+Nodes (5): success, name, notNull, primaryKey, type
 
 ### Community 248 - "Community 248"
 Cohesion: 0.40
-Nodes (5): name, notNull, primaryKey, type, body
+Nodes (5): target_id, name, notNull, primaryKey, type
 
 ### Community 249 - "Community 249"
 Cohesion: 0.40
-Nodes (5): key_prefix, name, notNull, primaryKey, type
+Nodes (5): user_agent, name, notNull, primaryKey, type
 
 ### Community 250 - "Community 250"
 Cohesion: 0.40
-Nodes (5): org_id, name, notNull, primaryKey, type
+Nodes (5): continuous_eval_context, name, notNull, primaryKey, type
 
 ### Community 251 - "Community 251"
 Cohesion: 0.40
-Nodes (5): expires_at, name, notNull, primaryKey, type
+Nodes (5): ip_address, name, notNull, primaryKey, type
 
 ### Community 252 - "Community 252"
 Cohesion: 0.40
-Nodes (5): read_at, name, notNull, primaryKey, type
+Nodes (5): name, notNull, primaryKey, type, body
 
 ### Community 253 - "Community 253"
 Cohesion: 0.40
-Nodes (3): ORG_PERMISSIONS, OrgPermission, SYSTEM_ROLE_PERMISSIONS
+Nodes (5): key_prefix, name, notNull, primaryKey, type
 
 ### Community 254 - "Community 254"
 Cohesion: 0.40
-Nodes (4): ListSessionsQuery, ListSessionsQuerySchema, RevokeSessionInput, RevokeSessionSchema
+Nodes (5): revoked_at, name, notNull, primaryKey, type
 
 ### Community 255 - "Community 255"
-Cohesion: 0.50
-Nodes (3): getTracer(), InitTelemetryOptions, withSpan()
+Cohesion: 0.40
+Nodes (5): org_id, name, notNull, primaryKey, type
 
 ### Community 256 - "Community 256"
 Cohesion: 0.40
-Nodes (4): mcpServers, nextjs, type, url
+Nodes (5): read_at, name, notNull, primaryKey, type
 
 ### Community 257 - "Community 257"
 Cohesion: 0.50
-Nodes (3): dialect, entries, version
+Nodes (5): BullMQ Email Queue, Dunning Management (Failed Payment Emails), HaveIBeenPwned Password Check, ZeroAuth SaaS Starter Guide, Win-Back Email Campaign
 
 ### Community 258 - "Community 258"
-Cohesion: 0.67
-Nodes (4): App Icon (192px), Personal Portrait Photo, PWA / Web App Manifest Icon Asset, Sydney Opera House (Background Location)
+Cohesion: 0.40
+Nodes (3): ORG_PERMISSIONS, OrgPermission, SYSTEM_ROLE_PERMISSIONS
 
 ### Community 259 - "Community 259"
-Cohesion: 0.67
-Nodes (3): buildConfig(), nextConfig, withNextIntl
+Cohesion: 0.40
+Nodes (4): ListSessionsQuery, ListSessionsQuerySchema, RevokeSessionInput, RevokeSessionSchema
 
 ### Community 260 - "Community 260"
-Cohesion: 0.67
-Nodes (3): format, type, lastActivityAt
+Cohesion: 0.50
+Nodes (3): getTracer(), InitTelemetryOptions, withSpan()
+
+### Community 261 - "Community 261"
+Cohesion: 0.40
+Nodes (4): mcpServers, nextjs, type, url
+
+### Community 262 - "Community 262"
+Cohesion: 0.50
+Nodes (3): dialect, entries, version
 
 ### Community 263 - "Community 263"
 Cohesion: 0.67
-Nodes (3): Passkeys / WebAuthn (FIDO2), Decentralized Identifiers (DID), FIDO Attestation & MDS3
+Nodes (4): App Icon (192px), Personal Portrait Photo, PWA / Web App Manifest Icon Asset, Sydney Opera House (Background Location)
 
 ### Community 264 - "Community 264"
 Cohesion: 0.67
+Nodes (3): buildConfig(), nextConfig, withNextIntl
+
+### Community 266 - "Community 266"
+Cohesion: 0.67
+Nodes (3): format, type, lastActivityAt
+
+### Community 268 - "Community 268"
+Cohesion: 0.67
+Nodes (3): Passkeys / WebAuthn (FIDO2), Decentralized Identifiers (DID), FIDO Attestation & MDS3
+
+### Community 269 - "Community 269"
+Cohesion: 0.67
 Nodes (3): orgSecurityPoliciesTable, organizationsTable, subscriptionsTable
 
-### Community 265 - "Community 265"
+### Community 270 - "Community 270"
+Cohesion: 0.67
+Nodes (3): org.routes test: GET/PUT security/policy, SecurityPolicy (passkey AAGUID policy shape), handleSavePolicy (PUT /orgs/:orgId/security/policy)
+
+### Community 271 - "Community 271"
 Cohesion: 0.67
 Nodes (3): generateAuthCode(), generateOAuthState(), nanoid
 
@@ -1386,9 +1424,11 @@ Nodes (3): generateAuthCode(), generateOAuthState(), nanoid
   packages/ui/public/icon-512.png · relation: not_a_branded_logo_but_personal_photo_of
 - `push_subscriptions Table (migration 0005)` → `issueVerification`  [AMBIGUOUS]
   src/api/routes/auth.routes.ts · relation: conceptually_related_to
+- `HonoEnv (apiKeyEnvironment variable)` → `ProfilePage disableTOTP (2FA disable card)`  [AMBIGUOUS]
+  packages/ui/src/app/dashboard/profile/page.tsx · relation: conceptually_related_to
 
 ## Knowledge Gaps
-- **2338 isolated node(s):** `parser`, `ecmaVersion`, `sourceType`, `project`, `extends` (+2333 more)
+- **2368 isolated node(s):** `parser`, `ecmaVersion`, `sourceType`, `project`, `extends` (+2363 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **29 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
@@ -1399,13 +1439,13 @@ _Questions this graph is uniquely positioned to answer:_
   _Edge tagged AMBIGUOUS (relation: not_a_branded_logo_but_personal_photo_of) - confidence is low._
 - **What is the exact relationship between `push_subscriptions Table (migration 0005)` and `issueVerification`?**
   _Edge tagged AMBIGUOUS (relation: conceptually_related_to) - confidence is low._
-- **Why does `common` connect `Community 39` to `DB Tokens & SaaS Settings`, `Community 85`?**
-  _High betweenness centrality (0.042) - this node is a cross-community bridge._
-- **Why does `or` connect `DB Tokens & SaaS Settings` to `Community 39`?**
+- **What is the exact relationship between `HonoEnv (apiKeyEnvironment variable)` and `ProfilePage disableTOTP (2FA disable card)`?**
+  _Edge tagged AMBIGUOUS (relation: conceptually_related_to) - confidence is low._
+- **Why does `common` connect `Community 38` to `Community 121`, `Community 124`?**
+  _High betweenness centrality (0.041) - this node is a cross-community bridge._
+- **Why does `purgeExpiredRefreshTokens()` connect `Community 121` to `Community 89`?**
+  _High betweenness centrality (0.041) - this node is a cross-community bridge._
+- **Why does `or` connect `Community 121` to `Community 38`?**
   _High betweenness centrality (0.041) - this node is a cross-community bridge._
 - **What connects `parser`, `ecmaVersion`, `sourceType` to the rest of the system?**
-  _2344 weakly-connected nodes found - possible documentation gaps or missing edges._
-- **Should `Authorization & Continuous Eval` be split into smaller, more focused modules?**
-  _Cohesion score 0.04180790960451977 - nodes in this community are weakly interconnected._
-- **Should `Audit & UI Primitives` be split into smaller, more focused modules?**
-  _Cohesion score 0.04124293785310734 - nodes in this community are weakly interconnected._
+  _2375 weakly-connected nodes found - possible documentation gaps or missing edges._

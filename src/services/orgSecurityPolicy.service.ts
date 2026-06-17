@@ -9,6 +9,7 @@ export interface OrgSecurityPolicy {
   requireHardwarePasskey: boolean;
   allowedPasskeyAaguids: string[];
   deniedPasskeyAaguids: string[];
+  ipAllowlist: string[];
   updatedAt?: Date;
   updatedBy?: string | null;
 }
@@ -20,6 +21,7 @@ export function defaultOrgSecurityPolicy(orgId: string): OrgSecurityPolicy {
     requireHardwarePasskey: false,
     allowedPasskeyAaguids: [],
     deniedPasskeyAaguids: [],
+    ipAllowlist: [],
   };
 }
 

@@ -1,6 +1,7 @@
 import { createHmac, randomUUID } from "crypto";
 import type { WebhookEndpoint, WebhookDelivery, WebhookEventType } from "./types";
 import { webhookStore } from "./store";
+import { webhookDeliveryLog } from "./deliveryLog";
 
 export function signPayload(secret: string, body: string): string {
   const hmac = createHmac("sha256", secret);
@@ -62,10 +63,12 @@ export async function deliverWebhook(
       ...base,
       status: success ? "delivered" : "failed",
       responseStatus: response.status,
-      responseBody,
+      // Cap stored response bodies so a chatty endpoint can't bloat the log.
+      responseBody: responseBody.slice(0, 2000),
       ...(success ? { deliveredAt: new Date() } : {}),
     };
 
+    webhookDeliveryLog.record(delivery);
     return delivery;
   } catch (err) {
     clearTimeout(timeout);
@@ -75,6 +78,7 @@ export async function deliverWebhook(
       status: "failed",
       error: errorMessage,
     };
+    webhookDeliveryLog.record(delivery);
     return delivery;
   }
 }

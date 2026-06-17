@@ -43,6 +43,48 @@
       "when": 1781733600000,
       "tag": "0005_push_subscriptions",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1781820000000,
+      "tag": "0006_api_key_environments",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1781906400000,
+      "tag": "0007_user_locale",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1781992800000,
+      "tag": "0008_support_tickets",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1782079200000,
+      "tag": "0009_org_ip_allowlist",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1782165600000,
+      "tag": "0010_legal_hold",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1782252000000,
+      "tag": "0011_email_suppressions",
+      "breakpoints": true
     }
   ]
 }

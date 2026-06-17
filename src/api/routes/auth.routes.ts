@@ -23,6 +23,17 @@ import { notifyIfNewDevice } from "../../services/loginNotification.service";
 import { recordAndRespond } from "../../services/accountTakeover.service";
 import { validateSignupEmail } from "../../services/disposableEmail.service";
 import { getClientIp } from "../../shared/clientIp";
+import {
+  isIpBlocked,
+  recordIpLoginFailure,
+  recordIpLoginSuccess,
+} from "../../middleware/credentialStuffing";
+import { normalizeLocale, localeFromAcceptLanguage, SUPPORTED_LOCALES } from "../../shared/locale";
+import {
+  isSignupPowEnabled,
+  createPowChallenge,
+  verifyPowSolution,
+} from "../../services/proofOfWork.service";
 import type { HonoEnv } from "../../shared/types";
 
 const router = new Hono<HonoEnv>();
@@ -62,6 +73,140 @@ function hashToken(token: string) {
   return nodeCrypto.createHash("sha256").update(token).digest("hex");
 }
 
+// ── MFA second-factor at login ───────────────────────────────────────────────
+
+// Audience/scope that tag the short-lived token handed out when a password is
+// correct but MFA is still pending. It is intentionally NOT a session token: no
+// session row is created for it, so it cannot satisfy `authMiddleware` (which
+// requires an active session) even though it is signed with the same key.
+const MFA_CHALLENGE_AUD = "mfa";
+const MFA_CHALLENGE_SCOPE = "mfa:challenge";
+const MFA_CHALLENGE_TTL_SECS = 300;
+
+/** A user must clear a second factor at login once TOTP is verified+enabled. */
+function userRequiresMfa(user: { mfa?: unknown }): boolean {
+  return (user.mfa as any)?.totp?.enabled === true;
+}
+
+/** Mint the short-lived token that ties the pending login to the verified user. */
+async function issueMfaChallengeToken(user: { id: string; email: string }): Promise<string> {
+  const tokenSvc = await getTokenService();
+  return tokenSvc.signAccessToken(
+    {
+      sub: user.id,
+      email: user.email,
+      sid: "mfa-pending",
+      aud: MFA_CHALLENGE_AUD,
+      scope: [MFA_CHALLENGE_SCOPE],
+    },
+    MFA_CHALLENGE_TTL_SECS
+  );
+}
+
+/** Verify a TOTP code against the user's stored secret. */
+async function verifyTotpCode(secret: string, code: string): Promise<boolean> {
+  try {
+    const { TOTP, Secret } = await import("otpauth");
+    const totp = new TOTP({
+      algorithm: "SHA1",
+      digits: 6,
+      period: 30,
+      secret: Secret.fromBase32(secret),
+    });
+    return totp.validate({ token: code, window: 1 }) !== null;
+  } catch (err) {
+    logger.error("TOTP verify error during login", err as Error);
+    return false;
+  }
+}
+
+/**
+ * Create a session + token pair for an authenticated user and return the login
+ * response body. Shared by the no-MFA path and the post-MFA path so both mint
+ * identical sessions.
+ */
+async function issueAuthenticatedSession(
+  c: any,
+  user: { id: string; email: string; displayName?: string | null }
+) {
+  const cfg = getConfig();
+  const tokenSvc = await getTokenService();
+  const db = getDb();
+
+  const fpInput = FingerprintService.extractFromRequest({
+    headers: Object.fromEntries(c.req.raw.headers as any),
+    ip: getClientIp(c),
+  });
+  const fingerprint = FingerprintService.compute(fpInput);
+
+  const popKey = c.req.header("x-pop-key") || undefined;
+  const sessionId = nodeCrypto.randomUUID();
+
+  const accessToken = await tokenSvc.signAccessToken({
+    sub: user.id,
+    email: user.email,
+    sid: sessionId,
+    aud: "zeroauth",
+    scope: ["openid"],
+    pop_key: popKey,
+  });
+  const payload = await tokenSvc.verifyAccessToken(accessToken);
+
+  const [session] = await db
+    .insert(sessionsTable)
+    .values({
+      id: sessionId,
+      userId: user.id,
+      tokenId: payload.jti,
+      deviceFingerprint: {
+        ...fingerprint,
+        isTrusted: false,
+        firstSeenAt: new Date(),
+        lastSeenAt: new Date(),
+      },
+      ipAddress: fpInput.ip,
+      country: c.get("inferredCountry") || undefined,
+      userAgent: c.req.header("user-agent"),
+      expiresAt: new Date(payload.exp * 1000),
+      lastActivityAt: new Date(),
+      isActive: true,
+      proofOfPossessionKey: payload.pop_key,
+    })
+    .returning();
+
+  const refreshTokenPlain = await tokenSvc.signRefreshToken();
+  const refreshTokenHash = hashToken(refreshTokenPlain);
+  await db.insert(refreshTokensTable).values({
+    userId: user.id,
+    sessionId: session.id,
+    tokenHash: refreshTokenHash,
+    expiresAt: new Date(Date.now() + cfg.session.refreshTokenTTL * 1000),
+  });
+
+  await enforceMaxConcurrentDevices(user.id);
+
+  await db.update(usersTable).set({ lastLoginAt: new Date() }).where(eq(usersTable.id, user.id));
+
+  // New-device alert email — fire and forget, never blocks the response
+  void notifyIfNewDevice({
+    userId: user.id,
+    email: user.email,
+    displayName: user.displayName ?? user.email,
+    sessionId: session.id,
+    fingerprintHash: fingerprint.hash,
+    ipAddress: fpInput.ip,
+    country: c.get("inferredCountry") || undefined,
+    userAgent: c.req.header("user-agent"),
+  });
+
+  return {
+    accessToken,
+    refreshToken: refreshTokenPlain,
+    expiresIn: cfg.session.defaultTTL,
+    tokenType: "Bearer",
+  };
+}
+
 const EMAIL_VERIFICATION_TTL_MIN = 30;
 
 /**
@@ -70,7 +215,12 @@ const EMAIL_VERIFICATION_TTL_MIN = 30;
  * both the code and a magic link to /verify-email carrying the code (the verify
  * page is authenticated and reads the email from the session).
  */
-async function issueVerification(user: { id: string; email: string; displayName?: string | null }) {
+async function issueVerification(user: {
+  id: string;
+  email: string;
+  displayName?: string | null;
+  locale?: string | null;
+}) {
   const db = getDb();
   const code = Math.floor(100000 + Math.random() * 900000).toString();
   await db
@@ -93,15 +243,42 @@ async function issueVerification(user: { id: string; email: string; displayName?
     code,
     verifyUrl,
     expiresInMinutes: EMAIL_VERIFICATION_TTL_MIN,
+    locale: normalizeLocale(user.locale),
   });
 }
+
+// GET /pow/challenge — issue a proof-of-work challenge for signup (bot mitigation).
+// Returns { enabled: false } when PoW is off so the client can skip it.
+router.get("/pow/challenge", rateLimit({ points: 30, windowSecs: 60 }), (c) => {
+  if (!isSignupPowEnabled()) return c.json({ enabled: false });
+  const { challenge, difficulty, expiresAt } = createPowChallenge();
+  return c.json({ enabled: true, challenge, difficulty, expiresAt });
+});
 
 // POST /register
 router.post("/register", rateLimit({ points: 10, windowSecs: 60 }), async (c) => {
   try {
-    const { email, password, displayName } = await c.req.json();
+    const {
+      email,
+      password,
+      displayName,
+      locale: bodyLocale,
+      powChallenge,
+      powSolution,
+    } = await c.req.json();
     if (!email || !password) {
       return c.json({ error: "INVALID_REQUEST", message: "email and password required" }, 400);
+    }
+
+    // Bot/abuse mitigation: require a valid proof-of-work when enabled.
+    if (isSignupPowEnabled()) {
+      const pow = verifyPowSolution(powChallenge ?? "", powSolution ?? "");
+      if (!pow.ok) {
+        return c.json(
+          { error: "POW_REQUIRED", message: "Proof-of-work challenge failed", reason: pow.reason },
+          400
+        );
+      }
     }
 
     const normalizedEmail = String(email).toLowerCase().trim();
@@ -132,12 +309,18 @@ router.post("/register", rateLimit({ points: 10, windowSecs: 60 }), async (c) =>
     const cfg = getConfig();
     const passwordHash = await bcrypt.hash(password, cfg.security.bcryptRounds);
 
+    // Preferred locale: explicit body value wins, else negotiate Accept-Language.
+    const locale = bodyLocale
+      ? normalizeLocale(bodyLocale)
+      : localeFromAcceptLanguage(c.req.header("accept-language"));
+
     const [user] = await db
       .insert(usersTable)
       .values({
         email: normalizedEmail,
         passwordHash,
         displayName: displayName || normalizedEmail.split("@")[0],
+        locale,
         roles: ["user"],
         attributes: {},
         mfa: { totp: { enabled: false, backupCodes: [] }, webauthn: { enabled: false } },
@@ -163,6 +346,7 @@ router.post("/register", rateLimit({ points: 10, windowSecs: 60 }), async (c) =>
     void sendWelcomeEmail(user.email, {
       name: user.displayName ?? user.email,
       loginUrl,
+      locale,
     });
 
     // Kick off email verification (code + magic link). Non-fatal on failure.
@@ -280,6 +464,22 @@ router.post("/login", rateLimit({ points: 20, windowSecs: 60 }), async (c) => {
       return c.json({ error: "INVALID_REQUEST", message: "email and password required" }, 400);
     }
 
+    // Credential-stuffing defense: block a source IP that has been failing logins
+    // across many accounts, independent of any single account's lockout.
+    const clientIp = getClientIp(c);
+    const ipBlock = isIpBlocked(clientIp);
+    if (ipBlock.blocked) {
+      if (ipBlock.retryAfterSecs) c.header("Retry-After", String(ipBlock.retryAfterSecs));
+      return c.json(
+        {
+          error: "TOO_MANY_ATTEMPTS",
+          message: "Too many failed login attempts from this network. Try again later.",
+          retryAfter: ipBlock.retryAfterSecs,
+        },
+        429
+      );
+    }
+
     const db = getDb();
     const users = await db
       .select()
@@ -288,92 +488,106 @@ router.post("/login", rateLimit({ points: 20, windowSecs: 60 }), async (c) => {
       .limit(1);
     const user = users[0];
     if (!user || !user.passwordHash) {
+      recordIpLoginFailure(clientIp, email);
       return c.json({ error: "INVALID_CREDENTIALS", message: "Invalid credentials" }, 401);
     }
 
     const valid = await bcrypt.compare(password, user.passwordHash);
     if (!valid) {
+      recordIpLoginFailure(clientIp, email);
       return c.json({ error: "INVALID_CREDENTIALS", message: "Invalid credentials" }, 401);
     }
 
-    const cfg = getConfig();
-    const tokenSvc = await getTokenService();
+    recordIpLoginSuccess(clientIp);
 
-    const fpInput = FingerprintService.extractFromRequest({
-      headers: Object.fromEntries(c.req.raw.headers as any),
-      ip: getClientIp(c),
-    });
-    const fingerprint = FingerprintService.compute(fpInput);
+    // Password is correct, but if the account has a second factor we stop here
+    // and hand back a short-lived challenge token instead of a real session.
+    // The caller must clear the second factor via POST /login/mfa.
+    if (userRequiresMfa(user)) {
+      const mfaToken = await issueMfaChallengeToken(user);
+      return c.json({
+        mfaRequired: true,
+        mfaToken,
+        methods: ["totp"],
+        expiresIn: MFA_CHALLENGE_TTL_SECS,
+      });
+    }
 
-    const popKey = c.req.header("x-pop-key") || undefined;
-    const sessionId = crypto.randomUUID();
-
-    const accessToken = await tokenSvc.signAccessToken({
-      sub: user.id,
-      email: user.email,
-      sid: sessionId,
-      aud: "zeroauth",
-      scope: ["openid"],
-      pop_key: popKey,
-    });
-    const payload = await tokenSvc.verifyAccessToken(accessToken);
-
-    const [session] = await db
-      .insert(sessionsTable)
-      .values({
-        id: sessionId,
-        userId: user.id,
-        tokenId: payload.jti,
-        deviceFingerprint: {
-          ...fingerprint,
-          isTrusted: false,
-          firstSeenAt: new Date(),
-          lastSeenAt: new Date(),
-        },
-        ipAddress: fpInput.ip,
-        country: c.get("inferredCountry") || undefined,
-        userAgent: c.req.header("user-agent"),
-        expiresAt: new Date(payload.exp * 1000),
-        lastActivityAt: new Date(),
-        isActive: true,
-        proofOfPossessionKey: payload.pop_key,
-      })
-      .returning();
-
-    const refreshTokenPlain = await tokenSvc.signRefreshToken();
-    const refreshTokenHash = hashToken(refreshTokenPlain);
-    await db.insert(refreshTokensTable).values({
-      userId: user.id,
-      sessionId: session.id,
-      tokenHash: refreshTokenHash,
-      expiresAt: new Date(Date.now() + cfg.session.refreshTokenTTL * 1000),
-    });
-
-    await enforceMaxConcurrentDevices(user.id);
-
-    await db.update(usersTable).set({ lastLoginAt: new Date() }).where(eq(usersTable.id, user.id));
-
-    // New-device alert email — fire and forget, never blocks the response
-    void notifyIfNewDevice({
-      userId: user.id,
-      email: user.email,
-      displayName: user.displayName ?? user.email,
-      sessionId: session.id,
-      fingerprintHash: fingerprint.hash,
-      ipAddress: fpInput.ip,
-      country: c.get("inferredCountry") || undefined,
-      userAgent: c.req.header("user-agent"),
-    });
-
-    return c.json({
-      accessToken,
-      refreshToken: refreshTokenPlain,
-      expiresIn: cfg.session.defaultTTL,
-      tokenType: "Bearer",
-    });
+    const body = await issueAuthenticatedSession(c, user);
+    return c.json(body);
   } catch (err) {
     logger.error("Login error", err as Error);
     return c.json({ error: "INTERNAL_ERROR", message: "Login failed" }, 500);
+  }
+});
+
+// POST /login/mfa — complete a login that requires a second factor.
+// Exchanges a valid TOTP code (or one-time backup code) + the challenge token
+// from POST /login for a real session.
+router.post("/login/mfa", rateLimit({ points: 10, windowSecs: 60 }), async (c) => {
+  try {
+    const { mfaToken, code } = await c.req.json();
+    if (!mfaToken || !code) {
+      return c.json(
+        { error: "INVALID_REQUEST", message: "mfaToken and code are required" },
+        400
+      );
+    }
+
+    const tokenSvc = await getTokenService();
+    let payload;
+    try {
+      payload = await tokenSvc.verifyAccessToken(mfaToken);
+    } catch {
+      return c.json({ error: "MFA_TOKEN_INVALID", message: "Invalid or expired MFA token" }, 401);
+    }
+
+    if (payload.aud !== MFA_CHALLENGE_AUD || !payload.scope?.includes(MFA_CHALLENGE_SCOPE)) {
+      return c.json({ error: "MFA_TOKEN_INVALID", message: "Not an MFA challenge token" }, 401);
+    }
+
+    const db = getDb();
+    const users = await db.select().from(usersTable).where(eq(usersTable.id, payload.sub)).limit(1);
+    const user = users[0];
+    if (!user) {
+      return c.json({ error: "MFA_TOKEN_INVALID", message: "Invalid or expired MFA token" }, 401);
+    }
+
+    const mfa = (user.mfa as any) ?? {};
+    if (mfa?.totp?.enabled !== true || !mfa?.totp?.secret) {
+      // The challenge was issued but TOTP was since removed — nothing to verify.
+      return c.json({ error: "MFA_NOT_ENABLED", message: "MFA is not enabled for this account" }, 400);
+    }
+
+    const submitted = String(code).trim();
+    let verified = await verifyTotpCode(mfa.totp.secret, submitted);
+
+    // Fall back to a one-time backup code (stored as sha256 hashes).
+    if (!verified && Array.isArray(mfa.totp.backupCodes) && mfa.totp.backupCodes.length > 0) {
+      const submittedHash = hashToken(submitted.replace(/[\s-]/g, "").toLowerCase());
+      const idx = mfa.totp.backupCodes.indexOf(submittedHash);
+      if (idx !== -1) {
+        verified = true;
+        const remaining = mfa.totp.backupCodes.filter((_: string, i: number) => i !== idx);
+        await db
+          .update(usersTable)
+          .set({
+            mfa: { ...mfa, totp: { ...mfa.totp, backupCodes: remaining } },
+            updatedAt: new Date(),
+          })
+          .where(eq(usersTable.id, user.id));
+      }
+    }
+
+    if (!verified) {
+      return c.json({ error: "INVALID_CODE", message: "Invalid MFA code" }, 401);
+    }
+
+    const body = await issueAuthenticatedSession(c, user);
+    return c.json(body);
+  } catch (err) {
+    logger.error("Login MFA error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR", message: "MFA verification failed" }, 500);
   }
 });
 
@@ -614,12 +828,52 @@ router.get("/me", authMiddleware, async (c) => {
         lastLoginAt: usersTable.lastLoginAt,
         emailVerifiedAt: usersTable.emailVerifiedAt,
         metadata: usersTable.metadata,
+        locale: usersTable.locale,
+        mfa: usersTable.mfa,
+        passkeys: usersTable.passkeys,
+        oauthProviders: usersTable.oauthProviders,
       })
       .from(usersTable)
       .where(eq(usersTable.id, user.id))
       .limit(1);
     if (!row) return c.json({ error: "USER_NOT_FOUND" }, 404);
-    return c.json({ ...row, emailVerified: row.emailVerifiedAt != null });
+
+    // Sanitize sensitive auth material before returning to the client: never
+    // expose the TOTP secret, backup-code hashes, or passkey public keys.
+    const rawMfa = (row.mfa as any) ?? {};
+    const mfa = {
+      totp: {
+        enabled: rawMfa.totp?.enabled === true,
+        verifiedAt: rawMfa.totp?.verifiedAt ?? null,
+        backupCodesRemaining: Array.isArray(rawMfa.totp?.backupCodes)
+          ? rawMfa.totp.backupCodes.length
+          : 0,
+      },
+      webauthn: { enabled: rawMfa.webauthn?.enabled === true },
+    };
+    const passkeys = ((row.passkeys as any[]) ?? []).map((pk) => ({
+      credentialId: pk.credentialId,
+      name: pk.name ?? "Passkey",
+      deviceType: pk.deviceType,
+      aaguid: pk.aaguid,
+      backedUp: pk.backedUp,
+      createdAt: pk.createdAt,
+      lastUsedAt: pk.lastUsedAt ?? null,
+    }));
+    const oauthProviders = ((row.oauthProviders as any[]) ?? []).map((p) => ({
+      provider: p.provider,
+      email: p.email,
+      connectedAt: p.connectedAt,
+    }));
+
+    const { mfa: _m, passkeys: _p, oauthProviders: _o, ...rest } = row as any;
+    return c.json({
+      ...rest,
+      emailVerified: row.emailVerifiedAt != null,
+      mfa,
+      passkeys,
+      oauthProviders,
+    });
   } catch (err) {
     logger.error("Get current user error", err as Error);
     return c.json({ error: "INTERNAL_ERROR" }, 500);
@@ -639,6 +893,7 @@ const patchMeSchema = z.object({
     .regex(/^[a-z0-9_-]+$/, "lowercase letters, digits, hyphens, underscores only")
     .nullable()
     .optional(),
+  locale: z.enum(SUPPORTED_LOCALES).optional(),
 });
 
 router.patch("/me", authMiddleware, async (c) => {
@@ -663,6 +918,7 @@ router.patch("/me", authMiddleware, async (c) => {
         roles: usersTable.roles,
         status: usersTable.status,
         phone: usersTable.phone,
+        locale: usersTable.locale,
         updatedAt: usersTable.updatedAt,
       });
     if (!updated) return c.json({ error: "USER_NOT_FOUND" }, 404);
@@ -670,6 +926,63 @@ router.patch("/me", authMiddleware, async (c) => {
   } catch (err) {
     logger.error("Patch current user error", err as Error);
     return c.json({ error: "INTERNAL_ERROR" }, 500);
+  }
+});
+
+// ── DELETE /auth/oauth/:provider — unlink a connected OAuth account ──────────
+// Removes the linked social-login provider. Refuses to remove the user's *only*
+// remaining login method (no password + this is the last provider), which would
+// otherwise lock them out of their account.
+router.delete("/oauth/:provider", authMiddleware, async (c) => {
+  try {
+    const user = c.get("user");
+    const provider = c.req.param("provider");
+
+    const db = getDb();
+    const [row] = await db
+      .select({ passwordHash: usersTable.passwordHash, oauthProviders: usersTable.oauthProviders })
+      .from(usersTable)
+      .where(eq(usersTable.id, user.id))
+      .limit(1);
+    if (!row) return c.json({ error: "USER_NOT_FOUND", message: "User not found" }, 404);
+
+    const providers: any[] = (row.oauthProviders as any[]) ?? [];
+    const linked = providers.some((p) => p.provider === provider);
+    if (!linked) {
+      return c.json({ error: "NOT_LINKED", message: `No ${provider} account is linked` }, 404);
+    }
+
+    const hasPassword = Boolean(row.passwordHash);
+    if (!hasPassword && providers.length <= 1) {
+      return c.json(
+        {
+          error: "LAST_CREDENTIAL",
+          message:
+            "Set a password before disconnecting your only sign-in method, or you'll be locked out.",
+        },
+        409
+      );
+    }
+
+    const remaining = providers.filter((p) => p.provider !== provider);
+    await db
+      .update(usersTable)
+      .set({ oauthProviders: remaining, updatedAt: new Date() })
+      .where(eq(usersTable.id, user.id));
+
+    // Treat unlinking a login method as a sensitive change: revoke other
+    // sessions and alert the user, mirroring email/password change handling.
+    void recordAndRespond(user.id, "oauth_unlink", {
+      email: user.email,
+      displayName: user.displayName ?? user.email,
+      ipAddress: getClientIp(c),
+      userAgent: c.req.header("user-agent"),
+    });
+
+    return c.json({ unlinked: true, provider });
+  } catch (err) {
+    logger.error("OAuth unlink error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR", message: "Failed to disconnect account" }, 500);
   }
 });
 

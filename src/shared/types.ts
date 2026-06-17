@@ -367,6 +367,10 @@ export type HonoEnv = {
     popVerified?: boolean;
     inferredCountry?: string;
     tenantId?: string;
+    /** "live" or "test" — set by apiKeyAuth so handlers can branch to sandbox data. */
+    apiKeyEnvironment?: "live" | "test";
+    /** Negotiated API version (e.g. "v1"), set by the apiVersioning middleware. */
+    apiVersion?: string;
   };
 };
 

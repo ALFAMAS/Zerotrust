@@ -13,6 +13,16 @@ interface WebhookEndpoint {
   createdAt?: string;
 }
 
+interface WebhookDelivery {
+  id: string;
+  event: string;
+  status: "pending" | "delivered" | "failed" | "retrying";
+  attempt: number;
+  responseStatus: number | null;
+  error: string | null;
+  recordedAt: string;
+}
+
 const EVENT_OPTIONS = [
   "auth.login.success",
   "auth.login.failed",
@@ -31,6 +41,8 @@ export default function WebhooksPage() {
   const [form, setForm] = useState({ url: "", secret: "", events: [] as string[] });
   const [error, setError] = useState<string | null>(null);
   const [pingResult, setPingResult] = useState<Record<string, string>>({});
+  const [deliveriesFor, setDeliveriesFor] = useState<string | null>(null);
+  const [deliveries, setDeliveries] = useState<WebhookDelivery[] | null>(null);
 
   const load = useCallback(() => {
     api
@@ -71,6 +83,17 @@ export default function WebhooksPage() {
       setPingResult((r) => ({ ...r, [id]: "✓ delivered" }));
     } catch {
       setPingResult((r) => ({ ...r, [id]: "✗ failed" }));
+    }
+  }
+
+  async function openDeliveries(id: string) {
+    setDeliveriesFor(id);
+    setDeliveries(null);
+    try {
+      const res = await api.get<{ deliveries: WebhookDelivery[] }>(`/webhooks/${id}/deliveries`);
+      setDeliveries(res.deliveries);
+    } catch {
+      setDeliveries([]);
     }
   }
 
@@ -152,6 +175,12 @@ export default function WebhooksPage() {
                   Test
                 </button>
                 <button
+                  onClick={() => openDeliveries(ep.id)}
+                  className="px-3 py-1.5 bg-muted hover:bg-accent text-foreground/80 text-xs rounded-lg transition-colors"
+                >
+                  Deliveries
+                </button>
+                <button
                   onClick={() => toggleActive(ep)}
                   className="px-3 py-1.5 bg-muted hover:bg-accent text-foreground/80 text-xs rounded-lg transition-colors"
                 >
@@ -218,6 +247,59 @@ export default function WebhooksPage() {
               Create endpoint
             </button>
           </div>
+        </Modal>
+      )}
+
+      {deliveriesFor && (
+        <Modal
+          title="Recent deliveries"
+          onClose={() => {
+            setDeliveriesFor(null);
+            setDeliveries(null);
+          }}
+        >
+          {deliveries === null ? (
+            <p className="text-sm text-muted-foreground">Loading…</p>
+          ) : deliveries.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              No deliveries recorded yet. Send a test ping or trigger an event.
+            </p>
+          ) : (
+            <div className="max-h-96 overflow-y-auto">
+              <table className="w-full text-xs">
+                <thead className="text-muted-foreground">
+                  <tr className="text-left">
+                    <th className="py-1.5 pr-3">Event</th>
+                    <th className="py-1.5 pr-3">Status</th>
+                    <th className="py-1.5 pr-3">Try</th>
+                    <th className="py-1.5 pr-3">HTTP</th>
+                    <th className="py-1.5">When</th>
+                  </tr>
+                </thead>
+                <tbody className="text-foreground/80">
+                  {deliveries.map((d) => (
+                    <tr key={d.id} className="border-t border-border align-top">
+                      <td className="py-1.5 pr-3 font-mono">{d.event}</td>
+                      <td className="py-1.5 pr-3">
+                        <span
+                          className={
+                            d.status === "delivered" ? "text-green-400" : "text-red-400"
+                          }
+                        >
+                          {d.status}
+                        </span>
+                      </td>
+                      <td className="py-1.5 pr-3">#{d.attempt}</td>
+                      <td className="py-1.5 pr-3">{d.responseStatus ?? d.error ?? "—"}</td>
+                      <td className="py-1.5 whitespace-nowrap">
+                        {new Date(d.recordedAt).toLocaleString()}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </Modal>
       )}
     </div>

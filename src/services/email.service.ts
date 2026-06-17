@@ -7,6 +7,8 @@ import { passwordResetEmailTemplate } from "../templates/emails/password-reset";
 import { securityAlertEmailTemplate } from "../templates/emails/security-alert";
 import { notificationEmailTemplate } from "../templates/emails/notification";
 import { billingEventEmailTemplate } from "../templates/emails/billing-event";
+import type { Locale } from "../shared/locale";
+import { isEmailSuppressed } from "./emailSuppression.service";
 import { getLogger } from "../logger";
 
 const logger = getLogger("email-service");
@@ -50,6 +52,11 @@ async function sendEmail(opts: {
   text?: string;
 }): Promise<void> {
   try {
+    // Honor the suppression list (hard bounces / complaints / manual blocks).
+    if (await isEmailSuppressed(opts.to)) {
+      logger.info("Email skipped (suppressed recipient)", { to: opts.to, subject: opts.subject });
+      return;
+    }
     const transport = getTransport();
     const from =
       process.env.MAIL_FROM ?? `noreply@${APP_NAME.toLowerCase().replace(/\s+/g, "")}.com`;
@@ -73,6 +80,7 @@ export async function sendWelcomeEmail(
   });
   await sendEmail({ to, subject, html, text });
 }
+// `data.locale` (optional) flows through to welcomeEmailTemplate for localization.
 
 export async function sendMagicLinkEmail(
   to: string,
@@ -103,7 +111,7 @@ export async function sendOtpEmail(
 
 export async function sendVerificationEmail(
   to: string,
-  data: { name: string; code: string; verifyUrl: string; expiresInMinutes?: number }
+  data: { name: string; code: string; verifyUrl: string; expiresInMinutes?: number; locale?: Locale }
 ): Promise<void> {
   const { subject, html, text } = verifyEmailTemplate({
     name: data.name,
@@ -111,6 +119,7 @@ export async function sendVerificationEmail(
     verifyUrl: data.verifyUrl,
     expiresInMinutes: data.expiresInMinutes ?? 30,
     appName: APP_NAME,
+    locale: data.locale,
   });
   await sendEmail({ to, subject, html, text });
 }

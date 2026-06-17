@@ -4,6 +4,7 @@ import { eq, and, isNull } from "drizzle-orm";
 import { getDb } from "../db";
 import { apiKeysTable, usersTable } from "../db/schema";
 import { apiKeyUsageMetric, getUsage, incrementUsage } from "../services/usage.service";
+import { runUsageNudges } from "../services/usageNudge.service";
 import { consumeRateLimit } from "./rateLimiting";
 import type { HonoEnv, User } from "../shared/types";
 
@@ -73,6 +74,13 @@ export const apiKeyAuth = createMiddleware<HonoEnv>(async (c, next) => {
   void incrementUsage("api_calls", scope);
   void incrementUsage(keyMetric, scope);
 
+  // Proactive upsell nudge when usage crosses a quota threshold (throttled).
+  void runUsageNudges(scope, (user as any).id, { email: (user as any).email }).catch(() => {});
+
   c.set("user", user as unknown as User);
+  // Expose the key's environment so downstream handlers can route test-mode
+  // traffic to sandbox data. Defaults to "live" for keys issued before 0006.
+  c.set("apiKeyEnvironment", key.environment === "test" ? "test" : "live");
+  c.header("X-ZeroAuth-Environment", key.environment === "test" ? "test" : "live");
   return next();
 });

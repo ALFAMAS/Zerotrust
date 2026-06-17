@@ -14,6 +14,7 @@ const logger = getLogger("api-keys-routes");
 
 const createSchema = z.object({
   name: z.string().min(1).max(100),
+  environment: z.enum(["live", "test"]).optional(),
   scopes: z.array(z.string().max(50)).max(50).optional(),
   expiresInDays: z.number().int().min(1).max(3650).optional(),
   orgId: z.string().uuid().optional(),
@@ -30,6 +31,7 @@ router.get("/", authMiddleware, async (c) => {
     .select({
       id: apiKeysTable.id,
       name: apiKeysTable.name,
+      environment: apiKeysTable.environment,
       keyPrefix: apiKeysTable.keyPrefix,
       scopes: apiKeysTable.scopes,
       orgId: apiKeysTable.orgId,
@@ -53,9 +55,11 @@ router.post("/", authMiddleware, rateLimit({ points: 20, windowSecs: 3600 }), as
   if (!parsed.success)
     return c.json({ error: "INVALID_REQUEST", issues: parsed.error.issues }, 400);
 
-  const rawKey = `zak_${randomBytes(32).toString("base64url")}`;
+  const environment = parsed.data.environment ?? "live";
+  // Prefix encodes the environment (Stripe-style): zak_live_… / zak_test_…
+  const rawKey = `zak_${environment}_${randomBytes(32).toString("base64url")}`;
   const keyHash = createHash("sha256").update(rawKey).digest("hex");
-  const keyPrefix = rawKey.slice(0, 12);
+  const keyPrefix = rawKey.slice(0, 17);
 
   const expiresAt = parsed.data.expiresInDays
     ? new Date(Date.now() + parsed.data.expiresInDays * 86_400_000)
@@ -88,6 +92,7 @@ router.post("/", authMiddleware, rateLimit({ points: 20, windowSecs: 3600 }), as
         userId: user.id,
         orgId: parsed.data.orgId ?? null,
         name: parsed.data.name,
+        environment,
         keyHash,
         keyPrefix,
         scopes: parsed.data.scopes ?? [],

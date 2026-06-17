@@ -1,5 +1,13 @@
+import Link from "next/link";
 import { brand } from "@/config/brand";
 import { Fingerprint, KeyRound, Lock, ShieldCheck } from "lucide-react";
+
+const footerLinks = [
+  { href: "/help", label: "Help" },
+  { href: "/status", label: "Status" },
+  { href: "/privacy", label: "Privacy" },
+  { href: "/terms", label: "Terms" },
+];
 
 const highlights = [
   {
@@ -87,33 +95,69 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       </aside>
 
       {/* ── Form panel ───────────────────────────────────────────────────── */}
-      <main
-        id="main-content"
-        className="relative flex items-center justify-center px-5 py-10 sm:px-8"
-      >
+      <div className="relative flex min-h-screen flex-col lg:min-h-0">
         <div className="bg-grid mask-fade pointer-events-none absolute inset-0 opacity-40 lg:hidden" aria-hidden />
-        <div className="animate-fade-up relative w-full max-w-md">
-          {/* Mobile logo (brand panel is hidden below lg) */}
-          <div className="mb-8 flex items-center justify-center gap-2 lg:hidden">
+
+        {/* Header: clickable logo + back-to-site link (all viewports) */}
+        <header className="relative flex items-center justify-between px-5 py-5 sm:px-8">
+          <Link href="/" className="flex items-center gap-2">
             <div
               className="flex h-9 w-9 items-center justify-center rounded-xl font-display font-bold text-white"
               style={{ backgroundColor: brand.logoColor }}
             >
               {brand.logoLetter}
             </div>
-            <span className="font-display text-xl font-semibold text-foreground">{brand.name}</span>
-          </div>
+            <span className="font-display text-lg font-semibold text-foreground">{brand.name}</span>
+          </Link>
+          <Link
+            href="/"
+            className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+          >
+            ← Back to site
+          </Link>
+        </header>
 
-          <div className="rounded-2xl border border-border bg-card/70 p-7 text-card-foreground shadow-2xl backdrop-blur-sm sm:p-8">
-            {children}
-          </div>
+        {/* Form */}
+        <main
+          id="main-content"
+          className="relative flex flex-1 items-center justify-center px-5 py-8 sm:px-8"
+        >
+          <div className="animate-fade-up relative w-full max-w-md">
+            <div className="rounded-2xl border border-border bg-card/70 p-7 text-card-foreground shadow-2xl backdrop-blur-sm sm:p-8">
+              {children}
+            </div>
 
-          <p className="mt-6 flex items-center justify-center gap-1.5 text-center text-xs text-muted-foreground">
-            <ShieldCheck className="h-3.5 w-3.5 text-primary/80" />
-            Protected by {brand.name} · zero-trust by default
-          </p>
-        </div>
-      </main>
+            <p className="mt-6 flex items-center justify-center gap-1.5 text-center text-xs text-muted-foreground">
+              <ShieldCheck className="h-3.5 w-3.5 text-primary/80" />
+              Protected by {brand.name} · zero-trust by default
+            </p>
+          </div>
+        </main>
+
+        {/* Footer */}
+        <footer className="relative border-t border-border px-5 py-6 sm:px-8">
+          <div className="flex flex-col items-center justify-between gap-3 text-xs text-muted-foreground sm:flex-row">
+            <span>
+              © {brand.copyrightYear} {brand.name} · {brand.license} licensed
+            </span>
+            <nav className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
+              {footerLinks.map((l) => (
+                <Link key={l.href} href={l.href} className="transition-colors hover:text-foreground">
+                  {l.label}
+                </Link>
+              ))}
+              <a
+                href={brand.githubUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="transition-colors hover:text-foreground"
+              >
+                GitHub
+              </a>
+            </nav>
+          </div>
+        </footer>
+      </div>
     </div>
   );
 }

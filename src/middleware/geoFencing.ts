@@ -4,19 +4,9 @@ import geoip from "geoip-lite";
 import { getConfig } from "../config";
 import { getLogger } from "../logger";
 import { ErrorCodes } from "../shared/types";
+import { cidrContains } from "../shared/cidr";
 
 const logger = getLogger("geo-fencing");
-
-function ipToLong(ip: string): number {
-  return ip.split(".").reduce((acc, oct) => (acc << 8) + parseInt(oct, 10), 0) >>> 0;
-}
-
-function cidrContains(cidr: string, ip: string): boolean {
-  const [range, bits] = cidr.split("/");
-  if (!bits) return range === ip;
-  const mask = ~(2 ** (32 - Number(bits)) - 1) >>> 0;
-  return (ipToLong(ip) & mask) === (ipToLong(range) & mask);
-}
 
 export function geoFencingMiddleware() {
   return createMiddleware<HonoEnv>(async (c, next) => {

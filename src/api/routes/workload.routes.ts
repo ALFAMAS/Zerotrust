@@ -7,7 +7,7 @@ import {
   revokeWorkloadCredential,
 } from "../../workload";
 import { getConfig } from "../../config";
-import { getLogger } from "../../logger";
+import { getLogger, auditLog } from "../../logger";
 import { TokenService } from "../../services/token.service";
 import { authMiddleware } from "../../middleware/auth";
 import type { HonoEnv } from "../../shared/types";
@@ -84,6 +84,16 @@ router.post("/token", async (c) => {
         workload_id: credential.workloadId,
       } as any,
       tokenTtl
+    );
+
+    void auditLog(
+      "workload.token.issued",
+      `workload:${credential.workloadId}`,
+      credential.workloadId,
+      true,
+      { scopes: grantedScopes, ttl: tokenTtl },
+      undefined,
+      { type: "agent", id: `workload:${credential.workloadId}`, workloadId: credential.workloadId }
     );
 
     return c.json({

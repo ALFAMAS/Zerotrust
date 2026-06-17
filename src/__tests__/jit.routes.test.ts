@@ -13,6 +13,60 @@ vi.mock("../middleware/auth", () => ({
   },
 }));
 
+// The store is DB-backed in production; these tests exercise the route layer
+// (validation, role guards, state transitions, status codes), so we back it with
+// a faithful in-memory fake — no database required.
+vi.mock("../jit/cross-tenant", () => {
+  const store = new Map<string, any>();
+  let seq = 0;
+  return {
+    requestCrossTenantAccess: async (
+      requestorId: string,
+      sourceTenantId: string,
+      targetTenantId: string,
+      targetResource: string,
+      justification: string,
+      ttlSeconds: number
+    ) => {
+      const id = `jit-${++seq}`;
+      const rec = {
+        id,
+        requestorId,
+        sourceTenantId,
+        targetTenantId,
+        targetResource,
+        justification,
+        status: "pending",
+        ttlSeconds,
+        createdAt: new Date().toISOString(),
+      };
+      store.set(id, rec);
+      return rec;
+    },
+    crossTenantJITStore: {
+      listByRequestor: async (userId: string) =>
+        [...store.values()].filter((r) => r.requestorId === userId),
+      listByTarget: async () => [...store.values()],
+      get: async (id: string) => store.get(id) ?? null,
+      approve: async (id: string, approverId: string) => {
+        const r = store.get(id);
+        if (!r || r.status !== "pending") return null;
+        r.status = "approved";
+        r.approvedBy = approverId;
+        r.expiresAt = new Date(Date.now() + r.ttlSeconds * 1000).toISOString();
+        return r;
+      },
+      deny: async (id: string, approverId: string) => {
+        const r = store.get(id);
+        if (!r || r.status !== "pending") return null;
+        r.status = "denied";
+        r.deniedBy = approverId;
+        return r;
+      },
+    },
+  };
+});
+
 import jitRoutes from "../jit/routes";
 
 const REQUESTOR = "11111111-1111-1111-1111-111111111111";

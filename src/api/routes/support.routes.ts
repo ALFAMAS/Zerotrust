@@ -1,0 +1,205 @@
+import { Hono } from "hono";
+import { z } from "zod";
+import { desc, eq } from "drizzle-orm";
+import { getDb } from "../../db";
+import { supportTicketsTable, supportTicketMessagesTable } from "../../db/schema";
+import { authMiddleware } from "../../middleware/auth";
+import { rateLimit } from "../../middleware/rateLimiting";
+import { getLogger } from "../../logger";
+import type { HonoEnv } from "../../shared/types";
+
+const router = new Hono<HonoEnv>();
+const logger = getLogger("support-routes");
+
+router.use("*", authMiddleware);
+
+const TICKET_STATUSES = ["open", "pending", "closed"] as const;
+
+const createSchema = z.object({
+  subject: z.string().min(1).max(200),
+  message: z.string().min(1).max(5000),
+  priority: z.enum(["low", "normal", "high"]).optional(),
+  orgId: z.string().uuid().optional(),
+});
+
+const replySchema = z.object({ body: z.string().min(1).max(5000) });
+const statusSchema = z.object({ status: z.enum(TICKET_STATUSES) });
+
+function isAgent(user: { roles?: string[] }): boolean {
+  return Boolean(user.roles?.includes("admin") || user.roles?.includes("support"));
+}
+
+// POST /support — open a ticket with its first message
+router.post("/", rateLimit({ points: 20, windowSecs: 3600 }), async (c) => {
+  const user = c.get("user");
+  const body = await c.req.json().catch(() => ({}));
+  const parsed = createSchema.safeParse(body);
+  if (!parsed.success) return c.json({ error: "INVALID_REQUEST", issues: parsed.error.issues }, 400);
+
+  try {
+    const db = getDb();
+    const [ticket] = await db
+      .insert(supportTicketsTable)
+      .values({
+        userId: user.id,
+        orgId: parsed.data.orgId ?? null,
+        subject: parsed.data.subject,
+        priority: parsed.data.priority ?? "normal",
+        status: "open",
+      })
+      .returning();
+
+    const [message] = await db
+      .insert(supportTicketMessagesTable)
+      .values({
+        ticketId: ticket.id,
+        authorId: user.id,
+        authorRole: "user",
+        body: parsed.data.message,
+      })
+      .returning();
+
+    logger.info("Support ticket opened", { ticketId: ticket.id, userId: user.id });
+    return c.json({ ticket, messages: [message] }, 201);
+  } catch (err) {
+    logger.error("Create ticket error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR" }, 500);
+  }
+});
+
+// GET /support — list tickets. Owners see their own; agents can pass ?all=true.
+router.get("/", async (c) => {
+  const user = c.get("user");
+  const all = c.req.query("all") === "true";
+  try {
+    const db = getDb();
+    const showAll = all && isAgent(user);
+    const tickets = await db
+      .select()
+      .from(supportTicketsTable)
+      .where(showAll ? undefined : eq(supportTicketsTable.userId, user.id))
+      .orderBy(desc(supportTicketsTable.updatedAt));
+    return c.json({ tickets, scope: showAll ? "all" : "mine" });
+  } catch (err) {
+    logger.error("List tickets error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR" }, 500);
+  }
+});
+
+// GET /support/:id — ticket with its message thread (owner or agent)
+router.get("/:id", async (c) => {
+  const user = c.get("user");
+  const id = c.req.param("id");
+  try {
+    const db = getDb();
+    const [ticket] = await db
+      .select()
+      .from(supportTicketsTable)
+      .where(eq(supportTicketsTable.id, id))
+      .limit(1);
+    if (!ticket) return c.json({ error: "NOT_FOUND", message: "Ticket not found" }, 404);
+    if (ticket.userId !== user.id && !isAgent(user)) {
+      return c.json({ error: "FORBIDDEN", message: "Not your ticket" }, 403);
+    }
+
+    const messages = await db
+      .select()
+      .from(supportTicketMessagesTable)
+      .where(eq(supportTicketMessagesTable.ticketId, id))
+      .orderBy(supportTicketMessagesTable.createdAt);
+
+    return c.json({ ticket, messages });
+  } catch (err) {
+    logger.error("Get ticket error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR" }, 500);
+  }
+});
+
+// POST /support/:id/messages — reply to a ticket (owner or agent)
+router.post("/:id/messages", rateLimit({ points: 60, windowSecs: 3600 }), async (c) => {
+  const user = c.get("user");
+  const id = c.req.param("id");
+  const body = await c.req.json().catch(() => ({}));
+  const parsed = replySchema.safeParse(body);
+  if (!parsed.success) return c.json({ error: "INVALID_REQUEST", issues: parsed.error.issues }, 400);
+
+  try {
+    const db = getDb();
+    const [ticket] = await db
+      .select()
+      .from(supportTicketsTable)
+      .where(eq(supportTicketsTable.id, id))
+      .limit(1);
+    if (!ticket) return c.json({ error: "NOT_FOUND", message: "Ticket not found" }, 404);
+
+    const agent = isAgent(user);
+    if (ticket.userId !== user.id && !agent) {
+      return c.json({ error: "FORBIDDEN", message: "Not your ticket" }, 403);
+    }
+    if (ticket.status === "closed") {
+      return c.json({ error: "TICKET_CLOSED", message: "Reopen the ticket before replying" }, 409);
+    }
+
+    const [message] = await db
+      .insert(supportTicketMessagesTable)
+      .values({
+        ticketId: id,
+        authorId: user.id,
+        authorRole: agent ? "agent" : "user",
+        body: parsed.data.body,
+      })
+      .returning();
+
+    // An agent reply awaits the user (pending); a user reply reopens for the agent.
+    await db
+      .update(supportTicketsTable)
+      .set({ status: agent ? "pending" : "open", updatedAt: new Date() })
+      .where(eq(supportTicketsTable.id, id));
+
+    return c.json({ message }, 201);
+  } catch (err) {
+    logger.error("Reply ticket error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR" }, 500);
+  }
+});
+
+// PATCH /support/:id — change status (owner may close/reopen own; agents any)
+router.patch("/:id", async (c) => {
+  const user = c.get("user");
+  const id = c.req.param("id");
+  const body = await c.req.json().catch(() => ({}));
+  const parsed = statusSchema.safeParse(body);
+  if (!parsed.success) return c.json({ error: "INVALID_REQUEST", issues: parsed.error.issues }, 400);
+
+  try {
+    const db = getDb();
+    const [ticket] = await db
+      .select()
+      .from(supportTicketsTable)
+      .where(eq(supportTicketsTable.id, id))
+      .limit(1);
+    if (!ticket) return c.json({ error: "NOT_FOUND", message: "Ticket not found" }, 404);
+
+    const agent = isAgent(user);
+    if (ticket.userId !== user.id && !agent) {
+      return c.json({ error: "FORBIDDEN", message: "Not your ticket" }, 403);
+    }
+    // Owners may only close or reopen their ticket, not mark it pending.
+    if (!agent && parsed.data.status === "pending") {
+      return c.json({ error: "FORBIDDEN", message: "Only agents can set pending" }, 403);
+    }
+
+    const [updated] = await db
+      .update(supportTicketsTable)
+      .set({ status: parsed.data.status, updatedAt: new Date() })
+      .where(eq(supportTicketsTable.id, id))
+      .returning();
+
+    return c.json({ ticket: updated });
+  } catch (err) {
+    logger.error("Update ticket status error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR" }, 500);
+  }
+});
+
+export default router;

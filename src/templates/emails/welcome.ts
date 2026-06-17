@@ -1,8 +1,12 @@
+import type { Locale } from "../../shared/locale";
+import { tr, htmlLang } from "./i18n";
+
 export interface WelcomeEmailData {
   name: string;
   appName: string;
   appUrl: string;
   loginUrl: string;
+  locale?: Locale;
 }
 
 export function welcomeEmailTemplate(data: WelcomeEmailData): {
@@ -10,12 +14,13 @@ export function welcomeEmailTemplate(data: WelcomeEmailData): {
   html: string;
   text: string;
 } {
-  const { name, appName, appUrl, loginUrl } = data;
+  const { name, appName, appUrl, loginUrl, locale } = data;
+  const v = { name, appName };
 
-  const subject = `Welcome to ${appName}!`;
+  const subject = tr(locale, "welcome_subject", v);
 
   const html = `<!DOCTYPE html>
-<html lang="en">
+<html lang="${htmlLang(locale)}">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
 <body style="margin:0;padding:0;background-color:#f4f4f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,sans-serif;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f5;padding:40px 16px;">
@@ -31,23 +36,23 @@ export function welcomeEmailTemplate(data: WelcomeEmailData): {
           <!-- Body -->
           <tr>
             <td style="padding:40px;color:#111827;">
-              <h2 style="margin:0 0 16px;font-size:22px;font-weight:600;color:#111827;">Welcome, ${name}!</h2>
+              <h2 style="margin:0 0 16px;font-size:22px;font-weight:600;color:#111827;">${tr(locale, "welcome_heading", v)}</h2>
               <p style="margin:0 0 24px;font-size:16px;line-height:24px;color:#374151;">
-                Your account has been created successfully. We're thrilled to have you on board.
+                ${tr(locale, "welcome_p1", v)}
               </p>
               <p style="margin:0 0 32px;font-size:16px;line-height:24px;color:#374151;">
-                You can now sign in to your account and start exploring everything ${appName} has to offer.
+                ${tr(locale, "welcome_p2", v)}
               </p>
               <!-- CTA Button -->
               <table cellpadding="0" cellspacing="0" style="margin:0 0 32px;">
                 <tr>
                   <td style="background-color:#6366f1;border-radius:8px;">
-                    <a href="${loginUrl}" style="display:inline-block;padding:12px 24px;color:#ffffff;font-size:16px;font-weight:600;text-decoration:none;">Sign In to Your Account</a>
+                    <a href="${loginUrl}" style="display:inline-block;padding:12px 24px;color:#ffffff;font-size:16px;font-weight:600;text-decoration:none;">${tr(locale, "welcome_cta", v)}</a>
                   </td>
                 </tr>
               </table>
               <p style="margin:0;font-size:14px;line-height:22px;color:#6b7280;">
-                If the button above doesn't work, copy and paste this link into your browser:<br>
+                ${tr(locale, "welcome_link_help", v)}<br>
                 <a href="${loginUrl}" style="color:#6366f1;word-break:break-all;">${loginUrl}</a>
               </p>
             </td>
@@ -56,10 +61,10 @@ export function welcomeEmailTemplate(data: WelcomeEmailData): {
           <tr>
             <td style="padding:24px 40px;border-top:1px solid #e5e7eb;text-align:center;">
               <p style="margin:0 0 8px;font-size:13px;color:#9ca3af;">
-                You received this email because you registered at <a href="${appUrl}" style="color:#6366f1;">${appName}</a>.
+                ${tr(locale, "welcome_footer_registered", v)}
               </p>
               <p style="margin:0;font-size:13px;color:#9ca3af;">
-                If you didn't create an account, you can safely ignore this email.
+                ${tr(locale, "welcome_footer_ignore", v)}
               </p>
             </td>
           </tr>
@@ -70,16 +75,16 @@ export function welcomeEmailTemplate(data: WelcomeEmailData): {
 </body>
 </html>`;
 
-  const text = `Welcome to ${appName}, ${name}!
+  const text = `${tr(locale, "welcome_heading", v)}
 
-Your account has been created successfully. We're thrilled to have you on board.
+${tr(locale, "welcome_p1", v)}
 
-Sign in to your account here:
+${tr(locale, "welcome_cta", v)}:
 ${loginUrl}
 
-If you didn't create an account, you can safely ignore this email.
+${tr(locale, "welcome_footer_ignore", v)}
 
-— The ${appName} Team
+${tr(locale, "welcome_team", v)}
 ${appUrl}`;
 
   return { subject, html, text };

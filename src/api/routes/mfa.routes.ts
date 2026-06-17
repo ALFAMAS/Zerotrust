@@ -124,15 +124,33 @@ router.post("/totp/verify", async (c) => {
       return c.json({ error: "INVALID_CODE", message: "Invalid TOTP code" }, 401);
     }
 
+    // Generate one-time recovery codes the first time TOTP is enabled so a user
+    // who loses their authenticator can still get in. They are shown ONCE here
+    // and stored only as sha256 hashes; redeemed at POST /auth/login/mfa.
+    const alreadyEnabled = mfa.totp.enabled === true && Array.isArray(mfa.totp.backupCodes) && mfa.totp.backupCodes.length > 0;
+    let backupCodes: string[] | undefined;
+    let backupCodeHashes: string[] = mfa.totp.backupCodes ?? [];
+    if (!alreadyEnabled) {
+      backupCodes = Array.from({ length: 10 }, () =>
+        crypto.randomBytes(5).toString("hex") // 10 hex chars per code
+      );
+      backupCodeHashes = backupCodes.map((code) =>
+        crypto.createHash("sha256").update(code.toLowerCase()).digest("hex")
+      );
+    }
+
     await db
       .update(usersTable)
       .set({
-        mfa: { ...mfa, totp: { ...mfa.totp, enabled: true, verifiedAt: new Date() } },
+        mfa: {
+          ...mfa,
+          totp: { ...mfa.totp, enabled: true, verifiedAt: new Date(), backupCodes: backupCodeHashes },
+        },
         updatedAt: new Date(),
       })
       .where(eq(usersTable.id, userId));
 
-    return c.json({ enabled: true });
+    return c.json(backupCodes ? { enabled: true, backupCodes } : { enabled: true });
   } catch (err) {
     logger.error("TOTP verify error", err as Error);
     return c.json({ error: "INTERNAL_ERROR", message: "TOTP verification failed" }, 500);

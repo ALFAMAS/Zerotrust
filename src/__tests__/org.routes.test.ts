@@ -44,6 +44,13 @@ vi.mock("../logger", () => ({
   }),
 }));
 
+// The per-org IP-allowlist middleware loads the policy via this service. Mock it
+// so it doesn't consume the hand-sequenced db chain in unrelated tests; default
+// to no restriction. Individual tests override it to exercise allowlist denial.
+vi.mock("../services/orgSecurityPolicy.service", () => ({
+  getOrgSecurityPolicy: vi.fn().mockResolvedValue({ ipAllowlist: [] }),
+}));
+
 // ── Constants ──────────────────────────────────────────────────────────────
 
 const USER_ID = "00000000-0000-0000-0000-000000000001";
@@ -63,6 +70,7 @@ function makeDbChain(returnValue: any = []) {
     innerJoin: vi.fn().mockReturnThis(),
     insert: vi.fn().mockReturnThis(),
     values: vi.fn().mockReturnThis(),
+    onConflictDoUpdate: vi.fn().mockReturnThis(),
     returning: vi.fn().mockResolvedValue(returnValue),
     update: vi.fn().mockReturnThis(),
     set: vi.fn().mockReturnThis(),
@@ -327,6 +335,185 @@ describe("POST /:orgId/invites", () => {
     });
 
     expect(res.status).toBe(403);
+  });
+});
+
+// ── Org passkey security policy ──────────────────────────────────────────────
+
+describe("GET /:orgId/security/policy", () => {
+  afterEach(() => {
+    vi.clearAllMocks();
+    vi.doUnmock("../middleware/auth");
+  });
+
+  it("returns the stored policy for a viewer", async () => {
+    const db = makeDbChain([]);
+    db.limit.mockResolvedValueOnce([makeOrgMember({ role: "viewer" })]); // requireOrgRole
+    db.limit.mockResolvedValueOnce([
+      {
+        orgId: ORG_ID,
+        requirePasskeyAttestation: true,
+        requireHardwarePasskey: true,
+        allowedPasskeyAaguids: ["aaguid-1"],
+        deniedPasskeyAaguids: [],
+      },
+    ]); // policy lookup
+
+    const app = await getApp(db);
+    const res = await app.request(`/${ORG_ID}/security/policy`);
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.policy.requirePasskeyAttestation).toBe(true);
+    expect(body.policy.requireHardwarePasskey).toBe(true);
+  });
+
+  it("returns permissive defaults when no policy is stored", async () => {
+    const db = makeDbChain([]);
+    db.limit.mockResolvedValueOnce([makeOrgMember({ role: "viewer" })]); // requireOrgRole
+    db.limit.mockResolvedValueOnce([]); // no policy row
+
+    const app = await getApp(db);
+    const res = await app.request(`/${ORG_ID}/security/policy`);
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.policy.requirePasskeyAttestation).toBe(false);
+    expect(body.policy.requireHardwarePasskey).toBe(false);
+  });
+
+  it("returns 403 for a non-member", async () => {
+    const db = makeDbChain([]);
+    db.limit.mockResolvedValueOnce([]); // requireOrgRole → no membership
+    const app = await getApp(db);
+    const res = await app.request(`/${ORG_ID}/security/policy`);
+    expect(res.status).toBe(403);
+  });
+});
+
+describe("PUT /:orgId/security/policy", () => {
+  afterEach(() => {
+    vi.clearAllMocks();
+    vi.doUnmock("../middleware/auth");
+  });
+
+  it("upserts the policy for an admin", async () => {
+    const db = makeDbChain([]);
+    db.limit.mockResolvedValueOnce([makeOrgMember({ role: "admin" })]); // requireOrgRole
+    const deniedAaguid = "ee882879-721c-4913-9775-3dfcce97072a";
+    db.returning.mockResolvedValueOnce([
+      {
+        orgId: ORG_ID,
+        requirePasskeyAttestation: true,
+        requireHardwarePasskey: false,
+        allowedPasskeyAaguids: [],
+        deniedPasskeyAaguids: [deniedAaguid],
+      },
+    ]);
+
+    const app = await getApp(db);
+    const res = await app.request(`/${ORG_ID}/security/policy`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        requirePasskeyAttestation: true,
+        requireHardwarePasskey: false,
+        deniedPasskeyAaguids: [deniedAaguid],
+      }),
+    });
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.policy.requirePasskeyAttestation).toBe(true);
+    expect(body.policy.deniedPasskeyAaguids).toContain(deniedAaguid);
+  });
+
+  it("rejects a malformed AAGUID with 400", async () => {
+    const db = makeDbChain([]);
+    db.limit.mockResolvedValueOnce([makeOrgMember({ role: "admin" })]); // requireOrgRole
+    const app = await getApp(db);
+    const res = await app.request(`/${ORG_ID}/security/policy`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ allowedPasskeyAaguids: ["not-a-uuid"] }),
+    });
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toBe("INVALID_REQUEST");
+  });
+
+  it("returns 403 when caller is only a member", async () => {
+    const db = makeDbChain([]);
+    db.limit.mockResolvedValueOnce([makeOrgMember({ role: "member" })]); // requireOrgRole
+    const app = await getApp(db);
+    const res = await app.request(`/${ORG_ID}/security/policy`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ requirePasskeyAttestation: true }),
+    });
+    expect(res.status).toBe(403);
+  });
+
+  it("rejects a malformed IP allowlist entry with 400", async () => {
+    const db = makeDbChain([]);
+    db.limit.mockResolvedValueOnce([makeOrgMember({ role: "admin" })]); // requireOrgRole
+    const app = await getApp(db);
+    const res = await app.request(`/${ORG_ID}/security/policy`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ipAllowlist: ["10.0.0.0/8", "not-an-ip"] }),
+    });
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toBe("INVALID_REQUEST");
+  });
+
+  it("persists a valid IP allowlist for an admin", async () => {
+    const db = makeDbChain([]);
+    db.limit.mockResolvedValueOnce([makeOrgMember({ role: "admin" })]); // requireOrgRole
+    db.returning.mockResolvedValueOnce([
+      { orgId: ORG_ID, ipAllowlist: ["203.0.113.0/24"] },
+    ]);
+    const app = await getApp(db);
+    const res = await app.request(`/${ORG_ID}/security/policy`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ipAllowlist: ["203.0.113.0/24"] }),
+    });
+    expect(res.status).toBe(200);
+    expect((await res.json()).policy.ipAllowlist).toContain("203.0.113.0/24");
+  });
+});
+
+describe("Per-org IP allowlist enforcement", () => {
+  afterEach(() => {
+    vi.clearAllMocks();
+    vi.doUnmock("../middleware/auth");
+  });
+
+  it("blocks an org-scoped request from an IP outside the allowlist", async () => {
+    const db = makeDbChain([]);
+    const app = await getApp(db);
+    // Override AFTER getApp — getApp resets modules, so the middleware uses the
+    // service instance resolved post-reset.
+    const { getOrgSecurityPolicy } = await import("../services/orgSecurityPolicy.service");
+    vi.mocked(getOrgSecurityPolicy).mockResolvedValueOnce({ ipAllowlist: ["10.0.0.0/8"] } as any);
+
+    const res = await app.request(`/${ORG_ID}`, {
+      headers: { "x-forwarded-for": "203.0.113.5" },
+    });
+    expect(res.status).toBe(403);
+    expect((await res.json()).error).toBe("ACCESS_DENIED_IP");
+  });
+
+  it("allows a request from an IP inside the allowlist", async () => {
+    const db = makeDbChain([]);
+    db.limit.mockResolvedValueOnce([makeOrgMember({ role: "viewer" })]); // requireOrgRole
+    db.limit.mockResolvedValueOnce([makeOrg()]); // org lookup
+    const app = await getApp(db);
+    const { getOrgSecurityPolicy } = await import("../services/orgSecurityPolicy.service");
+    vi.mocked(getOrgSecurityPolicy).mockResolvedValueOnce({ ipAllowlist: ["10.0.0.0/8"] } as any);
+
+    const res = await app.request(`/${ORG_ID}`, {
+      headers: { "x-forwarded-for": "10.1.2.3" },
+    });
+    // Passes the allowlist; reaches the handler (200 with org payload).
+    expect(res.status).toBe(200);
   });
 });
 

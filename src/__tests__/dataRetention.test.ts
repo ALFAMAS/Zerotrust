@@ -1,38 +1,51 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
-const { mockDb, enqueueDb, resetDb } = vi.hoisted(() => {
-  const results: any[][] = [];
-  let idx = 0;
-  const next = () => results[idx++] ?? { rowCount: 0 };
-  const makeChain = (): any => {
+const { mockDb, setCount, setHeld, resetDb } = vi.hoisted(() => {
+  // Per-table delete results, keyed by a tag on the (mocked) schema table —
+  // order-independent so concurrent runRetentionPolicies() can't shuffle them.
+  let counts: Record<string, any> = {};
+  let heldRows: { id: string }[] = [];
+  const makeDeleteChain = (table: any): any => {
+    const tag = table?.__t ?? "unknown";
+    const c: any = {};
+    c.where = () => Promise.resolve(counts[tag] ?? { rowCount: 0 });
+    return c;
+  };
+  const makeSelectChain = (): any => {
     const c: any = {};
     c.from = () => c;
-    c.where = () => Promise.resolve(next());
-    c.delete = () => c;
+    c.where = () => Promise.resolve(heldRows);
     return c;
   };
   return {
-    mockDb: { delete: () => makeChain() },
-    enqueueDb: (result: any) => results.push(result),
+    mockDb: { delete: (table: any) => makeDeleteChain(table), select: () => makeSelectChain() },
+    setCount: (tag: string, rowCount: number) => {
+      counts[tag] = { rowCount };
+    },
+    setHeld: (ids: string[]) => {
+      heldRows = ids.map((id) => ({ id }));
+    },
     resetDb: () => {
-      results.length = 0;
-      idx = 0;
+      counts = {};
+      heldRows = [];
     },
   };
 });
 
 vi.mock("../db", () => ({ getDb: () => mockDb }));
 vi.mock("../db/schema", () => ({
-  auditLogsTable: {},
-  sessionsTable: {},
-  refreshTokensTable: {},
-  otpsTable: {},
+  auditLogsTable: { __t: "audit", actorId: "actor_id", timestamp: "timestamp" },
+  sessionsTable: { __t: "sessions" },
+  refreshTokensTable: { __t: "refresh" },
+  otpsTable: { __t: "otps" },
+  usersTable: { id: "id", legalHold: "legal_hold" },
 }));
 vi.mock("drizzle-orm", () => ({
   lt: vi.fn(),
-  and: vi.fn(),
+  and: vi.fn((...args) => ({ and: args })),
   eq: vi.fn(),
   or: vi.fn(),
+  notInArray: vi.fn((col, ids) => ({ notInArray: ids })),
 }));
 vi.mock("../config", () => ({
   getConfig: () => ({
@@ -69,38 +82,49 @@ describe("Data Retention Service", () => {
   });
 
   it("purgeOldAuditLogs returns row count", async () => {
-    enqueueDb({ rowCount: 5 });
+    setCount("audit", 5);
     const { purgeOldAuditLogs } = await import("../services/dataRetention");
     const count = await purgeOldAuditLogs(90);
     expect(count).toBe(5);
   });
 
+  it("purgeOldAuditLogs still purges (excluding held users) when legal holds exist", async () => {
+    setHeld(["user-under-hold"]);
+    setCount("audit", 4);
+    const { purgeOldAuditLogs } = await import("../services/dataRetention");
+    const count = await purgeOldAuditLogs(90);
+    // Purge still runs; held users' logs are excluded via notInArray (mocked).
+    expect(count).toBe(4);
+    const { notInArray } = await import("drizzle-orm");
+    expect(notInArray).toHaveBeenCalled();
+  });
+
   it("purgeExpiredSessions returns row count", async () => {
-    enqueueDb({ rowCount: 3 });
+    setCount("sessions", 3);
     const { purgeExpiredSessions } = await import("../services/dataRetention");
     const count = await purgeExpiredSessions(30);
     expect(count).toBe(3);
   });
 
   it("purgeExpiredRefreshTokens returns row count", async () => {
-    enqueueDb({ rowCount: 7 });
+    setCount("refresh", 7);
     const { purgeExpiredRefreshTokens } = await import("../services/dataRetention");
     const count = await purgeExpiredRefreshTokens(30);
     expect(count).toBe(7);
   });
 
   it("purgeExpiredOtps returns row count", async () => {
-    enqueueDb({ rowCount: 2 });
+    setCount("otps", 2);
     const { purgeExpiredOtps } = await import("../services/dataRetention");
     const count = await purgeExpiredOtps(7);
     expect(count).toBe(2);
   });
 
   it("runRetentionPolicies aggregates all purge results", async () => {
-    enqueueDb({ rowCount: 10 }); // audit logs
-    enqueueDb({ rowCount: 4 }); // sessions
-    enqueueDb({ rowCount: 6 }); // refresh tokens
-    enqueueDb({ rowCount: 1 }); // otps
+    setCount("audit", 10);
+    setCount("sessions", 4);
+    setCount("refresh", 6);
+    setCount("otps", 1);
 
     const { runRetentionPolicies } = await import("../services/dataRetention");
     const result = await runRetentionPolicies();

@@ -34,6 +34,15 @@ interface CurrentUser {
   email: string;
 }
 
+interface SecurityPolicy {
+  orgId: string;
+  requirePasskeyAttestation: boolean;
+  requireHardwarePasskey: boolean;
+  allowedPasskeyAaguids: string[];
+  deniedPasskeyAaguids: string[];
+  ipAllowlist: string[];
+}
+
 export default function OrgSettingsPage() {
   const params = useParams();
   const router = useRouter();
@@ -59,13 +68,21 @@ export default function OrgSettingsPage() {
   const [deleteConfirm, setDeleteConfirm] = useState("");
   const [deleting, setDeleting] = useState(false);
 
+  // Passkey security policy state
+  const [policy, setPolicy] = useState<SecurityPolicy | null>(null);
+  const [allowedAaguids, setAllowedAaguids] = useState("");
+  const [deniedAaguids, setDeniedAaguids] = useState("");
+  const [ipAllowlist, setIpAllowlist] = useState("");
+  const [savingPolicy, setSavingPolicy] = useState(false);
+
   useEffect(() => {
     async function fetchAll() {
       try {
-        const [orgRes, meRes, membersRes] = await Promise.all([
+        const [orgRes, meRes, membersRes, policyRes] = await Promise.all([
           api.get<{ org: OrgDetails; memberCount: number }>(`/orgs/${orgId}`),
           api.get<CurrentUser>("/auth/me"),
           api.get<{ members: MemberRow[] }>(`/orgs/${orgId}/members`),
+          api.get<{ policy: SecurityPolicy }>(`/orgs/${orgId}/security/policy`).catch(() => null),
         ]);
 
         setOrg(orgRes.org);
@@ -73,6 +90,13 @@ export default function OrgSettingsPage() {
         setEditBillingEmail(orgRes.org.billingEmail ?? "");
         setEditLogoUrl(orgRes.org.logoUrl ?? "");
         setMembers(membersRes.members);
+
+        if (policyRes?.policy) {
+          setPolicy(policyRes.policy);
+          setAllowedAaguids((policyRes.policy.allowedPasskeyAaguids ?? []).join(", "));
+          setDeniedAaguids((policyRes.policy.deniedPasskeyAaguids ?? []).join(", "));
+          setIpAllowlist((policyRes.policy.ipAllowlist ?? []).join(", "));
+        }
 
         const me = membersRes.members.find((r) => r.user.id === meRes.id);
         setMyRole(me?.member.role ?? "");
@@ -84,6 +108,33 @@ export default function OrgSettingsPage() {
     }
     fetchAll();
   }, [orgId]);
+
+  async function handleSavePolicy(e: React.FormEvent) {
+    e.preventDefault();
+    if (!policy) return;
+    setSavingPolicy(true);
+    try {
+      const parseList = (s: string) =>
+        s
+          .split(/[\s,]+/)
+          .map((x) => x.trim().toLowerCase())
+          .filter(Boolean);
+      const res = await api.put<{ policy: SecurityPolicy }>(`/orgs/${orgId}/security/policy`, {
+        requirePasskeyAttestation: policy.requirePasskeyAttestation,
+        requireHardwarePasskey: policy.requireHardwarePasskey,
+        allowedPasskeyAaguids: parseList(allowedAaguids),
+        deniedPasskeyAaguids: parseList(deniedAaguids),
+        ipAllowlist: parseList(ipAllowlist),
+      });
+      setPolicy(res.policy);
+      setIpAllowlist((res.policy.ipAllowlist ?? []).join(", "));
+      toast({ message: "Security policy saved", type: "success" });
+    } catch (err: any) {
+      toast({ message: err.message || "Failed to save passkey policy", type: "error" });
+    } finally {
+      setSavingPolicy(false);
+    }
+  }
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
@@ -208,6 +259,101 @@ export default function OrgSettingsPage() {
           {saving ? "Saving…" : "Save changes"}
         </button>
       </form>
+
+      {/* Passkey security policy — admin+ */}
+      {policy && (
+        <form
+          onSubmit={handleSavePolicy}
+          className="bg-card border border-border rounded-xl p-5 space-y-4"
+        >
+          <div>
+            <h2 className="font-semibold text-foreground">Security policy</h2>
+            <p className="text-sm text-muted-foreground mt-0.5">
+              Passkey requirements (enforced via FIDO MDS3 attestation at registration) and an
+              optional IP allowlist for organization access.
+            </p>
+          </div>
+
+          <label className="flex items-start gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={policy.requirePasskeyAttestation}
+              onChange={(e) =>
+                setPolicy({ ...policy, requirePasskeyAttestation: e.target.checked })
+              }
+              className="mt-0.5 h-4 w-4 accent-primary"
+            />
+            <span className="text-sm text-foreground">
+              Require attestation
+              <span className="block text-xs text-muted-foreground">
+                Reject passkeys that can&apos;t prove their authenticator model (no self/none
+                attestation).
+              </span>
+            </span>
+          </label>
+
+          <label className="flex items-start gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={policy.requireHardwarePasskey}
+              onChange={(e) => setPolicy({ ...policy, requireHardwarePasskey: e.target.checked })}
+              className="mt-0.5 h-4 w-4 accent-primary"
+            />
+            <span className="text-sm text-foreground">
+              Hardware keys only
+              <span className="block text-xs text-muted-foreground">
+                Only allow FIDO-certified hardware security keys (e.g. YubiKey).
+              </span>
+            </span>
+          </label>
+
+          <div className="space-y-1">
+            <label className="text-xs text-muted-foreground">
+              Allowed AAGUIDs (comma or space separated — leave blank to allow all)
+            </label>
+            <input
+              value={allowedAaguids}
+              onChange={(e) => setAllowedAaguids(e.target.value)}
+              placeholder="ee882879-721c-4913-9775-3dfcce97072a"
+              className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm font-mono text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-ring"
+            />
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-xs text-muted-foreground">Denied AAGUIDs</label>
+            <input
+              value={deniedAaguids}
+              onChange={(e) => setDeniedAaguids(e.target.value)}
+              placeholder="00000000-0000-0000-0000-000000000000"
+              className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm font-mono text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-ring"
+            />
+          </div>
+
+          <div className="border-t border-border pt-4 space-y-1">
+            <label className="text-xs text-muted-foreground">
+              IP allowlist (IPv4 CIDRs, comma or space separated — leave blank to allow all)
+            </label>
+            <input
+              value={ipAllowlist}
+              onChange={(e) => setIpAllowlist(e.target.value)}
+              placeholder="203.0.113.0/24, 198.51.100.10"
+              className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm font-mono text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-ring"
+            />
+            <p className="text-xs text-amber-500/90">
+              ⚠ When set, all access to this organization is restricted to these ranges —
+              including this settings page. Make sure your current IP is included.
+            </p>
+          </div>
+
+          <button
+            type="submit"
+            disabled={savingPolicy}
+            className="bg-primary hover:bg-primary/90 disabled:opacity-50 text-primary-foreground text-sm px-4 py-2 rounded-lg transition-colors"
+          >
+            {savingPolicy ? "Saving…" : "Save security policy"}
+          </button>
+        </form>
+      )}
 
       {/* Transfer ownership — owner only */}
       {myRole === "owner" && nonOwnerMembers.length > 0 && (

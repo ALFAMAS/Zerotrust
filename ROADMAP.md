@@ -158,14 +158,27 @@ workload credentials are now listable/revocable from `/admin/workload`.
 - [x] Locale-aware formatting — `lib/format.ts` wraps `Intl.DateTimeFormat` /
   `NumberFormat` / `RelativeTimeFormat` and a `useFormat()` hook bound to the active
   next-intl locale; `NotificationBell` timestamps now localize through it.
-- [ ] Locale-aware email templates
-- [ ] RTL layout support
+- [~] Locale-aware email templates — `users.locale` (migration `0007`) captured from
+  `Accept-Language` at register and editable via `PATCH /auth/me`; `LocaleSwitcher` persists it
+  server-side. Email copy is sourced from a per-locale dictionary (`templates/emails/i18n.ts`,
+  en/es/fr) with English fallback. Welcome + verify-email are fully localized; remaining
+  templates can adopt the same `tr()` mechanism incrementally.
+- [ ] RTL layout support — _deferred: all configured locales (en/es/fr) are LTR; revisit when an
+  RTL locale (ar/he) is added._
 - [x] Missing-translation fallback to English
 
 **Customer Support**
 
-- [ ] Live chat widget — Crisp / Intercom / Tawk.to
-- [ ] Support ticket model
+- [x] Live chat widget — Crisp / Intercom / Tawk.to.
+  _2026-06-18: config-driven `LiveChatWidget` mounted in the dashboard shell; provider +
+  id via `NEXT_PUBLIC_CHAT_PROVIDER` / `NEXT_PUBLIC_CHAT_ID`. Injects the chosen provider's
+  script and passes the signed-in user's name/email for agent context. Unset = graceful no-op._
+- [x] Support ticket model — self-hosted threaded tickets (no third-party tool).
+  _2026-06-18: `support_tickets` + `support_ticket_messages` tables (migration `0008`);
+  `/support` routes — open ticket, list (owner-scoped; agents get `?all=true`), view thread,
+  reply (agent reply → `pending`, user reply → `open`), and status change (owners close/reopen,
+  agents any). Dashboard page at `/dashboard/support` (create + list + thread). Agent role:
+  `admin` or `support`._
 
 ### P3 — Differentiation
 
@@ -247,8 +260,13 @@ RFC 8693 token exchange, and scoped API keys — the foundation is in place.
   `exchangeToken()`, so an agent acts for a user with a verifiable delegation chain.
 - 🆕 [ ] **Human-in-the-loop approval** — reuse continuous-verification challenges to
   require a human approval step before an agent performs sensitive actions.
-- 🆕 [ ] **Agent-aware audit log** — tag every audit event as human vs. agent and
+- 🆕 [~] **Agent-aware audit log** — tag every audit event as human vs. agent and
   record the delegation chain.
+  _2026-06-18: `shared/principal.ts` derives an `AuditPrincipal` (human/agent + `workload_id`
+  + `act_as` delegation chain) from token claims; `auditLog()` now tags every entry with
+  `principal_type` (defaults to human, so existing call sites are unchanged) and the workload
+  agent-token mint logs with an agent principal. Remaining call sites can pass a principal
+  incrementally; full coverage + the act-as exchange flow still to be wired._
 
 ### 2.2 — Self-serve enterprise (close the SSO gap) 🆕 (P1)
 
@@ -263,8 +281,12 @@ Today SAML/OIDC/SCIM are env-driven (one IdP per deployment). Making them
   org-level toggle.
 - 🆕 [ ] **Session & device policy per org** — max session age, idle timeout,
   concurrent-session cap, trusted-device list, geo/IP rules.
-- 🆕 [ ] **IP allowlist per org** — restrict API + dashboard to CIDR ranges
+- 🆕 [x] **IP allowlist per org** — restrict API + dashboard to CIDR ranges
   (pulled forward from P3).
+  _2026-06-18: `org_security_policies.ip_allowlist` (IPv4 CIDRs, migration `0009`); a router
+  middleware enforces it on every `/:orgId` org-scoped request (UUID-guarded so literal paths
+  aren't mis-matched). Shared `shared/cidr.ts` matcher (also now backs global geofencing).
+  Managed from the org Settings → Security policy form; empty = no restriction._
 
 ### 2.3 — Trust, safety & abuse prevention 🆕 (P1–P2)
 
@@ -274,11 +296,25 @@ Builds on HIBP + lockout + anomaly detection + device fingerprinting already shi
   register (`disposableEmail.service.ts`, wired into `POST /register`). Block/allow lists are
   env-driven (`DISPOSABLE_EMAIL_BLOCKLIST` / `_ALLOWLIST`); set `DISPOSABLE_EMAIL_VALIDATE_MX=true`
   to also require a resolvable MX record.
-- 🆕 [ ] **Bot / abuse signals** — proof-of-work or CAPTCHA fallback on suspicious signups.
-- 🆕 [ ] **Credential-stuffing defense** — IP reputation + global velocity limits layered
+- 🆕 [x] **Bot / abuse signals** — proof-of-work or CAPTCHA fallback on suspicious signups.
+  _2026-06-18: stateless hashcash-style PoW (`services/proofOfWork.service.ts`) — signed,
+  self-expiring challenge; client finds a sha256 preimage with N leading zero bits.
+  `GET /auth/pow/challenge` issues it (returns `{enabled:false}` when off) and `POST /register`
+  verifies it. Browser solver in `lib/pow.ts` wired into the register page. Off by default
+  (`SIGNUP_POW_ENABLED`); difficulty/TTL env-tunable._
+- 🆕 [x] **Credential-stuffing defense** — IP reputation + global velocity limits layered
   on the per-IP rate limiter.
-- 🆕 [ ] **Email deliverability hardening** — SPF/DKIM/DMARC setup guide, bounce/complaint
+  _2026-06-18: `middleware/credentialStuffing.ts` tracks login failures per source IP in a
+  sliding window and blocks the IP (429 `TOO_MANY_ATTEMPTS`) once it crosses a raw
+  failure-velocity OR distinct-accounts-targeted threshold (the strong stuffing signal) —
+  complementing the per-account lockout. Wired into `POST /auth/login`; thresholds are
+  env-tunable (`CRED_STUFF_*`)._
+- 🆕 [x] **Email deliverability hardening** — SPF/DKIM/DMARC setup guide, bounce/complaint
   webhooks, suppression list (protects sender reputation for the BullMQ queue).
+  _2026-06-18: `email_suppressions` table (migration `0011`) + `emailSuppression.service.ts`;
+  the central `sendEmail()` skips suppressed recipients (fails open). Provider-agnostic
+  bounce/complaint webhook `POST /webhooks/email/event` (optional `EMAIL_WEBHOOK_SECRET`).
+  SPF/DKIM/DMARC + suppression runbook in [`docs/email-deliverability.md`](./docs/email-deliverability.md)._
 - 🆕 [ ] **Account merge / linking** — link an OAuth identity to an existing email account
   instead of creating a duplicate.
 
@@ -287,26 +323,55 @@ Builds on HIBP + lockout + anomaly detection + device fingerprinting already shi
 OpenAPI spec already exists (`Api Openapi` community) — leverage it.
 
 - 🆕 [ ] **Auto-generated SDKs** — TS + Python clients from the OpenAPI spec, published to npm/PyPI.
-- 🆕 [ ] **Sandbox / test-mode keys** — separate live vs. test API keys, mirroring Stripe.
+- 🆕 [x] **Sandbox / test-mode keys** — separate live vs. test API keys, mirroring Stripe.
+  _2026-06-18: `api_keys.environment` column (migration `0006`); `POST /api-keys` accepts
+  `environment: live|test` and prefixes the secret `zak_live_`/`zak_test_`; `apiKeyAuth`
+  sets `c.var.apiKeyEnvironment` + an `X-ZeroAuth-Environment` response header so handlers
+  can route test traffic to sandbox data. Dashboard key creator has a Live/Test selector and
+  the list flags test keys with a badge._
 - 🆕 [ ] **Per-key & per-plan rate limits + quotas** — extend rate limiting and usage metering.
-- [ ] **Webhook delivery logs UI** — persisted per-attempt history (already flagged in STARTER).
-- 🆕 [ ] **API versioning** — version prefix + deprecation headers + sunset policy.
+- [~] **Webhook delivery logs UI** — per-attempt history surfaced in the dashboard.
+  _2026-06-18: `webhookDeliveryLog` records every attempt (initial/retry/ping) in a bounded
+  in-memory ring buffer (`src/webhooks/deliveryLog.ts`); `GET /webhooks/:id/deliveries` returns
+  the history (secrets/response bodies omitted) and the dashboard webhooks page has a
+  "Deliveries" viewer. Full Postgres durability is deferred until the whole webhook subsystem
+  (endpoints are still in-memory) is persisted._
+- 🆕 [x] **API versioning** — version prefix + deprecation headers + sunset policy.
+  _2026-06-18: `middleware/apiVersioning.ts` — clients select via `X-API-Version` header or
+  `/vN` path prefix; a version registry tracks current/deprecated/sunset + sunset dates.
+  Deprecated versions get RFC 8594 `Deprecation`/`Sunset`/`Link` (successor) headers; sunset
+  (or past-sunset) versions get 410. `GET /api/versions` exposes the registry. Routes aren't
+  physically split yet — this establishes the negotiation + lifecycle contract._
 
 ### 2.5 — Compliance, data & residency 🆕 (P2–P3)
 
 Audit log already streams to Elasticsearch — extend the pipeline.
 
-- 🆕 [ ] **SIEM streaming** — fan out audit events to Datadog / Splunk / S3.
+- 🆕 [x] **SIEM streaming** — fan out audit events to Datadog / Splunk / S3.
+  _2026-06-18: `services/siem.service.ts` — generic HTTP sink (Datadog HTTP intake, Splunk HEC,
+  S3 proxy, any JSON collector); `auditLog()` fans every event out to it (fire-and-forget,
+  never throws/blocks). Off by default; configured via `SIEM_*` env._
 - 🆕 [ ] **Tamper-evident audit log** — hash-chain / Merkle anchoring for legal defensibility.
 - 🆕 [ ] **Data residency per org** — EU / US / APAC storage region (pulled forward from P3).
 - 🆕 [ ] **Privacy records** — ROPA, consent receipts, auto-generated DPA.
-- 🆕 [ ] **Legal hold** — override retention auto-purge for accounts under hold.
-- [ ] **SOC 2 Type II readiness** — access-control evidence, change mgmt, incident response.
+- 🆕 [x] **Legal hold** — override retention auto-purge for accounts under hold.
+  _2026-06-18: `users.legal_hold` (+reason/at, migration `0010`); `legalHold.service.ts`
+  (`setLegalHold` / `getHeldUserIds`, defensive). `purgeOldAuditLogs` excludes held users'
+  audit logs (`notInArray`) so their trail is preserved. Admin `POST
+  /admin/users/:id/legal-hold` places/lifts a hold (audited)._
+- [~] **SOC 2 Type II readiness** — access-control evidence, change mgmt, incident response.
+  _2026-06-18: [`docs/soc2-readiness.md`](./docs/soc2-readiness.md) maps existing controls to the
+  Trust Services Criteria (CC6–CC8, A1, C1/P) and enumerates the policy/process gaps to close
+  before an audit. Also shipped responsible disclosure: `/.well-known/security.txt` (RFC 9116)
+  + a public `/security` page._
 
 ### 2.6 — Reliability & scale 🆕 (P2–P3)
 
-- 🆕 [ ] **Backup restore + PITR** — backup exists; add a documented restore path and
+- 🆕 [x] **Backup restore + PITR** — backup exists; add a documented restore path and
   point-in-time recovery runbook (closes the loop on the P0 backup item).
+  _2026-06-18: `bun run db:restore -- <dump> [--clean]` (`scripts/db-restore.js`,
+  `pg_restore --no-owner`) + [`docs/backup-restore.md`](./docs/backup-restore.md) — restore
+  steps, Neon PITR procedure, recovery-path matrix, RPO/RTO targets, quarterly drill._
 - 🆕 [ ] **Read replicas + connection pooling** — PgBouncer, read/write split in the
   Drizzle connection layer.
 - 🆕 [ ] **Multi-region / active-active** — region routing + replicated session store.
@@ -317,11 +382,20 @@ Audit log already streams to Elasticsearch — extend the pipeline.
 
 Feature-flag infra with % rollout already shipped — extend it.
 
-- 🆕 [ ] **A/B experimentation framework** — variant assignment + conversion metrics on
+- 🆕 [~] **A/B experimentation framework** — variant assignment + conversion metrics on
   top of the existing feature-flag engine.
+  _2026-06-18: `services/experiments.service.ts` — deterministic, sticky, weighted variant
+  assignment (same FNV-1a bucketing as flag rollout, no storage) + exposure/conversion
+  tracking with per-variant conversion rates (`assignVariant` / `exposeToExperiment` /
+  `recordConversion` / `getExperimentResults`). Tracker is in-memory for now; durable
+  persistence + an admin results view can layer on without changing the assignment contract._
 - 🆕 [ ] **Pricing / paywall experiments** — test plan packaging and upgrade-prompt copy.
-- 🆕 [ ] **Usage-based upsell nudges** — "80% of API quota used" → in-app + email
+- 🆕 [x] **Usage-based upsell nudges** — "80% of API quota used" → in-app + email
   (now backed by real usage counters).
+  _2026-06-18: `services/usageNudge.service.ts` — pure `evaluateUsageNudges` (warning ≥80%,
+  exceeded ≥100%, skips unlimited/unused) + `runUsageNudges` dispatching an in-app
+  notification (+ optional email), deduped per metric/level/period and throttled. Wired into
+  `apiKeyAuth` after metering (throttle keeps it off the hot path)._
 - [ ] **Referral + loyalty programs** — see the full P3 spec in `STARTER.md`.
 
 ---

@@ -3,6 +3,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { api } from "../../../lib/api";
 import { setToken } from "../../../lib/auth";
+import { solveSignupPow } from "../../../lib/pow";
 import { useToast } from "@/lib/toast";
 import { brand } from "@/config/brand";
 import { Button } from "@/components/ui/button";
@@ -42,12 +43,15 @@ export default function RegisterPage() {
     }
     setLoading(true);
     try {
+      // Solve the anti-bot proof-of-work if the server requires one (no-op otherwise).
+      const pow = await solveSignupPow();
       await api.post(
         "/auth/register",
         {
           email: form.email,
           password: form.password,
           displayName: form.displayName,
+          ...pow,
         },
         true
       );

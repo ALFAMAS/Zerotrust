@@ -7,6 +7,7 @@ import {
   CreditCard,
   KeyRound,
   LayoutDashboard,
+  LifeBuoy,
   Monitor,
   Plug,
   ShieldCheck,
@@ -19,6 +20,7 @@ import { clearToken, isAuthenticated } from "../../lib/auth";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { NotificationBell } from "@/components/NotificationBell";
 import FeedbackWidget from "@/components/FeedbackWidget";
+import LiveChatWidget from "@/components/LiveChatWidget";
 import LocaleSwitcher from "@/components/LocaleSwitcher";
 import VerifyEmailBanner from "@/components/VerifyEmailBanner";
 import AppShell from "@/components/app-shell/AppShell";
@@ -37,6 +39,7 @@ const navItems: NavItem[] = [
   { href: "/dashboard/billing", label: "Billing", icon: CreditCard },
   { href: "/dashboard/jit", label: "Cross-tenant", icon: ShieldQuestion },
   { href: "/dashboard/settings", label: "Connected Apps", icon: Plug },
+  { href: "/dashboard/support", label: "Support", icon: LifeBuoy },
   { href: "/dashboard/account", label: "Account", icon: UserCog },
 ];
 
@@ -96,6 +99,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     >
       {children}
       <FeedbackWidget type="nps" context="dashboard" delay={45_000} />
+      <LiveChatWidget />
       <ProductTour />
     </AppShell>
   );

@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { api } from "@/lib/api";
+import { getToken } from "@/lib/auth";
 
 const LOCALES = [
   { code: "en", label: "English", flag: "🇺🇸" },
@@ -38,6 +40,11 @@ export default function LocaleSwitcher() {
     document.cookie = `za_locale=${code};path=/;max-age=${365 * 24 * 3600};samesite=lax`;
     setCurrent(code);
     setOpen(false);
+    // Persist to the account when signed in so transactional emails follow the
+    // chosen language too. Best-effort — never block the UI switch on it.
+    if (getToken()) {
+      void api.patch("/auth/me", { locale: code }).catch(() => {});
+    }
     window.location.reload();
   }
 

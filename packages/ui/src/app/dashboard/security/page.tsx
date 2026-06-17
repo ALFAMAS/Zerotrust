@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { api } from "../../../lib/api";
+import { isWebAuthnAvailable, startRegistration } from "../../../lib/webauthn";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,6 +14,7 @@ export default function SecurityPage() {
   const [loading, setLoading] = useState(true);
   const [totpSetup, setTotpSetup] = useState<any>(null);
   const [totpCode, setTotpCode] = useState("");
+  const [backupCodes, setBackupCodes] = useState<string[] | null>(null);
   const [msg, setMsg] = useState("");
 
   useEffect(() => {
@@ -30,14 +32,75 @@ export default function SecurityPage() {
 
   const verifyTOTP = async () => {
     try {
-      await api.post("/auth/mfa/totp/verify", { code: totpCode });
-      setMsg("TOTP enabled successfully!");
+      const res = await api.post<any>("/auth/mfa/totp/verify", { code: totpCode });
+      setMsg("TOTP enabled successfully! Two-factor authentication is now required at login.");
       setTotpSetup(null);
       setTotpCode("");
+      if (Array.isArray(res?.backupCodes)) setBackupCodes(res.backupCodes);
       const u = await api.get<any>("/auth/me");
       setUser(u);
     } catch (err: any) {
       setMsg(err.message || "TOTP verification failed");
+    }
+  };
+
+  const [addingPasskey, setAddingPasskey] = useState(false);
+
+  const addPasskey = async () => {
+    if (!isWebAuthnAvailable()) {
+      setMsg("This browser does not support passkeys.");
+      return;
+    }
+    setMsg("");
+    setAddingPasskey(true);
+    try {
+      const name =
+        (typeof window !== "undefined" && window.prompt("Name this passkey", "My device")) ||
+        "Passkey";
+      const options = await api.post<any>("/auth/passkey/register/options");
+      const attestation = await startRegistration(options);
+      await api.post("/auth/passkey/register/verify", { ...attestation, name });
+      setMsg("Passkey registered successfully.");
+      const u = await api.get<any>("/auth/me");
+      setUser(u);
+    } catch (err: any) {
+      if (err?.name === "NotAllowedError") {
+        setMsg("Passkey registration was cancelled.");
+      } else {
+        setMsg(err?.message || "Failed to register passkey.");
+      }
+    } finally {
+      setAddingPasskey(false);
+    }
+  };
+
+  const disconnectOAuth = async (provider: string) => {
+    if (!confirm(`Disconnect your ${provider} account?`)) return;
+    try {
+      await api.delete(`/auth/oauth/${provider}`);
+      setMsg(`Disconnected ${provider}. Other active sessions may have been signed out.`);
+      const u = await api.get<any>("/auth/me");
+      setUser(u);
+    } catch (err: any) {
+      setMsg(err.message || `Failed to disconnect ${provider}`);
+    }
+  };
+
+  const disableTOTP = async () => {
+    if (
+      !confirm(
+        "Disable two-factor authentication? Your account will be protected by password only."
+      )
+    )
+      return;
+    try {
+      await api.delete("/auth/mfa/totp");
+      setMsg("TOTP disabled. Two-factor authentication is no longer required at login.");
+      setBackupCodes(null);
+      const u = await api.get<any>("/auth/me");
+      setUser(u);
+    } catch (err: any) {
+      setMsg(err.message || "Failed to disable TOTP");
     }
   };
 
@@ -71,6 +134,51 @@ export default function SecurityPage() {
         <CardContent>
           {!user?.mfa?.totp?.enabled && !totpSetup && (
             <Button onClick={startTOTP}>Set Up TOTP</Button>
+          )}
+
+          {user?.mfa?.totp?.enabled && (
+            <div className="flex items-center justify-between gap-4">
+              <p className="text-sm text-muted-foreground">
+                Two-factor authentication is active on your account.
+                {typeof user?.mfa?.totp?.backupCodesRemaining === "number" && (
+                  <> {user.mfa.totp.backupCodesRemaining} backup code(s) remaining.</>
+                )}
+              </p>
+              <Button variant="destructive" onClick={disableTOTP}>
+                Disable
+              </Button>
+            </div>
+          )}
+
+          {backupCodes && (
+            <Alert className="mb-4">
+              <AlertDescription>
+                <p className="mb-2 font-medium text-foreground">
+                  Save your backup codes
+                </p>
+                <p className="mb-3 text-sm text-muted-foreground">
+                  Each code works once if you lose access to your authenticator. They
+                  won&apos;t be shown again.
+                </p>
+                <div className="grid grid-cols-2 gap-2 font-mono text-sm">
+                  {backupCodes.map((c) => (
+                    <span key={c} className="rounded bg-muted px-2 py-1">
+                      {c}
+                    </span>
+                  ))}
+                </div>
+                <Button
+                  variant="outline"
+                  className="mt-3"
+                  onClick={() => {
+                    void navigator.clipboard?.writeText(backupCodes.join("\n"));
+                    setMsg("Backup codes copied to clipboard.");
+                  }}
+                >
+                  Copy codes
+                </Button>
+              </AlertDescription>
+            </Alert>
           )}
 
           {totpSetup && (
@@ -132,16 +240,9 @@ export default function SecurityPage() {
             <p className="mb-4 text-sm text-muted-foreground">No passkeys registered yet.</p>
           )}
 
-          <Button
-            variant="outline"
-            onClick={() =>
-              alert(
-                "Passkey registration requires @simplewebauthn/browser. Implement in your app."
-              )
-            }
-          >
+          <Button variant="outline" onClick={addPasskey} disabled={addingPasskey}>
             <KeyRound />
-            Add passkey
+            {addingPasskey ? "Waiting for device…" : "Add passkey"}
           </Button>
         </CardContent>
       </Card>
@@ -164,9 +265,20 @@ export default function SecurityPage() {
                   className="flex items-center justify-between rounded-lg bg-muted p-3"
                 >
                   <span className="text-sm capitalize text-foreground">{provider}</span>
-                  <Badge variant={linked ? "success" : "secondary"}>
-                    {linked ? "Connected" : "Not connected"}
-                  </Badge>
+                  <div className="flex items-center gap-2">
+                    <Badge variant={linked ? "success" : "secondary"}>
+                      {linked ? "Connected" : "Not connected"}
+                    </Badge>
+                    {linked && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => disconnectOAuth(provider)}
+                      >
+                        Disconnect
+                      </Button>
+                    )}
+                  </div>
                 </div>
               );
             })}

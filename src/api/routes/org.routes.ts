@@ -14,14 +14,44 @@ import {
 } from "../../db/schema";
 import { ORG_PERMISSIONS } from "../../shared/permissions";
 import { authMiddleware } from "../../middleware/auth";
+import { getClientIp } from "../../shared/clientIp";
+import { ipMatchesAny, isValidCidrOrIp } from "../../shared/cidr";
+import { getOrgSecurityPolicy } from "../../services/orgSecurityPolicy.service";
 import { getLogger } from "../../logger";
 import type { HonoEnv } from "../../shared/types";
 
 const router = new Hono<HonoEnv>();
 const logger = getLogger("org-routes");
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 // ── Apply auth to all routes ──────────────────────────────────────────────────
 router.use("*", authMiddleware);
+
+// ── Per-org IP allowlist ────────────────────────────────────────────────────────
+// When an org configures an IP allowlist, every org-scoped request must come
+// from an allowed range. Runs on `/:orgId` routes only; the UUID guard prevents
+// literal paths like `/invites/accept` from being treated as an org id (which
+// would otherwise hit the uuid column with bad input).
+async function enforceOrgIpAllowlist(c: any, next: any) {
+  const orgId = c.req.param("orgId");
+  if (orgId && UUID_RE.test(orgId)) {
+    const policy = await getOrgSecurityPolicy(orgId);
+    if (policy.ipAllowlist && policy.ipAllowlist.length > 0) {
+      const ip = getClientIp(c);
+      if (!ipMatchesAny(ip, policy.ipAllowlist)) {
+        logger.warn("Org IP allowlist denied access", { orgId, ip });
+        return c.json(
+          { error: "ACCESS_DENIED_IP", message: "Access from this IP is not allowed for this organization" },
+          403
+        );
+      }
+    }
+  }
+  return next();
+}
+router.use("/:orgId", enforceOrgIpAllowlist);
+router.use("/:orgId/*", enforceOrgIpAllowlist);
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -119,6 +149,10 @@ const UpdateSecurityPolicySchema = z.object({
   requireHardwarePasskey: z.boolean().optional(),
   allowedPasskeyAaguids: z.array(z.string().uuid()).max(100).optional(),
   deniedPasskeyAaguids: z.array(z.string().uuid()).max(100).optional(),
+  ipAllowlist: z
+    .array(z.string().refine(isValidCidrOrIp, "Must be an IPv4 address or CIDR"))
+    .max(100)
+    .optional(),
 });
 
 // ── POST / ────────────────────────────────────────────────────────────────────
@@ -232,6 +266,7 @@ router.get("/:orgId/security/policy", async (c) => {
         requireHardwarePasskey: false,
         allowedPasskeyAaguids: [],
         deniedPasskeyAaguids: [],
+        ipAllowlist: [],
       },
     });
   } catch (err) {
@@ -263,6 +298,7 @@ router.put("/:orgId/security/policy", async (c) => {
       requireHardwarePasskey: parsed.data.requireHardwarePasskey ?? false,
       allowedPasskeyAaguids: parsed.data.allowedPasskeyAaguids ?? [],
       deniedPasskeyAaguids: parsed.data.deniedPasskeyAaguids ?? [],
+      ipAllowlist: parsed.data.ipAllowlist ?? [],
       updatedAt: new Date(),
       updatedBy: user.id,
     };
@@ -277,6 +313,7 @@ router.put("/:orgId/security/policy", async (c) => {
           requireHardwarePasskey: values.requireHardwarePasskey,
           allowedPasskeyAaguids: values.allowedPasskeyAaguids,
           deniedPasskeyAaguids: values.deniedPasskeyAaguids,
+          ipAllowlist: values.ipAllowlist,
           updatedAt: values.updatedAt,
           updatedBy: values.updatedBy,
         },
