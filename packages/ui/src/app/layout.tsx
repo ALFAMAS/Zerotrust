@@ -2,13 +2,14 @@ import type { Metadata, Viewport } from "next";
 import { Bricolage_Grotesque, Hanken_Grotesk, JetBrains_Mono } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import { NextIntlClientProvider } from "next-intl";
-import { getMessages } from "next-intl/server";
+import { getLocale, getMessages } from "next-intl/server";
 import { ToastProvider } from "../context/ToastContext";
 import CookieBanner from "@/components/CookieBanner";
 import AnalyticsScript from "@/components/AnalyticsScript";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import ServiceWorkerRegistrar from "@/components/ServiceWorkerRegistrar";
 import { brand } from "@/config/brand";
+import { directionForLocale, SUPPORTED_LOCALES } from "@/i18n/locales";
 import "./globals.css";
 
 const fontDisplay = Bricolage_Grotesque({
@@ -35,6 +36,12 @@ export const metadata: Metadata = {
   description,
   keywords: ["authentication", "zero trust", "passkeys", "webauthn", "mfa", "security"],
   manifest: "/manifest.json",
+  alternates: {
+    canonical: brand.url,
+    languages: Object.fromEntries(
+      SUPPORTED_LOCALES.map((locale) => [locale, `${brand.url}?locale=${locale}`])
+    ),
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
@@ -59,9 +66,11 @@ export const viewport: Viewport = {
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const messages = await getMessages();
+  const locale = await getLocale();
   return (
     <html
-      lang="en"
+      lang={locale}
+      dir={directionForLocale(locale)}
       suppressHydrationWarning
       className={`${fontDisplay.variable} ${fontSans.variable} ${fontMono.variable}`}
     >

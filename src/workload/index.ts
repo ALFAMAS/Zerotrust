@@ -29,11 +29,7 @@ export async function listWorkloadCredentials() {
   return rows.map((r) => ({
     ...r,
     // Derived status so the UI doesn't have to reconcile revoked + expired.
-    status: r.isRevoked
-      ? "revoked"
-      : r.expiresAt && r.expiresAt < now
-        ? "expired"
-        : "active",
+    status: r.isRevoked ? "revoked" : r.expiresAt && r.expiresAt < now ? "expired" : "active",
   }));
 }
 

@@ -8,6 +8,30 @@ import { runUsageNudges } from "../services/usageNudge.service";
 import { consumeRateLimit } from "./rateLimiting";
 import type { HonoEnv, User } from "../shared/types";
 
+export function requireApiKeyScopes(required: string | string[], mode: "all" | "any" = "all") {
+  const requiredScopes = Array.isArray(required) ? required : [required];
+  return createMiddleware<HonoEnv>(async (c, next) => {
+    const granted = c.get("apiKeyScopes") ?? [];
+    const allowed =
+      mode === "all"
+        ? requiredScopes.every((scope) => granted.includes(scope))
+        : requiredScopes.some((scope) => granted.includes(scope));
+
+    if (!allowed) {
+      return c.json(
+        {
+          error: "INSUFFICIENT_SCOPE",
+          required: requiredScopes,
+          granted,
+        },
+        403
+      );
+    }
+
+    return next();
+  });
+}
+
 export const apiKeyAuth = createMiddleware<HonoEnv>(async (c, next) => {
   const authHeader = c.req.header("Authorization") ?? "";
   const keyRaw = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : c.req.header("X-API-Key");
@@ -78,6 +102,8 @@ export const apiKeyAuth = createMiddleware<HonoEnv>(async (c, next) => {
   void runUsageNudges(scope, (user as any).id, { email: (user as any).email }).catch(() => {});
 
   c.set("user", user as unknown as User);
+  c.set("apiKeyId", key.id);
+  c.set("apiKeyScopes", key.scopes ?? []);
   // Expose the key's environment so downstream handlers can route test-mode
   // traffic to sandbox data. Defaults to "live" for keys issued before 0006.
   c.set("apiKeyEnvironment", key.environment === "test" ? "test" : "live");

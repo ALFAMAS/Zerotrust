@@ -16,5 +16,9 @@
       "Bash(mkdir -p /home/user/zeroauth/src/api/schemas /home/user/zeroauth/src/oauth/providers /home/user/zeroauth/src/audit /home/user/zeroauth/.github/workflows /home/user/zeroauth/.vscode /home/user/zeroauth/src/__tests__ /home/user/zeroauth/tests/load)",
       "Bash(cat > *)"
     ]
-  }
+  },
+  "enabledMcpjsonServers": [
+    "nextjs"
+  ],
+  "enableAllProjectMcpServers": true
 }
