@@ -16,7 +16,8 @@ jobs:
         with:
           bun-version: latest
       - run: bun install --frozen-lockfile
-      - run: bun run lint
+      - name: Biome (lint + format check)
+        run: bun run lint:ci
       - run: bun run type-check
 
   test:
@@ -47,10 +48,7 @@ jobs:
           --health-retries 5
     env:
       DATABASE_URL: postgresql://zeroauth:password@localhost:5432/zeroauth_test
-      REDIS_URI: redis://localhost:6379
-      TOKEN_SECRET_HEX: 0000000000000000000000000000000000000000000000000000000000000000
-      CSFLE_MASTER_KEY_HEX: 0000000000000000000000000000000000000000000000000000000000000000
-      NODE_ENV: test
+      REDIS_URI: redis://localhost:6379/0
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2

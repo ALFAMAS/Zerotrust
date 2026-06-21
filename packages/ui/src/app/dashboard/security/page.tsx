@@ -1,13 +1,13 @@
 "use client";
+import { KeyRound } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { api } from "../../../lib/api";
 import { isWebAuthnAvailable, startRegistration } from "../../../lib/webauthn";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { KeyRound } from "lucide-react";
 
 export default function SecurityPage() {
   const [user, setUser] = useState<any>(null);
@@ -108,7 +108,9 @@ export default function SecurityPage() {
 
   return (
     <div className="max-w-2xl space-y-6">
-      <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">Security Settings</h1>
+      <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
+        Security Settings
+      </h1>
 
       {msg && (
         <Alert>
@@ -153,12 +155,10 @@ export default function SecurityPage() {
           {backupCodes && (
             <Alert className="mb-4">
               <AlertDescription>
-                <p className="mb-2 font-medium text-foreground">
-                  Save your backup codes
-                </p>
+                <p className="mb-2 font-medium text-foreground">Save your backup codes</p>
                 <p className="mb-3 text-sm text-muted-foreground">
-                  Each code works once if you lose access to your authenticator. They
-                  won&apos;t be shown again.
+                  Each code works once if you lose access to your authenticator. They won&apos;t be
+                  shown again.
                 </p>
                 <div className="grid grid-cols-2 gap-2 font-mono text-sm">
                   {backupCodes.map((c) => (
@@ -186,7 +186,6 @@ export default function SecurityPage() {
               <p className="text-sm text-muted-foreground">
                 Scan this QR code with your authenticator app:
               </p>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={totpSetup.qrCodeUrl}
                 alt="TOTP QR Code"
@@ -270,11 +269,7 @@ export default function SecurityPage() {
                       {linked ? "Connected" : "Not connected"}
                     </Badge>
                     {linked && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => disconnectOAuth(provider)}
-                      >
+                      <Button variant="outline" size="sm" onClick={() => disconnectOAuth(provider)}>
                         Disconnect
                       </Button>
                     )}

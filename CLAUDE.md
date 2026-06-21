@@ -81,7 +81,7 @@ packages/ui/src/
 - **Web push (PWA)**: optional — set `VAPID_PUBLIC_KEY`/`VAPID_PRIVATE_KEY` (generate
   with `npx web-push generate-vapid-keys`) to enable push; unset = graceful no-op.
   The service worker (`packages/ui/public/sw.js`) only registers in production builds.
-- **Lint**: `bun run lint:fix` — ESLint + Prettier run automatically on commit via husky
+- **Lint**: `bun run lint:fix` — Biome (single Rust-based tool replaces ESLint + Prettier) runs automatically on commit via husky
 
 ## MCP servers
 

@@ -373,6 +373,10 @@ export type HonoEnv = {
     apiKeyEnvironment?: "live" | "test";
     /** Negotiated API version (e.g. "v1"), set by the apiVersioning middleware. */
     apiVersion?: string;
+    /** Org context for SCIM requests authenticated with a per-org token. */
+    scimOrgId?: string;
+    /** ID of the per-org SCIM token that authenticated the request. */
+    scimTokenId?: string;
   };
 };
 

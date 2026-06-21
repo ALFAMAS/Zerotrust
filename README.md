@@ -9,64 +9,64 @@ A production-ready SaaS boilerplate with enterprise-grade authentication built i
 
 ## What's built
 
-|     | Feature                                                               |
-| --- | --------------------------------------------------------------------- |
-| ✅  | Email + password auth with account lockout                            |
-| ✅  | Google, GitHub, Apple, Facebook OAuth                                 |
-| ✅  | Magic link (passwordless, 15-min TTL)                                 |
-| ✅  | Passkeys / WebAuthn (FIDO2)                                           |
-| ✅  | TOTP (Google Authenticator, Authy, 1Password)                         |
-| ✅  | Email OTP, SMS OTP (Twilio), WhatsApp, Telegram MFA                   |
-| ✅  | Session management — list, revoke, device tracking                    |
-| ✅  | Protected routes — client-side dashboard/admin guards, redirect to login |
-| ✅  | Silent token refresh — auto-replays a 401 via the refresh token        |
-| ✅  | PASETO v4 tokens (AES-256-GCM, no JWT footguns)                       |
-| ✅  | RBAC + ABAC with JIT privilege escalation                             |
-| ✅  | Continuous access evaluation + anomaly detection                      |
-| ✅  | Rate limiting (Redis-backed, in-memory fallback)                      |
-| ✅  | OIDC provider + SAML 2.0 SSO                                          |
-| ✅  | Decentralized identity — did:key / did:web resolver + proof-of-control |
-| ✅  | Identity federation (RFC 8693 token exchange) — admin provider registry |
-| ✅  | Workload / agent identity — scoped client-credential tokens (agent claim) |
-| ✅  | Cross-tenant JIT access — request + admin approval inbox, auto-expiring |
-| ✅  | SCIM 2.0 user provisioning                                            |
-| ✅  | LDAP / Active Directory sync                                          |
-| ✅  | User dashboard — profile, security, sessions                          |
-| ✅  | Admin panel at `/admin` — users, sessions, audit log, feature toggles |
-| ✅  | Dark mode toggle (system preference + manual, persisted)              |
-| ✅  | Toast notification system                                             |
-| ✅  | Loading skeletons                                                     |
-| ✅  | Mobile-responsive layouts                                             |
-| ✅  | PWA — installable, offline app-shell + IndexedDB write queue (Background Sync) |
-| ✅  | Web push notifications — service worker + Push API (VAPID), per-device opt-in |
-| ✅  | First-login product tour — dependency-free spotlight walkthrough      |
+|     | Feature                                                                          |
+| --- | -------------------------------------------------------------------------------- |
+| ✅  | Email + password auth with account lockout                                       |
+| ✅  | Google, GitHub, Apple, Facebook OAuth                                            |
+| ✅  | Magic link (passwordless, 15-min TTL)                                            |
+| ✅  | Passkeys / WebAuthn (FIDO2)                                                      |
+| ✅  | TOTP (Google Authenticator, Authy, 1Password)                                    |
+| ✅  | Email OTP, SMS OTP (Twilio), WhatsApp, Telegram MFA                              |
+| ✅  | Session management — list, revoke, device tracking                               |
+| ✅  | Protected routes — client-side dashboard/admin guards, redirect to login         |
+| ✅  | Silent token refresh — auto-replays a 401 via the refresh token                  |
+| ✅  | PASETO v4 tokens (AES-256-GCM, no JWT footguns)                                  |
+| ✅  | RBAC + ABAC with JIT privilege escalation                                        |
+| ✅  | Continuous access evaluation + anomaly detection                                 |
+| ✅  | Rate limiting (Redis-backed, in-memory fallback)                                 |
+| ✅  | OIDC provider + SAML 2.0 SSO                                                     |
+| ✅  | Decentralized identity — did:key / did:web resolver + proof-of-control           |
+| ✅  | Identity federation (RFC 8693 token exchange) — admin provider registry          |
+| ✅  | Workload / agent identity — scoped client-credential tokens (agent claim)        |
+| ✅  | Cross-tenant JIT access — request + admin approval inbox, auto-expiring          |
+| ✅  | SCIM 2.0 user provisioning                                                       |
+| ✅  | LDAP / Active Directory sync                                                     |
+| ✅  | User dashboard — profile, security, sessions                                     |
+| ✅  | Admin panel at `/admin` — users, sessions, audit log, feature toggles            |
+| ✅  | Dark mode toggle (system preference + manual, persisted)                         |
+| ✅  | Toast notification system                                                        |
+| ✅  | Loading skeletons                                                                |
+| ✅  | Mobile-responsive layouts                                                        |
+| ✅  | PWA — installable, offline app-shell + IndexedDB write queue (Background Sync)   |
+| ✅  | Web push notifications — service worker + Push API (VAPID), per-device opt-in    |
+| ✅  | First-login product tour — dependency-free spotlight walkthrough                 |
 | ✅  | Locale-aware formatting — `Intl.*` dates/numbers/relative-time via `useFormat()` |
-| ✅  | Cookie consent banner (GDPR)                                          |
-| ✅  | Privacy policy + Terms of service pages                               |
-| ✅  | GDPR data export + 30-day soft-delete account deletion                |
-| ✅  | Organizations & teams — workspaces, invite flows, org roles           |
-| ✅  | Custom org roles with fine-grained permission sets                    |
-| ✅  | Notification center — bell icon, SSE real-time, email fallback digest |
-| ✅  | Notification preferences + CAN-SPAM unsubscribe tokens                |
-| ✅  | Avatar upload (JPEG/PNG/GIF/WebP, 5 MB limit)                         |
-| ✅  | In-app NPS / thumbs feedback widget                                   |
-| ✅  | Analytics — Plausible and GA4 with consent gate                       |
-| ✅  | Blog + Changelog pages                                                |
-| ✅  | Sentry error monitoring — error boundaries + optional server capture  |
-| ✅  | i18n — next-intl, locale detection, language switcher (EN/ES/FR)      |
-| ✅  | BullMQ email queue — non-blocking transactional delivery              |
-| ✅  | Data retention — auto-purge audit logs, sessions, OTPs                |
-| ✅  | Immutable audit log (Elasticsearch)                                   |
-| ✅  | Prometheus metrics + OpenTelemetry tracing                            |
-| ✅  | Docker Compose — full stack in one command                            |
-| ✅  | GitHub Actions CI (lint + type-check + test + UI build)               |
-| ✅  | One-click deploy — Railway and Render buttons                         |
-| ✅  | API key management — named keys, SHA-256 hashed, scopes, revoke       |
-| ✅  | Stripe billing — checkout, customer portal, webhook handler           |
-| ✅  | Plan feature gates — `requirePlan()` middleware (free/pro/enterprise) |
-| ✅  | Billing dashboard — plan cards, Stripe checkout, manage subscription  |
-| ✅  | Help center — `/help` searchable FAQ with category filter             |
-| ✅  | Onboarding setup checklist — dismissable progress widget on dashboard |
+| ✅  | Cookie consent banner (GDPR)                                                     |
+| ✅  | Privacy policy + Terms of service pages                                          |
+| ✅  | GDPR data export + 30-day soft-delete account deletion                           |
+| ✅  | Organizations & teams — workspaces, invite flows, org roles                      |
+| ✅  | Custom org roles with fine-grained permission sets                               |
+| ✅  | Notification center — bell icon, SSE real-time, email fallback digest            |
+| ✅  | Notification preferences + CAN-SPAM unsubscribe tokens                           |
+| ✅  | Avatar upload (JPEG/PNG/GIF/WebP, 5 MB limit)                                    |
+| ✅  | In-app NPS / thumbs feedback widget                                              |
+| ✅  | Analytics — Plausible and GA4 with consent gate                                  |
+| ✅  | Blog + Changelog pages                                                           |
+| ✅  | Sentry error monitoring — error boundaries + optional server capture             |
+| ✅  | i18n — next-intl, locale detection, language switcher (EN/ES/FR)                 |
+| ✅  | BullMQ email queue — non-blocking transactional delivery                         |
+| ✅  | Data retention — auto-purge audit logs, sessions, OTPs                           |
+| ✅  | Immutable audit log (Elasticsearch)                                              |
+| ✅  | Prometheus metrics + OpenTelemetry tracing                                       |
+| ✅  | Docker Compose — full stack in one command                                       |
+| ✅  | GitHub Actions CI (lint + type-check + test + UI build)                          |
+| ✅  | One-click deploy — Railway and Render buttons                                    |
+| ✅  | API key management — named keys, SHA-256 hashed, scopes, revoke                  |
+| ✅  | Stripe billing — checkout, customer portal, webhook handler                      |
+| ✅  | Plan feature gates — `requirePlan()` middleware (free/pro/enterprise)            |
+| ✅  | Billing dashboard — plan cards, Stripe checkout, manage subscription             |
+| ✅  | Help center — `/help` searchable FAQ with category filter                        |
+| ✅  | Onboarding setup checklist — dismissable progress widget on dashboard            |
 
 ---
 
@@ -555,7 +555,8 @@ Full list with comments: [`.env.example`](./.env.example) and [`packages/ui/.env
 ├── docker-compose.yml              # Full stack
 ├── drizzle.config.ts               # Drizzle ORM config
 ├── .env.example                    # All env vars with descriptions
-└── STARTER.md                      # Roadmap + customization guide
+├── implemented.md                  # Shipped feature catalog
+├── not-implemented.md              # Backlog + perf + compliance gaps
 ```
 
 ---
@@ -771,7 +772,9 @@ Tests live in `src/__tests__/`. CI runs them on every push and pull request to `
 
 ## Roadmap
 
-See [STARTER.md](./STARTER.md) for the full feature catalog with priority tiers.
+See [`implemented.md`](./implemented.md) for the shipped feature catalog and
+[`not-implemented.md`](./not-implemented.md) for the backlog, performance
+optimizations, and compliance gaps.
 
 **✅ Shipped in 1.7**
 

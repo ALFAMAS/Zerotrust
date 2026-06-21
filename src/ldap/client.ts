@@ -10,11 +10,11 @@
  * routes can be registered.
  */
 
-import type { LDAPConfig, LDAPUser, LDAPGroup } from "./types.js";
-import { getDb } from "../db/index.js";
-import { usersTable, rolesTable } from "../db/schema.js";
 import { eq, inArray } from "drizzle-orm";
+import { getDb } from "../db/index.js";
+import { rolesTable, usersTable } from "../db/schema.js";
 import { getLogger } from "../logger/index.js";
+import type { LDAPConfig, LDAPGroup, LDAPUser } from "./types.js";
 
 const logger = getLogger("ldap-client");
 
@@ -46,7 +46,7 @@ let LdaptsClient: any = null;
 
 try {
   // Dynamic require so the module still loads when ldapts is absent
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  // biome-ignore lint/style/noRequireImports: dynamic require so the module still loads when ldapts is absent
   LdaptsClient = require("ldapts").Client;
 } catch {
   logger.warn(

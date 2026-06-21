@@ -1,10 +1,10 @@
 "use client";
-import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { api } from "../../../../lib/api";
-import { SkeletonTable, SkeletonCard } from "@/components/Skeleton";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { SkeletonCard, SkeletonTable } from "@/components/Skeleton";
 import { useToast } from "@/context/ToastContext";
+import { api } from "../../../../lib/api";
 
 interface OrgDetails {
   id: string;
@@ -108,7 +108,7 @@ export default function OrgDetailPage() {
 
   useEffect(() => {
     fetchAll();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // biome-ignore lint/correctness/useExhaustiveDependencies: fetch on orgId change only
   }, [orgId]);
 
   async function handleInvite(e: React.FormEvent) {
@@ -173,7 +173,9 @@ export default function OrgDetailPage() {
       <div className="flex items-start justify-between">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">{org.name}</h1>
+            <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
+              {org.name}
+            </h1>
             <span
               className={`text-xs px-2 py-0.5 rounded-full font-medium ${
                 ROLE_COLORS[myRole] ?? ROLE_COLORS.member

@@ -21,27 +21,19 @@
     "test": "bunx vitest",
     "test:watch": "bunx vitest --watch",
     "test:coverage": "bunx vitest --coverage",
-    "lint": "bunx eslint src --ext .ts",
-    "lint:fix": "bunx eslint src --ext .ts --fix",
-    "format": "bunx prettier --write \"src/**/*.ts\"",
+    "lint": "biome check",
+    "lint:fix": "biome check --write",
+    "format": "biome format --write",
+    "lint:ci": "biome ci",
     "type-check": "node ./node_modules/typescript/lib/tsc.js --noEmit",
     "prepare": "bunx husky",
-    "lint-staged": "bunx lint-staged",
+    "lint-staged": "biome check --write --staged --no-errors-on-unmatched",
     "release": "bunx semantic-release",
     "release:dry": "bunx semantic-release --dry-run"
   },
   "lint-staged": {
-    "src/**/*.ts": [
-      "bunx prettier --write"
-    ],
-    "src/**/!(*.test|*.spec).ts": [
-      "bunx eslint --fix --max-warnings=0"
-    ],
-    "packages/ui/src/**/*.{ts,tsx}": [
-      "bunx prettier --write"
-    ],
-    "*.{json,md}": [
-      "bunx prettier --write"
+    "*.{ts,tsx,js,mjs,cjs,json,jsonc,css}": [
+      "biome check --write --no-errors-on-unmatched"
     ]
   },
   "dependencies": {
@@ -83,6 +75,8 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.5.0",
+    "@biomejs/cli-win32-x64": "^2.5.0",
     "@commitlint/cli": "^21.0.2",
     "@commitlint/config-conventional": "^21.0.2",
     "@rollup/rollup-linux-x64-gnu": "^4.61.1",
@@ -96,21 +90,16 @@
     "@types/nodemailer": "^8.0.0",
     "@types/qrcode": "^1.5.6",
     "@types/ua-parser-js": "^0.7.39",
-    "@typescript-eslint/eslint-plugin": "^8.60.1",
-    "@typescript-eslint/parser": "^8.60.1",
-    "@vitest/coverage-v8": "4.1.8",
-    "@vitest/ui": "4.1.8",
+    "@vitest/coverage-v8": "^4.1.8",
+    "@vitest/ui": "^4.1.8",
     "concurrently": "^10.0.3",
     "conventional-changelog-conventionalcommits": "^9.3.1",
     "drizzle-kit": "^0.31.10",
-    "eslint": "^8.55.0",
     "husky": "^9.1.7",
-    "lint-staged": "^17.0.7",
-    "prettier": "^3.8.3",
     "semantic-release": "^25.0.3",
     "tsx": "^4.22.4",
     "typescript": "^5.4.0",
-    "vitest": "4.1.8"
+    "vitest": "^4.1.8"
   },
   "overrides": {
     "postcss": "^8.5.10"

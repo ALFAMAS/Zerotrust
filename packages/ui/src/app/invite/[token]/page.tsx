@@ -1,10 +1,10 @@
 "use client";
-import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { SkeletonCard } from "@/components/Skeleton";
 import { api } from "../../../lib/api";
 import { getToken } from "../../../lib/auth";
-import { SkeletonCard } from "@/components/Skeleton";
 
 interface AcceptResult {
   org: {
@@ -44,7 +44,7 @@ export default function InviteAcceptPage() {
         setErrorMessage(err.message || "Failed to accept invite");
         setStatus("error");
       });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // biome-ignore lint/correctness/useExhaustiveDependencies: fetch on token change only
   }, [token]);
 
   if (status === "loading") {

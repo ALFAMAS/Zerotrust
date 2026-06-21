@@ -5,31 +5,56 @@
  * Compatible with Azure AD, Okta, and other enterprise IdPs.
  */
 
-import { Hono } from "hono";
-import type { Context } from "hono";
 import { eq, ilike, sql } from "drizzle-orm";
+import type { Context } from "hono";
+import { Hono } from "hono";
 import { getDb } from "../db/index.js";
 import { usersTable } from "../db/schema.js";
-import { userToSCIM, scimToUserFields, scimError, parseSCIMFilter } from "./utils.js";
-import type { SCIMListResponse, SCIMUser } from "./types.js";
+import { validateOrgScimToken } from "../services/orgScimToken.service.js";
 import type { HonoEnv } from "../shared/types.js";
+import type { SCIMListResponse, SCIMUser } from "./types.js";
+import { parseSCIMFilter, scimError, scimToUserFields, userToSCIM } from "./utils.js";
 
 const router = new Hono<HonoEnv>();
 
 // ─── Bearer Token Auth ────────────────────────────────────────────────────────
+//
+// Three acceptance paths, in order:
+//   1. SCIM_API_TOKEN env (legacy, single-token mode) — kept for backwards
+//      compatibility with deployments that haven't migrated to per-org tokens.
+//   2. Per-org token from the `org_scim_tokens` table (preferred).
+//   3. No token configured at all → dev mode (open), for local development.
+//
+// In all authed paths, the resulting org context (if known) is exposed on
+// `c.var.scimOrgId` so downstream handlers can scope operations.
 
 router.use("*", async (c, next) => {
-  const token = process.env.SCIM_API_TOKEN;
-  if (!token) {
-    // If no token is configured, allow all (dev mode)
+  const authHeader = c.req.header("authorization") ?? "";
+  const match = authHeader.match(/^Bearer\s+(.+)$/i);
+
+  // Legacy single-token mode.
+  const legacyToken = process.env.SCIM_API_TOKEN;
+  if (legacyToken) {
+    if (!match || match[1] !== legacyToken) {
+      return c.json(scimError(401, "Invalid or missing Bearer token", "invalidValue"), 401);
+    }
+    // No org scoping in legacy mode — handlers continue to operate on the
+    // global user table, matching pre-existing behavior.
     return next();
   }
 
-  const authHeader = c.req.header("authorization") ?? "";
-  const match = authHeader.match(/^Bearer\s+(.+)$/i);
-  if (!match || match[1] !== token) {
+  if (!match) {
+    // No env token configured and no Bearer header → dev mode (open).
+    return next();
+  }
+
+  // Per-org token validation.
+  const result = await validateOrgScimToken(match[1]);
+  if (!result) {
     return c.json(scimError(401, "Invalid or missing Bearer token", "invalidValue"), 401);
   }
+  c.set("scimOrgId", result.orgId);
+  c.set("scimTokenId", result.tokenId);
   return next();
 });
 

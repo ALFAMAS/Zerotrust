@@ -76,7 +76,9 @@ export default function GeneralSettingsPage() {
       )}
 
       <div>
-        <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">General Settings</h1>
+        <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
+          General Settings
+        </h1>
         <p className="mt-1 text-sm text-muted-foreground">Branding and contact information</p>
       </div>
 
@@ -104,7 +106,9 @@ export default function GeneralSettingsPage() {
             placeholder="https://app.acme.com"
             className="w-full rounded-lg bg-muted border border-border px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none"
           />
-          <p className="mt-1 text-xs text-muted-foreground">Used for redirect URLs and email links</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Used for redirect URLs and email links
+          </p>
         </div>
 
         {/* Support Email */}
@@ -117,7 +121,9 @@ export default function GeneralSettingsPage() {
             placeholder="support@acme.com"
             className="w-full rounded-lg bg-muted border border-border px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none"
           />
-          <p className="mt-1 text-xs text-muted-foreground">Contact email shown in system-generated emails</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Contact email shown in system-generated emails
+          </p>
         </div>
 
         {/* Logo URL */}
@@ -130,13 +136,14 @@ export default function GeneralSettingsPage() {
             placeholder="https://acme.com/logo.png"
             className="w-full rounded-lg bg-muted border border-border px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none"
           />
-          <p className="mt-1 text-xs text-muted-foreground">Link to your logo image (PNG or SVG recommended)</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Link to your logo image (PNG or SVG recommended)
+          </p>
 
           {/* Logo preview */}
           {settings.logoUrl && (
             <div className="mt-3 flex items-center gap-3">
               <div className="rounded-lg bg-muted border border-border p-3 flex items-center justify-center">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={settings.logoUrl}
                   alt="Logo preview"
@@ -161,8 +168,19 @@ export default function GeneralSettingsPage() {
             {saving ? (
               <>
                 <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                  />
                 </svg>
                 Saving…
               </>

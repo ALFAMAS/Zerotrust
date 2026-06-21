@@ -1,23 +1,29 @@
+import { and, eq, gt, isNull, sql } from "drizzle-orm";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { nanoid } from "nanoid";
-import { eq, and, isNull, gt, sql } from "drizzle-orm";
 import { z } from "zod";
 import { getDb } from "../../db";
 import {
-  organizationsTable,
-  organizationMembersTable,
   organizationInvitesTable,
+  organizationMembersTable,
+  organizationsTable,
   orgCustomRolesTable,
   orgSecurityPoliciesTable,
   usersTable,
 } from "../../db/schema";
-import { ORG_PERMISSIONS } from "../../shared/permissions";
-import { authMiddleware } from "../../middleware/auth";
-import { getClientIp } from "../../shared/clientIp";
-import { ipMatchesAny, isValidCidrOrIp } from "../../shared/cidr";
-import { getOrgSecurityPolicy } from "../../services/orgSecurityPolicy.service";
 import { getLogger } from "../../logger";
+import { authMiddleware } from "../../middleware/auth";
+import {
+  createOrgScimToken,
+  listOrgScimTokens,
+  revokeOrgScimToken,
+  rotateOrgScimToken,
+} from "../../services/orgScimToken.service";
+import { getOrgSecurityPolicy } from "../../services/orgSecurityPolicy.service";
+import { ipMatchesAny, isValidCidrOrIp } from "../../shared/cidr";
+import { getClientIp } from "../../shared/clientIp";
+import { ORG_PERMISSIONS } from "../../shared/permissions";
 import type { HonoEnv } from "../../shared/types";
 
 const router = new Hono<HonoEnv>();
@@ -42,7 +48,10 @@ async function enforceOrgIpAllowlist(c: any, next: any) {
       if (!ipMatchesAny(ip, policy.ipAllowlist)) {
         logger.warn("Org IP allowlist denied access", { orgId, ip });
         return c.json(
-          { error: "ACCESS_DENIED_IP", message: "Access from this IP is not allowed for this organization" },
+          {
+            error: "ACCESS_DENIED_IP",
+            message: "Access from this IP is not allowed for this organization",
+          },
           403
         );
       }
@@ -325,6 +334,113 @@ router.put("/:orgId/security/policy", async (c) => {
     if (err instanceof HTTPException) throw err;
     logger.error("Update org security policy error", err as Error);
     return c.json({ error: "INTERNAL_ERROR", message: "Failed to update security policy" }, 500);
+  }
+});
+
+// ── Org SCIM tokens ──────────────────────────────────────────────────────────
+//
+// Per-org SCIM 2.0 (RFC 7644) bearer tokens. Admins generate one in the
+// dashboard and paste it into their IdP (Okta, Azure AD, Google Workspace)
+// so the IdP can call /scim/v2/* against this org. Plaintext is returned
+// exactly once at creation/rotation; only the hash is persisted.
+
+const CreateScimTokenSchema = z.object({
+  name: z.string().trim().min(1).max(80),
+  // Optional ISO-8601 expiry. null/omitted = no automatic expiry.
+  expiresAt: z.string().datetime().nullable().optional(),
+});
+
+// ── GET /:orgId/scim/tokens ─ List SCIM tokens (admin+)
+router.get("/:orgId/scim/tokens", async (c) => {
+  try {
+    const user = c.get("user");
+    const { orgId } = c.req.param();
+    const db = getDb();
+    await requireOrgRole(orgId, user.id, db, "admin");
+
+    const tokens = await listOrgScimTokens(orgId);
+    return c.json({ tokens });
+  } catch (err) {
+    if (err instanceof HTTPException) throw err;
+    logger.error("List org SCIM tokens error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR", message: "Failed to list SCIM tokens" }, 500);
+  }
+});
+
+// ── POST /:orgId/scim/tokens ─ Issue a new SCIM token (admin+)
+// Returns the plaintext exactly once. The caller must surface it to the admin
+// immediately; subsequent GETs only return metadata.
+router.post("/:orgId/scim/tokens", async (c) => {
+  try {
+    const user = c.get("user");
+    const { orgId } = c.req.param();
+    const db = getDb();
+    await requireOrgRole(orgId, user.id, db, "admin");
+
+    const body = (await c.req.json()) as Record<string, unknown>;
+    const parsed = CreateScimTokenSchema.safeParse(body);
+    if (!parsed.success) {
+      return c.json({ error: "INVALID_REQUEST", issues: parsed.error.issues }, 400);
+    }
+
+    const expiresAt = parsed.data.expiresAt ? new Date(parsed.data.expiresAt) : null;
+    const result = await createOrgScimToken({
+      orgId,
+      name: parsed.data.name,
+      createdBy: user.id,
+      expiresAt,
+    });
+
+    return c.json({ token: result.token, plaintext: result.plaintext }, 201);
+  } catch (err) {
+    if (err instanceof HTTPException) throw err;
+    logger.error("Create org SCIM token error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR", message: "Failed to create SCIM token" }, 500);
+  }
+});
+
+// ── POST /:orgId/scim/tokens/:tokenId/rotate ─ Rotate (admin+)
+// Revokes the old token and issues a new one with the same name. The new
+// plaintext is returned exactly once; the old token stops working immediately.
+router.post("/:orgId/scim/tokens/:tokenId/rotate", async (c) => {
+  try {
+    const user = c.get("user");
+    const { orgId, tokenId } = c.req.param();
+    const db = getDb();
+    await requireOrgRole(orgId, user.id, db, "admin");
+
+    const result = await rotateOrgScimToken({ orgId, tokenId, rotatedBy: user.id });
+    if (!result) {
+      return c.json({ error: "NOT_FOUND", message: "Token not found or already revoked" }, 404);
+    }
+
+    return c.json({ token: result.token, plaintext: result.plaintext });
+  } catch (err) {
+    if (err instanceof HTTPException) throw err;
+    logger.error("Rotate org SCIM token error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR", message: "Failed to rotate SCIM token" }, 500);
+  }
+});
+
+// ── DELETE /:orgId/scim/tokens/:tokenId ─ Revoke (admin+)
+// Idempotent — revoking an already-revoked token returns 404 (already gone).
+router.delete("/:orgId/scim/tokens/:tokenId", async (c) => {
+  try {
+    const user = c.get("user");
+    const { orgId, tokenId } = c.req.param();
+    const db = getDb();
+    await requireOrgRole(orgId, user.id, db, "admin");
+
+    const revoked = await revokeOrgScimToken(orgId, tokenId);
+    if (!revoked) {
+      return c.json({ error: "NOT_FOUND", message: "Token not found or already revoked" }, 404);
+    }
+
+    return c.body(null, 204);
+  } catch (err) {
+    if (err instanceof HTTPException) throw err;
+    logger.error("Revoke org SCIM token error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR", message: "Failed to revoke SCIM token" }, 500);
   }
 });
 
