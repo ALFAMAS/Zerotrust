@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
-import { api } from "../../../lib/api";
-import Modal from "../../../components/Modal";
+import { useCallback, useEffect, useState } from "react";
 import EmptyState from "../../../components/EmptyState";
+import Modal from "../../../components/Modal";
+import { api } from "../../../lib/api";
 
 interface WebhookEndpoint {
   id: string;
@@ -117,7 +117,9 @@ export default function WebhooksPage() {
     <div className="max-w-4xl">
       <div className="flex items-start justify-between mb-8">
         <div>
-          <h1 className="mb-1 font-display text-2xl font-semibold tracking-tight text-foreground">Webhooks</h1>
+          <h1 className="mb-1 font-display text-2xl font-semibold tracking-tight text-foreground">
+            Webhooks
+          </h1>
           <p className="text-muted-foreground text-sm">
             Receive signed HTTP callbacks when events happen in your account. Payloads are signed
             with HMAC-SHA256 in the <code className="text-primary">X-ZeroAuth-Signature</code>{" "}
@@ -282,9 +284,7 @@ export default function WebhooksPage() {
                       <td className="py-1.5 pr-3 font-mono">{d.event}</td>
                       <td className="py-1.5 pr-3">
                         <span
-                          className={
-                            d.status === "delivered" ? "text-green-400" : "text-red-400"
-                          }
+                          className={d.status === "delivered" ? "text-green-400" : "text-red-400"}
                         >
                           {d.status}
                         </span>

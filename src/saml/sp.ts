@@ -4,8 +4,8 @@
  * Implements SP-initiated SSO using the SAML 2.0 protocol.
  * ZeroAuth acts as the SP; an external IdP (Azure AD, Okta, etc.) handles authentication.
  */
-import crypto from "crypto";
-import zlib from "zlib";
+import crypto from "node:crypto";
+import zlib from "node:zlib";
 import { getLogger } from "../logger/index.js";
 
 const logger = getLogger("saml-sp");

@@ -1,9 +1,9 @@
+import { getTableColumns, getTableName, is } from "drizzle-orm";
+import { PgTable } from "drizzle-orm/pg-core";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
-import { is, getTableColumns, getTableName } from "drizzle-orm";
-import { PgTable } from "drizzle-orm/pg-core";
-import * as schema from "./schema";
 import { getConfig } from "../config";
+import * as schema from "./schema";
 
 type DrizzleDb = ReturnType<typeof drizzle<typeof schema>>;
 
@@ -20,14 +20,11 @@ export function getDb(): DrizzleDb {
 
 export async function initializeDatabase(): Promise<void> {
   if (isConnected && dbInstance) {
-    console.log("Database already connected");
     return;
   }
 
   const cfg = getConfig();
   const url = cfg.database.databaseUrl;
-
-  console.log(`Connecting to PostgreSQL at ${url.replace(/:([^@/]+)@/, ":***@")}`);
 
   try {
     sqlClient = postgres(url, {
@@ -38,7 +35,6 @@ export async function initializeDatabase(): Promise<void> {
 
     dbInstance = drizzle(sqlClient, { schema });
     isConnected = true;
-    console.log("✓ Database connected successfully");
   } catch (error) {
     console.error("✗ Failed to connect to database:", error);
     throw error;
@@ -74,7 +70,7 @@ export async function checkPendingMigrations(): Promise<void> {
     const actual = new Map<string, Set<string>>();
     for (const r of rows) {
       if (!actual.has(r.table_name)) actual.set(r.table_name, new Set());
-      actual.get(r.table_name)!.add(r.column_name);
+      actual.get(r.table_name)?.add(r.column_name);
     }
 
     const missingTables: string[] = [];
@@ -93,7 +89,6 @@ export async function checkPendingMigrations(): Promise<void> {
     }
 
     if (missingTables.length === 0 && missingColumns.length === 0) {
-      console.log(`✓ Database schema is up to date (${tables.length} tables verified)`);
       return;
     }
 
@@ -115,12 +110,10 @@ export async function closeDatabase(): Promise<void> {
   if (!isConnected || !sqlClient) return;
 
   try {
-    console.log("Closing database connection...");
     await sqlClient.end();
     dbInstance = null;
     sqlClient = null;
     isConnected = false;
-    console.log("✓ Database connection closed");
   } catch (error) {
     console.error("✗ Error closing database:", error);
     throw error;
@@ -165,5 +158,4 @@ export async function dropAllTables(): Promise<void> {
       END LOOP;
     END $$;
   `;
-  console.log("✓ All tables truncated");
 }

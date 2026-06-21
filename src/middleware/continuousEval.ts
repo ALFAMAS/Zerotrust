@@ -1,11 +1,12 @@
+import { eq } from "drizzle-orm";
 import { createMiddleware } from "hono/factory";
+import { insertAuditLog } from "../audit/chain";
+import { getDb } from "../db";
+import { sessionsTable } from "../db/schema";
+import { getLogger } from "../logger";
+import { AuthorizationEngine } from "../services/authz.service";
 import type { AuthzContext, HonoEnv } from "../shared/types";
 import { ErrorCodes, ZeroAuthError } from "../shared/types";
-import { AuthorizationEngine } from "../services/authz.service";
-import { getDb } from "../db";
-import { sessionsTable, auditLogsTable } from "../db/schema";
-import { eq } from "drizzle-orm";
-import { getLogger } from "../logger";
 
 const logger = getLogger("continuous-eval");
 
@@ -67,7 +68,8 @@ export function createContinuousEvalMiddleware(config?: Partial<ContinuousEvalCo
       authzContext.environment.riskScore = Math.min(100, riskScore + (authzResult.riskScore || 0));
 
       const db = getDb();
-      await db.update(sessionsTable)
+      await db
+        .update(sessionsTable)
         .set({
           continuousEvalResult: {
             decision: authzResult.decision === "allow" ? "allow" : "deny",
@@ -78,7 +80,7 @@ export function createContinuousEvalMiddleware(config?: Partial<ContinuousEvalCo
         })
         .where(eq(sessionsTable.id, session.id));
 
-      await db.insert(auditLogsTable).values({
+      await insertAuditLog({
         action: `ACCESS_EVAL_${resource}_${action}`,
         actorId: user.id,
         actorEmail: user.email,
@@ -101,7 +103,11 @@ export function createContinuousEvalMiddleware(config?: Partial<ContinuousEvalCo
       }
 
       if (authzResult.decision === "deny") {
-        throw new ZeroAuthError(ErrorCodes.ACCESS_DENIED, authzResult.reason || "Access denied by policy", 403);
+        throw new ZeroAuthError(
+          ErrorCodes.ACCESS_DENIED,
+          authzResult.reason || "Access denied by policy",
+          403
+        );
       }
 
       if (
@@ -116,7 +122,10 @@ export function createContinuousEvalMiddleware(config?: Partial<ContinuousEvalCo
       return next();
     } catch (error) {
       if (error instanceof ZeroAuthError) {
-        return c.json({ error: error.code, message: error.message, details: error.details }, error.statusCode as any);
+        return c.json(
+          { error: error.code, message: error.message, details: error.details },
+          error.statusCode as any
+        );
       }
       logger.error("Continuous evaluation error", error as Error);
       return c.json({ error: ErrorCodes.INTERNAL_ERROR, message: "Access evaluation failed" }, 500);
@@ -130,6 +139,12 @@ function extractResource(path: string): string | null {
 }
 
 function extractAction(method: string): string | null {
-  const map: Record<string, string> = { GET: "read", POST: "create", PUT: "update", PATCH: "update", DELETE: "delete" };
+  const map: Record<string, string> = {
+    GET: "read",
+    POST: "create",
+    PUT: "update",
+    PATCH: "update",
+    DELETE: "delete",
+  };
   return map[method] || null;
 }

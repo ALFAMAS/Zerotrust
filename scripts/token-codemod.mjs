@@ -1,7 +1,7 @@
 // One-off codemod: map hardcoded Tailwind gray/indigo utilities to shadcn
 // semantic tokens across the UI. Order matters (specific before generic).
-import { readdirSync, readFileSync, writeFileSync, statSync } from "node:fs";
-import { join, extname } from "node:path";
+import { readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { extname, join } from "node:path";
 
 const ROOT = process.argv[2];
 const DRY = process.argv.includes("--dry");
@@ -47,8 +47,8 @@ function walk(dir) {
   return out;
 }
 
-let changed = 0;
-let totalSubs = 0;
+let _changed = 0;
+let _totalSubs = 0;
 for (const file of walk(ROOT)) {
   const src = readFileSync(file, "utf8");
   let out = src;
@@ -60,10 +60,8 @@ for (const file of walk(ROOT)) {
     });
   }
   if (out !== src) {
-    changed++;
-    totalSubs += subs;
+    _changed++;
+    _totalSubs += subs;
     if (!DRY) writeFileSync(file, out);
-    console.log(`${subs.toString().padStart(4)}  ${file}`);
   }
 }
-console.log(`\n${DRY ? "[dry] " : ""}${changed} files, ${totalSubs} substitutions`);

@@ -9,11 +9,11 @@
  * Off by default. Enable with SIGNUP_POW_ENABLED=true; tune SIGNUP_POW_DIFFICULTY
  * (leading zero bits; ~16 ≈ sub-second in a browser) and SIGNUP_POW_TTL_MS.
  */
-import { createHash, createHmac, randomBytes, timingSafeEqual } from "crypto";
+import { createHash, createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 import { getConfig } from "../config";
 
-const DEFAULT_DIFFICULTY = parseInt(process.env.SIGNUP_POW_DIFFICULTY || "16");
-const TTL_MS = parseInt(process.env.SIGNUP_POW_TTL_MS || String(5 * 60 * 1000));
+const DEFAULT_DIFFICULTY = parseInt(process.env.SIGNUP_POW_DIFFICULTY || "16", 10);
+const TTL_MS = parseInt(process.env.SIGNUP_POW_TTL_MS || String(5 * 60 * 1000), 10);
 
 export function isSignupPowEnabled(): boolean {
   return process.env.SIGNUP_POW_ENABLED === "true";
@@ -77,11 +77,13 @@ export function verifyPowSolution(challenge: string, solution: string): PowResul
   const expected = sign(payload);
   const a = Buffer.from(mac);
   const b = Buffer.from(expected);
-  if (a.length !== b.length || !timingSafeEqual(a, b)) return { ok: false, reason: "BAD_SIGNATURE" };
+  if (a.length !== b.length || !timingSafeEqual(a, b))
+    return { ok: false, reason: "BAD_SIGNATURE" };
 
   // 2) Freshness.
   const expiresAt = Number(expiryStr);
-  if (!Number.isFinite(expiresAt) || expiresAt < Date.now()) return { ok: false, reason: "EXPIRED" };
+  if (!Number.isFinite(expiresAt) || expiresAt < Date.now())
+    return { ok: false, reason: "EXPIRED" };
 
   // 3) Work — solution must yield enough leading zero bits.
   const difficulty = Number(difficultyStr);

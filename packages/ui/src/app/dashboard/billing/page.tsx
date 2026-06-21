@@ -1,11 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { api } from "../../../lib/api";
-import { useSearchParams } from "next/navigation";
-import { Suspense } from "react";
-import Modal from "../../../components/Modal";
 import { Check } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
+import Modal from "../../../components/Modal";
+import { api } from "../../../lib/api";
 
 interface Subscription {
   plan: string;
@@ -137,8 +136,12 @@ function BillingContent() {
 
   return (
     <div className="max-w-4xl">
-      <h1 className="mb-1 font-display text-2xl font-semibold tracking-tight text-foreground">Billing</h1>
-      <p className="text-muted-foreground text-sm mb-8">Manage your subscription and payment details.</p>
+      <h1 className="mb-1 font-display text-2xl font-semibold tracking-tight text-foreground">
+        Billing
+      </h1>
+      <p className="text-muted-foreground text-sm mb-8">
+        Manage your subscription and payment details.
+      </p>
 
       {params.get("success") === "1" && (
         <div className="mb-6 bg-green-900/30 border border-green-700 rounded-xl p-4 text-green-300 text-sm">
@@ -211,7 +214,9 @@ function BillingContent() {
       {cancelOpen && (
         <Modal title="Before you go…" onClose={() => setCancelOpen(false)}>
           <div className="space-y-4">
-            <p className="text-sm text-muted-foreground">Help us improve — why are you canceling?</p>
+            <p className="text-sm text-muted-foreground">
+              Help us improve — why are you canceling?
+            </p>
             <div className="space-y-2">
               {CANCEL_REASONS.map((r) => (
                 <label key={r} className="flex items-center gap-2 text-sm text-foreground/80">
@@ -275,7 +280,9 @@ function BillingContent() {
               <p className="font-display text-lg font-semibold text-foreground">{plan.name}</p>
               <p className="mt-1 mb-4">
                 <span className="text-3xl font-bold text-foreground">{plan.price}</span>
-                {plan.period && <span className="text-muted-foreground text-sm ml-1">{plan.period}</span>}
+                {plan.period && (
+                  <span className="text-muted-foreground text-sm ml-1">{plan.period}</span>
+                )}
               </p>
               <ul className="space-y-2 mb-6 flex-1">
                 {plan.features.map((f) => (

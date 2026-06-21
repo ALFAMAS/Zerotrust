@@ -11,11 +11,11 @@
  *  - the account requires re-authentication
  */
 
-import { eq, and, gt } from "drizzle-orm";
+import { and, eq, gt } from "drizzle-orm";
 import { getDb } from "../db";
 import { securityEventsTable, sessionsTable } from "../db/schema";
-import { sendSecurityAlertEmail } from "./email.service";
 import { auditLog, getLogger } from "../logger";
+import { sendSecurityAlertEmail } from "./email.service";
 
 const logger = getLogger("account-takeover");
 
@@ -26,7 +26,7 @@ export type SensitiveChangeType =
   | "oauth_unlink";
 
 /** Window in which combined sensitive changes are considered suspicious. */
-const TAKEOVER_WINDOW_MS = parseInt(process.env.TAKEOVER_WINDOW_MS ?? String(60 * 60 * 1000));
+const TAKEOVER_WINDOW_MS = parseInt(process.env.TAKEOVER_WINDOW_MS ?? String(60 * 60 * 1000), 10);
 
 export interface TakeoverAssessment {
   flagged: boolean;

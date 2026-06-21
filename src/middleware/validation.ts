@@ -19,7 +19,10 @@ export function allowOnlyMethods(...methods: string[]) {
   return createMiddleware<HonoEnv>(async (c, next) => {
     if (!allowed.includes(c.req.method.toUpperCase())) {
       return c.json(
-        { error: ErrorCodes.INVALID_REQUEST, message: `Method not allowed. Allowed: ${allowed.join(", ")}` },
+        {
+          error: ErrorCodes.INVALID_REQUEST,
+          message: `Method not allowed. Allowed: ${allowed.join(", ")}`,
+        },
         405
       );
     }
@@ -27,7 +30,16 @@ export function allowOnlyMethods(...methods: string[]) {
   });
 }
 
-export function validate<T>(schema: { safeParse: (data: unknown) => { success: boolean; data?: T; error?: { issues: { path: (string | number)[]; message: string }[] } } }, source: "body" | "query" = "body") {
+export function validate<T>(
+  schema: {
+    safeParse: (data: unknown) => {
+      success: boolean;
+      data?: T;
+      error?: { issues: { path: (string | number)[]; message: string }[] };
+    };
+  },
+  source: "body" | "query" = "body"
+) {
   return createMiddleware<HonoEnv>(async (c, next) => {
     let data: unknown;
     if (source === "body") {
@@ -37,11 +49,14 @@ export function validate<T>(schema: { safeParse: (data: unknown) => { success: b
     }
     const result = schema.safeParse(data);
     if (!result.success) {
-      const details = result.error!.issues.map((i) => ({
+      const details = result.error?.issues.map((i) => ({
         field: i.path.join("."),
         message: i.message,
       }));
-      return c.json({ error: ErrorCodes.INVALID_REQUEST, message: "Validation failed", details }, 400);
+      return c.json(
+        { error: ErrorCodes.INVALID_REQUEST, message: "Validation failed", details },
+        400
+      );
     }
     return next();
   });

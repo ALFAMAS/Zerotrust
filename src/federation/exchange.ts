@@ -1,13 +1,13 @@
-import { getProvider } from "./registry.js";
-import { verifySubjectToken } from "./verify.js";
-import type { FederationTokenRequest, FederationTokenResponse } from "./types.js";
-import { getDb } from "../db/index.js";
-import { usersTable, sessionsTable } from "../db/schema.js";
+import crypto from "node:crypto";
 import { eq } from "drizzle-orm";
-import { TokenService } from "../services/token.service.js";
 import { getConfig } from "../config/index.js";
+import { getDb } from "../db/index.js";
+import { sessionsTable, usersTable } from "../db/schema.js";
 import { getLogger } from "../logger/index.js";
-import crypto from "crypto";
+import { TokenService } from "../services/token.service.js";
+import { getProvider } from "./registry.js";
+import type { FederationTokenRequest, FederationTokenResponse } from "./types.js";
+import { verifySubjectToken } from "./verify.js";
 
 const logger = getLogger("federation-exchange");
 

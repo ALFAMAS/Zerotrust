@@ -41,6 +41,10 @@ interface SecurityPolicy {
   allowedPasskeyAaguids: string[];
   deniedPasskeyAaguids: string[];
   ipAllowlist: string[];
+  maxSessionAgeSeconds: number;
+  idleTimeoutSeconds: number;
+  maxConcurrentSessions: number;
+  allowedCountries: string[];
 }
 
 interface ScimToken {
@@ -85,6 +89,7 @@ export default function OrgSettingsPage() {
   const [allowedAaguids, setAllowedAaguids] = useState("");
   const [deniedAaguids, setDeniedAaguids] = useState("");
   const [ipAllowlist, setIpAllowlist] = useState("");
+  const [allowedCountries, setAllowedCountries] = useState("");
   const [savingPolicy, setSavingPolicy] = useState(false);
 
   // SCIM token state — admin+ can list, generate, rotate, revoke
@@ -117,6 +122,7 @@ export default function OrgSettingsPage() {
           setAllowedAaguids((policyRes.policy.allowedPasskeyAaguids ?? []).join(", "));
           setDeniedAaguids((policyRes.policy.deniedPasskeyAaguids ?? []).join(", "));
           setIpAllowlist((policyRes.policy.ipAllowlist ?? []).join(", "));
+          setAllowedCountries((policyRes.policy.allowedCountries ?? []).join(", "));
         }
 
         setScimTokens(scimRes?.tokens ?? []);
@@ -142,15 +148,25 @@ export default function OrgSettingsPage() {
           .split(/[\s,]+/)
           .map((x) => x.trim().toLowerCase())
           .filter(Boolean);
+      const parseCountries = (s: string) =>
+        s
+          .split(/[\s,]+/)
+          .map((x) => x.trim().toUpperCase())
+          .filter(Boolean);
       const res = await api.put<{ policy: SecurityPolicy }>(`/orgs/${orgId}/security/policy`, {
         requirePasskeyAttestation: policy.requirePasskeyAttestation,
         requireHardwarePasskey: policy.requireHardwarePasskey,
         allowedPasskeyAaguids: parseList(allowedAaguids),
         deniedPasskeyAaguids: parseList(deniedAaguids),
         ipAllowlist: parseList(ipAllowlist),
+        maxSessionAgeSeconds: policy.maxSessionAgeSeconds || 0,
+        idleTimeoutSeconds: policy.idleTimeoutSeconds || 0,
+        maxConcurrentSessions: policy.maxConcurrentSessions || 0,
+        allowedCountries: parseCountries(allowedCountries),
       });
       setPolicy(res.policy);
       setIpAllowlist((res.policy.ipAllowlist ?? []).join(", "));
+      setAllowedCountries((res.policy.allowedCountries ?? []).join(", "));
       toast({ message: "Security policy saved", type: "success" });
     } catch (err: any) {
       toast({ message: err.message || "Failed to save passkey policy", type: "error" });
@@ -414,6 +430,72 @@ export default function OrgSettingsPage() {
               ⚠ When set, all access to this organization is restricted to these ranges — including
               this settings page. Make sure your current IP is included.
             </p>
+          </div>
+
+          <div className="border-t border-border pt-4 space-y-3">
+            <p className="text-sm font-medium text-foreground">Session &amp; device policy</p>
+            <p className="text-xs text-muted-foreground -mt-2">
+              Applies to every member of this organization. Use 0 for no limit.
+            </p>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+              <div className="space-y-1">
+                <label className="text-xs text-muted-foreground">Max session age (minutes)</label>
+                <input
+                  type="number"
+                  min={0}
+                  value={Math.round((policy.maxSessionAgeSeconds ?? 0) / 60)}
+                  onChange={(e) =>
+                    setPolicy({
+                      ...policy,
+                      maxSessionAgeSeconds: Math.max(0, Number(e.target.value) || 0) * 60,
+                    })
+                  }
+                  className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:border-ring"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs text-muted-foreground">Idle timeout (minutes)</label>
+                <input
+                  type="number"
+                  min={0}
+                  value={Math.round((policy.idleTimeoutSeconds ?? 0) / 60)}
+                  onChange={(e) =>
+                    setPolicy({
+                      ...policy,
+                      idleTimeoutSeconds: Math.max(0, Number(e.target.value) || 0) * 60,
+                    })
+                  }
+                  className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:border-ring"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs text-muted-foreground">Max concurrent sessions</label>
+                <input
+                  type="number"
+                  min={0}
+                  value={policy.maxConcurrentSessions ?? 0}
+                  onChange={(e) =>
+                    setPolicy({
+                      ...policy,
+                      maxConcurrentSessions: Math.max(0, Number(e.target.value) || 0),
+                    })
+                  }
+                  className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:border-ring"
+                />
+              </div>
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs text-muted-foreground">
+                Allowed countries (ISO 3166-1 alpha-2, comma or space separated — leave blank to
+                allow all)
+              </label>
+              <input
+                value={allowedCountries}
+                onChange={(e) => setAllowedCountries(e.target.value)}
+                placeholder="US, GB, DE"
+                className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm font-mono uppercase text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-ring"
+              />
+            </div>
           </div>
 
           <button

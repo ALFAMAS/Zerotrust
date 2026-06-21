@@ -1,315 +1,291 @@
 // ─── Configuration ───────────────────────────────────────────────────────────
-export { loadConfig, getConfig, resetConfig } from "./config";
 
-// ─── Database ────────────────────────────────────────────────────────────────
-export {
-  initializeDatabase,
-  closeDatabase,
-  checkDatabaseHealth,
-  isDbConnected,
-  dropAllTables,
-  getDb,
-} from "./db";
-
-// ─── Schema ──────────────────────────────────────────────────────────────────
-export {
-  usersTable,
-  sessionsTable,
-  rolesTable,
-  jitAccessTable,
-  auditLogsTable,
-  refreshTokensTable,
-  otpsTable,
-  workloadCredentialsTable,
-  saasSettingsTable,
-} from "./db/schema";
-
-// ─── Encryption (CSFLE) ──────────────────────────────────────────────────────
-export { initializeCSFLE, getCSFLE, resetCSFLE, type EncryptionKeyVersion } from "./crypto/csfle";
-
-// ─── Logging ─────────────────────────────────────────────────────────────────
-export {
-  initializeLogger,
-  getLogger,
-  createChildLogger,
-  auditLog,
-  resetLogger,
-  generateCorrelationId,
-  type LogContext,
-  type LogLevel,
-} from "./logger";
-
-// ─── Shared Types ───────────────────────────────────────────────────────────
-export type {
-  ZeroAuthConfig,
-  TokenPayload,
-  AccessTokenResponse,
-  User,
-  Passkey,
-  OAuthProvider,
-  Session,
-  DeviceFingerprint,
-  Role,
-  Permission,
-  ABACCondition,
-  AuthzContext,
-  AuthzResult,
-  JITAccessRequest,
-  AuditLog,
-  RefreshTokenRecord,
-  OTP,
-  WorkloadCredential,
-  OAuthAuthorizationRequest,
-  OAuthTokenResponse,
-  MFAChallengeResponse,
-  HonoEnv,
-} from "./shared/types";
-
-export {
-  ZeroAuthError,
-  ErrorCodes,
-  DEFAULT_ACCESS_TOKEN_TTL,
-  DEFAULT_REFRESH_TOKEN_TTL,
-  DEFAULT_SESSION_TTL,
-  DEFAULT_OTP_TTL,
-  DEFAULT_JIT_GRANT_TTL,
-} from "./shared/types";
-
-// ─── Services ───────────────────────────────────────────────────────────────
-export { TokenService } from "./services/token.service";
-export { AuthorizationEngine } from "./services/authz.service";
-export { FingerprintService } from "./services/fingerprint.service";
-export {
-  enforceMaxConcurrentDevices,
-  revokeSession,
-  revokeAllSessionsForUser,
-} from "./middleware/sessionControl";
-export { requireProofOfPossession, clearPoPNonces } from "./middleware/proofOfPossession";
-export { rateLimit, initRateLimiter, clearRateLimiter } from "./middleware/rateLimiting";
-export { geoFencingMiddleware } from "./middleware/geoFencing";
-export { temporalAccessMiddleware } from "./middleware/temporalAccess";
 export { createServer as createApiServer } from "./api/server";
-export { sendOTP } from "./mfa";
-export { requireFields, allowOnlyMethods } from "./middleware/validation";
 export {
-  checkAccountLockout,
-  recordFailedLogin,
-  recordSuccessfulLogin,
-  clearLockout,
-  isAccountLocked,
-} from "./middleware/accountLockout";
-export {
-  initAuditPipeline,
-  queueAuditDoc,
   flushAuditPipeline,
   getElasticsearchHealth,
+  initAuditPipeline,
+  queueAuditDoc,
   shutdownAuditPipeline,
 } from "./audit";
-export { getProviderAdapter } from "./oauth/provider.factory";
-export { handleSSFEvent } from "./ssf/receiver";
-export { sendSSFEvent } from "./ssf/sender";
-export { createWorkloadCredential, validateWorkloadCredential } from "./workload";
+export { getConfig, loadConfig, resetConfig } from "./config";
 
-// ─── Magic Links ─────────────────────────────────────────────────────────────
-export { sendMagicLink, verifyMagicLink } from "./services/magicLink.service";
-
-// ─── FIDO2 Hardware Attestation ──────────────────────────────────────────────
+// ─── Encryption (CSFLE) ──────────────────────────────────────────────────────
+export { type EncryptionKeyVersion, getCSFLE, initializeCSFLE, resetCSFLE } from "./crypto/csfle";
+export type { HardwareKeyProvider } from "./crypto/hardware-key-store";
+// ─── Hardware Key Storage ─────────────────────────────────────────────────────
 export {
-  verifyAttestation,
-  verifyAttestationWithMDS3,
-  getAttestationPolicy,
-  KNOWN_HARDWARE_KEY_AAGUIDS,
-  DEFAULT_POLICY as DEFAULT_ATTESTATION_POLICY,
-  HIGH_ASSURANCE_POLICY,
-} from "./mfa/attestation";
+  initHardwareKeyStore,
+  PKCS11Provider,
+  SecureEnclaveProvider,
+  SoftwareKeyProvider,
+  TPMKeyProvider,
+} from "./crypto/hardware-key-store";
 export type {
-  AttestationPolicy,
-  AttestationVerificationResult,
-  AttestationVerificationResultWithMDS3,
-} from "./mfa/attestation";
-
-// ─── FIDO MDS3 ───────────────────────────────────────────────────────────────
-export { initMDS3, getMDS3Entry, isFidoCertified, getDeviceDescription } from "./mfa/fido-mds3";
-export type { MDS3Entry, MDS3StatusReport, MDS3Cache } from "./mfa/fido-mds3";
-
-// ─── Attestation CA Pinning ───────────────────────────────────────────────────
+  KEMEncapsulation,
+  KEMPrivateKey,
+  KEMPublicKey,
+  PQKEMProvider,
+} from "./crypto/post-quantum";
+// ─── Post-Quantum Cryptography ────────────────────────────────────────────────
 export {
-  pinAttestationCA,
-  unpinAttestationCA,
-  getAttestationCAPins,
-  verifyAttestationCAPin,
-} from "./mfa/attestation-ca-pin";
-export type { AttestationCAPin } from "./mfa/attestation-ca-pin";
-
-// ─── mTLS Middleware ──────────────────────────────────────────────────────────
-export { mtlsMiddleware } from "./middleware/mtls";
-export type { mTLSOptions, WorkloadIdentity } from "./middleware/mtls";
-
-// ─── FIDO2 Discoverable Credentials ──────────────────────────────────────────
+  createKEMProvider,
+  establishPQSessionKey,
+  generatePQKeyPair,
+  hybridDecrypt,
+  hybridEncrypt,
+  NobleMLKEM,
+  SimulatedMLKEM,
+} from "./crypto/post-quantum";
+// ─── Database ────────────────────────────────────────────────────────────────
 export {
-  generateDiscoverableRegistrationOptions,
-  verifyDiscoverableRegistration,
-  generateDiscoverableAuthenticationOptions,
-  verifyDiscoverableAuthentication,
-} from "./mfa/resident-keys";
-export type { DiscoverableAuthenticator } from "./mfa/resident-keys";
-
-// ─── Multi-Tenant ────────────────────────────────────────────────────────────
+  checkDatabaseHealth,
+  closeDatabase,
+  dropAllTables,
+  getDb,
+  initializeDatabase,
+  isDbConnected,
+} from "./db";
+// ─── Schema ──────────────────────────────────────────────────────────────────
 export {
-  getAllTenants,
-  getTenant,
-  getTenantBySlug,
-  createTenant,
-  updateTenant,
-  deleteTenant,
-} from "./models/tenant.model";
+  auditLogsTable,
+  jitAccessTable,
+  otpsTable,
+  refreshTokensTable,
+  rolesTable,
+  saasSettingsTable,
+  sessionsTable,
+  usersTable,
+  workloadCredentialsTable,
+} from "./db/schema";
+// ─── Decentralized Identity (DID) ─────────────────────────────────────────────
+export { resolveDID, resolveDIDKey, resolveDIDWeb } from "./did/resolver";
 export type {
-  Tenant,
-  TenantSettings,
-  OidcConfig,
-  SamlConfig,
-  CreateTenantData,
-  UpdateTenantData,
-} from "./models/tenant.model";
-export { resolveTenant, requireTenant } from "./middleware/tenant";
-
-// ─── OIDC Provider ───────────────────────────────────────────────────────────
+  DIDAuthChallenge,
+  DIDAuthResult,
+  DIDDocument,
+  DIDProof,
+  VerificationMethod,
+} from "./did/types";
+export { createDIDChallenge, provisionDIDUser, verifyDIDProof } from "./did/verifier";
+export type {
+  FederatedProvider,
+  FederationTokenRequest,
+  FederationTokenResponse,
+} from "./federation/index";
+// ─── Cross-Tenant Federation ──────────────────────────────────────────────────
 export {
-  registerOIDCClient,
-  getOIDCClient,
-  validateAuthorizeRequest,
-  generateAuthCode,
-  exchangeAuthCode as exchangeOIDCCode,
-  buildUserInfo,
-  getDiscoveryDocument,
-} from "./oidc/provider";
-
-// ─── SAML 2.0 ────────────────────────────────────────────────────────────────
-export { buildAuthnRequest, parseSAMLResponse, buildSPMetadata } from "./saml/sp";
-export type { SAMLAssertion, SAMLIdPConfig, SAMLSPConfig } from "./saml/sp";
-
-// ─── Webhooks ────────────────────────────────────────────────────────────────
-export { dispatchEvent, webhookStore, signPayload } from "./webhooks";
-export type { WebhookEventType, WebhookEndpoint, WebhookDelivery } from "./webhooks/types";
-
-// ─── Metrics ─────────────────────────────────────────────────────────────────
-export { recordAuth, recordMFA, recordRateLimit, metricsRoute, metricsMiddleware } from "./metrics";
-
-// ─── Telemetry ───────────────────────────────────────────────────────────────
-export { initTelemetry, getTracer, withSpan, telemetryMiddleware } from "./telemetry";
-
-// ─── SCIM 2.0 ────────────────────────────────────────────────────────────────
-export { scimRoutes } from "./scim";
-export type { SCIMUser, SCIMGroup } from "./scim";
-
-// ─── Multi-Tenant Rate Limiting ───────────────────────────────────────────────
-export { tenantRateLimit, configureTenantQuota, getTenantQuota } from "./middleware/rateLimiting";
-
+  exchangeToken as exchangeFederatedToken,
+  getProvider as getFederationProvider,
+  initFederationFromEnv,
+  listProviders as listFederationProviders,
+  registerProvider as registerFederationProvider,
+  removeProvider as removeFederationProvider,
+  requireFederatedIdentity,
+} from "./federation/index";
+export type { CrossTenantJITRequest } from "./jit/cross-tenant";
 // ─── Cross-Tenant JIT ─────────────────────────────────────────────────────────
 export {
   crossTenantJITStore,
   requestCrossTenantAccess,
   requireCrossTenantJIT,
 } from "./jit/cross-tenant";
-export type { CrossTenantJITRequest } from "./jit/cross-tenant";
-
 // ─── LDAP / Active Directory ─────────────────────────────────────────────────
-export { LDAPClient, createLDAPClient } from "./ldap/client";
-export { syncAllUsers, syncModifiedUsers, scheduleLDAPSync } from "./ldap/sync";
-export type { LDAPConfig, LDAPUser, LDAPGroup } from "./ldap/types";
-
-// ─── Notifications (Slack / Teams / PagerDuty) ────────────────────────────────
-export { notificationDispatcher, initNotificationsFromEnv } from "./notifications";
-export type { NotificationEvent, NotificationChannel } from "./notifications/types";
-
-// ─── Token Binding ────────────────────────────────────────────────────────────
-export { tokenBindingMiddleware } from "./middleware/tokenBinding";
-export type { TokenBindingOptions } from "./middleware/tokenBinding";
-
-// ─── Anomaly Detection ────────────────────────────────────────────────────────
-export { anomalyDetectionMiddleware } from "./middleware/anomalyMiddleware";
-export type { AnomalyMiddlewareOptions } from "./middleware/anomalyMiddleware";
+export { createLDAPClient, LDAPClient } from "./ldap/client";
+export { scheduleLDAPSync, syncAllUsers, syncModifiedUsers } from "./ldap/sync";
+export type { LDAPConfig, LDAPGroup, LDAPUser } from "./ldap/types";
+// ─── Logging ─────────────────────────────────────────────────────────────────
 export {
-  scoreAnomaly,
-  updateBaseline,
-  getBaseline,
-  resetBaseline,
-  computeDeviceHash,
-} from "./services/anomalyDetection.service";
-export type { AnomalySignals, BehaviorObservation } from "./services/anomalyDetection.service";
-
-// ─── Continuous Verification ──────────────────────────────────────────────────
-export {
-  requireReverification,
-  recordVerification,
-  getVerification,
-} from "./middleware/continuousVerification";
-export type { ContinuousVerificationOptions } from "./middleware/continuousVerification";
-export { assessSessionRisk, computeRiskFactors } from "./services/sessionRisk.service";
-export type { RiskFactors, RiskAssessment } from "./services/sessionRisk.service";
-
-// ─── Cross-Tenant Federation ──────────────────────────────────────────────────
-export {
-  registerProvider as registerFederationProvider,
-  getProvider as getFederationProvider,
-  listProviders as listFederationProviders,
-  removeProvider as removeFederationProvider,
-  initFederationFromEnv,
-  exchangeToken as exchangeFederatedToken,
-  requireFederatedIdentity,
-} from "./federation/index";
+  auditLog,
+  createChildLogger,
+  generateCorrelationId,
+  getLogger,
+  initializeLogger,
+  type LogContext,
+  type LogLevel,
+  resetLogger,
+} from "./logger";
+// ─── Metrics ─────────────────────────────────────────────────────────────────
+export { metricsMiddleware, metricsRoute, recordAuth, recordMFA, recordRateLimit } from "./metrics";
+export { sendOTP } from "./mfa";
 export type {
-  FederatedProvider,
-  FederationTokenRequest,
-  FederationTokenResponse,
-} from "./federation/index";
-
-// ─── Hardware Key Storage ─────────────────────────────────────────────────────
+  AttestationPolicy,
+  AttestationVerificationResult,
+  AttestationVerificationResultWithMDS3,
+} from "./mfa/attestation";
+// ─── FIDO2 Hardware Attestation ──────────────────────────────────────────────
 export {
-  initHardwareKeyStore,
-  SoftwareKeyProvider,
-  TPMKeyProvider,
-  SecureEnclaveProvider,
-  PKCS11Provider,
-} from "./crypto/hardware-key-store";
-export type { HardwareKeyProvider } from "./crypto/hardware-key-store";
-
+  DEFAULT_POLICY as DEFAULT_ATTESTATION_POLICY,
+  getAttestationPolicy,
+  HIGH_ASSURANCE_POLICY,
+  KNOWN_HARDWARE_KEY_AAGUIDS,
+  verifyAttestation,
+  verifyAttestationWithMDS3,
+} from "./mfa/attestation";
+export type { AttestationCAPin } from "./mfa/attestation-ca-pin";
+// ─── Attestation CA Pinning ───────────────────────────────────────────────────
+export {
+  getAttestationCAPins,
+  pinAttestationCA,
+  unpinAttestationCA,
+  verifyAttestationCAPin,
+} from "./mfa/attestation-ca-pin";
+export type { EnterpriseAttestationCA, EnterpriseCertificate } from "./mfa/enterprise-attestation";
 // ─── Enterprise Attestation ───────────────────────────────────────────────────
 export {
   enterpriseCARegistry,
-  verifyEnterpriseAttestation,
-  requireEnterpriseAttestation,
   parseCertificate,
+  requireEnterpriseAttestation,
+  verifyEnterpriseAttestation,
 } from "./mfa/enterprise-attestation";
-export type { EnterpriseAttestationCA, EnterpriseCertificate } from "./mfa/enterprise-attestation";
-
-// ─── Decentralized Identity (DID) ─────────────────────────────────────────────
-export { resolveDID, resolveDIDKey, resolveDIDWeb } from "./did/resolver";
-export { createDIDChallenge, verifyDIDProof, provisionDIDUser } from "./did/verifier";
-export type {
-  DIDDocument,
-  DIDAuthChallenge,
-  DIDProof,
-  DIDAuthResult,
-  VerificationMethod,
-} from "./did/types";
-
-// ─── Post-Quantum Cryptography ────────────────────────────────────────────────
+export type { MDS3Cache, MDS3Entry, MDS3StatusReport } from "./mfa/fido-mds3";
+// ─── FIDO MDS3 ───────────────────────────────────────────────────────────────
+export { getDeviceDescription, getMDS3Entry, initMDS3, isFidoCertified } from "./mfa/fido-mds3";
+export type { DiscoverableAuthenticator } from "./mfa/resident-keys";
+// ─── FIDO2 Discoverable Credentials ──────────────────────────────────────────
 export {
-  createKEMProvider,
-  generatePQKeyPair,
-  hybridEncrypt,
-  hybridDecrypt,
-  SimulatedMLKEM,
-  NobleMLKEM,
-  establishPQSessionKey,
-} from "./crypto/post-quantum";
+  generateDiscoverableAuthenticationOptions,
+  generateDiscoverableRegistrationOptions,
+  verifyDiscoverableAuthentication,
+  verifyDiscoverableRegistration,
+} from "./mfa/resident-keys";
+export {
+  checkAccountLockout,
+  clearLockout,
+  isAccountLocked,
+  recordFailedLogin,
+  recordSuccessfulLogin,
+} from "./middleware/accountLockout";
+export type { AnomalyMiddlewareOptions } from "./middleware/anomalyMiddleware";
+// ─── Anomaly Detection ────────────────────────────────────────────────────────
+export { anomalyDetectionMiddleware } from "./middleware/anomalyMiddleware";
+export type { ContinuousVerificationOptions } from "./middleware/continuousVerification";
+// ─── Continuous Verification ──────────────────────────────────────────────────
+export {
+  getVerification,
+  recordVerification,
+  requireReverification,
+} from "./middleware/continuousVerification";
+export { geoFencingMiddleware } from "./middleware/geoFencing";
+export type { mTLSOptions, WorkloadIdentity } from "./middleware/mtls";
+// ─── mTLS Middleware ──────────────────────────────────────────────────────────
+export { mtlsMiddleware } from "./middleware/mtls";
+export { clearPoPNonces, requireProofOfPossession } from "./middleware/proofOfPossession";
+// ─── Multi-Tenant Rate Limiting ───────────────────────────────────────────────
+export {
+  clearRateLimiter,
+  configureTenantQuota,
+  getTenantQuota,
+  initRateLimiter,
+  rateLimit,
+  tenantRateLimit,
+} from "./middleware/rateLimiting";
+export {
+  enforceMaxConcurrentDevices,
+  revokeAllSessionsForUser,
+  revokeSession,
+} from "./middleware/sessionControl";
+export { temporalAccessMiddleware } from "./middleware/temporalAccess";
+export { requireTenant, resolveTenant } from "./middleware/tenant";
+export type { TokenBindingOptions } from "./middleware/tokenBinding";
+// ─── Token Binding ────────────────────────────────────────────────────────────
+export { tokenBindingMiddleware } from "./middleware/tokenBinding";
+export { allowOnlyMethods, requireFields } from "./middleware/validation";
 export type {
-  KEMPublicKey,
-  KEMPrivateKey,
-  KEMEncapsulation,
-  PQKEMProvider,
-} from "./crypto/post-quantum";
+  CreateTenantData,
+  OidcConfig,
+  SamlConfig,
+  Tenant,
+  TenantSettings,
+  UpdateTenantData,
+} from "./models/tenant.model";
+// ─── Multi-Tenant ────────────────────────────────────────────────────────────
+export {
+  createTenant,
+  deleteTenant,
+  getAllTenants,
+  getTenant,
+  getTenantBySlug,
+  updateTenant,
+} from "./models/tenant.model";
+// ─── Notifications (Slack / Teams / PagerDuty) ────────────────────────────────
+export { initNotificationsFromEnv, notificationDispatcher } from "./notifications";
+export type { NotificationChannel, NotificationEvent } from "./notifications/types";
+export { getProviderAdapter } from "./oauth/provider.factory";
+// ─── OIDC Provider ───────────────────────────────────────────────────────────
+export {
+  buildUserInfo,
+  exchangeAuthCode as exchangeOIDCCode,
+  generateAuthCode,
+  getDiscoveryDocument,
+  getOIDCClient,
+  registerOIDCClient,
+  validateAuthorizeRequest,
+} from "./oidc/provider";
+export type { SAMLAssertion, SAMLIdPConfig, SAMLSPConfig } from "./saml/sp";
+// ─── SAML 2.0 ────────────────────────────────────────────────────────────────
+export { buildAuthnRequest, buildSPMetadata, parseSAMLResponse } from "./saml/sp";
+export type { SCIMGroup, SCIMUser } from "./scim";
+// ─── SCIM 2.0 ────────────────────────────────────────────────────────────────
+export { scimRoutes } from "./scim";
+export type { AnomalySignals, BehaviorObservation } from "./services/anomalyDetection.service";
+export {
+  computeDeviceHash,
+  getBaseline,
+  resetBaseline,
+  scoreAnomaly,
+  updateBaseline,
+} from "./services/anomalyDetection.service";
+export { AuthorizationEngine } from "./services/authz.service";
+export { FingerprintService } from "./services/fingerprint.service";
+// ─── Magic Links ─────────────────────────────────────────────────────────────
+export { sendMagicLink, verifyMagicLink } from "./services/magicLink.service";
+export type { RiskAssessment, RiskFactors } from "./services/sessionRisk.service";
+export { assessSessionRisk, computeRiskFactors } from "./services/sessionRisk.service";
+// ─── Services ───────────────────────────────────────────────────────────────
+export { TokenService } from "./services/token.service";
+// ─── Shared Types ───────────────────────────────────────────────────────────
+export type {
+  ABACCondition,
+  AccessTokenResponse,
+  AuditLog,
+  AuthzContext,
+  AuthzResult,
+  DeviceFingerprint,
+  HonoEnv,
+  JITAccessRequest,
+  MFAChallengeResponse,
+  OAuthAuthorizationRequest,
+  OAuthProvider,
+  OAuthTokenResponse,
+  OTP,
+  Passkey,
+  Permission,
+  RefreshTokenRecord,
+  Role,
+  Session,
+  TokenPayload,
+  User,
+  WorkloadCredential,
+  ZeroAuthConfig,
+} from "./shared/types";
+export {
+  DEFAULT_ACCESS_TOKEN_TTL,
+  DEFAULT_JIT_GRANT_TTL,
+  DEFAULT_OTP_TTL,
+  DEFAULT_REFRESH_TOKEN_TTL,
+  DEFAULT_SESSION_TTL,
+  ErrorCodes,
+  ZeroAuthError,
+} from "./shared/types";
+export { handleSSFEvent } from "./ssf/receiver";
+export { sendSSFEvent } from "./ssf/sender";
+// ─── Telemetry ───────────────────────────────────────────────────────────────
+export { getTracer, initTelemetry, telemetryMiddleware, withSpan } from "./telemetry";
+// ─── Webhooks ────────────────────────────────────────────────────────────────
+export { dispatchEvent, signPayload, webhookStore } from "./webhooks";
+export type { WebhookDelivery, WebhookEndpoint, WebhookEventType } from "./webhooks/types";
+export { createWorkloadCredential, validateWorkloadCredential } from "./workload";
 
 export async function initializeZeroAuth() {
   const { getConfig } = await import("./config/index.js");

@@ -6,7 +6,7 @@
  * registration from authenticators issued by unexpected CAs.
  */
 
-import crypto from "crypto";
+import crypto from "node:crypto";
 import { getLogger } from "../logger";
 
 const logger = getLogger("attestation-ca-pin");
@@ -119,9 +119,7 @@ function computeCertificatePin(pem: string): string | null {
   try {
     const lines = pem.split(/\r?\n/).filter(Boolean);
     // Strip PEM headers/footers and join the base64 body
-    const b64 = lines
-      .filter((l) => !l.startsWith("-----"))
-      .join("");
+    const b64 = lines.filter((l) => !l.startsWith("-----")).join("");
 
     if (!b64) return null;
 
@@ -168,7 +166,9 @@ export function verifyAttestationCAPin(
 
   // Strict mode: self-attestation is rejected when pins are configured
   if (attestationCert === null) {
-    logger.warn("CA pin check: self-attestation rejected (pins configured)", { deploymentId: scopeId });
+    logger.warn("CA pin check: self-attestation rejected (pins configured)", {
+      deploymentId: scopeId,
+    });
     return false;
   }
 

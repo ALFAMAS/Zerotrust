@@ -10,6 +10,10 @@ Monorepo: Node/Hono API (`src/`) + Next.js 16 UI (`packages/ui/`).
 | UI (Next.js) | `packages/ui/`                  | 3000                              |
 | MCP server   | auto-started with UI dev server | `http://localhost:3000/_next/mcp` |
 
+**Status docs:** [`implemented.md`](./implemented.md) (what ships today) ·
+[`not-implemented.md`](./not-implemented.md) (product backlog) ·
+[`incomplete.md`](./incomplete.md) (code that exists but is unmounted/stubbed/orphaned).
+
 ## Running the project
 
 ```bash
@@ -17,7 +21,7 @@ bun dev          # starts API + UI concurrently
 bun dev:api      # API only
 bun dev:ui       # UI only (also starts MCP server)
 bun run test     # vitest test suite (236 tests)
-bun run db:backup # one-shot pg_dump backup with retention pruning
+bun run db:backup # one-shot pg_dump backup with local + S3 retention (any S3-compatible provider)
 bun run build    # tsc for API; next build for UI
 ```
 

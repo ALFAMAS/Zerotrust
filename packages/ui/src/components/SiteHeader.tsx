@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { brand } from "@/config/brand";
 import { buttonVariants } from "@/components/ui/button";
+import { brand } from "@/config/brand";
 import { cn } from "@/lib/utils";
 
 /** Shared marketing/public-page header. Sticky, blurred, brand + nav + auth CTAs. */

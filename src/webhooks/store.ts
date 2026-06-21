@@ -1,12 +1,10 @@
-import { randomUUID } from "crypto";
+import { randomUUID } from "node:crypto";
 import type { WebhookEndpoint, WebhookEventType } from "./types";
 
 export class WebhookStore {
   private endpoints: Map<string, WebhookEndpoint> = new Map();
 
-  registerEndpoint(
-    endpoint: Omit<WebhookEndpoint, "id" | "createdAt">
-  ): WebhookEndpoint {
+  registerEndpoint(endpoint: Omit<WebhookEndpoint, "id" | "createdAt">): WebhookEndpoint {
     const id = randomUUID();
     const now = new Date();
     const record: WebhookEndpoint = {
@@ -33,10 +31,7 @@ export class WebhookStore {
     return this.endpoints.delete(id);
   }
 
-  getEndpointsForEvent(
-    event: WebhookEventType,
-    tenantId?: string
-  ): WebhookEndpoint[] {
+  getEndpointsForEvent(event: WebhookEventType, tenantId?: string): WebhookEndpoint[] {
     return Array.from(this.endpoints.values()).filter((ep) => {
       if (!ep.active) return false;
       if (!ep.events.includes(event)) return false;

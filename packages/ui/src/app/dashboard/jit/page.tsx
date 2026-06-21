@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { Clock, Loader2, ShieldQuestion } from "lucide-react";
+import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import { useToast } from "@/lib/toast";
 
@@ -50,7 +50,7 @@ export default function JITRequestPage() {
 
   useEffect(() => {
     load();
-  }, []);
+  }, [load]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -88,7 +88,10 @@ export default function JITRequestPage() {
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4 rounded-xl border border-border bg-card p-5">
+      <form
+        onSubmit={handleSubmit}
+        className="space-y-4 rounded-xl border border-border bg-card p-5"
+      >
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="space-y-1.5">
             <label className="text-sm font-medium text-foreground">Target tenant ID</label>
@@ -146,7 +149,11 @@ export default function JITRequestPage() {
             disabled={submitting}
             className="flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
           >
-            {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldQuestion className="h-4 w-4" />}
+            {submitting ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <ShieldQuestion className="h-4 w-4" />
+            )}
             Request access
           </button>
         </div>
@@ -174,7 +181,9 @@ export default function JITRequestPage() {
                     <span className="font-mono text-sm text-foreground">{r.targetResource}</span>
                     <span className="text-xs text-muted-foreground">@ {r.targetTenantId}</span>
                   </div>
-                  <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{r.justification}</p>
+                  <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">
+                    {r.justification}
+                  </p>
                   {r.status === "approved" && r.expiresAt && (
                     <p className="mt-1 flex items-center gap-1 text-xs text-green-400">
                       <Clock className="h-3 w-3" /> expires {new Date(r.expiresAt).toLocaleString()}

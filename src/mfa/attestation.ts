@@ -168,7 +168,15 @@ export function verifyAttestation(
   }
 
   // Direct attestation required
-  if (policy.level === "direct" && (fmt as string) !== "packed" && (fmt as string) !== "tpm" && (fmt as string) !== "fido-u2f" && (fmt as string) !== "android-key" && fmt !== "attCA" && fmt !== "anonCA") {
+  if (
+    policy.level === "direct" &&
+    (fmt as string) !== "packed" &&
+    (fmt as string) !== "tpm" &&
+    (fmt as string) !== "fido-u2f" &&
+    (fmt as string) !== "android-key" &&
+    fmt !== "attCA" &&
+    fmt !== "anonCA"
+  ) {
     if (fmt !== "none" && fmt !== "self") {
       // unknown format — warn but pass
       logger.warn("Unknown attestation format", { fmt, aaguid });
@@ -286,7 +294,9 @@ export async function verifyAttestationWithMDS3(
       const desc = await getDeviceDescription(aaguid);
       if (desc) deviceDescription = desc;
     } catch (err) {
-      logger.warn("MDS3 lookup failed during verifyAttestationWithMDS3; continuing without it", { error: String(err) });
+      logger.warn("MDS3 lookup failed during verifyAttestationWithMDS3; continuing without it", {
+        error: String(err),
+      });
     }
   }
 

@@ -1,14 +1,14 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
-import SiteHeader from "@/components/SiteHeader";
+import { useCallback, useEffect, useState } from "react";
 import SiteFooter from "@/components/SiteFooter";
+import SiteHeader from "@/components/SiteHeader";
 
 const API_URL = process.env.NEXT_PUBLIC_ZEROAUTH_URL || "http://localhost:3000";
 
 interface StatusData {
   status: "operational" | "degraded" | "down";
-  components: Record<string, "operational" | "degraded" | "down">;
+  components: Record<string, "operational" | "degraded" | "down" | "not set">;
   uptimeSeconds: number;
   timestamp: string;
 }
@@ -17,12 +17,15 @@ const STATUS_STYLES: Record<string, { dot: string; label: string; text: string }
   operational: { dot: "bg-emerald-400", label: "Operational", text: "text-emerald-400" },
   degraded: { dot: "bg-amber-400", label: "Degraded", text: "text-amber-400" },
   down: { dot: "bg-red-500", label: "Down", text: "text-red-400" },
+  "not set": { dot: "bg-zinc-500", label: "Not set", text: "text-zinc-400" },
 };
 
 const COMPONENT_LABELS: Record<string, string> = {
   api: "API",
   database: "Database",
   cache: "Cache & rate limiting",
+  s3Backup: "Database backups (S3)",
+  s3ObjectStorage: "Object storage (S3)",
 };
 
 export default function StatusPage() {

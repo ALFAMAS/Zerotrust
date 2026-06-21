@@ -65,8 +65,7 @@ export async function startRegistration(options: any): Promise<any> {
     response: {
       clientDataJSON: bufferToBase64url(response.clientDataJSON),
       attestationObject: bufferToBase64url(response.attestationObject),
-      transports:
-        typeof response.getTransports === "function" ? response.getTransports() : [],
+      transports: typeof response.getTransports === "function" ? response.getTransports() : [],
     },
     clientExtensionResults: credential.getClientExtensionResults?.() ?? {},
   };

@@ -1,7 +1,7 @@
-import { eq, and, ne, desc } from "drizzle-orm";
+import { and, desc, eq, ne } from "drizzle-orm";
+import { getConfig } from "../config";
 import { getDb } from "../db";
 import { sessionsTable } from "../db/schema";
-import { getConfig } from "../config";
 import { getLogger } from "../logger";
 
 const logger = getLogger("session-control");

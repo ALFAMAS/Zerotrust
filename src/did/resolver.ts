@@ -67,10 +67,19 @@ export async function resolveDIDKey(did: string): Promise<DIDDocument> {
   }
 
   const vmId = `${did}#${multibase}`;
-  const vm: VerificationMethod = { id: vmId, type: keyType, controller: did, publicKeyJwk, publicKeyMultibase: multibase };
+  const vm: VerificationMethod = {
+    id: vmId,
+    type: keyType,
+    controller: did,
+    publicKeyJwk,
+    publicKeyMultibase: multibase,
+  };
 
   return {
-    "@context": ["https://www.w3.org/ns/did/v1", "https://w3id.org/security/suites/ed25519-2020/v1"],
+    "@context": [
+      "https://www.w3.org/ns/did/v1",
+      "https://w3id.org/security/suites/ed25519-2020/v1",
+    ],
     id: did,
     verificationMethod: [vm],
     authentication: [vmId],
@@ -85,9 +94,7 @@ export async function resolveDIDWeb(did: string): Promise<DIDDocument> {
   const parts = rest.split(":");
   const host = decodeURIComponent(parts[0]);
   const path = parts.slice(1).join("/");
-  const url = path
-    ? `https://${host}/${path}/did.json`
-    : `https://${host}/.well-known/did.json`;
+  const url = path ? `https://${host}/${path}/did.json` : `https://${host}/.well-known/did.json`;
 
   const res = await fetch(url, { headers: { Accept: "application/json" } });
   if (!res.ok) throw new Error(`Failed to fetch DID document from ${url}: ${res.status}`);

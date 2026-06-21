@@ -1,4 +1,4 @@
-import { getToken, getRefreshToken, setToken, clearToken } from "./auth";
+import { clearToken, getRefreshToken, getToken, setToken } from "./auth";
 import { enqueueWrite, isQueueableMethod } from "./offlineQueue";
 
 /** Thrown when a mutation is queued offline instead of reaching the server. */
@@ -29,7 +29,7 @@ async function refreshAccessToken(): Promise<boolean> {
     body: JSON.stringify({ refreshToken }),
   }).catch(() => null);
 
-  if (!res || !res.ok) return false;
+  if (!res?.ok) return false;
   const data = await res.json().catch(() => null);
   if (!data?.accessToken) return false;
   setToken(data.accessToken, data.refreshToken);
@@ -53,7 +53,7 @@ async function request<T>(
 ): Promise<T> {
   const token = getToken();
   const headers: Record<string, string> = { "Content-Type": "application/json" };
-  if (token && !skipAuth) headers["Authorization"] = `Bearer ${token}`;
+  if (token && !skipAuth) headers.Authorization = `Bearer ${token}`;
   const serializedBody = body !== undefined ? JSON.stringify(body) : undefined;
 
   let res: Response;

@@ -74,7 +74,9 @@ export default function AccountPage() {
   return (
     <div className="max-w-2xl mx-auto space-y-10 p-6">
       <div>
-        <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">Account</h1>
+        <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
+          Account
+        </h1>
         <p className="mt-1 text-sm text-muted-foreground">Manage your data and account status</p>
       </div>
 

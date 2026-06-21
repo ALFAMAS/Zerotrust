@@ -5,7 +5,7 @@
  * https://haveibeenpwned.com/API/v3#PwnedPasswords
  */
 
-import crypto from "crypto";
+import crypto from "node:crypto";
 import { getLogger } from "../logger";
 
 const logger = getLogger("password-breach");

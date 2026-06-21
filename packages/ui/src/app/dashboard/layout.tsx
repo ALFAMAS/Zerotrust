@@ -1,6 +1,4 @@
 "use client";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import {
   Bell,
   Building2,
@@ -16,16 +14,18 @@ import {
   UserCog,
   Webhook,
 } from "lucide-react";
-import { clearToken, isAuthenticated } from "../../lib/auth";
-import { ThemeToggle } from "@/components/ThemeToggle";
-import { NotificationBell } from "@/components/NotificationBell";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import AppShell from "@/components/app-shell/AppShell";
+import type { NavItem } from "@/components/app-shell/AppSidebar";
 import FeedbackWidget from "@/components/FeedbackWidget";
 import LiveChatWidget from "@/components/LiveChatWidget";
 import LocaleSwitcher from "@/components/LocaleSwitcher";
-import VerifyEmailBanner from "@/components/VerifyEmailBanner";
-import AppShell from "@/components/app-shell/AppShell";
+import { NotificationBell } from "@/components/NotificationBell";
 import ProductTour from "@/components/ProductTour";
-import type { NavItem } from "@/components/app-shell/AppSidebar";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import VerifyEmailBanner from "@/components/VerifyEmailBanner";
+import { clearToken, isAuthenticated } from "../../lib/auth";
 
 const navItems: NavItem[] = [
   { href: "/dashboard", label: "Overview", icon: LayoutDashboard, exact: true },

@@ -1,15 +1,15 @@
 import nodemailer from "nodemailer";
-import { welcomeEmailTemplate, type WelcomeEmailData } from "../templates/emails/welcome";
+import { getLogger } from "../logger";
+import type { Locale } from "../shared/locale";
+import { billingEventEmailTemplate } from "../templates/emails/billing-event";
 import { magicLinkEmailTemplate } from "../templates/emails/magic-link";
+import { notificationEmailTemplate } from "../templates/emails/notification";
 import { otpEmailTemplate } from "../templates/emails/otp";
-import { verifyEmailTemplate } from "../templates/emails/verify-email";
 import { passwordResetEmailTemplate } from "../templates/emails/password-reset";
 import { securityAlertEmailTemplate } from "../templates/emails/security-alert";
-import { notificationEmailTemplate } from "../templates/emails/notification";
-import { billingEventEmailTemplate } from "../templates/emails/billing-event";
-import type { Locale } from "../shared/locale";
+import { verifyEmailTemplate } from "../templates/emails/verify-email";
+import { type WelcomeEmailData, welcomeEmailTemplate } from "../templates/emails/welcome";
 import { isEmailSuppressed } from "./emailSuppression.service";
-import { getLogger } from "../logger";
 
 const logger = getLogger("email-service");
 
@@ -29,7 +29,7 @@ function getTransport(): nodemailer.Transporter {
   if (host || isProduction) {
     _transport = nodemailer.createTransport({
       host,
-      port: parseInt(process.env.MAIL_PORT ?? "587"),
+      port: parseInt(process.env.MAIL_PORT ?? "587", 10),
       secure: process.env.MAIL_PORT === "465",
       auth: process.env.MAIL_USER
         ? { user: process.env.MAIL_USER, pass: process.env.MAIL_PASSWORD }
@@ -111,7 +111,13 @@ export async function sendOtpEmail(
 
 export async function sendVerificationEmail(
   to: string,
-  data: { name: string; code: string; verifyUrl: string; expiresInMinutes?: number; locale?: Locale }
+  data: {
+    name: string;
+    code: string;
+    verifyUrl: string;
+    expiresInMinutes?: number;
+    locale?: Locale;
+  }
 ): Promise<void> {
   const { subject, html, text } = verifyEmailTemplate({
     name: data.name,

@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import Link from "next/link";
 import { LifeBuoy, Mail, Minus, Plus, Search } from "lucide-react";
-import { FAQ_ITEMS } from "../../data/faq";
-import { brand } from "@/config/brand";
-import SiteHeader from "@/components/SiteHeader";
+import Link from "next/link";
+import { useMemo, useState } from "react";
 import SiteFooter from "@/components/SiteFooter";
+import SiteHeader from "@/components/SiteHeader";
+import { brand } from "@/config/brand";
+import { FAQ_ITEMS } from "../../data/faq";
 
 const CATEGORIES = Array.from(new Set(FAQ_ITEMS.map((i) => i.category)));
 
@@ -97,7 +97,10 @@ export default function HelpPage() {
             {filtered.map((item) => {
               const isOpen = openId === item.id;
               return (
-                <div key={item.id} className="overflow-hidden rounded-xl border border-border bg-card">
+                <div
+                  key={item.id}
+                  className="overflow-hidden rounded-xl border border-border bg-card"
+                >
                   <button
                     onClick={() => setOpenId(isOpen ? null : item.id)}
                     className="flex w-full items-center justify-between gap-4 px-6 py-4 text-left transition-colors hover:bg-accent/50"

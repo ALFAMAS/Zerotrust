@@ -1,15 +1,16 @@
 "use client";
-import { useState } from "react";
 import Link from "next/link";
-import { api } from "../../../lib/api";
-import { setToken } from "../../../lib/auth";
-import { solveSignupPow } from "../../../lib/pow";
-import { useToast } from "@/lib/toast";
-import { brand } from "@/config/brand";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PasswordInput } from "@/components/ui/password-input";
+import { brand } from "@/config/brand";
+import { useToast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
+import { api } from "../../../lib/api";
+import { setToken } from "../../../lib/auth";
+import { solveSignupPow } from "../../../lib/pow";
 
 function passwordStrength(p: string): { score: number; label: string; color: string } {
   let score = 0;
@@ -107,9 +108,8 @@ export default function RegisterPage() {
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="password">Password</Label>
-          <Input
+          <PasswordInput
             id="password"
-            type="password"
             required
             autoComplete="new-password"
             value={form.password}
@@ -135,9 +135,8 @@ export default function RegisterPage() {
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="confirm">Confirm Password</Label>
-          <Input
+          <PasswordInput
             id="confirm"
-            type="password"
             required
             value={form.confirm}
             onChange={(e) => setForm({ ...form, confirm: e.target.value })}

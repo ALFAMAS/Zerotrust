@@ -228,7 +228,7 @@ export default function SecurityPage() {
                       {pk.name || "Security Key"}
                     </div>
                     <div className="text-xs text-muted-foreground">
-                      Added {new Date(pk.createdAt).toLocaleDateString()}
+                      Added {new Date(pk.createdAt).toLocaleString()}
                     </div>
                   </div>
                   <KeyRound className="h-4 w-4 text-muted-foreground" />

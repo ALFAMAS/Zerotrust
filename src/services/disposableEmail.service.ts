@@ -1,4 +1,4 @@
-import { resolveMx } from "dns/promises";
+import { resolveMx } from "node:dns/promises";
 
 export interface EmailValidationResult {
   allowed: boolean;

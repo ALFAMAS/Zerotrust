@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { useEffect, useRef, useState } from "react";
 import { api } from "@/lib/api";
 import { getToken } from "@/lib/auth";
+import { cn } from "@/lib/utils";
 
 const LOCALES = [
   { code: "en", label: "English", flag: "🇺🇸" },

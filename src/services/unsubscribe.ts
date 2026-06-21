@@ -1,4 +1,4 @@
-import { createHmac, timingSafeEqual } from "crypto";
+import { createHmac, timingSafeEqual } from "node:crypto";
 
 const SECRET = () => process.env.UNSUBSCRIBE_SECRET ?? "default-unsubscribe-secret-change-me";
 

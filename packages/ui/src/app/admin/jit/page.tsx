@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { Check, Clock, Loader2, ShieldQuestion, X } from "lucide-react";
+import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 
 interface JITRequest {
@@ -50,7 +50,7 @@ export default function AdminJITPage() {
 
   useEffect(() => {
     load();
-  }, []);
+  }, [load]);
 
   async function act(id: string, decision: "approve" | "deny") {
     setActing(id);
@@ -81,8 +81,8 @@ export default function AdminJITPage() {
           Cross-tenant access requests
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Approve or deny just-in-time access requests targeting your tenant. Approved grants
-          expire automatically.
+          Approve or deny just-in-time access requests targeting your tenant. Approved grants expire
+          automatically.
         </p>
       </div>
 
@@ -108,7 +108,9 @@ export default function AdminJITPage() {
                     <div className="flex items-start justify-between gap-4">
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-2">
-                          <span className="font-mono text-sm text-foreground">{r.targetResource}</span>
+                          <span className="font-mono text-sm text-foreground">
+                            {r.targetResource}
+                          </span>
                           <span className="text-xs text-muted-foreground">
                             requested by {r.requestorUserId}
                           </span>
@@ -125,7 +127,11 @@ export default function AdminJITPage() {
                           disabled={acting === r.id}
                           className="flex items-center gap-1.5 rounded-lg bg-green-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-green-500 disabled:opacity-50"
                         >
-                          {acting === r.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
+                          {acting === r.id ? (
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          ) : (
+                            <Check className="h-3.5 w-3.5" />
+                          )}
                           Approve
                         </button>
                         <button
@@ -155,12 +161,17 @@ export default function AdminJITPage() {
                   >
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className="font-mono text-sm text-foreground">{r.targetResource}</span>
-                        <span className="text-xs text-muted-foreground">by {r.requestorUserId}</span>
+                        <span className="font-mono text-sm text-foreground">
+                          {r.targetResource}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          by {r.requestorUserId}
+                        </span>
                       </div>
                       {r.status === "approved" && r.expiresAt && (
                         <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
-                          <Clock className="h-3 w-3" /> expires {new Date(r.expiresAt).toLocaleString()}
+                          <Clock className="h-3 w-3" /> expires{" "}
+                          {new Date(r.expiresAt).toLocaleString()}
                         </p>
                       )}
                     </div>

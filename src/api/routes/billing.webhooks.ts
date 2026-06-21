@@ -1,5 +1,5 @@
-import { Hono } from "hono";
 import { eq } from "drizzle-orm";
+import { Hono } from "hono";
 import Stripe from "stripe";
 import { getDb } from "../../db";
 import { subscriptionsTable } from "../../db/schema";
@@ -144,7 +144,7 @@ router.post("/webhook", async (c) => {
           .from(subscriptionsTable)
           .where(eq(subscriptionsTable.stripeSubscriptionId, invoice.subscription))
           .limit(1);
-        if (!existing || existing.status !== "past_due") break;
+        if (existing?.status !== "past_due") break;
 
         const meta = (existing.metadata as Record<string, unknown>) ?? {};
         delete meta.dunningStartedAt;

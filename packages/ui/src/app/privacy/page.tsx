@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
+import SiteFooter from "@/components/SiteFooter";
+import SiteHeader from "@/components/SiteHeader";
 import { brand } from "@/config/brand";
 import { legal } from "@/config/legal";
-import SiteHeader from "@/components/SiteHeader";
-import SiteFooter from "@/components/SiteFooter";
 
 export const metadata: Metadata = {
   title: `Privacy Policy — ${brand.name}`,
@@ -15,31 +15,41 @@ export default function PrivacyPage() {
       <SiteHeader />
 
       <main className="mx-auto w-full max-w-3xl flex-1 px-6 py-16">
-        <h1 className="font-display text-4xl font-semibold tracking-tight text-foreground">Privacy Policy</h1>
-        <p className="mb-12 mt-3 text-sm text-muted-foreground">Last updated: {legal.privacyEffectiveDate}</p>
+        <h1 className="font-display text-4xl font-semibold tracking-tight text-foreground">
+          Privacy Policy
+        </h1>
+        <p className="mb-12 mt-3 text-sm text-muted-foreground">
+          Last updated: {legal.privacyEffectiveDate}
+        </p>
 
         <div className="space-y-12 text-foreground/80 leading-relaxed">
-
           {/* 1 — Data Collection */}
           <section>
             <h2 className="text-xl font-semibold text-foreground mb-4 pb-2 border-b border-border">
               1. Data We Collect
             </h2>
             <p className="mb-3">
-              When you use {legal.companyName} we may collect the following categories of information:
+              When you use {legal.companyName} we may collect the following categories of
+              information:
             </p>
             <ul className="list-disc list-inside space-y-2 text-muted-foreground">
               <li>
-                <span className="text-foreground/80 font-medium">Account information</span> — email address, display name, and hashed passwords when you register.
+                <span className="text-foreground/80 font-medium">Account information</span> — email
+                address, display name, and hashed passwords when you register.
               </li>
               <li>
-                <span className="text-foreground/80 font-medium">Authentication data</span> — TOTP seeds, WebAuthn credential IDs (public keys only), and MFA recovery codes stored encrypted at rest.
+                <span className="text-foreground/80 font-medium">Authentication data</span> — TOTP
+                seeds, WebAuthn credential IDs (public keys only), and MFA recovery codes stored
+                encrypted at rest.
               </li>
               <li>
-                <span className="text-foreground/80 font-medium">Usage data</span> — login timestamps, IP addresses, device fingerprints, and session metadata used for anomaly detection.
+                <span className="text-foreground/80 font-medium">Usage data</span> — login
+                timestamps, IP addresses, device fingerprints, and session metadata used for anomaly
+                detection.
               </li>
               <li>
-                <span className="text-foreground/80 font-medium">Technical data</span> — browser user-agent, operating system, and screen resolution collected automatically.
+                <span className="text-foreground/80 font-medium">Technical data</span> — browser
+                user-agent, operating system, and screen resolution collected automatically.
               </li>
             </ul>
           </section>
@@ -68,15 +78,15 @@ export default function PrivacyPage() {
               3. Data Sharing
             </h2>
             <p className="mb-3">
-              {legal.companyName} is a self-hosted platform. When you run {legal.companyName} on your own infrastructure, all
-              data remains on your servers and is never transmitted to the {legal.companyName}{" "}
-              maintainers.
+              {legal.companyName} is a self-hosted platform. When you run {legal.companyName} on
+              your own infrastructure, all data remains on your servers and is never transmitted to
+              the {legal.companyName} maintainers.
             </p>
             <p className="text-muted-foreground">
-              If you use a managed {legal.companyName} cloud offering, we may share limited data with trusted
-              sub-processors (e.g., cloud hosting providers, email delivery services) solely to operate
-              the service. All sub-processors are contractually bound to protect your data under terms
-              no less protective than this policy.
+              If you use a managed {legal.companyName} cloud offering, we may share limited data
+              with trusted sub-processors (e.g., cloud hosting providers, email delivery services)
+              solely to operate the service. All sub-processors are contractually bound to protect
+              your data under terms no less protective than this policy.
             </p>
           </section>
 
@@ -90,7 +100,9 @@ export default function PrivacyPage() {
             </p>
             <ul className="list-disc list-inside space-y-2 text-muted-foreground">
               <li>All data in transit is encrypted with TLS 1.2 or higher.</li>
-              <li>Sensitive fields (passwords, TOTP seeds) are encrypted at rest using AES-256-GCM.</li>
+              <li>
+                Sensitive fields (passwords, TOTP seeds) are encrypted at rest using AES-256-GCM.
+              </li>
               <li>Access to production systems is protected by hardware MFA.</li>
               <li>Security patches are applied within 24 hours of a critical CVE disclosure.</li>
             </ul>
@@ -142,19 +154,38 @@ export default function PrivacyPage() {
               6. Your Rights (GDPR &amp; CCPA)
             </h2>
             <p className="mb-3">
-              Depending on your location you may have the following rights regarding your personal data:
+              Depending on your location you may have the following rights regarding your personal
+              data:
             </p>
             <ul className="list-disc list-inside space-y-2 text-muted-foreground">
-              <li><span className="text-foreground/80 font-medium">Access</span> — request a copy of the data we hold about you.</li>
-              <li><span className="text-foreground/80 font-medium">Rectification</span> — correct inaccurate or incomplete data.</li>
-              <li><span className="text-foreground/80 font-medium">Erasure</span> — request deletion of your personal data (&ldquo;right to be forgotten&rdquo;).</li>
-              <li><span className="text-foreground/80 font-medium">Portability</span> — receive your data in a machine-readable format.</li>
-              <li><span className="text-foreground/80 font-medium">Objection</span> — object to certain processing activities.</li>
-              <li><span className="text-foreground/80 font-medium">Withdraw consent</span> — revoke any consent you have given at any time.</li>
+              <li>
+                <span className="text-foreground/80 font-medium">Access</span> — request a copy of
+                the data we hold about you.
+              </li>
+              <li>
+                <span className="text-foreground/80 font-medium">Rectification</span> — correct
+                inaccurate or incomplete data.
+              </li>
+              <li>
+                <span className="text-foreground/80 font-medium">Erasure</span> — request deletion
+                of your personal data (&ldquo;right to be forgotten&rdquo;).
+              </li>
+              <li>
+                <span className="text-foreground/80 font-medium">Portability</span> — receive your
+                data in a machine-readable format.
+              </li>
+              <li>
+                <span className="text-foreground/80 font-medium">Objection</span> — object to
+                certain processing activities.
+              </li>
+              <li>
+                <span className="text-foreground/80 font-medium">Withdraw consent</span> — revoke
+                any consent you have given at any time.
+              </li>
             </ul>
             <p className="mt-3 text-muted-foreground">
-              To exercise any of these rights, contact us at the address below. We will respond within
-              30 days.
+              To exercise any of these rights, contact us at the address below. We will respond
+              within 30 days.
             </p>
           </section>
 
@@ -171,13 +202,9 @@ export default function PrivacyPage() {
               >
                 {legal.privacyEmail}
               </a>
-              {legal.companyAddress ? (
-                <>, or write to us at {legal.companyAddress}</>
-              ) : null}
-              .
+              {legal.companyAddress ? <>, or write to us at {legal.companyAddress}</> : null}.
             </p>
           </section>
-
         </div>
       </main>
 

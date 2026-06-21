@@ -14,10 +14,10 @@ import { getLogger } from "../logger";
 
 const logger = getLogger("credential-stuffing");
 
-const WINDOW_MS = parseInt(process.env.CRED_STUFF_WINDOW_MS || String(15 * 60 * 1000));
-const MAX_FAILURES = parseInt(process.env.CRED_STUFF_MAX_FAILURES || "20");
-const MAX_DISTINCT_ACCOUNTS = parseInt(process.env.CRED_STUFF_MAX_ACCOUNTS || "10");
-const BLOCK_MS = parseInt(process.env.CRED_STUFF_BLOCK_MS || String(30 * 60 * 1000));
+const WINDOW_MS = parseInt(process.env.CRED_STUFF_WINDOW_MS || String(15 * 60 * 1000), 10);
+const MAX_FAILURES = parseInt(process.env.CRED_STUFF_MAX_FAILURES || "20", 10);
+const MAX_DISTINCT_ACCOUNTS = parseInt(process.env.CRED_STUFF_MAX_ACCOUNTS || "10", 10);
+const BLOCK_MS = parseInt(process.env.CRED_STUFF_BLOCK_MS || String(30 * 60 * 1000), 10);
 
 interface IpRecord {
   failures: number;
@@ -29,14 +29,17 @@ interface IpRecord {
 const byIp = new Map<string, IpRecord>();
 
 // Periodic sweep so idle IPs don't accumulate.
-setInterval(() => {
-  const now = Date.now();
-  for (const [ip, rec] of byIp.entries()) {
-    const expired = now - rec.windowStart > WINDOW_MS;
-    const unblocked = !rec.blockedUntil || rec.blockedUntil < now;
-    if (expired && unblocked) byIp.delete(ip);
-  }
-}, 5 * 60 * 1000).unref();
+setInterval(
+  () => {
+    const now = Date.now();
+    for (const [ip, rec] of byIp.entries()) {
+      const expired = now - rec.windowStart > WINDOW_MS;
+      const unblocked = !rec.blockedUntil || rec.blockedUntil < now;
+      if (expired && unblocked) byIp.delete(ip);
+    }
+  },
+  5 * 60 * 1000
+).unref();
 
 /** True (with retry hint) when the IP is currently blocked for stuffing. */
 export function isIpBlocked(ip: string): { blocked: boolean; retryAfterSecs?: number } {

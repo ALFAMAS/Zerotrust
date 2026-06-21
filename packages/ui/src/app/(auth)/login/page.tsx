@@ -1,15 +1,16 @@
 "use client";
-import { useState } from "react";
-import Link from "next/link";
 import { Fingerprint } from "lucide-react";
-import { api } from "../../../lib/api";
-import { setToken } from "../../../lib/auth";
-import { isWebAuthnAvailable, startAuthentication } from "../../../lib/webauthn";
-import { useToast } from "@/lib/toast";
-import { brand } from "@/config/brand";
+import Link from "next/link";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PasswordInput } from "@/components/ui/password-input";
+import { brand } from "@/config/brand";
+import { useToast } from "@/lib/toast";
+import { api } from "../../../lib/api";
+import { setToken } from "../../../lib/auth";
+import { isWebAuthnAvailable, startAuthentication } from "../../../lib/webauthn";
 
 export default function LoginPage() {
   const [form, setForm] = useState({ email: "", password: "" });
@@ -28,7 +29,7 @@ export default function LoginPage() {
     // Honor a ?next= redirect-back target (set by the API client when an
     // expired session bounced the user here), but only same-origin paths.
     const next = new URLSearchParams(window.location.search).get("next");
-    const dest = next && next.startsWith("/") && !next.startsWith("//") ? next : "/dashboard";
+    const dest = next?.startsWith("/") && !next.startsWith("//") ? next : "/dashboard";
     window.location.href = dest;
   };
 
@@ -39,7 +40,10 @@ export default function LoginPage() {
       const data = await api.post<any>("/auth/login", form, true);
       if (data.mfaRequired) {
         setMfaToken(data.mfaToken);
-        toast({ message: "Enter your authenticator code to continue.", type: "info" });
+        toast({
+          message: "Enter your authenticator code to continue.",
+          type: "info",
+        });
         return;
       }
       finishLogin(data);
@@ -55,7 +59,10 @@ export default function LoginPage() {
 
   const handlePasskeyLogin = async () => {
     if (!isWebAuthnAvailable()) {
-      toast({ message: "This browser does not support passkeys.", type: "error" });
+      toast({
+        message: "This browser does not support passkeys.",
+        type: "error",
+      });
       return;
     }
     setLoading(true);
@@ -69,7 +76,11 @@ export default function LoginPage() {
       const assertion = await startAuthentication(options);
       const data = await api.post<any>(
         "/auth/passkey/authenticate/verify",
-        { ...assertion, challengeKey: options._challengeKey, email: form.email || undefined },
+        {
+          ...assertion,
+          challengeKey: options._challengeKey,
+          email: form.email || undefined,
+        },
         true
       );
       finishLogin(data);
@@ -77,7 +88,10 @@ export default function LoginPage() {
       if (err?.name === "NotAllowedError") {
         toast({ message: "Passkey sign-in was cancelled.", type: "error" });
       } else {
-        toast({ message: err?.message || "Passkey sign-in failed.", type: "error" });
+        toast({
+          message: err?.message || "Passkey sign-in failed.",
+          type: "error",
+        });
       }
     } finally {
       setLoading(false);
@@ -88,11 +102,7 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      const data = await api.post<any>(
-        "/auth/login/mfa",
-        { mfaToken, code: mfaCode.trim() },
-        true
-      );
+      const data = await api.post<any>("/auth/login/mfa", { mfaToken, code: mfaCode.trim() }, true);
       finishLogin(data);
     } catch (err: any) {
       toast({
@@ -155,9 +165,7 @@ export default function LoginPage() {
         <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
           Welcome back
         </h1>
-        <p className="mt-1.5 text-sm text-muted-foreground">
-          Sign in to your {brand.name} account
-        </p>
+        <p className="mt-1.5 text-sm text-muted-foreground">Sign in to your {brand.name} account</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -180,9 +188,8 @@ export default function LoginPage() {
               Forgot password?
             </Link>
           </div>
-          <Input
+          <PasswordInput
             id="password"
-            type="password"
             required
             autoComplete="current-password"
             value={form.password}
@@ -210,7 +217,14 @@ export default function LoginPage() {
       <div className="grid gap-2.5">
         <Button asChild variant="outline" className="w-full">
           <a href={`${oauthBase}/auth/oauth/google`}>
-            <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor">
+            <svg
+              role="img"
+              aria-label="Sign in with Google"
+              viewBox="0 0 24 24"
+              className="h-4 w-4"
+              fill="currentColor"
+            >
+              <title>Sign in with Google</title>
               <path
                 d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
                 fill="#4285F4"
@@ -233,7 +247,13 @@ export default function LoginPage() {
         </Button>
         <Button asChild variant="outline" className="w-full">
           <a href={`${oauthBase}/auth/oauth/github`}>
-            <svg viewBox="0 0 24 24" className="h-4 w-4 fill-current">
+            <svg
+              role="img"
+              aria-label="Sign in with GitHub"
+              viewBox="0 0 24 24"
+              className="h-4 w-4 fill-current"
+            >
+              <title>Sign in with GitHub</title>
               <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
             </svg>
             Continue with GitHub

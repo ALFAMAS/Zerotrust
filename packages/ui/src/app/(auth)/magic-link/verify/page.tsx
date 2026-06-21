@@ -1,11 +1,11 @@
 "use client";
 
-import { Suspense, useEffect, useRef, useState } from "react";
-import Link from "next/link";
 import { CheckCircle2, XCircle } from "lucide-react";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { api } from "../../../../lib/api";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { setToken } from "@/lib/auth";
+import { api } from "../../../../lib/api";
 
 type Status = "verifying" | "success" | "error";
 
@@ -13,7 +13,7 @@ type Tokens = { accessToken: string; refreshToken?: string };
 
 /** Only allow same-origin, non-protocol-relative paths to avoid open redirects. */
 function safeRedirect(value: string | null): string {
-  if (value && value.startsWith("/") && !value.startsWith("//")) return value;
+  if (value?.startsWith("/") && !value.startsWith("//")) return value;
   return "/dashboard";
 }
 
@@ -37,24 +37,24 @@ function VerifyMagicLinkInner() {
       return;
     }
 
-    (async () => {
+    async function verify() {
       try {
         // skipAuth: this is a sign-in flow, there's no session yet.
-        const tokens = await api.post<Tokens>(
-          "/auth/magic-link/verify",
-          { email, token },
-          true
-        );
+        const tokens = await api.post<Tokens>("/auth/magic-link/verify", { email, token }, true);
         setToken(tokens.accessToken, tokens.refreshToken);
         setStatus("success");
         window.location.href = redirect;
       } catch (err: any) {
         setStatus("error");
-        setError(
-          err?.message || "This magic link is invalid or has expired. Request a new one."
-        );
+        setError(err?.message || "This magic link is invalid or has expired. Request a new one.");
       }
-    })();
+    }
+
+    // handle promise explicitly to avoid floating-promise lint errors
+    verify().catch((err: any) => {
+      setStatus("error");
+      setError(err?.message || "This magic link is invalid or has expired. Request a new one.");
+    });
   }, [params]);
 
   if (status === "error") {
@@ -100,9 +100,7 @@ function VerifyMagicLinkInner() {
 
 export default function VerifyMagicLinkPage() {
   return (
-    <Suspense
-      fallback={<p className="text-center text-sm text-muted-foreground">Loading…</p>}
-    >
+    <Suspense fallback={<p className="text-center text-sm text-muted-foreground">Loading…</p>}>
       <VerifyMagicLinkInner />
     </Suspense>
   );

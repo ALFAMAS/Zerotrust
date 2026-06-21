@@ -1,5 +1,5 @@
-import type { LDAPClient } from "./client.js";
 import { getLogger } from "../logger/index.js";
+import type { LDAPClient } from "./client.js";
 
 export async function syncAllUsers(
   client: LDAPClient,

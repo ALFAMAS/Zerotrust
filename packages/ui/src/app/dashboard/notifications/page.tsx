@@ -1,18 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { Bell, BellOff, Smartphone } from "lucide-react";
-import { api } from "@/lib/api";
+import { useEffect, useState } from "react";
+import Toggle from "@/components/Toggle";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import Toggle from "@/components/Toggle";
 import { useToast } from "@/context/ToastContext";
-import {
-  isPushSupported,
-  isSubscribed,
-  subscribeToPush,
-  unsubscribeFromPush,
-} from "@/lib/push";
+import { api } from "@/lib/api";
+import { isPushSupported, isSubscribed, subscribeToPush, unsubscribeFromPush } from "@/lib/push";
 
 interface NotificationPreferences {
   emailFallback: boolean;
@@ -126,8 +121,8 @@ export default function NotificationSettingsPage() {
             </div>
           ) : (
             <p className="text-sm text-muted-foreground">
-              This browser doesn't support web push notifications. Install ZeroAuth as an app or
-              use a supported browser to enable them.
+              This browser doesn't support web push notifications. Install ZeroAuth as an app or use
+              a supported browser to enable them.
             </p>
           )}
         </CardContent>
@@ -141,9 +136,7 @@ export default function NotificationSettingsPage() {
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <Label className="text-sm font-medium text-foreground">
-                Email me when I'm away
-              </Label>
+              <Label className="text-sm font-medium text-foreground">Email me when I'm away</Label>
               <p className="mt-0.5 text-xs text-muted-foreground">
                 If you haven't seen an important notification in-app, send it to your email too.
               </p>

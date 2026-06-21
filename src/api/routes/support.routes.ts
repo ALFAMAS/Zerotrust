@@ -1,11 +1,11 @@
+import { desc, eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { z } from "zod";
-import { desc, eq } from "drizzle-orm";
 import { getDb } from "../../db";
-import { supportTicketsTable, supportTicketMessagesTable } from "../../db/schema";
+import { supportTicketMessagesTable, supportTicketsTable } from "../../db/schema";
+import { getLogger } from "../../logger";
 import { authMiddleware } from "../../middleware/auth";
 import { rateLimit } from "../../middleware/rateLimiting";
-import { getLogger } from "../../logger";
 import type { HonoEnv } from "../../shared/types";
 
 const router = new Hono<HonoEnv>();
@@ -34,7 +34,8 @@ router.post("/", rateLimit({ points: 20, windowSecs: 3600 }), async (c) => {
   const user = c.get("user");
   const body = await c.req.json().catch(() => ({}));
   const parsed = createSchema.safeParse(body);
-  if (!parsed.success) return c.json({ error: "INVALID_REQUEST", issues: parsed.error.issues }, 400);
+  if (!parsed.success)
+    return c.json({ error: "INVALID_REQUEST", issues: parsed.error.issues }, 400);
 
   try {
     const db = getDb();
@@ -121,7 +122,8 @@ router.post("/:id/messages", rateLimit({ points: 60, windowSecs: 3600 }), async 
   const id = c.req.param("id");
   const body = await c.req.json().catch(() => ({}));
   const parsed = replySchema.safeParse(body);
-  if (!parsed.success) return c.json({ error: "INVALID_REQUEST", issues: parsed.error.issues }, 400);
+  if (!parsed.success)
+    return c.json({ error: "INVALID_REQUEST", issues: parsed.error.issues }, 400);
 
   try {
     const db = getDb();
@@ -169,7 +171,8 @@ router.patch("/:id", async (c) => {
   const id = c.req.param("id");
   const body = await c.req.json().catch(() => ({}));
   const parsed = statusSchema.safeParse(body);
-  if (!parsed.success) return c.json({ error: "INVALID_REQUEST", issues: parsed.error.issues }, 400);
+  if (!parsed.success)
+    return c.json({ error: "INVALID_REQUEST", issues: parsed.error.issues }, 400);
 
   try {
     const db = getDb();

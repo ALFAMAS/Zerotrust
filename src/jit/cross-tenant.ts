@@ -9,11 +9,11 @@
  * `expiresAt` has passed is reported (and treated) as "expired".
  */
 
+import { and, eq } from "drizzle-orm";
 import { createMiddleware } from "hono/factory";
-import type { HonoEnv } from "../shared/types";
-import { eq, and } from "drizzle-orm";
 import { getDb } from "../db";
 import { crossTenantJITRequestsTable } from "../db/schema";
+import type { HonoEnv } from "../shared/types";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -107,7 +107,7 @@ class CrossTenantJITStore {
       .from(crossTenantJITRequestsTable)
       .where(eq(crossTenantJITRequestsTable.id, id))
       .limit(1);
-    if (!existing[0] || existing[0].status !== "pending") return null;
+    if (existing[0]?.status !== "pending") return null;
 
     const now = new Date();
     const expiresAt = new Date(now.getTime() + existing[0].ttlSeconds * 1000);

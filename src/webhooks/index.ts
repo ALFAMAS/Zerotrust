@@ -1,3 +1,3 @@
-export { dispatchEvent, signPayload, deliverWebhook } from "./delivery";
+export { deliverWebhook, dispatchEvent, signPayload } from "./delivery";
 export { WebhookStore, webhookStore } from "./store";
-export type { WebhookEventType, WebhookEndpoint, WebhookDelivery } from "./types";
+export type { WebhookDelivery, WebhookEndpoint, WebhookEventType } from "./types";

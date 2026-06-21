@@ -5,11 +5,11 @@
  * email with a one-click "secure my account" link that revokes the session.
  */
 
-import { eq, and, ne } from "drizzle-orm";
+import { and, eq, ne } from "drizzle-orm";
 import { getDb } from "../db";
 import { sessionsTable } from "../db/schema";
-import { sendSecurityAlertEmail } from "./email.service";
 import { getLogger } from "../logger";
+import { sendSecurityAlertEmail } from "./email.service";
 
 const logger = getLogger("login-notification");
 

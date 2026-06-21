@@ -1,7 +1,7 @@
-import { createMiddleware } from "hono/factory";
 import type { Context } from "hono";
-import type { HonoEnv } from "../shared/types";
+import { createMiddleware } from "hono/factory";
 import { getLogger } from "../logger";
+import type { HonoEnv } from "../shared/types";
 
 const logger = getLogger("tenant-middleware");
 

@@ -1,39 +1,45 @@
-import { Hono } from "hono";
+import * as nodeCrypto from "node:crypto";
+import * as fs from "node:fs/promises";
+import * as path from "node:path";
 import bcrypt from "bcryptjs";
+import { and, eq, gt } from "drizzle-orm";
+import { Hono } from "hono";
 import { nanoid } from "nanoid";
-import * as nodeCrypto from "crypto";
-import * as fs from "fs/promises";
-import * as path from "path";
-import { eq, and, gt } from "drizzle-orm";
 import { z } from "zod";
-import { getDb } from "../../db";
-import { usersTable, sessionsTable, refreshTokensTable, otpsTable } from "../../db/schema";
-import { FingerprintService } from "../../services/fingerprint.service";
-import { TokenService } from "../../services/token.service";
 import { getConfig } from "../../config";
-import { enforceMaxConcurrentDevices } from "../../middleware/sessionControl";
-import { rateLimit } from "../../middleware/rateLimiting";
-import { requireProofOfPossession } from "../../middleware/proofOfPossession";
-import { authMiddleware } from "../../middleware/auth";
+import { getDb } from "../../db";
+import { otpsTable, refreshTokensTable, sessionsTable, usersTable } from "../../db/schema";
 import { getLogger } from "../../logger";
-import { getProviderAdapter } from "../../oauth/provider.factory";
-import { sendWelcomeEmail, sendVerificationEmail } from "../../services/email.service";
-import { rejectIfBreached } from "../../services/passwordBreach.service";
-import { notifyIfNewDevice } from "../../services/loginNotification.service";
-import { recordAndRespond } from "../../services/accountTakeover.service";
-import { validateSignupEmail } from "../../services/disposableEmail.service";
-import { getClientIp } from "../../shared/clientIp";
+import { authMiddleware } from "../../middleware/auth";
 import {
   isIpBlocked,
   recordIpLoginFailure,
   recordIpLoginSuccess,
 } from "../../middleware/credentialStuffing";
-import { normalizeLocale, localeFromAcceptLanguage, SUPPORTED_LOCALES } from "../../shared/locale";
+import { requireProofOfPossession } from "../../middleware/proofOfPossession";
+import { rateLimit } from "../../middleware/rateLimiting";
+import { enforceMaxConcurrentDevices } from "../../middleware/sessionControl";
+import { getProviderAdapter } from "../../oauth/provider.factory";
+import { recordAndRespond } from "../../services/accountTakeover.service";
+import { validateSignupEmail } from "../../services/disposableEmail.service";
+import { sendVerificationEmail, sendWelcomeEmail } from "../../services/email.service";
+import { FingerprintService } from "../../services/fingerprint.service";
+import { notifyIfNewDevice } from "../../services/loginNotification.service";
 import {
-  isSignupPowEnabled,
+  deleteObject,
+  isS3BackupEnabled,
+  parseObjectKeyFromPublicUrl,
+  uploadBuffer,
+} from "../../services/objectStorage.service";
+import { rejectIfBreached } from "../../services/passwordBreach.service";
+import {
   createPowChallenge,
+  isSignupPowEnabled,
   verifyPowSolution,
 } from "../../services/proofOfWork.service";
+import { TokenService } from "../../services/token.service";
+import { getClientIp } from "../../shared/clientIp";
+import { localeFromAcceptLanguage, normalizeLocale, SUPPORTED_LOCALES } from "../../shared/locale";
 import type { HonoEnv } from "../../shared/types";
 
 const router = new Hono<HonoEnv>();
@@ -487,7 +493,7 @@ router.post("/login", rateLimit({ points: 20, windowSecs: 60 }), async (c) => {
       .where(eq(usersTable.email, email.toLowerCase()))
       .limit(1);
     const user = users[0];
-    if (!user || !user.passwordHash) {
+    if (!user?.passwordHash) {
       recordIpLoginFailure(clientIp, email);
       return c.json({ error: "INVALID_CREDENTIALS", message: "Invalid credentials" }, 401);
     }
@@ -528,10 +534,7 @@ router.post("/login/mfa", rateLimit({ points: 10, windowSecs: 60 }), async (c) =
   try {
     const { mfaToken, code } = await c.req.json();
     if (!mfaToken || !code) {
-      return c.json(
-        { error: "INVALID_REQUEST", message: "mfaToken and code are required" },
-        400
-      );
+      return c.json({ error: "INVALID_REQUEST", message: "mfaToken and code are required" }, 400);
     }
 
     const tokenSvc = await getTokenService();
@@ -556,7 +559,10 @@ router.post("/login/mfa", rateLimit({ points: 10, windowSecs: 60 }), async (c) =
     const mfa = (user.mfa as any) ?? {};
     if (mfa?.totp?.enabled !== true || !mfa?.totp?.secret) {
       // The challenge was issued but TOTP was since removed — nothing to verify.
-      return c.json({ error: "MFA_NOT_ENABLED", message: "MFA is not enabled for this account" }, 400);
+      return c.json(
+        { error: "MFA_NOT_ENABLED", message: "MFA is not enabled for this account" },
+        400
+      );
     }
 
     const submitted = String(code).trim();
@@ -1073,17 +1079,52 @@ router.post("/me/avatar", authMiddleware, async (c) => {
       return c.json({ error: "FILE_TOO_LARGE", message: "Avatar must be under 5 MB" }, 400);
     }
 
-    const uploadsDir = path.join(process.cwd(), "uploads", "avatars");
-    await fs.mkdir(uploadsDir, { recursive: true });
-
-    const filename = `${user.id}-${Date.now()}.${ext}`;
-    const filepath = path.join(uploadsDir, filename);
-    await fs.writeFile(filepath, Buffer.from(await file.arrayBuffer()));
-
-    const appUrl = process.env.APP_URL ?? "http://localhost:3000";
-    const avatarUrl = `${appUrl}/uploads/avatars/${filename}`;
-
     const db = getDb();
+    const buffer = Buffer.from(await file.arrayBuffer());
+    const objectKey = `avatars/${user.id}-${Date.now()}.${ext}`;
+
+    // Prefer S3 (same bucket as backups) when configured; fall back to the
+    // legacy local-disk path when S3 isn't set so local dev keeps working.
+    let avatarUrl: string;
+    let _s3ObjectKey: string | null = null;
+    const s3Enabled = await isS3BackupEnabled();
+    if (s3Enabled) {
+      const result = await uploadBuffer({
+        key: objectKey,
+        body: buffer,
+        contentType: file.type,
+      });
+      avatarUrl = result.url;
+      _s3ObjectKey = result.key;
+    } else {
+      const uploadsDir = path.join(process.cwd(), "uploads", "avatars");
+      await fs.mkdir(uploadsDir, { recursive: true });
+      const filename = `${user.id}-${Date.now()}.${ext}`;
+      const filepath = path.join(uploadsDir, filename);
+      await fs.writeFile(filepath, buffer);
+      const appUrl = process.env.APP_URL ?? "http://localhost:3000";
+      avatarUrl = `${appUrl}/uploads/avatars/${filename}`;
+    }
+
+    // Best-effort: clean up the previous S3 avatar so the bucket doesn't
+    // accumulate dead objects. Failures are logged, not returned.
+    const previous = await db
+      .select({ avatarUrl: usersTable.avatarUrl })
+      .from(usersTable)
+      .where(eq(usersTable.id, user.id))
+      .limit(1);
+    const oldUrl = previous[0]?.avatarUrl ?? null;
+    if (oldUrl && oldUrl !== avatarUrl) {
+      const oldKey = parseObjectKeyFromPublicUrl(oldUrl);
+      if (oldKey) {
+        try {
+          await deleteObject(oldKey);
+        } catch (err) {
+          logger.warn("Failed to delete previous avatar from S3", err as Error);
+        }
+      }
+    }
+
     await db
       .update(usersTable)
       .set({ avatarUrl, updatedAt: new Date() })

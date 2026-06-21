@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import { Fingerprint, Globe, KeyRound, Loader2, ShieldCheck } from "lucide-react";
+import { useState } from "react";
 import { api } from "@/lib/api";
 
 interface VerificationMethod {
@@ -60,9 +60,7 @@ export default function AdminDIDPage() {
       );
       setResolved(data);
     } catch (err: unknown) {
-      setResolveError(
-        err instanceof Error ? err.message : "Could not resolve this DID"
-      );
+      setResolveError(err instanceof Error ? err.message : "Could not resolve this DID");
     } finally {
       setResolving(false);
     }
@@ -80,9 +78,7 @@ export default function AdminDIDPage() {
       });
       setChallenge(data);
     } catch (err: unknown) {
-      setChallengeError(
-        err instanceof Error ? err.message : "Could not create a challenge"
-      );
+      setChallengeError(err instanceof Error ? err.message : "Could not create a challenge");
     } finally {
       setChallenging(false);
     }
@@ -98,10 +94,10 @@ export default function AdminDIDPage() {
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Resolve <code className="rounded bg-muted px-1 py-0.5 text-xs">did:key</code> and{" "}
-          <code className="rounded bg-muted px-1 py-0.5 text-xs">did:web</code> identifiers,
-          and generate a proof-of-control challenge. Use this to verify an organization&apos;s{" "}
-          <code className="rounded bg-muted px-1 py-0.5 text-xs">did:web</code> before trusting
-          it, or to test a DID authentication integration.
+          <code className="rounded bg-muted px-1 py-0.5 text-xs">did:web</code> identifiers, and
+          generate a proof-of-control challenge. Use this to verify an organization&apos;s{" "}
+          <code className="rounded bg-muted px-1 py-0.5 text-xs">did:web</code> before trusting it,
+          or to test a DID authentication integration.
         </p>
       </div>
 
@@ -128,7 +124,11 @@ export default function AdminDIDPage() {
             disabled={resolving || !resolveDid.trim()}
             className="flex items-center justify-center gap-2 rounded-lg bg-primary px-5 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
           >
-            {resolving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Fingerprint className="h-4 w-4" />}
+            {resolving ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Fingerprint className="h-4 w-4" />
+            )}
             Resolve
           </button>
         </div>
@@ -207,7 +207,11 @@ export default function AdminDIDPage() {
             disabled={challenging || !challengeDid.trim()}
             className="flex items-center justify-center gap-2 rounded-lg bg-primary px-5 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
           >
-            {challenging ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldCheck className="h-4 w-4" />}
+            {challenging ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <ShieldCheck className="h-4 w-4" />
+            )}
             Create challenge
           </button>
         </div>
@@ -222,7 +226,9 @@ export default function AdminDIDPage() {
           <dl className="mt-4 space-y-2 rounded-lg border border-border bg-background p-4 text-sm">
             <div className="flex flex-col gap-0.5">
               <dt className="text-xs text-muted-foreground">Challenge ID</dt>
-              <dd className="break-all font-mono text-xs text-foreground">{challenge.challengeId}</dd>
+              <dd className="break-all font-mono text-xs text-foreground">
+                {challenge.challengeId}
+              </dd>
             </div>
             <div className="flex flex-col gap-0.5">
               <dt className="text-xs text-muted-foreground">Challenge (sign this)</dt>

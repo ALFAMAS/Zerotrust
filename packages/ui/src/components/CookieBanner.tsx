@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
 import { brand } from "@/config/brand";
 import { getConsent, setConsent } from "@/lib/consent";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 export default function CookieBanner() {

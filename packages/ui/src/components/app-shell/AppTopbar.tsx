@@ -11,7 +11,12 @@ interface AppTopbarProps {
   onSignOut: () => void;
 }
 
-export default function AppTopbar({ brandSuffix, onMenuClick, actions, onSignOut }: AppTopbarProps) {
+export default function AppTopbar({
+  brandSuffix,
+  onMenuClick,
+  actions,
+  onSignOut,
+}: AppTopbarProps) {
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-border bg-background/80 px-4 backdrop-blur-md sm:px-6">
       {/* Mobile: hamburger + brand (sidebar shows the brand on desktop) */}

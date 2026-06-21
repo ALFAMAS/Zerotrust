@@ -1,5 +1,5 @@
-import webpush from "web-push";
 import { and, eq, inArray } from "drizzle-orm";
+import webpush from "web-push";
 import { getDb } from "../db";
 import { pushSubscriptionsTable } from "../db/schema";
 import { getLogger } from "../logger";
@@ -82,10 +82,7 @@ export async function removeSubscription(userId: string, endpoint: string): Prom
   await db
     .delete(pushSubscriptionsTable)
     .where(
-      and(
-        eq(pushSubscriptionsTable.endpoint, endpoint),
-        eq(pushSubscriptionsTable.userId, userId)
-      )
+      and(eq(pushSubscriptionsTable.endpoint, endpoint), eq(pushSubscriptionsTable.userId, userId))
     );
 }
 

@@ -1,9 +1,9 @@
-import { Hono } from "hono";
 import { eq } from "drizzle-orm";
+import { Hono } from "hono";
 import { getDb } from "../../db";
 import { usersTable } from "../../db/schema";
-import { verifyUnsubscribeToken } from "../../services/unsubscribe";
 import { getLogger } from "../../logger";
+import { verifyUnsubscribeToken } from "../../services/unsubscribe";
 import type { HonoEnv } from "../../shared/types";
 
 const router = new Hono<HonoEnv>();

@@ -1,12 +1,12 @@
 import { createMiddleware } from "hono/factory";
-import type { HonoEnv } from "../shared/types.js";
+import { getLogger } from "../logger/index.js";
 import {
+  type BehaviorObservation,
+  computeDeviceHash,
   scoreAnomaly,
   updateBaseline,
-  computeDeviceHash,
-  type BehaviorObservation,
 } from "../services/anomalyDetection.service.js";
-import { getLogger } from "../logger/index.js";
+import type { HonoEnv } from "../shared/types.js";
 
 const logger = getLogger("anomaly-middleware");
 

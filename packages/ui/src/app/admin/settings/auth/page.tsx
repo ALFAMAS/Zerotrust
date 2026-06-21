@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { api } from "@/lib/api";
 import Toggle from "@/components/Toggle";
+import { api } from "@/lib/api";
 
 interface AuthSettings {
   // Auth Methods
@@ -89,7 +89,7 @@ function NumberInput({ label, value, onChange, min, max }: NumberInputProps) {
         value={value}
         onChange={(e) => {
           const n = Number(e.target.value);
-          if (!isNaN(n)) onChange(Math.min(max, Math.max(min, n)));
+          if (!Number.isNaN(n)) onChange(Math.min(max, Math.max(min, n)));
         }}
         className="w-28 rounded-lg bg-muted border border-border px-3 py-1.5 text-sm text-foreground text-right focus:border-ring focus:outline-none"
       />
@@ -156,8 +156,12 @@ export default function AuthSettingsPage() {
       )}
 
       <div>
-        <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">Auth Settings</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Configure authentication methods, MFA, and security policy</p>
+        <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
+          Auth Settings
+        </h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Configure authentication methods, MFA, and security policy
+        </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -166,7 +170,9 @@ export default function AuthSettingsPage() {
           {/* Card 1: Authentication Methods */}
           <div className="rounded-xl bg-card border border-border p-5">
             <h2 className="font-semibold text-foreground mb-1">Authentication Methods</h2>
-            <p className="text-xs text-muted-foreground mb-4">Choose how users can sign in to your app</p>
+            <p className="text-xs text-muted-foreground mb-4">
+              Choose how users can sign in to your app
+            </p>
             <div className="divide-y divide-border">
               <ToggleRow
                 label="Email & Password"
@@ -204,7 +210,9 @@ export default function AuthSettingsPage() {
           {/* Card 4: Registration */}
           <div className="rounded-xl bg-card border border-border p-5">
             <h2 className="font-semibold text-foreground mb-1">Registration</h2>
-            <p className="text-xs text-muted-foreground mb-4">Control who can create new accounts</p>
+            <p className="text-xs text-muted-foreground mb-4">
+              Control who can create new accounts
+            </p>
             <div className="divide-y divide-border">
               <ToggleRow
                 label="Allow new registrations"
@@ -230,7 +238,9 @@ export default function AuthSettingsPage() {
                 onChange={(e) => set("allowedEmailDomains", e.target.value)}
                 className="w-full rounded-lg bg-muted border border-border px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none"
               />
-              <p className="mt-1 text-xs text-muted-foreground">Comma-separated. Leave blank to allow all domains.</p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Comma-separated. Leave blank to allow all domains.
+              </p>
             </div>
           </div>
         </div>
@@ -240,7 +250,9 @@ export default function AuthSettingsPage() {
           {/* Card 2: MFA */}
           <div className="rounded-xl bg-card border border-border p-5">
             <h2 className="font-semibold text-foreground mb-1">Multi-Factor Authentication</h2>
-            <p className="text-xs text-muted-foreground mb-4">Second-factor options available to users</p>
+            <p className="text-xs text-muted-foreground mb-4">
+              Second-factor options available to users
+            </p>
             <div className="divide-y divide-border">
               <ToggleRow
                 label="Authenticator App (TOTP)"
@@ -272,7 +284,9 @@ export default function AuthSettingsPage() {
           {/* Card 3: Security */}
           <div className="rounded-xl bg-card border border-border p-5">
             <h2 className="font-semibold text-foreground mb-1">Security Settings</h2>
-            <p className="text-xs text-muted-foreground mb-4">Session and account lockout configuration</p>
+            <p className="text-xs text-muted-foreground mb-4">
+              Session and account lockout configuration
+            </p>
             <div className="divide-y divide-border">
               <NumberInput
                 label="Session Duration (seconds)"
@@ -323,8 +337,19 @@ export default function AuthSettingsPage() {
           {saving ? (
             <>
               <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                />
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                />
               </svg>
               Saving…
             </>

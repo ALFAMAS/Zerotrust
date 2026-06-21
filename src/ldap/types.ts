@@ -3,16 +3,16 @@
  */
 
 export interface LDAPConfig {
-  url: string;                    // ldap://dc.example.com:389 or ldaps://...
-  baseDN: string;                 // DC=example,DC=com
-  bindDN: string;                 // CN=svc-zeroauth,OU=ServiceAccounts,...
+  url: string; // ldap://dc.example.com:389 or ldaps://...
+  baseDN: string; // DC=example,DC=com
+  bindDN: string; // CN=svc-zeroauth,OU=ServiceAccounts,...
   bindPassword: string;
-  userSearchBase?: string;        // OU=Users,DC=example,DC=com
-  userSearchFilter?: string;      // (&(objectClass=person)(sAMAccountName={{username}}))
+  userSearchBase?: string; // OU=Users,DC=example,DC=com
+  userSearchFilter?: string; // (&(objectClass=person)(sAMAccountName={{username}}))
   groupSearchBase?: string;
-  groupSearchFilter?: string;     // (&(objectClass=group)(member={{dn}}))
+  groupSearchFilter?: string; // (&(objectClass=group)(member={{dn}}))
   tlsOptions?: { rejectUnauthorized?: boolean; ca?: string };
-  timeout?: number;               // ms, default 5000
+  timeout?: number; // ms, default 5000
 }
 
 export interface LDAPUser {

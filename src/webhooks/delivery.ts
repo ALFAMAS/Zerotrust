@@ -1,7 +1,7 @@
-import { createHmac, randomUUID } from "crypto";
-import type { WebhookEndpoint, WebhookDelivery, WebhookEventType } from "./types";
-import { webhookStore } from "./store";
+import { createHmac, randomUUID } from "node:crypto";
 import { webhookDeliveryLog } from "./deliveryLog";
+import { webhookStore } from "./store";
+import type { WebhookDelivery, WebhookEndpoint, WebhookEventType } from "./types";
 
 export function signPayload(secret: string, body: string): string {
   const hmac = createHmac("sha256", secret);
@@ -38,7 +38,10 @@ export async function deliverWebhook(
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 30_000);
 
-  const base: Omit<WebhookDelivery, "status" | "responseStatus" | "responseBody" | "error" | "deliveredAt" | "nextRetryAt"> = {
+  const base: Omit<
+    WebhookDelivery,
+    "status" | "responseStatus" | "responseBody" | "error" | "deliveredAt" | "nextRetryAt"
+  > = {
     id: deliveryId,
     endpointId: endpoint.id,
     event,
@@ -92,7 +95,7 @@ async function retryDelivery(
   const result = await deliverWebhook(endpoint, event, payload, attempt);
 
   if (result.status !== "delivered" && attempt < endpoint.retryPolicy.maxRetries) {
-    const delay = endpoint.retryPolicy.backoffMs * Math.pow(2, attempt - 1);
+    const delay = endpoint.retryPolicy.backoffMs * 2 ** (attempt - 1);
     setTimeout(() => {
       retryDelivery(endpoint, event, payload, attempt + 1).catch(() => {
         // fire-and-forget — errors are swallowed

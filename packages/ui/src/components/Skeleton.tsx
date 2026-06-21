@@ -1,4 +1,4 @@
-import { type HTMLAttributes } from "react";
+import type { HTMLAttributes } from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -63,10 +63,7 @@ export function SkeletonTable({ rows = 4, columns = 4, className = "" }: Skeleto
       </div>
       {/* Body rows */}
       {Array.from({ length: rows }).map((_, rowIdx) => (
-        <div
-          key={rowIdx}
-          className="flex gap-4 border-b border-border px-4 py-3 last:border-b-0"
-        >
+        <div key={rowIdx} className="flex gap-4 border-b border-border px-4 py-3 last:border-b-0">
           {Array.from({ length: columns }).map((_, colIdx) => (
             <Skeleton key={colIdx} rounded="md" className="h-4 flex-1" />
           ))}

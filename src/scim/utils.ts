@@ -1,4 +1,4 @@
-import type { SCIMUser, SCIMError } from "./types";
+import type { SCIMError, SCIMUser } from "./types";
 
 /**
  * Convert a ZeroAuth UserDocument to SCIM 2.0 User representation.
@@ -50,12 +50,18 @@ export function userToSCIM(user: any, baseUrl: string): SCIMUser {
 /**
  * Convert a SCIM User payload to ZeroAuth user field updates.
  */
-export function scimToUserFields(
-  scimUser: SCIMUser
-): Partial<{ email: string; firstName: string; lastName: string; phone: string; active: boolean; displayName: string }> {
+export function scimToUserFields(scimUser: SCIMUser): Partial<{
+  email: string;
+  firstName: string;
+  lastName: string;
+  phone: string;
+  active: boolean;
+  displayName: string;
+}> {
   const fields: Record<string, unknown> = {};
 
-  const primaryEmail = scimUser.emails?.find((e) => e.primary)?.value ?? scimUser.emails?.[0]?.value;
+  const primaryEmail =
+    scimUser.emails?.find((e) => e.primary)?.value ?? scimUser.emails?.[0]?.value;
   if (primaryEmail) fields.email = primaryEmail;
 
   if (scimUser.name?.givenName) fields.firstName = scimUser.name.givenName;
@@ -67,12 +73,20 @@ export function scimToUserFields(
   else if (scimUser.name?.formatted) fields.displayName = scimUser.name.formatted;
 
   const primaryPhone =
-    scimUser.phoneNumbers?.find((p) => p.type === "work")?.value ?? scimUser.phoneNumbers?.[0]?.value;
+    scimUser.phoneNumbers?.find((p) => p.type === "work")?.value ??
+    scimUser.phoneNumbers?.[0]?.value;
   if (primaryPhone) fields.phone = primaryPhone;
 
   if (scimUser.active !== undefined) fields.active = scimUser.active;
 
-  return fields as Partial<{ email: string; firstName: string; lastName: string; phone: string; active: boolean; displayName: string }>;
+  return fields as Partial<{
+    email: string;
+    firstName: string;
+    lastName: string;
+    phone: string;
+    active: boolean;
+    displayName: string;
+  }>;
 }
 
 /**
@@ -95,7 +109,7 @@ export function scimError(status: number, detail: string, scimType?: string): SC
 export function parseSCIMFilter(
   filter: string
 ): { attribute: string; operator: string; value: string } | null {
-  if (!filter || !filter.trim()) return null;
+  if (!filter?.trim()) return null;
 
   // Match: attribute operator "value" or attribute operator value
   const match = filter.trim().match(/^(\S+)\s+(eq|ne|co|sw|ew|gt|lt|ge|le|pr)\s+"?([^"]*)"?$/i);

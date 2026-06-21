@@ -49,3 +49,12 @@ temp/
 .claude/
 @esbuild/
 @esbuild
+
+# User uploads (runtime artifacts — avatars, attachments)
+uploads/
+
+# Local DB backups
+backups/
+
+# Windows junction-repair log (output of scripts/fix-junctions.ps1)
+scripts/.junction-repair.tsv

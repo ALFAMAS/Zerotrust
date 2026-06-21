@@ -1,7 +1,7 @@
-import { eq, and, gt } from "drizzle-orm";
+import { and, eq, gt } from "drizzle-orm";
 import { getDb } from "../db";
-import { rolesTable, jitAccessTable } from "../db/schema";
-import type { Permission, ABACCondition, User, AuthzContext, AuthzResult } from "../shared/types";
+import { jitAccessTable, rolesTable } from "../db/schema";
+import type { ABACCondition, AuthzContext, AuthzResult, Permission, User } from "../shared/types";
 
 export class AuthorizationEngine {
   async evaluate(ctx: AuthzContext): Promise<AuthzResult> {
@@ -42,16 +42,23 @@ export class AuthorizationEngine {
     try {
       const db = getDb();
       const now = new Date();
-      const jitGrants = await db.select().from(jitAccessTable).where(
-        and(
-          eq(jitAccessTable.userId, user.id),
-          eq(jitAccessTable.status, "approved"),
-          gt(jitAccessTable.expiresAt, now)
-        )
-      );
+      const jitGrants = await db
+        .select()
+        .from(jitAccessTable)
+        .where(
+          and(
+            eq(jitAccessTable.userId, user.id),
+            eq(jitAccessTable.status, "approved"),
+            gt(jitAccessTable.expiresAt, now)
+          )
+        );
 
       for (const jit of jitGrants) {
-        const roleRows = await db.select({ name: rolesTable.name }).from(rolesTable).where(eq(rolesTable.id, jit.roleId)).limit(1);
+        const roleRows = await db
+          .select({ name: rolesTable.name })
+          .from(rolesTable)
+          .where(eq(rolesTable.id, jit.roleId))
+          .limit(1);
         const roleName = roleRows[0]?.name;
         if (roleName && !roles.includes(roleName)) roles.push(roleName);
       }
@@ -99,10 +106,17 @@ export class AuthorizationEngine {
     const rest = parts.slice(1);
     let obj: Record<string, unknown>;
     switch (root) {
-      case "user": obj = ctx.user as unknown as Record<string, unknown>; break;
-      case "env": obj = (ctx.environment as Record<string, unknown>) ?? {}; break;
-      case "resource": obj = ctx.resourceAttributes ?? {}; break;
-      default: return undefined;
+      case "user":
+        obj = ctx.user as unknown as Record<string, unknown>;
+        break;
+      case "env":
+        obj = (ctx.environment as Record<string, unknown>) ?? {};
+        break;
+      case "resource":
+        obj = ctx.resourceAttributes ?? {};
+        break;
+      default:
+        return undefined;
     }
     return rest.reduce<unknown>((cur, key) => {
       if (cur && typeof cur === "object") return (cur as Record<string, unknown>)[key];

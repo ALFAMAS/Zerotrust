@@ -66,7 +66,7 @@ export function encrypt(
 
   const body = concat(n, ciphertext, tag);
   let token = HEADER + base64UrlEncode(body);
-  if (footer.length > 0) token += "." + base64UrlEncode(footer);
+  if (footer.length > 0) token += `.${base64UrlEncode(footer)}`;
   return token;
 }
 

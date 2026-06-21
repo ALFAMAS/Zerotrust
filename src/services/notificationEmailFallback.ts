@@ -1,9 +1,9 @@
-import { lt, eq, and } from "drizzle-orm";
+import { and, eq, lt } from "drizzle-orm";
 import { getDb } from "../db";
-import { usersTable, notificationsTable } from "../db/schema";
+import { notificationsTable, usersTable } from "../db/schema";
+import { getLogger } from "../logger";
 import { sendNotificationEmail } from "./email.service";
 import { generateUnsubscribeToken } from "./unsubscribe";
-import { getLogger } from "../logger";
 
 const logger = getLogger("notification-fallback");
 

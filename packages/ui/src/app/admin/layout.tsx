@@ -1,8 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
 import {
   ArrowLeft,
   Bot,
@@ -13,15 +10,19 @@ import {
   Network,
   ScrollText,
   Settings,
+  ShieldCheck,
   ShieldQuestion,
   Users,
   Wallet,
 } from "lucide-react";
-import { isAuthenticated, clearToken } from "@/lib/auth";
-import { api } from "@/lib/api";
-import { ThemeToggle } from "@/components/ThemeToggle";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import AppShell from "@/components/app-shell/AppShell";
 import type { NavItem } from "@/components/app-shell/AppSidebar";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { api } from "@/lib/api";
+import { clearToken, isAuthenticated } from "@/lib/auth";
 
 const navItems: NavItem[] = [
   { href: "/admin", icon: LayoutDashboard, label: "Dashboard", exact: true },
@@ -34,6 +35,7 @@ const navItems: NavItem[] = [
   { href: "/admin/workload", icon: Bot, label: "Workload Identity" },
   { href: "/admin/federation", icon: Network, label: "Federation" },
   { href: "/admin/settings/general", icon: Settings, label: "General" },
+  { href: "/admin/access-reviews", icon: ShieldCheck, label: "Access Reviews" },
   { href: "/admin/audit", icon: ScrollText, label: "Audit Logs" },
 ];
 

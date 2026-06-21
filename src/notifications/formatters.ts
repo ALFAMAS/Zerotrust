@@ -29,21 +29,26 @@ const EMOJIS: Record<string, string> = {
 };
 
 function formatTitle(event: NotificationEvent): string {
-  return event.replace(/\./g, " ").replace(/\b\w/g, c => c.toUpperCase());
+  return event.replace(/\./g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-function formatFields(data: Record<string, unknown>): { title: string; value: string; short: boolean }[] {
+function formatFields(
+  data: Record<string, unknown>
+): { title: string; value: string; short: boolean }[] {
   return Object.entries(data)
     .filter(([, v]) => v !== undefined && v !== null)
     .slice(0, 6)
     .map(([k, v]) => ({
-      title: k.replace(/([A-Z])/g, " $1").replace(/^./, s => s.toUpperCase()),
+      title: k.replace(/([A-Z])/g, " $1").replace(/^./, (s) => s.toUpperCase()),
       value: String(v),
       short: String(v).length < 40,
     }));
 }
 
-export function formatSlackMessage(event: NotificationEvent, data: Record<string, unknown>): object {
+export function formatSlackMessage(
+  event: NotificationEvent,
+  data: Record<string, unknown>
+): object {
   const emoji = EMOJIS[event] ?? "ℹ️";
   const color = COLORS[event] ?? "#6366f1";
   const title = formatTitle(event);
@@ -63,7 +68,10 @@ export function formatSlackMessage(event: NotificationEvent, data: Record<string
   };
 }
 
-export function formatTeamsMessage(event: NotificationEvent, data: Record<string, unknown>): object {
+export function formatTeamsMessage(
+  event: NotificationEvent,
+  data: Record<string, unknown>
+): object {
   const emoji = EMOJIS[event] ?? "ℹ️";
   const title = formatTitle(event);
   const color = COLORS[event] ?? "#6366f1";

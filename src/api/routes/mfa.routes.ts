@@ -1,12 +1,12 @@
+import crypto from "node:crypto";
+import { and, eq, gt } from "drizzle-orm";
 import { Hono } from "hono";
-import crypto from "crypto";
-import { eq, and, gt } from "drizzle-orm";
 import { getDb } from "../../db";
-import { usersTable, otpsTable } from "../../db/schema";
+import { otpsTable, usersTable } from "../../db/schema";
+import { getLogger } from "../../logger";
+import { sendOTP } from "../../mfa";
 import { authMiddleware } from "../../middleware/auth";
 import { getSettings } from "../../models/settings.model";
-import { sendOTP } from "../../mfa";
-import { getLogger } from "../../logger";
 import { sendOtpEmail } from "../../services/email.service";
 import type { HonoEnv } from "../../shared/types";
 
@@ -127,12 +127,16 @@ router.post("/totp/verify", async (c) => {
     // Generate one-time recovery codes the first time TOTP is enabled so a user
     // who loses their authenticator can still get in. They are shown ONCE here
     // and stored only as sha256 hashes; redeemed at POST /auth/login/mfa.
-    const alreadyEnabled = mfa.totp.enabled === true && Array.isArray(mfa.totp.backupCodes) && mfa.totp.backupCodes.length > 0;
+    const alreadyEnabled =
+      mfa.totp.enabled === true &&
+      Array.isArray(mfa.totp.backupCodes) &&
+      mfa.totp.backupCodes.length > 0;
     let backupCodes: string[] | undefined;
     let backupCodeHashes: string[] = mfa.totp.backupCodes ?? [];
     if (!alreadyEnabled) {
-      backupCodes = Array.from({ length: 10 }, () =>
-        crypto.randomBytes(5).toString("hex") // 10 hex chars per code
+      backupCodes = Array.from(
+        { length: 10 },
+        () => crypto.randomBytes(5).toString("hex") // 10 hex chars per code
       );
       backupCodeHashes = backupCodes.map((code) =>
         crypto.createHash("sha256").update(code.toLowerCase()).digest("hex")
@@ -144,7 +148,12 @@ router.post("/totp/verify", async (c) => {
       .set({
         mfa: {
           ...mfa,
-          totp: { ...mfa.totp, enabled: true, verifiedAt: new Date(), backupCodes: backupCodeHashes },
+          totp: {
+            ...mfa.totp,
+            enabled: true,
+            verifiedAt: new Date(),
+            backupCodes: backupCodeHashes,
+          },
         },
         updatedAt: new Date(),
       })

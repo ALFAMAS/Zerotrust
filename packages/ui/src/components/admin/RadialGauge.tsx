@@ -1,7 +1,7 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import type { ApexOptions } from "apexcharts";
+import dynamic from "next/dynamic";
 
 // ApexCharts touches `window`, so load it client-only (same pattern as the
 // TailAdmin chart components, re-skinned to ZeroAuth's indigo palette).
@@ -36,7 +36,12 @@ export default function RadialGauge({ value, label, caption }: RadialGaugeProps)
     },
     fill: {
       type: "gradient",
-      gradient: { shade: "dark", type: "horizontal", gradientToColors: ["#818cf8"], stops: [0, 100] },
+      gradient: {
+        shade: "dark",
+        type: "horizontal",
+        gradientToColors: ["#818cf8"],
+        stops: [0, 100],
+      },
     },
     stroke: { lineCap: "round" },
     labels: [label],

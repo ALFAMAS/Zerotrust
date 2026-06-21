@@ -1,10 +1,11 @@
 import { createMiddleware } from "hono/factory";
-import type { HonoEnv } from "../shared/types";
 import { getLogger } from "../logger";
+import type { HonoEnv } from "../shared/types";
+
 const logger = getLogger("account-lockout");
 
-const MAX_ATTEMPTS = parseInt(process.env.MAX_LOGIN_ATTEMPTS || "5");
-const LOCKOUT_DURATION_MS = parseInt(process.env.LOCKOUT_DURATION_MS || String(30 * 60 * 1000));
+const MAX_ATTEMPTS = parseInt(process.env.MAX_LOGIN_ATTEMPTS || "5", 10);
+const LOCKOUT_DURATION_MS = parseInt(process.env.LOCKOUT_DURATION_MS || String(30 * 60 * 1000), 10);
 
 interface AttemptRecord {
   count: number;
@@ -21,20 +22,24 @@ interface LockoutEntry {
 const attemptMap = new Map<string, AttemptRecord>();
 const failedAttempts = new Map<string, LockoutEntry>();
 
-setInterval(() => {
-  const now = new Date();
-  for (const [email, entry] of failedAttempts.entries()) {
-    if (now.getTime() - entry.lastAttemptAt.getTime() > 60 * 60 * 1000) {
-      failedAttempts.delete(email);
+setInterval(
+  () => {
+    const now = new Date();
+    for (const [email, entry] of failedAttempts.entries()) {
+      if (now.getTime() - entry.lastAttemptAt.getTime() > 60 * 60 * 1000) {
+        failedAttempts.delete(email);
+      }
     }
-  }
-}, 10 * 60 * 1000).unref();
+  },
+  10 * 60 * 1000
+).unref();
 
 export function isAccountLocked(email: string): { locked: boolean; lockedUntil?: string } {
   const key = email.toLowerCase();
   const entry = failedAttempts.get(key);
   if (!entry?.lockedUntil) return { locked: false };
-  if (entry.lockedUntil > new Date()) return { locked: true, lockedUntil: entry.lockedUntil.toISOString() };
+  if (entry.lockedUntil > new Date())
+    return { locked: true, lockedUntil: entry.lockedUntil.toISOString() };
   entry.lockedUntil = undefined;
   entry.count = 0;
   failedAttempts.set(key, entry);

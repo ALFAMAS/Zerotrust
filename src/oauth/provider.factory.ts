@@ -58,7 +58,7 @@ export function getProviderAdapter(provider: string) {
         params.set("code", code);
 
         const tokenRes = await fetch(
-          "https://graph.facebook.com/v12.0/oauth/access_token?" + params.toString(),
+          `https://graph.facebook.com/v12.0/oauth/access_token?${params.toString()}`,
           {
             method: "GET",
           }

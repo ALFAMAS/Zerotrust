@@ -4,17 +4,17 @@
  */
 
 import { Hono } from "hono";
-import type { HonoEnv } from "../../shared/types";
 import {
+  createTenant,
   getAllTenants,
   getTenant,
   getTenantBySlug,
-  createTenant,
-  updateTenant,
   type OidcConfig,
   type SamlConfig,
   type TenantSettings,
+  updateTenant,
 } from "../../models/tenant.model.js";
+import type { HonoEnv } from "../../shared/types";
 
 const router = new Hono<HonoEnv>();
 
@@ -40,7 +40,7 @@ async function findByIdOrSlug(idOrSlug: string) {
 
 router.use("/*", async (c, next) => {
   const user = c.get("user");
-  if (!user || !user.roles.includes("admin")) {
+  if (!user?.roles.includes("admin")) {
     return c.json({ code: "ACCESS_DENIED", message: "Admin role required", details: [] }, 403);
   }
   return next();
@@ -180,7 +180,7 @@ router.delete("/:id", async (c) => {
     }
 
     const tenant = await updateTenant(existing.id, { status: "deleted" });
-    return c.json({ message: "Tenant deleted", id: tenant!.id });
+    return c.json({ message: "Tenant deleted", id: tenant?.id });
   } catch {
     return c.json({ code: "INTERNAL_ERROR", message: "Failed to delete tenant", details: [] }, 500);
   }

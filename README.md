@@ -1,363 +1,351 @@
-# ZeroAuth — SaaS Starter
+<div align="center">
 
-A production-ready SaaS boilerplate with enterprise-grade authentication built in. Clone it, add your business logic, and ship.
+# ZeroAuth
 
-**Backend:** Hono + TypeScript + PostgreSQL (Drizzle ORM) + Redis  
-**Frontend:** Next.js 16.2 + Tailwind CSS — landing page, user dashboard, and admin panel in one app
+**Production-grade authentication & identity platform — batteries included.**
 
----
+A full-stack auth foundation you can clone, brand, and ship: a Hono + TypeScript API
+and a Next.js dashboard/admin app, with passkeys, OAuth, SSO, MFA, RBAC/ABAC,
+organizations, billing, and an audit trail already wired together.
 
-## What's built
+[![CI](https://github.com/ALFAMAS/zeroauth/actions/workflows/ci.yml/badge.svg)](https://github.com/ALFAMAS/zeroauth/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](#license)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.4-3178c6?logo=typescript&logoColor=white)
+![Bun](https://img.shields.io/badge/Bun-1.x-black?logo=bun&logoColor=white)
+![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js&logoColor=white)
+![Hono](https://img.shields.io/badge/Hono-4-e36002)
 
-|     | Feature                                                                          |
-| --- | -------------------------------------------------------------------------------- |
-| ✅  | Email + password auth with account lockout                                       |
-| ✅  | Google, GitHub, Apple, Facebook OAuth                                            |
-| ✅  | Magic link (passwordless, 15-min TTL)                                            |
-| ✅  | Passkeys / WebAuthn (FIDO2)                                                      |
-| ✅  | TOTP (Google Authenticator, Authy, 1Password)                                    |
-| ✅  | Email OTP, SMS OTP (Twilio), WhatsApp, Telegram MFA                              |
-| ✅  | Session management — list, revoke, device tracking                               |
-| ✅  | Protected routes — client-side dashboard/admin guards, redirect to login         |
-| ✅  | Silent token refresh — auto-replays a 401 via the refresh token                  |
-| ✅  | PASETO v4 tokens (AES-256-GCM, no JWT footguns)                                  |
-| ✅  | RBAC + ABAC with JIT privilege escalation                                        |
-| ✅  | Continuous access evaluation + anomaly detection                                 |
-| ✅  | Rate limiting (Redis-backed, in-memory fallback)                                 |
-| ✅  | OIDC provider + SAML 2.0 SSO                                                     |
-| ✅  | Decentralized identity — did:key / did:web resolver + proof-of-control           |
-| ✅  | Identity federation (RFC 8693 token exchange) — admin provider registry          |
-| ✅  | Workload / agent identity — scoped client-credential tokens (agent claim)        |
-| ✅  | Cross-tenant JIT access — request + admin approval inbox, auto-expiring          |
-| ✅  | SCIM 2.0 user provisioning                                                       |
-| ✅  | LDAP / Active Directory sync                                                     |
-| ✅  | User dashboard — profile, security, sessions                                     |
-| ✅  | Admin panel at `/admin` — users, sessions, audit log, feature toggles            |
-| ✅  | Dark mode toggle (system preference + manual, persisted)                         |
-| ✅  | Toast notification system                                                        |
-| ✅  | Loading skeletons                                                                |
-| ✅  | Mobile-responsive layouts                                                        |
-| ✅  | PWA — installable, offline app-shell + IndexedDB write queue (Background Sync)   |
-| ✅  | Web push notifications — service worker + Push API (VAPID), per-device opt-in    |
-| ✅  | First-login product tour — dependency-free spotlight walkthrough                 |
-| ✅  | Locale-aware formatting — `Intl.*` dates/numbers/relative-time via `useFormat()` |
-| ✅  | Cookie consent banner (GDPR)                                                     |
-| ✅  | Privacy policy + Terms of service pages                                          |
-| ✅  | GDPR data export + 30-day soft-delete account deletion                           |
-| ✅  | Organizations & teams — workspaces, invite flows, org roles                      |
-| ✅  | Custom org roles with fine-grained permission sets                               |
-| ✅  | Notification center — bell icon, SSE real-time, email fallback digest            |
-| ✅  | Notification preferences + CAN-SPAM unsubscribe tokens                           |
-| ✅  | Avatar upload (JPEG/PNG/GIF/WebP, 5 MB limit)                                    |
-| ✅  | In-app NPS / thumbs feedback widget                                              |
-| ✅  | Analytics — Plausible and GA4 with consent gate                                  |
-| ✅  | Blog + Changelog pages                                                           |
-| ✅  | Sentry error monitoring — error boundaries + optional server capture             |
-| ✅  | i18n — next-intl, locale detection, language switcher (EN/ES/FR)                 |
-| ✅  | BullMQ email queue — non-blocking transactional delivery                         |
-| ✅  | Data retention — auto-purge audit logs, sessions, OTPs                           |
-| ✅  | Immutable audit log (Elasticsearch)                                              |
-| ✅  | Prometheus metrics + OpenTelemetry tracing                                       |
-| ✅  | Docker Compose — full stack in one command                                       |
-| ✅  | GitHub Actions CI (lint + type-check + test + UI build)                          |
-| ✅  | One-click deploy — Railway and Render buttons                                    |
-| ✅  | API key management — named keys, SHA-256 hashed, scopes, revoke                  |
-| ✅  | Stripe billing — checkout, customer portal, webhook handler                      |
-| ✅  | Plan feature gates — `requirePlan()` middleware (free/pro/enterprise)            |
-| ✅  | Billing dashboard — plan cards, Stripe checkout, manage subscription             |
-| ✅  | Help center — `/help` searchable FAQ with category filter                        |
-| ✅  | Onboarding setup checklist — dismissable progress widget on dashboard            |
+</div>
 
 ---
 
-## Ports
+## Table of contents
 
-| Service       | URL                         |
-| ------------- | --------------------------- |
-| API           | http://localhost:3000       |
-| App + Admin   | http://localhost:3000       |
-| Admin panel   | http://localhost:3000/admin |
-| API docs      | http://localhost:3000/docs  |
-| PostgreSQL    | localhost:5432              |
-| Redis         | localhost:6379              |
-| Elasticsearch | http://localhost:9200       |
-| Kibana        | http://localhost:5601       |
-
----
-
-## One-click deploy
-
-| Platform    | Button                                                                                                                                           |
-| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Railway** | [![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new/template?template=https://github.com/ALFAMAS/zeroauth)            |
-| **Render**  | [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/ALFAMAS/zeroauth) |
-
-Both platforms auto-detect Docker and provision a managed PostgreSQL + Redis. Set the required env vars (`TOKEN_SECRET_HEX`, `CSFLE_MASTER_KEY_HEX`, `DATABASE_URL`, `REDIS_URI`) during the deploy wizard.
+- [Why ZeroAuth](#why-zeroauth)
+- [Features](#features)
+- [Tech stack](#tech-stack)
+- [Architecture](#architecture)
+- [Quick start (local development)](#quick-start-local-development)
+- [Configuration](#configuration)
+- [Testing & code quality](#testing--code-quality)
+- [Production deployment](#production-deployment)
+- [API overview](#api-overview)
+- [Project structure](#project-structure)
+- [Customizing](#customizing)
+- [Security](#security)
+- [Project status](#project-status)
+- [Contributing](#contributing)
+- [License](#license)
 
 ---
 
-## Option A — Docker (recommended)
+## Why ZeroAuth
 
-The fastest way. Requires [Docker Desktop](https://www.docker.com/products/docker-desktop/).
+Authentication is the part of every SaaS that is high-stakes, time-consuming, and
+easy to get subtly wrong. ZeroAuth gives you a complete, opinionated implementation
+of the hard parts — token issuance, session lifecycle, MFA, SSO, RBAC, abuse
+defense, and an admin surface — so you can spend your time on product instead of
+rebuilding login for the hundredth time.
 
-### 1. Clone
+- **Secure by default** — PASETO v4 tokens (no JWT footguns), bcrypt password
+  hashing, client-side field encryption (CSFLE), HaveIBeenPwned breach checks, and
+  per-IP credential-stuffing defense are on out of the box.
+- **Enterprise-ready** — OIDC provider, SAML 2.0, SCIM 2.0, LDAP sync, and
+  per-org security policies are first-class, not afterthoughts.
+- **Operable** — Prometheus metrics, OpenTelemetry tracing, a public status page,
+  structured logs, and Slack/Teams/PagerDuty alerting ship with the platform.
 
-```bash
-git clone https://github.com/ALFAMAS/zeroauth my-saas
-cd my-saas
+> The authoritative, always-current feature catalog lives in
+> [`implemented.md`](./implemented.md). The list below is a curated summary.
+
+---
+
+## Features
+
+### Authentication & identity
+- Email + password with configurable account lockout
+- OAuth — Google, GitHub, Apple, Facebook (admin-toggleable per provider)
+- Magic links (passwordless, 15-minute TTL)
+- Passkeys / WebAuthn (FIDO2, resident keys, MDS3 attestation policy)
+- TOTP, Email OTP, SMS & WhatsApp OTP (Twilio), Telegram OTP
+- PASETO v4 access tokens + rotating, hashed refresh tokens
+- Session management — list, revoke, device fingerprinting, concurrent-session caps
+
+### Enterprise & federation
+- OIDC provider + SAML 2.0 SSO
+- SCIM 2.0 user provisioning · LDAP / Active Directory sync
+- Identity federation (RFC 8693 token exchange) with an admin provider registry
+- Workload / agent identity — scoped client-credential tokens
+- Decentralized identity — `did:key` / `did:web` resolver + proof-of-control
+- Organizations & teams — workspaces, invites, custom roles with fine-grained permissions
+- Cross-tenant JIT access — request + admin-approval inbox, auto-expiring
+
+### Access control & abuse defense
+- RBAC + ABAC with just-in-time privilege escalation
+- Continuous access evaluation — re-verification after sensitive operations
+- Anomaly detection — unusual location / time / device
+- Rate limiting — Redis-backed sliding window with in-memory fallback
+- Credential-stuffing defense, account-takeover detection, optional signup proof-of-work
+
+### Billing & growth
+- Stripe billing — checkout, customer portal, webhooks, per-org subscriptions
+- Plan feature gates (`requirePlan()`), 14-day trials, dunning, win-back, cancellation flow
+- API key management — named keys, SHA-256 hashed, scopes, revoke
+
+### Frontend (Next.js)
+- Landing page, user dashboard, and guarded admin panel in one app
+- PWA — installable, offline app-shell, web push (VAPID)
+- i18n (next-intl, EN/ES/FR), locale-aware `Intl.*` formatting, dark mode
+- GDPR — cookie consent, data export, 30-day soft-delete; privacy/terms pages
+- Notification center (SSE real-time + email fallback), feedback widget, product tour
+
+### Compliance & operations
+- Tamper-evident audit log (SHA-256 hash-chain) + Elasticsearch + SIEM fan-out
+- Access reviews tooling, data-retention auto-purge
+- Prometheus metrics, OpenTelemetry tracing, public `/status` page
+- S3-compatible storage (AWS S3, Backblaze B2, Cloudflare R2, MinIO, Wasabi) for
+  backups and user uploads
+- Automated `pg_dump` backups with local + S3 retention
+
+---
+
+## Tech stack
+
+| Layer        | Technology                                                                 |
+| ------------ | -------------------------------------------------------------------------- |
+| API          | [Hono](https://hono.dev) 4 · TypeScript 5 · run on [Bun](https://bun.sh)   |
+| Database     | PostgreSQL via [Drizzle ORM](https://orm.drizzle.team) (works with Neon)   |
+| Cache / queue| Redis (ioredis) · [BullMQ](https://docs.bullmq.io) email queue             |
+| Frontend     | [Next.js](https://nextjs.org) 16 (App Router) · Tailwind CSS · shadcn/ui   |
+| Crypto       | PASETO v4, `@noble/*`, ML-KEM (post-quantum KEM), CSFLE field encryption   |
+| Auth libs    | `@simplewebauthn/server` (WebAuthn) · `samlify` (SAML) · `otpauth` (TOTP)  |
+| Observability| Prometheus (`prom-client`) · OpenTelemetry · Sentry                        |
+| Tooling      | [Biome](https://biomejs.dev) (lint+format) · Vitest · Husky · semantic-release |
+
+---
+
+## Architecture
+
+ZeroAuth is a Bun monorepo: a standalone API server and a Next.js app that talks to it.
+
+```
+┌─────────────────────────┐         ┌──────────────────────────┐
+│  Next.js app (port 3000) │  HTTP   │   Hono API (port 1337)    │
+│  landing · dashboard ·   │ ──────▶ │   src/api/server.ts       │
+│  admin · PWA             │         │   auth · orgs · billing…  │
+└─────────────────────────┘         └────────────┬─────────────┘
+                                                  │
+                          ┌───────────────────────┼───────────────────────┐
+                          ▼                        ▼                        ▼
+                   PostgreSQL (5432)        Redis (6379)         Elasticsearch (9200, opt.)
+                   Drizzle ORM              sessions/rate-limit  audit log (optional)
+                                            /BullMQ queue
 ```
 
-### 2. Generate secrets
+| Service             | Local URL                       | Notes                                  |
+| ------------------- | ------------------------------- | -------------------------------------- |
+| API server          | http://localhost:1337           | `PORT` env (default **1337**)          |
+| Next.js app + admin | http://localhost:3000           | admin panel at `/admin`                |
+| API docs (Swagger)  | http://localhost:1337/docs      | dev only                               |
+| Health / metrics    | `/healthz` · `/metrics`         | on the API port                        |
+| PostgreSQL          | localhost:5432                  | or a managed provider (e.g. Neon)      |
+| Redis               | localhost:6379                  | optional — in-memory fallback if unset |
+
+---
+
+## Quick start (local development)
+
+**Prerequisites:** [Bun](https://bun.sh) 1.x · PostgreSQL 15+ (local or a managed
+URL like Neon) · Redis 7 (optional).
 
 ```bash
-openssl rand -hex 32   # copy this → TOKEN_SECRET_HEX
-openssl rand -hex 32   # copy this → CSFLE_MASTER_KEY_HEX
-```
+# 1. Clone
+git clone https://github.com/ALFAMAS/zeroauth my-app
+cd my-app
 
-### 3. Create `.env`
+# 2. Install all workspaces (API + packages/ui)
+bun install
 
-```bash
+# 3. Configure environment
 cp .env.example .env
 ```
 
-Open `.env` and paste in your two secrets:
-
-```env
-TOKEN_SECRET_HEX=<paste here>
-CSFLE_MASTER_KEY_HEX=<paste here>
-```
-
-Everything else has working defaults for local development.
-
-### 4. Start the backend stack
+Generate the two required secrets and paste them into `.env`:
 
 ```bash
-docker compose up -d
+openssl rand -hex 32   # → TOKEN_SECRET_HEX
+openssl rand -hex 32   # → CSFLE_MASTER_KEY_HEX
 ```
 
-This starts PostgreSQL, Redis, Elasticsearch, Kibana, and the API. Wait ~30 seconds, then confirm it's healthy:
+Set `DATABASE_URL` (and `REDIS_URI` if you have Redis). Everything else has working
+local defaults.
 
 ```bash
-docker compose logs -f zeroauth
-# Look for: "Server listening on http://localhost:3000"
+# 4. Create the schema
+bun run db:push          # fast dev sync; use db:migrate for versioned migrations
+
+# 5. Run API + UI together (hot reload on both)
+bun run dev
 ```
 
-### 5. Start the UI
+- API → **http://localhost:1337**
+- App → **http://localhost:3000**
 
-In a second terminal:
+Point the UI at the API by setting `NEXT_PUBLIC_ZEROAUTH_URL=http://localhost:1337`
+in `packages/ui/.env.local`.
+
+Run them individually if you prefer:
 
 ```bash
-cd packages/ui
-npm install
-npm run dev
+bun run dev:api    # API only (port 1337)
+bun run dev:ui     # UI only (port 3000, also starts the Next.js MCP server)
 ```
 
-Open **http://localhost:3000** to see the landing page.
-
-### 6. Create your first admin account
+### Create your first admin
 
 ```bash
-# Register
-curl -X POST http://localhost:3000/auth/register \
+curl -X POST http://localhost:1337/auth/register \
   -H "Content-Type: application/json" \
   -d '{"email":"admin@example.com","password":"Admin123!","displayName":"Admin"}'
-
-# Grant admin role
-docker exec -it zeroauth-postgres psql -U zeroauth -d zeroauth \
-  -c "UPDATE users SET roles = array_append(roles, 'admin') WHERE email = 'admin@example.com';"
 ```
 
-Log in at **http://localhost:3000/login**. Admin panel: **http://localhost:3000/admin**.
+Then grant the admin role in the database:
 
-### Manage the stack
-
-```bash
-docker compose down        # stop, keep data
-docker compose down -v     # stop, wipe all data
-docker compose restart     # restart all services
+```sql
+UPDATE users SET roles = array_append(roles, 'admin') WHERE email = 'admin@example.com';
 ```
+
+Log in at **http://localhost:3000/login** — the admin panel is at **/admin**.
 
 ---
 
-## Option B — VPS Deployment
+## Configuration
 
-Step-by-step for **Ubuntu 22.04** (DigitalOcean, Hetzner, Linode, AWS EC2, etc.).
+All variables are documented inline in [`.env.example`](./.env.example). The most
+important ones:
 
-**Time:** ~45 minutes  
-**You need:** a VPS, a domain name pointed at its IP, SSH access
+| Variable               | Required | Default                 | Description                                   |
+| ---------------------- | -------- | ----------------------- | --------------------------------------------- |
+| `TOKEN_SECRET_HEX`     | ✅       | —                       | 32-byte hex — signs PASETO v4 tokens          |
+| `CSFLE_MASTER_KEY_HEX` | ✅       | —                       | 32-byte hex — client-side field encryption    |
+| `DATABASE_URL`         | ✅       | —                       | PostgreSQL connection string                  |
+| `REDIS_URI`            |          | `redis://localhost:6379`| Sessions, rate limiting, queue (has fallback) |
+| `PORT`                 |          | `1337`                  | API listen port                               |
+| `API_BASE_URL`         |          | `http://localhost:1337` | Public API URL                                |
+| `NODE_ENV`             |          | `development`           | `development` or `production`                 |
+| `WEBAUTHN_RP_ID`       |          | `localhost`             | **Must** match your domain in production       |
+| `WEBAUTHN_RP_ORIGINS`  |          | `http://localhost:1337` | Allowed WebAuthn origins                       |
+| `MAIL_HOST` / `MAIL_*` |          | —                       | SMTP — required for magic links & email OTP    |
+| `OAUTH_<PROVIDER>_*`   |          | —                       | OAuth client id/secret/redirect (per provider) |
+| `STRIPE_SECRET_KEY`    |          | —                       | Enables billing endpoints when set            |
+| `ELASTICSEARCH_*`      |          | disabled                | Audit-log storage (off by default)            |
+| `BACKUP_S3_*`          |          | —                       | S3-compatible backups & uploads (see below)   |
 
-### 1. Connect and update
+**Frontend** (`packages/ui/.env.local`):
+
+| Variable                        | Description                                  |
+| ------------------------------- | -------------------------------------------- |
+| `NEXT_PUBLIC_ZEROAUTH_URL`      | Backend API base URL (no trailing slash)     |
+| `NEXT_PUBLIC_APP_NAME`          | App name shown in UI, emails, and meta tags  |
+| `NEXT_PUBLIC_PLAUSIBLE_DOMAIN`  | Plausible Analytics domain (consent-gated)   |
+| `NEXT_PUBLIC_GA_MEASUREMENT_ID` | Google Analytics 4 ID (consent-gated)        |
+| `NEXT_PUBLIC_SENTRY_DSN`        | Sentry DSN for browser error capture         |
+
+### S3-compatible storage (optional)
+
+ZeroAuth uses one provider-agnostic adapter for both DB backups (`backups/` prefix)
+and user uploads such as avatars (`uploads/` prefix). Set `BACKUP_S3_BUCKET` plus
+credentials to enable; `BACKUP_S3_ENDPOINT` + `BACKUP_S3_FORCE_PATH_STYLE=true` switch
+to Backblaze B2 / MinIO / R2. When unset, backups stay local and avatars fall back to
+local disk. See the `BACKUP_S3_*` / `UPLOADS_S3_*` block in `.env.example`.
+
+---
+
+## Testing & code quality
 
 ```bash
-ssh root@YOUR_SERVER_IP
-apt update && apt upgrade -y
+bun run test            # run the Vitest suite
+bun run test:watch      # watch mode
+bun run test:coverage   # coverage report
+
+bun run lint            # Biome lint (check only)
+bun run lint:fix        # Biome autofix (lint + format) — also runs on commit via Husky
+bun run type-check      # tsc --noEmit
 ```
 
-### 2. Install dependencies
+Tests live in `src/__tests__/`. CI ([`.github/workflows/ci.yml`](./.github/workflows/ci.yml))
+runs lint, type-check, the test suite, and the UI build on every push and PR to `main`.
+
+> Note: the HaveIBeenPwned breach check is enabled by default and reaches the network
+> during `register` tests. Set `HIBP_CHECK_ENABLED=false` for fully offline test runs.
+
+---
+
+## Production deployment
+
+ZeroAuth runs anywhere Bun and Node run. The reference setup below is **Ubuntu 22.04**
+with PM2 + nginx; managed PostgreSQL/Redis (e.g. Neon + Upstash) is recommended over
+self-hosting the data stores.
+
+### 1. System dependencies
 
 ```bash
-# Tools
+apt update && apt upgrade -y
 apt install -y curl git nginx certbot python3-certbot-nginx ufw
-
-# Bun (API runtime)
-curl -fsSL https://bun.sh/install | bash
-source ~/.bashrc
-
-# Node.js 20 (for Next.js UI)
-curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
-apt install -y nodejs
-
-# PM2 process manager
+curl -fsSL https://bun.sh/install | bash && source ~/.bashrc
+curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && apt install -y nodejs
 npm install -g pm2
 ```
 
-### 3. Install PostgreSQL
+(If self-hosting data stores: `apt install -y postgresql redis-server` and create a
+`zeroauth` database/user + a Redis password.)
+
+### 2. Clone, configure, build
 
 ```bash
-apt install -y postgresql postgresql-contrib
-systemctl start postgresql && systemctl enable postgresql
-
-sudo -u postgres psql <<SQL
-CREATE USER zeroauth WITH PASSWORD 'CHANGE_THIS_PASSWORD';
-CREATE DATABASE zeroauth OWNER zeroauth;
-GRANT ALL PRIVILEGES ON DATABASE zeroauth TO zeroauth;
-SQL
-```
-
-### 4. Install Redis
-
-```bash
-apt install -y redis-server
-
-# Add a password — open the config and uncomment the requirepass line
-sed -i 's/# requirepass foobared/requirepass CHANGE_THIS_PASSWORD/' /etc/redis/redis.conf
-systemctl restart redis && systemctl enable redis
-```
-
-### 5. Firewall
-
-```bash
-ufw allow OpenSSH
-ufw allow 'Nginx Full'
-ufw enable
-```
-
-### 6. Clone and configure
-
-```bash
-# Create a dedicated user
 useradd -m -s /bin/bash zeroauth && su - zeroauth
-
-# Clone
 git clone https://github.com/ALFAMAS/zeroauth /home/zeroauth/app
 cd /home/zeroauth/app
 
-# Generate secrets
-echo "TOKEN_SECRET_HEX=$(openssl rand -hex 32)"
-echo "CSFLE_MASTER_KEY_HEX=$(openssl rand -hex 32)"
-
 cp .env.example .env
-nano .env
+# Set at minimum: TOKEN_SECRET_HEX, CSFLE_MASTER_KEY_HEX, DATABASE_URL, REDIS_URI,
+# NODE_ENV=production, API_BASE_URL, and the WEBAUTHN_RP_* values for your domain.
+
+bun install
+bun run db:migrate     # apply versioned migrations
+bun run build          # compile the API to dist/
 ```
 
-Key values to set in `.env`:
+> **WebAuthn:** `WEBAUTHN_RP_ID` must equal your registrable domain (e.g.
+> `yourdomain.com`) and `WEBAUTHN_RP_ORIGINS` must list the exact HTTPS origin, or
+> passkeys will fail to register/authenticate.
 
-```env
-TOKEN_SECRET_HEX=<generated above>
-CSFLE_MASTER_KEY_HEX=<generated above>
-
-DATABASE_URL=postgresql://zeroauth:CHANGE_THIS_PASSWORD@localhost:5432/zeroauth
-REDIS_URI=redis://:CHANGE_THIS_PASSWORD@localhost:6379
-
-NODE_ENV=production
-PORT=3000
-API_BASE_URL=https://api.yourdomain.com
-
-# Email (needed for magic links and OTP)
-MAIL_HOST=smtp.yourprovider.com
-MAIL_PORT=587
-MAIL_USER=your@email.com
-MAIL_PASSWORD=your-smtp-password
-MAIL_FROM=noreply@yourdomain.com
-
-# WebAuthn — MUST match your domain
-WEBAUTHN_RP_ID=yourdomain.com
-WEBAUTHN_RP_NAME=YourApp
-WEBAUTHN_RP_ORIGINS=https://yourdomain.com
-
-# OAuth (optional — leave blank to disable)
-OAUTH_GOOGLE_CLIENT_ID=
-OAUTH_GOOGLE_CLIENT_SECRET=
-OAUTH_GOOGLE_REDIRECT_URI=https://api.yourdomain.com/auth/oauth/google/callback
-OAUTH_GITHUB_CLIENT_ID=
-OAUTH_GITHUB_CLIENT_SECRET=
-OAUTH_GITHUB_REDIRECT_URI=https://api.yourdomain.com/auth/oauth/github/callback
-```
-
-### 7. Install, migrate, and build
+### 3. Run with PM2
 
 ```bash
-# Install API dependencies
-bun install --production
+# API (port 1337) — cluster mode
+pm2 start dist/api/server.js --name zeroauth-api -i max
 
-# Run database migrations
-bun run db:migrate
-
-# Compile TypeScript
-bun run build
-```
-
-### 8. Start the API with PM2
-
-```bash
-mkdir -p /home/zeroauth/logs
-
-cat > /home/zeroauth/app/ecosystem.config.js << 'EOF'
-module.exports = {
-  apps: [{
-    name: 'zeroauth-api',
-    script: 'dist/api/server.js',
-    cwd: '/home/zeroauth/app',
-    instances: 'max',
-    exec_mode: 'cluster',
-    env_file: '/home/zeroauth/app/.env',
-    error_file: '/home/zeroauth/logs/api-error.log',
-    out_file: '/home/zeroauth/logs/api-out.log',
-    restart_delay: 1000,
-    max_restarts: 10,
-  }]
-};
-EOF
-
-pm2 start ecosystem.config.js
-pm2 save
-```
-
-Run the PM2 startup command it prints to enable auto-start on reboot.
-
-### 9. Build and start the UI
-
-```bash
-cd /home/zeroauth/app/packages/ui
+# UI (Next.js, port 3000)
+cd packages/ui
 echo "NEXT_PUBLIC_ZEROAUTH_URL=https://api.yourdomain.com" > .env.local
-
-npm install
 npm run build
+pm2 start npm --name zeroauth-ui -- start
 
-pm2 start npm --name "zeroauth-ui" -- start
-pm2 save
+pm2 save && pm2 startup    # run the printed command to enable boot persistence
 ```
 
-### 10. Configure Nginx
+### 4. nginx reverse proxy
 
-```bash
-exit   # back to root
+Two server blocks — the **API on 1337**, the **UI on 3000** (do not point both at the
+same port):
 
-cat > /etc/nginx/sites-available/zeroauth-api << 'NGINX'
+```nginx
+# /etc/nginx/sites-available/zeroauth-api  →  api.yourdomain.com
 server {
     server_name api.yourdomain.com;
     location / {
-        proxy_pass http://127.0.0.1:3000;
+        proxy_pass http://127.0.0.1:1337;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection 'upgrade';
@@ -365,155 +353,80 @@ server {
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_read_timeout 86400s;
+        proxy_read_timeout 86400s;   # keep SSE / web-push streams open
     }
 }
-NGINX
 
-cat > /etc/nginx/sites-available/zeroauth-ui << 'NGINX'
+# /etc/nginx/sites-available/zeroauth-ui  →  yourdomain.com
 server {
     server_name yourdomain.com www.yourdomain.com;
     location / {
         proxy_pass http://127.0.0.1:3000;
         proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
     }
 }
-NGINX
-
-ln -s /etc/nginx/sites-available/zeroauth-api /etc/nginx/sites-enabled/
-ln -s /etc/nginx/sites-available/zeroauth-ui /etc/nginx/sites-enabled/
-nginx -t && systemctl reload nginx
 ```
 
-### 11. Enable HTTPS
+```bash
+ln -s /etc/nginx/sites-available/zeroauth-api /etc/nginx/sites-enabled/
+ln -s /etc/nginx/sites-available/zeroauth-ui  /etc/nginx/sites-enabled/
+nginx -t && systemctl reload nginx
+ufw allow OpenSSH && ufw allow 'Nginx Full' && ufw enable
+```
+
+### 5. TLS
 
 ```bash
 certbot --nginx -d yourdomain.com -d www.yourdomain.com
 certbot --nginx -d api.yourdomain.com
 ```
 
-Certbot auto-renews. Confirm the timer is running:
-
-```bash
-systemctl status certbot.timer
-```
-
-### 12. Create your admin account
-
-```bash
-curl -X POST https://api.yourdomain.com/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{"email":"admin@yourdomain.com","password":"YourStrongPass123!","displayName":"Admin"}'
-
-sudo -u postgres psql -d zeroauth \
-  -c "UPDATE users SET roles = array_append(roles, 'admin') WHERE email = 'admin@yourdomain.com';"
-```
-
-Open **https://yourdomain.com** — admin panel at **https://yourdomain.com/admin**.
-
 ### Deploying updates
 
 ```bash
-su - zeroauth && cd /home/zeroauth/app
-
-git pull
-
-# Rebuild and restart API
-bun install --production && bun run build
-pm2 restart zeroauth-api
-
-# Rebuild and restart UI
-cd packages/ui && npm install && npm run build
-pm2 restart zeroauth-ui
+cd /home/zeroauth/app && git pull
+bun install && bun run db:migrate && bun run build && pm2 restart zeroauth-api
+cd packages/ui && npm install && npm run build && pm2 restart zeroauth-ui
 ```
 
 ---
 
-## Option C — Local development
+## API overview
 
-**Prerequisites:** Node.js 18+ or Bun 1.0+, PostgreSQL 15+, Redis 7 (optional)
+A condensed map of the most-used endpoints (auth-gated routes noted). The API mounts
+~30 route modules in `src/api/server.ts`; browse Swagger at `/docs` (dev) for the full
+surface.
 
-```bash
-git clone https://github.com/ALFAMAS/zeroauth my-saas
-cd my-saas
-
-# Install all deps (root API + packages/ui workspace)
-bun install
-
-# Configure
-cp .env.example .env
-# Edit .env: set DATABASE_URL, TOKEN_SECRET_HEX, CSFLE_MASTER_KEY_HEX
-
-# Run migrations
-bun run db:migrate
-
-# Start API + UI together (hot reload on both)
-bun run dev
 ```
+# Auth
+POST   /auth/register · /auth/login · /auth/logout
+POST   /auth/token/refresh
+GET    /auth/me                                   (auth)
+GET    /auth/oauth/:provider · /auth/oauth/:provider/callback
+POST   /auth/magic-link/send · /auth/magic-link/verify
+POST   /auth/passkey/register/options|verify      (auth)
+POST   /auth/passkey/authenticate/options|verify
+POST   /auth/mfa/totp/setup|verify · /auth/mfa/otp/send|verify
 
-API → http://localhost:3000  
-UI → http://localhost:3000
+# Sessions, orgs, keys, billing
+GET    /sessions · DELETE /sessions/:id           (auth)
+GET/POST /orgs · /orgs/:orgId/members|invites|roles
+GET/POST/DELETE /api-keys                          (auth)
+POST   /billing/checkout|portal · POST /billing/webhook (Stripe)
 
-```bash
-bun run dev:api    # API only
-bun run dev:ui     # UI only
+# Enterprise / federation
+/scim/v2/*   (SCIM)   ·   /ldap/*   ·   /federation/*
+OIDC discovery + SAML endpoints mounted at /
+GET /jwks · /.well-known/*
+
+# Ops
+GET    /status        (public status page data)
+GET    /healthz · /metrics (Prometheus)
 ```
-
----
-
-## Environment variables
-
-| Variable                     | Required | Default               | Description                              |
-| ---------------------------- | -------- | --------------------- | ---------------------------------------- |
-| `TOKEN_SECRET_HEX`           | ✅       | —                     | 32-byte hex for PASETO tokens            |
-| `CSFLE_MASTER_KEY_HEX`       | ✅       | —                     | 32-byte hex for field encryption         |
-| `DATABASE_URL`               | ✅       | —                     | PostgreSQL connection string             |
-| `REDIS_URI`                  |          | —                     | Redis URL (falls back to in-memory)      |
-| `PORT`                       |          | 3000                  | API listen port                          |
-| `NODE_ENV`                   |          | development           | `development` or `production`            |
-| `API_BASE_URL`               |          | http://localhost:3000 | Public API URL                           |
-| `APP_URL`                    |          | http://localhost:3000 | Public frontend URL                      |
-| `UNSUBSCRIBE_SECRET`         |          | —                     | 32+ char secret for unsubscribe tokens   |
-| `SENTRY_DSN`                 |          | —                     | Sentry DSN for server-side error capture |
-| `STRIPE_SECRET_KEY`          |          | —                     | Stripe secret key (starts with `sk_`)    |
-| `STRIPE_WEBHOOK_SECRET`      |          | —                     | Stripe webhook signing secret            |
-| `STRIPE_PRODUCT_PRO`         |          | —                     | Stripe product ID for Pro plan           |
-| `STRIPE_PRODUCT_ENTERPRISE`  |          | —                     | Stripe product ID for Enterprise plan    |
-| `OAUTH_GOOGLE_CLIENT_ID`     |          | —                     | Google OAuth                             |
-| `OAUTH_GOOGLE_CLIENT_SECRET` |          | —                     | Google OAuth                             |
-| `OAUTH_GITHUB_CLIENT_ID`     |          | —                     | GitHub OAuth                             |
-| `OAUTH_GITHUB_CLIENT_SECRET` |          | —                     | GitHub OAuth                             |
-| `MAIL_HOST`                  |          | —                     | SMTP host                                |
-| `MAIL_PORT`                  |          | 587                   | SMTP port                                |
-| `MAIL_USER`                  |          | —                     | SMTP username                            |
-| `MAIL_PASSWORD`              |          | —                     | SMTP password                            |
-| `MAIL_FROM`                  |          | —                     | Sender address                           |
-| `TWILIO_ACCOUNT_SID`         |          | —                     | SMS / WhatsApp OTP                       |
-| `TWILIO_AUTH_TOKEN`          |          | —                     | SMS / WhatsApp OTP                       |
-| `WEBAUTHN_RP_ID`             |          | localhost             | Must match your domain in production     |
-| `WEBAUTHN_RP_ORIGINS`        |          | http://localhost:3000 | Allowed origins                          |
-| `ELASTICSEARCH_HOST`         |          | localhost             | Audit log storage                        |
-| `LOG_LEVEL`                  |          | info                  | debug / info / warn / error              |
-
-**Frontend env vars** (`packages/ui/.env.local`):
-
-| Variable                        | Description                                 |
-| ------------------------------- | ------------------------------------------- |
-| `NEXT_PUBLIC_ZEROAUTH_URL`      | Backend API base URL (no trailing slash)    |
-| `NEXT_PUBLIC_APP_NAME`          | App name shown in UI, emails, and meta tags |
-| `NEXT_PUBLIC_PLAUSIBLE_DOMAIN`  | Plausible Analytics domain (consent-gated)  |
-| `NEXT_PUBLIC_GA_MEASUREMENT_ID` | Google Analytics 4 ID (consent-gated)       |
-| `NEXT_PUBLIC_SENTRY_DSN`        | Sentry DSN for browser error capture        |
-| `SENTRY_DSN`                    | Sentry DSN for Next.js server components    |
-| `NEXT_PUBLIC_STRIPE_PRICE_PRO`  | Stripe price ID shown on the billing page   |
-
-Full list with comments: [`.env.example`](./.env.example) and [`packages/ui/.env.example`](./packages/ui/.env.example)
 
 ---
 
@@ -523,296 +436,106 @@ Full list with comments: [`.env.example`](./.env.example) and [`packages/ui/.env
 .
 ├── src/                            # API (Hono + TypeScript + Drizzle)
 │   ├── api/
-│   │   ├── server.ts               # Hono app + route mounting
-│   │   └── routes/                 # auth, mfa, passkey, session, admin, ...
-│   ├── db/
-│   │   ├── schema.ts               # Drizzle ORM schema (PostgreSQL)
-│   │   └── index.ts                # DB connection pool
-│   ├── services/                   # token, magicLink, anomalyDetection, unsubscribe, ...
-│   ├── shared/
-│   │   ├── plans.ts                # Plan config (free/pro/enterprise) + feature gates
-│   │   └── permissions.ts          # Org permission constants
-│   └── middleware/                 # auth, rateLimiting, apiKeyAuth, requirePlan, ...
+│   │   ├── server.ts               # Hono app + route mounting (port 1337)
+│   │   └── routes/                 # auth, mfa, passkey, session, admin, orgs, billing…
+│   ├── db/                         # Drizzle schema + connection (PostgreSQL)
+│   ├── services/                   # token, email, MFA, OAuth, objectStorage, dbBackup…
+│   ├── middleware/                 # auth, rate limiting, CSRF, requirePlan, apiKeyAuth…
+│   ├── oidc/ · saml/ · scim/ · ldap/ · federation/ · did/ · jit/   # enterprise modules
+│   ├── crypto/                     # PASETO, CSFLE, hardware key store, post-quantum KEM
+│   └── __tests__/                  # Vitest unit + integration tests
 ├── packages/
-│   └── ui/                         # Next.js 16.2 (port 3000)
-│       ├── messages/               # i18n JSON files (en, es, fr)
-│       ├── sentry.*.config.ts      # Sentry client / server / edge config
+│   └── ui/                         # Next.js 16 app (port 3000)
+│       ├── messages/               # i18n JSON (en, es, fr)
 │       └── src/
-│           ├── app/
-│           │   ├── page.tsx        # Landing page
-│           │   ├── (auth)/         # /login /register /magic-link /callback
-│           │   ├── dashboard/      # /dashboard — profile, security, sessions, orgs,
-│           │   │                   #   api-keys, billing
-│           │   ├── admin/          # /admin — admin panel (same app, guarded)
-│           │   ├── blog/           # /blog — blog index + post pages
-│           │   ├── changelog/      # /changelog — versioned release notes
-│           │   ├── help/           # /help — searchable FAQ
-│           │   ├── privacy/        # /privacy
-│           │   └── terms/          # /terms
-│           ├── components/         # FeedbackWidget, LocaleSwitcher, SetupChecklist, ...
-│           └── data/               # blog-posts.ts, changelog.ts, faq.ts
-├── .github/workflows/ci.yml        # CI — lint + type-check + test + UI build
-├── docker-compose.yml              # Full stack
-├── drizzle.config.ts               # Drizzle ORM config
-├── .env.example                    # All env vars with descriptions
-├── implemented.md                  # Shipped feature catalog
-├── not-implemented.md              # Backlog + perf + compliance gaps
+│           ├── app/                # App Router: (auth)/, dashboard/, admin/, blog/, …
+│           ├── components/         # shared UI components
+│           └── lib/                # API client, auth tokens, helpers
+├── drizzle/                        # SQL migrations + journal
+├── scripts/                        # db-backup, db-restore, postinstall…
+├── .github/workflows/ci.yml        # CI: lint + type-check + test + UI build
+├── .env.example                    # all env vars, documented inline
+├── implemented.md                  # shipped feature catalog (source of truth)
+├── not-implemented.md              # product backlog + perf + compliance gaps
+└── incomplete.md                   # code that exists but is unmounted/stubbed/orphaned
 ```
 
 ---
 
 ## Customizing
 
-### Rename the app
+**Rename the app** — replace `ZeroAuth` across `packages/ui/src/` (start with
+`app/layout.tsx` metadata and `app/page.tsx`) and set `NEXT_PUBLIC_APP_NAME`.
 
-Replace `ZeroAuth` across `packages/ui/src/`:
-
-```
-packages/ui/src/app/page.tsx           ← landing page hero + navbar
-packages/ui/src/app/layout.tsx         ← <title> and metadata
-packages/ui/src/app/dashboard/layout.tsx
-packages/ui/src/app/admin/layout.tsx
-```
-
-### Change the brand color
-
-Edit `packages/ui/tailwind.config.js`:
-
-```js
-colors: {
-  brand: "#your-hex",   // default: #6366f1 (indigo)
-}
-```
-
-Then replace `indigo-` across UI files with `brand-`.
-
-### Add an API route
+**Add an API route**
 
 ```typescript
 // src/api/server.ts
 import myRoutes from "./routes/my.routes";
-app.use("/api/my-feature", authMiddleware, myRoutes);
+app.route("/my-feature", myRoutes);          // add authMiddleware inside the module
 ```
 
-### Read the current user in a route
+**Read the current user** (any handler after `authMiddleware`):
 
 ```typescript
-// Any handler after authMiddleware
 const user = c.get("user");
 const isAdmin = user.roles.includes("admin");
 ```
 
-### Add a custom org role
+**Custom org roles** — `POST /orgs/:orgId/roles` with a `permissions` array. Available
+permissions: `members:read|invite|manage`, `billing:view|manage`,
+`settings:view|manage`, `audit:view`, `roles:manage`, `invites:manage`.
 
-```bash
-POST /orgs/:orgId/roles
-{
-  "name": "Billing Manager",
-  "description": "Can view and manage billing only",
-  "permissions": ["billing:view", "billing:manage"]
-}
-```
+**Toggle auth methods** — Admin panel → **Auth Settings**; changes are live, no restart.
 
-Available permissions: `members:read`, `members:invite`, `members:manage`, `billing:view`, `billing:manage`, `settings:view`, `settings:manage`, `audit:view`, `roles:manage`, `invites:manage`.
-
-### Enable error monitoring
-
-Set `SENTRY_DSN` (backend) and `NEXT_PUBLIC_SENTRY_DSN` (frontend) in your env files. The `ErrorBoundary` component in `layout.tsx` automatically captures and reports unhandled React errors with a user-visible retry screen.
-
-### Configure analytics
-
-Set `NEXT_PUBLIC_PLAUSIBLE_DOMAIN` or `NEXT_PUBLIC_GA_MEASUREMENT_ID`. Scripts are injected only after cookie consent is accepted — fully GDPR-compliant with no changes needed.
-
-### Add a language
-
-1. Create `packages/ui/messages/{locale}.json` (copy from `en.json`)
-2. Add the locale to `SUPPORTED_LOCALES` in `src/i18n/request.ts`
-3. Add the entry to the `LOCALES` array in `components/LocaleSwitcher.tsx`
-
-### Toggle auth methods
-
-Admin panel → **Auth Settings** → flip any toggle.  
-Changes are live immediately — no restart needed.
+**Add a language** — create `packages/ui/messages/{locale}.json`, then register the
+locale in `src/i18n/request.ts` and the `LocaleSwitcher` component.
 
 ---
 
-## Key API endpoints
+## Security
 
-```
-POST   /auth/register
-POST   /auth/login
-POST   /auth/token/refresh
-POST   /auth/logout
-GET    /auth/me                                 (auth required)
-PATCH  /auth/me                                 (auth required)
-POST   /auth/me/avatar                          (auth required, multipart)
-GET    /auth/unsubscribe?token=...              (email unsubscribe, no auth)
+- **Tokens** — PASETO v4 (AES-256-GCM), 1-hour access TTL; refresh tokens are
+  SHA-256-hashed and rotated on use.
+- **At rest** — client-side field-level encryption (CSFLE) for sensitive columns with
+  key-version rotation; bcrypt password hashing.
+- **Abuse defense** — per-account lockout, per-IP credential-stuffing throttle,
+  HaveIBeenPwned breach checks on register/password-change, optional signup PoW.
+- **Audit** — tamper-evident SHA-256 hash-chained audit log, optional Elasticsearch +
+  SIEM streaming.
+- **Disclosure** — `/.well-known/security.txt` (RFC 9116); set `SECURITY_CONTACT`.
+  Report vulnerabilities per [`SECURITY.md`](./SECURITY.md) — please do not open public
+  issues for security reports.
 
-GET    /auth/oauth/google
-GET    /auth/oauth/google/callback
-GET    /auth/oauth/github
-GET    /auth/oauth/github/callback
-
-POST   /auth/magic-link/send
-POST   /auth/magic-link/verify
-
-POST   /auth/passkey/register/options           (auth required)
-POST   /auth/passkey/register/verify            (auth required)
-POST   /auth/passkey/authenticate/options
-POST   /auth/passkey/authenticate/verify
-
-POST   /auth/mfa/totp/setup                     (auth required)
-POST   /auth/mfa/totp/verify
-POST   /auth/mfa/otp/send
-POST   /auth/mfa/otp/verify
-
-GET    /sessions                                (auth required)
-DELETE /sessions/:id                            (auth required)
-
-GET    /notifications                           (auth required)
-GET    /notifications/unread-count              (auth required)
-POST   /notifications/:id/read                  (auth required)
-POST   /notifications/read-all                  (auth required)
-GET    /notifications/sse                       (auth required, SSE stream)
-GET    /notifications/preferences               (auth required)
-PUT    /notifications/preferences               (auth required)
-GET    /notifications/push/public-key            (auth required, VAPID key)
-POST   /notifications/push/subscribe             (auth required)
-POST   /notifications/push/unsubscribe           (auth required)
-
-GET    /orgs                                    (auth required)
-POST   /orgs                                    (auth required)
-GET    /orgs/:orgId/members
-POST   /orgs/:orgId/invites
-GET    /orgs/:orgId/roles                       (auth required)
-POST   /orgs/:orgId/roles                       (owner / admin)
-PUT    /orgs/:orgId/roles/:roleId               (owner / admin)
-DELETE /orgs/:orgId/roles/:roleId               (owner / admin)
-
-POST   /feedback                                (auth required)
-
-GET    /api-keys                                (auth required)
-POST   /api-keys                                (auth required)
-DELETE /api-keys/:id                            (auth required)
-
-GET    /billing/subscription?orgId=             (auth required — per-user or per-org)
-GET    /billing/usage?orgId=                    (auth required — usage vs plan limits)
-POST   /billing/checkout                        (auth required — orgId for per-org billing, 14-day trial)
-POST   /billing/change-plan                     (auth required — upgrade/downgrade with proration)
-POST   /billing/cancel                          (auth required — survey + pause option)
-POST   /billing/reactivate                      (auth required)
-POST   /billing/portal                          (auth required)
-POST   /billing/webhook                         (Stripe webhook — no auth)
-
-POST   /auth/password-reset/request
-POST   /auth/password-reset/confirm             (HIBP breach check)
-POST   /auth/me/email                           (auth required — password re-auth)
-
-GET    /webhooks                                (auth required — endpoint management)
-POST   /webhooks                                (auth required)
-PATCH  /webhooks/:id                            (auth required)
-DELETE /webhooks/:id                            (auth required)
-POST   /webhooks/:id/ping                       (auth required — test delivery)
-
-GET    /gdpr/export                             (auth required)
-DELETE /gdpr/account                            (auth required)
-POST   /gdpr/account/deletion/cancel            (auth required)
-
-GET    /admin/stats                             (admin only)
-GET    /admin/users                             (admin only)
-PUT    /admin/users/:id                         (admin only)
-DELETE /admin/users/:id                         (admin only)
-POST   /admin/users/:id/impersonate             (admin only — 30-min support session)
-PUT    /admin/users/:id/plan                    (admin only — manual plan override)
-GET    /admin/revenue                           (admin only — MRR/ARR/churn)
-POST   /admin/broadcast                         (admin only — announce to segments)
-GET    /admin/users/export                      (admin only — CSV)
-GET    /admin/audit/export                      (admin only — CSV)
-GET    /admin/feature-flags                     (admin only)
-PUT    /admin/feature-flags/:key                (admin only)
-DELETE /admin/feature-flags/:key                (admin only)
-GET    /admin/settings                          (admin only)
-PUT    /admin/settings                          (admin only)
-GET    /admin/feedback                          (admin only)
-
-GET    /status                                  (public — status page data)
-GET    /healthz
-GET    /metrics                                 (Prometheus)
-GET    /docs                                    (Swagger — dev only)
-```
+Rotating `TOKEN_SECRET_HEX` / `CSFLE_MASTER_KEY_HEX` is supported via a dual-key
+(accept-old, sign-new) transition window; rotate, deploy, wait for old tokens to
+expire, then drop the old key.
 
 ---
 
-## Tests
+## Project status
 
-```bash
-bun run test              # run all tests
-bun run test:watch        # watch mode
-bun run test:coverage     # with coverage report
-```
+ZeroAuth tracks its state across three living documents:
 
-Tests live in `src/__tests__/`. CI runs them on every push and pull request to `main`.
-
----
-
-## Secret rotation (zero downtime)
-
-**Rotating `TOKEN_SECRET_HEX`:**
-
-1. Add the new key as `TOKEN_SECRET_HEX_NEXT` in `.env`
-2. Update the token service to verify with both keys (accept old, sign new)
-3. Deploy — existing sessions keep working
-4. Wait for all existing tokens to expire (default TTL: 1 hour)
-5. Rename `TOKEN_SECRET_HEX_NEXT` → `TOKEN_SECRET_HEX`, remove the old key
-6. Deploy again
-
-**Rotating `CSFLE_MASTER_KEY_HEX`:** same dual-key pattern, then re-encrypt stored encrypted fields during the transition window.
+| Doc                                          | What it covers                                              |
+| -------------------------------------------- | ----------------------------------------------------------- |
+| [`implemented.md`](./implemented.md)         | Everything that ships today (authoritative)                 |
+| [`not-implemented.md`](./not-implemented.md) | Product backlog, performance work, and compliance gaps      |
+| [`incomplete.md`](./incomplete.md)           | Code in the tree that is unmounted, stubbed, or orphaned    |
 
 ---
 
-## Roadmap
+## Contributing
 
-See [`implemented.md`](./implemented.md) for the shipped feature catalog and
-[`not-implemented.md`](./not-implemented.md) for the backlog, performance
-optimizations, and compliance gaps.
-
-**✅ Shipped in 1.7**
-
-- Per-org Stripe subscriptions — one subscription per organization
-- DB backup — `bun run db:backup` (pg_dump, 30-day retention, optional S3) + daily scheduler
-- Environment parity — `.env.staging.example` staging template
-- HaveIBeenPwned password check on register and password change
-- Login notification email — new-device alert with one-click session revoke
-- Account takeover detection — sensitive-change pattern revokes sessions + alerts
-- Trial period — 14-day trial with expiry warning and upgrade emails
-- Dunning management — D3/D7/D14 escalating payment-failure emails
-- Cancellation flow — offboarding survey, pause option, retention coupon
-- Win-back campaign — D7/D30/D90 emails to churned subscribers
-- Admin: impersonate user, manual plan override, revenue dashboard (MRR/ARR/churn), broadcast email, CSV exports
-- Usage counters — metered API calls per billing period vs plan limits
-- User-facing webhooks — endpoint management UI, HMAC-signed payloads, test ping
-- Feature flags — admin-managed flags with percentage rollout
-- Status page — public `/status` page + endpoint
-- Alerting — error-spike and latency alerts to Slack/Teams/PagerDuty
-- Distributed tracing viewer — `docker-compose.tracing.yml` (Jaeger) for the existing OTel setup
-
-**P1 — Next up**
-
-- File storage — S3/R2/MinIO adapter, pre-signed upload URLs, CDN delivery
-- Upgrade prompt rollout — wire the `UpgradePrompt` component into every plan gate
-- Scope enforcement per API-key route + per-key rate limiting
-
-**P2 — Quality & scale (2–3 months)**
-
-- Locale-aware email templates (send transactional email in the user's language)
-- RTL layout support
-- Live chat widget + support ticket model
-
-_Shipped in 2026-06: PWA offline support, deep linking, web push notifications,
-first-login product tour, and locale-aware `Intl.*` formatting._
+1. Branch off `main` — **do not push directly to `main`**.
+2. Commits follow [Conventional Commits](https://www.conventionalcommits.org)
+   (enforced by commitlint; releases are automated via semantic-release).
+3. Biome runs on commit via Husky — keep `bun run lint` and `bun run type-check` green.
+4. Add/adjust Vitest tests for behavior changes.
+5. Open a PR to `main`; CI must pass.
 
 ---
 
 ## License
 
-MIT — use it for anything.
+[MIT](#license) — use it for anything, commercial or otherwise.

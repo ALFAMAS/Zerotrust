@@ -11,7 +11,7 @@
  * Alliance root CA. Set `FIDO_MDS3_ALLOW_UNSIGNED=true` only for offline tests.
  */
 
-import { X509Certificate, createVerify, constants } from "crypto";
+import { constants, createVerify, X509Certificate } from "node:crypto";
 import { getLogger } from "../logger";
 
 const logger = getLogger("fido-mds3");
@@ -105,7 +105,9 @@ function verifyTocSignature(jwtString: string): void {
 
   if (!header.x5c || header.x5c.length === 0) {
     if (process.env.FIDO_MDS3_ALLOW_UNSIGNED === "true") {
-      logger.warn("MDS3 TOC has no x5c chain — skipping verification (FIDO_MDS3_ALLOW_UNSIGNED=true)");
+      logger.warn(
+        "MDS3 TOC has no x5c chain — skipping verification (FIDO_MDS3_ALLOW_UNSIGNED=true)"
+      );
       return;
     }
     throw new Error("MDS3 JWT rejected: no x5c certificate chain to verify against");
@@ -151,16 +153,14 @@ function verifyTocSignature(jwtString: string): void {
   if (alg === "RS256") {
     ok = createVerify("RSA-SHA256").update(signingInput).verify(leafKey, signature);
   } else if (alg === "PS256") {
-    ok = createVerify("RSA-SHA256")
-      .update(signingInput)
-      .verify(
-        {
-          key: leafKey,
-          padding: constants.RSA_PKCS1_PSS_PADDING,
-          saltLength: constants.RSA_PSS_SALTLEN_DIGEST,
-        },
-        signature
-      );
+    ok = createVerify("RSA-SHA256").update(signingInput).verify(
+      {
+        key: leafKey,
+        padding: constants.RSA_PKCS1_PSS_PADDING,
+        saltLength: constants.RSA_PSS_SALTLEN_DIGEST,
+      },
+      signature
+    );
   } else if (alg === "ES256") {
     ok = createVerify("SHA256")
       .update(signingInput)
@@ -251,7 +251,7 @@ async function refreshToc(): Promise<void> {
     Accept: "application/jwt, application/json",
   };
   if (initApiKey) {
-    headers["Authorization"] = `Bearer ${initApiKey}`;
+    headers.Authorization = `Bearer ${initApiKey}`;
   }
 
   const response = await fetch(MDS3_TOC_URL, { headers });
@@ -261,7 +261,10 @@ async function refreshToc(): Promise<void> {
 
   const text = await response.text();
   cache = parseTocJwt(text);
-  logger.debug("MDS3 TOC refreshed", { entryCount: cache.entries.size, nextUpdate: cache.nextUpdate });
+  logger.debug("MDS3 TOC refreshed", {
+    entryCount: cache.entries.size,
+    nextUpdate: cache.nextUpdate,
+  });
 }
 
 /**
@@ -282,7 +285,7 @@ async function fetchEntryStatement(entry: MDS3Entry): Promise<void> {
 
   try {
     const headers: Record<string, string> = {};
-    if (initApiKey) headers["Authorization"] = `Bearer ${initApiKey}`;
+    if (initApiKey) headers.Authorization = `Bearer ${initApiKey}`;
 
     const response = await fetch(entry.url, { headers });
     if (!response.ok) {

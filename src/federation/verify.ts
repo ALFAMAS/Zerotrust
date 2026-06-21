@@ -1,5 +1,5 @@
-import type { FederatedProvider, FederatedClaim } from "./types.js";
 import { getLogger } from "../logger/index.js";
+import type { FederatedClaim, FederatedProvider } from "./types.js";
 
 const logger = getLogger("federation-verify");
 

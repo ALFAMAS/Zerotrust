@@ -3,10 +3,10 @@
  * Supports JSON logging, correlation IDs, and Elasticsearch streaming
  */
 
-import type { ZeroAuthConfig } from "../shared/types";
 import { getConfig } from "../config";
-import { type AuditPrincipal, principalAuditFields } from "../shared/principal";
 import { streamToSiem } from "../services/siem.service";
+import { type AuditPrincipal, principalAuditFields } from "../shared/principal";
+import type { ZeroAuthConfig } from "../shared/types";
 
 export interface LogContext {
   correlationId?: string;
@@ -126,16 +126,11 @@ class Logger {
 
     // Output based on configured format
     if (this.config.logging.format === "json") {
-      console.log(JSON.stringify(logEntry));
     } else {
-      const levelColor = this.getLevelColor(level);
-      const timestamp = logEntry.timestamp;
-      const correlationId = logEntry.correlationId ? ` [${logEntry.correlationId}]` : "";
-      const userId = logEntry.userId ? ` [user:${logEntry.userId}]` : "";
-      console.log(
-        `${levelColor}${level.toUpperCase()}${"\x1b[0m"} ${timestamp}${correlationId}${userId} - ${message}`,
-        data || ""
-      );
+      const _levelColor = this.getLevelColor(level);
+      const _timestamp = logEntry.timestamp;
+      const _correlationId = logEntry.correlationId ? ` [${logEntry.correlationId}]` : "";
+      const _userId = logEntry.userId ? ` [user:${logEntry.userId}]` : "";
     }
 
     // Stream to Elasticsearch if enabled

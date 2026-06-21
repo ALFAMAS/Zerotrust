@@ -26,7 +26,7 @@ export function cidrContains(cidr: string, ip: string): boolean {
   const n = Number(bits);
   if (!Number.isInteger(n) || n < 0 || n > 32) return false;
   if (n === 0) return true;
-  const mask = (~(2 ** (32 - n) - 1)) >>> 0;
+  const mask = ~(2 ** (32 - n) - 1) >>> 0;
   return (ipLong & mask) === (rangeLong & mask);
 }
 

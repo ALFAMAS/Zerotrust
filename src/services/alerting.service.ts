@@ -13,8 +13,8 @@
  */
 
 import { createMiddleware } from "hono/factory";
-import { notificationDispatcher } from "../notifications";
 import { getLogger } from "../logger";
+import { notificationDispatcher } from "../notifications";
 import type { HonoEnv } from "../shared/types";
 
 const logger = getLogger("alerting");
@@ -26,11 +26,11 @@ let lastLatencyAlertAt = 0;
 
 function cfg() {
   return {
-    errorThreshold: parseInt(process.env.ALERT_ERROR_THRESHOLD ?? "20"),
-    windowMs: parseInt(process.env.ALERT_WINDOW_SECS ?? "60") * 1000,
-    latencyMs: parseInt(process.env.ALERT_LATENCY_MS ?? "5000"),
-    latencyCount: parseInt(process.env.ALERT_LATENCY_COUNT ?? "10"),
-    cooldownMs: parseInt(process.env.ALERT_COOLDOWN_SECS ?? "300") * 1000,
+    errorThreshold: parseInt(process.env.ALERT_ERROR_THRESHOLD ?? "20", 10),
+    windowMs: parseInt(process.env.ALERT_WINDOW_SECS ?? "60", 10) * 1000,
+    latencyMs: parseInt(process.env.ALERT_LATENCY_MS ?? "5000", 10),
+    latencyCount: parseInt(process.env.ALERT_LATENCY_COUNT ?? "10", 10),
+    cooldownMs: parseInt(process.env.ALERT_COOLDOWN_SECS ?? "300", 10) * 1000,
   };
 }
 

@@ -1,8 +1,8 @@
-import { createMiddleware } from "hono/factory";
 import { eq } from "drizzle-orm";
+import { createMiddleware } from "hono/factory";
 import { getDb } from "../db";
 import { subscriptionsTable } from "../db/schema";
-import { planAllows, type Plan } from "../shared/plans";
+import { type Plan, planAllows } from "../shared/plans";
 import type { HonoEnv } from "../shared/types";
 
 export function requirePlan(feature: string) {

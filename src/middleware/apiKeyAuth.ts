@@ -1,12 +1,12 @@
+import { createHash } from "node:crypto";
+import { and, eq, isNull } from "drizzle-orm";
 import { createMiddleware } from "hono/factory";
-import { createHash } from "crypto";
-import { eq, and, isNull } from "drizzle-orm";
 import { getDb } from "../db";
 import { apiKeysTable, usersTable } from "../db/schema";
 import { apiKeyUsageMetric, getUsage, incrementUsage } from "../services/usage.service";
 import { runUsageNudges } from "../services/usageNudge.service";
-import { consumeRateLimit } from "./rateLimiting";
 import type { HonoEnv, User } from "../shared/types";
+import { consumeRateLimit } from "./rateLimiting";
 
 export function requireApiKeyScopes(required: string | string[], mode: "all" | "any" = "all") {
   const requiredScopes = Array.isArray(required) ? required : [required];

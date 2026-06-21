@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect } from "react";
+import { brand } from "@/config/brand";
 import { api } from "@/lib/api";
 import { getToken } from "@/lib/auth";
-import { brand } from "@/config/brand";
 
 /**
  * Embeds a third-party live-chat widget (Crisp / Intercom / Tawk.to) when one is
@@ -85,7 +85,7 @@ export default function LiveChatWidget() {
     return () => {
       cancelled = true;
     };
-  }, [chatProvider, chatId]);
+  }, []);
 
   return null;
 }

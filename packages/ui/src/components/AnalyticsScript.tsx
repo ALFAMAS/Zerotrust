@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Script from "next/script";
+import { useEffect, useState } from "react";
 import { getConsent } from "@/lib/consent";
 
 const PLAUSIBLE_DOMAIN = process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN;

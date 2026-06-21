@@ -9,8 +9,8 @@
  *   TPM 2.0 → Secure Enclave → PKCS#11 (if HW_KEY_PKCS11_LIB is set) → Software
  */
 
-import crypto from "crypto";
-import fs from "fs";
+import crypto from "node:crypto";
+import fs from "node:fs";
 import { getLogger } from "../logger";
 
 const logger = getLogger("hardware-key-store");
@@ -117,10 +117,7 @@ export class SoftwareKeyProvider implements HardwareKeyProvider {
     if (!entry) {
       throw new Error(`SoftwareKeyProvider: key not found: ${keyId}`);
     }
-    const mac = crypto
-      .createHmac("sha256", entry.material)
-      .update(data)
-      .digest();
+    const mac = crypto.createHmac("sha256", entry.material).update(data).digest();
     return mac;
   }
 
@@ -205,7 +202,10 @@ export class TPMKeyProvider implements HardwareKeyProvider {
     return false;
   }
 
-  async generateKey(_keyId: string, _algorithm: "PASETO" | "AES-256" | "ECDSA-P256"): Promise<void> {
+  async generateKey(
+    _keyId: string,
+    _algorithm: "PASETO" | "AES-256" | "ECDSA-P256"
+  ): Promise<void> {
     throw new NotImplementedError(
       "TPMKeyProvider.generateKey: add tpm2-tools bindings — see class JSDoc for guidance"
     );
@@ -264,7 +264,10 @@ export class SecureEnclaveProvider implements HardwareKeyProvider {
     return process.platform === "darwin";
   }
 
-  async generateKey(_keyId: string, _algorithm: "PASETO" | "AES-256" | "ECDSA-P256"): Promise<void> {
+  async generateKey(
+    _keyId: string,
+    _algorithm: "PASETO" | "AES-256" | "ECDSA-P256"
+  ): Promise<void> {
     throw new NotImplementedError(
       "SecureEnclaveProvider.generateKey: build a CryptoKit native addon — see class JSDoc for guidance"
     );
@@ -315,13 +318,19 @@ export class SecureEnclaveProvider implements HardwareKeyProvider {
 export class PKCS11Provider implements HardwareKeyProvider {
   public name = "pkcs11";
 
-  constructor(private libraryPath: string, _pin: string) {}
+  constructor(
+    private libraryPath: string,
+    _pin: string
+  ) {}
 
   async isAvailable(): Promise<boolean> {
     return fs.existsSync(this.libraryPath);
   }
 
-  async generateKey(_keyId: string, _algorithm: "PASETO" | "AES-256" | "ECDSA-P256"): Promise<void> {
+  async generateKey(
+    _keyId: string,
+    _algorithm: "PASETO" | "AES-256" | "ECDSA-P256"
+  ): Promise<void> {
     throw new NotImplementedError(
       "PKCS11Provider.generateKey: install pkcs11js and implement C_GenerateKeyPair — see class JSDoc"
     );
@@ -367,10 +376,7 @@ export class PKCS11Provider implements HardwareKeyProvider {
  * Priority: TPM2 → Secure Enclave → PKCS#11 → Software
  */
 export async function createHardwareKeyStore(): Promise<HardwareKeyProvider> {
-  const candidates: HardwareKeyProvider[] = [
-    new TPMKeyProvider(),
-    new SecureEnclaveProvider(),
-  ];
+  const candidates: HardwareKeyProvider[] = [new TPMKeyProvider(), new SecureEnclaveProvider()];
 
   const pkcs11Lib = process.env.HW_KEY_PKCS11_LIB;
   const pkcs11Pin = process.env.HW_KEY_PKCS11_PIN ?? "";
@@ -394,7 +400,9 @@ export async function createHardwareKeyStore(): Promise<HardwareKeyProvider> {
 
   // SoftwareKeyProvider.isAvailable() always returns true, so we should
   // never reach here.  Return a software provider as the last resort.
-  logger.warn("Hardware key store: all providers failed availability check, falling back to software");
+  logger.warn(
+    "Hardware key store: all providers failed availability check, falling back to software"
+  );
   return new SoftwareKeyProvider();
 }
 

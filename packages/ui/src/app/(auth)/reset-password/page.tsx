@@ -1,12 +1,12 @@
 "use client";
-import { useState, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { api } from "../../../lib/api";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Suspense, useState } from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { PasswordInput } from "@/components/ui/password-input";
+import { api } from "../../../lib/api";
 
 function ResetForm() {
   const searchParams = useSearchParams();
@@ -63,9 +63,8 @@ function ResetForm() {
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-1.5">
           <Label htmlFor="password">New Password</Label>
-          <Input
+          <PasswordInput
             id="password"
-            type="password"
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -75,9 +74,8 @@ function ResetForm() {
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="confirm">Confirm Password</Label>
-          <Input
+          <PasswordInput
             id="confirm"
-            type="password"
             required
             value={confirm}
             onChange={(e) => setConfirm(e.target.value)}

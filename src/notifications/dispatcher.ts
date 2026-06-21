@@ -1,13 +1,13 @@
-import crypto from "crypto";
+import crypto from "node:crypto";
+import { getLogger } from "../logger";
+import { formatPagerDutyPayload, formatSlackMessage, formatTeamsMessage } from "./formatters";
 import type {
   NotificationChannel,
   NotificationEvent,
+  PagerDutyConfig,
   SlackConfig,
   TeamsConfig,
-  PagerDutyConfig,
 } from "./types";
-import { formatSlackMessage, formatTeamsMessage, formatPagerDutyPayload } from "./formatters";
-import { getLogger } from "../logger";
 
 export class NotificationDispatcher {
   private channels: Map<string, NotificationChannel> = new Map();

@@ -30,10 +30,7 @@ const colorMap: Record<string, string> = {
 export default function Badge({ status, label }: BadgeProps) {
   const cls = colorMap[status] ?? "bg-muted text-muted-foreground ring-1 ring-border";
   return (
-    <UIBadge
-      variant="outline"
-      className={cn("rounded-full border-transparent font-medium", cls)}
-    >
+    <UIBadge variant="outline" className={cn("rounded-full border-transparent font-medium", cls)}>
       {label ?? status}
     </UIBadge>
   );

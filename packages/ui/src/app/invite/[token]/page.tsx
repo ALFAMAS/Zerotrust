@@ -45,7 +45,7 @@ export default function InviteAcceptPage() {
         setStatus("error");
       });
     // biome-ignore lint/correctness/useExhaustiveDependencies: fetch on token change only
-  }, [token]);
+  }, [token, router.replace]);
 
   if (status === "loading") {
     return (

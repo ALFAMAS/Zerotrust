@@ -1,11 +1,19 @@
 "use client";
 
+import {
+  Banknote,
+  CheckCircle2,
+  Download,
+  Megaphone,
+  Send,
+  TrendingDown,
+  TrendingUp,
+} from "lucide-react";
 import { useEffect, useState } from "react";
-import { Banknote, CheckCircle2, Download, Megaphone, Send, TrendingDown, TrendingUp } from "lucide-react";
-import { api } from "@/lib/api";
-import { Button } from "@/components/ui/button";
-import MetricCard from "@/components/admin/MetricCard";
 import DonutChart from "@/components/admin/DonutChart";
+import MetricCard from "@/components/admin/MetricCard";
+import { Button } from "@/components/ui/button";
+import { api } from "@/lib/api";
 
 interface RevenueData {
   mrr: number;
@@ -59,7 +67,9 @@ export default function RevenuePage() {
     <div className="space-y-8">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">Revenue</h1>
+          <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
+            Revenue
+          </h1>
           <p className="mt-1 text-sm text-muted-foreground">
             MRR, churn and subscription health at a glance
           </p>
@@ -106,7 +116,11 @@ export default function RevenuePage() {
               <option value="enterprise">Enterprise plan</option>
               <option value="inactive">Inactive 30+ days</option>
             </select>
-            <Button onClick={sendBroadcast} disabled={!broadcast.title || !broadcast.message} size="sm">
+            <Button
+              onClick={sendBroadcast}
+              disabled={!broadcast.title || !broadcast.message}
+              size="sm"
+            >
               <Send />
               Send
             </Button>
@@ -126,10 +140,23 @@ export default function RevenuePage() {
       ) : data ? (
         <>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <MetricCard icon={Banknote} label="MRR" value={fmt(data.mrr)} hint={data.currency?.toUpperCase()} />
+            <MetricCard
+              icon={Banknote}
+              label="MRR"
+              value={fmt(data.mrr)}
+              hint={data.currency?.toUpperCase()}
+            />
             <MetricCard icon={TrendingUp} label="ARR" value={fmt(data.arr)} />
-            <MetricCard icon={CheckCircle2} label="Active subscriptions" value={data.activeSubscriptions} />
-            <MetricCard icon={TrendingDown} label="Churn (30d)" value={`${data.churnRatePercent}%`} />
+            <MetricCard
+              icon={CheckCircle2}
+              label="Active subscriptions"
+              value={data.activeSubscriptions}
+            />
+            <MetricCard
+              icon={TrendingDown}
+              label="Churn (30d)"
+              value={`${data.churnRatePercent}%`}
+            />
           </div>
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -138,7 +165,10 @@ export default function RevenuePage() {
               {Object.keys(data.byPlan).length === 0 ? (
                 <p className="text-sm text-muted-foreground">No subscriptions yet</p>
               ) : (
-                <DonutChart labels={Object.keys(data.byPlan).map(cap)} series={Object.values(data.byPlan)} />
+                <DonutChart
+                  labels={Object.keys(data.byPlan).map(cap)}
+                  series={Object.values(data.byPlan)}
+                />
               )}
             </div>
 
@@ -155,7 +185,9 @@ export default function RevenuePage() {
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-foreground/80">Canceled (last 30 days)</span>
-                  <span className="text-sm font-semibold text-red-400">{data.canceledLast30Days}</span>
+                  <span className="text-sm font-semibold text-red-400">
+                    {data.canceledLast30Days}
+                  </span>
                 </div>
               </div>
             </div>

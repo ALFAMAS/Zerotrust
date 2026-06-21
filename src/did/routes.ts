@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import type { HonoEnv } from "../shared/types";
-import { createDIDChallenge, verifyDIDProof } from "./verifier";
 import { resolveDID } from "./resolver";
+import { createDIDChallenge, verifyDIDProof } from "./verifier";
 
 const app = new Hono<HonoEnv>();
 

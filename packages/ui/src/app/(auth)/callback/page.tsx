@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useEffect } from "react";
 import { setToken } from "@/lib/auth";
 
 function Spinner({ label }: { label: string }) {

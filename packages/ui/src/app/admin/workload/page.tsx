@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { Bot, Copy, KeyRound, Loader2, Ticket, Trash2 } from "lucide-react";
+import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 
 const API = process.env.NEXT_PUBLIC_ZEROAUTH_URL ?? "http://localhost:3000";
@@ -89,7 +89,7 @@ export default function AdminWorkloadPage() {
 
   useEffect(() => {
     loadCredentials();
-  }, []);
+  }, [loadCredentials]);
 
   async function handleRevoke(id: string) {
     setRevoking(id);
@@ -130,7 +130,7 @@ export default function AdminWorkloadPage() {
         setIssueError(
           res.status === 403
             ? "Forbidden — the workload issue key is missing or incorrect."
-            : data.error ?? "Failed to issue credential"
+            : (data.error ?? "Failed to issue credential")
         );
         return;
       }
@@ -182,7 +182,10 @@ export default function AdminWorkloadPage() {
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Issue credential */}
-        <form onSubmit={handleIssue} className="space-y-4 rounded-xl border border-border bg-card p-5">
+        <form
+          onSubmit={handleIssue}
+          className="space-y-4 rounded-xl border border-border bg-card p-5"
+        >
           <div className="flex items-center gap-2">
             <KeyRound className="h-4 w-4 text-primary" />
             <h2 className="font-semibold text-foreground">Issue a credential</h2>
@@ -244,7 +247,11 @@ export default function AdminWorkloadPage() {
             disabled={issuing}
             className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
           >
-            {issuing ? <Loader2 className="h-4 w-4 animate-spin" /> : <KeyRound className="h-4 w-4" />}
+            {issuing ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <KeyRound className="h-4 w-4" />
+            )}
             Issue credential
           </button>
 
@@ -260,7 +267,9 @@ export default function AdminWorkloadPage() {
                 Credential created — copy the secret now, it won&apos;t be shown again.
               </p>
               <div className="flex items-center justify-between gap-2">
-                <span className="break-all font-mono text-xs text-foreground">{created.secret}</span>
+                <span className="break-all font-mono text-xs text-foreground">
+                  {created.secret}
+                </span>
                 <CopyButton value={created.secret} />
               </div>
               <p className="text-xs text-muted-foreground">
@@ -271,7 +280,10 @@ export default function AdminWorkloadPage() {
         </form>
 
         {/* Mint token */}
-        <form onSubmit={handleMint} className="space-y-4 rounded-xl border border-border bg-card p-5">
+        <form
+          onSubmit={handleMint}
+          className="space-y-4 rounded-xl border border-border bg-card p-5"
+        >
           <div className="flex items-center gap-2">
             <Ticket className="h-4 w-4 text-primary" />
             <h2 className="font-semibold text-foreground">Mint an agent token</h2>
@@ -339,7 +351,10 @@ export default function AdminWorkloadPage() {
               {token.scopes.length > 0 && (
                 <div className="flex flex-wrap gap-1">
                   {token.scopes.map((s) => (
-                    <span key={s} className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-muted-foreground">
+                    <span
+                      key={s}
+                      className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-muted-foreground"
+                    >
                       {s}
                     </span>
                   ))}
