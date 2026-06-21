@@ -148,3 +148,9 @@ Grouped by category. Categories are ordered roughly by real-world exploit freque
 ### How to use this
 
 Don't audit against all 100. Run the top three categories (A, B, C) against your actual endpoints first — that's where the breach comes from. Then E, D, and L (money paths). The rest is hygiene you fix as you touch the code.
+
+    1. Security headers — Add helmet-equivalent headers (CSP, X-Frame-Options, X-Content-Type-Options) to Hono. ~1 hour.
+    2. Session inactivity timeout — Add lastActiveAt to session schema; add middleware or cron to expire idle sessions. ~2 hours.
+    3. Backup encryption — Encrypt pg_dump output before writing to disk/S3. ~1 hour.
+    4. npm audit in CI — Add bun update && npm audit --production to a CI step. ~30 min.
+    5. UI auth gating audit — Verify Next.js middleware protects all app routes. ~1 hour.
