@@ -287,10 +287,10 @@ export class LDAPClient {
       ldapDN: ldapUser.dn,
       ldapSyncedAt: new Date().toISOString(),
     };
-    if (tenantId) metadata["tenantId"] = tenantId;
+    if (tenantId) metadata.tenantId = tenantId;
 
     const attributes: Record<string, unknown> = {};
-    if (ldapUser.givenName) attributes["department"] = ldapUser.givenName;
+    if (ldapUser.givenName) attributes.department = ldapUser.givenName;
 
     const db = getDb();
 

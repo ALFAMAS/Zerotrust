@@ -1,6 +1,5 @@
+import { insertAuditLog } from "../audit/chain";
 import { getLogger } from "../logger";
-import { getDb } from "../db";
-import { auditLogsTable } from "../db/schema";
 import { revokeSession } from "../middleware/sessionControl";
 
 const logger = getLogger("ssf-receiver");
@@ -9,7 +8,7 @@ export async function handleSSFEvent(event: any) {
   logger.info("Received SSF event", { eventType: event?.type, severity: event?.severity });
 
   try {
-    await getDb().insert(auditLogsTable).values({
+    await insertAuditLog({
       action: `SSF:${event.type}`,
       actorId: event.actorId || null,
       targetId: event.targetSessionId || event.targetId || null,

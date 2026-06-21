@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { Loader2, Network, Plus, Trash2 } from "lucide-react";
+import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 
 interface FederatedProvider {
@@ -48,7 +48,7 @@ export default function AdminFederationPage() {
 
   useEffect(() => {
     load();
-  }, []);
+  }, [load]);
 
   async function handleAdd(e: React.FormEvent) {
     e.preventDefault();
@@ -64,7 +64,13 @@ export default function AdminFederationPage() {
         enabled: true,
       });
       showToast("Provider registered");
-      setForm({ id: "", name: "", issuerUrl: "", jwksUri: "", trustedTenantId: "" });
+      setForm({
+        id: "",
+        name: "",
+        issuerUrl: "",
+        jwksUri: "",
+        trustedTenantId: "",
+      });
       setShowForm(false);
       load();
     } catch (err: unknown) {
@@ -103,7 +109,8 @@ export default function AdminFederationPage() {
           <p className="mt-1 text-sm text-muted-foreground">
             Trusted external identity providers for RFC 8693 token exchange. A subject token from a
             registered provider can be exchanged for a ZeroAuth access token at{" "}
-            <code className="rounded bg-muted px-1 py-0.5 text-xs">/federation/token-exchange</code>.
+            <code className="rounded bg-muted px-1 py-0.5 text-xs">/federation/token-exchange</code>
+            .
           </p>
         </div>
         <button
@@ -115,7 +122,10 @@ export default function AdminFederationPage() {
       </div>
 
       {showForm && (
-        <form onSubmit={handleAdd} className="space-y-4 rounded-xl border border-border bg-card p-5">
+        <form
+          onSubmit={handleAdd}
+          className="space-y-4 rounded-xl border border-border bg-card p-5"
+        >
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-foreground">Provider ID</label>
@@ -159,7 +169,9 @@ export default function AdminFederationPage() {
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-foreground">Trusted tenant (optional)</label>
+              <label className="text-sm font-medium text-foreground">
+                Trusted tenant (optional)
+              </label>
               <input
                 value={form.trustedTenantId}
                 onChange={(e) => setForm({ ...form, trustedTenantId: e.target.value })}
@@ -225,7 +237,9 @@ export default function AdminFederationPage() {
                     {p.enabled ? "Enabled" : "Disabled"}
                   </span>
                 </div>
-                <p className="mt-1 break-all font-mono text-xs text-muted-foreground">{p.issuerUrl}</p>
+                <p className="mt-1 break-all font-mono text-xs text-muted-foreground">
+                  {p.issuerUrl}
+                </p>
                 {p.trustedTenantId && (
                   <p className="mt-0.5 text-xs text-muted-foreground">
                     Trusted tenant: {p.trustedTenantId}
@@ -233,7 +247,7 @@ export default function AdminFederationPage() {
                 )}
               </div>
               <button
-                onClick={() => handleDelete(p.id)}
+                onClick={(): any => handleDelete(p.id)}
                 disabled={deleting === p.id}
                 aria-label={`Remove ${p.name}`}
                 className="flex shrink-0 items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:border-red-700 hover:text-red-400 disabled:opacity-50"

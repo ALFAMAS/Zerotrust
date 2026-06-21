@@ -1,15 +1,15 @@
+import type { Context } from "hono";
 import { Hono } from "hono";
+import { getDb } from "../../db/index.js";
+import { userBehaviorBaselinesTable } from "../../db/schema.js";
+import { getLogger } from "../../logger/index.js";
 import { authMiddleware } from "../../middleware/auth.js";
 import {
   getBaseline,
   resetBaseline,
   scoreAnomaly,
 } from "../../services/anomalyDetection.service.js";
-import { getDb } from "../../db/index.js";
-import { userBehaviorBaselinesTable } from "../../db/schema.js";
-import { getLogger } from "../../logger/index.js";
 import type { HonoEnv } from "../../shared/types.js";
-import type { Context } from "hono";
 
 const router = new Hono<HonoEnv>();
 const logger = getLogger("anomaly-routes");
@@ -25,8 +25,8 @@ router.use("*", authMiddleware);
 router.get("/baselines", async (c) => {
   if (!isAdmin(c)) return c.json({ error: "FORBIDDEN" }, 403);
   try {
-    const limit = Math.min(100, parseInt(c.req.query("limit") ?? "20"));
-    const offset = parseInt(c.req.query("offset") ?? "0");
+    const limit = Math.min(100, parseInt(c.req.query("limit") ?? "20", 10));
+    const offset = parseInt(c.req.query("offset") ?? "0", 10);
     const db = getDb();
     const rows = await db.select().from(userBehaviorBaselinesTable).limit(limit).offset(offset);
     return c.json({ baselines: rows, limit, offset });

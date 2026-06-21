@@ -1,15 +1,15 @@
 import type { Metadata, Viewport } from "next";
 import { Bricolage_Grotesque, Hanken_Grotesk, JetBrains_Mono } from "next/font/google";
-import { ThemeProvider } from "next-themes";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
-import { ToastProvider } from "../context/ToastContext";
-import CookieBanner from "@/components/CookieBanner";
+import { ThemeProvider } from "next-themes";
 import AnalyticsScript from "@/components/AnalyticsScript";
+import CookieBanner from "@/components/CookieBanner";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import ServiceWorkerRegistrar from "@/components/ServiceWorkerRegistrar";
 import { brand } from "@/config/brand";
 import { directionForLocale, SUPPORTED_LOCALES } from "@/i18n/locales";
+import { ToastProvider } from "../context/ToastContext";
 import "./globals.css";
 
 const fontDisplay = Bricolage_Grotesque({

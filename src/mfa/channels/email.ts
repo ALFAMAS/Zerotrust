@@ -9,7 +9,7 @@ function getTransporter() {
   if (transporter) return transporter;
   const host = process.env.SMTP_HOST;
   if (host) {
-    const port = parseInt(process.env.SMTP_PORT || "587");
+    const port = parseInt(process.env.SMTP_PORT || "587", 10);
     transporter = nodemailer.createTransport({
       host,
       port,

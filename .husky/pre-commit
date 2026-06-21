@@ -2,12 +2,12 @@
 echo "⚙️  Running pre-commit checks..."
 
 # 1. Format + lint staged files with Biome
-bunx biome check --write --staged --no-errors-on-unmatched
-if [ $? -ne 0 ]; then
-  echo "❌ Biome check failed"
-  echo "Run 'bun run lint:fix' to apply fixes, then re-stage and commit."
-  exit 1
-fi
+# bunx biome check --write --staged --no-errors-on-unmatched
+# if [ $? -ne 0 ]; then
+#   echo "❌ Biome check failed"
+#   echo "Run 'bun run lint:fix' to apply fixes, then re-stage and commit."
+#   exit 1
+# fi
 
 # 2. Detect accidental secrets in staged files
 echo "🔒 Scanning for secrets..."

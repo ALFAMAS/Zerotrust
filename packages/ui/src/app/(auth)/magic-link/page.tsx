@@ -1,11 +1,11 @@
 "use client";
-import { useState } from "react";
 import Link from "next/link";
-import { api } from "../../../lib/api";
+import { useState } from "react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { api } from "../../../lib/api";
 
 export default function MagicLinkPage() {
   const [email, setEmail] = useState("");
@@ -37,7 +37,7 @@ export default function MagicLinkPage() {
           expires in 15 minutes.
         </p>
         <button
-          onClick={() => setSent(false)}
+          onClick={(): any => setSent(false)}
           className="text-sm text-primary hover:text-primary/80"
         >
           Use a different email

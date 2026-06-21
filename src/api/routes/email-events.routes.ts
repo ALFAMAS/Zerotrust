@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { z } from "zod";
-import { suppressEmail } from "../../services/emailSuppression.service";
 import { getLogger } from "../../logger";
+import { suppressEmail } from "../../services/emailSuppression.service";
 import type { HonoEnv } from "../../shared/types";
 
 const router = new Hono<HonoEnv>();

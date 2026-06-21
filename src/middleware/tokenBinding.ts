@@ -13,8 +13,8 @@
  */
 
 import { createMiddleware } from "hono/factory";
-import type { HonoEnv } from "../shared/types";
 import { getLogger } from "../logger";
+import type { HonoEnv } from "../shared/types";
 
 const logger = getLogger("token-binding");
 
@@ -58,7 +58,7 @@ export function tokenBindingMiddleware(opts?: TokenBindingOptions) {
       return next();
     }
 
-    const tbhClaim = (token as Record<string, unknown>)["tbh"];
+    const tbhClaim = (token as Record<string, unknown>).tbh;
     if (typeof tbhClaim !== "string") {
       return next();
     }

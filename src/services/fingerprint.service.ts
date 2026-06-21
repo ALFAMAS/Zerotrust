@@ -29,7 +29,7 @@ export class FingerprintService {
     ];
 
     const raw = components.join("|");
-    const hash = this.hashString(raw);
+    const hash = FingerprintService.hashString(raw);
 
     const browserStr =
       `${result.browser.name ?? ""} ${result.browser.major ?? ""}`.trim() || "unknown";

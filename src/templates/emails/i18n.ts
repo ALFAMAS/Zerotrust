@@ -1,4 +1,4 @@
-import { type Locale, DEFAULT_LOCALE, normalizeLocale } from "../../shared/locale";
+import { DEFAULT_LOCALE, type Locale, normalizeLocale } from "../../shared/locale";
 
 /**
  * Localized copy for transactional emails. English is the source of truth and
@@ -18,7 +18,8 @@ const en: Dict = {
   welcome_p2:
     "You can now sign in to your account and start exploring everything {appName} has to offer.",
   welcome_cta: "Sign in to your account",
-  welcome_link_help: "If the button above doesn't work, copy and paste this link into your browser:",
+  welcome_link_help:
+    "If the button above doesn't work, copy and paste this link into your browser:",
   welcome_footer_registered: "You received this email because you registered at {appName}.",
   welcome_footer_ignore: "If you didn't create an account, you can safely ignore this email.",
   welcome_team: "— The {appName} Team",
@@ -51,7 +52,8 @@ const es: Dict = {
   verify_cta: "Verificar correo",
   verify_or_code: "O introduce este código:",
   verify_link_help: "Si el botón no funciona, pega este enlace en tu navegador:",
-  verify_ignore: "Si no creaste una cuenta en {appName}, puedes ignorar este correo de forma segura.",
+  verify_ignore:
+    "Si no creaste una cuenta en {appName}, puedes ignorar este correo de forma segura.",
 };
 
 const fr: Dict = {
@@ -61,7 +63,8 @@ const fr: Dict = {
   welcome_p2:
     "Vous pouvez maintenant vous connecter à votre compte et découvrir tout ce que {appName} propose.",
   welcome_cta: "Connectez-vous à votre compte",
-  welcome_link_help: "Si le bouton ci-dessus ne fonctionne pas, copiez ce lien dans votre navigateur :",
+  welcome_link_help:
+    "Si le bouton ci-dessus ne fonctionne pas, copiez ce lien dans votre navigateur :",
   welcome_footer_registered: "Vous recevez cet e-mail car vous vous êtes inscrit sur {appName}.",
   welcome_footer_ignore:
     "Si vous n'avez pas créé de compte, vous pouvez ignorer cet e-mail en toute sécurité.",

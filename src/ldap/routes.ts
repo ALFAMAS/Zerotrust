@@ -1,9 +1,9 @@
 import { Hono } from "hono";
+import { getLogger } from "../logger/index.js";
+import { authMiddleware } from "../middleware/auth.js";
+import type { HonoEnv } from "../shared/types.js";
 import { createLDAPClient } from "./client.js";
 import { syncAllUsers } from "./sync.js";
-import { authMiddleware } from "../middleware/auth.js";
-import { getLogger } from "../logger/index.js";
-import type { HonoEnv } from "../shared/types.js";
 
 const router = new Hono<HonoEnv>();
 const logger = getLogger("ldap-routes");

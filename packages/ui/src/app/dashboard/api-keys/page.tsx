@@ -32,7 +32,7 @@ export default function ApiKeysPage() {
 
   useEffect(() => {
     load();
-  }, []);
+  }, [load]);
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
@@ -41,7 +41,7 @@ export default function ApiKeysPage() {
     setCreating(true);
     try {
       const body: any = { name: form.name.trim(), environment: form.environment };
-      if (form.expiresInDays) body.expiresInDays = parseInt(form.expiresInDays);
+      if (form.expiresInDays) body.expiresInDays = parseInt(form.expiresInDays, 10);
       const res = await api.post<any>("/api-keys", body);
       setNewKey(res.key);
       setForm({ name: "", expiresInDays: "", environment: form.environment });
@@ -68,7 +68,9 @@ export default function ApiKeysPage() {
 
   return (
     <div className="max-w-3xl">
-      <h1 className="mb-1 font-display text-2xl font-semibold tracking-tight text-foreground">API Keys</h1>
+      <h1 className="mb-1 font-display text-2xl font-semibold tracking-tight text-foreground">
+        API Keys
+      </h1>
       <p className="text-muted-foreground text-sm mb-8">
         Use API keys to authenticate programmatic access to your account.
       </p>
@@ -149,7 +151,9 @@ export default function ApiKeysPage() {
         {loading ? (
           <div className="p-6 text-muted-foreground text-sm">Loading…</div>
         ) : keys.length === 0 ? (
-          <div className="p-6 text-muted-foreground text-sm">No active API keys. Create one above.</div>
+          <div className="p-6 text-muted-foreground text-sm">
+            No active API keys. Create one above.
+          </div>
         ) : (
           <ul className="divide-y divide-border">
             {keys.map((key) => (
@@ -166,7 +170,7 @@ export default function ApiKeysPage() {
                   <p className="text-muted-foreground text-xs mt-0.5 font-mono">{key.keyPrefix}…</p>
                   {key.lastUsedAt ? (
                     <p className="text-muted-foreground text-xs mt-0.5">
-                      Last used {new Date(key.lastUsedAt).toLocaleDateString()}
+                      Last used {new Date(key.lastUsedAt).toLocaleString()}
                     </p>
                   ) : (
                     <p className="text-muted-foreground text-xs mt-0.5">Never used</p>

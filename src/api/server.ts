@@ -1,53 +1,54 @@
+import { serve } from "@hono/node-server";
+import { serveStatic } from "@hono/node-server/serve-static";
+import dotenv from "dotenv";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { secureHeaders } from "hono/secure-headers";
-import { serve } from "@hono/node-server";
-import { serveStatic } from "@hono/node-server/serve-static";
 import { initializeZeroAuth } from "..";
-import authRoutes from "./routes/auth.routes";
-import passwordResetRoutes from "./routes/password-reset.routes";
-import magicLinkRoutes from "./routes/magic-link.routes";
-import mfaRoutes from "./routes/mfa.routes";
-import sessionRoutes from "./routes/session.routes";
-import adminRoutes from "./routes/admin.routes";
-import passkeyRoutes from "./routes/passkey.routes";
-import workloadRoutes from "./routes/workload.routes";
-import verificationRoutes from "./routes/verification.routes";
-import anomalyRoutes from "./routes/anomaly.routes";
-import notificationRoutes from "./routes/notification.routes";
-import orgRoutes from "./routes/org.routes";
-import gdprRoutes from "./routes/gdpr.routes";
-import unsubscribeRoutes from "./routes/unsubscribe.routes";
-import feedbackRoutes from "./routes/feedback.routes";
-import supportRoutes from "./routes/support.routes";
-import emailEventRoutes from "./routes/email-events.routes";
-import apiKeyRoutes from "./routes/api-keys.routes";
-import billingRoutes from "./routes/billing.routes";
-import billingWebhookRoutes from "./routes/billing.webhooks";
-import adminToolsRoutes from "./routes/admin-tools.routes";
-import webhookManagementRoutes from "../webhooks/routes";
-import federationRoutes from "../federation/routes";
 import didRoutes from "../did/routes";
+import federationRoutes from "../federation/routes";
+import { initSentry } from "../instrument";
 import jitRoutes from "../jit/routes";
-import scimRoutes from "../scim/routes";
 import ldapRoutes from "../ldap/routes";
+import { getLogger } from "../logger";
+import { API_VERSIONS, apiVersioning, CURRENT_API_VERSION } from "../middleware/apiVersioning";
+import { authMiddleware } from "../middleware/auth";
+import { geoFencingMiddleware } from "../middleware/geoFencing";
+import { rateLimit } from "../middleware/rateLimiting";
+import { temporalAccessMiddleware } from "../middleware/temporalAccess";
 import oidcRoutes from "../oidc/routes";
 import samlRoutes from "../saml/routes";
-import tenantRoutes from "./routes/tenant.routes";
-import { rateLimit } from "../middleware/rateLimiting";
-import { geoFencingMiddleware } from "../middleware/geoFencing";
-import { apiVersioning, API_VERSIONS, CURRENT_API_VERSION } from "../middleware/apiVersioning";
-import { temporalAccessMiddleware } from "../middleware/temporalAccess";
-import { authMiddleware } from "../middleware/auth";
-import { getLogger } from "../logger";
-import { initSentry } from "../instrument";
-import { initEmailQueue } from "../services/emailQueue";
-import { startRetentionScheduler } from "../services/dataRetention";
-import { startNotificationEmailFallbackScheduler } from "../services/notificationEmailFallback";
-import { startBillingLifecycleScheduler } from "../services/billingLifecycle.service";
-import { startBackupScheduler } from "../services/dbBackup.service";
+import scimRoutes from "../scim/routes";
 import { alertingMiddleware } from "../services/alerting.service";
-import dotenv from "dotenv";
+import { startBillingLifecycleScheduler } from "../services/billingLifecycle.service";
+import { startRetentionScheduler } from "../services/dataRetention";
+import { startBackupScheduler } from "../services/dbBackup.service";
+import { initEmailQueue } from "../services/emailQueue";
+import { startNotificationEmailFallbackScheduler } from "../services/notificationEmailFallback";
+import webhookManagementRoutes from "../webhooks/routes";
+import accessReviewRoutes from "./routes/access-review.routes";
+import adminRoutes from "./routes/admin.routes";
+import adminToolsRoutes from "./routes/admin-tools.routes";
+import anomalyRoutes from "./routes/anomaly.routes";
+import apiKeyRoutes from "./routes/api-keys.routes";
+import authRoutes from "./routes/auth.routes";
+import billingRoutes from "./routes/billing.routes";
+import billingWebhookRoutes from "./routes/billing.webhooks";
+import emailEventRoutes from "./routes/email-events.routes";
+import feedbackRoutes from "./routes/feedback.routes";
+import gdprRoutes from "./routes/gdpr.routes";
+import magicLinkRoutes from "./routes/magic-link.routes";
+import mfaRoutes from "./routes/mfa.routes";
+import notificationRoutes from "./routes/notification.routes";
+import orgRoutes from "./routes/org.routes";
+import passkeyRoutes from "./routes/passkey.routes";
+import passwordResetRoutes from "./routes/password-reset.routes";
+import sessionRoutes from "./routes/session.routes";
+import supportRoutes from "./routes/support.routes";
+import tenantRoutes from "./routes/tenant.routes";
+import unsubscribeRoutes from "./routes/unsubscribe.routes";
+import verificationRoutes from "./routes/verification.routes";
+import workloadRoutes from "./routes/workload.routes";
 
 dotenv.config();
 
@@ -87,9 +88,7 @@ export async function createServer() {
   app.use("*", apiVersioning());
 
   // Public registry of supported API versions and their lifecycle status
-  app.get("/api/versions", (c) =>
-    c.json({ current: CURRENT_API_VERSION, versions: API_VERSIONS })
-  );
+  app.get("/api/versions", (c) => c.json({ current: CURRENT_API_VERSION, versions: API_VERSIONS }));
 
   // Error-spike + latency alerting (Slack / Teams / PagerDuty)
   app.use("*", alertingMiddleware());
@@ -111,6 +110,7 @@ export async function createServer() {
   // ─── Admin routes ─────────────────────────────────────────────────────────
   app.route("/admin", adminRoutes);
   app.route("/admin", adminToolsRoutes);
+  app.route("/admin/access-reviews", accessReviewRoutes);
 
   // ─── Workload routes ──────────────────────────────────────────────────────
   app.route("/workload", workloadRoutes);
@@ -229,7 +229,9 @@ export async function createServer() {
   // Public status page data — safe to expose (no internals, just up/down)
   const serverStartedAt = Date.now();
   app.get("/status", async (c) => {
-    const components: Record<string, "operational" | "degraded" | "down"> = { api: "operational" };
+    const components: Record<string, "operational" | "degraded" | "down" | "not set"> = {
+      api: "operational",
+    };
 
     try {
       const { isDbConnected } = await import("../db/index.js");
@@ -243,6 +245,34 @@ export async function createServer() {
       components.cache = (await pingRedis()) ? "operational" : "degraded";
     } catch {
       components.cache = "degraded";
+    }
+
+    // S3 backup + object storage share the same bucket and credentials, so a
+    // single ping covers both. We surface them as two components — DB backups
+    // (backups/ prefix) and user object storage (uploads/ prefix) — so operators
+    // can see each feature independently. When `BACKUP_S3_BUCKET` is unset we
+    // render an explicit "not set" state (greyed out on the UI) so they show as
+    // components without false alarms; a failed ping stays "down" so broken
+    // credentials / DNS / bucket policy are still loud.
+    let s3Enabled = false;
+    try {
+      const { isS3BackupEnabled, pingS3WithTimeout } = await import(
+        "../services/objectStorage.service.js"
+      );
+      s3Enabled = isS3BackupEnabled();
+      if (s3Enabled) {
+        const result = await pingS3WithTimeout();
+        const state = result.ok ? "operational" : "down";
+        components.s3Backup = state;
+        components.s3ObjectStorage = state;
+      } else {
+        components.s3Backup = "not set";
+        components.s3ObjectStorage = "not set";
+      }
+    } catch {
+      const state = s3Enabled ? "down" : "not set";
+      components.s3Backup = state;
+      components.s3ObjectStorage = state;
     }
 
     const overall = Object.values(components).includes("down")
@@ -284,6 +314,26 @@ export async function createServer() {
       health.settings = "unavailable";
     }
 
+    // S3 backup: always surface state. "not set" when BACKUP_S3_BUCKET is unset;
+    // a broken backup must not pull the API out of rotation (mirrors the Redis
+    // "down but still 200" pattern above) — postgres is the only component that
+    // flips the HTTP status.
+    let s3Enabled = false;
+    try {
+      const { isS3BackupEnabled, pingS3WithTimeout } = await import(
+        "../services/objectStorage.service.js"
+      );
+      s3Enabled = isS3BackupEnabled();
+      if (s3Enabled) {
+        const result = await pingS3WithTimeout();
+        health.s3Backup = result.ok ? "ok" : "down";
+      } else {
+        health.s3Backup = "not set";
+      }
+    } catch {
+      health.s3Backup = s3Enabled ? "down" : "not set";
+    }
+
     const httpStatus = health.postgres === "ok" ? 200 : 503;
     return c.json(health, httpStatus as any);
   });
@@ -294,7 +344,7 @@ export async function createServer() {
 if (require.main === module) {
   (async () => {
     const app = await createServer();
-    const port = parseInt(process.env.PORT || "1337");
+    const port = parseInt(process.env.PORT || "1337", 10);
     serve({ fetch: app.fetch, port }, (info) => {
       logger.info(`Server listening on http://localhost:${info.port}`);
     });

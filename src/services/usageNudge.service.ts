@@ -6,10 +6,11 @@
  * upgrade. Each (metric, level, period) fires at most once per process to avoid
  * spamming on every usage check.
  */
-import { getUsageSummary } from "./usage.service";
+
 import { broadcastNotification } from "../api/routes/notification.routes";
-import { sendNotificationEmail } from "./email.service";
 import { getLogger } from "../logger";
+import { sendNotificationEmail } from "./email.service";
+import { getUsageSummary } from "./usage.service";
 
 const logger = getLogger("usage-nudge");
 
@@ -55,7 +56,10 @@ export function evaluateUsageNudges(
 const sent = new Set<string>();
 // Throttle: avoid recomputing the (multi-query) usage summary on every request.
 const lastChecked = new Map<string, number>();
-const MIN_CHECK_INTERVAL_MS = parseInt(process.env.USAGE_NUDGE_MIN_INTERVAL_MS || String(5 * 60 * 1000));
+const MIN_CHECK_INTERVAL_MS = parseInt(
+  process.env.USAGE_NUDGE_MIN_INTERVAL_MS || String(5 * 60 * 1000),
+  10
+);
 
 export function _resetUsageNudgeDedup(): void {
   sent.clear();

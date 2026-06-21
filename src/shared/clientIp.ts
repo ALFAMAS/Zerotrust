@@ -10,7 +10,10 @@ import type { Context } from "hono";
  */
 function socketRemoteAddress(c: Context): string | undefined {
   const env = c.env as
-    | { incoming?: { socket?: { remoteAddress?: string } }; server?: { incoming?: { socket?: { remoteAddress?: string } } } }
+    | {
+        incoming?: { socket?: { remoteAddress?: string } };
+        server?: { incoming?: { socket?: { remoteAddress?: string } } };
+      }
     | undefined;
   const bindings = env?.server ?? env;
   return bindings?.incoming?.socket?.remoteAddress;

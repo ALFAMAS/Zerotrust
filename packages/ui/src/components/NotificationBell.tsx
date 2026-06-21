@@ -1,9 +1,9 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
 import { Bell } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { api } from "@/lib/api";
-import { cn } from "@/lib/utils";
 import { useFormat } from "@/lib/format";
+import { cn } from "@/lib/utils";
 
 interface Notification {
   id: string;
@@ -50,7 +50,7 @@ export function NotificationBell() {
   useEffect(() => {
     const token =
       typeof window !== "undefined"
-        ? localStorage.getItem("token") ?? sessionStorage.getItem("token")
+        ? (localStorage.getItem("token") ?? sessionStorage.getItem("token"))
         : null;
     if (!token) return;
 
@@ -171,7 +171,7 @@ export function NotificationBell() {
                   <div className="min-w-0 flex-1">
                     <div className="truncate text-sm font-medium text-foreground">{n.title}</div>
                     <div className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">
-                      {n.body.length > 80 ? n.body.slice(0, 80) + "…" : n.body}
+                      {n.body.length > 80 ? `${n.body.slice(0, 80)}…` : n.body}
                     </div>
                     <div className="mt-1 text-[11px] text-muted-foreground/70">
                       {fmt.relativeTime(n.createdAt)}

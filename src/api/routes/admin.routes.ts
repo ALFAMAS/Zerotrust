@@ -1,18 +1,19 @@
+import { and, desc, eq, gt, ilike, ne, or, sql } from "drizzle-orm";
 import { Hono } from "hono";
-import { eq, and, ne, ilike, or, sql, desc, gt } from "drizzle-orm";
+import { verifyAuditChain } from "../../audit/chain";
 import { getDb } from "../../db";
 import {
-  usersTable,
-  sessionsTable,
   auditLogsTable,
-  rolesTable,
-  jitAccessTable,
   feedbackTable,
+  jitAccessTable,
+  rolesTable,
+  sessionsTable,
+  usersTable,
 } from "../../db/schema";
-import { authMiddleware } from "../../middleware/auth";
-import { getSettings, updateSettings } from "../../models/settings.model";
-import { revokeAllSessionsForUser, revokeSession } from "../../middleware/sessionControl";
 import { getLogger } from "../../logger";
+import { authMiddleware } from "../../middleware/auth";
+import { revokeAllSessionsForUser, revokeSession } from "../../middleware/sessionControl";
+import { getSettings, updateSettings } from "../../models/settings.model";
 import type { HonoEnv } from "../../shared/types";
 
 const router = new Hono<HonoEnv>();
@@ -58,8 +59,8 @@ router.put("/settings", async (c) => {
 // GET /users?page=1&limit=20&search=&status=
 router.get("/users", async (c) => {
   try {
-    const page = Math.max(1, parseInt(c.req.query("page") || "1"));
-    const limit = Math.min(100, Math.max(1, parseInt(c.req.query("limit") || "20")));
+    const page = Math.max(1, parseInt(c.req.query("page") || "1", 10));
+    const limit = Math.min(100, Math.max(1, parseInt(c.req.query("limit") || "20", 10)));
     const search = c.req.query("search") || "";
     const status = c.req.query("status") || "";
 
@@ -85,10 +86,7 @@ router.get("/users", async (c) => {
         .orderBy(desc(usersTable.createdAt))
         .offset((page - 1) * limit)
         .limit(limit),
-      db
-        .select({ count: sql<number>`count(*)::int` })
-        .from(usersTable)
-        .where(where),
+      db.select({ count: sql<number>`count(*)::int` }).from(usersTable).where(where),
     ]);
 
     const sanitized = users.map((u) => ({
@@ -97,6 +95,7 @@ router.get("/users", async (c) => {
       displayName: u.displayName,
       status: u.status,
       roles: u.roles,
+      emailVerifiedAt: u.emailVerifiedAt,
       createdAt: u.createdAt,
       lastLoginAt: u.lastLoginAt,
     }));
@@ -120,14 +119,37 @@ router.get("/users/:id", async (c) => {
     }
 
     const u = rows[0];
+    const mfa = (u.mfa ?? {}) as any;
+    const passkeys = Array.isArray(u.passkeys) ? u.passkeys : [];
+    const oauthProviders = Array.isArray(u.oauthProviders) ? u.oauthProviders : [];
+
+    const activeSessionsRes = await db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(sessionsTable)
+      .where(and(eq(sessionsTable.userId, u.id), eq(sessionsTable.isActive, true)));
+
     return c.json({
       id: u.id,
       email: u.email,
       displayName: u.displayName,
+      username: u.username,
+      phone: u.phone,
       status: u.status,
       roles: u.roles,
+      locale: u.locale,
+      emailVerifiedAt: u.emailVerifiedAt,
       createdAt: u.createdAt,
+      updatedAt: u.updatedAt,
       lastLoginAt: u.lastLoginAt,
+      mfa: {
+        totpEnabled: Boolean(mfa?.totp?.enabled),
+        webauthnEnabled: Boolean(mfa?.webauthn?.enabled) || passkeys.length > 0,
+      },
+      passkeyCount: passkeys.length,
+      oauthProviders: oauthProviders
+        .map((p: any) => (typeof p === "string" ? p : p?.provider))
+        .filter(Boolean),
+      activeSessions: activeSessionsRes[0]?.count ?? 0,
     });
   } catch (err) {
     logger.error("Admin get user error", err as Error);
@@ -226,8 +248,8 @@ router.post("/users/:id/force-logout", async (c) => {
 // GET /sessions?userId=&active=true&page=1&limit=20
 router.get("/sessions", async (c) => {
   try {
-    const page = Math.max(1, parseInt(c.req.query("page") || "1"));
-    const limit = Math.min(100, Math.max(1, parseInt(c.req.query("limit") || "20")));
+    const page = Math.max(1, parseInt(c.req.query("page") || "1", 10));
+    const limit = Math.min(100, Math.max(1, parseInt(c.req.query("limit") || "20", 10)));
 
     const db = getDb();
     const conditions: any[] = [];
@@ -240,16 +262,30 @@ router.get("/sessions", async (c) => {
 
     const [sessions, countResult] = await Promise.all([
       db
-        .select()
+        .select({
+          id: sessionsTable.id,
+          userId: sessionsTable.userId,
+          userEmail: usersTable.email,
+          userDisplayName: usersTable.displayName,
+          deviceFingerprint: sessionsTable.deviceFingerprint,
+          userAgent: sessionsTable.userAgent,
+          ipAddress: sessionsTable.ipAddress,
+          country: sessionsTable.country,
+          isActive: sessionsTable.isActive,
+          revokedAt: sessionsTable.revokedAt,
+          revokedReason: sessionsTable.revokedReason,
+          anomalyFlags: sessionsTable.anomalyFlags,
+          createdAt: sessionsTable.createdAt,
+          lastActivityAt: sessionsTable.lastActivityAt,
+          expiresAt: sessionsTable.expiresAt,
+        })
         .from(sessionsTable)
+        .leftJoin(usersTable, eq(sessionsTable.userId, usersTable.id))
         .where(whereClause)
         .orderBy(desc(sessionsTable.lastActivityAt))
         .offset((page - 1) * limit)
         .limit(limit),
-      db
-        .select({ count: sql<number>`count(*)::int` })
-        .from(sessionsTable)
-        .where(whereClause),
+      db.select({ count: sql<number>`count(*)::int` }).from(sessionsTable).where(whereClause),
     ]);
 
     const total = countResult[0]?.count ?? 0;
@@ -577,8 +613,8 @@ router.delete("/jit-grants/:id", async (c) => {
 // GET /audit-logs?limit=50&offset=0&action=&actorId=
 router.get("/audit-logs", async (c) => {
   try {
-    const limit = Math.min(parseInt(c.req.query("limit") || "50"), 200);
-    const offset = parseInt(c.req.query("offset") || "0");
+    const limit = Math.min(parseInt(c.req.query("limit") || "50", 10), 200);
+    const offset = parseInt(c.req.query("offset") || "0", 10);
     const action = c.req.query("action");
     const actorId = c.req.query("actorId");
 
@@ -597,10 +633,7 @@ router.get("/audit-logs", async (c) => {
         .orderBy(desc(auditLogsTable.timestamp))
         .offset(offset)
         .limit(limit),
-      db
-        .select({ count: sql<number>`count(*)::int` })
-        .from(auditLogsTable)
-        .where(whereClause),
+      db.select({ count: sql<number>`count(*)::int` }).from(auditLogsTable).where(whereClause),
     ]);
 
     return c.json({ logs, total: countResult[0]?.count ?? 0, limit, offset });
@@ -610,12 +643,24 @@ router.get("/audit-logs", async (c) => {
   }
 });
 
+// GET /audit-logs/verify?limit=1000 — verify the tamper-evidence hash chain
+router.get("/audit-logs/verify", async (c) => {
+  try {
+    const limit = Math.min(parseInt(c.req.query("limit") || "1000", 10), 10000);
+    const result = await verifyAuditChain(limit);
+    return c.json(result);
+  } catch (err) {
+    logger.error("Admin audit chain verify error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR", message: "Failed to verify audit chain" }, 500);
+  }
+});
+
 // ── GET /admin/feedback ───────────────────────────────────────────────────────
 
 router.get("/feedback", async (c) => {
   try {
-    const limit = Math.min(parseInt(c.req.query("limit") ?? "50"), 200);
-    const offset = parseInt(c.req.query("offset") ?? "0");
+    const limit = Math.min(parseInt(c.req.query("limit") ?? "50", 10), 200);
+    const offset = parseInt(c.req.query("offset") ?? "0", 10);
     const type = c.req.query("type");
 
     const db = getDb();

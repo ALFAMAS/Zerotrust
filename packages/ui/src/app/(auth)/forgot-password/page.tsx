@@ -1,10 +1,10 @@
 "use client";
-import { useState } from "react";
 import Link from "next/link";
-import { api } from "../../../lib/api";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { api } from "../../../lib/api";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -37,7 +37,9 @@ export default function ForgotPasswordPage() {
   return (
     <>
       <h1 className="mb-1 text-2xl font-bold text-foreground">Reset password</h1>
-      <p className="mb-6 text-sm text-muted-foreground">We&apos;ll send a reset link to your email.</p>
+      <p className="mb-6 text-sm text-muted-foreground">
+        We&apos;ll send a reset link to your email.
+      </p>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-1.5">
           <Label htmlFor="email">Email</Label>

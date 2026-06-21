@@ -1,19 +1,24 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { api } from "../../../lib/api";
-import { brand } from "@/config/brand";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useEffect, useRef, useState } from "react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { brand } from "@/config/brand";
+import { api } from "../../../lib/api";
 
 export default function ProfilePage() {
   const [user, setUser] = useState<any>(null);
-  const [form, setForm] = useState({ displayName: "", avatarUrl: "", phone: "", username: "" });
+  const [form, setForm] = useState({
+    displayName: "",
+    avatarUrl: "",
+    phone: "",
+    username: "",
+  });
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState("");
   const [msgType, setMsgType] = useState<"success" | "error">("success");
@@ -64,7 +69,7 @@ export default function ProfilePage() {
     setUploading(true);
     setMsg("");
     try {
-      const token = typeof window !== "undefined" ? localStorage.getItem("za_token") : null;
+      const token = typeof window !== "undefined" ? localStorage.getItem("za_access_token") : null;
       const fd = new FormData();
       fd.append("avatar", file);
 
@@ -124,7 +129,9 @@ export default function ProfilePage() {
 
   return (
     <div className="max-w-lg">
-      <h1 className="mb-6 font-display text-2xl font-semibold tracking-tight text-foreground">Profile Settings</h1>
+      <h1 className="mb-6 font-display text-2xl font-semibold tracking-tight text-foreground">
+        Profile Settings
+      </h1>
 
       {/* Avatar */}
       <Card className="mb-6">
@@ -134,9 +141,7 @@ export default function ProfilePage() {
         <CardContent>
           <div className="flex items-center gap-5">
             <Avatar className="h-20 w-20 border-2 border-border">
-              {form.avatarUrl ? (
-                <AvatarImage src={form.avatarUrl} alt="Avatar" />
-              ) : null}
+              {form.avatarUrl ? <AvatarImage src={form.avatarUrl} alt="Avatar" /> : null}
               <AvatarFallback className="bg-primary text-2xl font-bold text-primary-foreground">
                 {initials}
               </AvatarFallback>

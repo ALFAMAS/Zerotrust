@@ -1,6 +1,6 @@
+import { Fingerprint, KeyRound, Lock, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import { brand } from "@/config/brand";
-import { Fingerprint, KeyRound, Lock, ShieldCheck } from "lucide-react";
 
 const footerLinks = [
   { href: "/help", label: "Help" },
@@ -32,13 +32,19 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
     <div className="relative grid min-h-screen lg:grid-cols-[1.05fr_1fr]">
       {/* ── Brand / atmosphere panel (desktop only) ──────────────────────── */}
       <aside className="relative hidden overflow-hidden border-r border-border bg-background lg:flex lg:flex-col lg:justify-between lg:p-14">
-        <div className="bg-grid mask-fade pointer-events-none absolute inset-0 opacity-70" aria-hidden />
+        <div
+          className="bg-grid mask-fade pointer-events-none absolute inset-0 opacity-70"
+          aria-hidden
+        />
         <div
           className="pointer-events-none absolute -left-32 top-24 h-[28rem] w-[28rem] rounded-full opacity-40 blur-[140px]"
           style={{ background: brand.color }}
           aria-hidden
         />
-        <div className="pointer-events-none absolute bottom-0 right-0 h-80 w-80 translate-x-1/3 translate-y-1/3 rounded-full bg-primary/30 blur-[120px]" aria-hidden />
+        <div
+          className="pointer-events-none absolute bottom-0 right-0 h-80 w-80 translate-x-1/3 translate-y-1/3 rounded-full bg-primary/30 blur-[120px]"
+          aria-hidden
+        />
 
         <div className="animate-fade-up relative flex items-center gap-3">
           <div
@@ -96,7 +102,10 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
 
       {/* ── Form panel ───────────────────────────────────────────────────── */}
       <div className="relative flex min-h-screen flex-col lg:min-h-0">
-        <div className="bg-grid mask-fade pointer-events-none absolute inset-0 opacity-40 lg:hidden" aria-hidden />
+        <div
+          className="bg-grid mask-fade pointer-events-none absolute inset-0 opacity-40 lg:hidden"
+          aria-hidden
+        />
 
         {/* Header: clickable logo + back-to-site link (all viewports) */}
         <header className="relative flex items-center justify-between px-5 py-5 sm:px-8">
@@ -142,7 +151,11 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
             </span>
             <nav className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
               {footerLinks.map((l) => (
-                <Link key={l.href} href={l.href} className="transition-colors hover:text-foreground">
+                <Link
+                  key={l.href}
+                  href={l.href}
+                  className="transition-colors hover:text-foreground"
+                >
                   {l.label}
                 </Link>
               ))}

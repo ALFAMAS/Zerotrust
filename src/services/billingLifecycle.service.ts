@@ -13,11 +13,11 @@
  * extra tables are needed and emails are never sent twice for a stage.
  */
 
-import { eq, and, isNotNull } from "drizzle-orm";
+import { and, eq, isNotNull } from "drizzle-orm";
 import { getDb } from "../db";
 import { subscriptionsTable, usersTable } from "../db/schema";
-import { sendBillingEventEmail } from "./email.service";
 import { getLogger } from "../logger";
+import { sendBillingEventEmail } from "./email.service";
 
 const logger = getLogger("billing-lifecycle");
 

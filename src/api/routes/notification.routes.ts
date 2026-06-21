@@ -1,15 +1,15 @@
+import { and, desc, eq } from "drizzle-orm";
 import { Hono } from "hono";
-import { eq, desc, and } from "drizzle-orm";
 import { z } from "zod";
 import { getDb } from "../../db";
 import { notificationsTable, usersTable } from "../../db/schema";
-import { authMiddleware } from "../../middleware/auth";
 import { getLogger } from "../../logger";
+import { authMiddleware } from "../../middleware/auth";
 import { sendNotificationEmail } from "../../services/email.service";
 import {
   getVapidPublicKey,
-  saveSubscription,
   removeSubscription,
+  saveSubscription,
   sendWebPush,
 } from "../../services/webPush.service";
 import type { HonoEnv } from "../../shared/types";
@@ -211,7 +211,7 @@ router.get("/sse", (c) => {
       if (!sseClients.has(userId)) {
         sseClients.set(userId, new Set());
       }
-      sseClients.get(userId)!.add(ctrl);
+      sseClients.get(userId)?.add(ctrl);
 
       // Send initial connected event
       ctrl.send("connected", JSON.stringify({ userId }));

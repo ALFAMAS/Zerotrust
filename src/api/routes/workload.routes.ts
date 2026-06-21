@@ -1,16 +1,16 @@
 import { Hono } from "hono";
+import { getConfig } from "../../config";
+import { auditLog, getLogger } from "../../logger";
+import { authMiddleware } from "../../middleware/auth";
+import { TokenService } from "../../services/token.service";
+import type { HonoEnv } from "../../shared/types";
 import {
   createWorkloadCredential,
   getValidWorkloadCredential,
-  validateWorkloadCredential,
   listWorkloadCredentials,
   revokeWorkloadCredential,
+  validateWorkloadCredential,
 } from "../../workload";
-import { getConfig } from "../../config";
-import { getLogger, auditLog } from "../../logger";
-import { TokenService } from "../../services/token.service";
-import { authMiddleware } from "../../middleware/auth";
-import type { HonoEnv } from "../../shared/types";
 
 const router = new Hono<HonoEnv>();
 const logger = getLogger("workload-routes");
@@ -34,7 +34,12 @@ router.post("/issue", async (c) => {
     const { workloadId, scopes, ttl } = await c.req.json();
     if (!workloadId) return c.json({ error: "INVALID_REQUEST" }, 400);
 
-    const created = await createWorkloadCredential(workloadId, undefined, scopes || [], ttl || 3600);
+    const created = await createWorkloadCredential(
+      workloadId,
+      undefined,
+      scopes || [],
+      ttl || 3600
+    );
     return c.json({ created });
   } catch (err) {
     logger.error("Issue workload credential failed", err as Error);
@@ -71,7 +76,10 @@ router.post("/token", async (c) => {
       return c.json({ error: "INVALID_SCOPE" }, 403);
     }
 
-    const tokenTtl = Math.min(Number.isInteger(ttl) ? ttl : credential.ttl || 3600, credential.ttl || 3600);
+    const tokenTtl = Math.min(
+      Number.isInteger(ttl) ? ttl : credential.ttl || 3600,
+      credential.ttl || 3600
+    );
     const tokenSvc = await getTokenService();
     const accessToken = await tokenSvc.signAccessToken(
       {

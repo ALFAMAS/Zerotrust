@@ -1,12 +1,12 @@
 import { Hono } from "hono";
-import { rateLimit } from "../middleware/rateLimiting.js";
-import { authMiddleware } from "../middleware/auth.js";
-import { registerProvider, listProviders, removeProvider } from "./registry.js";
-import { exchangeToken } from "./exchange.js";
-import type { FederationTokenRequest } from "./types.js";
 import { getLogger } from "../logger/index.js";
+import { authMiddleware } from "../middleware/auth.js";
+import { rateLimit } from "../middleware/rateLimiting.js";
 import { getClientIp } from "../shared/clientIp.js";
 import type { HonoEnv } from "../shared/types.js";
+import { exchangeToken } from "./exchange.js";
+import { listProviders, registerProvider, removeProvider } from "./registry.js";
+import type { FederationTokenRequest } from "./types.js";
 
 const router = new Hono<HonoEnv>();
 const logger = getLogger("federation-routes");

@@ -1,7 +1,8 @@
 # ZeroAuth — Implemented Features
 
-This file is the authoritative list of what ZeroAuth ships today. Anything not on
-this list lives in [`not-implemented.md`](./not-implemented.md).
+This file is the authoritative list of what ZeroAuth ships today. Planned-but-unbuilt
+features live in [`not-implemented.md`](./not-implemented.md); code that exists but is
+unmounted, stubbed, or orphaned is tracked in [`incomplete.md`](./incomplete.md).
 
 Sources of truth: `src/` (backend), `packages/ui/src/` (frontend), and Drizzle
 migrations in `src/db/`. Update this file when you ship a feature, not the other
@@ -64,6 +65,7 @@ needs surfacing
 - ✅ Remove / leave org — safety checks (cannot remove last owner)
 - ✅ Per-org IP allowlist — `org_security_policies.ip_allowlist` (IPv4 CIDRs, migration `0009`), enforced via shared `cidr.ts` matcher
 - ✅ Org passkey policy — `requirePasskeyAttestation` / `requireHardwarePasskey` / `allowedPasskeyAaguids` / `deniedPasskeyAaguids` in `org_security_policies`; enforced at registration via MDS3 attestation + AAGUID lookup; `GET/PUT /:orgId/security/policy` admin-gated; UI in org Settings → Security policy form
+- ✅ Session & device policy per org — `max_session_age_seconds` / `idle_timeout_seconds` / `max_concurrent_sessions` / `allowed_countries` on `org_security_policies` (migration `0014`); enforced in `auth.ts` via `sessionPolicy.service.ts` (cached effective policy = strictest across the user's orgs; revokes on max-age / idle / geo violation, caps concurrent sessions); config via the extended `GET/PUT /:orgId/security/policy`; UI in org Settings → Security policy form; unit tests in `sessionPolicy.service.test.ts`. _(Trusted-device list deferred — needs a device-enrolment flow.)_
 - ✅ Cross-tenant JIT access — request + approval inbox + durable audit (`cross_tenant_jit_requests`, migration `0003`)
 
 ---
@@ -116,7 +118,7 @@ needs surfacing
 - ✅ Security alert emails — new-device login, account-takeover pattern
 - ✅ Billing-event template — reusable title/body/CTA layout for lifecycle emails
 - ✅ Email suppression list — `email_suppressions` table (migration `0011`); `sendEmail()` skips suppressed recipients; provider-agnostic `POST /webhooks/email/event` for bounce/complaint
-- ✅ Email deliverability hardening — SPF/DKIM/DMARC runbook + suppression enforcement ([`docs/email-deliverability.md`](./docs/email-deliverability.md))
+- ✅ Email deliverability hardening — SPF/DKIM/DMARC runbook + suppression enforcement
 
 ### Notification center
 
@@ -179,7 +181,9 @@ needs surfacing
 - ✅ Privacy policy + Terms pages
 - ✅ CAN-SPAM unsubscribe — one-click signed tokens
 - ✅ Bug-bounty / responsible-disclosure page — `/.well-known/security.txt` (RFC 9116) + public `/security`
-- ✅ SOC 2 Type II readiness map — controls mapped to TSC CC6–CC8, A1, C1/P ([`docs/soc2-readiness.md`](./docs/soc2-readiness.md))
+- ✅ SOC 2 Type II readiness map — controls mapped to TSC CC6–CC8, A1, C1/P
+- ✅ Tamper-evident audit log — SHA-256 hash-chained `audit_logs` rows (`seq` / `prev_hash` / `entry_hash`, migration `0013`); `insertAuditLog()` chains under an advisory lock (`src/audit/chain.ts`); `verifyAuditChain()` + `GET /admin/audit-logs/verify` and a **Verify integrity** button on the admin Audit Logs page detect edits/deletes/reordering
+- ✅ Access reviews — admin snapshots all privileged (non-default) role grants and records an approve/flag/revoke decision per user, retained as evidence (`access_reviews` + `access_review_items`, migration `0013`); a "revoke" decision strips elevated roles; `/admin/access-reviews` API + list/detail UI (SOC 2 CC6)
 
 ---
 
@@ -212,7 +216,7 @@ needs surfacing
 - ✅ Structured logging — `getLogger()` with log levels + correlation IDs
 - ✅ Audit log — immutable event trail to Elasticsearch + fan-out to SIEM (Datadog/Splunk/S3)
 - ✅ Distributed tracing viewer — `docker-compose.tracing.yml` (Jaeger all-in-one, OTLP)
-- ✅ Health status page — public `/status` page + endpoint (API / DB / cache)
+- ✅ Health status page — public `/status` page + endpoint (API / DB / cache / S3 backups when configured, with 4s timeout on the S3 ping)
 - ✅ Alerting — Slack / Teams / PagerDuty on error spike or latency breach (cooldown, env-tunable)
 - ✅ Kibana dashboards — pre-built 8.x dashboards for auth, MFA, denied-access, rate-limit, anomaly, overview ([`kibana/README.md`](./kibana/README.md))
 
@@ -288,8 +292,10 @@ needs surfacing
 - ✅ Render one-click deploy button
 - ✅ Secret rotation — zero-downtime procedure documented in README
 - ✅ Environment parity — `.env.staging.example` staging template
-- ✅ DB backup — `bun run db:backup` runs `pg_dump` with 30-day retention, optional S3; daily in-server scheduler (`BACKUP_ENABLED=true`)
-- ✅ DB restore + PITR — `bun run db:restore -- <dump> [--clean]` (`pg_restore --no-owner`), Neon PITR runbook, quarterly drill ([`docs/backup-restore.md`](./docs/backup-restore.md))
+- ✅ DB backup — `bun run db:backup` runs `pg_dump` with 30-day local retention; daily in-server scheduler (`BACKUP_ENABLED=true`)
+- ✅ Provider-agnostic S3-compatible backup upload — AWS SDK v3 (`@aws-sdk/client-s3`) drives uploads to AWS S3, Backblaze B2, Cloudflare R2, MinIO, Wasabi, etc.; `BACKUP_S3_ENDPOINT` + `BACKUP_S3_FORCE_PATH_STYLE` (true for B2/MinIO) switch providers; S3-side retention sweep (`BACKUP_S3_RETENTION_DAYS`); no `aws` CLI dep
+- ✅ S3-backed user file uploads — same bucket as backups, separate `uploads/` prefix; `uploadBuffer()` + `publicURLForKey()` + `parseObjectKeyFromPublicUrl()` helpers; avatar (`POST /auth/me/avatar`) writes to S3 when configured, falls back to local disk otherwise; old avatar deleted from S3 on re-upload; supports `BACKUP_S3_PUBLIC_URL_TEMPLATE` (CDN override)
+- ✅ DB restore + PITR — `bun run db:restore -- <dump> [--clean]` (`pg_restore --no-owner`), Neon PITR runbook, quarterly drill
 
 ---
 

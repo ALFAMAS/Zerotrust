@@ -1,8 +1,8 @@
-import { notFound } from "next/navigation";
-import Link from "next/link";
 import type { Metadata } from "next";
-import { getBlogPost, blogPosts } from "@/data/blog-posts";
+import Link from "next/link";
+import { notFound } from "next/navigation";
 import { brand } from "@/config/brand";
+import { blogPosts, getBlogPost } from "@/data/blog-posts";
 
 interface Props {
   params: { slug: string };

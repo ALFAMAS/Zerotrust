@@ -4,9 +4,9 @@
  * Masks sensitive fields before shipping.
  */
 
-import type { AuditLog } from "../shared/types";
 import { getConfig } from "../config";
 import { getLogger } from "../logger";
+import type { AuditLog } from "../shared/types";
 
 const logger = getLogger("audit-pipeline");
 
@@ -59,7 +59,7 @@ async function buildEsClient() {
         body.push(masked);
       }
 
-      const ndjson = body.map((line) => JSON.stringify(line)).join("\n") + "\n";
+      const ndjson = `${body.map((line) => JSON.stringify(line)).join("\n")}\n`;
 
       const response = await fetch(`${baseUrl}/_bulk`, {
         method: "POST",

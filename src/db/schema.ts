@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm";
 import {
+  bigserial,
   boolean,
   index,
   integer,
@@ -126,7 +127,49 @@ export const auditLogsTable = pgTable("audit_logs", {
   continuousEvalContext: jsonb("continuous_eval_context"),
   metadata: jsonb("metadata"),
   timestamp: timestamp("timestamp", { withTimezone: true }).notNull().default(sql`now()`),
+  // Tamper-evidence: monotonic sequence gives a strict total order, and each
+  // entry's hash chains to the previous one (entryHash = sha256(prevHash + body)).
+  // Editing/deleting/reordering any row breaks the chain — see audit/chain.ts.
+  seq: bigserial("seq", { mode: "number" }).notNull(),
+  prevHash: text("prev_hash"),
+  entryHash: text("entry_hash"),
 });
+
+// ── Access reviews (SOC 2 CC6: periodic review of privileged access) ──────────
+export const accessReviewsTable = pgTable("access_reviews", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  title: text("title").notNull(),
+  status: text("status").notNull().default("open"), // open | completed
+  note: text("note"),
+  createdBy: uuid("created_by"),
+  createdByEmail: text("created_by_email"),
+  completedAt: timestamp("completed_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().default(sql`now()`),
+});
+
+export const accessReviewItemsTable = pgTable(
+  "access_review_items",
+  {
+    id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+    reviewId: uuid("review_id")
+      .notNull()
+      .references(() => accessReviewsTable.id, { onDelete: "cascade" }),
+    userId: uuid("user_id").notNull(),
+    userEmail: text("user_email"),
+    userDisplayName: text("user_display_name"),
+    rolesSnapshot: text("roles_snapshot").array().notNull().default(sql`ARRAY[]::text[]`),
+    decision: text("decision").notNull().default("pending"), // pending | approved | revoked | flagged
+    decidedBy: uuid("decided_by"),
+    decidedByEmail: text("decided_by_email"),
+    decidedAt: timestamp("decided_at", { withTimezone: true }),
+    note: text("note"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
+  },
+  (t) => ({
+    reviewIdx: index("access_review_items_review_id_idx").on(t.reviewId),
+  })
+);
 
 export const refreshTokensTable = pgTable("refresh_tokens", {
   id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -294,6 +337,13 @@ export const orgSecurityPoliciesTable = pgTable("org_security_policies", {
   // IPv4 CIDR allowlist. Empty = no restriction; non-empty restricts org-scoped
   // API access to callers whose IP matches one of the ranges.
   ipAllowlist: text("ip_allowlist").array().notNull().default(sql`ARRAY[]::text[]`),
+  // ── Session & device policy (enforced in the auth middleware) ──
+  // All numeric limits use 0 = unlimited.
+  maxSessionAgeSeconds: integer("max_session_age_seconds").notNull().default(0),
+  idleTimeoutSeconds: integer("idle_timeout_seconds").notNull().default(0),
+  maxConcurrentSessions: integer("max_concurrent_sessions").notNull().default(0),
+  // ISO 3166-1 alpha-2 codes a member's session may originate from. Empty = any.
+  allowedCountries: text("allowed_countries").array().notNull().default(sql`ARRAY[]::text[]`),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
   updatedBy: uuid("updated_by").references(() => usersTable.id, { onDelete: "set null" }),
 });

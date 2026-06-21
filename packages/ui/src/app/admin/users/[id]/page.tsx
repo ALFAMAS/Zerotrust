@@ -1,25 +1,34 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { api } from "@/lib/api";
+import { useEffect, useState } from "react";
 import Badge from "@/components/Badge";
+import { api } from "@/lib/api";
 
 interface UserDetail {
   id: string;
-  name?: string;
+  displayName?: string;
+  username?: string | null;
+  phone?: string | null;
   email: string;
   status: "active" | "suspended" | "deleted" | string;
+  roles?: string[];
+  locale?: string;
+  emailVerifiedAt?: string | null;
   createdAt: string;
+  updatedAt?: string;
   lastLoginAt?: string;
   mfa?: {
     totpEnabled?: boolean;
-    emailOtpEnabled?: boolean;
-    smsOtpEnabled?: boolean;
+    webauthnEnabled?: boolean;
   };
+  passkeyCount?: number;
+  oauthProviders?: string[];
   activeSessions?: number;
   sessionsCount?: number;
 }
+
+const fmt = (d?: string | null) => (d ? new Date(d).toLocaleString() : "—");
 
 export default function UserDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -46,14 +55,14 @@ export default function UserDetailPage() {
       }
     }
     load();
-  }, [id]);
+  }, [id, showToast]);
 
   async function handleForceLogout() {
     if (!confirm("Force logout all sessions for this user?")) return;
     setActionLoading(true);
     try {
       await api.post(`/admin/users/${id}/logout`);
-      setUser((u) => u ? { ...u, activeSessions: 0, sessionsCount: 0 } : u);
+      setUser((u) => (u ? { ...u, activeSessions: 0, sessionsCount: 0 } : u));
       showToast("All sessions revoked");
     } catch {
       showToast("Action failed");
@@ -68,7 +77,7 @@ export default function UserDetailPage() {
     setActionLoading(true);
     try {
       await api.patch(`/admin/users/${id}`, { status: newStatus });
-      setUser((u) => u ? { ...u, status: newStatus } : u);
+      setUser((u) => (u ? { ...u, status: newStatus } : u));
       showToast(`User ${newStatus}`);
     } catch {
       showToast("Action failed");
@@ -101,9 +110,7 @@ export default function UserDetailPage() {
   }
 
   if (!user) {
-    return (
-      <div className="text-center py-16 text-muted-foreground">User not found.</div>
-    );
+    return <div className="text-center py-16 text-muted-foreground">User not found.</div>;
   }
 
   const sessionCount = user.activeSessions ?? user.sessionsCount ?? 0;
@@ -124,45 +131,120 @@ export default function UserDetailPage() {
         >
           ← Back
         </button>
-        <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">User Detail</h1>
+        <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
+          User Detail
+        </h1>
       </div>
 
       {/* Profile Card */}
       <div className="rounded-xl bg-card border border-border p-6">
         <div className="flex items-center gap-5">
           <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/15 text-2xl font-bold text-primary">
-            {(user.name?.[0] ?? user.email[0]).toUpperCase()}
+            {(user.displayName?.[0] ?? user.email[0]).toUpperCase()}
           </div>
           <div className="flex-1">
-            <div className="flex items-center gap-3">
-              <h2 className="text-xl font-semibold text-foreground">{user.name ?? user.email}</h2>
+            <div className="flex flex-wrap items-center gap-2">
+              <h2 className="text-xl font-semibold text-foreground">
+                {user.displayName ?? user.email}
+              </h2>
               <Badge status={user.status} />
+              {(user.roles?.length ? user.roles : ["user"]).map((r) => (
+                <span
+                  key={r}
+                  className={`rounded-full px-2 py-0.5 text-[10px] font-medium ring-1 ${
+                    r === "admin"
+                      ? "bg-primary/15 text-primary ring-primary/30"
+                      : "bg-muted text-muted-foreground ring-border"
+                  }`}
+                >
+                  {r}
+                </span>
+              ))}
             </div>
-            {user.name && (
-              <p className="text-sm text-muted-foreground mt-0.5">{user.email}</p>
-            )}
-            <p className="text-xs text-muted-foreground mt-1">
-              Created {user.createdAt ? new Date(user.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }) : "—"}
+            <p className="text-sm text-muted-foreground mt-0.5">
+              {user.email}{" "}
+              {user.emailVerifiedAt ? (
+                <span
+                  className="text-xs text-green-400"
+                  title={`Verified ${fmt(user.emailVerifiedAt)}`}
+                >
+                  ✓ verified
+                </span>
+              ) : (
+                <span className="text-xs text-yellow-400">unverified</span>
+              )}
             </p>
           </div>
         </div>
+
+        {/* Account metadata */}
+        <dl className="mt-5 grid grid-cols-2 gap-x-6 gap-y-3 border-t border-border pt-5 text-sm sm:grid-cols-3">
+          <div>
+            <dt className="text-xs uppercase tracking-wider text-muted-foreground">Created</dt>
+            <dd className="mt-0.5 text-foreground">{fmt(user.createdAt)}</dd>
+          </div>
+          <div>
+            <dt className="text-xs uppercase tracking-wider text-muted-foreground">Last login</dt>
+            <dd className="mt-0.5 text-foreground">
+              {user.lastLoginAt ? fmt(user.lastLoginAt) : "Never"}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-xs uppercase tracking-wider text-muted-foreground">Updated</dt>
+            <dd className="mt-0.5 text-foreground">{fmt(user.updatedAt)}</dd>
+          </div>
+          {user.username && (
+            <div>
+              <dt className="text-xs uppercase tracking-wider text-muted-foreground">Username</dt>
+              <dd className="mt-0.5 text-foreground">{user.username}</dd>
+            </div>
+          )}
+          {user.phone && (
+            <div>
+              <dt className="text-xs uppercase tracking-wider text-muted-foreground">Phone</dt>
+              <dd className="mt-0.5 text-foreground">{user.phone}</dd>
+            </div>
+          )}
+          {user.locale && (
+            <div>
+              <dt className="text-xs uppercase tracking-wider text-muted-foreground">Locale</dt>
+              <dd className="mt-0.5 text-foreground">{user.locale}</dd>
+            </div>
+          )}
+          {user.oauthProviders && user.oauthProviders.length > 0 && (
+            <div>
+              <dt className="text-xs uppercase tracking-wider text-muted-foreground">
+                Linked logins
+              </dt>
+              <dd className="mt-0.5 text-foreground capitalize">
+                {user.oauthProviders.join(", ")}
+              </dd>
+            </div>
+          )}
+        </dl>
       </div>
 
       {/* MFA Status */}
       <div className="rounded-xl bg-card border border-border p-6 space-y-4">
         <h3 className="font-semibold text-foreground">Multi-Factor Authentication</h3>
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 gap-4">
           {[
             { label: "Authenticator App (TOTP)", enabled: user.mfa?.totpEnabled },
-            { label: "Email OTP", enabled: user.mfa?.emailOtpEnabled },
-            { label: "SMS OTP", enabled: user.mfa?.smsOtpEnabled },
+            {
+              label: `Passkeys / WebAuthn${user.passkeyCount ? ` (${user.passkeyCount})` : ""}`,
+              enabled: user.mfa?.webauthnEnabled,
+            },
           ].map((item) => (
             <div key={item.label} className="rounded-lg bg-muted p-3 text-center">
-              <div className={`text-lg mb-1 ${item.enabled ? "text-green-400" : "text-muted-foreground"}`}>
+              <div
+                className={`text-lg mb-1 ${item.enabled ? "text-green-400" : "text-muted-foreground"}`}
+              >
                 {item.enabled ? "✓" : "✗"}
               </div>
               <p className="text-xs text-muted-foreground">{item.label}</p>
-              <p className={`text-xs font-medium mt-0.5 ${item.enabled ? "text-green-400" : "text-muted-foreground"}`}>
+              <p
+                className={`text-xs font-medium mt-0.5 ${item.enabled ? "text-green-400" : "text-muted-foreground"}`}
+              >
                 {item.enabled ? "Enabled" : "Disabled"}
               </p>
             </div>

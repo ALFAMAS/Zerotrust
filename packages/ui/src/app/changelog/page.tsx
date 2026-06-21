@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { changelog } from "@/data/changelog";
-import { brand } from "@/config/brand";
-import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
+import SiteHeader from "@/components/SiteHeader";
+import { brand } from "@/config/brand";
+import { changelog } from "@/data/changelog";
 
 export const metadata: Metadata = {
   title: `Changelog — ${process.env.NEXT_PUBLIC_APP_NAME ?? "ZeroAuth"}`,
@@ -23,7 +23,9 @@ export default function ChangelogPage() {
       <SiteHeader />
       <main className="mx-auto w-full max-w-3xl flex-1 px-6 py-16">
         <header className="mb-12">
-          <h1 className="font-display text-4xl font-semibold tracking-tight text-foreground">Changelog</h1>
+          <h1 className="font-display text-4xl font-semibold tracking-tight text-foreground">
+            Changelog
+          </h1>
           <p className="mt-3 text-muted-foreground">
             All notable changes to {brand.name}, newest first.
           </p>
@@ -64,7 +66,10 @@ export default function ChangelogPage() {
                         </span>
                         <ul className="space-y-1">
                           {section.items.map((item, ii) => (
-                            <li key={ii} className="flex items-start gap-2 text-sm text-foreground/80">
+                            <li
+                              key={ii}
+                              className="flex items-start gap-2 text-sm text-foreground/80"
+                            >
                               <span className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-muted-foreground/50" />
                               {item}
                             </li>

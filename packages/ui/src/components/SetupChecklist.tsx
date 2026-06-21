@@ -1,10 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Link from "next/link";
 import { Check } from "lucide-react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
 
 interface ChecklistItem {
   id: string;

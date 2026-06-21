@@ -15,18 +15,18 @@ const DEFAULT_CONFIG: Partial<ZeroAuthConfig> = {
     databaseUrl:
       process.env.DATABASE_URL ||
       "postgresql://neon_owner:3J6RcaLXeGwO@ep-noisy-hill-a1hjd9xk-pooler.ap-southeast-1.aws.neon.tech/neon?sslmode=require&channel_binding=require",
-    connectionPoolSize: parseInt(process.env.DB_POOL_SIZE || "10"),
+    connectionPoolSize: parseInt(process.env.DB_POOL_SIZE || "10", 10),
   },
   session: {
-    defaultTTL: parseInt(process.env.SESSION_TTL || "3600"),
-    refreshTokenTTL: parseInt(process.env.REFRESH_TOKEN_TTL || "604800"),
-    maxConcurrentDevices: parseInt(process.env.MAX_CONCURRENT_DEVICES || "5"),
+    defaultTTL: parseInt(process.env.SESSION_TTL || "3600", 10),
+    refreshTokenTTL: parseInt(process.env.REFRESH_TOKEN_TTL || "604800", 10),
+    maxConcurrentDevices: parseInt(process.env.MAX_CONCURRENT_DEVICES || "5", 10),
   },
   security: {
-    bcryptRounds: parseInt(process.env.BCRYPT_ROUNDS || "12"),
+    bcryptRounds: parseInt(process.env.BCRYPT_ROUNDS || "12", 10),
     tokenSecretHex: process.env.TOKEN_SECRET_HEX || generateSecureKey(32),
     csfleMasterKeyHex: process.env.CSFLE_MASTER_KEY_HEX || generateSecureKey(32),
-    csflekeyRotationIntervalDays: parseInt(process.env.CSFLE_KEY_ROTATION_DAYS || "90"),
+    csflekeyRotationIntervalDays: parseInt(process.env.CSFLE_KEY_ROTATION_DAYS || "90", 10),
   },
   oauth: {
     providers: {
@@ -60,9 +60,9 @@ const DEFAULT_CONFIG: Partial<ZeroAuthConfig> = {
     },
   },
   mfa: {
-    totpWindow: parseInt(process.env.TOTP_WINDOW || "1"),
-    otpExpirySecs: parseInt(process.env.OTP_EXPIRY_SECS || "900"),
-    maxOTPAttempts: parseInt(process.env.MAX_OTP_ATTEMPTS || "5"),
+    totpWindow: parseInt(process.env.TOTP_WINDOW || "1", 10),
+    otpExpirySecs: parseInt(process.env.OTP_EXPIRY_SECS || "900", 10),
+    maxOTPAttempts: parseInt(process.env.MAX_OTP_ATTEMPTS || "5", 10),
     channels: {
       email: { enabled: process.env.MFA_EMAIL_ENABLED !== "false" },
       sms: {
@@ -82,8 +82,8 @@ const DEFAULT_CONFIG: Partial<ZeroAuthConfig> = {
   rateLimiting: {
     enabled: process.env.RATE_LIMITING_ENABLED !== "false",
     redisUri: process.env.REDIS_URI,
-    perIpLimit: parseInt(process.env.RATE_LIMIT_PER_IP || "100"),
-    windowSecs: parseInt(process.env.RATE_LIMIT_WINDOW_SECS || "60"),
+    perIpLimit: parseInt(process.env.RATE_LIMIT_PER_IP || "100", 10),
+    windowSecs: parseInt(process.env.RATE_LIMIT_WINDOW_SECS || "60", 10),
   },
   geofencing: {
     enabled: process.env.GEOFENCING_ENABLED === "true",
@@ -93,7 +93,7 @@ const DEFAULT_CONFIG: Partial<ZeroAuthConfig> = {
   elasticsearch: {
     enabled: process.env.ELASTICSEARCH_ENABLED === "true",
     host: process.env.ELASTICSEARCH_HOST || "localhost",
-    port: parseInt(process.env.ELASTICSEARCH_PORT || "9200"),
+    port: parseInt(process.env.ELASTICSEARCH_PORT || "9200", 10),
     indexPrefix: process.env.ELASTICSEARCH_INDEX_PREFIX || "zeroauth",
   },
   logging: {

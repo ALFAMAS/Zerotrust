@@ -1,16 +1,16 @@
-import { Hono } from "hono";
-import { buildAuthnRequest, parseSAMLResponse, consumeRelayState, buildSPMetadata } from "./sp.js";
-import { getDb } from "../db/index.js";
-import { usersTable, sessionsTable, refreshTokensTable } from "../db/schema.js";
+import * as nodeCrypto from "node:crypto";
 import { eq } from "drizzle-orm";
-import { TokenService } from "../services/token.service.js";
-import { getConfig } from "../config/index.js";
-import { rateLimit } from "../middleware/rateLimiting.js";
-import { getLogger } from "../logger/index.js";
-import type { HonoEnv } from "../shared/types.js";
-import { getClientIp } from "../shared/clientIp.js";
-import * as nodeCrypto from "crypto";
+import { Hono } from "hono";
 import { nanoid } from "nanoid";
+import { getConfig } from "../config/index.js";
+import { getDb } from "../db/index.js";
+import { refreshTokensTable, sessionsTable, usersTable } from "../db/schema.js";
+import { getLogger } from "../logger/index.js";
+import { rateLimit } from "../middleware/rateLimiting.js";
+import { TokenService } from "../services/token.service.js";
+import { getClientIp } from "../shared/clientIp.js";
+import type { HonoEnv } from "../shared/types.js";
+import { buildAuthnRequest, buildSPMetadata, consumeRelayState, parseSAMLResponse } from "./sp.js";
 
 const router = new Hono<HonoEnv>();
 const logger = getLogger("saml-routes");
@@ -118,7 +118,7 @@ router.post("/saml/acs", rateLimit({ points: 20, windowSecs: 60 }), async (c) =>
     // Map NameID or attributes to email
     const email = assertion.nameId.includes("@")
       ? assertion.nameId
-      : (assertion.attributes["email"] as string) ||
+      : (assertion.attributes.email as string) ||
         (assertion.attributes[
           "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
         ] as string);
@@ -135,8 +135,8 @@ router.post("/saml/acs", rateLimit({ points: 20, windowSecs: 60 }), async (c) =>
     }
 
     const displayName =
-      (assertion.attributes["displayName"] as string) ||
-      (assertion.attributes["name"] as string) ||
+      (assertion.attributes.displayName as string) ||
+      (assertion.attributes.name as string) ||
       (assertion.attributes[
         "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"
       ] as string) ||

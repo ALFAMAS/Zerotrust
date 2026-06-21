@@ -14,11 +14,21 @@
       "PowerShell(grep *)",
       "PowerShell(Get-ChildItem -Path .\\\\src -Directory | Where-Object {$_.Name -eq \"api\"})",
       "Bash(mkdir -p /home/user/zeroauth/src/api/schemas /home/user/zeroauth/src/oauth/providers /home/user/zeroauth/src/audit /home/user/zeroauth/.github/workflows /home/user/zeroauth/.vscode /home/user/zeroauth/src/__tests__ /home/user/zeroauth/tests/load)",
-      "Bash(cat > *)"
+      "Bash(cat > *)",
+      "mcp__nextjs__get_errors",
+      "PowerShell(Get-CimInstance *)",
+      "PowerShell($conn = Get-NetTCPConnection -LocalPort 3000 -State Listen -ErrorAction SilentlyContinue; if \\($conn\\) { $conn | ForEach-Object { $p = Get-Process -Id $_.OwningProcess -ErrorAction SilentlyContinue; [PSCustomObject]@{ PID=$_.OwningProcess; Name=$p.Name; Start=$p.StartTime } } | Format-List } else { \"Nothing listening on 3000\" })",
+      "PowerShell(wsl -l -v; Write-Output \"----\"; wsl -e bash -lc \"ps aux | grep -E 'next|bun' | grep -v grep\")",
+      "PowerShell(wsl -e bash -lc \"cd /mnt/c/Users/ALFAMAS/Desktop/zeroauth/packages/ui/src && touch components/ui/password-input.tsx 'app/\\(auth\\)/login/page.tsx' 'app/\\(auth\\)/register/page.tsx' 'app/\\(auth\\)/reset-password/page.tsx' app/dashboard/sessions/page.tsx && echo touched\")",
+      "PowerShell(wsl -e bash -lc \"cd /mnt/c/Users/ALFAMAS/Desktop/zeroauth && python3 -c 'import playwright; print\\(\\\\\"playwright ok\\\\\"\\)' 2>&1 | head -5\")",
+      "PowerShell(wsl -e bash -lc 'python3 -c \"import playwright, sys; print\\(playwright.__version__ if hasattr\\(playwright,\\\\\"__version__\\\\\"\\) else \\\\\"installed\\\\\"\\)\" 2>&1 | head -5')",
+      "PowerShell(wsl -e bash -lc 'cd /mnt/c/Users/ALFAMAS/Desktop/zeroauth && python3 .tmp_pwtest.py 2>&1 | head -40')",
+      "PowerShell(powershell -ExecutionPolicy Bypass -File scripts/fix-junctions.ps1)",
+      "Bash(node -e \"console.log\\(require\\('@simplewebauthn/server/package.json'\\).version\\)\")"
     ]
   },
+  "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
     "nextjs"
-  ],
-  "enableAllProjectMcpServers": true
+  ]
 }

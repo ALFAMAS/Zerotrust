@@ -1,9 +1,9 @@
-import crypto from "crypto";
-import { eq, and, gt } from "drizzle-orm";
+import crypto from "node:crypto";
+import { and, eq, gt } from "drizzle-orm";
 import { getDb } from "../db";
-import { usersTable, otpsTable } from "../db/schema";
-import { getSettings } from "../models/settings.model";
+import { otpsTable, usersTable } from "../db/schema";
 import { getLogger } from "../logger";
+import { getSettings } from "../models/settings.model";
 import { sendMagicLinkEmail } from "./email.service";
 
 const logger = getLogger("magic-link");

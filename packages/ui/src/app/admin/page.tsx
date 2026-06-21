@@ -1,14 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Link from "next/link";
 import { Download, KeyRound, LogIn, Monitor, UserCheck, UserPlus, Users } from "lucide-react";
-import { api } from "@/lib/api";
-import { getToken } from "@/lib/auth";
-import { brand } from "@/config/brand";
-import Badge from "@/components/Badge";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 import MetricCard from "@/components/admin/MetricCard";
 import RadialGauge from "@/components/admin/RadialGauge";
+import Badge from "@/components/Badge";
+import { brand } from "@/config/brand";
+import { api } from "@/lib/api";
+import { getToken } from "@/lib/auth";
 
 interface Stats {
   totalUsers: number;
@@ -29,7 +29,12 @@ interface User {
 const quickActions = [
   { href: "/admin/users", icon: UserPlus, title: "Add user", desc: "Invite a new member" },
   { href: "/admin/sessions", icon: Monitor, title: "View sessions", desc: "Active user sessions" },
-  { href: "/admin/settings/auth", icon: KeyRound, title: "Auth settings", desc: "Configure auth methods" },
+  {
+    href: "/admin/settings/auth",
+    icon: KeyRound,
+    title: "Auth settings",
+    desc: "Configure auth methods",
+  },
 ];
 
 export default function AdminOverviewPage() {
@@ -89,8 +94,12 @@ export default function AdminOverviewPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">Dashboard</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Overview of your authentication platform</p>
+        <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
+          Dashboard
+        </h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Overview of your authentication platform
+        </p>
       </div>
 
       {/* Metric tiles */}
@@ -103,7 +112,11 @@ export default function AdminOverviewPage() {
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <MetricCard icon={Users} label="Total users" value={stats?.totalUsers ?? "—"} />
-          <MetricCard icon={UserCheck} label="Active users (30d)" value={stats?.activeUsers ?? "—"} />
+          <MetricCard
+            icon={UserCheck}
+            label="Active users (30d)"
+            value={stats?.activeUsers ?? "—"}
+          />
           <MetricCard icon={Monitor} label="Active sessions" value={stats?.activeSessions ?? "—"} />
           <MetricCard icon={LogIn} label="Logins (24h)" value={stats?.totalLogins24h ?? "—"} />
         </div>
@@ -141,7 +154,9 @@ export default function AdminOverviewPage() {
                   {(u.name?.[0] ?? u.email[0]).toUpperCase()}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium text-foreground">{u.name ?? u.email}</p>
+                  <p className="truncate text-sm font-medium text-foreground">
+                    {u.name ?? u.email}
+                  </p>
                   {u.name && <p className="truncate text-xs text-muted-foreground">{u.email}</p>}
                 </div>
                 <Badge status={u.status} />

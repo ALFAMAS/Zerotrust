@@ -1,11 +1,11 @@
+import { and, eq } from "drizzle-orm";
 import { Hono } from "hono";
-import { eq, and } from "drizzle-orm";
 import Stripe from "stripe";
 import { getDb } from "../../db";
-import { subscriptionsTable, feedbackTable, organizationMembersTable } from "../../db/schema";
+import { feedbackTable, organizationMembersTable, subscriptionsTable } from "../../db/schema";
+import { auditLog, getLogger } from "../../logger";
 import { authMiddleware } from "../../middleware/auth";
 import { getUsageSummary } from "../../services/usage.service";
-import { auditLog, getLogger } from "../../logger";
 import type { HonoEnv } from "../../shared/types";
 
 const router = new Hono<HonoEnv>();
@@ -19,7 +19,7 @@ function getStripe() {
 
 /** Trial length for new subscriptions; 0 disables trials. */
 function trialDays(): number {
-  return parseInt(process.env.TRIAL_DAYS ?? "14");
+  return parseInt(process.env.TRIAL_DAYS ?? "14", 10);
 }
 
 /** Org-scoped requests require the caller to be an org owner or admin. */

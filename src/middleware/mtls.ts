@@ -12,8 +12,8 @@
  */
 
 import { createMiddleware } from "hono/factory";
-import type { HonoEnv } from "../shared/types";
 import { getLogger } from "../logger";
+import type { HonoEnv } from "../shared/types";
 
 const logger = getLogger("mtls");
 
@@ -98,7 +98,7 @@ function extractCertInfo(
     const subjectMatch = xfcc.match(/Subject="([^"]+)"/i);
     if (subjectMatch?.[1]) {
       const subject = parseSubject(subjectMatch[1]);
-      const cn = subject["CN"] ?? "";
+      const cn = subject.CN ?? "";
       if (cn) {
         return { cn, subject };
       }
@@ -110,7 +110,7 @@ function extractCertInfo(
   if (sslCert?.trim()) {
     // Try to parse as a DN string (CN=...,O=...)
     const subject = parseSubject(sslCert.trim());
-    const cn = subject["CN"] ?? "";
+    const cn = subject.CN ?? "";
     if (cn) {
       return { cn, subject };
     }

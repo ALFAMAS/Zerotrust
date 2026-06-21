@@ -1,4 +1,4 @@
-import crypto from "crypto";
+import crypto from "node:crypto";
 import { createMiddleware } from "hono/factory";
 import type { HonoEnv } from "../shared/types";
 
@@ -65,12 +65,12 @@ export function parseCertificate(pem: string): EnterpriseCertificate {
 
   return {
     subject: {
-      CN: subject["CN"] ?? "",
-      O: subject["O"],
-      OU: subject["OU"],
-      serialNumber: subject["serialNumber"],
+      CN: subject.CN ?? "",
+      O: subject.O,
+      OU: subject.OU,
+      serialNumber: subject.serialNumber,
     },
-    issuer: { CN: issuer["CN"] ?? "", O: issuer["O"] },
+    issuer: { CN: issuer.CN ?? "", O: issuer.O },
     validFrom: new Date(cert.validFrom),
     validTo: new Date(cert.validTo),
     fingerprint: cert.fingerprint256,
@@ -132,9 +132,7 @@ export async function verifyEnterpriseAttestation(opts: {
       }
 
       return { verified: true, caId: ca.id, caName: ca.name, deviceInfo };
-    } catch {
-      continue;
-    }
+    } catch {}
   }
 
   return { verified: false, reason: "no_matching_ca", deviceInfo };

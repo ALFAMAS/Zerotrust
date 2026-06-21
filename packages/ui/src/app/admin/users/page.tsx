@@ -1,19 +1,23 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
-import { api } from "@/lib/api";
+import { useCallback, useEffect, useState } from "react";
 import Badge from "@/components/Badge";
 import Modal from "@/components/Modal";
+import { api } from "@/lib/api";
 
 interface User {
   id: string;
-  name?: string;
+  displayName?: string;
   email: string;
   status: "active" | "suspended" | "deleted" | string;
+  roles?: string[];
+  emailVerifiedAt?: string | null;
   createdAt: string;
   lastLoginAt?: string;
 }
+
+const fmt = (d?: string | null) => (d ? new Date(d).toLocaleString() : null);
 
 interface UsersResponse {
   users?: User[];
@@ -63,7 +67,7 @@ export default function UsersPage() {
     } finally {
       setLoading(false);
     }
-  }, [page, search, statusFilter]);
+  }, [page, search, statusFilter, showToast]);
 
   useEffect(() => {
     loadUsers();
@@ -73,9 +77,7 @@ export default function UsersPage() {
     const newStatus = user.status === "active" ? "suspended" : "active";
     try {
       await api.patch(`/admin/users/${user.id}`, { status: newStatus });
-      setUsers((prev) =>
-        prev.map((u) => (u.id === user.id ? { ...u, status: newStatus } : u))
-      );
+      setUsers((prev) => prev.map((u) => (u.id === user.id ? { ...u, status: newStatus } : u)));
       showToast(`User ${newStatus}`);
     } catch {
       showToast("Action failed");
@@ -123,7 +125,9 @@ export default function UsersPage() {
 
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">Users</h1>
+          <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
+            Users
+          </h1>
           <p className="mt-1 text-sm text-muted-foreground">{total} total users</p>
         </div>
         <button
@@ -140,12 +144,18 @@ export default function UsersPage() {
           type="text"
           placeholder="Search by email or name..."
           value={search}
-          onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            setPage(1);
+          }}
           className="rounded-lg bg-card border border-border px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none w-64"
         />
         <select
           value={statusFilter}
-          onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
+          onChange={(e) => {
+            setStatusFilter(e.target.value);
+            setPage(1);
+          }}
           className="rounded-lg bg-card border border-border px-3 py-2 text-sm text-foreground focus:border-ring focus:outline-none"
         >
           <option value="all">All Status</option>
@@ -160,74 +170,125 @@ export default function UsersPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border bg-card/80">
-                <th className="px-5 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">User</th>
-                <th className="px-5 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Status</th>
-                <th className="px-5 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Created</th>
-                <th className="px-5 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Last Login</th>
-                <th className="px-5 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">Actions</th>
+                <th className="px-5 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                  User
+                </th>
+                <th className="px-5 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                  Roles
+                </th>
+                <th className="px-5 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                  Status
+                </th>
+                <th className="px-5 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                  Created
+                </th>
+                <th className="px-5 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                  Last Login
+                </th>
+                <th className="px-5 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
               {loading && (
                 <tr>
-                  <td colSpan={5} className="px-5 py-8 text-center text-muted-foreground">Loading…</td>
+                  <td colSpan={6} className="px-5 py-8 text-center text-muted-foreground">
+                    Loading…
+                  </td>
                 </tr>
               )}
               {!loading && users.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-5 py-8 text-center text-muted-foreground">No users found.</td>
+                  <td colSpan={6} className="px-5 py-8 text-center text-muted-foreground">
+                    No users found.
+                  </td>
                 </tr>
               )}
-              {!loading && users.map((u) => (
-                <tr key={u.id} className="hover:bg-accent/50 transition-colors">
-                  <td className="px-5 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-primary/15 text-xs font-medium text-primary">
-                        {(u.name?.[0] ?? u.email[0]).toUpperCase()}
+              {!loading &&
+                users.map((u) => (
+                  <tr key={u.id} className="hover:bg-accent/50 transition-colors">
+                    <td className="px-5 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-primary/15 text-xs font-medium text-primary">
+                          {(u.displayName?.[0] ?? u.email[0]).toUpperCase()}
+                        </div>
+                        <div>
+                          <p className="font-medium text-foreground">{u.displayName ?? u.email}</p>
+                          <div className="flex items-center gap-1.5">
+                            <p className="text-xs text-muted-foreground">{u.email}</p>
+                            {u.emailVerifiedAt ? (
+                              <span
+                                className="text-[10px] text-green-400"
+                                title={`Verified ${fmt(u.emailVerifiedAt)}`}
+                              >
+                                ✓ verified
+                              </span>
+                            ) : (
+                              <span
+                                className="text-[10px] text-yellow-400"
+                                title="Email not verified"
+                              >
+                                unverified
+                              </span>
+                            )}
+                          </div>
+                        </div>
                       </div>
-                      <div>
-                        <p className="font-medium text-foreground">{u.name ?? u.email}</p>
-                        {u.name && <p className="text-xs text-muted-foreground">{u.email}</p>}
+                    </td>
+                    <td className="px-5 py-4">
+                      <div className="flex flex-wrap gap-1">
+                        {(u.roles?.length ? u.roles : ["user"]).map((r) => (
+                          <span
+                            key={r}
+                            className={`rounded-full px-2 py-0.5 text-[10px] font-medium ring-1 ${
+                              r === "admin"
+                                ? "bg-primary/15 text-primary ring-primary/30"
+                                : "bg-muted text-muted-foreground ring-border"
+                            }`}
+                          >
+                            {r}
+                          </span>
+                        ))}
                       </div>
-                    </div>
-                  </td>
-                  <td className="px-5 py-4">
-                    <Badge status={u.status} />
-                  </td>
-                  <td className="px-5 py-4 text-muted-foreground">
-                    {u.createdAt ? new Date(u.createdAt).toLocaleDateString() : "—"}
-                  </td>
-                  <td className="px-5 py-4 text-muted-foreground">
-                    {u.lastLoginAt ? new Date(u.lastLoginAt).toLocaleDateString() : "Never"}
-                  </td>
-                  <td className="px-5 py-4 text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      <Link
-                        href={`/admin/users/${u.id}`}
-                        className="rounded px-2 py-1 text-xs text-primary hover:bg-primary/10 transition-colors"
-                      >
-                        View
-                      </Link>
-                      <button
-                        onClick={() => handleToggleStatus(u)}
-                        className={`rounded px-2 py-1 text-xs transition-colors ${
-                          u.status === "active"
-                            ? "text-orange-400 hover:bg-orange-900/30"
-                            : "text-green-400 hover:bg-green-900/30"
-                        }`}
-                      >
-                        {u.status === "active" ? "Suspend" : "Activate"}
-                      </button>
-                      <button
-                        onClick={() => handleDelete(u)}
-                        className="rounded px-2 py-1 text-xs text-red-400 hover:bg-red-900/30 transition-colors"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                    </td>
+                    <td className="px-5 py-4">
+                      <Badge status={u.status} />
+                    </td>
+                    <td className="px-5 py-4 text-muted-foreground text-xs">
+                      {fmt(u.createdAt) ?? "—"}
+                    </td>
+                    <td className="px-5 py-4 text-muted-foreground text-xs">
+                      {fmt(u.lastLoginAt) ?? "Never"}
+                    </td>
+                    <td className="px-5 py-4 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <Link
+                          href={`/admin/users/${u.id}`}
+                          className="rounded px-2 py-1 text-xs text-primary hover:bg-primary/10 transition-colors"
+                        >
+                          View
+                        </Link>
+                        <button
+                          onClick={() => handleToggleStatus(u)}
+                          className={`rounded px-2 py-1 text-xs transition-colors ${
+                            u.status === "active"
+                              ? "text-orange-400 hover:bg-orange-900/30"
+                              : "text-green-400 hover:bg-green-900/30"
+                          }`}
+                        >
+                          {u.status === "active" ? "Suspend" : "Activate"}
+                        </button>
+                        <button
+                          onClick={() => handleDelete(u)}
+                          className="rounded px-2 py-1 text-xs text-red-400 hover:bg-red-900/30 transition-colors"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
             </tbody>
           </table>
         </div>
@@ -270,7 +331,6 @@ export default function UsersPage() {
                 value={inviteEmail}
                 onChange={(e) => setInviteEmail(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleInvite()}
-                autoFocus
                 className="w-full rounded-lg bg-muted border border-border px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none"
               />
             </div>

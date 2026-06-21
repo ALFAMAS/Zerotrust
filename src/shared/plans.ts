@@ -26,7 +26,7 @@ export const PLAN_CONFIGS: Record<Plan, PlanConfig> = {
   },
   pro: {
     name: "Pro",
-    priceMonthly: parseInt(process.env.PLAN_PRO_PRICE_MONTHLY ?? "29"),
+    priceMonthly: parseInt(process.env.PLAN_PRO_PRICE_MONTHLY ?? "29", 10),
     features: {
       apiKeys: 20,
       orgMembers: 50,
@@ -41,7 +41,7 @@ export const PLAN_CONFIGS: Record<Plan, PlanConfig> = {
   },
   enterprise: {
     name: "Enterprise",
-    priceMonthly: parseInt(process.env.PLAN_ENTERPRISE_PRICE_MONTHLY ?? "99"),
+    priceMonthly: parseInt(process.env.PLAN_ENTERPRISE_PRICE_MONTHLY ?? "99", 10),
     features: {
       apiKeys: -1, // unlimited
       orgMembers: -1,

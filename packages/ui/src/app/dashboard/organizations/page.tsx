@@ -1,9 +1,9 @@
 "use client";
-import { useEffect, useState } from "react";
 import Link from "next/link";
-import { api } from "../../../lib/api";
+import { useEffect, useState } from "react";
 import { SkeletonCard } from "@/components/Skeleton";
 import { useToast } from "@/context/ToastContext";
+import { api } from "../../../lib/api";
 
 interface OrgMember {
   member: {
@@ -54,7 +54,7 @@ export default function OrganizationsPage() {
 
   useEffect(() => {
     fetchOrgs();
-  }, []);
+  }, [fetchOrgs]);
 
   function autoSlug(name: string): string {
     return name
@@ -98,7 +98,9 @@ export default function OrganizationsPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">Organizations</h1>
+        <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
+          Organizations
+        </h1>
         <button
           onClick={() => setShowCreateForm((v) => !v)}
           className="text-sm bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-lg transition-colors"

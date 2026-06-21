@@ -4,31 +4,31 @@
  * Mounted at /admin alongside admin.routes.ts (same guard).
  */
 
+import * as nodeCrypto from "node:crypto";
+import { desc, eq, inArray, lt, ne } from "drizzle-orm";
 import { Hono } from "hono";
-import { eq, ne, desc, inArray, lt } from "drizzle-orm";
-import * as nodeCrypto from "crypto";
+import { getConfig } from "../../config";
 import { getDb } from "../../db";
 import {
-  usersTable,
-  sessionsTable,
-  subscriptionsTable,
   auditLogsTable,
   notificationsTable,
+  sessionsTable,
+  subscriptionsTable,
+  usersTable,
 } from "../../db/schema";
+import { auditLog, getLogger } from "../../logger";
 import { authMiddleware } from "../../middleware/auth";
-import { TokenService } from "../../services/token.service";
-import { getConfig } from "../../config";
-import { PLAN_CONFIGS, PLANS, type Plan } from "../../shared/plans";
 import { sendNotificationEmail } from "../../services/email.service";
 import {
+  clearFlagCache,
+  deleteFlag,
   listFlags,
   upsertFlag,
-  deleteFlag,
-  clearFlagCache,
 } from "../../services/featureFlags.service";
-import { auditLog, getLogger } from "../../logger";
 import { setLegalHold } from "../../services/legalHold.service";
+import { TokenService } from "../../services/token.service";
 import { getClientIp } from "../../shared/clientIp";
+import { PLAN_CONFIGS, PLANS, type Plan } from "../../shared/plans";
 import type { HonoEnv } from "../../shared/types";
 
 const router = new Hono<HonoEnv>();
@@ -125,7 +125,7 @@ router.put("/users/:id/plan", async (c) => {
     const targetId = c.req.param("id");
     const body = await c.req.json().catch(() => ({}));
     const plan = body.plan as Plan;
-    const trialDays = parseInt(body.trialDays ?? "0") || 0;
+    const trialDays = parseInt(body.trialDays ?? "0", 10) || 0;
 
     if (!PLANS.includes(plan)) {
       return c.json({ error: "INVALID_REQUEST", message: `plan must be one of ${PLANS}` }, 400);
@@ -369,7 +369,7 @@ router.get("/users/export", async (c) => {
 // GET /admin/audit/export?limit=10000 — CSV of recent audit log entries
 router.get("/audit/export", async (c) => {
   try {
-    const limit = Math.min(50_000, parseInt(c.req.query("limit") || "10000"));
+    const limit = Math.min(50_000, parseInt(c.req.query("limit") || "10000", 10));
     const db = getDb();
     const rows = await db
       .select()

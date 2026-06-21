@@ -1,3 +1,13 @@
-export { NotificationDispatcher, notificationDispatcher, initNotificationsFromEnv } from "./dispatcher";
+export {
+  initNotificationsFromEnv,
+  NotificationDispatcher,
+  notificationDispatcher,
+} from "./dispatcher";
 export { default as notificationRoutes } from "./routes";
-export type { NotificationEvent, NotificationChannel, SlackConfig, TeamsConfig, PagerDutyConfig } from "./types";
+export type {
+  NotificationChannel,
+  NotificationEvent,
+  PagerDutyConfig,
+  SlackConfig,
+  TeamsConfig,
+} from "./types";

@@ -1,23 +1,23 @@
-import { Hono } from "hono";
-import crypto from "crypto";
+import crypto from "node:crypto";
 import { and, eq } from "drizzle-orm";
+import { Hono } from "hono";
+import { getConfig } from "../../config";
 import { getDb } from "../../db";
 import {
   organizationMembersTable,
-  usersTable,
-  sessionsTable,
   refreshTokensTable,
+  sessionsTable,
+  usersTable,
 } from "../../db/schema";
-import { authMiddleware } from "../../middleware/auth";
-import { getSettings } from "../../models/settings.model";
-import { TokenService } from "../../services/token.service";
-import { getConfig } from "../../config";
 import { getLogger } from "../../logger";
 import { KNOWN_HARDWARE_KEY_AAGUIDS, verifyAttestation } from "../../mfa/attestation";
+import { authMiddleware } from "../../middleware/auth";
+import { getSettings } from "../../models/settings.model";
 import {
   getOrgSecurityPolicy,
   toAttestationPolicy,
 } from "../../services/orgSecurityPolicy.service";
+import { TokenService } from "../../services/token.service";
 import { getClientIp } from "../../shared/clientIp";
 import type { HonoEnv } from "../../shared/types";
 
@@ -205,7 +205,9 @@ router.post("/register/verify", authMiddleware, async (c) => {
     }
 
     const newPasskey = {
-      credentialId: Buffer.from(credential.id).toString("base64url"),
+      // credential.id is already a Base64URLString in @simplewebauthn/server v13;
+      // wrapping it in Buffer.from() would re-encode the string and corrupt the id.
+      credentialId: credential.id,
       publicKey: Buffer.from(credential.publicKey).toString("base64url"),
       counter: credential.counter,
       deviceType: credentialDeviceType,

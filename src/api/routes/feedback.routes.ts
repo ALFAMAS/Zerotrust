@@ -3,9 +3,9 @@ import { Hono } from "hono";
 import { z } from "zod";
 import { getDb } from "../../db";
 import { feedbackTable } from "../../db/schema";
+import { getLogger } from "../../logger";
 import { authMiddleware } from "../../middleware/auth";
 import { rateLimit } from "../../middleware/rateLimiting";
-import { getLogger } from "../../logger";
 import type { HonoEnv } from "../../shared/types";
 
 const router = new Hono<HonoEnv>();

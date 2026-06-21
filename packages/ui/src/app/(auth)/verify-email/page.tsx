@@ -1,15 +1,15 @@
 "use client";
 
-import { Suspense, useEffect, useRef, useState } from "react";
-import Link from "next/link";
 import { CheckCircle2 } from "lucide-react";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { api } from "../../../lib/api";
-import { isAuthenticated } from "../../../lib/auth";
-import { useToast } from "@/lib/toast";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useToast } from "@/lib/toast";
+import { api } from "../../../lib/api";
+import { isAuthenticated } from "../../../lib/auth";
 
 type Status = "idle" | "verifying" | "success" | "error";
 
@@ -56,7 +56,7 @@ function VerifyEmailInner() {
       autoTried.current = true;
       void verify(qCode);
     }
-  }, [params]);
+  }, [params, verify]);
 
   if (status === "success") {
     return (
@@ -122,9 +122,7 @@ function VerifyEmailInner() {
 
 export default function VerifyEmailPage() {
   return (
-    <Suspense
-      fallback={<p className="text-center text-sm text-muted-foreground">Loading…</p>}
-    >
+    <Suspense fallback={<p className="text-center text-sm text-muted-foreground">Loading…</p>}>
       <VerifyEmailInner />
     </Suspense>
   );

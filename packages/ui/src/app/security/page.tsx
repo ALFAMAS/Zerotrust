@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import { brand } from "@/config/brand";
-import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
+import SiteHeader from "@/components/SiteHeader";
+import { brand } from "@/config/brand";
 
 export const metadata: Metadata = {
   title: `Security & Responsible Disclosure — ${brand.name}`,
@@ -29,9 +29,12 @@ export default function SecurityPage() {
               Reporting a vulnerability
             </h2>
             <p className="mb-3">
-              Email <a className="text-primary" href={`mailto:${contact}`}>{contact}</a> with a
-              description, reproduction steps, and impact. Encrypt sensitive details if possible.
-              Our machine-readable policy is published at{" "}
+              Email{" "}
+              <a className="text-primary" href={`mailto:${contact}`}>
+                {contact}
+              </a>{" "}
+              with a description, reproduction steps, and impact. Encrypt sensitive details if
+              possible. Our machine-readable policy is published at{" "}
               <a className="text-primary" href="/.well-known/security.txt">
                 /.well-known/security.txt
               </a>{" "}
@@ -58,10 +61,10 @@ export default function SecurityPage() {
               Scope &amp; safe harbor
             </h2>
             <p className="mb-3">
-              In scope: the {brand.name} application and API. Please avoid privacy violations,
-              data destruction, and service degradation (no automated DoS or bulk scanning).
-              Use only test accounts you control. Give us reasonable time to remediate before any
-              public disclosure.
+              In scope: the {brand.name} application and API. Please avoid privacy violations, data
+              destruction, and service degradation (no automated DoS or bulk scanning). Use only
+              test accounts you control. Give us reasonable time to remediate before any public
+              disclosure.
             </p>
             <p>
               Good-faith testing that follows this policy is authorized, and we consider it exempt

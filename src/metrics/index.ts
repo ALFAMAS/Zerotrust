@@ -1,21 +1,26 @@
-export { metricsRegistry, register } from "./registry";
 export {
-  authAttemptsTotal,
-  mfaEventsTotal,
-  sessionEventsTotal,
-  rateLimitHitsTotal,
-  anomalyEventsTotal,
-  webhookDeliveriesTotal,
-  authDurationSeconds,
-  requestDurationSeconds,
   activeSessions,
   activeUsers,
+  anomalyEventsTotal,
+  authAttemptsTotal,
+  authDurationSeconds,
+  mfaEventsTotal,
+  rateLimitHitsTotal,
+  requestDurationSeconds,
+  sessionEventsTotal,
+  webhookDeliveriesTotal,
 } from "./counters";
 export { metricsMiddleware, metricsRoute } from "./middleware";
+export { metricsRegistry, register } from "./registry";
 
 // ─── Helper functions ─────────────────────────────────────────────────────────
 
-import { authAttemptsTotal, authDurationSeconds, mfaEventsTotal, rateLimitHitsTotal } from "./counters";
+import {
+  authAttemptsTotal,
+  authDurationSeconds,
+  mfaEventsTotal,
+  rateLimitHitsTotal,
+} from "./counters";
 
 export function recordAuth(
   action: string,

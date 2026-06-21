@@ -1,4 +1,11 @@
 export { resolveDID, resolveDIDKey, resolveDIDWeb } from "./resolver";
-export { createDIDChallenge, verifyDIDProof, provisionDIDUser } from "./verifier";
 export { default as didRoutes } from "./routes";
-export type { DIDDocument, DIDAuthChallenge, DIDProof, DIDAuthResult, VerificationMethod, DIDMethod } from "./types";
+export type {
+  DIDAuthChallenge,
+  DIDAuthResult,
+  DIDDocument,
+  DIDMethod,
+  DIDProof,
+  VerificationMethod,
+} from "./types";
+export { createDIDChallenge, provisionDIDUser, verifyDIDProof } from "./verifier";

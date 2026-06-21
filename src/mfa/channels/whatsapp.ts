@@ -1,4 +1,5 @@
 import { getLogger } from "../../logger";
+
 const logger = getLogger("mfa-whatsapp");
 
 export async function sendWhatsAppOTP(to: string, body: string) {

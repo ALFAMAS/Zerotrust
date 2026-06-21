@@ -1,7 +1,7 @@
-import type { FederatedProvider } from "./types.js";
+import { eq } from "drizzle-orm";
 import { getDb } from "../db/index.js";
 import { federatedProvidersTable } from "../db/schema.js";
-import { eq } from "drizzle-orm";
+import type { FederatedProvider } from "./types.js";
 
 type ProviderRow = typeof federatedProvidersTable.$inferSelect;
 

@@ -4,9 +4,9 @@
  */
 
 import { Hono } from "hono";
+import { authMiddleware } from "../middleware/auth";
 import type { HonoEnv } from "../shared/types";
 import { crossTenantJITStore, requestCrossTenantAccess } from "./cross-tenant";
-import { authMiddleware } from "../middleware/auth";
 
 const app = new Hono<HonoEnv>();
 

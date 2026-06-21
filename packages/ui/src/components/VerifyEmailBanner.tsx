@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Link from "next/link";
 import { MailWarning, X } from "lucide-react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
 import { api } from "@/lib/api";
 import { useToast } from "@/lib/toast";
-import { Button } from "@/components/ui/button";
 
 const DISMISS_KEY = "za_verify_email_dismissed";
 
@@ -56,9 +56,7 @@ export default function VerifyEmailBanner() {
       <div className="mx-auto flex max-w-5xl flex-col gap-3 px-6 py-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-start gap-2.5 text-sm text-amber-200">
           <MailWarning className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-400" />
-          <span>
-            Please verify your email{email ? ` (${email})` : ""} to secure your account.
-          </span>
+          <span>Please verify your email{email ? ` (${email})` : ""} to secure your account.</span>
         </div>
         <div className="flex flex-shrink-0 items-center gap-2">
           <Button
@@ -70,11 +68,7 @@ export default function VerifyEmailBanner() {
           >
             {resending ? "Sending…" : "Resend email"}
           </Button>
-          <Button
-            size="sm"
-            asChild
-            className="bg-amber-500 text-amber-950 hover:bg-amber-400"
-          >
+          <Button size="sm" asChild className="bg-amber-500 text-amber-950 hover:bg-amber-400">
             <Link href="/verify-email">Enter code</Link>
           </Button>
           <button

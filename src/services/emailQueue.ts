@@ -28,7 +28,7 @@ function parseRedisUri(uri: string): { host: string; port: number; password?: st
     const url = new URL(uri);
     return {
       host: url.hostname,
-      port: parseInt(url.port || "6379"),
+      port: parseInt(url.port || "6379", 10),
       password: url.password ? decodeURIComponent(url.password) : undefined,
     };
   } catch {

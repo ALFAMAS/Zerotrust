@@ -1,10 +1,10 @@
+import { and, eq } from "drizzle-orm";
 import { Hono } from "hono";
-import { eq, and } from "drizzle-orm";
 import { getDb } from "../../db";
 import { sessionsTable } from "../../db/schema";
-import { authMiddleware } from "../../middleware/auth";
-import { revokeSession, revokeAllSessionsForUser } from "../../middleware/sessionControl";
 import { getLogger } from "../../logger";
+import { authMiddleware } from "../../middleware/auth";
+import { revokeAllSessionsForUser, revokeSession } from "../../middleware/sessionControl";
 import type { HonoEnv } from "../../shared/types";
 
 const router = new Hono<HonoEnv>();

@@ -1,8 +1,8 @@
-import { lt, and, eq, or, notInArray } from "drizzle-orm";
+import { and, eq, lt, notInArray, or } from "drizzle-orm";
 import { getDb } from "../db";
-import { auditLogsTable, sessionsTable, refreshTokensTable, otpsTable } from "../db/schema";
-import { getHeldUserIds } from "./legalHold.service";
+import { auditLogsTable, otpsTable, refreshTokensTable, sessionsTable } from "../db/schema";
 import { getLogger } from "../logger";
+import { getHeldUserIds } from "./legalHold.service";
 
 const logger = getLogger("data-retention");
 
@@ -14,10 +14,10 @@ export interface RetentionPolicy {
 }
 
 const DEFAULT_POLICY: RetentionPolicy = {
-  auditLogRetentionDays: parseInt(process.env.AUDIT_LOG_RETENTION_DAYS ?? "90"),
-  sessionRetentionDays: parseInt(process.env.SESSION_RETENTION_DAYS ?? "30"),
-  refreshTokenRetentionDays: parseInt(process.env.REFRESH_TOKEN_RETENTION_DAYS ?? "30"),
-  otpRetentionDays: parseInt(process.env.OTP_RETENTION_DAYS ?? "7"),
+  auditLogRetentionDays: parseInt(process.env.AUDIT_LOG_RETENTION_DAYS ?? "90", 10),
+  sessionRetentionDays: parseInt(process.env.SESSION_RETENTION_DAYS ?? "30", 10),
+  refreshTokenRetentionDays: parseInt(process.env.REFRESH_TOKEN_RETENTION_DAYS ?? "30", 10),
+  otpRetentionDays: parseInt(process.env.OTP_RETENTION_DAYS ?? "7", 10),
 };
 
 function daysAgo(days: number): Date {
@@ -37,7 +37,11 @@ export async function purgeOldAuditLogs(retentionDays?: number): Promise<number>
         : lt(auditLogsTable.timestamp, cutoff);
     const result = await db.delete(auditLogsTable).where(where);
     const count = (result as any).rowCount ?? 0;
-    logger.info("Purged old audit logs", { count, cutoffDays: days, legalHolds: heldUserIds.length });
+    logger.info("Purged old audit logs", {
+      count,
+      cutoffDays: days,
+      legalHolds: heldUserIds.length,
+    });
     return count;
   } catch (err) {
     logger.error("Failed to purge audit logs", err as Error);

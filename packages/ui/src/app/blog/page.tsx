@@ -1,10 +1,10 @@
-import Link from "next/link";
-import type { Metadata } from "next";
 import { ArrowRight, CalendarDays } from "lucide-react";
-import { blogPosts } from "@/data/blog-posts";
-import { brand } from "@/config/brand";
-import SiteHeader from "@/components/SiteHeader";
+import type { Metadata } from "next";
+import Link from "next/link";
 import SiteFooter from "@/components/SiteFooter";
+import SiteHeader from "@/components/SiteHeader";
+import { brand } from "@/config/brand";
+import { blogPosts } from "@/data/blog-posts";
 
 export const metadata: Metadata = {
   title: `Blog — ${process.env.NEXT_PUBLIC_APP_NAME ?? "ZeroAuth"}`,
@@ -17,7 +17,9 @@ export default function BlogPage() {
       <SiteHeader />
       <main className="mx-auto w-full max-w-3xl flex-1 px-6 py-16">
         <header className="mb-12">
-          <h1 className="font-display text-4xl font-semibold tracking-tight text-foreground">Blog</h1>
+          <h1 className="font-display text-4xl font-semibold tracking-tight text-foreground">
+            Blog
+          </h1>
           <p className="mt-3 text-muted-foreground">
             News, deep dives, and guides from the {brand.name} team.
           </p>
@@ -49,7 +51,10 @@ export default function BlogPage() {
               </div>
 
               <h2 className="mt-3 font-display text-xl font-semibold tracking-tight text-foreground">
-                <Link href={`/blog/${post.slug}`} className="transition-colors group-hover:text-primary">
+                <Link
+                  href={`/blog/${post.slug}`}
+                  className="transition-colors group-hover:text-primary"
+                >
                   {post.title}
                 </Link>
               </h2>

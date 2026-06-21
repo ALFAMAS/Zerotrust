@@ -1,4 +1,5 @@
 import { getLogger } from "../../logger";
+
 const logger = getLogger("mfa-sms");
 
 export async function sendSmsOTP(to: string, body: string) {

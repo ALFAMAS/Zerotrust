@@ -5,7 +5,7 @@
  * Exposes ZeroAuth itself as an identity provider so other apps
  * can authenticate users via standard OIDC flows.
  */
-import crypto from "crypto";
+import crypto from "node:crypto";
 import { nanoid } from "nanoid";
 import { getLogger } from "../logger/index.js";
 

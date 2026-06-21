@@ -1,4 +1,3 @@
-import Link from "next/link";
 import {
   Activity,
   ArrowRight,
@@ -19,8 +18,9 @@ import {
   Users,
   Webhook,
 } from "lucide-react";
-import { brand } from "@/config/brand";
+import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
+import { brand } from "@/config/brand";
 import { cn } from "@/lib/utils";
 
 const features = [
@@ -93,7 +93,14 @@ const alsoIncluded = [
   { icon: RadioTower, label: "Shared Signals Framework (SSF)" },
 ];
 
-const standards = ["PASETO", "FIDO2 / WebAuthn", "OAuth 2.1", "OpenID Connect", "SAML 2.0", "SCIM-ready"];
+const standards = [
+  "PASETO",
+  "FIDO2 / WebAuthn",
+  "OAuth 2.1",
+  "OpenID Connect",
+  "SAML 2.0",
+  "SCIM-ready",
+];
 
 const steps = [
   { step: "01", title: "Clone & configure", code: "cp .env.example .env   # add your secrets" },
@@ -146,7 +153,10 @@ export default function LandingPage() {
 
       {/* ── Hero ─────────────────────────────────────────────────────────── */}
       <section className="relative overflow-hidden">
-        <div className="bg-grid mask-fade pointer-events-none absolute inset-0 opacity-60" aria-hidden />
+        <div
+          className="bg-grid mask-fade pointer-events-none absolute inset-0 opacity-60"
+          aria-hidden
+        />
         <div
           className="pointer-events-none absolute left-1/2 top-[-10rem] h-[32rem] w-[32rem] -translate-x-1/2 rounded-full opacity-30 blur-[160px]"
           style={{ background: brand.color }}
@@ -207,12 +217,21 @@ export default function LandingPage() {
             <pre className="overflow-x-auto p-4 font-mono text-[13px] leading-relaxed text-muted-foreground">
               <code>
                 <span className="text-primary">curl</span> -X POST {brand.apiUrl}/auth/login \{"\n"}
-                {"  "}-H <span className="text-emerald-400">&apos;Content-Type: application/json&apos;</span> \{"\n"}
-                {"  "}-d <span className="text-emerald-400">&apos;{`{"email":"you@example.com","password":"••••"}`}&apos;</span>
+                {"  "}-H{" "}
+                <span className="text-emerald-400">&apos;Content-Type: application/json&apos;</span>{" "}
+                \{"\n"}
+                {"  "}-d{" "}
+                <span className="text-emerald-400">
+                  &apos;{`{"email":"you@example.com","password":"••••"}`}&apos;
+                </span>
                 {"\n\n"}
                 <span className="text-muted-foreground/60"># → 200 OK</span>
                 {"\n"}
-                {`{ `}<span className="text-foreground">&quot;accessToken&quot;</span>: <span className="text-emerald-400">&quot;v4.local.…&quot;</span>, <span className="text-foreground">&quot;mfaRequired&quot;</span>: <span className="text-primary">false</span> {`}`}
+                {`{ `}
+                <span className="text-foreground">&quot;accessToken&quot;</span>:{" "}
+                <span className="text-emerald-400">&quot;v4.local.…&quot;</span>,{" "}
+                <span className="text-foreground">&quot;mfaRequired&quot;</span>:{" "}
+                <span className="text-primary">false</span> {`}`}
               </code>
             </pre>
           </div>
@@ -279,7 +298,9 @@ export default function LandingPage() {
           <h2 className="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
             Running in minutes
           </h2>
-          <p className="mt-3 text-muted-foreground">Self-host the whole stack with three commands.</p>
+          <p className="mt-3 text-muted-foreground">
+            Self-host the whole stack with three commands.
+          </p>
         </div>
         <div className="space-y-5">
           {steps.map((s) => (
@@ -301,7 +322,10 @@ export default function LandingPage() {
       {/* ── CTA ──────────────────────────────────────────────────────────── */}
       <section className="mx-auto max-w-5xl px-6 pb-24">
         <div className="relative overflow-hidden rounded-2xl border border-border bg-card p-10 text-center sm:p-16">
-          <div className="bg-grid mask-fade pointer-events-none absolute inset-0 opacity-50" aria-hidden />
+          <div
+            className="bg-grid mask-fade pointer-events-none absolute inset-0 opacity-50"
+            aria-hidden
+          />
           <div
             className="pointer-events-none absolute bottom-[-8rem] left-1/2 h-72 w-72 -translate-x-1/2 rounded-full opacity-30 blur-[120px]"
             style={{ background: brand.color }}
@@ -315,7 +339,10 @@ export default function LandingPage() {
               Self-hosted. Open source. No vendor lock-in, no per-MAU surprises.
             </p>
             <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-              <Link href="/register" className={cn(buttonVariants({ size: "lg" }), "px-8 text-base")}>
+              <Link
+                href="/register"
+                className={cn(buttonVariants({ size: "lg" }), "px-8 text-base")}
+              >
                 Create your account
                 <ArrowRight />
               </Link>
@@ -345,7 +372,9 @@ export default function LandingPage() {
                 >
                   {brand.logoLetter}
                 </div>
-                <span className="font-display text-lg font-semibold text-foreground">{brand.name}</span>
+                <span className="font-display text-lg font-semibold text-foreground">
+                  {brand.name}
+                </span>
               </div>
               <p className="mt-3 flex items-center gap-1.5 text-sm text-muted-foreground">
                 <Lock className="h-3.5 w-3.5" />
@@ -357,25 +386,90 @@ export default function LandingPage() {
               <div>
                 <h4 className="text-sm font-medium text-foreground">Product</h4>
                 <ul className="mt-3 space-y-2 text-sm">
-                  <li><a href="#features" className="text-muted-foreground transition-colors hover:text-foreground">Features</a></li>
-                  <li><Link href="/changelog" className="text-muted-foreground transition-colors hover:text-foreground">Changelog</Link></li>
-                  <li><Link href="/status" className="text-muted-foreground transition-colors hover:text-foreground">Status</Link></li>
+                  <li>
+                    <a
+                      href="#features"
+                      className="text-muted-foreground transition-colors hover:text-foreground"
+                    >
+                      Features
+                    </a>
+                  </li>
+                  <li>
+                    <Link
+                      href="/changelog"
+                      className="text-muted-foreground transition-colors hover:text-foreground"
+                    >
+                      Changelog
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/status"
+                      className="text-muted-foreground transition-colors hover:text-foreground"
+                    >
+                      Status
+                    </Link>
+                  </li>
                 </ul>
               </div>
               <div>
                 <h4 className="text-sm font-medium text-foreground">Resources</h4>
                 <ul className="mt-3 space-y-2 text-sm">
-                  <li><a href={`${brand.apiUrl}/docs`} className="text-muted-foreground transition-colors hover:text-foreground">Docs</a></li>
-                  <li><Link href="/blog" className="text-muted-foreground transition-colors hover:text-foreground">Blog</Link></li>
-                  <li><Link href="/help" className="text-muted-foreground transition-colors hover:text-foreground">Help</Link></li>
+                  <li>
+                    <a
+                      href={`${brand.apiUrl}/docs`}
+                      className="text-muted-foreground transition-colors hover:text-foreground"
+                    >
+                      Docs
+                    </a>
+                  </li>
+                  <li>
+                    <Link
+                      href="/blog"
+                      className="text-muted-foreground transition-colors hover:text-foreground"
+                    >
+                      Blog
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/help"
+                      className="text-muted-foreground transition-colors hover:text-foreground"
+                    >
+                      Help
+                    </Link>
+                  </li>
                 </ul>
               </div>
               <div>
                 <h4 className="text-sm font-medium text-foreground">Legal</h4>
                 <ul className="mt-3 space-y-2 text-sm">
-                  <li><Link href="/privacy" className="text-muted-foreground transition-colors hover:text-foreground">Privacy</Link></li>
-                  <li><Link href="/terms" className="text-muted-foreground transition-colors hover:text-foreground">Terms</Link></li>
-                  <li><a href={brand.githubUrl} target="_blank" rel="noopener noreferrer" className="text-muted-foreground transition-colors hover:text-foreground">GitHub</a></li>
+                  <li>
+                    <Link
+                      href="/privacy"
+                      className="text-muted-foreground transition-colors hover:text-foreground"
+                    >
+                      Privacy
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/terms"
+                      className="text-muted-foreground transition-colors hover:text-foreground"
+                    >
+                      Terms
+                    </Link>
+                  </li>
+                  <li>
+                    <a
+                      href={brand.githubUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-muted-foreground transition-colors hover:text-foreground"
+                    >
+                      GitHub
+                    </a>
+                  </li>
                 </ul>
               </div>
             </div>

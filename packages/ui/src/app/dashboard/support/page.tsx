@@ -1,9 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { api } from "../../../lib/api";
-import Modal from "../../../components/Modal";
 import EmptyState from "../../../components/EmptyState";
+import Modal from "../../../components/Modal";
+import { api } from "../../../lib/api";
 
 interface Ticket {
   id: string;

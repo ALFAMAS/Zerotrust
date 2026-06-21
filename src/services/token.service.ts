@@ -8,10 +8,9 @@
  */
 
 import { nanoid } from "nanoid";
-import type { TokenPayload } from "../shared/types";
+import { decrypt, encrypt, PasetoError } from "../crypto/paseto-v4";
+import type { TokenPayload, ZeroAuthConfig } from "../shared/types";
 import { DEFAULT_ACCESS_TOKEN_TTL } from "../shared/types";
-import type { ZeroAuthConfig } from "../shared/types";
-import { encrypt, decrypt, PasetoError } from "../crypto/paseto-v4";
 
 export class TokenService {
   private key!: Uint8Array;

@@ -1,10 +1,10 @@
-import { NodeSDK } from "@opentelemetry/sdk-node";
-import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-http";
+import type { Span, SpanOptions, Tracer } from "@opentelemetry/api";
+import { context, SpanKind, SpanStatusCode, trace } from "@opentelemetry/api";
 import { getNodeAutoInstrumentations } from "@opentelemetry/auto-instrumentations-node";
+import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-http";
 import { resourceFromAttributes } from "@opentelemetry/resources";
+import { NodeSDK } from "@opentelemetry/sdk-node";
 import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from "@opentelemetry/semantic-conventions";
-import { trace, context, SpanStatusCode, SpanKind } from "@opentelemetry/api";
-import type { Tracer, Span, SpanOptions } from "@opentelemetry/api";
 
 let sdk: NodeSDK | undefined;
 
@@ -16,14 +16,14 @@ export interface InitTelemetryOptions {
 }
 
 export function initTelemetry(options: InitTelemetryOptions = {}): void {
-  const enabled = options.enabled !== false && process.env["OTEL_ENABLED"] !== "false";
+  const enabled = options.enabled !== false && process.env.OTEL_ENABLED !== "false";
 
   if (!enabled) return;
 
   const endpoint =
-    options.endpoint ?? process.env["OTEL_EXPORTER_OTLP_ENDPOINT"] ?? "http://localhost:4318";
+    options.endpoint ?? process.env.OTEL_EXPORTER_OTLP_ENDPOINT ?? "http://localhost:4318";
 
-  const serviceName = options.serviceName ?? process.env["OTEL_SERVICE_NAME"] ?? "zeroauth";
+  const serviceName = options.serviceName ?? process.env.OTEL_SERVICE_NAME ?? "zeroauth";
 
   const serviceVersion = options.serviceVersion ?? "1.0.0";
 

@@ -1,11 +1,11 @@
+import { and, eq, gt } from "drizzle-orm";
 import { Hono } from "hono";
-import { eq, and, gt } from "drizzle-orm";
 import { getDb } from "../../db/index.js";
-import { usersTable, otpsTable } from "../../db/schema.js";
-import { authMiddleware } from "../../middleware/auth.js";
-import { recordVerification, getVerification } from "../../middleware/continuousVerification.js";
-import { sendOtpEmail } from "../../services/email.service.js";
+import { otpsTable, usersTable } from "../../db/schema.js";
 import { getLogger } from "../../logger/index.js";
+import { authMiddleware } from "../../middleware/auth.js";
+import { getVerification, recordVerification } from "../../middleware/continuousVerification.js";
+import { sendOtpEmail } from "../../services/email.service.js";
 import type { HonoEnv } from "../../shared/types.js";
 
 const router = new Hono<HonoEnv>();

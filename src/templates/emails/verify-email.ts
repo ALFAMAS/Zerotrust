@@ -1,5 +1,5 @@
 import type { Locale } from "../../shared/locale";
-import { tr, htmlLang } from "./i18n";
+import { htmlLang, tr } from "./i18n";
 
 export interface VerifyEmailData {
   name: string;

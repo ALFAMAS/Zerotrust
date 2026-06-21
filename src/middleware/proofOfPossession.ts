@@ -1,6 +1,6 @@
 import { createMiddleware } from "hono/factory";
-import type { HonoEnv } from "../shared/types";
 import { getLogger } from "../logger";
+import type { HonoEnv } from "../shared/types";
 import { ErrorCodes } from "../shared/types";
 
 const logger = getLogger("proof-of-possession");
@@ -20,13 +20,16 @@ export function requireProofOfPossession() {
   return createMiddleware<HonoEnv>(async (c, next) => {
     try {
       const token = c.get("token") as any;
-      if (!token || !token.pop_key) return next();
+      if (!token?.pop_key) return next();
 
       const clientPop = c.req.header("x-pop-key") || "";
       const nonce = c.req.header("x-pop-nonce") || "";
 
       if (!clientPop || !nonce) {
-        return c.json({ error: ErrorCodes.TOKEN_INVALID, message: "Proof-of-possession required" }, 401);
+        return c.json(
+          { error: ErrorCodes.TOKEN_INVALID, message: "Proof-of-possession required" },
+          401
+        );
       }
 
       const expiry = nonceCache.get(nonce);
@@ -37,7 +40,10 @@ export function requireProofOfPossession() {
 
       if (clientPop !== token.pop_key) {
         logger.warn("PoP key mismatch");
-        return c.json({ error: ErrorCodes.TOKEN_INVALID, message: "Proof-of-possession mismatch" }, 401);
+        return c.json(
+          { error: ErrorCodes.TOKEN_INVALID, message: "Proof-of-possession mismatch" },
+          401
+        );
       }
 
       nonceCache.set(nonce, Date.now() + 5 * 60 * 1000);

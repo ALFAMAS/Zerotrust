@@ -3,8 +3,8 @@
  * Encrypts sensitive user attributes with key rotation support
  */
 
-import type { ZeroAuthConfig } from "../shared/types";
 import { getConfig } from "../config";
+import type { ZeroAuthConfig } from "../shared/types";
 
 export interface EncryptionKeyVersion {
   versionId: string;
@@ -44,8 +44,6 @@ class CSFLEManager {
       // Create initial key version
       this.currentKeyVersionId = `v1-${Date.now()}`;
       await this.createKeyVersion(this.currentKeyVersionId);
-
-      console.log("✓ CSFLE system initialized with master key");
     } catch (error) {
       console.error("✗ Failed to initialize CSFLE:", error);
       throw error;
@@ -109,8 +107,6 @@ class CSFLEManager {
       const newVersionId = `v${this.keyVersions.size + 1}-${Date.now()}`;
       await this.createKeyVersion(newVersionId);
       this.currentKeyVersionId = newVersionId;
-
-      console.log(`✓ Key rotated. New version: ${newVersionId}`);
       return newVersionId;
     } catch (error) {
       console.error("Failed to rotate keys:", error);
@@ -139,20 +135,23 @@ class CSFLEManager {
   /**
    * Encrypt a value with the current key
    */
-  async encrypt(plaintext: string | Buffer): Promise<{ ciphertext: string; keyVersion: string; iv: string }> {
+  async encrypt(
+    plaintext: string | Buffer
+  ): Promise<{ ciphertext: string; keyVersion: string; iv: string }> {
     try {
       const key = await this.getCurrentKey();
-      const data =
-        typeof plaintext === "string"
-          ? new TextEncoder().encode(plaintext)
-          : plaintext;
+      const data = typeof plaintext === "string" ? new TextEncoder().encode(plaintext) : plaintext;
 
       // Generate IV for AES-GCM
       const iv = crypto.getRandomValues(new Uint8Array(12));
 
       // Encrypt
       const ciphertext = await crypto.subtle.encrypt(
-        { name: "AES-GCM", iv: iv as unknown as ArrayBuffer, additionalData: new TextEncoder().encode(this.currentKeyVersionId) },
+        {
+          name: "AES-GCM",
+          iv: iv as unknown as ArrayBuffer,
+          additionalData: new TextEncoder().encode(this.currentKeyVersionId),
+        },
         key,
         data as unknown as ArrayBuffer
       );
@@ -171,11 +170,7 @@ class CSFLEManager {
   /**
    * Decrypt a value (handles multiple key versions)
    */
-  async decrypt(
-    ciphertext: string,
-    keyVersion: string,
-    iv: string
-  ): Promise<string> {
+  async decrypt(ciphertext: string, keyVersion: string, iv: string): Promise<string> {
     try {
       const keyVersionData = this.keyVersions.get(keyVersion);
       if (!keyVersionData) {
@@ -194,7 +189,11 @@ class CSFLEManager {
       const ciphertextBytes = this.base64urlToBytes(ciphertext);
 
       const plaintext = await crypto.subtle.decrypt(
-        { name: "AES-GCM", iv: ivBytes as unknown as ArrayBuffer, additionalData: new TextEncoder().encode(keyVersion) },
+        {
+          name: "AES-GCM",
+          iv: ivBytes as unknown as ArrayBuffer,
+          additionalData: new TextEncoder().encode(keyVersion),
+        },
         key,
         ciphertextBytes as unknown as ArrayBuffer
       );
@@ -220,7 +219,8 @@ class CSFLEManager {
     const currentVersion = this.keyVersions.get(this.currentKeyVersionId);
     if (!currentVersion) return false;
 
-    const daysSinceCreation = (Date.now() - currentVersion.createdAt.getTime()) / (1000 * 60 * 60 * 24);
+    const daysSinceCreation =
+      (Date.now() - currentVersion.createdAt.getTime()) / (1000 * 60 * 60 * 24);
     return daysSinceCreation >= this.config.security.csflekeyRotationIntervalDays;
   }
 
@@ -313,7 +313,7 @@ export function csflEncryptionPlugin(schema: any, options: { fields: string[] })
     next();
   });
 
-  schema.post("findOne", async function (doc: any, next: any) {
+  schema.post("findOne", async (doc: any, next: any) => {
     if (doc) {
       const csfle = getCSFLE();
       await decryptFieldsInDoc(doc, fieldsToEncrypt, csfle);
@@ -321,7 +321,7 @@ export function csflEncryptionPlugin(schema: any, options: { fields: string[] })
     next();
   });
 
-  schema.post("findOneAndUpdate", async function (doc: any, next: any) {
+  schema.post("findOneAndUpdate", async (doc: any, next: any) => {
     if (doc) {
       const csfle = getCSFLE();
       await decryptFieldsInDoc(doc, fieldsToEncrypt, csfle);

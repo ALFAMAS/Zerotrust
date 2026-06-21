@@ -109,7 +109,7 @@ export default function OrgDetailPage() {
   useEffect(() => {
     fetchAll();
     // biome-ignore lint/correctness/useExhaustiveDependencies: fetch on orgId change only
-  }, [orgId]);
+  }, [fetchAll]);
 
   async function handleInvite(e: React.FormEvent) {
     e.preventDefault();
@@ -243,7 +243,7 @@ export default function OrgDetailPage() {
                   {member.role}
                 </span>
                 <span className="text-xs text-muted-foreground whitespace-nowrap">
-                  {member.joinedAt ? new Date(member.joinedAt).toLocaleDateString() : "—"}
+                  {member.joinedAt ? new Date(member.joinedAt).toLocaleString() : "—"}
                 </span>
               </div>
             ))

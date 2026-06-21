@@ -2,7 +2,8 @@
 
 Backlog of features, gaps, and follow-ups that have not landed yet. Anything in
 [`implemented.md`](./implemented.md) is shipped — this file is everything else,
-grouped by where the work would land.
+grouped by where the work would land. For code that _exists_ in the tree but is
+unmounted, stubbed, or orphaned, see [`incomplete.md`](./incomplete.md).
 
 **Legend:** 🆕 net-new idea · ⚡ backend exists, needs surfacing/finishing ·
 [~] partial / behind a flag · priority bands P0 → P3 (P0 = launch blocker,
@@ -27,7 +28,7 @@ _None remaining — all P0 items shipped. See `implemented.md`._
 - [ ] **Self-serve SCIM token per org** — generate/rotate a SCIM bearer token in org settings UI
 - [x] **Org passkey policy** — drive the existing MDS3 attestation engine from an org-level toggle ("hardware keys only", "require attestation")
   _Shipped: `org_security_policies` table (requirePasskeyAttestation / requireHardwarePasskey / allowedPasskeyAaguids / deniedPasskeyAaguids); `GET/PUT /:orgId/security/policy` in `org.routes.ts`; enforcement via `verifyAttestation()` + `KNOWN_HARDWARE_KEY_AAGUIDS` in `passkey.routes.ts`; UI in the org Settings → Security policy form; tests in `org.routes.test.ts`._
-- [ ] **Session & device policy per org** — max session age, idle timeout, concurrent-session cap, trusted-device list, geo/IP rules
+- [ ] **Trusted-device list per org** — let org admins register/require trusted devices (needs a device-enrolment flow). _Split out of the shipped "Session & device policy per org" (see `implemented.md`), which covers max session age, idle timeout, concurrent-session cap, and geo/IP rules._
 
 ### Trust, safety & abuse prevention
 
@@ -64,7 +65,6 @@ _None remaining — all P0 items shipped. See `implemented.md`._
 
 ### Compliance, data & residency
 
-- [ ] **Tamper-evident audit log** — hash-chain / Merkle anchoring for legal defensibility
 - [ ] **Data residency per org** — EU / US / APAC storage region (pulled forward from P3)
 - [ ] **Privacy records** — ROPA, consent receipts, auto-generated DPA
 - [ ] `[~]` **SOC 2 Type II readiness** — see Compliance Gaps section below
@@ -186,10 +186,14 @@ _None remaining — all P0 items shipped. See `implemented.md`._
 
 ### File storage & uploads
 
-- [ ] **S3-compatible storage** — AWS S3, Cloudflare R2, or MinIO adapter
+- [x] **S3-compatible storage** — _shipped:_ provider-agnostic adapter (AWS S3,
+  Backblaze B2, Cloudflare R2, MinIO, Wasabi) in `src/services/objectStorage.service.ts`;
+  drives both DB backups and S3-backed avatar uploads. See `implemented.md`.
 - [ ] **Pre-signed upload URLs** — secure direct-to-storage uploads from browser
+  (current uploads go through the API via `uploadBuffer()`, not direct)
 - [ ] **File attachments** — per-feature uploads with type / size validation
-- [ ] **CDN delivery** — serve files from edge for fast global access
+- [ ] **CDN delivery** — `[~]` `BACKUP_S3_PUBLIC_URL_TEMPLATE` allows a CDN/custom-domain
+  override for object URLs; no dedicated edge-cache config beyond that
 
 ### API keys (extended)
 
@@ -208,10 +212,6 @@ _None remaining — all P0 items shipped. See `implemented.md`._
 ---
 
 ## Performance Optimizations
-
-From the now-removed `docs/performance-analysis.md` (2026-06-13), sorted by
-impact-to-effort:
-extracted backlog.)
 
 ### Tier 1 — auth-path scaling (highest ROI)
 
@@ -257,22 +257,27 @@ extracted backlog.)
 
 ## Compliance Gaps (SOC 2 Type II readiness)
 
-Mapped to the TSC — full control map in
-[`docs/soc2-readiness.md`](./docs/soc2-readiness.md). These are the policy and
+Mapped to the TSC. These are the policy and
 process gaps remaining before an audit:
 
 - [ ] **Formal policies** — Information Security, Access Control, Incident
       Response, Change Management, Vendor Management, BCP/DR (written + approved)
-- [ ] **Access reviews** — periodic (quarterly) review of admin/role grants with
-      evidence retained
+- [x] **Access reviews** — tooling shipped (`/admin/access-reviews`, see
+      `implemented.md`); _process gap remaining:_ run it quarterly and retain the
+      completed reviews as evidence
 - [ ] **Onboarding/offboarding** — documented joiner/leaver checklist with
       timely access revocation evidence
 - [ ] **Risk assessment** — annual documented risk assessment + treatment plan
 - [ ] **Vendor management** — sub-processor inventory + security review records
 - [ ] **Incident response** — runbook + post-incident reviews; tabletop exercise
-- [ ] **Tamper-evident audit log** — see Compliance section in P2 above
-- [ ] **Backup restore drill** — evidence of periodic successful restores
-      (runbook exists; periodic evidence to be retained)
+- [x] **Tamper-evident audit log** — SHA-256 hash-chain shipped (see
+      `implemented.md`); _optional hardening:_ anchor the latest `entry_hash` to an
+      external notary/transparency log
+- [ ] **Backup restore drill** — evidence of periodic successful restores.
+      _The previous `docs/backup-restore.md` runbook was removed with the `docs/`
+      folder; the restore tooling still exists (`bun run db:backup`,
+      `src/services/dbBackup.service.ts`, Neon PITR), but the runbook + periodic
+      drill evidence need to be re-established._
 - [ ] **Monitoring evidence** — alert acknowledgement + on-call records
 - [ ] **Auditor + window** — engage a CPA firm; select the observation period
 

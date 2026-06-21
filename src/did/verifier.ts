@@ -1,7 +1,7 @@
-import crypto from "crypto";
-import type { DIDAuthChallenge, DIDProof, DIDAuthResult, VerificationMethod } from "./types";
-import { resolveDID } from "./resolver";
+import crypto from "node:crypto";
 import { UserModel } from "../models/user.model";
+import { resolveDID } from "./resolver";
+import type { DIDAuthChallenge, DIDAuthResult, DIDProof, VerificationMethod } from "./types";
 
 const challenges = new Map<string, DIDAuthChallenge>();
 
@@ -15,9 +15,12 @@ export function createDIDChallenge(did: string, domain: string): DIDAuthChalleng
   return record;
 }
 
-function resolveVM(doc: import("./types").DIDDocument, vmRef: string | VerificationMethod): VerificationMethod | null {
+function resolveVM(
+  doc: import("./types").DIDDocument,
+  vmRef: string | VerificationMethod
+): VerificationMethod | null {
   if (typeof vmRef === "object") return vmRef;
-  return doc.verificationMethod.find(vm => vm.id === vmRef) ?? null;
+  return doc.verificationMethod.find((vm) => vm.id === vmRef) ?? null;
 }
 
 export async function verifyDIDProof(proof: DIDProof, challengeId: string): Promise<DIDAuthResult> {
@@ -28,14 +31,16 @@ export async function verifyDIDProof(proof: DIDProof, challengeId: string): Prom
     return { verified: false, reason: "challenge_expired" };
   }
 
-  if (proof.challenge !== stored.challenge) return { verified: false, reason: "challenge_mismatch" };
+  if (proof.challenge !== stored.challenge)
+    return { verified: false, reason: "challenge_mismatch" };
   if (proof.domain !== stored.domain) return { verified: false, reason: "domain_mismatch" };
-  if (proof.proofPurpose !== "authentication") return { verified: false, reason: "invalid_proof_purpose" };
+  if (proof.proofPurpose !== "authentication")
+    return { verified: false, reason: "invalid_proof_purpose" };
 
   const didDoc = await resolveDID(stored.did);
   if (!didDoc) return { verified: false, reason: "did_resolution_failed" };
 
-  const vmRef = didDoc.authentication.find(a =>
+  const vmRef = didDoc.authentication.find((a) =>
     typeof a === "string" ? a === proof.verificationMethod : a.id === proof.verificationMethod
   );
   if (!vmRef) return { verified: false, reason: "verification_method_not_found_in_authentication" };
@@ -57,7 +62,12 @@ export async function verifyDIDProof(proof: DIDProof, challengeId: string): Prom
     if (vm.publicKeyJwk) {
       const pubKey = crypto.createPublicKey({ key: vm.publicKeyJwk as any, format: "jwk" });
       const algorithm = vm.publicKeyJwk.crv === "Ed25519" ? "ed25519" : "sha256";
-      const valid = crypto.verify(algorithm === "ed25519" ? null : "sha256", Buffer.from(signedData), pubKey, sigBytes);
+      const valid = crypto.verify(
+        algorithm === "ed25519" ? null : "sha256",
+        Buffer.from(signedData),
+        pubKey,
+        sigBytes
+      );
       if (!valid) return { verified: false, reason: "signature_invalid" };
     } else if (vm.publicKeyMultibase) {
       // Ed25519 from multibase key
@@ -77,7 +87,10 @@ export async function verifyDIDProof(proof: DIDProof, challengeId: string): Prom
   return { verified: true, did: stored.did, method };
 }
 
-export async function provisionDIDUser(did: string, _didDocument: import("./types").DIDDocument): Promise<string> {
+export async function provisionDIDUser(
+  did: string,
+  _didDocument: import("./types").DIDDocument
+): Promise<string> {
   let user = await (UserModel as any).findOne({ did });
   if (!user) {
     user = await (UserModel as any).create({

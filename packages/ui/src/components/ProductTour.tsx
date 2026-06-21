@@ -124,7 +124,12 @@ export default function ProductTour() {
       };
 
   return createPortal(
-    <div className="fixed inset-0 z-[100]" role="dialog" aria-modal="true" aria-label="Product tour">
+    <div
+      className="fixed inset-0 z-[100]"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Product tour"
+    >
       {/* Dimming overlay (click-through prevented). A spotlight cut-out is drawn
           via a ring box when a target exists. */}
       <div className="absolute inset-0 bg-black/60" onClick={finish} />

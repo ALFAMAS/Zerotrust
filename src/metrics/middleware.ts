@@ -1,7 +1,7 @@
-import { createMiddleware } from "hono/factory";
 import type { Context } from "hono";
+import { createMiddleware } from "hono/factory";
+import { collectDefaultMetrics, register } from "prom-client";
 import type { HonoEnv } from "../shared/types";
-import { register, collectDefaultMetrics } from "prom-client";
 import { requestDurationSeconds } from "./counters";
 
 collectDefaultMetrics({ register });

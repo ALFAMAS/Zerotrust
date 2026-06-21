@@ -1,10 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { X } from "lucide-react";
-import { brand } from "@/config/brand";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { brand } from "@/config/brand";
 
 type FeedbackType = "nps" | "thumbs";
 
@@ -21,7 +20,7 @@ const DISMISS_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 
 function getToken() {
   if (typeof window === "undefined") return null;
-  return localStorage.getItem("za_token");
+  return localStorage.getItem("za_access_token");
 }
 
 async function submitFeedback(payload: {
@@ -56,7 +55,7 @@ export default function FeedbackWidget({
 
   useEffect(() => {
     const dismissed = localStorage.getItem(storageKey);
-    if (dismissed && Date.now() < parseInt(dismissed)) return;
+    if (dismissed && Date.now() < parseInt(dismissed, 10)) return;
 
     const timer = setTimeout(() => setVisible(true), delay);
     return () => clearTimeout(timer);
@@ -76,7 +75,12 @@ export default function FeedbackWidget({
     if (score === null) return;
     setSubmitting(true);
     try {
-      await submitFeedback({ type, score, comment: comment || undefined, context });
+      await submitFeedback({
+        type,
+        score,
+        comment: comment || undefined,
+        context,
+      });
     } catch {
       // non-blocking
     } finally {
@@ -108,7 +112,9 @@ export default function FeedbackWidget({
           <p className="mb-1 text-sm font-medium text-foreground">
             How likely are you to recommend us?
           </p>
-          <p className="mb-4 text-xs text-muted-foreground">0 = not at all · 10 = extremely likely</p>
+          <p className="mb-4 text-xs text-muted-foreground">
+            0 = not at all · 10 = extremely likely
+          </p>
           <div className="flex flex-wrap gap-1">
             {Array.from({ length: 11 }, (_, i) => (
               <button

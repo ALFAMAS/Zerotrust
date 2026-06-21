@@ -1,11 +1,11 @@
+import { eq } from "drizzle-orm";
 import { createMiddleware } from "hono/factory";
+import { getDb } from "../db/index.js";
+import { usersTable } from "../db/schema.js";
+import { getLogger } from "../logger/index.js";
 import type { HonoEnv } from "../shared/types.js";
 import { getProvider } from "./registry.js";
 import { verifySubjectToken } from "./verify.js";
-import { getDb } from "../db/index.js";
-import { usersTable } from "../db/schema.js";
-import { eq } from "drizzle-orm";
-import { getLogger } from "../logger/index.js";
 
 const logger = getLogger("federation-middleware");
 
@@ -34,7 +34,7 @@ export function requireFederatedIdentity(opts: FederatedIdentityOptions = {}) {
     const token = authHeader.slice(7);
 
     const provider = await getProvider(providerId);
-    if (!provider || !provider.enabled) {
+    if (!provider?.enabled) {
       return c.json(
         { error: "UNKNOWN_PROVIDER", message: "Federation provider not found or disabled" },
         401

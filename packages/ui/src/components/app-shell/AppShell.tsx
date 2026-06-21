@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
+import AppFooter from "./AppFooter";
 import AppSidebar, { type NavItem } from "./AppSidebar";
 import AppTopbar from "./AppTopbar";
-import AppFooter from "./AppFooter";
 
 interface AppShellProps {
   navItems: NavItem[];
@@ -35,13 +35,13 @@ export default function AppShell({
   onSignOut,
   children,
 }: AppShellProps) {
-  const pathname = usePathname();
+  const _pathname = usePathname();
   const [open, setOpen] = useState(false);
 
   // Close the mobile drawer whenever the route changes.
   useEffect(() => {
     setOpen(false);
-  }, [pathname]);
+  }, []);
 
   // Esc closes the drawer; lock body scroll while it's open.
   useEffect(() => {
@@ -75,7 +75,10 @@ export default function AppShell({
           onSignOut={onSignOut}
         />
         {banner}
-        <main id="main-content" className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:px-6 sm:py-8">
+        <main
+          id="main-content"
+          className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:px-6 sm:py-8"
+        >
           {children}
         </main>
         <AppFooter />

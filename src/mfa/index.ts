@@ -1,8 +1,9 @@
+import { getLogger } from "../logger";
 import { sendEmailOTP } from "./channels/email";
 import { sendSmsOTP } from "./channels/sms";
-import { sendWhatsAppOTP } from "./channels/whatsapp";
 import { sendTelegramOTP } from "./channels/telegram";
-import { getLogger } from "../logger";
+import { sendWhatsAppOTP } from "./channels/whatsapp";
+
 const logger = getLogger("mfa");
 
 export async function sendOTP(

@@ -1,9 +1,9 @@
+import { and, eq, gt } from "drizzle-orm";
 import { createMiddleware } from "hono/factory";
-import type { HonoEnv } from "../shared/types";
-import { getLogger } from "../logger";
 import { getDb } from "../db";
 import { jitAccessTable } from "../db/schema";
-import { eq, and, gt } from "drizzle-orm";
+import { getLogger } from "../logger";
+import type { HonoEnv } from "../shared/types";
 import { ErrorCodes } from "../shared/types";
 
 const logger = getLogger("temporal-access");
@@ -22,7 +22,15 @@ function getLocalHourAndDay(timezone?: string) {
 
     const dayPart = parts.find((p) => p.type === "weekday")?.value || "";
     const hourPart = parts.find((p) => p.type === "hour")?.value || "0";
-    const dayMap: Record<string, number> = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
+    const dayMap: Record<string, number> = {
+      Sun: 0,
+      Mon: 1,
+      Tue: 2,
+      Wed: 3,
+      Thu: 4,
+      Fri: 5,
+      Sat: 6,
+    };
     return { day: dayMap[dayPart] ?? new Date().getDay(), hour: parseInt(hourPart, 10), tz };
   } catch {
     const d = new Date();
@@ -52,7 +60,10 @@ export function temporalAccessMiddleware() {
       // Check for active JIT grant
       const userId = user.id;
       if (!userId) {
-        return c.json({ error: ErrorCodes.ACCESS_DENIED, message: "Access not allowed at this time" }, 403);
+        return c.json(
+          { error: ErrorCodes.ACCESS_DENIED, message: "Access not allowed at this time" },
+          403
+        );
       }
 
       const now = new Date();
@@ -74,7 +85,10 @@ export function temporalAccessMiddleware() {
       }
 
       logger.warn("Access denied by temporal policy", { userId, day, hour });
-      return c.json({ error: ErrorCodes.ACCESS_DENIED, message: "Access not allowed at this time" }, 403);
+      return c.json(
+        { error: ErrorCodes.ACCESS_DENIED, message: "Access not allowed at this time" },
+        403
+      );
     } catch (err) {
       logger.error("Temporal access middleware error", err as Error);
       return next();

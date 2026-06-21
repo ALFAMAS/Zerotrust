@@ -21,6 +21,7 @@ import {
   rotateOrgScimToken,
 } from "../../services/orgScimToken.service";
 import { getOrgSecurityPolicy } from "../../services/orgSecurityPolicy.service";
+import { clearSessionPolicyCache } from "../../services/sessionPolicy.service";
 import { ipMatchesAny, isValidCidrOrIp } from "../../shared/cidr";
 import { getClientIp } from "../../shared/clientIp";
 import { ORG_PERMISSIONS } from "../../shared/permissions";
@@ -162,6 +163,14 @@ const UpdateSecurityPolicySchema = z.object({
     .array(z.string().refine(isValidCidrOrIp, "Must be an IPv4 address or CIDR"))
     .max(100)
     .optional(),
+  // Session & device policy — 0 = unlimited.
+  maxSessionAgeSeconds: z.number().int().min(0).max(31_536_000).optional(),
+  idleTimeoutSeconds: z.number().int().min(0).max(31_536_000).optional(),
+  maxConcurrentSessions: z.number().int().min(0).max(1000).optional(),
+  allowedCountries: z
+    .array(z.string().regex(/^[A-Z]{2}$/, "Must be an ISO 3166-1 alpha-2 code"))
+    .max(250)
+    .optional(),
 });
 
 // ── POST / ────────────────────────────────────────────────────────────────────
@@ -276,6 +285,10 @@ router.get("/:orgId/security/policy", async (c) => {
         allowedPasskeyAaguids: [],
         deniedPasskeyAaguids: [],
         ipAllowlist: [],
+        maxSessionAgeSeconds: 0,
+        idleTimeoutSeconds: 0,
+        maxConcurrentSessions: 0,
+        allowedCountries: [],
       },
     });
   } catch (err) {
@@ -308,6 +321,10 @@ router.put("/:orgId/security/policy", async (c) => {
       allowedPasskeyAaguids: parsed.data.allowedPasskeyAaguids ?? [],
       deniedPasskeyAaguids: parsed.data.deniedPasskeyAaguids ?? [],
       ipAllowlist: parsed.data.ipAllowlist ?? [],
+      maxSessionAgeSeconds: parsed.data.maxSessionAgeSeconds ?? 0,
+      idleTimeoutSeconds: parsed.data.idleTimeoutSeconds ?? 0,
+      maxConcurrentSessions: parsed.data.maxConcurrentSessions ?? 0,
+      allowedCountries: parsed.data.allowedCountries ?? [],
       updatedAt: new Date(),
       updatedBy: user.id,
     };
@@ -323,11 +340,19 @@ router.put("/:orgId/security/policy", async (c) => {
           allowedPasskeyAaguids: values.allowedPasskeyAaguids,
           deniedPasskeyAaguids: values.deniedPasskeyAaguids,
           ipAllowlist: values.ipAllowlist,
+          maxSessionAgeSeconds: values.maxSessionAgeSeconds,
+          idleTimeoutSeconds: values.idleTimeoutSeconds,
+          maxConcurrentSessions: values.maxConcurrentSessions,
+          allowedCountries: values.allowedCountries,
           updatedAt: values.updatedAt,
           updatedBy: values.updatedBy,
         },
       })
       .returning();
+
+    // Effective policy is cached per-user in the auth middleware; drop it so
+    // the new limits take effect promptly.
+    clearSessionPolicyCache();
 
     return c.json({ policy });
   } catch (err) {

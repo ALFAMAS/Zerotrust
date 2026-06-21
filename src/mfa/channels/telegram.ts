@@ -1,4 +1,5 @@
 import { getLogger } from "../../logger";
+
 const logger = getLogger("mfa-telegram");
 
 export async function sendTelegramOTP(botToken: string, chatId: string, body: string) {

@@ -1,12 +1,18 @@
+import { and, eq } from "drizzle-orm";
 import { createMiddleware } from "hono/factory";
-import type { TokenPayload, HonoEnv } from "../shared/types";
-import { ErrorCodes, ZeroAuthError } from "../shared/types";
-import { TokenService } from "../services/token.service";
-import { getDb } from "../db";
-import { usersTable, sessionsTable } from "../db/schema";
-import { eq, and } from "drizzle-orm";
-import { getLogger } from "../logger";
 import { getConfig } from "../config";
+import { getDb } from "../db";
+import { sessionsTable, usersTable } from "../db/schema";
+import { getLogger } from "../logger";
+import {
+  enforceConcurrentSessionCap,
+  evaluateSessionPolicy,
+  getEffectiveSessionPolicy,
+} from "../services/sessionPolicy.service";
+import { TokenService } from "../services/token.service";
+import type { HonoEnv, TokenPayload } from "../shared/types";
+import { ErrorCodes, ZeroAuthError } from "../shared/types";
+import { revokeSession } from "./sessionControl";
 
 const logger = getLogger("auth-middleware");
 let tokenService: TokenService;
@@ -21,7 +27,7 @@ export async function initAuthMiddleware(): Promise<void> {
 export const authMiddleware = createMiddleware<HonoEnv>(async (c, next) => {
   try {
     const authHeader = c.req.header("authorization");
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    if (!authHeader?.startsWith("Bearer ")) {
       return c.json(
         { error: ErrorCodes.TOKEN_INVALID, message: "Missing or malformed Authorization header" },
         401
@@ -35,7 +41,10 @@ export const authMiddleware = createMiddleware<HonoEnv>(async (c, next) => {
       payload = await tokenService.verifyAccessToken(token);
     } catch (error) {
       if (error instanceof Error && error.message === "TOKEN_EXPIRED") {
-        return c.json({ error: ErrorCodes.TOKEN_EXPIRED, message: "Access token has expired" }, 401);
+        return c.json(
+          { error: ErrorCodes.TOKEN_EXPIRED, message: "Access token has expired" },
+          401
+        );
       }
       return c.json({ error: ErrorCodes.TOKEN_INVALID, message: "Invalid or tampered token" }, 401);
     }
@@ -55,7 +64,10 @@ export const authMiddleware = createMiddleware<HonoEnv>(async (c, next) => {
       .limit(1);
 
     if (sessionRows.length === 0) {
-      return c.json({ error: ErrorCodes.SESSION_NOT_FOUND, message: "Session not found or revoked" }, 401);
+      return c.json(
+        { error: ErrorCodes.SESSION_NOT_FOUND, message: "Session not found or revoked" },
+        401
+      );
     }
 
     const session = sessionRows[0];
@@ -72,6 +84,38 @@ export const authMiddleware = createMiddleware<HonoEnv>(async (c, next) => {
       return c.json({ error: ErrorCodes.TOKEN_REVOKED, message: "Session has been revoked" }, 401);
     }
 
+    // Enforce org-level session & device policy (strictest across the user's
+    // orgs). The effective policy is cached, and only orgs that configured a
+    // limit do any work here.
+    const sessionPolicy = await getEffectiveSessionPolicy(session.userId);
+    const policyDecision = evaluateSessionPolicy(session, sessionPolicy);
+    if (!policyDecision.allowed) {
+      await revokeSession(session.id, policyDecision.reason).catch(() => {});
+      return c.json(
+        {
+          error: policyDecision.reason,
+          message: "Session ended by your organization's security policy",
+        },
+        401
+      );
+    }
+    if (sessionPolicy.maxConcurrentSessions > 0) {
+      const currentRevoked = await enforceConcurrentSessionCap(
+        session.userId,
+        sessionPolicy.maxConcurrentSessions,
+        session.id
+      );
+      if (currentRevoked) {
+        return c.json(
+          {
+            error: "SESSION_CONCURRENT_LIMIT",
+            message: "Session ended: concurrent-session limit reached",
+          },
+          401
+        );
+      }
+    }
+
     const userRows = await db
       .select()
       .from(usersTable)
@@ -85,11 +129,17 @@ export const authMiddleware = createMiddleware<HonoEnv>(async (c, next) => {
     const userRow = userRows[0];
 
     if (userRow.status === "deleted") {
-      return c.json({ error: ErrorCodes.USER_DELETED, message: "User account has been deleted" }, 401);
+      return c.json(
+        { error: ErrorCodes.USER_DELETED, message: "User account has been deleted" },
+        401
+      );
     }
 
     if (userRow.status === "suspended") {
-      return c.json({ error: ErrorCodes.USER_SUSPENDED, message: "User account is suspended" }, 403);
+      return c.json(
+        { error: ErrorCodes.USER_SUSPENDED, message: "User account is suspended" },
+        403
+      );
     }
 
     // Set typed context variables
@@ -103,7 +153,10 @@ export const authMiddleware = createMiddleware<HonoEnv>(async (c, next) => {
       avatarUrl: userRow.avatarUrl,
       roles: userRow.roles ?? [],
       attributes: (userRow.attributes as any) ?? {},
-      mfa: (userRow.mfa as any) ?? { totp: { enabled: false, backupCodes: [] }, webauthn: { enabled: false } },
+      mfa: (userRow.mfa as any) ?? {
+        totp: { enabled: false, backupCodes: [] },
+        webauthn: { enabled: false },
+      },
       passkeys: (userRow.passkeys as any[]) ?? [],
       oauthProviders: (userRow.oauthProviders as any[]) ?? [],
       status: userRow.status as any,
@@ -158,7 +211,7 @@ export const authMiddleware = createMiddleware<HonoEnv>(async (c, next) => {
 export const optionalAuthMiddleware = createMiddleware<HonoEnv>(async (c, next) => {
   try {
     const authHeader = c.req.header("authorization");
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    if (!authHeader?.startsWith("Bearer ")) {
       await next();
       return;
     }
@@ -191,8 +244,32 @@ export const optionalAuthMiddleware = createMiddleware<HonoEnv>(async (c, next) 
 
           if (userRows.length > 0 && userRows[0].status === "active") {
             const userRow = userRows[0];
-            c.set("user", { id: userRow.id, email: userRow.email, displayName: userRow.displayName, roles: userRow.roles ?? [], attributes: (userRow.attributes as any) ?? {}, mfa: (userRow.mfa as any) ?? {}, passkeys: (userRow.passkeys as any[]) ?? [], oauthProviders: (userRow.oauthProviders as any[]) ?? [], status: userRow.status as any, subUserIds: userRow.subUserIds ?? [], sessionConfig: (userRow.sessionConfig as any) ?? {}, lastLoginAt: userRow.lastLoginAt, createdAt: userRow.createdAt, updatedAt: userRow.updatedAt });
-            c.set("session", { id: session.id, userId: session.userId, tokenId: session.tokenId, deviceFingerprint: (session.deviceFingerprint as any) ?? {}, ipAddress: session.ipAddress, expiresAt: session.expiresAt, lastActivityAt: session.lastActivityAt, isActive: session.isActive });
+            c.set("user", {
+              id: userRow.id,
+              email: userRow.email,
+              displayName: userRow.displayName,
+              roles: userRow.roles ?? [],
+              attributes: (userRow.attributes as any) ?? {},
+              mfa: (userRow.mfa as any) ?? {},
+              passkeys: (userRow.passkeys as any[]) ?? [],
+              oauthProviders: (userRow.oauthProviders as any[]) ?? [],
+              status: userRow.status as any,
+              subUserIds: userRow.subUserIds ?? [],
+              sessionConfig: (userRow.sessionConfig as any) ?? {},
+              lastLoginAt: userRow.lastLoginAt,
+              createdAt: userRow.createdAt,
+              updatedAt: userRow.updatedAt,
+            });
+            c.set("session", {
+              id: session.id,
+              userId: session.userId,
+              tokenId: session.tokenId,
+              deviceFingerprint: (session.deviceFingerprint as any) ?? {},
+              ipAddress: session.ipAddress,
+              expiresAt: session.expiresAt,
+              lastActivityAt: session.lastActivityAt,
+              isActive: session.isActive,
+            });
             c.set("token", payload);
           }
         }
