@@ -21,6 +21,9 @@ function makeDbChain(returnValue: any = []) {
     returning: vi.fn().mockResolvedValue(returnValue),
     and: vi.fn().mockReturnThis(),
     isNull: vi.fn().mockReturnThis(),
+    // Drizzle query builders are thenables with `.catch`; the service uses a
+    // fire-and-forget `update(...).set(...).where(...).catch(...)`.
+    catch: vi.fn().mockReturnValue(Promise.resolve()),
   };
   // `update(...).set(...).where(...).returning(...)` must work as a single chain.
   chain.update.mockImplementation(() => chain);

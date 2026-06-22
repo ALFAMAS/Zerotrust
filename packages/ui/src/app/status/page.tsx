@@ -47,11 +47,30 @@ export default function StatusPage() {
     }
   }, []);
 
+  // Initial load
   useEffect(() => {
     load();
-    const interval = setInterval(load, 30_000);
-    return () => clearInterval(interval);
   }, [load]);
+
+  // SSE for real-time status updates (replaces 30s polling)
+  useEffect(() => {
+    const es = new EventSource(`${API_URL}/status/stream`);
+    es.onmessage = (e) => {
+      try {
+        const statusData = JSON.parse(e.data);
+        setData(statusData);
+        setError(false);
+        setLastChecked(new Date());
+      } catch {
+        // ignore parse errors
+      }
+    };
+    es.onerror = () => {
+      setError(true);
+      // EventSource will auto-reconnect
+    };
+    return () => es.close();
+  }, []);
 
   const overall = error ? "down" : (data?.status ?? "operational");
   const style = STATUS_STYLES[overall];
@@ -62,10 +81,9 @@ export default function StatusPage() {
       <main className="mx-auto w-full max-w-2xl flex-1 px-6 py-16">
         <h1 className="font-display text-3xl font-semibold tracking-tight">System status</h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Live status of all platform components. Updates every 30 seconds.
+          Live status of all platform components. Updates in real-time.
         </p>
 
-        {/* Overall banner */}
         <div
           className={`mb-8 mt-10 flex items-center gap-4 rounded-xl border p-6 ${
             overall === "operational"
@@ -88,13 +106,12 @@ export default function StatusPage() {
             </p>
             {lastChecked && (
               <p className="mt-0.5 text-xs text-muted-foreground">
-                Last checked {lastChecked.toLocaleTimeString()}
+                Last updated {lastChecked.toLocaleTimeString()}
               </p>
             )}
           </div>
         </div>
 
-        {/* Components */}
         <div className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card">
           {error && (
             <div className="flex items-center justify-between px-6 py-4">

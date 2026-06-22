@@ -8,14 +8,40 @@ import * as schema from "./schema";
 type DrizzleDb = ReturnType<typeof drizzle<typeof schema>>;
 
 let dbInstance: DrizzleDb | null = null;
+let readDbInstance: DrizzleDb | null = null;
 let sqlClient: ReturnType<typeof postgres> | null = null;
+let readSqlClient: ReturnType<typeof postgres> | null = null;
 let isConnected = false;
 
+/**
+ * Primary (write) database connection.
+ * All mutations and schema operations must use this instance.
+ */
 export function getDb(): DrizzleDb {
   if (!dbInstance) {
     throw new Error("Database not initialized. Call initializeDatabase() first.");
   }
   return dbInstance;
+}
+
+/**
+ * Read replica connection.
+ *
+ * When DATABASE_URL_READ_REPLICA is set, this returns a separate Drizzle
+ * instance connected to the replica. When it is not set, the primary
+ * connection is returned as a safe fallback so callers never break.
+ *
+ * Use this for read-heavy queries (admin lists, analytics, status checks,
+ * session lookups, etc.) to offload traffic from the primary.
+ */
+export function getReadDb(): DrizzleDb {
+  if (readDbInstance) return readDbInstance;
+  return getDb();
+}
+
+/** Whether a dedicated read-replica connection is active. */
+export function hasReadReplica(): boolean {
+  return readDbInstance !== null;
 }
 
 export async function initializeDatabase(): Promise<void> {
@@ -34,6 +60,21 @@ export async function initializeDatabase(): Promise<void> {
     });
 
     dbInstance = drizzle(sqlClient, { schema });
+
+    // Read replica: only when explicitly configured
+    if (cfg.database.databaseUrlReadReplica) {
+      readSqlClient = postgres(cfg.database.databaseUrlReadReplica, {
+        max: cfg.database.readReplicaPoolSize,
+        idle_timeout: 20,
+        connect_timeout: 10,
+        // Read-only mode: refuse writes at the postgres driver level
+        ...(process.env.DB_READ_REPLICA_STRICT === "true"
+          ? { connection: { default_transaction_read_only: true } }
+          : {}),
+      });
+      readDbInstance = drizzle(readSqlClient, { schema });
+    }
+
     isConnected = true;
   } catch (error) {
     console.error("✗ Failed to connect to database:", error);
@@ -107,12 +148,15 @@ export async function checkPendingMigrations(): Promise<void> {
 }
 
 export async function closeDatabase(): Promise<void> {
-  if (!isConnected || !sqlClient) return;
+  if (!isConnected) return;
 
   try {
-    await sqlClient.end();
+    await sqlClient?.end();
+    if (readSqlClient) await readSqlClient.end();
     dbInstance = null;
+    readDbInstance = null;
     sqlClient = null;
+    readSqlClient = null;
     isConnected = false;
   } catch (error) {
     console.error("✗ Error closing database:", error);
@@ -120,11 +164,17 @@ export async function closeDatabase(): Promise<void> {
   }
 }
 
-export async function checkDatabaseHealth(): Promise<{
+export interface DatabaseHealth {
   status: "healthy" | "degraded" | "unhealthy";
   uptime: number;
   connections: { current: number; available: number };
-}> {
+  replica?: {
+    status: "healthy" | "degraded" | "unhealthy";
+    lagMs?: number;
+  };
+}
+
+export async function checkDatabaseHealth(): Promise<DatabaseHealth> {
   if (!isConnected || !dbInstance) {
     return { status: "unhealthy", uptime: 0, connections: { current: 0, available: 0 } };
   }
@@ -132,7 +182,25 @@ export async function checkDatabaseHealth(): Promise<{
   try {
     const result = await sqlClient!`SELECT extract(epoch from now())::int as ts`;
     if (result.length > 0) {
-      return { status: "healthy", uptime: 0, connections: { current: 1, available: 99 } };
+      const health: DatabaseHealth = {
+        status: "healthy",
+        uptime: 0,
+        connections: { current: 1, available: 99 },
+      };
+
+      // Check replica health when configured
+      if (readDbInstance && readSqlClient) {
+        try {
+          const replicaResult = await readSqlClient`SELECT extract(epoch from now())::int as ts`;
+          health.replica = {
+            status: replicaResult.length > 0 ? "healthy" : "degraded",
+          };
+        } catch {
+          health.replica = { status: "unhealthy" };
+        }
+      }
+
+      return health;
     }
     return { status: "degraded", uptime: 0, connections: { current: 0, available: 0 } };
   } catch {

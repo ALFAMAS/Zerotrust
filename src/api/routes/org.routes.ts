@@ -63,6 +63,56 @@ async function enforceOrgIpAllowlist(c: any, next: any) {
 router.use("/:orgId", enforceOrgIpAllowlist);
 router.use("/:orgId/*", enforceOrgIpAllowlist);
 
+// ── Per-org trusted-device enforcement ────────────────────────────────────────
+// When an org requires trusted devices, every org-scoped request must come from
+// a registered device fingerprint. Runs on `/:orgId` routes only.
+
+async function enforceOrgTrustedDevice(c: any, next: any) {
+  const orgId = c.req.param("orgId");
+  if (orgId && UUID_RE.test(orgId)) {
+    try {
+      const policy = await getOrgSecurityPolicy(orgId);
+      if (policy.requireTrustedDevices) {
+        const userId = c.get("user")?.id;
+        if (!userId) return c.json({ error: "UNAUTHORIZED" }, 401);
+
+        // Get device fingerprint from request headers
+        const deviceFingerprint = c.req.header("x-device-fingerprint");
+        if (!deviceFingerprint) {
+          return c.json(
+            {
+              error: "TRUSTED_DEVICE_REQUIRED",
+              message: "This organization requires access from a registered trusted device. Register this device in your org settings.",
+            },
+            403
+          );
+        }
+
+        const { isDeviceTrusted } = await import("../../services/trustedDevice.service.js");
+        const trusted = await isDeviceTrusted(orgId, deviceFingerprint);
+        if (!trusted) {
+          return c.json(
+            {
+              error: "TRUSTED_DEVICE_REQUIRED",
+              message: "This device is not registered as trusted for this organization. Register it in your org settings.",
+            },
+            403
+          );
+        }
+
+        // Update last used timestamp (fire-and-forget)
+        const { updateLastUsed } = await import("../../services/trustedDevice.service.js");
+        void updateLastUsed(orgId, deviceFingerprint);
+      }
+    } catch (err) {
+      logger.error("Trusted device enforcement error", { orgId, error: String(err) });
+    }
+  }
+  return next();
+}
+router.use("/:orgId", enforceOrgTrustedDevice);
+router.use("/:orgId/*", enforceOrgTrustedDevice);
+
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 type DrizzleDB = ReturnType<typeof getDb>;
@@ -167,10 +217,8 @@ const UpdateSecurityPolicySchema = z.object({
   maxSessionAgeSeconds: z.number().int().min(0).max(31_536_000).optional(),
   idleTimeoutSeconds: z.number().int().min(0).max(31_536_000).optional(),
   maxConcurrentSessions: z.number().int().min(0).max(1000).optional(),
-  allowedCountries: z
-    .array(z.string().regex(/^[A-Z]{2}$/, "Must be an ISO 3166-1 alpha-2 code"))
-    .max(250)
-    .optional(),
+  allowedCountries: z.array(z.string().regex(/^[A-Z]{2}$/, "Must be an ISO 3166-1 alpha-2 code")).max(250).optional(),
+  requireTrustedDevices: z.boolean().optional(),
 });
 
 // ── POST / ────────────────────────────────────────────────────────────────────
@@ -325,6 +373,7 @@ router.put("/:orgId/security/policy", async (c) => {
       idleTimeoutSeconds: parsed.data.idleTimeoutSeconds ?? 0,
       maxConcurrentSessions: parsed.data.maxConcurrentSessions ?? 0,
       allowedCountries: parsed.data.allowedCountries ?? [],
+        requireTrustedDevices: parsed.data.requireTrustedDevices ?? false,
       updatedAt: new Date(),
       updatedBy: user.id,
     };
@@ -359,6 +408,214 @@ router.put("/:orgId/security/policy", async (c) => {
     if (err instanceof HTTPException) throw err;
     logger.error("Update org security policy error", err as Error);
     return c.json({ error: "INTERNAL_ERROR", message: "Failed to update security policy" }, 500);
+  }
+});
+
+// ── Org SSO config ────────────────────────────────────────────────────────────
+// Self-serve SAML/OIDC configuration per organization. Org admins can upload
+// metadata, set fields manually, and test the connection without redeploying.
+
+import type { OrgSsoConfig } from "../../db/schema";
+
+const UpdateSsoConfigSchema = z.object({
+  saml: z
+    .object({
+      enabled: z.boolean().default(false),
+      idpEntityId: z.string().max(2048).optional(),
+      idpSsoUrl: z.string().url().max(2048).optional(),
+      idpCert: z.string().max(50000).optional(),
+    })
+    .optional(),
+  oidc: z
+    .object({
+      enabled: z.boolean().default(false),
+      issuerUrl: z.string().url().max(2048).optional(),
+      clientId: z.string().max(2048).optional(),
+      clientSecret: z.string().max(2048).optional(),
+      redirectUris: z.array(z.string().url().max(2048)).max(20).optional(),
+    })
+    .optional(),
+});
+
+// GET /:orgId/sso — read current SSO config (admin+)
+router.get("/:orgId/sso", async (c) => {
+  try {
+    const user = c.get("user");
+    const { orgId } = c.req.param();
+    const db = getDb();
+    await requireOrgRole(orgId, user.id, db, "admin");
+
+    const [org] = await db
+      .select({ ssoConfig: organizationsTable.ssoConfig })
+      .from(organizationsTable)
+      .where(eq(organizationsTable.id, orgId))
+      .limit(1);
+
+    return c.json({ sso: org?.ssoConfig ?? null });
+  } catch (err) {
+    if (err instanceof HTTPException) throw err;
+    logger.error("Get org SSO config error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR" }, 500);
+  }
+});
+
+// PUT /:orgId/sso — update SSO config (admin+)
+router.put("/:orgId/sso", async (c) => {
+  try {
+    const user = c.get("user");
+    const { orgId } = c.req.param();
+    const db = getDb();
+    await requireOrgRole(orgId, user.id, db, "admin");
+
+    const body = (await c.req.json()) as Record<string, unknown>;
+    const parsed = UpdateSsoConfigSchema.safeParse(body);
+    if (!parsed.success) {
+      return c.json({ error: "INVALID_REQUEST", issues: parsed.error.issues }, 400);
+    }
+
+    // Merge with existing config
+    const [existing] = await db
+      .select({ ssoConfig: organizationsTable.ssoConfig })
+      .from(organizationsTable)
+      .where(eq(organizationsTable.id, orgId))
+      .limit(1);
+
+    const current: OrgSsoConfig = (existing?.ssoConfig as OrgSsoConfig) ?? {};
+    const updated: OrgSsoConfig = {
+      ...current,
+      ...(parsed.data.saml ? { saml: { ...current.saml, ...parsed.data.saml } } : {}),
+      ...(parsed.data.oidc ? { oidc: { ...current.oidc, ...parsed.data.oidc } } : {}),
+    };
+
+    const [org] = await db
+      .update(organizationsTable)
+      .set({ ssoConfig: updated, updatedAt: new Date() })
+      .where(eq(organizationsTable.id, orgId))
+      .returning({ ssoConfig: organizationsTable.ssoConfig });
+
+    return c.json({ sso: org?.ssoConfig ?? null });
+  } catch (err) {
+    if (err instanceof HTTPException) throw err;
+    logger.error("Update org SSO config error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR" }, 500);
+  }
+});
+
+// POST /:orgId/sso/test — test SSO connection (admin+)
+// Performs a lightweight connectivity check (HTTP GET to IdP metadata/OIDC discovery).
+router.post("/:orgId/sso/test", async (c) => {
+  try {
+    const user = c.get("user");
+    const { orgId } = c.req.param();
+    const db = getDb();
+    await requireOrgRole(orgId, user.id, db, "admin");
+
+    const [org] = await db
+      .select({ ssoConfig: organizationsTable.ssoConfig })
+      .from(organizationsTable)
+      .where(eq(organizationsTable.id, orgId))
+      .limit(1);
+
+    const sso: OrgSsoConfig = (org?.ssoConfig as OrgSsoConfig) ?? {};
+    const results: { saml?: { status: string; error?: string }; oidc?: { status: string; error?: string } } = {};
+
+    if (sso.saml?.enabled && sso.saml.idpSsoUrl) {
+      try {
+        const res = await fetch(sso.saml.idpSsoUrl, { method: "GET", signal: AbortSignal.timeout(10_000) });
+        results.saml = { status: res.ok ? "success" : "error", error: res.ok ? undefined : `HTTP ${res.status}` };
+      } catch (e) {
+        results.saml = { status: "error", error: (e as Error).message };
+      }
+    }
+
+    if (sso.oidc?.enabled && sso.oidc.issuerUrl) {
+      try {
+        const wellKnown = new URL("/.well-known/openid-configuration", sso.oidc.issuerUrl);
+        const res = await fetch(wellKnown.toString(), { signal: AbortSignal.timeout(10_000) });
+        results.oidc = { status: res.ok ? "success" : "error", error: res.ok ? undefined : `HTTP ${res.status}` };
+      } catch (e) {
+        results.oidc = { status: "error", error: (e as Error).message };
+      }
+    }
+
+    // Persist test results
+    const updated: OrgSsoConfig = { ...sso };
+    if (results.saml) {
+      updated.saml = { ...updated.saml!, lastTestedAt: new Date().toISOString(), lastTestStatus: results.saml.status as "success" | "error", lastTestError: results.saml.error };
+    }
+    if (results.oidc) {
+      updated.oidc = { ...updated.oidc!, lastTestedAt: new Date().toISOString(), lastTestStatus: results.oidc.status as "success" | "error", lastTestError: results.oidc.error };
+    }
+    await db.update(organizationsTable).set({ ssoConfig: updated, updatedAt: new Date() }).where(eq(organizationsTable.id, orgId));
+
+    return c.json({ results });
+  } catch (err) {
+    if (err instanceof HTTPException) throw err;
+    logger.error("Test org SSO config error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR" }, 500);
+  }
+});
+
+// ── Trusted devices ───────────────────────────────────────────────────────────
+
+const RegisterTrustedDeviceSchema = z.object({
+  userId: z.string().uuid(),
+  deviceName: z.string().trim().min(1).max(100),
+  deviceFingerprint: z.string().trim().min(1).max(512),
+});
+
+// GET /:orgId/trusted-devices — list trusted devices (admin+)
+router.get("/:orgId/trusted-devices", async (c) => {
+  try {
+    const user = c.get("user");
+    const { orgId } = c.req.param();
+    const db = getDb();
+    await requireOrgRole(orgId, user.id, db, "admin");
+    const { listTrustedDevices } = await import("../../services/trustedDevice.service.js");
+    const devices = await listTrustedDevices(orgId);
+    return c.json({ devices });
+  } catch (err) {
+    if (err instanceof HTTPException) throw err;
+    logger.error("List trusted devices error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR" }, 500);
+  }
+});
+
+// POST /:orgId/trusted-devices — register a trusted device (admin+)
+router.post("/:orgId/trusted-devices", async (c) => {
+  try {
+    const user = c.get("user");
+    const { orgId } = c.req.param();
+    const db = getDb();
+    await requireOrgRole(orgId, user.id, db, "admin");
+    const body = (await c.req.json()) as Record<string, unknown>;
+    const parsed = RegisterTrustedDeviceSchema.safeParse(body);
+    if (!parsed.success) return c.json({ error: "INVALID_REQUEST", issues: parsed.error.issues }, 400);
+    const { registerTrustedDevice } = await import("../../services/trustedDevice.service.js");
+    const device = await registerTrustedDevice({ orgId, userId: parsed.data.userId, deviceName: parsed.data.deviceName, deviceFingerprint: parsed.data.deviceFingerprint, registeredBy: user.id });
+    return c.json({ device }, 201);
+  } catch (err) {
+    if (err instanceof HTTPException) throw err;
+    logger.error("Register trusted device error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR" }, 500);
+  }
+});
+
+// DELETE /:orgId/trusted-devices/:deviceId — remove a trusted device (admin+)
+router.delete("/:orgId/trusted-devices/:deviceId", async (c) => {
+  try {
+    const user = c.get("user");
+    const { orgId, deviceId } = c.req.param();
+    const db = getDb();
+    await requireOrgRole(orgId, user.id, db, "admin");
+    const { removeTrustedDevice } = await import("../../services/trustedDevice.service.js");
+    const removed = await removeTrustedDevice(orgId, deviceId);
+    if (!removed) return c.json({ error: "NOT_FOUND", message: "Device not found" }, 404);
+    return c.body(null, 204);
+  } catch (err) {
+    if (err instanceof HTTPException) throw err;
+    logger.error("Remove trusted device error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR" }, 500);
   }
 });
 

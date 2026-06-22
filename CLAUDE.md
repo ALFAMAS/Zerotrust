@@ -11,8 +11,7 @@ Monorepo: Node/Hono API (`src/`) + Next.js 16 UI (`packages/ui/`).
 | MCP server   | auto-started with UI dev server | `http://localhost:3000/_next/mcp` |
 
 **Status docs:** [`implemented.md`](./implemented.md) (what ships today) ·
-[`not-implemented.md`](./not-implemented.md) (product backlog) ·
-[`incomplete.md`](./incomplete.md) (code that exists but is unmounted/stubbed/orphaned).
+[`not-implemented.md`](./not-implemented.md) (product backlog).
 
 ## Running the project
 

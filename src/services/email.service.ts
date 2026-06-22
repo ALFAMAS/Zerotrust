@@ -84,7 +84,7 @@ export async function sendWelcomeEmail(
 
 export async function sendMagicLinkEmail(
   to: string,
-  data: { name: string; magicLinkUrl: string; expiresInMinutes?: number }
+  data: { name: string; magicLinkUrl: string; expiresInMinutes?: number; locale?: Locale }
 ): Promise<void> {
   const { subject, html, text } = magicLinkEmailTemplate({
     name: data.name,
@@ -92,6 +92,7 @@ export async function sendMagicLinkEmail(
     expiresInMinutes: data.expiresInMinutes ?? 15,
     appName: APP_NAME,
     appUrl: APP_URL,
+    locale: data.locale,
   });
   await sendEmail({ to, subject, html, text });
 }
@@ -132,7 +133,7 @@ export async function sendVerificationEmail(
 
 export async function sendPasswordResetEmail(
   to: string,
-  data: { name: string; resetUrl: string; expiresInMinutes?: number }
+  data: { name: string; resetUrl: string; expiresInMinutes?: number; locale?: Locale }
 ): Promise<void> {
   const { subject, html, text } = passwordResetEmailTemplate({
     name: data.name,
@@ -140,6 +141,7 @@ export async function sendPasswordResetEmail(
     expiresInMinutes: data.expiresInMinutes ?? 30,
     appName: APP_NAME,
     appUrl: APP_URL,
+    locale: data.locale,
   });
   await sendEmail({ to, subject, html, text });
 }
@@ -194,4 +196,22 @@ export async function sendNotificationEmail(
     appUrl: APP_URL,
   });
   await sendEmail({ to, subject, html, text });
+}
+
+// ── BullMQ queued versions ─────────────────────────────────────────────────────
+
+export async function queueBillingEventEmail(
+  to: string,
+  data: { name: string; title: string; body: string; ctaLabel?: string; ctaUrl?: string }
+): Promise<void> {
+  const { enqueueEmail } = await import("./emailQueue.js");
+  await enqueueEmail("notification", to, { ...data, appName: APP_NAME, appUrl: APP_URL, isBilling: true });
+}
+
+export async function queueNotificationEmail(
+  to: string,
+  data: { name: string; title: string; body: string; link?: string; unsubscribeUrl?: string }
+): Promise<void> {
+  const { enqueueEmail } = await import("./emailQueue.js");
+  await enqueueEmail("notification", to, { ...data, appName: APP_NAME, appUrl: APP_URL });
 }

@@ -3,6 +3,10 @@
     "nextjs": {
       "type": "http",
       "url": "http://localhost:3000/_next/mcp"
+    },
+    "playwright": {
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp@latest"]
     }
   }
 }

@@ -9,22 +9,25 @@ import { join } from "node:path";
 
 const sendMock = vi.fn();
 vi.mock("@aws-sdk/client-s3", () => {
-  const S3Client = vi.fn().mockImplementation(() => ({ send: sendMock }));
+  // Everything here is invoked via `new`. Vitest 4 only honours a constructor's
+  // instance (`this`) when the mock implementation is a `function`/`class`, not
+  // an arrow — so build constructable mocks. Commands expose `__type` + `input`
+  // for assertions; the client exposes `send`.
+  const command = (type: string) =>
+    vi.fn(function (this: { __type: string; input: unknown }, input: unknown) {
+      this.__type = type;
+      this.input = input;
+    });
+  const S3Client = vi.fn(function (this: { send: typeof sendMock }) {
+    this.send = sendMock;
+  });
   return {
     S3Client,
-    PutObjectCommand: vi.fn().mockImplementation((input) => ({ __type: "PutObject", input })),
-    DeleteObjectCommand: vi
-      .fn()
-      .mockImplementation((input) => ({ __type: "DeleteObject", input })),
-    DeleteObjectsCommand: vi
-      .fn()
-      .mockImplementation((input) => ({ __type: "DeleteObjects", input })),
-    ListObjectsV2Command: vi
-      .fn()
-      .mockImplementation((input) => ({ __type: "ListObjectsV2", input })),
-    HeadBucketCommand: vi
-      .fn()
-      .mockImplementation((input) => ({ __type: "HeadBucket", input })),
+    PutObjectCommand: command("PutObject"),
+    DeleteObjectCommand: command("DeleteObject"),
+    DeleteObjectsCommand: command("DeleteObjects"),
+    ListObjectsV2Command: command("ListObjectsV2"),
+    HeadBucketCommand: command("HeadBucket"),
   };
 });
 
@@ -45,6 +48,9 @@ import {
   listObjects,
   deleteObject,
   pruneOldBackups,
+  cdnURLForKey,
+  getUploadCacheControl,
+  uploadCdnBaseUrl,
 } from "../services/objectStorage.service";
 
 // ── Env helpers ─────────────────────────────────────────────────────────────
@@ -62,6 +68,8 @@ function setEnv(overrides: Record<string, string | undefined>) {
     "BACKUP_S3_PUBLIC_URL_TEMPLATE",
     "UPLOADS_S3_PREFIX",
     "BACKUP_RETENTION_DAYS",
+    "UPLOADS_CDN_URL",
+    "UPLOADS_CACHE_CONTROL",
   ];
   const saved: Record<string, string | undefined> = {};
   for (const k of keys) {
@@ -88,6 +96,19 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  // uploadFile() hands a lazily-opened read stream to the (mocked) S3 client,
+  // which never consumes it. Destroy any such stream — with a no-op error
+  // handler — before removing the temp dir, so a late open() can't raise an
+  // uncaught ENOENT against the just-deleted file.
+  for (const call of sendMock.mock.calls) {
+    const body = (call?.[0] as { input?: { Body?: unknown } })?.input?.Body as
+      | { destroy?: () => void; on?: (event: string, cb: () => void) => void }
+      | undefined;
+    if (body && typeof body.destroy === "function") {
+      body.on?.("error", () => {});
+      body.destroy();
+    }
+  }
   rmSync(tmpDir, { recursive: true, force: true });
 });
 
@@ -593,6 +614,53 @@ describe("uploadBuffer", () => {
       expect(cmd.input.Bucket).toBe("my-bucket");
       expect(cmd.input.Key).toBe("uploads/avatars/u1-1.jpg");
       expect(cmd.input.ContentType).toBe("image/jpeg");
+      // Stamped with the default long-lived immutable Cache-Control for the edge.
+      expect(cmd.input.CacheControl).toBe("public, max-age=31536000, immutable");
+    } finally {
+      restore();
+    }
+  });
+
+  it("stamps an explicit cacheControl override on the PutObject", async () => {
+    const restore = setEnv({
+      BACKUP_S3_ACCESS_KEY_ID: "k",
+      BACKUP_S3_SECRET_ACCESS_KEY: "s",
+      BACKUP_S3_BUCKET: "b",
+      BACKUP_S3_ENDPOINT: "https://example.com",
+      BACKUP_S3_FORCE_PATH_STYLE: "true",
+    });
+    sendMock.mockResolvedValueOnce({});
+    try {
+      await uploadBuffer({
+        key: "f.bin",
+        body: Buffer.from("x"),
+        contentType: "application/octet-stream",
+        cacheControl: "private, no-store",
+      });
+      expect(sendMock.mock.calls[0][0].input.CacheControl).toBe("private, no-store");
+    } finally {
+      restore();
+    }
+  });
+
+  it("returns the dedicated UPLOADS_CDN_URL delivery URL when configured", async () => {
+    const restore = setEnv({
+      BACKUP_S3_ACCESS_KEY_ID: "k",
+      BACKUP_S3_SECRET_ACCESS_KEY: "s",
+      BACKUP_S3_BUCKET: "b",
+      BACKUP_S3_ENDPOINT: "https://s3.eu-central-003.backblazeb2.com",
+      BACKUP_S3_FORCE_PATH_STYLE: "true",
+      UPLOADS_CDN_URL: "https://cdn.zeroauth.app/",
+    });
+    sendMock.mockResolvedValueOnce({});
+    try {
+      const result = await uploadBuffer({
+        key: "avatars/u1-1.jpg",
+        body: Buffer.from("x"),
+        contentType: "image/jpeg",
+      });
+      // CDN host + path, not the origin bucket host; trailing slash trimmed.
+      expect(result.url).toBe("https://cdn.zeroauth.app/uploads/avatars/u1-1.jpg");
     } finally {
       restore();
     }
@@ -709,6 +777,93 @@ describe("publicURLForKey", () => {
     try {
       expect(publicURLForKey(cfg, "avatars/u1.jpg")).toBe(
         "https://cdn.example.com/zeroauth/avatars/u1.jpg"
+      );
+    } finally {
+      restore();
+    }
+  });
+});
+
+// ── CDN delivery + cache config (uploads) ───────────────────────────────────
+
+describe("getUploadCacheControl", () => {
+  it("defaults to a long-lived immutable policy", () => {
+    const restore = setEnv({});
+    try {
+      expect(getUploadCacheControl()).toBe("public, max-age=31536000, immutable");
+    } finally {
+      restore();
+    }
+  });
+
+  it("honours UPLOADS_CACHE_CONTROL when set", () => {
+    const restore = setEnv({ UPLOADS_CACHE_CONTROL: "public, max-age=600" });
+    try {
+      expect(getUploadCacheControl()).toBe("public, max-age=600");
+    } finally {
+      restore();
+    }
+  });
+});
+
+describe("uploadCdnBaseUrl", () => {
+  it("returns null when UPLOADS_CDN_URL is unset", () => {
+    const restore = setEnv({});
+    try {
+      expect(uploadCdnBaseUrl()).toBeNull();
+    } finally {
+      restore();
+    }
+  });
+
+  it("trims trailing slashes", () => {
+    const restore = setEnv({ UPLOADS_CDN_URL: "https://cdn.example.com///" });
+    try {
+      expect(uploadCdnBaseUrl()).toBe("https://cdn.example.com");
+    } finally {
+      restore();
+    }
+  });
+});
+
+describe("cdnURLForKey", () => {
+  const cfg = {
+    endpoint: "https://s3.eu-central-003.backblazeb2.com",
+    region: "eu-central-003",
+    accessKeyId: "k",
+    secretAccessKey: "s",
+    bucket: "my-bucket",
+    prefix: "uploads/",
+    forcePathStyle: true,
+  };
+
+  it("routes through UPLOADS_CDN_URL when configured", () => {
+    const restore = setEnv({ UPLOADS_CDN_URL: "https://cdn.example.com" });
+    try {
+      expect(cdnURLForKey(cfg, "uploads/avatars/u1.jpg")).toBe(
+        "https://cdn.example.com/uploads/avatars/u1.jpg"
+      );
+    } finally {
+      restore();
+    }
+  });
+
+  it("encodes special characters in the key under the CDN host", () => {
+    const restore = setEnv({ UPLOADS_CDN_URL: "https://cdn.example.com" });
+    try {
+      expect(cdnURLForKey(cfg, "uploads/has space & plus.jpg")).toBe(
+        "https://cdn.example.com/uploads/has%20space%20%26%20plus.jpg"
+      );
+    } finally {
+      restore();
+    }
+  });
+
+  it("falls back to the origin publicURLForKey when no CDN is set", () => {
+    const restore = setEnv({});
+    try {
+      expect(cdnURLForKey(cfg, "uploads/avatars/u1.jpg")).toBe(
+        "https://s3.eu-central-003.backblazeb2.com/my-bucket/uploads/avatars/u1.jpg"
       );
     } finally {
       restore();

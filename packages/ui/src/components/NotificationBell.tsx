@@ -1,6 +1,7 @@
 "use client";
+
 import { Bell } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { api } from "@/lib/api";
 import { useFormat } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -17,16 +18,11 @@ interface Notification {
 
 function typeIcon(type: Notification["type"]): string {
   switch (type) {
-    case "security":
-      return "🔒";
-    case "success":
-      return "✓";
-    case "warning":
-      return "⚠️";
-    case "error":
-      return "✕";
-    default:
-      return "ℹ️";
+    case "security": return "🔒";
+    case "success": return "✓";
+    case "warning": return "⚠️";
+    case "error": return "✕";
+    default: return "ℹ️";
   }
 }
 
@@ -37,6 +33,7 @@ export function NotificationBell() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loadingList, setLoadingList] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const esRef = useRef<EventSource | null>(null);
 
   // Fetch unread count on mount
   useEffect(() => {
@@ -46,7 +43,7 @@ export function NotificationBell() {
       .catch(() => {});
   }, []);
 
-  // Poll unread count every 30 s for badge updates
+  // SSE for real-time unread count updates (replaces 30s polling)
   useEffect(() => {
     const token =
       typeof window !== "undefined"
@@ -54,14 +51,34 @@ export function NotificationBell() {
         : null;
     if (!token) return;
 
-    const interval = setInterval(() => {
-      api
-        .get<{ count: number }>("/notifications/unread-count")
-        .then((d) => setUnreadCount(d.count))
-        .catch(() => {});
-    }, 30_000);
+    const connect = () => {
+      const es = new EventSource(
+        `${process.env.NEXT_PUBLIC_ZEROAUTH_URL || "http://localhost:3000"}/notifications/sse?token=${token}`
+      );
+      esRef.current = es;
 
-    return () => clearInterval(interval);
+      es.addEventListener("notification", () => {
+        // New notification arrived — bump unread count
+        setUnreadCount((c) => c + 1);
+      });
+
+      es.addEventListener("unread_count", ((e: MessageEvent) => {
+        const data = JSON.parse(e.data);
+        setUnreadCount(data.count);
+      }) as EventListener);
+
+      es.onerror = () => {
+        es.close();
+        // Reconnect after 5s
+        setTimeout(connect, 5000);
+      };
+    };
+
+    connect();
+
+    return () => {
+      esRef.current?.close();
+    };
   }, []);
 
   // Close dropdown on click-outside or Escape
@@ -94,17 +111,17 @@ export function NotificationBell() {
       .finally(() => setLoadingList(false));
   }, [open]);
 
-  async function markRead(id: string) {
+  const markRead = useCallback(async (id: string) => {
     await api.post(`/notifications/${id}/read`).catch(() => {});
     setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
     setUnreadCount((c) => Math.max(0, c - 1));
-  }
+  }, []);
 
-  async function markAllRead() {
+  const markAllRead = useCallback(async () => {
     await api.post("/notifications/read-all").catch(() => {});
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
     setUnreadCount(0);
-  }
+  }, []);
 
   function handleNotificationClick(n: Notification) {
     if (!n.read) markRead(n.id);
@@ -114,7 +131,6 @@ export function NotificationBell() {
 
   return (
     <div ref={containerRef} className="relative">
-      {/* Bell button */}
       <button
         aria-label="Notifications"
         aria-haspopup="dialog"
@@ -130,7 +146,6 @@ export function NotificationBell() {
         )}
       </button>
 
-      {/* Dropdown */}
       {open && (
         <div
           role="dialog"
@@ -141,10 +156,7 @@ export function NotificationBell() {
           <div className="flex items-center justify-between border-b border-border px-4 py-3">
             <span className="text-sm font-semibold text-foreground">Notifications</span>
             {unreadCount > 0 && (
-              <button
-                onClick={markAllRead}
-                className="text-xs text-primary transition-colors hover:text-primary/80"
-              >
+              <button onClick={markAllRead} className="text-xs text-primary transition-colors hover:text-primary/80">
                 Mark all read
               </button>
             )}
@@ -154,9 +166,7 @@ export function NotificationBell() {
             {loadingList ? (
               <div className="px-4 py-6 text-center text-sm text-muted-foreground">Loading…</div>
             ) : notifications.length === 0 ? (
-              <div className="px-4 py-6 text-center text-sm text-muted-foreground">
-                No notifications
-              </div>
+              <div className="px-4 py-6 text-center text-sm text-muted-foreground">No notifications</div>
             ) : (
               notifications.map((n) => (
                 <button

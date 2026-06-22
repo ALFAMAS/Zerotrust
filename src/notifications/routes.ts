@@ -1,8 +1,25 @@
 import { Hono } from "hono";
+import { authMiddleware } from "../middleware/auth";
 import type { HonoEnv } from "../shared/types";
 import { notificationDispatcher } from "./dispatcher";
 
 const app = new Hono<HonoEnv>();
+
+// ─── Auth + admin guard ───────────────────────────────────────────────────────
+// Channel management (add/update/delete/test alerting destinations) is a
+// privileged operation, so the whole router sits behind authentication + an
+// admin-role check — same pattern as src/api/routes/admin.routes.ts.
+app.use("*", authMiddleware);
+app.use("*", async (c, next) => {
+  const user = c.get("user");
+  if (!user) {
+    return c.json({ error: "UNAUTHORIZED", message: "Authentication required" }, 401);
+  }
+  if (!user.roles?.includes("admin")) {
+    return c.json({ error: "FORBIDDEN", message: "Admin role required" }, 403);
+  }
+  return next();
+});
 
 // POST /test — send a test notification
 app.post("/test", async (c) => {

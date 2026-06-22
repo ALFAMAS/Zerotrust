@@ -126,11 +126,16 @@ class Logger {
 
     // Output based on configured format
     if (this.config.logging.format === "json") {
+      process.stdout.write(`${JSON.stringify(logEntry)}\n`);
     } else {
-      const _levelColor = this.getLevelColor(level);
-      const _timestamp = logEntry.timestamp;
-      const _correlationId = logEntry.correlationId ? ` [${logEntry.correlationId}]` : "";
-      const _userId = logEntry.userId ? ` [user:${logEntry.userId}]` : "";
+      const levelColor = this.getLevelColor(level);
+      const timestamp = String(logEntry.timestamp);
+      const correlationId = logEntry.correlationId ? ` [${String(logEntry.correlationId)}]` : "";
+      const userId = logEntry.userId ? ` [user:${String(logEntry.userId)}]` : "";
+      const reset = "\x1b[0m";
+      process.stdout.write(
+        `${timestamp} ${levelColor}${level.toUpperCase()}${reset}${correlationId}${userId} ${message}\n`
+      );
     }
 
     // Stream to Elasticsearch if enabled

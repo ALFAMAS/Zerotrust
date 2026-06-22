@@ -13,10 +13,54 @@ import {
 } from "drizzle-orm/pg-core";
 import type { OidcConfig, SamlConfig, TenantSettings } from "../models/tenant.model";
 
+/** Org-level SSO config — subset of tenant SSO, scoped to a single organization. */
+/** Org-level SSO config — subset of tenant SSO, scoped to a single organization. */
+export interface OrgSsoConfig {
+  saml?: {
+    enabled: boolean;
+    idpEntityId?: string;
+    idpSsoUrl?: string;
+    idpCert?: string;
+    lastTestedAt?: string;
+    lastTestStatus?: "success" | "error";
+    lastTestError?: string;
+  };
+  oidc?: {
+    enabled: boolean;
+    issuerUrl?: string;
+    clientId?: string;
+    clientSecret?: string;
+    redirectUris?: string[];
+    lastTestedAt?: string;
+    lastTestStatus?: "success" | "error";
+    lastTestError?: string;
+  };
+}
+
+/** Per-organization branding overrides (white-label). */
+export interface OrgBranding {
+  appName?: string;
+  brandColor?: string;
+  logoUrl?: string;
+  faviconUrl?: string;
+  /** When true, hide all "Powered by ZeroAuth" badges. */
+  hidePoweredBy?: boolean;
+  /** Custom email "from" address (must be verified via custom email domain). */
+  emailFromAddress?: string;
+  /** Custom email domain (e.g. noreply@theirdomain.com). */
+  emailDomain?: string;
+  /** Custom login page URL — orgs can host their own login page. */
+  customLoginUrl?: string;
+}
+
 export const usersTable = pgTable("users", {
   id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
   email: text("email").notNull().unique(),
   username: text("username").unique(),
+  // Decentralized Identifier (did:key / did:web) for login-via-DID. Nullable —
+  // only set for accounts provisioned through the DID auth flow. Unique allows
+  // many NULLs (Postgres), so non-DID users are unaffected.
+  did: text("did").unique(),
   passwordHash: text("password_hash"),
   phone: text("phone"),
   displayName: text("display_name").notNull(),
@@ -49,33 +93,45 @@ export const usersTable = pgTable("users", {
   lastLoginAt: timestamp("last_login_at", { withTimezone: true }),
   emailVerifiedAt: timestamp("email_verified_at", { withTimezone: true }),
   metadata: jsonb("metadata"),
+  // Customer segment tag — used by CS/success teams to categorize accounts.
+  customerSegment: text("customer_segment"), // "champion" | "at_risk" | "expansion" | "new" | null
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().default(sql`now()`),
 });
 
-export const sessionsTable = pgTable("sessions", {
-  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: uuid("user_id")
-    .notNull()
-    .references(() => usersTable.id, { onDelete: "cascade" }),
-  tokenId: text("token_id").notNull().unique(),
-  deviceFingerprint: jsonb("device_fingerprint").notNull().default(sql`'{}'::jsonb`),
-  ipAddress: text("ip_address").notNull(),
-  country: text("country"),
-  userAgent: text("user_agent"),
-  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
-  lastActivityAt: timestamp("last_activity_at", { withTimezone: true })
-    .notNull()
-    .default(sql`now()`),
-  isActive: boolean("is_active").notNull().default(true),
-  revokedAt: timestamp("revoked_at", { withTimezone: true }),
-  revokedReason: text("revoked_reason"),
-  proofOfPossessionKey: text("proof_of_possession_key"),
-  continuousEvalResult: jsonb("continuous_eval_result"),
-  anomalyFlags: jsonb("anomaly_flags"),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().default(sql`now()`),
-});
+export const sessionsTable = pgTable(
+  "sessions",
+  {
+    id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => usersTable.id, { onDelete: "cascade" }),
+    tokenId: text("token_id").notNull().unique(),
+    deviceFingerprint: jsonb("device_fingerprint").notNull().default(sql`'{}'::jsonb`),
+    ipAddress: text("ip_address").notNull(),
+    country: text("country"),
+    userAgent: text("user_agent"),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    lastActivityAt: timestamp("last_activity_at", { withTimezone: true })
+      .notNull()
+      .default(sql`now()`),
+    isActive: boolean("is_active").notNull().default(true),
+    revokedAt: timestamp("revoked_at", { withTimezone: true }),
+    revokedReason: text("revoked_reason"),
+    proofOfPossessionKey: text("proof_of_possession_key"),
+    continuousEvalResult: jsonb("continuous_eval_result"),
+    anomalyFlags: jsonb("anomaly_flags"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().default(sql`now()`),
+  },
+  (t) => ({
+    sessionsUserIdIsActiveIdx: index("sessions_user_id_is_active_idx").on(t.userId, t.isActive),
+    sessionsExpiresAtIsActiveIdx: index("sessions_expires_at_is_active_idx").on(
+      t.expiresAt,
+      t.isActive
+    ),
+  })
+);
 
 export const rolesTable = pgTable("roles", {
   id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -107,33 +163,39 @@ export const jitAccessTable = pgTable("jit_access", {
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().default(sql`now()`),
 });
 
-export const auditLogsTable = pgTable("audit_logs", {
-  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
-  action: text("action").notNull(),
-  actorId: uuid("actor_id"),
-  actorEmail: text("actor_email"),
-  targetId: text("target_id"),
-  targetType: text("target_type"),
-  ipAddress: text("ip_address"),
-  country: text("country"),
-  userAgent: text("user_agent"),
-  deviceHash: text("device_hash"),
-  sessionId: text("session_id"),
-  success: boolean("success").notNull(),
-  errorCode: text("error_code"),
-  duration: integer("duration"),
-  resourceDetails: jsonb("resource_details"),
-  riskScore: integer("risk_score"),
-  continuousEvalContext: jsonb("continuous_eval_context"),
-  metadata: jsonb("metadata"),
-  timestamp: timestamp("timestamp", { withTimezone: true }).notNull().default(sql`now()`),
-  // Tamper-evidence: monotonic sequence gives a strict total order, and each
-  // entry's hash chains to the previous one (entryHash = sha256(prevHash + body)).
-  // Editing/deleting/reordering any row breaks the chain — see audit/chain.ts.
-  seq: bigserial("seq", { mode: "number" }).notNull(),
-  prevHash: text("prev_hash"),
-  entryHash: text("entry_hash"),
-});
+export const auditLogsTable = pgTable(
+  "audit_logs",
+  {
+    id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+    action: text("action").notNull(),
+    actorId: uuid("actor_id"),
+    actorEmail: text("actor_email"),
+    targetId: text("target_id"),
+    targetType: text("target_type"),
+    ipAddress: text("ip_address"),
+    country: text("country"),
+    userAgent: text("user_agent"),
+    deviceHash: text("device_hash"),
+    sessionId: text("session_id"),
+    success: boolean("success").notNull(),
+    errorCode: text("error_code"),
+    duration: integer("duration"),
+    resourceDetails: jsonb("resource_details"),
+    riskScore: integer("risk_score"),
+    continuousEvalContext: jsonb("continuous_eval_context"),
+    metadata: jsonb("metadata"),
+    timestamp: timestamp("timestamp", { withTimezone: true }).notNull().default(sql`now()`),
+    // Tamper-evidence: monotonic sequence gives a strict total order, and each
+    // entry's hash chains to the previous one (entryHash = sha256(prevHash + body)).
+    // Editing/deleting/reordering any row breaks the chain — see audit/chain.ts.
+    seq: bigserial("seq", { mode: "number" }).notNull(),
+    prevHash: text("prev_hash"),
+    entryHash: text("entry_hash"),
+  },
+  (t) => ({
+    auditLogsTimestampIdx: index("audit_logs_timestamp_idx").on(t.timestamp),
+  })
+);
 
 // ── Access reviews (SOC 2 CC6: periodic review of privileged access) ──────────
 export const accessReviewsTable = pgTable("access_reviews", {
@@ -196,6 +258,21 @@ export const otpsTable = pgTable("otps", {
   expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
   usedAt: timestamp("used_at", { withTimezone: true }),
   attempts: integer("attempts").notNull().default(0),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
+});
+
+// Short-lived OAuth exchange codes. After the OAuth callback creates a session,
+// the tokens are stored here under a one-time code that the frontend redeems
+// via POST /oauth/exchange. This avoids putting tokens in the URL.
+export const oauthExchangeCodesTable = pgTable("oauth_exchange_codes", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  code: text("code").notNull().unique(),
+  userId: uuid("user_id").notNull(),
+  sessionId: uuid("session_id").notNull(),
+  accessToken: text("access_token").notNull(),
+  refreshToken: text("refresh_token").notNull(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  usedAt: timestamp("used_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
 });
 
@@ -295,19 +372,25 @@ export const saasSettingsTable = pgTable("saas_settings", {
   updatedBy: text("updated_by"),
 });
 
-export const notificationsTable = pgTable("notifications", {
-  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: uuid("user_id")
-    .notNull()
-    .references(() => usersTable.id, { onDelete: "cascade" }),
-  type: text("type").notNull(), // "info" | "success" | "warning" | "error" | "security"
-  title: text("title").notNull(),
-  body: text("body").notNull(),
-  link: text("link"), // optional deep-link
-  read: boolean("read").notNull().default(false),
-  readAt: timestamp("read_at", { withTimezone: true }),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
-});
+export const notificationsTable = pgTable(
+  "notifications",
+  {
+    id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => usersTable.id, { onDelete: "cascade" }),
+    type: text("type").notNull(), // "info" | "success" | "warning" | "error" | "security"
+    title: text("title").notNull(),
+    body: text("body").notNull(),
+    link: text("link"), // optional deep-link
+    read: boolean("read").notNull().default(false),
+    readAt: timestamp("read_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
+  },
+  (t) => ({
+    notificationsUserIdReadIdx: index("notifications_user_id_read_idx").on(t.userId, t.read),
+  })
+);
 
 export const organizationsTable = pgTable("organizations", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -316,9 +399,21 @@ export const organizationsTable = pgTable("organizations", {
   logoUrl: text("logo_url"),
   billingEmail: text("billing_email"),
   ownerId: uuid("owner_id").references(() => usersTable.id, { onDelete: "cascade" }),
+  // Self-serve SSO config — org admins configure SAML/OIDC from the dashboard.
+  ssoConfig: jsonb("sso_config").$type<OrgSsoConfig>(),
+  // Multi-tenant enterprise: custom domain, branding overrides, data residency.
+  customDomain: text("custom_domain"),
+  branding: jsonb("branding").$type<OrgBranding>(),
+  storageRegion: text("storage_region").notNull().default("us"),
+  // References the tenant this org belongs to (for multi-tenant platform).
+  tenantId: uuid("tenant_id"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
+}, (t) => ({
+  organizationsCustomDomainIdx: index("organizations_custom_domain_idx").on(t.customDomain),
+  organizationsStorageRegionIdx: index("organizations_storage_region_idx").on(t.storageRegion),
+  organizationsTenantIdx: index("organizations_tenant_idx").on(t.tenantId),
+}));
 
 export const orgSecurityPoliciesTable = pgTable("org_security_policies", {
   orgId: uuid("org_id")
@@ -344,6 +439,8 @@ export const orgSecurityPoliciesTable = pgTable("org_security_policies", {
   maxConcurrentSessions: integer("max_concurrent_sessions").notNull().default(0),
   // ISO 3166-1 alpha-2 codes a member's session may originate from. Empty = any.
   allowedCountries: text("allowed_countries").array().notNull().default(sql`ARRAY[]::text[]`),
+  // When true, org members must use a registered trusted device to access the org.
+  requireTrustedDevices: boolean("require_trusted_devices").notNull().default(false),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
   updatedBy: uuid("updated_by").references(() => usersTable.id, { onDelete: "set null" }),
 });
@@ -456,26 +553,32 @@ export const supportTicketMessagesTable = pgTable("support_ticket_messages", {
 
 // ── API Keys ──────────────────────────────────────────────────────────────────
 
-export const apiKeysTable = pgTable("api_keys", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  userId: uuid("user_id")
-    .notNull()
-    .references(() => usersTable.id, { onDelete: "cascade" }),
-  orgId: uuid("org_id").references(() => organizationsTable.id, { onDelete: "cascade" }),
-  name: text("name").notNull(),
-  // "live" or "test" — test-mode keys mirror Stripe: they authenticate but are
-  // intended to hit sandbox/non-production data paths and are visually flagged.
-  environment: text("environment").notNull().default("live"),
-  keyHash: text("key_hash").notNull().unique(),
-  keyPrefix: text("key_prefix").notNull(), // first 8 chars for display
-  scopes: text("scopes").array().notNull().default(sql`ARRAY[]::text[]`),
-  rateLimitPerMinute: integer("rate_limit_per_minute"),
-  monthlyQuota: integer("monthly_quota"),
-  expiresAt: timestamp("expires_at"),
-  lastUsedAt: timestamp("last_used_at"),
-  revokedAt: timestamp("revoked_at"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+export const apiKeysTable = pgTable(
+  "api_keys",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => usersTable.id, { onDelete: "cascade" }),
+    orgId: uuid("org_id").references(() => organizationsTable.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    // "live" or "test" — test-mode keys mirror Stripe: they authenticate but are
+    // intended to hit sandbox/non-production data paths and are visually flagged.
+    environment: text("environment").notNull().default("live"),
+    keyHash: text("key_hash").notNull().unique(),
+    keyPrefix: text("key_prefix").notNull(), // first 8 chars for display
+    scopes: text("scopes").array().notNull().default(sql`ARRAY[]::text[]`),
+    rateLimitPerMinute: integer("rate_limit_per_minute"),
+    monthlyQuota: integer("monthly_quota"),
+    expiresAt: timestamp("expires_at"),
+    lastUsedAt: timestamp("last_used_at"),
+    revokedAt: timestamp("revoked_at"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (t) => ({
+    apiKeysUserIdIdx: index("api_keys_user_id_idx").on(t.userId),
+  })
+);
 
 // ── Org SCIM Tokens ───────────────────────────────────────────────────────────
 //
@@ -511,30 +614,36 @@ export const orgScimTokensTable = pgTable(
 
 // ── Subscriptions ─────────────────────────────────────────────────────────────
 
-export const subscriptionsTable = pgTable("subscriptions", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  // unique: one subscription per user / per org (multiple NULLs allowed)
-  userId: uuid("user_id")
-    .references(() => usersTable.id, { onDelete: "set null" })
-    .unique(),
-  orgId: uuid("org_id")
-    .references(() => organizationsTable.id, { onDelete: "set null" })
-    .unique(),
-  stripeCustomerId: text("stripe_customer_id").unique(),
-  stripeSubscriptionId: text("stripe_subscription_id").unique(),
-  stripePriceId: text("stripe_price_id"),
-  stripeProductId: text("stripe_product_id"),
-  plan: text("plan").notNull().default("free"), // "free" | "pro" | "enterprise"
-  status: text("status").notNull().default("active"), // "active" | "canceled" | "past_due" | "trialing" | "paused"
-  currentPeriodStart: timestamp("current_period_start"),
-  currentPeriodEnd: timestamp("current_period_end"),
-  cancelAtPeriodEnd: boolean("cancel_at_period_end").notNull().default(false),
-  trialEnd: timestamp("trial_end"),
-  canceledAt: timestamp("canceled_at"),
-  metadata: jsonb("metadata"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
+export const subscriptionsTable = pgTable(
+  "subscriptions",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    // unique: one subscription per user / per org (multiple NULLs allowed)
+    userId: uuid("user_id")
+      .references(() => usersTable.id, { onDelete: "set null" })
+      .unique(),
+    orgId: uuid("org_id")
+      .references(() => organizationsTable.id, { onDelete: "set null" })
+      .unique(),
+    stripeCustomerId: text("stripe_customer_id").unique(),
+    stripeSubscriptionId: text("stripe_subscription_id").unique(),
+    stripePriceId: text("stripe_price_id"),
+    stripeProductId: text("stripe_product_id"),
+    plan: text("plan").notNull().default("free"), // "free" | "pro" | "enterprise"
+    status: text("status").notNull().default("active"), // "active" | "canceled" | "past_due" | "trialing" | "paused"
+    currentPeriodStart: timestamp("current_period_start"),
+    currentPeriodEnd: timestamp("current_period_end"),
+    cancelAtPeriodEnd: boolean("cancel_at_period_end").notNull().default(false),
+    trialEnd: timestamp("trial_end"),
+    canceledAt: timestamp("canceled_at"),
+    metadata: jsonb("metadata"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (t) => ({
+    subscriptionsStatusIdx: index("subscriptions_status_idx").on(t.status),
+  })
+);
 
 // ── Security events (account takeover detection) ──────────────────────────────
 
@@ -621,3 +730,533 @@ export const featureFlagsTable = pgTable("feature_flags", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
+
+// ── Login streaks ──────────────────────────────────────────────────────────────
+// Tracks daily login streak per user with a 1-day grace period.
+
+export const streaksTable = pgTable("streaks", {
+  userId: uuid("user_id")
+    .primaryKey()
+    .references(() => usersTable.id, { onDelete: "cascade" }),
+  currentStreak: integer("current_streak").notNull().default(0),
+  longestStreak: integer("longest_streak").notNull().default(0),
+  lastLoginDate: text("last_login_date"), // ISO date string YYYY-MM-DD
+  lastLoginAt: timestamp("last_login_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().default(sql`now()`),
+});
+
+// ── Points ledger ──────────────────────────────────────────────────────────────
+// Append-only log of every points change for a user. The running balance is
+// computed by summing rows — this design gives us a full audit trail and makes
+// it trivial to build a points history page.
+
+export const pointsLedgerTable = pgTable(
+  "points_ledger",
+  {
+    id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => usersTable.id, { onDelete: "cascade" }),
+    amount: integer("amount").notNull(), // positive = earned, negative = spent
+    balance: integer("balance").notNull(), // running balance after this entry
+    reason: text("reason").notNull(), // "daily_login" | "referral" | "achievement" | "redemption" | …
+    description: text("description"),
+    metadata: jsonb("metadata"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
+  },
+  (t) => ({
+    pointsLedgerUserIdCreatedIdx: index("points_ledger_user_id_created_idx").on(
+      t.userId,
+      t.createdAt
+    ),
+  })
+);
+
+// ── Achievements ──────────────────────────────────────────────────────────────
+// Tracks which achievements a user has unlocked and when.
+
+export const achievementsTable = pgTable(
+  "achievements",
+  {
+    id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => usersTable.id, { onDelete: "cascade" }),
+    key: text("key").notNull(), // "first_login" | "power_user" | "early_adopter" | …
+    unlockedAt: timestamp("unlocked_at", { withTimezone: true }).notNull().default(sql`now()`),
+  },
+  (t) => ({
+    achievementsUserKeyUnq: unique().on(t.userId, t.key),
+    achievementsUserIdIdx: index("achievements_user_id_idx").on(t.userId),
+  })
+);
+
+// ── Trusted devices per org ──────────────────────────────────────────────────
+
+export const trustedDevicesTable = pgTable(
+  "trusted_devices",
+  {
+    id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+    orgId: uuid("org_id")
+      .notNull()
+      .references(() => organizationsTable.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => usersTable.id, { onDelete: "cascade" }),
+    deviceName: text("device_name").notNull(),
+    deviceFingerprint: text("device_fingerprint").notNull(),
+    registeredBy: uuid("registered_by").references(() => usersTable.id, { onDelete: "set null" }),
+    lastUsedAt: timestamp("last_used_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
+  },
+  (t) => ({
+    trustedDevicesOrgIdIdx: index("trusted_devices_org_id_idx").on(t.orgId),
+    trustedDevicesFingerprintUnq: unique().on(t.orgId, t.deviceFingerprint),
+  })
+);
+
+// ── Webhook delivery logs (durable) ───────────────────────────────────────────
+
+export const webhookDeliveryLogsTable = pgTable(
+  "webhook_delivery_logs",
+  {
+    id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+    webhookId: uuid("webhook_id").notNull(),
+    event: text("event").notNull(),
+    payload: jsonb("payload").notNull(),
+    statusCode: integer("status_code"),
+    responseBody: text("response_body"),
+    errorMessage: text("error_message"),
+    attempt: integer("attempt").notNull().default(1),
+    duration: integer("duration"),
+    success: boolean("success").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
+  },
+  (t) => ({
+    webhookDeliveryLogsWebhookIdIdx: index("webhook_delivery_logs_webhook_id_idx").on(t.webhookId),
+    webhookDeliveryLogsCreatedIdx: index("webhook_delivery_logs_created_idx").on(t.createdAt),
+  })
+);
+
+// ── Passkeys (dedicated table - N+1 fix) ──────────────────────────────────────
+
+export const passkeysTable = pgTable(
+  "passkeys",
+  {
+    id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => usersTable.id, { onDelete: "cascade" }),
+    credentialId: text("credential_id").notNull().unique(),
+    publicKey: text("public_key").notNull(),
+    signCount: integer("sign_count").notNull().default(0),
+    deviceType: text("device_type"),
+    backedUp: boolean("backed_up").notNull().default(false),
+    transports: text("transports").array().notNull().default(sql`ARRAY[]::text[]`),
+    aaguid: text("aaguid"),
+    deviceName: text("device_name"),
+    lastUsedAt: timestamp("last_used_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
+  },
+  (t) => ({
+    passkeysUserIdIdx: index("passkeys_user_id_idx").on(t.userId),
+    passkeysCredentialIdIdx: index("passkeys_credential_id_idx").on(t.credentialId),
+  })
+);
+
+// ── A/B experiment results (durable) ──────────────────────────────────────────
+
+export const experimentResultsTable = pgTable(
+  "experiment_results",
+  {
+    id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+    experimentKey: text("experiment_key").notNull(),
+    variant: text("variant").notNull(),
+    subjectId: text("subject_id").notNull(),
+    converted: boolean("converted").notNull().default(false),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
+  },
+  (t) => ({
+    experimentResultsKeyVariantIdx: index("experiment_results_key_variant_idx").on(
+      t.experimentKey,
+      t.variant
+    ),
+    experimentResultsSubjectUnq: unique().on(t.experimentKey, t.subjectId),
+  })
+);
+
+// ── Analytics events (per-feature) ────────────────────────────────────────────
+
+export const analyticsEventsTable = pgTable(
+  "analytics_events",
+  {
+    id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+    userId: uuid("user_id").references(() => usersTable.id, { onDelete: "set null" }),
+    feature: text("feature").notNull(),
+    action: text("action").notNull(),
+    metadata: jsonb("metadata"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
+  },
+  (t) => ({
+    analyticsEventsFeatureIdx: index("analytics_events_feature_idx").on(t.feature, t.createdAt),
+    analyticsEventsUserIdx: index("analytics_events_user_id_idx").on(t.userId),
+  })
+);
+
+// ── Search analytics ──────────────────────────────────────────────────────────
+
+export const searchAnalyticsTable = pgTable(
+  "search_analytics",
+  {
+    id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+    userId: uuid("user_id").references(() => usersTable.id, { onDelete: "set null" }),
+    query: text("query").notNull(),
+    resultCount: integer("result_count").notNull().default(0),
+    source: text("source").notNull().default("global"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
+  },
+  (t) => ({
+    searchAnalyticsCreatedIdx: index("search_analytics_created_idx").on(t.createdAt),
+    searchAnalyticsZeroResultsIdx: index("search_analytics_zero_results_idx").on(
+      t.resultCount,
+      t.createdAt
+    ),
+  })
+);
+
+// ── File attachments ─────────────────────────────────────────────────────────
+
+export const fileAttachmentsTable = pgTable(
+  "file_attachments",
+  {
+    id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => usersTable.id, { onDelete: "cascade" }),
+    orgId: uuid("org_id").references(() => organizationsTable.id, { onDelete: "cascade" }),
+    feature: text("feature").notNull(), // e.g. "support_ticket", "org_settings"
+    featureRecordId: text("feature_record_id"), // ID of the record this file is attached to
+    fileName: text("file_name").notNull(),
+    fileSize: integer("file_size").notNull(),
+    contentType: text("content_type").notNull(),
+    storageKey: text("storage_key").notNull(), // S3 key or local path
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
+  },
+  (t) => ({
+    fileAttachmentsUserIdx: index("file_attachments_user_id_idx").on(t.userId),
+    fileAttachmentsFeatureIdx: index("file_attachments_feature_idx").on(
+      t.feature,
+      t.featureRecordId
+    ),
+  })
+);
+
+// ── Shared notes (collaboration) ────────────────────────────────────────────
+
+export const sharedNotesTable = pgTable(
+  "shared_notes",
+  {
+    id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+    orgId: uuid("org_id")
+      .notNull()
+      .references(() => organizationsTable.id, { onDelete: "cascade" }),
+    title: text("title").notNull(),
+    content: text("content").notNull().default(""),
+    createdBy: uuid("created_by")
+      .notNull()
+      .references(() => usersTable.id, { onDelete: "cascade" }),
+    updatedBy: uuid("updated_by").references(() => usersTable.id, { onDelete: "set null" }),
+    archived: boolean("archived").notNull().default(false),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().default(sql`now()`),
+  },
+  (t) => ({
+    sharedNotesOrgIdx: index("shared_notes_org_idx").on(t.orgId, t.archived),
+    sharedNotesCreatedByIdx: index("shared_notes_created_by_idx").on(t.createdBy),
+  })
+);
+
+export const sharedNoteRevisionsTable = pgTable(
+  "shared_note_revisions",
+  {
+    id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+    noteId: uuid("note_id")
+      .notNull()
+      .references(() => sharedNotesTable.id, { onDelete: "cascade" }),
+    content: text("content").notNull(),
+    editedBy: uuid("edited_by")
+      .notNull()
+      .references(() => usersTable.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
+  },
+  (t) => ({
+    sharedNoteRevisionsNoteIdx: index("shared_note_revisions_note_idx").on(t.noteId, t.createdAt),
+  })
+);
+
+// ── Activity events (team feed) ──────────────────────────────────────────────
+
+export const activityEventsTable = pgTable(
+  "activity_events",
+  {
+    id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+    orgId: uuid("org_id")
+      .notNull()
+      .references(() => organizationsTable.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => usersTable.id, { onDelete: "cascade" }),
+    type: text("type").notNull(), // "note_created" | "note_updated" | "mention" | "settings_changed" | "member_joined" | …
+    title: text("title").notNull(),
+    description: text("description"),
+    metadata: jsonb("metadata"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
+  },
+  (t) => ({
+    activityEventsOrgIdx: index("activity_events_org_idx").on(t.orgId, t.createdAt),
+    activityEventsUserIdx: index("activity_events_user_idx").on(t.userId),
+  })
+);
+
+// ── @mentions log ────────────────────────────────────────────────────────────
+
+export const mentionsTable = pgTable(
+  "mentions",
+  {
+    id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+    orgId: uuid("org_id")
+      .notNull()
+      .references(() => organizationsTable.id, { onDelete: "cascade" }),
+    mentionedUserId: uuid("mentioned_user_id")
+      .notNull()
+      .references(() => usersTable.id, { onDelete: "cascade" }),
+    mentionedByUserId: uuid("mentioned_by_user_id")
+      .notNull()
+      .references(() => usersTable.id, { onDelete: "cascade" }),
+    sourceType: text("source_type").notNull(), // "note", "activity"
+    sourceId: uuid("source_id"),
+    notificationSent: boolean("notification_sent").notNull().default(false),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
+  },
+  (t) => ({
+    mentionsUserIdx: index("mentions_user_idx").on(t.mentionedUserId, t.createdAt),
+  })
+);
+
+// ── Presence (real-time heartbeat) ───────────────────────────────────────────
+
+export const presenceTable = pgTable("presence", {
+  userId: uuid("user_id")
+    .primaryKey()
+    .references(() => usersTable.id, { onDelete: "cascade" }),
+  orgId: uuid("org_id")
+    .notNull()
+    .references(() => organizationsTable.id, { onDelete: "cascade" }),
+  status: text("status").notNull().default("online"), // "online" | "idle" | "offline"
+  lastSeenAt: timestamp("last_seen_at", { withTimezone: true }).notNull().default(sql`now()`),
+  displayName: text("display_name").notNull(),
+  avatarUrl: text("avatar_url"),
+});
+
+// ── Tax exemptions / VAT IDs (org-level) ──────────────────────────────────────
+
+export const taxExemptionsTable = pgTable(
+  "tax_exemptions",
+  {
+    id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+    orgId: uuid("org_id")
+      .notNull()
+      .references(() => organizationsTable.id, { onDelete: "cascade" }),
+    kind: text("kind").notNull(), // "vat" | "tax_id" | "reverse_charge"
+    taxId: text("tax_id").notNull(), // VAT number / tax ID as submitted
+    country: text("country").notNull(), // ISO-3166 alpha-2
+    businessName: text("business_name"),
+    status: text("status").notNull().default("pending"), // "pending" | "verified" | "rejected"
+    verifiedAt: timestamp("verified_at", { withTimezone: true }),
+    submittedBy: uuid("submitted_by").references(() => usersTable.id, { onDelete: "set null" }),
+    metadata: jsonb("metadata"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().default(sql`now()`),
+  },
+  (t) => ({
+    taxExemptionsOrgIdx: index("tax_exemptions_org_id_idx").on(t.orgId),
+    taxExemptionsOrgTaxIdUnq: unique().on(t.orgId, t.taxId),
+  })
+);
+
+// ── Wallet ─────────────────────────────────────────────────────────────────────
+// Per-user wallet with balance, currency, and Stripe top-up integration.
+
+export const walletsTable = pgTable("wallets", {
+  userId: uuid("user_id")
+    .primaryKey()
+    .references(() => usersTable.id, { onDelete: "cascade" }),
+  balance: integer("balance").notNull().default(0), // in smallest currency unit (cents)
+  lifetimeBalance: integer("lifetime_balance").notNull().default(0), // total ever earned
+  currency: text("currency").notNull().default("usd"), // ISO 4217
+  stripeCustomerId: text("stripe_customer_id"),
+  autoTopUp: boolean("auto_top_up").notNull().default(false),
+  autoTopUpThreshold: integer("auto_top_up_threshold"), // trigger when balance below this
+  autoTopUpAmount: integer("auto_top_up_amount"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().default(sql`now()`),
+});
+
+export const walletTransactionsTable = pgTable("wallet_transactions", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => usersTable.id, { onDelete: "cascade" }),
+  amount: integer("amount").notNull(), // positive = top-up, negative = spend
+  balanceAfter: integer("balance_after").notNull(),
+  type: text("type").notNull(), // "top_up" | "spend" | "refund" | "referral_credit" | "tier_bonus"
+  description: text("description"),
+  stripePaymentIntentId: text("stripe_payment_intent_id"),
+  metadata: jsonb("metadata"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
+}, (t) => ({
+  walletTransactionsUserIdCreatedIdx: index("wallet_transactions_user_id_created_idx").on(t.userId, t.createdAt),
+}));
+
+// ── Tier system ───────────────────────────────────────────────────────────────
+// Bronze / Silver / Gold / Platinum tiers with perks.
+
+export const tiersTable = pgTable("tiers", {
+  key: text("key").primaryKey(), // "bronze" | "silver" | "gold" | "platinum"
+  name: text("name").notNull(),
+  description: text("description"),
+  minPoints: integer("min_points").notNull(), // points required to reach this tier
+  multiplier: integer("multiplier").notNull().default(100), // points earning multiplier (100 = 1x)
+  perks: jsonb("perks").$type<string[]>().notNull().default(sql`ARRAY[]::text[]`),
+  color: text("color"), // hex color for badge display
+  icon: text("icon"), // lucide icon name
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
+});
+
+export const userTiersTable = pgTable("user_tiers", {
+  userId: uuid("user_id")
+    .primaryKey()
+    .references(() => usersTable.id, { onDelete: "cascade" }),
+  tierKey: text("tier_key")
+    .notNull()
+    .references(() => tiersTable.key, { onDelete: "restrict" }),
+  achievedAt: timestamp("achieved_at", { withTimezone: true }).notNull().default(sql`now()`),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
+});
+
+// ── Redemption catalog ────────────────────────────────────────────────────────
+// Items users can redeem with points.
+
+export const redemptionsCatalogTable = pgTable("redemptions_catalog", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  key: text("key").notNull().unique(), // "account_credit_5" | "feature_unlock" | "extended_trial" | "swag_code"
+  name: text("name").notNull(),
+  description: text("description"),
+  cost: integer("cost").notNull(), // points required
+  type: text("type").notNull(), // "account_credit" | "feature_unlock" | "extended_trial" | "swag"
+  value: jsonb("value").$type<{ cents?: number; days?: number; feature?: string; code?: string }>(),
+  active: boolean("active").notNull().default(true),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
+});
+
+export const redemptionsTable = pgTable("redemptions", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => usersTable.id, { onDelete: "cascade" }),
+  catalogId: uuid("catalog_id")
+    .notNull()
+    .references(() => redemptionsCatalogTable.id, { onDelete: "restrict" }),
+  pointsSpent: integer("points_spent").notNull(),
+  status: text("status").notNull().default("completed"), // "completed" | "pending" | "failed"
+  fulfilledAt: timestamp("fulfilled_at", { withTimezone: true }),
+  metadata: jsonb("metadata"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
+}, (t) => ({
+  redemptionsUserIdCreatedIdx: index("redemptions_user_id_created_idx").on(t.userId, t.createdAt),
+}));
+
+// ── Referrals ─────────────────────────────────────────────────────────────────
+// Unique referral links, tracking, and reward attribution.
+
+export const referralsTable = pgTable("referrals", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  referrerUserId: uuid("referrer_user_id")
+    .notNull()
+    .references(() => usersTable.id, { onDelete: "cascade" }),
+  code: text("code").notNull().unique(), // short signed link code
+  slug: text("slug").notNull().unique(), // URL-friendly slug
+  clicks: integer("clicks").notNull().default(0),
+  signups: integer("signups").notNull().default(0),
+  conversions: integer("conversions").notNull().default(0), // signed up + paid
+  rewardsEarned: integer("rewards_earned").notNull().default(0), // points earned from this link
+  active: boolean("active").notNull().default(true),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
+}, (t) => ({
+  referralsReferrerIdx: index("referrals_referrer_idx").on(t.referrerUserId),
+  referralsCodeIdx: index("referrals_code_idx").on(t.code),
+}));
+
+export const referralTrackingTable = pgTable("referral_tracking", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  referralId: uuid("referral_id")
+    .notNull()
+    .references(() => referralsTable.id, { onDelete: "cascade" }),
+  referredUserId: uuid("referred_user_id").references(() => usersTable.id, { onDelete: "set null" }),
+  ipAddress: text("ip_address"),
+  userAgent: text("user_agent"),
+  utmSource: text("utm_source"),
+  utmMedium: text("utm_medium"),
+  utmCampaign: text("utm_campaign"),
+  status: text("status").notNull().default("clicked"), // "clicked" | "signed_up" | "converted" | "rewarded"
+  clickedAt: timestamp("clicked_at", { withTimezone: true }).notNull().default(sql`now()`),
+  signedUpAt: timestamp("signed_up_at", { withTimezone: true }),
+  convertedAt: timestamp("converted_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
+}, (t) => ({
+  referralTrackingReferralIdx: index("referral_tracking_referral_idx").on(t.referralId),
+  referralTrackingReferredIdx: index("referral_tracking_referred_idx").on(t.referredUserId),
+}));
+
+// ── SOC 2 controls ────────────────────────────────────────────────────────────
+// Documented control implementation evidence for SOC 2 Type II audits.
+
+export const soc2ControlsTable = pgTable("soc2_controls", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  controlId: text("control_id").notNull().unique(), // "CC6.1" | "A1.2" | ...
+  category: text("category").notNull(), // "CC6" | "A1" | "C1" | "P"
+  title: text("title").notNull(),
+  description: text("description"),
+  implementation: text("implementation").notNull(), // what we do
+  evidence: text("evidence"), // where proof lives
+  status: text("status").notNull().default("implemented"), // "implemented" | "partial" | "planned"
+  lastReviewedAt: timestamp("last_reviewed_at", { withTimezone: true }),
+  reviewedBy: text("reviewed_by"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().default(sql`now()`),
+});
+
+// ── Risk assessment ───────────────────────────────────────────────────────────
+// Annual risk register with treatment plans.
+
+export const riskAssessmentsTable = pgTable("risk_assessments", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  year: integer("year").notNull(), // assessment year
+  riskId: text("risk_id").notNull(), // "R-001" | "R-002" | ...
+  category: text("category").notNull(), // "security" | "availability" | "compliance" | "financial"
+  title: text("title").notNull(),
+  description: text("description"),
+  likelihood: integer("likelihood").notNull(), // 1-5
+  impact: integer("impact").notNull(), // 1-5
+  riskScore: integer("risk_score").notNull(), // likelihood * impact
+  treatment: text("treatment").notNull(), // "mitigate" | "accept" | "transfer" | "avoid"
+  mitigation: text("mitigation"),
+  owner: text("owner"),
+  status: text("status").notNull().default("open"), // "open" | "mitigated" | "closed"
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().default(sql`now()`),
+}, (t) => ({
+  riskAssessmentsYearIdx: index("risk_assessments_year_idx").on(t.year),
+  riskAssessmentsRiskIdUnq: unique().on(t.year, t.riskId),
+}));

@@ -1,6 +1,6 @@
 "use client";
 
-import { LogOut, Menu } from "lucide-react";
+import { LogOut, Menu, Search } from "lucide-react";
 import { brand } from "@/config/brand";
 
 interface AppTopbarProps {
@@ -35,6 +35,20 @@ export default function AppTopbar({
       </span>
 
       <div className="ml-auto flex items-center gap-1 sm:gap-2">
+        <button
+          type="button"
+          onClick={() =>
+            document.dispatchEvent(new KeyboardEvent("keydown", { key: "k", metaKey: true }))
+          }
+          aria-label="Open command palette"
+          className="hidden h-8 items-center gap-2 rounded-lg border border-border px-3 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground sm:flex"
+        >
+          <Search className="h-3.5 w-3.5" />
+          <span className="hidden md:inline">Search…</span>
+          <kbd className="rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium">
+            ⌘K
+          </kbd>
+        </button>
         {actions}
         <button
           type="button"

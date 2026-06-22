@@ -685,4 +685,422 @@ router.get("/feedback", async (c) => {
   }
 });
 
+// ── Customer segments ──────────────────────────────────────────────────────────
+// Admin endpoints for tagging accounts with customer segments.
+
+const VALID_SEGMENTS = ["champion", "at_risk", "expansion", "new"] as const;
+
+// GET /admin/users/segments — list users by segment
+router.get("/users/segments", async (c) => {
+  try {
+    const segment = c.req.query("segment");
+    const db = getDb();
+
+    let rows: any[];
+    if (segment && VALID_SEGMENTS.includes(segment as any)) {
+      rows = await db
+        .select({
+          id: usersTable.id,
+          email: usersTable.email,
+          displayName: usersTable.displayName,
+          customerSegment: usersTable.customerSegment,
+        })
+        .from(usersTable)
+        .where(eq(usersTable.customerSegment, segment));
+    } else {
+      // Return counts per segment
+      rows = await db
+        .select({
+          segment: usersTable.customerSegment,
+          count: sql<number>`count(*)::int`,
+        })
+        .from(usersTable)
+        .where(sql`${usersTable.customerSegment} IS NOT NULL`)
+        .groupBy(usersTable.customerSegment);
+    }
+
+    return c.json({ segments: rows });
+  } catch (err) {
+    logger.error("Admin segments error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR" }, 500);
+  }
+});
+
+// PUT /admin/users/:id/segment — set customer segment for a user
+router.put("/users/:id/segment", async (c) => {
+  try {
+    const userId = c.req.param("id");
+    const { segment } = await c.req.json().catch(() => ({ segment: null }));
+
+    if (segment !== null && !VALID_SEGMENTS.includes(segment)) {
+      return c.json(
+        {
+          error: "INVALID_REQUEST",
+          message: `Segment must be one of: ${VALID_SEGMENTS.join(", ")}`,
+        },
+        400
+      );
+    }
+
+    const db = getDb();
+    const [updated] = await db
+      .update(usersTable)
+      .set({ customerSegment: segment, updatedAt: new Date() })
+      .where(eq(usersTable.id, userId))
+      .returning({ id: usersTable.id, customerSegment: usersTable.customerSegment });
+
+    if (!updated) {
+      return c.json({ error: "USER_NOT_FOUND" }, 404);
+    }
+
+    return c.json({ user: updated });
+  } catch (err) {
+    logger.error("Admin set segment error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR" }, 500);
+  }
+});
+
+// ── Lifecycle emails ──────────────────────────────────────────────────────────
+
+// POST /admin/lifecycle-emails — trigger lifecycle email batch (admin only)
+router.post("/lifecycle-emails", async (c) => {
+  try {
+    const { sendLifecycleEmails } = await import("../../services/lifecycleEmail.service.js");
+    const results = await sendLifecycleEmails();
+    return c.json({ success: true, results });
+  } catch (err) {
+    logger.error("Admin lifecycle emails error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR" }, 500);
+  }
+});
+
 export default router;
+
+// ── Webhook delivery logs ─────────────────────────────────────────────────────
+
+// GET /admin/webhooks/:webhookId/deliveries — list delivery attempts
+router.get("/webhooks/:webhookId/deliveries", async (c) => {
+  try {
+    const { webhookId } = c.req.param();
+    const limit = Math.min(parseInt(c.req.query("limit") ?? "50", 10), 200);
+    const { getDeliveryLogs } = await import("../../services/webhookDeliveryLog.service.js");
+    const logs = await getDeliveryLogs(webhookId, limit);
+    return c.json({ deliveries: logs });
+  } catch (err) {
+    logger.error("Admin webhook deliveries error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR" }, 500);
+  }
+});
+
+// ── Pre-signed uploads ────────────────────────────────────────────────────────
+
+// POST /admin/uploads/presigned — generate a pre-signed upload URL (admin+)
+router.post("/uploads/presigned", async (c) => {
+  try {
+    const { contentType, fileName, maxSize } = await c.req.json().catch(() => ({}));
+    if (!contentType || !fileName) {
+      return c.json(
+        { error: "INVALID_REQUEST", message: "contentType and fileName required" },
+        400
+      );
+    }
+    const { generatePresignedUploadUrl } = await import(
+      "../../services/presignedUpload.service.js"
+    );
+    const result = await generatePresignedUploadUrl({ contentType, fileName, maxSize });
+    return c.json(result);
+  } catch (err: any) {
+    logger.error("Admin presigned upload error", err as Error);
+    return c.json({ error: "INVALID_REQUEST", message: err.message }, 400);
+  }
+});
+
+// ── Analytics ─────────────────────────────────────────────────────────────────
+
+import {
+  getFeatureUsage,
+  getFunnelCounts,
+  getZeroResultQueries,
+  trackFunnelEvent,
+} from "../../services/analytics.service";
+
+// GET /admin/analytics/funnel — funnel conversion counts
+router.get("/analytics/funnel", async (c) => {
+  try {
+    const days = Math.min(parseInt(c.req.query("days") ?? "30", 10), 365);
+    const endDate = new Date();
+    const startDate = new Date(Date.now() - days * 86_400_000);
+    const counts = await getFunnelCounts(startDate, endDate);
+    return c.json({ funnel: counts, period: { startDate, endDate, days } });
+  } catch (err) {
+    logger.error("Admin funnel analytics error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR" }, 500);
+  }
+});
+
+// GET /admin/analytics/features — per-feature usage counts
+router.get("/analytics/features", async (c) => {
+  try {
+    const feature = c.req.query("feature");
+    if (!feature)
+      return c.json({ error: "INVALID_REQUEST", message: "feature query param required" }, 400);
+    const days = Math.min(parseInt(c.req.query("days") ?? "30", 10), 365);
+    const endDate = new Date();
+    const startDate = new Date(Date.now() - days * 86_400_000);
+    const usage = await getFeatureUsage(feature, startDate, endDate);
+    return c.json({ feature, usage, period: { startDate, endDate, days } });
+  } catch (err) {
+    logger.error("Admin feature analytics error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR" }, 500);
+  }
+});
+
+// GET /admin/analytics/search — zero-result search queries
+router.get("/analytics/search", async (c) => {
+  try {
+    const days = Math.min(parseInt(c.req.query("days") ?? "30", 10), 365);
+    const limit = Math.min(parseInt(c.req.query("limit") ?? "50", 10), 200);
+    const endDate = new Date();
+    const startDate = new Date(Date.now() - days * 86_400_000);
+    const queries = await getZeroResultQueries(startDate, endDate, limit);
+    return c.json({ zeroResultQueries: queries, period: { startDate, endDate, days } });
+  } catch (err) {
+    logger.error("Admin search analytics error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR" }, 500);
+  }
+});
+
+// POST /admin/analytics/track — track a funnel event (for testing/integration)
+router.post("/analytics/track", async (c) => {
+  try {
+    const { userId, step, metadata } = await c.req.json().catch(() => ({}));
+    if (!userId || !step)
+      return c.json({ error: "INVALID_REQUEST", message: "userId and step required" }, 400);
+    await trackFunnelEvent({ userId, step, metadata });
+    return c.json({ success: true });
+  } catch (err) {
+    logger.error("Admin track analytics error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR" }, 500);
+  }
+});
+
+// ── File attachments ──────────────────────────────────────────────────────────
+
+import { fileAttachmentsTable } from "../../db/schema";
+
+// GET /admin/attachments — list file attachments (admin)
+router.get("/attachments", async (c) => {
+  try {
+    const limit = Math.min(parseInt(c.req.query("limit") ?? "50", 10), 200);
+    const offset = parseInt(c.req.query("offset") ?? "0", 10);
+    const feature = c.req.query("feature");
+    const db = getDb();
+    const conditions = feature ? eq(fileAttachmentsTable.feature, feature) : undefined;
+    const rows = await db
+      .select()
+      .from(fileAttachmentsTable)
+      .where(conditions)
+      .orderBy(desc(fileAttachmentsTable.createdAt))
+      .limit(limit)
+      .offset(offset);
+    return c.json({ attachments: rows });
+  } catch (err) {
+    logger.error("Admin attachments error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR" }, 500);
+  }
+});
+
+// ── Pricing / paywall experiments ─────────────────────────────────────────────
+
+import {
+  assignVariant,
+  getExperimentResults,
+  recordConversion,
+  recordExposure,
+  type Variant,
+} from "../../services/experiments.service";
+
+interface PricingExperiment {
+  key: string;
+  name: string;
+  variants: Variant[];
+  enabled: boolean;
+}
+
+// In-memory store for pricing experiments (can be moved to DB later)
+const pricingExperiments = new Map<string, PricingExperiment>();
+
+// Initialize default pricing experiments
+pricingExperiments.set("pricing_page_v1", {
+  key: "pricing_page_v1",
+  name: "Pricing Page Layout",
+  variants: [
+    { name: "control", weight: 50 },
+    { name: "highlight_pro", weight: 50 },
+  ],
+  enabled: true,
+});
+
+// GET /admin/experiments/pricing — list pricing experiments
+router.get("/experiments/pricing", async (c) => {
+  try {
+    const experiments = Array.from(pricingExperiments.values());
+    return c.json({ experiments });
+  } catch (err) {
+    logger.error("Admin pricing experiments error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR" }, 500);
+  }
+});
+
+// POST /admin/experiments/pricing — create/update a pricing experiment
+router.post("/experiments/pricing", async (c) => {
+  try {
+    const { key, name, variants, enabled } = await c.req.json().catch(() => ({}));
+    if (!key || !name || !variants) {
+      return c.json({ error: "INVALID_REQUEST", message: "key, name, and variants required" }, 400);
+    }
+    pricingExperiments.set(key, { key, name, variants, enabled: enabled ?? true });
+    return c.json({ experiment: pricingExperiments.get(key) });
+  } catch (err) {
+    logger.error("Admin create pricing experiment error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR" }, 500);
+  }
+});
+
+// GET /admin/experiments/pricing/:key/results — get experiment results
+router.get("/experiments/pricing/:key/results", async (c) => {
+  try {
+    const key = c.req.param("key");
+    const results = getExperimentResults(key);
+    const experiment = pricingExperiments.get(key);
+    return c.json({ experiment, results });
+  } catch (err) {
+    logger.error("Admin experiment results error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR" }, 500);
+  }
+});
+
+// POST /admin/experiments/pricing/:key/expose — record an exposure
+router.post("/experiments/pricing/:key/expose", async (c) => {
+  try {
+    const key = c.req.param("key");
+    const { userId } = await c.req.json().catch(() => ({}));
+    if (!userId) return c.json({ error: "INVALID_REQUEST", message: "userId required" }, 400);
+    const experiment = pricingExperiments.get(key);
+    if (!experiment) return c.json({ error: "NOT_FOUND", message: "Experiment not found" }, 404);
+    const variant = assignVariant(key, userId, experiment.variants);
+    if (variant) recordExposure(key, variant);
+    return c.json({ variant });
+  } catch (err) {
+    logger.error("Admin experiment expose error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR" }, 500);
+  }
+});
+
+// POST /admin/experiments/pricing/:key/convert — record a conversion
+router.post("/experiments/pricing/:key/convert", async (c) => {
+  try {
+    const key = c.req.param("key");
+    const { userId } = await c.req.json().catch(() => ({}));
+    if (!userId) return c.json({ error: "INVALID_REQUEST", message: "userId required" }, 400);
+    const experiment = pricingExperiments.get(key);
+    if (!experiment) return c.json({ error: "NOT_FOUND", message: "Experiment not found" }, 404);
+    // Find which variant this user was assigned to and record conversion
+    const variant = assignVariant(key, userId, experiment.variants);
+    if (variant) recordConversion(key, variant);
+    return c.json({ success: true });
+  } catch (err) {
+    logger.error("Admin experiment convert error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR" }, 500);
+  }
+});
+
+// POST /admin/attachments/upload — upload a file attachment
+router.post("/attachments/upload", authMiddleware, async (c) => {
+  try {
+    const user = c.get("user");
+    const formData = await c.req.formData();
+    const file = formData.get("file") as File | null;
+    const feature = formData.get("feature") as string | null;
+    const featureRecordId = formData.get("feature_record_id") as string | null;
+    const orgId = formData.get("org_id") as string | null;
+
+    if (!file || !feature) {
+      return c.json({ error: "INVALID_REQUEST", message: "file and feature required" }, 400);
+    }
+
+    // Validate file type and size
+    const allowedTypes = [
+      "image/jpeg",
+      "image/png",
+      "image/gif",
+      "image/webp",
+      "application/pdf",
+      "text/plain",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    ];
+    if (!allowedTypes.includes(file.type)) {
+      return c.json(
+        { error: "INVALID_FILE_TYPE", message: `Allowed types: ${allowedTypes.join(", ")}` },
+        400
+      );
+    }
+
+    const maxSize = 10 * 1024 * 1024; // 10 MB
+    if (file.size > maxSize) {
+      return c.json({ error: "FILE_TOO_LARGE", message: "Max file size is 10 MB" }, 400);
+    }
+
+    // Upload to S3 (stamped with a long-lived Cache-Control so an edge/CDN can
+    // cache it) or fall back to local disk.
+    const { uploadBuffer, isS3BackupEnabled, getUploadCacheControl } = await import(
+      "../../services/objectStorage.service.js"
+    );
+    const cacheControl = getUploadCacheControl();
+    const ext = file.name.split(".").pop() || "bin";
+    const storageKey = `attachments/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+    const buffer = Buffer.from(await file.arrayBuffer());
+
+    let url: string;
+    if (isS3BackupEnabled()) {
+      // uploadBuffer returns the CDN/edge-aware delivery URL for the stored key.
+      const uploaded = await uploadBuffer({
+        key: storageKey,
+        body: buffer,
+        contentType: file.type,
+        cacheControl,
+      });
+      url = uploaded.url;
+    } else {
+      // Fallback: store locally
+      const fs = await import("node:fs/promises");
+      const path = await import("node:path");
+      const uploadDir = path.join(process.cwd(), "uploads", "attachments");
+      await fs.mkdir(uploadDir, { recursive: true });
+      await fs.writeFile(path.join(uploadDir, storageKey.replace(/\//g, "_")), buffer);
+      url = `/uploads/attachments/${storageKey.replace(/\//g, "_")}`;
+    }
+
+    // Record in database
+    const db = getDb();
+    const [attachment] = await db
+      .insert(fileAttachmentsTable)
+      .values({
+        userId: user.id,
+        orgId,
+        feature,
+        featureRecordId,
+        fileName: file.name,
+        fileSize: file.size,
+        contentType: file.type,
+        storageKey,
+      })
+      .returning();
+
+    return c.json({ attachment, url, cacheControl }, 201);
+  } catch (err) {
+    logger.error("Admin attachment upload error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR" }, 500);
+  }
+});

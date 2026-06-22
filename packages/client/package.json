@@ -1,0 +1,40 @@
+{
+  "name": "@zeroauth/client",
+  "version": "1.0.0",
+  "description": "Auto-generated, dependency-free TypeScript client for the ZeroAuth API.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": ["dist", "src", "README.md"],
+  "scripts": {
+    "generate": "tsx ../../scripts/generate-sdk.ts",
+    "build": "tsc -p tsconfig.json",
+    "prepublishOnly": "npm run generate && npm run build"
+  },
+  "keywords": ["zeroauth", "auth", "authentication", "sdk", "openapi", "typescript", "paseto"],
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ALFAMAS/zeroauth.git",
+    "directory": "packages/client"
+  },
+  "devDependencies": {
+    "tsx": "^4.22.4",
+    "typescript": "^5.4.0"
+  }
+}

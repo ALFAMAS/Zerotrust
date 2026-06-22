@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Badge from "@/components/Badge";
 import Modal from "@/components/Modal";
 import { api } from "@/lib/api";
@@ -40,10 +40,13 @@ export default function UsersPage() {
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviting, setInviting] = useState(false);
 
-  function showToast(msg: string) {
+  const toastTimer = useRef<ReturnType<typeof setTimeout>>();
+
+  const showToast = useCallback((msg: string) => {
     setToast(msg);
-    setTimeout(() => setToast(null), 3000);
-  }
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    toastTimer.current = setTimeout(() => setToast(null), 3000);
+  }, []);
 
   const loadUsers = useCallback(async () => {
     setLoading(true);
@@ -67,7 +70,7 @@ export default function UsersPage() {
     } finally {
       setLoading(false);
     }
-  }, [page, search, statusFilter, showToast]);
+  }, [page, search, statusFilter]);
 
   useEffect(() => {
     loadUsers();

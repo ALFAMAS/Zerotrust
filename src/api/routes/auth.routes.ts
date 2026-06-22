@@ -2,13 +2,19 @@ import * as nodeCrypto from "node:crypto";
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
 import bcrypt from "bcryptjs";
-import { and, eq, gt } from "drizzle-orm";
+import { and, eq, gt, sql } from "drizzle-orm";
 import { Hono } from "hono";
 import { nanoid } from "nanoid";
 import { z } from "zod";
 import { getConfig } from "../../config";
 import { getDb } from "../../db";
-import { otpsTable, refreshTokensTable, sessionsTable, usersTable } from "../../db/schema";
+import {
+  oauthExchangeCodesTable,
+  otpsTable,
+  refreshTokensTable,
+  sessionsTable,
+  usersTable,
+} from "../../db/schema";
 import { getLogger } from "../../logger";
 import { authMiddleware } from "../../middleware/auth";
 import {
@@ -19,6 +25,11 @@ import {
 import { requireProofOfPossession } from "../../middleware/proofOfPossession";
 import { rateLimit } from "../../middleware/rateLimiting";
 import { enforceMaxConcurrentDevices } from "../../middleware/sessionControl";
+import {
+  buildAuthorizationUrl,
+  isSupportedProvider,
+  PROVIDER_META,
+} from "../../oauth/authorize-url";
 import { getProviderAdapter } from "../../oauth/provider.factory";
 import { recordAndRespond } from "../../services/accountTakeover.service";
 import { validateSignupEmail } from "../../services/disposableEmail.service";
@@ -45,27 +56,92 @@ import type { HonoEnv } from "../../shared/types";
 const router = new Hono<HonoEnv>();
 const logger = getLogger("auth-routes");
 
-const oauthStateStore = new Map<string, { ts: number }>();
-const OAUTH_STATE_TTL_MS = 5 * 60 * 1000;
+const OAUTH_STATE_TTL_SECS = 300; // 5 minutes
 
-function generateOAuthState() {
+async function getAndVerifyOAuthState(
+  state?: string
+): Promise<{ ok: boolean; codeChallenge: string | null; codeVerifier: string | null }> {
+  if (!state) return { ok: false, codeChallenge: null, codeVerifier: null };
+  // Try Redis first
+  try {
+    const { getRedis } = await import("../../services/rateLimiter/redis.js");
+    const redis = getRedis();
+    if (redis) {
+      const raw = await redis.get(`oauth:state:${state}`);
+      if (!raw) return { ok: false, codeChallenge: null, codeVerifier: null };
+      await redis.del(`oauth:state:${state}`);
+      const parsed = JSON.parse(raw);
+      if (Date.now() - parsed.ts > OAUTH_STATE_TTL_SECS * 1000)
+        return { ok: false, codeChallenge: null, codeVerifier: null };
+      return {
+        ok: true,
+        codeChallenge: parsed.codeChallenge || null,
+        codeVerifier: parsed.codeVerifier || null,
+      };
+    }
+  } catch {
+    // Redis not available, fall through to memory
+  }
+  // Fallback: in-memory store
+  const entry = oauthStateStore.get(state);
+  if (!entry) return { ok: false, codeChallenge: null, codeVerifier: null };
+  if (Date.now() - entry.ts > OAUTH_STATE_TTL_SECS * 1000) {
+    oauthStateStore.delete(state);
+    return { ok: false, codeChallenge: null, codeVerifier: null };
+  }
+  const challenge = (entry as any).codeChallenge || null;
+  const verifier = (entry as any).codeVerifier || null;
+  oauthStateStore.delete(state);
+  return { ok: true, codeChallenge: challenge, codeVerifier: verifier };
+}
+
+// In-memory fallback for single-instance deployments.
+// Bounded: entries auto-expire via TTL and a periodic sweep purges stale
+// entries so the Map never grows without bound.
+const oauthStateStore = new Map<
+  string,
+  { ts: number; codeChallenge?: string | null; codeVerifier?: string | null }
+>();
+const OAUTH_STATE_MAX_SIZE = 10_000;
+
+// Periodic sweep every 60s to evict expired entries from the in-memory store.
+const oauthStateCleanupInterval = setInterval(() => {
+  const cutoff = Date.now() - OAUTH_STATE_TTL_SECS * 1000;
+  for (const [key, entry] of oauthStateStore) {
+    if (entry.ts < cutoff) oauthStateStore.delete(key);
+  }
+}, 60_000);
+// Allow the process to exit even if the timer is still registered.
+if (oauthStateCleanupInterval.unref) oauthStateCleanupInterval.unref();
+
+async function generateOAuthState(codeChallenge?: string, codeVerifier?: string): Promise<string> {
   const state = nanoid();
-  oauthStateStore.set(state, { ts: Date.now() });
+  const store = JSON.stringify({
+    ts: Date.now(),
+    codeChallenge: codeChallenge || null,
+    codeVerifier: codeVerifier || null,
+  });
+  // Store in Redis if available (multi-instance safe), else fall back to memory
+  try {
+    const { getRedis } = await import("../../services/rateLimiter/redis.js");
+    const redis = getRedis();
+    if (redis) {
+      await redis.setex(`oauth:state:${state}`, OAUTH_STATE_TTL_SECS, store);
+      return state;
+    }
+  } catch {
+    // Redis not available, fall through to memory
+  }
+  // Fallback: in-memory store with bounded size. If the cap is hit, evict the
+  // oldest 25% of entries to make room (amortised cost, prevents OOM).
+  if (oauthStateStore.size >= OAUTH_STATE_MAX_SIZE) {
+    const entries = [...oauthStateStore.entries()].sort((a, b) => a[1].ts - b[1].ts);
+    const evictCount = Math.floor(OAUTH_STATE_MAX_SIZE * 0.25);
+    for (let i = 0; i < evictCount; i++) oauthStateStore.delete(entries[i][0]);
+  }
+  oauthStateStore.set(state, JSON.parse(store));
   return state;
 }
-
-function verifyOAuthState(state?: string) {
-  if (!state) return null;
-  const entry = oauthStateStore.get(state);
-  if (!entry) return null;
-  if (Date.now() - entry.ts > OAUTH_STATE_TTL_MS) {
-    oauthStateStore.delete(state);
-    return null;
-  }
-  oauthStateStore.delete(state);
-  return entry;
-}
-
 let tokenServiceInstance: TokenService | null = null;
 async function getTokenService() {
   if (tokenServiceInstance) return tokenServiceInstance;
@@ -193,6 +269,35 @@ async function issueAuthenticatedSession(
 
   await db.update(usersTable).set({ lastLoginAt: new Date() }).where(eq(usersTable.id, user.id));
 
+  // Streak tracking + achievement checks — fire and forget, never blocks login.
+  void (async () => {
+    try {
+      const { recordLogin } = await import("../../services/streak.service.js");
+      const { unlockAchievement } = await import("../../services/achievement.service.js");
+      const { awardPoints } = await import("../../services/points.service.js");
+
+      const streak = await recordLogin(user.id);
+
+      // First Login achievement
+      await unlockAchievement(user.id, "first_login");
+
+      // Power User achievement (7-day streak)
+      if (streak.currentStreak >= 7) {
+        await unlockAchievement(user.id, "power_user");
+      }
+
+      // Award daily login points
+      await awardPoints({
+        userId: user.id,
+        amount: 10,
+        reason: "daily_login",
+        description: `Day ${streak.currentStreak} login streak`,
+      });
+    } catch (err) {
+      logger.warn("Post-login streak/achievement error", { userId: user.id, error: String(err) });
+    }
+  })();
+
   // New-device alert email — fire and forget, never blocks the response
   void notifyIfNewDevice({
     userId: user.id,
@@ -206,10 +311,15 @@ async function issueAuthenticatedSession(
   });
 
   return {
-    accessToken,
-    refreshToken: refreshTokenPlain,
-    expiresIn: cfg.session.defaultTTL,
-    tokenType: "Bearer",
+    body: {
+      accessToken,
+      refreshToken: refreshTokenPlain,
+      expiresIn: cfg.session.defaultTTL,
+      tokenType: "Bearer",
+    },
+    // Exposed for callers (OAuth callback) that must persist the session id
+    // alongside the issued tokens. Not part of the public login response.
+    sessionId: session.id,
   };
 }
 
@@ -519,7 +629,7 @@ router.post("/login", rateLimit({ points: 20, windowSecs: 60 }), async (c) => {
       });
     }
 
-    const body = await issueAuthenticatedSession(c, user);
+    const { body } = await issueAuthenticatedSession(c, user);
     return c.json(body);
   } catch (err) {
     logger.error("Login error", err as Error);
@@ -538,7 +648,7 @@ router.post("/login/mfa", rateLimit({ points: 10, windowSecs: 60 }), async (c) =
     }
 
     const tokenSvc = await getTokenService();
-    let payload;
+    let payload: Awaited<ReturnType<TokenService["verifyAccessToken"]>>;
     try {
       payload = await tokenSvc.verifyAccessToken(mfaToken);
     } catch {
@@ -589,7 +699,7 @@ router.post("/login/mfa", rateLimit({ points: 10, windowSecs: 60 }), async (c) =
       return c.json({ error: "INVALID_CODE", message: "Invalid MFA code" }, 401);
     }
 
-    const body = await issueAuthenticatedSession(c, user);
+    const { body } = await issueAuthenticatedSession(c, user);
     return c.json(body);
   } catch (err) {
     logger.error("Login MFA error", err as Error);
@@ -691,9 +801,53 @@ router.post(
 );
 
 // POST /oauth/state
-router.post("/oauth/state", rateLimit({ points: 20, windowSecs: 60 }), (c) => {
-  const state = generateOAuthState();
-  return c.json({ state, ttlSeconds: Math.floor(OAUTH_STATE_TTL_MS / 1000) });
+router.post("/oauth/state", rateLimit({ points: 20, windowSecs: 60 }), async (c) => {
+  const body = await c.req.json().catch(() => ({}));
+  const state = await generateOAuthState((body as any).codeChallenge);
+  return c.json({ state, ttlSeconds: OAUTH_STATE_TTL_SECS });
+});
+
+// GET /oauth/:provider/authorize — returns the provider authorization URL + state.
+//
+// PKCE is generated server-side: the code_verifier is created here, kept only in
+// the (Redis/in-memory) state record, and never sent to the browser. This keeps
+// the verifier secret end-to-end (the SPA cannot leak it via URL/history) while
+// still binding the authorization code to this transaction. The CSRF `state` is
+// validated on the callback.
+router.get("/oauth/:provider/authorize", rateLimit({ points: 20, windowSecs: 60 }), async (c) => {
+  const provider = c.req.param("provider");
+  if (!isSupportedProvider(provider)) {
+    return c.json(
+      { error: "UNSUPPORTED_PROVIDER", message: `Provider '${provider}' is not supported` },
+      400
+    );
+  }
+
+  const cfg = getConfig();
+  const p = cfg.oauth.providers[provider];
+  if (!p?.clientId || !p?.clientSecret || !p?.redirectUri) {
+    return c.json(
+      { error: "PROVIDER_NOT_CONFIGURED", message: `Provider '${provider}' is not configured` },
+      400
+    );
+  }
+
+  let codeChallenge: string | undefined;
+  let codeVerifier: string | undefined;
+  if (PROVIDER_META[provider].supportsPKCE) {
+    codeVerifier = nodeCrypto.randomBytes(32).toString("base64url");
+    codeChallenge = nodeCrypto.createHash("sha256").update(codeVerifier).digest("base64url");
+  }
+
+  const state = await generateOAuthState(codeChallenge, codeVerifier);
+  const authorizeUrl = buildAuthorizationUrl(provider, {
+    clientId: p.clientId,
+    redirectUri: p.redirectUri,
+    state,
+    codeChallenge,
+  });
+
+  return c.json({ authorizeUrl, state });
 });
 
 // GET /oauth/:provider/callback
@@ -702,19 +856,33 @@ router.get("/oauth/:provider/callback", rateLimit({ points: 20, windowSecs: 60 }
     const provider = c.req.param("provider");
     const code = c.req.query("code");
     const state = c.req.query("state");
-    const codeVerifier = c.req.query("code_verifier");
 
     if (!code) {
       return c.json({ error: "INVALID_REQUEST", message: "code is required" }, 400);
     }
-    if (!verifyOAuthState(state)) {
+    const stateResult = await getAndVerifyOAuthState(state);
+    if (!stateResult.ok) {
       return c.json({ error: "INVALID_STATE", message: "Invalid or expired state" }, 400);
     }
 
+    // PKCE verification: if a code_challenge was stored, the code_verifier must match
+    let codeVerifier: string | null = null;
+    if (stateResult.codeChallenge) {
+      codeVerifier = stateResult.codeVerifier;
+      if (!codeVerifier) {
+        return c.json({ error: "PKCE_REQUIRED", message: "code_verifier is required" }, 400);
+      }
+      const { createHash } = await import("node:crypto");
+      const challenge = createHash("sha256").update(codeVerifier).digest("base64url");
+      if (challenge !== stateResult.codeChallenge) {
+        return c.json({ error: "PKCE_MISMATCH", message: "Invalid code_verifier" }, 400);
+      }
+    }
+
     const adapter = getProviderAdapter(provider);
-    let result;
+    let result: Awaited<ReturnType<typeof adapter.exchangeCode>>;
     try {
-      result = await adapter.exchangeCode(code, codeVerifier);
+      result = await adapter.exchangeCode(code, codeVerifier ?? undefined);
     } catch (err) {
       if (err instanceof Error && err.message.startsWith("UNSUPPORTED_OAUTH_PROVIDER")) {
         return c.json(
@@ -729,10 +897,13 @@ router.get("/oauth/:provider/callback", rateLimit({ points: 20, windowSecs: 60 }
     }
 
     const profile: any = result.profile;
-    const email = profile.email || profile.emails?.[0]?.value;
-    if (!email) {
+    const rawEmail = profile.email || profile.emails?.[0]?.value;
+    if (!rawEmail) {
       return c.json({ error: "NO_EMAIL", message: "Provider did not return email" }, 400);
     }
+    const email = String(rawEmail).toLowerCase().trim();
+    const providerId = profile.id != null ? String(profile.id) : undefined;
+    const link = { provider, providerId, email, connectedAt: new Date() };
 
     const db = getDb();
     const userRows = await db.select().from(usersTable).where(eq(usersTable.email, email)).limit(1);
@@ -745,72 +916,90 @@ router.get("/oauth/:provider/callback", rateLimit({ points: 20, windowSecs: 60 }
           email,
           displayName: profile.name || email.split("@")[0],
           roles: ["user"],
-          oauthProviders: [{ provider, providerId: profile.id, connectedAt: new Date() }],
+          oauthProviders: [link],
+          // Trust the IdP's verification assertion for the initial email.
+          emailVerifiedAt: profile.emailVerified ? new Date() : null,
           status: "active",
         } as any)
         .returning();
       user = created;
     } else {
       const providers: any[] = (user.oauthProviders as any[]) || [];
-      const has = providers.some((p) => p.provider === provider && p.providerId === profile.id);
+      const has = providers.some((p) => p.provider === provider && p.providerId === providerId);
       if (!has) {
         await db
           .update(usersTable)
-          .set({
-            oauthProviders: [
-              ...providers,
-              { provider, providerId: profile.id, connectedAt: new Date() },
-            ],
-          })
+          .set({ oauthProviders: [...providers, link], updatedAt: new Date() })
           .where(eq(usersTable.id, user.id));
       }
     }
 
-    const tokenSvc = await getTokenService();
-    const popKey = c.req.header("x-pop-key") || undefined;
-    const sessionId = crypto.randomUUID();
+    // Mint the session through the shared helper so OAuth logins get the same
+    // device fingerprinting, new-device alerting, and max-device enforcement as
+    // password logins.
+    const { body, sessionId } = await issueAuthenticatedSession(c, user);
 
-    const accessToken = await tokenSvc.signAccessToken({
-      sub: user.id,
-      email: user.email,
-      sid: sessionId,
-      aud: "zeroauth",
-      scope: ["openid"],
-      pop_key: popKey,
-    });
-    const payload = await tokenSvc.verifyAccessToken(accessToken);
-
-    const [session] = await db
-      .insert(sessionsTable)
-      .values({
-        id: sessionId,
-        userId: user.id,
-        tokenId: payload.jti,
-        deviceFingerprint: {},
-        ipAddress: getClientIp(c),
-        userAgent: c.req.header("user-agent"),
-        expiresAt: new Date(payload.exp * 1000),
-        lastActivityAt: new Date(),
-        isActive: true,
-      })
-      .returning();
-
-    const refreshPlain = await tokenSvc.signRefreshToken();
-    await db.insert(refreshTokensTable).values({
+    // Hand the tokens off via a short-lived, one-time exchange code rather than
+    // putting them in the redirect URL (browser history, logs, Referer). The SPA
+    // redeems it via POST /oauth/exchange.
+    const exchangeCode = nanoid(32);
+    const EXCHANGE_CODE_TTL_SECS = 60;
+    await db.insert(oauthExchangeCodesTable).values({
+      code: exchangeCode,
       userId: user.id,
-      sessionId: session.id,
-      tokenHash: hashToken(refreshPlain),
-      expiresAt: new Date(Date.now() + getConfig().session.refreshTokenTTL * 1000),
+      sessionId,
+      accessToken: body.accessToken,
+      refreshToken: body.refreshToken,
+      expiresAt: new Date(Date.now() + EXCHANGE_CODE_TTL_SECS * 1000),
     });
 
-    return c.json({
-      accessToken,
-      refreshToken: refreshPlain,
-      expiresIn: getConfig().session.defaultTTL,
-    });
+    const appUrl = process.env.APP_URL || "http://localhost:3000";
+    return c.redirect(`${appUrl}/login?oauth_code=${exchangeCode}`, 302);
   } catch (err) {
     logger.error("OAuth callback error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR", message: "OAuth callback failed" }, 500);
+    // Redirect to frontend login with an error so the user isn't stuck on a
+    // bare JSON error page at the API origin.
+    const appUrl = process.env.APP_URL || "http://localhost:3000";
+    return c.redirect(
+      `${appUrl}/login?error=OAUTH_FAILED&message=${encodeURIComponent("OAuth callback failed")}`,
+      302
+    );
+  }
+});
+
+// POST /oauth/exchange — redeems a short-lived exchange code for tokens.
+// This avoids passing tokens through the URL (browser history, logs, Referer).
+router.post("/oauth/exchange", rateLimit({ points: 10, windowSecs: 60 }), async (c) => {
+  try {
+    const { code } = await c.req.json().catch(() => ({}));
+    if (!code || typeof code !== "string") {
+      return c.json({ error: "INVALID_REQUEST", message: "code is required" }, 400);
+    }
+
+    const db = getDb();
+    const [row] = await db
+      .select()
+      .from(oauthExchangeCodesTable)
+      .where(eq(oauthExchangeCodesTable.code, code))
+      .limit(1);
+
+    if (!row || row.usedAt || row.expiresAt < new Date()) {
+      return c.json({ error: "INVALID_CODE", message: "Invalid or expired code" }, 400);
+    }
+
+    // Mark as used (one-time)
+    await db
+      .update(oauthExchangeCodesTable)
+      .set({ usedAt: new Date() })
+      .where(eq(oauthExchangeCodesTable.code, code));
+
+    return c.json({
+      accessToken: row.accessToken,
+      refreshToken: row.refreshToken,
+    });
+  } catch (err) {
+    logger.error("OAuth exchange error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR", message: "Token exchange failed" }, 500);
   }
 });
 
@@ -935,6 +1124,136 @@ router.patch("/me", authMiddleware, async (c) => {
   }
 });
 
+// ── POST /auth/me/onboarding-complete ──────────────────────────────────────────
+// Fires an analytics/Slack event when the user finishes the setup checklist.
+// Idempotent: repeated calls are no-ops (tracked via users.metadata).
+router.post("/me/onboarding-complete", authMiddleware, async (c) => {
+  try {
+    const user = c.get("user");
+    const db = getDb();
+
+    const [row] = await db
+      .select({ metadata: usersTable.metadata })
+      .from(usersTable)
+      .where(eq(usersTable.id, user.id))
+      .limit(1);
+
+    // Idempotent: already marked complete.
+    if ((row?.metadata as any)?.onboardingCompletedAt) {
+      return c.json({ success: true, alreadyCompleted: true });
+    }
+
+    await db
+      .update(usersTable)
+      .set({
+        metadata: {
+          ...(row?.metadata ?? {}),
+          onboardingCompletedAt: new Date().toISOString(),
+        },
+        updatedAt: new Date(),
+      })
+      .where(eq(usersTable.id, user.id));
+
+    // Fire notification (Slack / Teams / PagerDuty) — non-blocking.
+    const { notificationDispatcher } = await import("../../notifications/dispatcher.js");
+    void notificationDispatcher.dispatch(
+      "onboarding.completed",
+      {
+        userId: user.id,
+        email: user.email,
+        displayName: user.displayName ?? user.email,
+      }
+    );
+
+    return c.json({ success: true });
+  } catch (err) {
+    logger.error("Onboarding complete error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR", message: "Failed to mark onboarding complete" }, 500);
+  }
+});
+
+// ── GET /auth/me/streak ───────────────────────────────────────────────────────
+router.get("/me/streak", authMiddleware, async (c) => {
+  try {
+    const user = c.get("user");
+    const { getStreak } = await import("../../services/streak.service.js");
+    const streak = await getStreak(user.id);
+    return c.json({ streak });
+  } catch (err) {
+    logger.error("Get streak error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR" }, 500);
+  }
+});
+
+// ── GET /auth/me/achievements ─────────────────────────────────────────────────
+router.get("/me/achievements", authMiddleware, async (c) => {
+  try {
+    const user = c.get("user");
+    const { getUserAchievements, ACHIEVEMENT_DEFS } = await import("../../services/achievement.service.js");
+    const unlocked = await getUserAchievements(user.id);
+    const achievements = Object.values(ACHIEVEMENT_DEFS).map((def) => {
+      const found = unlocked.find((u: any) => u.key === def.key);
+      return {
+        key: def.key,
+        label: def.label,
+        description: def.description,
+        icon: def.icon,
+        unlockedAt: found?.unlockedAt ?? null,
+      };
+    });
+    return c.json({ achievements });
+  } catch (err) {
+    logger.error("Get achievements error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR" }, 500);
+  }
+});
+
+// ── GET /auth/me/points ───────────────────────────────────────────────────────
+router.get("/me/points", authMiddleware, async (c) => {
+  try {
+    const user = c.get("user");
+    const { getPointsBalance, getPointsHistory } = await import("../../services/points.service.js");
+    const balance = await getPointsBalance(user.id);
+    const { entries, total } = await getPointsHistory(user.id);
+    return c.json({ balance, history: entries, total });
+  } catch (err) {
+    logger.error("Get points error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR" }, 500);
+  }
+});
+
+// ── NPS survey ────────────────────────────────────────────────────────────────
+
+// GET /auth/me/nps/should-prompt — check if user should see NPS survey
+router.get("/me/nps/should-prompt", authMiddleware, async (c) => {
+  try {
+    const user = c.get("user");
+    const { shouldPromptNps } = await import("../../services/nps.service.js");
+    const should = await shouldPromptNps(user.id);
+    return c.json({ shouldPrompt: should });
+  } catch (err) {
+    logger.error("NPS should-prompt error", err as Error);
+    return c.json({ shouldPrompt: false });
+  }
+});
+
+// POST /auth/me/nps — submit NPS feedback
+router.post("/me/nps", authMiddleware, async (c) => {
+  try {
+    const user = c.get("user");
+    const { score, comment, context } = await c.req.json().catch(() => ({}));
+    if (typeof score !== "number" || score < 0 || score > 10) {
+      return c.json({ error: "INVALID_REQUEST", message: "score must be 0-10" }, 400);
+    }
+    const { recordNpsFeedback } = await import("../../services/nps.service.js");
+    await recordNpsFeedback(user.id, score, comment, context);
+    return c.json({ success: true });
+  } catch (err) {
+    logger.error("NPS submit error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR" }, 500);
+  }
+});
+
 // ── DELETE /auth/oauth/:provider — unlink a connected OAuth account ──────────
 // Removes the linked social-login provider. Refuses to remove the user's *only*
 // remaining login method (no password + this is the last provider), which would
@@ -989,6 +1308,81 @@ router.delete("/oauth/:provider", authMiddleware, async (c) => {
   } catch (err) {
     logger.error("OAuth unlink error", err as Error);
     return c.json({ error: "INTERNAL_ERROR", message: "Failed to disconnect account" }, 500);
+  }
+});
+
+// ── POST /auth/me/link — link an OAuth identity to the current account ───────
+// Allows a signed-in user to link an additional OAuth provider to their existing
+// account instead of creating a duplicate. Requires the OAuth flow to complete
+// first, then the frontend calls this with the provider + providerUserId.
+router.post("/me/link", authMiddleware, async (c) => {
+  try {
+    const user = c.get("user");
+    const { provider, providerUserId, providerEmail } = await c.req.json().catch(() => ({}));
+
+    if (!provider || !providerUserId) {
+      return c.json({ error: "INVALID_REQUEST", message: "provider and providerUserId required" }, 400);
+    }
+
+    const supported = ["google", "github", "apple", "facebook"];
+    if (!supported.includes(provider)) {
+      return c.json({ error: "INVALID_REQUEST", message: `Unsupported provider. Supported: ${supported.join(", ")}` }, 400);
+    }
+
+    const db = getDb();
+
+    // Check if this provider account is already linked to someone else
+    const [existingLink] = await db
+      .select({ id: usersTable.id, email: usersTable.email })
+      .from(usersTable)
+      .where(
+        and(
+          eq(usersTable.status, "active"),
+          sql`${usersTable.oauthProviders} @> ${JSON.stringify([{ provider, providerUserId }])}::jsonb`
+        )
+      )
+      .limit(1);
+
+    if (existingLink && existingLink.id !== user.id) {
+      return c.json(
+        { error: "ALREADY_LINKED", message: "This OAuth account is already linked to another user" },
+        409
+      );
+    }
+
+    // Check if already linked to current user
+    const [currentUser] = await db
+      .select({ oauthProviders: usersTable.oauthProviders })
+      .from(usersTable)
+      .where(eq(usersTable.id, user.id))
+      .limit(1);
+
+    const providers: any[] = (currentUser?.oauthProviders as any) ?? [];
+    if (providers.some((p: any) => p.provider === provider)) {
+      return c.json({ error: "ALREADY_LINKED", message: `This account already has ${provider} linked` }, 409);
+    }
+
+    // Link the provider
+    const newProvider = {
+      provider,
+      providerUserId,
+      email: providerEmail ?? null,
+      linkedAt: new Date().toISOString(),
+    };
+
+    await db
+      .update(usersTable)
+      .set({
+        oauthProviders: [...providers, newProvider],
+        updatedAt: new Date(),
+      })
+      .where(eq(usersTable.id, user.id));
+
+    logger.info("OAuth provider linked", { userId: user.id, provider });
+    return c.json({ linked: true, provider });
+  } catch (err) {
+    logger.error("Account link error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR", message: "Failed to link account" }, 500);
   }
 });
 
@@ -1086,7 +1480,6 @@ router.post("/me/avatar", authMiddleware, async (c) => {
     // Prefer S3 (same bucket as backups) when configured; fall back to the
     // legacy local-disk path when S3 isn't set so local dev keeps working.
     let avatarUrl: string;
-    let _s3ObjectKey: string | null = null;
     const s3Enabled = await isS3BackupEnabled();
     if (s3Enabled) {
       const result = await uploadBuffer({
@@ -1095,7 +1488,6 @@ router.post("/me/avatar", authMiddleware, async (c) => {
         contentType: file.type,
       });
       avatarUrl = result.url;
-      _s3ObjectKey = result.key;
     } else {
       const uploadsDir = path.join(process.cwd(), "uploads", "avatars");
       await fs.mkdir(uploadsDir, { recursive: true });
@@ -1120,7 +1512,9 @@ router.post("/me/avatar", authMiddleware, async (c) => {
         try {
           await deleteObject(oldKey);
         } catch (err) {
-          logger.warn("Failed to delete previous avatar from S3", err as Error);
+          logger.warn("Failed to delete previous avatar from S3", {
+            error: err instanceof Error ? err.message : String(err),
+          });
         }
       }
     }

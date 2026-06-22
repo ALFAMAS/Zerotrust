@@ -930,6 +930,180 @@ describe("GET /oauth/:provider/callback", () => {
     const body = await res.json();
     expect(body.error).toBe("PROVIDER_ERROR");
   });
+
+  it("creates a session and 302-redirects with a one-time oauth_code", async () => {
+    const router = await getRouter();
+    const app = new Hono().route("/", router);
+    const stateRes = await app.request("/oauth/state", { method: "POST" });
+    const { state } = await stateRes.json();
+
+    const { getProviderAdapter } = await import("../oauth/provider.factory");
+    vi.mocked(getProviderAdapter).mockReturnValue({
+      exchangeCode: vi.fn().mockResolvedValue({
+        tokens: {},
+        profile: { id: "g-123", email: "new@example.com", name: "New User", emailVerified: true },
+      }),
+    } as any);
+
+    db.limit.mockResolvedValueOnce([]); // no existing user → create path
+    db.returning
+      .mockResolvedValueOnce([makeActiveUser({ id: USER_ID, email: "new@example.com" })]) // user
+      .mockResolvedValueOnce([makeSession()]) // session insert
+      .mockResolvedValueOnce([{ id: "rt-1" }]); // refresh token insert
+
+    const res = await app.request(`/oauth/google/callback?code=abc&state=${state}`);
+    expect(res.status).toBe(302);
+    expect(res.headers.get("location")).toContain("/login?oauth_code=");
+  });
+});
+
+// ── GET /oauth/:provider/authorize ─────────────────────────────────────────
+
+describe("GET /oauth/:provider/authorize", () => {
+  beforeEach(async () => {
+    vi.resetModules();
+    const { getDb } = await import("../db");
+    vi.mocked(getDb).mockReturnValue(makeDbChain([]) as any);
+  });
+  afterEach(() => vi.clearAllMocks());
+
+  it("returns 400 for an unsupported provider", async () => {
+    const router = await getRouter();
+    const app = new Hono().route("/", router);
+    const res = await app.request("/oauth/twitter/authorize");
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toBe("UNSUPPORTED_PROVIDER");
+  });
+
+  it("returns 400 when the provider is not configured", async () => {
+    const router = await getRouter();
+    const app = new Hono().route("/", router);
+    const res = await app.request("/oauth/google/authorize");
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toBe("PROVIDER_NOT_CONFIGURED");
+  });
+});
+
+describe("GET /oauth/:provider/authorize (configured)", () => {
+  beforeEach(() => {
+    vi.resetModules();
+    vi.doMock("../config", () => ({
+      getConfig: () => ({
+        session: { defaultTTL: 3600, refreshTokenTTL: 604800, maxConcurrentDevices: 5 },
+        security: {
+          bcryptRounds: 4,
+          tokenSecretHex: "a".repeat(64),
+          csfleMasterKeyHex: "b".repeat(64),
+          csflekeyRotationIntervalDays: 90,
+        },
+        rateLimiting: { enabled: false, perIpLimit: 100, windowSecs: 60 },
+        geofencing: { enabled: false, allowedCountries: [], allowedIpRanges: [] },
+        mfa: {
+          totpWindow: 1,
+          otpExpirySecs: 900,
+          maxOTPAttempts: 5,
+          channels: {
+            email: { enabled: true },
+            sms: { enabled: false, provider: "twilio" },
+            whatsapp: { enabled: false, provider: "twilio" },
+            telegram: { enabled: false, botToken: "" },
+          },
+        },
+        oauth: {
+          providers: {
+            google: {
+              clientId: "gid",
+              clientSecret: "gsecret",
+              redirectUri: "http://localhost:1337/auth/oauth/google/callback",
+            },
+          },
+        },
+        elasticsearch: { enabled: false, host: "localhost", port: 9200, indexPrefix: "zeroauth" },
+        logging: { level: "error", format: "json" },
+      }),
+    }));
+  });
+  afterEach(() => {
+    vi.clearAllMocks();
+    vi.doUnmock("../config");
+  });
+
+  it("returns the Google authorize URL with state + server-side PKCE challenge", async () => {
+    const { getDb } = await import("../db");
+    vi.mocked(getDb).mockReturnValue(makeDbChain([]) as any);
+    const router = await getRouter();
+    const app = new Hono().route("/", router);
+    const res = await app.request("/oauth/google/authorize");
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.authorizeUrl).toContain("https://accounts.google.com/o/oauth2/v2/auth");
+    const url = new URL(body.authorizeUrl);
+    expect(url.searchParams.get("client_id")).toBe("gid");
+    expect(url.searchParams.get("response_type")).toBe("code");
+    expect(url.searchParams.get("state")).toBe(body.state);
+    expect(url.searchParams.get("code_challenge")).toBeTruthy();
+    expect(url.searchParams.get("code_challenge_method")).toBe("S256");
+    expect(url.searchParams.get("scope")).toContain("email");
+  });
+});
+
+// ── POST /oauth/exchange ───────────────────────────────────────────────────
+
+describe("POST /oauth/exchange", () => {
+  let db: ReturnType<typeof makeDbChain>;
+
+  beforeEach(async () => {
+    vi.resetModules();
+    db = makeDbChain([]);
+    const { getDb } = await import("../db");
+    vi.mocked(getDb).mockReturnValue(db as any);
+  });
+  afterEach(() => vi.clearAllMocks());
+
+  const post = (app: Hono, code?: unknown) =>
+    app.request("/oauth/exchange", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(code === undefined ? {} : { code }),
+    });
+
+  it("returns 400 when code is missing", async () => {
+    const router = await getRouter();
+    const app = new Hono().route("/", router);
+    const res = await post(app);
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toBe("INVALID_REQUEST");
+  });
+
+  it("returns 400 for an invalid or expired code", async () => {
+    db.limit.mockResolvedValueOnce([]);
+    const router = await getRouter();
+    const app = new Hono().route("/", router);
+    const res = await post(app, "nope");
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toBe("INVALID_CODE");
+  });
+
+  it("returns the stored tokens for a valid one-time code", async () => {
+    db.limit.mockResolvedValueOnce([
+      {
+        code: "c1",
+        userId: USER_ID,
+        sessionId: SESSION_ID,
+        accessToken: "at",
+        refreshToken: "rt",
+        usedAt: null,
+        expiresAt: new Date(Date.now() + 60_000),
+      },
+    ]);
+    const router = await getRouter();
+    const app = new Hono().route("/", router);
+    const res = await post(app, "c1");
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.accessToken).toBe("at");
+    expect(body.refreshToken).toBe("rt");
+  });
 });
 
 // ── Rate Limiting (route-level) ────────────────────────────────────────────

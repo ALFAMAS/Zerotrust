@@ -85,10 +85,11 @@
   border-radius: 4px;
 }
 
-/* Skip-to-main link */
+/* Skip-to-main link — logical inset so it parks off the *start* edge in both
+ * LTR and RTL layouts. */
 .skip-to-main {
   position: absolute;
-  left: -9999px;
+  inset-inline-start: -9999px;
   top: 1rem;
   z-index: 9999;
   padding: 0.5rem 1rem;
@@ -99,13 +100,27 @@
   text-decoration: none;
 }
 .skip-to-main:focus {
-  left: 1rem;
+  inset-inline-start: 1rem;
   outline: none;
+}
+
+/*
+ * Toast slide-in distance. Corner-anchored toasts should slide in from the
+ * *inline-end* edge; that edge is the right in LTR and the left in RTL, so the
+ * offset sign is driven by direction. Keyframes read the variable, so any
+ * element using them flips automatically under `dir="rtl"` — no per-component
+ * RTL overrides needed.
+ */
+:root {
+  --toast-slide-from: 110%;
+}
+[dir="rtl"] {
+  --toast-slide-from: -110%;
 }
 
 @keyframes slideIn {
   from {
-    transform: translateX(110%);
+    transform: translateX(var(--toast-slide-from));
     opacity: 0;
   }
   to {
@@ -120,7 +135,7 @@
     opacity: 1;
   }
   to {
-    transform: translateX(110%);
+    transform: translateX(var(--toast-slide-from));
     opacity: 0;
   }
 }

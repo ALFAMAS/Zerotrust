@@ -3,7 +3,9 @@
 export interface ZeroAuthConfig {
   database: {
     databaseUrl: string;
+    databaseUrlReadReplica?: string;
     connectionPoolSize: number;
+    readReplicaPoolSize: number;
   };
   session: {
     defaultTTL: number;
@@ -377,6 +379,12 @@ export type HonoEnv = {
     scimOrgId?: string;
     /** ID of the per-org SCIM token that authenticated the request. */
     scimTokenId?: string;
+    /** Audit principal (agent/human + delegation chain) derived in auth middleware. */
+    auditPrincipal?: { type: "human" | "agent"; id: string; workloadId?: string; actAs?: string[] };
+    /** MCP principal for MCP-protected resource access. */
+    mcpPrincipal?: { type: "human" | "agent"; id: string; workloadId?: string; actAs?: string[] };
+    /** MCP token payload. */
+    mcpToken?: Record<string, unknown>;
   };
 };
 

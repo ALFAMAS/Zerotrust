@@ -47,8 +47,10 @@ jobs:
           --health-timeout 5s
           --health-retries 5
     env:
-      DATABASE_URL: postgresql://zeroauth:password@localhost:5432/zeroauth_test
-      REDIS_URI: redis://localhost:6379/0
+      DATABASE_URL: postgresql://zeroauth:***@localhost:5432/zeroauth_test
+      REDIS_URI: redis://localhost:6379
+      TOKEN_SECRET_HEX: a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2
+      CSFLE_MASTER_KEY_HEX: f6e5d4c3b2a1f6e5d4c3b2a1f6e5d4c3b2a1f6e5d4c3b2a1f6e5d4c3b2a1f6e5
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
@@ -72,3 +74,93 @@ jobs:
       - run: bun run build
         env:
           NEXT_PUBLIC_ZEROAUTH_URL: http://localhost:3000
+
+  load-test:
+    name: Load & Chaos Tests
+    runs-on: ubuntu-latest
+    needs: [test]
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: zeroauth
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: zeroauth_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql://zeroauth:***@localhost:5432/zeroauth_test
+      REDIS_URI: redis://localhost:6379
+      TOKEN_SECRET_HEX: a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2
+      CSFLE_MASTER_KEY_HEX: f6e5d4c3b2a1f6e5d4c3b2a1f6e5d4c3b2a1f6e5d4c3b2a1f6e5d4c3b2a1f6e5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile
+
+      - name: Start API server
+        run: |
+          bun run dev:api &
+          echo "Waiting for API server..."
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:1337/health > /dev/null 2>&1; then
+              echo "API server is ready"
+              break
+            fi
+            sleep 1
+          done
+
+      - name: Install k6
+        run: |
+          sudo gpg -k
+          sudo gpg --no-default-keyring --keyring /usr/share/keyrings/k6-archive-keyring.gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
+          echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
+          sudo apt-get update
+          sudo apt-get install -y k6
+
+      - name: Seed test users
+        run: |
+          for i in $(seq 0 49); do
+            curl -sf -X POST http://localhost:1337/auth/register \
+              -H "Content-Type: application/json" \
+              -d "{\"email\":\"loadtest${i}@example.com\",\"password\":\"Load@Test1234!\",\"displayName\":\"Load Test ${i}\"}" || true
+          done
+
+      - name: Run load test (full suite)
+        run: |
+          k6 run \
+            --out json=tests/load/results-full.json \
+            -e BASE_URL=http://localhost:1337 \
+            tests/load/full-suite.k6.js
+        continue-on-error: true
+
+      - name: Run chaos / fault injection test
+        run: |
+          k6 run \
+            --out json=tests/load/results-chaos.json \
+            -e BASE_URL=http://localhost:1337 \
+            tests/load/chaos-fault.k6.js
+        continue-on-error: true
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: k6-test-results
+          path: tests/load/results-*.json

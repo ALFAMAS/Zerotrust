@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Badge from "@/components/Badge";
 import { api } from "@/lib/api";
 
@@ -24,12 +24,15 @@ export default function AccessReviewsPage() {
   const [creating, setCreating] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
 
-  function showToast(msg: string) {
-    setToast(msg);
-    setTimeout(() => setToast(null), 3000);
-  }
+  const toastTimer = useRef<ReturnType<typeof setTimeout>>();
 
-  async function load() {
+  const showToast = useCallback((msg: string) => {
+    setToast(msg);
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    toastTimer.current = setTimeout(() => setToast(null), 3000);
+  }, []);
+
+  const load = useCallback(async () => {
     setLoading(true);
     try {
       const data = await api.get<{ reviews: Review[] }>("/admin/access-reviews");
@@ -39,7 +42,7 @@ export default function AccessReviewsPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, []);
 
   useEffect(() => {
     load();

@@ -198,7 +198,9 @@ export async function validateOrgScimToken(plaintext: string): Promise<{
     .set({ lastUsedAt: new Date() })
     .where(eq(orgScimTokensTable.id, row.id))
     .catch((err) => {
-      logger.warn("Failed to update SCIM token lastUsedAt", err as Error);
+      logger.warn("Failed to update SCIM token lastUsedAt", {
+        error: err instanceof Error ? err.message : String(err),
+      });
     });
 
   return { tokenId: row.id, orgId: row.orgId };

@@ -13,6 +13,7 @@ import { TokenService } from "../services/token.service";
 import type { HonoEnv, TokenPayload } from "../shared/types";
 import { ErrorCodes, ZeroAuthError } from "../shared/types";
 import { revokeSession } from "./sessionControl";
+import { principalFromToken, principalAuditFields, describePrincipal } from "../shared/principal";
 
 const logger = getLogger("auth-middleware");
 let tokenService: TokenService;
@@ -191,13 +192,17 @@ export const authMiddleware = createMiddleware<HonoEnv>(async (c, next) => {
 
     c.set("token", payload);
 
+    // Derive audit principal from token (agent/human + delegation chain)
+    const auditPrincipal = principalFromToken(payload);
+    c.set("auditPrincipal", auditPrincipal);
+
     // Update last activity
     await db
       .update(sessionsTable)
       .set({ lastActivityAt: new Date() })
       .where(eq(sessionsTable.id, session.id));
 
-    logger.debug("✓ Token verified", { userId: payload.sub, sessionId: payload.sid });
+    logger.debug("✓ Token verified", { userId: payload.sub, sessionId: payload.sid, principal: describePrincipal(auditPrincipal) });
     return next();
   } catch (error) {
     if (error instanceof ZeroAuthError) {

@@ -1,8 +1,10 @@
 "use client";
 import {
+  Award,
   Bell,
   Building2,
   CreditCard,
+  FileText as FileTextIcon,
   KeyRound,
   LayoutDashboard,
   LifeBuoy,
@@ -13,6 +15,7 @@ import {
   User,
   UserCog,
   Webhook,
+  Activity,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -24,7 +27,9 @@ import LocaleSwitcher from "@/components/LocaleSwitcher";
 import { NotificationBell } from "@/components/NotificationBell";
 import ProductTour from "@/components/ProductTour";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import NpsSurveyPrompt from "@/components/NpsSurveyPrompt";
 import VerifyEmailBanner from "@/components/VerifyEmailBanner";
+import { CommandPalette } from "@/components/CommandPalette";
 import { clearToken, isAuthenticated } from "../../lib/auth";
 
 const navItems: NavItem[] = [
@@ -37,9 +42,12 @@ const navItems: NavItem[] = [
   { href: "/dashboard/api-keys", label: "API Keys", icon: KeyRound },
   { href: "/dashboard/webhooks", label: "Webhooks", icon: Webhook },
   { href: "/dashboard/billing", label: "Billing", icon: CreditCard },
+  { href: "/dashboard/points", label: "Points & Rewards", icon: Award },
   { href: "/dashboard/jit", label: "Cross-tenant", icon: ShieldQuestion },
   { href: "/dashboard/settings", label: "Connected Apps", icon: Plug },
   { href: "/dashboard/support", label: "Support", icon: LifeBuoy },
+  { href: "/dashboard/notes", label: "Shared Notes", icon: FileTextIcon },
+  { href: "/dashboard/activity", label: "Activity", icon: Activity },
   { href: "/dashboard/account", label: "Account", icon: UserCog },
 ];
 
@@ -98,9 +106,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       }
     >
       {children}
+      <NpsSurveyPrompt />
       <FeedbackWidget type="nps" context="dashboard" delay={45_000} />
       <LiveChatWidget />
       <ProductTour />
+      <CommandPalette />
     </AppShell>
   );
 }

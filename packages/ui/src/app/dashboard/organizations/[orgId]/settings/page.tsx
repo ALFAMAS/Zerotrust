@@ -642,6 +642,9 @@ export default function OrgSettingsPage() {
         </form>
       </div>
 
+      {/* SSO configuration — admin+ */}
+      <SsoSettingsForm orgId={orgId} myRole={myRole} toast={toast} />
+
       {/* Transfer ownership — owner only */}
       {myRole === "owner" && nonOwnerMembers.length > 0 && (
         <form

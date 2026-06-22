@@ -38,9 +38,12 @@ export const metadata: Metadata = {
   manifest: "/manifest.json",
   alternates: {
     canonical: brand.url,
-    languages: Object.fromEntries(
-      SUPPORTED_LOCALES.map((locale) => [locale, `${brand.url}?locale=${locale}`])
-    ),
+    languages: {
+      ...Object.fromEntries(
+        SUPPORTED_LOCALES.map((locale) => [locale, `${brand.url}/${locale}`])
+      ),
+      "x-default": brand.url,
+    },
   },
   appleWebApp: {
     capable: true,

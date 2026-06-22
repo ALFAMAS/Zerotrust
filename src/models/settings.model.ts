@@ -89,6 +89,12 @@ export async function updateSettings(
   const db = getDb();
   const update: Record<string, unknown> = { ...partial, updatedAt: new Date() };
   if (updatedBy) update.updatedBy = updatedBy;
+  if (typeof update.allowedEmailDomains === "string") {
+    update.allowedEmailDomains = (update.allowedEmailDomains as string)
+      .split(",")
+      .map((d: string) => d.trim())
+      .filter(Boolean);
+  }
 
   await db
     .insert(saasSettingsTable)

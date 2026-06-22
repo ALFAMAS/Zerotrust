@@ -5,15 +5,15 @@
  * Compatible with Azure AD, Okta, and other enterprise IdPs.
  */
 
-import { eq, ilike, sql } from "drizzle-orm";
+import { and, arrayContains, eq, ilike, sql } from "drizzle-orm";
 import type { Context } from "hono";
 import { Hono } from "hono";
 import { getDb } from "../db/index.js";
-import { usersTable } from "../db/schema.js";
+import { rolesTable, usersTable } from "../db/schema.js";
 import { validateOrgScimToken } from "../services/orgScimToken.service.js";
 import type { HonoEnv } from "../shared/types.js";
-import type { SCIMListResponse, SCIMUser } from "./types.js";
-import { parseSCIMFilter, scimError, scimToUserFields, userToSCIM } from "./utils.js";
+import type { SCIMGroup, SCIMListResponse, SCIMUser } from "./types.js";
+import { groupToSCIM, parseSCIMFilter, scimError, scimToUserFields, userToSCIM } from "./utils.js";
 
 const router = new Hono<HonoEnv>();
 
@@ -429,24 +429,281 @@ router.delete("/Users/:id", async (c) => {
   }
 });
 
-// ─── GET /Groups (stub) ───────────────────────────────────────────────────────
+// ─── Groups ───────────────────────────────────────────────────────────────────
+//
+// SCIM Groups map onto the `roles` table. A group's membership is derived from
+// each user's `roles` array (which stores role *names*): a user is a member of a
+// group iff their `roles` array contains that role's `name`. The role `name` is
+// the stable internal identifier referenced by users and is never renamed once
+// created — only the human-facing `displayName` is mutable — so membership links
+// survive display-name changes.
 
-router.get("/Groups", (c) => {
-  const startIndex = Math.max(1, parseInt(c.req.query("startIndex") ?? "1", 10));
-  const response: SCIMListResponse<never> = {
-    schemas: ["urn:ietf:params:scim:api:messages:2.0:ListResponse"],
-    totalResults: 0,
-    startIndex,
-    itemsPerPage: 0,
-    Resources: [],
-  };
-  return c.json(response);
+type RoleRow = typeof rolesTable.$inferSelect;
+
+/** Users whose `roles` array contains the given role name (group members). */
+async function getGroupMembers(roleName: string): Promise<(typeof usersTable.$inferSelect)[]> {
+  const db = getDb();
+  return db
+    .select()
+    .from(usersTable)
+    .where(arrayContains(usersTable.roles, [roleName]));
+}
+
+/** Add a role name to a user's `roles` array (idempotent). */
+async function addRoleToUser(userId: string, roleName: string): Promise<void> {
+  const db = getDb();
+  await db
+    .update(usersTable)
+    .set({ roles: sql`array_append(${usersTable.roles}, ${roleName})`, updatedAt: new Date() })
+    .where(and(eq(usersTable.id, userId), sql`NOT (${roleName} = ANY(${usersTable.roles}))`));
+}
+
+/** Remove a role name from a user's `roles` array. */
+async function removeRoleFromUser(userId: string, roleName: string): Promise<void> {
+  const db = getDb();
+  await db
+    .update(usersTable)
+    .set({ roles: sql`array_remove(${usersTable.roles}, ${roleName})`, updatedAt: new Date() })
+    .where(eq(usersTable.id, userId));
+}
+
+/** Reconcile a group's membership to exactly `memberIds` (used by POST/PUT). */
+async function setGroupMembers(roleName: string, memberIds: string[]): Promise<void> {
+  const current = await getGroupMembers(roleName);
+  const currentIds = new Set(current.map((u) => u.id));
+  const wanted = new Set(memberIds);
+  for (const id of wanted) if (!currentIds.has(id)) await addRoleToUser(id, roleName);
+  for (const u of current) if (!wanted.has(u.id)) await removeRoleFromUser(u.id, roleName);
+}
+
+function memberIdsFromValue(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return (value as Array<{ value?: string }>).map((m) => m?.value).filter(Boolean) as string[];
+}
+
+async function groupResponse(c: Context, role: RoleRow): Promise<SCIMGroup> {
+  const members = await getGroupMembers(role.name);
+  return groupToSCIM(role, members, getBaseUrl(c));
+}
+
+// ─── GET /Groups ────────────────────────────────────────────────────────────
+
+router.get("/Groups", async (c) => {
+  try {
+    const startIndex = Math.max(1, parseInt(c.req.query("startIndex") ?? "1", 10));
+    const count = Math.min(200, Math.max(1, parseInt(c.req.query("count") ?? "100", 10)));
+    const filterStr = c.req.query("filter");
+    const skip = startIndex - 1;
+    const db = getDb();
+
+    let roles: RoleRow[];
+    let totalResults: number;
+
+    const parsed = filterStr ? parseSCIMFilter(filterStr) : null;
+    if (parsed && parsed.attribute === "displayName" && parsed.operator === "eq") {
+      roles = await db
+        .select()
+        .from(rolesTable)
+        .where(eq(rolesTable.displayName, parsed.value))
+        .offset(skip)
+        .limit(count);
+      const countResult = await db
+        .select({ count: sql<number>`count(*)::int` })
+        .from(rolesTable)
+        .where(eq(rolesTable.displayName, parsed.value));
+      totalResults = countResult[0]?.count ?? 0;
+    } else {
+      roles = await db.select().from(rolesTable).offset(skip).limit(count);
+      const countResult = await db.select({ count: sql<number>`count(*)::int` }).from(rolesTable);
+      totalResults = countResult[0]?.count ?? 0;
+    }
+
+    const Resources = await Promise.all(roles.map((r) => groupResponse(c, r)));
+    const response: SCIMListResponse<SCIMGroup> = {
+      schemas: ["urn:ietf:params:scim:api:messages:2.0:ListResponse"],
+      totalResults,
+      startIndex,
+      itemsPerPage: Resources.length,
+      Resources,
+    };
+    return c.json(response);
+  } catch (err) {
+    void err;
+    return c.json(scimError(500, "Failed to list groups"), 500);
+  }
 });
 
-// ─── POST /Groups (stub) ──────────────────────────────────────────────────────
+// ─── POST /Groups ─────────────────────────────────────────────────────────────
 
-router.post("/Groups", (c) => {
-  return c.json(scimError(501, "Groups are not supported", "invalidValue"), 501);
+router.post("/Groups", async (c) => {
+  try {
+    const group = (await c.req.json()) as SCIMGroup;
+    if (!group.displayName) {
+      return c.json(scimError(400, "displayName is required", "invalidValue"), 400);
+    }
+
+    const db = getDb();
+    const existing = await db
+      .select()
+      .from(rolesTable)
+      .where(eq(rolesTable.name, group.displayName))
+      .limit(1);
+    if (existing.length > 0) {
+      return c.json(
+        scimError(409, `Group '${group.displayName}' already exists`, "uniqueness"),
+        409
+      );
+    }
+
+    const [role] = await db
+      .insert(rolesTable)
+      .values({ name: group.displayName, displayName: group.displayName })
+      .returning();
+
+    await setGroupMembers(role.name, memberIdsFromValue(group.members));
+
+    const scimResponse = await groupResponse(c, role);
+    c.header("Location", scimResponse.meta?.location ?? "");
+    return c.json(scimResponse, 201);
+  } catch (err) {
+    void err;
+    return c.json(scimError(500, "Failed to create group"), 500);
+  }
+});
+
+// ─── GET /Groups/:id ──────────────────────────────────────────────────────────
+
+router.get("/Groups/:id", async (c) => {
+  try {
+    const id = c.req.param("id");
+    const db = getDb();
+    const rows = await db.select().from(rolesTable).where(eq(rolesTable.id, id)).limit(1);
+    if (rows.length === 0) return c.json(scimError(404, "Group not found"), 404);
+    return c.json(await groupResponse(c, rows[0]));
+  } catch (err) {
+    void err;
+    return c.json(scimError(500, "Failed to get group"), 500);
+  }
+});
+
+// ─── PUT /Groups/:id (full replace) ───────────────────────────────────────────
+
+router.put("/Groups/:id", async (c) => {
+  try {
+    const id = c.req.param("id");
+    const group = (await c.req.json()) as SCIMGroup;
+    const db = getDb();
+    const rows = await db.select().from(rolesTable).where(eq(rolesTable.id, id)).limit(1);
+    if (rows.length === 0) return c.json(scimError(404, "Group not found"), 404);
+
+    if (group.displayName && group.displayName !== rows[0].displayName) {
+      await db
+        .update(rolesTable)
+        .set({ displayName: group.displayName, updatedAt: new Date() })
+        .where(eq(rolesTable.id, id));
+    }
+    await setGroupMembers(rows[0].name, memberIdsFromValue(group.members));
+
+    const [updated] = await db.select().from(rolesTable).where(eq(rolesTable.id, id)).limit(1);
+    return c.json(await groupResponse(c, updated));
+  } catch (err) {
+    void err;
+    return c.json(scimError(500, "Failed to update group"), 500);
+  }
+});
+
+// ─── PATCH /Groups/:id (add / remove / replace members or displayName) ────────
+
+router.patch("/Groups/:id", async (c) => {
+  try {
+    const id = c.req.param("id");
+    const body = (await c.req.json()) as {
+      Operations?: Array<{ op: string; path?: string; value?: unknown }>;
+    };
+    if (!Array.isArray(body.Operations)) {
+      return c.json(scimError(400, "Operations array is required", "invalidValue"), 400);
+    }
+
+    const db = getDb();
+    const rows = await db.select().from(rolesTable).where(eq(rolesTable.id, id)).limit(1);
+    if (rows.length === 0) return c.json(scimError(404, "Group not found"), 404);
+    const roleName = rows[0].name;
+
+    for (const op of body.Operations) {
+      const operation = op.op?.toLowerCase();
+      const path = op.path;
+
+      // displayName updates (path-scoped or in a no-path replace bag).
+      if (operation === "replace") {
+        if (path === "displayName" && typeof op.value === "string") {
+          await db
+            .update(rolesTable)
+            .set({ displayName: op.value, updatedAt: new Date() })
+            .where(eq(rolesTable.id, id));
+          continue;
+        }
+        if (!path && typeof op.value === "object" && op.value !== null) {
+          const bag = op.value as Record<string, unknown>;
+          if (typeof bag.displayName === "string") {
+            await db
+              .update(rolesTable)
+              .set({ displayName: bag.displayName, updatedAt: new Date() })
+              .where(eq(rolesTable.id, id));
+          }
+          if (bag.members !== undefined) {
+            await setGroupMembers(roleName, memberIdsFromValue(bag.members));
+          }
+          continue;
+        }
+      }
+
+      // Member mutations.
+      if (path === "members") {
+        if (operation === "add") {
+          for (const uid of memberIdsFromValue(op.value)) await addRoleToUser(uid, roleName);
+        } else if (operation === "replace") {
+          await setGroupMembers(roleName, memberIdsFromValue(op.value));
+        } else if (operation === "remove") {
+          // No value → remove all members.
+          if (op.value === undefined) await setGroupMembers(roleName, []);
+          else
+            for (const uid of memberIdsFromValue(op.value)) await removeRoleFromUser(uid, roleName);
+        }
+        continue;
+      }
+
+      // Targeted remove: members[value eq "userId"]
+      const m = path?.match(/^members\[value eq "?([^"\]]+)"?\]$/i);
+      if (m && operation === "remove") {
+        await removeRoleFromUser(m[1], roleName);
+      }
+    }
+
+    const [updated] = await db.select().from(rolesTable).where(eq(rolesTable.id, id)).limit(1);
+    return c.json(await groupResponse(c, updated));
+  } catch (err) {
+    void err;
+    return c.json(scimError(500, "Failed to patch group"), 500);
+  }
+});
+
+// ─── DELETE /Groups/:id ───────────────────────────────────────────────────────
+
+router.delete("/Groups/:id", async (c) => {
+  try {
+    const id = c.req.param("id");
+    const db = getDb();
+    const rows = await db.select().from(rolesTable).where(eq(rolesTable.id, id)).limit(1);
+    if (rows.length === 0) return c.json(scimError(404, "Group not found"), 404);
+
+    // Strip the role from every member, then delete the role itself.
+    await setGroupMembers(rows[0].name, []);
+    await db.delete(rolesTable).where(eq(rolesTable.id, id));
+    return c.body(null, 204);
+  } catch (err) {
+    void err;
+    return c.json(scimError(500, "Failed to delete group"), 500);
+  }
 });
 
 export default router;

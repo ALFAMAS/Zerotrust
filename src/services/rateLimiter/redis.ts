@@ -48,3 +48,8 @@ export async function pingRedis(): Promise<boolean> {
     return false;
   }
 }
+
+/** Get the raw Redis client (for OAuth state, exchange codes, etc.) */
+export function getRedis(): Redis | null {
+  return client;
+}

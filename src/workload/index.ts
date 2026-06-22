@@ -88,7 +88,7 @@ export async function getValidWorkloadCredential(workloadId: string, providedSec
       and(
         eq(workloadCredentialsTable.workloadId, workloadId),
         eq(workloadCredentialsTable.isRevoked, false),
-        gt(workloadCredentialsTable.expiresAt!, now)
+        gt(workloadCredentialsTable.expiresAt, now)
       )
     )
     .limit(1);

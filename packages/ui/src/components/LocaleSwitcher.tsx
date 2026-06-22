@@ -10,6 +10,7 @@ const LOCALES = [
   { code: "en", label: "English", flag: "🇺🇸" },
   { code: "es", label: "Español", flag: "🇪🇸" },
   { code: "fr", label: "Français", flag: "🇫🇷" },
+  { code: "ar", label: "العربية", flag: "🇸🇦" },
 ] as const;
 
 function getCurrentLocale(): string {
@@ -37,6 +38,7 @@ export default function LocaleSwitcher() {
   }, [open]);
 
   function switchLocale(code: string) {
+    // biome-ignore lint/suspicious/noDocumentCookie: first-party locale preference cookie
     document.cookie = `za_locale=${code};path=/;max-age=${365 * 24 * 3600};samesite=lax`;
     setCurrent(code);
     setOpen(false);
@@ -53,6 +55,7 @@ export default function LocaleSwitcher() {
   return (
     <div ref={ref} className="relative">
       <button
+        type="button"
         onClick={() => setOpen((v) => !v)}
         className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
         aria-label="Switch language"
@@ -67,11 +70,12 @@ export default function LocaleSwitcher() {
       {open && (
         <div
           role="listbox"
-          className="absolute right-0 z-50 mt-1 w-36 overflow-hidden rounded-xl border border-border bg-popover py-1 shadow-xl"
+          className="absolute end-0 z-50 mt-1 w-36 overflow-hidden rounded-xl border border-border bg-popover py-1 shadow-xl"
         >
           {LOCALES.map((locale) => (
             <button
               key={locale.code}
+              type="button"
               role="option"
               aria-selected={locale.code === current}
               onClick={() => switchLocale(locale.code)}

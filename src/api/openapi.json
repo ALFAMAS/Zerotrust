@@ -214,17 +214,17 @@
         }
       }
     },
-    "/auth/oauth/{provider}": {
+    "/auth/oauth/{provider}/authorize": {
       "get": {
         "tags": ["OAuth"],
-        "summary": "Initiate OAuth authorization flow",
+        "summary": "Begin OAuth authorization flow (returns the provider's authorize URL)",
+        "description": "Generates a CSRF state and (where supported) a server-side PKCE pair, then returns the provider authorization URL the client should navigate to. The PKCE code_verifier never leaves the server.",
         "parameters": [
-          { "name": "provider", "in": "path", "required": true, "schema": { "type": "string", "enum": ["google", "github", "facebook", "apple"] } },
-          { "name": "codeChallenge", "in": "query", "schema": { "type": "string" } }
+          { "name": "provider", "in": "path", "required": true, "schema": { "type": "string", "enum": ["google", "github", "facebook"] } }
         ],
         "responses": {
-          "302": { "description": "Redirect to provider authorization URL" },
-          "400": { "description": "Provider not configured", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorEnvelope" } } } }
+          "200": { "description": "Authorization URL", "content": { "application/json": { "schema": { "type": "object", "properties": { "authorizeUrl": { "type": "string", "format": "uri" }, "state": { "type": "string" } } } } } },
+          "400": { "description": "Provider unsupported or not configured", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorEnvelope" } } } }
         }
       }
     },
@@ -232,16 +232,31 @@
       "get": {
         "tags": ["OAuth"],
         "summary": "OAuth authorization code callback",
+        "description": "Provider redirects here with an authorization code. On success the server creates a session, stores the tokens under a one-time exchange code, and 302-redirects to the frontend at /login?oauth_code=<code>. The SPA redeems it via POST /auth/oauth/exchange.",
         "parameters": [
-          { "name": "provider", "in": "path", "required": true, "schema": { "type": "string", "enum": ["google", "github", "facebook", "apple"] } },
+          { "name": "provider", "in": "path", "required": true, "schema": { "type": "string", "enum": ["google", "github", "facebook"] } },
           { "name": "code", "in": "query", "required": true, "schema": { "type": "string" } },
-          { "name": "state", "in": "query", "schema": { "type": "string" } },
-          { "name": "code_verifier", "in": "query", "schema": { "type": "string" } }
+          { "name": "state", "in": "query", "required": true, "schema": { "type": "string" } }
         ],
         "responses": {
-          "200": { "description": "Tokens issued", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/TokenResponse" } } } },
-          "400": { "description": "Invalid state or code", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorEnvelope" } } } },
-          "502": { "description": "Provider error", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorEnvelope" } } } }
+          "302": { "description": "Redirect to the frontend with a one-time oauth_code (success) or an error query param" },
+          "400": { "description": "Missing code, invalid/expired state, or PKCE failure", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorEnvelope" } } } },
+          "502": { "description": "Provider token exchange failed", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorEnvelope" } } } }
+        }
+      }
+    },
+    "/auth/oauth/exchange": {
+      "post": {
+        "tags": ["OAuth"],
+        "summary": "Redeem a one-time OAuth exchange code for tokens",
+        "description": "Exchanges the single-use code delivered to /login?oauth_code=<code> for the access and refresh tokens. Keeps tokens out of the URL/history.",
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "type": "object", "required": ["code"], "properties": { "code": { "type": "string" } } } } }
+        },
+        "responses": {
+          "200": { "description": "Tokens issued", "content": { "application/json": { "schema": { "type": "object", "properties": { "accessToken": { "type": "string" }, "refreshToken": { "type": "string" } } } } } },
+          "400": { "description": "Invalid or expired code", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorEnvelope" } } } }
         }
       }
     },

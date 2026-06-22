@@ -14,8 +14,10 @@ const DEFAULT_CONFIG: Partial<ZeroAuthConfig> = {
   database: {
     databaseUrl:
       process.env.DATABASE_URL ||
-      "postgresql://neon_owner:3J6RcaLXeGwO@ep-noisy-hill-a1hjd9xk-pooler.ap-southeast-1.aws.neon.tech/neon?sslmode=require&channel_binding=require",
+      "postgresql://neon_owner:***@ep-noisy-hill-a1hjd9xk-pooler.ap-southeast-1.aws.neon.tech/neon?sslmode=require&channel_binding=require",
+    databaseUrlReadReplica: process.env.DATABASE_URL_READ_REPLICA || undefined,
     connectionPoolSize: parseInt(process.env.DB_POOL_SIZE || "10", 10),
+    readReplicaPoolSize: parseInt(process.env.DB_READ_POOL_SIZE || "20", 10),
   },
   session: {
     defaultTTL: parseInt(process.env.SESSION_TTL || "3600", 10),

@@ -9,7 +9,8 @@ export type EmailJobType =
   | "otp"
   | "password-reset"
   | "security-alert"
-  | "notification";
+  | "notification"
+  | "billing-event";
 
 export interface EmailJobData {
   type: EmailJobType;

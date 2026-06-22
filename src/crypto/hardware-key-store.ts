@@ -5,8 +5,19 @@
  * a software fallback that encrypts key material in memory using HKDF +
  * AES-256-GCM.
  *
- * Auto-selection priority:
- *   TPM 2.0 → Secure Enclave → PKCS#11 (if HW_KEY_PKCS11_LIB is set) → Software
+ * ⚠️ This build is **software-only**: the TPM / Secure Enclave / PKCS#11
+ * providers below are unimplemented skeletons (every operation throws
+ * `NotImplementedError`). Wiring real hardware needs native addons / host
+ * tooling — see each provider's JSDoc.
+ *
+ * Provider selection is controlled by the `KEY_PROVIDER` env var:
+ *   - unset / `auto`     → software provider (the only functional one); logs an
+ *                          informational notice if a TPM / Secure Enclave is
+ *                          physically present but unsupported by this build.
+ *   - `software`         → software provider.
+ *   - `tpm` / `secure-enclave` / `pkcs11` → **fails fast at startup** with a
+ *                          clear error, instead of silently selecting a stub
+ *                          that throws on first crypto use.
  */
 
 import crypto from "node:crypto";
@@ -369,41 +380,65 @@ export class PKCS11Provider implements HardwareKeyProvider {
 
 // ─── Auto-Selection ───────────────────────────────────────────────────────────
 
+/** KEY_PROVIDER values that select an (unimplemented) hardware provider. */
+const HARDWARE_PROVIDER_SELECTORS = new Set(["tpm", "tpm2", "secure-enclave", "pkcs11", "hsm"]);
+
 /**
- * Probe all providers in priority order and return the first one that
- * reports itself as available.
- *
- * Priority: TPM2 → Secure Enclave → PKCS#11 → Software
+ * Probe the hardware providers purely to surface an informational log line when
+ * a TPM / Secure Enclave / PKCS#11 device is physically present but unsupported
+ * by this software-only build. Never selects them — they can't perform crypto.
  */
-export async function createHardwareKeyStore(): Promise<HardwareKeyProvider> {
-  const candidates: HardwareKeyProvider[] = [new TPMKeyProvider(), new SecureEnclaveProvider()];
-
+async function noteUnsupportedHardware(): Promise<void> {
+  const probes: HardwareKeyProvider[] = [new TPMKeyProvider(), new SecureEnclaveProvider()];
   const pkcs11Lib = process.env.HW_KEY_PKCS11_LIB;
-  const pkcs11Pin = process.env.HW_KEY_PKCS11_PIN ?? "";
   if (pkcs11Lib) {
-    candidates.push(new PKCS11Provider(pkcs11Lib, pkcs11Pin));
+    probes.push(new PKCS11Provider(pkcs11Lib, process.env.HW_KEY_PKCS11_PIN ?? ""));
   }
-
-  candidates.push(new SoftwareKeyProvider());
-
-  for (const provider of candidates) {
+  for (const probe of probes) {
     try {
-      const available = await provider.isAvailable();
-      if (available) {
-        logger.info(`Hardware key store: selected provider "${provider.name}"`);
-        return provider;
+      if (await probe.isAvailable()) {
+        logger.info(
+          `Hardware key store: detected "${probe.name}" hardware, but this build is ` +
+            "software-only — using the software provider. A hardware implementation must " +
+            "be wired up before KEY_PROVIDER can select it."
+        );
       }
     } catch {
-      // Provider detection threw — try next
+      // Detection threw — ignore; this is best-effort diagnostics only.
     }
   }
+}
 
-  // SoftwareKeyProvider.isAvailable() always returns true, so we should
-  // never reach here.  Return a software provider as the last resort.
-  logger.warn(
-    "Hardware key store: all providers failed availability check, falling back to software"
-  );
-  return new SoftwareKeyProvider();
+/**
+ * Select the key-storage provider based on the `KEY_PROVIDER` env var.
+ *
+ * The software provider is the only functional one in this build. Explicitly
+ * requesting a hardware provider throws at startup (fail-fast) rather than
+ * returning a stub that would throw on the first sign/encrypt/decrypt call.
+ */
+export async function createHardwareKeyStore(): Promise<HardwareKeyProvider> {
+  const requested = (process.env.KEY_PROVIDER ?? "auto").trim().toLowerCase();
+
+  if (HARDWARE_PROVIDER_SELECTORS.has(requested)) {
+    throw new Error(
+      `KEY_PROVIDER="${requested}" requested, but hardware-backed key providers ` +
+        "(TPM / Secure Enclave / PKCS#11) are not implemented in this build — every " +
+        "operation would throw. Unset KEY_PROVIDER or set KEY_PROVIDER=software."
+    );
+  }
+
+  if (requested !== "auto" && requested !== "software") {
+    throw new Error(`Unknown KEY_PROVIDER="${requested}". Valid values: software, auto (default).`);
+  }
+
+  // In auto mode, emit a diagnostic if hardware is present but unsupported.
+  if (requested === "auto") {
+    await noteUnsupportedHardware();
+  }
+
+  const provider = new SoftwareKeyProvider();
+  logger.info(`Hardware key store: selected provider "${provider.name}"`);
+  return provider;
 }
 
 // ─── Singleton ────────────────────────────────────────────────────────────────

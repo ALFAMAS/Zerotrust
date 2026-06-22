@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { api } from "../../../lib/api";
 
 interface ApiKey {
@@ -23,12 +23,13 @@ export default function ApiKeysPage() {
   const [error, setError] = useState("");
   const [copied, setCopied] = useState(false);
 
-  const load = () =>
+  const load = useCallback(() => {
     api
       .get<ApiKey[]>("/api-keys")
       .then(setKeys)
       .catch(() => {})
       .finally(() => setLoading(false));
+  }, []);
 
   useEffect(() => {
     load();

@@ -16,16 +16,17 @@ import { authMiddleware } from "../middleware/auth";
 import { geoFencingMiddleware } from "../middleware/geoFencing";
 import { rateLimit } from "../middleware/rateLimiting";
 import { temporalAccessMiddleware } from "../middleware/temporalAccess";
+import notificationChannelRoutes from "../notifications/routes";
 import oidcRoutes from "../oidc/routes";
 import samlRoutes from "../saml/routes";
 import scimRoutes from "../scim/routes";
 import { alertingMiddleware } from "../services/alerting.service";
+import { sloAlertingMiddleware, sloRouteHandler } from "../services/slo.service";
 import { startBillingLifecycleScheduler } from "../services/billingLifecycle.service";
 import { startRetentionScheduler } from "../services/dataRetention";
 import { startBackupScheduler } from "../services/dbBackup.service";
 import { initEmailQueue } from "../services/emailQueue";
 import { startNotificationEmailFallbackScheduler } from "../services/notificationEmailFallback";
-import webhookManagementRoutes from "../webhooks/routes";
 import accessReviewRoutes from "./routes/access-review.routes";
 import adminRoutes from "./routes/admin.routes";
 import adminToolsRoutes from "./routes/admin-tools.routes";
@@ -34,10 +35,19 @@ import apiKeyRoutes from "./routes/api-keys.routes";
 import authRoutes from "./routes/auth.routes";
 import billingRoutes from "./routes/billing.routes";
 import billingWebhookRoutes from "./routes/billing.webhooks";
+import collaborationRoutes from "./routes/collaboration.routes";
 import emailEventRoutes from "./routes/email-events.routes";
+import globalizationRoutes from "./routes/globalization.routes";
+import magicLinkRoutes from "./routes/magic-link.routes";
+import regionRoutes from "./routes/region.routes";
+import searchRoutes from "./routes/search.routes";
+import walletRoutes from "./routes/wallet.routes";
+import complianceRoutes from "./routes/compliance.routes";
+import mcpRoutes from "./routes/mcp.routes";
+import agenticRoutes from "./routes/agentic.routes";
+import webhookManagementRoutes from "../webhooks/routes";
 import feedbackRoutes from "./routes/feedback.routes";
 import gdprRoutes from "./routes/gdpr.routes";
-import magicLinkRoutes from "./routes/magic-link.routes";
 import mfaRoutes from "./routes/mfa.routes";
 import notificationRoutes from "./routes/notification.routes";
 import orgRoutes from "./routes/org.routes";
@@ -93,6 +103,12 @@ export async function createServer() {
   // Error-spike + latency alerting (Slack / Teams / PagerDuty)
   app.use("*", alertingMiddleware());
 
+  // SLO burn-rate alerting (debounced, checks Prometheus metrics)
+  app.use("*", sloAlertingMiddleware());
+
+  // SLO status endpoint — current error budget + burn rates
+  app.get("/admin/slo", sloRouteHandler);
+
   // ─── Static uploads (avatars, etc.) ──────────────────────────────────────
   app.use("/uploads/*", serveStatic({ root: "./" }));
 
@@ -145,7 +161,11 @@ export async function createServer() {
   app.route("/admin/anomaly", anomalyRoutes);
 
   // ─── Notification routes ──────────────────────────────────────────────────
+  // User-facing in-app / SSE / web-push notifications.
   app.route("/notifications", notificationRoutes);
+  // Admin-only alerting-channel management (Slack / Teams / PagerDuty). The
+  // router self-guards with authMiddleware + an admin-role check.
+  app.route("/admin/notifications", notificationChannelRoutes);
 
   // ─── Organization routes ──────────────────────────────────────────────────
   app.route("/orgs", orgRoutes);
@@ -164,6 +184,33 @@ export async function createServer() {
   // ─── Billing routes ───────────────────────────────────────────────────────
   app.route("/billing", billingRoutes);
   app.route("/billing", billingWebhookRoutes);
+  // Multi-currency pricing, PPP, location tax, EU VAT + tax-exemption endpoints.
+  app.route("/billing", globalizationRoutes);
+
+  // ─── Collaboration routes ─────────────────────────────────────────────────
+  // Shared notes, activity feed, @mentions, presence, and global search.
+  app.route("/collab", collaborationRoutes);
+
+  // ─── Region / tenant routes ────────────────────────────────────────────────
+  // Custom domain resolution, per-org branding, data residency.
+  app.route("/regions", regionRoutes);
+
+  // ─── Search routes ─────────────────────────────────────────────────────────
+  // Full-text search (Elasticsearch) + smart/semantic search.
+  app.route("/search", searchRoutes);
+
+  // ─── Wallet, Loyalty, Referral, Gamification ──────────────────────────────
+  // Wallet, points, tiers, redemptions, referrals.
+  app.route("/wallet", walletRoutes);
+
+  // ─── Compliance ────────────────────────────────────────────────────────────
+  // SOC 2 readiness + controls, risk assessment.
+  app.route("/compliance", complianceRoutes);
+
+  // ─── Agentic And AI-Native Auth ────────────────────────────────────────────
+  // MCP authorization server, delegation, human-in-the-loop approvals.
+  app.route("/mcp", mcpRoutes);
+  app.route("/agentic", agenticRoutes);
 
   // ─── User-facing webhook management (developer feature) ──────────────────
   app.route("/webhooks", webhookManagementRoutes);
@@ -200,7 +247,7 @@ export async function createServer() {
 
   // ─── Responsible disclosure (RFC 9116) ──────────────────────────────────────
   const securityTxt = () => {
-    const contact = process.env.SECURITY_CONTACT ?? "mailto:security@example.com";
+    const contact = process.env.SECURITY_CONTACT ?? "mailto:arafat0951@gmail.com";
     const appUrl = process.env.APP_URL ?? "http://localhost:3000";
     const expires = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString();
     return [
@@ -215,16 +262,6 @@ export async function createServer() {
   app.get("/security.txt", (c) => c.text(securityTxt()));
 
   // ─── Health checks ────────────────────────────────────────────────────────
-  app.get("/health", async (c) => {
-    const health: Record<string, unknown> = { status: "ok" };
-    try {
-      const { pingRedis } = await import("../services/rateLimiter/redis.js");
-      health.redis = (await pingRedis()) ? "ok" : "down";
-    } catch {
-      health.redis = "unconfigured";
-    }
-    return c.json(health);
-  });
 
   // Public status page data — safe to expose (no internals, just up/down)
   const serverStartedAt = Date.now();
@@ -289,8 +326,106 @@ export async function createServer() {
     });
   });
 
-  app.get("/healthz", async (c) => {
-    const health: Record<string, unknown> = { status: "ok", timestamp: new Date().toISOString() };
+  // SSE stream for real-time status updates
+  app.get("/status/stream", () => {
+    const stream = new ReadableStream({
+      start(controller) {
+        const encoder = new TextEncoder();
+
+        const sendStatus = async () => {
+          try {
+            const components: Record<string, "operational" | "degraded" | "down" | "not set"> = {
+              api: "operational",
+            };
+            try {
+              const { isDbConnected } = await import("../db/index.js");
+              components.database = isDbConnected() ? "operational" : "down";
+            } catch {
+              components.database = "down";
+            }
+            try {
+              const { pingRedis } = await import("../services/rateLimiter/redis.js");
+              components.cache = (await pingRedis()) ? "operational" : "degraded";
+            } catch {
+              components.cache = "degraded";
+            }
+            let s3Enabled = false;
+            try {
+              const { isS3BackupEnabled, pingS3WithTimeout } = await import(
+                "../services/objectStorage.service.js"
+              );
+              s3Enabled = isS3BackupEnabled();
+              if (s3Enabled) {
+                const ping = await pingS3WithTimeout(4000);
+                components.s3Backup = ping.ok ? "operational" : "down";
+                components.s3ObjectStorage = ping.ok ? "operational" : "down";
+              } else {
+                components.s3Backup = "not set";
+                components.s3ObjectStorage = "not set";
+              }
+            } catch {
+              components.s3Backup = s3Enabled ? "down" : "not set";
+              components.s3ObjectStorage = s3Enabled ? "down" : "not set";
+            }
+            const overall: "operational" | "degraded" | "down" = Object.values(components).includes(
+              "down"
+            )
+              ? "down"
+              : Object.values(components).includes("degraded")
+                ? "degraded"
+                : "operational";
+            const data = JSON.stringify({
+              status: overall,
+              components,
+              uptimeSeconds: Math.floor((Date.now() - serverStartedAt) / 1000),
+              timestamp: new Date().toISOString(),
+            });
+            controller.enqueue(encoder.encode(`data: ${data}\n\n`));
+          } catch {
+            /* ignore */
+          }
+        };
+
+        // Send initial status
+        void sendStatus();
+
+        // Broadcast every 30s
+        const interval = setInterval(sendStatus, 30_000);
+        const pingInterval = setInterval(() => {
+          try {
+            controller.enqueue(encoder.encode(": ping\n\n"));
+          } catch {
+            clearInterval(pingInterval);
+            clearInterval(interval);
+          }
+        }, 30_000);
+
+        // Cleanup stored on controller for cancel
+        (controller as any)._cleanup = () => {
+          clearInterval(interval);
+          clearInterval(pingInterval);
+        };
+      },
+      cancel() {
+        const s = this as any;
+        if (s._cleanup) s._cleanup();
+      },
+    });
+    return new Response(stream, {
+      headers: {
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache",
+        Connection: "keep-alive",
+        "X-Accel-Buffering": "no",
+      },
+    });
+  });
+
+  app.get("/health", async (c) => {
+    const health: Record<string, unknown> = {
+      status: "ok",
+      timestamp: new Date().toISOString(),
+    };
 
     try {
       const { pingRedis } = await import("../services/rateLimiter/redis.js");

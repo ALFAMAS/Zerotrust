@@ -56,7 +56,7 @@ rebuilding login for the hundredth time.
   structured logs, and Slack/Teams/PagerDuty alerting ship with the platform.
 
 > The authoritative, always-current feature catalog lives in
-> [`implemented.md`](./implemented.md). The list below is a curated summary.
+> [`tdone.md`](./tdone.md). The list below is a curated summary.
 
 ---
 
@@ -79,6 +79,7 @@ rebuilding login for the hundredth time.
 - Decentralized identity — `did:key` / `did:web` resolver + proof-of-control
 - Organizations & teams — workspaces, invites, custom roles with fine-grained permissions
 - Cross-tenant JIT access — request + admin-approval inbox, auto-expiring
+- MCP OAuth authorization server plus agentic delegation with human approval gates
 
 ### Access control & abuse defense
 - RBAC + ABAC with just-in-time privilege escalation
@@ -91,21 +92,26 @@ rebuilding login for the hundredth time.
 - Stripe billing — checkout, customer portal, webhooks, per-org subscriptions
 - Plan feature gates (`requirePlan()`), 14-day trials, dunning, win-back, cancellation flow
 - API key management — named keys, SHA-256 hashed, scopes, revoke
+- Multi-currency pricing, PPP discounts, tax quotes, VAT validation, and tax exemptions
+- Wallet, loyalty tiers, points ledger, redemption catalog, and referral tracking
 
 ### Frontend (Next.js)
 - Landing page, user dashboard, and guarded admin panel in one app
 - PWA — installable, offline app-shell, web push (VAPID)
-- i18n (next-intl, EN/ES/FR), locale-aware `Intl.*` formatting, dark mode
+- i18n (next-intl, EN/ES/FR/AR with RTL support), locale-aware `Intl.*` formatting, dark mode
 - GDPR — cookie consent, data export, 30-day soft-delete; privacy/terms pages
 - Notification center (SSE real-time + email fallback), feedback widget, product tour
+- Command palette, shared notes, team activity feed, mentions, and presence
 
 ### Compliance & operations
 - Tamper-evident audit log (SHA-256 hash-chain) + Elasticsearch + SIEM fan-out
 - Access reviews tooling, data-retention auto-purge
+- SOC 2 readiness controls, risk register, privacy records, and compliance runbooks
 - Prometheus metrics, OpenTelemetry tracing, public `/status` page
 - S3-compatible storage (AWS S3, Backblaze B2, Cloudflare R2, MinIO, Wasabi) for
   backups and user uploads
 - Automated `pg_dump` backups with local + S3 retention
+- SLO burn-rate reporting, read-replica support, k6 load/chaos harnesses
 
 ---
 
@@ -120,7 +126,8 @@ rebuilding login for the hundredth time.
 | Crypto       | PASETO v4, `@noble/*`, ML-KEM (post-quantum KEM), CSFLE field encryption   |
 | Auth libs    | `@simplewebauthn/server` (WebAuthn) · `samlify` (SAML) · `otpauth` (TOTP)  |
 | Observability| Prometheus (`prom-client`) · OpenTelemetry · Sentry                        |
-| Tooling      | [Biome](https://biomejs.dev) (lint+format) · Vitest · Husky · semantic-release |
+| SDK          | Generated TypeScript client in `packages/client` from `src/api/openapi.json` |
+| Tooling      | [Biome](https://biomejs.dev) (lint+format) · Vitest · Playwright · Husky · semantic-release |
 
 ---
 
@@ -398,7 +405,7 @@ cd packages/ui && npm install && npm run build && pm2 restart zeroauth-ui
 ## API overview
 
 A condensed map of the most-used endpoints (auth-gated routes noted). The API mounts
-~30 route modules in `src/api/server.ts`; browse Swagger at `/docs` (dev) for the full
+31 route modules in `src/api/server.ts`; browse Swagger at `/docs` (dev) for the full
 surface.
 
 ```
@@ -417,15 +424,28 @@ GET    /sessions · DELETE /sessions/:id           (auth)
 GET/POST /orgs · /orgs/:orgId/members|invites|roles
 GET/POST/DELETE /api-keys                          (auth)
 POST   /billing/checkout|portal · POST /billing/webhook (Stripe)
+GET    /billing/pricing · POST /billing/tax/quote
 
 # Enterprise / federation
 /scim/v2/*   (SCIM)   ·   /ldap/*   ·   /federation/*
 OIDC discovery + SAML endpoints mounted at /
 GET /jwks · /.well-known/*
 
+# Collaboration, search, wallet, compliance
+GET    /collab/search · /collab/activity · /collab/presence/:orgId
+GET/POST/PUT/DELETE /collab/notes[/:id]
+GET    /search · /search/smart · /search/provider
+GET    /wallet · /wallet/tier · /wallet/referrals/dashboard
+GET    /compliance/soc2/readiness · /compliance/risk-assessment/:year
+
+# AI-native / agentic auth
+GET    /.well-known/oauth-authorization-server
+GET    /mcp/authorize · POST /mcp/token
+POST   /agentic/auth/delegation/exchange
+
 # Ops
 GET    /status        (public status page data)
-GET    /healthz · /metrics (Prometheus)
+GET    /health · /healthz · /metrics (Prometheus)
 ```
 
 ---
@@ -437,27 +457,28 @@ GET    /healthz · /metrics (Prometheus)
 ├── src/                            # API (Hono + TypeScript + Drizzle)
 │   ├── api/
 │   │   ├── server.ts               # Hono app + route mounting (port 1337)
-│   │   └── routes/                 # auth, mfa, passkey, session, admin, orgs, billing…
+│   │   └── routes/                 # auth, mfa, passkey, admin, orgs, billing, wallet, search…
 │   ├── db/                         # Drizzle schema + connection (PostgreSQL)
 │   ├── services/                   # token, email, MFA, OAuth, objectStorage, dbBackup…
 │   ├── middleware/                 # auth, rate limiting, CSRF, requirePlan, apiKeyAuth…
 │   ├── oidc/ · saml/ · scim/ · ldap/ · federation/ · did/ · jit/   # enterprise modules
+│   ├── audit/ · metrics/ · webhooks/ · workload/                   # ops + platform modules
 │   ├── crypto/                     # PASETO, CSFLE, hardware key store, post-quantum KEM
 │   └── __tests__/                  # Vitest unit + integration tests
 ├── packages/
+│   ├── client/                     # generated dependency-free TypeScript SDK
 │   └── ui/                         # Next.js 16 app (port 3000)
-│       ├── messages/               # i18n JSON (en, es, fr)
+│       ├── messages/               # i18n JSON (en, es, fr, ar)
 │       └── src/
 │           ├── app/                # App Router: (auth)/, dashboard/, admin/, blog/, …
 │           ├── components/         # shared UI components
 │           └── lib/                # API client, auth tokens, helpers
 ├── drizzle/                        # SQL migrations + journal
+├── docs/compliance/                # compliance policies, runbooks, and evidence templates
 ├── scripts/                        # db-backup, db-restore, postinstall…
 ├── .github/workflows/ci.yml        # CI: lint + type-check + test + UI build
 ├── .env.example                    # all env vars, documented inline
-├── implemented.md                  # shipped feature catalog (source of truth)
-├── not-implemented.md              # product backlog + perf + compliance gaps
-└── incomplete.md                   # code that exists but is unmounted/stubbed/orphaned
+└── tdone.md                        # shipped feature catalog + latest audit snapshot
 ```
 
 ---
@@ -515,13 +536,18 @@ expire, then drop the old key.
 
 ## Project status
 
-ZeroAuth tracks its state across three living documents:
+ZeroAuth tracks its state in the repository docs:
 
 | Doc                                          | What it covers                                              |
 | -------------------------------------------- | ----------------------------------------------------------- |
-| [`implemented.md`](./implemented.md)         | Everything that ships today (authoritative)                 |
-| [`not-implemented.md`](./not-implemented.md) | Product backlog, performance work, and compliance gaps      |
-| [`incomplete.md`](./incomplete.md)           | Code in the tree that is unmounted, stubbed, or orphaned    |
+| [`tdone.md`](./tdone.md)                     | Everything that ships today, plus the latest codebase audit |
+| [`docs/compliance`](./docs/compliance/README.md) | Compliance policies, procedures, and evidence templates |
+| [`packages/client`](./packages/client/README.md) | Generated TypeScript SDK package and usage notes |
+
+Latest audit note: the source tree now mounts the major backend surfaces described
+above, but local verification is currently blocked by broken Bun workspace links in
+`node_modules`. See the audit snapshot at the bottom of [`tdone.md`](./tdone.md)
+for the exact commands and failures.
 
 ---
 

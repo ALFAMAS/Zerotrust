@@ -1,4 +1,4 @@
-import { and, desc, eq, ne } from "drizzle-orm";
+import { and, desc, eq, inArray, ne } from "drizzle-orm";
 import { getConfig } from "../config";
 import { getDb } from "../db";
 import { sessionsTable } from "../db/schema";
@@ -20,15 +20,15 @@ export async function enforceMaxConcurrentDevices(userId: string, maxDevices?: n
   if (activeSessions.length <= allowed) return [];
 
   const toRevoke = activeSessions.slice(allowed).reverse();
-  const revokedIds: string[] = [];
+  const revokedIds = toRevoke.map((s) => s.id);
 
-  for (const s of toRevoke) {
-    await db
-      .update(sessionsTable)
-      .set({ isActive: false, revokedAt: new Date(), revokedReason: "MAX_DEVICES_EXCEEDED" })
-      .where(eq(sessionsTable.id, s.id));
-    revokedIds.push(s.id);
-    logger.info("Revoked session due to max devices", { userId, sessionId: s.id });
+  await db
+    .update(sessionsTable)
+    .set({ isActive: false, revokedAt: new Date(), revokedReason: "MAX_DEVICES_EXCEEDED" })
+    .where(inArray(sessionsTable.id, revokedIds));
+
+  for (const id of revokedIds) {
+    logger.info("Revoked session due to max devices", { userId, sessionId: id });
   }
 
   return revokedIds;

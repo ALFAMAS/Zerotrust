@@ -17,7 +17,7 @@ export interface SCIMGroup {
   externalId?: string;
   displayName: string;
   members?: Array<{ value: string; display?: string }>;
-  meta?: { resourceType: string; created?: string; lastModified?: string };
+  meta?: { resourceType: string; created?: string; lastModified?: string; location?: string };
 }
 
 export interface SCIMListResponse<T> {

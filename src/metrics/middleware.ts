@@ -1,10 +1,8 @@
 import type { Context } from "hono";
 import { createMiddleware } from "hono/factory";
-import { collectDefaultMetrics, register } from "prom-client";
+import { register } from "prom-client";
 import type { HonoEnv } from "../shared/types";
 import { requestDurationSeconds } from "./counters";
-
-collectDefaultMetrics({ register });
 
 export function metricsMiddleware() {
   return createMiddleware<HonoEnv>(async (c, next) => {

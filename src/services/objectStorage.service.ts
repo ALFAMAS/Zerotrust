@@ -186,6 +186,12 @@ export async function uploadBuffer(opts: {
   key: string;
   body: Buffer;
   contentType: string;
+  /**
+   * Cache-Control to stamp on the object so a CDN/edge can cache it. Defaults
+   * to the long-lived immutable policy from `getUploadCacheControl()` — safe
+   * because upload keys are unique per write (timestamp + random suffix).
+   */
+  cacheControl?: string;
 }): Promise<{ key: string; size: number; url: string }> {
   const cfg = readConfig();
   if (!cfg) throw new Error("S3 backup not configured (BACKUP_S3_BUCKET + credentials)");
@@ -193,6 +199,7 @@ export async function uploadBuffer(opts: {
   const uploadsPrefix = (process.env.UPLOADS_S3_PREFIX ?? "uploads/").replace(/\/?$/, "/");
   const cleanKey = opts.key.replace(/^\/+/, "");
   const objectKey = `${uploadsPrefix}${cleanKey}`;
+  const cacheControl = opts.cacheControl ?? getUploadCacheControl();
 
   await getClient(cfg).send(
     new PutObjectCommand({
@@ -201,16 +208,62 @@ export async function uploadBuffer(opts: {
       Body: opts.body,
       ContentLength: opts.body.length,
       ContentType: opts.contentType,
+      CacheControl: cacheControl,
     })
   );
 
-  const url = publicURLForKey(cfg, objectKey);
+  // Prefer the dedicated uploads CDN/edge URL when configured; otherwise the
+  // direct origin (S3/B2/R2) URL.
+  const url = cdnURLForKey(cfg, objectKey);
   logger.info("Uploaded user file to S3", {
     bucket: cfg.bucket,
     key: objectKey,
     size: opts.body.length,
   });
   return { key: objectKey, size: opts.body.length, url };
+}
+
+// ── Edge / CDN delivery for user uploads ──────────────────────────────────────
+
+/**
+ * Cache-Control header stamped on uploaded objects (and echoed on the local-disk
+ * fallback response) so a CDN/edge can cache them aggressively.
+ *
+ *   UPLOADS_CACHE_CONTROL   default "public, max-age=31536000, immutable"
+ *
+ * Upload keys are unique per write, so `immutable` is safe — a changed file gets
+ * a new key, never a stale cache hit.
+ */
+export function getUploadCacheControl(): string {
+  return process.env.UPLOADS_CACHE_CONTROL?.trim() || "public, max-age=31536000, immutable";
+}
+
+/**
+ * Base URL of the CDN/edge cache that fronts the uploads bucket, e.g.
+ * `https://cdn.zeroauth.app`. Distinct from `BACKUP_S3_PUBLIC_URL_TEMPLATE`
+ * (which targets the backups workflow): this one is dedicated to user-facing
+ * upload delivery. Returns null (→ origin URL) when unset.
+ *
+ *   UPLOADS_CDN_URL   e.g. https://cdn.zeroauth.app
+ */
+export function uploadCdnBaseUrl(): string | null {
+  const base = process.env.UPLOADS_CDN_URL?.trim();
+  return base ? base.replace(/\/+$/, "") : null;
+}
+
+/**
+ * Public delivery URL for an uploaded object key. Routes through the dedicated
+ * uploads CDN (`UPLOADS_CDN_URL`) when configured, otherwise falls back to the
+ * origin URL from `publicURLForKey()` (which itself honours
+ * `BACKUP_S3_PUBLIC_URL_TEMPLATE`).
+ */
+export function cdnURLForKey(cfg: S3Config, objectKey: string): string {
+  const cdn = uploadCdnBaseUrl();
+  if (cdn) {
+    const encodedKey = objectKey.split("/").map(encodeURIComponent).join("/");
+    return `${cdn}/${encodedKey}`;
+  }
+  return publicURLForKey(cfg, objectKey);
 }
 
 /**
@@ -222,17 +275,22 @@ export async function uploadBuffer(opts: {
  * you need to override (e.g. behind a CDN or custom domain).
  */
 export function publicURLForKey(cfg: S3Config, objectKey: string): string {
+  // Percent-encode each path segment but keep "/" as the separator, so a nested
+  // key like "uploads/avatars/u1.jpg" maps to a real URL path instead of
+  // "uploads%2Favatars%2Fu1.jpg" (which most providers won't resolve).
+  const encodedKey = objectKey.split("/").map(encodeURIComponent).join("/");
+
   const override = process.env.BACKUP_S3_PUBLIC_URL_TEMPLATE;
   if (override) {
-    return override.replace("{key}", encodeURIComponent(objectKey));
+    return override.replace("{key}", encodedKey);
   }
   if (!cfg.endpoint) {
     // AWS S3 virtual-hosted style (default SDK behaviour when no endpoint).
-    return `https://${cfg.bucket}.s3.${cfg.region}.amazonaws.com/${encodeURIComponent(objectKey)}`;
+    return `https://${cfg.bucket}.s3.${cfg.region}.amazonaws.com/${encodedKey}`;
   }
   // Path-style: https://endpoint/bucket/key
   const base = cfg.endpoint.replace(/\/+$/, "");
-  return `${base}/${cfg.bucket}/${encodeURIComponent(objectKey)}`;
+  return `${base}/${cfg.bucket}/${encodedKey}`;
 }
 
 /**

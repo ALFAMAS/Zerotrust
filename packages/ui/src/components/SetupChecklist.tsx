@@ -1,9 +1,10 @@
 "use client";
 
-import { Check } from "lucide-react";
+import { Check, Trophy } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
+import { api } from "../../lib/api";
 
 interface ChecklistItem {
   id: string;
@@ -43,16 +44,53 @@ const DISMISS_KEY = "za_setup_checklist_dismissed";
 
 export default function SetupChecklist({ user }: { user: any }) {
   const [dismissed, setDismissed] = useState(false);
+  const [celebrated, setCelebrated] = useState(false);
 
   useEffect(() => {
     if (localStorage.getItem(DISMISS_KEY) === "1") setDismissed(true);
+  }, []);
+
+  const fireOnboardingComplete = useCallback(async () => {
+    try {
+      await api.post("/auth/me/onboarding-complete", {});
+    } catch {
+      // non-fatal
+    }
   }, []);
 
   if (!user || dismissed) return null;
 
   const completed = ITEMS.filter((i) => i.check(user));
   const total = ITEMS.length;
-  if (completed.length === total) return null;
+  const allDone = completed.length === total;
+
+  // Fire onboarding-complete when all items are done
+  useEffect(() => {
+    if (allDone && !celebrated) {
+      setCelebrated(true);
+      fireOnboardingComplete();
+    }
+  }, [allDone, celebrated, fireOnboardingComplete]);
+
+  if (allDone) {
+    return (
+      <Card className="mb-6 border-primary/40 bg-primary/5 p-6">
+        <div className="flex items-center gap-4">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/20">
+            <Trophy className="h-6 w-6 text-primary" />
+          </div>
+          <div>
+            <h3 className="font-display text-lg font-semibold text-foreground">
+              🎉 Onboarding complete!
+            </h3>
+            <p className="text-sm text-muted-foreground">
+              You&apos;ve completed all setup steps. You&apos;re all set to make the most of ZeroAuth.
+            </p>
+          </div>
+        </div>
+      </Card>
+    );
+  }
 
   const pct = Math.round((completed.length / total) * 100);
 
@@ -76,9 +114,10 @@ export default function SetupChecklist({ user }: { user: any }) {
         {completed.length}/{total} steps completed
       </p>
 
-      <div className="mb-5 h-1.5 rounded-full bg-muted">
+      {/* Progress bar */}
+      <div className="mb-5 h-2 rounded-full bg-muted">
         <div
-          className="h-1.5 rounded-full bg-primary transition-all"
+          className="h-2 rounded-full bg-primary transition-all"
           style={{ width: `${pct}%` }}
         />
       </div>

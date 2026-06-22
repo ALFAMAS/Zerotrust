@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Badge from "@/components/Badge";
 import { api } from "@/lib/api";
 
@@ -45,12 +45,15 @@ export default function AccessReviewDetailPage() {
   const [busy, setBusy] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
 
-  function showToast(msg: string) {
-    setToast(msg);
-    setTimeout(() => setToast(null), 3000);
-  }
+  const toastTimer = useRef<ReturnType<typeof setTimeout>>();
 
-  async function load() {
+  const showToast = useCallback((msg: string) => {
+    setToast(msg);
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    toastTimer.current = setTimeout(() => setToast(null), 3000);
+  }, []);
+
+  const load = useCallback(async () => {
     setLoading(true);
     try {
       const data = await api.get<{ review: Review; items: ReviewItem[] }>(
@@ -63,7 +66,7 @@ export default function AccessReviewDetailPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [id]);
 
   useEffect(() => {
     load();

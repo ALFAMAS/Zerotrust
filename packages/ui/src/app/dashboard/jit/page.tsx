@@ -1,7 +1,7 @@
 "use client";
 
 import { Clock, Loader2, ShieldQuestion } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import { useToast } from "@/lib/toast";
 
@@ -37,7 +37,7 @@ export default function JITRequestPage() {
     ttlMinutes: 60,
   });
 
-  async function load() {
+  const load = useCallback(async () => {
     try {
       const data = await api.get<JITRequest[]>("/jit/cross-tenant");
       setRequests(Array.isArray(data) ? data : []);
@@ -46,7 +46,7 @@ export default function JITRequestPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, []);
 
   useEffect(() => {
     load();

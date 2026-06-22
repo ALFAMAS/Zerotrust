@@ -10,6 +10,7 @@ export interface OrgSecurityPolicy {
   allowedPasskeyAaguids: string[];
   deniedPasskeyAaguids: string[];
   ipAllowlist: string[];
+  requireTrustedDevices: boolean;
   updatedAt?: Date;
   updatedBy?: string | null;
 }
@@ -22,6 +23,7 @@ export function defaultOrgSecurityPolicy(orgId: string): OrgSecurityPolicy {
     allowedPasskeyAaguids: [],
     deniedPasskeyAaguids: [],
     ipAllowlist: [],
+    requireTrustedDevices: false,
   };
 }
 

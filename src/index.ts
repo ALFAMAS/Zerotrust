@@ -43,9 +43,12 @@ export {
   closeDatabase,
   dropAllTables,
   getDb,
+  getReadDb,
+  hasReadReplica,
   initializeDatabase,
   isDbConnected,
 } from "./db";
+export type { DatabaseHealth } from "./db";
 // ─── Schema ──────────────────────────────────────────────────────────────────
 export {
   auditLogsTable,

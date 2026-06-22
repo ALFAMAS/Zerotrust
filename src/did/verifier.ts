@@ -1,5 +1,7 @@
 import crypto from "node:crypto";
-import { UserModel } from "../models/user.model";
+import { eq } from "drizzle-orm";
+import { getDb } from "../db";
+import { usersTable } from "../db/schema";
 import { resolveDID } from "./resolver";
 import type { DIDAuthChallenge, DIDAuthResult, DIDProof, VerificationMethod } from "./types";
 
@@ -87,17 +89,33 @@ export async function verifyDIDProof(proof: DIDProof, challengeId: string): Prom
   return { verified: true, did: stored.did, method };
 }
 
+/**
+ * Find-or-create a local ZeroAuth user for a verified DID. Idempotent: a repeat
+ * login for the same DID returns the existing user id. The account has no
+ * password (DID proof-of-control is the credential) and is marked active +
+ * email-verified, since control of the DID has already been cryptographically
+ * proven by the time this is called.
+ */
 export async function provisionDIDUser(
   did: string,
   _didDocument: import("./types").DIDDocument
 ): Promise<string> {
-  let user = await (UserModel as any).findOne({ did });
-  if (!user) {
-    user = await (UserModel as any).create({
-      email: `${did.replace(/[^a-zA-Z0-9]/g, "-")}@did.local`,
+  const db = getDb();
+
+  const existing = await db.select().from(usersTable).where(eq(usersTable.did, did)).limit(1);
+  if (existing.length > 0) return existing[0].id;
+
+  // Synthetic, stable, unique email derived from the DID (no real mailbox).
+  const email = `${did.replace(/[^a-zA-Z0-9]/g, "-").toLowerCase()}@did.local`;
+  const [user] = await db
+    .insert(usersTable)
+    .values({
+      email,
       did,
-      passwordHash: "",
-    });
-  }
-  return String(user._id);
+      displayName: did,
+      status: "active",
+      emailVerifiedAt: new Date(),
+    })
+    .returning();
+  return user.id;
 }

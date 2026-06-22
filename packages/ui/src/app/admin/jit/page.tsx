@@ -1,7 +1,7 @@
 "use client";
 
 import { Check, Clock, Loader2, ShieldQuestion, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { api } from "@/lib/api";
 
 interface JITRequest {
@@ -32,12 +32,15 @@ export default function AdminJITPage() {
   const [acting, setActing] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
 
-  function showToast(msg: string) {
-    setToast(msg);
-    setTimeout(() => setToast(null), 3000);
-  }
+  const toastTimer = useRef<ReturnType<typeof setTimeout>>();
 
-  async function load() {
+  const showToast = useCallback((msg: string) => {
+    setToast(msg);
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    toastTimer.current = setTimeout(() => setToast(null), 3000);
+  }, []);
+
+  const load = useCallback(async () => {
     try {
       const data = await api.get<JITRequest[]>("/jit/cross-tenant/incoming");
       setRequests(Array.isArray(data) ? data : []);
@@ -46,7 +49,7 @@ export default function AdminJITPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, []);
 
   useEffect(() => {
     load();

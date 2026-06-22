@@ -11,7 +11,9 @@ export type NotificationEvent =
   | "session.mass_revocation"
   | "scim.provision_error"
   | "error.spike"
-  | "latency.breach";
+  | "latency.breach"
+  | "slo.burn"
+  | "onboarding.completed";
 
 export interface SlackConfig {
   webhookUrl: string;

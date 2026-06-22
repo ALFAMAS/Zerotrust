@@ -56,6 +56,12 @@ export function assignVariant(
 
 // ── Exposure / conversion tracking (in-memory) ───────────────────────────────
 
+// ── Exposure / conversion tracking (durable) ──────────────────────────────────
+
+import { and, eq } from "drizzle-orm";
+import { getDb } from "../db";
+import { experimentResultsTable } from "../db/schema";
+
 interface VariantStats {
   exposures: number;
   conversions: number;
@@ -76,14 +82,38 @@ function statsFor(experimentKey: string, variant: string): VariantStats {
   return s;
 }
 
-/** Record that a subject saw `variant` of `experimentKey`. */
+/** Record that a subject saw variant of experimentKey. */
 export function recordExposure(experimentKey: string, variant: string): void {
   statsFor(experimentKey, variant).exposures += 1;
+  void persistExposure(experimentKey, variant);
 }
 
-/** Record a conversion for `variant` of `experimentKey`. */
+async function persistExposure(experimentKey: string, variant: string): Promise<void> {
+  try {
+    const db = getDb();
+    await db.insert(experimentResultsTable).values({
+      experimentKey, variant, subjectId: "_aggregate_", converted: false,
+    }).onConflictDoNothing();
+  } catch { /* non-fatal */ }
+}
+
+/** Record a conversion for variant of experimentKey. */
 export function recordConversion(experimentKey: string, variant: string): void {
   statsFor(experimentKey, variant).conversions += 1;
+  void persistConversion(experimentKey, variant);
+}
+
+async function persistConversion(experimentKey: string, variant: string): Promise<void> {
+  try {
+    const db = getDb();
+    await db.update(experimentResultsTable)
+      .set({ converted: true })
+      .where(and(
+        eq(experimentResultsTable.experimentKey, experimentKey),
+        eq(experimentResultsTable.variant, variant),
+        eq(experimentResultsTable.subjectId, "_aggregate_")
+      ));
+  } catch { /* non-fatal */ }
 }
 
 export interface VariantResult {
