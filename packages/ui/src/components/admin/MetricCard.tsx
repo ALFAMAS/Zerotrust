@@ -9,12 +9,7 @@ interface MetricCardProps {
 }
 
 /** Compact stat tile in the zerotrust dark/indigo design (replaces the emoji StatCard in admin). */
-export default function MetricCard({
-  icon: Icon,
-  label,
-  value,
-  hint,
-}: MetricCardProps) {
+export default function MetricCard({ icon: Icon, label, value, hint }: MetricCardProps) {
   return (
     <div className="rounded-xl border border-border bg-card p-5 transition-colors hover:border-primary/40">
       <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-background text-primary">

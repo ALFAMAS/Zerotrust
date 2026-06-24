@@ -8,10 +8,7 @@ import { otpEmailTemplate } from "../templates/emails/otp";
 import { passwordResetEmailTemplate } from "../templates/emails/password-reset";
 import { securityAlertEmailTemplate } from "../templates/emails/security-alert";
 import { verifyEmailTemplate } from "../templates/emails/verify-email";
-import {
-  type WelcomeEmailData,
-  welcomeEmailTemplate,
-} from "../templates/emails/welcome";
+import { type WelcomeEmailData, welcomeEmailTemplate } from "../templates/emails/welcome";
 import { isEmailSuppressed } from "./emailSuppression.service";
 
 const logger = getLogger("email-service");
@@ -65,15 +62,11 @@ async function sendEmail(opts: {
     }
     const transport = getTransport();
     const from =
-      process.env.MAIL_FROM ??
-      `noreply@${APP_NAME.toLowerCase().replace(/\s+/g, "")}.com`;
+      process.env.MAIL_FROM ?? `noreply@${APP_NAME.toLowerCase().replace(/\s+/g, "")}.com`;
     await transport.sendMail({ from, ...opts });
     logger.info("Email sent", { to: opts.to, subject: opts.subject });
   } catch (err) {
-    logger.error(
-      `Failed to send email to ${opts.to} (subject: ${opts.subject})`,
-      err as Error,
-    );
+    logger.error(`Failed to send email to ${opts.to} (subject: ${opts.subject})`, err as Error);
   }
 }
 
@@ -81,7 +74,7 @@ async function sendEmail(opts: {
 
 export async function sendWelcomeEmail(
   to: string,
-  data: Omit<WelcomeEmailData, "appName" | "appUrl">,
+  data: Omit<WelcomeEmailData, "appName" | "appUrl">
 ): Promise<void> {
   const { subject, html, text } = welcomeEmailTemplate({
     ...data,
@@ -99,7 +92,7 @@ export async function sendMagicLinkEmail(
     magicLinkUrl: string;
     expiresInMinutes?: number;
     locale?: Locale;
-  },
+  }
 ): Promise<void> {
   const { subject, html, text } = magicLinkEmailTemplate({
     name: data.name,
@@ -114,7 +107,7 @@ export async function sendMagicLinkEmail(
 
 export async function sendOtpEmail(
   to: string,
-  data: { name: string; code: string; expiresInMinutes?: number },
+  data: { name: string; code: string; expiresInMinutes?: number }
 ): Promise<void> {
   const { subject, html, text } = otpEmailTemplate({
     name: data.name,
@@ -133,7 +126,7 @@ export async function sendVerificationEmail(
     verifyUrl: string;
     expiresInMinutes?: number;
     locale?: Locale;
-  },
+  }
 ): Promise<void> {
   const { subject, html, text } = verifyEmailTemplate({
     name: data.name,
@@ -153,7 +146,7 @@ export async function sendPasswordResetEmail(
     resetUrl: string;
     expiresInMinutes?: number;
     locale?: Locale;
-  },
+  }
 ): Promise<void> {
   const { subject, html, text } = passwordResetEmailTemplate({
     name: data.name,
@@ -175,7 +168,7 @@ export async function sendSecurityAlertEmail(
     location: string;
     time: string;
     revokeSessionUrl?: string;
-  },
+  }
 ): Promise<void> {
   const { subject, html, text } = securityAlertEmailTemplate({
     name: data.name,
@@ -198,7 +191,7 @@ export async function sendBillingEventEmail(
     body: string;
     ctaLabel?: string;
     ctaUrl?: string;
-  },
+  }
 ): Promise<void> {
   const { subject, html, text } = billingEventEmailTemplate({
     ...data,
@@ -216,7 +209,7 @@ export async function sendNotificationEmail(
     body: string;
     link?: string;
     unsubscribeUrl?: string;
-  },
+  }
 ): Promise<void> {
   const { subject, html, text } = notificationEmailTemplate({
     name: data.name,
@@ -240,7 +233,7 @@ export async function queueBillingEventEmail(
     body: string;
     ctaLabel?: string;
     ctaUrl?: string;
-  },
+  }
 ): Promise<void> {
   const { enqueueEmail } = await import("./emailQueue.js");
   await enqueueEmail("notification", to, {
@@ -259,7 +252,7 @@ export async function queueNotificationEmail(
     body: string;
     link?: string;
     unsubscribeUrl?: string;
-  },
+  }
 ): Promise<void> {
   const { enqueueEmail } = await import("./emailQueue.js");
   await enqueueEmail("notification", to, {

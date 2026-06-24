@@ -41,9 +41,7 @@ export function NpsSurveyPrompt() {
       <div className="rounded-xl border border-border bg-card p-5 shadow-2xl">
         {submitted ? (
           <div className="text-center">
-            <p className="text-sm font-medium text-foreground">
-              Thank you for your feedback! 🎉
-            </p>
+            <p className="text-sm font-medium text-foreground">Thank you for your feedback! 🎉</p>
           </div>
         ) : (
           <>

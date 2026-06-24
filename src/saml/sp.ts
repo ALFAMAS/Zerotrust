@@ -38,10 +38,7 @@ export interface SAMLAssertion {
 }
 
 // In-memory relay-state store
-const relayStateStore = new Map<
-  string,
-  { redirectUrl?: string; tenantId?: string; ts: number }
->();
+const relayStateStore = new Map<string, { redirectUrl?: string; tenantId?: string; ts: number }>();
 const RELAY_TTL_MS = 10 * 60 * 1000;
 
 /**
@@ -54,7 +51,7 @@ export function buildAuthnRequest(
     redirectUrl?: string;
     tenantId?: string;
     forceAuthn?: boolean;
-  } = {},
+  } = {}
 ): { redirectUrl: string; relayState: string } {
   const requestId = `_${crypto.randomBytes(16).toString("hex")}`;
   const now = new Date().toISOString();
@@ -66,12 +63,10 @@ export function buildAuthnRequest(
     ts: Date.now(),
   });
 
-  const nameIdFormat =
-    sp.nameIdFormat ?? "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress";
+  const nameIdFormat = sp.nameIdFormat ?? "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress";
 
   const authnContextClassRef =
-    sp.authnContextClassRef ??
-    "urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport";
+    sp.authnContextClassRef ?? "urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport";
 
   const authnRequest = `<?xml version="1.0"?>
 <samlp:AuthnRequest
@@ -111,7 +106,7 @@ export function buildAuthnRequest(
 export function parseSAMLResponse(
   samlResponse: string,
   idp: SAMLIdPConfig,
-  sp: SAMLSPConfig,
+  sp: SAMLSPConfig
 ): SAMLAssertion {
   let xml: string;
   try {
@@ -140,17 +135,14 @@ export function parseSAMLResponse(
 
   const nameIdFormatMatch = xml.match(/<saml:?NameID[^>]*Format="([^"]+)"/);
   const nameIdFormat =
-    nameIdFormatMatch?.[1] ??
-    "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress";
+    nameIdFormatMatch?.[1] ?? "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress";
 
   // Extract Issuer
   const issuerMatch = xml.match(/<saml:?Issuer[^>]*>([^<]+)<\/saml:?Issuer>/);
   const issuer = issuerMatch?.[1]?.trim() ?? "";
 
   // Validate audience
-  const audienceMatch = xml.match(
-    /<saml:?Audience[^>]*>([^<]+)<\/saml:?Audience>/,
-  );
+  const audienceMatch = xml.match(/<saml:?Audience[^>]*>([^<]+)<\/saml:?Audience>/);
   if (audienceMatch && audienceMatch[1].trim() !== sp.entityId) {
     logger.warn("SAML audience mismatch", {
       expected: sp.entityId,
@@ -182,14 +174,12 @@ export function parseSAMLResponse(
 
   // Extract attributes
   const attributes: Record<string, string | string[]> = {};
-  const attrRegex =
-    /<saml:?Attribute[^>]*Name="([^"]+)"[^>]*>([\s\S]*?)<\/saml:?Attribute>/g;
+  const attrRegex = /<saml:?Attribute[^>]*Name="([^"]+)"[^>]*>([\s\S]*?)<\/saml:?Attribute>/g;
   for (const attrMatch of xml.matchAll(attrRegex)) {
     const attrName = attrMatch[1];
     const valuesStr = attrMatch[2];
     const values: string[] = [];
-    const valRegex =
-      /<saml:?AttributeValue[^>]*>([^<]*)<\/saml:?AttributeValue>/g;
+    const valRegex = /<saml:?AttributeValue[^>]*>([^<]*)<\/saml:?AttributeValue>/g;
     for (const valMatch of valuesStr.matchAll(valRegex)) {
       values.push(valMatch[1].trim());
     }
@@ -206,9 +196,7 @@ export function parseSAMLResponse(
     attributes,
     issuer,
     notBefore: notBeforeMatch ? new Date(notBeforeMatch[1]) : undefined,
-    notOnOrAfter: notOnOrAfterMatch
-      ? new Date(notOnOrAfterMatch[1])
-      : undefined,
+    notOnOrAfter: notOnOrAfterMatch ? new Date(notOnOrAfterMatch[1]) : undefined,
   };
 }
 
@@ -224,7 +212,7 @@ export function buildSPMetadata(
   org: { name: string; url: string } = {
     name: "zerotrust",
     url: "https://zerotrust.dev",
-  },
+  }
 ): string {
   return `<?xml version="1.0"?>
 <md:EntityDescriptor

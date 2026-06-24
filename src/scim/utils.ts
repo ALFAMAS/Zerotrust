@@ -5,12 +5,8 @@ import type { SCIMError, SCIMGroup, SCIMUser } from "./types";
  */
 export function userToSCIM(user: any, baseUrl: string): SCIMUser {
   const id = String(user._id ?? user.id ?? "");
-  const createdAt = user.createdAt
-    ? new Date(user.createdAt).toISOString()
-    : undefined;
-  const updatedAt = user.updatedAt
-    ? new Date(user.updatedAt).toISOString()
-    : undefined;
+  const createdAt = user.createdAt ? new Date(user.createdAt).toISOString() : undefined;
+  const updatedAt = user.updatedAt ? new Date(user.updatedAt).toISOString() : undefined;
 
   // Parse displayName into name parts (best-effort)
   const displayName: string = user.displayName ?? "";
@@ -58,11 +54,7 @@ export function userToSCIM(user: any, baseUrl: string): SCIMUser {
  * display name, and membership is derived from each user's `roles` array
  * (which holds role *names*).
  */
-export function groupToSCIM(
-  role: any,
-  members: any[],
-  baseUrl: string,
-): SCIMGroup {
+export function groupToSCIM(role: any, members: any[], baseUrl: string): SCIMGroup {
   const id = String(role.id ?? "");
   return {
     schemas: ["urn:ietf:params:scim:schemas:core:2.0:Group"],
@@ -74,12 +66,8 @@ export function groupToSCIM(
     })),
     meta: {
       resourceType: "Group",
-      created: role.createdAt
-        ? new Date(role.createdAt).toISOString()
-        : undefined,
-      lastModified: role.updatedAt
-        ? new Date(role.updatedAt).toISOString()
-        : undefined,
+      created: role.createdAt ? new Date(role.createdAt).toISOString() : undefined,
+      lastModified: role.updatedAt ? new Date(role.updatedAt).toISOString() : undefined,
       location: `${baseUrl}/scim/v2/Groups/${id}`,
     },
   };
@@ -99,20 +87,16 @@ export function scimToUserFields(scimUser: SCIMUser): Partial<{
   const fields: Record<string, unknown> = {};
 
   const primaryEmail =
-    scimUser.emails?.find((e) => e.primary)?.value ??
-    scimUser.emails?.[0]?.value;
+    scimUser.emails?.find((e) => e.primary)?.value ?? scimUser.emails?.[0]?.value;
   if (primaryEmail) fields.email = primaryEmail;
 
   if (scimUser.name?.givenName) fields.firstName = scimUser.name.givenName;
   if (scimUser.name?.familyName) fields.lastName = scimUser.name.familyName;
 
   // Build displayName from name parts
-  const parts = [scimUser.name?.givenName, scimUser.name?.familyName].filter(
-    Boolean,
-  );
+  const parts = [scimUser.name?.givenName, scimUser.name?.familyName].filter(Boolean);
   if (parts.length) fields.displayName = parts.join(" ");
-  else if (scimUser.name?.formatted)
-    fields.displayName = scimUser.name.formatted;
+  else if (scimUser.name?.formatted) fields.displayName = scimUser.name.formatted;
 
   const primaryPhone =
     scimUser.phoneNumbers?.find((p) => p.type === "work")?.value ??
@@ -134,11 +118,7 @@ export function scimToUserFields(scimUser: SCIMUser): Partial<{
 /**
  * Build a SCIM 2.0 Error object.
  */
-export function scimError(
-  status: number,
-  detail: string,
-  scimType?: string,
-): SCIMError {
+export function scimError(status: number, detail: string, scimType?: string): SCIMError {
   return {
     schemas: ["urn:ietf:params:scim:api:messages:2.0:Error"],
     status: String(status),
@@ -153,14 +133,12 @@ export function scimError(
  * Examples: `userName eq "user@example.com"`, `externalId eq "abc123"`
  */
 export function parseSCIMFilter(
-  filter: string,
+  filter: string
 ): { attribute: string; operator: string; value: string } | null {
   if (!filter?.trim()) return null;
 
   // Match: attribute operator "value" or attribute operator value
-  const match = filter
-    .trim()
-    .match(/^(\S+)\s+(eq|ne|co|sw|ew|gt|lt|ge|le|pr)\s+"?([^"]*)"?$/i);
+  const match = filter.trim().match(/^(\S+)\s+(eq|ne|co|sw|ew|gt|lt|ge|le|pr)\s+"?([^"]*)"?$/i);
   if (!match) return null;
 
   return {

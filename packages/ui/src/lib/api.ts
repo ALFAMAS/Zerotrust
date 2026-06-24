@@ -5,15 +5,12 @@ import { enqueueWrite, isQueueableMethod } from "./offlineQueue";
 export class OfflineQueuedError extends Error {
   queued = true;
   constructor() {
-    super(
-      "You're offline — this change was queued and will sync when you reconnect.",
-    );
+    super("You're offline — this change was queued and will sync when you reconnect.");
     this.name = "OfflineQueuedError";
   }
 }
 
-const BASE_URL =
-  process.env.NEXT_PUBLIC_ZEROTRUST_URL || "http://localhost:3000";
+const BASE_URL = process.env.NEXT_PUBLIC_ZEROTRUST_URL || "http://localhost:3000";
 
 /** Request timeout in milliseconds before we abort and may retry. */
 const FETCH_TIMEOUT_MS = 15_000;
@@ -57,13 +54,8 @@ async function refreshAccessToken(): Promise<boolean> {
 
 function redirectToLogin(): void {
   clearToken();
-  if (
-    typeof window !== "undefined" &&
-    !window.location.pathname.startsWith("/login")
-  ) {
-    const next = encodeURIComponent(
-      window.location.pathname + window.location.search,
-    );
+  if (typeof window !== "undefined" && !window.location.pathname.startsWith("/login")) {
+    const next = encodeURIComponent(window.location.pathname + window.location.search);
     window.location.href = `/login?next=${next}`;
   }
 }
@@ -72,7 +64,7 @@ function redirectToLogin(): void {
 async function fetchWithTimeout(
   url: string,
   init: RequestInit,
-  timeoutMs: number,
+  timeoutMs: number
 ): Promise<Response> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
@@ -107,16 +99,10 @@ function getCached<T>(key: string): T | null {
   return null;
 }
 
-function setCache<T>(
-  key: string,
-  data: T,
-  ttlMs: number = DEFAULT_CACHE_TTL_MS,
-): void {
+function setCache<T>(key: string, data: T, ttlMs: number = DEFAULT_CACHE_TTL_MS): void {
   // Bounded cache: evict oldest 25% when full
   if (requestCache.size >= 1000) {
-    const entries = [...requestCache.entries()].sort(
-      (a, b) => a[1].expiresAt - b[1].expiresAt,
-    );
+    const entries = [...requestCache.entries()].sort((a, b) => a[1].expiresAt - b[1].expiresAt);
     const evictCount = Math.floor(1000 * 0.25);
     for (let i = 0; i < evictCount; i++) requestCache.delete(entries[i][0]);
   }
@@ -135,7 +121,7 @@ async function request<T>(
   body?: unknown,
   skipAuth = false,
   isRetry = false,
-  cacheTtlMs?: number,
+  cacheTtlMs?: number
 ): Promise<T> {
   const token = getToken();
   const headers: Record<string, string> = {
@@ -172,7 +158,7 @@ async function request<T>(
         res = await fetchWithTimeout(
           `${BASE_URL}${path}`,
           { method, headers, body: serializedBody },
-          FETCH_TIMEOUT_MS,
+          FETCH_TIMEOUT_MS
         );
       } catch (networkErr) {
         if (

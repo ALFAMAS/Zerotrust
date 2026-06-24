@@ -32,9 +32,7 @@ const DEFAULT_CONFIG: ContinuousEvalConfig = {
 
 const authzEngine = new AuthorizationEngine();
 
-export function createContinuousEvalMiddleware(
-  config?: Partial<ContinuousEvalConfig>,
-) {
+export function createContinuousEvalMiddleware(config?: Partial<ContinuousEvalConfig>) {
   return createMiddleware<HonoEnv>(async (c, next) => {
     try {
       const user = c.get("user");
@@ -53,8 +51,7 @@ export function createContinuousEvalMiddleware(
         action,
         environment: {
           currentTime: new Date(),
-          currentIp:
-            c.req.header("x-forwarded-for")?.split(",")[0].trim() || "",
+          currentIp: c.req.header("x-forwarded-for")?.split(",")[0].trim() || "",
           userAgent: c.req.header("user-agent") || "",
           riskScore: 0,
         },
@@ -64,19 +61,11 @@ export function createContinuousEvalMiddleware(
       const anomalyFlags = session.anomalyFlags as any;
 
       if (anomalyFlags?.deviceChangeDetected) riskScore += 25;
-      if (
-        evalConfig.enableLocationAnomaly &&
-        anomalyFlags?.locationChangeDetected
-      )
-        riskScore += 30;
-      if (evalConfig.enableTimeAnomaly && anomalyFlags?.timeAnomalyDetected)
-        riskScore += 20;
+      if (evalConfig.enableLocationAnomaly && anomalyFlags?.locationChangeDetected) riskScore += 30;
+      if (evalConfig.enableTimeAnomaly && anomalyFlags?.timeAnomalyDetected) riskScore += 20;
 
       const authzResult = await authzEngine.evaluate(authzContext);
-      authzContext.environment.riskScore = Math.min(
-        100,
-        riskScore + (authzResult.riskScore || 0),
-      );
+      authzContext.environment.riskScore = Math.min(100, riskScore + (authzResult.riskScore || 0));
 
       const db = getDb();
       await db
@@ -109,7 +98,7 @@ export function createContinuousEvalMiddleware(
           ErrorCodes.ACCESS_DENIED,
           "Access denied due to suspicious activity. Please re-authenticate.",
           403,
-          { riskScore: authzContext.environment.riskScore },
+          { riskScore: authzContext.environment.riskScore }
         );
       }
 
@@ -117,23 +106,17 @@ export function createContinuousEvalMiddleware(
         throw new zerotrustError(
           ErrorCodes.ACCESS_DENIED,
           authzResult.reason || "Access denied by policy",
-          403,
+          403
         );
       }
 
       if (
-        authzContext.environment.riskScore >=
-          evalConfig.requireStepUpAboveRisk &&
+        authzContext.environment.riskScore >= evalConfig.requireStepUpAboveRisk &&
         !c.req.header("x-step-up-verified")
       ) {
-        throw new zerotrustError(
-          ErrorCodes.MFA_REQUIRED,
-          "Additional verification required",
-          403,
-          {
-            riskScore: authzContext.environment.riskScore,
-          },
-        );
+        throw new zerotrustError(ErrorCodes.MFA_REQUIRED, "Additional verification required", 403, {
+          riskScore: authzContext.environment.riskScore,
+        });
       }
 
       return next();
@@ -141,7 +124,7 @@ export function createContinuousEvalMiddleware(
       if (error instanceof zerotrustError) {
         return c.json(
           { error: error.code, message: error.message, details: error.details },
-          error.statusCode as any,
+          error.statusCode as any
         );
       }
       logger.error("Continuous evaluation error", error as Error);
@@ -150,7 +133,7 @@ export function createContinuousEvalMiddleware(
           error: ErrorCodes.INTERNAL_ERROR,
           message: "Access evaluation failed",
         },
-        500,
+        500
       );
     }
   });

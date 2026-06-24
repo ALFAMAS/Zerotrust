@@ -10,11 +10,7 @@ import { TokenService } from "../services/token.service";
 import { getClientIp } from "../shared/clientIp";
 import type { HonoEnv } from "../shared/types";
 import { resolveDID } from "./resolver";
-import {
-  createDIDChallenge,
-  provisionDIDUser,
-  verifyDIDProof,
-} from "./verifier";
+import { createDIDChallenge, provisionDIDUser, verifyDIDProof } from "./verifier";
 
 const app = new Hono<HonoEnv>();
 
@@ -40,11 +36,7 @@ async function issueDIDSession(userId: string, c: Context<HonoEnv>) {
   const tokenSvc = await getTokenService();
   const db = getDb();
 
-  const userRows = await db
-    .select()
-    .from(usersTable)
-    .where(eq(usersTable.id, userId))
-    .limit(1);
+  const userRows = await db.select().from(usersTable).where(eq(usersTable.id, userId)).limit(1);
   const user = userRows[0];
   if (!user) throw new Error("User not found");
 
@@ -107,9 +99,7 @@ app.get("/resolve", async (c) => {
 // The caller proves control of `did` by signing the returned challenge with the
 // key in the DID document's `authentication` set.
 app.post("/challenge", async (c) => {
-  const body = await c.req
-    .json<{ did?: unknown }>()
-    .catch(() => ({}) as { did?: unknown });
+  const body = await c.req.json<{ did?: unknown }>().catch(() => ({}) as { did?: unknown });
   const { did } = body;
 
   if (!did || typeof did !== "string") {
@@ -148,7 +138,7 @@ app.post("/verify", async (c) => {
 
   const result = await verifyDIDProof(
     proof as Parameters<typeof verifyDIDProof>[0],
-    challengeId as string,
+    challengeId as string
   );
 
   if (!result.verified) {
@@ -174,7 +164,7 @@ app.post("/login", rateLimit({ points: 10, windowSecs: 60 }), async (c) => {
 
   const result = await verifyDIDProof(
     proof as Parameters<typeof verifyDIDProof>[0],
-    challengeId as string,
+    challengeId as string
   );
 
   if (!result.verified || !result.did) {
@@ -185,10 +175,7 @@ app.post("/login", rateLimit({ points: 10, windowSecs: 60 }), async (c) => {
     // verifyDIDProof already resolved + validated the document; re-resolve for the
     // provisioning record (provisionDIDUser keys solely on the DID string).
     const didDoc = await resolveDID(result.did);
-    const userId = await provisionDIDUser(
-      result.did,
-      didDoc as import("./types").DIDDocument,
-    );
+    const userId = await provisionDIDUser(result.did, didDoc as import("./types").DIDDocument);
     const tokens = await issueDIDSession(userId, c);
     return c.json({
       verified: true,

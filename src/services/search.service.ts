@@ -47,9 +47,7 @@ function getEsClient(): any {
       node: `http://${cfg.elasticsearch.host}:${cfg.elasticsearch.port}`,
     });
   } catch {
-    logger.warn(
-      "@elastic/elasticsearch not installed; falling back to DB search",
-    );
+    logger.warn("@elastic/elasticsearch not installed; falling back to DB search");
   }
   return esClient;
 }
@@ -132,9 +130,7 @@ export async function bulkIndex(docs: SearchDocument[]): Promise<number> {
       },
     ]);
     const result = await client.bulk({ refresh: true, operations });
-    const errors = result.errors
-      ? result.items.filter((i: any) => i.index?.error).length
-      : 0;
+    const errors = result.errors ? result.items.filter((i: any) => i.index?.error).length : 0;
     return docs.length - errors;
   } catch (err) {
     logger.warn("Bulk index failed", { error: String(err) });
@@ -142,10 +138,7 @@ export async function bulkIndex(docs: SearchDocument[]): Promise<number> {
   }
 }
 
-export async function deleteDocument(
-  type: SearchableType,
-  id: string,
-): Promise<boolean> {
+export async function deleteDocument(type: SearchableType, id: string): Promise<boolean> {
   const client = getEsClient();
   if (!client) return false;
   try {
@@ -179,7 +172,7 @@ async function searchElasticsearch(
   orgId: string | undefined,
   type: SearchableType | undefined,
   region: StorageRegion | undefined,
-  limit: number,
+  limit: number
 ): Promise<SearchResults> {
   const client = getEsClient();
   const must: any[] = [
@@ -221,10 +214,7 @@ async function searchElasticsearch(
     }));
 
     return {
-      total:
-        typeof result.hits.total === "object"
-          ? result.hits.total.value
-          : result.hits.total,
+      total: typeof result.hits.total === "object" ? result.hits.total.value : result.hits.total,
       hits,
       provider: "elasticsearch",
     };
@@ -239,7 +229,7 @@ async function searchDatabase(
   orgId: string | undefined,
   type: SearchableType | undefined,
   _region: StorageRegion | undefined,
-  limit: number,
+  limit: number
 ): Promise<SearchResults> {
   const db = getDb();
   const hits: SearchHit[] = [];
@@ -247,7 +237,7 @@ async function searchDatabase(
 
   if (!type || type === "user") {
     const rows = await db.execute(
-      sql`SELECT id, title, email FROM users WHERE email ILIKE ${q} OR display_name ILIKE ${q} LIMIT ${limit}`,
+      sql`SELECT id, title, email FROM users WHERE email ILIKE ${q} OR display_name ILIKE ${q} LIMIT ${limit}`
     );
     for (const r of rows as any[]) {
       hits.push({
@@ -261,7 +251,7 @@ async function searchDatabase(
 
   if (!type || type === "org") {
     const rows = await db.execute(
-      sql`SELECT id, name FROM organizations WHERE name ILIKE ${q} LIMIT ${limit}`,
+      sql`SELECT id, name FROM organizations WHERE name ILIKE ${q} LIMIT ${limit}`
     );
     for (const r of rows as any[]) {
       hits.push({ id: r.id, type: "org", title: r.name, score: 1 });
@@ -273,7 +263,7 @@ async function searchDatabase(
       ? sql`(title ILIKE ${q} OR content ILIKE ${q}) AND org_id = ${orgId} AND archived = false`
       : sql`(title ILIKE ${q} OR content ILIKE ${q}) AND archived = false`;
     const rows = await db.execute(
-      sql`SELECT id, title FROM shared_notes WHERE ${filter} LIMIT ${limit}`,
+      sql`SELECT id, title FROM shared_notes WHERE ${filter} LIMIT ${limit}`
     );
     for (const r of rows as any[]) {
       hits.push({ id: r.id, type: "note", title: r.title, score: 1 });
@@ -298,9 +288,7 @@ export interface SemanticSearchRequest {
  * this will dispatch to a vector search. The provider-agnostic interface
  * means the rest of the app doesn't care which backend serves the results.
  */
-export async function smartSearch(
-  params: SemanticSearchRequest,
-): Promise<SearchResults> {
+export async function smartSearch(params: SemanticSearchRequest): Promise<SearchResults> {
   const { query, orgId, region, limit = 10 } = params;
 
   // Check if an embedding provider is configured
@@ -321,14 +309,12 @@ async function embeddingSearch(
   orgId: string | undefined,
   region: StorageRegion | undefined,
   limit: number,
-  provider: string,
+  provider: string
 ): Promise<SearchResults> {
   // Placeholder: in production this would call the embedding API,
   // embed the query, and run a kNN search against an ES dense_vector field.
   // For now, fall back to keyword search with a note about the provider.
-  logger.info(
-    `Embedding search requested (provider=${provider}), falling back to keyword`,
-  );
+  logger.info(`Embedding search requested (provider=${provider}), falling back to keyword`);
   const results = await search({ query, orgId, region, limit });
   return { ...results, provider: "database" };
 }

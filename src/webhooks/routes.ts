@@ -38,7 +38,7 @@ app.post("/", async (c) => {
         message: "url, secret, and events[] are required",
         details: [],
       },
-      400,
+      400
     );
   }
 
@@ -68,7 +68,7 @@ app.get("/:id", (c) => {
         message: `Webhook endpoint ${id} not found`,
         details: [],
       },
-      404,
+      404
     );
   }
 
@@ -88,7 +88,7 @@ app.patch("/:id", async (c) => {
         message: `Webhook endpoint ${id} not found`,
         details: [],
       },
-      404,
+      404
     );
   }
 
@@ -107,7 +107,7 @@ app.delete("/:id", (c) => {
         message: `Webhook endpoint ${id} not found`,
         details: [],
       },
-      404,
+      404
     );
   }
 
@@ -126,14 +126,12 @@ app.get("/:id/deliveries", (c) => {
         message: `Webhook endpoint ${id} not found`,
         details: [],
       },
-      404,
+      404
     );
   }
 
   const limitRaw = parseInt(c.req.query("limit") ?? "50", 10);
-  const limit = Number.isFinite(limitRaw)
-    ? Math.min(Math.max(limitRaw, 1), 100)
-    : 50;
+  const limit = Number.isFinite(limitRaw) ? Math.min(Math.max(limitRaw, 1), 100) : 50;
 
   const deliveries = webhookDeliveryLog.list(id, limit).map((d) => ({
     id: d.id,
@@ -162,7 +160,7 @@ app.post("/:id/ping", async (c) => {
         message: `Webhook endpoint ${id} not found`,
         details: [],
       },
-      404,
+      404
     );
   }
 
@@ -171,7 +169,7 @@ app.post("/:id/ping", async (c) => {
       endpoint,
       "auth.login.success" as WebhookEventType,
       { test: true, message: "zerotrust webhook ping" },
-      1,
+      1
     );
     return c.json(delivery);
   } catch (err) {
@@ -181,7 +179,7 @@ app.post("/:id/ping", async (c) => {
         message: "Failed to send test webhook",
         details: [String(err)],
       },
-      500,
+      500
     );
   }
 });

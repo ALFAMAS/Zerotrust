@@ -42,8 +42,8 @@ export async function sendLifecycleEmails() {
         gte(usersTable.createdAt, d1Start),
         lte(usersTable.createdAt, d1End),
         // Only send if not already sent (tracked in metadata)
-        sql`(${usersTable.metadata}->>'lifecycleD1Sent') IS NULL`,
-      ),
+        sql`(${usersTable.metadata}->>'lifecycleD1Sent') IS NULL`
+      )
     );
 
   let d1Sent = 0;
@@ -92,8 +92,8 @@ export async function sendLifecycleEmails() {
       and(
         gte(usersTable.createdAt, d3Start),
         lte(usersTable.createdAt, d3End),
-        sql`(${usersTable.metadata}->>'lifecycleD3Sent') IS NULL`,
-      ),
+        sql`(${usersTable.metadata}->>'lifecycleD3Sent') IS NULL`
+      )
     );
 
   let d3Sent = 0;
@@ -141,8 +141,8 @@ export async function sendLifecycleEmails() {
       and(
         gte(usersTable.createdAt, d7Start),
         lte(usersTable.createdAt, d7End),
-        sql`(${usersTable.metadata}->>'lifecycleD7Sent') IS NULL`,
-      ),
+        sql`(${usersTable.metadata}->>'lifecycleD7Sent') IS NULL`
+      )
     );
 
   let d7Sent = 0;
@@ -192,16 +192,14 @@ export async function sendLifecycleEmails() {
       and(
         gte(subscriptionsTable.trialEnd, d14Start),
         lte(subscriptionsTable.trialEnd, d14End),
-        sql`(${usersTable.metadata}->>'lifecycleD14Sent') IS NULL`,
-      ),
+        sql`(${usersTable.metadata}->>'lifecycleD14Sent') IS NULL`
+      )
     );
 
   let d14Sent = 0;
   for (const user of d14Users) {
     try {
-      const trialEndDate = user.trialEnd
-        ? new Date(user.trialEnd).toLocaleDateString()
-        : "soon";
+      const trialEndDate = user.trialEnd ? new Date(user.trialEnd).toLocaleDateString() : "soon";
       await sendNotificationEmail(user.email, {
         name: user.displayName ?? user.email,
         title: `Your ${APP_NAME} trial expires on ${trialEndDate}`,

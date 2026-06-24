@@ -6,10 +6,7 @@ import { sessionsTable, usersTable } from "../db/schema.js";
 import { getLogger } from "../logger/index.js";
 import { TokenService } from "../services/token.service.js";
 import { getProvider } from "./registry.js";
-import type {
-  FederationTokenRequest,
-  FederationTokenResponse,
-} from "./types.js";
+import type { FederationTokenRequest, FederationTokenResponse } from "./types.js";
 import { verifySubjectToken } from "./verify.js";
 
 const logger = getLogger("federation-exchange");
@@ -25,18 +22,15 @@ async function getTokenService(): Promise<TokenService> {
 
 export async function exchangeToken(
   req: FederationTokenRequest,
-  remoteIp: string,
+  remoteIp: string
 ): Promise<FederationTokenResponse> {
   const provider = await getProvider(req.providerId);
-  if (!provider)
-    throw new Error(`Unknown federation provider: ${req.providerId}`);
-  if (!provider.enabled)
-    throw new Error(`Federation provider ${req.providerId} is disabled`);
+  if (!provider) throw new Error(`Unknown federation provider: ${req.providerId}`);
+  if (!provider.enabled) throw new Error(`Federation provider ${req.providerId} is disabled`);
 
   const claim = await verifySubjectToken(req.subjectToken, provider);
 
-  if (!claim.email)
-    throw new Error("Federation provider did not supply an email address");
+  if (!claim.email) throw new Error("Federation provider did not supply an email address");
 
   const db = getDb();
   let userRows = await db

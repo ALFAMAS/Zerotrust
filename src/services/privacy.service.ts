@@ -1,11 +1,6 @@
 // ── Privacy records (ROPA, consent receipts, DPA) ───────────────────────────
 
-export type PrivacyRecordType =
-  | "ropa"
-  | "consent"
-  | "dpa"
-  | "data_request"
-  | "breach_notification";
+export type PrivacyRecordType = "ropa" | "consent" | "dpa" | "data_request" | "breach_notification";
 
 export interface PrivacyRecord {
   id: string;
@@ -87,7 +82,7 @@ export function generateConsentReceipt(
   orgId: string,
   userId: string,
   purpose: string,
-  legalBasis: string,
+  legalBasis: string
 ): PrivacyRecord {
   return {
     id: `consent-${orgId}-${userId}-${Date.now()}`,
@@ -131,7 +126,7 @@ export function generateDpa(orgId: string, orgName: string): PrivacyRecord {
 export function generateDataRequest(
   orgId: string,
   userId: string,
-  requestType: "access" | "deletion" | "portability",
+  requestType: "access" | "deletion" | "portability"
 ): PrivacyRecord {
   return {
     id: `sar-${orgId}-${userId}-${Date.now()}`,

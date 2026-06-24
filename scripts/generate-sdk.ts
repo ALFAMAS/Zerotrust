@@ -83,9 +83,7 @@ function camelCase(input: string): string {
     .split(/\s+/);
   return parts
     .map((p, i) =>
-      i === 0
-        ? p.charAt(0).toLowerCase() + p.slice(1)
-        : p.charAt(0).toUpperCase() + p.slice(1),
+      i === 0 ? p.charAt(0).toLowerCase() + p.slice(1) : p.charAt(0).toUpperCase() + p.slice(1)
     )
     .join("");
 }
@@ -109,10 +107,8 @@ export function tsTypeForSchema(schema: OpenApiSchema | undefined): string {
   if (schema.allOf?.length) {
     return schema.allOf.map(tsTypeForSchema).join(" & ");
   }
-  if (schema.oneOf?.length)
-    return schema.oneOf.map(tsTypeForSchema).join(" | ");
-  if (schema.anyOf?.length)
-    return schema.anyOf.map(tsTypeForSchema).join(" | ");
+  if (schema.oneOf?.length) return schema.oneOf.map(tsTypeForSchema).join(" | ");
+  if (schema.anyOf?.length) return schema.anyOf.map(tsTypeForSchema).join(" | ");
 
   if (schema.enum?.length) {
     return schema.enum
@@ -120,11 +116,7 @@ export function tsTypeForSchema(schema: OpenApiSchema | undefined): string {
       .join(" | ");
   }
 
-  const types = Array.isArray(schema.type)
-    ? schema.type
-    : schema.type
-      ? [schema.type]
-      : [];
+  const types = Array.isArray(schema.type) ? schema.type : schema.type ? [schema.type] : [];
   const nullable = types.includes("null");
   const primary = types.find((t) => t !== "null");
 
@@ -158,10 +150,7 @@ function objectType(schema: OpenApiSchema): string {
   const keys = Object.keys(props);
   if (keys.length === 0) {
     // Free-form object.
-    if (
-      schema.additionalProperties &&
-      typeof schema.additionalProperties === "object"
-    ) {
+    if (schema.additionalProperties && typeof schema.additionalProperties === "object") {
       return `Record<string, ${tsTypeForSchema(schema.additionalProperties)}>`;
     }
     return "Record<string, unknown>";
@@ -177,10 +166,7 @@ function objectType(schema: OpenApiSchema): string {
 }
 
 /** Emit the top-level `export interface`/`export type` block for one named schema. */
-export function emitSchemaDeclaration(
-  name: string,
-  schema: OpenApiSchema,
-): string {
+export function emitSchemaDeclaration(name: string, schema: OpenApiSchema): string {
   const doc = schema.description ? `/** ${schema.description} */\n` : "";
   const isObject =
     (schema.type === "object" || (!schema.type && schema.properties)) &&
@@ -189,11 +175,7 @@ export function emitSchemaDeclaration(
     !schema.anyOf &&
     !schema.allOf;
 
-  if (
-    isObject &&
-    schema.properties &&
-    Object.keys(schema.properties).length > 0
-  ) {
+  if (isObject && schema.properties && Object.keys(schema.properties).length > 0) {
     const required = new Set(schema.required ?? []);
     const body = Object.entries(schema.properties)
       .map(([k, v]) => {
@@ -243,11 +225,9 @@ function buildMethod(
   method: HttpMethod,
   route: string,
   op: OpenApiOperation,
-  usedNames: Set<string>,
+  usedNames: Set<string>
 ): BuiltMethod {
-  let name = op.operationId
-    ? camelCase(op.operationId)
-    : operationMethodName(method, route);
+  let name = op.operationId ? camelCase(op.operationId) : operationMethodName(method, route);
   // Guarantee uniqueness across the client.
   if (usedNames.has(name)) {
     let i = 2;
@@ -274,10 +254,7 @@ function buildMethod(
   if (queryParams.length > 0) {
     const anyRequired = queryParams.some((p) => p.required);
     const fields = queryParams
-      .map(
-        (p) =>
-          `${safeKey(p.name)}${p.required ? "" : "?"}: ${tsTypeForSchema(p.schema)}`,
-      )
+      .map((p) => `${safeKey(p.name)}${p.required ? "" : "?"}: ${tsTypeForSchema(p.schema)}`)
       .join("; ");
     args.push(`query${anyRequired ? "" : "?"}: { ${fields} }`);
   }
@@ -285,7 +262,7 @@ function buildMethod(
   // URL template with encoded path params.
   const urlTemplate = route.replace(
     /\{([^}]+)}/g,
-    (_m, raw) => `\${encodeURIComponent(${camelCase(raw)})}`,
+    (_m, raw) => `\${encodeURIComponent(${camelCase(raw)})}`
   );
 
   // request() options object.
@@ -297,13 +274,10 @@ function buildMethod(
   // JSDoc.
   const docLines: string[] = [];
   if (op.summary) docLines.push(op.summary);
-  if (op.description && op.description !== op.summary)
-    docLines.push("", op.description);
+  if (op.description && op.description !== op.summary) docLines.push("", op.description);
   docLines.push("", `@route ${method.toUpperCase()} ${route}`);
   for (const p of pathParams)
-    docLines.push(
-      `@param ${camelCase(p.name)} ${p.description ?? "path parameter"}`,
-    );
+    docLines.push(`@param ${camelCase(p.name)} ${p.description ?? "path parameter"}`);
   const doc = `  /**\n${docLines.map((l) => `   *${l ? ` ${l}` : ""}`).join("\n")}\n   */\n`;
 
   const code =
@@ -426,15 +400,10 @@ export function generateSdk(spec: OpenApiSpec): string {
   const schemas = spec.components?.schemas ?? {};
   // Use the exact schema key as the type name — $ref resolution depends on it.
   const typeBlocks = Object.entries(schemas).map(([name, schema]) =>
-    emitSchemaDeclaration(name, schema),
+    emitSchemaDeclaration(name, schema)
   );
 
-  const usedNames = new Set<string>([
-    "request",
-    "setToken",
-    "constructor",
-    "token",
-  ]);
+  const usedNames = new Set<string>(["request", "setToken", "constructor", "token"]);
   const methods: BuiltMethod[] = [];
   for (const [route, ops] of Object.entries(spec.paths ?? {})) {
     for (const method of HTTP_METHODS) {
@@ -481,12 +450,12 @@ export function main(): void {
 
   const methodCount = Object.values(spec.paths ?? {}).reduce(
     (n, ops) => n + HTTP_METHODS.filter((m) => ops[m]).length,
-    0,
+    0
   );
   const schemaCount = Object.keys(spec.components?.schemas ?? {}).length;
   // biome-ignore lint/suspicious/noConsole: CLI progress output for the generator
   console.log(
-    `✓ Generated @zerotrust/client → ${path.relative(repoRoot, outFile)} (${methodCount} operations, ${schemaCount} schemas)`,
+    `✓ Generated @zerotrust/client → ${path.relative(repoRoot, outFile)} (${methodCount} operations, ${schemaCount} schemas)`
   );
 }
 

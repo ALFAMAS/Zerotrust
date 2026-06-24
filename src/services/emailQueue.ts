@@ -24,9 +24,7 @@ const QUEUE_NAME = "zerotrust-email";
 let _queue: Queue<EmailJobData> | null = null;
 let _worker: Worker<EmailJobData> | null = null;
 
-function parseRedisUri(
-  uri: string,
-): { host: string; port: number; password?: string } | null {
+function parseRedisUri(uri: string): { host: string; port: number; password?: string } | null {
   try {
     const url = new URL(uri);
     return {
@@ -89,7 +87,7 @@ export async function initEmailQueue(redisUri: string): Promise<void> {
           logger.warn("Unknown email job type", { type });
       }
     },
-    { connection: conn, concurrency: 5 },
+    { connection: conn, concurrency: 5 }
   );
 
   _worker.on("completed", (job) => {
@@ -101,10 +99,7 @@ export async function initEmailQueue(redisUri: string): Promise<void> {
   });
 
   _worker.on("failed", (job, err) => {
-    logger.error(
-      `Email job ${job?.id ?? "?"} failed: ${(err as Error).message}`,
-      err as Error,
-    );
+    logger.error(`Email job ${job?.id ?? "?"} failed: ${(err as Error).message}`, err as Error);
   });
 
   logger.info("Email queue initialized", { queue: QUEUE_NAME });
@@ -113,7 +108,7 @@ export async function initEmailQueue(redisUri: string): Promise<void> {
 export async function enqueueEmail(
   type: EmailJobType,
   to: string,
-  payload: Record<string, unknown>,
+  payload: Record<string, unknown>
 ): Promise<boolean> {
   if (!_queue) return false;
   try {

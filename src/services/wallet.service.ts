@@ -1,7 +1,6 @@
 import { and, desc, eq, gte, sql } from "drizzle-orm";
 import { generateCodeFromAlphabet } from "../crypto/codes";
 import { getDb } from "../db";
-import { isUnavailableStorageError } from "../db/storageFallback";
 import {
   pointsLedgerTable,
   redemptionsCatalogTable,
@@ -14,6 +13,7 @@ import {
   walletsTable,
   walletTransactionsTable,
 } from "../db/schema";
+import { isUnavailableStorageError } from "../db/storageFallback";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -712,17 +712,21 @@ export async function getReferralStats(userId: string): Promise<{
       .orderBy(desc(referralsTable.createdAt));
   } catch (err) {
     if (
-      isUnavailableStorageError(err, ["referrals"], [
-        "referrer_user_id",
-        "code",
-        "slug",
-        "clicks",
-        "signups",
-        "conversions",
-        "rewards_earned",
-        "active",
-        "created_at",
-      ])
+      isUnavailableStorageError(
+        err,
+        ["referrals"],
+        [
+          "referrer_user_id",
+          "code",
+          "slug",
+          "clicks",
+          "signups",
+          "conversions",
+          "rewards_earned",
+          "active",
+          "created_at",
+        ]
+      )
     ) {
       return {
         totalClicks: 0,

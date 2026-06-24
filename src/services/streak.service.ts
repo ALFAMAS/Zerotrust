@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import { getDb } from "../db";
-import { isUnavailableStorageError } from "../db/storageFallback";
 import { streaksTable } from "../db/schema";
+import { isUnavailableStorageError } from "../db/storageFallback";
 import { getLogger } from "../logger";
 
 const logger = getLogger("streak-service");
@@ -113,12 +113,11 @@ export async function getStreak(userId: string) {
     return streak ?? { currentStreak: 0, longestStreak: 0, lastLoginDate: null };
   } catch (err) {
     if (
-      isUnavailableStorageError(err, ["streaks"], [
-        "current_streak",
-        "longest_streak",
-        "last_login_date",
-        "last_login_at",
-      ])
+      isUnavailableStorageError(
+        err,
+        ["streaks"],
+        ["current_streak", "longest_streak", "last_login_date", "last_login_at"]
+      )
     ) {
       logger.warn("Streak storage is unavailable; returning empty streak", {
         userId,

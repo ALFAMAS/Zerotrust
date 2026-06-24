@@ -1,9 +1,6 @@
 import { createMiddleware } from "hono/factory";
 import { getLogger } from "../logger/index.js";
-import {
-  assessSessionRisk,
-  computeRiskFactors,
-} from "../services/sessionRisk.service.js";
+import { assessSessionRisk, computeRiskFactors } from "../services/sessionRisk.service.js";
 import type { HonoEnv } from "../shared/types.js";
 
 const logger = getLogger("continuous-verification");
@@ -42,9 +39,7 @@ export function getVerification(sessionId: string): VerificationRecord | null {
   return rec;
 }
 
-export function requireReverification(
-  opts: ContinuousVerificationOptions = {},
-) {
+export function requireReverification(opts: ContinuousVerificationOptions = {}) {
   return createMiddleware<HonoEnv>(async (c, next) => {
     const session = c.get("session");
     if (!session) return next();
@@ -64,21 +59,14 @@ export function requireReverification(
 
     const factors = computeRiskFactors(
       {
-        lastActivityAt: session.lastActivityAt
-          ? new Date(session.lastActivityAt)
-          : null,
-        country:
-          ((session as unknown as Record<string, unknown>).country as
-            | string
-            | null) ?? null,
+        lastActivityAt: session.lastActivityAt ? new Date(session.lastActivityAt) : null,
+        country: ((session as unknown as Record<string, unknown>).country as string | null) ?? null,
         deviceFingerprint:
-          (session as unknown as Record<string, unknown>).deviceFingerprint ??
-          null,
-        anomalyFlags:
-          (session as unknown as Record<string, unknown>).anomalyFlags ?? null,
+          (session as unknown as Record<string, unknown>).deviceFingerprint ?? null,
+        anomalyFlags: (session as unknown as Record<string, unknown>).anomalyFlags ?? null,
       },
       request,
-      { sensitiveOperation: opts.sensitiveOperation },
+      { sensitiveOperation: opts.sensitiveOperation }
     );
 
     const assessment = assessSessionRisk(factors);
@@ -89,10 +77,7 @@ export function requireReverification(
         level: assessment.level,
         reason: assessment.reason,
       });
-      c.header(
-        "Www-Authenticate",
-        `zerotrust-Reverify level=${assessment.level}`,
-      );
+      c.header("Www-Authenticate", `zerotrust-Reverify level=${assessment.level}`);
       return c.json(
         {
           error: "REVERIFICATION_REQUIRED",
@@ -100,7 +85,7 @@ export function requireReverification(
           reason: assessment.reason,
           challengeUrl: "/auth/verify/challenge",
         },
-        401,
+        401
       );
     }
 

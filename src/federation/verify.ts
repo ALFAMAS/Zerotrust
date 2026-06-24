@@ -35,7 +35,7 @@ async function fetchJwks(uri: string): Promise<JwksKey[]> {
 
 export async function verifySubjectToken(
   token: string,
-  provider: FederatedProvider,
+  provider: FederatedProvider
 ): Promise<FederatedClaim> {
   if (provider.jwksUri) {
     try {
@@ -44,28 +44,20 @@ export async function verifySubjectToken(
       await fetchJwks(provider.jwksUri); // warm cache and validate JWKS endpoint is reachable
       const parts = token.split(".");
       if (parts.length === 3) {
-        const payloadJson = Buffer.from(parts[1], "base64url").toString(
-          "utf-8",
-        );
+        const payloadJson = Buffer.from(parts[1], "base64url").toString("utf-8");
         const payload = JSON.parse(payloadJson) as Record<string, unknown>;
         if (payload.iss && payload.iss !== provider.issuerUrl) {
           throw new Error(
-            `Issuer mismatch: expected ${provider.issuerUrl}, got ${String(payload.iss)}`,
+            `Issuer mismatch: expected ${provider.issuerUrl}, got ${String(payload.iss)}`
           );
         }
-        if (
-          typeof payload.exp === "number" &&
-          payload.exp < Math.floor(Date.now() / 1000)
-        ) {
+        if (typeof payload.exp === "number" && payload.exp < Math.floor(Date.now() / 1000)) {
           throw new Error("Token has expired");
         }
         return {
           sub: String(payload.sub ?? ""),
           email: typeof payload.email === "string" ? payload.email : undefined,
-          scope:
-            typeof payload.scope === "string"
-              ? payload.scope.split(" ")
-              : undefined,
+          scope: typeof payload.scope === "string" ? payload.scope.split(" ") : undefined,
         };
       }
     } catch (err) {
@@ -92,8 +84,7 @@ export async function verifySubjectToken(
     sub?: string;
   };
   const sub = data.id ?? data.sub;
-  if (!sub)
-    throw new Error("Remote provider did not return a subject identifier");
+  if (!sub) throw new Error("Remote provider did not return a subject identifier");
 
   return { sub, email: data.email };
 }

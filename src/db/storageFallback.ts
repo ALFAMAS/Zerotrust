@@ -5,7 +5,7 @@
 export function isUnavailableStorageError(
   error: unknown,
   tableNames: string[],
-  columnNames: string[] = [],
+  columnNames: string[] = []
 ) {
   let current: unknown = error;
   while (current && typeof current === "object") {
@@ -15,14 +15,16 @@ export function isUnavailableStorageError(
     const message = typeof candidate.message === "string" ? candidate.message : "";
     if (
       tableNames.some((table) =>
-        new RegExp(`relation\\s+["']?(?:\\w+\\.)?${table}["']?\\s+does not exist`, "i").test(message),
+        new RegExp(`relation\\s+["']?(?:\\w+\\.)?${table}["']?\\s+does not exist`, "i").test(
+          message
+        )
       )
     ) {
       return true;
     }
     if (
       columnNames.some((column) =>
-        new RegExp(`column\\s+["']?${column}["']?\\s+does not exist`, "i").test(message),
+        new RegExp(`column\\s+["']?${column}["']?\\s+does not exist`, "i").test(message)
       )
     ) {
       return true;

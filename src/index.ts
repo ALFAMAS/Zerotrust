@@ -349,8 +349,7 @@ export {
 
 export async function initializezerotrust() {
   const { getConfig } = await import("./config/index.js");
-  const { initializeDatabase, checkPendingMigrations } =
-    await import("./db/index.js");
+  const { initializeDatabase, checkPendingMigrations } = await import("./db/index.js");
   const { initializeCSFLE } = await import("./crypto/csfle.js");
   const { initializeLogger } = await import("./logger/index.js");
 

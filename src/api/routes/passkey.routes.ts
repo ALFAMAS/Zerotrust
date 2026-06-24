@@ -10,10 +10,7 @@ import {
   usersTable,
 } from "../../db/schema";
 import { getLogger } from "../../logger";
-import {
-  KNOWN_HARDWARE_KEY_AAGUIDS,
-  verifyAttestation,
-} from "../../mfa/attestation";
+import { KNOWN_HARDWARE_KEY_AAGUIDS, verifyAttestation } from "../../mfa/attestation";
 import { authMiddleware } from "../../middleware/auth";
 import { getSettings } from "../../models/settings.model";
 import {
@@ -40,10 +37,7 @@ function hashToken(token: string): string {
   return crypto.createHash("sha256").update(token).digest("hex");
 }
 
-const challengeStore = new Map<
-  string,
-  { challenge: string; expiresAt: number }
->();
+const challengeStore = new Map<string, { challenge: string; expiresAt: number }>();
 const CHALLENGE_TTL_MS = 5 * 60 * 1000;
 
 function storeChallenge(key: string, challenge: string): void {
@@ -79,19 +73,13 @@ function registrationChallengeKey(userId: string, orgId?: string): string {
   return orgId ? `${userId}:${orgId}` : userId;
 }
 
-async function assertOrgMembership(
-  orgId: string,
-  userId: string,
-): Promise<void> {
+async function assertOrgMembership(orgId: string, userId: string): Promise<void> {
   const db = getDb();
   const [member] = await db
     .select({ id: organizationMembersTable.id })
     .from(organizationMembersTable)
     .where(
-      and(
-        eq(organizationMembersTable.orgId, orgId),
-        eq(organizationMembersTable.userId, userId),
-      ),
+      and(eq(organizationMembersTable.orgId, orgId), eq(organizationMembersTable.userId, userId))
     )
     .limit(1);
   if (!member) {
@@ -104,10 +92,7 @@ router.post("/register/options", authMiddleware, async (c) => {
   try {
     const settings = await getSettings();
     if (!settings.passkeyEnabled) {
-      return c.json(
-        { error: "FEATURE_DISABLED", message: "Passkeys are disabled" },
-        403,
-      );
+      return c.json({ error: "FEATURE_DISABLED", message: "Passkeys are disabled" }, 403);
     }
 
     const user = c.get("user");
@@ -117,8 +102,7 @@ router.post("/register/options", authMiddleware, async (c) => {
       await assertOrgMembership(orgId, userId);
     }
     const policy = orgId ? await getOrgSecurityPolicy(orgId) : null;
-    const { generateRegistrationOptions } =
-      await import("@simplewebauthn/server");
+    const { generateRegistrationOptions } = await import("@simplewebauthn/server");
 
     const existingPasskeys = user.passkeys || [];
     const excludeCredentials = existingPasskeys.map((pk) => ({
@@ -145,16 +129,10 @@ router.post("/register/options", authMiddleware, async (c) => {
     return c.json(options);
   } catch (err) {
     if ((err as Error).message === "ORG_MEMBERSHIP_REQUIRED") {
-      return c.json(
-        { error: "FORBIDDEN", message: "Not a member of this organization" },
-        403,
-      );
+      return c.json({ error: "FORBIDDEN", message: "Not a member of this organization" }, 403);
     }
     logger.error("Passkey register options error", err as Error);
-    return c.json(
-      { error: "INTERNAL_ERROR", message: "Failed to generate options" },
-      500,
-    );
+    return c.json({ error: "INTERNAL_ERROR", message: "Failed to generate options" }, 500);
   }
 });
 
@@ -163,10 +141,7 @@ router.post("/register/verify", authMiddleware, async (c) => {
   try {
     const settings = await getSettings();
     if (!settings.passkeyEnabled) {
-      return c.json(
-        { error: "FEATURE_DISABLED", message: "Passkeys are disabled" },
-        403,
-      );
+      return c.json({ error: "FEATURE_DISABLED", message: "Passkeys are disabled" }, 403);
     }
 
     const user = c.get("user");
@@ -178,21 +153,18 @@ router.post("/register/verify", authMiddleware, async (c) => {
     }
     const policy = orgId ? await getOrgSecurityPolicy(orgId) : null;
 
-    const expectedChallenge = consumeChallenge(
-      registrationChallengeKey(userId, orgId),
-    );
+    const expectedChallenge = consumeChallenge(registrationChallengeKey(userId, orgId));
     if (!expectedChallenge) {
       return c.json(
         {
           error: "CHALLENGE_EXPIRED",
           message: "Registration challenge expired or not found",
         },
-        400,
+        400
       );
     }
 
-    const { verifyRegistrationResponse } =
-      await import("@simplewebauthn/server");
+    const { verifyRegistrationResponse } = await import("@simplewebauthn/server");
     const appUrl = settings.appUrl || "http://localhost:3000";
     const rpID = new URL(appUrl).hostname;
 
@@ -213,20 +185,16 @@ router.post("/register/verify", authMiddleware, async (c) => {
           error: "VERIFICATION_FAILED",
           message: "Registration verification failed",
         },
-        400,
+        400
       );
     }
 
     if (!verification.verified || !verification.registrationInfo) {
-      return c.json(
-        { error: "VERIFICATION_FAILED", message: "Registration not verified" },
-        400,
-      );
+      return c.json({ error: "VERIFICATION_FAILED", message: "Registration not verified" }, 400);
     }
 
     const { registrationInfo } = verification;
-    const { credential, credentialDeviceType, credentialBackedUp } =
-      registrationInfo;
+    const { credential, credentialDeviceType, credentialBackedUp } = registrationInfo;
     const aaguid = registrationInfo.aaguid
       ? String(registrationInfo.aaguid).toLowerCase()
       : undefined;
@@ -238,24 +206,17 @@ router.post("/register/verify", authMiddleware, async (c) => {
           aaguid,
           userVerified: Boolean(registrationInfo.userVerified),
         },
-        toAttestationPolicy(policy),
+        toAttestationPolicy(policy)
       );
-      const isKnownHardware = aaguid
-        ? KNOWN_HARDWARE_KEY_AAGUIDS[aaguid] !== undefined
-        : false;
-      if (
-        !attestationResult.passed ||
-        (policy.requireHardwarePasskey && !isKnownHardware)
-      ) {
+      const isKnownHardware = aaguid ? KNOWN_HARDWARE_KEY_AAGUIDS[aaguid] !== undefined : false;
+      if (!attestationResult.passed || (policy.requireHardwarePasskey && !isKnownHardware)) {
         return c.json(
           {
             error: "PASSKEY_POLICY_FAILED",
-            message:
-              attestationResult.reason ??
-              "Passkey does not satisfy organization policy",
+            message: attestationResult.reason ?? "Passkey does not satisfy organization policy",
             aaguid,
           },
-          400,
+          400
         );
       }
     }
@@ -300,16 +261,10 @@ router.post("/register/verify", authMiddleware, async (c) => {
     return c.json({ verified: true });
   } catch (err) {
     if ((err as Error).message === "ORG_MEMBERSHIP_REQUIRED") {
-      return c.json(
-        { error: "FORBIDDEN", message: "Not a member of this organization" },
-        403,
-      );
+      return c.json({ error: "FORBIDDEN", message: "Not a member of this organization" }, 403);
     }
     logger.error("Passkey register verify error", err as Error);
-    return c.json(
-      { error: "INTERNAL_ERROR", message: "Registration verification failed" },
-      500,
-    );
+    return c.json({ error: "INTERNAL_ERROR", message: "Registration verification failed" }, 500);
   }
 });
 
@@ -318,15 +273,11 @@ router.post("/authenticate/options", async (c) => {
   try {
     const settings = await getSettings();
     if (!settings.passkeyEnabled) {
-      return c.json(
-        { error: "FEATURE_DISABLED", message: "Passkeys are disabled" },
-        403,
-      );
+      return c.json({ error: "FEATURE_DISABLED", message: "Passkeys are disabled" }, 403);
     }
 
     const { email } = await c.req.json();
-    const { generateAuthenticationOptions } =
-      await import("@simplewebauthn/server");
+    const { generateAuthenticationOptions } = await import("@simplewebauthn/server");
     const appUrl = settings.appUrl || "http://localhost:3000";
     const rpID = new URL(appUrl).hostname;
 
@@ -351,17 +302,13 @@ router.post("/authenticate/options", async (c) => {
       userVerification: "preferred",
       allowCredentials,
     });
-    const challengeKey =
-      email || `anon:${crypto.randomBytes(8).toString("hex")}`;
+    const challengeKey = email || `anon:${crypto.randomBytes(8).toString("hex")}`;
     storeAuthChallenge(challengeKey, options.challenge);
 
     return c.json({ ...options, _challengeKey: challengeKey });
   } catch (err) {
     logger.error("Passkey auth options error", err as Error);
-    return c.json(
-      { error: "INTERNAL_ERROR", message: "Failed to generate options" },
-      500,
-    );
+    return c.json({ error: "INTERNAL_ERROR", message: "Failed to generate options" }, 500);
   }
 });
 
@@ -370,20 +317,14 @@ router.post("/authenticate/verify", async (c) => {
   try {
     const settings = await getSettings();
     if (!settings.passkeyEnabled) {
-      return c.json(
-        { error: "FEATURE_DISABLED", message: "Passkeys are disabled" },
-        403,
-      );
+      return c.json({ error: "FEATURE_DISABLED", message: "Passkeys are disabled" }, 403);
     }
 
     const body = await c.req.json();
     const { email, challengeKey } = body;
     const key = challengeKey || email;
     if (!key) {
-      return c.json(
-        { error: "INVALID_REQUEST", message: "email or challengeKey required" },
-        400,
-      );
+      return c.json({ error: "INVALID_REQUEST", message: "email or challengeKey required" }, 400);
     }
 
     const expectedChallenge = consumeAuthChallenge(key);
@@ -393,21 +334,17 @@ router.post("/authenticate/verify", async (c) => {
           error: "CHALLENGE_EXPIRED",
           message: "Authentication challenge expired",
         },
-        400,
+        400
       );
     }
 
-    const { verifyAuthenticationResponse } =
-      await import("@simplewebauthn/server");
+    const { verifyAuthenticationResponse } = await import("@simplewebauthn/server");
     const appUrl = settings.appUrl || "http://localhost:3000";
     const rpID = new URL(appUrl).hostname;
     const credentialId = body?.id || body?.rawId;
 
     if (!credentialId) {
-      return c.json(
-        { error: "INVALID_REQUEST", message: "credentialId required" },
-        400,
-      );
+      return c.json({ error: "INVALID_REQUEST", message: "credentialId required" }, 400);
     }
 
     const db = getDb();
@@ -431,7 +368,7 @@ router.post("/authenticate/verify", async (c) => {
           error: "PASSKEY_NOT_FOUND",
           message: "No user found for this passkey",
         },
-        401,
+        401
       );
     }
 
@@ -444,9 +381,7 @@ router.post("/authenticate/verify", async (c) => {
         expectedRPID: rpID,
         credential: {
           id: passkey.credentialId,
-          publicKey: new Uint8Array(
-            Buffer.from(passkey.publicKey, "base64url"),
-          ),
+          publicKey: new Uint8Array(Buffer.from(passkey.publicKey, "base64url")),
           counter: passkey.counter,
           transports: passkey.transports,
         },
@@ -460,7 +395,7 @@ router.post("/authenticate/verify", async (c) => {
           error: "VERIFICATION_FAILED",
           message: "Authentication verification failed",
         },
-        401,
+        401
       );
     }
 
@@ -470,7 +405,7 @@ router.post("/authenticate/verify", async (c) => {
           error: "VERIFICATION_FAILED",
           message: "Authentication not verified",
         },
-        401,
+        401
       );
     }
 
@@ -481,7 +416,7 @@ router.post("/authenticate/verify", async (c) => {
             counter: verification.authenticationInfo.newCounter,
             lastUsedAt: new Date(),
           }
-        : pk,
+        : pk
     );
     await db
       .update(usersTable)
@@ -537,7 +472,7 @@ router.post("/authenticate/verify", async (c) => {
         error: "INTERNAL_ERROR",
         message: "Authentication verification failed",
       },
-      500,
+      500
     );
   }
 });

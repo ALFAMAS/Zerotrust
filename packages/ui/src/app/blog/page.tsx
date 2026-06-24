@@ -58,9 +58,7 @@ export default function BlogPage() {
                   {post.title}
                 </Link>
               </h2>
-              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                {post.excerpt}
-              </p>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{post.excerpt}</p>
               <Link
                 href={`/blog/${post.slug}`}
                 className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-primary transition-colors hover:text-primary/80"

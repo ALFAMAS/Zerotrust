@@ -132,14 +132,9 @@ export async function pingS3(): Promise<{ ok: boolean; error?: string }> {
  * can't hang a caller (notably the public `/status` endpoint). The promise
  * rejects on timeout so the caller can map it to a "down" component status.
  */
-export function pingS3WithTimeout(
-  timeoutMs = 4000,
-): Promise<{ ok: boolean; error?: string }> {
+export function pingS3WithTimeout(timeoutMs = 4000): Promise<{ ok: boolean; error?: string }> {
   return new Promise((resolve, reject) => {
-    const timer = setTimeout(
-      () => reject(new Error("S3 ping timed out")),
-      timeoutMs,
-    );
+    const timer = setTimeout(() => reject(new Error("S3 ping timed out")), timeoutMs);
     pingS3()
       .then((result) => {
         clearTimeout(timer);
@@ -155,13 +150,10 @@ export function pingS3WithTimeout(
 /** Stream a local file to the configured bucket under the configured prefix. */
 export async function uploadFile(
   localPath: string,
-  key: string,
+  key: string
 ): Promise<{ key: string; size: number }> {
   const cfg = readConfig();
-  if (!cfg)
-    throw new Error(
-      "S3 backup not configured (BACKUP_S3_BUCKET + credentials)",
-    );
+  if (!cfg) throw new Error("S3 backup not configured (BACKUP_S3_BUCKET + credentials)");
 
   const info = await stat(localPath);
   const objectKey = fullKey(cfg, key);
@@ -174,7 +166,7 @@ export async function uploadFile(
       Body: body,
       ContentLength: info.size,
       ContentType: "application/octet-stream",
-    }),
+    })
   );
 
   logger.info("Uploaded to S3-compatible storage", {
@@ -202,15 +194,9 @@ export async function uploadBuffer(opts: {
   cacheControl?: string;
 }): Promise<{ key: string; size: number; url: string }> {
   const cfg = readConfig();
-  if (!cfg)
-    throw new Error(
-      "S3 backup not configured (BACKUP_S3_BUCKET + credentials)",
-    );
+  if (!cfg) throw new Error("S3 backup not configured (BACKUP_S3_BUCKET + credentials)");
 
-  const uploadsPrefix = (process.env.UPLOADS_S3_PREFIX ?? "uploads/").replace(
-    /\/?$/,
-    "/",
-  );
+  const uploadsPrefix = (process.env.UPLOADS_S3_PREFIX ?? "uploads/").replace(/\/?$/, "/");
   const cleanKey = opts.key.replace(/^\/+/, "");
   const objectKey = `${uploadsPrefix}${cleanKey}`;
   const cacheControl = opts.cacheControl ?? getUploadCacheControl();
@@ -223,7 +209,7 @@ export async function uploadBuffer(opts: {
       ContentLength: opts.body.length,
       ContentType: opts.contentType,
       CacheControl: cacheControl,
-    }),
+    })
   );
 
   // Prefer the dedicated uploads CDN/edge URL when configured; otherwise the
@@ -249,10 +235,7 @@ export async function uploadBuffer(opts: {
  * a new key, never a stale cache hit.
  */
 export function getUploadCacheControl(): string {
-  return (
-    process.env.UPLOADS_CACHE_CONTROL?.trim() ||
-    "public, max-age=31536000, immutable"
-  );
+  return process.env.UPLOADS_CACHE_CONTROL?.trim() || "public, max-age=31536000, immutable";
 }
 
 /**
@@ -323,9 +306,7 @@ export function parseObjectKeyFromPublicUrl(publicUrl: string): string | null {
     if (
       pathMatch &&
       url.host &&
-      (url.host.includes("backblaze") ||
-        url.host.includes("r2.") ||
-        url.host.includes("minio"))
+      (url.host.includes("backblaze") || url.host.includes("r2.") || url.host.includes("minio"))
     ) {
       return decodeURIComponent(pathMatch[2]);
     }
@@ -356,7 +337,7 @@ export async function listObjects(): Promise<S3Object[]> {
         Bucket: cfg.bucket,
         Prefix: cfg.prefix,
         ContinuationToken: continuationToken,
-      }),
+      })
     );
     for (const obj of res.Contents ?? []) {
       if (!obj.Key || obj.Size === undefined || !obj.LastModified) continue;
@@ -376,9 +357,7 @@ export async function listObjects(): Promise<S3Object[]> {
 export async function deleteObject(objectKey: string): Promise<void> {
   const cfg = readConfig();
   if (!cfg) throw new Error("S3 backup not configured");
-  await getClient(cfg).send(
-    new DeleteObjectCommand({ Bucket: cfg.bucket, Key: objectKey }),
-  );
+  await getClient(cfg).send(new DeleteObjectCommand({ Bucket: cfg.bucket, Key: objectKey }));
   logger.info("Deleted S3 object", { bucket: cfg.bucket, key: objectKey });
 }
 
@@ -410,7 +389,7 @@ export async function pruneOldBackups(maxAgeDays: number): Promise<string[]> {
           Objects: batch.map((o) => ({ Key: o.key })),
           Quiet: true,
         },
-      }),
+      })
     );
     for (const o of batch) pruned.push(o.key);
   }

@@ -17,18 +17,14 @@
 // inside the logger, so importing the logger back would be circular.
 
 export function isSiemEnabled(): boolean {
-  return (
-    process.env.SIEM_ENABLED === "true" && Boolean(process.env.SIEM_ENDPOINT)
-  );
+  return process.env.SIEM_ENABLED === "true" && Boolean(process.env.SIEM_ENDPOINT);
 }
 
 /**
  * Send one audit/security event to the configured SIEM. Returns true if a
  * delivery was attempted (endpoint configured), false if SIEM is disabled.
  */
-export async function streamToSiem(
-  event: Record<string, unknown>,
-): Promise<boolean> {
+export async function streamToSiem(event: Record<string, unknown>): Promise<boolean> {
   if (!isSiemEnabled()) return false;
 
   const endpoint = process.env.SIEM_ENDPOINT as string;

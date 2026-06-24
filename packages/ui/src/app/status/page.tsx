@@ -4,8 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
 
-const API_URL =
-  process.env.NEXT_PUBLIC_ZEROTRUST_URL || "http://localhost:3000";
+const API_URL = process.env.NEXT_PUBLIC_ZEROTRUST_URL || "http://localhost:3000";
 
 interface StatusData {
   status: "operational" | "degraded" | "down";
@@ -14,10 +13,7 @@ interface StatusData {
   timestamp: string;
 }
 
-const STATUS_STYLES: Record<
-  string,
-  { dot: string; label: string; text: string }
-> = {
+const STATUS_STYLES: Record<string, { dot: string; label: string; text: string }> = {
   operational: {
     dot: "bg-emerald-400",
     label: "Operational",
@@ -87,9 +83,7 @@ export default function StatusPage() {
     <div className="flex min-h-screen flex-col bg-background text-foreground">
       <SiteHeader />
       <main className="mx-auto w-full max-w-2xl flex-1 px-6 py-16">
-        <h1 className="font-display text-3xl font-semibold tracking-tight">
-          System status
-        </h1>
+        <h1 className="font-display text-3xl font-semibold tracking-tight">System status</h1>
         <p className="mt-2 text-sm text-muted-foreground">
           Live status of all platform components. Updates in real-time.
         </p>
@@ -103,9 +97,7 @@ export default function StatusPage() {
                 : "border-red-800/60 bg-red-950/30"
           }`}
         >
-          <span
-            className={`h-3.5 w-3.5 rounded-full ${style.dot} animate-pulse`}
-          />
+          <span className={`h-3.5 w-3.5 rounded-full ${style.dot} animate-pulse`} />
           <div>
             <p className={`font-medium ${style.text}`}>
               {error
@@ -138,13 +130,8 @@ export default function StatusPage() {
             Object.entries(data.components).map(([key, value]) => {
               const s = STATUS_STYLES[value];
               return (
-                <div
-                  key={key}
-                  className="flex items-center justify-between px-6 py-4"
-                >
-                  <span className="text-sm text-foreground/80">
-                    {COMPONENT_LABELS[key] ?? key}
-                  </span>
+                <div key={key} className="flex items-center justify-between px-6 py-4">
+                  <span className="text-sm text-foreground/80">{COMPONENT_LABELS[key] ?? key}</span>
                   <span className={`flex items-center gap-2 text-sm ${s.text}`}>
                     <span className={`h-2 w-2 rounded-full ${s.dot}`} />
                     {s.label}
