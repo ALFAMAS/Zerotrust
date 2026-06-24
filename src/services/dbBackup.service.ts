@@ -74,14 +74,22 @@ function encryptionKey(): Buffer | null {
   return scryptSync(raw, "zerotrust-db-backup", 32);
 }
 
-async function encryptBackup(file: string): Promise<string | null> {
+function backupEncryptionKey(): Buffer | null {
   const key = encryptionKey();
+  if (!key && process.env.BACKUP_REQUIRE_ENCRYPTION === "true") {
+    throw new Error(
+      "BACKUP_REQUIRE_ENCRYPTION=true but BACKUP_ENCRYPTION_KEY is not set",
+    );
+  }
+
+  return key;
+}
+
+async function encryptBackup(
+  file: string,
+  key: Buffer | null,
+): Promise<string | null> {
   if (!key) {
-    if (process.env.BACKUP_REQUIRE_ENCRYPTION === "true") {
-      throw new Error(
-        "BACKUP_REQUIRE_ENCRYPTION=true but BACKUP_ENCRYPTION_KEY is not set",
-      );
-    }
     logger.warn(
       "Database backup encryption disabled; set BACKUP_ENCRYPTION_KEY to encrypt backups at rest",
     );
@@ -186,6 +194,14 @@ export async function runBackup(): Promise<BackupResult> {
   const dir = backupDir();
   await mkdir(dir, { recursive: true });
 
+  let key: Buffer | null;
+  try {
+    key = backupEncryptionKey();
+  } catch (err) {
+    logger.error("Database backup encryption is misconfigured", err as Error);
+    return { ok: false, pruned: [], error: String(err) };
+  }
+
   const stamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
   let file = path.join(dir, `zerotrust-${stamp}.dump`);
 
@@ -193,10 +209,15 @@ export async function runBackup(): Promise<BackupResult> {
     // Custom format (-Fc) is compressed and restorable with pg_restore
     await run("pg_dump", ["--format=custom", `--file=${file}`, databaseUrl]);
     logger.info("Database backup written", { file });
-    const encryptedFile = await encryptBackup(file);
+    const encryptedFile = await encryptBackup(file, key);
     if (encryptedFile) file = encryptedFile;
   } catch (err) {
     logger.error("pg_dump failed", err as Error);
+    try {
+      await unlink(file);
+    } catch {
+      // Backup file was never created or was already removed.
+    }
     return { ok: false, pruned: [], error: String(err) };
   }
 

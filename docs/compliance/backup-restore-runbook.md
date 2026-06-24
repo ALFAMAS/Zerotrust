@@ -27,6 +27,11 @@ Expected controls:
 bun run db:backup
 ```
 
+Set `BACKUP_ENCRYPTION_KEY` or `BACKUP_ENCRYPTION_KEY_HEX` to produce
+AES-256-GCM encrypted `.dump.enc` artifacts. Use
+`BACKUP_REQUIRE_ENCRYPTION=true` in production/staging so a missing or invalid
+key fails before `pg_dump` writes a plaintext dump.
+
 Record:
 
 - Date/time.
@@ -43,7 +48,11 @@ production during a drill.
 
 1. Create or identify an isolated restore database.
 2. Confirm the target database URL points to the isolated database.
-3. Select a backup artifact.
+3. Select a backup artifact. For encrypted `.dump.enc` artifacts, make sure the
+   matching `.dump.enc.meta` file is next to the encrypted backup, or set
+   `BACKUP_ENCRYPTED_METADATA_FILE` to its path. Export the same
+   `BACKUP_ENCRYPTION_KEY` or `BACKUP_ENCRYPTION_KEY_HEX` used when the backup
+   was created.
 4. Run the restore command.
 5. Verify schema and representative row counts.
 6. Run application smoke checks against the restored database if practical.
@@ -51,7 +60,9 @@ production during a drill.
 8. Record evidence.
 
 ```bash
-bun run db:restore
+bun run db:restore -- ./backups/zerotrust-<stamp>.dump
+# or, for encrypted backups:
+BACKUP_ENCRYPTION_KEY=... bun run db:restore -- ./backups/zerotrust-<stamp>.dump.enc
 ```
 
 ## Restore Drill Evidence Template
