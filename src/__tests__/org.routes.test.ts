@@ -186,6 +186,17 @@ describe("POST / (create org)", () => {
     const body = await res.json();
     expect(body.org.id).toBe(ORG_ID);
     expect(body.member.role).toBe("owner");
+    expect(db.select).toHaveBeenCalledWith({ id: expect.anything() });
+    expect(db.returning.mock.calls[0]?.[0]).toEqual(
+      expect.objectContaining({
+        id: expect.anything(),
+        name: expect.anything(),
+        slug: expect.anything(),
+        ownerId: expect.anything(),
+        createdAt: expect.anything(),
+        updatedAt: expect.anything(),
+      }),
+    );
   });
 
   it("returns 409 when slug is already in use", async () => {
