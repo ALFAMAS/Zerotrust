@@ -10,7 +10,10 @@ import { brand } from "@/config/brand";
 import { useToast } from "@/lib/toast";
 import { api } from "../../../lib/api";
 import { setToken } from "../../../lib/auth";
-import { isWebAuthnAvailable, startAuthentication } from "../../../lib/webauthn";
+import {
+  isWebAuthnAvailable,
+  startAuthentication,
+} from "../../../lib/webauthn";
 
 export default function LoginPage() {
   const [form, setForm] = useState({ email: "", password: "" });
@@ -19,8 +22,9 @@ export default function LoginPage() {
   const [mfaCode, setMfaCode] = useState("");
   const { toast } = useToast();
 
-  const apiBase = process.env.NEXT_PUBLIC_ZEROAUTH_URL || "http://localhost:1337";
-  console.log(apiBase);
+  const apiBase =
+    process.env.NEXT_PUBLIC_ZEROAUTH_URL || "http://localhost:1337";
+
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const oauthCode = params.get("oauth_code");
@@ -65,7 +69,8 @@ export default function LoginPage() {
     setToken(data.accessToken, data.refreshToken);
     toast({ message: "Welcome back!", type: "success" });
     const next = new URLSearchParams(window.location.search).get("next");
-    const dest = next?.startsWith("/") && !next.startsWith("//") ? next : "/dashboard";
+    const dest =
+      next?.startsWith("/") && !next.startsWith("//") ? next : "/dashboard";
     window.location.href = dest;
   };
 
@@ -106,7 +111,7 @@ export default function LoginPage() {
       const options = await api.post<any>(
         "/auth/passkey/authenticate/options",
         { email: form.email || undefined },
-        true
+        true,
       );
       const assertion = await startAuthentication(options);
       const data = await api.post<any>(
@@ -116,7 +121,7 @@ export default function LoginPage() {
           challengeKey: options._challengeKey,
           email: form.email || undefined,
         },
-        true
+        true,
       );
       finishLogin(data);
     } catch (err: any) {
@@ -137,7 +142,11 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      const data = await api.post<any>("/auth/login/mfa", { mfaToken, code: mfaCode.trim() }, true);
+      const data = await api.post<any>(
+        "/auth/login/mfa",
+        { mfaToken, code: mfaCode.trim() },
+        true,
+      );
       finishLogin(data);
     } catch (err: any) {
       toast({
@@ -158,7 +167,9 @@ export default function LoginPage() {
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
         toast({
-          message: (err as { message?: string }).message || `Failed to initiate ${provider} login`,
+          message:
+            (err as { message?: string }).message ||
+            `Failed to initiate ${provider} login`,
           type: "error",
         });
         return;
@@ -181,7 +192,8 @@ export default function LoginPage() {
             Two-factor authentication
           </h1>
           <p className="mt-1.5 text-sm text-muted-foreground">
-            Enter the 6-digit code from your authenticator app, or a backup code.
+            Enter the 6-digit code from your authenticator app, or a backup
+            code.
           </p>
         </div>
         <form onSubmit={handleMfaSubmit} className="space-y-4">
@@ -223,7 +235,9 @@ export default function LoginPage() {
         <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
           Welcome back
         </h1>
-        <p className="mt-1.5 text-sm text-muted-foreground">Sign in to your {brand.name} account</p>
+        <p className="mt-1.5 text-sm text-muted-foreground">
+          Sign in to your {brand.name} account
+        </p>
       </div>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-1.5">
@@ -241,7 +255,10 @@ export default function LoginPage() {
         <div className="space-y-1.5">
           <div className="flex items-center justify-between">
             <Label htmlFor="password">Password</Label>
-            <Link href="/forgot-password" className="text-xs text-primary hover:text-primary/80">
+            <Link
+              href="/forgot-password"
+              className="text-xs text-primary hover:text-primary/80"
+            >
               Forgot password?
             </Link>
           </div>
@@ -329,13 +346,19 @@ export default function LoginPage() {
         </Button>
       </div>
       <div className="mt-5 text-center">
-        <Link href="/magic-link" className="text-sm font-medium text-primary hover:text-primary/80">
+        <Link
+          href="/magic-link"
+          className="text-sm font-medium text-primary hover:text-primary/80"
+        >
           Email me a magic link instead
         </Link>
       </div>
       <p className="mt-6 text-center text-sm text-muted-foreground">
         Don&apos;t have an account?{" "}
-        <Link href="/register" className="font-medium text-primary hover:text-primary/80">
+        <Link
+          href="/register"
+          className="font-medium text-primary hover:text-primary/80"
+        >
           Create one
         </Link>
       </p>
