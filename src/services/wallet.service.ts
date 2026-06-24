@@ -1,4 +1,5 @@
-import { and, desc, eq, sql } from "drizzle-orm";
+import { and, desc, eq, gte, sql } from "drizzle-orm";
+import { generateCodeFromAlphabet } from "../crypto/codes";
 import { getDb } from "../db";
 import {
   pointsLedgerTable,
@@ -151,16 +152,20 @@ export async function spendFromWallet(
     .limit(1);
   if (!wallet) throw new Error("Wallet not found");
 
-  const currentBalance = wallet.balance;
-  if (currentBalance < amount)
-    throw new Error(`Insufficient balance: ${currentBalance} < ${amount}`);
-
-  const newBalance = currentBalance - amount;
-
-  await db
+  // Atomic, conditional decrement: the `balance >= amount` guard lives inside
+  // the UPDATE so two concurrent spends can never both succeed off a stale read
+  // (TOCTOU double-spend). If no row matches, the balance was insufficient at
+  // the moment of write.
+  const debited = await db
     .update(walletsTable)
-    .set({ balance: newBalance, updatedAt: new Date() })
-    .where(eq(walletsTable.userId, userId));
+    .set({ balance: sql`${walletsTable.balance} - ${amount}`, updatedAt: new Date() })
+    .where(and(eq(walletsTable.userId, userId), gte(walletsTable.balance, amount)))
+    .returning({ balance: walletsTable.balance });
+
+  if (debited.length === 0) {
+    throw new Error(`Insufficient balance: ${wallet.balance} < ${amount}`);
+  }
+  const newBalance = debited[0].balance;
 
   const [tx] = await db
     .insert(walletTransactionsTable)
@@ -536,12 +541,7 @@ export async function redeemItem(
 // ── Referrals ─────────────────────────────────────────────────────────────────
 
 function generateReferralCode(): string {
-  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  let code = "";
-  for (let i = 0; i < 8; i++) {
-    code += chars[Math.floor(Math.random() * chars.length)];
-  }
-  return code;
+  return generateCodeFromAlphabet(8);
 }
 
 export async function createReferralLink(

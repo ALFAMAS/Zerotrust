@@ -13,6 +13,7 @@ import ldapRoutes from "../ldap/routes";
 import { getLogger } from "../logger";
 import { API_VERSIONS, apiVersioning, CURRENT_API_VERSION } from "../middleware/apiVersioning";
 import { authMiddleware } from "../middleware/auth";
+import { corsOptionsFromEnv } from "../middleware/cors";
 import { geoFencingMiddleware } from "../middleware/geoFencing";
 import { rateLimit } from "../middleware/rateLimiting";
 import { temporalAccessMiddleware } from "../middleware/temporalAccess";
@@ -91,7 +92,7 @@ export async function createServer() {
   // Daily pg_dump backup when BACKUP_ENABLED=true
   startBackupScheduler(24);
 
-  app.use("*", cors());
+  app.use("*", cors(corsOptionsFromEnv()));
   app.use("*", secureHeaders());
 
   // API version negotiation + deprecation/sunset headers

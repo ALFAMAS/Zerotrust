@@ -1,5 +1,6 @@
 import { and, eq, gt } from "drizzle-orm";
 import { Hono } from "hono";
+import { generateNumericCode } from "../../crypto/codes.js";
 import { getDb } from "../../db/index.js";
 import { otpsTable, usersTable } from "../../db/schema.js";
 import { getLogger } from "../../logger/index.js";
@@ -60,7 +61,7 @@ router.post("/challenge", async (c) => {
     }
 
     if (type === "otp") {
-      const code = Math.floor(100000 + Math.random() * 900000).toString();
+      const code = generateNumericCode(6);
       const db = getDb();
       await db
         .delete(otpsTable)

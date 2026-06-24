@@ -7,6 +7,7 @@ import { Hono } from "hono";
 import { nanoid } from "nanoid";
 import { z } from "zod";
 import { getConfig } from "../../config";
+import { generateNumericCode } from "../../crypto/codes";
 import { getDb } from "../../db";
 import {
   oauthExchangeCodesTable,
@@ -338,7 +339,7 @@ async function issueVerification(user: {
   locale?: string | null;
 }) {
   const db = getDb();
-  const code = Math.floor(100000 + Math.random() * 900000).toString();
+  const code = generateNumericCode(6);
   await db
     .delete(otpsTable)
     .where(and(eq(otpsTable.userId, user.id), eq(otpsTable.type, "email_verification")));

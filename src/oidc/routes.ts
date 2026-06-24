@@ -16,6 +16,7 @@ import {
   generateAuthCode,
   getDiscoveryDocument,
   getOIDCClient,
+  isRegisteredRedirectUri,
   validateAuthorizeRequest,
 } from "./provider.js";
 
@@ -86,6 +87,15 @@ router.get("/oidc/authorize", rateLimit({ points: 30, windowSecs: 60 }), (c) => 
   });
 
   if (!validation.valid) {
+    // Only bounce the error back to the client when the redirect_uri is one the
+    // client actually registered. Otherwise the redirect_uri is attacker-chosen
+    // and redirecting to it is an open redirect that leaks error/state params.
+    if (!isRegisteredRedirectUri(client_id, redirect_uri)) {
+      return c.json(
+        { code: validation.error, message: validation.errorDescription, details: [] },
+        400
+      );
+    }
     const errorUrl = new URL(redirect_uri);
     errorUrl.searchParams.set("error", validation.error!);
     errorUrl.searchParams.set("error_description", validation.errorDescription!);
