@@ -2,6 +2,7 @@
 
 import {
   ArrowLeft,
+  Bell,
   Bot,
   ClipboardCheck,
   Fingerprint,
@@ -38,6 +39,7 @@ const navItems: NavItem[] = [
   { href: "/admin/federation", icon: Network, label: "Federation" },
   { href: "/admin/approvals", icon: ShieldAlert, label: "Agent Approvals" },
   { href: "/admin/compliance", icon: ClipboardCheck, label: "Compliance" },
+  { href: "/admin/alerts", icon: Bell, label: "Alerts" },
   { href: "/admin/settings/general", icon: Settings, label: "General" },
   { href: "/admin/access-reviews", icon: ShieldCheck, label: "Access Reviews" },
   { href: "/admin/audit", icon: ScrollText, label: "Audit Logs" },

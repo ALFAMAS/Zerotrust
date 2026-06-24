@@ -11,6 +11,7 @@ import {
   LifeBuoy,
   Monitor,
   Plug,
+  Search,
   Share2,
   ShieldCheck,
   ShieldQuestion,
@@ -35,6 +36,7 @@ import { clearToken, isAuthenticated } from "../../lib/auth";
 
 const navItems: NavItem[] = [
   { href: "/dashboard", label: "Overview", icon: LayoutDashboard, exact: true },
+  { href: "/dashboard/search", label: "Search", icon: Search },
   { href: "/dashboard/profile", label: "Profile", icon: User },
   { href: "/dashboard/security", label: "Security", icon: ShieldCheck },
   { href: "/dashboard/sessions", label: "Sessions", icon: Monitor },
