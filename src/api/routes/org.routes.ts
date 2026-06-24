@@ -256,7 +256,7 @@ router.post("/", async (c) => {
 
     // Check slug uniqueness
     const existing = await db
-      .select()
+      .select({ id: organizationsTable.id })
       .from(organizationsTable)
       .where(eq(organizationsTable.slug, slug))
       .limit(1);
@@ -265,11 +265,26 @@ router.post("/", async (c) => {
       return c.json({ error: "SLUG_CONFLICT", message: "Slug already in use" }, 409);
     }
 
-    // Insert org
-    const orgRows = await db
-      .insert(organizationsTable)
-      .values({ name, slug, ownerId: user.id })
-      .returning();
+    // Insert org using a raw statement so Drizzle does not include optional
+    // organization columns that may be absent until newer migrations run.
+    const orgRows = (await db.execute(sql`
+      insert into organizations (name, slug, owner_id)
+      values (${name}, ${slug}, ${user.id})
+      returning
+        id,
+        name,
+        slug,
+        owner_id as "ownerId",
+        created_at as "createdAt",
+        updated_at as "updatedAt"
+    `)) as Array<{
+      id: string;
+      name: string;
+      slug: string;
+      ownerId: string | null;
+      createdAt: Date;
+      updatedAt: Date;
+    }>;
     const org = orgRows[0];
 
     // Insert owner member

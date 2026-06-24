@@ -81,6 +81,7 @@ function makeDbChain(returnValue: any = []) {
     values: vi.fn().mockReturnThis(),
     onConflictDoUpdate: vi.fn().mockReturnThis(),
     returning: vi.fn().mockResolvedValue(returnValue),
+    execute: vi.fn().mockResolvedValue(returnValue),
     update: vi.fn().mockReturnThis(),
     set: vi.fn().mockReturnThis(),
     delete: vi.fn().mockReturnThis(),
@@ -171,7 +172,7 @@ describe("POST / (create org)", () => {
     // slug uniqueness check → no existing org
     db.limit.mockResolvedValueOnce([]);
     // insert org returning
-    db.returning.mockResolvedValueOnce([makeOrg()]);
+    db.execute.mockResolvedValueOnce([makeOrg()]);
     // insert member returning
     db.returning.mockResolvedValueOnce([makeOrgMember()]);
 
@@ -186,6 +187,9 @@ describe("POST / (create org)", () => {
     const body = await res.json();
     expect(body.org.id).toBe(ORG_ID);
     expect(body.member.role).toBe("owner");
+    expect(db.select).toHaveBeenCalledWith({ id: expect.anything() });
+    expect(db.execute).toHaveBeenCalledOnce();
+    expect(db.insert).toHaveBeenCalledOnce();
   });
 
   it("returns 409 when slug is already in use", async () => {
