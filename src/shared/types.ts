@@ -234,16 +234,7 @@ export interface Permission {
 
 export interface ABACCondition {
   attribute: string;
-  operator:
-    | "eq"
-    | "ne"
-    | "in"
-    | "nin"
-    | "gt"
-    | "lt"
-    | "gte"
-    | "lte"
-    | "contains";
+  operator: "eq" | "ne" | "in" | "nin" | "gt" | "lt" | "gte" | "lte" | "contains";
   value: unknown;
 }
 
@@ -425,7 +416,7 @@ export class zerotrustError extends Error {
     public code: string,
     message: string,
     public statusCode: number = 400,
-    public details?: Record<string, unknown>,
+    public details?: Record<string, unknown>
   ) {
     super(message);
     this.name = "zerotrustError";

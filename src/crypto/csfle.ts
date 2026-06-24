@@ -38,7 +38,7 @@ class CSFLEManager {
         keyBytes as unknown as ArrayBuffer,
         { name: "HKDF", hash: "SHA-256" },
         false,
-        ["deriveKey"],
+        ["deriveKey"]
       );
 
       // Create initial key version
@@ -53,9 +53,7 @@ class CSFLEManager {
   /**
    * Create a new key version using HKDF derivation
    */
-  private async createKeyVersion(
-    versionId: string,
-  ): Promise<EncryptionKeyVersion> {
+  private async createKeyVersion(versionId: string): Promise<EncryptionKeyVersion> {
     try {
       // Derive a new key from master key using HKDF
       const salt = crypto.getRandomValues(new Uint8Array(16));
@@ -71,7 +69,7 @@ class CSFLEManager {
         this.masterKey,
         { name: "AES-GCM", length: 256 },
         true, // extractable for backup
-        ["encrypt", "decrypt"],
+        ["encrypt", "decrypt"]
       );
 
       // Extract key material for storage/audit
@@ -130,7 +128,7 @@ class CSFLEManager {
       keyVersion.keyMaterial as unknown as ArrayBuffer,
       { name: "AES-GCM" },
       false,
-      ["encrypt", "decrypt"],
+      ["encrypt", "decrypt"]
     );
   }
 
@@ -138,14 +136,11 @@ class CSFLEManager {
    * Encrypt a value with the current key
    */
   async encrypt(
-    plaintext: string | Buffer,
+    plaintext: string | Buffer
   ): Promise<{ ciphertext: string; keyVersion: string; iv: string }> {
     try {
       const key = await this.getCurrentKey();
-      const data =
-        typeof plaintext === "string"
-          ? new TextEncoder().encode(plaintext)
-          : plaintext;
+      const data = typeof plaintext === "string" ? new TextEncoder().encode(plaintext) : plaintext;
 
       // Generate IV for AES-GCM
       const iv = crypto.getRandomValues(new Uint8Array(12));
@@ -158,7 +153,7 @@ class CSFLEManager {
           additionalData: new TextEncoder().encode(this.currentKeyVersionId),
         },
         key,
-        data as unknown as ArrayBuffer,
+        data as unknown as ArrayBuffer
       );
 
       return {
@@ -175,11 +170,7 @@ class CSFLEManager {
   /**
    * Decrypt a value (handles multiple key versions)
    */
-  async decrypt(
-    ciphertext: string,
-    keyVersion: string,
-    iv: string,
-  ): Promise<string> {
+  async decrypt(ciphertext: string, keyVersion: string, iv: string): Promise<string> {
     try {
       const keyVersionData = this.keyVersions.get(keyVersion);
       if (!keyVersionData) {
@@ -191,7 +182,7 @@ class CSFLEManager {
         keyVersionData.keyMaterial as unknown as ArrayBuffer,
         { name: "AES-GCM" },
         false,
-        ["decrypt"],
+        ["decrypt"]
       );
 
       const ivBytes = this.base64urlToBytes(iv);
@@ -204,7 +195,7 @@ class CSFLEManager {
           additionalData: new TextEncoder().encode(keyVersion),
         },
         key,
-        ciphertextBytes as unknown as ArrayBuffer,
+        ciphertextBytes as unknown as ArrayBuffer
       );
 
       return new TextDecoder().decode(plaintext);
@@ -230,9 +221,7 @@ class CSFLEManager {
 
     const daysSinceCreation =
       (Date.now() - currentVersion.createdAt.getTime()) / (1000 * 60 * 60 * 24);
-    return (
-      daysSinceCreation >= this.config.security.csflekeyRotationIntervalDays
-    );
+    return daysSinceCreation >= this.config.security.csflekeyRotationIntervalDays;
   }
 
   // Utility methods
@@ -246,10 +235,7 @@ class CSFLEManager {
 
   private bytesToBase64url(bytes: Uint8Array): string {
     const binary = String.fromCharCode(...Array.from(bytes));
-    return btoa(binary)
-      .replace(/\+/g, "-")
-      .replace(/\//g, "_")
-      .replace(/=/g, "");
+    return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
   }
 
   private base64urlToBytes(str: string): Uint8Array {
@@ -263,9 +249,7 @@ let csfleSingleton: CSFLEManager | null = null;
 /**
  * Initialize and get CSFLE manager
  */
-export async function initializeCSFLE(
-  config?: zerotrustConfig,
-): Promise<CSFLEManager> {
+export async function initializeCSFLE(config?: zerotrustConfig): Promise<CSFLEManager> {
   if (csfleSingleton) return csfleSingleton;
 
   const cfg = config || getConfig();
@@ -297,10 +281,7 @@ export function resetCSFLE(): void {
  * @deprecated Use CSFLE.encrypt/decrypt directly with Drizzle queries.
  * Kept for backward compatibility only.
  */
-export function csflEncryptionPlugin(
-  schema: any,
-  options: { fields: string[] },
-): void {
+export function csflEncryptionPlugin(schema: any, options: { fields: string[] }): void {
   const fieldsToEncrypt = options.fields || [];
 
   // Pre-save: encrypt sensitive fields
@@ -352,11 +333,7 @@ export function csflEncryptionPlugin(
 /**
  * Helper to decrypt fields in a document
  */
-async function decryptFieldsInDoc(
-  doc: any,
-  fields: string[],
-  csfle: CSFLEManager,
-): Promise<void> {
+async function decryptFieldsInDoc(doc: any, fields: string[], csfle: CSFLEManager): Promise<void> {
   for (const field of fields) {
     const encryptedData = doc[`_${field}_encrypted`];
     if (encryptedData) {
@@ -364,7 +341,7 @@ async function decryptFieldsInDoc(
         doc[field] = await csfle.decrypt(
           encryptedData.ciphertext,
           encryptedData.keyVersion,
-          encryptedData.iv,
+          encryptedData.iv
         );
       } catch (error) {
         console.error(`Failed to decrypt field ${field}:`, error);

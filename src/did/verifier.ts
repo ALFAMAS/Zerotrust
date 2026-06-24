@@ -3,19 +3,11 @@ import { eq } from "drizzle-orm";
 import { getDb } from "../db";
 import { usersTable } from "../db/schema";
 import { resolveDID } from "./resolver";
-import type {
-  DIDAuthChallenge,
-  DIDAuthResult,
-  DIDProof,
-  VerificationMethod,
-} from "./types";
+import type { DIDAuthChallenge, DIDAuthResult, DIDProof, VerificationMethod } from "./types";
 
 const challenges = new Map<string, DIDAuthChallenge>();
 
-export function createDIDChallenge(
-  did: string,
-  domain: string,
-): DIDAuthChallenge {
+export function createDIDChallenge(did: string, domain: string): DIDAuthChallenge {
   const id = crypto.randomUUID();
   const challenge = crypto.randomBytes(32).toString("base64url");
   const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
@@ -27,16 +19,13 @@ export function createDIDChallenge(
 
 function resolveVM(
   doc: import("./types").DIDDocument,
-  vmRef: string | VerificationMethod,
+  vmRef: string | VerificationMethod
 ): VerificationMethod | null {
   if (typeof vmRef === "object") return vmRef;
   return doc.verificationMethod.find((vm) => vm.id === vmRef) ?? null;
 }
 
-export async function verifyDIDProof(
-  proof: DIDProof,
-  challengeId: string,
-): Promise<DIDAuthResult> {
+export async function verifyDIDProof(proof: DIDProof, challengeId: string): Promise<DIDAuthResult> {
   const stored = challenges.get(challengeId);
   if (!stored) return { verified: false, reason: "challenge_not_found" };
   if (stored.expiresAt < new Date()) {
@@ -46,8 +35,7 @@ export async function verifyDIDProof(
 
   if (proof.challenge !== stored.challenge)
     return { verified: false, reason: "challenge_mismatch" };
-  if (proof.domain !== stored.domain)
-    return { verified: false, reason: "domain_mismatch" };
+  if (proof.domain !== stored.domain) return { verified: false, reason: "domain_mismatch" };
   if (proof.proofPurpose !== "authentication")
     return { verified: false, reason: "invalid_proof_purpose" };
 
@@ -55,9 +43,7 @@ export async function verifyDIDProof(
   if (!didDoc) return { verified: false, reason: "did_resolution_failed" };
 
   const vmRef = didDoc.authentication.find((a) =>
-    typeof a === "string"
-      ? a === proof.verificationMethod
-      : a.id === proof.verificationMethod,
+    typeof a === "string" ? a === proof.verificationMethod : a.id === proof.verificationMethod
   );
   if (!vmRef)
     return {
@@ -84,13 +70,12 @@ export async function verifyDIDProof(
         key: vm.publicKeyJwk as any,
         format: "jwk",
       });
-      const algorithm =
-        vm.publicKeyJwk.crv === "Ed25519" ? "ed25519" : "sha256";
+      const algorithm = vm.publicKeyJwk.crv === "Ed25519" ? "ed25519" : "sha256";
       const valid = crypto.verify(
         algorithm === "ed25519" ? null : "sha256",
         Buffer.from(signedData),
         pubKey,
-        sigBytes,
+        sigBytes
       );
       if (!valid) return { verified: false, reason: "signature_invalid" };
     } else if (vm.publicKeyMultibase) {
@@ -101,12 +86,7 @@ export async function verifyDIDProof(
         format: "der",
         type: "spki",
       });
-      const valid = crypto.verify(
-        null,
-        Buffer.from(signedData),
-        pubKey,
-        sigBytes,
-      );
+      const valid = crypto.verify(null, Buffer.from(signedData), pubKey, sigBytes);
       if (!valid) return { verified: false, reason: "signature_invalid" };
     } else {
       return { verified: false, reason: "unsupported_key_format" };
@@ -129,15 +109,11 @@ export async function verifyDIDProof(
  */
 export async function provisionDIDUser(
   did: string,
-  _didDocument: import("./types").DIDDocument,
+  _didDocument: import("./types").DIDDocument
 ): Promise<string> {
   const db = getDb();
 
-  const existing = await db
-    .select()
-    .from(usersTable)
-    .where(eq(usersTable.did, did))
-    .limit(1);
+  const existing = await db.select().from(usersTable).where(eq(usersTable.did, did)).limit(1);
   if (existing.length > 0) return existing[0].id;
 
   // Synthetic, stable, unique email derived from the DID (no real mailbox).

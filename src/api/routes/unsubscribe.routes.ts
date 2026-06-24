@@ -72,10 +72,7 @@ router.get("/unsubscribe", async (c) => {
 
   const data = verifyUnsubscribeToken(token);
   if (!data) {
-    return c.html(
-      errorPage("This unsubscribe link is invalid or has expired."),
-      400,
-    );
+    return c.html(errorPage("This unsubscribe link is invalid or has expired."), 400);
   }
 
   try {
@@ -91,8 +88,7 @@ router.get("/unsubscribe", async (c) => {
     }
 
     const meta = (user.metadata as Record<string, unknown>) ?? {};
-    const prefs =
-      (meta.notificationPreferences as Record<string, unknown>) ?? {};
+    const prefs = (meta.notificationPreferences as Record<string, unknown>) ?? {};
 
     let updatedPrefs: Record<string, unknown>;
     let message: string;

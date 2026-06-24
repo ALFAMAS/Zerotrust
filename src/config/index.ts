@@ -22,20 +22,13 @@ const DEFAULT_CONFIG: Partial<zerotrustConfig> = {
   session: {
     defaultTTL: parseInt(process.env.SESSION_TTL || "3600", 10),
     refreshTokenTTL: parseInt(process.env.REFRESH_TOKEN_TTL || "604800", 10),
-    maxConcurrentDevices: parseInt(
-      process.env.MAX_CONCURRENT_DEVICES || "5",
-      10,
-    ),
+    maxConcurrentDevices: parseInt(process.env.MAX_CONCURRENT_DEVICES || "5", 10),
   },
   security: {
     bcryptRounds: parseInt(process.env.BCRYPT_ROUNDS || "12", 10),
     tokenSecretHex: process.env.TOKEN_SECRET_HEX || generateSecureKey(32),
-    csfleMasterKeyHex:
-      process.env.CSFLE_MASTER_KEY_HEX || generateSecureKey(32),
-    csflekeyRotationIntervalDays: parseInt(
-      process.env.CSFLE_KEY_ROTATION_DAYS || "90",
-      10,
-    ),
+    csfleMasterKeyHex: process.env.CSFLE_MASTER_KEY_HEX || generateSecureKey(32),
+    csflekeyRotationIntervalDays: parseInt(process.env.CSFLE_KEY_ROTATION_DAYS || "90", 10),
   },
   oauth: {
     providers: {
@@ -64,8 +57,7 @@ const DEFAULT_CONFIG: Partial<zerotrustConfig> = {
         clientId: process.env.OAUTH_APPLE_CLIENT_ID || "",
         clientSecret: process.env.OAUTH_APPLE_CLIENT_SECRET || "",
         redirectUri:
-          process.env.OAUTH_APPLE_REDIRECT_URI ||
-          "http://localhost:3000/auth/oauth/apple/callback",
+          process.env.OAUTH_APPLE_REDIRECT_URI || "http://localhost:3000/auth/oauth/apple/callback",
       },
     },
   },
@@ -97,12 +89,8 @@ const DEFAULT_CONFIG: Partial<zerotrustConfig> = {
   },
   geofencing: {
     enabled: process.env.GEOFENCING_ENABLED === "true",
-    allowedCountries: (process.env.ALLOWED_COUNTRIES || "US,AU,EU,BD,IN").split(
-      ",",
-    ),
-    allowedIpRanges: (process.env.ALLOWED_IP_RANGES || "")
-      .split(",")
-      .filter(Boolean),
+    allowedCountries: (process.env.ALLOWED_COUNTRIES || "US,AU,EU,BD,IN").split(","),
+    allowedIpRanges: (process.env.ALLOWED_IP_RANGES || "").split(",").filter(Boolean),
   },
   elasticsearch: {
     enabled: process.env.ELASTICSEARCH_ENABLED === "true",
@@ -111,11 +99,7 @@ const DEFAULT_CONFIG: Partial<zerotrustConfig> = {
     indexPrefix: process.env.ELASTICSEARCH_INDEX_PREFIX || "zerotrust",
   },
   logging: {
-    level: (process.env.LOG_LEVEL || "info") as
-      | "debug"
-      | "info"
-      | "warn"
-      | "error",
+    level: (process.env.LOG_LEVEL || "info") as "debug" | "info" | "warn" | "error",
     format: (process.env.LOG_FORMAT || "json") as "json" | "text",
   },
 };
@@ -133,20 +117,12 @@ function validateConfig(config: zerotrustConfig): void {
     errors.push("DATABASE_URL environment variable is required");
   }
 
-  if (
-    !config.security.tokenSecretHex ||
-    config.security.tokenSecretHex.length < 64
-  ) {
+  if (!config.security.tokenSecretHex || config.security.tokenSecretHex.length < 64) {
     errors.push("TOKEN_SECRET_HEX must be at least 32 bytes (64 hex chars)");
   }
 
-  if (
-    !config.security.csfleMasterKeyHex ||
-    config.security.csfleMasterKeyHex.length < 64
-  ) {
-    errors.push(
-      "CSFLE_MASTER_KEY_HEX must be at least 32 bytes (64 hex chars)",
-    );
+  if (!config.security.csfleMasterKeyHex || config.security.csfleMasterKeyHex.length < 64) {
+    errors.push("CSFLE_MASTER_KEY_HEX must be at least 32 bytes (64 hex chars)");
   }
 
   let hasValidOAuth = false;
@@ -157,21 +133,16 @@ function validateConfig(config: zerotrustConfig): void {
   }
   if (!hasValidOAuth) {
     console.warn(
-      "WARNING: No OAuth providers configured. Set OAUTH_*_CLIENT_ID and OAUTH_*_CLIENT_SECRET",
+      "WARNING: No OAuth providers configured. Set OAUTH_*_CLIENT_ID and OAUTH_*_CLIENT_SECRET"
     );
   }
 
-  const mfaChannelsEnabled = Object.values(config.mfa.channels).filter(
-    (c) => c.enabled,
-  ).length;
+  const mfaChannelsEnabled = Object.values(config.mfa.channels).filter((c) => c.enabled).length;
   if (mfaChannelsEnabled === 0) {
     errors.push("At least one MFA channel must be enabled");
   }
 
-  if (
-    config.mfa.channels.telegram.enabled &&
-    !config.mfa.channels.telegram.botToken
-  ) {
+  if (config.mfa.channels.telegram.enabled && !config.mfa.channels.telegram.botToken) {
     errors.push("TELEGRAM_BOT_TOKEN required when MFA_TELEGRAM_ENABLED=true");
   }
 

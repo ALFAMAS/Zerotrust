@@ -19,10 +19,7 @@ let tokenServiceInstance: TokenService | null = null;
 async function getTokenService() {
   if (tokenServiceInstance) return tokenServiceInstance;
   const cfg = getConfig();
-  tokenServiceInstance = new TokenService(
-    cfg.security.tokenSecretHex,
-    cfg.session,
-  );
+  tokenServiceInstance = new TokenService(cfg.security.tokenSecretHex, cfg.session);
   await tokenServiceInstance.init();
   return tokenServiceInstance;
 }
@@ -30,10 +27,7 @@ async function getTokenService() {
 router.post("/issue", async (c) => {
   try {
     const key = c.req.header("x-workload-key");
-    if (
-      !process.env.WORKLOAD_ISSUE_KEY ||
-      key !== process.env.WORKLOAD_ISSUE_KEY
-    ) {
+    if (!process.env.WORKLOAD_ISSUE_KEY || key !== process.env.WORKLOAD_ISSUE_KEY) {
       return c.json({ error: "FORBIDDEN" }, 403);
     }
 
@@ -44,7 +38,7 @@ router.post("/issue", async (c) => {
       workloadId,
       undefined,
       scopes || [],
-      ttl || 3600,
+      ttl || 3600
     );
     return c.json({ created });
   } catch (err) {
@@ -56,8 +50,7 @@ router.post("/issue", async (c) => {
 router.post("/validate", async (c) => {
   try {
     const { workloadId, secret } = await c.req.json();
-    if (!workloadId || !secret)
-      return c.json({ error: "INVALID_REQUEST" }, 400);
+    if (!workloadId || !secret) return c.json({ error: "INVALID_REQUEST" }, 400);
     const ok = await validateWorkloadCredential(workloadId, secret);
     return c.json({ valid: ok });
   } catch (err) {
@@ -69,8 +62,7 @@ router.post("/validate", async (c) => {
 router.post("/token", async (c) => {
   try {
     const { workloadId, secret, scopes, ttl } = await c.req.json();
-    if (!workloadId || !secret)
-      return c.json({ error: "INVALID_REQUEST" }, 400);
+    if (!workloadId || !secret) return c.json({ error: "INVALID_REQUEST" }, 400);
 
     const credential = await getValidWorkloadCredential(workloadId, secret);
     if (!credential) {
@@ -78,22 +70,15 @@ router.post("/token", async (c) => {
     }
 
     const allowedScopes = new Set((credential.scopes as string[]) ?? []);
-    const requestedScopes = Array.isArray(scopes)
-      ? scopes.map(String)
-      : Array.from(allowedScopes);
-    const grantedScopes = requestedScopes.filter((scope) =>
-      allowedScopes.has(scope),
-    );
-    if (
-      requestedScopes.length > 0 &&
-      grantedScopes.length !== requestedScopes.length
-    ) {
+    const requestedScopes = Array.isArray(scopes) ? scopes.map(String) : Array.from(allowedScopes);
+    const grantedScopes = requestedScopes.filter((scope) => allowedScopes.has(scope));
+    if (requestedScopes.length > 0 && grantedScopes.length !== requestedScopes.length) {
       return c.json({ error: "INVALID_SCOPE" }, 403);
     }
 
     const tokenTtl = Math.min(
       Number.isInteger(ttl) ? ttl : credential.ttl || 3600,
-      credential.ttl || 3600,
+      credential.ttl || 3600
     );
     const tokenSvc = await getTokenService();
     const accessToken = await tokenSvc.signAccessToken(
@@ -106,7 +91,7 @@ router.post("/token", async (c) => {
         principal_type: "agent",
         workload_id: credential.workloadId,
       },
-      tokenTtl,
+      tokenTtl
     );
 
     void auditLog(
@@ -120,7 +105,7 @@ router.post("/token", async (c) => {
         type: "agent",
         id: `workload:${credential.workloadId}`,
         workloadId: credential.workloadId,
-      },
+      }
     );
 
     return c.json({

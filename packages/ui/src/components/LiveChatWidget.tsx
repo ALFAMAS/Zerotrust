@@ -36,9 +36,7 @@ function ThirdPartyChatWidget() {
     async function getIdentity(): Promise<{ name?: string; email?: string }> {
       if (!getToken()) return {};
       try {
-        const me = await api.get<{ displayName?: string; email?: string }>(
-          "/auth/me",
-        );
+        const me = await api.get<{ displayName?: string; email?: string }>("/auth/me");
         return { name: me.displayName, email: me.email };
       } catch {
         return {};
@@ -52,10 +50,8 @@ function ThirdPartyChatWidget() {
       if (chatProvider === "crisp") {
         w.$crisp = w.$crisp || [];
         w.CRISP_WEBSITE_ID = chatId;
-        if (identity.email)
-          w.$crisp.push(["set", "user:email", [identity.email]]);
-        if (identity.name)
-          w.$crisp.push(["set", "user:nickname", [identity.name]]);
+        if (identity.email) w.$crisp.push(["set", "user:email", [identity.email]]);
+        if (identity.name) w.$crisp.push(["set", "user:nickname", [identity.name]]);
         const s = document.createElement("script");
         s.id = "zerotrust-livechat";
         s.src = "https://client.crisp.chat/l.js";
@@ -109,9 +105,7 @@ function ThirdPartyChatWidget() {
 /** Native chat widget — creates support tickets via the API */
 function NativeChatWidget() {
   const [open, setOpen] = useState(false);
-  const [messages, setMessages] = useState<
-    Array<{ role: "user" | "system"; text: string }>
-  >([]);
+  const [messages, setMessages] = useState<Array<{ role: "user" | "system"; text: string }>>([]);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const [ticketId, setTicketId] = useState<string | null>(null);
@@ -133,13 +127,10 @@ function NativeChatWidget() {
     try {
       if (!ticketId) {
         // Create a new support ticket
-        const res = await api.post<{ ticket: { id: string } }>(
-          "/support/tickets",
-          {
-            subject: text.slice(0, 80),
-            body: text,
-          },
-        );
+        const res = await api.post<{ ticket: { id: string } }>("/support/tickets", {
+          subject: text.slice(0, 80),
+          body: text,
+        });
         setTicketId(res.ticket.id);
         setMessages((prev) => [
           ...prev,
@@ -175,11 +166,7 @@ function NativeChatWidget() {
         className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform hover:scale-105"
         aria-label="Open support chat"
       >
-        {open ? (
-          <X className="h-6 w-6" />
-        ) : (
-          <MessageCircle className="h-6 w-6" />
-        )}
+        {open ? <X className="h-6 w-6" /> : <MessageCircle className="h-6 w-6" />}
       </button>
 
       {/* Chat panel */}

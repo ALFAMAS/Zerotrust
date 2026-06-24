@@ -62,8 +62,7 @@ export default function RevenuePage() {
   }
 
   const fmt = (n: number) => `$${n.toLocaleString()}`;
-  const oauthBase =
-    process.env.NEXT_PUBLIC_ZEROTRUST_URL || "http://localhost:3000";
+  const oauthBase = process.env.NEXT_PUBLIC_ZEROTRUST_URL || "http://localhost:3000";
 
   const inputClasses =
     "w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring";
@@ -98,17 +97,13 @@ export default function RevenuePage() {
           <h2 className="font-medium text-foreground">Send announcement</h2>
           <input
             value={broadcast.title}
-            onChange={(e) =>
-              setBroadcast({ ...broadcast, title: e.target.value })
-            }
+            onChange={(e) => setBroadcast({ ...broadcast, title: e.target.value })}
             placeholder="Title"
             className={inputClasses}
           />
           <textarea
             value={broadcast.message}
-            onChange={(e) =>
-              setBroadcast({ ...broadcast, message: e.target.value })
-            }
+            onChange={(e) => setBroadcast({ ...broadcast, message: e.target.value })}
             placeholder="Message"
             rows={3}
             className={inputClasses}
@@ -116,9 +111,7 @@ export default function RevenuePage() {
           <div className="flex flex-wrap items-center gap-3">
             <select
               value={broadcast.segment}
-              onChange={(e) =>
-                setBroadcast({ ...broadcast, segment: e.target.value })
-              }
+              onChange={(e) => setBroadcast({ ...broadcast, segment: e.target.value })}
               className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-ring focus:outline-none"
             >
               <option value="all">All users</option>
@@ -136,9 +129,7 @@ export default function RevenuePage() {
               Send
             </Button>
             {broadcastResult && (
-              <span className="text-sm text-muted-foreground">
-                {broadcastResult}
-              </span>
+              <span className="text-sm text-muted-foreground">{broadcastResult}</span>
             )}
           </div>
         </div>
@@ -147,10 +138,7 @@ export default function RevenuePage() {
       {loading ? (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {[...Array(4)].map((_, i) => (
-            <div
-              key={i}
-              className="h-32 animate-pulse rounded-xl border border-border bg-card"
-            />
+            <div key={i} className="h-32 animate-pulse rounded-xl border border-border bg-card" />
           ))}
         </div>
       ) : data ? (
@@ -177,13 +165,9 @@ export default function RevenuePage() {
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div className="rounded-xl border border-border bg-card p-6">
-              <h2 className="mb-4 font-medium text-foreground">
-                Subscriptions by plan
-              </h2>
+              <h2 className="mb-4 font-medium text-foreground">Subscriptions by plan</h2>
               {Object.keys(data.byPlan).length === 0 ? (
-                <p className="text-sm text-muted-foreground">
-                  No subscriptions yet
-                </p>
+                <p className="text-sm text-muted-foreground">No subscriptions yet</p>
               ) : (
                 <DonutChart
                   labels={Object.keys(data.byPlan).map(cap)}
@@ -197,22 +181,14 @@ export default function RevenuePage() {
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-foreground/80">In trial</span>
-                  <span className="text-sm font-semibold text-blue-400">
-                    {data.trialing}
-                  </span>
+                  <span className="text-sm font-semibold text-blue-400">{data.trialing}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-foreground/80">
-                    Past due (dunning)
-                  </span>
-                  <span className="text-sm font-semibold text-amber-400">
-                    {data.pastDue}
-                  </span>
+                  <span className="text-sm text-foreground/80">Past due (dunning)</span>
+                  <span className="text-sm font-semibold text-amber-400">{data.pastDue}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-foreground/80">
-                    Canceled (last 30 days)
-                  </span>
+                  <span className="text-sm text-foreground/80">Canceled (last 30 days)</span>
                   <span className="text-sm font-semibold text-red-400">
                     {data.canceledLast30Days}
                   </span>
@@ -222,9 +198,7 @@ export default function RevenuePage() {
           </div>
         </>
       ) : (
-        <p className="text-sm text-muted-foreground">
-          Failed to load revenue data.
-        </p>
+        <p className="text-sm text-muted-foreground">Failed to load revenue data.</p>
       )}
     </div>
   );

@@ -16,11 +16,7 @@ interface RadialGaugeProps {
   caption?: string;
 }
 
-export default function RadialGauge({
-  value,
-  label,
-  caption,
-}: RadialGaugeProps) {
+export default function RadialGauge({ value, label, caption }: RadialGaugeProps) {
   const options: ApexOptions = {
     chart: {
       type: "radialBar",
@@ -59,17 +55,8 @@ export default function RadialGauge({
 
   return (
     <div className="flex flex-col items-center">
-      <ReactApexChart
-        options={options}
-        series={[value]}
-        type="radialBar"
-        height={240}
-      />
-      {caption && (
-        <p className="-mt-2 text-center text-sm text-muted-foreground">
-          {caption}
-        </p>
-      )}
+      <ReactApexChart options={options} series={[value]} type="radialBar" height={240} />
+      {caption && <p className="-mt-2 text-center text-sm text-muted-foreground">{caption}</p>}
     </div>
   );
 }

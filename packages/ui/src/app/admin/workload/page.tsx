@@ -86,9 +86,7 @@ export default function AdminWorkloadPage() {
 
   async function loadCredentials() {
     try {
-      const data = await api.get<{ credentials: WorkloadCredential[] }>(
-        "/workload/credentials",
-      );
+      const data = await api.get<{ credentials: WorkloadCredential[] }>("/workload/credentials");
       setCredentials(data.credentials ?? []);
     } catch {
       setCredentials([]);
@@ -108,10 +106,8 @@ export default function AdminWorkloadPage() {
       await api.post(`/workload/credentials/${id}/revoke`);
       setCredentials((prev) =>
         prev.map((cred) =>
-          cred.id === id
-            ? { ...cred, isRevoked: true, status: "revoked" }
-            : cred,
-        ),
+          cred.id === id ? { ...cred, isRevoked: true, status: "revoked" } : cred
+        )
       );
     } catch {
       // leave row unchanged on failure
@@ -146,7 +142,7 @@ export default function AdminWorkloadPage() {
         setIssueError(
           res.status === 403
             ? "Forbidden — the workload issue key is missing or incorrect."
-            : (data.error ?? "Failed to issue credential"),
+            : (data.error ?? "Failed to issue credential")
         );
         return;
       }
@@ -176,9 +172,7 @@ export default function AdminWorkloadPage() {
       });
       setToken(data);
     } catch (err: unknown) {
-      setTokenError(
-        err instanceof Error ? err.message : "Failed to mint token",
-      );
+      setTokenError(err instanceof Error ? err.message : "Failed to mint token");
     } finally {
       setMinting(false);
     }
@@ -191,13 +185,10 @@ export default function AdminWorkloadPage() {
           Workload &amp; agent identity
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Issue scoped, short-lived credentials to services and AI agents, then
-          exchange them for access tokens via client-credentials. Workload
-          tokens carry a{" "}
-          <code className="rounded bg-muted px-1 py-0.5 text-xs">
-            principal_type: agent
-          </code>{" "}
-          claim to distinguish them from human users.
+          Issue scoped, short-lived credentials to services and AI agents, then exchange them for
+          access tokens via client-credentials. Workload tokens carry a{" "}
+          <code className="rounded bg-muted px-1 py-0.5 text-xs">principal_type: agent</code> claim
+          to distinguish them from human users.
         </p>
       </div>
 
@@ -209,16 +200,11 @@ export default function AdminWorkloadPage() {
         >
           <div className="flex items-center gap-2">
             <KeyRound className="h-4 w-4 text-primary" />
-            <h2 className="font-semibold text-foreground">
-              Issue a credential
-            </h2>
+            <h2 className="font-semibold text-foreground">Issue a credential</h2>
           </div>
 
           <div className="space-y-1.5">
-            <label
-              htmlFor="page-f0"
-              className="text-sm font-medium text-foreground"
-            >
+            <label htmlFor="page-f0" className="text-sm font-medium text-foreground">
               Workload issue key
             </label>
             <input
@@ -231,27 +217,19 @@ export default function AdminWorkloadPage() {
               className="w-full rounded-lg border border-border bg-muted px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none"
             />
             <p className="text-xs text-muted-foreground">
-              Sent as the{" "}
-              <code className="rounded bg-muted px-1">x-workload-key</code>{" "}
-              header. Set{" "}
-              <code className="rounded bg-muted px-1">WORKLOAD_ISSUE_KEY</code>{" "}
-              in the API env.
+              Sent as the <code className="rounded bg-muted px-1">x-workload-key</code> header. Set{" "}
+              <code className="rounded bg-muted px-1">WORKLOAD_ISSUE_KEY</code> in the API env.
             </p>
           </div>
 
           <div className="space-y-1.5">
-            <label
-              htmlFor="page-f1"
-              className="text-sm font-medium text-foreground"
-            >
+            <label htmlFor="page-f1" className="text-sm font-medium text-foreground">
               Workload ID
             </label>
             <input
               id="page-f1"
               value={issueForm.workloadId}
-              onChange={(e) =>
-                setIssueForm({ ...issueForm, workloadId: e.target.value })
-              }
+              onChange={(e) => setIssueForm({ ...issueForm, workloadId: e.target.value })}
               placeholder="billing-sync-job"
               required
               className="w-full rounded-lg border border-border bg-muted px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none"
@@ -259,18 +237,13 @@ export default function AdminWorkloadPage() {
           </div>
 
           <div className="space-y-1.5">
-            <label
-              htmlFor="page-f2"
-              className="text-sm font-medium text-foreground"
-            >
+            <label htmlFor="page-f2" className="text-sm font-medium text-foreground">
               Scopes
             </label>
             <input
               id="page-f2"
               value={issueForm.scopes}
-              onChange={(e) =>
-                setIssueForm({ ...issueForm, scopes: e.target.value })
-              }
+              onChange={(e) => setIssueForm({ ...issueForm, scopes: e.target.value })}
               placeholder="users:read, billing:write"
               className="w-full rounded-lg border border-border bg-muted px-3 py-2 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none"
             />
@@ -278,10 +251,7 @@ export default function AdminWorkloadPage() {
           </div>
 
           <div className="space-y-1.5">
-            <label
-              htmlFor="page-f3"
-              className="text-sm font-medium text-foreground"
-            >
+            <label htmlFor="page-f3" className="text-sm font-medium text-foreground">
               TTL (seconds)
             </label>
             <input
@@ -321,8 +291,7 @@ export default function AdminWorkloadPage() {
           {created && (
             <div className="space-y-2 rounded-lg border border-green-500/30 bg-green-500/10 p-4">
               <p className="text-xs font-medium text-green-400">
-                Credential created — copy the secret now, it won&apos;t be shown
-                again.
+                Credential created — copy the secret now, it won&apos;t be shown again.
               </p>
               <div className="flex items-center justify-between gap-2">
                 <span className="break-all font-mono text-xs text-foreground">
@@ -344,24 +313,17 @@ export default function AdminWorkloadPage() {
         >
           <div className="flex items-center gap-2">
             <Ticket className="h-4 w-4 text-primary" />
-            <h2 className="font-semibold text-foreground">
-              Mint an agent token
-            </h2>
+            <h2 className="font-semibold text-foreground">Mint an agent token</h2>
           </div>
 
           <div className="space-y-1.5">
-            <label
-              htmlFor="page-f4"
-              className="text-sm font-medium text-foreground"
-            >
+            <label htmlFor="page-f4" className="text-sm font-medium text-foreground">
               Workload ID
             </label>
             <input
               id="page-f4"
               value={tokenForm.workloadId}
-              onChange={(e) =>
-                setTokenForm({ ...tokenForm, workloadId: e.target.value })
-              }
+              onChange={(e) => setTokenForm({ ...tokenForm, workloadId: e.target.value })}
               placeholder="billing-sync-job"
               required
               className="w-full rounded-lg border border-border bg-muted px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none"
@@ -369,19 +331,14 @@ export default function AdminWorkloadPage() {
           </div>
 
           <div className="space-y-1.5">
-            <label
-              htmlFor="page-f5"
-              className="text-sm font-medium text-foreground"
-            >
+            <label htmlFor="page-f5" className="text-sm font-medium text-foreground">
               Secret
             </label>
             <input
               id="page-f5"
               type="password"
               value={tokenForm.secret}
-              onChange={(e) =>
-                setTokenForm({ ...tokenForm, secret: e.target.value })
-              }
+              onChange={(e) => setTokenForm({ ...tokenForm, secret: e.target.value })}
               placeholder="workload secret"
               required
               className="w-full rounded-lg border border-border bg-muted px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none"
@@ -389,18 +346,13 @@ export default function AdminWorkloadPage() {
           </div>
 
           <div className="space-y-1.5">
-            <label
-              htmlFor="page-f6"
-              className="text-sm font-medium text-foreground"
-            >
+            <label htmlFor="page-f6" className="text-sm font-medium text-foreground">
               Scopes (optional subset)
             </label>
             <input
               id="page-f6"
               value={tokenForm.scopes}
-              onChange={(e) =>
-                setTokenForm({ ...tokenForm, scopes: e.target.value })
-              }
+              onChange={(e) => setTokenForm({ ...tokenForm, scopes: e.target.value })}
               placeholder="leave blank for all granted scopes"
               className="w-full rounded-lg border border-border bg-muted px-3 py-2 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none"
             />
@@ -411,11 +363,7 @@ export default function AdminWorkloadPage() {
             disabled={minting}
             className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
           >
-            {minting ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Bot className="h-4 w-4" />
-            )}
+            {minting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Bot className="h-4 w-4" />}
             Mint token
           </button>
 
@@ -429,8 +377,7 @@ export default function AdminWorkloadPage() {
             <div className="space-y-2 rounded-lg border border-border bg-background p-4">
               <div className="flex items-center justify-between">
                 <span className="text-xs text-muted-foreground">
-                  {token.tokenType} · expires in {token.expiresIn}s ·{" "}
-                  {token.principalType}
+                  {token.tokenType} · expires in {token.expiresIn}s · {token.principalType}
                 </span>
                 <CopyButton value={token.accessToken} />
               </div>
@@ -474,9 +421,7 @@ export default function AdminWorkloadPage() {
               >
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-mono text-sm text-foreground">
-                      {cred.workloadId}
-                    </span>
+                    <span className="font-mono text-sm text-foreground">{cred.workloadId}</span>
                     <span
                       className={`rounded-full border px-2 py-0.5 text-xs font-medium capitalize ${CRED_STATUS_STYLES[cred.status]}`}
                     >
@@ -497,8 +442,7 @@ export default function AdminWorkloadPage() {
                   )}
                   <p className="mt-1 text-xs text-muted-foreground">
                     Created {new Date(cred.createdAt).toLocaleString()}
-                    {cred.expiresAt &&
-                      ` · expires ${new Date(cred.expiresAt).toLocaleString()}`}
+                    {cred.expiresAt && ` · expires ${new Date(cred.expiresAt).toLocaleString()}`}
                   </p>
                 </div>
                 {cred.status !== "revoked" && (

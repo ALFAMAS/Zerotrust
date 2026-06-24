@@ -77,21 +77,16 @@ function encryptionKey(): Buffer | null {
 function backupEncryptionKey(): Buffer | null {
   const key = encryptionKey();
   if (!key && process.env.BACKUP_REQUIRE_ENCRYPTION === "true") {
-    throw new Error(
-      "BACKUP_REQUIRE_ENCRYPTION=true but BACKUP_ENCRYPTION_KEY is not set",
-    );
+    throw new Error("BACKUP_REQUIRE_ENCRYPTION=true but BACKUP_ENCRYPTION_KEY is not set");
   }
 
   return key;
 }
 
-async function encryptBackup(
-  file: string,
-  key: Buffer | null,
-): Promise<string | null> {
+async function encryptBackup(file: string, key: Buffer | null): Promise<string | null> {
   if (!key) {
     logger.warn(
-      "Database backup encryption disabled; set BACKUP_ENCRYPTION_KEY to encrypt backups at rest",
+      "Database backup encryption disabled; set BACKUP_ENCRYPTION_KEY to encrypt backups at rest"
     );
     return null;
   }
@@ -118,7 +113,7 @@ async function encryptBackup(
       iv: iv.toString("base64"),
       tag: tag.toString("base64"),
     })}\n`,
-    { flag: "wx" },
+    { flag: "wx" }
   );
   await unlink(file);
   logger.info("Database backup encrypted", { file: encryptedFile });
@@ -128,17 +123,11 @@ async function encryptBackup(
 function isBackupArtifact(name: string): boolean {
   return (
     name.startsWith("zerotrust-") &&
-    (name.endsWith(".dump") ||
-      name.endsWith(".dump.enc") ||
-      name.endsWith(".dump.enc.meta"))
+    (name.endsWith(".dump") || name.endsWith(".dump.enc") || name.endsWith(".dump.enc.meta"))
   );
 }
 
-function run(
-  cmd: string,
-  args: string[],
-  env?: NodeJS.ProcessEnv,
-): Promise<number> {
+function run(cmd: string, args: string[], env?: NodeJS.ProcessEnv): Promise<number> {
   return new Promise((resolve, reject) => {
     const child = spawn(cmd, args, {
       env: { ...process.env, ...env },
@@ -150,9 +139,7 @@ function run(
     child.stderr?.on("data", (d) => (stderr += d.toString()));
     child.on("error", reject);
     child.on("close", (code) =>
-      code === 0
-        ? resolve(0)
-        : reject(new Error(`${cmd} exited ${code}: ${stderr.slice(0, 500)}`)),
+      code === 0 ? resolve(0) : reject(new Error(`${cmd} exited ${code}: ${stderr.slice(0, 500)}`))
     );
   });
 }
@@ -222,8 +209,7 @@ export async function runBackup(): Promise<BackupResult> {
   }
 
   const pruned = await pruneOldBackups();
-  if (pruned.length)
-    logger.info("Pruned old local backups", { count: pruned.length });
+  if (pruned.length) logger.info("Pruned old local backups", { count: pruned.length });
 
   // Optional S3-compatible upload + S3-side retention.
   let uploaded = false;
@@ -241,10 +227,7 @@ export async function runBackup(): Promise<BackupResult> {
         logger.info("S3 retention sweep complete", { count: s3Pruned.length });
       }
     } catch (err) {
-      logger.error(
-        "S3 upload/prune failed (backup kept locally)",
-        err as Error,
-      );
+      logger.error("S3 upload/prune failed (backup kept locally)", err as Error);
     }
   }
 
@@ -257,9 +240,7 @@ let backupInterval: ReturnType<typeof setInterval> | null = null;
 
 export function startBackupScheduler(intervalHours = 24): void {
   if (process.env.BACKUP_ENABLED !== "true") {
-    logger.info(
-      "DB backup scheduler disabled (set BACKUP_ENABLED=true to enable)",
-    );
+    logger.info("DB backup scheduler disabled (set BACKUP_ENABLED=true to enable)");
     return;
   }
   if (backupInterval) clearInterval(backupInterval);
@@ -267,7 +248,7 @@ export function startBackupScheduler(intervalHours = 24): void {
     () => {
       void runBackup();
     },
-    intervalHours * 60 * 60 * 1000,
+    intervalHours * 60 * 60 * 1000
   );
   if (backupInterval.unref) backupInterval.unref();
   logger.info("DB backup scheduler started", { intervalHours });

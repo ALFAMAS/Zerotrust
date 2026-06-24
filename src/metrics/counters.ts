@@ -6,10 +6,9 @@ function existingMetric<T extends string, M>(name: string): M | undefined {
 }
 
 export const authAttemptsTotal =
-  existingMetric<
-    "action" | "success" | "tenant",
-    Counter<"action" | "success" | "tenant">
-  >("zerotrust_auth_attempts_total") ??
+  existingMetric<"action" | "success" | "tenant", Counter<"action" | "success" | "tenant">>(
+    "zerotrust_auth_attempts_total"
+  ) ??
   new Counter({
     name: "zerotrust_auth_attempts_total",
     help: "Total number of authentication attempts",
@@ -18,10 +17,9 @@ export const authAttemptsTotal =
   });
 
 export const mfaEventsTotal =
-  existingMetric<
-    "method" | "event" | "tenant",
-    Counter<"method" | "event" | "tenant">
-  >("zerotrust_mfa_events_total") ??
+  existingMetric<"method" | "event" | "tenant", Counter<"method" | "event" | "tenant">>(
+    "zerotrust_mfa_events_total"
+  ) ??
   new Counter({
     name: "zerotrust_mfa_events_total",
     help: "Total number of MFA events",
@@ -31,7 +29,7 @@ export const mfaEventsTotal =
 
 export const sessionEventsTotal =
   existingMetric<"event" | "tenant", Counter<"event" | "tenant">>(
-    "zerotrust_session_events_total",
+    "zerotrust_session_events_total"
   ) ??
   new Counter({
     name: "zerotrust_session_events_total",
@@ -42,7 +40,7 @@ export const sessionEventsTotal =
 
 export const rateLimitHitsTotal =
   existingMetric<"endpoint" | "tenant", Counter<"endpoint" | "tenant">>(
-    "zerotrust_rate_limit_hits_total",
+    "zerotrust_rate_limit_hits_total"
   ) ??
   new Counter({
     name: "zerotrust_rate_limit_hits_total",
@@ -52,10 +50,9 @@ export const rateLimitHitsTotal =
   });
 
 export const anomalyEventsTotal =
-  existingMetric<
-    "type" | "severity" | "tenant",
-    Counter<"type" | "severity" | "tenant">
-  >("zerotrust_anomaly_events_total") ??
+  existingMetric<"type" | "severity" | "tenant", Counter<"type" | "severity" | "tenant">>(
+    "zerotrust_anomaly_events_total"
+  ) ??
   new Counter({
     name: "zerotrust_anomaly_events_total",
     help: "Total number of anomaly detection events",
@@ -65,7 +62,7 @@ export const anomalyEventsTotal =
 
 export const webhookDeliveriesTotal =
   existingMetric<"event_type" | "status", Counter<"event_type" | "status">>(
-    "zerotrust_webhook_deliveries_total",
+    "zerotrust_webhook_deliveries_total"
   ) ??
   new Counter({
     name: "zerotrust_webhook_deliveries_total",
@@ -75,9 +72,7 @@ export const webhookDeliveriesTotal =
   });
 
 export const authDurationSeconds =
-  existingMetric<"action", Histogram<"action">>(
-    "zerotrust_auth_duration_seconds",
-  ) ??
+  existingMetric<"action", Histogram<"action">>("zerotrust_auth_duration_seconds") ??
   new Histogram({
     name: "zerotrust_auth_duration_seconds",
     help: "Duration of authentication operations in seconds",
@@ -87,10 +82,9 @@ export const authDurationSeconds =
   });
 
 export const requestDurationSeconds =
-  existingMetric<
-    "method" | "route" | "status_code",
-    Histogram<"method" | "route" | "status_code">
-  >("zerotrust_request_duration_seconds") ??
+  existingMetric<"method" | "route" | "status_code", Histogram<"method" | "route" | "status_code">>(
+    "zerotrust_request_duration_seconds"
+  ) ??
   new Histogram({
     name: "zerotrust_request_duration_seconds",
     help: "Duration of HTTP requests in seconds",

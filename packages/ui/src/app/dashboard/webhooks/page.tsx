@@ -94,9 +94,7 @@ export default function WebhooksPage() {
     setDeliveriesFor(id);
     setDeliveries(null);
     try {
-      const res = await api.get<{ deliveries: WebhookDelivery[] }>(
-        `/webhooks/${id}/deliveries`,
-      );
+      const res = await api.get<{ deliveries: WebhookDelivery[] }>(`/webhooks/${id}/deliveries`);
       setDeliveries(res.deliveries);
     } catch {
       setDeliveries([]);
@@ -115,9 +113,7 @@ export default function WebhooksPage() {
   function toggleEvent(event: string) {
     setForm((f) => ({
       ...f,
-      events: f.events.includes(event)
-        ? f.events.filter((e) => e !== event)
-        : [...f.events, event],
+      events: f.events.includes(event) ? f.events.filter((e) => e !== event) : [...f.events, event],
     }));
   }
 
@@ -129,9 +125,9 @@ export default function WebhooksPage() {
             Webhooks
           </h1>
           <p className="text-muted-foreground text-sm">
-            Receive signed HTTP callbacks when events happen in your account.
-            Payloads are signed with HMAC-SHA256 in the{" "}
-            <code className="text-primary">X-zerotrust-Signature</code> header.
+            Receive signed HTTP callbacks when events happen in your account. Payloads are signed
+            with HMAC-SHA256 in the <code className="text-primary">X-zerotrust-Signature</code>{" "}
+            header.
           </p>
         </div>
         <button
@@ -167,22 +163,14 @@ export default function WebhooksPage() {
               className="bg-card border border-border rounded-xl p-5 flex items-center justify-between gap-4"
             >
               <div className="min-w-0">
-                <p className="text-sm font-medium text-foreground truncate">
-                  {ep.url}
-                </p>
+                <p className="text-sm font-medium text-foreground truncate">{ep.url}</p>
                 <p className="text-xs text-muted-foreground mt-1">
                   {ep.events.length} event{ep.events.length === 1 ? "" : "s"} ·{" "}
-                  <span
-                    className={
-                      ep.active ? "text-green-400" : "text-muted-foreground"
-                    }
-                  >
+                  <span className={ep.active ? "text-green-400" : "text-muted-foreground"}>
                     {ep.active ? "Active" : "Disabled"}
                   </span>
                   {pingResult[ep.id] && (
-                    <span className="ml-2 text-muted-foreground">
-                      {pingResult[ep.id]}
-                    </span>
+                    <span className="ml-2 text-muted-foreground">{pingResult[ep.id]}</span>
                   )}
                 </p>
               </div>
@@ -222,16 +210,10 @@ export default function WebhooksPage() {
       )}
 
       {createOpen && (
-        <Modal
-          title="Add webhook endpoint"
-          onClose={() => setCreateOpen(false)}
-        >
+        <Modal title="Add webhook endpoint" onClose={() => setCreateOpen(false)}>
           <div className="space-y-4">
             <div>
-              <label
-                htmlFor="page-f0"
-                className="block text-sm text-foreground/80 mb-1.5"
-              >
+              <label htmlFor="page-f0" className="block text-sm text-foreground/80 mb-1.5">
                 Endpoint URL
               </label>
               <input
@@ -243,10 +225,7 @@ export default function WebhooksPage() {
               />
             </div>
             <div>
-              <label
-                htmlFor="page-f1"
-                className="block text-sm text-foreground/80 mb-1.5"
-              >
+              <label htmlFor="page-f1" className="block text-sm text-foreground/80 mb-1.5">
                 Signing secret
               </label>
               <input
@@ -261,15 +240,10 @@ export default function WebhooksPage() {
               </p>
             </div>
             <div>
-              <span className="block text-sm text-foreground/80 mb-1.5">
-                Events
-              </span>
+              <span className="block text-sm text-foreground/80 mb-1.5">Events</span>
               <div className="grid grid-cols-2 gap-2">
                 {EVENT_OPTIONS.map((ev) => (
-                  <label
-                    key={ev}
-                    className="flex items-center gap-2 text-xs text-foreground/80"
-                  >
+                  <label key={ev} className="flex items-center gap-2 text-xs text-foreground/80">
                     <input
                       type="checkbox"
                       checked={form.events.includes(ev)}
@@ -326,19 +300,13 @@ export default function WebhooksPage() {
                       <td className="py-1.5 pr-3 font-mono">{d.event}</td>
                       <td className="py-1.5 pr-3">
                         <span
-                          className={
-                            d.status === "delivered"
-                              ? "text-green-400"
-                              : "text-red-400"
-                          }
+                          className={d.status === "delivered" ? "text-green-400" : "text-red-400"}
                         >
                           {d.status}
                         </span>
                       </td>
                       <td className="py-1.5 pr-3">#{d.attempt}</td>
-                      <td className="py-1.5 pr-3">
-                        {d.responseStatus ?? d.error ?? "—"}
-                      </td>
+                      <td className="py-1.5 pr-3">{d.responseStatus ?? d.error ?? "—"}</td>
                       <td className="py-1.5 whitespace-nowrap">
                         {new Date(d.recordedAt).toLocaleString()}
                       </td>

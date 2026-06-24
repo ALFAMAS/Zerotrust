@@ -71,8 +71,7 @@ export default function ChangelogPage() {
 
                 <div className="space-y-4">
                   {entry.sections.map((section, si) => {
-                    const style =
-                      TYPE_STYLES[section.type] ?? TYPE_STYLES.changed;
+                    const style = TYPE_STYLES[section.type] ?? TYPE_STYLES.changed;
                     return (
                       <div key={si}>
                         <span

@@ -32,9 +32,7 @@ export async function sendEmailOTP(to: string, subject: string, body: string) {
   const t = getTransporter();
   try {
     const info = await t.sendMail({
-      from:
-        process.env.SMTP_FROM ||
-        `no-reply@${process.env.AUTH_DOMAIN || "zerotrust.local"}`,
+      from: process.env.SMTP_FROM || `no-reply@${process.env.AUTH_DOMAIN || "zerotrust.local"}`,
       to,
       subject,
       text: body,

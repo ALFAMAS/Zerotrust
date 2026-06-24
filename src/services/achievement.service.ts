@@ -1,7 +1,7 @@
 import { and, eq } from "drizzle-orm";
 import { getDb } from "../db";
-import { isUnavailableStorageError } from "../db/storageFallback";
 import { achievementsTable } from "../db/schema";
+import { isUnavailableStorageError } from "../db/storageFallback";
 import { getLogger } from "../logger";
 
 const logger = getLogger("achievement-service");

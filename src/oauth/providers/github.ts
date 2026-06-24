@@ -22,7 +22,7 @@ export async function exchangeCode(
   clientId: string,
   clientSecret: string,
   redirectUri: string,
-  _codeVerifier?: string,
+  _codeVerifier?: string
 ): Promise<{ tokens: unknown; profile: GitHubProfile | null }> {
   const params = new URLSearchParams();
   params.set("code", code);
@@ -59,9 +59,7 @@ export async function exchangeCode(
     headers: authHeaders,
   });
   if (!profileRes.ok) {
-    throw new Error(
-      `Failed to fetch GitHub user profile: ${profileRes.status}`,
-    );
+    throw new Error(`Failed to fetch GitHub user profile: ${profileRes.status}`);
   }
   const raw = (await profileRes.json()) as {
     id: number;
@@ -83,9 +81,7 @@ export async function exchangeCode(
     });
     if (emailsRes.ok) {
       const emails = (await emailsRes.json()) as GitHubEmail[];
-      const chosen =
-        emails.find((e) => e.primary && e.verified) ??
-        emails.find((e) => e.verified);
+      const chosen = emails.find((e) => e.primary && e.verified) ?? emails.find((e) => e.verified);
       if (chosen) {
         email = chosen.email;
         emailVerified = chosen.verified;

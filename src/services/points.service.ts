@@ -15,7 +15,7 @@ function isMissingPointsStorageError(error: unknown): boolean {
     if (
       /relation\s+["']?points_ledger["']?\s+does not exist/i.test(message) ||
       /column\s+["']?(balance|amount|reason|description|metadata|created_at)["']?\s+does not exist/i.test(
-        message,
+        message
       )
     ) {
       return true;

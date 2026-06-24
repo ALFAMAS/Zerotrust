@@ -10,14 +10,7 @@ import type { AuditLog } from "../shared/types";
 
 const logger = getLogger("audit-pipeline");
 
-const SENSITIVE_FIELDS = new Set([
-  "code",
-  "token",
-  "secret",
-  "password",
-  "otp",
-  "pin",
-]);
+const SENSITIVE_FIELDS = new Set(["code", "token", "secret", "password", "otp", "pin"]);
 
 interface ESBulkItem {
   index: { _index: string; _id?: string };
@@ -27,9 +20,7 @@ let flushInterval: ReturnType<typeof setInterval> | null = null;
 const pendingDocs: AuditLog[] = [];
 let esClient: any = null;
 
-function maskSensitiveFields(
-  doc: Record<string, unknown>,
-): Record<string, unknown> {
+function maskSensitiveFields(doc: Record<string, unknown>): Record<string, unknown> {
   const result: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(doc)) {
     const lowerKey = key.toLowerCase();
@@ -64,9 +55,7 @@ async function buildEsClient() {
 
       for (const doc of docs) {
         body.push({ index: { _index: index } });
-        const masked = maskSensitiveFields(
-          doc as unknown as Record<string, unknown>,
-        );
+        const masked = maskSensitiveFields(doc as unknown as Record<string, unknown>);
         body.push(masked);
       }
 
@@ -80,9 +69,7 @@ async function buildEsClient() {
 
       if (!response.ok) {
         const text = await response.text();
-        throw new Error(
-          `ES bulk error ${response.status}: ${text.slice(0, 200)}`,
-        );
+        throw new Error(`ES bulk error ${response.status}: ${text.slice(0, 200)}`);
       }
 
       return response.json();

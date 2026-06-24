@@ -111,11 +111,7 @@ class Logger {
   /**
    * Core logging function
    */
-  private log(
-    level: LogLevel,
-    message: string,
-    data?: Record<string, unknown>,
-  ): void {
+  private log(level: LogLevel, message: string, data?: Record<string, unknown>): void {
     if (LOG_LEVELS[level] < this.minLogLevel) {
       return; // Skip logs below configured level
     }
@@ -134,15 +130,11 @@ class Logger {
     } else {
       const levelColor = this.getLevelColor(level);
       const timestamp = String(logEntry.timestamp);
-      const correlationId = logEntry.correlationId
-        ? ` [${String(logEntry.correlationId)}]`
-        : "";
-      const userId = logEntry.userId
-        ? ` [user:${String(logEntry.userId)}]`
-        : "";
+      const correlationId = logEntry.correlationId ? ` [${String(logEntry.correlationId)}]` : "";
+      const userId = logEntry.userId ? ` [user:${String(logEntry.userId)}]` : "";
       const reset = "\x1b[0m";
       process.stdout.write(
-        `${timestamp} ${levelColor}${level.toUpperCase()}${reset}${correlationId}${userId} ${message}\n`,
+        `${timestamp} ${levelColor}${level.toUpperCase()}${reset}${correlationId}${userId} ${message}\n`
       );
     }
 
@@ -157,9 +149,7 @@ class Logger {
   /**
    * Stream log to Elasticsearch
    */
-  private async streamToElasticsearch(
-    logEntry: Record<string, unknown>,
-  ): Promise<void> {
+  private async streamToElasticsearch(logEntry: Record<string, unknown>): Promise<void> {
     // Streaming is best-effort: when no Elasticsearch client is configured we
     // simply skip (logs still go to the console/file transports).
     if (!this.elasticsearchClient) {
@@ -220,13 +210,7 @@ export function initializeLogger(config?: zerotrustConfig): Logger {
     const port = cfg.elasticsearch.port;
     const base = `http://${host}:${port}`;
     const esClient = {
-      index: async ({
-        index,
-        document,
-      }: {
-        index: string;
-        document: Record<string, unknown>;
-      }) => {
+      index: async ({ index, document }: { index: string; document: Record<string, unknown> }) => {
         try {
           const url = `${base}/${index}/_doc`;
           await fetch(url, {
@@ -260,10 +244,7 @@ export function getLogger(module?: string): Logger {
 /**
  * Create a child logger with additional context
  */
-export function createChildLogger(
-  module: string,
-  context?: LogContext,
-): Logger {
+export function createChildLogger(module: string, context?: LogContext): Logger {
   const logger = new Logger(getConfig(), module);
   if (context) {
     for (const [key, value] of Object.entries(context)) {
@@ -284,7 +265,7 @@ export async function auditLog(
   success: boolean,
   details?: Record<string, unknown>,
   error?: Error,
-  principal?: AuditPrincipal,
+  principal?: AuditPrincipal
 ): Promise<void> {
   const logger = getLogger("audit");
 

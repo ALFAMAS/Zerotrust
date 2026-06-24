@@ -13,10 +13,7 @@ app.use("*", authMiddleware);
 app.use("*", async (c, next) => {
   const user = c.get("user");
   if (!user) {
-    return c.json(
-      { error: "UNAUTHORIZED", message: "Authentication required" },
-      401,
-    );
+    return c.json({ error: "UNAUTHORIZED", message: "Authentication required" }, 401);
   }
   if (!user.roles?.includes("admin")) {
     return c.json({ error: "FORBIDDEN", message: "Admin role required" }, 403);

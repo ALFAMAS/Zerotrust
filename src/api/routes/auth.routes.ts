@@ -34,10 +34,7 @@ import {
 import { getProviderAdapter } from "../../oauth/provider.factory";
 import { recordAndRespond } from "../../services/accountTakeover.service";
 import { validateSignupEmail } from "../../services/disposableEmail.service";
-import {
-  sendVerificationEmail,
-  sendWelcomeEmail,
-} from "../../services/email.service";
+import { sendVerificationEmail, sendWelcomeEmail } from "../../services/email.service";
 import { FingerprintService } from "../../services/fingerprint.service";
 import { notifyIfNewDevice } from "../../services/loginNotification.service";
 import {
@@ -54,11 +51,7 @@ import {
 } from "../../services/proofOfWork.service";
 import { TokenService } from "../../services/token.service";
 import { getClientIp } from "../../shared/clientIp";
-import {
-  localeFromAcceptLanguage,
-  normalizeLocale,
-  SUPPORTED_LOCALES,
-} from "../../shared/locale";
+import { localeFromAcceptLanguage, normalizeLocale, SUPPORTED_LOCALES } from "../../shared/locale";
 import type { HonoEnv } from "../../shared/types";
 
 const router = new Hono<HonoEnv>();
@@ -66,9 +59,7 @@ const logger = getLogger("auth-routes");
 
 const OAUTH_STATE_TTL_SECS = 300; // 5 minutes
 
-async function getAndVerifyOAuthState(
-  state?: string,
-): Promise<{
+async function getAndVerifyOAuthState(state?: string): Promise<{
   ok: boolean;
   codeChallenge: string | null;
   codeVerifier: string | null;
@@ -126,10 +117,7 @@ const oauthStateCleanupInterval = setInterval(() => {
 // Allow the process to exit even if the timer is still registered.
 if (oauthStateCleanupInterval.unref) oauthStateCleanupInterval.unref();
 
-async function generateOAuthState(
-  codeChallenge?: string,
-  codeVerifier?: string,
-): Promise<string> {
+async function generateOAuthState(codeChallenge?: string, codeVerifier?: string): Promise<string> {
   const state = nanoid();
   const store = JSON.stringify({
     ts: Date.now(),
@@ -150,9 +138,7 @@ async function generateOAuthState(
   // Fallback: in-memory store with bounded size. If the cap is hit, evict the
   // oldest 25% of entries to make room (amortised cost, prevents OOM).
   if (oauthStateStore.size >= OAUTH_STATE_MAX_SIZE) {
-    const entries = [...oauthStateStore.entries()].sort(
-      (a, b) => a[1].ts - b[1].ts,
-    );
+    const entries = [...oauthStateStore.entries()].sort((a, b) => a[1].ts - b[1].ts);
     const evictCount = Math.floor(OAUTH_STATE_MAX_SIZE * 0.25);
     for (let i = 0; i < evictCount; i++) oauthStateStore.delete(entries[i][0]);
   }
@@ -163,10 +149,7 @@ let tokenServiceInstance: TokenService | null = null;
 async function getTokenService() {
   if (tokenServiceInstance) return tokenServiceInstance;
   const cfg = getConfig();
-  tokenServiceInstance = new TokenService(
-    cfg.security.tokenSecretHex,
-    cfg.session,
-  );
+  tokenServiceInstance = new TokenService(cfg.security.tokenSecretHex, cfg.session);
   await tokenServiceInstance.init();
   return tokenServiceInstance;
 }
@@ -191,10 +174,7 @@ function userRequiresMfa(user: { mfa?: unknown }): boolean {
 }
 
 /** Mint the short-lived token that ties the pending login to the verified user. */
-async function issueMfaChallengeToken(user: {
-  id: string;
-  email: string;
-}): Promise<string> {
+async function issueMfaChallengeToken(user: { id: string; email: string }): Promise<string> {
   const tokenSvc = await getTokenService();
   return tokenSvc.signAccessToken(
     {
@@ -204,7 +184,7 @@ async function issueMfaChallengeToken(user: {
       aud: MFA_CHALLENGE_AUD,
       scope: [MFA_CHALLENGE_SCOPE],
     },
-    MFA_CHALLENGE_TTL_SECS,
+    MFA_CHALLENGE_TTL_SECS
   );
 }
 
@@ -232,7 +212,7 @@ async function verifyTotpCode(secret: string, code: string): Promise<boolean> {
  */
 async function issueAuthenticatedSession(
   c: any,
-  user: { id: string; email: string; displayName?: string | null },
+  user: { id: string; email: string; displayName?: string | null }
 ) {
   const cfg = getConfig();
   const tokenSvc = await getTokenService();
@@ -290,17 +270,13 @@ async function issueAuthenticatedSession(
 
   await enforceMaxConcurrentDevices(user.id);
 
-  await db
-    .update(usersTable)
-    .set({ lastLoginAt: new Date() })
-    .where(eq(usersTable.id, user.id));
+  await db.update(usersTable).set({ lastLoginAt: new Date() }).where(eq(usersTable.id, user.id));
 
   // Streak tracking + achievement checks — fire and forget, never blocks login.
   void (async () => {
     try {
       const { recordLogin } = await import("../../services/streak.service.js");
-      const { unlockAchievement } =
-        await import("../../services/achievement.service.js");
+      const { unlockAchievement } = await import("../../services/achievement.service.js");
       const { awardPoints } = await import("../../services/points.service.js");
 
       const streak = await recordLogin(user.id);
@@ -371,12 +347,7 @@ async function issueVerification(user: {
   const code = generateNumericCode(6);
   await db
     .delete(otpsTable)
-    .where(
-      and(
-        eq(otpsTable.userId, user.id),
-        eq(otpsTable.type, "email_verification"),
-      ),
-    );
+    .where(and(eq(otpsTable.userId, user.id), eq(otpsTable.type, "email_verification")));
   await db.insert(otpsTable).values({
     userId: user.id,
     code,
@@ -407,140 +378,121 @@ router.get("/pow/challenge", rateLimit({ points: 30, windowSecs: 60 }), (c) => {
 });
 
 // POST /register
-router.post(
-  "/register",
-  rateLimit({ points: 10, windowSecs: 60 }),
-  async (c) => {
-    try {
-      const {
-        email,
-        password,
-        displayName,
-        locale: bodyLocale,
-        powChallenge,
-        powSolution,
-      } = await c.req.json();
-      if (!email || !password) {
+router.post("/register", rateLimit({ points: 10, windowSecs: 60 }), async (c) => {
+  try {
+    const {
+      email,
+      password,
+      displayName,
+      locale: bodyLocale,
+      powChallenge,
+      powSolution,
+    } = await c.req.json();
+    if (!email || !password) {
+      return c.json({ error: "INVALID_REQUEST", message: "email and password required" }, 400);
+    }
+
+    // Bot/abuse mitigation: require a valid proof-of-work when enabled.
+    if (isSignupPowEnabled()) {
+      const pow = verifyPowSolution(powChallenge ?? "", powSolution ?? "");
+      if (!pow.ok) {
         return c.json(
-          { error: "INVALID_REQUEST", message: "email and password required" },
-          400,
-        );
-      }
-
-      // Bot/abuse mitigation: require a valid proof-of-work when enabled.
-      if (isSignupPowEnabled()) {
-        const pow = verifyPowSolution(powChallenge ?? "", powSolution ?? "");
-        if (!pow.ok) {
-          return c.json(
-            {
-              error: "POW_REQUIRED",
-              message: "Proof-of-work challenge failed",
-              reason: pow.reason,
-            },
-            400,
-          );
-        }
-      }
-
-      const normalizedEmail = String(email).toLowerCase().trim();
-      const emailValidation = await validateSignupEmail(normalizedEmail);
-      if (!emailValidation.allowed) {
-        return c.json(
-          { error: emailValidation.code, message: emailValidation.message },
-          emailValidation.code === "INVALID_EMAIL" ? 400 : 422,
-        );
-      }
-
-      const db = getDb();
-      const existing = await db
-        .select()
-        .from(usersTable)
-        .where(eq(usersTable.email, normalizedEmail))
-        .limit(1);
-      if (existing.length > 0) {
-        return c.json(
-          { error: "USER_ALREADY_EXISTS", message: "User already exists" },
-          409,
-        );
-      }
-
-      // HaveIBeenPwned breach check (k-anonymity — fails open on network errors)
-      const breachMessage = await rejectIfBreached(password);
-      if (breachMessage) {
-        return c.json(
-          { error: "PASSWORD_BREACHED", message: breachMessage },
-          400,
-        );
-      }
-
-      const cfg = getConfig();
-      const passwordHash = await bcrypt.hash(
-        password,
-        cfg.security.bcryptRounds,
-      );
-
-      // Preferred locale: explicit body value wins, else negotiate Accept-Language.
-      const locale = bodyLocale
-        ? normalizeLocale(bodyLocale)
-        : localeFromAcceptLanguage(c.req.header("accept-language"));
-
-      const [user] = await db
-        .insert(usersTable)
-        .values({
-          email: normalizedEmail,
-          passwordHash,
-          displayName: displayName || normalizedEmail.split("@")[0],
-          locale,
-          roles: ["user"],
-          attributes: {},
-          mfa: {
-            totp: { enabled: false, backupCodes: [] },
-            webauthn: { enabled: false },
+          {
+            error: "POW_REQUIRED",
+            message: "Proof-of-work challenge failed",
+            reason: pow.reason,
           },
-          passkeys: [],
-          oauthProviders: [],
-          status: "active",
-          sessionConfig: {
-            maxDevices: cfg.session.maxConcurrentDevices,
-            allowedCountries: cfg.geofencing.allowedCountries,
-            allowedIpRanges: cfg.geofencing.allowedIpRanges,
-            scheduleRestriction: {
-              enabled: false,
-              timezone: "UTC",
-              allowedDays: [],
-              allowedHoursStart: 0,
-              allowedHoursEnd: 23,
-            },
-          },
-        })
-        .returning();
-
-      const loginUrl = `${process.env.APP_URL ?? "http://localhost:3000"}/login`;
-      void sendWelcomeEmail(user.email, {
-        name: user.displayName ?? user.email,
-        loginUrl,
-        locale,
-      });
-
-      // Kick off email verification (code + magic link). Non-fatal on failure.
-      try {
-        await issueVerification(user);
-      } catch (e) {
-        logger.warn("Failed to issue email verification on register", {
-          error: String(e),
-        });
+          400
+        );
       }
+    }
 
-      return c.json({ success: true, userId: user.id }, 201);
-    } catch (err) {
-      logger.error("Registration error", err as Error);
+    const normalizedEmail = String(email).toLowerCase().trim();
+    const emailValidation = await validateSignupEmail(normalizedEmail);
+    if (!emailValidation.allowed) {
       return c.json(
-        { error: "INTERNAL_ERROR", message: "Registration failed" },
-        500,
+        { error: emailValidation.code, message: emailValidation.message },
+        emailValidation.code === "INVALID_EMAIL" ? 400 : 422
       );
     }
-  },
-);
+
+    const db = getDb();
+    const existing = await db
+      .select()
+      .from(usersTable)
+      .where(eq(usersTable.email, normalizedEmail))
+      .limit(1);
+    if (existing.length > 0) {
+      return c.json({ error: "USER_ALREADY_EXISTS", message: "User already exists" }, 409);
+    }
+
+    // HaveIBeenPwned breach check (k-anonymity — fails open on network errors)
+    const breachMessage = await rejectIfBreached(password);
+    if (breachMessage) {
+      return c.json({ error: "PASSWORD_BREACHED", message: breachMessage }, 400);
+    }
+
+    const cfg = getConfig();
+    const passwordHash = await bcrypt.hash(password, cfg.security.bcryptRounds);
+
+    // Preferred locale: explicit body value wins, else negotiate Accept-Language.
+    const locale = bodyLocale
+      ? normalizeLocale(bodyLocale)
+      : localeFromAcceptLanguage(c.req.header("accept-language"));
+
+    const [user] = await db
+      .insert(usersTable)
+      .values({
+        email: normalizedEmail,
+        passwordHash,
+        displayName: displayName || normalizedEmail.split("@")[0],
+        locale,
+        roles: ["user"],
+        attributes: {},
+        mfa: {
+          totp: { enabled: false, backupCodes: [] },
+          webauthn: { enabled: false },
+        },
+        passkeys: [],
+        oauthProviders: [],
+        status: "active",
+        sessionConfig: {
+          maxDevices: cfg.session.maxConcurrentDevices,
+          allowedCountries: cfg.geofencing.allowedCountries,
+          allowedIpRanges: cfg.geofencing.allowedIpRanges,
+          scheduleRestriction: {
+            enabled: false,
+            timezone: "UTC",
+            allowedDays: [],
+            allowedHoursStart: 0,
+            allowedHoursEnd: 23,
+          },
+        },
+      })
+      .returning();
+
+    const loginUrl = `${process.env.APP_URL ?? "http://localhost:3000"}/login`;
+    void sendWelcomeEmail(user.email, {
+      name: user.displayName ?? user.email,
+      loginUrl,
+      locale,
+    });
+
+    // Kick off email verification (code + magic link). Non-fatal on failure.
+    try {
+      await issueVerification(user);
+    } catch (e) {
+      logger.warn("Failed to issue email verification on register", {
+        error: String(e),
+      });
+    }
+
+    return c.json({ success: true, userId: user.id }, 201);
+  } catch (err) {
+    logger.error("Registration error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR", message: "Registration failed" }, 500);
+  }
+});
 
 // POST /verify-email — confirm ownership via emailed code (requires auth)
 //
@@ -555,10 +507,7 @@ router.post(
     try {
       const { code } = await c.req.json().catch(() => ({}));
       if (!code) {
-        return c.json(
-          { error: "INVALID_REQUEST", message: "code required" },
-          400,
-        );
+        return c.json({ error: "INVALID_REQUEST", message: "code required" }, 400);
       }
 
       const authUser = c.get("user");
@@ -569,10 +518,7 @@ router.post(
         .where(eq(usersTable.id, authUser.id))
         .limit(1);
       if (!user) {
-        return c.json(
-          { error: "USER_NOT_FOUND", message: "User not found" },
-          404,
-        );
+        return c.json({ error: "USER_NOT_FOUND", message: "User not found" }, 404);
       }
       if (user.emailVerifiedAt) {
         return c.json({ success: true, alreadyVerified: true });
@@ -586,15 +532,12 @@ router.post(
             eq(otpsTable.userId, user.id),
             eq(otpsTable.type, "email_verification"),
             eq(otpsTable.code, String(code).trim()),
-            gt(otpsTable.expiresAt, new Date()),
-          ),
+            gt(otpsTable.expiresAt, new Date())
+          )
         )
         .limit(1);
       if (!otp) {
-        return c.json(
-          { error: "INVALID_CODE", message: "Invalid or expired code" },
-          400,
-        );
+        return c.json({ error: "INVALID_CODE", message: "Invalid or expired code" }, 400);
       }
 
       await db
@@ -603,22 +546,14 @@ router.post(
         .where(eq(usersTable.id, user.id));
       await db
         .delete(otpsTable)
-        .where(
-          and(
-            eq(otpsTable.userId, user.id),
-            eq(otpsTable.type, "email_verification"),
-          ),
-        );
+        .where(and(eq(otpsTable.userId, user.id), eq(otpsTable.type, "email_verification")));
 
       return c.json({ success: true });
     } catch (err) {
       logger.error("Email verification error", err as Error);
-      return c.json(
-        { error: "INTERNAL_ERROR", message: "Verification failed" },
-        500,
-      );
+      return c.json({ error: "INTERNAL_ERROR", message: "Verification failed" }, 500);
     }
-  },
+  }
 );
 
 // POST /verify-email/resend — re-issue a verification email for the current user
@@ -641,8 +576,7 @@ router.post(
         .where(eq(usersTable.id, user.id))
         .limit(1);
       if (!row) return c.json({ error: "USER_NOT_FOUND" }, 404);
-      if (row.emailVerifiedAt)
-        return c.json({ success: true, alreadyVerified: true });
+      if (row.emailVerifiedAt) return c.json({ success: true, alreadyVerified: true });
 
       await issueVerification(row);
       return c.json({ success: true });
@@ -650,7 +584,7 @@ router.post(
       logger.error("Resend verification error", err as Error);
       return c.json({ error: "INTERNAL_ERROR" }, 500);
     }
-  },
+  }
 );
 
 // POST /login
@@ -658,10 +592,7 @@ router.post("/login", rateLimit({ points: 20, windowSecs: 60 }), async (c) => {
   try {
     const { email, password } = await c.req.json();
     if (!email || !password) {
-      return c.json(
-        { error: "INVALID_REQUEST", message: "email and password required" },
-        400,
-      );
+      return c.json({ error: "INVALID_REQUEST", message: "email and password required" }, 400);
     }
 
     // Credential-stuffing defense: block a source IP that has been failing logins
@@ -669,16 +600,14 @@ router.post("/login", rateLimit({ points: 20, windowSecs: 60 }), async (c) => {
     const clientIp = getClientIp(c);
     const ipBlock = isIpBlocked(clientIp);
     if (ipBlock.blocked) {
-      if (ipBlock.retryAfterSecs)
-        c.header("Retry-After", String(ipBlock.retryAfterSecs));
+      if (ipBlock.retryAfterSecs) c.header("Retry-After", String(ipBlock.retryAfterSecs));
       return c.json(
         {
           error: "TOO_MANY_ATTEMPTS",
-          message:
-            "Too many failed login attempts from this network. Try again later.",
+          message: "Too many failed login attempts from this network. Try again later.",
           retryAfter: ipBlock.retryAfterSecs,
         },
-        429,
+        429
       );
     }
 
@@ -699,19 +628,13 @@ router.post("/login", rateLimit({ points: 20, windowSecs: 60 }), async (c) => {
     const user = users[0];
     if (!user?.passwordHash) {
       recordIpLoginFailure(clientIp, email);
-      return c.json(
-        { error: "INVALID_CREDENTIALS", message: "Invalid credentials" },
-        401,
-      );
+      return c.json({ error: "INVALID_CREDENTIALS", message: "Invalid credentials" }, 401);
     }
 
     const valid = await bcrypt.compare(password, user.passwordHash);
     if (!valid) {
       recordIpLoginFailure(clientIp, email);
-      return c.json(
-        { error: "INVALID_CREDENTIALS", message: "Invalid credentials" },
-        401,
-      );
+      return c.json({ error: "INVALID_CREDENTIALS", message: "Invalid credentials" }, 401);
     }
 
     recordIpLoginSuccess(clientIp);
@@ -740,126 +663,102 @@ router.post("/login", rateLimit({ points: 20, windowSecs: 60 }), async (c) => {
 // POST /login/mfa — complete a login that requires a second factor.
 // Exchanges a valid TOTP code (or one-time backup code) + the challenge token
 // from POST /login for a real session.
-router.post(
-  "/login/mfa",
-  rateLimit({ points: 10, windowSecs: 60 }),
-  async (c) => {
-    try {
-      const { mfaToken, code } = await c.req.json();
-      if (!mfaToken || !code) {
-        return c.json(
-          {
-            error: "INVALID_REQUEST",
-            message: "mfaToken and code are required",
-          },
-          400,
-        );
-      }
-
-      const tokenSvc = await getTokenService();
-      let payload: Awaited<ReturnType<TokenService["verifyAccessToken"]>>;
-      try {
-        payload = await tokenSvc.verifyAccessToken(mfaToken);
-      } catch {
-        return c.json(
-          {
-            error: "MFA_TOKEN_INVALID",
-            message: "Invalid or expired MFA token",
-          },
-          401,
-        );
-      }
-
-      if (
-        payload.aud !== MFA_CHALLENGE_AUD ||
-        !payload.scope?.includes(MFA_CHALLENGE_SCOPE)
-      ) {
-        return c.json(
-          { error: "MFA_TOKEN_INVALID", message: "Not an MFA challenge token" },
-          401,
-        );
-      }
-
-      const db = getDb();
-      const users = await db
-        .select({
-          id: usersTable.id,
-          email: usersTable.email,
-          displayName: usersTable.displayName,
-          mfa: usersTable.mfa,
-        })
-        .from(usersTable)
-        .where(eq(usersTable.id, payload.sub))
-        .limit(1);
-      const user = users[0];
-      if (!user) {
-        return c.json(
-          {
-            error: "MFA_TOKEN_INVALID",
-            message: "Invalid or expired MFA token",
-          },
-          401,
-        );
-      }
-
-      const mfa = (user.mfa as any) ?? {};
-      if (mfa?.totp?.enabled !== true || !mfa?.totp?.secret) {
-        // The challenge was issued but TOTP was since removed — nothing to verify.
-        return c.json(
-          {
-            error: "MFA_NOT_ENABLED",
-            message: "MFA is not enabled for this account",
-          },
-          400,
-        );
-      }
-
-      const submitted = String(code).trim();
-      let verified = await verifyTotpCode(mfa.totp.secret, submitted);
-
-      // Fall back to a one-time backup code (stored as sha256 hashes).
-      if (
-        !verified &&
-        Array.isArray(mfa.totp.backupCodes) &&
-        mfa.totp.backupCodes.length > 0
-      ) {
-        const submittedHash = hashToken(
-          submitted.replace(/[\s-]/g, "").toLowerCase(),
-        );
-        const idx = mfa.totp.backupCodes.indexOf(submittedHash);
-        if (idx !== -1) {
-          verified = true;
-          const remaining = mfa.totp.backupCodes.filter(
-            (_: string, i: number) => i !== idx,
-          );
-          await db
-            .update(usersTable)
-            .set({
-              mfa: { ...mfa, totp: { ...mfa.totp, backupCodes: remaining } },
-              updatedAt: new Date(),
-            })
-            .where(eq(usersTable.id, user.id));
-        }
-      }
-
-      if (!verified) {
-        return c.json(
-          { error: "INVALID_CODE", message: "Invalid MFA code" },
-          401,
-        );
-      }
-
-      const { body } = await issueAuthenticatedSession(c, user);
-      return c.json(body);
-    } catch (err) {
-      logger.error("Login MFA error", err as Error);
+router.post("/login/mfa", rateLimit({ points: 10, windowSecs: 60 }), async (c) => {
+  try {
+    const { mfaToken, code } = await c.req.json();
+    if (!mfaToken || !code) {
       return c.json(
-        { error: "INTERNAL_ERROR", message: "MFA verification failed" },
-        500,
+        {
+          error: "INVALID_REQUEST",
+          message: "mfaToken and code are required",
+        },
+        400
       );
     }
-  },
-);
+
+    const tokenSvc = await getTokenService();
+    let payload: Awaited<ReturnType<TokenService["verifyAccessToken"]>>;
+    try {
+      payload = await tokenSvc.verifyAccessToken(mfaToken);
+    } catch {
+      return c.json(
+        {
+          error: "MFA_TOKEN_INVALID",
+          message: "Invalid or expired MFA token",
+        },
+        401
+      );
+    }
+
+    if (payload.aud !== MFA_CHALLENGE_AUD || !payload.scope?.includes(MFA_CHALLENGE_SCOPE)) {
+      return c.json({ error: "MFA_TOKEN_INVALID", message: "Not an MFA challenge token" }, 401);
+    }
+
+    const db = getDb();
+    const users = await db
+      .select({
+        id: usersTable.id,
+        email: usersTable.email,
+        displayName: usersTable.displayName,
+        mfa: usersTable.mfa,
+      })
+      .from(usersTable)
+      .where(eq(usersTable.id, payload.sub))
+      .limit(1);
+    const user = users[0];
+    if (!user) {
+      return c.json(
+        {
+          error: "MFA_TOKEN_INVALID",
+          message: "Invalid or expired MFA token",
+        },
+        401
+      );
+    }
+
+    const mfa = (user.mfa as any) ?? {};
+    if (mfa?.totp?.enabled !== true || !mfa?.totp?.secret) {
+      // The challenge was issued but TOTP was since removed — nothing to verify.
+      return c.json(
+        {
+          error: "MFA_NOT_ENABLED",
+          message: "MFA is not enabled for this account",
+        },
+        400
+      );
+    }
+
+    const submitted = String(code).trim();
+    let verified = await verifyTotpCode(mfa.totp.secret, submitted);
+
+    // Fall back to a one-time backup code (stored as sha256 hashes).
+    if (!verified && Array.isArray(mfa.totp.backupCodes) && mfa.totp.backupCodes.length > 0) {
+      const submittedHash = hashToken(submitted.replace(/[\s-]/g, "").toLowerCase());
+      const idx = mfa.totp.backupCodes.indexOf(submittedHash);
+      if (idx !== -1) {
+        verified = true;
+        const remaining = mfa.totp.backupCodes.filter((_: string, i: number) => i !== idx);
+        await db
+          .update(usersTable)
+          .set({
+            mfa: { ...mfa, totp: { ...mfa.totp, backupCodes: remaining } },
+            updatedAt: new Date(),
+          })
+          .where(eq(usersTable.id, user.id));
+      }
+    }
+
+    if (!verified) {
+      return c.json({ error: "INVALID_CODE", message: "Invalid MFA code" }, 401);
+    }
+
+    const { body } = await issueAuthenticatedSession(c, user);
+    return c.json(body);
+  } catch (err) {
+    logger.error("Login MFA error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR", message: "MFA verification failed" }, 500);
+  }
+});
 
 // POST /token/refresh
 router.post(
@@ -870,10 +769,7 @@ router.post(
     try {
       const { refreshToken } = await c.req.json();
       if (!refreshToken) {
-        return c.json(
-          { error: "INVALID_REQUEST", message: "refreshToken required" },
-          400,
-        );
+        return c.json({ error: "INVALID_REQUEST", message: "refreshToken required" }, 400);
       }
 
       const tokenHash = hashToken(refreshToken);
@@ -886,10 +782,7 @@ router.post(
         .limit(1);
       const rt = rtRows[0];
       if (!rt || rt.isRevoked || rt.expiresAt < new Date()) {
-        return c.json(
-          { error: "TOKEN_INVALID", message: "Invalid refresh token" },
-          401,
-        );
+        return c.json({ error: "TOKEN_INVALID", message: "Invalid refresh token" }, 401);
       }
 
       await db
@@ -907,10 +800,7 @@ router.post(
         .limit(1);
       const user = userRows[0];
       if (!user) {
-        return c.json(
-          { error: "USER_NOT_FOUND", message: "User not found" },
-          404,
-        );
+        return c.json({ error: "USER_NOT_FOUND", message: "User not found" }, 404);
       }
 
       const popKey = c.req.header("x-pop-key") || undefined;
@@ -958,24 +848,17 @@ router.post(
       });
     } catch (err) {
       logger.error("Refresh token error", err as Error);
-      return c.json(
-        { error: "INTERNAL_ERROR", message: "Refresh failed" },
-        500,
-      );
+      return c.json({ error: "INTERNAL_ERROR", message: "Refresh failed" }, 500);
     }
-  },
+  }
 );
 
 // POST /oauth/state
-router.post(
-  "/oauth/state",
-  rateLimit({ points: 20, windowSecs: 60 }),
-  async (c) => {
-    const body = await c.req.json().catch(() => ({}));
-    const state = await generateOAuthState((body as any).codeChallenge);
-    return c.json({ state, ttlSeconds: OAUTH_STATE_TTL_SECS });
-  },
-);
+router.post("/oauth/state", rateLimit({ points: 20, windowSecs: 60 }), async (c) => {
+  const body = await c.req.json().catch(() => ({}));
+  const state = await generateOAuthState((body as any).codeChallenge);
+  return c.json({ state, ttlSeconds: OAUTH_STATE_TTL_SECS });
+});
 
 // GET /oauth/:provider/authorize — returns the provider authorization URL + state.
 //
@@ -984,262 +867,212 @@ router.post(
 // the verifier secret end-to-end (the SPA cannot leak it via URL/history) while
 // still binding the authorization code to this transaction. The CSRF `state` is
 // validated on the callback.
-router.get(
-  "/oauth/:provider/authorize",
-  rateLimit({ points: 20, windowSecs: 60 }),
-  async (c) => {
-    const provider = c.req.param("provider");
-    if (!isSupportedProvider(provider)) {
-      return c.json(
-        {
-          error: "UNSUPPORTED_PROVIDER",
-          message: `Provider '${provider}' is not supported`,
-        },
-        400,
-      );
-    }
+router.get("/oauth/:provider/authorize", rateLimit({ points: 20, windowSecs: 60 }), async (c) => {
+  const provider = c.req.param("provider");
+  if (!isSupportedProvider(provider)) {
+    return c.json(
+      {
+        error: "UNSUPPORTED_PROVIDER",
+        message: `Provider '${provider}' is not supported`,
+      },
+      400
+    );
+  }
 
-    const cfg = getConfig();
-    const p = cfg.oauth.providers[provider];
-    if (!p?.clientId || !p?.clientSecret || !p?.redirectUri) {
-      return c.json(
-        {
-          error: "PROVIDER_NOT_CONFIGURED",
-          message: `Provider '${provider}' is not configured`,
-        },
-        400,
-      );
-    }
+  const cfg = getConfig();
+  const p = cfg.oauth.providers[provider];
+  if (!p?.clientId || !p?.clientSecret || !p?.redirectUri) {
+    return c.json(
+      {
+        error: "PROVIDER_NOT_CONFIGURED",
+        message: `Provider '${provider}' is not configured`,
+      },
+      400
+    );
+  }
 
-    let codeChallenge: string | undefined;
-    let codeVerifier: string | undefined;
-    if (PROVIDER_META[provider].supportsPKCE) {
-      codeVerifier = nodeCrypto.randomBytes(32).toString("base64url");
-      codeChallenge = nodeCrypto
-        .createHash("sha256")
-        .update(codeVerifier)
-        .digest("base64url");
-    }
+  let codeChallenge: string | undefined;
+  let codeVerifier: string | undefined;
+  if (PROVIDER_META[provider].supportsPKCE) {
+    codeVerifier = nodeCrypto.randomBytes(32).toString("base64url");
+    codeChallenge = nodeCrypto.createHash("sha256").update(codeVerifier).digest("base64url");
+  }
 
-    const state = await generateOAuthState(codeChallenge, codeVerifier);
-    const authorizeUrl = buildAuthorizationUrl(provider, {
-      clientId: p.clientId,
-      redirectUri: p.redirectUri,
-      state,
-      codeChallenge,
-    });
+  const state = await generateOAuthState(codeChallenge, codeVerifier);
+  const authorizeUrl = buildAuthorizationUrl(provider, {
+    clientId: p.clientId,
+    redirectUri: p.redirectUri,
+    state,
+    codeChallenge,
+  });
 
-    return c.json({ authorizeUrl, state });
-  },
-);
+  return c.json({ authorizeUrl, state });
+});
 
 // GET /oauth/:provider/callback
-router.get(
-  "/oauth/:provider/callback",
-  rateLimit({ points: 20, windowSecs: 60 }),
-  async (c) => {
+router.get("/oauth/:provider/callback", rateLimit({ points: 20, windowSecs: 60 }), async (c) => {
+  try {
+    const provider = c.req.param("provider");
+    const code = c.req.query("code");
+    const state = c.req.query("state");
+
+    if (!code) {
+      return c.json({ error: "INVALID_REQUEST", message: "code is required" }, 400);
+    }
+    const stateResult = await getAndVerifyOAuthState(state);
+    if (!stateResult.ok) {
+      return c.json({ error: "INVALID_STATE", message: "Invalid or expired state" }, 400);
+    }
+
+    // PKCE verification: if a code_challenge was stored, the code_verifier must match
+    let codeVerifier: string | null = null;
+    if (stateResult.codeChallenge) {
+      codeVerifier = stateResult.codeVerifier;
+      if (!codeVerifier) {
+        return c.json({ error: "PKCE_REQUIRED", message: "code_verifier is required" }, 400);
+      }
+      const { createHash } = await import("node:crypto");
+      const challenge = createHash("sha256").update(codeVerifier).digest("base64url");
+      if (challenge !== stateResult.codeChallenge) {
+        return c.json({ error: "PKCE_MISMATCH", message: "Invalid code_verifier" }, 400);
+      }
+    }
+
+    const adapter = getProviderAdapter(provider);
+    let result: Awaited<ReturnType<typeof adapter.exchangeCode>>;
     try {
-      const provider = c.req.param("provider");
-      const code = c.req.query("code");
-      const state = c.req.query("state");
-
-      if (!code) {
-        return c.json(
-          { error: "INVALID_REQUEST", message: "code is required" },
-          400,
-        );
-      }
-      const stateResult = await getAndVerifyOAuthState(state);
-      if (!stateResult.ok) {
-        return c.json(
-          { error: "INVALID_STATE", message: "Invalid or expired state" },
-          400,
-        );
-      }
-
-      // PKCE verification: if a code_challenge was stored, the code_verifier must match
-      let codeVerifier: string | null = null;
-      if (stateResult.codeChallenge) {
-        codeVerifier = stateResult.codeVerifier;
-        if (!codeVerifier) {
-          return c.json(
-            { error: "PKCE_REQUIRED", message: "code_verifier is required" },
-            400,
-          );
-        }
-        const { createHash } = await import("node:crypto");
-        const challenge = createHash("sha256")
-          .update(codeVerifier)
-          .digest("base64url");
-        if (challenge !== stateResult.codeChallenge) {
-          return c.json(
-            { error: "PKCE_MISMATCH", message: "Invalid code_verifier" },
-            400,
-          );
-        }
-      }
-
-      const adapter = getProviderAdapter(provider);
-      let result: Awaited<ReturnType<typeof adapter.exchangeCode>>;
-      try {
-        result = await adapter.exchangeCode(code, codeVerifier ?? undefined);
-      } catch (err) {
-        if (
-          err instanceof Error &&
-          err.message.startsWith("UNSUPPORTED_OAUTH_PROVIDER")
-        ) {
-          return c.json(
-            {
-              error: "UNSUPPORTED_PROVIDER",
-              message: `Provider '${provider}' is not supported`,
-            },
-            501,
-          );
-        }
-        throw err;
-      }
-      if (!result?.profile) {
+      result = await adapter.exchangeCode(code, codeVerifier ?? undefined);
+    } catch (err) {
+      if (err instanceof Error && err.message.startsWith("UNSUPPORTED_OAUTH_PROVIDER")) {
         return c.json(
           {
-            error: "PROVIDER_ERROR",
-            message: "Provider token exchange failed",
+            error: "UNSUPPORTED_PROVIDER",
+            message: `Provider '${provider}' is not supported`,
           },
-          502,
+          501
         );
       }
-
-      const profile: any = result.profile;
-      const rawEmail = profile.email || profile.emails?.[0]?.value;
-      if (!rawEmail) {
-        return c.json(
-          { error: "NO_EMAIL", message: "Provider did not return email" },
-          400,
-        );
-      }
-      const email = String(rawEmail).toLowerCase().trim();
-      const providerId = profile.id != null ? String(profile.id) : undefined;
-      const link = { provider, providerId, email, connectedAt: new Date() };
-
-      const db = getDb();
-      const userRows = await db
-        .select()
-        .from(usersTable)
-        .where(eq(usersTable.email, email))
-        .limit(1);
-      let user = userRows[0];
-
-      if (!user) {
-        const [created] = await db
-          .insert(usersTable)
-          .values({
-            email,
-            displayName: profile.name || email.split("@")[0],
-            roles: ["user"],
-            oauthProviders: [link],
-            // Trust the IdP's verification assertion for the initial email.
-            emailVerifiedAt: profile.emailVerified ? new Date() : null,
-            status: "active",
-          } as any)
-          .returning();
-        user = created;
-      } else {
-        const providers: any[] = (user.oauthProviders as any[]) || [];
-        const has = providers.some(
-          (p) => p.provider === provider && p.providerId === providerId,
-        );
-        if (!has) {
-          await db
-            .update(usersTable)
-            .set({
-              oauthProviders: [...providers, link],
-              updatedAt: new Date(),
-            })
-            .where(eq(usersTable.id, user.id));
-        }
-      }
-
-      // Mint the session through the shared helper so OAuth logins get the same
-      // device fingerprinting, new-device alerting, and max-device enforcement as
-      // password logins.
-      const { body, sessionId } = await issueAuthenticatedSession(c, user);
-
-      // Hand the tokens off via a short-lived, one-time exchange code rather than
-      // putting them in the redirect URL (browser history, logs, Referer). The SPA
-      // redeems it via POST /oauth/exchange.
-      const exchangeCode = nanoid(32);
-      const EXCHANGE_CODE_TTL_SECS = 60;
-      await db.insert(oauthExchangeCodesTable).values({
-        code: exchangeCode,
-        userId: user.id,
-        sessionId,
-        accessToken: body.accessToken,
-        refreshToken: body.refreshToken,
-        expiresAt: new Date(Date.now() + EXCHANGE_CODE_TTL_SECS * 1000),
-      });
-
-      const appUrl = process.env.APP_URL || "http://localhost:3000";
-      return c.redirect(`${appUrl}/login?oauth_code=${exchangeCode}`, 302);
-    } catch (err) {
-      logger.error("OAuth callback error", err as Error);
-      // Redirect to frontend login with an error so the user isn't stuck on a
-      // bare JSON error page at the API origin.
-      const appUrl = process.env.APP_URL || "http://localhost:3000";
-      return c.redirect(
-        `${appUrl}/login?error=OAUTH_FAILED&message=${encodeURIComponent("OAuth callback failed")}`,
-        302,
+      throw err;
+    }
+    if (!result?.profile) {
+      return c.json(
+        {
+          error: "PROVIDER_ERROR",
+          message: "Provider token exchange failed",
+        },
+        502
       );
     }
-  },
-);
+
+    const profile: any = result.profile;
+    const rawEmail = profile.email || profile.emails?.[0]?.value;
+    if (!rawEmail) {
+      return c.json({ error: "NO_EMAIL", message: "Provider did not return email" }, 400);
+    }
+    const email = String(rawEmail).toLowerCase().trim();
+    const providerId = profile.id != null ? String(profile.id) : undefined;
+    const link = { provider, providerId, email, connectedAt: new Date() };
+
+    const db = getDb();
+    const userRows = await db.select().from(usersTable).where(eq(usersTable.email, email)).limit(1);
+    let user = userRows[0];
+
+    if (!user) {
+      const [created] = await db
+        .insert(usersTable)
+        .values({
+          email,
+          displayName: profile.name || email.split("@")[0],
+          roles: ["user"],
+          oauthProviders: [link],
+          // Trust the IdP's verification assertion for the initial email.
+          emailVerifiedAt: profile.emailVerified ? new Date() : null,
+          status: "active",
+        } as any)
+        .returning();
+      user = created;
+    } else {
+      const providers: any[] = (user.oauthProviders as any[]) || [];
+      const has = providers.some((p) => p.provider === provider && p.providerId === providerId);
+      if (!has) {
+        await db
+          .update(usersTable)
+          .set({
+            oauthProviders: [...providers, link],
+            updatedAt: new Date(),
+          })
+          .where(eq(usersTable.id, user.id));
+      }
+    }
+
+    // Mint the session through the shared helper so OAuth logins get the same
+    // device fingerprinting, new-device alerting, and max-device enforcement as
+    // password logins.
+    const { body, sessionId } = await issueAuthenticatedSession(c, user);
+
+    // Hand the tokens off via a short-lived, one-time exchange code rather than
+    // putting them in the redirect URL (browser history, logs, Referer). The SPA
+    // redeems it via POST /oauth/exchange.
+    const exchangeCode = nanoid(32);
+    const EXCHANGE_CODE_TTL_SECS = 60;
+    await db.insert(oauthExchangeCodesTable).values({
+      code: exchangeCode,
+      userId: user.id,
+      sessionId,
+      accessToken: body.accessToken,
+      refreshToken: body.refreshToken,
+      expiresAt: new Date(Date.now() + EXCHANGE_CODE_TTL_SECS * 1000),
+    });
+
+    const appUrl = process.env.APP_URL || "http://localhost:3000";
+    return c.redirect(`${appUrl}/login?oauth_code=${exchangeCode}`, 302);
+  } catch (err) {
+    logger.error("OAuth callback error", err as Error);
+    // Redirect to frontend login with an error so the user isn't stuck on a
+    // bare JSON error page at the API origin.
+    const appUrl = process.env.APP_URL || "http://localhost:3000";
+    return c.redirect(
+      `${appUrl}/login?error=OAUTH_FAILED&message=${encodeURIComponent("OAuth callback failed")}`,
+      302
+    );
+  }
+});
 
 // POST /oauth/exchange — redeems a short-lived exchange code for tokens.
 // This avoids passing tokens through the URL (browser history, logs, Referer).
-router.post(
-  "/oauth/exchange",
-  rateLimit({ points: 10, windowSecs: 60 }),
-  async (c) => {
-    try {
-      const { code } = await c.req.json().catch(() => ({}));
-      if (!code || typeof code !== "string") {
-        return c.json(
-          { error: "INVALID_REQUEST", message: "code is required" },
-          400,
-        );
-      }
-
-      const db = getDb();
-      const [row] = await db
-        .select()
-        .from(oauthExchangeCodesTable)
-        .where(eq(oauthExchangeCodesTable.code, code))
-        .limit(1);
-
-      if (!row || row.usedAt || row.expiresAt < new Date()) {
-        return c.json(
-          { error: "INVALID_CODE", message: "Invalid or expired code" },
-          400,
-        );
-      }
-
-      // Mark as used (one-time)
-      await db
-        .update(oauthExchangeCodesTable)
-        .set({ usedAt: new Date() })
-        .where(eq(oauthExchangeCodesTable.code, code));
-
-      return c.json({
-        accessToken: row.accessToken,
-        refreshToken: row.refreshToken,
-      });
-    } catch (err) {
-      logger.error("OAuth exchange error", err as Error);
-      return c.json(
-        { error: "INTERNAL_ERROR", message: "Token exchange failed" },
-        500,
-      );
+router.post("/oauth/exchange", rateLimit({ points: 10, windowSecs: 60 }), async (c) => {
+  try {
+    const { code } = await c.req.json().catch(() => ({}));
+    if (!code || typeof code !== "string") {
+      return c.json({ error: "INVALID_REQUEST", message: "code is required" }, 400);
     }
-  },
-);
+
+    const db = getDb();
+    const [row] = await db
+      .select()
+      .from(oauthExchangeCodesTable)
+      .where(eq(oauthExchangeCodesTable.code, code))
+      .limit(1);
+
+    if (!row || row.usedAt || row.expiresAt < new Date()) {
+      return c.json({ error: "INVALID_CODE", message: "Invalid or expired code" }, 400);
+    }
+
+    // Mark as used (one-time)
+    await db
+      .update(oauthExchangeCodesTable)
+      .set({ usedAt: new Date() })
+      .where(eq(oauthExchangeCodesTable.code, code));
+
+    return c.json({
+      accessToken: row.accessToken,
+      refreshToken: row.refreshToken,
+    });
+  } catch (err) {
+    logger.error("OAuth exchange error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR", message: "Token exchange failed" }, 500);
+  }
+});
 
 // ── GET /auth/me/streak ───────────────────────────────────────────────────────
 router.get("/me/streak", authMiddleware, async (c) => {
@@ -1258,8 +1091,9 @@ router.get("/me/streak", authMiddleware, async (c) => {
 router.get("/me/achievements", authMiddleware, async (c) => {
   try {
     const user = c.get("user");
-    const { getUserAchievements, ACHIEVEMENT_DEFS } =
-      await import("../../services/achievement.service.js");
+    const { getUserAchievements, ACHIEVEMENT_DEFS } = await import(
+      "../../services/achievement.service.js"
+    );
     const unlocked = await getUserAchievements(user.id);
     const achievements = Object.values(ACHIEVEMENT_DEFS).map((def) => {
       const found = unlocked.find((u: any) => u.key === def.key);
@@ -1360,10 +1194,7 @@ const patchMeSchema = z.object({
     .string()
     .min(3)
     .max(50)
-    .regex(
-      /^[a-z0-9_-]+$/,
-      "lowercase letters, digits, hyphens, underscores only",
-    )
+    .regex(/^[a-z0-9_-]+$/, "lowercase letters, digits, hyphens, underscores only")
     .nullable()
     .optional(),
   locale: z.enum(SUPPORTED_LOCALES).optional(),
@@ -1375,10 +1206,7 @@ router.patch("/me", authMiddleware, async (c) => {
     const body = await c.req.json().catch(() => ({}));
     const parsed = patchMeSchema.safeParse(body);
     if (!parsed.success)
-      return c.json(
-        { error: "INVALID_REQUEST", issues: parsed.error.issues },
-        400,
-      );
+      return c.json({ error: "INVALID_REQUEST", issues: parsed.error.issues }, 400);
 
     const db = getDb();
     const [updated] = await db
@@ -1436,8 +1264,7 @@ router.post("/me/onboarding-complete", authMiddleware, async (c) => {
       .where(eq(usersTable.id, user.id));
 
     // Fire notification (Slack / Teams / PagerDuty) — non-blocking.
-    const { notificationDispatcher } =
-      await import("../../notifications/dispatcher.js");
+    const { notificationDispatcher } = await import("../../notifications/dispatcher.js");
     void notificationDispatcher.dispatch("onboarding.completed", {
       userId: user.id,
       email: user.email,
@@ -1452,7 +1279,7 @@ router.post("/me/onboarding-complete", authMiddleware, async (c) => {
         error: "INTERNAL_ERROR",
         message: "Failed to mark onboarding complete",
       },
-      500,
+      500
     );
   }
 });
@@ -1461,8 +1288,7 @@ router.post("/me/onboarding-complete", authMiddleware, async (c) => {
 router.get("/me/points", authMiddleware, async (c) => {
   try {
     const user = c.get("user");
-    const { getPointsBalance, getPointsHistory } =
-      await import("../../services/points.service.js");
+    const { getPointsBalance, getPointsHistory } = await import("../../services/points.service.js");
     const balance = await getPointsBalance(user.id);
     const { entries, total } = await getPointsHistory(user.id);
     return c.json({ balance, history: entries, total });
@@ -1493,10 +1319,7 @@ router.post("/me/nps", authMiddleware, async (c) => {
     const user = c.get("user");
     const { score, comment, context } = await c.req.json().catch(() => ({}));
     if (typeof score !== "number" || score < 0 || score > 10) {
-      return c.json(
-        { error: "INVALID_REQUEST", message: "score must be 0-10" },
-        400,
-      );
+      return c.json({ error: "INVALID_REQUEST", message: "score must be 0-10" }, 400);
     }
     const { recordNpsFeedback } = await import("../../services/nps.service.js");
     await recordNpsFeedback(user.id, score, comment, context);
@@ -1525,19 +1348,12 @@ router.delete("/oauth/:provider", authMiddleware, async (c) => {
       .from(usersTable)
       .where(eq(usersTable.id, user.id))
       .limit(1);
-    if (!row)
-      return c.json(
-        { error: "USER_NOT_FOUND", message: "User not found" },
-        404,
-      );
+    if (!row) return c.json({ error: "USER_NOT_FOUND", message: "User not found" }, 404);
 
     const providers: any[] = (row.oauthProviders as any[]) ?? [];
     const linked = providers.some((p) => p.provider === provider);
     if (!linked) {
-      return c.json(
-        { error: "NOT_LINKED", message: `No ${provider} account is linked` },
-        404,
-      );
+      return c.json({ error: "NOT_LINKED", message: `No ${provider} account is linked` }, 404);
     }
 
     const hasPassword = Boolean(row.passwordHash);
@@ -1548,7 +1364,7 @@ router.delete("/oauth/:provider", authMiddleware, async (c) => {
           message:
             "Set a password before disconnecting your only sign-in method, or you'll be locked out.",
         },
-        409,
+        409
       );
     }
 
@@ -1570,10 +1386,7 @@ router.delete("/oauth/:provider", authMiddleware, async (c) => {
     return c.json({ unlinked: true, provider });
   } catch (err) {
     logger.error("OAuth unlink error", err as Error);
-    return c.json(
-      { error: "INTERNAL_ERROR", message: "Failed to disconnect account" },
-      500,
-    );
+    return c.json({ error: "INTERNAL_ERROR", message: "Failed to disconnect account" }, 500);
   }
 });
 
@@ -1584,9 +1397,7 @@ router.delete("/oauth/:provider", authMiddleware, async (c) => {
 router.post("/me/link", authMiddleware, async (c) => {
   try {
     const user = c.get("user");
-    const { provider, providerUserId, providerEmail } = await c.req
-      .json()
-      .catch(() => ({}));
+    const { provider, providerUserId, providerEmail } = await c.req.json().catch(() => ({}));
 
     if (!provider || !providerUserId) {
       return c.json(
@@ -1594,7 +1405,7 @@ router.post("/me/link", authMiddleware, async (c) => {
           error: "INVALID_REQUEST",
           message: "provider and providerUserId required",
         },
-        400,
+        400
       );
     }
 
@@ -1605,7 +1416,7 @@ router.post("/me/link", authMiddleware, async (c) => {
           error: "INVALID_REQUEST",
           message: `Unsupported provider. Supported: ${supported.join(", ")}`,
         },
-        400,
+        400
       );
     }
 
@@ -1618,8 +1429,8 @@ router.post("/me/link", authMiddleware, async (c) => {
       .where(
         and(
           eq(usersTable.status, "active"),
-          sql`${usersTable.oauthProviders} @> ${JSON.stringify([{ provider, providerUserId }])}::jsonb`,
-        ),
+          sql`${usersTable.oauthProviders} @> ${JSON.stringify([{ provider, providerUserId }])}::jsonb`
+        )
       )
       .limit(1);
 
@@ -1629,7 +1440,7 @@ router.post("/me/link", authMiddleware, async (c) => {
           error: "ALREADY_LINKED",
           message: "This OAuth account is already linked to another user",
         },
-        409,
+        409
       );
     }
 
@@ -1647,7 +1458,7 @@ router.post("/me/link", authMiddleware, async (c) => {
           error: "ALREADY_LINKED",
           message: `This account already has ${provider} linked`,
         },
-        409,
+        409
       );
     }
 
@@ -1671,94 +1482,76 @@ router.post("/me/link", authMiddleware, async (c) => {
     return c.json({ linked: true, provider });
   } catch (err) {
     logger.error("Account link error", err as Error);
-    return c.json(
-      { error: "INTERNAL_ERROR", message: "Failed to link account" },
-      500,
-    );
+    return c.json({ error: "INTERNAL_ERROR", message: "Failed to link account" }, 500);
   }
 });
 
 // ── POST /auth/me/email — change email (requires current password) ───────────
 
-router.post(
-  "/me/email",
-  authMiddleware,
-  rateLimit({ points: 5, windowSecs: 60 }),
-  async (c) => {
-    try {
-      const user = c.get("user");
-      const { newEmail, password } = await c.req.json().catch(() => ({}));
-      if (!newEmail || !password) {
-        return c.json(
-          {
-            error: "INVALID_REQUEST",
-            message: "newEmail and password required",
-          },
-          400,
-        );
-      }
-
-      const db = getDb();
-      const [row] = await db
-        .select()
-        .from(usersTable)
-        .where(eq(usersTable.id, user.id))
-        .limit(1);
-      if (!row?.passwordHash) {
-        return c.json(
-          {
-            error: "REAUTH_REQUIRED",
-            message: "Password verification required",
-          },
-          403,
-        );
-      }
-
-      const valid = await bcrypt.compare(password, row.passwordHash);
-      if (!valid) {
-        return c.json(
-          { error: "INVALID_CREDENTIALS", message: "Incorrect password" },
-          401,
-        );
-      }
-
-      const normalized = String(newEmail).toLowerCase().trim();
-      const [taken] = await db
-        .select({ id: usersTable.id })
-        .from(usersTable)
-        .where(eq(usersTable.email, normalized))
-        .limit(1);
-      if (taken) {
-        return c.json(
-          { error: "EMAIL_TAKEN", message: "Email already in use" },
-          409,
-        );
-      }
-
-      const previousEmail = row.email;
-      await db
-        .update(usersTable)
-        .set({ email: normalized, updatedAt: new Date() })
-        .where(eq(usersTable.id, user.id));
-
-      // Account takeover detection: email change shortly after a password
-      // reset (or other sensitive change) revokes other sessions and alerts
-      // both the old and new address.
-      void recordAndRespond(user.id, "email_change", {
-        email: normalized,
-        previousEmail,
-        displayName: row.displayName ?? normalized,
-        ipAddress: getClientIp(c),
-        userAgent: c.req.header("user-agent"),
-      });
-
-      return c.json({ success: true, email: normalized });
-    } catch (err) {
-      logger.error("Email change error", err as Error);
-      return c.json({ error: "INTERNAL_ERROR" }, 500);
+router.post("/me/email", authMiddleware, rateLimit({ points: 5, windowSecs: 60 }), async (c) => {
+  try {
+    const user = c.get("user");
+    const { newEmail, password } = await c.req.json().catch(() => ({}));
+    if (!newEmail || !password) {
+      return c.json(
+        {
+          error: "INVALID_REQUEST",
+          message: "newEmail and password required",
+        },
+        400
+      );
     }
-  },
-);
+
+    const db = getDb();
+    const [row] = await db.select().from(usersTable).where(eq(usersTable.id, user.id)).limit(1);
+    if (!row?.passwordHash) {
+      return c.json(
+        {
+          error: "REAUTH_REQUIRED",
+          message: "Password verification required",
+        },
+        403
+      );
+    }
+
+    const valid = await bcrypt.compare(password, row.passwordHash);
+    if (!valid) {
+      return c.json({ error: "INVALID_CREDENTIALS", message: "Incorrect password" }, 401);
+    }
+
+    const normalized = String(newEmail).toLowerCase().trim();
+    const [taken] = await db
+      .select({ id: usersTable.id })
+      .from(usersTable)
+      .where(eq(usersTable.email, normalized))
+      .limit(1);
+    if (taken) {
+      return c.json({ error: "EMAIL_TAKEN", message: "Email already in use" }, 409);
+    }
+
+    const previousEmail = row.email;
+    await db
+      .update(usersTable)
+      .set({ email: normalized, updatedAt: new Date() })
+      .where(eq(usersTable.id, user.id));
+
+    // Account takeover detection: email change shortly after a password
+    // reset (or other sensitive change) revokes other sessions and alerts
+    // both the old and new address.
+    void recordAndRespond(user.id, "email_change", {
+      email: normalized,
+      previousEmail,
+      displayName: row.displayName ?? normalized,
+      ipAddress: getClientIp(c),
+      userAgent: c.req.header("user-agent"),
+    });
+
+    return c.json({ success: true, email: normalized });
+  } catch (err) {
+    logger.error("Email change error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR" }, 500);
+  }
+});
 
 // ── POST /auth/me/avatar ──────────────────────────────────────────────────────
 
@@ -1777,10 +1570,7 @@ router.post("/me/avatar", authMiddleware, async (c) => {
     const file = formData.get("avatar");
 
     if (!file || !(file instanceof File)) {
-      return c.json(
-        { error: "INVALID_REQUEST", message: "avatar file required" },
-        400,
-      );
+      return c.json({ error: "INVALID_REQUEST", message: "avatar file required" }, 400);
     }
 
     const ext = ALLOWED_AVATAR_TYPES[file.type];
@@ -1790,15 +1580,12 @@ router.post("/me/avatar", authMiddleware, async (c) => {
           error: "INVALID_TYPE",
           message: "Only JPEG, PNG, GIF, WebP images are allowed",
         },
-        400,
+        400
       );
     }
 
     if (file.size > MAX_AVATAR_BYTES) {
-      return c.json(
-        { error: "FILE_TOO_LARGE", message: "Avatar must be under 5 MB" },
-        400,
-      );
+      return c.json({ error: "FILE_TOO_LARGE", message: "Avatar must be under 5 MB" }, 400);
     }
 
     const db = getDb();

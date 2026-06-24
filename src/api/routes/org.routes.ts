@@ -4,7 +4,6 @@ import { HTTPException } from "hono/http-exception";
 import { nanoid } from "nanoid";
 import { z } from "zod";
 import { getDb } from "../../db";
-import { isUnavailableStorageError } from "../../db/storageFallback";
 import {
   organizationInvitesTable,
   organizationMembersTable,
@@ -13,6 +12,7 @@ import {
   orgSecurityPoliciesTable,
   usersTable,
 } from "../../db/schema";
+import { isUnavailableStorageError } from "../../db/storageFallback";
 import { getLogger } from "../../logger";
 import { authMiddleware } from "../../middleware/auth";
 import {
@@ -311,16 +311,20 @@ router.get("/", async (c) => {
     return c.json({ orgs: rows });
   } catch (err) {
     if (
-      isUnavailableStorageError(err, ["organization_members", "organizations"], [
-        "logo_url",
-        "billing_email",
-        "sso_config",
-        "custom_domain",
-        "branding",
-        "storage_region",
-        "tenant_id",
-        "custom_role_id",
-      ])
+      isUnavailableStorageError(
+        err,
+        ["organization_members", "organizations"],
+        [
+          "logo_url",
+          "billing_email",
+          "sso_config",
+          "custom_domain",
+          "branding",
+          "storage_region",
+          "tenant_id",
+          "custom_role_id",
+        ]
+      )
     ) {
       logger.warn("Organization storage is unavailable; returning no organizations", {
         userId: c.get("user")?.id,

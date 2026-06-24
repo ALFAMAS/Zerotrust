@@ -53,10 +53,7 @@ export function getOIDCClient(clientId: string): OIDCClient | null {
  * OAuth error/state params to an attacker-controlled destination
  * (OAuth 2.0 Security BCP §4.1.1).
  */
-export function isRegisteredRedirectUri(
-  clientId: string,
-  redirectUri: string,
-): boolean {
+export function isRegisteredRedirectUri(clientId: string, redirectUri: string): boolean {
   const client = clientStore.get(clientId);
   return !!client && client.redirectUris.includes(redirectUri);
 }
@@ -87,7 +84,7 @@ export function generateAuthCode(
     nonce?: string;
     codeChallenge?: string;
     codeChallengeMethod?: string;
-  },
+  }
 ): string {
   const code = nanoid(32);
   authCodes.set(code, {
@@ -107,7 +104,7 @@ export function exchangeAuthCode(
   code: string,
   clientId?: string,
   redirectUri?: string,
-  codeVerifier?: string,
+  codeVerifier?: string
 ): {
   userId: string;
   scope: string[];
@@ -199,9 +196,7 @@ export function validateAuthorizeRequest(params: AuthorizeParams): {
   }
 
   const requestedScopes = params.scope.split(" ");
-  const invalidScopes = requestedScopes.filter(
-    (s) => !client.scopes.includes(s),
-  );
+  const invalidScopes = requestedScopes.filter((s) => !client.scopes.includes(s));
   if (invalidScopes.length > 0) {
     return {
       valid: false,
@@ -215,9 +210,7 @@ export function validateAuthorizeRequest(params: AuthorizeParams): {
 
 // ─── Discovery Document ────────────────────────────────────────────────────────
 
-export function getDiscoveryDocument(
-  issuerUrl: string,
-): Record<string, unknown> {
+export function getDiscoveryDocument(issuerUrl: string): Record<string, unknown> {
   return {
     issuer: issuerUrl,
     authorization_endpoint: `${issuerUrl}/oidc/authorize`,
@@ -229,11 +222,7 @@ export function getDiscoveryDocument(
     subject_types_supported: ["public"],
     id_token_signing_alg_values_supported: ["HS256"],
     scopes_supported: ["openid", "profile", "email", "phone"],
-    token_endpoint_auth_methods_supported: [
-      "client_secret_post",
-      "client_secret_basic",
-      "none",
-    ],
+    token_endpoint_auth_methods_supported: ["client_secret_post", "client_secret_basic", "none"],
     claims_supported: [
       "sub",
       "email",
@@ -259,7 +248,7 @@ export function buildUserInfo(
     status: string;
     updatedAt?: Date | null;
   },
-  scopes: string[],
+  scopes: string[]
 ): Record<string, unknown> {
   const info: Record<string, unknown> = { sub: user.id };
 
@@ -271,9 +260,7 @@ export function buildUserInfo(
   if (scopes.includes("profile")) {
     info.name = user.displayName;
     info.preferred_username = user.username ?? user.email;
-    info.updated_at = user.updatedAt
-      ? Math.floor(user.updatedAt.getTime() / 1000)
-      : 0;
+    info.updated_at = user.updatedAt ? Math.floor(user.updatedAt.getTime() / 1000) : 0;
   }
 
   if (scopes.includes("phone") && user.phone) {

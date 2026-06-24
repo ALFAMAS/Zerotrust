@@ -24,16 +24,14 @@ export class TokenService {
   async init() {
     const keyBytes = this.hexToBytes(this.config.secretKeyHex);
     if (keyBytes.length !== 32) {
-      throw new Error(
-        "TOKEN_SECRET_INVALID: expected a 32-byte (64 hex char) key",
-      );
+      throw new Error("TOKEN_SECRET_INVALID: expected a 32-byte (64 hex char) key");
     }
     this.key = keyBytes;
   }
 
   async signAccessToken(
     payload: Omit<TokenPayload, "iat" | "exp" | "jti">,
-    ttl = DEFAULT_ACCESS_TOKEN_TTL,
+    ttl = DEFAULT_ACCESS_TOKEN_TTL
   ): Promise<string> {
     const now = Math.floor(Date.now() / 1000);
     const full: TokenPayload = {
@@ -65,11 +63,7 @@ export class TokenService {
     } catch {
       throw new Error("TOKEN_INVALID");
     }
-    if (
-      payload === null ||
-      typeof payload !== "object" ||
-      typeof payload.exp !== "number"
-    ) {
+    if (payload === null || typeof payload !== "object" || typeof payload.exp !== "number") {
       throw new Error("TOKEN_INVALID");
     }
     const now = Math.floor(Date.now() / 1000);

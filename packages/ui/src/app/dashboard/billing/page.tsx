@@ -71,6 +71,37 @@ function BillingContent() {
   const [cancelBusy, setCancelBusy] = useState(false);
   const [retentionOffer, setRetentionOffer] = useState<string | null>(null);
 
+  // Multi-currency / PPP pricing (backend: /billing/currencies + /billing/pricing).
+  const [currency, setCurrency] = useState("USD");
+  const [currencies, setCurrencies] = useState<{ code: string; symbol: string; name: string }[]>(
+    []
+  );
+  const [prices, setPrices] = useState<
+    Record<string, { formatted: string; pppDiscountPercent: number }>
+  >({});
+
+  useEffect(() => {
+    api
+      .get<{ currencies: { code: string; symbol: string; name: string }[] }>("/billing/currencies")
+      .then((r) => setCurrencies(r.currencies ?? []))
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    const locale = typeof navigator !== "undefined" ? navigator.language : "en-US";
+    api
+      .get<{ plans: { plan: string; formatted: string; pppDiscountPercent: number }[] }>(
+        `/billing/pricing?currency=${currency}&locale=${encodeURIComponent(locale)}`
+      )
+      .then((r) => {
+        const map: Record<string, { formatted: string; pppDiscountPercent: number }> = {};
+        for (const p of r.plans ?? [])
+          map[p.plan] = { formatted: p.formatted, pppDiscountPercent: p.pppDiscountPercent };
+        setPrices(map);
+      })
+      .catch(() => {});
+  }, [currency]);
+
   function loadSubscription() {
     api
       .get<Subscription>("/billing/subscription")
@@ -269,9 +300,34 @@ function BillingContent() {
         </Modal>
       )}
 
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <h2 className="font-display text-lg font-semibold text-foreground">Plans</h2>
+        {currencies.length > 0 && (
+          <div className="flex items-center gap-2">
+            <label htmlFor="billing-currency" className="text-sm text-muted-foreground">
+              Currency
+            </label>
+            <select
+              id="billing-currency"
+              value={currency}
+              onChange={(e) => setCurrency(e.target.value)}
+              className="rounded-lg border border-border bg-card px-2 py-1 text-sm text-foreground"
+            >
+              {currencies.map((c) => (
+                <option key={c.code} value={c.code}>
+                  {c.code} · {c.symbol}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {PLANS.map((plan) => {
           const isCurrent = plan.id === currentPlan;
+          const localized = prices[plan.id];
+          const showLocalized = localized && plan.id !== "free" && plan.id !== "enterprise";
           return (
             <div
               key={plan.id}
@@ -284,9 +340,16 @@ function BillingContent() {
               )}
               <p className="font-display text-lg font-semibold text-foreground">{plan.name}</p>
               <p className="mt-1 mb-4">
-                <span className="text-3xl font-bold text-foreground">{plan.price}</span>
+                <span className="text-3xl font-bold text-foreground">
+                  {showLocalized ? localized.formatted : plan.price}
+                </span>
                 {plan.period && (
                   <span className="text-muted-foreground text-sm ml-1">{plan.period}</span>
+                )}
+                {showLocalized && localized.pppDiscountPercent > 0 && (
+                  <span className="ml-2 inline-block rounded bg-emerald-500/15 px-1.5 py-0.5 text-xs font-medium text-emerald-400">
+                    −{localized.pppDiscountPercent}% local pricing
+                  </span>
                 )}
               </p>
               <ul className="space-y-2 mb-6 flex-1">
