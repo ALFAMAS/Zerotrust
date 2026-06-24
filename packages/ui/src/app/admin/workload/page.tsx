@@ -89,6 +89,7 @@ export default function AdminWorkloadPage() {
 
   useEffect(() => {
     loadCredentials();
+    // biome-ignore lint/correctness/useExhaustiveDependencies: loads on mount / when the route key changes; closes over stable setters
   }, [loadCredentials]);
 
   async function handleRevoke(id: string) {

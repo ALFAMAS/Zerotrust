@@ -34,6 +34,7 @@ export default function SessionsPage() {
 
   useEffect(() => {
     fetchSessions();
+    // biome-ignore lint/correctness/useExhaustiveDependencies: loads on mount / when the route key changes; closes over stable setters
   }, [fetchSessions]);
 
   const revoke = async (id: string) => {

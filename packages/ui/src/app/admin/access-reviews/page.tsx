@@ -32,6 +32,7 @@ export default function AccessReviewsPage() {
     toastTimer.current = setTimeout(() => setToast(null), 3000);
   }, []);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: data loader intentionally runs on mount / when the route key changes; it closes over stable state setters
   const load = useCallback(async () => {
     setLoading(true);
     try {

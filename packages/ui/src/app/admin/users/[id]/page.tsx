@@ -55,6 +55,7 @@ export default function UserDetailPage() {
       }
     }
     load();
+    // biome-ignore lint/correctness/useExhaustiveDependencies: loads on mount / when the route key changes; closes over stable setters
   }, [id, showToast]);
 
   async function handleForceLogout() {

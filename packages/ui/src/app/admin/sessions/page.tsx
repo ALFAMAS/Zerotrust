@@ -63,6 +63,7 @@ export default function SessionsPage() {
       }
     }
     load();
+    // biome-ignore lint/correctness/useExhaustiveDependencies: loads once on mount; closes over stable state setters
   }, [showToast]);
 
   async function handleRevoke(session: Session) {

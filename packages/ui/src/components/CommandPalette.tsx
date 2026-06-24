@@ -92,7 +92,17 @@ export function CommandPalette() {
     return () => clearTimeout(timer);
   }, [query]);
 
-  // Keyboard navigation
+  const navigateTo = useCallback(
+    (result: SearchResult) => {
+      setOpen(false);
+      setQuery("");
+      router.push(result.href);
+    },
+    [router]
+  );
+
+  // Keyboard navigation. navigateTo is declared above so the hook order and the
+  // dependency list stay valid (no temporal-dead-zone reference).
   useEffect(() => {
     if (!open || results.length === 0) return;
     function handleNav(e: KeyboardEvent) {
@@ -111,16 +121,7 @@ export function CommandPalette() {
     }
     document.addEventListener("keydown", handleNav);
     return () => document.removeEventListener("keydown", handleNav);
-  }, [open, results, selectedIndex]);
-
-  const navigateTo = useCallback(
-    (result: SearchResult) => {
-      setOpen(false);
-      setQuery("");
-      router.push(result.href);
-    },
-    [router]
-  );
+  }, [open, results, selectedIndex, navigateTo]);
 
   if (!open) return null;
 

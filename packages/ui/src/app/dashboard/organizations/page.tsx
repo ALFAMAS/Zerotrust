@@ -54,6 +54,7 @@ export default function OrganizationsPage() {
 
   useEffect(() => {
     fetchOrgs();
+    // biome-ignore lint/correctness/useExhaustiveDependencies: loads on mount / when the route key changes; closes over stable setters
   }, [fetchOrgs]);
 
   function autoSlug(name: string): string {

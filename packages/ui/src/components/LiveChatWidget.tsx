@@ -107,6 +107,7 @@ function NativeChatWidget() {
   const [ticketId, setTicketId] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: data loader intentionally runs on mount / when the route key changes; it closes over stable state setters
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
