@@ -255,6 +255,7 @@ important ones:
 | `STRIPE_SECRET_KEY`    |          | —                        | Enables billing endpoints when set             |
 | `ELASTICSEARCH_*`      |          | disabled                 | Audit-log storage (off by default)             |
 | `BACKUP_S3_*`          |          | —                        | S3-compatible backups & uploads (see below)    |
+| `BACKUP_ENCRYPTION_KEY` |          | —                        | AES-256-GCM encryption key/passphrase for DB dumps |
 
 **Frontend** (`packages/ui/.env.local`):
 
@@ -272,7 +273,7 @@ zerotrust uses one provider-agnostic adapter for both DB backups (`backups/` pre
 and user uploads such as avatars (`uploads/` prefix). Set `BACKUP_S3_BUCKET` plus
 credentials to enable; `BACKUP_S3_ENDPOINT` + `BACKUP_S3_FORCE_PATH_STYLE=true` switch
 to Backblaze B2 / MinIO / R2. When unset, backups stay local and avatars fall back to
-local disk. See the `BACKUP_S3_*` / `UPLOADS_S3_*` block in `.env.example`.
+local disk. Set `BACKUP_ENCRYPTION_KEY` (or `BACKUP_ENCRYPTION_KEY_HEX`) to encrypt DB dumps before local retention or S3 upload; use `BACKUP_REQUIRE_ENCRYPTION=true` in production to fail closed rather than write plaintext dumps. See the `BACKUP_S3_*`, `BACKUP_ENCRYPTION_*`, and `UPLOADS_S3_*` blocks in `.env.example`.
 
 ---
 
