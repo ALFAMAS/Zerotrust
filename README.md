@@ -206,7 +206,7 @@ bun run dev
 - API → **http://localhost:1337**
 - App → **http://localhost:3000**
 
-Point the UI at the API by setting `NEXT_PUBLIC_zerotrust_URL=http://localhost:1337`
+Point the UI at the API by setting `NEXT_PUBLIC_ZEROTRUST_URL=http://localhost:1337`
 in `packages/ui/.env.local`.
 
 Run them individually if you prefer:
@@ -239,29 +239,29 @@ Log in at **http://localhost:3000/login** — the admin panel is at **/admin**.
 All variables are documented inline in [`.env.example`](./.env.example). The most
 important ones:
 
-| Variable               | Required | Default                  | Description                                    |
-| ---------------------- | -------- | ------------------------ | ---------------------------------------------- |
-| `TOKEN_SECRET_HEX`     | ✅       | —                        | 32-byte hex — signs PASETO v4 tokens           |
-| `CSFLE_MASTER_KEY_HEX` | ✅       | —                        | 32-byte hex — client-side field encryption     |
-| `DATABASE_URL`         | ✅       | —                        | PostgreSQL connection string                   |
-| `REDIS_URI`            |          | `redis://localhost:6379` | Sessions, rate limiting, queue (has fallback)  |
-| `PORT`                 |          | `1337`                   | API listen port                                |
-| `API_BASE_URL`         |          | `http://localhost:1337`  | Public API URL                                 |
-| `NODE_ENV`             |          | `development`            | `development` or `production`                  |
-| `WEBAUTHN_RP_ID`       |          | `localhost`              | **Must** match your domain in production       |
-| `WEBAUTHN_RP_ORIGINS`  |          | `http://localhost:1337`  | Allowed WebAuthn origins                       |
-| `MAIL_HOST` / `MAIL_*` |          | —                        | SMTP — required for magic links & email OTP    |
-| `OAUTH_<PROVIDER>_*`   |          | —                        | OAuth client id/secret/redirect (per provider) |
-| `STRIPE_SECRET_KEY`    |          | —                        | Enables billing endpoints when set             |
-| `ELASTICSEARCH_*`      |          | disabled                 | Audit-log storage (off by default)             |
-| `BACKUP_S3_*`          |          | —                        | S3-compatible backups & uploads (see below)    |
+| Variable                | Required | Default                  | Description                                        |
+| ----------------------- | -------- | ------------------------ | -------------------------------------------------- |
+| `TOKEN_SECRET_HEX`      | ✅       | —                        | 32-byte hex — signs PASETO v4 tokens               |
+| `CSFLE_MASTER_KEY_HEX`  | ✅       | —                        | 32-byte hex — client-side field encryption         |
+| `DATABASE_URL`          | ✅       | —                        | PostgreSQL connection string                       |
+| `REDIS_URI`             |          | `redis://localhost:6379` | Sessions, rate limiting, queue (has fallback)      |
+| `PORT`                  |          | `1337`                   | API listen port                                    |
+| `API_BASE_URL`          |          | `http://localhost:1337`  | Public API URL                                     |
+| `NODE_ENV`              |          | `development`            | `development` or `production`                      |
+| `WEBAUTHN_RP_ID`        |          | `localhost`              | **Must** match your domain in production           |
+| `WEBAUTHN_RP_ORIGINS`   |          | `http://localhost:1337`  | Allowed WebAuthn origins                           |
+| `MAIL_HOST` / `MAIL_*`  |          | —                        | SMTP — required for magic links & email OTP        |
+| `OAUTH_<PROVIDER>_*`    |          | —                        | OAuth client id/secret/redirect (per provider)     |
+| `STRIPE_SECRET_KEY`     |          | —                        | Enables billing endpoints when set                 |
+| `ELASTICSEARCH_*`       |          | disabled                 | Audit-log storage (off by default)                 |
+| `BACKUP_S3_*`           |          | —                        | S3-compatible backups & uploads (see below)        |
 | `BACKUP_ENCRYPTION_KEY` |          | —                        | AES-256-GCM encryption key/passphrase for DB dumps |
 
 **Frontend** (`packages/ui/.env.local`):
 
 | Variable                        | Description                                 |
 | ------------------------------- | ------------------------------------------- |
-| `NEXT_PUBLIC_zerotrust_URL`     | Backend API base URL (no trailing slash)    |
+| `NEXT_PUBLIC_ZEROTRUST_URL`     | Backend API base URL (no trailing slash)    |
 | `NEXT_PUBLIC_APP_NAME`          | App name shown in UI, emails, and meta tags |
 | `NEXT_PUBLIC_PLAUSIBLE_DOMAIN`  | Plausible Analytics domain (consent-gated)  |
 | `NEXT_PUBLIC_GA_MEASUREMENT_ID` | Google Analytics 4 ID (consent-gated)       |
@@ -344,7 +344,7 @@ pm2 start dist/api/server.js --name zerotrust-api -i max
 
 # UI (Next.js, port 3000)
 cd packages/ui
-echo "NEXT_PUBLIC_zerotrust_URL=https://api.yourdomain.com" > .env.local
+echo "NEXT_PUBLIC_ZEROTRUST_URL=https://api.yourdomain.com" > .env.local
 npm run build
 pm2 start npm --name zerotrust-ui -- start
 

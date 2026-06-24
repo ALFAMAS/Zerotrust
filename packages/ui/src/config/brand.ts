@@ -13,7 +13,7 @@ export const brand = {
   logoColor: process.env.NEXT_PUBLIC_LOGO_COLOR ?? "#6366f1", // used for inline style on the logo div
   color: process.env.NEXT_PUBLIC_BRAND_COLOR ?? "#6366f1", // primary brand color
   url: process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000",
-  apiUrl: process.env.NEXT_PUBLIC_zerotrust_URL ?? "http://localhost:3000",
+  apiUrl: process.env.NEXT_PUBLIC_ZEROTRUST_URL ?? "http://localhost:1337",
   githubUrl:
     process.env.NEXT_PUBLIC_GITHUB_URL ??
     "https://github.com/ALFAMAS/zerotrust",

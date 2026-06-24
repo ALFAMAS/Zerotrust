@@ -5,7 +5,7 @@ import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
 
 const API_URL =
-  process.env.NEXT_PUBLIC_zerotrust_URL || "http://localhost:3000";
+  process.env.NEXT_PUBLIC_ZEROTRUST_URL || "http://localhost:3000";
 
 interface StatusData {
   status: "operational" | "degraded" | "down";

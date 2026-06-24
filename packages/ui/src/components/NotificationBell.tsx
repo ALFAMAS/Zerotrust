@@ -58,7 +58,7 @@ export function NotificationBell() {
 
     const connect = () => {
       const es = new EventSource(
-        `${process.env.NEXT_PUBLIC_zerotrust_URL || "http://localhost:3000"}/notifications/sse?token=${token}`,
+        `${process.env.NEXT_PUBLIC_ZEROTRUST_URL || "http://localhost:3000"}/notifications/sse?token=${token}`,
       );
       esRef.current = es;
 

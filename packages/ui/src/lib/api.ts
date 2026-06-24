@@ -13,7 +13,7 @@ export class OfflineQueuedError extends Error {
 }
 
 const BASE_URL =
-  process.env.NEXT_PUBLIC_zerotrust_URL || "http://localhost:3000";
+  process.env.NEXT_PUBLIC_ZEROTRUST_URL || "http://localhost:3000";
 
 /** Request timeout in milliseconds before we abort and may retry. */
 const FETCH_TIMEOUT_MS = 15_000;

@@ -4,7 +4,7 @@ import { Bot, Copy, KeyRound, Loader2, Ticket, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 
-const API = process.env.NEXT_PUBLIC_zerotrust_URL ?? "http://localhost:3000";
+const API = process.env.NEXT_PUBLIC_ZEROTRUST_URL ?? "http://localhost:1337";
 
 interface CreatedCredential {
   id: string;

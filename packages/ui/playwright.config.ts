@@ -25,7 +25,7 @@ export default defineConfig({
 
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
 
-  // Boots the whole app. NEXT_PUBLIC_zerotrust_URL points the UI's API client at
+  // Boots the whole app. NEXT_PUBLIC_ZEROTRUST_URL points the UI's API client at
   // the API on :1337 (its default is :3000, which only serves the Next.js app).
   // HIBP_CHECK_ENABLED=false keeps registration deterministic offline (the live
   // HaveIBeenPwned check would otherwise reject some passwords).
@@ -38,7 +38,7 @@ export default defineConfig({
     stdout: "pipe",
     stderr: "pipe",
     env: {
-      NEXT_PUBLIC_zerotrust_URL: "http://localhost:1337",
+      NEXT_PUBLIC_ZEROTRUST_URL: "http://localhost:1337",
       HIBP_CHECK_ENABLED: "false",
     },
   },

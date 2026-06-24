@@ -63,7 +63,7 @@ export default function RevenuePage() {
 
   const fmt = (n: number) => `$${n.toLocaleString()}`;
   const oauthBase =
-    process.env.NEXT_PUBLIC_zerotrust_URL || "http://localhost:3000";
+    process.env.NEXT_PUBLIC_ZEROTRUST_URL || "http://localhost:3000";
 
   const inputClasses =
     "w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring";

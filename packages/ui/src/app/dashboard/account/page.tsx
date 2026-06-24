@@ -4,7 +4,7 @@ import { useState } from "react";
 import { api } from "@/lib/api";
 import { getToken } from "@/lib/auth";
 
-const API = process.env.NEXT_PUBLIC_zerotrust_URL ?? "http://localhost:3000";
+const API = process.env.NEXT_PUBLIC_ZEROTRUST_URL ?? "http://localhost:3000";
 
 export default function AccountPage() {
   const [exportLoading, setExportLoading] = useState(false);

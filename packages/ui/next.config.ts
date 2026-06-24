@@ -16,8 +16,8 @@ const nextConfig: NextConfig = {
   ],
 
   env: {
-    NEXT_PUBLIC_zerotrust_URL:
-      process.env.NEXT_PUBLIC_zerotrust_URL ?? "http://localhost:3000",
+    NEXT_PUBLIC_ZEROTRUST_URL:
+      process.env.NEXT_PUBLIC_ZEROTRUST_URL ?? "http://localhost:1337",
   },
 
   turbopack: {
