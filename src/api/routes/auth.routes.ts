@@ -683,8 +683,16 @@ router.post("/login", rateLimit({ points: 20, windowSecs: 60 }), async (c) => {
     }
 
     const db = getDb();
+    // Select only fields required for password login. This keeps login working
+    // when optional profile/compliance columns have not been migrated yet.
     const users = await db
-      .select()
+      .select({
+        id: usersTable.id,
+        email: usersTable.email,
+        passwordHash: usersTable.passwordHash,
+        displayName: usersTable.displayName,
+        mfa: usersTable.mfa,
+      })
       .from(usersTable)
       .where(eq(usersTable.email, email.toLowerCase()))
       .limit(1);
@@ -774,7 +782,12 @@ router.post(
 
       const db = getDb();
       const users = await db
-        .select()
+        .select({
+          id: usersTable.id,
+          email: usersTable.email,
+          displayName: usersTable.displayName,
+          mfa: usersTable.mfa,
+        })
         .from(usersTable)
         .where(eq(usersTable.id, payload.sub))
         .limit(1);
