@@ -1,11 +1,43 @@
 "use client";
 
-import Script from "next/script";
 import { useEffect, useState } from "react";
 import { getConsent } from "@/lib/consent";
 
 const PLAUSIBLE_DOMAIN = process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN;
 const GA_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
+
+declare global {
+  interface Window {
+    dataLayer?: unknown[];
+    gtag?: (...args: unknown[]) => void;
+  }
+}
+
+function appendExternalScript({
+  id,
+  src,
+  defer,
+  dataset,
+}: {
+  id: string;
+  src: string;
+  defer?: boolean;
+  dataset?: Record<string, string>;
+}) {
+  const existing = document.getElementById(id);
+  if (existing) return existing;
+
+  const script = document.createElement("script");
+  script.id = id;
+  script.src = src;
+  script.async = true;
+  if (defer) script.defer = true;
+  for (const [key, value] of Object.entries(dataset ?? {})) {
+    script.dataset[key] = value;
+  }
+  document.head.appendChild(script);
+  return script;
+}
 
 export default function AnalyticsScript() {
   const [accepted, setAccepted] = useState(false);
@@ -17,40 +49,45 @@ export default function AnalyticsScript() {
       setAccepted((e as CustomEvent<{ value: string }>).detail.value === "accepted");
     }
 
+    function onStorage() {
+      setAccepted(getConsent() === "accepted");
+    }
+
     window.addEventListener("za:consent-change", onConsentChange);
-    window.addEventListener("storage", () => setAccepted(getConsent() === "accepted"));
+    window.addEventListener("storage", onStorage);
 
     return () => {
       window.removeEventListener("za:consent-change", onConsentChange);
+      window.removeEventListener("storage", onStorage);
     };
   }, []);
 
-  if (!accepted) return null;
+  useEffect(() => {
+    if (!accepted) return;
 
-  return (
-    <>
-      {PLAUSIBLE_DOMAIN && (
-        <Script
-          defer
-          data-domain={PLAUSIBLE_DOMAIN}
-          src="https://plausible.io/js/script.js"
-          strategy="afterInteractive"
-        />
-      )}
-      {GA_ID && (
-        <>
-          <Script
-            src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
-            strategy="afterInteractive"
-          />
-          <Script id="ga-init" strategy="afterInteractive">{`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', '${GA_ID}');
-          `}</Script>
-        </>
-      )}
-    </>
-  );
+    if (PLAUSIBLE_DOMAIN) {
+      appendExternalScript({
+        id: "plausible-analytics",
+        src: "https://plausible.io/js/script.js",
+        defer: true,
+        dataset: { domain: PLAUSIBLE_DOMAIN },
+      });
+    }
+
+    if (GA_ID) {
+      window.dataLayer = window.dataLayer || [];
+      window.gtag = (...args: unknown[]) => {
+        window.dataLayer?.push(args);
+      };
+      window.gtag("js", new Date());
+      window.gtag("config", GA_ID);
+
+      appendExternalScript({
+        id: "google-analytics",
+        src: `https://www.googletagmanager.com/gtag/js?id=${GA_ID}`,
+      });
+    }
+  }, [accepted]);
+
+  return null;
 }

@@ -65,14 +65,18 @@ function encryptionKey() {
   return scryptSync(raw, "zerotrust-db-backup", 32);
 }
 
-function encryptBackup(localFile) {
+function backupEncryptionKey() {
   const key = encryptionKey();
+  if (!key && process.env.BACKUP_REQUIRE_ENCRYPTION === "true") {
+    throw new Error(
+      "BACKUP_REQUIRE_ENCRYPTION=true but BACKUP_ENCRYPTION_KEY is not set",
+    );
+  }
+  return key;
+}
+
+function encryptBackup(localFile, key) {
   if (!key) {
-    if (process.env.BACKUP_REQUIRE_ENCRYPTION === "true") {
-      throw new Error(
-        "BACKUP_REQUIRE_ENCRYPTION=true but BACKUP_ENCRYPTION_KEY is not set",
-      );
-    }
     console.warn(
       "⚠ Backup encryption disabled; set BACKUP_ENCRYPTION_KEY to encrypt backups at rest",
     );
@@ -198,13 +202,19 @@ async function uploadToS3(localFile, key) {
 }
 
 (async () => {
+  const key = backupEncryptionKey();
   console.log(`→ Backing up database to ${file}`);
-  await run("pg_dump", ["--format=custom", `--file=${file}`, databaseUrl]);
-  console.log("✓ Backup complete");
-  const encryptedFile = await encryptBackup(file);
-  if (encryptedFile) {
-    file = encryptedFile;
-    console.log(`✓ Backup encrypted: ${file}`);
+  try {
+    await run("pg_dump", ["--format=custom", `--file=${file}`, databaseUrl]);
+    console.log("✓ Backup complete");
+    const encryptedFile = await encryptBackup(file, key);
+    if (encryptedFile) {
+      file = encryptedFile;
+      console.log(`✓ Backup encrypted: ${file}`);
+    }
+  } catch (err) {
+    if (existsSync(file)) unlinkSync(file);
+    throw err;
   }
 
   const pruned = pruneLocal();
