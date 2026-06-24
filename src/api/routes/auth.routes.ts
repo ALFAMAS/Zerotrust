@@ -1241,6 +1241,43 @@ router.post(
   },
 );
 
+// ── GET /auth/me/streak ───────────────────────────────────────────────────────
+router.get("/me/streak", authMiddleware, async (c) => {
+  try {
+    const user = c.get("user");
+    const { getStreak } = await import("../../services/streak.service.js");
+    const streak = await getStreak(user.id);
+    return c.json({ streak });
+  } catch (err) {
+    logger.error("Get streak error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR" }, 500);
+  }
+});
+
+// ── GET /auth/me/achievements ─────────────────────────────────────────────────
+router.get("/me/achievements", authMiddleware, async (c) => {
+  try {
+    const user = c.get("user");
+    const { getUserAchievements, ACHIEVEMENT_DEFS } =
+      await import("../../services/achievement.service.js");
+    const unlocked = await getUserAchievements(user.id);
+    const achievements = Object.values(ACHIEVEMENT_DEFS).map((def) => {
+      const found = unlocked.find((u: any) => u.key === def.key);
+      return {
+        key: def.key,
+        label: def.label,
+        description: def.description,
+        icon: def.icon,
+        unlockedAt: found?.unlockedAt ?? null,
+      };
+    });
+    return c.json({ achievements });
+  } catch (err) {
+    logger.error("Get achievements error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR" }, 500);
+  }
+});
+
 // ── GET /auth/me ──────────────────────────────────────────────────────────────
 
 router.get("/me", authMiddleware, async (c) => {
@@ -1417,43 +1454,6 @@ router.post("/me/onboarding-complete", authMiddleware, async (c) => {
       },
       500,
     );
-  }
-});
-
-// ── GET /auth/me/streak ───────────────────────────────────────────────────────
-router.get("/me/streak", authMiddleware, async (c) => {
-  try {
-    const user = c.get("user");
-    const { getStreak } = await import("../../services/streak.service.js");
-    const streak = await getStreak(user.id);
-    return c.json({ streak });
-  } catch (err) {
-    logger.error("Get streak error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR" }, 500);
-  }
-});
-
-// ── GET /auth/me/achievements ─────────────────────────────────────────────────
-router.get("/me/achievements", authMiddleware, async (c) => {
-  try {
-    const user = c.get("user");
-    const { getUserAchievements, ACHIEVEMENT_DEFS } =
-      await import("../../services/achievement.service.js");
-    const unlocked = await getUserAchievements(user.id);
-    const achievements = Object.values(ACHIEVEMENT_DEFS).map((def) => {
-      const found = unlocked.find((u: any) => u.key === def.key);
-      return {
-        key: def.key,
-        label: def.label,
-        description: def.description,
-        icon: def.icon,
-        unlockedAt: found?.unlockedAt ?? null,
-      };
-    });
-    return c.json({ achievements });
-  } catch (err) {
-    logger.error("Get achievements error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR" }, 500);
   }
 });
 
