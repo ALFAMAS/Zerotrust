@@ -37,6 +37,7 @@ export {
   NobleMLKEM,
   SimulatedMLKEM,
 } from "./crypto/post-quantum";
+export type { DatabaseHealth } from "./db";
 // ─── Database ────────────────────────────────────────────────────────────────
 export {
   checkDatabaseHealth,
@@ -48,7 +49,6 @@ export {
   initializeDatabase,
   isDbConnected,
 } from "./db";
-export type { DatabaseHealth } from "./db";
 // ─── Schema ──────────────────────────────────────────────────────────────────
 export {
   auditLogsTable,

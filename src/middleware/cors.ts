@@ -48,7 +48,10 @@ export function corsPolicyFromEnv(env: NodeJS.ProcessEnv = process.env): CorsPol
  * - No allowlist configured, non-production → reflect the caller (dev convenience).
  * - No allowlist configured, production → deny (return `null`): fail closed.
  */
-export function resolveCorsOrigin(requestOrigin: string | undefined, policy: CorsPolicy): string | null {
+export function resolveCorsOrigin(
+  requestOrigin: string | undefined,
+  policy: CorsPolicy
+): string | null {
   if (policy.allowWildcard) return "*";
   const origin = requestOrigin?.replace(/\/$/, "");
   if (origin && policy.allowedOrigins.includes(origin)) return origin;

@@ -193,7 +193,10 @@ export function SsoSettingsForm({
               ) : (
                 <X className="h-4 w-4" />
               )}
-              SAML: {testResults.saml.status === "success" ? "Connection successful" : testResults.saml.error}
+              SAML:{" "}
+              {testResults.saml.status === "success"
+                ? "Connection successful"
+                : testResults.saml.error}
             </div>
           )}
           {testResults.oidc && (
@@ -209,7 +212,10 @@ export function SsoSettingsForm({
               ) : (
                 <X className="h-4 w-4" />
               )}
-              OIDC: {testResults.oidc.status === "success" ? "Connection successful" : testResults.oidc.error}
+              OIDC:{" "}
+              {testResults.oidc.status === "success"
+                ? "Connection successful"
+                : testResults.oidc.error}
             </div>
           )}
         </div>

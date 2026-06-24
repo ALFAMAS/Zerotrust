@@ -23,12 +23,12 @@
  *   SLO_ALERT_ENABLED=true            master toggle
  */
 
-import { createMiddleware } from "hono/factory";
 import type { Context } from "hono";
+import { createMiddleware } from "hono/factory";
 import { getLogger } from "../logger";
+import { metricsRegistry } from "../metrics/registry";
 import { notificationDispatcher } from "../notifications";
 import type { HonoEnv } from "../shared/types";
-import { metricsRegistry } from "../metrics/registry";
 
 const logger = getLogger("slo");
 
@@ -161,25 +161,31 @@ export async function computeSLOStatus(): Promise<SLOStatus> {
   const availErrorRate = totalRequests > 0 ? errorRequests / totalRequests : 0;
   const availActual = Math.max(0, 1 - availErrorRate);
   // Budget consumed = actual error budget used / total error budget
-  const availBudgetUsed = totalRequests > 0
-    ? Math.max(0, errorRequests - (totalRequests * availErrorBudget)) / Math.max(1, totalRequests * availErrorBudget)
-    : 0;
+  const availBudgetUsed =
+    totalRequests > 0
+      ? Math.max(0, errorRequests - totalRequests * availErrorBudget) /
+        Math.max(1, totalRequests * availErrorBudget)
+      : 0;
   const availBudgetRemaining = Math.max(0, 1 - Math.min(1, availBudgetUsed));
 
   // Latency SLO
   const latErrorBudget = 1 - c.latencyTarget;
   const latSlowRate = totalRequests > 0 ? slowRequests / totalRequests : 0;
   const latActual = Math.max(0, 1 - latSlowRate);
-  const latBudgetUsed = totalRequests > 0
-    ? Math.max(0, slowRequests - (totalRequests * latErrorBudget)) / Math.max(1, totalRequests * latErrorBudget)
-    : 0;
+  const latBudgetUsed =
+    totalRequests > 0
+      ? Math.max(0, slowRequests - totalRequests * latErrorBudget) /
+        Math.max(1, totalRequests * latErrorBudget)
+      : 0;
   const latBudgetRemaining = Math.max(0, 1 - Math.min(1, latBudgetUsed));
 
   // Burn rates: ratio of current consumption rate to sustainable rate
   const windowFraction = Math.min(1, (now - _windowStartMs) / windowMs);
   const sustainableRate = 1; // 1× = consume full budget over full window
-  const availBurnRate = windowFraction > 0 ? (1 - availBudgetRemaining) / (windowFraction * sustainableRate) : 0;
-  const latBurnRate = windowFraction > 0 ? (1 - latBudgetRemaining) / (windowFraction * sustainableRate) : 0;
+  const availBurnRate =
+    windowFraction > 0 ? (1 - availBudgetRemaining) / (windowFraction * sustainableRate) : 0;
+  const latBurnRate =
+    windowFraction > 0 ? (1 - latBudgetRemaining) / (windowFraction * sustainableRate) : 0;
 
   return {
     window: {
@@ -202,10 +208,8 @@ export async function computeSLOStatus(): Promise<SLOStatus> {
     burnRates: {
       availability: Math.round(availBurnRate * 100) / 100,
       latency: Math.round(latBurnRate * 100) / 100,
-      alerting: c.enabled && (
-        availBurnRate >= c.burnAlertThreshold ||
-        latBurnRate >= c.burnAlertThreshold
-      ),
+      alerting:
+        c.enabled && (availBurnRate >= c.burnAlertThreshold || latBurnRate >= c.burnAlertThreshold),
     },
     metrics: {
       totalRequests: Math.round(totalRequests),
@@ -243,12 +247,12 @@ export async function checkBurnRateAlerts(): Promise<void> {
     const reasons: string[] = [];
     if (burnRates.availability >= cfg().burnAlertThreshold) {
       reasons.push(
-        `Availability burn rate ${burnRates.availability}× (target: 99.9%, budget remaining: ${(status.availability.errorBudgetRemaining * 100).toFixed(1)}%)`,
+        `Availability burn rate ${burnRates.availability}× (target: 99.9%, budget remaining: ${(status.availability.errorBudgetRemaining * 100).toFixed(1)}%)`
       );
     }
     if (burnRates.latency >= cfg().burnAlertThreshold) {
       reasons.push(
-        `Latency burn rate ${burnRates.latency}× (target: P${cfg().latencyThresholdMs}ms ≥ ${cfg().latencyTarget * 100}%, budget remaining: ${(status.latency.errorBudgetRemaining * 100).toFixed(1)}%)`,
+        `Latency burn rate ${burnRates.latency}× (target: P${cfg().latencyThresholdMs}ms ≥ ${cfg().latencyTarget * 100}%, budget remaining: ${(status.latency.errorBudgetRemaining * 100).toFixed(1)}%)`
       );
     }
 

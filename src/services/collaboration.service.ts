@@ -1,13 +1,13 @@
 import { and, desc, eq, inArray, sql } from "drizzle-orm";
+import { broadcastNotification } from "../api/routes/notification.routes";
 import { getDb } from "../db";
 import {
-  sharedNotesTable,
-  sharedNoteRevisionsTable,
   activityEventsTable,
   mentionsTable,
+  sharedNoteRevisionsTable,
+  sharedNotesTable,
   usersTable,
 } from "../db/schema";
-import { broadcastNotification } from "../api/routes/notification.routes";
 import { sendNotificationEmail } from "../services/email.service";
 
 // ── Shared notes ─────────────────────────────────────────────────────────────
@@ -59,7 +59,11 @@ export async function createNote(input: CreateNoteInput) {
   return note;
 }
 
-export async function updateNote(noteId: string, userId: string, updates: { title?: string; content?: string }) {
+export async function updateNote(
+  noteId: string,
+  userId: string,
+  updates: { title?: string; content?: string }
+) {
   const db = getDb();
   const [existing] = await db
     .select()
@@ -302,7 +306,13 @@ export async function getUserMentions(userId: string, limit = 30) {
 
 export type PresenceStatus = "online" | "idle" | "offline";
 
-export async function heartbeatPresence(userId: string, orgId: string, displayName: string, avatarUrl?: string, status: PresenceStatus = "online") {
+export async function heartbeatPresence(
+  userId: string,
+  orgId: string,
+  displayName: string,
+  avatarUrl?: string,
+  status: PresenceStatus = "online"
+) {
   const db = getDb();
   // Use raw SQL for upsert since Drizzle onConflictDoUpdate needs a proper target
   await db.execute(sql`
@@ -319,7 +329,9 @@ export async function heartbeatPresence(userId: string, orgId: string, displayNa
 
 export async function setPresenceOffline(userId: string) {
   const db = getDb();
-  await db.execute(sql`UPDATE presence SET status = 'offline', last_seen_at = now() WHERE user_id = ${userId}`);
+  await db.execute(
+    sql`UPDATE presence SET status = 'offline', last_seen_at = now() WHERE user_id = ${userId}`
+  );
 }
 
 export async function getOrgPresence(orgId: string) {
@@ -360,7 +372,12 @@ const NAV_PAGES: SearchResult[] = [
   { type: "page", title: "Account", href: "/dashboard/account", icon: "UserCog" },
 ];
 
-export async function globalSearch(_userId: string, orgId: string | null, query: string, limit = 10): Promise<SearchResult[]> {
+export async function globalSearch(
+  _userId: string,
+  orgId: string | null,
+  query: string,
+  limit = 10
+): Promise<SearchResult[]> {
   const db = getDb();
   const results: SearchResult[] = [];
   const q = query.toLowerCase();
@@ -378,11 +395,13 @@ export async function globalSearch(_userId: string, orgId: string | null, query:
       const notes = await db
         .select({ id: sharedNotesTable.id, title: sharedNotesTable.title })
         .from(sharedNotesTable)
-        .where(and(
-          eq(sharedNotesTable.orgId, orgId),
-          eq(sharedNotesTable.archived, false),
-          sql`(${sharedNotesTable.title} ILIKE ${`%${query}%`} OR ${sharedNotesTable.content} ILIKE ${`%${query}%`})`
-        ))
+        .where(
+          and(
+            eq(sharedNotesTable.orgId, orgId),
+            eq(sharedNotesTable.archived, false),
+            sql`(${sharedNotesTable.title} ILIKE ${`%${query}%`} OR ${sharedNotesTable.content} ILIKE ${`%${query}%`})`
+          )
+        )
         .limit(3);
 
       for (const note of notes) {
@@ -403,7 +422,9 @@ export async function globalSearch(_userId: string, orgId: string | null, query:
       const members = await db
         .select({ id: usersTable.id, displayName: usersTable.displayName, email: usersTable.email })
         .from(usersTable)
-        .where(sql`${usersTable.displayName} ILIKE ${`%${query}%`} OR ${usersTable.email} ILIKE ${`%${query}%`}`)
+        .where(
+          sql`${usersTable.displayName} ILIKE ${`%${query}%`} OR ${usersTable.email} ILIKE ${`%${query}%`}`
+        )
         .limit(3);
 
       for (const member of members) {

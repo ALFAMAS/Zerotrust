@@ -36,7 +36,8 @@ function startActivityFlusher(): void {
     const db = getDb();
     for (const [tokenId, lastActivity] of updates) {
       try {
-        await db.update(sessionsTable)
+        await db
+          .update(sessionsTable)
           .set({ lastActivityAt: lastActivity })
           .where(eq(sessionsTable.tokenId, tokenId));
       } catch (err) {

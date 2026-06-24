@@ -4,10 +4,6 @@ import { Hono } from "hono";
 import { verifyAuditChain } from "../../audit/chain";
 import { getDb } from "../../db";
 import {
-  ALLOWED_UPLOAD_CONTENT_TYPES,
-  safeExtensionForContentType,
-} from "../../services/uploadSafety";
-import {
   auditLogsTable,
   feedbackTable,
   jitAccessTable,
@@ -19,6 +15,10 @@ import { getLogger } from "../../logger";
 import { authMiddleware } from "../../middleware/auth";
 import { revokeAllSessionsForUser, revokeSession } from "../../middleware/sessionControl";
 import { getSettings, updateSettings } from "../../models/settings.model";
+import {
+  ALLOWED_UPLOAD_CONTENT_TYPES,
+  safeExtensionForContentType,
+} from "../../services/uploadSafety";
 import type { HonoEnv } from "../../shared/types";
 
 const router = new Hono<HonoEnv>();

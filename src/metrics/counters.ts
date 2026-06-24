@@ -82,10 +82,9 @@ export const authDurationSeconds =
   });
 
 export const requestDurationSeconds =
-  existingMetric<
-    "method" | "route" | "status_code",
-    Histogram<"method" | "route" | "status_code">
-  >("zeroauth_request_duration_seconds") ??
+  existingMetric<"method" | "route" | "status_code", Histogram<"method" | "route" | "status_code">>(
+    "zeroauth_request_duration_seconds"
+  ) ??
   new Histogram({
     name: "zeroauth_request_duration_seconds",
     help: "Duration of HTTP requests in seconds",

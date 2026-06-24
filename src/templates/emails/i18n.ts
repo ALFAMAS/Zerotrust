@@ -37,10 +37,12 @@ const en: Dict = {
   // ── Magic link ──
   magiclink_subject: "Your sign-in link for {appName}",
   magiclink_heading: "Hi, {name}!",
-  magiclink_p1: "You requested a sign-in link for your {appName} account. Click the button below to sign in instantly.",
+  magiclink_p1:
+    "You requested a sign-in link for your {appName} account. Click the button below to sign in instantly.",
   magiclink_p2: "This link expires in {minutes} minutes and can only be used once.",
   magiclink_cta: "Sign In Now",
-  magiclink_link_help: "If the button above doesn't work, copy and paste this link into your browser:",
+  magiclink_link_help:
+    "If the button above doesn't work, copy and paste this link into your browser:",
   magiclink_ignore: "If you didn't request this, you can safely ignore this email.",
   magiclink_footer: "You received this email because a sign-in was requested at {appName}.",
   magiclink_valid: "This link is valid for {minutes} minutes.",
@@ -53,7 +55,8 @@ const en: Dict = {
   reset_p2: "Click the button below to set a new password. This link expires in {minutes} minutes.",
   reset_cta: "Reset Password",
   reset_link_help: "If the button above doesn't work, copy and paste this link into your browser:",
-  reset_security: "If you didn't request a password reset, please secure your account immediately by changing your password and reviewing your active sessions.",
+  reset_security:
+    "If you didn't request a password reset, please secure your account immediately by changing your password and reviewing your active sessions.",
   reset_footer: "You received this email because a password reset was requested at {appName}.",
   reset_valid: "This link is valid for {minutes} minutes.",
   reset_team: "— The {appName} Team",
@@ -66,7 +69,8 @@ const en: Dict = {
   alert_device: "Device",
   alert_location: "Location",
   alert_time: "Time",
-  alert_warning: "If this wasn't you, your account may be compromised. Click \"Secure My Account\" immediately to revoke access and change your password.",
+  alert_warning:
+    'If this wasn\'t you, your account may be compromised. Click "Secure My Account" immediately to revoke access and change your password.',
   alert_secure_cta: "Secure My Account",
   alert_wasme_cta: "This was me",
   alert_footer: "This security alert was sent from {appName}.",
@@ -78,7 +82,8 @@ const en: Dict = {
   // ── OTP ──
   otp_subject: "Your {appName} verification code",
   otp_heading: "Your verification code",
-  otp_p1: "Hi {name}, use the following code to verify your identity. This code expires in {minutes} minutes.",
+  otp_p1:
+    "Hi {name}, use the following code to verify your identity. This code expires in {minutes} minutes.",
   otp_code_label: "Verification code:",
   otp_ignore: "If you didn't request this code, you can safely ignore this email.",
   otp_footer: "You received this email because a verification was requested at {appName}.",
@@ -88,7 +93,8 @@ const en: Dict = {
   // ── Notification ──
   notification_link: "View details",
   notification_unsubscribe: "Unsubscribe",
-  notification_footer: "You received this email because of your notification preferences at {appName}.",
+  notification_footer:
+    "You received this email because of your notification preferences at {appName}.",
 };
 
 const es: Dict = {
@@ -113,7 +119,8 @@ const es: Dict = {
     "Si no creaste una cuenta en {appName}, puedes ignorar este correo de forma segura.",
   magiclink_subject: "Tu enlace de inicio de sesión para {appName}",
   magiclink_heading: "¡Hola, {name}!",
-  magiclink_p1: "Solicitaste un enlace de inicio de sesión para tu cuenta de {appName}. Haz clic en el botón para iniciar sesión al instante.",
+  magiclink_p1:
+    "Solicitaste un enlace de inicio de sesión para tu cuenta de {appName}. Haz clic en el botón para iniciar sesión al instante.",
   magiclink_p2: "Este enlace caduca en {minutes} minutos y solo se puede usar una vez.",
   magiclink_cta: "Iniciar sesión",
   magiclink_link_help: "Si el botón no funciona, copia y pega este enlace en tu navegador:",
@@ -123,8 +130,10 @@ const es: Dict = {
   magiclink_team: "— El equipo de {appName}",
   reset_subject: "Restablece tu contraseña de {appName}",
   reset_heading: "Solicitud de restablecimiento de contraseña",
-  reset_p1: "Hola {name}, recibimos una solicitud para restablecer la contraseña de tu cuenta de {appName}.",
-  reset_p2: "Haz clic en el botón para establecer una nueva contraseña. Este enlace caduca en {minutes} minutos.",
+  reset_p1:
+    "Hola {name}, recibimos una solicitud para restablecer la contraseña de tu cuenta de {appName}.",
+  reset_p2:
+    "Haz clic en el botón para establecer una nueva contraseña. Este enlace caduca en {minutes} minutos.",
   reset_cta: "Restablecer contraseña",
   reset_link_help: "Si el botón no funciona, copia y pega este enlace en tu navegador:",
   reset_security: "Si no solicitaste un restablecimiento, protege tu cuenta inmediatamente.",
@@ -138,14 +147,16 @@ const es: Dict = {
   alert_device: "Dispositivo",
   alert_location: "Ubicación",
   alert_time: "Hora",
-  alert_warning: "Si no fuiste tú, tu cuenta puede estar comprometida. Haz clic en \"Proteger mi cuenta\" inmediatamente.",
+  alert_warning:
+    'Si no fuiste tú, tu cuenta puede estar comprometida. Haz clic en "Proteger mi cuenta" inmediatamente.',
   alert_secure_cta: "Proteger mi cuenta",
   alert_wasme_cta: "Fui yo",
   alert_footer: "Esta alerta de seguridad fue enviada desde {appName}.",
   alert_support: "Si crees que es un error, contacta a nuestro equipo de soporte.",
   otp_subject: "Tu código de verificación de {appName}",
   otp_heading: "Tu código de verificación",
-  otp_p1: "Hola {name}, usa el siguiente código para verificar tu identidad. Este código caduca en {minutes} minutos.",
+  otp_p1:
+    "Hola {name}, usa el siguiente código para verificar tu identidad. Este código caduca en {minutes} minutos.",
   otp_code_label: "Código de verificación:",
   otp_ignore: "Si no solicitaste este código, puedes ignorar este correo de forma segura.",
   otp_footer: "Recibiste este correo porque se solicitó una verificación en {appName}.",
@@ -180,21 +191,26 @@ const fr: Dict = {
     "Si vous n'avez pas créé de compte {appName}, vous pouvez ignorer cet e-mail en toute sécurité.",
   magiclink_subject: "Votre lien de connexion pour {appName}",
   magiclink_heading: "Bonjour, {name} !",
-  magiclink_p1: "Vous avez demandé un lien de connexion pour votre compte {appName}. Cliquez sur le bouton pour vous connecter instantanément.",
+  magiclink_p1:
+    "Vous avez demandé un lien de connexion pour votre compte {appName}. Cliquez sur le bouton pour vous connecter instantanément.",
   magiclink_p2: "Ce lien expire dans {minutes} minutes et ne peut être utilisé qu'une seule fois.",
   magiclink_cta: "Se connecter",
   magiclink_link_help: "Si le bouton ne fonctionne pas, copiez ce lien dans votre navigateur :",
-  magiclink_ignore: "Si vous n'avez pas demandé ceci, vous pouvez ignorer cet e-mail en toute sécurité.",
+  magiclink_ignore:
+    "Si vous n'avez pas demandé ceci, vous pouvez ignorer cet e-mail en toute sécurité.",
   magiclink_footer: "Vous recevez cet e-mail car une connexion a été demandée sur {appName}.",
   magiclink_valid: "Ce lien est valable pendant {minutes} minutes.",
   magiclink_team: "— L'équipe {appName}",
   reset_subject: "Réinitialisez votre mot de passe {appName}",
   reset_heading: "Demande de réinitialisation de mot de passe",
-  reset_p1: "Bonjour {name}, nous avons reçu une demande de réinitialisation du mot de passe de votre compte {appName}.",
-  reset_p2: "Cliquez sur le bouton pour définir un nouveau mot de passe. Ce lien expire dans {minutes} minutes.",
+  reset_p1:
+    "Bonjour {name}, nous avons reçu une demande de réinitialisation du mot de passe de votre compte {appName}.",
+  reset_p2:
+    "Cliquez sur le bouton pour définir un nouveau mot de passe. Ce lien expire dans {minutes} minutes.",
   reset_cta: "Réinitialiser le mot de passe",
   reset_link_help: "Si le bouton ne fonctionne pas, copiez ce lien dans votre navigateur :",
-  reset_security: "Si vous n'avez pas demandé de réinitialisation, sécurisez votre compte immédiatement.",
+  reset_security:
+    "Si vous n'avez pas demandé de réinitialisation, sécurisez votre compte immédiatement.",
   reset_footer: "Vous recevez cet e-mail car une réinitialisation a été demandée sur {appName}.",
   reset_valid: "Ce lien est valable pendant {minutes} minutes.",
   reset_team: "— L'équipe {appName}",
@@ -205,22 +221,26 @@ const fr: Dict = {
   alert_device: "Appareil",
   alert_location: "Emplacement",
   alert_time: "Heure",
-  alert_warning: "Si ce n'était pas vous, votre compte peut être compromis. Cliquez sur \"Sécuriser mon compte\" immédiatement.",
+  alert_warning:
+    'Si ce n\'était pas vous, votre compte peut être compromis. Cliquez sur "Sécuriser mon compte" immédiatement.',
   alert_secure_cta: "Sécuriser mon compte",
   alert_wasme_cta: "C'était moi",
   alert_footer: "Cette alerte de sécurité a été envoyée depuis {appName}.",
   alert_support: "Si vous pensez qu'il s'agit d'une erreur, contactez notre équipe de support.",
   otp_subject: "Votre code de vérification {appName}",
   otp_heading: "Votre code de vérification",
-  otp_p1: "Bonjour {name}, utilisez le code suivant pour vérifier votre identité. Ce code expire dans {minutes} minutes.",
+  otp_p1:
+    "Bonjour {name}, utilisez le code suivant pour vérifier votre identité. Ce code expire dans {minutes} minutes.",
   otp_code_label: "Code de vérification :",
-  otp_ignore: "Si vous n'avez pas demandé ce code, vous pouvez ignorer cet e-mail en toute sécurité.",
+  otp_ignore:
+    "Si vous n'avez pas demandé ce code, vous pouvez ignorer cet e-mail en toute sécurité.",
   otp_footer: "Vous recevez cet e-mail car une vérification a été demandée sur {appName}.",
   otp_valid: "Ce code est valable pendant {minutes} minutes.",
   otp_team: "— L'équipe {appName}",
   notification_link: "Voir les détails",
   notification_unsubscribe: "Se désabonner",
-  notification_footer: "Vous recevez cet e-mail en raison de vos préférences de notification sur {appName}.",
+  notification_footer:
+    "Vous recevez cet e-mail en raison de vos préférences de notification sur {appName}.",
 };
 
 const DICTS: Record<Locale, Dict> = { en, es, fr };

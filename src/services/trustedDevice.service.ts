@@ -43,7 +43,11 @@ export async function registerTrustedDevice(input: {
       registeredBy: input.registeredBy,
     })
     .returning();
-  logger.info("Trusted device registered", { orgId: input.orgId, userId: input.userId, deviceId: device.id });
+  logger.info("Trusted device registered", {
+    orgId: input.orgId,
+    userId: input.userId,
+    deviceId: device.id,
+  });
   return device as TrustedDevice;
 }
 

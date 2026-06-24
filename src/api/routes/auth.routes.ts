@@ -1157,14 +1157,11 @@ router.post("/me/onboarding-complete", authMiddleware, async (c) => {
 
     // Fire notification (Slack / Teams / PagerDuty) — non-blocking.
     const { notificationDispatcher } = await import("../../notifications/dispatcher.js");
-    void notificationDispatcher.dispatch(
-      "onboarding.completed",
-      {
-        userId: user.id,
-        email: user.email,
-        displayName: user.displayName ?? user.email,
-      }
-    );
+    void notificationDispatcher.dispatch("onboarding.completed", {
+      userId: user.id,
+      email: user.email,
+      displayName: user.displayName ?? user.email,
+    });
 
     return c.json({ success: true });
   } catch (err) {
@@ -1190,7 +1187,9 @@ router.get("/me/streak", authMiddleware, async (c) => {
 router.get("/me/achievements", authMiddleware, async (c) => {
   try {
     const user = c.get("user");
-    const { getUserAchievements, ACHIEVEMENT_DEFS } = await import("../../services/achievement.service.js");
+    const { getUserAchievements, ACHIEVEMENT_DEFS } = await import(
+      "../../services/achievement.service.js"
+    );
     const unlocked = await getUserAchievements(user.id);
     const achievements = Object.values(ACHIEVEMENT_DEFS).map((def) => {
       const found = unlocked.find((u: any) => u.key === def.key);
@@ -1322,12 +1321,21 @@ router.post("/me/link", authMiddleware, async (c) => {
     const { provider, providerUserId, providerEmail } = await c.req.json().catch(() => ({}));
 
     if (!provider || !providerUserId) {
-      return c.json({ error: "INVALID_REQUEST", message: "provider and providerUserId required" }, 400);
+      return c.json(
+        { error: "INVALID_REQUEST", message: "provider and providerUserId required" },
+        400
+      );
     }
 
     const supported = ["google", "github", "apple", "facebook"];
     if (!supported.includes(provider)) {
-      return c.json({ error: "INVALID_REQUEST", message: `Unsupported provider. Supported: ${supported.join(", ")}` }, 400);
+      return c.json(
+        {
+          error: "INVALID_REQUEST",
+          message: `Unsupported provider. Supported: ${supported.join(", ")}`,
+        },
+        400
+      );
     }
 
     const db = getDb();
@@ -1346,7 +1354,10 @@ router.post("/me/link", authMiddleware, async (c) => {
 
     if (existingLink && existingLink.id !== user.id) {
       return c.json(
-        { error: "ALREADY_LINKED", message: "This OAuth account is already linked to another user" },
+        {
+          error: "ALREADY_LINKED",
+          message: "This OAuth account is already linked to another user",
+        },
         409
       );
     }
@@ -1360,7 +1371,10 @@ router.post("/me/link", authMiddleware, async (c) => {
 
     const providers: any[] = (currentUser?.oauthProviders as any) ?? [];
     if (providers.some((p: any) => p.provider === provider)) {
-      return c.json({ error: "ALREADY_LINKED", message: `This account already has ${provider} linked` }, 409);
+      return c.json(
+        { error: "ALREADY_LINKED", message: `This account already has ${provider} linked` },
+        409
+      );
     }
 
     // Link the provider

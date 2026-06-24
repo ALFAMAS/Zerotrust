@@ -1,10 +1,10 @@
 "use client";
 
-import { ArrowLeft, Archive, Clock, User } from "lucide-react";
-import { useRouter, useParams } from "next/navigation";
+import { Archive, ArrowLeft, Clock, User } from "lucide-react";
+import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { api } from "@/lib/api";
 import { SkeletonText } from "@/components/Skeleton";
+import { api } from "@/lib/api";
 
 interface Note {
   id: string;
@@ -43,9 +43,7 @@ export default function NoteDetailPage() {
     if (!noteId) return;
     setLoading(true);
     try {
-      const data = await api.get<{ note: Note; revisions: Revision[] }>(
-        `/collab/notes/${noteId}`,
-      );
+      const data = await api.get<{ note: Note; revisions: Revision[] }>(`/collab/notes/${noteId}`);
       setNote(data.note);
       setTitle(data.note.title);
       setContent(data.note.content);
@@ -71,7 +69,7 @@ export default function NoteDetailPage() {
       try {
         await api.put(`/collab/notes/${noteId}`, { title, content });
         setNote((prev) =>
-          prev ? { ...prev, title, content, updatedAt: new Date().toISOString() } : prev,
+          prev ? { ...prev, title, content, updatedAt: new Date().toISOString() } : prev
         );
       } catch {
         // ignore
@@ -166,8 +164,7 @@ export default function NoteDetailPage() {
               >
                 <User className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
                 <span className="text-muted-foreground">
-                  {rev.editorName ?? "Unknown"} edited{" "}
-                  {new Date(rev.createdAt).toLocaleString()}
+                  {rev.editorName ?? "Unknown"} edited {new Date(rev.createdAt).toLocaleString()}
                 </span>
               </div>
             ))}

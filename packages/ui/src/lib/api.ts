@@ -144,7 +144,7 @@ async function request<T>(
 
     for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
       if (attempt > 0) {
-        await sleep(BASE_RETRY_DELAY_MS * Math.pow(2, attempt - 1));
+        await sleep(BASE_RETRY_DELAY_MS * 2 ** (attempt - 1));
       }
 
       let res: Response;
@@ -227,7 +227,8 @@ async function request<T>(
 }
 
 export const api = {
-  get: <T>(path: string, cacheTtlMs?: number) => request<T>("GET", path, undefined, false, false, cacheTtlMs),
+  get: <T>(path: string, cacheTtlMs?: number) =>
+    request<T>("GET", path, undefined, false, false, cacheTtlMs),
   post: <T>(path: string, body?: unknown, skipAuth = false) => {
     // Invalidate related cache entries on mutation
     invalidateCache(path.split("/").slice(0, -1).join("/"));

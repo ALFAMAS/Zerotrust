@@ -64,7 +64,11 @@ function ThirdPartyChatWidget() {
         s.async = true;
         s.src = `https://widget.intercom.io/widget/${chatId}`;
         s.onload = () => {
-          try { w.Intercom?.("boot", w.intercomSettings); } catch { /* ignore */ }
+          try {
+            w.Intercom?.("boot", w.intercomSettings);
+          } catch {
+            /* ignore */
+          }
         };
         document.head.appendChild(s);
       } else if (chatProvider === "tawk") {
@@ -86,7 +90,9 @@ function ThirdPartyChatWidget() {
     }
 
     getIdentity().then(inject);
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   return null;
@@ -123,7 +129,10 @@ function NativeChatWidget() {
         setTicketId(res.ticket.id);
         setMessages((prev) => [
           ...prev,
-          { role: "system", text: "Thanks for reaching out! A support agent will respond shortly. Your ticket has been created." },
+          {
+            role: "system",
+            text: "Thanks for reaching out! A support agent will respond shortly. Your ticket has been created.",
+          },
         ]);
       } else {
         // Add message to existing ticket

@@ -82,7 +82,8 @@ async function enforceOrgTrustedDevice(c: any, next: any) {
           return c.json(
             {
               error: "TRUSTED_DEVICE_REQUIRED",
-              message: "This organization requires access from a registered trusted device. Register this device in your org settings.",
+              message:
+                "This organization requires access from a registered trusted device. Register this device in your org settings.",
             },
             403
           );
@@ -94,7 +95,8 @@ async function enforceOrgTrustedDevice(c: any, next: any) {
           return c.json(
             {
               error: "TRUSTED_DEVICE_REQUIRED",
-              message: "This device is not registered as trusted for this organization. Register it in your org settings.",
+              message:
+                "This device is not registered as trusted for this organization. Register it in your org settings.",
             },
             403
           );
@@ -217,7 +219,10 @@ const UpdateSecurityPolicySchema = z.object({
   maxSessionAgeSeconds: z.number().int().min(0).max(31_536_000).optional(),
   idleTimeoutSeconds: z.number().int().min(0).max(31_536_000).optional(),
   maxConcurrentSessions: z.number().int().min(0).max(1000).optional(),
-  allowedCountries: z.array(z.string().regex(/^[A-Z]{2}$/, "Must be an ISO 3166-1 alpha-2 code")).max(250).optional(),
+  allowedCountries: z
+    .array(z.string().regex(/^[A-Z]{2}$/, "Must be an ISO 3166-1 alpha-2 code"))
+    .max(250)
+    .optional(),
   requireTrustedDevices: z.boolean().optional(),
 });
 
@@ -373,7 +378,7 @@ router.put("/:orgId/security/policy", async (c) => {
       idleTimeoutSeconds: parsed.data.idleTimeoutSeconds ?? 0,
       maxConcurrentSessions: parsed.data.maxConcurrentSessions ?? 0,
       allowedCountries: parsed.data.allowedCountries ?? [],
-        requireTrustedDevices: parsed.data.requireTrustedDevices ?? false,
+      requireTrustedDevices: parsed.data.requireTrustedDevices ?? false,
       updatedAt: new Date(),
       updatedBy: user.id,
     };
@@ -517,12 +522,21 @@ router.post("/:orgId/sso/test", async (c) => {
       .limit(1);
 
     const sso: OrgSsoConfig = (org?.ssoConfig as OrgSsoConfig) ?? {};
-    const results: { saml?: { status: string; error?: string }; oidc?: { status: string; error?: string } } = {};
+    const results: {
+      saml?: { status: string; error?: string };
+      oidc?: { status: string; error?: string };
+    } = {};
 
     if (sso.saml?.enabled && sso.saml.idpSsoUrl) {
       try {
-        const res = await fetch(sso.saml.idpSsoUrl, { method: "GET", signal: AbortSignal.timeout(10_000) });
-        results.saml = { status: res.ok ? "success" : "error", error: res.ok ? undefined : `HTTP ${res.status}` };
+        const res = await fetch(sso.saml.idpSsoUrl, {
+          method: "GET",
+          signal: AbortSignal.timeout(10_000),
+        });
+        results.saml = {
+          status: res.ok ? "success" : "error",
+          error: res.ok ? undefined : `HTTP ${res.status}`,
+        };
       } catch (e) {
         results.saml = { status: "error", error: (e as Error).message };
       }
@@ -532,7 +546,10 @@ router.post("/:orgId/sso/test", async (c) => {
       try {
         const wellKnown = new URL("/.well-known/openid-configuration", sso.oidc.issuerUrl);
         const res = await fetch(wellKnown.toString(), { signal: AbortSignal.timeout(10_000) });
-        results.oidc = { status: res.ok ? "success" : "error", error: res.ok ? undefined : `HTTP ${res.status}` };
+        results.oidc = {
+          status: res.ok ? "success" : "error",
+          error: res.ok ? undefined : `HTTP ${res.status}`,
+        };
       } catch (e) {
         results.oidc = { status: "error", error: (e as Error).message };
       }
@@ -541,12 +558,25 @@ router.post("/:orgId/sso/test", async (c) => {
     // Persist test results
     const updated: OrgSsoConfig = { ...sso };
     if (results.saml) {
-      updated.saml = { ...updated.saml!, lastTestedAt: new Date().toISOString(), lastTestStatus: results.saml.status as "success" | "error", lastTestError: results.saml.error };
+      updated.saml = {
+        ...updated.saml!,
+        lastTestedAt: new Date().toISOString(),
+        lastTestStatus: results.saml.status as "success" | "error",
+        lastTestError: results.saml.error,
+      };
     }
     if (results.oidc) {
-      updated.oidc = { ...updated.oidc!, lastTestedAt: new Date().toISOString(), lastTestStatus: results.oidc.status as "success" | "error", lastTestError: results.oidc.error };
+      updated.oidc = {
+        ...updated.oidc!,
+        lastTestedAt: new Date().toISOString(),
+        lastTestStatus: results.oidc.status as "success" | "error",
+        lastTestError: results.oidc.error,
+      };
     }
-    await db.update(organizationsTable).set({ ssoConfig: updated, updatedAt: new Date() }).where(eq(organizationsTable.id, orgId));
+    await db
+      .update(organizationsTable)
+      .set({ ssoConfig: updated, updatedAt: new Date() })
+      .where(eq(organizationsTable.id, orgId));
 
     return c.json({ results });
   } catch (err) {
@@ -590,9 +620,16 @@ router.post("/:orgId/trusted-devices", async (c) => {
     await requireOrgRole(orgId, user.id, db, "admin");
     const body = (await c.req.json()) as Record<string, unknown>;
     const parsed = RegisterTrustedDeviceSchema.safeParse(body);
-    if (!parsed.success) return c.json({ error: "INVALID_REQUEST", issues: parsed.error.issues }, 400);
+    if (!parsed.success)
+      return c.json({ error: "INVALID_REQUEST", issues: parsed.error.issues }, 400);
     const { registerTrustedDevice } = await import("../../services/trustedDevice.service.js");
-    const device = await registerTrustedDevice({ orgId, userId: parsed.data.userId, deviceName: parsed.data.deviceName, deviceFingerprint: parsed.data.deviceFingerprint, registeredBy: user.id });
+    const device = await registerTrustedDevice({
+      orgId,
+      userId: parsed.data.userId,
+      deviceName: parsed.data.deviceName,
+      deviceFingerprint: parsed.data.deviceFingerprint,
+      registeredBy: user.id,
+    });
     return c.json({ device }, 201);
   } catch (err) {
     if (err instanceof HTTPException) throw err;

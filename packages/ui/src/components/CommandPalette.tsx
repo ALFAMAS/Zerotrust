@@ -1,8 +1,8 @@
 "use client";
 
-import { Search, File, User, Settings, ArrowRight } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { ArrowRight, File, Search, Settings, User } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
@@ -79,7 +79,7 @@ export function CommandPalette() {
       setLoading(true);
       try {
         const data = await api.get<{ results: SearchResult[] }>(
-          `/collab/search?q=${encodeURIComponent(query)}`,
+          `/collab/search?q=${encodeURIComponent(query)}`
         );
         setResults(data.results || []);
       } catch {
@@ -119,7 +119,7 @@ export function CommandPalette() {
       setQuery("");
       router.push(result.href);
     },
-    [router],
+    [router]
   );
 
   if (!open) return null;
@@ -162,9 +162,7 @@ export function CommandPalette() {
         {/* Results */}
         <div className="max-h-80 overflow-y-auto p-2">
           {loading && (
-            <div className="px-3 py-6 text-center text-sm text-muted-foreground">
-              Searching…
-            </div>
+            <div className="px-3 py-6 text-center text-sm text-muted-foreground">Searching…</div>
           )}
 
           {!loading && query.length >= 2 && results.length === 0 && (
@@ -186,7 +184,7 @@ export function CommandPalette() {
                     "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors",
                     i === selectedIndex
                       ? "bg-accent text-accent-foreground"
-                      : "text-foreground hover:bg-accent hover:text-accent-foreground",
+                      : "text-foreground hover:bg-accent hover:text-accent-foreground"
                   )}
                 >
                   <span
@@ -194,7 +192,7 @@ export function CommandPalette() {
                       "flex h-7 w-7 items-center justify-center rounded-md",
                       i === selectedIndex
                         ? "bg-primary/10 text-primary"
-                        : "bg-muted text-muted-foreground",
+                        : "bg-muted text-muted-foreground"
                     )}
                   >
                     <ResultIcon icon={result.icon} type={result.type} />

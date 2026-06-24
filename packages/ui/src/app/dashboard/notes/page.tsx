@@ -1,10 +1,10 @@
 "use client";
 
-import { FileText, Plus, Search, Archive, Clock } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { Archive, Clock, FileText, Plus, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { api } from "@/lib/api";
+import { useCallback, useEffect, useState } from "react";
 import { SkeletonCard } from "@/components/Skeleton";
+import { api } from "@/lib/api";
 
 interface Note {
   id: string;
@@ -40,9 +40,7 @@ export default function NotesPage() {
     if (!orgId) return;
     setLoading(true);
     try {
-      const data = await api.get<{ notes: Note[] }>(
-        `/collab/notes?orgId=${orgId}`,
-      );
+      const data = await api.get<{ notes: Note[] }>(`/collab/notes?orgId=${orgId}`);
       setNotes(data.notes || []);
     } catch {
       setNotes([]);
@@ -73,7 +71,7 @@ export default function NotesPage() {
     ? notes.filter(
         (n) =>
           n.title.toLowerCase().includes(search.toLowerCase()) ||
-          n.content.toLowerCase().includes(search.toLowerCase()),
+          n.content.toLowerCase().includes(search.toLowerCase())
       )
     : notes;
 
@@ -96,9 +94,7 @@ export default function NotesPage() {
           <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
             Shared Notes
           </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Collaborative notes for your team
-          </p>
+          <p className="mt-1 text-sm text-muted-foreground">Collaborative notes for your team</p>
         </div>
         <button
           onClick={createNote}
@@ -160,9 +156,7 @@ export default function NotesPage() {
                 </div>
               </div>
               {note.creatorName && (
-                <div className="mt-2 text-[11px] text-muted-foreground">
-                  by {note.creatorName}
-                </div>
+                <div className="mt-2 text-[11px] text-muted-foreground">by {note.creatorName}</div>
               )}
             </button>
           ))}
