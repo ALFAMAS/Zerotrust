@@ -177,6 +177,15 @@ function slugify(name: string): string {
     .replace(/^-|-$/g, "");
 }
 
+const ORGANIZATION_LEGACY_COLUMNS = {
+  id: organizationsTable.id,
+  name: organizationsTable.name,
+  slug: organizationsTable.slug,
+  ownerId: organizationsTable.ownerId,
+  createdAt: organizationsTable.createdAt,
+  updatedAt: organizationsTable.updatedAt,
+};
+
 // ── Zod schemas ───────────────────────────────────────────────────────────────
 
 const CreateOrgSchema = z.object({
@@ -256,7 +265,7 @@ router.post("/", async (c) => {
 
     // Check slug uniqueness
     const existing = await db
-      .select()
+      .select({ id: organizationsTable.id })
       .from(organizationsTable)
       .where(eq(organizationsTable.slug, slug))
       .limit(1);
@@ -269,7 +278,7 @@ router.post("/", async (c) => {
     const orgRows = await db
       .insert(organizationsTable)
       .values({ name, slug, ownerId: user.id })
-      .returning();
+      .returning(ORGANIZATION_LEGACY_COLUMNS);
     const org = orgRows[0];
 
     // Insert owner member
