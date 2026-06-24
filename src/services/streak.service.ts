@@ -8,6 +8,27 @@ const logger = getLogger("streak-service");
 /** Number of hours after midnight a user can still count yesterday's login. */
 const GRACE_PERIOD_HOURS = 24;
 
+function isMissingStreakStorageError(error: unknown): boolean {
+  let current: unknown = error;
+  while (current && typeof current === "object") {
+    const candidate = current as { code?: unknown; message?: unknown; cause?: unknown };
+    if (candidate.code === "42P01" || candidate.code === "42703") return true;
+
+    const message = typeof candidate.message === "string" ? candidate.message : "";
+    if (
+      /relation\s+["']?streaks["']?\s+does not exist/i.test(message) ||
+      /column\s+["']?(current_streak|longest_streak|last_login_date|last_login_at)["']?\s+does not exist/i.test(
+        message,
+      )
+    ) {
+      return true;
+    }
+
+    current = candidate.cause;
+  }
+  return false;
+}
+
 /**
  * Record a login event and update the user's streak.
  * Returns the updated streak info.
@@ -102,11 +123,22 @@ export async function recordLogin(userId: string) {
  */
 export async function getStreak(userId: string) {
   const db = getDb();
-  const [streak] = await db
-    .select()
-    .from(streaksTable)
-    .where(eq(streaksTable.userId, userId))
-    .limit(1);
+  try {
+    const [streak] = await db
+      .select()
+      .from(streaksTable)
+      .where(eq(streaksTable.userId, userId))
+      .limit(1);
 
-  return streak ?? { currentStreak: 0, longestStreak: 0, lastLoginDate: null };
+    return streak ?? { currentStreak: 0, longestStreak: 0, lastLoginDate: null };
+  } catch (err) {
+    if (isMissingStreakStorageError(err)) {
+      logger.warn("Streak storage is unavailable; returning empty streak", {
+        userId,
+        error: String(err),
+      });
+      return { currentStreak: 0, longestStreak: 0, lastLoginDate: null };
+    }
+    throw err;
+  }
 }
