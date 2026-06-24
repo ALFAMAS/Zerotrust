@@ -44,6 +44,7 @@ export default class ErrorBoundary extends React.Component<Props, State> {
               <p className="text-xs text-gray-600 mb-4 font-mono">Ref: {this.state.eventId}</p>
             )}
             <button
+              type="button"
               onClick={() => this.setState({ hasError: false, eventId: null })}
               className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm rounded-lg transition-colors"
             >

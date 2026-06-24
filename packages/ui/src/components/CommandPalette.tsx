@@ -175,6 +175,7 @@ export function CommandPalette() {
             <div role="listbox">
               {results.map((result, i) => (
                 <button
+                  type="button"
                   key={`${result.type}-${result.href}-${i}`}
                   role="option"
                   aria-selected={i === selectedIndex}

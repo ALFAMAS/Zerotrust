@@ -117,6 +117,7 @@ export default function AdminFederationPage() {
           </p>
         </div>
         <button
+          type="button"
           onClick={() => setShowForm((v) => !v)}
           className="flex shrink-0 items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
         >
@@ -250,6 +251,7 @@ export default function AdminFederationPage() {
                 )}
               </div>
               <button
+                type="button"
                 onClick={(): any => handleDelete(p.id)}
                 disabled={deleting === p.id}
                 aria-label={`Remove ${p.name}`}

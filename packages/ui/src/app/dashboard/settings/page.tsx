@@ -116,6 +116,7 @@ export default function SettingsPage() {
                 <div>
                   {isConnected ? (
                     <button
+                      type="button"
                       onClick={() => handleDisconnect(provider.id)}
                       disabled={actionLoading === provider.id}
                       className="border border-border hover:border-red-700 text-muted-foreground hover:text-red-400 px-3 py-1.5 rounded-lg text-xs transition-colors disabled:opacity-50"

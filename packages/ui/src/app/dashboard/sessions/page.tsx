@@ -49,6 +49,7 @@ export default function SessionsPage() {
           Active Sessions
         </h1>
         <button
+          type="button"
           onClick={() => {
             if (confirm("Revoke all other sessions?"))
               api
@@ -143,6 +144,7 @@ export default function SessionsPage() {
                 </div>
                 {session.isActive && !session.isCurrent && (
                   <button
+                    type="button"
                     onClick={() => revoke(session.id)}
                     className="shrink-0 text-xs text-red-400 hover:text-red-300 border border-red-800 px-2.5 py-1 rounded-lg hover:bg-red-950 transition-colors"
                   >

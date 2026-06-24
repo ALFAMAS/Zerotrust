@@ -1,6 +1,6 @@
 "use client";
 
-import { CreditCard, Shield, User } from "lucide-react";
+import { Shield, User } from "lucide-react";
 
 /**
  * Shows three progress bars:

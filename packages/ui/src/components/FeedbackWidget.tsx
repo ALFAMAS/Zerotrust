@@ -100,6 +100,7 @@ export default function FeedbackWidget({
       aria-label="Feedback"
     >
       <button
+        type="button"
         onClick={dismiss}
         className="absolute right-3 top-3 text-muted-foreground transition-colors hover:text-foreground"
         aria-label="Close"
@@ -118,6 +119,7 @@ export default function FeedbackWidget({
           <div className="flex flex-wrap gap-1">
             {Array.from({ length: 11 }, (_, i) => (
               <button
+                type="button"
                 key={i}
                 onClick={() => handleScore(i)}
                 className="h-8 w-8 rounded-md border border-border text-xs text-muted-foreground transition-colors hover:border-primary hover:bg-primary hover:text-primary-foreground"
@@ -134,6 +136,7 @@ export default function FeedbackWidget({
           <p className="mb-4 text-sm font-medium text-foreground">Was this page helpful?</p>
           <div className="flex gap-3">
             <button
+              type="button"
               onClick={() => handleScore(1)}
               className="flex-1 rounded-lg border border-border py-2 text-xl text-muted-foreground transition-colors hover:border-emerald-500 hover:bg-emerald-900/30 hover:text-emerald-300"
               aria-label="Thumbs up"
@@ -141,6 +144,7 @@ export default function FeedbackWidget({
               👍
             </button>
             <button
+              type="button"
               onClick={() => handleScore(-1)}
               className="flex-1 rounded-lg border border-border py-2 text-xl text-muted-foreground transition-colors hover:border-red-500 hover:bg-red-900/30 hover:text-red-300"
               aria-label="Thumbs down"

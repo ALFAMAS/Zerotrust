@@ -102,6 +102,7 @@ export default function OrganizationsPage() {
           Organizations
         </h1>
         <button
+          type="button"
           onClick={() => setShowCreateForm((v) => !v)}
           className="text-sm bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-lg transition-colors"
         >
@@ -165,6 +166,7 @@ export default function OrganizationsPage() {
         <div className="text-center py-16 text-muted-foreground">
           <p className="mb-3">You don&apos;t belong to any organizations yet.</p>
           <button
+            type="button"
             onClick={() => setShowCreateForm(true)}
             className="text-sm text-primary hover:text-primary/80 underline"
           >

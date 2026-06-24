@@ -134,6 +134,7 @@ export default function UsersPage() {
           <p className="mt-1 text-sm text-muted-foreground">{total} total users</p>
         </div>
         <button
+          type="button"
           onClick={() => setShowInviteModal(true)}
           className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-foreground hover:bg-primary/90 transition-colors"
         >
@@ -273,6 +274,7 @@ export default function UsersPage() {
                           View
                         </Link>
                         <button
+                          type="button"
                           onClick={() => handleToggleStatus(u)}
                           className={`rounded px-2 py-1 text-xs transition-colors ${
                             u.status === "active"
@@ -283,6 +285,7 @@ export default function UsersPage() {
                           {u.status === "active" ? "Suspend" : "Activate"}
                         </button>
                         <button
+                          type="button"
                           onClick={() => handleDelete(u)}
                           className="rounded px-2 py-1 text-xs text-red-400 hover:bg-red-900/30 transition-colors"
                         >
@@ -304,6 +307,7 @@ export default function UsersPage() {
         </span>
         <div className="flex gap-2">
           <button
+            type="button"
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page <= 1}
             className="rounded px-3 py-1.5 bg-muted border border-border disabled:opacity-40 hover:bg-accent transition-colors"
@@ -311,6 +315,7 @@ export default function UsersPage() {
             Previous
           </button>
           <button
+            type="button"
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page >= totalPages}
             className="rounded px-3 py-1.5 bg-muted border border-border disabled:opacity-40 hover:bg-accent transition-colors"
@@ -339,12 +344,14 @@ export default function UsersPage() {
             </div>
             <div className="flex justify-end gap-3">
               <button
+                type="button"
                 onClick={() => setShowInviteModal(false)}
                 className="rounded-lg px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
                 Cancel
               </button>
               <button
+                type="button"
                 onClick={handleInvite}
                 disabled={inviting || !inviteEmail.trim()}
                 className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors"

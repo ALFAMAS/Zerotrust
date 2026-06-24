@@ -170,6 +170,7 @@ export default function ProductTour() {
           </div>
           <div className="flex items-center gap-2">
             <button
+              type="button"
               onClick={finish}
               className="text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
             >

@@ -184,6 +184,7 @@ export default function AdminOverviewPage() {
             </Link>
           ))}
           <button
+            type="button"
             onClick={exportUsers}
             disabled={exporting}
             className="flex flex-col items-start gap-2 rounded-lg border border-border bg-background p-4 text-left transition-colors hover:border-primary/50 disabled:opacity-50"

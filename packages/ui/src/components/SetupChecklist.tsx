@@ -58,19 +58,20 @@ export default function SetupChecklist({ user }: { user: any }) {
     }
   }, []);
 
-  if (!user || dismissed) return null;
-
-  const completed = ITEMS.filter((i) => i.check(user));
+  const completed = user ? ITEMS.filter((i) => i.check(user)) : [];
   const total = ITEMS.length;
-  const allDone = completed.length === total;
+  const allDone = !!user && completed.length === total;
 
-  // Fire onboarding-complete when all items are done
+  // Fire onboarding-complete when all items are done. Declared before any early
+  // return so the hook order stays stable across renders (Rules of Hooks).
   useEffect(() => {
     if (allDone && !celebrated) {
       setCelebrated(true);
       fireOnboardingComplete();
     }
   }, [allDone, celebrated, fireOnboardingComplete]);
+
+  if (!user || dismissed) return null;
 
   if (allDone) {
     return (
@@ -105,6 +106,7 @@ export default function SetupChecklist({ user }: { user: any }) {
       <div className="mb-1 flex items-center justify-between">
         <h2 className="text-sm font-semibold text-foreground">Get started</h2>
         <button
+          type="button"
           onClick={dismiss}
           className="text-xs text-muted-foreground transition-colors hover:text-foreground"
         >

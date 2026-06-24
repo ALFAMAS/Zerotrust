@@ -130,6 +130,7 @@ export default function SessionsPage() {
       <div className="flex gap-1 border-b border-border">
         {tabs.map((t) => (
           <button
+            type="button"
             key={t.key}
             onClick={() => setTab(t.key)}
             className={[
@@ -260,6 +261,7 @@ export default function SessionsPage() {
                       <td className="px-5 py-4 text-right">
                         {active && (
                           <button
+                            type="button"
                             onClick={() => handleRevoke(s)}
                             className="rounded px-2 py-1 text-xs text-red-400 hover:bg-red-900/30 transition-colors"
                           >

@@ -79,6 +79,7 @@ export default function AccessReviewsPage() {
           </p>
         </div>
         <button
+          type="button"
           onClick={startReview}
           disabled={creating}
           className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors"

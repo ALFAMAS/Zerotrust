@@ -137,6 +137,7 @@ export function NotificationBell() {
   return (
     <div ref={containerRef} className="relative">
       <button
+        type="button"
         aria-label="Notifications"
         aria-haspopup="dialog"
         aria-expanded={open}
@@ -162,6 +163,7 @@ export function NotificationBell() {
             <span className="text-sm font-semibold text-foreground">Notifications</span>
             {unreadCount > 0 && (
               <button
+                type="button"
                 onClick={markAllRead}
                 className="text-xs text-primary transition-colors hover:text-primary/80"
               >
@@ -180,6 +182,7 @@ export function NotificationBell() {
             ) : (
               notifications.map((n) => (
                 <button
+                  type="button"
                   key={n.id}
                   onClick={() => handleNotificationClick(n)}
                   className={cn(
@@ -208,6 +211,7 @@ export function NotificationBell() {
           {notifications.length > 0 && (
             <div className="border-t border-border px-4 py-2">
               <button
+                type="button"
                 onClick={markAllRead}
                 className="w-full py-1 text-center text-xs text-primary transition-colors hover:text-primary/80"
               >

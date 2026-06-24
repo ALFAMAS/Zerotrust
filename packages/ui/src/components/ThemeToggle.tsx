@@ -18,7 +18,7 @@ export function ThemeToggle() {
 
   if (!mounted) {
     return (
-      <button className={btnClass} aria-label="Toggle theme">
+      <button type="button" className={btnClass} aria-label="Toggle theme">
         <span className="h-4 w-4" />
       </button>
     );
@@ -38,7 +38,13 @@ export function ThemeToggle() {
         : "Switch to dark mode";
 
   return (
-    <button onClick={cycleTheme} aria-label={label} title={label} className={btnClass}>
+    <button
+      type="button"
+      onClick={cycleTheme}
+      aria-label={label}
+      title={label}
+      className={btnClass}
+    >
       {theme === "dark" ? (
         <Moon className="h-4 w-4" />
       ) : theme === "light" ? (

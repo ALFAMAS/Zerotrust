@@ -110,6 +110,7 @@ export default function NoteDetailPage() {
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
         <button
+          type="button"
           onClick={() => router.push("/dashboard/notes")}
           className="flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
         >
@@ -123,6 +124,7 @@ export default function NoteDetailPage() {
             <span className="text-xs text-muted-foreground">Auto-saved</span>
           )}
           <button
+            type="button"
             onClick={handleArchive}
             className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:border-destructive hover:text-destructive"
           >

@@ -120,6 +120,7 @@ export default function AdminDIDPage() {
             className="flex-1 rounded-lg border border-border bg-muted px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none"
           />
           <button
+            type="button"
             onClick={() => handleResolve()}
             disabled={resolving || !resolveDid.trim()}
             className="flex items-center justify-center gap-2 rounded-lg bg-primary px-5 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
@@ -134,6 +135,7 @@ export default function AdminDIDPage() {
         </div>
 
         <button
+          type="button"
           onClick={() => {
             setResolveDid(EXAMPLE_KEY);
             handleResolve(EXAMPLE_KEY);
@@ -203,6 +205,7 @@ export default function AdminDIDPage() {
             className="flex-1 rounded-lg border border-border bg-muted px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none"
           />
           <button
+            type="button"
             onClick={handleChallenge}
             disabled={challenging || !challengeDid.trim()}
             className="flex items-center justify-center gap-2 rounded-lg bg-primary px-5 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"

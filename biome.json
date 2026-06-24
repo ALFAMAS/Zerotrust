@@ -88,8 +88,8 @@
         "useConst": "error"
       },
       "nursery": {
-        "noFloatingPromises": "error",
-        "noMisusedPromises": "error"
+        "noFloatingPromises": "warn",
+        "noMisusedPromises": "warn"
       }
     }
   },

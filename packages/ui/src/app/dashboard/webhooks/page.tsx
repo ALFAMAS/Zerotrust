@@ -127,6 +127,7 @@ export default function WebhooksPage() {
           </p>
         </div>
         <button
+          type="button"
           onClick={() => setCreateOpen(true)}
           className="shrink-0 px-4 py-2 bg-primary hover:bg-primary/90 text-foreground text-sm font-medium rounded-lg transition-colors"
         >
@@ -171,24 +172,28 @@ export default function WebhooksPage() {
               </div>
               <div className="flex items-center gap-2 shrink-0">
                 <button
+                  type="button"
                   onClick={() => pingEndpoint(ep.id)}
                   className="px-3 py-1.5 bg-muted hover:bg-accent text-foreground/80 text-xs rounded-lg transition-colors"
                 >
                   Test
                 </button>
                 <button
+                  type="button"
                   onClick={() => openDeliveries(ep.id)}
                   className="px-3 py-1.5 bg-muted hover:bg-accent text-foreground/80 text-xs rounded-lg transition-colors"
                 >
                   Deliveries
                 </button>
                 <button
+                  type="button"
                   onClick={() => toggleActive(ep)}
                   className="px-3 py-1.5 bg-muted hover:bg-accent text-foreground/80 text-xs rounded-lg transition-colors"
                 >
                   {ep.active ? "Disable" : "Enable"}
                 </button>
                 <button
+                  type="button"
                   onClick={() => deleteEndpoint(ep.id)}
                   className="px-3 py-1.5 bg-red-900/50 hover:bg-red-900 text-red-300 text-xs rounded-lg transition-colors"
                 >
@@ -242,6 +247,7 @@ export default function WebhooksPage() {
             </div>
             {error && <p className="text-sm text-red-400">{error}</p>}
             <button
+              type="button"
               onClick={createEndpoint}
               disabled={!form.url || !form.secret || form.events.length === 0}
               className="w-full py-2 bg-primary hover:bg-primary/90 disabled:opacity-50 text-foreground text-sm font-medium rounded-lg transition-colors"

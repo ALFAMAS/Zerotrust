@@ -333,6 +333,7 @@ export default function AuthSettingsPage() {
       {/* Save Button */}
       <div className="flex justify-end pt-2">
         <button
+          type="button"
           onClick={handleSave}
           disabled={saving}
           className="flex items-center gap-2 rounded-lg bg-primary px-6 py-2.5 text-sm font-medium text-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors min-w-[140px] justify-center"

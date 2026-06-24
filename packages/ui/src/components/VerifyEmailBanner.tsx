@@ -72,6 +72,7 @@ export default function VerifyEmailBanner() {
             <Link href="/verify-email">Enter code</Link>
           </Button>
           <button
+            type="button"
             onClick={dismiss}
             aria-label="Dismiss"
             className="rounded-md p-1 text-amber-300 transition-colors hover:bg-amber-500/20 hover:text-amber-100"

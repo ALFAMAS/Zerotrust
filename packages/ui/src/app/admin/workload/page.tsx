@@ -411,6 +411,7 @@ export default function AdminWorkloadPage() {
                 </div>
                 {cred.status !== "revoked" && (
                   <button
+                    type="button"
                     onClick={() => handleRevoke(cred.id)}
                     disabled={revoking === cred.id}
                     className="flex shrink-0 items-center gap-1.5 self-start rounded-lg border border-border px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:border-red-700 hover:text-red-400 disabled:opacity-50"

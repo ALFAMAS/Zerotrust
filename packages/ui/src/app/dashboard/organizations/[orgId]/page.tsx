@@ -200,6 +200,7 @@ export default function OrgDetailPage() {
           )}
           {myRole !== "owner" && (
             <button
+              type="button"
               onClick={handleLeave}
               className="text-sm text-red-400 hover:text-red-300 border border-red-800 px-3 py-1.5 rounded-lg hover:bg-red-950 transition-colors"
             >
@@ -321,6 +322,7 @@ export default function OrgDetailPage() {
                   {new Date(invite.expiresAt).toLocaleDateString()}
                 </span>
                 <button
+                  type="button"
                   onClick={() => handleRevokeInvite(invite.id)}
                   className="text-xs text-red-400 hover:text-red-300 border border-red-800 px-2 py-0.5 rounded hover:bg-red-950 transition-colors whitespace-nowrap"
                 >

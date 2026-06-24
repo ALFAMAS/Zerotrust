@@ -168,6 +168,7 @@ export default function AuditPage() {
           </p>
         </div>
         <button
+          type="button"
           onClick={runVerify}
           disabled={verifying}
           className="rounded-lg border border-border bg-card px-4 py-2 text-sm font-medium text-foreground hover:bg-accent disabled:opacity-50 transition-colors"
