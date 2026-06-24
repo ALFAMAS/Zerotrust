@@ -8,10 +8,21 @@
 // Env:   DATABASE_URL (required), BACKUP_DIR, BACKUP_RETENTION_DAYS,
 //        BACKUP_S3_BUCKET, BACKUP_S3_ENDPOINT, BACKUP_S3_REGION,
 //        BACKUP_S3_ACCESS_KEY_ID, BACKUP_S3_SECRET_ACCESS_KEY,
-//        BACKUP_S3_PREFIX, BACKUP_S3_FORCE_PATH_STYLE, BACKUP_S3_RETENTION_DAYS
+//        BACKUP_S3_PREFIX, BACKUP_S3_FORCE_PATH_STYLE, BACKUP_S3_RETENTION_DAYS,
+//        BACKUP_ENCRYPTION_KEY, BACKUP_ENCRYPTION_KEY_HEX, BACKUP_REQUIRE_ENCRYPTION
 
 const { spawn } = require("node:child_process");
-const { mkdirSync, readdirSync, statSync, unlinkSync, existsSync } = require("node:fs");
+const { createCipheriv, randomBytes, scryptSync } = require("node:crypto");
+const {
+  createReadStream,
+  createWriteStream,
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  statSync,
+  unlinkSync,
+  writeFileSync,
+} = require("node:fs");
 const path = require("node:path");
 
 const databaseUrl = process.env.DATABASE_URL;
@@ -25,7 +36,7 @@ const retentionDays = parseInt(process.env.BACKUP_RETENTION_DAYS || "30", 10);
 mkdirSync(dir, { recursive: true });
 
 const stamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
-const file = path.join(dir, `zerotrust-${stamp}.dump`);
+let file = path.join(dir, `zerotrust-${stamp}.dump`);
 
 function run(cmd, args) {
   return new Promise((resolve, reject) => {
@@ -38,11 +49,76 @@ function run(cmd, args) {
   });
 }
 
+function encryptionKey() {
+  const hex = process.env.BACKUP_ENCRYPTION_KEY_HEX;
+  if (hex) {
+    const key = Buffer.from(hex, "hex");
+    if (key.length !== 32) {
+      throw new Error("BACKUP_ENCRYPTION_KEY_HEX must decode to 32 bytes");
+    }
+    return key;
+  }
+  const raw = process.env.BACKUP_ENCRYPTION_KEY;
+  if (!raw) return null;
+  const base64 = Buffer.from(raw, "base64");
+  if (base64.length === 32 && base64.toString("base64") === raw) return base64;
+  return scryptSync(raw, "zerotrust-db-backup", 32);
+}
+
+function encryptBackup(localFile) {
+  const key = encryptionKey();
+  if (!key) {
+    if (process.env.BACKUP_REQUIRE_ENCRYPTION === "true") {
+      throw new Error(
+        "BACKUP_REQUIRE_ENCRYPTION=true but BACKUP_ENCRYPTION_KEY is not set",
+      );
+    }
+    console.warn(
+      "⚠ Backup encryption disabled; set BACKUP_ENCRYPTION_KEY to encrypt backups at rest",
+    );
+    return Promise.resolve(null);
+  }
+  const iv = randomBytes(12);
+  const cipher = createCipheriv("aes-256-gcm", key, iv);
+  const encryptedFile = `${localFile}.enc`;
+  return new Promise((resolve, reject) => {
+    const input = createReadStream(localFile);
+    const output = createWriteStream(encryptedFile);
+    input.on("error", reject);
+    cipher.on("error", reject);
+    output.on("error", reject);
+    output.on("finish", () => {
+      const tag = cipher.getAuthTag();
+      writeFileSync(
+        `${encryptedFile}.meta`,
+        `${JSON.stringify({
+          algorithm: "aes-256-gcm",
+          iv: iv.toString("base64"),
+          tag: tag.toString("base64"),
+        })}\n`,
+        { flag: "wx" },
+      );
+      unlinkSync(localFile);
+      resolve(encryptedFile);
+    });
+    input.pipe(cipher).pipe(output);
+  });
+}
+
+function isBackupArtifact(name) {
+  return (
+    name.startsWith("zerotrust-") &&
+    (name.endsWith(".dump") ||
+      name.endsWith(".dump.enc") ||
+      name.endsWith(".dump.enc.meta"))
+  );
+}
+
 function pruneLocal() {
   const cutoff = Date.now() - retentionDays * 86400000;
   let pruned = 0;
   for (const name of readdirSync(dir)) {
-    if (!name.startsWith("zerotrust-") || !name.endsWith(".dump")) continue;
+    if (!isBackupArtifact(name)) continue;
     const full = path.join(dir, name);
     if (statSync(full).mtimeMs < cutoff) {
       unlinkSync(full);
@@ -125,13 +201,22 @@ async function uploadToS3(localFile, key) {
   console.log(`→ Backing up database to ${file}`);
   await run("pg_dump", ["--format=custom", `--file=${file}`, databaseUrl]);
   console.log("✓ Backup complete");
+  const encryptedFile = await encryptBackup(file);
+  if (encryptedFile) {
+    file = encryptedFile;
+    console.log(`✓ Backup encrypted: ${file}`);
+  }
 
   const pruned = pruneLocal();
   if (pruned) console.log(`✓ Pruned ${pruned} local backup(s) older than ${retentionDays} days`);
 
   if (process.env.BACKUP_S3_BUCKET) {
     try {
-      await uploadToS3(file, path.basename(file));
+      const key = path.basename(file);
+      await uploadToS3(file, key);
+      if (file.endsWith(".enc")) {
+        await uploadToS3(`${file}.meta`, `${key}.meta`);
+      }
     } catch (err) {
       console.error(`✗ S3 upload failed: ${err.message}`);
       console.error("  (Backup is still on local disk at " + file + ")");

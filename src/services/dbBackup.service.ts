@@ -8,6 +8,8 @@
  *   BACKUP_ENABLED=true          — daily scheduler inside the API server
  *   BACKUP_DIR=./backups         — destination directory
  *   BACKUP_RETENTION_DAYS=30     — local retention window
+ *   BACKUP_ENCRYPTION_KEY          — enables AES-256-GCM encryption at rest
+ *   BACKUP_REQUIRE_ENCRYPTION=true — fail backups when encryption is not configured
  *
  * S3-compatible upload configuration (see src/services/objectStorage.service.ts):
  *   BACKUP_S3_BUCKET             — required to enable uploads
@@ -21,7 +23,9 @@
  */
 
 import { spawn } from "node:child_process";
-import { mkdir, readdir, stat, unlink } from "node:fs/promises";
+import { createCipheriv, randomBytes, scryptSync } from "node:crypto";
+import { createReadStream, createWriteStream } from "node:fs";
+import { mkdir, readdir, stat, unlink, writeFile } from "node:fs/promises";
 import * as path from "node:path";
 import { getLogger } from "../logger";
 import {
@@ -37,6 +41,7 @@ export interface BackupResult {
   ok: boolean;
   file?: string;
   uploaded?: boolean;
+  encrypted?: boolean;
   pruned: string[];
   s3Pruned?: string[];
   error?: string;
@@ -48,6 +53,77 @@ function backupDir(): string {
 
 function retentionDays(): number {
   return parseInt(process.env.BACKUP_RETENTION_DAYS ?? "30", 10);
+}
+
+function encryptionKey(): Buffer | null {
+  const hex = process.env.BACKUP_ENCRYPTION_KEY_HEX;
+  if (hex) {
+    const key = Buffer.from(hex, "hex");
+    if (key.length !== 32) {
+      throw new Error("BACKUP_ENCRYPTION_KEY_HEX must decode to 32 bytes");
+    }
+    return key;
+  }
+
+  const raw = process.env.BACKUP_ENCRYPTION_KEY;
+  if (!raw) return null;
+
+  const base64 = Buffer.from(raw, "base64");
+  if (base64.length === 32 && base64.toString("base64") === raw) return base64;
+
+  return scryptSync(raw, "zerotrust-db-backup", 32);
+}
+
+async function encryptBackup(file: string): Promise<string | null> {
+  const key = encryptionKey();
+  if (!key) {
+    if (process.env.BACKUP_REQUIRE_ENCRYPTION === "true") {
+      throw new Error(
+        "BACKUP_REQUIRE_ENCRYPTION=true but BACKUP_ENCRYPTION_KEY is not set",
+      );
+    }
+    logger.warn(
+      "Database backup encryption disabled; set BACKUP_ENCRYPTION_KEY to encrypt backups at rest",
+    );
+    return null;
+  }
+
+  const iv = randomBytes(12);
+  const cipher = createCipheriv("aes-256-gcm", key, iv);
+  const encryptedFile = `${file}.enc`;
+
+  await new Promise<void>((resolve, reject) => {
+    const input = createReadStream(file);
+    const output = createWriteStream(encryptedFile);
+    input.on("error", reject);
+    cipher.on("error", reject);
+    output.on("error", reject);
+    output.on("finish", resolve);
+    input.pipe(cipher).pipe(output);
+  });
+
+  const tag = cipher.getAuthTag();
+  await writeFile(
+    `${encryptedFile}.meta`,
+    `${JSON.stringify({
+      algorithm: "aes-256-gcm",
+      iv: iv.toString("base64"),
+      tag: tag.toString("base64"),
+    })}\n`,
+    { flag: "wx" },
+  );
+  await unlink(file);
+  logger.info("Database backup encrypted", { file: encryptedFile });
+  return encryptedFile;
+}
+
+function isBackupArtifact(name: string): boolean {
+  return (
+    name.startsWith("zerotrust-") &&
+    (name.endsWith(".dump") ||
+      name.endsWith(".dump.enc") ||
+      name.endsWith(".dump.enc.meta"))
+  );
 }
 
 function run(
@@ -85,7 +161,7 @@ export async function pruneOldBackups(): Promise<string[]> {
     return pruned; // directory doesn't exist yet
   }
   for (const name of entries) {
-    if (!name.startsWith("zerotrust-") || !name.endsWith(".dump")) continue;
+    if (!isBackupArtifact(name)) continue;
     const full = path.join(dir, name);
     try {
       const info = await stat(full);
@@ -111,12 +187,14 @@ export async function runBackup(): Promise<BackupResult> {
   await mkdir(dir, { recursive: true });
 
   const stamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
-  const file = path.join(dir, `zerotrust-${stamp}.dump`);
+  let file = path.join(dir, `zerotrust-${stamp}.dump`);
 
   try {
     // Custom format (-Fc) is compressed and restorable with pg_restore
     await run("pg_dump", ["--format=custom", `--file=${file}`, databaseUrl]);
     logger.info("Database backup written", { file });
+    const encryptedFile = await encryptBackup(file);
+    if (encryptedFile) file = encryptedFile;
   } catch (err) {
     logger.error("pg_dump failed", err as Error);
     return { ok: false, pruned: [], error: String(err) };
@@ -133,6 +211,9 @@ export async function runBackup(): Promise<BackupResult> {
     try {
       const key = path.basename(file);
       await uploadFile(file, key);
+      if (file.endsWith(".enc")) {
+        await uploadFile(`${file}.meta`, `${key}.meta`);
+      }
       uploaded = true;
       s3Pruned = await pruneOldS3Backups(s3RetentionDays());
       if (s3Pruned.length) {
@@ -146,7 +227,7 @@ export async function runBackup(): Promise<BackupResult> {
     }
   }
 
-  return { ok: true, file, uploaded, pruned, s3Pruned };
+  return { ok: true, file, uploaded, encrypted: file.endsWith(".enc"), pruned, s3Pruned };
 }
 
 // ── Scheduler ─────────────────────────────────────────────────────────────────
