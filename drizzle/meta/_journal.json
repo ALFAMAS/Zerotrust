@@ -127,6 +127,13 @@
       "when": 1782160234121,
       "tag": "0017_sync_schema",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1782766800000,
+      "tag": "0018_repair_user_login_columns",
+      "breakpoints": true
     }
   ]
 }
