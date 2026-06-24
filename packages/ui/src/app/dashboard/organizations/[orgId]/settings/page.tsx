@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { SkeletonCard } from "@/components/Skeleton";
 import { useToast } from "@/context/ToastContext";
 import { api } from "../../../../../lib/api";
+import { SsoSettingsForm } from "./SsoSettingsForm";
 
 interface OrgDetails {
   id: string;

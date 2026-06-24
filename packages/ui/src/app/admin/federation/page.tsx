@@ -30,7 +30,7 @@ export default function AdminFederationPage() {
     trustedTenantId: "",
   });
 
-  const toastTimer = useRef<ReturnType<typeof setTimeout>>();
+  const toastTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const showToast = useCallback((msg: string) => {
     setToast(msg);

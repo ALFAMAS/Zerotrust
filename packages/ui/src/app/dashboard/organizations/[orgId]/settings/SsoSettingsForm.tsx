@@ -114,7 +114,7 @@ export function SsoSettingsForm({
     setTesting(true);
     setTestResults(null);
     try {
-      const res = await api.post(`/orgs/${orgId}/sso/test`, {});
+      const res = await api.post<{ results: unknown }>(`/orgs/${orgId}/sso/test`, {});
       setTestResults(res.results);
       toast({ message: "Connection test complete", type: "success" });
     } catch (err: any) {
