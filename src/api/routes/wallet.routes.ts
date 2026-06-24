@@ -186,7 +186,7 @@ router.post("/redemptions", async (c) => {
 const referralSchema = z.object({ slug: z.string().min(3).max(50).optional() });
 
 // POST /referrals — create a referral link
-router.post("/", async (c) => {
+router.post("/referrals", async (c) => {
   try {
     const user = c.get("user");
     if (!user) return c.json({ error: "UNAUTHORIZED" }, 401);
@@ -203,7 +203,7 @@ router.post("/", async (c) => {
 });
 
 // GET /referrals/dashboard — referral dashboard stats
-router.get("/dashboard", async (c) => {
+router.get("/referrals/dashboard", async (c) => {
   try {
     const user = c.get("user");
     if (!user) return c.json({ error: "UNAUTHORIZED" }, 401);
