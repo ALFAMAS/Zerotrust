@@ -1,0 +1,339 @@
+# Instincts generated from https://github.com/ALFAMAS/Zerotrust
+# Generated: 2026-06-24T11:22:00.277Z
+# Version: 2.0
+# NOTE: This file supplements (does not replace) any existing curated instincts.
+# High-confidence manually curated instincts should be preserved alongside these.
+
+---
+id: Zerotrust-commit-conventional
+trigger: "when writing a commit message"
+confidence: 0.85
+domain: git
+source: repo-analysis
+source_repo: https://github.com/ALFAMAS/Zerotrust
+---
+
+# Zerotrust Commit Conventional
+
+## Action
+
+Use conventional commit format with prefixes: fix
+
+## Evidence
+
+- 1 commits analyzed
+- Detected conventional commit pattern
+- Examples: fix: upload backup encryption metadata
+
+---
+id: Zerotrust-commit-length
+trigger: "when writing a commit message"
+confidence: 0.6
+domain: git
+source: repo-analysis
+source_repo: https://github.com/ALFAMAS/Zerotrust
+---
+
+# Zerotrust Commit Length
+
+## Action
+
+Keep commit messages concise (~38 characters)
+
+## Evidence
+
+- Average commit message length: 38 chars
+- Based on 1 commits
+
+---
+id: Zerotrust-naming-files
+trigger: "when creating a new file"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/ALFAMAS/Zerotrust
+---
+
+# Zerotrust Naming Files
+
+## Action
+
+Use camelCase naming convention
+
+## Evidence
+
+- Analyzed file naming patterns in repository
+- Dominant pattern: camelCase
+
+---
+id: Zerotrust-export-style
+trigger: "when exporting from a module"
+confidence: 0.7
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/ALFAMAS/Zerotrust
+---
+
+# Zerotrust Export Style
+
+## Action
+
+Prefer named exports
+
+## Evidence
+
+- Export pattern analysis
+- Dominant style: named
+
+---
+id: Zerotrust-arch-type-based
+trigger: "when adding new code"
+confidence: 0.8
+domain: architecture
+source: repo-analysis
+source_repo: https://github.com/ALFAMAS/Zerotrust
+---
+
+# Zerotrust Arch Type Based
+
+## Action
+
+Place code in the appropriate type folder (components/, services/, utils/, etc.)
+
+## Evidence
+
+- Type-based module organization detected
+- Folders: services
+
+---
+id: Zerotrust-test-separate
+trigger: "when writing tests"
+confidence: 0.8
+domain: testing
+source: repo-analysis
+source_repo: https://github.com/ALFAMAS/Zerotrust
+---
+
+# Zerotrust Test Separate
+
+## Action
+
+Place tests in the tests/ or __tests__/ directory, mirroring src structure
+
+## Evidence
+
+- Separate test directory pattern detected
+- Tests live in dedicated test folders
+
+---
+id: zerotrust-instinct-filename-camelcase
+trigger: "When creating a new file in the codebase"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: ALFAMAS/Zerotrust
+---
+
+# Zerotrust Instinct Filename Camelcase
+
+## Action
+
+Name the file using camelCase convention
+
+## Evidence
+
+- Pattern in namingConventions.files
+- src/services/backupEncryption.js
+
+---
+id: zerotrust-instinct-function-camelcase
+trigger: "When defining a function"
+confidence: 0.9
+domain: code-style
+source: repo-analysis
+source_repo: ALFAMAS/Zerotrust
+---
+
+# Zerotrust Instinct Function Camelcase
+
+## Action
+
+Use camelCase for the function name
+
+## Evidence
+
+- Pattern in namingConventions.functions
+- src/services/backupEncryption.js
+
+---
+id: zerotrust-instinct-class-pascalcase
+trigger: "When declaring a class"
+confidence: 0.9
+domain: code-style
+source: repo-analysis
+source_repo: ALFAMAS/Zerotrust
+---
+
+# Zerotrust Instinct Class Pascalcase
+
+## Action
+
+Use PascalCase for the class name
+
+## Evidence
+
+- Pattern in namingConventions.classes
+
+---
+id: zerotrust-instinct-constant-screaming-snake-case
+trigger: "When defining a constant"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: ALFAMAS/Zerotrust
+---
+
+# Zerotrust Instinct Constant Screaming Snake Case
+
+## Action
+
+Use SCREAMING_SNAKE_CASE for the constant name
+
+## Evidence
+
+- Pattern in namingConventions.constants
+
+---
+id: zerotrust-instinct-import-mixed
+trigger: "When importing modules"
+confidence: 0.7
+domain: code-style
+source: repo-analysis
+source_repo: ALFAMAS/Zerotrust
+---
+
+# Zerotrust Instinct Import Mixed
+
+## Action
+
+Use either default or named imports as appropriate (mixed style)
+
+## Evidence
+
+- Pattern in importStyle: mixed
+
+---
+id: zerotrust-instinct-export-named
+trigger: "When exporting modules or functions"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: ALFAMAS/Zerotrust
+---
+
+# Zerotrust Instinct Export Named
+
+## Action
+
+Use named exports
+
+## Evidence
+
+- Pattern in exportStyle: named
+
+---
+id: zerotrust-instinct-try-catch-error-handling
+trigger: "When handling errors in code"
+confidence: 0.9
+domain: code-style
+source: repo-analysis
+source_repo: ALFAMAS/Zerotrust
+---
+
+# Zerotrust Instinct Try Catch Error Handling
+
+## Action
+
+Use try-catch blocks for error handling
+
+## Evidence
+
+- Pattern in errorHandling.style: try-catch
+
+---
+id: zerotrust-instinct-git-commit-conventional-fix
+trigger: "When making a commit that fixes a bug or issue"
+confidence: 0.9
+domain: git
+source: repo-analysis
+source_repo: ALFAMAS/Zerotrust
+---
+
+# Zerotrust Instinct Git Commit Conventional Fix
+
+## Action
+
+Start the commit message with 'fix:' followed by a concise description
+
+## Evidence
+
+- Seen in commit: fix: upload backup encryption metadata
+- Pattern in commits.prefixes
+
+---
+id: zerotrust-instinct-git-commit-length
+trigger: "When writing a commit message"
+confidence: 0.7
+domain: git
+source: repo-analysis
+source_repo: ALFAMAS/Zerotrust
+---
+
+# Zerotrust Instinct Git Commit Length
+
+## Action
+
+Keep the commit message concise, around 38 characters on average
+
+## Evidence
+
+- Pattern in commits.averageLength
+
+---
+id: zerotrust-instinct-test-location-separate
+trigger: "When adding or updating tests"
+confidence: 0.8
+domain: testing
+source: repo-analysis
+source_repo: ALFAMAS/Zerotrust
+---
+
+# Zerotrust Instinct Test Location Separate
+
+## Action
+
+Place test files in a separate directory from source code
+
+## Evidence
+
+- Pattern in architecture.folderStructure.testLocation: separate
+
+---
+id: zerotrust-instinct-test-services-structure
+trigger: "When writing tests for code in 'services' directory"
+confidence: 0.7
+domain: testing
+source: repo-analysis
+source_repo: ALFAMAS/Zerotrust
+---
+
+# Zerotrust Instinct Test Services Structure
+
+## Action
+
+Mirror the structure of 'src/services' in the test directory
+
+## Evidence
+
+- Pattern in architecture.folderStructure.srcLayout: services
+
