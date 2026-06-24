@@ -117,8 +117,11 @@ export default function OrganizationsPage() {
         >
           <h2 className="text-sm font-semibold text-foreground">New organization</h2>
           <div className="space-y-1">
-            <label className="text-xs text-muted-foreground">Name</label>
+            <label htmlFor="page-f0" className="text-xs text-muted-foreground">
+              Name
+            </label>
             <input
+              id="page-f0"
               value={orgName}
               onChange={(e) => handleNameChange(e.target.value)}
               required
@@ -127,10 +130,11 @@ export default function OrganizationsPage() {
             />
           </div>
           <div className="space-y-1">
-            <label className="text-xs text-muted-foreground">
+            <label htmlFor="page-f1" className="text-xs text-muted-foreground">
               Slug (optional — auto-generated from name)
             </label>
             <input
+              id="page-f1"
               value={orgSlug}
               onChange={(e) => {
                 setSlugManual(true);

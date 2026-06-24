@@ -192,8 +192,11 @@ export default function AdminWorkloadPage() {
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-sm font-medium text-foreground">Workload issue key</label>
+            <label htmlFor="page-f0" className="text-sm font-medium text-foreground">
+              Workload issue key
+            </label>
             <input
+              id="page-f0"
               type="password"
               value={issueKey}
               onChange={(e) => setIssueKey(e.target.value)}
@@ -208,8 +211,11 @@ export default function AdminWorkloadPage() {
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-sm font-medium text-foreground">Workload ID</label>
+            <label htmlFor="page-f1" className="text-sm font-medium text-foreground">
+              Workload ID
+            </label>
             <input
+              id="page-f1"
               value={issueForm.workloadId}
               onChange={(e) => setIssueForm({ ...issueForm, workloadId: e.target.value })}
               placeholder="billing-sync-job"
@@ -219,8 +225,11 @@ export default function AdminWorkloadPage() {
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-sm font-medium text-foreground">Scopes</label>
+            <label htmlFor="page-f2" className="text-sm font-medium text-foreground">
+              Scopes
+            </label>
             <input
+              id="page-f2"
               value={issueForm.scopes}
               onChange={(e) => setIssueForm({ ...issueForm, scopes: e.target.value })}
               placeholder="users:read, billing:write"
@@ -230,8 +239,11 @@ export default function AdminWorkloadPage() {
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-sm font-medium text-foreground">TTL (seconds)</label>
+            <label htmlFor="page-f3" className="text-sm font-medium text-foreground">
+              TTL (seconds)
+            </label>
             <input
+              id="page-f3"
               type="number"
               min={60}
               value={issueForm.ttlSeconds}
@@ -290,8 +302,11 @@ export default function AdminWorkloadPage() {
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-sm font-medium text-foreground">Workload ID</label>
+            <label htmlFor="page-f4" className="text-sm font-medium text-foreground">
+              Workload ID
+            </label>
             <input
+              id="page-f4"
               value={tokenForm.workloadId}
               onChange={(e) => setTokenForm({ ...tokenForm, workloadId: e.target.value })}
               placeholder="billing-sync-job"
@@ -301,8 +316,11 @@ export default function AdminWorkloadPage() {
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-sm font-medium text-foreground">Secret</label>
+            <label htmlFor="page-f5" className="text-sm font-medium text-foreground">
+              Secret
+            </label>
             <input
+              id="page-f5"
               type="password"
               value={tokenForm.secret}
               onChange={(e) => setTokenForm({ ...tokenForm, secret: e.target.value })}
@@ -313,8 +331,11 @@ export default function AdminWorkloadPage() {
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-sm font-medium text-foreground">Scopes (optional subset)</label>
+            <label htmlFor="page-f6" className="text-sm font-medium text-foreground">
+              Scopes (optional subset)
+            </label>
             <input
+              id="page-f6"
               value={tokenForm.scopes}
               onChange={(e) => setTokenForm({ ...tokenForm, scopes: e.target.value })}
               placeholder="leave blank for all granted scopes"

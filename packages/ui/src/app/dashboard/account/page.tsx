@@ -139,10 +139,11 @@ export default function AccountPage() {
             )}
 
             <div className="space-y-3">
-              <label className="block text-sm text-muted-foreground">
+              <label htmlFor="page-f0" className="block text-sm text-muted-foreground">
                 Type <span className="font-mono font-bold text-red-400">DELETE</span> to confirm
               </label>
               <input
+                id="page-f0"
                 type="text"
                 value={deleteConfirm}
                 onChange={(e) => setDeleteConfirm(e.target.value)}

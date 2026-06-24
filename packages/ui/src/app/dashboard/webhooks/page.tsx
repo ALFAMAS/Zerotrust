@@ -209,8 +209,11 @@ export default function WebhooksPage() {
         <Modal title="Add webhook endpoint" onClose={() => setCreateOpen(false)}>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm text-foreground/80 mb-1.5">Endpoint URL</label>
+              <label htmlFor="page-f0" className="block text-sm text-foreground/80 mb-1.5">
+                Endpoint URL
+              </label>
               <input
+                id="page-f0"
                 value={form.url}
                 onChange={(e) => setForm({ ...form, url: e.target.value })}
                 placeholder="https://example.com/webhooks/zeroauth"
@@ -218,8 +221,11 @@ export default function WebhooksPage() {
               />
             </div>
             <div>
-              <label className="block text-sm text-foreground/80 mb-1.5">Signing secret</label>
+              <label htmlFor="page-f1" className="block text-sm text-foreground/80 mb-1.5">
+                Signing secret
+              </label>
               <input
+                id="page-f1"
                 value={form.secret}
                 onChange={(e) => setForm({ ...form, secret: e.target.value })}
                 placeholder="whsec_…"

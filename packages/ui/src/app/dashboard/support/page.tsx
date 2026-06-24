@@ -177,8 +177,11 @@ export default function SupportPage() {
         <Modal title="New support ticket" onClose={() => setCreateOpen(false)}>
           <div className="space-y-4">
             <div>
-              <label className="mb-1.5 block text-sm text-foreground/80">Subject</label>
+              <label htmlFor="page-f0" className="mb-1.5 block text-sm text-foreground/80">
+                Subject
+              </label>
               <input
+                id="page-f0"
                 value={form.subject}
                 onChange={(e) => setForm({ ...form, subject: e.target.value })}
                 placeholder="Brief summary of the issue"
@@ -186,8 +189,11 @@ export default function SupportPage() {
               />
             </div>
             <div>
-              <label className="mb-1.5 block text-sm text-foreground/80">Message</label>
+              <label htmlFor="page-f1" className="mb-1.5 block text-sm text-foreground/80">
+                Message
+              </label>
               <textarea
+                id="page-f1"
                 value={form.message}
                 onChange={(e) => setForm({ ...form, message: e.target.value })}
                 rows={5}
@@ -196,8 +202,11 @@ export default function SupportPage() {
               />
             </div>
             <div>
-              <label className="mb-1.5 block text-sm text-foreground/80">Priority</label>
+              <label htmlFor="page-f2" className="mb-1.5 block text-sm text-foreground/80">
+                Priority
+              </label>
               <select
+                id="page-f2"
                 value={form.priority}
                 onChange={(e) => setForm({ ...form, priority: e.target.value })}
                 className="w-full rounded-lg border border-border bg-muted px-3 py-2 text-sm text-foreground"

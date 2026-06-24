@@ -94,8 +94,11 @@ export default function JITRequestPage() {
       >
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="space-y-1.5">
-            <label className="text-sm font-medium text-foreground">Target tenant ID</label>
+            <label htmlFor="page-f0" className="text-sm font-medium text-foreground">
+              Target tenant ID
+            </label>
             <input
+              id="page-f0"
               value={form.targetTenantId}
               onChange={(e) => setForm({ ...form, targetTenantId: e.target.value })}
               placeholder="acme-corp"
@@ -104,8 +107,11 @@ export default function JITRequestPage() {
             />
           </div>
           <div className="space-y-1.5">
-            <label className="text-sm font-medium text-foreground">Resource</label>
+            <label htmlFor="page-f1" className="text-sm font-medium text-foreground">
+              Resource
+            </label>
             <input
+              id="page-f1"
               value={form.targetResource}
               onChange={(e) => setForm({ ...form, targetResource: e.target.value })}
               placeholder="admin:users:read"
@@ -116,8 +122,11 @@ export default function JITRequestPage() {
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-sm font-medium text-foreground">Justification</label>
+          <label htmlFor="page-f2" className="text-sm font-medium text-foreground">
+            Justification
+          </label>
           <textarea
+            id="page-f2"
             value={form.justification}
             onChange={(e) => setForm({ ...form, justification: e.target.value })}
             placeholder="Why do you need this access?"
@@ -129,8 +138,11 @@ export default function JITRequestPage() {
 
         <div className="flex items-end justify-between gap-4">
           <div className="space-y-1.5">
-            <label className="text-sm font-medium text-foreground">Duration (minutes)</label>
+            <label htmlFor="page-f3" className="text-sm font-medium text-foreground">
+              Duration (minutes)
+            </label>
             <input
+              id="page-f3"
               type="number"
               min={5}
               max={60}

@@ -81,8 +81,11 @@ interface NumberInputProps {
 function NumberInput({ label, value, onChange, min, max }: NumberInputProps) {
   return (
     <div className="flex items-center justify-between py-3">
-      <label className="text-sm font-medium text-foreground">{label}</label>
+      <label htmlFor="page-f0" className="text-sm font-medium text-foreground">
+        {label}
+      </label>
       <input
+        id="page-f0"
         type="number"
         min={min}
         max={max}
@@ -231,10 +234,11 @@ export default function AuthSettingsPage() {
               />
             </div>
             <div className="mt-4">
-              <label className="block text-sm font-medium text-foreground mb-1">
+              <label htmlFor="page-f1" className="block text-sm font-medium text-foreground mb-1">
                 Allowed Email Domains
               </label>
               <input
+                id="page-f1"
                 type="text"
                 placeholder="acme.com, corp.com (leave blank for all)"
                 value={settings.allowedEmailDomains}

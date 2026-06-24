@@ -330,10 +330,14 @@ export default function UsersPage() {
         <Modal title="Invite User" onClose={() => setShowInviteModal(false)}>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-foreground/80 mb-1">
+              <label
+                htmlFor="page-f0"
+                className="block text-sm font-medium text-foreground/80 mb-1"
+              >
                 Email address
               </label>
               <input
+                id="page-f0"
                 type="email"
                 placeholder="user@example.com"
                 value={inviteEmail}
