@@ -546,10 +546,12 @@ ZeroAuth tracks its state in the repository docs:
 | [`docs/compliance`](./docs/compliance/README.md) | Compliance policies, procedures, and evidence templates |
 | [`packages/client`](./packages/client/README.md) | Generated TypeScript SDK package and usage notes |
 
-Latest audit note: the source tree now mounts the major backend surfaces described
-above, but local verification is currently blocked by broken Bun workspace links in
-`node_modules`. See the audit snapshot at the bottom of [`tdone.md`](./tdone.md)
-for the exact commands and failures.
+Latest audit note (2026-06-24): a clean `bun install` restores a fully working
+tree — `bun run lint:ci`, `bun run type-check`, the 677-test suite, and the UI
+build all pass. The earlier "broken workspace links" blocker is resolved, and the
+CI lint job (which previously crashed on Linux for a missing Biome binary) now
+runs. See the production-hardening audit snapshot at the bottom of
+[`tdone.md`](./tdone.md) for the full list of security fixes and findings.
 
 ---
 
