@@ -19,9 +19,11 @@ jobs:
       - name: Biome (lint + format check)
         run: bun run lint:ci
       - name: Production dependency audit
-        run: |
-          npm install --package-lock-only --ignore-scripts
-          npm audit --omit=dev --audit-level=high
+        # Use Bun's native audit against the real bun.lock. The previous
+        # `npm install --package-lock-only` approach crashed ("Cannot read
+        # properties of null") because npm cannot resolve this Bun workspace,
+        # so the gate never actually ran.
+        run: bun audit --prod --audit-level=high
       - run: bun run type-check
 
   test:
