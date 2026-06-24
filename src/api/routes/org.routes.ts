@@ -4,6 +4,7 @@ import { HTTPException } from "hono/http-exception";
 import { nanoid } from "nanoid";
 import { z } from "zod";
 import { getDb } from "../../db";
+import { isUnavailableStorageError } from "../../db/storageFallback";
 import {
   organizationInvitesTable,
   organizationMembersTable,
@@ -309,6 +310,25 @@ router.get("/", async (c) => {
 
     return c.json({ orgs: rows });
   } catch (err) {
+    if (
+      isUnavailableStorageError(err, ["organization_members", "organizations"], [
+        "logo_url",
+        "billing_email",
+        "sso_config",
+        "custom_domain",
+        "branding",
+        "storage_region",
+        "tenant_id",
+        "custom_role_id",
+      ])
+    ) {
+      logger.warn("Organization storage is unavailable; returning no organizations", {
+        userId: c.get("user")?.id,
+        error: String(err),
+      });
+      return c.json({ orgs: [] });
+    }
+
     logger.error("List orgs error", err as Error);
     return c.json({ error: "INTERNAL_ERROR", message: "Failed to list organizations" }, 500);
   }

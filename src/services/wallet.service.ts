@@ -1,6 +1,7 @@
 import { and, desc, eq, gte, sql } from "drizzle-orm";
 import { generateCodeFromAlphabet } from "../crypto/codes";
 import { getDb } from "../db";
+import { isUnavailableStorageError } from "../db/storageFallback";
 import {
   pointsLedgerTable,
   redemptionsCatalogTable,
@@ -702,11 +703,37 @@ export async function getReferralStats(userId: string): Promise<{
   }>;
 }> {
   const db = getDb();
-  const links = await db
-    .select()
-    .from(referralsTable)
-    .where(eq(referralsTable.referrerUserId, userId))
-    .orderBy(desc(referralsTable.createdAt));
+  let links: (typeof referralsTable.$inferSelect)[];
+  try {
+    links = await db
+      .select()
+      .from(referralsTable)
+      .where(eq(referralsTable.referrerUserId, userId))
+      .orderBy(desc(referralsTable.createdAt));
+  } catch (err) {
+    if (
+      isUnavailableStorageError(err, ["referrals"], [
+        "referrer_user_id",
+        "code",
+        "slug",
+        "clicks",
+        "signups",
+        "conversions",
+        "rewards_earned",
+        "active",
+        "created_at",
+      ])
+    ) {
+      return {
+        totalClicks: 0,
+        totalSignups: 0,
+        totalConversions: 0,
+        totalRewards: 0,
+        links: [],
+      };
+    }
+    throw err;
+  }
 
   let totalClicks = 0,
     totalSignups = 0,
