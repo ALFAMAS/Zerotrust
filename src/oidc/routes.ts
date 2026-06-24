@@ -97,8 +97,8 @@ router.get("/oidc/authorize", rateLimit({ points: 30, windowSecs: 60 }), (c) => 
       );
     }
     const errorUrl = new URL(redirect_uri);
-    errorUrl.searchParams.set("error", validation.error!);
-    errorUrl.searchParams.set("error_description", validation.errorDescription!);
+    errorUrl.searchParams.set("error", validation.error ?? "invalid_request");
+    errorUrl.searchParams.set("error_description", validation.errorDescription ?? "");
     if (state) errorUrl.searchParams.set("state", state);
     return c.redirect(errorUrl.toString());
   }

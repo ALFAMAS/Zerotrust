@@ -322,13 +322,14 @@ router.post("/broadcast", async (c) => {
 function toCsv(rows: Record<string, unknown>[]): string {
   if (rows.length === 0) return "";
   const headers = Object.keys(rows[0]);
-  const escape = (v: unknown) => {
+  const escapeCsv = (v: unknown) => {
     const s = v === null || v === undefined ? "" : String(v);
     return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
   };
-  return [headers.join(","), ...rows.map((r) => headers.map((h) => escape(r[h])).join(","))].join(
-    "\n"
-  );
+  return [
+    headers.join(","),
+    ...rows.map((r) => headers.map((h) => escapeCsv(r[h])).join(",")),
+  ].join("\n");
 }
 
 // GET /admin/users/export — CSV of all users

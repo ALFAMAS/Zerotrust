@@ -127,7 +127,9 @@ export function CommandPalette() {
   return (
     <div className="fixed inset-0 z-[100] flex items-start justify-center pt-[15vh]">
       {/* Backdrop */}
-      <div
+      <button
+        type="button"
+        aria-label="Close command palette"
         className="fixed inset-0 bg-background/80 backdrop-blur-sm"
         onClick={() => {
           setOpen(false);

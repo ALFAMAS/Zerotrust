@@ -21,12 +21,12 @@ export async function generatePresignedUploadUrl(input: {
   maxSize?: number;
 }): Promise<PresignedUrl> {
   if (!ALLOWED_TYPES.includes(input.contentType)) {
-    throw new Error("Invalid content type. Allowed: " + ALLOWED_TYPES.join(", "));
+    throw new Error(`Invalid content type. Allowed: ${ALLOWED_TYPES.join(", ")}`);
   }
 
   const maxSize = Math.min(input.maxSize ?? MAX_FILE_SIZE, MAX_FILE_SIZE);
   const ext = input.fileName.split(".").pop() || "bin";
-  const key = "uploads/" + Date.now() + "-" + randomBytes(8).toString("hex") + "." + ext;
+  const key = `uploads/${Date.now()}-${randomBytes(8).toString("hex")}.${ext}`;
 
   const { isS3BackupEnabled, getS3Config } = await import("./objectStorage.service.js");
   if (!isS3BackupEnabled()) {
@@ -38,16 +38,14 @@ export async function generatePresignedUploadUrl(input: {
 
   // Build a pre-signed URL pattern using the configured endpoint
   const baseUrl =
-    cfg.endpoint ||
-    "https://" + cfg.bucket + ".s3." + (cfg.region || "us-east-1") + ".amazonaws.com";
+    cfg.endpoint || `https://${cfg.bucket}.s3.${cfg.region || "us-east-1"}.amazonaws.com`;
   const expiresAt = Math.floor(Date.now() / 1000) + UPLOAD_TTL_SECS;
 
   // Simple signed URL using HMAC (compatible with S3 signature v4)
   const { createHmac } = await import("node:crypto");
   const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, "");
-  const scope = dateStr + "/" + (cfg.region || "us-east-1") + "/s3/aws4_request";
-  const stringToSign =
-    "PUT\n\n" + input.contentType + "\n" + expiresAt + "\n/" + cfg.bucket + "/" + key;
+  const scope = `${dateStr}/${cfg.region || "us-east-1"}/s3/aws4_request`;
+  const stringToSign = `PUT\n\n${input.contentType}\n${expiresAt}\n/${cfg.bucket}/${key}`;
   const signature = createHmac("sha256", cfg.secretAccessKey || "")
     .update(stringToSign)
     .digest("hex");

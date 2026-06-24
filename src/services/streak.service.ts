@@ -58,7 +58,7 @@ export async function recordLogin(userId: string) {
   }
 
   // Check if this login continues the streak (yesterday or within grace period)
-  const lastLogin = streaks.lastLoginDate ? new Date(streaks.lastLoginDate + "T00:00:00Z") : null;
+  const lastLogin = streaks.lastLoginDate ? new Date(`${streaks.lastLoginDate}T00:00:00Z`) : null;
   const hoursSinceLastLogin = lastLogin
     ? (now.getTime() - lastLogin.getTime()) / 3_600_000
     : Infinity;

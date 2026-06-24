@@ -236,7 +236,7 @@ export default function WebhooksPage() {
               </p>
             </div>
             <div>
-              <label className="block text-sm text-foreground/80 mb-1.5">Events</label>
+              <span className="block text-sm text-foreground/80 mb-1.5">Events</span>
               <div className="grid grid-cols-2 gap-2">
                 {EVENT_OPTIONS.map((ev) => (
                   <label key={ev} className="flex items-center gap-2 text-xs text-foreground/80">

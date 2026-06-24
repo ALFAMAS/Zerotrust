@@ -110,7 +110,9 @@ export default function AppSidebar({ items, open, onClose, brandSuffix, footer }
         )}
         aria-hidden={!open}
       >
-        <div
+        <button
+          type="button"
+          aria-label="Close menu"
           className={cn(
             "absolute inset-0 bg-black/60 transition-opacity",
             open ? "opacity-100" : "opacity-0"

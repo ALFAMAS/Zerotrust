@@ -200,6 +200,7 @@ export default function OrganizationsPage() {
                   <p className="text-xs text-muted-foreground mt-0.5 font-mono">{org.slug}</p>
                 </div>
                 <svg
+                  aria-hidden="true"
                   xmlns="http://www.w3.org/2000/svg"
                   className="w-4 h-4 text-muted-foreground"
                   viewBox="0 0 24 24"

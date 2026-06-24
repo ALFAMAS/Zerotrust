@@ -85,7 +85,8 @@
         }
       },
       "style": {
-        "useConst": "error"
+        "useConst": "error",
+        "noNonNullAssertion": "off"
       },
       "nursery": {
         "noFloatingPromises": "warn",

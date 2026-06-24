@@ -591,7 +591,7 @@ export async function trackReferralClick(
 ): Promise<string | null> {
   const db = getDb();
   const ref = await getReferralByCode(referralCode);
-  if (!ref || !ref.active) return null;
+  if (!ref?.active) return null;
 
   await db
     .update(referralsTable)

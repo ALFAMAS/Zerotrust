@@ -100,7 +100,7 @@ router.post("/saml/acs", rateLimit({ points: 20, windowSecs: 60 }), async (c) =>
 
     const relayEntry = RelayState ? consumeRelayState(RelayState) : null;
 
-    let assertion;
+    let assertion: ReturnType<typeof parseSAMLResponse>;
     try {
       assertion = parseSAMLResponse(SAMLResponse, idpConfig, spConfig);
     } catch (parseErr) {
