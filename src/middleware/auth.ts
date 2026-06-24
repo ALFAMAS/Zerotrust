@@ -10,10 +10,10 @@ import {
   getEffectiveSessionPolicy,
 } from "../services/sessionPolicy.service";
 import { TokenService } from "../services/token.service";
+import { describePrincipal, principalFromToken } from "../shared/principal";
 import type { HonoEnv, TokenPayload } from "../shared/types";
 import { ErrorCodes, ZeroAuthError } from "../shared/types";
 import { revokeSession } from "./sessionControl";
-import { principalFromToken, principalAuditFields, describePrincipal } from "../shared/principal";
 
 const logger = getLogger("auth-middleware");
 let tokenService: TokenService;
@@ -202,7 +202,11 @@ export const authMiddleware = createMiddleware<HonoEnv>(async (c, next) => {
       .set({ lastActivityAt: new Date() })
       .where(eq(sessionsTable.id, session.id));
 
-    logger.debug("✓ Token verified", { userId: payload.sub, sessionId: payload.sid, principal: describePrincipal(auditPrincipal) });
+    logger.debug("✓ Token verified", {
+      userId: payload.sub,
+      sessionId: payload.sid,
+      principal: describePrincipal(auditPrincipal),
+    });
     return next();
   } catch (error) {
     if (error instanceof ZeroAuthError) {

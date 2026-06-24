@@ -2,9 +2,9 @@
 
 import { ArrowDownCircle, ArrowUpCircle, Award, Coins, History } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Card } from "@/components/ui/card";
 import { SkeletonCard, SkeletonText } from "@/components/Skeleton";
-import { api } from "../../lib/api";
+import { Card } from "@/components/ui/card";
+import { api } from "@/lib/api";
 
 interface PointsEntry {
   id: string;

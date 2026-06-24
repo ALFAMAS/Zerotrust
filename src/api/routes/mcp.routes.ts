@@ -15,14 +15,10 @@ import { Hono } from "hono";
 import { z } from "zod";
 import { getConfig } from "../../config/index.js";
 import { getLogger } from "../../logger/index.js";
-import { authMiddleware } from "../../middleware/auth.js";
 import { rateLimit } from "../../middleware/rateLimiting.js";
-import {
-  principalFromToken,
-  describePrincipal,
-} from "../../shared/principal.js";
-import { ErrorCodes, ZeroAuthError } from "../../shared/types.js";
+import { principalFromToken } from "../../shared/principal.js";
 import type { HonoEnv } from "../../shared/types.js";
+import { ErrorCodes, ZeroAuthError } from "../../shared/types.js";
 
 const router = new Hono<HonoEnv>();
 const logger = getLogger("mcp-auth");
@@ -40,17 +36,8 @@ router.get("/.well-known/oauth-authorization-server", (c) => {
       "urn:ietf:params:oauth:grant-type:token-exchange",
     ],
     response_types_supported: ["code"],
-    scopes_supported: [
-      "mcp:tools",
-      "mcp:resources",
-      "mcp:prompts",
-      "openid",
-      "profile",
-    ],
-    token_endpoint_auth_methods_supported: [
-      "client_secret_post",
-      "client_secret_basic",
-    ],
+    scopes_supported: ["mcp:tools", "mcp:resources", "mcp:prompts", "openid", "profile"],
+    token_endpoint_auth_methods_supported: ["client_secret_post", "client_secret_basic"],
   });
 });
 
@@ -65,63 +52,47 @@ const authorizeSchema = z.object({
   state: z.string().optional(),
 });
 
-router.post(
-  "/authorize",
-  rateLimit({ points: 20, windowSecs: 60 }),
-  async (c) => {
-    const body = await c.req.json().catch(() => ({}));
-    const parsed = authorizeSchema.safeParse(body);
-    if (!parsed.success) {
-      return c.json(
-        { error: "invalid_request", message: parsed.error.issues[0]?.message },
-        400,
-      );
-    }
+router.post("/authorize", rateLimit({ points: 20, windowSecs: 60 }), async (c) => {
+  const body = await c.req.json().catch(() => ({}));
+  const parsed = authorizeSchema.safeParse(body);
+  if (!parsed.success) {
+    return c.json({ error: "invalid_request", message: parsed.error.issues[0]?.message }, 400);
+  }
 
-    // Validate client credentials against registered MCP clients
-    const mcpSecret = process.env.MCP_CLIENT_SECRET;
-    if (!mcpSecret || parsed.data.client_secret !== mcpSecret) {
-      return c.json(
-        { error: "invalid_client", message: "Invalid client credentials" },
-        401,
-      );
-    }
+  // Validate client credentials against registered MCP clients
+  const mcpSecret = process.env.MCP_CLIENT_SECRET;
+  if (!mcpSecret || parsed.data.client_secret !== mcpSecret) {
+    return c.json({ error: "invalid_client", message: "Invalid client credentials" }, 401);
+  }
 
-    // Issue a short-lived authorization code
-    const code = crypto.randomUUID();
-    const expiresAt = Date.now() + 5 * 60 * 1000; // 5 min
+  // Issue a short-lived authorization code
+  const code = crypto.randomUUID();
+  const expiresAt = Date.now() + 5 * 60 * 1000; // 5 min
 
-    // Store code in memory (in production use Redis with TTL)
-    mcpAuthCodes.set(code, {
-      clientId: parsed.data.client_id,
-      scope: parsed.data.scope,
-      redirectUri: parsed.data.redirect_uri,
-      state: parsed.data.state,
-      expiresAt,
-    });
+  // Store code in memory (in production use Redis with TTL)
+  mcpAuthCodes.set(code, {
+    clientId: parsed.data.client_id,
+    scope: parsed.data.scope,
+    redirectUri: parsed.data.redirect_uri,
+    state: parsed.data.state,
+    expiresAt,
+  });
 
-    const redirectBase =
-      parsed.data.redirect_uri ??
-      process.env.APP_URL ??
-      "http://localhost:3000";
-    const params = new URLSearchParams({ code });
-    if (parsed.data.state) params.set("state", parsed.data.state);
+  const redirectBase = parsed.data.redirect_uri ?? process.env.APP_URL ?? "http://localhost:3000";
+  const params = new URLSearchParams({ code });
+  if (parsed.data.state) params.set("state", parsed.data.state);
 
-    return c.json({
-      authorization_code: code,
-      expires_in: 300,
-      redirect_to: `${redirectBase}/mcp/callback?${params.toString()}`,
-    });
-  },
-);
+  return c.json({
+    authorization_code: code,
+    expires_in: 300,
+    redirect_to: `${redirectBase}/mcp/callback?${params.toString()}`,
+  });
+});
 
 // ── Token endpoint ────────────────────────────────────────────────────────────
 
 const tokenSchema = z.object({
-  grant_type: z.enum([
-    "authorization_code",
-    "urn:ietf:params:oauth:grant-type:token-exchange",
-  ]),
+  grant_type: z.enum(["authorization_code", "urn:ietf:params:oauth:grant-type:token-exchange"]),
   code: z.string().min(1).optional(),
   client_id: z.string().min(1),
   client_secret: z.string().min(1),
@@ -144,23 +115,17 @@ router.post("/token", rateLimit({ points: 30, windowSecs: 60 }), async (c) => {
   const body = await c.req.json().catch(() => ({}));
   const parsed = tokenSchema.safeParse(body);
   if (!parsed.success) {
-    return c.json(
-      { error: "invalid_request", message: parsed.error.issues[0]?.message },
-      400,
-    );
+    return c.json({ error: "invalid_request", message: parsed.error.issues[0]?.message }, 400);
   }
 
   // Validate client
   const mcpSecret = process.env.MCP_CLIENT_SECRET;
   if (!mcpSecret || parsed.data.client_secret !== mcpSecret) {
-    return c.json(
-      { error: "invalid_client", message: "Invalid client credentials" },
-      401,
-    );
+    return c.json({ error: "invalid_client", message: "Invalid client credentials" }, 401);
   }
 
   const cfg = getConfig();
-  const { TokenService } = await import("../services/token.service.js");
+  const { TokenService } = await import("../../services/token.service.js");
   const svc = new TokenService(cfg.security.tokenSecretHex, cfg.session);
   await svc.init();
 
@@ -173,10 +138,10 @@ router.post("/token", rateLimit({ points: 30, windowSecs: 60 }), async (c) => {
           error: "invalid_grant",
           message: "Authorization code expired or invalid",
         },
-        400,
+        400
       );
     }
-    mcpAuthCodes.delete(parsed.data.code!);
+    mcpAuthCodes.delete(parsed.data.code ?? "");
 
     // Determine subject — if actor_token present, this is a delegation
     let subjectId = codeEntry.clientId;
@@ -185,17 +150,12 @@ router.post("/token", rateLimit({ points: 30, windowSecs: 60 }), async (c) => {
 
     if (parsed.data.actor_token) {
       try {
-        const actorPayload = await svc.verifyAccessToken(
-          parsed.data.actor_token,
-        );
+        const actorPayload = await svc.verifyAccessToken(parsed.data.actor_token);
         actAs = [actorPayload.sub];
         subjectId = actorPayload.sub;
         workloadId = codeEntry.clientId;
       } catch {
-        return c.json(
-          { error: "invalid_grant", message: "Invalid actor token" },
-          400,
-        );
+        return c.json({ error: "invalid_grant", message: "Invalid actor token" }, 400);
       }
     }
 
@@ -233,14 +193,12 @@ router.post("/token", rateLimit({ points: 30, windowSecs: 60 }), async (c) => {
         error: "invalid_request",
         message: "subject_token required for exchange",
       },
-      400,
+      400
     );
   }
 
   try {
-    const subjectPayload = await svc.verifyAccessToken(
-      parsed.data.subject_token,
-    );
+    const subjectPayload = await svc.verifyAccessToken(parsed.data.subject_token);
     const scopes = parsed.data.scope.split(" ");
     const sessionId = crypto.randomUUID();
 
@@ -249,12 +207,8 @@ router.post("/token", rateLimit({ points: 30, windowSecs: 60 }), async (c) => {
       sid: sessionId,
       aud: "mcp",
       scope: scopes,
-      ...(subjectPayload.principal_type
-        ? { principal_type: subjectPayload.principal_type }
-        : {}),
-      ...(subjectPayload.workload_id
-        ? { workload_id: subjectPayload.workload_id }
-        : {}),
+      ...(subjectPayload.principal_type ? { principal_type: subjectPayload.principal_type } : {}),
+      ...(subjectPayload.workload_id ? { workload_id: subjectPayload.workload_id } : {}),
       ...(subjectPayload.act_as ? { act_as: subjectPayload.act_as } : {}),
     });
 
@@ -271,10 +225,7 @@ router.post("/token", rateLimit({ points: 30, windowSecs: 60 }), async (c) => {
       issued_token_type: "urn:ietf:params:oauth:token-type:access_token",
     });
   } catch {
-    return c.json(
-      { error: "invalid_grant", message: "Invalid subject token" },
-      400,
-    );
+    return c.json({ error: "invalid_grant", message: "Invalid subject token" }, 400);
   }
 });
 
@@ -284,44 +235,32 @@ export function mcpAuthMiddleware(requiredScope?: string) {
   return async (c: any, next: any) => {
     const authHeader = c.req.header("authorization");
     if (!authHeader?.startsWith("Bearer ")) {
-      throw new ZeroAuthError(
-        ErrorCodes.TOKEN_INVALID,
-        "Missing bearer token",
-        401,
-      );
+      throw new ZeroAuthError(ErrorCodes.TOKEN_INVALID, "Missing bearer token", 401);
     }
 
     const token = authHeader.slice(7);
     const cfg = getConfig();
-    const { TokenService } = await import("../services/token.service.js");
+    const { TokenService } = await import("../../services/token.service.js");
     const svc = new TokenService(cfg.security.tokenSecretHex, cfg.session);
     await svc.init();
 
     try {
       const payload = await svc.verifyAccessToken(token);
       if (payload.aud !== "mcp") {
-        throw new ZeroAuthError(
-          ErrorCodes.TOKEN_INVALID,
-          "Token not intended for MCP",
-          401,
-        );
+        throw new ZeroAuthError(ErrorCodes.TOKEN_INVALID, "Token not intended for MCP", 401);
       }
       if (requiredScope && !payload.scope?.includes(requiredScope)) {
         throw new ZeroAuthError(
           ErrorCodes.INSUFFICIENT_PRIVILEGE,
           `Missing scope: ${requiredScope}`,
-          403,
+          403
         );
       }
       c.set("mcpPrincipal", principalFromToken(payload));
       c.set("mcpToken", payload);
     } catch (err) {
       if (err instanceof ZeroAuthError) throw err;
-      throw new ZeroAuthError(
-        ErrorCodes.TOKEN_INVALID,
-        "Invalid MCP token",
-        401,
-      );
+      throw new ZeroAuthError(ErrorCodes.TOKEN_INVALID, "Invalid MCP token", 401);
     }
 
     return next();

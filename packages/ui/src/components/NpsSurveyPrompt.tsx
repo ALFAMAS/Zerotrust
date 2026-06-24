@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { api } from "../../../lib/api";
+import { api } from "@/lib/api";
 
 /**
  * NPS Survey prompt — shows after 30 days, then quarterly.
@@ -46,7 +46,9 @@ export function NpsSurveyPrompt() {
         ) : (
           <>
             <div className="mb-3 flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-foreground">How likely are you to recommend ZeroAuth?</h3>
+              <h3 className="text-sm font-semibold text-foreground">
+                How likely are you to recommend ZeroAuth?
+              </h3>
               <button
                 onClick={() => setDismissed(true)}
                 className="text-muted-foreground hover:text-foreground"

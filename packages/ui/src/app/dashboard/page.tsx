@@ -1,11 +1,11 @@
 "use client";
-import { Award, Flame, Monitor, ShieldCheck, KeyRound, User } from "lucide-react";
+import { Award, Flame, KeyRound, Monitor, ShieldCheck, User } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import SetupChecklist from "@/components/SetupChecklist";
-import { SkeletonCard, SkeletonText } from "@/components/Skeleton";
 import { AchievementBadges } from "@/components/AchievementBadges";
 import { ProgressBars } from "@/components/ProgressBars";
+import SetupChecklist from "@/components/SetupChecklist";
+import { SkeletonCard, SkeletonText } from "@/components/Skeleton";
 import { StreakDisplay } from "@/components/StreakDisplay";
 import { api } from "../../lib/api";
 
@@ -97,7 +97,7 @@ export default function DashboardPage() {
         <p className="mt-1 text-muted-foreground">{user?.email}</p>
       </div>
 
-      <SetupChecklist user={user} {/* @ts-ignore */} />
+      <SetupChecklist user={user} />
 
       {/* Progress bars */}
       <ProgressBars user={user} />
@@ -106,9 +106,7 @@ export default function DashboardPage() {
       {streak && <StreakDisplay streak={streak} />}
 
       {/* Achievement badges */}
-      {unlockedAchievements.length > 0 && (
-        <AchievementBadges achievements={unlockedAchievements} />
-      )}
+      {unlockedAchievements.length > 0 && <AchievementBadges achievements={unlockedAchievements} />}
 
       <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-3">
         {stats.map((stat) => (

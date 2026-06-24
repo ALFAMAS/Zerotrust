@@ -1,5 +1,6 @@
 "use client";
 import {
+  Activity,
   Award,
   Bell,
   Building2,
@@ -15,21 +16,20 @@ import {
   User,
   UserCog,
   Webhook,
-  Activity,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import AppShell from "@/components/app-shell/AppShell";
 import type { NavItem } from "@/components/app-shell/AppSidebar";
+import { CommandPalette } from "@/components/CommandPalette";
 import FeedbackWidget from "@/components/FeedbackWidget";
 import LiveChatWidget from "@/components/LiveChatWidget";
 import LocaleSwitcher from "@/components/LocaleSwitcher";
 import { NotificationBell } from "@/components/NotificationBell";
+import { NpsSurveyPrompt } from "@/components/NpsSurveyPrompt";
 import ProductTour from "@/components/ProductTour";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import NpsSurveyPrompt from "@/components/NpsSurveyPrompt";
 import VerifyEmailBanner from "@/components/VerifyEmailBanner";
-import { CommandPalette } from "@/components/CommandPalette";
 import { clearToken, isAuthenticated } from "../../lib/auth";
 
 const navItems: NavItem[] = [

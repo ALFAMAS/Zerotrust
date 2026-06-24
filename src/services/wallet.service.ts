@@ -1,20 +1,17 @@
 import { and, desc, eq, sql } from "drizzle-orm";
 import { getDb } from "../db";
 import {
-  walletsTable,
-  walletTransactionsTable,
-  tiersTable,
-  userTiersTable,
+  pointsLedgerTable,
   redemptionsCatalogTable,
   redemptionsTable,
   referralsTable,
   referralTrackingTable,
-  pointsLedgerTable,
+  tiersTable,
   usersTable,
+  userTiersTable,
+  walletsTable,
+  walletTransactionsTable,
 } from "../db/schema";
-import { getLogger } from "../logger";
-
-const logger = getLogger("wallet-service");
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -57,14 +54,15 @@ export interface ReferralStats {
 
 export async function getWallet(userId: string): Promise<WalletBalance> {
   const db = getDb();
-  const [wallet] = await db.select().from(walletsTable).where(eq(walletsTable.userId, userId)).limit(1);
+  const [wallet] = await db
+    .select()
+    .from(walletsTable)
+    .where(eq(walletsTable.userId, userId))
+    .limit(1);
 
   if (!wallet) {
     // Auto-create wallet
-    const [created] = await db
-      .insert(walletsTable)
-      .values({ userId })
-      .returning();
+    const [created] = await db.insert(walletsTable).values({ userId }).returning();
     const tier = await getCurrentTier(userId);
     return {
       balance: created.balance,
@@ -88,12 +86,20 @@ export async function getWallet(userId: string): Promise<WalletBalance> {
 export async function topUpWallet(
   userId: string,
   amount: number,
-  opts: { stripePaymentIntentId?: string; description?: string; metadata?: Record<string, unknown> } = {},
+  opts: {
+    stripePaymentIntentId?: string;
+    description?: string;
+    metadata?: Record<string, unknown>;
+  } = {}
 ): Promise<{ balance: number; transactionId: string }> {
   if (amount <= 0) throw new Error("Top-up amount must be positive");
 
   const db = getDb();
-  const [wallet] = await db.select().from(walletsTable).where(eq(walletsTable.userId, userId)).limit(1);
+  const [wallet] = await db
+    .select()
+    .from(walletsTable)
+    .where(eq(walletsTable.userId, userId))
+    .limit(1);
 
   const currentBalance = wallet?.balance ?? 0;
   const currentLifetime = wallet?.lifetimeBalance ?? 0;
@@ -101,7 +107,9 @@ export async function topUpWallet(
   const newLifetime = currentLifetime + amount;
 
   if (!wallet) {
-    await db.insert(walletsTable).values({ userId, balance: newBalance, lifetimeBalance: newLifetime });
+    await db
+      .insert(walletsTable)
+      .values({ userId, balance: newBalance, lifetimeBalance: newLifetime });
   } else {
     await db
       .update(walletsTable)
@@ -131,16 +139,21 @@ export async function topUpWallet(
 export async function spendFromWallet(
   userId: string,
   amount: number,
-  opts: { description?: string; metadata?: Record<string, unknown> } = {},
+  opts: { description?: string; metadata?: Record<string, unknown> } = {}
 ): Promise<{ balance: number; transactionId: string }> {
   if (amount <= 0) throw new Error("Spend amount must be positive");
 
   const db = getDb();
-  const [wallet] = await db.select().from(walletsTable).where(eq(walletsTable.userId, userId)).limit(1);
+  const [wallet] = await db
+    .select()
+    .from(walletsTable)
+    .where(eq(walletsTable.userId, userId))
+    .limit(1);
   if (!wallet) throw new Error("Wallet not found");
 
   const currentBalance = wallet.balance;
-  if (currentBalance < amount) throw new Error(`Insufficient balance: ${currentBalance} < ${amount}`);
+  if (currentBalance < amount)
+    throw new Error(`Insufficient balance: ${currentBalance} < ${amount}`);
 
   const newBalance = currentBalance - amount;
 
@@ -177,7 +190,14 @@ export async function getWalletTransactions(userId: string, limit = 30, offset =
 
 // ── Points engine ────────────────────────────────────────────────────────────
 
-export type EarnReason = "daily_login" | "referral" | "achievement" | "profile_complete" | "first_payment" | "tier_bonus" | "manual";
+export type EarnReason =
+  | "daily_login"
+  | "referral"
+  | "achievement"
+  | "profile_complete"
+  | "first_payment"
+  | "tier_bonus"
+  | "manual";
 
 export interface EarnPointsResult {
   balance: number;
@@ -191,7 +211,7 @@ export async function earnPoints(
   amount: number,
   reason: EarnReason,
   description?: string,
-  metadata?: Record<string, unknown>,
+  metadata?: Record<string, unknown>
 ): Promise<EarnPointsResult> {
   if (amount <= 0) throw new Error("Earn amount must be positive");
 
@@ -201,14 +221,20 @@ export async function earnPoints(
   const adjustedAmount = Math.round((amount * multiplier) / 100);
 
   // Ensure wallet exists
-  const [wallet] = await db.select().from(walletsTable).where(eq(walletsTable.userId, userId)).limit(1);
+  const [wallet] = await db
+    .select()
+    .from(walletsTable)
+    .where(eq(walletsTable.userId, userId))
+    .limit(1);
   const currentBalance = wallet?.balance ?? 0;
   const currentLifetime = wallet?.lifetimeBalance ?? 0;
   const newBalance = currentBalance + adjustedAmount;
   const newLifetime = currentLifetime + adjustedAmount;
 
   if (!wallet) {
-    await db.insert(walletsTable).values({ userId, balance: newBalance, lifetimeBalance: newLifetime });
+    await db
+      .insert(walletsTable)
+      .values({ userId, balance: newBalance, lifetimeBalance: newLifetime });
   } else {
     await db
       .update(walletsTable)
@@ -237,9 +263,15 @@ export async function earnPoints(
   };
 }
 
-export async function getPointsBalance(userId: string): Promise<{ balance: number; lifetimeBalance: number }> {
+export async function getPointsBalance(
+  userId: string
+): Promise<{ balance: number; lifetimeBalance: number }> {
   const db = getDb();
-  const [wallet] = await db.select().from(walletsTable).where(eq(walletsTable.userId, userId)).limit(1);
+  const [wallet] = await db
+    .select()
+    .from(walletsTable)
+    .where(eq(walletsTable.userId, userId))
+    .limit(1);
   return {
     balance: wallet?.balance ?? 0,
     lifetimeBalance: wallet?.lifetimeBalance ?? 0,
@@ -262,24 +294,57 @@ export async function getPointsHistory(userId: string, limit = 50, offset = 0) {
 export async function seedDefaultTiers(): Promise<void> {
   const db = getDb();
   const defaults = [
-    { key: "bronze", name: "Bronze", description: "Entry tier", minPoints: 0, multiplier: 100, perks: ["Basic support"], color: "#CD7F32", icon: "Award" },
-    { key: "silver", name: "Silver", description: "Active user", minPoints: 500, multiplier: 125, perks: ["Priority support", "Extended trial"], color: "#C0C0C0", icon: "Star" },
-    { key: "gold", name: "Gold", description: "Power user", minPoints: 2000, multiplier: 150, perks: ["Priority support", "API rate boost", "Custom branding"], color: "#FFD700", icon: "Crown" },
-    { key: "platinum", name: "Platinum", description: "Enterprise", minPoints: 10000, multiplier: 200, perks: ["Dedicated support", "SLA guarantee", "White-label", "Custom integrations"], color: "#E5E4E2", icon: "Gem" },
+    {
+      key: "bronze",
+      name: "Bronze",
+      description: "Entry tier",
+      minPoints: 0,
+      multiplier: 100,
+      perks: ["Basic support"],
+      color: "#CD7F32",
+      icon: "Award",
+    },
+    {
+      key: "silver",
+      name: "Silver",
+      description: "Active user",
+      minPoints: 500,
+      multiplier: 125,
+      perks: ["Priority support", "Extended trial"],
+      color: "#C0C0C0",
+      icon: "Star",
+    },
+    {
+      key: "gold",
+      name: "Gold",
+      description: "Power user",
+      minPoints: 2000,
+      multiplier: 150,
+      perks: ["Priority support", "API rate boost", "Custom branding"],
+      color: "#FFD700",
+      icon: "Crown",
+    },
+    {
+      key: "platinum",
+      name: "Platinum",
+      description: "Enterprise",
+      minPoints: 10000,
+      multiplier: 200,
+      perks: ["Dedicated support", "SLA guarantee", "White-label", "Custom integrations"],
+      color: "#E5E4E2",
+      icon: "Gem",
+    },
   ];
 
   for (const tier of defaults) {
-    await db
-      .insert(tiersTable)
-      .values(tier)
-      .onConflictDoNothing();
+    await db.insert(tiersTable).values(tier).onConflictDoNothing();
   }
 }
 
 export async function getCurrentTier(userId: string): Promise<UserTierInfo | null> {
   const db = getDb();
   const [userTier] = await db
-    .select({ tier: tiersTable })
+    .select({ tier: tiersTable, achievedAt: userTiersTable.achievedAt })
     .from(userTiersTable)
     .innerJoin(tiersTable, eq(userTiersTable.tierKey, tiersTable.key))
     .where(eq(userTiersTable.userId, userId))
@@ -294,11 +359,14 @@ export async function getCurrentTier(userId: string): Promise<UserTierInfo | nul
     perks: userTier.tier.perks ?? [],
     color: userTier.tier.color ?? undefined,
     icon: userTier.tier.icon ?? undefined,
-    achievedAt: userTier.tier.achievedAt,
+    achievedAt: userTier.achievedAt,
   };
 }
 
-export async function evaluateTierUpgrade(userId: string, lifetimeBalance: number): Promise<{ upgraded: boolean; tier?: string }> {
+export async function evaluateTierUpgrade(
+  userId: string,
+  lifetimeBalance: number
+): Promise<{ upgraded: boolean; tier?: string }> {
   const db = getDb();
   await seedDefaultTiers();
 
@@ -345,25 +413,60 @@ export async function evaluateTierUpgrade(userId: string, lifetimeBalance: numbe
 export async function seedDefaultRedemptions(): Promise<void> {
   const db = getDb();
   const defaults = [
-    { key: "account_credit_5", name: "$5 Account Credit", description: "$5 credit to your account", cost: 500, type: "account_credit", value: { cents: 500 } },
-    { key: "account_credit_10", name: "$10 Account Credit", description: "$10 credit to your account", cost: 900, type: "account_credit", value: { cents: 1000 } },
-    { key: "extended_trial_7", name: "7-Day Trial Extension", description: "Add 7 days to your trial", cost: 300, type: "extended_trial", value: { days: 7 } },
-    { key: "extended_trial_30", name: "30-Day Trial Extension", description: "Add 30 days to your trial", cost: 1000, type: "extended_trial", value: { days: 30 } },
-    { key: "swag_code", name: "Swag Code", description: "Exclusive swag discount code", cost: 2000, type: "swag", value: { code: "SWAG-{random}" } },
+    {
+      key: "account_credit_5",
+      name: "$5 Account Credit",
+      description: "$5 credit to your account",
+      cost: 500,
+      type: "account_credit",
+      value: { cents: 500 },
+    },
+    {
+      key: "account_credit_10",
+      name: "$10 Account Credit",
+      description: "$10 credit to your account",
+      cost: 900,
+      type: "account_credit",
+      value: { cents: 1000 },
+    },
+    {
+      key: "extended_trial_7",
+      name: "7-Day Trial Extension",
+      description: "Add 7 days to your trial",
+      cost: 300,
+      type: "extended_trial",
+      value: { days: 7 },
+    },
+    {
+      key: "extended_trial_30",
+      name: "30-Day Trial Extension",
+      description: "Add 30 days to your trial",
+      cost: 1000,
+      type: "extended_trial",
+      value: { days: 30 },
+    },
+    {
+      key: "swag_code",
+      name: "Swag Code",
+      description: "Exclusive swag discount code",
+      cost: 2000,
+      type: "swag",
+      value: { code: "SWAG-{random}" },
+    },
   ];
 
   for (const item of defaults) {
-    await db
-      .insert(redemptionsCatalogTable)
-      .values(item)
-      .onConflictDoNothing();
+    await db.insert(redemptionsCatalogTable).values(item).onConflictDoNothing();
   }
 }
 
 export async function getRedemptionCatalog(): Promise<RedemptionItem[]> {
   const db = getDb();
   await seedDefaultRedemptions();
-  const items = await db.select().from(redemptionsCatalogTable).where(eq(redemptionsCatalogTable.active, true));
+  const items = await db
+    .select()
+    .from(redemptionsCatalogTable)
+    .where(eq(redemptionsCatalogTable.active, true));
   return items.map((i) => ({
     id: i.id,
     key: i.key,
@@ -375,23 +478,36 @@ export async function getRedemptionCatalog(): Promise<RedemptionItem[]> {
   }));
 }
 
-export async function redeemItem(userId: string, catalogKey: string): Promise<{ success: boolean; redemptionId: string; message: string }> {
+export async function redeemItem(
+  userId: string,
+  catalogKey: string
+): Promise<{ success: boolean; redemptionId: string; message: string }> {
   const db = getDb();
   await seedDefaultRedemptions();
 
   const [item] = await db
     .select()
     .from(redemptionsCatalogTable)
-    .where(and(eq(redemptionsCatalogTable.key, catalogKey), eq(redemptionsCatalogTable.active, true)))
+    .where(
+      and(eq(redemptionsCatalogTable.key, catalogKey), eq(redemptionsCatalogTable.active, true))
+    )
     .limit(1);
 
   if (!item) throw new Error("Redemption item not found");
 
-  const [wallet] = await db.select().from(walletsTable).where(eq(walletsTable.userId, userId)).limit(1);
+  const [wallet] = await db
+    .select()
+    .from(walletsTable)
+    .where(eq(walletsTable.userId, userId))
+    .limit(1);
   const balance = wallet?.balance ?? 0;
 
   if (balance < item.cost) {
-    return { success: false, redemptionId: "", message: `Insufficient points: need ${item.cost}, have ${balance}` };
+    return {
+      success: false,
+      redemptionId: "",
+      message: `Insufficient points: need ${item.cost}, have ${balance}`,
+    };
   }
 
   // Deduct points
@@ -410,7 +526,11 @@ export async function redeemItem(userId: string, catalogKey: string): Promise<{ 
     })
     .returning();
 
-  return { success: true, redemptionId: redemption.id, message: `Successfully redeemed: ${item.name}` };
+  return {
+    success: true,
+    redemptionId: redemption.id,
+    message: `Successfully redeemed: ${item.name}`,
+  };
 }
 
 // ── Referrals ─────────────────────────────────────────────────────────────────
@@ -424,7 +544,10 @@ function generateReferralCode(): string {
   return code;
 }
 
-export async function createReferralLink(userId: string, slug?: string): Promise<{ code: string; slug: string }> {
+export async function createReferralLink(
+  userId: string,
+  slug?: string
+): Promise<{ code: string; slug: string }> {
   const db = getDb();
   const code = generateReferralCode();
   const finalSlug = slug?.toLowerCase().replace(/[^a-z0-9-]/g, "") ?? code.toLowerCase();
@@ -440,13 +563,21 @@ export async function createReferralLink(userId: string, slug?: string): Promise
 
 export async function getReferralByCode(code: string) {
   const db = getDb();
-  const [ref] = await db.select().from(referralsTable).where(eq(referralsTable.code, code)).limit(1);
+  const [ref] = await db
+    .select()
+    .from(referralsTable)
+    .where(eq(referralsTable.code, code))
+    .limit(1);
   return ref ?? null;
 }
 
 export async function getReferralBySlug(slug: string) {
   const db = getDb();
-  const [ref] = await db.select().from(referralsTable).where(eq(referralsTable.slug, slug)).limit(1);
+  const [ref] = await db
+    .select()
+    .from(referralsTable)
+    .where(eq(referralsTable.slug, slug))
+    .limit(1);
   return ref ?? null;
 }
 
@@ -456,13 +587,16 @@ export async function trackReferralClick(
   userAgent: string,
   utmSource?: string,
   utmMedium?: string,
-  utmCampaign?: string,
+  utmCampaign?: string
 ): Promise<string | null> {
   const db = getDb();
   const ref = await getReferralByCode(referralCode);
   if (!ref || !ref.active) return null;
 
-  await db.update(referralsTable).set({ clicks: ref.clicks + 1 }).where(eq(referralsTable.id, ref.id));
+  await db
+    .update(referralsTable)
+    .set({ clicks: ref.clicks + 1 })
+    .where(eq(referralsTable.id, ref.id));
 
   const [tracking] = await db
     .insert(referralTrackingTable)
@@ -505,13 +639,18 @@ export async function trackReferralSignup(trackingId: string, userId: string): P
     .where(eq(referralsTable.id, tracking.ref.id));
 }
 
-export async function trackReferralConversion(userId: string, amount: number): Promise<void> {
+export async function trackReferralConversion(userId: string, _amount: number): Promise<void> {
   const db = getDb();
   const [tracking] = await db
     .select({ referral: referralTrackingTable, ref: referralsTable })
     .from(referralTrackingTable)
     .innerJoin(referralsTable, eq(referralTrackingTable.referralId, referralsTable.id))
-    .where(and(eq(referralTrackingTable.referredUserId, userId), eq(referralTrackingTable.status, "signed_up")))
+    .where(
+      and(
+        eq(referralTrackingTable.referredUserId, userId),
+        eq(referralTrackingTable.status, "signed_up")
+      )
+    )
     .limit(1);
 
   if (!tracking) return;
@@ -519,7 +658,7 @@ export async function trackReferralConversion(userId: string, amount: number): P
   await db
     .update(referralTrackingTable)
     .set({ status: "converted", convertedAt: new Date() })
-    .where(eq(referralTrackingTable.id, tracking.id));
+    .where(eq(referralTrackingTable.id, tracking.referral.id));
 
   await db
     .update(referralsTable)
@@ -535,7 +674,12 @@ export async function trackReferralConversion(userId: string, amount: number): P
     .limit(1);
 
   if (referrer) {
-    await earnPoints(referrer.referrerUserId, rewardPoints, "referral", `Referral conversion: ${userId}`);
+    await earnPoints(
+      referrer.referrerUserId,
+      rewardPoints,
+      "referral",
+      `Referral conversion: ${userId}`
+    );
     await db
       .update(referralsTable)
       .set({ rewardsEarned: tracking.ref.rewardsEarned + rewardPoints })
@@ -548,7 +692,14 @@ export async function getReferralStats(userId: string): Promise<{
   totalSignups: number;
   totalConversions: number;
   totalRewards: number;
-  links: Array<{ code: string; slug: string; clicks: number; signups: number; conversions: number; rewardsEarned: number }>;
+  links: Array<{
+    code: string;
+    slug: string;
+    clicks: number;
+    signups: number;
+    conversions: number;
+    rewardsEarned: number;
+  }>;
 }> {
   const db = getDb();
   const links = await db
@@ -557,7 +708,10 @@ export async function getReferralStats(userId: string): Promise<{
     .where(eq(referralsTable.referrerUserId, userId))
     .orderBy(desc(referralsTable.createdAt));
 
-  let totalClicks = 0, totalSignups = 0, totalConversions = 0, totalRewards = 0;
+  let totalClicks = 0,
+    totalSignups = 0,
+    totalConversions = 0,
+    totalRewards = 0;
   for (const link of links) {
     totalClicks += link.clicks;
     totalSignups += link.signups;
@@ -583,7 +737,11 @@ export async function getReferralStats(userId: string): Promise<{
 
 export async function getReferralDashboard(userId: string) {
   const stats = await getReferralStats(userId);
-  const [user] = await getDb().select({ displayName: usersTable.displayName }).from(usersTable).where(eq(usersTable.id, userId)).limit(1);
+  const [user] = await getDb()
+    .select({ displayName: usersTable.displayName })
+    .from(usersTable)
+    .where(eq(usersTable.id, userId))
+    .limit(1);
 
   return {
     ...stats,

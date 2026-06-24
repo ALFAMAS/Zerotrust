@@ -9,22 +9,20 @@
  *   GET  /auth/delegation              — list active delegations
  */
 
-import { desc, eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { z } from "zod";
-import { getDb } from "../../db";
+import { insertAuditLog } from "../../audit/chain";
+import { getConfig } from "../../config";
 import { getLogger } from "../../logger";
 import { authMiddleware } from "../../middleware/auth";
-import { principalFromToken, describePrincipal, principalAuditFields } from "../../shared/principal";
-import { insertAuditLog } from "../../audit/chain";
-import type { HonoEnv } from "../../shared/types";
 import {
-  getPendingApprovals,
-  getApproval,
-  approveChallenge,
-  rejectChallenge,
   approvalStats,
+  approveChallenge,
+  getPendingApprovals,
+  rejectChallenge,
 } from "../../services/approval.service";
+import { describePrincipal, principalFromToken } from "../../shared/principal";
+import type { HonoEnv } from "../../shared/types";
 
 const router = new Hono<HonoEnv>();
 const logger = getLogger("agentic-routes");

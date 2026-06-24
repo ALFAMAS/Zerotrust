@@ -3,27 +3,20 @@ import { z } from "zod";
 import { getLogger } from "../../logger";
 import { authMiddleware } from "../../middleware/auth";
 import {
-  getWallet,
-  topUpWallet,
-  spendFromWallet,
-  getWalletTransactions,
-  earnPoints,
+  createReferralLink,
+  getCurrentTier,
   getPointsBalance,
   getPointsHistory,
-  getCurrentTier,
   getRedemptionCatalog,
-  redeemItem,
-  createReferralLink,
   getReferralBySlug,
-  trackReferralClick,
-  trackReferralSignup,
   getReferralDashboard,
+  getWallet,
+  getWalletTransactions,
+  redeemItem,
+  spendFromWallet,
+  topUpWallet,
+  trackReferralClick,
 } from "../../services/wallet.service";
-import {
-  getSoc2Controls,
-  getSoc2Readiness,
-  updateSoc2Control,
-} from "../../services/compliance.service";
 import type { HonoEnv } from "../../shared/types";
 
 const router = new Hono<HonoEnv>();
@@ -74,8 +67,11 @@ router.post("/top-up", async (c) => {
     if (!user) return c.json({ error: "UNAUTHORIZED" }, 401);
     const body = await c.req.json().catch(() => ({}));
     const parsed = topUpSchema.safeParse(body);
-    if (!parsed.success) return c.json({ error: "INVALID_REQUEST", issues: parsed.error.issues }, 400);
-    const result = await topUpWallet(user.id, parsed.data.amount, { stripePaymentIntentId: parsed.data.stripePaymentIntentId });
+    if (!parsed.success)
+      return c.json({ error: "INVALID_REQUEST", issues: parsed.error.issues }, 400);
+    const result = await topUpWallet(user.id, parsed.data.amount, {
+      stripePaymentIntentId: parsed.data.stripePaymentIntentId,
+    });
     return c.json(result);
   } catch (err: any) {
     logger.error("Top-up error", err as Error);
@@ -95,8 +91,11 @@ router.post("/spend", async (c) => {
     if (!user) return c.json({ error: "UNAUTHORIZED" }, 401);
     const body = await c.req.json().catch(() => ({}));
     const parsed = spendSchema.safeParse(body);
-    if (!parsed.success) return c.json({ error: "INVALID_REQUEST", issues: parsed.error.issues }, 400);
-    const result = await spendFromWallet(user.id, parsed.data.amount, { description: parsed.data.description });
+    if (!parsed.success)
+      return c.json({ error: "INVALID_REQUEST", issues: parsed.error.issues }, 400);
+    const result = await spendFromWallet(user.id, parsed.data.amount, {
+      description: parsed.data.description,
+    });
     return c.json(result);
   } catch (err: any) {
     logger.error("Spend error", err as Error);
@@ -172,7 +171,8 @@ router.post("/redemptions", async (c) => {
     if (!user) return c.json({ error: "UNAUTHORIZED" }, 401);
     const body = await c.req.json().catch(() => ({}));
     const parsed = redeemSchema.safeParse(body);
-    if (!parsed.success) return c.json({ error: "INVALID_REQUEST", issues: parsed.error.issues }, 400);
+    if (!parsed.success)
+      return c.json({ error: "INVALID_REQUEST", issues: parsed.error.issues }, 400);
     const result = await redeemItem(user.id, parsed.data.key);
     return c.json(result);
   } catch (err: any) {
@@ -192,7 +192,8 @@ router.post("/", async (c) => {
     if (!user) return c.json({ error: "UNAUTHORIZED" }, 401);
     const body = await c.req.json().catch(() => ({}));
     const parsed = referralSchema.safeParse(body);
-    if (!parsed.success) return c.json({ error: "INVALID_REQUEST", issues: parsed.error.issues }, 400);
+    if (!parsed.success)
+      return c.json({ error: "INVALID_REQUEST", issues: parsed.error.issues }, 400);
     const result = await createReferralLink(user.id, parsed.data.slug);
     return c.json(result, 201);
   } catch (err) {
@@ -229,11 +230,20 @@ router.get("/r/:slug", async (c) => {
     const utmMedium = c.req.query("utm_medium") ?? undefined;
     const utmCampaign = c.req.query("utm_campaign") ?? undefined;
 
-    const trackingId = await trackReferralClick(ref.code, ip, ua, utmSource, utmMedium, utmCampaign);
+    const trackingId = await trackReferralClick(
+      ref.code,
+      ip,
+      ua,
+      utmSource,
+      utmMedium,
+      utmCampaign
+    );
 
     // Store tracking ID in cookie for later signup attribution
     c.header("Set-Cookie", `za_referral=${trackingId}; Path=/; Max-Age=2592000; SameSite=Lax`);
-    const redirectUrl = process.env.APP_URL ? `${process.env.APP_URL}/register?ref=${ref.code}` : `/register?ref=${ref.code}`;
+    const redirectUrl = process.env.APP_URL
+      ? `${process.env.APP_URL}/register?ref=${ref.code}`
+      : `/register?ref=${ref.code}`;
     return c.redirect(redirectUrl);
   } catch (err) {
     logger.error("Referral click error", err as Error);

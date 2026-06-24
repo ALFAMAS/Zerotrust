@@ -26,7 +26,8 @@
       "PowerShell(powershell -ExecutionPolicy Bypass -File scripts/fix-junctions.ps1)",
       "Bash(node -e \"console.log\\(require\\('@simplewebauthn/server/package.json'\\).version\\)\")",
       "Bash(bun run *)",
-      "Bash(node -e \"const m=require\\('./packages/ui/messages/en.json'\\); console.log\\(Object.keys\\(m\\).join\\('\\\\n'\\)\\)\")"
+      "Bash(node -e \"const m=require\\('./packages/ui/messages/en.json'\\); console.log\\(Object.keys\\(m\\).join\\('\\\\n'\\)\\)\")",
+      "Bash(node ./node_modules/typescript/lib/tsc.js --noEmit)"
     ]
   },
   "enableAllProjectMcpServers": true,

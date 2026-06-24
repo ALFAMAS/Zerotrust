@@ -97,6 +97,8 @@ rebuilding login for the hundredth time.
 
 ### Frontend (Next.js)
 - Landing page, user dashboard, and guarded admin panel in one app
+- Admin consoles — users, revenue, sessions, auth settings, federation, JIT,
+  agent approvals (human-in-the-loop), and SOC 2 / risk compliance
 - PWA — installable, offline app-shell, web push (VAPID)
 - i18n (next-intl, EN/ES/FR/AR with RTL support), locale-aware `Intl.*` formatting, dark mode
 - GDPR — cookie consent, data export, 30-day soft-delete; privacy/terms pages

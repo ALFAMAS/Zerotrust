@@ -90,7 +90,7 @@ router.post("/token", async (c) => {
         scope: grantedScopes,
         principal_type: "agent",
         workload_id: credential.workloadId,
-      } as any,
+      },
       tokenTtl
     );
 

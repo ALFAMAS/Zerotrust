@@ -63,9 +63,13 @@ export interface ZeroAuthConfig {
 
 // ─── Authentication & Token Types ──────────────────────────────────────────
 
-export interface TokenPayload {
+// Declared as a `type` (not `interface`) so it gains an implicit index
+// signature and is therefore assignable to `Record<string, unknown>` — the
+// `TokenLike` shape consumed by shared/principal.ts. An interface would not be.
+export type TokenPayload = {
   sub: string;
-  email: string;
+  /** Optional — human tokens carry the user's email; agent/workload tokens do not. */
+  email?: string;
   sid: string;
   jti: string;
   iat: number;
@@ -74,7 +78,14 @@ export interface TokenPayload {
   iss?: string;
   scope?: string[];
   pop_key?: string;
-}
+  // ── Agent / delegation claims (see shared/principal.ts) ──────────────────
+  /** "agent" for workload/MCP tokens, "human" for delegated user tokens. */
+  principal_type?: "agent" | "human";
+  /** Workload identifier for agent tokens. */
+  workload_id?: string;
+  /** Delegation chain — the subject(s) this token acts on behalf of. */
+  act_as?: string[];
+};
 
 export interface AccessTokenResponse {
   accessToken: string;

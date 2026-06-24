@@ -10,8 +10,9 @@ Monorepo: Node/Hono API (`src/`) + Next.js 16 UI (`packages/ui/`).
 | UI (Next.js) | `packages/ui/`                  | 3000                              |
 | MCP server   | auto-started with UI dev server | `http://localhost:3000/_next/mcp` |
 
-**Status docs:** [`implemented.md`](./implemented.md) (what ships today) ·
-[`not-implemented.md`](./not-implemented.md) (product backlog).
+**Status docs:** [`README.md`](./README.md) is the source of truth for what ships
+today (see its **Features** section); [`docs/compliance/`](./docs/compliance/README.md)
+covers SOC 2 policies, runbooks, and evidence.
 
 ## Running the project
 

@@ -6,12 +6,10 @@
  * before the action proceeds. This reuses the continuous-verification infrastructure.
  */
 
-import { and, desc, eq } from "drizzle-orm";
-import { getDb } from "../db";
-import { getLogger } from "../logger";
 import { broadcastNotification } from "../api/routes/notification.routes";
-import { principalFromToken, describePrincipal } from "../shared/principal";
+import { getLogger } from "../logger";
 import type { AuditPrincipal } from "../shared/principal";
+import { describePrincipal, principalFromToken } from "../shared/principal";
 
 const logger = getLogger("approval-service");
 
@@ -37,10 +35,7 @@ export interface ApprovalChallenge {
 
 // ── Sensitive actions that require human approval ─────────────────────────────
 
-const SENSITIVE_ACTIONS: Record<
-  string,
-  { description: string; requireReason: boolean }
-> = {
+const SENSITIVE_ACTIONS: Record<string, { description: string; requireReason: boolean }> = {
   "user.delete": { description: "Delete user account", requireReason: true },
   "user.role.change": { description: "Change user role", requireReason: true },
   "billing.cancel": { description: "Cancel subscription", requireReason: true },
@@ -118,9 +113,7 @@ export async function createApprovalChallenge(params: {
 
 // ── Check / get approval ──────────────────────────────────────────────────────
 
-export async function getApproval(
-  id: string,
-): Promise<ApprovalChallenge | null> {
+export async function getApproval(id: string): Promise<ApprovalChallenge | null> {
   const challenge = pendingApprovals.get(id);
   if (!challenge) return null;
 
@@ -146,7 +139,7 @@ export async function getPendingApprovals(): Promise<ApprovalChallenge[]> {
 
 export async function approveChallenge(
   id: string,
-  approvedBy: string,
+  approvedBy: string
 ): Promise<ApprovalChallenge | null> {
   const challenge = pendingApprovals.get(id);
   if (!challenge) return null;
@@ -169,7 +162,7 @@ export async function approveChallenge(
 
 export async function rejectChallenge(
   id: string,
-  rejectedBy: string,
+  rejectedBy: string
 ): Promise<ApprovalChallenge | null> {
   const challenge = pendingApprovals.get(id);
   if (!challenge) return null;
@@ -191,10 +184,7 @@ export async function rejectChallenge(
 
 // ── Verify execution token ────────────────────────────────────────────────────
 
-export function verifyExecutionToken(
-  approvalId: string,
-  token: string,
-): boolean {
+export function verifyExecutionToken(approvalId: string, token: string): boolean {
   const challenge = pendingApprovals.get(approvalId);
   if (!challenge) return false;
   if (challenge.status !== "approved") return false;
@@ -238,7 +228,7 @@ export function requireHumanApproval(action: string) {
         approval_id: challenge.id,
         expires_at: new Date(challenge.expiresAt).toISOString(),
       },
-      202,
+      202
     );
   };
 }
