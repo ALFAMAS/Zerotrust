@@ -5,6 +5,27 @@ import { getLogger } from "../logger";
 
 const logger = getLogger("points-service");
 
+function isMissingPointsStorageError(error: unknown): boolean {
+  let current: unknown = error;
+  while (current && typeof current === "object") {
+    const candidate = current as { code?: unknown; message?: unknown; cause?: unknown };
+    if (candidate.code === "42P01" || candidate.code === "42703") return true;
+
+    const message = typeof candidate.message === "string" ? candidate.message : "";
+    if (
+      /relation\s+["']?points_ledger["']?\s+does not exist/i.test(message) ||
+      /column\s+["']?(balance|amount|reason|description|metadata|created_at)["']?\s+does not exist/i.test(
+        message,
+      )
+    ) {
+      return true;
+    }
+
+    current = candidate.cause;
+  }
+  return false;
+}
+
 export interface AwardPointsInput {
   userId: string;
   amount: number;
@@ -58,14 +79,25 @@ export async function awardPoints(input: AwardPointsInput) {
  */
 export async function getPointsBalance(userId: string): Promise<number> {
   const db = getDb();
-  const [lastEntry] = await db
-    .select({ balance: pointsLedgerTable.balance })
-    .from(pointsLedgerTable)
-    .where(eq(pointsLedgerTable.userId, userId))
-    .orderBy(desc(pointsLedgerTable.createdAt))
-    .limit(1);
+  try {
+    const [lastEntry] = await db
+      .select({ balance: pointsLedgerTable.balance })
+      .from(pointsLedgerTable)
+      .where(eq(pointsLedgerTable.userId, userId))
+      .orderBy(desc(pointsLedgerTable.createdAt))
+      .limit(1);
 
-  return lastEntry?.balance ?? 0;
+    return lastEntry?.balance ?? 0;
+  } catch (err) {
+    if (isMissingPointsStorageError(err)) {
+      logger.warn("Points storage is unavailable; returning zero balance", {
+        userId,
+        error: String(err),
+      });
+      return 0;
+    }
+    throw err;
+  }
 }
 
 /**
@@ -73,18 +105,29 @@ export async function getPointsBalance(userId: string): Promise<number> {
  */
 export async function getPointsHistory(userId: string, limit = 50, offset = 0) {
   const db = getDb();
-  const entries = await db
-    .select()
-    .from(pointsLedgerTable)
-    .where(eq(pointsLedgerTable.userId, userId))
-    .orderBy(desc(pointsLedgerTable.createdAt))
-    .limit(limit)
-    .offset(offset);
+  try {
+    const entries = await db
+      .select()
+      .from(pointsLedgerTable)
+      .where(eq(pointsLedgerTable.userId, userId))
+      .orderBy(desc(pointsLedgerTable.createdAt))
+      .limit(limit)
+      .offset(offset);
 
-  const [countResult] = await db
-    .select()
-    .from(pointsLedgerTable)
-    .where(eq(pointsLedgerTable.userId, userId));
+    const [countResult] = await db
+      .select()
+      .from(pointsLedgerTable)
+      .where(eq(pointsLedgerTable.userId, userId));
 
-  return { entries, total: countResult ? undefined : entries.length };
+    return { entries, total: countResult ? undefined : entries.length };
+  } catch (err) {
+    if (isMissingPointsStorageError(err)) {
+      logger.warn("Points storage is unavailable; returning empty history", {
+        userId,
+        error: String(err),
+      });
+      return { entries: [], total: 0 };
+    }
+    throw err;
+  }
 }
