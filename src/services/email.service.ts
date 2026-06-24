@@ -8,12 +8,15 @@ import { otpEmailTemplate } from "../templates/emails/otp";
 import { passwordResetEmailTemplate } from "../templates/emails/password-reset";
 import { securityAlertEmailTemplate } from "../templates/emails/security-alert";
 import { verifyEmailTemplate } from "../templates/emails/verify-email";
-import { type WelcomeEmailData, welcomeEmailTemplate } from "../templates/emails/welcome";
+import {
+  type WelcomeEmailData,
+  welcomeEmailTemplate,
+} from "../templates/emails/welcome";
 import { isEmailSuppressed } from "./emailSuppression.service";
 
 const logger = getLogger("email-service");
 
-const APP_NAME = process.env.APP_NAME ?? "ZeroAuth";
+const APP_NAME = process.env.APP_NAME ?? "zerotrust";
 const APP_URL = process.env.APP_URL ?? "http://localhost:3000";
 
 // ── Singleton transport ────────────────────────────────────────────────────
@@ -54,16 +57,23 @@ async function sendEmail(opts: {
   try {
     // Honor the suppression list (hard bounces / complaints / manual blocks).
     if (await isEmailSuppressed(opts.to)) {
-      logger.info("Email skipped (suppressed recipient)", { to: opts.to, subject: opts.subject });
+      logger.info("Email skipped (suppressed recipient)", {
+        to: opts.to,
+        subject: opts.subject,
+      });
       return;
     }
     const transport = getTransport();
     const from =
-      process.env.MAIL_FROM ?? `noreply@${APP_NAME.toLowerCase().replace(/\s+/g, "")}.com`;
+      process.env.MAIL_FROM ??
+      `noreply@${APP_NAME.toLowerCase().replace(/\s+/g, "")}.com`;
     await transport.sendMail({ from, ...opts });
     logger.info("Email sent", { to: opts.to, subject: opts.subject });
   } catch (err) {
-    logger.error(`Failed to send email to ${opts.to} (subject: ${opts.subject})`, err as Error);
+    logger.error(
+      `Failed to send email to ${opts.to} (subject: ${opts.subject})`,
+      err as Error,
+    );
   }
 }
 
@@ -71,7 +81,7 @@ async function sendEmail(opts: {
 
 export async function sendWelcomeEmail(
   to: string,
-  data: Omit<WelcomeEmailData, "appName" | "appUrl">
+  data: Omit<WelcomeEmailData, "appName" | "appUrl">,
 ): Promise<void> {
   const { subject, html, text } = welcomeEmailTemplate({
     ...data,
@@ -84,7 +94,12 @@ export async function sendWelcomeEmail(
 
 export async function sendMagicLinkEmail(
   to: string,
-  data: { name: string; magicLinkUrl: string; expiresInMinutes?: number; locale?: Locale }
+  data: {
+    name: string;
+    magicLinkUrl: string;
+    expiresInMinutes?: number;
+    locale?: Locale;
+  },
 ): Promise<void> {
   const { subject, html, text } = magicLinkEmailTemplate({
     name: data.name,
@@ -99,7 +114,7 @@ export async function sendMagicLinkEmail(
 
 export async function sendOtpEmail(
   to: string,
-  data: { name: string; code: string; expiresInMinutes?: number }
+  data: { name: string; code: string; expiresInMinutes?: number },
 ): Promise<void> {
   const { subject, html, text } = otpEmailTemplate({
     name: data.name,
@@ -118,7 +133,7 @@ export async function sendVerificationEmail(
     verifyUrl: string;
     expiresInMinutes?: number;
     locale?: Locale;
-  }
+  },
 ): Promise<void> {
   const { subject, html, text } = verifyEmailTemplate({
     name: data.name,
@@ -133,7 +148,12 @@ export async function sendVerificationEmail(
 
 export async function sendPasswordResetEmail(
   to: string,
-  data: { name: string; resetUrl: string; expiresInMinutes?: number; locale?: Locale }
+  data: {
+    name: string;
+    resetUrl: string;
+    expiresInMinutes?: number;
+    locale?: Locale;
+  },
 ): Promise<void> {
   const { subject, html, text } = passwordResetEmailTemplate({
     name: data.name,
@@ -155,7 +175,7 @@ export async function sendSecurityAlertEmail(
     location: string;
     time: string;
     revokeSessionUrl?: string;
-  }
+  },
 ): Promise<void> {
   const { subject, html, text } = securityAlertEmailTemplate({
     name: data.name,
@@ -172,7 +192,13 @@ export async function sendSecurityAlertEmail(
 
 export async function sendBillingEventEmail(
   to: string,
-  data: { name: string; title: string; body: string; ctaLabel?: string; ctaUrl?: string }
+  data: {
+    name: string;
+    title: string;
+    body: string;
+    ctaLabel?: string;
+    ctaUrl?: string;
+  },
 ): Promise<void> {
   const { subject, html, text } = billingEventEmailTemplate({
     ...data,
@@ -184,7 +210,13 @@ export async function sendBillingEventEmail(
 
 export async function sendNotificationEmail(
   to: string,
-  data: { name: string; title: string; body: string; link?: string; unsubscribeUrl?: string }
+  data: {
+    name: string;
+    title: string;
+    body: string;
+    link?: string;
+    unsubscribeUrl?: string;
+  },
 ): Promise<void> {
   const { subject, html, text } = notificationEmailTemplate({
     name: data.name,
@@ -202,7 +234,13 @@ export async function sendNotificationEmail(
 
 export async function queueBillingEventEmail(
   to: string,
-  data: { name: string; title: string; body: string; ctaLabel?: string; ctaUrl?: string }
+  data: {
+    name: string;
+    title: string;
+    body: string;
+    ctaLabel?: string;
+    ctaUrl?: string;
+  },
 ): Promise<void> {
   const { enqueueEmail } = await import("./emailQueue.js");
   await enqueueEmail("notification", to, {
@@ -215,8 +253,18 @@ export async function queueBillingEventEmail(
 
 export async function queueNotificationEmail(
   to: string,
-  data: { name: string; title: string; body: string; link?: string; unsubscribeUrl?: string }
+  data: {
+    name: string;
+    title: string;
+    body: string;
+    link?: string;
+    unsubscribeUrl?: string;
+  },
 ): Promise<void> {
   const { enqueueEmail } = await import("./emailQueue.js");
-  await enqueueEmail("notification", to, { ...data, appName: APP_NAME, appUrl: APP_URL });
+  await enqueueEmail("notification", to, {
+    ...data,
+    appName: APP_NAME,
+    appUrl: APP_URL,
+  });
 }

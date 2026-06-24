@@ -33,7 +33,7 @@ function formatTitle(event: NotificationEvent): string {
 }
 
 function formatFields(
-  data: Record<string, unknown>
+  data: Record<string, unknown>,
 ): { title: string; value: string; short: boolean }[] {
   return Object.entries(data)
     .filter(([, v]) => v !== undefined && v !== null)
@@ -47,7 +47,7 @@ function formatFields(
 
 export function formatSlackMessage(
   event: NotificationEvent,
-  data: Record<string, unknown>
+  data: Record<string, unknown>,
 ): object {
   const emoji = EMOJIS[event] ?? "ℹ️";
   const color = COLORS[event] ?? "#6366f1";
@@ -60,7 +60,7 @@ export function formatSlackMessage(
         color,
         title: `${emoji} ${title}`,
         fields: formatFields(data),
-        footer: "ZeroAuth Security Alert",
+        footer: "zerotrust Security Alert",
         ts,
         mrkdwn_in: ["text", "fields"],
       },
@@ -70,7 +70,7 @@ export function formatSlackMessage(
 
 export function formatTeamsMessage(
   event: NotificationEvent,
-  data: Record<string, unknown>
+  data: Record<string, unknown>,
 ): object {
   const emoji = EMOJIS[event] ?? "ℹ️";
   const title = formatTitle(event);
@@ -101,7 +101,7 @@ export function formatPagerDutyPayload(
   event: NotificationEvent,
   data: Record<string, unknown>,
   integrationKey: string,
-  severity: "critical" | "error" | "warning" | "info" = "error"
+  severity: "critical" | "error" | "warning" | "info" = "error",
 ): object {
   return {
     routing_key: integrationKey,
@@ -109,10 +109,10 @@ export function formatPagerDutyPayload(
     payload: {
       summary: formatTitle(event),
       severity,
-      source: "zeroauth",
+      source: "zerotrust",
       timestamp: new Date().toISOString(),
       custom_details: data,
     },
-    dedup_key: `zeroauth-${event}-${Date.now()}`,
+    dedup_key: `zerotrust-${event}-${Date.now()}`,
   };
 }

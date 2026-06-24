@@ -1,1 +1,142 @@
-{"nodes": [{"id": "c_users_alfamas_desktop_zeroauth_src_tests_legalhold_service_test_ts", "label": "legalHold.service.test.ts", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\legalHold.service.test.ts", "source_location": "L1"}, {"id": "tests_legalhold_service_test_captured", "label": "captured", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\legalHold.service.test.ts", "source_location": "L17"}, {"id": "tests_legalhold_service_test_chain", "label": "chain", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\legalHold.service.test.ts", "source_location": "L18"}], "edges": [{"source": "c_users_alfamas_desktop_zeroauth_src_tests_legalhold_service_test_ts", "target": "vitest", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\legalHold.service.test.ts", "source_location": "L1", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_tests_legalhold_service_test_ts", "target": "c_users_alfamas_desktop_zeroauth_src_services_legalhold_service_ts", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\legalHold.service.test.ts", "source_location": "L10", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_tests_legalhold_service_test_ts", "target": "services_legalhold_service_setlegalhold", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\legalHold.service.test.ts", "source_location": "L10", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_tests_legalhold_service_test_ts", "target": "services_legalhold_service_gethelduserids", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\legalHold.service.test.ts", "source_location": "L10", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_tests_legalhold_service_test_ts", "target": "c_users_alfamas_desktop_zeroauth_src_db_index_ts", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\legalHold.service.test.ts", "source_location": "L11", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_tests_legalhold_service_test_ts", "target": "db_index_getdb", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\legalHold.service.test.ts", "source_location": "L11", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_tests_legalhold_service_test_ts", "target": "tests_legalhold_service_test_captured", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\legalHold.service.test.ts", "source_location": "L17", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_tests_legalhold_service_test_ts", "target": "tests_legalhold_service_test_chain", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\legalHold.service.test.ts", "source_location": "L18", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_tests_legalhold_service_test_ts", "target": "tests_legalhold_service_test_captured", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\legalHold.service.test.ts", "source_location": "L36", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_tests_legalhold_service_test_ts", "target": "tests_legalhold_service_test_chain", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\legalHold.service.test.ts", "source_location": "L37", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_tests_legalhold_service_test_ts", "target": "tests_legalhold_service_test_chain", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\legalHold.service.test.ts", "source_location": "L54", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_tests_legalhold_service_test_ts", "target": "tests_legalhold_service_test_chain", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\legalHold.service.test.ts", "source_location": "L64", "weight": 1.0}], "raw_calls": []}
+{
+    "nodes": [
+        {
+            "id": "c_users_alfamas_desktop_zerotrust_src_tests_legalhold_service_test_ts",
+            "label": "legalHold.service.test.ts",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\legalHold.service.test.ts",
+            "source_location": "L1"
+        },
+        {
+            "id": "tests_legalhold_service_test_captured",
+            "label": "captured",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\legalHold.service.test.ts",
+            "source_location": "L17"
+        },
+        {
+            "id": "tests_legalhold_service_test_chain",
+            "label": "chain",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\legalHold.service.test.ts",
+            "source_location": "L18"
+        }
+    ],
+    "edges": [
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_tests_legalhold_service_test_ts",
+            "target": "vitest",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\legalHold.service.test.ts",
+            "source_location": "L1",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_tests_legalhold_service_test_ts",
+            "target": "c_users_alfamas_desktop_zerotrust_src_services_legalhold_service_ts",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\legalHold.service.test.ts",
+            "source_location": "L10",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_tests_legalhold_service_test_ts",
+            "target": "services_legalhold_service_setlegalhold",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\legalHold.service.test.ts",
+            "source_location": "L10",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_tests_legalhold_service_test_ts",
+            "target": "services_legalhold_service_gethelduserids",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\legalHold.service.test.ts",
+            "source_location": "L10",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_tests_legalhold_service_test_ts",
+            "target": "c_users_alfamas_desktop_zerotrust_src_db_index_ts",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\legalHold.service.test.ts",
+            "source_location": "L11",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_tests_legalhold_service_test_ts",
+            "target": "db_index_getdb",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\legalHold.service.test.ts",
+            "source_location": "L11",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_tests_legalhold_service_test_ts",
+            "target": "tests_legalhold_service_test_captured",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\legalHold.service.test.ts",
+            "source_location": "L17",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_tests_legalhold_service_test_ts",
+            "target": "tests_legalhold_service_test_chain",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\legalHold.service.test.ts",
+            "source_location": "L18",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_tests_legalhold_service_test_ts",
+            "target": "tests_legalhold_service_test_captured",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\legalHold.service.test.ts",
+            "source_location": "L36",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_tests_legalhold_service_test_ts",
+            "target": "tests_legalhold_service_test_chain",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\legalHold.service.test.ts",
+            "source_location": "L37",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_tests_legalhold_service_test_ts",
+            "target": "tests_legalhold_service_test_chain",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\legalHold.service.test.ts",
+            "source_location": "L54",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_tests_legalhold_service_test_ts",
+            "target": "tests_legalhold_service_test_chain",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\legalHold.service.test.ts",
+            "source_location": "L64",
+            "weight": 1.0
+        }
+    ],
+    "raw_calls": []
+}

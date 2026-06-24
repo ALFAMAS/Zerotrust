@@ -58,7 +58,7 @@ export function NotificationBell() {
 
     const connect = () => {
       const es = new EventSource(
-        `${process.env.NEXT_PUBLIC_ZEROAUTH_URL || "http://localhost:3000"}/notifications/sse?token=${token}`
+        `${process.env.NEXT_PUBLIC_zerotrust_URL || "http://localhost:3000"}/notifications/sse?token=${token}`,
       );
       esRef.current = es;
 
@@ -90,7 +90,10 @@ export function NotificationBell() {
   useEffect(() => {
     if (!open) return;
     function handleClick(e: MouseEvent) {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(e.target as Node)
+      ) {
         setOpen(false);
       }
     }
@@ -118,7 +121,9 @@ export function NotificationBell() {
 
   const markRead = useCallback(async (id: string) => {
     await api.post(`/notifications/${id}/read`).catch(() => {});
-    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
+    setNotifications((prev) =>
+      prev.map((n) => (n.id === id ? { ...n, read: true } : n)),
+    );
     setUnreadCount((c) => Math.max(0, c - 1));
   }, []);
 
@@ -160,7 +165,9 @@ export function NotificationBell() {
           className="absolute right-0 z-50 mt-2 w-80 overflow-hidden rounded-xl border border-border bg-popover shadow-2xl"
         >
           <div className="flex items-center justify-between border-b border-border px-4 py-3">
-            <span className="text-sm font-semibold text-foreground">Notifications</span>
+            <span className="text-sm font-semibold text-foreground">
+              Notifications
+            </span>
             {unreadCount > 0 && (
               <button
                 type="button"
@@ -174,7 +181,9 @@ export function NotificationBell() {
 
           <div className="max-h-80 overflow-y-auto">
             {loadingList ? (
-              <div className="px-4 py-6 text-center text-sm text-muted-foreground">Loading…</div>
+              <div className="px-4 py-6 text-center text-sm text-muted-foreground">
+                Loading…
+              </div>
             ) : notifications.length === 0 ? (
               <div className="px-4 py-6 text-center text-sm text-muted-foreground">
                 No notifications
@@ -187,12 +196,16 @@ export function NotificationBell() {
                   onClick={() => handleNotificationClick(n)}
                   className={cn(
                     "flex w-full items-start gap-3 border-b border-border px-4 py-3 text-left transition-colors last:border-b-0 hover:bg-accent",
-                    n.read && "opacity-60"
+                    n.read && "opacity-60",
                   )}
                 >
-                  <span className="mt-0.5 flex-shrink-0 text-lg">{typeIcon(n.type)}</span>
+                  <span className="mt-0.5 flex-shrink-0 text-lg">
+                    {typeIcon(n.type)}
+                  </span>
                   <div className="min-w-0 flex-1">
-                    <div className="truncate text-sm font-medium text-foreground">{n.title}</div>
+                    <div className="truncate text-sm font-medium text-foreground">
+                      {n.title}
+                    </div>
                     <div className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">
                       {n.body.length > 80 ? `${n.body.slice(0, 80)}…` : n.body}
                     </div>

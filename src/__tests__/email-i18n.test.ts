@@ -31,7 +31,9 @@ describe("locale negotiation", () => {
 
 describe("email translation helper", () => {
   it("interpolates variables", () => {
-    expect(tr("en", "welcome_heading", { name: "Alice" })).toBe("Welcome, Alice!");
+    expect(tr("en", "welcome_heading", { name: "Alice" })).toBe(
+      "Welcome, Alice!",
+    );
   });
 
   it("falls back to English for an unknown key", () => {
@@ -43,23 +45,23 @@ describe("localized templates", () => {
   it("renders the welcome email in Spanish and French", () => {
     const es = welcomeEmailTemplate({
       name: "Ana",
-      appName: "ZeroAuth",
+      appName: "zerotrust",
       appUrl: "https://app.test",
       loginUrl: "https://app.test/login",
       locale: "es",
     });
-    expect(es.subject).toBe("¡Bienvenido a ZeroAuth!");
+    expect(es.subject).toBe("¡Bienvenido a zerotrust!");
     expect(es.html).toContain("¡Bienvenido, Ana!");
     expect(es.html).toContain('lang="es"');
 
     const fr = welcomeEmailTemplate({
       name: "Jean",
-      appName: "ZeroAuth",
+      appName: "zerotrust",
       appUrl: "https://app.test",
       loginUrl: "https://app.test/login",
       locale: "fr",
     });
-    expect(fr.subject).toBe("Bienvenue sur ZeroAuth !");
+    expect(fr.subject).toBe("Bienvenue sur zerotrust !");
     expect(fr.html).toContain("Bienvenue, Jean");
   });
 
@@ -69,9 +71,9 @@ describe("localized templates", () => {
       code: "123456",
       verifyUrl: "https://app.test/verify",
       expiresInMinutes: 30,
-      appName: "ZeroAuth",
+      appName: "zerotrust",
     });
-    expect(en.subject).toBe("Verify your email — ZeroAuth");
+    expect(en.subject).toBe("Verify your email — zerotrust");
     expect(en.html).toContain("Confirm your email, Bob");
     expect(en.html).toContain("expire in 30 minutes");
   });
@@ -82,10 +84,10 @@ describe("localized templates", () => {
       code: "654321",
       verifyUrl: "https://app.test/verify",
       expiresInMinutes: 15,
-      appName: "ZeroAuth",
+      appName: "zerotrust",
       locale: "es",
     });
-    expect(es.subject).toBe("Verifica tu correo — ZeroAuth");
+    expect(es.subject).toBe("Verifica tu correo — zerotrust");
     expect(es.html).toContain("caducan en 15 minutos");
   });
 });

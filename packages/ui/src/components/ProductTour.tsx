@@ -24,7 +24,7 @@ interface TourStep {
 
 const STEPS: TourStep[] = [
   {
-    title: "Welcome to ZeroAuth 👋",
+    title: "Welcome to zerotrust 👋",
     body: "A quick tour of the essentials. It takes about 20 seconds — you can skip anytime.",
   },
   {
@@ -35,7 +35,7 @@ const STEPS: TourStep[] = [
   {
     target: '[data-tour="nav-/dashboard/api-keys"]',
     title: "Build with the API",
-    body: "Create scoped API keys to authenticate your apps and services against ZeroAuth.",
+    body: "Create scoped API keys to authenticate your apps and services against zerotrust.",
   },
   {
     target: '[data-tour="nav-/dashboard/notifications"]',
@@ -159,7 +159,9 @@ export default function ProductTour() {
         <h2 className="font-display text-base font-semibold tracking-tight text-foreground">
           {current.title}
         </h2>
-        <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{current.body}</p>
+        <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
+          {current.body}
+        </p>
 
         <div className="mt-4 flex items-center justify-between">
           <div className="flex items-center gap-1.5" aria-hidden>
@@ -180,13 +182,16 @@ export default function ProductTour() {
             >
               Skip
             </button>
-            <Button size="sm" onClick={() => (isLast ? finish() : setStep((s) => s + 1))}>
+            <Button
+              size="sm"
+              onClick={() => (isLast ? finish() : setStep((s) => s + 1))}
+            >
               {isLast ? "Done" : "Next"}
             </Button>
           </div>
         </div>
       </div>
     </div>,
-    document.body
+    document.body,
   );
 }

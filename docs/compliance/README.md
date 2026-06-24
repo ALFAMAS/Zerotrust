@@ -1,6 +1,6 @@
-# ZeroAuth Compliance Documentation
+# zerotrust Compliance Documentation
 
-This folder contains the operating documents needed to run ZeroAuth's compliance
+This folder contains the operating documents needed to run zerotrust's compliance
 program. The documents are intentionally practical: each one names the owner,
 review cadence, required evidence, and where product controls already exist.
 
@@ -10,18 +10,18 @@ These documents are implementation-ready drafts owned by Mas Yasin Arafat. They
 still need approval dates and recurring evidence before they can be used as audit
 evidence.
 
-| Area | Document | Status |
-| --- | --- | --- |
-| Policies | [policies.md](./policies.md) | Drafted, pending approval |
-| Access lifecycle | [onboarding-offboarding-checklist.md](./onboarding-offboarding-checklist.md) | Drafted, ready to use |
-| Vendor management | [vendor-management-register.md](./vendor-management-register.md) | Template drafted, needs vendor entries |
-| Incident response | [incident-response-runbook.md](./incident-response-runbook.md) | Drafted, needs tabletop exercise |
-| Backup/restore | [backup-restore-runbook.md](./backup-restore-runbook.md) | Drafted, needs restore drill evidence |
-| Access reviews | [access-review-procedure.md](./access-review-procedure.md) | Drafted, maps to shipped access-review tooling |
-| Monitoring | [monitoring-evidence-procedure.md](./monitoring-evidence-procedure.md) | Drafted, needs alert/on-call records |
-| SOC 2 planning | [soc2-auditor-readiness.md](./soc2-auditor-readiness.md) | Drafted, needs auditor + window |
-| Audit log hardening | [audit-log-anchoring-plan.md](./audit-log-anchoring-plan.md) | Design drafted, not implemented |
-| Evidence tracker | [evidence-register.md](./evidence-register.md) | Template drafted |
+| Area                | Document                                                                     | Status                                         |
+| ------------------- | ---------------------------------------------------------------------------- | ---------------------------------------------- |
+| Policies            | [policies.md](./policies.md)                                                 | Drafted, pending approval                      |
+| Access lifecycle    | [onboarding-offboarding-checklist.md](./onboarding-offboarding-checklist.md) | Drafted, ready to use                          |
+| Vendor management   | [vendor-management-register.md](./vendor-management-register.md)             | Template drafted, needs vendor entries         |
+| Incident response   | [incident-response-runbook.md](./incident-response-runbook.md)               | Drafted, needs tabletop exercise               |
+| Backup/restore      | [backup-restore-runbook.md](./backup-restore-runbook.md)                     | Drafted, needs restore drill evidence          |
+| Access reviews      | [access-review-procedure.md](./access-review-procedure.md)                   | Drafted, maps to shipped access-review tooling |
+| Monitoring          | [monitoring-evidence-procedure.md](./monitoring-evidence-procedure.md)       | Drafted, needs alert/on-call records           |
+| SOC 2 planning      | [soc2-auditor-readiness.md](./soc2-auditor-readiness.md)                     | Drafted, needs auditor + window                |
+| Audit log hardening | [audit-log-anchoring-plan.md](./audit-log-anchoring-plan.md)                 | Design drafted, not implemented                |
+| Evidence tracker    | [evidence-register.md](./evidence-register.md)                               | Template drafted                               |
 
 ## Evidence Storage Convention
 
@@ -66,12 +66,12 @@ Do not commit:
 
 ## Operating Cadence
 
-| Cadence | Activity |
-| --- | --- |
-| Weekly | Review open incidents, security alerts, failed backups, and high-risk changes |
-| Monthly | Review vendors, monitoring evidence, backup status, and policy exceptions |
-| Quarterly | Run access review, restore drill, incident tabletop, and vendor risk review |
-| Annually | Approve policies, run risk assessment, confirm auditor scope |
+| Cadence   | Activity                                                                      |
+| --------- | ----------------------------------------------------------------------------- |
+| Weekly    | Review open incidents, security alerts, failed backups, and high-risk changes |
+| Monthly   | Review vendors, monitoring evidence, backup status, and policy exceptions     |
+| Quarterly | Run access review, restore drill, incident tabletop, and vendor risk review   |
+| Annually  | Approve policies, run risk assessment, confirm auditor scope                  |
 
 ## Links To Product Controls
 

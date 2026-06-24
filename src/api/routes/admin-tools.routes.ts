@@ -39,7 +39,10 @@ router.use("*", authMiddleware);
 router.use("*", async (c, next) => {
   const user = c.get("user");
   if (!user) {
-    return c.json({ error: "UNAUTHORIZED", message: "Authentication required" }, 401);
+    return c.json(
+      { error: "UNAUTHORIZED", message: "Authentication required" },
+      401,
+    );
   }
   if (!user.roles?.includes("admin")) {
     return c.json({ error: "FORBIDDEN", message: "Admin role required" }, 403);
@@ -51,7 +54,10 @@ let tokenServiceInstance: TokenService | null = null;
 async function getTokenService() {
   if (tokenServiceInstance) return tokenServiceInstance;
   const cfg = getConfig();
-  tokenServiceInstance = new TokenService(cfg.security.tokenSecretHex, cfg.session);
+  tokenServiceInstance = new TokenService(
+    cfg.security.tokenSecretHex,
+    cfg.session,
+  );
   await tokenServiceInstance.init();
   return tokenServiceInstance;
 }
@@ -65,10 +71,17 @@ router.post("/users/:id/impersonate", async (c) => {
     const targetId = c.req.param("id");
 
     const db = getDb();
-    const [target] = await db.select().from(usersTable).where(eq(usersTable.id, targetId)).limit(1);
+    const [target] = await db
+      .select()
+      .from(usersTable)
+      .where(eq(usersTable.id, targetId))
+      .limit(1);
     if (!target) return c.json({ error: "USER_NOT_FOUND" }, 404);
     if (target.roles?.includes("admin")) {
-      return c.json({ error: "FORBIDDEN", message: "Cannot impersonate another admin" }, 403);
+      return c.json(
+        { error: "FORBIDDEN", message: "Cannot impersonate another admin" },
+        403,
+      );
     }
 
     const tokenSvc = await getTokenService();
@@ -78,7 +91,7 @@ router.post("/users/:id/impersonate", async (c) => {
       sub: target.id,
       email: target.email,
       sid: sessionId,
-      aud: "zeroauth",
+      aud: "zerotrust",
       scope: ["openid", "impersonation"],
     });
     const payload = await tokenSvc.verifyAccessToken(accessToken);
@@ -109,7 +122,11 @@ router.post("/users/:id/impersonate", async (c) => {
       accessToken,
       expiresIn: 30 * 60,
       tokenType: "Bearer",
-      impersonating: { id: target.id, email: target.email, displayName: target.displayName },
+      impersonating: {
+        id: target.id,
+        email: target.email,
+        displayName: target.displayName,
+      },
     });
   } catch (err) {
     logger.error("Impersonation error", err as Error);
@@ -128,7 +145,10 @@ router.put("/users/:id/plan", async (c) => {
     const trialDays = parseInt(body.trialDays ?? "0", 10) || 0;
 
     if (!PLANS.includes(plan)) {
-      return c.json({ error: "INVALID_REQUEST", message: `plan must be one of ${PLANS}` }, 400);
+      return c.json(
+        { error: "INVALID_REQUEST", message: `plan must be one of ${PLANS}` },
+        400,
+      );
     }
 
     const db = getDb();
@@ -139,13 +159,18 @@ router.put("/users/:id/plan", async (c) => {
       .limit(1);
     if (!target) return c.json({ error: "USER_NOT_FOUND" }, 404);
 
-    const trialEnd = trialDays > 0 ? new Date(Date.now() + trialDays * 86400_000) : null;
+    const trialEnd =
+      trialDays > 0 ? new Date(Date.now() + trialDays * 86400_000) : null;
     const values = {
       userId: targetId,
       plan,
       status: trialEnd ? "trialing" : "active",
       trialEnd,
-      metadata: { manualOverride: true, overriddenBy: admin.id, overriddenAt: new Date() },
+      metadata: {
+        manualOverride: true,
+        overriddenBy: admin.id,
+        overriddenAt: new Date(),
+      },
     };
 
     const [sub] = await db
@@ -157,7 +182,10 @@ router.put("/users/:id/plan", async (c) => {
       })
       .returning();
 
-    await auditLog("admin.plan_override", admin.id, targetId, true, { plan, trialDays });
+    await auditLog("admin.plan_override", admin.id, targetId, true, {
+      plan,
+      trialDays,
+    });
 
     return c.json({ success: true, subscription: sub });
   } catch (err) {
@@ -173,7 +201,9 @@ router.get("/revenue", async (c) => {
     const db = getDb();
     const subs = await db.select().from(subscriptionsTable);
 
-    const billable = subs.filter((s) => ["active", "trialing", "past_due"].includes(s.status));
+    const billable = subs.filter((s) =>
+      ["active", "trialing", "past_due"].includes(s.status),
+    );
     const byPlan: Record<string, number> = {};
     let mrr = 0;
     for (const s of billable) {
@@ -184,10 +214,12 @@ router.get("/revenue", async (c) => {
 
     const thirtyDaysAgo = new Date(Date.now() - 30 * 86400_000);
     const canceledLast30 = subs.filter(
-      (s) => s.status === "canceled" && s.canceledAt && s.canceledAt > thirtyDaysAgo
+      (s) =>
+        s.status === "canceled" && s.canceledAt && s.canceledAt > thirtyDaysAgo,
     ).length;
     const activeStart = billable.length + canceledLast30;
-    const churnRate = activeStart > 0 ? +((canceledLast30 / activeStart) * 100).toFixed(2) : 0;
+    const churnRate =
+      activeStart > 0 ? +((canceledLast30 / activeStart) * 100).toFixed(2) : 0;
 
     return c.json({
       mrr,
@@ -218,7 +250,10 @@ router.post("/broadcast", async (c) => {
     const sendEmail = body.sendEmail === true;
 
     if (!title || !message) {
-      return c.json({ error: "INVALID_REQUEST", message: "title and message required" }, 400);
+      return c.json(
+        { error: "INVALID_REQUEST", message: "title and message required" },
+        400,
+      );
     }
 
     const db = getDb();
@@ -288,7 +323,7 @@ router.post("/broadcast", async (c) => {
           title,
           body: message,
           link: link ?? null,
-        }))
+        })),
       );
     }
 
@@ -355,11 +390,14 @@ router.get("/users/export", async (c) => {
         roles: u.roles?.join("|"),
         lastLoginAt: u.lastLoginAt?.toISOString() ?? "",
         createdAt: u.createdAt.toISOString(),
-      }))
+      })),
     );
 
     c.header("Content-Type", "text/csv; charset=utf-8");
-    c.header("Content-Disposition", `attachment; filename="users-${Date.now()}.csv"`);
+    c.header(
+      "Content-Disposition",
+      `attachment; filename="users-${Date.now()}.csv"`,
+    );
     return c.body(csv);
   } catch (err) {
     logger.error("User export error", err as Error);
@@ -370,7 +408,10 @@ router.get("/users/export", async (c) => {
 // GET /admin/audit/export?limit=10000 — CSV of recent audit log entries
 router.get("/audit/export", async (c) => {
   try {
-    const limit = Math.min(50_000, parseInt(c.req.query("limit") || "10000", 10));
+    const limit = Math.min(
+      50_000,
+      parseInt(c.req.query("limit") || "10000", 10),
+    );
     const db = getDb();
     const rows = await db
       .select()
@@ -382,16 +423,21 @@ router.get("/audit/export", async (c) => {
       rows.map((r) => ({
         ...r,
         timestamp: r.timestamp?.toISOString?.() ?? r.timestamp,
-        resourceDetails: r.resourceDetails ? JSON.stringify(r.resourceDetails) : "",
+        resourceDetails: r.resourceDetails
+          ? JSON.stringify(r.resourceDetails)
+          : "",
         continuousEvalContext: r.continuousEvalContext
           ? JSON.stringify(r.continuousEvalContext)
           : "",
         metadata: r.metadata ? JSON.stringify(r.metadata) : "",
-      }))
+      })),
     );
 
     c.header("Content-Type", "text/csv; charset=utf-8");
-    c.header("Content-Disposition", `attachment; filename="audit-${Date.now()}.csv"`);
+    c.header(
+      "Content-Disposition",
+      `attachment; filename="audit-${Date.now()}.csv"`,
+    );
     return c.body(csv);
   } catch (err) {
     logger.error("Audit export error", err as Error);
@@ -443,20 +489,30 @@ router.delete("/feature-flags/:key", async (c) => {
 router.post("/users/:id/legal-hold", async (c) => {
   const id = c.req.param("id");
   const admin = c.get("user");
-  const body = (await c.req.json().catch(() => ({}))) as { hold?: boolean; reason?: string };
+  const body = (await c.req.json().catch(() => ({}))) as {
+    hold?: boolean;
+    reason?: string;
+  };
   if (typeof body.hold !== "boolean") {
-    return c.json({ error: "INVALID_REQUEST", message: "hold (boolean) is required" }, 400);
+    return c.json(
+      { error: "INVALID_REQUEST", message: "hold (boolean) is required" },
+      400,
+    );
   }
 
-  const ok = await setLegalHold(id, body.hold, { reason: body.reason, by: admin.id });
-  if (!ok) return c.json({ error: "NOT_FOUND", message: "User not found" }, 404);
+  const ok = await setLegalHold(id, body.hold, {
+    reason: body.reason,
+    by: admin.id,
+  });
+  if (!ok)
+    return c.json({ error: "NOT_FOUND", message: "User not found" }, 404);
 
   void auditLog(
     body.hold ? "admin.legal_hold.placed" : "admin.legal_hold.lifted",
     admin.id,
     id,
     true,
-    { reason: body.reason }
+    { reason: body.reason },
   );
   return c.json({ success: true, userId: id, legalHold: body.hold });
 });

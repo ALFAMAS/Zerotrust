@@ -1,1 +1,279 @@
-{"nodes": [{"id": "claudemd_guide", "label": "ZeroAuth Claude Code Guide", "file_type": "document", "source_file": "CLAUDE.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "claudemd_monorepo", "label": "Monorepo Structure (API + UI)", "file_type": "rationale", "source_file": "CLAUDE.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "claudemd_api_server", "label": "Hono API Server (src/api/server.ts)", "file_type": "code", "source_file": "CLAUDE.md", "source_location": "src/api/server.ts", "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "claudemd_nextjs_ui", "label": "Next.js UI (packages/ui)", "file_type": "code", "source_file": "CLAUDE.md", "source_location": "packages/ui/", "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "claudemd_nextjs_mcp", "label": "Next.js MCP Server", "file_type": "document", "source_file": "CLAUDE.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "claudemd_ship_workflow", "label": "Shipping Workflow (graphify + PR to main)", "file_type": "rationale", "source_file": "CLAUDE.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "claudemd_drizzle", "label": "Drizzle ORM + PostgreSQL", "file_type": "code", "source_file": "CLAUDE.md", "source_location": "src/db/", "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "claudemd_redis", "label": "Redis (sessions, rate limiting, email queue)", "file_type": "document", "source_file": "CLAUDE.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "claudemd_biome", "label": "Biome Lint/Format", "file_type": "document", "source_file": "CLAUDE.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "claudemd_webpush", "label": "Web Push (PWA VAPID)", "file_type": "document", "source_file": "CLAUDE.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "claudemd_bun", "label": "Bun Package Manager", "file_type": "document", "source_file": "CLAUDE.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "claudemd_graphify_skill", "label": "graphify Knowledge Graph", "file_type": "document", "source_file": "CLAUDE.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}], "edges": [{"source": "claudemd_guide", "target": "claudemd_monorepo", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "CLAUDE.md", "source_location": null, "weight": 1.0}, {"source": "claudemd_monorepo", "target": "claudemd_api_server", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "CLAUDE.md", "source_location": null, "weight": 1.0}, {"source": "claudemd_monorepo", "target": "claudemd_nextjs_ui", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "CLAUDE.md", "source_location": null, "weight": 1.0}, {"source": "claudemd_guide", "target": "claudemd_nextjs_mcp", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "CLAUDE.md", "source_location": null, "weight": 1.0}, {"source": "claudemd_nextjs_mcp", "target": "claudemd_nextjs_ui", "relation": "conceptually_related_to", "confidence": "INFERRED", "confidence_score": 0.95, "source_file": "CLAUDE.md", "source_location": null, "weight": 1.0}, {"source": "claudemd_guide", "target": "claudemd_ship_workflow", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "CLAUDE.md", "source_location": null, "weight": 1.0}, {"source": "claudemd_ship_workflow", "target": "claudemd_graphify_skill", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "CLAUDE.md", "source_location": null, "weight": 1.0}, {"source": "claudemd_guide", "target": "claudemd_drizzle", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "CLAUDE.md", "source_location": null, "weight": 1.0}, {"source": "claudemd_guide", "target": "claudemd_redis", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "CLAUDE.md", "source_location": null, "weight": 1.0}, {"source": "claudemd_guide", "target": "claudemd_biome", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "CLAUDE.md", "source_location": null, "weight": 1.0}, {"source": "claudemd_guide", "target": "claudemd_webpush", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "CLAUDE.md", "source_location": null, "weight": 1.0}, {"source": "claudemd_guide", "target": "claudemd_bun", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "CLAUDE.md", "source_location": null, "weight": 1.0}, {"source": "claudemd_api_server", "target": "claudemd_drizzle", "relation": "conceptually_related_to", "confidence": "INFERRED", "confidence_score": 0.85, "source_file": "CLAUDE.md", "source_location": null, "weight": 1.0}, {"source": "claudemd_webpush", "target": "impl_pwa", "relation": "conceptually_related_to", "confidence": "INFERRED", "confidence_score": 0.85, "source_file": "CLAUDE.md", "source_location": null, "weight": 1.0}], "hyperedges": []}
+{
+    "nodes": [
+        {
+            "id": "claudemd_guide",
+            "label": "zerotrust Claude Code Guide",
+            "file_type": "document",
+            "source_file": "CLAUDE.md",
+            "source_location": null,
+            "source_url": null,
+            "captured_at": null,
+            "author": null,
+            "contributor": null
+        },
+        {
+            "id": "claudemd_monorepo",
+            "label": "Monorepo Structure (API + UI)",
+            "file_type": "rationale",
+            "source_file": "CLAUDE.md",
+            "source_location": null,
+            "source_url": null,
+            "captured_at": null,
+            "author": null,
+            "contributor": null
+        },
+        {
+            "id": "claudemd_api_server",
+            "label": "Hono API Server (src/api/server.ts)",
+            "file_type": "code",
+            "source_file": "CLAUDE.md",
+            "source_location": "src/api/server.ts",
+            "source_url": null,
+            "captured_at": null,
+            "author": null,
+            "contributor": null
+        },
+        {
+            "id": "claudemd_nextjs_ui",
+            "label": "Next.js UI (packages/ui)",
+            "file_type": "code",
+            "source_file": "CLAUDE.md",
+            "source_location": "packages/ui/",
+            "source_url": null,
+            "captured_at": null,
+            "author": null,
+            "contributor": null
+        },
+        {
+            "id": "claudemd_nextjs_mcp",
+            "label": "Next.js MCP Server",
+            "file_type": "document",
+            "source_file": "CLAUDE.md",
+            "source_location": null,
+            "source_url": null,
+            "captured_at": null,
+            "author": null,
+            "contributor": null
+        },
+        {
+            "id": "claudemd_ship_workflow",
+            "label": "Shipping Workflow (graphify + PR to main)",
+            "file_type": "rationale",
+            "source_file": "CLAUDE.md",
+            "source_location": null,
+            "source_url": null,
+            "captured_at": null,
+            "author": null,
+            "contributor": null
+        },
+        {
+            "id": "claudemd_drizzle",
+            "label": "Drizzle ORM + PostgreSQL",
+            "file_type": "code",
+            "source_file": "CLAUDE.md",
+            "source_location": "src/db/",
+            "source_url": null,
+            "captured_at": null,
+            "author": null,
+            "contributor": null
+        },
+        {
+            "id": "claudemd_redis",
+            "label": "Redis (sessions, rate limiting, email queue)",
+            "file_type": "document",
+            "source_file": "CLAUDE.md",
+            "source_location": null,
+            "source_url": null,
+            "captured_at": null,
+            "author": null,
+            "contributor": null
+        },
+        {
+            "id": "claudemd_biome",
+            "label": "Biome Lint/Format",
+            "file_type": "document",
+            "source_file": "CLAUDE.md",
+            "source_location": null,
+            "source_url": null,
+            "captured_at": null,
+            "author": null,
+            "contributor": null
+        },
+        {
+            "id": "claudemd_webpush",
+            "label": "Web Push (PWA VAPID)",
+            "file_type": "document",
+            "source_file": "CLAUDE.md",
+            "source_location": null,
+            "source_url": null,
+            "captured_at": null,
+            "author": null,
+            "contributor": null
+        },
+        {
+            "id": "claudemd_bun",
+            "label": "Bun Package Manager",
+            "file_type": "document",
+            "source_file": "CLAUDE.md",
+            "source_location": null,
+            "source_url": null,
+            "captured_at": null,
+            "author": null,
+            "contributor": null
+        },
+        {
+            "id": "claudemd_graphify_skill",
+            "label": "graphify Knowledge Graph",
+            "file_type": "document",
+            "source_file": "CLAUDE.md",
+            "source_location": null,
+            "source_url": null,
+            "captured_at": null,
+            "author": null,
+            "contributor": null
+        }
+    ],
+    "edges": [
+        {
+            "source": "claudemd_guide",
+            "target": "claudemd_monorepo",
+            "relation": "references",
+            "confidence": "EXTRACTED",
+            "confidence_score": 1.0,
+            "source_file": "CLAUDE.md",
+            "source_location": null,
+            "weight": 1.0
+        },
+        {
+            "source": "claudemd_monorepo",
+            "target": "claudemd_api_server",
+            "relation": "references",
+            "confidence": "EXTRACTED",
+            "confidence_score": 1.0,
+            "source_file": "CLAUDE.md",
+            "source_location": null,
+            "weight": 1.0
+        },
+        {
+            "source": "claudemd_monorepo",
+            "target": "claudemd_nextjs_ui",
+            "relation": "references",
+            "confidence": "EXTRACTED",
+            "confidence_score": 1.0,
+            "source_file": "CLAUDE.md",
+            "source_location": null,
+            "weight": 1.0
+        },
+        {
+            "source": "claudemd_guide",
+            "target": "claudemd_nextjs_mcp",
+            "relation": "references",
+            "confidence": "EXTRACTED",
+            "confidence_score": 1.0,
+            "source_file": "CLAUDE.md",
+            "source_location": null,
+            "weight": 1.0
+        },
+        {
+            "source": "claudemd_nextjs_mcp",
+            "target": "claudemd_nextjs_ui",
+            "relation": "conceptually_related_to",
+            "confidence": "INFERRED",
+            "confidence_score": 0.95,
+            "source_file": "CLAUDE.md",
+            "source_location": null,
+            "weight": 1.0
+        },
+        {
+            "source": "claudemd_guide",
+            "target": "claudemd_ship_workflow",
+            "relation": "references",
+            "confidence": "EXTRACTED",
+            "confidence_score": 1.0,
+            "source_file": "CLAUDE.md",
+            "source_location": null,
+            "weight": 1.0
+        },
+        {
+            "source": "claudemd_ship_workflow",
+            "target": "claudemd_graphify_skill",
+            "relation": "references",
+            "confidence": "EXTRACTED",
+            "confidence_score": 1.0,
+            "source_file": "CLAUDE.md",
+            "source_location": null,
+            "weight": 1.0
+        },
+        {
+            "source": "claudemd_guide",
+            "target": "claudemd_drizzle",
+            "relation": "references",
+            "confidence": "EXTRACTED",
+            "confidence_score": 1.0,
+            "source_file": "CLAUDE.md",
+            "source_location": null,
+            "weight": 1.0
+        },
+        {
+            "source": "claudemd_guide",
+            "target": "claudemd_redis",
+            "relation": "references",
+            "confidence": "EXTRACTED",
+            "confidence_score": 1.0,
+            "source_file": "CLAUDE.md",
+            "source_location": null,
+            "weight": 1.0
+        },
+        {
+            "source": "claudemd_guide",
+            "target": "claudemd_biome",
+            "relation": "references",
+            "confidence": "EXTRACTED",
+            "confidence_score": 1.0,
+            "source_file": "CLAUDE.md",
+            "source_location": null,
+            "weight": 1.0
+        },
+        {
+            "source": "claudemd_guide",
+            "target": "claudemd_webpush",
+            "relation": "references",
+            "confidence": "EXTRACTED",
+            "confidence_score": 1.0,
+            "source_file": "CLAUDE.md",
+            "source_location": null,
+            "weight": 1.0
+        },
+        {
+            "source": "claudemd_guide",
+            "target": "claudemd_bun",
+            "relation": "references",
+            "confidence": "EXTRACTED",
+            "confidence_score": 1.0,
+            "source_file": "CLAUDE.md",
+            "source_location": null,
+            "weight": 1.0
+        },
+        {
+            "source": "claudemd_api_server",
+            "target": "claudemd_drizzle",
+            "relation": "conceptually_related_to",
+            "confidence": "INFERRED",
+            "confidence_score": 0.85,
+            "source_file": "CLAUDE.md",
+            "source_location": null,
+            "weight": 1.0
+        },
+        {
+            "source": "claudemd_webpush",
+            "target": "impl_pwa",
+            "relation": "conceptually_related_to",
+            "confidence": "INFERRED",
+            "confidence_score": 0.85,
+            "source_file": "CLAUDE.md",
+            "source_location": null,
+            "weight": 1.0
+        }
+    ],
+    "hyperedges": []
+}

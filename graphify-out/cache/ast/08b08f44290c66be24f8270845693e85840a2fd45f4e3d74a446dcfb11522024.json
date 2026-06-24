@@ -1,1 +1,269 @@
-{"nodes": [{"id": "c_users_alfamas_desktop_zeroauth_packages_ui_src_app_admin_revenue_page_tsx", "label": "page.tsx", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\app\\admin\\revenue\\page.tsx", "source_location": "L1"}, {"id": "revenue_page_revenuedata", "label": "RevenueData", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\app\\admin\\revenue\\page.tsx", "source_location": "L10"}, {"id": "revenue_page_cap", "label": "cap()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\app\\admin\\revenue\\page.tsx", "source_location": "L22"}, {"id": "revenue_page_revenuepage", "label": "RevenuePage()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\app\\admin\\revenue\\page.tsx", "source_location": "L24"}], "edges": [{"source": "c_users_alfamas_desktop_zeroauth_packages_ui_src_app_admin_revenue_page_tsx", "target": "react", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\app\\admin\\revenue\\page.tsx", "source_location": "L3", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_packages_ui_src_app_admin_revenue_page_tsx", "target": "lucide_react", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\app\\admin\\revenue\\page.tsx", "source_location": "L4", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_packages_ui_src_app_admin_revenue_page_tsx", "target": "c_users_alfamas_desktop_zeroauth_packages_ui_src_lib_api_ts", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\app\\admin\\revenue\\page.tsx", "source_location": "L5", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_packages_ui_src_app_admin_revenue_page_tsx", "target": "lib_api_api", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\app\\admin\\revenue\\page.tsx", "source_location": "L5", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_packages_ui_src_app_admin_revenue_page_tsx", "target": "c_users_alfamas_desktop_zeroauth_packages_ui_src_components_ui_button_tsx", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\app\\admin\\revenue\\page.tsx", "source_location": "L6", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_packages_ui_src_app_admin_revenue_page_tsx", "target": "ui_button_button", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\app\\admin\\revenue\\page.tsx", "source_location": "L6", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_packages_ui_src_app_admin_revenue_page_tsx", "target": "c_users_alfamas_desktop_zeroauth_packages_ui_src_components_admin_metriccard_tsx", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\app\\admin\\revenue\\page.tsx", "source_location": "L7", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_packages_ui_src_app_admin_revenue_page_tsx", "target": "c_users_alfamas_desktop_zeroauth_packages_ui_src_components_admin_donutchart_tsx", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\app\\admin\\revenue\\page.tsx", "source_location": "L8", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_packages_ui_src_app_admin_revenue_page_tsx", "target": "revenue_page_revenuedata", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\app\\admin\\revenue\\page.tsx", "source_location": "L10", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_packages_ui_src_app_admin_revenue_page_tsx", "target": "revenue_page_cap", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\app\\admin\\revenue\\page.tsx", "source_location": "L22", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_packages_ui_src_app_admin_revenue_page_tsx", "target": "revenue_page_revenuepage", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\app\\admin\\revenue\\page.tsx", "source_location": "L24", "weight": 1.0}], "raw_calls": [{"caller_nid": "revenue_page_cap", "callee": "toUpperCase", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\app\\admin\\revenue\\page.tsx", "source_location": "L22"}, {"caller_nid": "revenue_page_cap", "callee": "charAt", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\app\\admin\\revenue\\page.tsx", "source_location": "L22"}, {"caller_nid": "revenue_page_cap", "callee": "slice", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\app\\admin\\revenue\\page.tsx", "source_location": "L22"}, {"caller_nid": "revenue_page_revenuepage", "callee": "useState", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\app\\admin\\revenue\\page.tsx", "source_location": "L25"}, {"caller_nid": "revenue_page_revenuepage", "callee": "useState", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\app\\admin\\revenue\\page.tsx", "source_location": "L26"}, {"caller_nid": "revenue_page_revenuepage", "callee": "useState", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\app\\admin\\revenue\\page.tsx", "source_location": "L27"}, {"caller_nid": "revenue_page_revenuepage", "callee": "useState", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\app\\admin\\revenue\\page.tsx", "source_location": "L28"}, {"caller_nid": "revenue_page_revenuepage", "callee": "useState", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\app\\admin\\revenue\\page.tsx", "source_location": "L29"}, {"caller_nid": "revenue_page_revenuepage", "callee": "useEffect", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\app\\admin\\revenue\\page.tsx", "source_location": "L31"}, {"caller_nid": "revenue_page_revenuepage", "callee": "map", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\app\\admin\\revenue\\page.tsx", "source_location": "L122"}, {"caller_nid": "revenue_page_revenuepage", "callee": "Array", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\app\\admin\\revenue\\page.tsx", "source_location": "L122"}, {"caller_nid": "revenue_page_revenuepage", "callee": "fmt", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\app\\admin\\revenue\\page.tsx", "source_location": "L129"}, {"caller_nid": "revenue_page_revenuepage", "callee": "toUpperCase", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\app\\admin\\revenue\\page.tsx", "source_location": "L129"}, {"caller_nid": "revenue_page_revenuepage", "callee": "fmt", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\app\\admin\\revenue\\page.tsx", "source_location": "L130"}, {"caller_nid": "revenue_page_revenuepage", "callee": "keys", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\app\\admin\\revenue\\page.tsx", "source_location": "L138"}, {"caller_nid": "revenue_page_revenuepage", "callee": "map", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\app\\admin\\revenue\\page.tsx", "source_location": "L141"}, {"caller_nid": "revenue_page_revenuepage", "callee": "keys", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\app\\admin\\revenue\\page.tsx", "source_location": "L141"}, {"caller_nid": "revenue_page_revenuepage", "callee": "values", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\app\\admin\\revenue\\page.tsx", "source_location": "L141"}]}
+{
+    "nodes": [
+        {
+            "id": "c_users_alfamas_desktop_zerotrust_packages_ui_src_app_admin_revenue_page_tsx",
+            "label": "page.tsx",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\app\\admin\\revenue\\page.tsx",
+            "source_location": "L1"
+        },
+        {
+            "id": "revenue_page_revenuedata",
+            "label": "RevenueData",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\app\\admin\\revenue\\page.tsx",
+            "source_location": "L10"
+        },
+        {
+            "id": "revenue_page_cap",
+            "label": "cap()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\app\\admin\\revenue\\page.tsx",
+            "source_location": "L22"
+        },
+        {
+            "id": "revenue_page_revenuepage",
+            "label": "RevenuePage()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\app\\admin\\revenue\\page.tsx",
+            "source_location": "L24"
+        }
+    ],
+    "edges": [
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_packages_ui_src_app_admin_revenue_page_tsx",
+            "target": "react",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\app\\admin\\revenue\\page.tsx",
+            "source_location": "L3",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_packages_ui_src_app_admin_revenue_page_tsx",
+            "target": "lucide_react",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\app\\admin\\revenue\\page.tsx",
+            "source_location": "L4",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_packages_ui_src_app_admin_revenue_page_tsx",
+            "target": "c_users_alfamas_desktop_zerotrust_packages_ui_src_lib_api_ts",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\app\\admin\\revenue\\page.tsx",
+            "source_location": "L5",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_packages_ui_src_app_admin_revenue_page_tsx",
+            "target": "lib_api_api",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\app\\admin\\revenue\\page.tsx",
+            "source_location": "L5",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_packages_ui_src_app_admin_revenue_page_tsx",
+            "target": "c_users_alfamas_desktop_zerotrust_packages_ui_src_components_ui_button_tsx",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\app\\admin\\revenue\\page.tsx",
+            "source_location": "L6",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_packages_ui_src_app_admin_revenue_page_tsx",
+            "target": "ui_button_button",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\app\\admin\\revenue\\page.tsx",
+            "source_location": "L6",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_packages_ui_src_app_admin_revenue_page_tsx",
+            "target": "c_users_alfamas_desktop_zerotrust_packages_ui_src_components_admin_metriccard_tsx",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\app\\admin\\revenue\\page.tsx",
+            "source_location": "L7",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_packages_ui_src_app_admin_revenue_page_tsx",
+            "target": "c_users_alfamas_desktop_zerotrust_packages_ui_src_components_admin_donutchart_tsx",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\app\\admin\\revenue\\page.tsx",
+            "source_location": "L8",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_packages_ui_src_app_admin_revenue_page_tsx",
+            "target": "revenue_page_revenuedata",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\app\\admin\\revenue\\page.tsx",
+            "source_location": "L10",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_packages_ui_src_app_admin_revenue_page_tsx",
+            "target": "revenue_page_cap",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\app\\admin\\revenue\\page.tsx",
+            "source_location": "L22",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_packages_ui_src_app_admin_revenue_page_tsx",
+            "target": "revenue_page_revenuepage",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\app\\admin\\revenue\\page.tsx",
+            "source_location": "L24",
+            "weight": 1.0
+        }
+    ],
+    "raw_calls": [
+        {
+            "caller_nid": "revenue_page_cap",
+            "callee": "toUpperCase",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\app\\admin\\revenue\\page.tsx",
+            "source_location": "L22"
+        },
+        {
+            "caller_nid": "revenue_page_cap",
+            "callee": "charAt",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\app\\admin\\revenue\\page.tsx",
+            "source_location": "L22"
+        },
+        {
+            "caller_nid": "revenue_page_cap",
+            "callee": "slice",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\app\\admin\\revenue\\page.tsx",
+            "source_location": "L22"
+        },
+        {
+            "caller_nid": "revenue_page_revenuepage",
+            "callee": "useState",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\app\\admin\\revenue\\page.tsx",
+            "source_location": "L25"
+        },
+        {
+            "caller_nid": "revenue_page_revenuepage",
+            "callee": "useState",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\app\\admin\\revenue\\page.tsx",
+            "source_location": "L26"
+        },
+        {
+            "caller_nid": "revenue_page_revenuepage",
+            "callee": "useState",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\app\\admin\\revenue\\page.tsx",
+            "source_location": "L27"
+        },
+        {
+            "caller_nid": "revenue_page_revenuepage",
+            "callee": "useState",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\app\\admin\\revenue\\page.tsx",
+            "source_location": "L28"
+        },
+        {
+            "caller_nid": "revenue_page_revenuepage",
+            "callee": "useState",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\app\\admin\\revenue\\page.tsx",
+            "source_location": "L29"
+        },
+        {
+            "caller_nid": "revenue_page_revenuepage",
+            "callee": "useEffect",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\app\\admin\\revenue\\page.tsx",
+            "source_location": "L31"
+        },
+        {
+            "caller_nid": "revenue_page_revenuepage",
+            "callee": "map",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\app\\admin\\revenue\\page.tsx",
+            "source_location": "L122"
+        },
+        {
+            "caller_nid": "revenue_page_revenuepage",
+            "callee": "Array",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\app\\admin\\revenue\\page.tsx",
+            "source_location": "L122"
+        },
+        {
+            "caller_nid": "revenue_page_revenuepage",
+            "callee": "fmt",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\app\\admin\\revenue\\page.tsx",
+            "source_location": "L129"
+        },
+        {
+            "caller_nid": "revenue_page_revenuepage",
+            "callee": "toUpperCase",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\app\\admin\\revenue\\page.tsx",
+            "source_location": "L129"
+        },
+        {
+            "caller_nid": "revenue_page_revenuepage",
+            "callee": "fmt",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\app\\admin\\revenue\\page.tsx",
+            "source_location": "L130"
+        },
+        {
+            "caller_nid": "revenue_page_revenuepage",
+            "callee": "keys",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\app\\admin\\revenue\\page.tsx",
+            "source_location": "L138"
+        },
+        {
+            "caller_nid": "revenue_page_revenuepage",
+            "callee": "map",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\app\\admin\\revenue\\page.tsx",
+            "source_location": "L141"
+        },
+        {
+            "caller_nid": "revenue_page_revenuepage",
+            "callee": "keys",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\app\\admin\\revenue\\page.tsx",
+            "source_location": "L141"
+        },
+        {
+            "caller_nid": "revenue_page_revenuepage",
+            "callee": "values",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\app\\admin\\revenue\\page.tsx",
+            "source_location": "L141"
+        }
+    ]
+}

@@ -10,15 +10,15 @@ export interface BlogPost {
 
 export const blogPosts: BlogPost[] = [
   {
-    slug: "introducing-zeroauth",
-    title: "Introducing ZeroAuth: Zero-Trust Auth for Modern Apps",
+    slug: "introducing-zerotrust",
+    title: "Introducing zerotrust: Zero-Trust Auth for Modern Apps",
     excerpt:
-      "Today we're open-sourcing ZeroAuth — a complete, self-hosted authentication platform with passkeys, MFA, RBAC, and real-time anomaly detection.",
-    author: "ZeroAuth Team",
+      "Today we're open-sourcing zerotrust — a complete, self-hosted authentication platform with passkeys, MFA, RBAC, and real-time anomaly detection.",
+    author: "zerotrust Team",
     date: "2026-01-15",
     tags: ["announcement", "open-source"],
     content: `
-We built ZeroAuth because every new project deserves production-grade authentication without the enterprise price tag.
+We built zerotrust because every new project deserves production-grade authentication without the enterprise price tag.
 
 ## What's included
 
@@ -43,7 +43,7 @@ Clone the repo, copy \`.env.example\`, run \`docker compose up\`, and you have a
     title: "Passkeys: The End of Password Fatigue",
     excerpt:
       "Passkeys use public-key cryptography to eliminate passwords entirely. Here's how they work and why you should migrate today.",
-    author: "ZeroAuth Team",
+    author: "zerotrust Team",
     date: "2026-02-03",
     tags: ["security", "webauthn", "passkeys"],
     content: `
@@ -60,7 +60,7 @@ No password is ever transmitted, stored, or phished.
 
 Passkeys work in Chrome 108+, Safari 16+, and Firefox 122+. On mobile, Face ID, Touch ID, and Android fingerprint sensors all work out of the box.
 
-## Enabling passkeys in ZeroAuth
+## Enabling passkeys in zerotrust
 
 Passkey registration and authentication are built in. Users can add a passkey from **Settings → Security → Passkeys** and use it immediately on any supported device.
     `.trim(),

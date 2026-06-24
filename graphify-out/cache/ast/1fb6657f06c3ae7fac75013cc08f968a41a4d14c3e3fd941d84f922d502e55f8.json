@@ -1,1 +1,176 @@
-{"nodes": [{"id": "c_users_alfamas_desktop_zeroauth_src_models_user_model_ts", "label": "user.model.ts", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\models\\user.model.ts", "source_location": "L1"}, {"id": "models_user_model_userdocument", "label": "UserDocument", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\models\\user.model.ts", "source_location": "L5"}, {"id": "models_user_model_passkeyschema", "label": "PasskeySchema", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\models\\user.model.ts", "source_location": "L7"}, {"id": "models_user_model_oauthproviderschema", "label": "OAuthProviderSchema", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\models\\user.model.ts", "source_location": "L19"}, {"id": "models_user_model_schedulerestrictionschema", "label": "ScheduleRestrictionSchema", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\models\\user.model.ts", "source_location": "L26"}, {"id": "models_user_model_userschema", "label": "UserSchema", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\models\\user.model.ts", "source_location": "L34"}, {"id": "models_user_model_fieldstoencrypt", "label": "fieldsToEncrypt", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\models\\user.model.ts", "source_location": "L89"}, {"id": "models_user_model_usermodel", "label": "UserModel", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\models\\user.model.ts", "source_location": "L98"}], "edges": [{"source": "c_users_alfamas_desktop_zeroauth_src_models_user_model_ts", "target": "mongoose", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\models\\user.model.ts", "source_location": "L1", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_models_user_model_ts", "target": "c_users_alfamas_desktop_zeroauth_src_shared_types_ts", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\models\\user.model.ts", "source_location": "L2", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_models_user_model_ts", "target": "shared_types_user", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\models\\user.model.ts", "source_location": "L2", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_models_user_model_ts", "target": "c_users_alfamas_desktop_zeroauth_src_crypto_csfle_ts", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\models\\user.model.ts", "source_location": "L3", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_models_user_model_ts", "target": "crypto_csfle_csflencryptionplugin", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\models\\user.model.ts", "source_location": "L3", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_models_user_model_ts", "target": "models_user_model_userdocument", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\models\\user.model.ts", "source_location": "L5", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_models_user_model_ts", "target": "models_user_model_passkeyschema", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\models\\user.model.ts", "source_location": "L7", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_models_user_model_ts", "target": "models_user_model_oauthproviderschema", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\models\\user.model.ts", "source_location": "L19", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_models_user_model_ts", "target": "models_user_model_schedulerestrictionschema", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\models\\user.model.ts", "source_location": "L26", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_models_user_model_ts", "target": "models_user_model_userschema", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\models\\user.model.ts", "source_location": "L34", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_models_user_model_ts", "target": "models_user_model_fieldstoencrypt", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\models\\user.model.ts", "source_location": "L89", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_models_user_model_ts", "target": "models_user_model_usermodel", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\models\\user.model.ts", "source_location": "L98", "weight": 1.0}], "raw_calls": []}
+{
+    "nodes": [
+        {
+            "id": "c_users_alfamas_desktop_zerotrust_src_models_user_model_ts",
+            "label": "user.model.ts",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\models\\user.model.ts",
+            "source_location": "L1"
+        },
+        {
+            "id": "models_user_model_userdocument",
+            "label": "UserDocument",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\models\\user.model.ts",
+            "source_location": "L5"
+        },
+        {
+            "id": "models_user_model_passkeyschema",
+            "label": "PasskeySchema",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\models\\user.model.ts",
+            "source_location": "L7"
+        },
+        {
+            "id": "models_user_model_oauthproviderschema",
+            "label": "OAuthProviderSchema",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\models\\user.model.ts",
+            "source_location": "L19"
+        },
+        {
+            "id": "models_user_model_schedulerestrictionschema",
+            "label": "ScheduleRestrictionSchema",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\models\\user.model.ts",
+            "source_location": "L26"
+        },
+        {
+            "id": "models_user_model_userschema",
+            "label": "UserSchema",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\models\\user.model.ts",
+            "source_location": "L34"
+        },
+        {
+            "id": "models_user_model_fieldstoencrypt",
+            "label": "fieldsToEncrypt",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\models\\user.model.ts",
+            "source_location": "L89"
+        },
+        {
+            "id": "models_user_model_usermodel",
+            "label": "UserModel",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\models\\user.model.ts",
+            "source_location": "L98"
+        }
+    ],
+    "edges": [
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_models_user_model_ts",
+            "target": "mongoose",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\models\\user.model.ts",
+            "source_location": "L1",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_models_user_model_ts",
+            "target": "c_users_alfamas_desktop_zerotrust_src_shared_types_ts",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\models\\user.model.ts",
+            "source_location": "L2",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_models_user_model_ts",
+            "target": "shared_types_user",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\models\\user.model.ts",
+            "source_location": "L2",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_models_user_model_ts",
+            "target": "c_users_alfamas_desktop_zerotrust_src_crypto_csfle_ts",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\models\\user.model.ts",
+            "source_location": "L3",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_models_user_model_ts",
+            "target": "crypto_csfle_csflencryptionplugin",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\models\\user.model.ts",
+            "source_location": "L3",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_models_user_model_ts",
+            "target": "models_user_model_userdocument",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\models\\user.model.ts",
+            "source_location": "L5",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_models_user_model_ts",
+            "target": "models_user_model_passkeyschema",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\models\\user.model.ts",
+            "source_location": "L7",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_models_user_model_ts",
+            "target": "models_user_model_oauthproviderschema",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\models\\user.model.ts",
+            "source_location": "L19",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_models_user_model_ts",
+            "target": "models_user_model_schedulerestrictionschema",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\models\\user.model.ts",
+            "source_location": "L26",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_models_user_model_ts",
+            "target": "models_user_model_userschema",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\models\\user.model.ts",
+            "source_location": "L34",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_models_user_model_ts",
+            "target": "models_user_model_fieldstoencrypt",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\models\\user.model.ts",
+            "source_location": "L89",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_models_user_model_ts",
+            "target": "models_user_model_usermodel",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\models\\user.model.ts",
+            "source_location": "L98",
+            "weight": 1.0
+        }
+    ],
+    "raw_calls": []
+}

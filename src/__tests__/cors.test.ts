@@ -3,23 +3,32 @@ import { corsPolicyFromEnv, resolveCorsOrigin } from "../middleware/cors";
 
 describe("CORS origin policy", () => {
   it("reflects any origin in development when nothing is configured", () => {
-    const policy = corsPolicyFromEnv({ NODE_ENV: "development" } as NodeJS.ProcessEnv);
-    expect(resolveCorsOrigin("https://evil.example", policy)).toBe("https://evil.example");
+    const policy = corsPolicyFromEnv({
+      NODE_ENV: "development",
+    } as NodeJS.ProcessEnv);
+    expect(resolveCorsOrigin("https://evil.example", policy)).toBe(
+      "https://evil.example",
+    );
   });
 
   it("fails closed in production when no allowlist is configured", () => {
-    const policy = corsPolicyFromEnv({ NODE_ENV: "production" } as NodeJS.ProcessEnv);
+    const policy = corsPolicyFromEnv({
+      NODE_ENV: "production",
+    } as NodeJS.ProcessEnv);
     expect(resolveCorsOrigin("https://evil.example", policy)).toBeNull();
   });
 
   it("reflects only allowlisted origins in production", () => {
     const policy = corsPolicyFromEnv({
       NODE_ENV: "production",
-      CORS_ALLOWED_ORIGINS: "https://app.zeroauth.com, https://admin.zeroauth.com",
+      CORS_ALLOWED_ORIGINS:
+        "https://app.zerotrust.com, https://admin.zerotrust.com",
     } as NodeJS.ProcessEnv);
-    expect(resolveCorsOrigin("https://app.zeroauth.com", policy)).toBe("https://app.zeroauth.com");
-    expect(resolveCorsOrigin("https://admin.zeroauth.com", policy)).toBe(
-      "https://admin.zeroauth.com"
+    expect(resolveCorsOrigin("https://app.zerotrust.com", policy)).toBe(
+      "https://app.zerotrust.com",
+    );
+    expect(resolveCorsOrigin("https://admin.zerotrust.com", policy)).toBe(
+      "https://admin.zerotrust.com",
     );
     expect(resolveCorsOrigin("https://evil.example", policy)).toBeNull();
   });
@@ -27,10 +36,10 @@ describe("CORS origin policy", () => {
   it("always trusts APP_URL", () => {
     const policy = corsPolicyFromEnv({
       NODE_ENV: "production",
-      APP_URL: "https://dashboard.zeroauth.com/",
+      APP_URL: "https://dashboard.zerotrust.com/",
     } as NodeJS.ProcessEnv);
-    expect(resolveCorsOrigin("https://dashboard.zeroauth.com", policy)).toBe(
-      "https://dashboard.zeroauth.com"
+    expect(resolveCorsOrigin("https://dashboard.zerotrust.com", policy)).toBe(
+      "https://dashboard.zerotrust.com",
     );
     expect(resolveCorsOrigin("https://evil.example", policy)).toBeNull();
   });
@@ -47,8 +56,10 @@ describe("CORS origin policy", () => {
   it("normalizes trailing slashes on both sides", () => {
     const policy = corsPolicyFromEnv({
       NODE_ENV: "production",
-      CORS_ALLOWED_ORIGINS: "https://app.zeroauth.com/",
+      CORS_ALLOWED_ORIGINS: "https://app.zerotrust.com/",
     } as NodeJS.ProcessEnv);
-    expect(resolveCorsOrigin("https://app.zeroauth.com", policy)).toBe("https://app.zeroauth.com");
+    expect(resolveCorsOrigin("https://app.zerotrust.com", policy)).toBe(
+      "https://app.zerotrust.com",
+    );
   });
 });

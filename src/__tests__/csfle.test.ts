@@ -5,7 +5,11 @@ const MASTER_KEY_HEX = "b".repeat(64);
 
 const mockConfig = {
   database: { mongoUri: "", connectionPoolSize: 1 },
-  session: { defaultTTL: 3600, refreshTokenTTL: 604800, maxConcurrentDevices: 5 },
+  session: {
+    defaultTTL: 3600,
+    refreshTokenTTL: 604800,
+    maxConcurrentDevices: 5,
+  },
   security: {
     bcryptRounds: 10,
     tokenSecretHex: "a".repeat(64),
@@ -26,7 +30,12 @@ const mockConfig = {
   },
   rateLimiting: { enabled: false, perIpLimit: 100, windowSecs: 60 },
   geofencing: { enabled: false, allowedCountries: [], allowedIpRanges: [] },
-  elasticsearch: { enabled: false, host: "localhost", port: 9200, indexPrefix: "zeroauth" },
+  elasticsearch: {
+    enabled: false,
+    host: "localhost",
+    port: 9200,
+    indexPrefix: "zerotrust",
+  },
   logging: { level: "info" as const, format: "json" as const },
 } as any;
 
@@ -74,7 +83,9 @@ describe("CSFLE", () => {
 
   it("throws on unknown key version during decrypt", async () => {
     const manager = await initializeCSFLE(mockConfig);
-    await expect(manager.decrypt("fakecipher", "unknown-version", "fakeiv")).rejects.toThrow();
+    await expect(
+      manager.decrypt("fakecipher", "unknown-version", "fakeiv"),
+    ).rejects.toThrow();
   });
 
   it("returns singleton from getCSFLE after init", async () => {

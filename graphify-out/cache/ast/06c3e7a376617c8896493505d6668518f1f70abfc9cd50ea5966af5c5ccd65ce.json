@@ -1,1 +1,129 @@
-{"nodes": [{"id": "c_users_alfamas_desktop_zeroauth_packages_ui_src_lib_offlinequeue_ts", "label": "offlineQueue.ts", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\lib\\offlineQueue.ts", "source_location": "L1"}, {"id": "lib_offlinequeue_queuedwrite", "label": "QueuedWrite", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\lib\\offlineQueue.ts", "source_location": "L13"}, {"id": "lib_offlinequeue_opendb", "label": "openDB()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\lib\\offlineQueue.ts", "source_location": "L21"}, {"id": "lib_offlinequeue_isqueueablemethod", "label": "isQueueableMethod()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\lib\\offlineQueue.ts", "source_location": "L35"}, {"id": "lib_offlinequeue_enqueuewrite", "label": "enqueueWrite()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\lib\\offlineQueue.ts", "source_location": "L40"}, {"id": "lib_offlinequeue_pendingwritecount", "label": "pendingWriteCount()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\lib\\offlineQueue.ts", "source_location": "L61"}], "edges": [{"source": "c_users_alfamas_desktop_zeroauth_packages_ui_src_lib_offlinequeue_ts", "target": "lib_offlinequeue_queuedwrite", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\lib\\offlineQueue.ts", "source_location": "L13", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_packages_ui_src_lib_offlinequeue_ts", "target": "lib_offlinequeue_opendb", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\lib\\offlineQueue.ts", "source_location": "L21", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_packages_ui_src_lib_offlinequeue_ts", "target": "lib_offlinequeue_isqueueablemethod", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\lib\\offlineQueue.ts", "source_location": "L35", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_packages_ui_src_lib_offlinequeue_ts", "target": "lib_offlinequeue_enqueuewrite", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\lib\\offlineQueue.ts", "source_location": "L40", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_packages_ui_src_lib_offlinequeue_ts", "target": "lib_offlinequeue_pendingwritecount", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\lib\\offlineQueue.ts", "source_location": "L61", "weight": 1.0}, {"source": "lib_offlinequeue_enqueuewrite", "target": "lib_offlinequeue_opendb", "relation": "calls", "context": "call", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\lib\\offlineQueue.ts", "source_location": "L42", "weight": 1.0}, {"source": "lib_offlinequeue_pendingwritecount", "target": "lib_offlinequeue_opendb", "relation": "calls", "context": "call", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\lib\\offlineQueue.ts", "source_location": "L63", "weight": 1.0}], "raw_calls": [{"caller_nid": "lib_offlinequeue_isqueueablemethod", "callee": "toUpperCase", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\lib\\offlineQueue.ts", "source_location": "L36"}, {"caller_nid": "lib_offlinequeue_enqueuewrite", "callee": "register", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\lib\\offlineQueue.ts", "source_location": "L55"}]}
+{
+    "nodes": [
+        {
+            "id": "c_users_alfamas_desktop_zerotrust_packages_ui_src_lib_offlinequeue_ts",
+            "label": "offlineQueue.ts",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\lib\\offlineQueue.ts",
+            "source_location": "L1"
+        },
+        {
+            "id": "lib_offlinequeue_queuedwrite",
+            "label": "QueuedWrite",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\lib\\offlineQueue.ts",
+            "source_location": "L13"
+        },
+        {
+            "id": "lib_offlinequeue_opendb",
+            "label": "openDB()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\lib\\offlineQueue.ts",
+            "source_location": "L21"
+        },
+        {
+            "id": "lib_offlinequeue_isqueueablemethod",
+            "label": "isQueueableMethod()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\lib\\offlineQueue.ts",
+            "source_location": "L35"
+        },
+        {
+            "id": "lib_offlinequeue_enqueuewrite",
+            "label": "enqueueWrite()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\lib\\offlineQueue.ts",
+            "source_location": "L40"
+        },
+        {
+            "id": "lib_offlinequeue_pendingwritecount",
+            "label": "pendingWriteCount()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\lib\\offlineQueue.ts",
+            "source_location": "L61"
+        }
+    ],
+    "edges": [
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_packages_ui_src_lib_offlinequeue_ts",
+            "target": "lib_offlinequeue_queuedwrite",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\lib\\offlineQueue.ts",
+            "source_location": "L13",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_packages_ui_src_lib_offlinequeue_ts",
+            "target": "lib_offlinequeue_opendb",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\lib\\offlineQueue.ts",
+            "source_location": "L21",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_packages_ui_src_lib_offlinequeue_ts",
+            "target": "lib_offlinequeue_isqueueablemethod",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\lib\\offlineQueue.ts",
+            "source_location": "L35",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_packages_ui_src_lib_offlinequeue_ts",
+            "target": "lib_offlinequeue_enqueuewrite",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\lib\\offlineQueue.ts",
+            "source_location": "L40",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_packages_ui_src_lib_offlinequeue_ts",
+            "target": "lib_offlinequeue_pendingwritecount",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\lib\\offlineQueue.ts",
+            "source_location": "L61",
+            "weight": 1.0
+        },
+        {
+            "source": "lib_offlinequeue_enqueuewrite",
+            "target": "lib_offlinequeue_opendb",
+            "relation": "calls",
+            "context": "call",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\lib\\offlineQueue.ts",
+            "source_location": "L42",
+            "weight": 1.0
+        },
+        {
+            "source": "lib_offlinequeue_pendingwritecount",
+            "target": "lib_offlinequeue_opendb",
+            "relation": "calls",
+            "context": "call",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\lib\\offlineQueue.ts",
+            "source_location": "L63",
+            "weight": 1.0
+        }
+    ],
+    "raw_calls": [
+        {
+            "caller_nid": "lib_offlinequeue_isqueueablemethod",
+            "callee": "toUpperCase",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\lib\\offlineQueue.ts",
+            "source_location": "L36"
+        },
+        {
+            "caller_nid": "lib_offlinequeue_enqueuewrite",
+            "callee": "register",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\lib\\offlineQueue.ts",
+            "source_location": "L55"
+        }
+    ]
+}

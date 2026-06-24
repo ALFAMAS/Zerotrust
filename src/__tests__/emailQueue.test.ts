@@ -17,7 +17,11 @@ vi.mock("bullmq", () => ({
 
 vi.mock("../config", () => ({
   getConfig: () => ({
-    session: { defaultTTL: 3600, refreshTokenTTL: 604800, maxConcurrentDevices: 5 },
+    session: {
+      defaultTTL: 3600,
+      refreshTokenTTL: 604800,
+      maxConcurrentDevices: 5,
+    },
     security: {
       bcryptRounds: 4,
       tokenSecretHex: "a".repeat(64),
@@ -38,7 +42,12 @@ vi.mock("../config", () => ({
       },
     },
     oauth: { providers: {} },
-    elasticsearch: { enabled: false, host: "localhost", port: 9200, indexPrefix: "zeroauth" },
+    elasticsearch: {
+      enabled: false,
+      host: "localhost",
+      port: 9200,
+      indexPrefix: "zerotrust",
+    },
     logging: { level: "error", format: "json" },
   }),
 }));
@@ -55,7 +64,9 @@ describe("Email Queue", () => {
 
   it("enqueueEmail returns false when queue is not initialized", async () => {
     const { enqueueEmail } = await import("../services/emailQueue");
-    const result = await enqueueEmail("welcome", "test@example.com", { name: "Test" });
+    const result = await enqueueEmail("welcome", "test@example.com", {
+      name: "Test",
+    });
     expect(result).toBe(false);
   });
 
@@ -71,13 +82,16 @@ describe("Email Queue", () => {
     const { initEmailQueue, enqueueEmail, shutdownEmailQueue } =
       await import("../services/emailQueue");
     await initEmailQueue("redis://:pass@localhost:6379");
-    const result = await enqueueEmail("welcome", "user@example.com", { name: "User" });
+    const result = await enqueueEmail("welcome", "user@example.com", {
+      name: "User",
+    });
     expect(result).toBe(true);
     await shutdownEmailQueue();
   });
 
   it("gracefully skips init for invalid redis URI", async () => {
-    const { initEmailQueue, getEmailQueue } = await import("../services/emailQueue");
+    const { initEmailQueue, getEmailQueue } =
+      await import("../services/emailQueue");
     await initEmailQueue("not-a-valid-uri");
     expect(getEmailQueue()).toBeNull();
   });

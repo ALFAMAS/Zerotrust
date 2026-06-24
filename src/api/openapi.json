@@ -1,7 +1,7 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "ZeroAuth API",
+    "title": "zerotrust API",
     "version": "1.0.0",
     "description": "Zero-trust authentication and authorization API. Built on PASETO v4, ABAC/RBAC, device attestation, and continuous access evaluation.",
     "contact": {
@@ -9,7 +9,10 @@
     }
   },
   "servers": [
-    { "url": "http://localhost:3000", "description": "Local development" }
+    {
+      "url": "http://localhost:3000",
+      "description": "Local development"
+    }
   ],
   "components": {
     "securitySchemes": {
@@ -22,17 +25,29 @@
     "schemas": {
       "ErrorEnvelope": {
         "type": "object",
-        "required": ["code", "message", "details"],
+        "required": [
+          "code",
+          "message",
+          "details"
+        ],
         "properties": {
-          "code": { "type": "string" },
-          "message": { "type": "string" },
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
           "details": {
             "type": "array",
             "items": {
               "type": "object",
               "properties": {
-                "field": { "type": "string" },
-                "message": { "type": "string" }
+                "field": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
               }
             }
           }
@@ -41,29 +56,66 @@
       "TokenResponse": {
         "type": "object",
         "properties": {
-          "accessToken": { "type": "string", "description": "PASETO v4.local access token" },
-          "refreshToken": { "type": "string" },
-          "expiresIn": { "type": "integer", "description": "Access token TTL in seconds" },
-          "tokenType": { "type": "string", "enum": ["Bearer"] }
+          "accessToken": {
+            "type": "string",
+            "description": "PASETO v4.local access token"
+          },
+          "refreshToken": {
+            "type": "string"
+          },
+          "expiresIn": {
+            "type": "integer",
+            "description": "Access token TTL in seconds"
+          },
+          "tokenType": {
+            "type": "string",
+            "enum": [
+              "Bearer"
+            ]
+          }
         }
       },
       "Session": {
         "type": "object",
         "properties": {
-          "id": { "type": "string" },
-          "ipAddress": { "type": "string" },
-          "country": { "type": "string" },
-          "userAgent": { "type": "string" },
-          "isActive": { "type": "boolean" },
-          "isCurrent": { "type": "boolean" },
-          "lastActivityAt": { "type": "string", "format": "date-time" },
-          "createdAt": { "type": "string", "format": "date-time" },
+          "id": {
+            "type": "string"
+          },
+          "ipAddress": {
+            "type": "string"
+          },
+          "country": {
+            "type": "string"
+          },
+          "userAgent": {
+            "type": "string"
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "isCurrent": {
+            "type": "boolean"
+          },
+          "lastActivityAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
           "deviceFingerprint": {
             "type": "object",
             "properties": {
-              "platform": { "type": "string" },
-              "browser": { "type": "string" },
-              "os": { "type": "string" }
+              "platform": {
+                "type": "string"
+              },
+              "browser": {
+                "type": "string"
+              },
+              "os": {
+                "type": "string"
+              }
             }
           }
         }
@@ -73,7 +125,9 @@
   "paths": {
     "/auth/register": {
       "post": {
-        "tags": ["Auth"],
+        "tags": [
+          "Auth"
+        ],
         "summary": "Register a new user",
         "requestBody": {
           "required": true,
@@ -81,15 +135,24 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["email", "password"],
+                "required": [
+                  "email",
+                  "password"
+                ],
                 "properties": {
-                  "email": { "type": "string", "format": "email" },
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  },
                   "password": {
                     "type": "string",
                     "minLength": 8,
                     "description": "Must include uppercase, lowercase, digit, and special character"
                   },
-                  "displayName": { "type": "string", "maxLength": 100 }
+                  "displayName": {
+                    "type": "string",
+                    "maxLength": 100
+                  }
                 }
               }
             }
@@ -103,21 +166,45 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "success": { "type": "boolean" },
-                    "userId": { "type": "string" }
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "userId": {
+                      "type": "string"
+                    }
                   }
                 }
               }
             }
           },
-          "409": { "description": "User already exists", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorEnvelope" } } } },
-          "422": { "description": "Validation error", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorEnvelope" } } } }
+          "409": {
+            "description": "User already exists",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
         }
       }
     },
     "/auth/login": {
       "post": {
-        "tags": ["Auth"],
+        "tags": [
+          "Auth"
+        ],
         "summary": "Login with email and password",
         "requestBody": {
           "required": true,
@@ -125,10 +212,18 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["email", "password"],
+                "required": [
+                  "email",
+                  "password"
+                ],
                 "properties": {
-                  "email": { "type": "string", "format": "email" },
-                  "password": { "type": "string" }
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  },
+                  "password": {
+                    "type": "string"
+                  }
                 }
               }
             }
@@ -137,17 +232,52 @@
         "responses": {
           "200": {
             "description": "Login successful",
-            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/TokenResponse" } } }
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            }
           },
-          "401": { "description": "Invalid credentials", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorEnvelope" } } } },
-          "423": { "description": "Account locked", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorEnvelope" } } } },
-          "429": { "description": "Rate limit exceeded", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorEnvelope" } } } }
+          "401": {
+            "description": "Invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "423": {
+            "description": "Account locked",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
         }
       }
     },
     "/auth/token/refresh": {
       "post": {
-        "tags": ["Auth"],
+        "tags": [
+          "Auth"
+        ],
         "summary": "Rotate refresh token and issue new access token",
         "requestBody": {
           "required": true,
@@ -155,43 +285,107 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["refreshToken"],
+                "required": [
+                  "refreshToken"
+                ],
                 "properties": {
-                  "refreshToken": { "type": "string" }
+                  "refreshToken": {
+                    "type": "string"
+                  }
                 }
               }
             }
           }
         },
         "responses": {
-          "200": { "description": "Tokens rotated", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/TokenResponse" } } } },
-          "401": { "description": "Invalid or expired refresh token", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorEnvelope" } } } }
+          "200": {
+            "description": "Tokens rotated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid or expired refresh token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
         }
       }
     },
     "/auth/logout": {
       "post": {
-        "tags": ["Auth"],
+        "tags": [
+          "Auth"
+        ],
         "summary": "Revoke current session",
-        "security": [{ "BearerAuth": [] }],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "responses": {
-          "200": { "description": "Logged out", "content": { "application/json": { "schema": { "type": "object", "properties": { "success": { "type": "boolean" } } } } } }
+          "200": {
+            "description": "Logged out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          }
         }
       }
     },
     "/auth/logout/all": {
       "post": {
-        "tags": ["Auth"],
+        "tags": [
+          "Auth"
+        ],
         "summary": "Revoke all sessions for the authenticated user",
-        "security": [{ "BearerAuth": [] }],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "responses": {
-          "200": { "description": "All sessions revoked", "content": { "application/json": { "schema": { "type": "object", "properties": { "success": { "type": "boolean" } } } } } }
+          "200": {
+            "description": "All sessions revoked",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          }
         }
       }
     },
     "/auth/oauth/state": {
       "post": {
-        "tags": ["OAuth"],
+        "tags": [
+          "OAuth"
+        ],
         "summary": "Generate an ephemeral OAuth state token (PKCE/nonce)",
         "requestBody": {
           "content": {
@@ -199,8 +393,14 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "codeChallenge": { "type": "string", "description": "PKCE code_challenge (S256)" },
-                  "redirectUri": { "type": "string", "format": "uri" }
+                  "codeChallenge": {
+                    "type": "string",
+                    "description": "PKCE code_challenge (S256)"
+                  },
+                  "redirectUri": {
+                    "type": "string",
+                    "format": "uri"
+                  }
                 }
               }
             }
@@ -209,60 +409,210 @@
         "responses": {
           "200": {
             "description": "State token",
-            "content": { "application/json": { "schema": { "type": "object", "properties": { "state": { "type": "string" }, "nonce": { "type": "string" }, "ttlSeconds": { "type": "integer" } } } } }
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "state": {
+                      "type": "string"
+                    },
+                    "nonce": {
+                      "type": "string"
+                    },
+                    "ttlSeconds": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
     },
     "/auth/oauth/{provider}/authorize": {
       "get": {
-        "tags": ["OAuth"],
+        "tags": [
+          "OAuth"
+        ],
         "summary": "Begin OAuth authorization flow (returns the provider's authorize URL)",
         "description": "Generates a CSRF state and (where supported) a server-side PKCE pair, then returns the provider authorization URL the client should navigate to. The PKCE code_verifier never leaves the server.",
         "parameters": [
-          { "name": "provider", "in": "path", "required": true, "schema": { "type": "string", "enum": ["google", "github", "facebook"] } }
+          {
+            "name": "provider",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "google",
+                "github",
+                "facebook"
+              ]
+            }
+          }
         ],
         "responses": {
-          "200": { "description": "Authorization URL", "content": { "application/json": { "schema": { "type": "object", "properties": { "authorizeUrl": { "type": "string", "format": "uri" }, "state": { "type": "string" } } } } } },
-          "400": { "description": "Provider unsupported or not configured", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorEnvelope" } } } }
+          "200": {
+            "description": "Authorization URL",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "authorizeUrl": {
+                      "type": "string",
+                      "format": "uri"
+                    },
+                    "state": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Provider unsupported or not configured",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
         }
       }
     },
     "/auth/oauth/{provider}/callback": {
       "get": {
-        "tags": ["OAuth"],
+        "tags": [
+          "OAuth"
+        ],
         "summary": "OAuth authorization code callback",
         "description": "Provider redirects here with an authorization code. On success the server creates a session, stores the tokens under a one-time exchange code, and 302-redirects to the frontend at /login?oauth_code=<code>. The SPA redeems it via POST /auth/oauth/exchange.",
         "parameters": [
-          { "name": "provider", "in": "path", "required": true, "schema": { "type": "string", "enum": ["google", "github", "facebook"] } },
-          { "name": "code", "in": "query", "required": true, "schema": { "type": "string" } },
-          { "name": "state", "in": "query", "required": true, "schema": { "type": "string" } }
+          {
+            "name": "provider",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "google",
+                "github",
+                "facebook"
+              ]
+            }
+          },
+          {
+            "name": "code",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
         ],
         "responses": {
-          "302": { "description": "Redirect to the frontend with a one-time oauth_code (success) or an error query param" },
-          "400": { "description": "Missing code, invalid/expired state, or PKCE failure", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorEnvelope" } } } },
-          "502": { "description": "Provider token exchange failed", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorEnvelope" } } } }
+          "302": {
+            "description": "Redirect to the frontend with a one-time oauth_code (success) or an error query param"
+          },
+          "400": {
+            "description": "Missing code, invalid/expired state, or PKCE failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Provider token exchange failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
         }
       }
     },
     "/auth/oauth/exchange": {
       "post": {
-        "tags": ["OAuth"],
+        "tags": [
+          "OAuth"
+        ],
         "summary": "Redeem a one-time OAuth exchange code for tokens",
         "description": "Exchanges the single-use code delivered to /login?oauth_code=<code> for the access and refresh tokens. Keeps tokens out of the URL/history.",
         "requestBody": {
           "required": true,
-          "content": { "application/json": { "schema": { "type": "object", "required": ["code"], "properties": { "code": { "type": "string" } } } } }
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "code"
+                ],
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
         },
         "responses": {
-          "200": { "description": "Tokens issued", "content": { "application/json": { "schema": { "type": "object", "properties": { "accessToken": { "type": "string" }, "refreshToken": { "type": "string" } } } } } },
-          "400": { "description": "Invalid or expired code", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorEnvelope" } } } }
+          "200": {
+            "description": "Tokens issued",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "accessToken": {
+                      "type": "string"
+                    },
+                    "refreshToken": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid or expired code",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
         }
       }
     },
     "/auth/password-reset/request": {
       "post": {
-        "tags": ["Password Reset"],
+        "tags": [
+          "Password Reset"
+        ],
         "summary": "Request a password reset OTP",
         "requestBody": {
           "required": true,
@@ -270,23 +620,56 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["email"],
+                "required": [
+                  "email"
+                ],
                 "properties": {
-                  "email": { "type": "string", "format": "email" },
-                  "channel": { "type": "string", "enum": ["email", "sms", "whatsapp", "telegram"], "default": "email" }
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  },
+                  "channel": {
+                    "type": "string",
+                    "enum": [
+                      "email",
+                      "sms",
+                      "whatsapp",
+                      "telegram"
+                    ],
+                    "default": "email"
+                  }
                 }
               }
             }
           }
         },
         "responses": {
-          "200": { "description": "Reset code sent (response is identical whether email exists or not)", "content": { "application/json": { "schema": { "type": "object", "properties": { "success": { "type": "boolean" }, "message": { "type": "string" } } } } } }
+          "200": {
+            "description": "Reset code sent (response is identical whether email exists or not)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
         }
       }
     },
     "/auth/password-reset/confirm": {
       "post": {
-        "tags": ["Password Reset"],
+        "tags": [
+          "Password Reset"
+        ],
         "summary": "Confirm password reset with OTP",
         "requestBody": {
           "required": true,
@@ -294,60 +677,136 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["email", "code", "newPassword"],
+                "required": [
+                  "email",
+                  "code",
+                  "newPassword"
+                ],
                 "properties": {
-                  "email": { "type": "string", "format": "email" },
-                  "code": { "type": "string" },
-                  "newPassword": { "type": "string", "minLength": 8 }
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  },
+                  "code": {
+                    "type": "string"
+                  },
+                  "newPassword": {
+                    "type": "string",
+                    "minLength": 8
+                  }
                 }
               }
             }
           }
         },
         "responses": {
-          "200": { "description": "Password updated", "content": { "application/json": { "schema": { "type": "object", "properties": { "success": { "type": "boolean" } } } } } },
-          "400": { "description": "Invalid or expired code", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorEnvelope" } } } }
+          "200": {
+            "description": "Password updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid or expired code",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
         }
       }
     },
     "/auth/passkey/register/options": {
       "post": {
-        "tags": ["Passkeys"],
+        "tags": [
+          "Passkeys"
+        ],
         "summary": "Get WebAuthn registration options",
-        "security": [{ "BearerAuth": [] }],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "responses": {
-          "200": { "description": "PublicKeyCredentialCreationOptions" }
+          "200": {
+            "description": "PublicKeyCredentialCreationOptions"
+          }
         }
       }
     },
     "/auth/passkey/register": {
       "post": {
-        "tags": ["Passkeys"],
+        "tags": [
+          "Passkeys"
+        ],
         "summary": "Complete WebAuthn registration",
-        "security": [{ "BearerAuth": [] }],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["body"],
+                "required": [
+                  "body"
+                ],
                 "properties": {
-                  "body": { "type": "object", "description": "AuthenticatorAttestationResponse" },
-                  "name": { "type": "string", "description": "Friendly passkey name" }
+                  "body": {
+                    "type": "object",
+                    "description": "AuthenticatorAttestationResponse"
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "Friendly passkey name"
+                  }
                 }
               }
             }
           }
         },
         "responses": {
-          "200": { "description": "Passkey registered", "content": { "application/json": { "schema": { "type": "object", "properties": { "success": { "type": "boolean" }, "credentialId": { "type": "string" } } } } } }
+          "200": {
+            "description": "Passkey registered",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "credentialId": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
         }
       }
     },
     "/auth/passkey/authenticate/options": {
       "post": {
-        "tags": ["Passkeys"],
+        "tags": [
+          "Passkeys"
+        ],
         "summary": "Get WebAuthn authentication options",
         "requestBody": {
           "content": {
@@ -355,20 +814,27 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "email": { "type": "string", "format": "email" }
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  }
                 }
               }
             }
           }
         },
         "responses": {
-          "200": { "description": "PublicKeyCredentialRequestOptions + challengeKey" }
+          "200": {
+            "description": "PublicKeyCredentialRequestOptions + challengeKey"
+          }
         }
       }
     },
     "/auth/passkey/authenticate": {
       "post": {
-        "tags": ["Passkeys"],
+        "tags": [
+          "Passkeys"
+        ],
         "summary": "Complete WebAuthn authentication",
         "requestBody": {
           "required": true,
@@ -376,40 +842,96 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["body", "challengeKey"],
+                "required": [
+                  "body",
+                  "challengeKey"
+                ],
                 "properties": {
-                  "body": { "type": "object", "description": "AuthenticatorAssertionResponse" },
-                  "challengeKey": { "type": "string" }
+                  "body": {
+                    "type": "object",
+                    "description": "AuthenticatorAssertionResponse"
+                  },
+                  "challengeKey": {
+                    "type": "string"
+                  }
                 }
               }
             }
           }
         },
         "responses": {
-          "200": { "description": "Tokens issued", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/TokenResponse" } } } },
-          "401": { "description": "Passkey verification failed", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorEnvelope" } } } }
+          "200": {
+            "description": "Tokens issued",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Passkey verification failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
         }
       }
     },
     "/auth/passkey/{credentialId}": {
       "delete": {
-        "tags": ["Passkeys"],
+        "tags": [
+          "Passkeys"
+        ],
         "summary": "Remove a registered passkey",
-        "security": [{ "BearerAuth": [] }],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "parameters": [
-          { "name": "credentialId", "in": "path", "required": true, "schema": { "type": "string" } }
+          {
+            "name": "credentialId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
         ],
         "responses": {
-          "200": { "description": "Passkey removed" },
-          "404": { "description": "Passkey not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorEnvelope" } } } }
+          "200": {
+            "description": "Passkey removed"
+          },
+          "404": {
+            "description": "Passkey not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
         }
       }
     },
     "/auth/mfa/totp/setup": {
       "post": {
-        "tags": ["MFA"],
+        "tags": [
+          "MFA"
+        ],
         "summary": "Initialize TOTP setup — returns secret and QR code",
-        "security": [{ "BearerAuth": [] }],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "responses": {
           "200": {
             "description": "TOTP setup initiated",
@@ -418,9 +940,16 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "secret": { "type": "string" },
-                    "otpAuthUrl": { "type": "string" },
-                    "qrDataUrl": { "type": "string", "description": "Data URI for QR code image" }
+                    "secret": {
+                      "type": "string"
+                    },
+                    "otpAuthUrl": {
+                      "type": "string"
+                    },
+                    "qrDataUrl": {
+                      "type": "string",
+                      "description": "Data URI for QR code image"
+                    }
                   }
                 }
               }
@@ -431,129 +960,377 @@
     },
     "/auth/mfa/totp/verify": {
       "post": {
-        "tags": ["MFA"],
+        "tags": [
+          "MFA"
+        ],
         "summary": "Verify TOTP code and activate TOTP MFA",
-        "security": [{ "BearerAuth": [] }],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
-              "schema": { "type": "object", "required": ["code"], "properties": { "code": { "type": "string", "minLength": 6, "maxLength": 6 } } }
+              "schema": {
+                "type": "object",
+                "required": [
+                  "code"
+                ],
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "minLength": 6,
+                    "maxLength": 6
+                  }
+                }
+              }
             }
           }
         },
         "responses": {
           "200": {
             "description": "TOTP activated — backup codes returned once",
-            "content": { "application/json": { "schema": { "type": "object", "properties": { "success": { "type": "boolean" }, "backupCodes": { "type": "array", "items": { "type": "string" } } } } } }
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "backupCodes": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
           },
-          "400": { "description": "Invalid TOTP code", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorEnvelope" } } } }
+          "400": {
+            "description": "Invalid TOTP code",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
         }
       }
     },
     "/auth/mfa/totp/disable": {
       "post": {
-        "tags": ["MFA"],
+        "tags": [
+          "MFA"
+        ],
         "summary": "Disable TOTP (requires valid TOTP code)",
-        "security": [{ "BearerAuth": [] }],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
-          "content": { "application/json": { "schema": { "type": "object", "required": ["code"], "properties": { "code": { "type": "string" } } } } }
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "code"
+                ],
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
         },
         "responses": {
-          "200": { "description": "TOTP disabled" },
-          "400": { "description": "Invalid code or TOTP not enabled", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorEnvelope" } } } }
+          "200": {
+            "description": "TOTP disabled"
+          },
+          "400": {
+            "description": "Invalid code or TOTP not enabled",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
         }
       }
     },
     "/auth/mfa/backup-codes/regenerate": {
       "post": {
-        "tags": ["MFA"],
+        "tags": [
+          "MFA"
+        ],
         "summary": "Regenerate backup codes (invalidates existing ones)",
-        "security": [{ "BearerAuth": [] }],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
-          "content": { "application/json": { "schema": { "type": "object", "required": ["code"], "properties": { "code": { "type": "string" } } } } }
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "code"
+                ],
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
         },
         "responses": {
-          "200": { "description": "New backup codes — shown once", "content": { "application/json": { "schema": { "type": "object", "properties": { "backupCodes": { "type": "array", "items": { "type": "string" } } } } } } }
+          "200": {
+            "description": "New backup codes — shown once",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "backupCodes": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
         }
       }
     },
     "/auth/mfa/backup-codes/redeem": {
       "post": {
-        "tags": ["MFA"],
+        "tags": [
+          "MFA"
+        ],
         "summary": "Redeem a backup code for authentication",
         "requestBody": {
           "required": true,
-          "content": { "application/json": { "schema": { "type": "object", "required": ["code"], "properties": { "code": { "type": "string" } } } } }
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "code"
+                ],
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
         },
         "responses": {
-          "200": { "description": "Backup code accepted", "content": { "application/json": { "schema": { "type": "object", "properties": { "success": { "type": "boolean" }, "remainingCodes": { "type": "integer" } } } } } },
-          "401": { "description": "Invalid backup code", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorEnvelope" } } } }
+          "200": {
+            "description": "Backup code accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "remainingCodes": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid backup code",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
         }
       }
     },
     "/auth/mfa/otp/send": {
       "post": {
-        "tags": ["MFA"],
+        "tags": [
+          "MFA"
+        ],
         "summary": "Send OTP via email, SMS, WhatsApp, or Telegram",
-        "security": [{ "BearerAuth": [] }],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["channel", "target"],
+                "required": [
+                  "channel",
+                  "target"
+                ],
                 "properties": {
-                  "channel": { "type": "string", "enum": ["email", "sms", "whatsapp", "telegram"] },
-                  "target": { "type": "string", "description": "Email address, phone number, or Telegram chat ID" }
+                  "channel": {
+                    "type": "string",
+                    "enum": [
+                      "email",
+                      "sms",
+                      "whatsapp",
+                      "telegram"
+                    ]
+                  },
+                  "target": {
+                    "type": "string",
+                    "description": "Email address, phone number, or Telegram chat ID"
+                  }
                 }
               }
             }
           }
         },
         "responses": {
-          "200": { "description": "OTP sent", "content": { "application/json": { "schema": { "type": "object", "properties": { "success": { "type": "boolean" }, "expiresIn": { "type": "integer" } } } } } }
+          "200": {
+            "description": "OTP sent",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "expiresIn": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          }
         }
       }
     },
     "/auth/mfa/otp/verify": {
       "post": {
-        "tags": ["MFA"],
+        "tags": [
+          "MFA"
+        ],
         "summary": "Verify channel OTP",
-        "security": [{ "BearerAuth": [] }],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["code", "channel"],
+                "required": [
+                  "code",
+                  "channel"
+                ],
                 "properties": {
-                  "code": { "type": "string" },
-                  "channel": { "type": "string", "enum": ["email", "sms", "whatsapp", "telegram"] }
+                  "code": {
+                    "type": "string"
+                  },
+                  "channel": {
+                    "type": "string",
+                    "enum": [
+                      "email",
+                      "sms",
+                      "whatsapp",
+                      "telegram"
+                    ]
+                  }
                 }
               }
             }
           }
         },
         "responses": {
-          "200": { "description": "OTP verified" },
-          "400": { "description": "Invalid or expired OTP", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorEnvelope" } } } }
+          "200": {
+            "description": "OTP verified"
+          },
+          "400": {
+            "description": "Invalid or expired OTP",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
         }
       }
     },
     "/sessions": {
       "get": {
-        "tags": ["Sessions"],
+        "tags": [
+          "Sessions"
+        ],
         "summary": "List active sessions for authenticated user",
-        "security": [{ "BearerAuth": [] }],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "parameters": [
-          { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 20 } },
-          { "name": "offset", "in": "query", "schema": { "type": "integer", "default": 0 } },
-          { "name": "activeOnly", "in": "query", "schema": { "type": "boolean", "default": true } }
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 0
+            }
+          },
+          {
+            "name": "activeOnly",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "default": true
+            }
+          }
         ],
         "responses": {
           "200": {
@@ -563,10 +1340,21 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "sessions": { "type": "array", "items": { "$ref": "#/components/schemas/Session" } },
-                    "total": { "type": "integer" },
-                    "limit": { "type": "integer" },
-                    "offset": { "type": "integer" }
+                    "sessions": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Session"
+                      }
+                    },
+                    "total": {
+                      "type": "integer"
+                    },
+                    "limit": {
+                      "type": "integer"
+                    },
+                    "offset": {
+                      "type": "integer"
+                    }
                   }
                 }
               }
@@ -575,121 +1363,742 @@
         }
       },
       "delete": {
-        "tags": ["Sessions"],
+        "tags": [
+          "Sessions"
+        ],
         "summary": "Revoke all other sessions (keep current)",
-        "security": [{ "BearerAuth": [] }],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "responses": {
-          "200": { "description": "Sessions revoked", "content": { "application/json": { "schema": { "type": "object", "properties": { "success": { "type": "boolean" }, "revokedCount": { "type": "integer" } } } } } }
+          "200": {
+            "description": "Sessions revoked",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "revokedCount": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          }
         }
       }
     },
     "/sessions/{id}": {
       "delete": {
-        "tags": ["Sessions"],
+        "tags": [
+          "Sessions"
+        ],
         "summary": "Revoke a specific session",
-        "security": [{ "BearerAuth": [] }],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "parameters": [
-          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
         ],
         "responses": {
-          "200": { "description": "Session revoked" },
-          "404": { "description": "Session not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorEnvelope" } } } }
+          "200": {
+            "description": "Session revoked"
+          },
+          "404": {
+            "description": "Session not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
         }
       }
     },
     "/workload/credentials": {
       "post": {
-        "tags": ["Workload Identity"],
+        "tags": [
+          "Workload Identity"
+        ],
         "summary": "Issue a short-lived scoped workload credential",
-        "security": [{ "BearerAuth": [] }],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "responses": {
-          "200": { "description": "Workload credential issued" }
+          "200": {
+            "description": "Workload credential issued"
+          }
         }
       }
     },
     "/workload/validate": {
       "post": {
-        "tags": ["Workload Identity"],
+        "tags": [
+          "Workload Identity"
+        ],
         "summary": "Validate a workload credential",
         "responses": {
-          "200": { "description": "Credential valid" },
-          "401": { "description": "Invalid or expired credential", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorEnvelope" } } } }
+          "200": {
+            "description": "Credential valid"
+          },
+          "401": {
+            "description": "Invalid or expired credential",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
         }
       }
     },
     "/admin/users": {
       "get": {
-        "tags": ["Admin"],
+        "tags": [
+          "Admin"
+        ],
         "summary": "List all users (admin only)",
-        "security": [{ "BearerAuth": [] }],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "parameters": [
-          { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 20 } },
-          { "name": "offset", "in": "query", "schema": { "type": "integer", "default": 0 } },
-          { "name": "search", "in": "query", "schema": { "type": "string" } }
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 0
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
         ],
         "responses": {
-          "200": { "description": "User list" },
-          "403": { "description": "Admin access required", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorEnvelope" } } } }
+          "200": {
+            "description": "User list"
+          },
+          "403": {
+            "description": "Admin access required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
         }
       }
     },
     "/admin/users/{id}": {
-      "get": { "tags": ["Admin"], "summary": "Get user by ID (admin only)", "security": [{ "BearerAuth": [] }], "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }], "responses": { "200": { "description": "User" }, "404": { "description": "Not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorEnvelope" } } } } } },
-      "patch": { "tags": ["Admin"], "summary": "Update user status, roles, or displayName (admin only)", "security": [{ "BearerAuth": [] }], "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }], "requestBody": { "content": { "application/json": { "schema": { "type": "object", "properties": { "status": { "type": "string", "enum": ["active", "suspended", "deleted"] }, "roles": { "type": "array", "items": { "type": "string" } }, "displayName": { "type": "string" } } } } } }, "responses": { "200": { "description": "Updated user" } } },
-      "delete": { "tags": ["Admin"], "summary": "Soft-delete user and revoke all sessions (admin only)", "security": [{ "BearerAuth": [] }], "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }], "responses": { "200": { "description": "Deleted" } } }
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "Get user by ID (admin only)",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User"
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "Update user status, roles, or displayName (admin only)",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "active",
+                      "suspended",
+                      "deleted"
+                    ]
+                  },
+                  "roles": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "displayName": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated user"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "Soft-delete user and revoke all sessions (admin only)",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Deleted"
+          }
+        }
+      }
     },
     "/admin/users/{id}/roles": {
-      "post": { "tags": ["Admin"], "summary": "Assign role to user (admin only)", "security": [{ "BearerAuth": [] }], "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }], "requestBody": { "required": true, "content": { "application/json": { "schema": { "type": "object", "required": ["roleName"], "properties": { "roleName": { "type": "string" } } } } } }, "responses": { "200": { "description": "Role assigned" } } }
-    },
-    "/admin/users/{id}/roles/{roleName}": {
-      "delete": { "tags": ["Admin"], "summary": "Remove role from user (admin only)", "security": [{ "BearerAuth": [] }], "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }, { "name": "roleName", "in": "path", "required": true, "schema": { "type": "string" } }], "responses": { "200": { "description": "Role removed" } } }
-    },
-    "/admin/users/{id}/sessions": {
-      "get": { "tags": ["Admin"], "summary": "List all sessions for a user (admin only)", "security": [{ "BearerAuth": [] }], "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }], "responses": { "200": { "description": "Session list" } } },
-      "delete": { "tags": ["Admin"], "summary": "Revoke all sessions for a user (admin only)", "security": [{ "BearerAuth": [] }], "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }], "responses": { "200": { "description": "Sessions revoked" } } }
-    },
-    "/admin/sessions/{id}": {
-      "delete": { "tags": ["Admin"], "summary": "Revoke a specific session by ID (admin only)", "security": [{ "BearerAuth": [] }], "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }], "responses": { "200": { "description": "Session revoked" } } }
-    },
-    "/admin/roles": {
-      "get": { "tags": ["Admin"], "summary": "List all roles (admin only)", "security": [{ "BearerAuth": [] }], "responses": { "200": { "description": "Role list" } } },
-      "post": { "tags": ["Admin"], "summary": "Create a new role (admin only)", "security": [{ "BearerAuth": [] }], "requestBody": { "required": true, "content": { "application/json": { "schema": { "type": "object", "required": ["name", "displayName"], "properties": { "name": { "type": "string" }, "displayName": { "type": "string" }, "description": { "type": "string" }, "parentRoleName": { "type": "string" }, "permissions": { "type": "array" } } } } } }, "responses": { "201": { "description": "Role created" } } }
-    },
-    "/admin/jit-grants": {
-      "get": { "tags": ["Admin"], "summary": "List JIT access grants (admin only)", "security": [{ "BearerAuth": [] }], "parameters": [{ "name": "status", "in": "query", "schema": { "type": "string", "enum": ["pending", "approved", "denied", "expired", "revoked"] } }], "responses": { "200": { "description": "JIT grants" } } }
-    },
-    "/admin/jit-grants/{id}/approve": {
-      "post": { "tags": ["Admin"], "summary": "Approve a JIT grant request (admin only)", "security": [{ "BearerAuth": [] }], "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }], "responses": { "200": { "description": "Approved" }, "404": { "description": "Not found or already processed", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorEnvelope" } } } } } }
-    },
-    "/admin/jit-grants/{id}/deny": {
-      "post": { "tags": ["Admin"], "summary": "Deny a JIT grant request (admin only)", "security": [{ "BearerAuth": [] }], "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }], "responses": { "200": { "description": "Denied" } } }
-    },
-    "/admin/jit-grants/{id}": {
-      "delete": { "tags": ["Admin"], "summary": "Revoke an approved JIT grant (admin only)", "security": [{ "BearerAuth": [] }], "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }], "responses": { "200": { "description": "Revoked" } } }
-    },
-    "/admin/audit-logs": {
-      "get": { "tags": ["Admin"], "summary": "Query audit log (admin only)", "security": [{ "BearerAuth": [] }], "parameters": [{ "name": "limit", "in": "query", "schema": { "type": "integer", "default": 50 } }, { "name": "offset", "in": "query", "schema": { "type": "integer", "default": 0 } }, { "name": "action", "in": "query", "schema": { "type": "string" } }, { "name": "actorId", "in": "query", "schema": { "type": "string" } }], "responses": { "200": { "description": "Audit logs" } } }
-    },
-    "/ssf/events": {
       "post": {
-        "tags": ["Shared Signals"],
-        "summary": "Receive a Security Event Token (SET) from a provider",
+        "tags": [
+          "Admin"
+        ],
+        "summary": "Assign role to user (admin only)",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "parameters": [
-          { "name": "x-ssf-signature", "in": "header", "schema": { "type": "string" } }
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
         ],
         "requestBody": {
           "required": true,
-          "content": { "application/json": { "schema": { "type": "object", "description": "RFC 8417 Security Event Token payload" } } }
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "roleName"
+                ],
+                "properties": {
+                  "roleName": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
         },
         "responses": {
-          "200": { "description": "Event handled" },
-          "401": { "description": "Invalid SSF signature", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorEnvelope" } } } }
+          "200": {
+            "description": "Role assigned"
+          }
+        }
+      }
+    },
+    "/admin/users/{id}/roles/{roleName}": {
+      "delete": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "Remove role from user (admin only)",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "roleName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Role removed"
+          }
+        }
+      }
+    },
+    "/admin/users/{id}/sessions": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "List all sessions for a user (admin only)",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Session list"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "Revoke all sessions for a user (admin only)",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sessions revoked"
+          }
+        }
+      }
+    },
+    "/admin/sessions/{id}": {
+      "delete": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "Revoke a specific session by ID (admin only)",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Session revoked"
+          }
+        }
+      }
+    },
+    "/admin/roles": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "List all roles (admin only)",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Role list"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "Create a new role (admin only)",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "displayName"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "displayName": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "parentRoleName": {
+                    "type": "string"
+                  },
+                  "permissions": {
+                    "type": "array"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Role created"
+          }
+        }
+      }
+    },
+    "/admin/jit-grants": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "List JIT access grants (admin only)",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "pending",
+                "approved",
+                "denied",
+                "expired",
+                "revoked"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "JIT grants"
+          }
+        }
+      }
+    },
+    "/admin/jit-grants/{id}/approve": {
+      "post": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "Approve a JIT grant request (admin only)",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Approved"
+          },
+          "404": {
+            "description": "Not found or already processed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/jit-grants/{id}/deny": {
+      "post": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "Deny a JIT grant request (admin only)",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Denied"
+          }
+        }
+      }
+    },
+    "/admin/jit-grants/{id}": {
+      "delete": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "Revoke an approved JIT grant (admin only)",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Revoked"
+          }
+        }
+      }
+    },
+    "/admin/audit-logs": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "Query audit log (admin only)",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 50
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 0
+            }
+          },
+          {
+            "name": "action",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "actorId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Audit logs"
+          }
+        }
+      }
+    },
+    "/ssf/events": {
+      "post": {
+        "tags": [
+          "Shared Signals"
+        ],
+        "summary": "Receive a Security Event Token (SET) from a provider",
+        "parameters": [
+          {
+            "name": "x-ssf-signature",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "RFC 8417 Security Event Token payload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Event handled"
+          },
+          "401": {
+            "description": "Invalid SSF signature",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
+          }
         }
       }
     },
     "/healthz": {
       "get": {
-        "tags": ["Health"],
+        "tags": [
+          "Health"
+        ],
         "summary": "Health and dependency status",
         "responses": {
           "200": {
@@ -699,15 +2108,26 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "status": { "type": "string", "enum": ["ok"] },
-                    "redis": { "type": "string" },
-                    "elasticsearch": { "type": "string" }
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "ok"
+                      ]
+                    },
+                    "redis": {
+                      "type": "string"
+                    },
+                    "elasticsearch": {
+                      "type": "string"
+                    }
                   }
                 }
               }
             }
           },
-          "503": { "description": "One or more dependencies degraded" }
+          "503": {
+            "description": "One or more dependencies degraded"
+          }
         }
       }
     }

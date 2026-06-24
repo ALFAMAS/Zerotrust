@@ -8,7 +8,11 @@ vi.mock("../db", () => ({
 
 vi.mock("../config", () => ({
   getConfig: () => ({
-    session: { defaultTTL: 3600, refreshTokenTTL: 604800, maxConcurrentDevices: 5 },
+    session: {
+      defaultTTL: 3600,
+      refreshTokenTTL: 604800,
+      maxConcurrentDevices: 5,
+    },
     security: {
       bcryptRounds: 4,
       tokenSecretHex: "a".repeat(64),
@@ -29,7 +33,12 @@ vi.mock("../config", () => ({
       },
     },
     oauth: { providers: {} },
-    elasticsearch: { enabled: false, host: "localhost", port: 9200, indexPrefix: "zeroauth" },
+    elasticsearch: {
+      enabled: false,
+      host: "localhost",
+      port: 9200,
+      indexPrefix: "zerotrust",
+    },
     logging: { level: "error", format: "json" },
   }),
 }));
@@ -45,7 +54,7 @@ vi.mock("../logger", () => ({
 
 vi.mock("../models/settings.model", () => ({
   getSettings: vi.fn().mockResolvedValue({
-    appName: "ZeroAuth Test",
+    appName: "zerotrust Test",
     appUrl: "http://localhost:3000",
     magicLinkEnabled: true,
   }),
@@ -204,14 +213,20 @@ describe("verifyMagicLink", () => {
     vi.mocked(getDb).mockReturnValue(db as any);
 
     const { verifyMagicLink } = await import("../services/magicLink.service");
-    const result = await verifyMagicLink("alice@example.com", "nonexistent-token");
+    const result = await verifyMagicLink(
+      "alice@example.com",
+      "nonexistent-token",
+    );
     expect(result).toBeNull();
   });
 
   it("returns userId and userEmail when the token is valid and not expired", async () => {
     const crypto = await import("crypto");
     const rawToken = "valid-raw-token-abc123";
-    const tokenHash = crypto.createHash("sha256").update(rawToken).digest("hex");
+    const tokenHash = crypto
+      .createHash("sha256")
+      .update(rawToken)
+      .digest("hex");
 
     const db = {
       select: vi.fn().mockReturnThis(),
@@ -247,7 +262,10 @@ describe("verifyMagicLink", () => {
   it("deletes the OTP record after successful verification (single-use)", async () => {
     const crypto = await import("crypto");
     const rawToken = "single-use-token";
-    const tokenHash = crypto.createHash("sha256").update(rawToken).digest("hex");
+    const tokenHash = crypto
+      .createHash("sha256")
+      .update(rawToken)
+      .digest("hex");
 
     const deleteMock = vi.fn().mockReturnThis();
     const db = {
@@ -285,7 +303,10 @@ describe("verifyMagicLink", () => {
     // First call returns a valid record; second call returns nothing (already deleted)
     const crypto = await import("crypto");
     const rawToken = "reuse-attempt-token";
-    const tokenHash = crypto.createHash("sha256").update(rawToken).digest("hex");
+    const tokenHash = crypto
+      .createHash("sha256")
+      .update(rawToken)
+      .digest("hex");
 
     const db = {
       select: vi.fn().mockReturnThis(),
@@ -347,7 +368,10 @@ describe("verifyMagicLink", () => {
   it("returns null when user record is not found after OTP lookup", async () => {
     const crypto = await import("crypto");
     const rawToken = "orphan-otp-token";
-    const tokenHash = crypto.createHash("sha256").update(rawToken).digest("hex");
+    const tokenHash = crypto
+      .createHash("sha256")
+      .update(rawToken)
+      .digest("hex");
 
     const db = {
       select: vi.fn().mockReturnThis(),

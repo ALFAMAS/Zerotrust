@@ -1,11 +1,11 @@
 /**
- * LDAP / Active Directory type definitions for ZeroAuth
+ * LDAP / Active Directory type definitions for zerotrust
  */
 
 export interface LDAPConfig {
   url: string; // ldap://dc.example.com:389 or ldaps://...
   baseDN: string; // DC=example,DC=com
-  bindDN: string; // CN=svc-zeroauth,OU=ServiceAccounts,...
+  bindDN: string; // CN=svc-zerotrust,OU=ServiceAccounts,...
   bindPassword: string;
   userSearchBase?: string; // OU=Users,DC=example,DC=com
   userSearchFilter?: string; // (&(objectClass=person)(sAMAccountName={{username}}))

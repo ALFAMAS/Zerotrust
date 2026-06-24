@@ -1,1 +1,76 @@
-{"nodes": [{"id": "c_users_alfamas_desktop_zeroauth_packages_ui_src_components_app_shell_apptopbar_tsx", "label": "AppTopbar.tsx", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\components\\app-shell\\AppTopbar.tsx", "source_location": "L1"}, {"id": "app_shell_apptopbar_apptopbarprops", "label": "AppTopbarProps", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\components\\app-shell\\AppTopbar.tsx", "source_location": "L6"}, {"id": "app_shell_apptopbar_apptopbar", "label": "AppTopbar()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\components\\app-shell\\AppTopbar.tsx", "source_location": "L14"}], "edges": [{"source": "c_users_alfamas_desktop_zeroauth_packages_ui_src_components_app_shell_apptopbar_tsx", "target": "lucide_react", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\components\\app-shell\\AppTopbar.tsx", "source_location": "L3", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_packages_ui_src_components_app_shell_apptopbar_tsx", "target": "c_users_alfamas_desktop_zeroauth_packages_ui_src_config_brand_ts", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\components\\app-shell\\AppTopbar.tsx", "source_location": "L4", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_packages_ui_src_components_app_shell_apptopbar_tsx", "target": "config_brand_brand", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\components\\app-shell\\AppTopbar.tsx", "source_location": "L4", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_packages_ui_src_components_app_shell_apptopbar_tsx", "target": "app_shell_apptopbar_apptopbarprops", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\components\\app-shell\\AppTopbar.tsx", "source_location": "L6", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_packages_ui_src_components_app_shell_apptopbar_tsx", "target": "app_shell_apptopbar_apptopbar", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\components\\app-shell\\AppTopbar.tsx", "source_location": "L14", "weight": 1.0}], "raw_calls": []}
+{
+    "nodes": [
+        {
+            "id": "c_users_alfamas_desktop_zerotrust_packages_ui_src_components_app_shell_apptopbar_tsx",
+            "label": "AppTopbar.tsx",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\components\\app-shell\\AppTopbar.tsx",
+            "source_location": "L1"
+        },
+        {
+            "id": "app_shell_apptopbar_apptopbarprops",
+            "label": "AppTopbarProps",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\components\\app-shell\\AppTopbar.tsx",
+            "source_location": "L6"
+        },
+        {
+            "id": "app_shell_apptopbar_apptopbar",
+            "label": "AppTopbar()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\components\\app-shell\\AppTopbar.tsx",
+            "source_location": "L14"
+        }
+    ],
+    "edges": [
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_packages_ui_src_components_app_shell_apptopbar_tsx",
+            "target": "lucide_react",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\components\\app-shell\\AppTopbar.tsx",
+            "source_location": "L3",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_packages_ui_src_components_app_shell_apptopbar_tsx",
+            "target": "c_users_alfamas_desktop_zerotrust_packages_ui_src_config_brand_ts",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\components\\app-shell\\AppTopbar.tsx",
+            "source_location": "L4",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_packages_ui_src_components_app_shell_apptopbar_tsx",
+            "target": "config_brand_brand",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\components\\app-shell\\AppTopbar.tsx",
+            "source_location": "L4",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_packages_ui_src_components_app_shell_apptopbar_tsx",
+            "target": "app_shell_apptopbar_apptopbarprops",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\components\\app-shell\\AppTopbar.tsx",
+            "source_location": "L6",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_packages_ui_src_components_app_shell_apptopbar_tsx",
+            "target": "app_shell_apptopbar_apptopbar",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\components\\app-shell\\AppTopbar.tsx",
+            "source_location": "L14",
+            "weight": 1.0
+        }
+    ],
+    "raw_calls": []
+}

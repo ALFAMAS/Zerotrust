@@ -18,7 +18,8 @@ const ITEMS: ChecklistItem[] = [
     id: "email_verified",
     label: "Verify your email",
     href: "/verify-email",
-    check: (u) => u?.emailVerified === true || u?.attributes?.emailVerified === true,
+    check: (u) =>
+      u?.emailVerified === true || u?.attributes?.emailVerified === true,
   },
   {
     id: "display_name",
@@ -85,8 +86,8 @@ export default function SetupChecklist({ user }: { user: any }) {
               🎉 Onboarding complete!
             </h3>
             <p className="text-sm text-muted-foreground">
-              You&apos;ve completed all setup steps. You&apos;re all set to make the most of
-              ZeroAuth.
+              You&apos;ve completed all setup steps. You&apos;re all set to make
+              the most of zerotrust.
             </p>
           </div>
         </div>
@@ -119,7 +120,10 @@ export default function SetupChecklist({ user }: { user: any }) {
 
       {/* Progress bar */}
       <div className="mb-5 h-2 rounded-full bg-muted">
-        <div className="h-2 rounded-full bg-primary transition-all" style={{ width: `${pct}%` }} />
+        <div
+          className="h-2 rounded-full bg-primary transition-all"
+          style={{ width: `${pct}%` }}
+        />
       </div>
 
       <ul className="space-y-2">

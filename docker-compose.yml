@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   # ─────────────────────────────────────────────────────────────────────────
@@ -6,29 +6,29 @@ services:
   # ─────────────────────────────────────────────────────────────────────────
   postgres:
     image: postgres:16-alpine
-    container_name: zeroauth-postgres
+    container_name: zerotrust-postgres
     ports:
       - "5432:5432"
     environment:
-      POSTGRES_USER: zeroauth
+      POSTGRES_USER: zerotrust
       POSTGRES_PASSWORD: password
-      POSTGRES_DB: zeroauth
+      POSTGRES_DB: zerotrust
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U zeroauth -d zeroauth"]
+      test: ["CMD-SHELL", "pg_isready -U zerotrust -d zerotrust"]
       interval: 10s
       timeout: 5s
       retries: 5
     networks:
-      - zeroauth
+      - zerotrust
 
   # ─────────────────────────────────────────────────────────────────────────
   # Redis: Distributed rate limiting, caching, session storage
   # ─────────────────────────────────────────────────────────────────────────
   redis:
     image: redis:7-alpine
-    container_name: zeroauth-redis
+    container_name: zerotrust-redis
     ports:
       - "6379:6379"
     # noeviction is required by BullMQ — other policies can evict queued jobs
@@ -41,14 +41,14 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - zeroauth
+      - zerotrust
 
   # ─────────────────────────────────────────────────────────────────────────
   # Elasticsearch: Audit logs, event streaming, analytics
   # ─────────────────────────────────────────────────────────────────────────
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.10.0
-    container_name: zeroauth-elasticsearch
+    container_name: zerotrust-elasticsearch
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=false
@@ -65,14 +65,14 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - zeroauth
+      - zerotrust
 
   # ─────────────────────────────────────────────────────────────────────────
   # Kibana: Elasticsearch UI for monitoring and dashboards
   # ─────────────────────────────────────────────────────────────────────────
   kibana:
     image: docker.elastic.co/kibana/kibana:8.10.0
-    container_name: zeroauth-kibana
+    container_name: zerotrust-kibana
     environment:
       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
     ports:
@@ -86,21 +86,21 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - zeroauth
+      - zerotrust
 
   # ─────────────────────────────────────────────────────────────────────────
-  # ZeroAuth API Server
+  # zerotrust API Server
   # ─────────────────────────────────────────────────────────────────────────
-  zeroauth:
+  zerotrust:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: zeroauth-api
+    container_name: zerotrust-api
     ports:
       - "3000:3000"
     environment:
       # Database
-      DATABASE_URL: postgresql://zeroauth:password@postgres:5432/zeroauth
+      DATABASE_URL: postgresql://zerotrust:password@postgres:5432/zerotrust
 
       # Session
       SESSION_TTL: 3600
@@ -154,10 +154,10 @@ services:
       retries: 5
 
     networks:
-      - zeroauth
+      - zerotrust
 
 networks:
-  zeroauth:
+  zerotrust:
     driver: bridge
 
 volumes:

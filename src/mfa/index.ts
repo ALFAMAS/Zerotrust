@@ -9,10 +9,14 @@ const logger = getLogger("mfa");
 export async function sendOTP(
   channel: "email" | "sms" | "whatsapp" | "telegram",
   target: string,
-  code: string
+  code: string,
 ) {
   if (channel === "email") {
-    return sendEmailOTP(target, "Your ZeroAuth OTP", `Your verification code is: ${code}`);
+    return sendEmailOTP(
+      target,
+      "Your zerotrust OTP",
+      `Your verification code is: ${code}`,
+    );
   }
   if (channel === "sms") {
     return sendSmsOTP(target, `Your verification code is: ${code}`);
@@ -24,7 +28,7 @@ export async function sendOTP(
     return sendTelegramOTP(
       process.env.TELEGRAM_BOT_TOKEN || "",
       target,
-      `Your verification code is: ${code}`
+      `Your verification code is: ${code}`,
     );
   }
   logger.warn("Requested unsupported MFA channel", { channel });

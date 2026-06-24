@@ -1,1 +1,94 @@
-{"nodes": [{"id": "c_users_alfamas_desktop_zeroauth_src_notifications_types_ts", "label": "types.ts", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\notifications\\types.ts", "source_location": "L1"}, {"id": "notifications_types_notificationevent", "label": "NotificationEvent", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\notifications\\types.ts", "source_location": "L1"}, {"id": "notifications_types_slackconfig", "label": "SlackConfig", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\notifications\\types.ts", "source_location": "L16"}, {"id": "notifications_types_teamsconfig", "label": "TeamsConfig", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\notifications\\types.ts", "source_location": "L23"}, {"id": "notifications_types_pagerdutyconfig", "label": "PagerDutyConfig", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\notifications\\types.ts", "source_location": "L27"}, {"id": "notifications_types_notificationchannel", "label": "NotificationChannel", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\notifications\\types.ts", "source_location": "L32"}], "edges": [{"source": "c_users_alfamas_desktop_zeroauth_src_notifications_types_ts", "target": "notifications_types_notificationevent", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\notifications\\types.ts", "source_location": "L1", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_notifications_types_ts", "target": "notifications_types_slackconfig", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\notifications\\types.ts", "source_location": "L16", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_notifications_types_ts", "target": "notifications_types_teamsconfig", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\notifications\\types.ts", "source_location": "L23", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_notifications_types_ts", "target": "notifications_types_pagerdutyconfig", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\notifications\\types.ts", "source_location": "L27", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_notifications_types_ts", "target": "notifications_types_notificationchannel", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\notifications\\types.ts", "source_location": "L32", "weight": 1.0}], "raw_calls": []}
+{
+    "nodes": [
+        {
+            "id": "c_users_alfamas_desktop_zerotrust_src_notifications_types_ts",
+            "label": "types.ts",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\notifications\\types.ts",
+            "source_location": "L1"
+        },
+        {
+            "id": "notifications_types_notificationevent",
+            "label": "NotificationEvent",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\notifications\\types.ts",
+            "source_location": "L1"
+        },
+        {
+            "id": "notifications_types_slackconfig",
+            "label": "SlackConfig",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\notifications\\types.ts",
+            "source_location": "L16"
+        },
+        {
+            "id": "notifications_types_teamsconfig",
+            "label": "TeamsConfig",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\notifications\\types.ts",
+            "source_location": "L23"
+        },
+        {
+            "id": "notifications_types_pagerdutyconfig",
+            "label": "PagerDutyConfig",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\notifications\\types.ts",
+            "source_location": "L27"
+        },
+        {
+            "id": "notifications_types_notificationchannel",
+            "label": "NotificationChannel",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\notifications\\types.ts",
+            "source_location": "L32"
+        }
+    ],
+    "edges": [
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_notifications_types_ts",
+            "target": "notifications_types_notificationevent",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\notifications\\types.ts",
+            "source_location": "L1",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_notifications_types_ts",
+            "target": "notifications_types_slackconfig",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\notifications\\types.ts",
+            "source_location": "L16",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_notifications_types_ts",
+            "target": "notifications_types_teamsconfig",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\notifications\\types.ts",
+            "source_location": "L23",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_notifications_types_ts",
+            "target": "notifications_types_pagerdutyconfig",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\notifications\\types.ts",
+            "source_location": "L27",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_notifications_types_ts",
+            "target": "notifications_types_notificationchannel",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\notifications\\types.ts",
+            "source_location": "L32",
+            "weight": 1.0
+        }
+    ],
+    "raw_calls": []
+}

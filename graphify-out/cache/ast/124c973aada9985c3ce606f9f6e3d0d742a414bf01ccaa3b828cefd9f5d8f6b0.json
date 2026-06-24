@@ -1,1 +1,327 @@
-{"nodes": [{"id": "c_users_alfamas_desktop_zeroauth_claude_settings_local_json", "label": "settings.local.json", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\.claude\\settings.local.json", "source_location": "L1"}, {"id": "claude_settings_local_permissions", "label": "permissions", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\.claude\\settings.local.json", "source_location": "L2"}, {"id": "claude_settings_local_permissions_allow", "label": "allow", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\.claude\\settings.local.json", "source_location": "L3"}, {"id": "claude_settings_local_enableallprojectmcpservers", "label": "enableAllProjectMcpServers", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\.claude\\settings.local.json", "source_location": "L30"}, {"id": "claude_settings_local_enabledmcpjsonservers", "label": "enabledMcpjsonServers", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\.claude\\settings.local.json", "source_location": "L31"}], "edges": [{"source": "c_users_alfamas_desktop_zeroauth_claude_settings_local_json", "target": "claude_settings_local_permissions", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\.claude\\settings.local.json", "source_location": "L2", "weight": 1.0}, {"source": "claude_settings_local_permissions", "target": "claude_settings_local_permissions_allow", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\.claude\\settings.local.json", "source_location": "L3", "weight": 1.0}, {"source": "claude_settings_local_permissions_allow", "target": "ref_powershell_get_childitem_recurse_file_measure_object_foreach_object_count", "relation": "extends", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\.claude\\settings.local.json", "source_location": "L3", "weight": 1.0, "context": "import"}, {"source": "claude_settings_local_permissions_allow", "target": "ref_powershell_python_c_import_graphify_print_graphify_is_installed_2_null", "relation": "extends", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\.claude\\settings.local.json", "source_location": "L3", "weight": 1.0, "context": "import"}, {"source": "claude_settings_local_permissions_allow", "target": "ref_powershell_python_m_graphify_mode_deep", "relation": "extends", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\.claude\\settings.local.json", "source_location": "L3", "weight": 1.0, "context": "import"}, {"source": "claude_settings_local_permissions_allow", "target": "ref_powershell_python_m_graphify_mode_deep_update", "relation": "extends", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\.claude\\settings.local.json", "source_location": "L3", "weight": 1.0, "context": "import"}, {"source": "claude_settings_local_permissions_allow", "target": "ref_powershell_python_c_import_graphify_print_graphify_is_working_null", "relation": "extends", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\.claude\\settings.local.json", "source_location": "L3", "weight": 1.0, "context": "import"}, {"source": "claude_settings_local_permissions_allow", "target": "ref_powershell_python_m_graphify_help", "relation": "extends", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\.claude\\settings.local.json", "source_location": "L3", "weight": 1.0, "context": "import"}, {"source": "claude_settings_local_permissions_allow", "target": "ref_powershell_python_m_graphify_extract_no_cluster", "relation": "extends", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\.claude\\settings.local.json", "source_location": "L3", "weight": 1.0, "context": "import"}, {"source": "claude_settings_local_permissions_allow", "target": "ref_powershell_python_m_graphify_update_no_cluster", "relation": "extends", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\.claude\\settings.local.json", "source_location": "L3", "weight": 1.0, "context": "import"}, {"source": "claude_settings_local_permissions_allow", "target": "ref_powershell_python_m_graphify_cluster_only_no_viz", "relation": "extends", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\.claude\\settings.local.json", "source_location": "L3", "weight": 1.0, "context": "import"}, {"source": "claude_settings_local_permissions_allow", "target": "ref_powershell_get_content", "relation": "extends", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\.claude\\settings.local.json", "source_location": "L3", "weight": 1.0, "context": "import"}, {"source": "claude_settings_local_permissions_allow", "target": "ref_powershell_grep", "relation": "extends", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\.claude\\settings.local.json", "source_location": "L3", "weight": 1.0, "context": "import"}, {"source": "claude_settings_local_permissions_allow", "target": "ref_powershell_get_childitem_path_src_directory_where_object_name_eq_api", "relation": "extends", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\.claude\\settings.local.json", "source_location": "L3", "weight": 1.0, "context": "import"}, {"source": "claude_settings_local_permissions_allow", "target": "ref_bash_mkdir_p_home_user_zeroauth_src_api_schemas_home_user_zeroauth_src_oauth_providers_home_user_zeroauth_src_audit_home_user_zeroauth_github_workflows_home_user_zeroauth_vscode_home_user_zeroauth_src_tests_home_user_zeroauth_tests_load", "relation": "extends", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\.claude\\settings.local.json", "source_location": "L3", "weight": 1.0, "context": "import"}, {"source": "claude_settings_local_permissions_allow", "target": "ref_bash_cat", "relation": "extends", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\.claude\\settings.local.json", "source_location": "L3", "weight": 1.0, "context": "import"}, {"source": "claude_settings_local_permissions_allow", "target": "ref_mcp_nextjs_get_errors", "relation": "extends", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\.claude\\settings.local.json", "source_location": "L3", "weight": 1.0, "context": "import"}, {"source": "claude_settings_local_permissions_allow", "target": "ref_powershell_get_ciminstance", "relation": "extends", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\.claude\\settings.local.json", "source_location": "L3", "weight": 1.0, "context": "import"}, {"source": "claude_settings_local_permissions_allow", "target": "ref_powershell_conn_get_nettcpconnection_localport_3000_state_listen_erroraction_silentlycontinue_if_conn_conn_foreach_object_p_get_process_id_owningprocess_erroraction_silentlycontinue_pscustomobject_pid_owningprocess_name_p_name_start_p_starttime_format_list_else_nothing_listening_on_3000", "relation": "extends", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\.claude\\settings.local.json", "source_location": "L3", "weight": 1.0, "context": "import"}, {"source": "claude_settings_local_permissions_allow", "target": "ref_powershell_wsl_l_v_write_output_wsl_e_bash_lc_ps_aux_grep_e_next_bun_grep_v_grep", "relation": "extends", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\.claude\\settings.local.json", "source_location": "L3", "weight": 1.0, "context": "import"}, {"source": "claude_settings_local_permissions_allow", "target": "ref_powershell_wsl_e_bash_lc_cd_mnt_c_users_alfamas_desktop_zeroauth_packages_ui_src_touch_components_ui_password_input_tsx_app_auth_login_page_tsx_app_auth_register_page_tsx_app_auth_reset_password_page_tsx_app_dashboard_sessions_page_tsx_echo_touched", "relation": "extends", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\.claude\\settings.local.json", "source_location": "L3", "weight": 1.0, "context": "import"}, {"source": "claude_settings_local_permissions_allow", "target": "ref_powershell_wsl_e_bash_lc_cd_mnt_c_users_alfamas_desktop_zeroauth_python3_c_import_playwright_print_playwright_ok_2_1_head_5", "relation": "extends", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\.claude\\settings.local.json", "source_location": "L3", "weight": 1.0, "context": "import"}, {"source": "claude_settings_local_permissions_allow", "target": "ref_powershell_wsl_e_bash_lc_python3_c_import_playwright_sys_print_playwright_version_if_hasattr_playwright_version_else_installed_2_1_head_5", "relation": "extends", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\.claude\\settings.local.json", "source_location": "L3", "weight": 1.0, "context": "import"}, {"source": "claude_settings_local_permissions_allow", "target": "ref_powershell_wsl_e_bash_lc_cd_mnt_c_users_alfamas_desktop_zeroauth_python3_tmp_pwtest_py_2_1_head_40", "relation": "extends", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\.claude\\settings.local.json", "source_location": "L3", "weight": 1.0, "context": "import"}, {"source": "claude_settings_local_permissions_allow", "target": "ref_powershell_powershell_executionpolicy_bypass_file_scripts_fix_junctions_ps1", "relation": "extends", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\.claude\\settings.local.json", "source_location": "L3", "weight": 1.0, "context": "import"}, {"source": "claude_settings_local_permissions_allow", "target": "ref_bash_node_e_console_log_require_simplewebauthn_server_package_json_version", "relation": "extends", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\.claude\\settings.local.json", "source_location": "L3", "weight": 1.0, "context": "import"}, {"source": "c_users_alfamas_desktop_zeroauth_claude_settings_local_json", "target": "claude_settings_local_enableallprojectmcpservers", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\.claude\\settings.local.json", "source_location": "L30", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_claude_settings_local_json", "target": "claude_settings_local_enabledmcpjsonservers", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\.claude\\settings.local.json", "source_location": "L31", "weight": 1.0}, {"source": "claude_settings_local_enabledmcpjsonservers", "target": "ref_nextjs", "relation": "extends", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\.claude\\settings.local.json", "source_location": "L31", "weight": 1.0, "context": "import"}]}
+{
+    "nodes": [
+        {
+            "id": "c_users_alfamas_desktop_zerotrust_claude_settings_local_json",
+            "label": "settings.local.json",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\.claude\\settings.local.json",
+            "source_location": "L1"
+        },
+        {
+            "id": "claude_settings_local_permissions",
+            "label": "permissions",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\.claude\\settings.local.json",
+            "source_location": "L2"
+        },
+        {
+            "id": "claude_settings_local_permissions_allow",
+            "label": "allow",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\.claude\\settings.local.json",
+            "source_location": "L3"
+        },
+        {
+            "id": "claude_settings_local_enableallprojectmcpservers",
+            "label": "enableAllProjectMcpServers",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\.claude\\settings.local.json",
+            "source_location": "L30"
+        },
+        {
+            "id": "claude_settings_local_enabledmcpjsonservers",
+            "label": "enabledMcpjsonServers",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\.claude\\settings.local.json",
+            "source_location": "L31"
+        }
+    ],
+    "edges": [
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_claude_settings_local_json",
+            "target": "claude_settings_local_permissions",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\.claude\\settings.local.json",
+            "source_location": "L2",
+            "weight": 1.0
+        },
+        {
+            "source": "claude_settings_local_permissions",
+            "target": "claude_settings_local_permissions_allow",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\.claude\\settings.local.json",
+            "source_location": "L3",
+            "weight": 1.0
+        },
+        {
+            "source": "claude_settings_local_permissions_allow",
+            "target": "ref_powershell_get_childitem_recurse_file_measure_object_foreach_object_count",
+            "relation": "extends",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\.claude\\settings.local.json",
+            "source_location": "L3",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "claude_settings_local_permissions_allow",
+            "target": "ref_powershell_python_c_import_graphify_print_graphify_is_installed_2_null",
+            "relation": "extends",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\.claude\\settings.local.json",
+            "source_location": "L3",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "claude_settings_local_permissions_allow",
+            "target": "ref_powershell_python_m_graphify_mode_deep",
+            "relation": "extends",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\.claude\\settings.local.json",
+            "source_location": "L3",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "claude_settings_local_permissions_allow",
+            "target": "ref_powershell_python_m_graphify_mode_deep_update",
+            "relation": "extends",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\.claude\\settings.local.json",
+            "source_location": "L3",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "claude_settings_local_permissions_allow",
+            "target": "ref_powershell_python_c_import_graphify_print_graphify_is_working_null",
+            "relation": "extends",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\.claude\\settings.local.json",
+            "source_location": "L3",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "claude_settings_local_permissions_allow",
+            "target": "ref_powershell_python_m_graphify_help",
+            "relation": "extends",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\.claude\\settings.local.json",
+            "source_location": "L3",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "claude_settings_local_permissions_allow",
+            "target": "ref_powershell_python_m_graphify_extract_no_cluster",
+            "relation": "extends",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\.claude\\settings.local.json",
+            "source_location": "L3",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "claude_settings_local_permissions_allow",
+            "target": "ref_powershell_python_m_graphify_update_no_cluster",
+            "relation": "extends",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\.claude\\settings.local.json",
+            "source_location": "L3",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "claude_settings_local_permissions_allow",
+            "target": "ref_powershell_python_m_graphify_cluster_only_no_viz",
+            "relation": "extends",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\.claude\\settings.local.json",
+            "source_location": "L3",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "claude_settings_local_permissions_allow",
+            "target": "ref_powershell_get_content",
+            "relation": "extends",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\.claude\\settings.local.json",
+            "source_location": "L3",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "claude_settings_local_permissions_allow",
+            "target": "ref_powershell_grep",
+            "relation": "extends",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\.claude\\settings.local.json",
+            "source_location": "L3",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "claude_settings_local_permissions_allow",
+            "target": "ref_powershell_get_childitem_path_src_directory_where_object_name_eq_api",
+            "relation": "extends",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\.claude\\settings.local.json",
+            "source_location": "L3",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "claude_settings_local_permissions_allow",
+            "target": "ref_bash_mkdir_p_home_user_zerotrust_src_api_schemas_home_user_zerotrust_src_oauth_providers_home_user_zerotrust_src_audit_home_user_zerotrust_github_workflows_home_user_zerotrust_vscode_home_user_zerotrust_src_tests_home_user_zerotrust_tests_load",
+            "relation": "extends",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\.claude\\settings.local.json",
+            "source_location": "L3",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "claude_settings_local_permissions_allow",
+            "target": "ref_bash_cat",
+            "relation": "extends",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\.claude\\settings.local.json",
+            "source_location": "L3",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "claude_settings_local_permissions_allow",
+            "target": "ref_mcp_nextjs_get_errors",
+            "relation": "extends",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\.claude\\settings.local.json",
+            "source_location": "L3",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "claude_settings_local_permissions_allow",
+            "target": "ref_powershell_get_ciminstance",
+            "relation": "extends",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\.claude\\settings.local.json",
+            "source_location": "L3",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "claude_settings_local_permissions_allow",
+            "target": "ref_powershell_conn_get_nettcpconnection_localport_3000_state_listen_erroraction_silentlycontinue_if_conn_conn_foreach_object_p_get_process_id_owningprocess_erroraction_silentlycontinue_pscustomobject_pid_owningprocess_name_p_name_start_p_starttime_format_list_else_nothing_listening_on_3000",
+            "relation": "extends",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\.claude\\settings.local.json",
+            "source_location": "L3",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "claude_settings_local_permissions_allow",
+            "target": "ref_powershell_wsl_l_v_write_output_wsl_e_bash_lc_ps_aux_grep_e_next_bun_grep_v_grep",
+            "relation": "extends",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\.claude\\settings.local.json",
+            "source_location": "L3",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "claude_settings_local_permissions_allow",
+            "target": "ref_powershell_wsl_e_bash_lc_cd_mnt_c_users_alfamas_desktop_zerotrust_packages_ui_src_touch_components_ui_password_input_tsx_app_auth_login_page_tsx_app_auth_register_page_tsx_app_auth_reset_password_page_tsx_app_dashboard_sessions_page_tsx_echo_touched",
+            "relation": "extends",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\.claude\\settings.local.json",
+            "source_location": "L3",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "claude_settings_local_permissions_allow",
+            "target": "ref_powershell_wsl_e_bash_lc_cd_mnt_c_users_alfamas_desktop_zerotrust_python3_c_import_playwright_print_playwright_ok_2_1_head_5",
+            "relation": "extends",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\.claude\\settings.local.json",
+            "source_location": "L3",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "claude_settings_local_permissions_allow",
+            "target": "ref_powershell_wsl_e_bash_lc_python3_c_import_playwright_sys_print_playwright_version_if_hasattr_playwright_version_else_installed_2_1_head_5",
+            "relation": "extends",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\.claude\\settings.local.json",
+            "source_location": "L3",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "claude_settings_local_permissions_allow",
+            "target": "ref_powershell_wsl_e_bash_lc_cd_mnt_c_users_alfamas_desktop_zerotrust_python3_tmp_pwtest_py_2_1_head_40",
+            "relation": "extends",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\.claude\\settings.local.json",
+            "source_location": "L3",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "claude_settings_local_permissions_allow",
+            "target": "ref_powershell_powershell_executionpolicy_bypass_file_scripts_fix_junctions_ps1",
+            "relation": "extends",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\.claude\\settings.local.json",
+            "source_location": "L3",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "claude_settings_local_permissions_allow",
+            "target": "ref_bash_node_e_console_log_require_simplewebauthn_server_package_json_version",
+            "relation": "extends",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\.claude\\settings.local.json",
+            "source_location": "L3",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_claude_settings_local_json",
+            "target": "claude_settings_local_enableallprojectmcpservers",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\.claude\\settings.local.json",
+            "source_location": "L30",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_claude_settings_local_json",
+            "target": "claude_settings_local_enabledmcpjsonservers",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\.claude\\settings.local.json",
+            "source_location": "L31",
+            "weight": 1.0
+        },
+        {
+            "source": "claude_settings_local_enabledmcpjsonservers",
+            "target": "ref_nextjs",
+            "relation": "extends",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\.claude\\settings.local.json",
+            "source_location": "L31",
+            "weight": 1.0,
+            "context": "import"
+        }
+    ]
+}

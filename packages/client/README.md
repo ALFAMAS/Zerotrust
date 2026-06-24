@@ -1,6 +1,6 @@
-# @zeroauth/client
+# @zerotrust/client
 
-Auto-generated, **dependency-free** TypeScript client for the [ZeroAuth](https://github.com/ALFAMAS/zeroauth) API.
+Auto-generated, **dependency-free** TypeScript client for the [zerotrust](https://github.com/ALFAMAS/zerotrust) API.
 
 The client is generated from the OpenAPI spec (`src/api/openapi.json`) by
 [`scripts/generate-sdk.ts`](../../scripts/generate-sdk.ts). It targets the global
@@ -13,16 +13,16 @@ query params, path params, and response types.
 ## Install
 
 ```bash
-npm install @zeroauth/client
+npm install @zerotrust/client
 ```
 
 ## Usage
 
 ```ts
-import { ZeroAuthClient, ZeroAuthError } from "@zeroauth/client";
+import { zerotrustClient, zerotrustError } from "@zerotrust/client";
 
-const client = new ZeroAuthClient({
-  baseUrl: "https://api.zeroauth.app",
+const client = new zerotrustClient({
+  baseUrl: "https://api.zerotrust.app",
 });
 
 // Email + password login → typed TokenResponse
@@ -40,7 +40,7 @@ const { sessions } = await client.getSessions({ limit: 20, activeOnly: true });
 try {
   await client.deleteSessionsById("does-not-exist");
 } catch (err) {
-  if (err instanceof ZeroAuthError) {
+  if (err instanceof zerotrustError) {
     console.error(err.status, err.code, err.message);
   }
 }
@@ -48,14 +48,14 @@ try {
 
 ### Options
 
-| Option    | Type                       | Description                                             |
-| --------- | -------------------------- | ------------------------------------------------------- |
-| `baseUrl` | `string`                   | API base URL. Defaults to the OpenAPI `servers[0].url`. |
-| `token`   | `string`                   | Bearer (PASETO) token sent as `Authorization`.          |
-| `fetch`   | `typeof fetch`             | Custom fetch (defaults to the global `fetch`).          |
-| `headers` | `Record<string, string>`   | Extra headers merged into every request.                |
+| Option    | Type                     | Description                                             |
+| --------- | ------------------------ | ------------------------------------------------------- |
+| `baseUrl` | `string`                 | API base URL. Defaults to the OpenAPI `servers[0].url`. |
+| `token`   | `string`                 | Bearer (PASETO) token sent as `Authorization`.          |
+| `fetch`   | `typeof fetch`           | Custom fetch (defaults to the global `fetch`).          |
+| `headers` | `Record<string, string>` | Extra headers merged into every request.                |
 
-Every non-2xx response throws a `ZeroAuthError` carrying the HTTP `status`,
+Every non-2xx response throws a `zerotrustError` carrying the HTTP `status`,
 the API error `code`, and the parsed `details`.
 
 ## Regenerating

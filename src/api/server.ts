@@ -4,14 +4,18 @@ import dotenv from "dotenv";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { secureHeaders } from "hono/secure-headers";
-import { initializeZeroAuth } from "..";
+import { initializezerotrust } from "..";
 import didRoutes from "../did/routes";
 import federationRoutes from "../federation/routes";
 import { initSentry } from "../instrument";
 import jitRoutes from "../jit/routes";
 import ldapRoutes from "../ldap/routes";
 import { getLogger } from "../logger";
-import { API_VERSIONS, apiVersioning, CURRENT_API_VERSION } from "../middleware/apiVersioning";
+import {
+  API_VERSIONS,
+  apiVersioning,
+  CURRENT_API_VERSION,
+} from "../middleware/apiVersioning";
 import { authMiddleware } from "../middleware/auth";
 import { corsOptionsFromEnv } from "../middleware/cors";
 import { geoFencingMiddleware } from "../middleware/geoFencing";
@@ -27,7 +31,10 @@ import { startRetentionScheduler } from "../services/dataRetention";
 import { startBackupScheduler } from "../services/dbBackup.service";
 import { initEmailQueue } from "../services/emailQueue";
 import { startNotificationEmailFallbackScheduler } from "../services/notificationEmailFallback";
-import { sloAlertingMiddleware, sloRouteHandler } from "../services/slo.service";
+import {
+  sloAlertingMiddleware,
+  sloRouteHandler,
+} from "../services/slo.service";
 import webhookManagementRoutes from "../webhooks/routes";
 import accessReviewRoutes from "./routes/access-review.routes";
 import adminRoutes from "./routes/admin.routes";
@@ -68,7 +75,7 @@ import type { HonoEnv } from "../shared/types";
 const logger = getLogger("api-server");
 export async function createServer() {
   initSentry();
-  const { logger: initLogger } = await initializeZeroAuth();
+  const { logger: initLogger } = await initializezerotrust();
   initLogger.info("Starting API server setup");
 
   const app = new Hono<HonoEnv>();
@@ -76,7 +83,7 @@ export async function createServer() {
   // Start email queue worker when Redis is available
   if (process.env.REDIS_URI) {
     initEmailQueue(process.env.REDIS_URI).catch((err: Error) =>
-      initLogger.error("Email queue init failed", err)
+      initLogger.error("Email queue init failed", err),
     );
   }
 
@@ -99,7 +106,9 @@ export async function createServer() {
   app.use("*", apiVersioning());
 
   // Public registry of supported API versions and their lifecycle status
-  app.get("/api/versions", (c) => c.json({ current: CURRENT_API_VERSION, versions: API_VERSIONS }));
+  app.get("/api/versions", (c) =>
+    c.json({ current: CURRENT_API_VERSION, versions: API_VERSIONS }),
+  );
 
   // Error-spike + latency alerting (Slack / Teams / PagerDuty)
   app.use("*", alertingMiddleware());
@@ -243,14 +252,17 @@ export async function createServer() {
     temporalAccessMiddleware(),
     (c) => {
       return c.json({ ok: true, user: c.get("user")?.id });
-    }
+    },
   );
 
   // ─── Responsible disclosure (RFC 9116) ──────────────────────────────────────
   const securityTxt = () => {
-    const contact = process.env.SECURITY_CONTACT ?? "mailto:arafat0951@gmail.com";
+    const contact =
+      process.env.SECURITY_CONTACT ?? "mailto:arafat0951@gmail.com";
     const appUrl = process.env.APP_URL ?? "http://localhost:3000";
-    const expires = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString();
+    const expires = new Date(
+      Date.now() + 365 * 24 * 60 * 60 * 1000,
+    ).toISOString();
     return [
       `Contact: ${contact}`,
       `Expires: ${expires}`,
@@ -267,7 +279,10 @@ export async function createServer() {
   // Public status page data — safe to expose (no internals, just up/down)
   const serverStartedAt = Date.now();
   app.get("/status", async (c) => {
-    const components: Record<string, "operational" | "degraded" | "down" | "not set"> = {
+    const components: Record<
+      string,
+      "operational" | "degraded" | "down" | "not set"
+    > = {
       api: "operational",
     };
 
@@ -294,9 +309,8 @@ export async function createServer() {
     // credentials / DNS / bucket policy are still loud.
     let s3Enabled = false;
     try {
-      const { isS3BackupEnabled, pingS3WithTimeout } = await import(
-        "../services/objectStorage.service.js"
-      );
+      const { isS3BackupEnabled, pingS3WithTimeout } =
+        await import("../services/objectStorage.service.js");
       s3Enabled = isS3BackupEnabled();
       if (s3Enabled) {
         const result = await pingS3WithTimeout();
@@ -335,7 +349,10 @@ export async function createServer() {
 
         const sendStatus = async () => {
           try {
-            const components: Record<string, "operational" | "degraded" | "down" | "not set"> = {
+            const components: Record<
+              string,
+              "operational" | "degraded" | "down" | "not set"
+            > = {
               api: "operational",
             };
             try {
@@ -345,16 +362,18 @@ export async function createServer() {
               components.database = "down";
             }
             try {
-              const { pingRedis } = await import("../services/rateLimiter/redis.js");
-              components.cache = (await pingRedis()) ? "operational" : "degraded";
+              const { pingRedis } =
+                await import("../services/rateLimiter/redis.js");
+              components.cache = (await pingRedis())
+                ? "operational"
+                : "degraded";
             } catch {
               components.cache = "degraded";
             }
             let s3Enabled = false;
             try {
-              const { isS3BackupEnabled, pingS3WithTimeout } = await import(
-                "../services/objectStorage.service.js"
-              );
+              const { isS3BackupEnabled, pingS3WithTimeout } =
+                await import("../services/objectStorage.service.js");
               s3Enabled = isS3BackupEnabled();
               if (s3Enabled) {
                 const ping = await pingS3WithTimeout(4000);
@@ -368,9 +387,9 @@ export async function createServer() {
               components.s3Backup = s3Enabled ? "down" : "not set";
               components.s3ObjectStorage = s3Enabled ? "down" : "not set";
             }
-            const overall: "operational" | "degraded" | "down" = Object.values(components).includes(
-              "down"
-            )
+            const overall: "operational" | "degraded" | "down" = Object.values(
+              components,
+            ).includes("down")
               ? "down"
               : Object.values(components).includes("degraded")
                 ? "degraded"
@@ -456,9 +475,8 @@ export async function createServer() {
     // flips the HTTP status.
     let s3Enabled = false;
     try {
-      const { isS3BackupEnabled, pingS3WithTimeout } = await import(
-        "../services/objectStorage.service.js"
-      );
+      const { isS3BackupEnabled, pingS3WithTimeout } =
+        await import("../services/objectStorage.service.js");
       s3Enabled = isS3BackupEnabled();
       if (s3Enabled) {
         const result = await pingS3WithTimeout();

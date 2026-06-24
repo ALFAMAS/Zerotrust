@@ -22,7 +22,7 @@ export async function exchangeCode(
   clientId: string,
   clientSecret: string,
   redirectUri: string,
-  _codeVerifier?: string
+  _codeVerifier?: string,
 ): Promise<{ tokens: unknown; profile: GitHubProfile | null }> {
   const params = new URLSearchParams();
   params.set("code", code);
@@ -32,7 +32,10 @@ export async function exchangeCode(
 
   const tokenRes = await fetch("https://github.com/login/oauth/access_token", {
     method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded", Accept: "application/json" },
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      Accept: "application/json",
+    },
     body: params.toString(),
   });
 
@@ -49,12 +52,16 @@ export async function exchangeCode(
   const authHeaders = {
     Authorization: `Bearer ${tokens.access_token}`,
     Accept: "application/vnd.github+json",
-    "User-Agent": "ZeroAuth",
+    "User-Agent": "zerotrust",
   };
 
-  const profileRes = await fetch("https://api.github.com/user", { headers: authHeaders });
+  const profileRes = await fetch("https://api.github.com/user", {
+    headers: authHeaders,
+  });
   if (!profileRes.ok) {
-    throw new Error(`Failed to fetch GitHub user profile: ${profileRes.status}`);
+    throw new Error(
+      `Failed to fetch GitHub user profile: ${profileRes.status}`,
+    );
   }
   const raw = (await profileRes.json()) as {
     id: number;
@@ -71,10 +78,14 @@ export async function exchangeCode(
   } else {
     // Email is private — resolve the verified primary via the emails endpoint
     // (needs the `user:email` scope, which we request at authorization time).
-    const emailsRes = await fetch("https://api.github.com/user/emails", { headers: authHeaders });
+    const emailsRes = await fetch("https://api.github.com/user/emails", {
+      headers: authHeaders,
+    });
     if (emailsRes.ok) {
       const emails = (await emailsRes.json()) as GitHubEmail[];
-      const chosen = emails.find((e) => e.primary && e.verified) ?? emails.find((e) => e.verified);
+      const chosen =
+        emails.find((e) => e.primary && e.verified) ??
+        emails.find((e) => e.verified);
       if (chosen) {
         email = chosen.email;
         emailVerified = chosen.verified;

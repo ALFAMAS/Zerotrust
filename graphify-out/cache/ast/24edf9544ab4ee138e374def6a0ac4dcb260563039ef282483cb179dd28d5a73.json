@@ -1,1 +1,148 @@
-{"nodes": [{"id": "c_users_alfamas_desktop_zeroauth_tests_load_chaos_k6_js", "label": "chaos.k6.js", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\tests\\load\\chaos.k6.js", "source_location": "L1"}, {"id": "load_chaos_k6_degradederrorrate", "label": "degradedErrorRate", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\tests\\load\\chaos.k6.js", "source_location": "L15"}, {"id": "load_chaos_k6_options", "label": "options", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\tests\\load\\chaos.k6.js", "source_location": "L17"}, {"id": "load_chaos_k6_setup", "label": "setup()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\tests\\load\\chaos.k6.js", "source_location": "L49"}, {"id": "load_chaos_k6_healthres", "label": "healthRes", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\tests\\load\\chaos.k6.js", "source_location": "L61"}, {"id": "load_chaos_k6_loginres", "label": "loginRes", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\tests\\load\\chaos.k6.js", "source_location": "L77"}, {"id": "load_chaos_k6_ok", "label": "ok", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\tests\\load\\chaos.k6.js", "source_location": "L83"}], "edges": [{"source": "c_users_alfamas_desktop_zeroauth_tests_load_chaos_k6_js", "target": "http", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\tests\\load\\chaos.k6.js", "source_location": "L11", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_tests_load_chaos_k6_js", "target": "k6", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\tests\\load\\chaos.k6.js", "source_location": "L12", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_tests_load_chaos_k6_js", "target": "metrics", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\tests\\load\\chaos.k6.js", "source_location": "L13", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_tests_load_chaos_k6_js", "target": "load_chaos_k6_degradederrorrate", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\tests\\load\\chaos.k6.js", "source_location": "L15", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_tests_load_chaos_k6_js", "target": "load_chaos_k6_options", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\tests\\load\\chaos.k6.js", "source_location": "L17", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_tests_load_chaos_k6_js", "target": "load_chaos_k6_setup", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\tests\\load\\chaos.k6.js", "source_location": "L49", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_tests_load_chaos_k6_js", "target": "load_chaos_k6_healthres", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\tests\\load\\chaos.k6.js", "source_location": "L61", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_tests_load_chaos_k6_js", "target": "load_chaos_k6_loginres", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\tests\\load\\chaos.k6.js", "source_location": "L77", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_tests_load_chaos_k6_js", "target": "load_chaos_k6_ok", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\tests\\load\\chaos.k6.js", "source_location": "L83", "weight": 1.0}], "raw_calls": [{"caller_nid": "load_chaos_k6_setup", "callee": "get", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\tests\\load\\chaos.k6.js", "source_location": "L51"}]}
+{
+    "nodes": [
+        {
+            "id": "c_users_alfamas_desktop_zerotrust_tests_load_chaos_k6_js",
+            "label": "chaos.k6.js",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\tests\\load\\chaos.k6.js",
+            "source_location": "L1"
+        },
+        {
+            "id": "load_chaos_k6_degradederrorrate",
+            "label": "degradedErrorRate",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\tests\\load\\chaos.k6.js",
+            "source_location": "L15"
+        },
+        {
+            "id": "load_chaos_k6_options",
+            "label": "options",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\tests\\load\\chaos.k6.js",
+            "source_location": "L17"
+        },
+        {
+            "id": "load_chaos_k6_setup",
+            "label": "setup()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\tests\\load\\chaos.k6.js",
+            "source_location": "L49"
+        },
+        {
+            "id": "load_chaos_k6_healthres",
+            "label": "healthRes",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\tests\\load\\chaos.k6.js",
+            "source_location": "L61"
+        },
+        {
+            "id": "load_chaos_k6_loginres",
+            "label": "loginRes",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\tests\\load\\chaos.k6.js",
+            "source_location": "L77"
+        },
+        {
+            "id": "load_chaos_k6_ok",
+            "label": "ok",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\tests\\load\\chaos.k6.js",
+            "source_location": "L83"
+        }
+    ],
+    "edges": [
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_tests_load_chaos_k6_js",
+            "target": "http",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\tests\\load\\chaos.k6.js",
+            "source_location": "L11",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_tests_load_chaos_k6_js",
+            "target": "k6",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\tests\\load\\chaos.k6.js",
+            "source_location": "L12",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_tests_load_chaos_k6_js",
+            "target": "metrics",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\tests\\load\\chaos.k6.js",
+            "source_location": "L13",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_tests_load_chaos_k6_js",
+            "target": "load_chaos_k6_degradederrorrate",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\tests\\load\\chaos.k6.js",
+            "source_location": "L15",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_tests_load_chaos_k6_js",
+            "target": "load_chaos_k6_options",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\tests\\load\\chaos.k6.js",
+            "source_location": "L17",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_tests_load_chaos_k6_js",
+            "target": "load_chaos_k6_setup",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\tests\\load\\chaos.k6.js",
+            "source_location": "L49",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_tests_load_chaos_k6_js",
+            "target": "load_chaos_k6_healthres",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\tests\\load\\chaos.k6.js",
+            "source_location": "L61",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_tests_load_chaos_k6_js",
+            "target": "load_chaos_k6_loginres",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\tests\\load\\chaos.k6.js",
+            "source_location": "L77",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_tests_load_chaos_k6_js",
+            "target": "load_chaos_k6_ok",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\tests\\load\\chaos.k6.js",
+            "source_location": "L83",
+            "weight": 1.0
+        }
+    ],
+    "raw_calls": [
+        {
+            "caller_nid": "load_chaos_k6_setup",
+            "callee": "get",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\tests\\load\\chaos.k6.js",
+            "source_location": "L51"
+        }
+    ]
+}

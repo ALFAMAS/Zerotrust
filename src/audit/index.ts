@@ -1,6 +1,6 @@
 /**
  * Elasticsearch audit pipeline.
- * Bulk-indexes AuditLog documents into daily indices (zeroauth-audit-YYYY-MM-DD).
+ * Bulk-indexes AuditLog documents into daily indices (zerotrust-audit-YYYY-MM-DD).
  * Masks sensitive fields before shipping.
  */
 
@@ -10,7 +10,14 @@ import type { AuditLog } from "../shared/types";
 
 const logger = getLogger("audit-pipeline");
 
-const SENSITIVE_FIELDS = new Set(["code", "token", "secret", "password", "otp", "pin"]);
+const SENSITIVE_FIELDS = new Set([
+  "code",
+  "token",
+  "secret",
+  "password",
+  "otp",
+  "pin",
+]);
 
 interface ESBulkItem {
   index: { _index: string; _id?: string };
@@ -20,7 +27,9 @@ let flushInterval: ReturnType<typeof setInterval> | null = null;
 const pendingDocs: AuditLog[] = [];
 let esClient: any = null;
 
-function maskSensitiveFields(doc: Record<string, unknown>): Record<string, unknown> {
+function maskSensitiveFields(
+  doc: Record<string, unknown>,
+): Record<string, unknown> {
   const result: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(doc)) {
     const lowerKey = key.toLowerCase();
@@ -55,7 +64,9 @@ async function buildEsClient() {
 
       for (const doc of docs) {
         body.push({ index: { _index: index } });
-        const masked = maskSensitiveFields(doc as unknown as Record<string, unknown>);
+        const masked = maskSensitiveFields(
+          doc as unknown as Record<string, unknown>,
+        );
         body.push(masked);
       }
 
@@ -69,7 +80,9 @@ async function buildEsClient() {
 
       if (!response.ok) {
         const text = await response.text();
-        throw new Error(`ES bulk error ${response.status}: ${text.slice(0, 200)}`);
+        throw new Error(
+          `ES bulk error ${response.status}: ${text.slice(0, 200)}`,
+        );
       }
 
       return response.json();
@@ -93,10 +106,16 @@ async function buildEsClient() {
       const policy = {
         policy: {
           phases: {
-            hot: { min_age: "0ms", actions: { rollover: { max_age: "1d", max_size: "5gb" } } },
+            hot: {
+              min_age: "0ms",
+              actions: { rollover: { max_age: "1d", max_size: "5gb" } },
+            },
             warm: {
               min_age: "7d",
-              actions: { shrink: { number_of_shards: 1 }, forcemerge: { max_num_segments: 1 } },
+              actions: {
+                shrink: { number_of_shards: 1 },
+                forcemerge: { max_num_segments: 1 },
+              },
             },
             cold: { min_age: "30d", actions: { freeze: {} } },
             delete: { min_age: "90d", actions: { delete: {} } },
@@ -132,7 +151,9 @@ async function flushPendingDocs(): Promise<void> {
     if (!esClient) return;
 
     await esClient.bulk(batch);
-    logger.debug("Flushed audit docs to Elasticsearch", { count: batch.length });
+    logger.debug("Flushed audit docs to Elasticsearch", {
+      count: batch.length,
+    });
   } catch (err) {
     logger.error("Failed to flush audit docs to Elasticsearch", err as Error);
     pendingDocs.unshift(...batch);
@@ -172,7 +193,10 @@ export async function flushAuditPipeline(): Promise<void> {
   await flushPendingDocs();
 }
 
-export async function getElasticsearchHealth(): Promise<{ status: string; available: boolean }> {
+export async function getElasticsearchHealth(): Promise<{
+  status: string;
+  available: boolean;
+}> {
   try {
     if (!esClient) esClient = await buildEsClient();
     if (!esClient) return { status: "disabled", available: false };

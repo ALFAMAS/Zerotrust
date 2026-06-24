@@ -50,7 +50,11 @@ function retentionDays(): number {
   return parseInt(process.env.BACKUP_RETENTION_DAYS ?? "30", 10);
 }
 
-function run(cmd: string, args: string[], env?: NodeJS.ProcessEnv): Promise<number> {
+function run(
+  cmd: string,
+  args: string[],
+  env?: NodeJS.ProcessEnv,
+): Promise<number> {
   return new Promise((resolve, reject) => {
     const child = spawn(cmd, args, {
       env: { ...process.env, ...env },
@@ -62,7 +66,9 @@ function run(cmd: string, args: string[], env?: NodeJS.ProcessEnv): Promise<numb
     child.stderr?.on("data", (d) => (stderr += d.toString()));
     child.on("error", reject);
     child.on("close", (code) =>
-      code === 0 ? resolve(0) : reject(new Error(`${cmd} exited ${code}: ${stderr.slice(0, 500)}`))
+      code === 0
+        ? resolve(0)
+        : reject(new Error(`${cmd} exited ${code}: ${stderr.slice(0, 500)}`)),
     );
   });
 }
@@ -79,7 +85,7 @@ export async function pruneOldBackups(): Promise<string[]> {
     return pruned; // directory doesn't exist yet
   }
   for (const name of entries) {
-    if (!name.startsWith("zeroauth-") || !name.endsWith(".dump")) continue;
+    if (!name.startsWith("zerotrust-") || !name.endsWith(".dump")) continue;
     const full = path.join(dir, name);
     try {
       const info = await stat(full);
@@ -105,7 +111,7 @@ export async function runBackup(): Promise<BackupResult> {
   await mkdir(dir, { recursive: true });
 
   const stamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
-  const file = path.join(dir, `zeroauth-${stamp}.dump`);
+  const file = path.join(dir, `zerotrust-${stamp}.dump`);
 
   try {
     // Custom format (-Fc) is compressed and restorable with pg_restore
@@ -117,7 +123,8 @@ export async function runBackup(): Promise<BackupResult> {
   }
 
   const pruned = await pruneOldBackups();
-  if (pruned.length) logger.info("Pruned old local backups", { count: pruned.length });
+  if (pruned.length)
+    logger.info("Pruned old local backups", { count: pruned.length });
 
   // Optional S3-compatible upload + S3-side retention.
   let uploaded = false;
@@ -132,7 +139,10 @@ export async function runBackup(): Promise<BackupResult> {
         logger.info("S3 retention sweep complete", { count: s3Pruned.length });
       }
     } catch (err) {
-      logger.error("S3 upload/prune failed (backup kept locally)", err as Error);
+      logger.error(
+        "S3 upload/prune failed (backup kept locally)",
+        err as Error,
+      );
     }
   }
 
@@ -145,7 +155,9 @@ let backupInterval: ReturnType<typeof setInterval> | null = null;
 
 export function startBackupScheduler(intervalHours = 24): void {
   if (process.env.BACKUP_ENABLED !== "true") {
-    logger.info("DB backup scheduler disabled (set BACKUP_ENABLED=true to enable)");
+    logger.info(
+      "DB backup scheduler disabled (set BACKUP_ENABLED=true to enable)",
+    );
     return;
   }
   if (backupInterval) clearInterval(backupInterval);
@@ -153,7 +165,7 @@ export function startBackupScheduler(intervalHours = 24): void {
     () => {
       void runBackup();
     },
-    intervalHours * 60 * 60 * 1000
+    intervalHours * 60 * 60 * 1000,
   );
   if (backupInterval.unref) backupInterval.unref();
   logger.info("DB backup scheduler started", { intervalHours });

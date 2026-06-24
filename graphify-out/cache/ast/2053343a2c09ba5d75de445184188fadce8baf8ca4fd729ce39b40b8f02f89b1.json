@@ -1,1 +1,253 @@
-{"nodes": [{"id": "c_users_alfamas_desktop_zeroauth_src_services_emailqueue_ts", "label": "emailQueue.ts", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\emailQueue.ts", "source_location": "L1"}, {"id": "services_emailqueue_logger", "label": "logger", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\emailQueue.ts", "source_location": "L4"}, {"id": "services_emailqueue_emailjobtype", "label": "EmailJobType", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\emailQueue.ts", "source_location": "L6"}, {"id": "services_emailqueue_emailjobdata", "label": "EmailJobData", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\emailQueue.ts", "source_location": "L14"}, {"id": "services_emailqueue_parseredisuri", "label": "parseRedisUri()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\emailQueue.ts", "source_location": "L26"}, {"id": "services_emailqueue_getemailqueue", "label": "getEmailQueue()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\emailQueue.ts", "source_location": "L39"}, {"id": "services_emailqueue_initemailqueue", "label": "initEmailQueue()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\emailQueue.ts", "source_location": "L43"}, {"id": "services_emailqueue_enqueueemail", "label": "enqueueEmail()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\emailQueue.ts", "source_location": "L103"}, {"id": "services_emailqueue_shutdownemailqueue", "label": "shutdownEmailQueue()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\emailQueue.ts", "source_location": "L118"}], "edges": [{"source": "c_users_alfamas_desktop_zeroauth_src_services_emailqueue_ts", "target": "bullmq", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\emailQueue.ts", "source_location": "L1", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_emailqueue_ts", "target": "c_users_alfamas_desktop_zeroauth_src_logger_index_ts", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\emailQueue.ts", "source_location": "L2", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_emailqueue_ts", "target": "logger_index_getlogger", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\emailQueue.ts", "source_location": "L2", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_emailqueue_ts", "target": "services_emailqueue_logger", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\emailQueue.ts", "source_location": "L4", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_emailqueue_ts", "target": "services_emailqueue_emailjobtype", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\emailQueue.ts", "source_location": "L6", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_emailqueue_ts", "target": "services_emailqueue_emailjobdata", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\emailQueue.ts", "source_location": "L14", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_emailqueue_ts", "target": "services_emailqueue_parseredisuri", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\emailQueue.ts", "source_location": "L26", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_emailqueue_ts", "target": "services_emailqueue_getemailqueue", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\emailQueue.ts", "source_location": "L39", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_emailqueue_ts", "target": "services_emailqueue_initemailqueue", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\emailQueue.ts", "source_location": "L43", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_emailqueue_ts", "target": "services_emailqueue_enqueueemail", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\emailQueue.ts", "source_location": "L103", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_emailqueue_ts", "target": "services_emailqueue_shutdownemailqueue", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\emailQueue.ts", "source_location": "L118", "weight": 1.0}, {"source": "services_emailqueue_initemailqueue", "target": "services_emailqueue_parseredisuri", "relation": "calls", "context": "call", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\emailQueue.ts", "source_location": "L44", "weight": 1.0}], "raw_calls": [{"caller_nid": "services_emailqueue_parseredisuri", "callee": "parseInt", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\emailQueue.ts", "source_location": "L31"}, {"caller_nid": "services_emailqueue_parseredisuri", "callee": "decodeURIComponent", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\emailQueue.ts", "source_location": "L32"}, {"caller_nid": "services_emailqueue_initemailqueue", "callee": "warn", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\emailQueue.ts", "source_location": "L46"}, {"caller_nid": "services_emailqueue_initemailqueue", "callee": "on", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\emailQueue.ts", "source_location": "L92"}, {"caller_nid": "services_emailqueue_initemailqueue", "callee": "on", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\emailQueue.ts", "source_location": "L96"}, {"caller_nid": "services_emailqueue_initemailqueue", "callee": "info", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\emailQueue.ts", "source_location": "L100"}, {"caller_nid": "services_emailqueue_enqueueemail", "callee": "add", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\emailQueue.ts", "source_location": "L110"}, {"caller_nid": "services_emailqueue_enqueueemail", "callee": "error", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\emailQueue.ts", "source_location": "L113"}, {"caller_nid": "services_emailqueue_shutdownemailqueue", "callee": "close", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\emailQueue.ts", "source_location": "L120"}, {"caller_nid": "services_emailqueue_shutdownemailqueue", "callee": "close", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\emailQueue.ts", "source_location": "L121"}]}
+{
+    "nodes": [
+        {
+            "id": "c_users_alfamas_desktop_zerotrust_src_services_emailqueue_ts",
+            "label": "emailQueue.ts",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\emailQueue.ts",
+            "source_location": "L1"
+        },
+        {
+            "id": "services_emailqueue_logger",
+            "label": "logger",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\emailQueue.ts",
+            "source_location": "L4"
+        },
+        {
+            "id": "services_emailqueue_emailjobtype",
+            "label": "EmailJobType",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\emailQueue.ts",
+            "source_location": "L6"
+        },
+        {
+            "id": "services_emailqueue_emailjobdata",
+            "label": "EmailJobData",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\emailQueue.ts",
+            "source_location": "L14"
+        },
+        {
+            "id": "services_emailqueue_parseredisuri",
+            "label": "parseRedisUri()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\emailQueue.ts",
+            "source_location": "L26"
+        },
+        {
+            "id": "services_emailqueue_getemailqueue",
+            "label": "getEmailQueue()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\emailQueue.ts",
+            "source_location": "L39"
+        },
+        {
+            "id": "services_emailqueue_initemailqueue",
+            "label": "initEmailQueue()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\emailQueue.ts",
+            "source_location": "L43"
+        },
+        {
+            "id": "services_emailqueue_enqueueemail",
+            "label": "enqueueEmail()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\emailQueue.ts",
+            "source_location": "L103"
+        },
+        {
+            "id": "services_emailqueue_shutdownemailqueue",
+            "label": "shutdownEmailQueue()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\emailQueue.ts",
+            "source_location": "L118"
+        }
+    ],
+    "edges": [
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_emailqueue_ts",
+            "target": "bullmq",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\emailQueue.ts",
+            "source_location": "L1",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_emailqueue_ts",
+            "target": "c_users_alfamas_desktop_zerotrust_src_logger_index_ts",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\emailQueue.ts",
+            "source_location": "L2",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_emailqueue_ts",
+            "target": "logger_index_getlogger",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\emailQueue.ts",
+            "source_location": "L2",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_emailqueue_ts",
+            "target": "services_emailqueue_logger",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\emailQueue.ts",
+            "source_location": "L4",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_emailqueue_ts",
+            "target": "services_emailqueue_emailjobtype",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\emailQueue.ts",
+            "source_location": "L6",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_emailqueue_ts",
+            "target": "services_emailqueue_emailjobdata",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\emailQueue.ts",
+            "source_location": "L14",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_emailqueue_ts",
+            "target": "services_emailqueue_parseredisuri",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\emailQueue.ts",
+            "source_location": "L26",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_emailqueue_ts",
+            "target": "services_emailqueue_getemailqueue",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\emailQueue.ts",
+            "source_location": "L39",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_emailqueue_ts",
+            "target": "services_emailqueue_initemailqueue",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\emailQueue.ts",
+            "source_location": "L43",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_emailqueue_ts",
+            "target": "services_emailqueue_enqueueemail",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\emailQueue.ts",
+            "source_location": "L103",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_emailqueue_ts",
+            "target": "services_emailqueue_shutdownemailqueue",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\emailQueue.ts",
+            "source_location": "L118",
+            "weight": 1.0
+        },
+        {
+            "source": "services_emailqueue_initemailqueue",
+            "target": "services_emailqueue_parseredisuri",
+            "relation": "calls",
+            "context": "call",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\emailQueue.ts",
+            "source_location": "L44",
+            "weight": 1.0
+        }
+    ],
+    "raw_calls": [
+        {
+            "caller_nid": "services_emailqueue_parseredisuri",
+            "callee": "parseInt",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\emailQueue.ts",
+            "source_location": "L31"
+        },
+        {
+            "caller_nid": "services_emailqueue_parseredisuri",
+            "callee": "decodeURIComponent",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\emailQueue.ts",
+            "source_location": "L32"
+        },
+        {
+            "caller_nid": "services_emailqueue_initemailqueue",
+            "callee": "warn",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\emailQueue.ts",
+            "source_location": "L46"
+        },
+        {
+            "caller_nid": "services_emailqueue_initemailqueue",
+            "callee": "on",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\emailQueue.ts",
+            "source_location": "L92"
+        },
+        {
+            "caller_nid": "services_emailqueue_initemailqueue",
+            "callee": "on",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\emailQueue.ts",
+            "source_location": "L96"
+        },
+        {
+            "caller_nid": "services_emailqueue_initemailqueue",
+            "callee": "info",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\emailQueue.ts",
+            "source_location": "L100"
+        },
+        {
+            "caller_nid": "services_emailqueue_enqueueemail",
+            "callee": "add",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\emailQueue.ts",
+            "source_location": "L110"
+        },
+        {
+            "caller_nid": "services_emailqueue_enqueueemail",
+            "callee": "error",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\emailQueue.ts",
+            "source_location": "L113"
+        },
+        {
+            "caller_nid": "services_emailqueue_shutdownemailqueue",
+            "callee": "close",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\emailQueue.ts",
+            "source_location": "L120"
+        },
+        {
+            "caller_nid": "services_emailqueue_shutdownemailqueue",
+            "callee": "close",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\emailQueue.ts",
+            "source_location": "L121"
+        }
+    ]
+}

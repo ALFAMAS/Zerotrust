@@ -1,1 +1,647 @@
-{"nodes": [{"id": "c_users_alfamas_desktop_zeroauth_src_services_email_service_ts", "label": "email.service.ts", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\email.service.ts", "source_location": "L1"}, {"id": "services_email_service_logger", "label": "logger", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\email.service.ts", "source_location": "L14"}, {"id": "services_email_service_gettransport", "label": "getTransport()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\email.service.ts", "source_location": "L23"}, {"id": "services_email_service_sendemail", "label": "sendEmail()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\email.service.ts", "source_location": "L48"}, {"id": "services_email_service_sendwelcomeemail", "label": "sendWelcomeEmail()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\email.service.ts", "source_location": "L72"}, {"id": "services_email_service_sendmagiclinkemail", "label": "sendMagicLinkEmail()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\email.service.ts", "source_location": "L85"}, {"id": "services_email_service_sendotpemail", "label": "sendOtpEmail()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\email.service.ts", "source_location": "L99"}, {"id": "services_email_service_sendverificationemail", "label": "sendVerificationEmail()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\email.service.ts", "source_location": "L112"}, {"id": "services_email_service_sendpasswordresetemail", "label": "sendPasswordResetEmail()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\email.service.ts", "source_location": "L127"}, {"id": "services_email_service_sendsecurityalertemail", "label": "sendSecurityAlertEmail()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\email.service.ts", "source_location": "L141"}, {"id": "services_email_service_sendbillingeventemail", "label": "sendBillingEventEmail()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\email.service.ts", "source_location": "L165"}, {"id": "services_email_service_sendnotificationemail", "label": "sendNotificationEmail()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\email.service.ts", "source_location": "L177"}], "edges": [{"source": "c_users_alfamas_desktop_zeroauth_src_services_email_service_ts", "target": "nodemailer", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\email.service.ts", "source_location": "L1", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_email_service_ts", "target": "c_users_alfamas_desktop_zeroauth_src_templates_emails_welcome_ts", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\email.service.ts", "source_location": "L2", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_email_service_ts", "target": "emails_welcome_welcomeemailtemplate", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\email.service.ts", "source_location": "L2", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_email_service_ts", "target": "emails_welcome_welcomeemaildata", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\email.service.ts", "source_location": "L2", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_email_service_ts", "target": "c_users_alfamas_desktop_zeroauth_src_templates_emails_magic_link_ts", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\email.service.ts", "source_location": "L3", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_email_service_ts", "target": "emails_magic_link_magiclinkemailtemplate", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\email.service.ts", "source_location": "L3", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_email_service_ts", "target": "c_users_alfamas_desktop_zeroauth_src_templates_emails_otp_ts", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\email.service.ts", "source_location": "L4", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_email_service_ts", "target": "emails_otp_otpemailtemplate", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\email.service.ts", "source_location": "L4", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_email_service_ts", "target": "c_users_alfamas_desktop_zeroauth_src_templates_emails_verify_email_ts", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\email.service.ts", "source_location": "L5", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_email_service_ts", "target": "emails_verify_email_verifyemailtemplate", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\email.service.ts", "source_location": "L5", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_email_service_ts", "target": "c_users_alfamas_desktop_zeroauth_src_templates_emails_password_reset_ts", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\email.service.ts", "source_location": "L6", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_email_service_ts", "target": "emails_password_reset_passwordresetemailtemplate", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\email.service.ts", "source_location": "L6", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_email_service_ts", "target": "c_users_alfamas_desktop_zeroauth_src_templates_emails_security_alert_ts", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\email.service.ts", "source_location": "L7", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_email_service_ts", "target": "emails_security_alert_securityalertemailtemplate", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\email.service.ts", "source_location": "L7", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_email_service_ts", "target": "c_users_alfamas_desktop_zeroauth_src_templates_emails_notification_ts", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\email.service.ts", "source_location": "L8", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_email_service_ts", "target": "emails_notification_notificationemailtemplate", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\email.service.ts", "source_location": "L8", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_email_service_ts", "target": "c_users_alfamas_desktop_zeroauth_src_templates_emails_billing_event_ts", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\email.service.ts", "source_location": "L9", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_email_service_ts", "target": "emails_billing_event_billingeventemailtemplate", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\email.service.ts", "source_location": "L9", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_email_service_ts", "target": "c_users_alfamas_desktop_zeroauth_src_shared_locale_ts", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\email.service.ts", "source_location": "L10", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_email_service_ts", "target": "shared_locale_locale", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\email.service.ts", "source_location": "L10", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_email_service_ts", "target": "c_users_alfamas_desktop_zeroauth_src_services_emailsuppression_service_ts", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\email.service.ts", "source_location": "L11", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_email_service_ts", "target": "services_emailsuppression_service_isemailsuppressed", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\email.service.ts", "source_location": "L11", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_email_service_ts", "target": "c_users_alfamas_desktop_zeroauth_src_logger_index_ts", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\email.service.ts", "source_location": "L12", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_email_service_ts", "target": "logger_index_getlogger", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\email.service.ts", "source_location": "L12", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_email_service_ts", "target": "services_email_service_logger", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\email.service.ts", "source_location": "L14", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_email_service_ts", "target": "services_email_service_gettransport", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\email.service.ts", "source_location": "L23", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_email_service_ts", "target": "services_email_service_sendemail", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\email.service.ts", "source_location": "L48", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_email_service_ts", "target": "services_email_service_sendwelcomeemail", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\email.service.ts", "source_location": "L72", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_email_service_ts", "target": "services_email_service_sendmagiclinkemail", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\email.service.ts", "source_location": "L85", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_email_service_ts", "target": "services_email_service_sendotpemail", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\email.service.ts", "source_location": "L99", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_email_service_ts", "target": "services_email_service_sendverificationemail", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\email.service.ts", "source_location": "L112", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_email_service_ts", "target": "services_email_service_sendpasswordresetemail", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\email.service.ts", "source_location": "L127", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_email_service_ts", "target": "services_email_service_sendsecurityalertemail", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\email.service.ts", "source_location": "L141", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_email_service_ts", "target": "services_email_service_sendbillingeventemail", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\email.service.ts", "source_location": "L165", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_email_service_ts", "target": "services_email_service_sendnotificationemail", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\email.service.ts", "source_location": "L177", "weight": 1.0}, {"source": "services_email_service_sendemail", "target": "services_email_service_gettransport", "relation": "calls", "context": "call", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\email.service.ts", "source_location": "L60", "weight": 1.0}, {"source": "services_email_service_sendwelcomeemail", "target": "services_email_service_sendemail", "relation": "calls", "context": "call", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\email.service.ts", "source_location": "L81", "weight": 1.0}, {"source": "services_email_service_sendmagiclinkemail", "target": "services_email_service_sendemail", "relation": "calls", "context": "call", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\email.service.ts", "source_location": "L96", "weight": 1.0}, {"source": "services_email_service_sendotpemail", "target": "services_email_service_sendemail", "relation": "calls", "context": "call", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\email.service.ts", "source_location": "L109", "weight": 1.0}, {"source": "services_email_service_sendverificationemail", "target": "services_email_service_sendemail", "relation": "calls", "context": "call", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\email.service.ts", "source_location": "L124", "weight": 1.0}, {"source": "services_email_service_sendpasswordresetemail", "target": "services_email_service_sendemail", "relation": "calls", "context": "call", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\email.service.ts", "source_location": "L138", "weight": 1.0}, {"source": "services_email_service_sendsecurityalertemail", "target": "services_email_service_sendemail", "relation": "calls", "context": "call", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\email.service.ts", "source_location": "L162", "weight": 1.0}, {"source": "services_email_service_sendbillingeventemail", "target": "services_email_service_sendemail", "relation": "calls", "context": "call", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\email.service.ts", "source_location": "L174", "weight": 1.0}, {"source": "services_email_service_sendnotificationemail", "target": "services_email_service_sendemail", "relation": "calls", "context": "call", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\email.service.ts", "source_location": "L190", "weight": 1.0}], "raw_calls": [{"caller_nid": "services_email_service_gettransport", "callee": "createTransport", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\email.service.ts", "source_location": "L30"}, {"caller_nid": "services_email_service_gettransport", "callee": "parseInt", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\email.service.ts", "source_location": "L32"}, {"caller_nid": "services_email_service_gettransport", "callee": "createTransport", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\email.service.ts", "source_location": "L40"}, {"caller_nid": "services_email_service_sendemail", "callee": "isEmailSuppressed", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\email.service.ts", "source_location": "L56"}, {"caller_nid": "services_email_service_sendemail", "callee": "info", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\email.service.ts", "source_location": "L57"}, {"caller_nid": "services_email_service_sendemail", "callee": "replace", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\email.service.ts", "source_location": "L62"}, {"caller_nid": "services_email_service_sendemail", "callee": "toLowerCase", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\email.service.ts", "source_location": "L62"}, {"caller_nid": "services_email_service_sendemail", "callee": "sendMail", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\email.service.ts", "source_location": "L63"}, {"caller_nid": "services_email_service_sendemail", "callee": "info", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\email.service.ts", "source_location": "L64"}, {"caller_nid": "services_email_service_sendemail", "callee": "error", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\email.service.ts", "source_location": "L66"}, {"caller_nid": "services_email_service_sendwelcomeemail", "callee": "welcomeEmailTemplate", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\email.service.ts", "source_location": "L76"}, {"caller_nid": "services_email_service_sendmagiclinkemail", "callee": "magicLinkEmailTemplate", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\email.service.ts", "source_location": "L89"}, {"caller_nid": "services_email_service_sendotpemail", "callee": "otpEmailTemplate", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\email.service.ts", "source_location": "L103"}, {"caller_nid": "services_email_service_sendverificationemail", "callee": "verifyEmailTemplate", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\email.service.ts", "source_location": "L116"}, {"caller_nid": "services_email_service_sendpasswordresetemail", "callee": "passwordResetEmailTemplate", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\email.service.ts", "source_location": "L131"}, {"caller_nid": "services_email_service_sendsecurityalertemail", "callee": "securityAlertEmailTemplate", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\email.service.ts", "source_location": "L152"}, {"caller_nid": "services_email_service_sendbillingeventemail", "callee": "billingEventEmailTemplate", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\email.service.ts", "source_location": "L169"}, {"caller_nid": "services_email_service_sendnotificationemail", "callee": "notificationEmailTemplate", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\email.service.ts", "source_location": "L181"}]}
+{
+    "nodes": [
+        {
+            "id": "c_users_alfamas_desktop_zerotrust_src_services_email_service_ts",
+            "label": "email.service.ts",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\email.service.ts",
+            "source_location": "L1"
+        },
+        {
+            "id": "services_email_service_logger",
+            "label": "logger",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\email.service.ts",
+            "source_location": "L14"
+        },
+        {
+            "id": "services_email_service_gettransport",
+            "label": "getTransport()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\email.service.ts",
+            "source_location": "L23"
+        },
+        {
+            "id": "services_email_service_sendemail",
+            "label": "sendEmail()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\email.service.ts",
+            "source_location": "L48"
+        },
+        {
+            "id": "services_email_service_sendwelcomeemail",
+            "label": "sendWelcomeEmail()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\email.service.ts",
+            "source_location": "L72"
+        },
+        {
+            "id": "services_email_service_sendmagiclinkemail",
+            "label": "sendMagicLinkEmail()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\email.service.ts",
+            "source_location": "L85"
+        },
+        {
+            "id": "services_email_service_sendotpemail",
+            "label": "sendOtpEmail()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\email.service.ts",
+            "source_location": "L99"
+        },
+        {
+            "id": "services_email_service_sendverificationemail",
+            "label": "sendVerificationEmail()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\email.service.ts",
+            "source_location": "L112"
+        },
+        {
+            "id": "services_email_service_sendpasswordresetemail",
+            "label": "sendPasswordResetEmail()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\email.service.ts",
+            "source_location": "L127"
+        },
+        {
+            "id": "services_email_service_sendsecurityalertemail",
+            "label": "sendSecurityAlertEmail()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\email.service.ts",
+            "source_location": "L141"
+        },
+        {
+            "id": "services_email_service_sendbillingeventemail",
+            "label": "sendBillingEventEmail()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\email.service.ts",
+            "source_location": "L165"
+        },
+        {
+            "id": "services_email_service_sendnotificationemail",
+            "label": "sendNotificationEmail()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\email.service.ts",
+            "source_location": "L177"
+        }
+    ],
+    "edges": [
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_email_service_ts",
+            "target": "nodemailer",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\email.service.ts",
+            "source_location": "L1",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_email_service_ts",
+            "target": "c_users_alfamas_desktop_zerotrust_src_templates_emails_welcome_ts",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\email.service.ts",
+            "source_location": "L2",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_email_service_ts",
+            "target": "emails_welcome_welcomeemailtemplate",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\email.service.ts",
+            "source_location": "L2",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_email_service_ts",
+            "target": "emails_welcome_welcomeemaildata",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\email.service.ts",
+            "source_location": "L2",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_email_service_ts",
+            "target": "c_users_alfamas_desktop_zerotrust_src_templates_emails_magic_link_ts",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\email.service.ts",
+            "source_location": "L3",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_email_service_ts",
+            "target": "emails_magic_link_magiclinkemailtemplate",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\email.service.ts",
+            "source_location": "L3",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_email_service_ts",
+            "target": "c_users_alfamas_desktop_zerotrust_src_templates_emails_otp_ts",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\email.service.ts",
+            "source_location": "L4",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_email_service_ts",
+            "target": "emails_otp_otpemailtemplate",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\email.service.ts",
+            "source_location": "L4",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_email_service_ts",
+            "target": "c_users_alfamas_desktop_zerotrust_src_templates_emails_verify_email_ts",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\email.service.ts",
+            "source_location": "L5",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_email_service_ts",
+            "target": "emails_verify_email_verifyemailtemplate",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\email.service.ts",
+            "source_location": "L5",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_email_service_ts",
+            "target": "c_users_alfamas_desktop_zerotrust_src_templates_emails_password_reset_ts",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\email.service.ts",
+            "source_location": "L6",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_email_service_ts",
+            "target": "emails_password_reset_passwordresetemailtemplate",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\email.service.ts",
+            "source_location": "L6",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_email_service_ts",
+            "target": "c_users_alfamas_desktop_zerotrust_src_templates_emails_security_alert_ts",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\email.service.ts",
+            "source_location": "L7",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_email_service_ts",
+            "target": "emails_security_alert_securityalertemailtemplate",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\email.service.ts",
+            "source_location": "L7",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_email_service_ts",
+            "target": "c_users_alfamas_desktop_zerotrust_src_templates_emails_notification_ts",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\email.service.ts",
+            "source_location": "L8",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_email_service_ts",
+            "target": "emails_notification_notificationemailtemplate",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\email.service.ts",
+            "source_location": "L8",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_email_service_ts",
+            "target": "c_users_alfamas_desktop_zerotrust_src_templates_emails_billing_event_ts",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\email.service.ts",
+            "source_location": "L9",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_email_service_ts",
+            "target": "emails_billing_event_billingeventemailtemplate",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\email.service.ts",
+            "source_location": "L9",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_email_service_ts",
+            "target": "c_users_alfamas_desktop_zerotrust_src_shared_locale_ts",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\email.service.ts",
+            "source_location": "L10",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_email_service_ts",
+            "target": "shared_locale_locale",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\email.service.ts",
+            "source_location": "L10",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_email_service_ts",
+            "target": "c_users_alfamas_desktop_zerotrust_src_services_emailsuppression_service_ts",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\email.service.ts",
+            "source_location": "L11",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_email_service_ts",
+            "target": "services_emailsuppression_service_isemailsuppressed",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\email.service.ts",
+            "source_location": "L11",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_email_service_ts",
+            "target": "c_users_alfamas_desktop_zerotrust_src_logger_index_ts",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\email.service.ts",
+            "source_location": "L12",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_email_service_ts",
+            "target": "logger_index_getlogger",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\email.service.ts",
+            "source_location": "L12",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_email_service_ts",
+            "target": "services_email_service_logger",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\email.service.ts",
+            "source_location": "L14",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_email_service_ts",
+            "target": "services_email_service_gettransport",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\email.service.ts",
+            "source_location": "L23",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_email_service_ts",
+            "target": "services_email_service_sendemail",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\email.service.ts",
+            "source_location": "L48",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_email_service_ts",
+            "target": "services_email_service_sendwelcomeemail",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\email.service.ts",
+            "source_location": "L72",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_email_service_ts",
+            "target": "services_email_service_sendmagiclinkemail",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\email.service.ts",
+            "source_location": "L85",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_email_service_ts",
+            "target": "services_email_service_sendotpemail",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\email.service.ts",
+            "source_location": "L99",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_email_service_ts",
+            "target": "services_email_service_sendverificationemail",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\email.service.ts",
+            "source_location": "L112",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_email_service_ts",
+            "target": "services_email_service_sendpasswordresetemail",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\email.service.ts",
+            "source_location": "L127",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_email_service_ts",
+            "target": "services_email_service_sendsecurityalertemail",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\email.service.ts",
+            "source_location": "L141",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_email_service_ts",
+            "target": "services_email_service_sendbillingeventemail",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\email.service.ts",
+            "source_location": "L165",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_email_service_ts",
+            "target": "services_email_service_sendnotificationemail",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\email.service.ts",
+            "source_location": "L177",
+            "weight": 1.0
+        },
+        {
+            "source": "services_email_service_sendemail",
+            "target": "services_email_service_gettransport",
+            "relation": "calls",
+            "context": "call",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\email.service.ts",
+            "source_location": "L60",
+            "weight": 1.0
+        },
+        {
+            "source": "services_email_service_sendwelcomeemail",
+            "target": "services_email_service_sendemail",
+            "relation": "calls",
+            "context": "call",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\email.service.ts",
+            "source_location": "L81",
+            "weight": 1.0
+        },
+        {
+            "source": "services_email_service_sendmagiclinkemail",
+            "target": "services_email_service_sendemail",
+            "relation": "calls",
+            "context": "call",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\email.service.ts",
+            "source_location": "L96",
+            "weight": 1.0
+        },
+        {
+            "source": "services_email_service_sendotpemail",
+            "target": "services_email_service_sendemail",
+            "relation": "calls",
+            "context": "call",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\email.service.ts",
+            "source_location": "L109",
+            "weight": 1.0
+        },
+        {
+            "source": "services_email_service_sendverificationemail",
+            "target": "services_email_service_sendemail",
+            "relation": "calls",
+            "context": "call",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\email.service.ts",
+            "source_location": "L124",
+            "weight": 1.0
+        },
+        {
+            "source": "services_email_service_sendpasswordresetemail",
+            "target": "services_email_service_sendemail",
+            "relation": "calls",
+            "context": "call",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\email.service.ts",
+            "source_location": "L138",
+            "weight": 1.0
+        },
+        {
+            "source": "services_email_service_sendsecurityalertemail",
+            "target": "services_email_service_sendemail",
+            "relation": "calls",
+            "context": "call",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\email.service.ts",
+            "source_location": "L162",
+            "weight": 1.0
+        },
+        {
+            "source": "services_email_service_sendbillingeventemail",
+            "target": "services_email_service_sendemail",
+            "relation": "calls",
+            "context": "call",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\email.service.ts",
+            "source_location": "L174",
+            "weight": 1.0
+        },
+        {
+            "source": "services_email_service_sendnotificationemail",
+            "target": "services_email_service_sendemail",
+            "relation": "calls",
+            "context": "call",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\email.service.ts",
+            "source_location": "L190",
+            "weight": 1.0
+        }
+    ],
+    "raw_calls": [
+        {
+            "caller_nid": "services_email_service_gettransport",
+            "callee": "createTransport",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\email.service.ts",
+            "source_location": "L30"
+        },
+        {
+            "caller_nid": "services_email_service_gettransport",
+            "callee": "parseInt",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\email.service.ts",
+            "source_location": "L32"
+        },
+        {
+            "caller_nid": "services_email_service_gettransport",
+            "callee": "createTransport",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\email.service.ts",
+            "source_location": "L40"
+        },
+        {
+            "caller_nid": "services_email_service_sendemail",
+            "callee": "isEmailSuppressed",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\email.service.ts",
+            "source_location": "L56"
+        },
+        {
+            "caller_nid": "services_email_service_sendemail",
+            "callee": "info",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\email.service.ts",
+            "source_location": "L57"
+        },
+        {
+            "caller_nid": "services_email_service_sendemail",
+            "callee": "replace",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\email.service.ts",
+            "source_location": "L62"
+        },
+        {
+            "caller_nid": "services_email_service_sendemail",
+            "callee": "toLowerCase",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\email.service.ts",
+            "source_location": "L62"
+        },
+        {
+            "caller_nid": "services_email_service_sendemail",
+            "callee": "sendMail",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\email.service.ts",
+            "source_location": "L63"
+        },
+        {
+            "caller_nid": "services_email_service_sendemail",
+            "callee": "info",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\email.service.ts",
+            "source_location": "L64"
+        },
+        {
+            "caller_nid": "services_email_service_sendemail",
+            "callee": "error",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\email.service.ts",
+            "source_location": "L66"
+        },
+        {
+            "caller_nid": "services_email_service_sendwelcomeemail",
+            "callee": "welcomeEmailTemplate",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\email.service.ts",
+            "source_location": "L76"
+        },
+        {
+            "caller_nid": "services_email_service_sendmagiclinkemail",
+            "callee": "magicLinkEmailTemplate",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\email.service.ts",
+            "source_location": "L89"
+        },
+        {
+            "caller_nid": "services_email_service_sendotpemail",
+            "callee": "otpEmailTemplate",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\email.service.ts",
+            "source_location": "L103"
+        },
+        {
+            "caller_nid": "services_email_service_sendverificationemail",
+            "callee": "verifyEmailTemplate",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\email.service.ts",
+            "source_location": "L116"
+        },
+        {
+            "caller_nid": "services_email_service_sendpasswordresetemail",
+            "callee": "passwordResetEmailTemplate",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\email.service.ts",
+            "source_location": "L131"
+        },
+        {
+            "caller_nid": "services_email_service_sendsecurityalertemail",
+            "callee": "securityAlertEmailTemplate",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\email.service.ts",
+            "source_location": "L152"
+        },
+        {
+            "caller_nid": "services_email_service_sendbillingeventemail",
+            "callee": "billingEventEmailTemplate",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\email.service.ts",
+            "source_location": "L169"
+        },
+        {
+            "caller_nid": "services_email_service_sendnotificationemail",
+            "callee": "notificationEmailTemplate",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\email.service.ts",
+            "source_location": "L181"
+        }
+    ]
+}

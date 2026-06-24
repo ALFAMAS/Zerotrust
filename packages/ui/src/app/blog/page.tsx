@@ -7,8 +7,8 @@ import { brand } from "@/config/brand";
 import { blogPosts } from "@/data/blog-posts";
 
 export const metadata: Metadata = {
-  title: `Blog — ${process.env.NEXT_PUBLIC_APP_NAME ?? "ZeroAuth"}`,
-  description: "News, deep dives, and guides from the ZeroAuth team.",
+  title: `Blog — ${process.env.NEXT_PUBLIC_APP_NAME ?? "zerotrust"}`,
+  description: "News, deep dives, and guides from the zerotrust team.",
 };
 
 export default function BlogPage() {
@@ -58,7 +58,9 @@ export default function BlogPage() {
                   {post.title}
                 </Link>
               </h2>
-              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{post.excerpt}</p>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                {post.excerpt}
+              </p>
               <Link
                 href={`/blog/${post.slug}`}
                 className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-primary transition-colors hover:text-primary/80"

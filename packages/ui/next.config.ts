@@ -5,7 +5,8 @@ const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 const nextConfig: NextConfig = {
   env: {
-    NEXT_PUBLIC_ZEROAUTH_URL: process.env.NEXT_PUBLIC_ZEROAUTH_URL ?? "http://localhost:3000",
+    NEXT_PUBLIC_zerotrust_URL:
+      process.env.NEXT_PUBLIC_zerotrust_URL ?? "http://localhost:3000",
   },
 
   turbopack: {

@@ -6,9 +6,9 @@
  * Sync). This mirrors the SW's store so writes survive a full reload while
  * disconnected, and replay automatically on reconnect.
  */
-const DB_NAME = "zeroauth-pwa";
+const DB_NAME = "zerotrust-pwa";
 const STORE_NAME = "write-queue";
-const SYNC_TAG = "zeroauth-write-queue";
+const SYNC_TAG = "zerotrust-write-queue";
 
 export interface QueuedWrite {
   url: string;
@@ -23,7 +23,10 @@ function openDB(): Promise<IDBDatabase> {
     const req = indexedDB.open(DB_NAME, 1);
     req.onupgradeneeded = () => {
       if (!req.result.objectStoreNames.contains(STORE_NAME)) {
-        req.result.createObjectStore(STORE_NAME, { keyPath: "id", autoIncrement: true });
+        req.result.createObjectStore(STORE_NAME, {
+          keyPath: "id",
+          autoIncrement: true,
+        });
       }
     };
     req.onsuccess = () => resolve(req.result);

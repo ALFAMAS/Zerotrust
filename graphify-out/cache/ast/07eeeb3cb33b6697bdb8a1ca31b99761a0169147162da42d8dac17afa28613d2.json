@@ -1,1 +1,182 @@
-{"nodes": [{"id": "c_users_alfamas_desktop_zeroauth_src_mfa_index_ts", "label": "index.ts", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\mfa\\index.ts", "source_location": "L1"}, {"id": "mfa_index_logger", "label": "logger", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\mfa\\index.ts", "source_location": "L6"}, {"id": "mfa_index_sendotp", "label": "sendOTP()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\mfa\\index.ts", "source_location": "L8"}], "edges": [{"source": "c_users_alfamas_desktop_zeroauth_src_mfa_index_ts", "target": "c_users_alfamas_desktop_zeroauth_src_mfa_channels_email_ts", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\mfa\\index.ts", "source_location": "L1", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_mfa_index_ts", "target": "channels_email_sendemailotp", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\mfa\\index.ts", "source_location": "L1", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_mfa_index_ts", "target": "c_users_alfamas_desktop_zeroauth_src_mfa_channels_sms_ts", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\mfa\\index.ts", "source_location": "L2", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_mfa_index_ts", "target": "channels_sms_sendsmsotp", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\mfa\\index.ts", "source_location": "L2", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_mfa_index_ts", "target": "c_users_alfamas_desktop_zeroauth_src_mfa_channels_whatsapp_ts", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\mfa\\index.ts", "source_location": "L3", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_mfa_index_ts", "target": "channels_whatsapp_sendwhatsappotp", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\mfa\\index.ts", "source_location": "L3", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_mfa_index_ts", "target": "c_users_alfamas_desktop_zeroauth_src_mfa_channels_telegram_ts", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\mfa\\index.ts", "source_location": "L4", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_mfa_index_ts", "target": "channels_telegram_sendtelegramotp", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\mfa\\index.ts", "source_location": "L4", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_mfa_index_ts", "target": "c_users_alfamas_desktop_zeroauth_src_logger_index_ts", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\mfa\\index.ts", "source_location": "L5", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_mfa_index_ts", "target": "logger_index_getlogger", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\mfa\\index.ts", "source_location": "L5", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_mfa_index_ts", "target": "mfa_index_logger", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\mfa\\index.ts", "source_location": "L6", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_mfa_index_ts", "target": "mfa_index_sendotp", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\mfa\\index.ts", "source_location": "L8", "weight": 1.0}], "raw_calls": [{"caller_nid": "mfa_index_sendotp", "callee": "sendEmailOTP", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\mfa\\index.ts", "source_location": "L14"}, {"caller_nid": "mfa_index_sendotp", "callee": "sendSmsOTP", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\mfa\\index.ts", "source_location": "L17"}, {"caller_nid": "mfa_index_sendotp", "callee": "sendWhatsAppOTP", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\mfa\\index.ts", "source_location": "L20"}, {"caller_nid": "mfa_index_sendotp", "callee": "sendTelegramOTP", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\mfa\\index.ts", "source_location": "L23"}, {"caller_nid": "mfa_index_sendotp", "callee": "warn", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\mfa\\index.ts", "source_location": "L29"}]}
+{
+    "nodes": [
+        {
+            "id": "c_users_alfamas_desktop_zerotrust_src_mfa_index_ts",
+            "label": "index.ts",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\mfa\\index.ts",
+            "source_location": "L1"
+        },
+        {
+            "id": "mfa_index_logger",
+            "label": "logger",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\mfa\\index.ts",
+            "source_location": "L6"
+        },
+        {
+            "id": "mfa_index_sendotp",
+            "label": "sendOTP()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\mfa\\index.ts",
+            "source_location": "L8"
+        }
+    ],
+    "edges": [
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_mfa_index_ts",
+            "target": "c_users_alfamas_desktop_zerotrust_src_mfa_channels_email_ts",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\mfa\\index.ts",
+            "source_location": "L1",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_mfa_index_ts",
+            "target": "channels_email_sendemailotp",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\mfa\\index.ts",
+            "source_location": "L1",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_mfa_index_ts",
+            "target": "c_users_alfamas_desktop_zerotrust_src_mfa_channels_sms_ts",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\mfa\\index.ts",
+            "source_location": "L2",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_mfa_index_ts",
+            "target": "channels_sms_sendsmsotp",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\mfa\\index.ts",
+            "source_location": "L2",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_mfa_index_ts",
+            "target": "c_users_alfamas_desktop_zerotrust_src_mfa_channels_whatsapp_ts",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\mfa\\index.ts",
+            "source_location": "L3",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_mfa_index_ts",
+            "target": "channels_whatsapp_sendwhatsappotp",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\mfa\\index.ts",
+            "source_location": "L3",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_mfa_index_ts",
+            "target": "c_users_alfamas_desktop_zerotrust_src_mfa_channels_telegram_ts",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\mfa\\index.ts",
+            "source_location": "L4",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_mfa_index_ts",
+            "target": "channels_telegram_sendtelegramotp",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\mfa\\index.ts",
+            "source_location": "L4",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_mfa_index_ts",
+            "target": "c_users_alfamas_desktop_zerotrust_src_logger_index_ts",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\mfa\\index.ts",
+            "source_location": "L5",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_mfa_index_ts",
+            "target": "logger_index_getlogger",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\mfa\\index.ts",
+            "source_location": "L5",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_mfa_index_ts",
+            "target": "mfa_index_logger",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\mfa\\index.ts",
+            "source_location": "L6",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_mfa_index_ts",
+            "target": "mfa_index_sendotp",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\mfa\\index.ts",
+            "source_location": "L8",
+            "weight": 1.0
+        }
+    ],
+    "raw_calls": [
+        {
+            "caller_nid": "mfa_index_sendotp",
+            "callee": "sendEmailOTP",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\mfa\\index.ts",
+            "source_location": "L14"
+        },
+        {
+            "caller_nid": "mfa_index_sendotp",
+            "callee": "sendSmsOTP",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\mfa\\index.ts",
+            "source_location": "L17"
+        },
+        {
+            "caller_nid": "mfa_index_sendotp",
+            "callee": "sendWhatsAppOTP",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\mfa\\index.ts",
+            "source_location": "L20"
+        },
+        {
+            "caller_nid": "mfa_index_sendotp",
+            "callee": "sendTelegramOTP",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\mfa\\index.ts",
+            "source_location": "L23"
+        },
+        {
+            "caller_nid": "mfa_index_sendotp",
+            "callee": "warn",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\mfa\\index.ts",
+            "source_location": "L29"
+        }
+    ]
+}

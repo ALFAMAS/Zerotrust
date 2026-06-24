@@ -18,7 +18,9 @@ afterEach(() => {
 
 describe("SIEM streaming", () => {
   it("is disabled without config and never calls fetch", async () => {
-    const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response(null));
+    const fetchSpy = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValue(new Response(null));
     expect(isSiemEnabled()).toBe(false);
     expect(await streamToSiem({ action: "x" })).toBe(false);
     expect(fetchSpy).not.toHaveBeenCalled();
@@ -29,9 +31,11 @@ describe("SIEM streaming", () => {
     process.env.SIEM_ENDPOINT = "https://collector.test/intake";
     process.env.SIEM_AUTH_HEADER = "DD-API-KEY";
     process.env.SIEM_API_KEY = "secret-key";
-    process.env.SIEM_SOURCE = "zeroauth-test";
+    process.env.SIEM_SOURCE = "zerotrust-test";
 
-    const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response(null));
+    const fetchSpy = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValue(new Response(null));
     const ok = await streamToSiem({ action: "user.login", actor: "u1" });
     expect(ok).toBe(true);
     expect(fetchSpy).toHaveBeenCalledTimes(1);
@@ -42,7 +46,7 @@ describe("SIEM streaming", () => {
     expect((init as any).headers["DD-API-KEY"]).toBe("secret-key");
     const body = JSON.parse((init as any).body);
     expect(body.action).toBe("user.login");
-    expect(body.source).toBe("zeroauth-test");
+    expect(body.source).toBe("zerotrust-test");
     expect(body["@timestamp"]).toBeTruthy();
   });
 

@@ -1,1 +1,1083 @@
-{"nodes": [{"id": "c_users_alfamas_desktop_zeroauth_src_crypto_hardware_key_store_ts", "label": "hardware-key-store.ts", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L1"}, {"id": "crypto_hardware_key_store_logger", "label": "logger", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L16"}, {"id": "crypto_hardware_key_store_hardwarekeyprovider", "label": "HardwareKeyProvider", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L20"}, {"id": "crypto_hardware_key_store_softwarekeyprovider", "label": "SoftwareKeyProvider", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L72"}, {"id": "crypto_hardware_key_store_softwarekeyprovider_getmastersecret", "label": ".getMasterSecret()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L78"}, {"id": "crypto_hardware_key_store_softwarekeyprovider_derivekey", "label": ".deriveKey()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L94"}, {"id": "crypto_hardware_key_store_softwarekeyprovider_isavailable", "label": ".isAvailable()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L102"}, {"id": "crypto_hardware_key_store_softwarekeyprovider_generatekey", "label": ".generateKey()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L106"}, {"id": "crypto_hardware_key_store_softwarekeyprovider_sign", "label": ".sign()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L115"}, {"id": "crypto_hardware_key_store_softwarekeyprovider_encrypt", "label": ".encrypt()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L127"}, {"id": "crypto_hardware_key_store_softwarekeyprovider_decrypt", "label": ".decrypt()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L147"}, {"id": "crypto_hardware_key_store_softwarekeyprovider_deletekey", "label": ".deleteKey()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L169"}, {"id": "crypto_hardware_key_store_softwarekeyprovider_listkeys", "label": ".listKeys()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L174"}, {"id": "crypto_hardware_key_store_notimplementederror", "label": "NotImplementedError", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L181"}, {"id": "crypto_hardware_key_store_notimplementederror_constructor", "label": ".constructor()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L182"}, {"id": "crypto_hardware_key_store_tpmkeyprovider", "label": "TPMKeyProvider", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L197"}, {"id": "crypto_hardware_key_store_tpmkeyprovider_isavailable", "label": ".isAvailable()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L200"}, {"id": "crypto_hardware_key_store_tpmkeyprovider_generatekey", "label": ".generateKey()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L208"}, {"id": "crypto_hardware_key_store_tpmkeyprovider_sign", "label": ".sign()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L214"}, {"id": "crypto_hardware_key_store_tpmkeyprovider_encrypt", "label": ".encrypt()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L220"}, {"id": "crypto_hardware_key_store_tpmkeyprovider_decrypt", "label": ".decrypt()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L226"}, {"id": "crypto_hardware_key_store_tpmkeyprovider_deletekey", "label": ".deleteKey()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L232"}, {"id": "crypto_hardware_key_store_tpmkeyprovider_listkeys", "label": ".listKeys()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L238"}, {"id": "crypto_hardware_key_store_secureenclaveprovider", "label": "SecureEnclaveProvider", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L256"}, {"id": "crypto_hardware_key_store_secureenclaveprovider_isavailable", "label": ".isAvailable()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L259"}, {"id": "crypto_hardware_key_store_secureenclaveprovider_generatekey", "label": ".generateKey()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L267"}, {"id": "crypto_hardware_key_store_secureenclaveprovider_sign", "label": ".sign()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L273"}, {"id": "crypto_hardware_key_store_secureenclaveprovider_encrypt", "label": ".encrypt()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L279"}, {"id": "crypto_hardware_key_store_secureenclaveprovider_decrypt", "label": ".decrypt()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L285"}, {"id": "crypto_hardware_key_store_secureenclaveprovider_deletekey", "label": ".deleteKey()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L291"}, {"id": "crypto_hardware_key_store_secureenclaveprovider_listkeys", "label": ".listKeys()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L297"}, {"id": "crypto_hardware_key_store_pkcs11provider", "label": "PKCS11Provider", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L315"}, {"id": "crypto_hardware_key_store_pkcs11provider_constructor", "label": ".constructor()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L318"}, {"id": "crypto_hardware_key_store_pkcs11provider_isavailable", "label": ".isAvailable()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L320"}, {"id": "crypto_hardware_key_store_pkcs11provider_generatekey", "label": ".generateKey()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L324"}, {"id": "crypto_hardware_key_store_pkcs11provider_sign", "label": ".sign()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L330"}, {"id": "crypto_hardware_key_store_pkcs11provider_encrypt", "label": ".encrypt()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L336"}, {"id": "crypto_hardware_key_store_pkcs11provider_decrypt", "label": ".decrypt()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L342"}, {"id": "crypto_hardware_key_store_pkcs11provider_deletekey", "label": ".deleteKey()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L348"}, {"id": "crypto_hardware_key_store_pkcs11provider_listkeys", "label": ".listKeys()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L354"}, {"id": "crypto_hardware_key_store_createhardwarekeystore", "label": "createHardwareKeyStore()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L369"}, {"id": "crypto_hardware_key_store_inithardwarekeystore", "label": "initHardwareKeyStore()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L410"}], "edges": [{"source": "c_users_alfamas_desktop_zeroauth_src_crypto_hardware_key_store_ts", "target": "crypto", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L12", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_crypto_hardware_key_store_ts", "target": "fs", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L13", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_crypto_hardware_key_store_ts", "target": "c_users_alfamas_desktop_zeroauth_src_logger_index_ts", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L14", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_crypto_hardware_key_store_ts", "target": "logger_index_getlogger", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L14", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_crypto_hardware_key_store_ts", "target": "crypto_hardware_key_store_logger", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L16", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_crypto_hardware_key_store_ts", "target": "crypto_hardware_key_store_hardwarekeyprovider", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L20", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_crypto_hardware_key_store_ts", "target": "crypto_hardware_key_store_softwarekeyprovider", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L72", "weight": 1.0}, {"source": "crypto_hardware_key_store_softwarekeyprovider", "target": "crypto_hardware_key_store_softwarekeyprovider_getmastersecret", "relation": "method", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L78", "weight": 1.0}, {"source": "crypto_hardware_key_store_softwarekeyprovider", "target": "crypto_hardware_key_store_softwarekeyprovider_derivekey", "relation": "method", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L94", "weight": 1.0}, {"source": "crypto_hardware_key_store_softwarekeyprovider", "target": "crypto_hardware_key_store_softwarekeyprovider_isavailable", "relation": "method", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L102", "weight": 1.0}, {"source": "crypto_hardware_key_store_softwarekeyprovider", "target": "crypto_hardware_key_store_softwarekeyprovider_generatekey", "relation": "method", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L106", "weight": 1.0}, {"source": "crypto_hardware_key_store_softwarekeyprovider", "target": "crypto_hardware_key_store_softwarekeyprovider_sign", "relation": "method", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L115", "weight": 1.0}, {"source": "crypto_hardware_key_store_softwarekeyprovider", "target": "crypto_hardware_key_store_softwarekeyprovider_encrypt", "relation": "method", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L127", "weight": 1.0}, {"source": "crypto_hardware_key_store_softwarekeyprovider", "target": "crypto_hardware_key_store_softwarekeyprovider_decrypt", "relation": "method", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L147", "weight": 1.0}, {"source": "crypto_hardware_key_store_softwarekeyprovider", "target": "crypto_hardware_key_store_softwarekeyprovider_deletekey", "relation": "method", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L169", "weight": 1.0}, {"source": "crypto_hardware_key_store_softwarekeyprovider", "target": "crypto_hardware_key_store_softwarekeyprovider_listkeys", "relation": "method", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L174", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_crypto_hardware_key_store_ts", "target": "crypto_hardware_key_store_notimplementederror", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L181", "weight": 1.0}, {"source": "crypto_hardware_key_store_notimplementederror", "target": "crypto_hardware_key_store_notimplementederror_constructor", "relation": "method", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L182", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_crypto_hardware_key_store_ts", "target": "crypto_hardware_key_store_tpmkeyprovider", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L197", "weight": 1.0}, {"source": "crypto_hardware_key_store_tpmkeyprovider", "target": "crypto_hardware_key_store_tpmkeyprovider_isavailable", "relation": "method", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L200", "weight": 1.0}, {"source": "crypto_hardware_key_store_tpmkeyprovider", "target": "crypto_hardware_key_store_tpmkeyprovider_generatekey", "relation": "method", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L208", "weight": 1.0}, {"source": "crypto_hardware_key_store_tpmkeyprovider", "target": "crypto_hardware_key_store_tpmkeyprovider_sign", "relation": "method", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L214", "weight": 1.0}, {"source": "crypto_hardware_key_store_tpmkeyprovider", "target": "crypto_hardware_key_store_tpmkeyprovider_encrypt", "relation": "method", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L220", "weight": 1.0}, {"source": "crypto_hardware_key_store_tpmkeyprovider", "target": "crypto_hardware_key_store_tpmkeyprovider_decrypt", "relation": "method", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L226", "weight": 1.0}, {"source": "crypto_hardware_key_store_tpmkeyprovider", "target": "crypto_hardware_key_store_tpmkeyprovider_deletekey", "relation": "method", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L232", "weight": 1.0}, {"source": "crypto_hardware_key_store_tpmkeyprovider", "target": "crypto_hardware_key_store_tpmkeyprovider_listkeys", "relation": "method", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L238", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_crypto_hardware_key_store_ts", "target": "crypto_hardware_key_store_secureenclaveprovider", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L256", "weight": 1.0}, {"source": "crypto_hardware_key_store_secureenclaveprovider", "target": "crypto_hardware_key_store_secureenclaveprovider_isavailable", "relation": "method", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L259", "weight": 1.0}, {"source": "crypto_hardware_key_store_secureenclaveprovider", "target": "crypto_hardware_key_store_secureenclaveprovider_generatekey", "relation": "method", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L267", "weight": 1.0}, {"source": "crypto_hardware_key_store_secureenclaveprovider", "target": "crypto_hardware_key_store_secureenclaveprovider_sign", "relation": "method", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L273", "weight": 1.0}, {"source": "crypto_hardware_key_store_secureenclaveprovider", "target": "crypto_hardware_key_store_secureenclaveprovider_encrypt", "relation": "method", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L279", "weight": 1.0}, {"source": "crypto_hardware_key_store_secureenclaveprovider", "target": "crypto_hardware_key_store_secureenclaveprovider_decrypt", "relation": "method", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L285", "weight": 1.0}, {"source": "crypto_hardware_key_store_secureenclaveprovider", "target": "crypto_hardware_key_store_secureenclaveprovider_deletekey", "relation": "method", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L291", "weight": 1.0}, {"source": "crypto_hardware_key_store_secureenclaveprovider", "target": "crypto_hardware_key_store_secureenclaveprovider_listkeys", "relation": "method", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L297", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_crypto_hardware_key_store_ts", "target": "crypto_hardware_key_store_pkcs11provider", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L315", "weight": 1.0}, {"source": "crypto_hardware_key_store_pkcs11provider", "target": "crypto_hardware_key_store_pkcs11provider_constructor", "relation": "method", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L318", "weight": 1.0}, {"source": "crypto_hardware_key_store_pkcs11provider", "target": "crypto_hardware_key_store_pkcs11provider_isavailable", "relation": "method", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L320", "weight": 1.0}, {"source": "crypto_hardware_key_store_pkcs11provider", "target": "crypto_hardware_key_store_pkcs11provider_generatekey", "relation": "method", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L324", "weight": 1.0}, {"source": "crypto_hardware_key_store_pkcs11provider", "target": "crypto_hardware_key_store_pkcs11provider_sign", "relation": "method", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L330", "weight": 1.0}, {"source": "crypto_hardware_key_store_pkcs11provider", "target": "crypto_hardware_key_store_pkcs11provider_encrypt", "relation": "method", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L336", "weight": 1.0}, {"source": "crypto_hardware_key_store_pkcs11provider", "target": "crypto_hardware_key_store_pkcs11provider_decrypt", "relation": "method", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L342", "weight": 1.0}, {"source": "crypto_hardware_key_store_pkcs11provider", "target": "crypto_hardware_key_store_pkcs11provider_deletekey", "relation": "method", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L348", "weight": 1.0}, {"source": "crypto_hardware_key_store_pkcs11provider", "target": "crypto_hardware_key_store_pkcs11provider_listkeys", "relation": "method", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L354", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_crypto_hardware_key_store_ts", "target": "crypto_hardware_key_store_createhardwarekeystore", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L369", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_crypto_hardware_key_store_ts", "target": "crypto_hardware_key_store_inithardwarekeystore", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L410", "weight": 1.0}, {"source": "crypto_hardware_key_store_softwarekeyprovider_derivekey", "target": "crypto_hardware_key_store_softwarekeyprovider_getmastersecret", "relation": "calls", "context": "call", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L95", "weight": 1.0}, {"source": "crypto_hardware_key_store_softwarekeyprovider_generatekey", "target": "crypto_hardware_key_store_softwarekeyprovider_derivekey", "relation": "calls", "context": "call", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L110", "weight": 1.0}, {"source": "crypto_hardware_key_store_softwarekeyprovider_encrypt", "target": "crypto_hardware_key_store_pkcs11provider_generatekey", "relation": "calls", "context": "call", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L131", "weight": 1.0}, {"source": "crypto_hardware_key_store_createhardwarekeystore", "target": "crypto_hardware_key_store_pkcs11provider_isavailable", "relation": "calls", "context": "call", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L385", "weight": 1.0}, {"source": "crypto_hardware_key_store_inithardwarekeystore", "target": "crypto_hardware_key_store_createhardwarekeystore", "relation": "calls", "context": "call", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L411", "weight": 1.0}], "raw_calls": [{"caller_nid": "crypto_hardware_key_store_softwarekeyprovider_getmastersecret", "callee": "from", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L81"}, {"caller_nid": "crypto_hardware_key_store_softwarekeyprovider_getmastersecret", "callee": "warn", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L83"}, {"caller_nid": "crypto_hardware_key_store_softwarekeyprovider_getmastersecret", "callee": "alloc", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L87"}, {"caller_nid": "crypto_hardware_key_store_softwarekeyprovider_derivekey", "callee": "from", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L96"}, {"caller_nid": "crypto_hardware_key_store_softwarekeyprovider_derivekey", "callee": "hkdfSync", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L98"}, {"caller_nid": "crypto_hardware_key_store_softwarekeyprovider_derivekey", "callee": "alloc", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L98"}, {"caller_nid": "crypto_hardware_key_store_softwarekeyprovider_derivekey", "callee": "from", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L99"}, {"caller_nid": "crypto_hardware_key_store_softwarekeyprovider_generatekey", "callee": "has", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L107"}, {"caller_nid": "crypto_hardware_key_store_softwarekeyprovider_generatekey", "callee": "set", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L111"}, {"caller_nid": "crypto_hardware_key_store_softwarekeyprovider_generatekey", "callee": "debug", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L112"}, {"caller_nid": "crypto_hardware_key_store_softwarekeyprovider_sign", "callee": "get", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L116"}, {"caller_nid": "crypto_hardware_key_store_softwarekeyprovider_sign", "callee": "digest", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L120"}, {"caller_nid": "crypto_hardware_key_store_softwarekeyprovider_sign", "callee": "update", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L120"}, {"caller_nid": "crypto_hardware_key_store_softwarekeyprovider_sign", "callee": "createHmac", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L120"}, {"caller_nid": "crypto_hardware_key_store_softwarekeyprovider_encrypt", "callee": "get", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L128"}, {"caller_nid": "crypto_hardware_key_store_softwarekeyprovider_encrypt", "callee": "get", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L132"}, {"caller_nid": "crypto_hardware_key_store_softwarekeyprovider_encrypt", "callee": "randomBytes", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L135"}, {"caller_nid": "crypto_hardware_key_store_softwarekeyprovider_encrypt", "callee": "createCipheriv", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L136"}, {"caller_nid": "crypto_hardware_key_store_softwarekeyprovider_encrypt", "callee": "setAAD", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L138"}, {"caller_nid": "crypto_hardware_key_store_softwarekeyprovider_encrypt", "callee": "concat", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L140"}, {"caller_nid": "crypto_hardware_key_store_softwarekeyprovider_encrypt", "callee": "update", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L140"}, {"caller_nid": "crypto_hardware_key_store_softwarekeyprovider_encrypt", "callee": "final", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L140"}, {"caller_nid": "crypto_hardware_key_store_softwarekeyprovider_encrypt", "callee": "getAuthTag", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L141"}, {"caller_nid": "crypto_hardware_key_store_softwarekeyprovider_encrypt", "callee": "concat", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L144"}, {"caller_nid": "crypto_hardware_key_store_softwarekeyprovider_decrypt", "callee": "get", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L148"}, {"caller_nid": "crypto_hardware_key_store_softwarekeyprovider_decrypt", "callee": "subarray", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L156"}, {"caller_nid": "crypto_hardware_key_store_softwarekeyprovider_decrypt", "callee": "subarray", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L157"}, {"caller_nid": "crypto_hardware_key_store_softwarekeyprovider_decrypt", "callee": "subarray", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L158"}, {"caller_nid": "crypto_hardware_key_store_softwarekeyprovider_decrypt", "callee": "createDecipheriv", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L160"}, {"caller_nid": "crypto_hardware_key_store_softwarekeyprovider_decrypt", "callee": "setAuthTag", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L161"}, {"caller_nid": "crypto_hardware_key_store_softwarekeyprovider_decrypt", "callee": "setAAD", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L163"}, {"caller_nid": "crypto_hardware_key_store_softwarekeyprovider_decrypt", "callee": "concat", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L166"}, {"caller_nid": "crypto_hardware_key_store_softwarekeyprovider_decrypt", "callee": "update", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L166"}, {"caller_nid": "crypto_hardware_key_store_softwarekeyprovider_decrypt", "callee": "final", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L166"}, {"caller_nid": "crypto_hardware_key_store_softwarekeyprovider_deletekey", "callee": "delete", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L170"}, {"caller_nid": "crypto_hardware_key_store_softwarekeyprovider_deletekey", "callee": "debug", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L171"}, {"caller_nid": "crypto_hardware_key_store_softwarekeyprovider_listkeys", "callee": "from", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L175"}, {"caller_nid": "crypto_hardware_key_store_softwarekeyprovider_listkeys", "callee": "keys", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L175"}, {"caller_nid": "crypto_hardware_key_store_notimplementederror_constructor", "callee": "super", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L183"}, {"caller_nid": "crypto_hardware_key_store_tpmkeyprovider_isavailable", "callee": "existsSync", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L202"}, {"caller_nid": "crypto_hardware_key_store_tpmkeyprovider_isavailable", "callee": "existsSync", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L202"}, {"caller_nid": "crypto_hardware_key_store_pkcs11provider_isavailable", "callee": "existsSync", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L321"}, {"caller_nid": "crypto_hardware_key_store_createhardwarekeystore", "callee": "push", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L378"}, {"caller_nid": "crypto_hardware_key_store_createhardwarekeystore", "callee": "push", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L381"}, {"caller_nid": "crypto_hardware_key_store_createhardwarekeystore", "callee": "info", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L387"}, {"caller_nid": "crypto_hardware_key_store_createhardwarekeystore", "callee": "warn", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\crypto\\hardware-key-store.ts", "source_location": "L397"}]}
+{
+    "nodes": [
+        {
+            "id": "c_users_alfamas_desktop_zerotrust_src_crypto_hardware_key_store_ts",
+            "label": "hardware-key-store.ts",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L1"
+        },
+        {
+            "id": "crypto_hardware_key_store_logger",
+            "label": "logger",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L16"
+        },
+        {
+            "id": "crypto_hardware_key_store_hardwarekeyprovider",
+            "label": "HardwareKeyProvider",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L20"
+        },
+        {
+            "id": "crypto_hardware_key_store_softwarekeyprovider",
+            "label": "SoftwareKeyProvider",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L72"
+        },
+        {
+            "id": "crypto_hardware_key_store_softwarekeyprovider_getmastersecret",
+            "label": ".getMasterSecret()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L78"
+        },
+        {
+            "id": "crypto_hardware_key_store_softwarekeyprovider_derivekey",
+            "label": ".deriveKey()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L94"
+        },
+        {
+            "id": "crypto_hardware_key_store_softwarekeyprovider_isavailable",
+            "label": ".isAvailable()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L102"
+        },
+        {
+            "id": "crypto_hardware_key_store_softwarekeyprovider_generatekey",
+            "label": ".generateKey()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L106"
+        },
+        {
+            "id": "crypto_hardware_key_store_softwarekeyprovider_sign",
+            "label": ".sign()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L115"
+        },
+        {
+            "id": "crypto_hardware_key_store_softwarekeyprovider_encrypt",
+            "label": ".encrypt()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L127"
+        },
+        {
+            "id": "crypto_hardware_key_store_softwarekeyprovider_decrypt",
+            "label": ".decrypt()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L147"
+        },
+        {
+            "id": "crypto_hardware_key_store_softwarekeyprovider_deletekey",
+            "label": ".deleteKey()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L169"
+        },
+        {
+            "id": "crypto_hardware_key_store_softwarekeyprovider_listkeys",
+            "label": ".listKeys()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L174"
+        },
+        {
+            "id": "crypto_hardware_key_store_notimplementederror",
+            "label": "NotImplementedError",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L181"
+        },
+        {
+            "id": "crypto_hardware_key_store_notimplementederror_constructor",
+            "label": ".constructor()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L182"
+        },
+        {
+            "id": "crypto_hardware_key_store_tpmkeyprovider",
+            "label": "TPMKeyProvider",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L197"
+        },
+        {
+            "id": "crypto_hardware_key_store_tpmkeyprovider_isavailable",
+            "label": ".isAvailable()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L200"
+        },
+        {
+            "id": "crypto_hardware_key_store_tpmkeyprovider_generatekey",
+            "label": ".generateKey()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L208"
+        },
+        {
+            "id": "crypto_hardware_key_store_tpmkeyprovider_sign",
+            "label": ".sign()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L214"
+        },
+        {
+            "id": "crypto_hardware_key_store_tpmkeyprovider_encrypt",
+            "label": ".encrypt()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L220"
+        },
+        {
+            "id": "crypto_hardware_key_store_tpmkeyprovider_decrypt",
+            "label": ".decrypt()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L226"
+        },
+        {
+            "id": "crypto_hardware_key_store_tpmkeyprovider_deletekey",
+            "label": ".deleteKey()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L232"
+        },
+        {
+            "id": "crypto_hardware_key_store_tpmkeyprovider_listkeys",
+            "label": ".listKeys()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L238"
+        },
+        {
+            "id": "crypto_hardware_key_store_secureenclaveprovider",
+            "label": "SecureEnclaveProvider",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L256"
+        },
+        {
+            "id": "crypto_hardware_key_store_secureenclaveprovider_isavailable",
+            "label": ".isAvailable()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L259"
+        },
+        {
+            "id": "crypto_hardware_key_store_secureenclaveprovider_generatekey",
+            "label": ".generateKey()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L267"
+        },
+        {
+            "id": "crypto_hardware_key_store_secureenclaveprovider_sign",
+            "label": ".sign()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L273"
+        },
+        {
+            "id": "crypto_hardware_key_store_secureenclaveprovider_encrypt",
+            "label": ".encrypt()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L279"
+        },
+        {
+            "id": "crypto_hardware_key_store_secureenclaveprovider_decrypt",
+            "label": ".decrypt()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L285"
+        },
+        {
+            "id": "crypto_hardware_key_store_secureenclaveprovider_deletekey",
+            "label": ".deleteKey()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L291"
+        },
+        {
+            "id": "crypto_hardware_key_store_secureenclaveprovider_listkeys",
+            "label": ".listKeys()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L297"
+        },
+        {
+            "id": "crypto_hardware_key_store_pkcs11provider",
+            "label": "PKCS11Provider",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L315"
+        },
+        {
+            "id": "crypto_hardware_key_store_pkcs11provider_constructor",
+            "label": ".constructor()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L318"
+        },
+        {
+            "id": "crypto_hardware_key_store_pkcs11provider_isavailable",
+            "label": ".isAvailable()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L320"
+        },
+        {
+            "id": "crypto_hardware_key_store_pkcs11provider_generatekey",
+            "label": ".generateKey()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L324"
+        },
+        {
+            "id": "crypto_hardware_key_store_pkcs11provider_sign",
+            "label": ".sign()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L330"
+        },
+        {
+            "id": "crypto_hardware_key_store_pkcs11provider_encrypt",
+            "label": ".encrypt()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L336"
+        },
+        {
+            "id": "crypto_hardware_key_store_pkcs11provider_decrypt",
+            "label": ".decrypt()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L342"
+        },
+        {
+            "id": "crypto_hardware_key_store_pkcs11provider_deletekey",
+            "label": ".deleteKey()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L348"
+        },
+        {
+            "id": "crypto_hardware_key_store_pkcs11provider_listkeys",
+            "label": ".listKeys()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L354"
+        },
+        {
+            "id": "crypto_hardware_key_store_createhardwarekeystore",
+            "label": "createHardwareKeyStore()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L369"
+        },
+        {
+            "id": "crypto_hardware_key_store_inithardwarekeystore",
+            "label": "initHardwareKeyStore()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L410"
+        }
+    ],
+    "edges": [
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_crypto_hardware_key_store_ts",
+            "target": "crypto",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L12",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_crypto_hardware_key_store_ts",
+            "target": "fs",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L13",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_crypto_hardware_key_store_ts",
+            "target": "c_users_alfamas_desktop_zerotrust_src_logger_index_ts",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L14",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_crypto_hardware_key_store_ts",
+            "target": "logger_index_getlogger",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L14",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_crypto_hardware_key_store_ts",
+            "target": "crypto_hardware_key_store_logger",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L16",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_crypto_hardware_key_store_ts",
+            "target": "crypto_hardware_key_store_hardwarekeyprovider",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L20",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_crypto_hardware_key_store_ts",
+            "target": "crypto_hardware_key_store_softwarekeyprovider",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L72",
+            "weight": 1.0
+        },
+        {
+            "source": "crypto_hardware_key_store_softwarekeyprovider",
+            "target": "crypto_hardware_key_store_softwarekeyprovider_getmastersecret",
+            "relation": "method",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L78",
+            "weight": 1.0
+        },
+        {
+            "source": "crypto_hardware_key_store_softwarekeyprovider",
+            "target": "crypto_hardware_key_store_softwarekeyprovider_derivekey",
+            "relation": "method",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L94",
+            "weight": 1.0
+        },
+        {
+            "source": "crypto_hardware_key_store_softwarekeyprovider",
+            "target": "crypto_hardware_key_store_softwarekeyprovider_isavailable",
+            "relation": "method",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L102",
+            "weight": 1.0
+        },
+        {
+            "source": "crypto_hardware_key_store_softwarekeyprovider",
+            "target": "crypto_hardware_key_store_softwarekeyprovider_generatekey",
+            "relation": "method",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L106",
+            "weight": 1.0
+        },
+        {
+            "source": "crypto_hardware_key_store_softwarekeyprovider",
+            "target": "crypto_hardware_key_store_softwarekeyprovider_sign",
+            "relation": "method",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L115",
+            "weight": 1.0
+        },
+        {
+            "source": "crypto_hardware_key_store_softwarekeyprovider",
+            "target": "crypto_hardware_key_store_softwarekeyprovider_encrypt",
+            "relation": "method",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L127",
+            "weight": 1.0
+        },
+        {
+            "source": "crypto_hardware_key_store_softwarekeyprovider",
+            "target": "crypto_hardware_key_store_softwarekeyprovider_decrypt",
+            "relation": "method",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L147",
+            "weight": 1.0
+        },
+        {
+            "source": "crypto_hardware_key_store_softwarekeyprovider",
+            "target": "crypto_hardware_key_store_softwarekeyprovider_deletekey",
+            "relation": "method",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L169",
+            "weight": 1.0
+        },
+        {
+            "source": "crypto_hardware_key_store_softwarekeyprovider",
+            "target": "crypto_hardware_key_store_softwarekeyprovider_listkeys",
+            "relation": "method",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L174",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_crypto_hardware_key_store_ts",
+            "target": "crypto_hardware_key_store_notimplementederror",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L181",
+            "weight": 1.0
+        },
+        {
+            "source": "crypto_hardware_key_store_notimplementederror",
+            "target": "crypto_hardware_key_store_notimplementederror_constructor",
+            "relation": "method",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L182",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_crypto_hardware_key_store_ts",
+            "target": "crypto_hardware_key_store_tpmkeyprovider",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L197",
+            "weight": 1.0
+        },
+        {
+            "source": "crypto_hardware_key_store_tpmkeyprovider",
+            "target": "crypto_hardware_key_store_tpmkeyprovider_isavailable",
+            "relation": "method",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L200",
+            "weight": 1.0
+        },
+        {
+            "source": "crypto_hardware_key_store_tpmkeyprovider",
+            "target": "crypto_hardware_key_store_tpmkeyprovider_generatekey",
+            "relation": "method",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L208",
+            "weight": 1.0
+        },
+        {
+            "source": "crypto_hardware_key_store_tpmkeyprovider",
+            "target": "crypto_hardware_key_store_tpmkeyprovider_sign",
+            "relation": "method",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L214",
+            "weight": 1.0
+        },
+        {
+            "source": "crypto_hardware_key_store_tpmkeyprovider",
+            "target": "crypto_hardware_key_store_tpmkeyprovider_encrypt",
+            "relation": "method",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L220",
+            "weight": 1.0
+        },
+        {
+            "source": "crypto_hardware_key_store_tpmkeyprovider",
+            "target": "crypto_hardware_key_store_tpmkeyprovider_decrypt",
+            "relation": "method",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L226",
+            "weight": 1.0
+        },
+        {
+            "source": "crypto_hardware_key_store_tpmkeyprovider",
+            "target": "crypto_hardware_key_store_tpmkeyprovider_deletekey",
+            "relation": "method",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L232",
+            "weight": 1.0
+        },
+        {
+            "source": "crypto_hardware_key_store_tpmkeyprovider",
+            "target": "crypto_hardware_key_store_tpmkeyprovider_listkeys",
+            "relation": "method",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L238",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_crypto_hardware_key_store_ts",
+            "target": "crypto_hardware_key_store_secureenclaveprovider",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L256",
+            "weight": 1.0
+        },
+        {
+            "source": "crypto_hardware_key_store_secureenclaveprovider",
+            "target": "crypto_hardware_key_store_secureenclaveprovider_isavailable",
+            "relation": "method",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L259",
+            "weight": 1.0
+        },
+        {
+            "source": "crypto_hardware_key_store_secureenclaveprovider",
+            "target": "crypto_hardware_key_store_secureenclaveprovider_generatekey",
+            "relation": "method",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L267",
+            "weight": 1.0
+        },
+        {
+            "source": "crypto_hardware_key_store_secureenclaveprovider",
+            "target": "crypto_hardware_key_store_secureenclaveprovider_sign",
+            "relation": "method",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L273",
+            "weight": 1.0
+        },
+        {
+            "source": "crypto_hardware_key_store_secureenclaveprovider",
+            "target": "crypto_hardware_key_store_secureenclaveprovider_encrypt",
+            "relation": "method",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L279",
+            "weight": 1.0
+        },
+        {
+            "source": "crypto_hardware_key_store_secureenclaveprovider",
+            "target": "crypto_hardware_key_store_secureenclaveprovider_decrypt",
+            "relation": "method",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L285",
+            "weight": 1.0
+        },
+        {
+            "source": "crypto_hardware_key_store_secureenclaveprovider",
+            "target": "crypto_hardware_key_store_secureenclaveprovider_deletekey",
+            "relation": "method",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L291",
+            "weight": 1.0
+        },
+        {
+            "source": "crypto_hardware_key_store_secureenclaveprovider",
+            "target": "crypto_hardware_key_store_secureenclaveprovider_listkeys",
+            "relation": "method",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L297",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_crypto_hardware_key_store_ts",
+            "target": "crypto_hardware_key_store_pkcs11provider",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L315",
+            "weight": 1.0
+        },
+        {
+            "source": "crypto_hardware_key_store_pkcs11provider",
+            "target": "crypto_hardware_key_store_pkcs11provider_constructor",
+            "relation": "method",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L318",
+            "weight": 1.0
+        },
+        {
+            "source": "crypto_hardware_key_store_pkcs11provider",
+            "target": "crypto_hardware_key_store_pkcs11provider_isavailable",
+            "relation": "method",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L320",
+            "weight": 1.0
+        },
+        {
+            "source": "crypto_hardware_key_store_pkcs11provider",
+            "target": "crypto_hardware_key_store_pkcs11provider_generatekey",
+            "relation": "method",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L324",
+            "weight": 1.0
+        },
+        {
+            "source": "crypto_hardware_key_store_pkcs11provider",
+            "target": "crypto_hardware_key_store_pkcs11provider_sign",
+            "relation": "method",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L330",
+            "weight": 1.0
+        },
+        {
+            "source": "crypto_hardware_key_store_pkcs11provider",
+            "target": "crypto_hardware_key_store_pkcs11provider_encrypt",
+            "relation": "method",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L336",
+            "weight": 1.0
+        },
+        {
+            "source": "crypto_hardware_key_store_pkcs11provider",
+            "target": "crypto_hardware_key_store_pkcs11provider_decrypt",
+            "relation": "method",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L342",
+            "weight": 1.0
+        },
+        {
+            "source": "crypto_hardware_key_store_pkcs11provider",
+            "target": "crypto_hardware_key_store_pkcs11provider_deletekey",
+            "relation": "method",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L348",
+            "weight": 1.0
+        },
+        {
+            "source": "crypto_hardware_key_store_pkcs11provider",
+            "target": "crypto_hardware_key_store_pkcs11provider_listkeys",
+            "relation": "method",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L354",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_crypto_hardware_key_store_ts",
+            "target": "crypto_hardware_key_store_createhardwarekeystore",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L369",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_crypto_hardware_key_store_ts",
+            "target": "crypto_hardware_key_store_inithardwarekeystore",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L410",
+            "weight": 1.0
+        },
+        {
+            "source": "crypto_hardware_key_store_softwarekeyprovider_derivekey",
+            "target": "crypto_hardware_key_store_softwarekeyprovider_getmastersecret",
+            "relation": "calls",
+            "context": "call",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L95",
+            "weight": 1.0
+        },
+        {
+            "source": "crypto_hardware_key_store_softwarekeyprovider_generatekey",
+            "target": "crypto_hardware_key_store_softwarekeyprovider_derivekey",
+            "relation": "calls",
+            "context": "call",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L110",
+            "weight": 1.0
+        },
+        {
+            "source": "crypto_hardware_key_store_softwarekeyprovider_encrypt",
+            "target": "crypto_hardware_key_store_pkcs11provider_generatekey",
+            "relation": "calls",
+            "context": "call",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L131",
+            "weight": 1.0
+        },
+        {
+            "source": "crypto_hardware_key_store_createhardwarekeystore",
+            "target": "crypto_hardware_key_store_pkcs11provider_isavailable",
+            "relation": "calls",
+            "context": "call",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L385",
+            "weight": 1.0
+        },
+        {
+            "source": "crypto_hardware_key_store_inithardwarekeystore",
+            "target": "crypto_hardware_key_store_createhardwarekeystore",
+            "relation": "calls",
+            "context": "call",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L411",
+            "weight": 1.0
+        }
+    ],
+    "raw_calls": [
+        {
+            "caller_nid": "crypto_hardware_key_store_softwarekeyprovider_getmastersecret",
+            "callee": "from",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L81"
+        },
+        {
+            "caller_nid": "crypto_hardware_key_store_softwarekeyprovider_getmastersecret",
+            "callee": "warn",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L83"
+        },
+        {
+            "caller_nid": "crypto_hardware_key_store_softwarekeyprovider_getmastersecret",
+            "callee": "alloc",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L87"
+        },
+        {
+            "caller_nid": "crypto_hardware_key_store_softwarekeyprovider_derivekey",
+            "callee": "from",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L96"
+        },
+        {
+            "caller_nid": "crypto_hardware_key_store_softwarekeyprovider_derivekey",
+            "callee": "hkdfSync",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L98"
+        },
+        {
+            "caller_nid": "crypto_hardware_key_store_softwarekeyprovider_derivekey",
+            "callee": "alloc",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L98"
+        },
+        {
+            "caller_nid": "crypto_hardware_key_store_softwarekeyprovider_derivekey",
+            "callee": "from",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L99"
+        },
+        {
+            "caller_nid": "crypto_hardware_key_store_softwarekeyprovider_generatekey",
+            "callee": "has",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L107"
+        },
+        {
+            "caller_nid": "crypto_hardware_key_store_softwarekeyprovider_generatekey",
+            "callee": "set",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L111"
+        },
+        {
+            "caller_nid": "crypto_hardware_key_store_softwarekeyprovider_generatekey",
+            "callee": "debug",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L112"
+        },
+        {
+            "caller_nid": "crypto_hardware_key_store_softwarekeyprovider_sign",
+            "callee": "get",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L116"
+        },
+        {
+            "caller_nid": "crypto_hardware_key_store_softwarekeyprovider_sign",
+            "callee": "digest",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L120"
+        },
+        {
+            "caller_nid": "crypto_hardware_key_store_softwarekeyprovider_sign",
+            "callee": "update",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L120"
+        },
+        {
+            "caller_nid": "crypto_hardware_key_store_softwarekeyprovider_sign",
+            "callee": "createHmac",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L120"
+        },
+        {
+            "caller_nid": "crypto_hardware_key_store_softwarekeyprovider_encrypt",
+            "callee": "get",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L128"
+        },
+        {
+            "caller_nid": "crypto_hardware_key_store_softwarekeyprovider_encrypt",
+            "callee": "get",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L132"
+        },
+        {
+            "caller_nid": "crypto_hardware_key_store_softwarekeyprovider_encrypt",
+            "callee": "randomBytes",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L135"
+        },
+        {
+            "caller_nid": "crypto_hardware_key_store_softwarekeyprovider_encrypt",
+            "callee": "createCipheriv",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L136"
+        },
+        {
+            "caller_nid": "crypto_hardware_key_store_softwarekeyprovider_encrypt",
+            "callee": "setAAD",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L138"
+        },
+        {
+            "caller_nid": "crypto_hardware_key_store_softwarekeyprovider_encrypt",
+            "callee": "concat",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L140"
+        },
+        {
+            "caller_nid": "crypto_hardware_key_store_softwarekeyprovider_encrypt",
+            "callee": "update",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L140"
+        },
+        {
+            "caller_nid": "crypto_hardware_key_store_softwarekeyprovider_encrypt",
+            "callee": "final",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L140"
+        },
+        {
+            "caller_nid": "crypto_hardware_key_store_softwarekeyprovider_encrypt",
+            "callee": "getAuthTag",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L141"
+        },
+        {
+            "caller_nid": "crypto_hardware_key_store_softwarekeyprovider_encrypt",
+            "callee": "concat",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L144"
+        },
+        {
+            "caller_nid": "crypto_hardware_key_store_softwarekeyprovider_decrypt",
+            "callee": "get",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L148"
+        },
+        {
+            "caller_nid": "crypto_hardware_key_store_softwarekeyprovider_decrypt",
+            "callee": "subarray",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L156"
+        },
+        {
+            "caller_nid": "crypto_hardware_key_store_softwarekeyprovider_decrypt",
+            "callee": "subarray",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L157"
+        },
+        {
+            "caller_nid": "crypto_hardware_key_store_softwarekeyprovider_decrypt",
+            "callee": "subarray",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L158"
+        },
+        {
+            "caller_nid": "crypto_hardware_key_store_softwarekeyprovider_decrypt",
+            "callee": "createDecipheriv",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L160"
+        },
+        {
+            "caller_nid": "crypto_hardware_key_store_softwarekeyprovider_decrypt",
+            "callee": "setAuthTag",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L161"
+        },
+        {
+            "caller_nid": "crypto_hardware_key_store_softwarekeyprovider_decrypt",
+            "callee": "setAAD",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L163"
+        },
+        {
+            "caller_nid": "crypto_hardware_key_store_softwarekeyprovider_decrypt",
+            "callee": "concat",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L166"
+        },
+        {
+            "caller_nid": "crypto_hardware_key_store_softwarekeyprovider_decrypt",
+            "callee": "update",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L166"
+        },
+        {
+            "caller_nid": "crypto_hardware_key_store_softwarekeyprovider_decrypt",
+            "callee": "final",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L166"
+        },
+        {
+            "caller_nid": "crypto_hardware_key_store_softwarekeyprovider_deletekey",
+            "callee": "delete",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L170"
+        },
+        {
+            "caller_nid": "crypto_hardware_key_store_softwarekeyprovider_deletekey",
+            "callee": "debug",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L171"
+        },
+        {
+            "caller_nid": "crypto_hardware_key_store_softwarekeyprovider_listkeys",
+            "callee": "from",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L175"
+        },
+        {
+            "caller_nid": "crypto_hardware_key_store_softwarekeyprovider_listkeys",
+            "callee": "keys",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L175"
+        },
+        {
+            "caller_nid": "crypto_hardware_key_store_notimplementederror_constructor",
+            "callee": "super",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L183"
+        },
+        {
+            "caller_nid": "crypto_hardware_key_store_tpmkeyprovider_isavailable",
+            "callee": "existsSync",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L202"
+        },
+        {
+            "caller_nid": "crypto_hardware_key_store_tpmkeyprovider_isavailable",
+            "callee": "existsSync",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L202"
+        },
+        {
+            "caller_nid": "crypto_hardware_key_store_pkcs11provider_isavailable",
+            "callee": "existsSync",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L321"
+        },
+        {
+            "caller_nid": "crypto_hardware_key_store_createhardwarekeystore",
+            "callee": "push",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L378"
+        },
+        {
+            "caller_nid": "crypto_hardware_key_store_createhardwarekeystore",
+            "callee": "push",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L381"
+        },
+        {
+            "caller_nid": "crypto_hardware_key_store_createhardwarekeystore",
+            "callee": "info",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L387"
+        },
+        {
+            "caller_nid": "crypto_hardware_key_store_createhardwarekeystore",
+            "callee": "warn",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\crypto\\hardware-key-store.ts",
+            "source_location": "L397"
+        }
+    ]
+}

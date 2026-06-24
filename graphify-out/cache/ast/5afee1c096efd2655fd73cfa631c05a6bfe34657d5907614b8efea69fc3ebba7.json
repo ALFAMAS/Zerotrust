@@ -1,1 +1,422 @@
-{"nodes": [{"id": "c_users_alfamas_desktop_zeroauth_src_shared_types_ts", "label": "types.ts", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\shared\\types.ts", "source_location": "L1"}, {"id": "shared_types_zeroauthconfig", "label": "ZeroAuthConfig", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\shared\\types.ts", "source_location": "L3"}, {"id": "shared_types_tokenpayload", "label": "TokenPayload", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\shared\\types.ts", "source_location": "L64"}, {"id": "shared_types_accesstokenresponse", "label": "AccessTokenResponse", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\shared\\types.ts", "source_location": "L77"}, {"id": "shared_types_user", "label": "User", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\shared\\types.ts", "source_location": "L86"}, {"id": "shared_types_passkey", "label": "Passkey", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\shared\\types.ts", "source_location": "L137"}, {"id": "shared_types_oauthprovider", "label": "OAuthProvider", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\shared\\types.ts", "source_location": "L152"}, {"id": "shared_types_session", "label": "Session", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\shared\\types.ts", "source_location": "L161"}, {"id": "shared_types_devicefingerprint", "label": "DeviceFingerprint", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\shared\\types.ts", "source_location": "L189"}, {"id": "shared_types_role", "label": "Role", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\shared\\types.ts", "source_location": "L204"}, {"id": "shared_types_permission", "label": "Permission", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\shared\\types.ts", "source_location": "L216"}, {"id": "shared_types_abaccondition", "label": "ABACCondition", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\shared\\types.ts", "source_location": "L222"}, {"id": "shared_types_authzcontext", "label": "AuthzContext", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\shared\\types.ts", "source_location": "L228"}, {"id": "shared_types_authzresult", "label": "AuthzResult", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\shared\\types.ts", "source_location": "L243"}, {"id": "shared_types_jitaccessrequest", "label": "JITAccessRequest", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\shared\\types.ts", "source_location": "L254"}, {"id": "shared_types_auditlog", "label": "AuditLog", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\shared\\types.ts", "source_location": "L272"}, {"id": "shared_types_refreshtokenrecord", "label": "RefreshTokenRecord", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\shared\\types.ts", "source_location": "L296"}, {"id": "shared_types_otp", "label": "OTP", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\shared\\types.ts", "source_location": "L308"}, {"id": "shared_types_workloadcredential", "label": "WorkloadCredential", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\shared\\types.ts", "source_location": "L322"}, {"id": "shared_types_oauthauthorizationrequest", "label": "OAuthAuthorizationRequest", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\shared\\types.ts", "source_location": "L339"}, {"id": "shared_types_oauthtokenresponse", "label": "OAuthTokenResponse", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\shared\\types.ts", "source_location": "L346"}, {"id": "shared_types_mfachallengeresponse", "label": "MFAChallengeResponse", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\shared\\types.ts", "source_location": "L354"}, {"id": "shared_types_honoenv", "label": "HonoEnv", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\shared\\types.ts", "source_location": "L362"}, {"id": "shared_types_zeroautherror", "label": "ZeroAuthError", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\shared\\types.ts", "source_location": "L377"}, {"id": "shared_types_zeroautherror_constructor", "label": ".constructor()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\shared\\types.ts", "source_location": "L378"}, {"id": "shared_types_errorcodes", "label": "ErrorCodes", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\shared\\types.ts", "source_location": "L389"}], "edges": [{"source": "c_users_alfamas_desktop_zeroauth_src_shared_types_ts", "target": "shared_types_zeroauthconfig", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\shared\\types.ts", "source_location": "L3", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_shared_types_ts", "target": "shared_types_tokenpayload", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\shared\\types.ts", "source_location": "L64", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_shared_types_ts", "target": "shared_types_accesstokenresponse", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\shared\\types.ts", "source_location": "L77", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_shared_types_ts", "target": "shared_types_user", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\shared\\types.ts", "source_location": "L86", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_shared_types_ts", "target": "shared_types_passkey", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\shared\\types.ts", "source_location": "L137", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_shared_types_ts", "target": "shared_types_oauthprovider", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\shared\\types.ts", "source_location": "L152", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_shared_types_ts", "target": "shared_types_session", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\shared\\types.ts", "source_location": "L161", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_shared_types_ts", "target": "shared_types_devicefingerprint", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\shared\\types.ts", "source_location": "L189", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_shared_types_ts", "target": "shared_types_role", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\shared\\types.ts", "source_location": "L204", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_shared_types_ts", "target": "shared_types_permission", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\shared\\types.ts", "source_location": "L216", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_shared_types_ts", "target": "shared_types_abaccondition", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\shared\\types.ts", "source_location": "L222", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_shared_types_ts", "target": "shared_types_authzcontext", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\shared\\types.ts", "source_location": "L228", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_shared_types_ts", "target": "shared_types_authzresult", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\shared\\types.ts", "source_location": "L243", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_shared_types_ts", "target": "shared_types_jitaccessrequest", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\shared\\types.ts", "source_location": "L254", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_shared_types_ts", "target": "shared_types_auditlog", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\shared\\types.ts", "source_location": "L272", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_shared_types_ts", "target": "shared_types_refreshtokenrecord", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\shared\\types.ts", "source_location": "L296", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_shared_types_ts", "target": "shared_types_otp", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\shared\\types.ts", "source_location": "L308", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_shared_types_ts", "target": "shared_types_workloadcredential", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\shared\\types.ts", "source_location": "L322", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_shared_types_ts", "target": "shared_types_oauthauthorizationrequest", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\shared\\types.ts", "source_location": "L339", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_shared_types_ts", "target": "shared_types_oauthtokenresponse", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\shared\\types.ts", "source_location": "L346", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_shared_types_ts", "target": "shared_types_mfachallengeresponse", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\shared\\types.ts", "source_location": "L354", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_shared_types_ts", "target": "shared_types_honoenv", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\shared\\types.ts", "source_location": "L362", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_shared_types_ts", "target": "shared_types_zeroautherror", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\shared\\types.ts", "source_location": "L377", "weight": 1.0}, {"source": "shared_types_zeroautherror", "target": "shared_types_zeroautherror_constructor", "relation": "method", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\shared\\types.ts", "source_location": "L378", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_shared_types_ts", "target": "shared_types_errorcodes", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\shared\\types.ts", "source_location": "L389", "weight": 1.0}], "raw_calls": [{"caller_nid": "shared_types_zeroautherror_constructor", "callee": "super", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\shared\\types.ts", "source_location": "L384"}]}
+{
+    "nodes": [
+        {
+            "id": "c_users_alfamas_desktop_zerotrust_src_shared_types_ts",
+            "label": "types.ts",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\shared\\types.ts",
+            "source_location": "L1"
+        },
+        {
+            "id": "shared_types_zerotrustconfig",
+            "label": "zerotrustConfig",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\shared\\types.ts",
+            "source_location": "L3"
+        },
+        {
+            "id": "shared_types_tokenpayload",
+            "label": "TokenPayload",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\shared\\types.ts",
+            "source_location": "L64"
+        },
+        {
+            "id": "shared_types_accesstokenresponse",
+            "label": "AccessTokenResponse",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\shared\\types.ts",
+            "source_location": "L77"
+        },
+        {
+            "id": "shared_types_user",
+            "label": "User",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\shared\\types.ts",
+            "source_location": "L86"
+        },
+        {
+            "id": "shared_types_passkey",
+            "label": "Passkey",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\shared\\types.ts",
+            "source_location": "L137"
+        },
+        {
+            "id": "shared_types_oauthprovider",
+            "label": "OAuthProvider",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\shared\\types.ts",
+            "source_location": "L152"
+        },
+        {
+            "id": "shared_types_session",
+            "label": "Session",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\shared\\types.ts",
+            "source_location": "L161"
+        },
+        {
+            "id": "shared_types_devicefingerprint",
+            "label": "DeviceFingerprint",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\shared\\types.ts",
+            "source_location": "L189"
+        },
+        {
+            "id": "shared_types_role",
+            "label": "Role",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\shared\\types.ts",
+            "source_location": "L204"
+        },
+        {
+            "id": "shared_types_permission",
+            "label": "Permission",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\shared\\types.ts",
+            "source_location": "L216"
+        },
+        {
+            "id": "shared_types_abaccondition",
+            "label": "ABACCondition",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\shared\\types.ts",
+            "source_location": "L222"
+        },
+        {
+            "id": "shared_types_authzcontext",
+            "label": "AuthzContext",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\shared\\types.ts",
+            "source_location": "L228"
+        },
+        {
+            "id": "shared_types_authzresult",
+            "label": "AuthzResult",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\shared\\types.ts",
+            "source_location": "L243"
+        },
+        {
+            "id": "shared_types_jitaccessrequest",
+            "label": "JITAccessRequest",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\shared\\types.ts",
+            "source_location": "L254"
+        },
+        {
+            "id": "shared_types_auditlog",
+            "label": "AuditLog",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\shared\\types.ts",
+            "source_location": "L272"
+        },
+        {
+            "id": "shared_types_refreshtokenrecord",
+            "label": "RefreshTokenRecord",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\shared\\types.ts",
+            "source_location": "L296"
+        },
+        {
+            "id": "shared_types_otp",
+            "label": "OTP",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\shared\\types.ts",
+            "source_location": "L308"
+        },
+        {
+            "id": "shared_types_workloadcredential",
+            "label": "WorkloadCredential",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\shared\\types.ts",
+            "source_location": "L322"
+        },
+        {
+            "id": "shared_types_oauthauthorizationrequest",
+            "label": "OAuthAuthorizationRequest",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\shared\\types.ts",
+            "source_location": "L339"
+        },
+        {
+            "id": "shared_types_oauthtokenresponse",
+            "label": "OAuthTokenResponse",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\shared\\types.ts",
+            "source_location": "L346"
+        },
+        {
+            "id": "shared_types_mfachallengeresponse",
+            "label": "MFAChallengeResponse",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\shared\\types.ts",
+            "source_location": "L354"
+        },
+        {
+            "id": "shared_types_honoenv",
+            "label": "HonoEnv",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\shared\\types.ts",
+            "source_location": "L362"
+        },
+        {
+            "id": "shared_types_zerotrusterror",
+            "label": "zerotrustError",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\shared\\types.ts",
+            "source_location": "L377"
+        },
+        {
+            "id": "shared_types_zerotrusterror_constructor",
+            "label": ".constructor()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\shared\\types.ts",
+            "source_location": "L378"
+        },
+        {
+            "id": "shared_types_errorcodes",
+            "label": "ErrorCodes",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\shared\\types.ts",
+            "source_location": "L389"
+        }
+    ],
+    "edges": [
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_shared_types_ts",
+            "target": "shared_types_zerotrustconfig",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\shared\\types.ts",
+            "source_location": "L3",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_shared_types_ts",
+            "target": "shared_types_tokenpayload",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\shared\\types.ts",
+            "source_location": "L64",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_shared_types_ts",
+            "target": "shared_types_accesstokenresponse",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\shared\\types.ts",
+            "source_location": "L77",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_shared_types_ts",
+            "target": "shared_types_user",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\shared\\types.ts",
+            "source_location": "L86",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_shared_types_ts",
+            "target": "shared_types_passkey",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\shared\\types.ts",
+            "source_location": "L137",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_shared_types_ts",
+            "target": "shared_types_oauthprovider",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\shared\\types.ts",
+            "source_location": "L152",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_shared_types_ts",
+            "target": "shared_types_session",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\shared\\types.ts",
+            "source_location": "L161",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_shared_types_ts",
+            "target": "shared_types_devicefingerprint",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\shared\\types.ts",
+            "source_location": "L189",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_shared_types_ts",
+            "target": "shared_types_role",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\shared\\types.ts",
+            "source_location": "L204",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_shared_types_ts",
+            "target": "shared_types_permission",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\shared\\types.ts",
+            "source_location": "L216",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_shared_types_ts",
+            "target": "shared_types_abaccondition",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\shared\\types.ts",
+            "source_location": "L222",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_shared_types_ts",
+            "target": "shared_types_authzcontext",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\shared\\types.ts",
+            "source_location": "L228",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_shared_types_ts",
+            "target": "shared_types_authzresult",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\shared\\types.ts",
+            "source_location": "L243",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_shared_types_ts",
+            "target": "shared_types_jitaccessrequest",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\shared\\types.ts",
+            "source_location": "L254",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_shared_types_ts",
+            "target": "shared_types_auditlog",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\shared\\types.ts",
+            "source_location": "L272",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_shared_types_ts",
+            "target": "shared_types_refreshtokenrecord",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\shared\\types.ts",
+            "source_location": "L296",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_shared_types_ts",
+            "target": "shared_types_otp",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\shared\\types.ts",
+            "source_location": "L308",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_shared_types_ts",
+            "target": "shared_types_workloadcredential",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\shared\\types.ts",
+            "source_location": "L322",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_shared_types_ts",
+            "target": "shared_types_oauthauthorizationrequest",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\shared\\types.ts",
+            "source_location": "L339",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_shared_types_ts",
+            "target": "shared_types_oauthtokenresponse",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\shared\\types.ts",
+            "source_location": "L346",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_shared_types_ts",
+            "target": "shared_types_mfachallengeresponse",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\shared\\types.ts",
+            "source_location": "L354",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_shared_types_ts",
+            "target": "shared_types_honoenv",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\shared\\types.ts",
+            "source_location": "L362",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_shared_types_ts",
+            "target": "shared_types_zerotrusterror",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\shared\\types.ts",
+            "source_location": "L377",
+            "weight": 1.0
+        },
+        {
+            "source": "shared_types_zerotrusterror",
+            "target": "shared_types_zerotrusterror_constructor",
+            "relation": "method",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\shared\\types.ts",
+            "source_location": "L378",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_shared_types_ts",
+            "target": "shared_types_errorcodes",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\shared\\types.ts",
+            "source_location": "L389",
+            "weight": 1.0
+        }
+    ],
+    "raw_calls": [
+        {
+            "caller_nid": "shared_types_zerotrusterror_constructor",
+            "callee": "super",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\shared\\types.ts",
+            "source_location": "L384"
+        }
+    ]
+}

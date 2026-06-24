@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // One-shot database restore from a pg_dump custom-format backup.
-// Usage: bun run db:restore -- ./backups/zeroauth-<stamp>.dump [--clean]
+// Usage: bun run db:restore -- ./backups/zerotrust-<stamp>.dump [--clean]
 //   (or: node scripts/db-restore.js ./backups/<file>.dump)
 // Env:  DATABASE_URL (required, target DB)
 //

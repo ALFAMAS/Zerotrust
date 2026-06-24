@@ -9,7 +9,11 @@ vi.mock("../db", () => ({
 
 vi.mock("../config", () => ({
   getConfig: () => ({
-    session: { defaultTTL: 3600, refreshTokenTTL: 604800, maxConcurrentDevices: 5 },
+    session: {
+      defaultTTL: 3600,
+      refreshTokenTTL: 604800,
+      maxConcurrentDevices: 5,
+    },
     security: {
       bcryptRounds: 4,
       tokenSecretHex: "a".repeat(64),
@@ -30,7 +34,12 @@ vi.mock("../config", () => ({
       },
     },
     oauth: { providers: {} },
-    elasticsearch: { enabled: false, host: "localhost", port: 9200, indexPrefix: "zeroauth" },
+    elasticsearch: {
+      enabled: false,
+      host: "localhost",
+      port: 9200,
+      indexPrefix: "zerotrust",
+    },
     logging: { level: "error", format: "json" },
   }),
 }));
@@ -131,7 +140,7 @@ function makeInvite(overrides: Record<string, unknown> = {}) {
 async function getApp(
   db: ReturnType<typeof makeDbChain>,
   userId = USER_ID,
-  email = "alice@example.com"
+  email = "alice@example.com",
 ) {
   vi.resetModules();
 
@@ -491,8 +500,11 @@ describe("Per-org IP allowlist enforcement", () => {
     const app = await getApp(db);
     // Override AFTER getApp — getApp resets modules, so the middleware uses the
     // service instance resolved post-reset.
-    const { getOrgSecurityPolicy } = await import("../services/orgSecurityPolicy.service");
-    vi.mocked(getOrgSecurityPolicy).mockResolvedValueOnce({ ipAllowlist: ["10.0.0.0/8"] } as any);
+    const { getOrgSecurityPolicy } =
+      await import("../services/orgSecurityPolicy.service");
+    vi.mocked(getOrgSecurityPolicy).mockResolvedValueOnce({
+      ipAllowlist: ["10.0.0.0/8"],
+    } as any);
 
     const res = await app.request(`/${ORG_ID}`, {
       headers: { "x-forwarded-for": "203.0.113.5" },
@@ -506,8 +518,11 @@ describe("Per-org IP allowlist enforcement", () => {
     db.limit.mockResolvedValueOnce([makeOrgMember({ role: "viewer" })]); // requireOrgRole
     db.limit.mockResolvedValueOnce([makeOrg()]); // org lookup
     const app = await getApp(db);
-    const { getOrgSecurityPolicy } = await import("../services/orgSecurityPolicy.service");
-    vi.mocked(getOrgSecurityPolicy).mockResolvedValueOnce({ ipAllowlist: ["10.0.0.0/8"] } as any);
+    const { getOrgSecurityPolicy } =
+      await import("../services/orgSecurityPolicy.service");
+    vi.mocked(getOrgSecurityPolicy).mockResolvedValueOnce({
+      ipAllowlist: ["10.0.0.0/8"],
+    } as any);
 
     const res = await app.request(`/${ORG_ID}`, {
       headers: { "x-forwarded-for": "10.1.2.3" },
@@ -536,7 +551,9 @@ describe("POST /invites/accept", () => {
     // insert member
     db.returning.mockResolvedValueOnce([makeOrgMember({ role: "member" })]);
     // update invite usedAt
-    db.returning.mockResolvedValueOnce([{ ...validInvite, usedAt: new Date() }]);
+    db.returning.mockResolvedValueOnce([
+      { ...validInvite, usedAt: new Date() },
+    ]);
     // get org
     db.limit.mockResolvedValueOnce([makeOrg()]);
 
@@ -626,9 +643,13 @@ describe("DELETE /:orgId/members/:userId", () => {
   it("successfully removes a non-owner member when caller is admin", async () => {
     const db = makeDbChain([]);
     // requireOrgRole: caller is admin
-    db.limit.mockResolvedValueOnce([makeOrgMember({ userId: USER_ID, role: "admin" })]);
+    db.limit.mockResolvedValueOnce([
+      makeOrgMember({ userId: USER_ID, role: "admin" }),
+    ]);
     // target member lookup (not owner)
-    db.limit.mockResolvedValueOnce([makeOrgMember({ userId: OTHER_USER_ID, role: "member" })]);
+    db.limit.mockResolvedValueOnce([
+      makeOrgMember({ userId: OTHER_USER_ID, role: "member" }),
+    ]);
     // delete
     db.returning.mockResolvedValueOnce([]);
 
@@ -645,9 +666,13 @@ describe("DELETE /:orgId/members/:userId", () => {
   it("returns 403 when trying to remove the org owner", async () => {
     const db = makeDbChain([]);
     // requireOrgRole: caller is admin
-    db.limit.mockResolvedValueOnce([makeOrgMember({ userId: USER_ID, role: "admin" })]);
+    db.limit.mockResolvedValueOnce([
+      makeOrgMember({ userId: USER_ID, role: "admin" }),
+    ]);
     // target member lookup — is the owner
-    db.limit.mockResolvedValueOnce([makeOrgMember({ userId: OTHER_USER_ID, role: "owner" })]);
+    db.limit.mockResolvedValueOnce([
+      makeOrgMember({ userId: OTHER_USER_ID, role: "owner" }),
+    ]);
 
     const app = await getApp(db);
     const res = await app.request(`/${ORG_ID}/members/${OTHER_USER_ID}`, {

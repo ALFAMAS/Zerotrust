@@ -1,1 +1,358 @@
-{"nodes": [{"id": "c_users_alfamas_desktop_zeroauth_src_tests_rate_limit_test_ts", "label": "rate-limit.test.ts", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\rate-limit.test.ts", "source_location": "L1"}, {"id": "tests_rate_limit_test_result", "label": "result", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\rate-limit.test.ts", "source_location": "L51"}, {"id": "tests_rate_limit_test_blocked", "label": "blocked", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\rate-limit.test.ts", "source_location": "L73"}, {"id": "tests_rate_limit_test_r1", "label": "r1", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\rate-limit.test.ts", "source_location": "L82"}, {"id": "tests_rate_limit_test_r2", "label": "r2", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\rate-limit.test.ts", "source_location": "L83"}, {"id": "tests_rate_limit_test_r3", "label": "r3", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\rate-limit.test.ts", "source_location": "L84"}, {"id": "tests_rate_limit_test_blockedkey1", "label": "blockedKey1", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\rate-limit.test.ts", "source_location": "L114"}, {"id": "tests_rate_limit_test_allowedkey2", "label": "allowedKey2", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\rate-limit.test.ts", "source_location": "L115"}, {"id": "tests_rate_limit_test_afterclear", "label": "afterClear", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\rate-limit.test.ts", "source_location": "L130"}, {"id": "tests_rate_limit_test_ban", "label": "ban", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\rate-limit.test.ts", "source_location": "L155"}, {"id": "tests_rate_limit_test_enabledratelimitconfig", "label": "enabledRateLimitConfig()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\rate-limit.test.ts", "source_location": "L318"}, {"id": "tests_rate_limit_test_app", "label": "app", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\rate-limit.test.ts", "source_location": "L394"}, {"id": "tests_rate_limit_test_retryafter", "label": "retryAfter", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\rate-limit.test.ts", "source_location": "L446"}, {"id": "tests_rate_limit_test_quota", "label": "quota", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\rate-limit.test.ts", "source_location": "L500"}], "edges": [{"source": "c_users_alfamas_desktop_zeroauth_src_tests_rate_limit_test_ts", "target": "vitest", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\rate-limit.test.ts", "source_location": "L1", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_tests_rate_limit_test_ts", "target": "tests_rate_limit_test_result", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\rate-limit.test.ts", "source_location": "L51", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_tests_rate_limit_test_ts", "target": "tests_rate_limit_test_blocked", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\rate-limit.test.ts", "source_location": "L73", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_tests_rate_limit_test_ts", "target": "tests_rate_limit_test_r1", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\rate-limit.test.ts", "source_location": "L82", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_tests_rate_limit_test_ts", "target": "tests_rate_limit_test_r2", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\rate-limit.test.ts", "source_location": "L83", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_tests_rate_limit_test_ts", "target": "tests_rate_limit_test_r3", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\rate-limit.test.ts", "source_location": "L84", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_tests_rate_limit_test_ts", "target": "tests_rate_limit_test_result", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\rate-limit.test.ts", "source_location": "L94", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_tests_rate_limit_test_ts", "target": "tests_rate_limit_test_blocked", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\rate-limit.test.ts", "source_location": "L103", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_tests_rate_limit_test_ts", "target": "tests_rate_limit_test_blockedkey1", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\rate-limit.test.ts", "source_location": "L114", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_tests_rate_limit_test_ts", "target": "tests_rate_limit_test_allowedkey2", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\rate-limit.test.ts", "source_location": "L115", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_tests_rate_limit_test_ts", "target": "tests_rate_limit_test_blocked", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\rate-limit.test.ts", "source_location": "L126", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_tests_rate_limit_test_ts", "target": "tests_rate_limit_test_afterclear", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\rate-limit.test.ts", "source_location": "L130", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_tests_rate_limit_test_ts", "target": "tests_rate_limit_test_result", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\rate-limit.test.ts", "source_location": "L146", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_tests_rate_limit_test_ts", "target": "tests_rate_limit_test_ban", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\rate-limit.test.ts", "source_location": "L155", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_tests_rate_limit_test_ts", "target": "tests_rate_limit_test_ban", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\rate-limit.test.ts", "source_location": "L164", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_tests_rate_limit_test_ts", "target": "tests_rate_limit_test_ban", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\rate-limit.test.ts", "source_location": "L174", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_tests_rate_limit_test_ts", "target": "tests_rate_limit_test_enabledratelimitconfig", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\rate-limit.test.ts", "source_location": "L318", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_tests_rate_limit_test_ts", "target": "tests_rate_limit_test_app", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\rate-limit.test.ts", "source_location": "L394", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_tests_rate_limit_test_ts", "target": "tests_rate_limit_test_app", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\rate-limit.test.ts", "source_location": "L410", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_tests_rate_limit_test_ts", "target": "tests_rate_limit_test_app", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\rate-limit.test.ts", "source_location": "L424", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_tests_rate_limit_test_ts", "target": "tests_rate_limit_test_app", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\rate-limit.test.ts", "source_location": "L440", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_tests_rate_limit_test_ts", "target": "tests_rate_limit_test_retryafter", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\rate-limit.test.ts", "source_location": "L446", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_tests_rate_limit_test_ts", "target": "tests_rate_limit_test_app", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\rate-limit.test.ts", "source_location": "L456", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_tests_rate_limit_test_ts", "target": "tests_rate_limit_test_app", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\rate-limit.test.ts", "source_location": "L472", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_tests_rate_limit_test_ts", "target": "tests_rate_limit_test_quota", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\rate-limit.test.ts", "source_location": "L500", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_tests_rate_limit_test_ts", "target": "tests_rate_limit_test_quota", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\rate-limit.test.ts", "source_location": "L508", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_tests_rate_limit_test_ts", "target": "tests_rate_limit_test_quota", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\rate-limit.test.ts", "source_location": "L515", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_tests_rate_limit_test_ts", "target": "tests_rate_limit_test_quota", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\rate-limit.test.ts", "source_location": "L521", "weight": 1.0}], "raw_calls": []}
+{
+    "nodes": [
+        {
+            "id": "c_users_alfamas_desktop_zerotrust_src_tests_rate_limit_test_ts",
+            "label": "rate-limit.test.ts",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\rate-limit.test.ts",
+            "source_location": "L1"
+        },
+        {
+            "id": "tests_rate_limit_test_result",
+            "label": "result",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\rate-limit.test.ts",
+            "source_location": "L51"
+        },
+        {
+            "id": "tests_rate_limit_test_blocked",
+            "label": "blocked",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\rate-limit.test.ts",
+            "source_location": "L73"
+        },
+        {
+            "id": "tests_rate_limit_test_r1",
+            "label": "r1",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\rate-limit.test.ts",
+            "source_location": "L82"
+        },
+        {
+            "id": "tests_rate_limit_test_r2",
+            "label": "r2",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\rate-limit.test.ts",
+            "source_location": "L83"
+        },
+        {
+            "id": "tests_rate_limit_test_r3",
+            "label": "r3",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\rate-limit.test.ts",
+            "source_location": "L84"
+        },
+        {
+            "id": "tests_rate_limit_test_blockedkey1",
+            "label": "blockedKey1",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\rate-limit.test.ts",
+            "source_location": "L114"
+        },
+        {
+            "id": "tests_rate_limit_test_allowedkey2",
+            "label": "allowedKey2",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\rate-limit.test.ts",
+            "source_location": "L115"
+        },
+        {
+            "id": "tests_rate_limit_test_afterclear",
+            "label": "afterClear",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\rate-limit.test.ts",
+            "source_location": "L130"
+        },
+        {
+            "id": "tests_rate_limit_test_ban",
+            "label": "ban",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\rate-limit.test.ts",
+            "source_location": "L155"
+        },
+        {
+            "id": "tests_rate_limit_test_enabledratelimitconfig",
+            "label": "enabledRateLimitConfig()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\rate-limit.test.ts",
+            "source_location": "L318"
+        },
+        {
+            "id": "tests_rate_limit_test_app",
+            "label": "app",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\rate-limit.test.ts",
+            "source_location": "L394"
+        },
+        {
+            "id": "tests_rate_limit_test_retryafter",
+            "label": "retryAfter",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\rate-limit.test.ts",
+            "source_location": "L446"
+        },
+        {
+            "id": "tests_rate_limit_test_quota",
+            "label": "quota",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\rate-limit.test.ts",
+            "source_location": "L500"
+        }
+    ],
+    "edges": [
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_tests_rate_limit_test_ts",
+            "target": "vitest",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\rate-limit.test.ts",
+            "source_location": "L1",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_tests_rate_limit_test_ts",
+            "target": "tests_rate_limit_test_result",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\rate-limit.test.ts",
+            "source_location": "L51",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_tests_rate_limit_test_ts",
+            "target": "tests_rate_limit_test_blocked",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\rate-limit.test.ts",
+            "source_location": "L73",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_tests_rate_limit_test_ts",
+            "target": "tests_rate_limit_test_r1",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\rate-limit.test.ts",
+            "source_location": "L82",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_tests_rate_limit_test_ts",
+            "target": "tests_rate_limit_test_r2",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\rate-limit.test.ts",
+            "source_location": "L83",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_tests_rate_limit_test_ts",
+            "target": "tests_rate_limit_test_r3",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\rate-limit.test.ts",
+            "source_location": "L84",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_tests_rate_limit_test_ts",
+            "target": "tests_rate_limit_test_result",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\rate-limit.test.ts",
+            "source_location": "L94",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_tests_rate_limit_test_ts",
+            "target": "tests_rate_limit_test_blocked",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\rate-limit.test.ts",
+            "source_location": "L103",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_tests_rate_limit_test_ts",
+            "target": "tests_rate_limit_test_blockedkey1",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\rate-limit.test.ts",
+            "source_location": "L114",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_tests_rate_limit_test_ts",
+            "target": "tests_rate_limit_test_allowedkey2",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\rate-limit.test.ts",
+            "source_location": "L115",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_tests_rate_limit_test_ts",
+            "target": "tests_rate_limit_test_blocked",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\rate-limit.test.ts",
+            "source_location": "L126",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_tests_rate_limit_test_ts",
+            "target": "tests_rate_limit_test_afterclear",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\rate-limit.test.ts",
+            "source_location": "L130",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_tests_rate_limit_test_ts",
+            "target": "tests_rate_limit_test_result",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\rate-limit.test.ts",
+            "source_location": "L146",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_tests_rate_limit_test_ts",
+            "target": "tests_rate_limit_test_ban",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\rate-limit.test.ts",
+            "source_location": "L155",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_tests_rate_limit_test_ts",
+            "target": "tests_rate_limit_test_ban",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\rate-limit.test.ts",
+            "source_location": "L164",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_tests_rate_limit_test_ts",
+            "target": "tests_rate_limit_test_ban",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\rate-limit.test.ts",
+            "source_location": "L174",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_tests_rate_limit_test_ts",
+            "target": "tests_rate_limit_test_enabledratelimitconfig",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\rate-limit.test.ts",
+            "source_location": "L318",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_tests_rate_limit_test_ts",
+            "target": "tests_rate_limit_test_app",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\rate-limit.test.ts",
+            "source_location": "L394",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_tests_rate_limit_test_ts",
+            "target": "tests_rate_limit_test_app",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\rate-limit.test.ts",
+            "source_location": "L410",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_tests_rate_limit_test_ts",
+            "target": "tests_rate_limit_test_app",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\rate-limit.test.ts",
+            "source_location": "L424",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_tests_rate_limit_test_ts",
+            "target": "tests_rate_limit_test_app",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\rate-limit.test.ts",
+            "source_location": "L440",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_tests_rate_limit_test_ts",
+            "target": "tests_rate_limit_test_retryafter",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\rate-limit.test.ts",
+            "source_location": "L446",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_tests_rate_limit_test_ts",
+            "target": "tests_rate_limit_test_app",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\rate-limit.test.ts",
+            "source_location": "L456",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_tests_rate_limit_test_ts",
+            "target": "tests_rate_limit_test_app",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\rate-limit.test.ts",
+            "source_location": "L472",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_tests_rate_limit_test_ts",
+            "target": "tests_rate_limit_test_quota",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\rate-limit.test.ts",
+            "source_location": "L500",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_tests_rate_limit_test_ts",
+            "target": "tests_rate_limit_test_quota",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\rate-limit.test.ts",
+            "source_location": "L508",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_tests_rate_limit_test_ts",
+            "target": "tests_rate_limit_test_quota",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\rate-limit.test.ts",
+            "source_location": "L515",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_tests_rate_limit_test_ts",
+            "target": "tests_rate_limit_test_quota",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\rate-limit.test.ts",
+            "source_location": "L521",
+            "weight": 1.0
+        }
+    ],
+    "raw_calls": []
+}

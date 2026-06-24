@@ -1,6 +1,10 @@
 import crypto from "node:crypto";
 import { getLogger } from "../logger";
-import { formatPagerDutyPayload, formatSlackMessage, formatTeamsMessage } from "./formatters";
+import {
+  formatPagerDutyPayload,
+  formatSlackMessage,
+  formatTeamsMessage,
+} from "./formatters";
 import type {
   NotificationChannel,
   NotificationEvent,
@@ -12,8 +16,13 @@ import type {
 export class NotificationDispatcher {
   private channels: Map<string, NotificationChannel> = new Map();
 
-  addChannel(channel: Omit<NotificationChannel, "id"> & { id?: string }): NotificationChannel {
-    const ch = { ...channel, id: channel.id ?? crypto.randomUUID() } as NotificationChannel;
+  addChannel(
+    channel: Omit<NotificationChannel, "id"> & { id?: string },
+  ): NotificationChannel {
+    const ch = {
+      ...channel,
+      id: channel.id ?? crypto.randomUUID(),
+    } as NotificationChannel;
     this.channels.set(ch.id, ch);
     return ch;
   }
@@ -29,37 +38,47 @@ export class NotificationDispatcher {
 
   getChannels(tenantId?: string): NotificationChannel[] {
     const all = Array.from(this.channels.values());
-    return tenantId ? all.filter((c) => !c.tenantId || c.tenantId === tenantId) : all;
+    return tenantId
+      ? all.filter((c) => !c.tenantId || c.tenantId === tenantId)
+      : all;
   }
 
   async dispatch(
     event: NotificationEvent,
     data: Record<string, unknown>,
-    tenantId?: string
+    tenantId?: string,
   ): Promise<void> {
     const matching = this.getChannels(tenantId).filter(
-      (c) => c.enabled && c.events.includes(event)
+      (c) => c.enabled && c.events.includes(event),
     );
     if (matching.length === 0) return;
 
-    await Promise.allSettled(matching.map((channel) => this.sendToChannel(channel, event, data)));
+    await Promise.allSettled(
+      matching.map((channel) => this.sendToChannel(channel, event, data)),
+    );
   }
 
   private async sendToChannel(
     channel: NotificationChannel,
     event: NotificationEvent,
-    data: Record<string, unknown>
+    data: Record<string, unknown>,
   ): Promise<void> {
     try {
       if (channel.type === "slack") {
-        await this.sendToSlack(channel.config as SlackConfig, formatSlackMessage(event, data));
+        await this.sendToSlack(
+          channel.config as SlackConfig,
+          formatSlackMessage(event, data),
+        );
       } else if (channel.type === "teams") {
-        await this.sendToTeams(channel.config as TeamsConfig, formatTeamsMessage(event, data));
+        await this.sendToTeams(
+          channel.config as TeamsConfig,
+          formatTeamsMessage(event, data),
+        );
       } else if (channel.type === "pagerduty") {
         const cfg = channel.config as PagerDutyConfig;
         await this.sendToPagerDuty(
           cfg,
-          formatPagerDutyPayload(event, data, cfg.integrationKey, cfg.severity)
+          formatPagerDutyPayload(event, data, cfg.integrationKey, cfg.severity),
         );
       }
     } catch (err) {
@@ -71,7 +90,10 @@ export class NotificationDispatcher {
     }
   }
 
-  private async sendToSlack(config: SlackConfig, payload: object): Promise<void> {
+  private async sendToSlack(
+    config: SlackConfig,
+    payload: object,
+  ): Promise<void> {
     const body = {
       ...payload,
       channel: config.channel,
@@ -86,7 +108,10 @@ export class NotificationDispatcher {
     if (!res.ok) throw new Error(`Slack webhook returned ${res.status}`);
   }
 
-  private async sendToTeams(config: TeamsConfig, payload: object): Promise<void> {
+  private async sendToTeams(
+    config: TeamsConfig,
+    payload: object,
+  ): Promise<void> {
     const res = await fetch(config.webhookUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -95,7 +120,10 @@ export class NotificationDispatcher {
     if (!res.ok) throw new Error(`Teams webhook returned ${res.status}`);
   }
 
-  private async sendToPagerDuty(_config: PagerDutyConfig, payload: object): Promise<void> {
+  private async sendToPagerDuty(
+    _config: PagerDutyConfig,
+    payload: object,
+  ): Promise<void> {
     const res = await fetch("https://events.pagerduty.com/v2/enqueue", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -118,11 +146,15 @@ export function initNotificationsFromEnv(): void {
       enabled: true,
       events:
         parseEvents(process.env.SLACK_EVENTS) ||
-        (["anomaly.detected", "auth.brute_force", "user.locked"] as NotificationEvent[]),
+        ([
+          "anomaly.detected",
+          "auth.brute_force",
+          "user.locked",
+        ] as NotificationEvent[]),
       config: {
         webhookUrl: process.env.SLACK_WEBHOOK_URL,
         channel: process.env.SLACK_CHANNEL,
-        username: process.env.SLACK_USERNAME ?? "ZeroAuth",
+        username: process.env.SLACK_USERNAME ?? "zerotrust",
         iconEmoji: ":lock:",
       },
     });

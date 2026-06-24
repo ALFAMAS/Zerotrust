@@ -1,1 +1,1831 @@
-{"nodes": [{"id": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "label": "org.routes.ts", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L1"}, {"id": "routes_org_routes_router", "label": "router", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L30"}, {"id": "routes_org_routes_logger", "label": "logger", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L31"}, {"id": "routes_org_routes_enforceorgipallowlist", "label": "enforceOrgIpAllowlist()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L43"}, {"id": "routes_org_routes_drizzledb", "label": "DrizzleDB", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L68"}, {"id": "routes_org_routes_orgrole", "label": "OrgRole", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L70"}, {"id": "routes_org_routes_organizationmember", "label": "OrganizationMember", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L72"}, {"id": "routes_org_routes_role_order", "label": "ROLE_ORDER", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L84"}, {"id": "routes_org_routes_rolerank", "label": "roleRank()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L86"}, {"id": "routes_org_routes_requireorgrole", "label": "requireOrgRole()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L91"}, {"id": "routes_org_routes_slugify", "label": "slugify()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L117"}, {"id": "routes_org_routes_createorgschema", "label": "CreateOrgSchema", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L129"}, {"id": "routes_org_routes_updateorgschema", "label": "UpdateOrgSchema", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L134"}, {"id": "routes_org_routes_updatememberroleschema", "label": "UpdateMemberRoleSchema", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L140"}, {"id": "routes_org_routes_createinviteschema", "label": "CreateInviteSchema", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L144"}, {"id": "routes_org_routes_acceptinviteschema", "label": "AcceptInviteSchema", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L149"}, {"id": "routes_org_routes_transferownershipschema", "label": "TransferOwnershipSchema", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L153"}, {"id": "routes_org_routes_updatesecuritypolicyschema", "label": "UpdateSecurityPolicySchema", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L157"}, {"id": "routes_org_routes_user", "label": "user", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L180"}, {"id": "routes_org_routes_body", "label": "body", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L181"}, {"id": "routes_org_routes_parsed", "label": "parsed", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L182"}, {"id": "routes_org_routes_db", "label": "db", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L201"}, {"id": "routes_org_routes_orgid", "label": "{ orgId }", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L269"}, {"id": "routes_org_routes_values", "label": "values", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L317"}, {"id": "routes_org_routes_createscimtokenschema", "label": "CreateScimTokenSchema", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L372"}, {"id": "routes_org_routes_orgid_tokenid", "label": "{ orgId, tokenId }", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L433"}, {"id": "routes_org_routes_updates", "label": "updates", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L523"}, {"id": "routes_org_routes_currentuser", "label": "currentUser", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L609"}, {"id": "routes_org_routes_orgid_userid", "label": "{ orgId, userId }", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L610"}, {"id": "routes_org_routes_target", "label": "target", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L628"}, {"id": "routes_org_routes_token", "label": "token", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L792"}, {"id": "routes_org_routes_expiresat", "label": "expiresAt", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L793"}, {"id": "routes_org_routes_now", "label": "now", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L825"}, {"id": "routes_org_routes_orgid_inviteid", "label": "{ orgId, inviteId }", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L850"}, {"id": "routes_org_routes_invite", "label": "invite", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L901"}, {"id": "routes_org_routes_customroleschema", "label": "customRoleSchema", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L1017"}, {"id": "routes_org_routes_validperms", "label": "validPerms", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L1050"}, {"id": "routes_org_routes_roleid", "label": "roleId", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L1077"}, {"id": "routes_org_routes_update", "label": "update", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L1098"}], "edges": [{"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "drizzle_orm", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L1", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "hono", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L2", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "http_exception", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L3", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "nanoid", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L4", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "zod", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L5", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "c_users_alfamas_desktop_zeroauth_src_db_index_ts", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L6", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "db_index_getdb", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L6", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "c_users_alfamas_desktop_zeroauth_src_db_schema_ts", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L7", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "db_schema_organizationinvitestable", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L7", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "db_schema_organizationmemberstable", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L7", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "db_schema_organizationstable", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L7", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "db_schema_orgcustomrolestable", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L7", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "db_schema_orgsecuritypoliciestable", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L7", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "db_schema_userstable", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L7", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "c_users_alfamas_desktop_zeroauth_src_logger_index_ts", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L15", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "logger_index_getlogger", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L15", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "c_users_alfamas_desktop_zeroauth_src_middleware_auth_ts", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L16", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "middleware_auth_authmiddleware", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L16", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "c_users_alfamas_desktop_zeroauth_src_services_orgscimtoken_service_ts", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L17", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "services_orgscimtoken_service_createorgscimtoken", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L17", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "services_orgscimtoken_service_listorgscimtokens", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L17", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "services_orgscimtoken_service_revokeorgscimtoken", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L17", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "services_orgscimtoken_service_rotateorgscimtoken", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L17", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "c_users_alfamas_desktop_zeroauth_src_services_orgsecuritypolicy_service_ts", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L23", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "services_orgsecuritypolicy_service_getorgsecuritypolicy", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L23", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "c_users_alfamas_desktop_zeroauth_src_services_sessionpolicy_service_ts", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L24", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "services_sessionpolicy_service_clearsessionpolicycache", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L24", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "c_users_alfamas_desktop_zeroauth_src_shared_cidr_ts", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L25", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "shared_cidr_ipmatchesany", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L25", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "shared_cidr_isvalidcidrorip", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L25", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "c_users_alfamas_desktop_zeroauth_src_shared_clientip_ts", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L26", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "shared_clientip_getclientip", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L26", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "c_users_alfamas_desktop_zeroauth_src_shared_permissions_ts", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L27", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "shared_permissions_org_permissions", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L27", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "c_users_alfamas_desktop_zeroauth_src_shared_types_ts", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L28", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "shared_types_honoenv", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L28", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_router", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L30", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_logger", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L31", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_enforceorgipallowlist", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L43", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_drizzledb", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L68", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_orgrole", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L70", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_organizationmember", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L72", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_role_order", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L84", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_rolerank", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L86", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_requireorgrole", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L91", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_slugify", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L117", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_createorgschema", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L129", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_updateorgschema", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L134", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_updatememberroleschema", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L140", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_createinviteschema", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L144", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_acceptinviteschema", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L149", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_transferownershipschema", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L153", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_updatesecuritypolicyschema", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L157", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_user", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L180", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_body", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L181", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_parsed", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L182", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_db", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L201", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_user", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L245", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_db", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L246", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_user", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L268", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_orgid", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L269", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_db", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L270", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_user", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L305", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_orgid", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L306", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_db", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L307", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_body", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L311", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_parsed", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L312", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_values", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L317", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_createscimtokenschema", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L372", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_user", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L381", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_orgid", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L382", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_db", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L383", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_user", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L400", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_orgid", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L401", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_db", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L402", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_body", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L405", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_parsed", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L406", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_user", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L432", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_orgid_tokenid", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L433", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_db", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L434", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_user", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L454", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_orgid_tokenid", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L455", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_db", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L456", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_user", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L476", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_orgid", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L477", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_db", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L478", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_user", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L511", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_orgid", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L512", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_db", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L513", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_body", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L517", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_parsed", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L518", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_updates", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L523", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_user", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L557", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_orgid", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L558", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_db", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L559", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_user", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L577", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_orgid", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L578", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_db", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L579", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_currentuser", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L609", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_orgid_userid", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L610", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_db", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L611", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_target", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L628", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_currentuser", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L651", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_orgid_userid", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L652", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_db", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L653", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_body", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L661", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_parsed", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L662", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_currentuser", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L699", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_orgid", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L700", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_db", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L701", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_body", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L705", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_parsed", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L706", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_currentuser", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L779", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_orgid", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L780", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_db", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L781", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_body", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L785", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_parsed", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L786", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_token", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L792", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_expiresat", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L793", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_currentuser", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L819", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_orgid", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L820", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_db", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L821", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_now", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L825", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_currentuser", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L849", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_orgid_inviteid", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L850", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_db", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L851", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_currentuser", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L881", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_body", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L882", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_parsed", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L883", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_db", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L889", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_invite", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L901", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_user", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L984", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_orgid", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L985", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_db", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L988", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_customroleschema", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L1017", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_user", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L1025", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_orgid", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L1026", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_db", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L1029", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_parsed", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L1046", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_validperms", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L1050", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_user", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L1075", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_orgid", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L1076", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_roleid", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L1077", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_db", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L1080", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_parsed", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L1094", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_update", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L1098", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_user", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L1125", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_orgid", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L1126", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_roleid", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L1127", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_org_routes_ts", "target": "routes_org_routes_db", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L1130", "weight": 1.0}, {"source": "routes_org_routes_requireorgrole", "target": "routes_org_routes_rolerank", "relation": "calls", "context": "call", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L110", "weight": 1.0}], "raw_calls": [{"caller_nid": "routes_org_routes_enforceorgipallowlist", "callee": "param", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L44"}, {"caller_nid": "routes_org_routes_enforceorgipallowlist", "callee": "test", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L45"}, {"caller_nid": "routes_org_routes_enforceorgipallowlist", "callee": "getOrgSecurityPolicy", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L46"}, {"caller_nid": "routes_org_routes_enforceorgipallowlist", "callee": "getClientIp", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L48"}, {"caller_nid": "routes_org_routes_enforceorgipallowlist", "callee": "ipMatchesAny", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L49"}, {"caller_nid": "routes_org_routes_enforceorgipallowlist", "callee": "warn", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L50"}, {"caller_nid": "routes_org_routes_enforceorgipallowlist", "callee": "json", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L51"}, {"caller_nid": "routes_org_routes_enforceorgipallowlist", "callee": "next", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L61"}, {"caller_nid": "routes_org_routes_rolerank", "callee": "indexOf", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L87"}, {"caller_nid": "routes_org_routes_requireorgrole", "callee": "limit", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L97"}, {"caller_nid": "routes_org_routes_requireorgrole", "callee": "where", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L97"}, {"caller_nid": "routes_org_routes_requireorgrole", "callee": "from", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L97"}, {"caller_nid": "routes_org_routes_requireorgrole", "callee": "select", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L97"}, {"caller_nid": "routes_org_routes_requireorgrole", "callee": "and", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L101"}, {"caller_nid": "routes_org_routes_requireorgrole", "callee": "eq", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L101"}, {"caller_nid": "routes_org_routes_requireorgrole", "callee": "eq", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L101"}, {"caller_nid": "routes_org_routes_slugify", "callee": "replace", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L118"}, {"caller_nid": "routes_org_routes_slugify", "callee": "replace", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L118"}, {"caller_nid": "routes_org_routes_slugify", "callee": "replace", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L118"}, {"caller_nid": "routes_org_routes_slugify", "callee": "replace", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L118"}, {"caller_nid": "routes_org_routes_slugify", "callee": "trim", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L118"}, {"caller_nid": "routes_org_routes_slugify", "callee": "toLowerCase", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\org.routes.ts", "source_location": "L118"}]}
+{
+    "nodes": [
+        {
+            "id": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "label": "org.routes.ts",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L1"
+        },
+        {
+            "id": "routes_org_routes_router",
+            "label": "router",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L30"
+        },
+        {
+            "id": "routes_org_routes_logger",
+            "label": "logger",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L31"
+        },
+        {
+            "id": "routes_org_routes_enforceorgipallowlist",
+            "label": "enforceOrgIpAllowlist()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L43"
+        },
+        {
+            "id": "routes_org_routes_drizzledb",
+            "label": "DrizzleDB",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L68"
+        },
+        {
+            "id": "routes_org_routes_orgrole",
+            "label": "OrgRole",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L70"
+        },
+        {
+            "id": "routes_org_routes_organizationmember",
+            "label": "OrganizationMember",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L72"
+        },
+        {
+            "id": "routes_org_routes_role_order",
+            "label": "ROLE_ORDER",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L84"
+        },
+        {
+            "id": "routes_org_routes_rolerank",
+            "label": "roleRank()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L86"
+        },
+        {
+            "id": "routes_org_routes_requireorgrole",
+            "label": "requireOrgRole()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L91"
+        },
+        {
+            "id": "routes_org_routes_slugify",
+            "label": "slugify()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L117"
+        },
+        {
+            "id": "routes_org_routes_createorgschema",
+            "label": "CreateOrgSchema",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L129"
+        },
+        {
+            "id": "routes_org_routes_updateorgschema",
+            "label": "UpdateOrgSchema",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L134"
+        },
+        {
+            "id": "routes_org_routes_updatememberroleschema",
+            "label": "UpdateMemberRoleSchema",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L140"
+        },
+        {
+            "id": "routes_org_routes_createinviteschema",
+            "label": "CreateInviteSchema",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L144"
+        },
+        {
+            "id": "routes_org_routes_acceptinviteschema",
+            "label": "AcceptInviteSchema",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L149"
+        },
+        {
+            "id": "routes_org_routes_transferownershipschema",
+            "label": "TransferOwnershipSchema",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L153"
+        },
+        {
+            "id": "routes_org_routes_updatesecuritypolicyschema",
+            "label": "UpdateSecurityPolicySchema",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L157"
+        },
+        {
+            "id": "routes_org_routes_user",
+            "label": "user",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L180"
+        },
+        {
+            "id": "routes_org_routes_body",
+            "label": "body",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L181"
+        },
+        {
+            "id": "routes_org_routes_parsed",
+            "label": "parsed",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L182"
+        },
+        {
+            "id": "routes_org_routes_db",
+            "label": "db",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L201"
+        },
+        {
+            "id": "routes_org_routes_orgid",
+            "label": "{ orgId }",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L269"
+        },
+        {
+            "id": "routes_org_routes_values",
+            "label": "values",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L317"
+        },
+        {
+            "id": "routes_org_routes_createscimtokenschema",
+            "label": "CreateScimTokenSchema",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L372"
+        },
+        {
+            "id": "routes_org_routes_orgid_tokenid",
+            "label": "{ orgId, tokenId }",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L433"
+        },
+        {
+            "id": "routes_org_routes_updates",
+            "label": "updates",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L523"
+        },
+        {
+            "id": "routes_org_routes_currentuser",
+            "label": "currentUser",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L609"
+        },
+        {
+            "id": "routes_org_routes_orgid_userid",
+            "label": "{ orgId, userId }",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L610"
+        },
+        {
+            "id": "routes_org_routes_target",
+            "label": "target",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L628"
+        },
+        {
+            "id": "routes_org_routes_token",
+            "label": "token",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L792"
+        },
+        {
+            "id": "routes_org_routes_expiresat",
+            "label": "expiresAt",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L793"
+        },
+        {
+            "id": "routes_org_routes_now",
+            "label": "now",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L825"
+        },
+        {
+            "id": "routes_org_routes_orgid_inviteid",
+            "label": "{ orgId, inviteId }",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L850"
+        },
+        {
+            "id": "routes_org_routes_invite",
+            "label": "invite",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L901"
+        },
+        {
+            "id": "routes_org_routes_customroleschema",
+            "label": "customRoleSchema",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L1017"
+        },
+        {
+            "id": "routes_org_routes_validperms",
+            "label": "validPerms",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L1050"
+        },
+        {
+            "id": "routes_org_routes_roleid",
+            "label": "roleId",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L1077"
+        },
+        {
+            "id": "routes_org_routes_update",
+            "label": "update",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L1098"
+        }
+    ],
+    "edges": [
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "drizzle_orm",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L1",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "hono",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L2",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "http_exception",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L3",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "nanoid",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L4",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "zod",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L5",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "c_users_alfamas_desktop_zerotrust_src_db_index_ts",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L6",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "db_index_getdb",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L6",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "c_users_alfamas_desktop_zerotrust_src_db_schema_ts",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L7",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "db_schema_organizationinvitestable",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L7",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "db_schema_organizationmemberstable",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L7",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "db_schema_organizationstable",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L7",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "db_schema_orgcustomrolestable",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L7",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "db_schema_orgsecuritypoliciestable",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L7",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "db_schema_userstable",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L7",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "c_users_alfamas_desktop_zerotrust_src_logger_index_ts",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L15",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "logger_index_getlogger",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L15",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "c_users_alfamas_desktop_zerotrust_src_middleware_auth_ts",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L16",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "middleware_auth_authmiddleware",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L16",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "c_users_alfamas_desktop_zerotrust_src_services_orgscimtoken_service_ts",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L17",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "services_orgscimtoken_service_createorgscimtoken",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L17",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "services_orgscimtoken_service_listorgscimtokens",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L17",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "services_orgscimtoken_service_revokeorgscimtoken",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L17",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "services_orgscimtoken_service_rotateorgscimtoken",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L17",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "c_users_alfamas_desktop_zerotrust_src_services_orgsecuritypolicy_service_ts",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L23",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "services_orgsecuritypolicy_service_getorgsecuritypolicy",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L23",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "c_users_alfamas_desktop_zerotrust_src_services_sessionpolicy_service_ts",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L24",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "services_sessionpolicy_service_clearsessionpolicycache",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L24",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "c_users_alfamas_desktop_zerotrust_src_shared_cidr_ts",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L25",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "shared_cidr_ipmatchesany",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L25",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "shared_cidr_isvalidcidrorip",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L25",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "c_users_alfamas_desktop_zerotrust_src_shared_clientip_ts",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L26",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "shared_clientip_getclientip",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L26",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "c_users_alfamas_desktop_zerotrust_src_shared_permissions_ts",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L27",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "shared_permissions_org_permissions",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L27",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "c_users_alfamas_desktop_zerotrust_src_shared_types_ts",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L28",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "shared_types_honoenv",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L28",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_router",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L30",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_logger",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L31",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_enforceorgipallowlist",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L43",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_drizzledb",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L68",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_orgrole",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L70",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_organizationmember",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L72",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_role_order",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L84",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_rolerank",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L86",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_requireorgrole",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L91",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_slugify",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L117",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_createorgschema",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L129",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_updateorgschema",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L134",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_updatememberroleschema",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L140",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_createinviteschema",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L144",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_acceptinviteschema",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L149",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_transferownershipschema",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L153",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_updatesecuritypolicyschema",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L157",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_user",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L180",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_body",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L181",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_parsed",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L182",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_db",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L201",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_user",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L245",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_db",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L246",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_user",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L268",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_orgid",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L269",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_db",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L270",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_user",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L305",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_orgid",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L306",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_db",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L307",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_body",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L311",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_parsed",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L312",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_values",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L317",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_createscimtokenschema",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L372",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_user",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L381",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_orgid",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L382",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_db",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L383",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_user",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L400",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_orgid",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L401",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_db",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L402",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_body",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L405",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_parsed",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L406",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_user",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L432",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_orgid_tokenid",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L433",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_db",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L434",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_user",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L454",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_orgid_tokenid",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L455",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_db",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L456",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_user",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L476",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_orgid",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L477",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_db",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L478",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_user",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L511",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_orgid",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L512",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_db",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L513",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_body",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L517",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_parsed",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L518",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_updates",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L523",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_user",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L557",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_orgid",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L558",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_db",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L559",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_user",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L577",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_orgid",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L578",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_db",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L579",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_currentuser",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L609",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_orgid_userid",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L610",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_db",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L611",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_target",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L628",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_currentuser",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L651",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_orgid_userid",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L652",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_db",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L653",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_body",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L661",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_parsed",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L662",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_currentuser",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L699",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_orgid",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L700",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_db",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L701",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_body",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L705",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_parsed",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L706",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_currentuser",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L779",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_orgid",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L780",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_db",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L781",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_body",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L785",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_parsed",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L786",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_token",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L792",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_expiresat",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L793",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_currentuser",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L819",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_orgid",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L820",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_db",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L821",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_now",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L825",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_currentuser",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L849",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_orgid_inviteid",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L850",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_db",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L851",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_currentuser",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L881",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_body",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L882",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_parsed",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L883",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_db",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L889",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_invite",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L901",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_user",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L984",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_orgid",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L985",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_db",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L988",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_customroleschema",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L1017",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_user",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L1025",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_orgid",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L1026",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_db",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L1029",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_parsed",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L1046",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_validperms",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L1050",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_user",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L1075",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_orgid",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L1076",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_roleid",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L1077",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_db",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L1080",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_parsed",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L1094",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_update",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L1098",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_user",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L1125",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_orgid",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L1126",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_roleid",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L1127",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_org_routes_ts",
+            "target": "routes_org_routes_db",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L1130",
+            "weight": 1.0
+        },
+        {
+            "source": "routes_org_routes_requireorgrole",
+            "target": "routes_org_routes_rolerank",
+            "relation": "calls",
+            "context": "call",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L110",
+            "weight": 1.0
+        }
+    ],
+    "raw_calls": [
+        {
+            "caller_nid": "routes_org_routes_enforceorgipallowlist",
+            "callee": "param",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L44"
+        },
+        {
+            "caller_nid": "routes_org_routes_enforceorgipallowlist",
+            "callee": "test",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L45"
+        },
+        {
+            "caller_nid": "routes_org_routes_enforceorgipallowlist",
+            "callee": "getOrgSecurityPolicy",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L46"
+        },
+        {
+            "caller_nid": "routes_org_routes_enforceorgipallowlist",
+            "callee": "getClientIp",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L48"
+        },
+        {
+            "caller_nid": "routes_org_routes_enforceorgipallowlist",
+            "callee": "ipMatchesAny",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L49"
+        },
+        {
+            "caller_nid": "routes_org_routes_enforceorgipallowlist",
+            "callee": "warn",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L50"
+        },
+        {
+            "caller_nid": "routes_org_routes_enforceorgipallowlist",
+            "callee": "json",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L51"
+        },
+        {
+            "caller_nid": "routes_org_routes_enforceorgipallowlist",
+            "callee": "next",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L61"
+        },
+        {
+            "caller_nid": "routes_org_routes_rolerank",
+            "callee": "indexOf",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L87"
+        },
+        {
+            "caller_nid": "routes_org_routes_requireorgrole",
+            "callee": "limit",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L97"
+        },
+        {
+            "caller_nid": "routes_org_routes_requireorgrole",
+            "callee": "where",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L97"
+        },
+        {
+            "caller_nid": "routes_org_routes_requireorgrole",
+            "callee": "from",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L97"
+        },
+        {
+            "caller_nid": "routes_org_routes_requireorgrole",
+            "callee": "select",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L97"
+        },
+        {
+            "caller_nid": "routes_org_routes_requireorgrole",
+            "callee": "and",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L101"
+        },
+        {
+            "caller_nid": "routes_org_routes_requireorgrole",
+            "callee": "eq",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L101"
+        },
+        {
+            "caller_nid": "routes_org_routes_requireorgrole",
+            "callee": "eq",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L101"
+        },
+        {
+            "caller_nid": "routes_org_routes_slugify",
+            "callee": "replace",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L118"
+        },
+        {
+            "caller_nid": "routes_org_routes_slugify",
+            "callee": "replace",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L118"
+        },
+        {
+            "caller_nid": "routes_org_routes_slugify",
+            "callee": "replace",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L118"
+        },
+        {
+            "caller_nid": "routes_org_routes_slugify",
+            "callee": "replace",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L118"
+        },
+        {
+            "caller_nid": "routes_org_routes_slugify",
+            "callee": "trim",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L118"
+        },
+        {
+            "caller_nid": "routes_org_routes_slugify",
+            "callee": "toLowerCase",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\org.routes.ts",
+            "source_location": "L118"
+        }
+    ]
+}

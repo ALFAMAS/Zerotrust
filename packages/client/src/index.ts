@@ -1,8 +1,8 @@
 /* eslint-disable */
 // ─────────────────────────────────────────────────────────────────────────────
-// @zeroauth/client — AUTO-GENERATED from src/api/openapi.json. DO NOT EDIT.
+// @zerotrust/client — AUTO-GENERATED from src/api/openapi.json. DO NOT EDIT.
 // Regenerate with `bun run sdk:generate`.
-// ZeroAuth API v1.0.0
+// zerotrust API v1.0.0
 // ─────────────────────────────────────────────────────────────────────────────
 
 // ── Schema types ──
@@ -35,10 +35,10 @@ export interface Session {
 
 // ── Runtime ──
 /**
- * Options for constructing a {@link ZeroAuthClient}.
+ * Options for constructing a {@link zerotrustClient}.
  */
-export interface ZeroAuthClientOptions {
-  /** API base URL, e.g. "https://api.zeroauth.app". Defaults to the spec server. */
+export interface zerotrustClientOptions {
+  /** API base URL, e.g. "https://api.zerotrust.app". Defaults to the spec server. */
   baseUrl?: string;
   /** Bearer token (PASETO) sent as the Authorization header on every request. */
   token?: string;
@@ -48,20 +48,25 @@ export interface ZeroAuthClientOptions {
   headers?: Record<string, string>;
 }
 
-export interface ZeroAuthRequestOptions {
+export interface zerotrustRequestOptions {
   query?: Record<string, unknown>;
   body?: unknown;
   headers?: Record<string, string>;
 }
 
 /** Thrown for any non-2xx response. Carries the HTTP status and parsed body. */
-export class ZeroAuthError extends Error {
+export class zerotrustError extends Error {
   readonly status: number;
   readonly code?: string;
   readonly details?: unknown;
-  constructor(message: string, status: number, code?: string, details?: unknown) {
+  constructor(
+    message: string,
+    status: number,
+    code?: string,
+    details?: unknown,
+  ) {
     super(message);
-    this.name = "ZeroAuthError";
+    this.name = "zerotrustError";
     this.status = status;
     this.code = code;
     this.details = details;
@@ -70,20 +75,24 @@ export class ZeroAuthError extends Error {
 
 // ── Client ──
 /**
- * Typed client for the ZeroAuth API (v1.0.0).
+ * Typed client for the zerotrust API (v1.0.0).
  * Auto-generated — do not edit by hand. Regenerate with `bun run sdk:generate`.
  */
-export class ZeroAuthClient {
+export class zerotrustClient {
   private baseUrl: string;
   private fetchImpl: typeof fetch;
   private defaultHeaders: Record<string, string>;
   token?: string;
 
-  constructor(options: ZeroAuthClientOptions = {}) {
-    this.baseUrl = (options.baseUrl ?? "http://localhost:3000").replace(/\/+$/, "");
+  constructor(options: zerotrustClientOptions = {}) {
+    this.baseUrl = (options.baseUrl ?? "http://localhost:3000").replace(
+      /\/+$/,
+      "",
+    );
     this.token = options.token;
     const f = options.fetch ?? globalThis.fetch;
-    if (!f) throw new Error("No fetch implementation available; pass options.fetch");
+    if (!f)
+      throw new Error("No fetch implementation available; pass options.fetch");
     this.fetchImpl = f.bind(globalThis);
     this.defaultHeaders = options.headers ?? {};
   }
@@ -94,7 +103,11 @@ export class ZeroAuthClient {
   }
 
   /** Low-level request helper used by every generated method. */
-  async request<T>(method: string, path: string, options: ZeroAuthRequestOptions = {}): Promise<T> {
+  async request<T>(
+    method: string,
+    path: string,
+    options: zerotrustRequestOptions = {},
+  ): Promise<T> {
     let url = this.baseUrl + path;
     if (options.query) {
       const sp = new URLSearchParams();
@@ -105,7 +118,10 @@ export class ZeroAuthClient {
       if (qs) url += (url.includes("?") ? "&" : "?") + qs;
     }
 
-    const headers: Record<string, string> = { ...this.defaultHeaders, ...options.headers };
+    const headers: Record<string, string> = {
+      ...this.defaultHeaders,
+      ...options.headers,
+    };
     if (this.token) headers.Authorization = `Bearer ${this.token}`;
     let body: string | undefined;
     if (options.body !== undefined) {
@@ -123,9 +139,13 @@ export class ZeroAuthClient {
     }
 
     if (!res.ok) {
-      const env = parsed as { code?: string; message?: string; error?: string; details?: unknown } | undefined;
-      throw new ZeroAuthError(
-        env?.message ?? env?.error ?? `Request failed with status ${res.status}`,
+      const env = parsed as
+        | { code?: string; message?: string; error?: string; details?: unknown }
+        | undefined;
+      throw new zerotrustError(
+        env?.message ??
+          env?.error ??
+          `Request failed with status ${res.status}`,
         res.status,
         env?.code ?? env?.error,
         env?.details ?? parsed,
@@ -139,7 +159,11 @@ export class ZeroAuthClient {
    *
    * @route POST /auth/register
    */
-  postAuthRegister(body: { email: string; password: string; displayName?: string }): Promise<{ success?: boolean; userId?: string }> {
+  postAuthRegister(body: {
+    email: string;
+    password: string;
+    displayName?: string;
+  }): Promise<{ success?: boolean; userId?: string }> {
     return this.request("POST", `/auth/register`, { body });
   }
 
@@ -148,7 +172,10 @@ export class ZeroAuthClient {
    *
    * @route POST /auth/login
    */
-  postAuthLogin(body: { email: string; password: string }): Promise<TokenResponse> {
+  postAuthLogin(body: {
+    email: string;
+    password: string;
+  }): Promise<TokenResponse> {
     return this.request("POST", `/auth/login`, { body });
   }
 
@@ -184,7 +211,10 @@ export class ZeroAuthClient {
    *
    * @route POST /auth/oauth/state
    */
-  postAuthOauthState(body?: { codeChallenge?: string; redirectUri?: string }): Promise<{ state?: string; nonce?: string; ttlSeconds?: number }> {
+  postAuthOauthState(body?: {
+    codeChallenge?: string;
+    redirectUri?: string;
+  }): Promise<{ state?: string; nonce?: string; ttlSeconds?: number }> {
     return this.request("POST", `/auth/oauth/state`, { body });
   }
 
@@ -196,8 +226,13 @@ export class ZeroAuthClient {
    * @route GET /auth/oauth/{provider}/authorize
    * @param provider path parameter
    */
-  getAuthOauthByProviderAuthorize(provider: "google" | "github" | "facebook"): Promise<{ authorizeUrl?: string; state?: string }> {
-    return this.request("GET", `/auth/oauth/${encodeURIComponent(provider)}/authorize`);
+  getAuthOauthByProviderAuthorize(
+    provider: "google" | "github" | "facebook",
+  ): Promise<{ authorizeUrl?: string; state?: string }> {
+    return this.request(
+      "GET",
+      `/auth/oauth/${encodeURIComponent(provider)}/authorize`,
+    );
   }
 
   /**
@@ -208,8 +243,15 @@ export class ZeroAuthClient {
    * @route GET /auth/oauth/{provider}/callback
    * @param provider path parameter
    */
-  getAuthOauthByProviderCallback(provider: "google" | "github" | "facebook", query: { code: string; state: string }): Promise<unknown> {
-    return this.request("GET", `/auth/oauth/${encodeURIComponent(provider)}/callback`, { query });
+  getAuthOauthByProviderCallback(
+    provider: "google" | "github" | "facebook",
+    query: { code: string; state: string },
+  ): Promise<unknown> {
+    return this.request(
+      "GET",
+      `/auth/oauth/${encodeURIComponent(provider)}/callback`,
+      { query },
+    );
   }
 
   /**
@@ -219,7 +261,9 @@ export class ZeroAuthClient {
    *
    * @route POST /auth/oauth/exchange
    */
-  postAuthOauthExchange(body: { code: string }): Promise<{ accessToken?: string; refreshToken?: string }> {
+  postAuthOauthExchange(body: {
+    code: string;
+  }): Promise<{ accessToken?: string; refreshToken?: string }> {
     return this.request("POST", `/auth/oauth/exchange`, { body });
   }
 
@@ -228,7 +272,10 @@ export class ZeroAuthClient {
    *
    * @route POST /auth/password-reset/request
    */
-  postAuthPasswordResetRequest(body: { email: string; channel?: "email" | "sms" | "whatsapp" | "telegram" }): Promise<{ success?: boolean; message?: string }> {
+  postAuthPasswordResetRequest(body: {
+    email: string;
+    channel?: "email" | "sms" | "whatsapp" | "telegram";
+  }): Promise<{ success?: boolean; message?: string }> {
     return this.request("POST", `/auth/password-reset/request`, { body });
   }
 
@@ -237,7 +284,11 @@ export class ZeroAuthClient {
    *
    * @route POST /auth/password-reset/confirm
    */
-  postAuthPasswordResetConfirm(body: { email: string; code: string; newPassword: string }): Promise<{ success?: boolean }> {
+  postAuthPasswordResetConfirm(body: {
+    email: string;
+    code: string;
+    newPassword: string;
+  }): Promise<{ success?: boolean }> {
     return this.request("POST", `/auth/password-reset/confirm`, { body });
   }
 
@@ -255,7 +306,10 @@ export class ZeroAuthClient {
    *
    * @route POST /auth/passkey/register
    */
-  postAuthPasskeyRegister(body: { body: Record<string, unknown>; name?: string }): Promise<{ success?: boolean; credentialId?: string }> {
+  postAuthPasskeyRegister(body: {
+    body: Record<string, unknown>;
+    name?: string;
+  }): Promise<{ success?: boolean; credentialId?: string }> {
     return this.request("POST", `/auth/passkey/register`, { body });
   }
 
@@ -264,7 +318,9 @@ export class ZeroAuthClient {
    *
    * @route POST /auth/passkey/authenticate/options
    */
-  postAuthPasskeyAuthenticateOptions(body?: { email?: string }): Promise<unknown> {
+  postAuthPasskeyAuthenticateOptions(body?: {
+    email?: string;
+  }): Promise<unknown> {
     return this.request("POST", `/auth/passkey/authenticate/options`, { body });
   }
 
@@ -273,7 +329,10 @@ export class ZeroAuthClient {
    *
    * @route POST /auth/passkey/authenticate
    */
-  postAuthPasskeyAuthenticate(body: { body: Record<string, unknown>; challengeKey: string }): Promise<TokenResponse> {
+  postAuthPasskeyAuthenticate(body: {
+    body: Record<string, unknown>;
+    challengeKey: string;
+  }): Promise<TokenResponse> {
     return this.request("POST", `/auth/passkey/authenticate`, { body });
   }
 
@@ -284,7 +343,10 @@ export class ZeroAuthClient {
    * @param credentialId path parameter
    */
   deleteAuthPasskeyByCredentialId(credentialId: string): Promise<unknown> {
-    return this.request("DELETE", `/auth/passkey/${encodeURIComponent(credentialId)}`);
+    return this.request(
+      "DELETE",
+      `/auth/passkey/${encodeURIComponent(credentialId)}`,
+    );
   }
 
   /**
@@ -292,7 +354,11 @@ export class ZeroAuthClient {
    *
    * @route POST /auth/mfa/totp/setup
    */
-  postAuthMfaTotpSetup(): Promise<{ secret?: string; otpAuthUrl?: string; qrDataUrl?: string }> {
+  postAuthMfaTotpSetup(): Promise<{
+    secret?: string;
+    otpAuthUrl?: string;
+    qrDataUrl?: string;
+  }> {
     return this.request("POST", `/auth/mfa/totp/setup`);
   }
 
@@ -301,7 +367,9 @@ export class ZeroAuthClient {
    *
    * @route POST /auth/mfa/totp/verify
    */
-  postAuthMfaTotpVerify(body: { code: string }): Promise<{ success?: boolean; backupCodes?: string[] }> {
+  postAuthMfaTotpVerify(body: {
+    code: string;
+  }): Promise<{ success?: boolean; backupCodes?: string[] }> {
     return this.request("POST", `/auth/mfa/totp/verify`, { body });
   }
 
@@ -319,7 +387,9 @@ export class ZeroAuthClient {
    *
    * @route POST /auth/mfa/backup-codes/regenerate
    */
-  postAuthMfaBackupCodesRegenerate(body: { code: string }): Promise<{ backupCodes?: string[] }> {
+  postAuthMfaBackupCodesRegenerate(body: {
+    code: string;
+  }): Promise<{ backupCodes?: string[] }> {
     return this.request("POST", `/auth/mfa/backup-codes/regenerate`, { body });
   }
 
@@ -328,7 +398,9 @@ export class ZeroAuthClient {
    *
    * @route POST /auth/mfa/backup-codes/redeem
    */
-  postAuthMfaBackupCodesRedeem(body: { code: string }): Promise<{ success?: boolean; remainingCodes?: number }> {
+  postAuthMfaBackupCodesRedeem(body: {
+    code: string;
+  }): Promise<{ success?: boolean; remainingCodes?: number }> {
     return this.request("POST", `/auth/mfa/backup-codes/redeem`, { body });
   }
 
@@ -337,7 +409,10 @@ export class ZeroAuthClient {
    *
    * @route POST /auth/mfa/otp/send
    */
-  postAuthMfaOtpSend(body: { channel: "email" | "sms" | "whatsapp" | "telegram"; target: string }): Promise<{ success?: boolean; expiresIn?: number }> {
+  postAuthMfaOtpSend(body: {
+    channel: "email" | "sms" | "whatsapp" | "telegram";
+    target: string;
+  }): Promise<{ success?: boolean; expiresIn?: number }> {
     return this.request("POST", `/auth/mfa/otp/send`, { body });
   }
 
@@ -346,7 +421,10 @@ export class ZeroAuthClient {
    *
    * @route POST /auth/mfa/otp/verify
    */
-  postAuthMfaOtpVerify(body: { code: string; channel: "email" | "sms" | "whatsapp" | "telegram" }): Promise<unknown> {
+  postAuthMfaOtpVerify(body: {
+    code: string;
+    channel: "email" | "sms" | "whatsapp" | "telegram";
+  }): Promise<unknown> {
     return this.request("POST", `/auth/mfa/otp/verify`, { body });
   }
 
@@ -355,7 +433,16 @@ export class ZeroAuthClient {
    *
    * @route GET /sessions
    */
-  getSessions(query?: { limit?: number; offset?: number; activeOnly?: boolean }): Promise<{ sessions?: Session[]; total?: number; limit?: number; offset?: number }> {
+  getSessions(query?: {
+    limit?: number;
+    offset?: number;
+    activeOnly?: boolean;
+  }): Promise<{
+    sessions?: Session[];
+    total?: number;
+    limit?: number;
+    offset?: number;
+  }> {
     return this.request("GET", `/sessions`, { query });
   }
 
@@ -401,7 +488,11 @@ export class ZeroAuthClient {
    *
    * @route GET /admin/users
    */
-  getAdminUsers(query?: { limit?: number; offset?: number; search?: string }): Promise<unknown> {
+  getAdminUsers(query?: {
+    limit?: number;
+    offset?: number;
+    search?: string;
+  }): Promise<unknown> {
     return this.request("GET", `/admin/users`, { query });
   }
 
@@ -421,8 +512,17 @@ export class ZeroAuthClient {
    * @route PATCH /admin/users/{id}
    * @param id path parameter
    */
-  patchAdminUsersById(id: string, body?: { status?: "active" | "suspended" | "deleted"; roles?: string[]; displayName?: string }): Promise<unknown> {
-    return this.request("PATCH", `/admin/users/${encodeURIComponent(id)}`, { body });
+  patchAdminUsersById(
+    id: string,
+    body?: {
+      status?: "active" | "suspended" | "deleted";
+      roles?: string[];
+      displayName?: string;
+    },
+  ): Promise<unknown> {
+    return this.request("PATCH", `/admin/users/${encodeURIComponent(id)}`, {
+      body,
+    });
   }
 
   /**
@@ -441,8 +541,15 @@ export class ZeroAuthClient {
    * @route POST /admin/users/{id}/roles
    * @param id path parameter
    */
-  postAdminUsersByIdRoles(id: string, body: { roleName: string }): Promise<unknown> {
-    return this.request("POST", `/admin/users/${encodeURIComponent(id)}/roles`, { body });
+  postAdminUsersByIdRoles(
+    id: string,
+    body: { roleName: string },
+  ): Promise<unknown> {
+    return this.request(
+      "POST",
+      `/admin/users/${encodeURIComponent(id)}/roles`,
+      { body },
+    );
   }
 
   /**
@@ -452,8 +559,14 @@ export class ZeroAuthClient {
    * @param id path parameter
    * @param roleName path parameter
    */
-  deleteAdminUsersByIdRolesByRoleName(id: string, roleName: string): Promise<unknown> {
-    return this.request("DELETE", `/admin/users/${encodeURIComponent(id)}/roles/${encodeURIComponent(roleName)}`);
+  deleteAdminUsersByIdRolesByRoleName(
+    id: string,
+    roleName: string,
+  ): Promise<unknown> {
+    return this.request(
+      "DELETE",
+      `/admin/users/${encodeURIComponent(id)}/roles/${encodeURIComponent(roleName)}`,
+    );
   }
 
   /**
@@ -463,7 +576,10 @@ export class ZeroAuthClient {
    * @param id path parameter
    */
   getAdminUsersByIdSessions(id: string): Promise<unknown> {
-    return this.request("GET", `/admin/users/${encodeURIComponent(id)}/sessions`);
+    return this.request(
+      "GET",
+      `/admin/users/${encodeURIComponent(id)}/sessions`,
+    );
   }
 
   /**
@@ -473,7 +589,10 @@ export class ZeroAuthClient {
    * @param id path parameter
    */
   deleteAdminUsersByIdSessions(id: string): Promise<unknown> {
-    return this.request("DELETE", `/admin/users/${encodeURIComponent(id)}/sessions`);
+    return this.request(
+      "DELETE",
+      `/admin/users/${encodeURIComponent(id)}/sessions`,
+    );
   }
 
   /**
@@ -500,7 +619,13 @@ export class ZeroAuthClient {
    *
    * @route POST /admin/roles
    */
-  postAdminRoles(body: { name: string; displayName: string; description?: string; parentRoleName?: string; permissions?: unknown[] }): Promise<unknown> {
+  postAdminRoles(body: {
+    name: string;
+    displayName: string;
+    description?: string;
+    parentRoleName?: string;
+    permissions?: unknown[];
+  }): Promise<unknown> {
     return this.request("POST", `/admin/roles`, { body });
   }
 
@@ -509,7 +634,9 @@ export class ZeroAuthClient {
    *
    * @route GET /admin/jit-grants
    */
-  getAdminJitGrants(query?: { status?: "pending" | "approved" | "denied" | "expired" | "revoked" }): Promise<unknown> {
+  getAdminJitGrants(query?: {
+    status?: "pending" | "approved" | "denied" | "expired" | "revoked";
+  }): Promise<unknown> {
     return this.request("GET", `/admin/jit-grants`, { query });
   }
 
@@ -520,7 +647,10 @@ export class ZeroAuthClient {
    * @param id path parameter
    */
   postAdminJitGrantsByIdApprove(id: string): Promise<unknown> {
-    return this.request("POST", `/admin/jit-grants/${encodeURIComponent(id)}/approve`);
+    return this.request(
+      "POST",
+      `/admin/jit-grants/${encodeURIComponent(id)}/approve`,
+    );
   }
 
   /**
@@ -530,7 +660,10 @@ export class ZeroAuthClient {
    * @param id path parameter
    */
   postAdminJitGrantsByIdDeny(id: string): Promise<unknown> {
-    return this.request("POST", `/admin/jit-grants/${encodeURIComponent(id)}/deny`);
+    return this.request(
+      "POST",
+      `/admin/jit-grants/${encodeURIComponent(id)}/deny`,
+    );
   }
 
   /**
@@ -540,7 +673,10 @@ export class ZeroAuthClient {
    * @param id path parameter
    */
   deleteAdminJitGrantsById(id: string): Promise<unknown> {
-    return this.request("DELETE", `/admin/jit-grants/${encodeURIComponent(id)}`);
+    return this.request(
+      "DELETE",
+      `/admin/jit-grants/${encodeURIComponent(id)}`,
+    );
   }
 
   /**
@@ -548,7 +684,12 @@ export class ZeroAuthClient {
    *
    * @route GET /admin/audit-logs
    */
-  getAdminAuditLogs(query?: { limit?: number; offset?: number; action?: string; actorId?: string }): Promise<unknown> {
+  getAdminAuditLogs(query?: {
+    limit?: number;
+    offset?: number;
+    action?: string;
+    actorId?: string;
+  }): Promise<unknown> {
     return this.request("GET", `/admin/audit-logs`, { query });
   }
 
@@ -566,7 +707,11 @@ export class ZeroAuthClient {
    *
    * @route GET /healthz
    */
-  getHealthz(): Promise<{ status?: "ok"; redis?: string; elasticsearch?: string }> {
+  getHealthz(): Promise<{
+    status?: "ok";
+    redis?: string;
+    elasticsearch?: string;
+  }> {
     return this.request("GET", `/healthz`);
   }
 }

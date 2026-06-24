@@ -10,7 +10,11 @@ import { TokenService } from "../services/token.service";
 import { getClientIp } from "../shared/clientIp";
 import type { HonoEnv } from "../shared/types";
 import { resolveDID } from "./resolver";
-import { createDIDChallenge, provisionDIDUser, verifyDIDProof } from "./verifier";
+import {
+  createDIDChallenge,
+  provisionDIDUser,
+  verifyDIDProof,
+} from "./verifier";
 
 const app = new Hono<HonoEnv>();
 
@@ -36,7 +40,11 @@ async function issueDIDSession(userId: string, c: Context<HonoEnv>) {
   const tokenSvc = await getTokenService();
   const db = getDb();
 
-  const userRows = await db.select().from(usersTable).where(eq(usersTable.id, userId)).limit(1);
+  const userRows = await db
+    .select()
+    .from(usersTable)
+    .where(eq(usersTable.id, userId))
+    .limit(1);
   const user = userRows[0];
   if (!user) throw new Error("User not found");
 
@@ -45,7 +53,7 @@ async function issueDIDSession(userId: string, c: Context<HonoEnv>) {
     sub: user.id,
     email: user.email,
     sid: sessionId,
-    aud: "zeroauth",
+    aud: "zerotrust",
     scope: ["openid"],
   });
   const payload = await tokenSvc.verifyAccessToken(accessToken);
@@ -73,7 +81,11 @@ async function issueDIDSession(userId: string, c: Context<HonoEnv>) {
     expiresAt: new Date(Date.now() + cfg.session.refreshTokenTTL * 1000),
   });
 
-  return { accessToken, refreshToken: refreshTokenPlain, expiresIn: cfg.session.defaultTTL };
+  return {
+    accessToken,
+    refreshToken: refreshTokenPlain,
+    expiresIn: cfg.session.defaultTTL,
+  };
 }
 
 // GET /resolve?did=... — resolve a DID to its DID document.
@@ -95,7 +107,9 @@ app.get("/resolve", async (c) => {
 // The caller proves control of `did` by signing the returned challenge with the
 // key in the DID document's `authentication` set.
 app.post("/challenge", async (c) => {
-  const body = await c.req.json<{ did?: unknown }>().catch(() => ({}) as { did?: unknown });
+  const body = await c.req
+    .json<{ did?: unknown }>()
+    .catch(() => ({}) as { did?: unknown });
   const { did } = body;
 
   if (!did || typeof did !== "string") {
@@ -134,7 +148,7 @@ app.post("/verify", async (c) => {
 
   const result = await verifyDIDProof(
     proof as Parameters<typeof verifyDIDProof>[0],
-    challengeId as string
+    challengeId as string,
   );
 
   if (!result.verified) {
@@ -145,7 +159,7 @@ app.post("/verify", async (c) => {
 });
 
 // POST /login — verify a signed DID proof, then provision a local user and issue
-// a ZeroAuth session. This is the login-via-DID entry point: it runs the same
+// a zerotrust session. This is the login-via-DID entry point: it runs the same
 // proof-of-control check as /verify, find-or-creates a user keyed on the DID,
 // and returns access + refresh tokens.
 app.post("/login", rateLimit({ points: 10, windowSecs: 60 }), async (c) => {
@@ -160,7 +174,7 @@ app.post("/login", rateLimit({ points: 10, windowSecs: 60 }), async (c) => {
 
   const result = await verifyDIDProof(
     proof as Parameters<typeof verifyDIDProof>[0],
-    challengeId as string
+    challengeId as string,
   );
 
   if (!result.verified || !result.did) {
@@ -171,9 +185,17 @@ app.post("/login", rateLimit({ points: 10, windowSecs: 60 }), async (c) => {
     // verifyDIDProof already resolved + validated the document; re-resolve for the
     // provisioning record (provisionDIDUser keys solely on the DID string).
     const didDoc = await resolveDID(result.did);
-    const userId = await provisionDIDUser(result.did, didDoc as import("./types").DIDDocument);
+    const userId = await provisionDIDUser(
+      result.did,
+      didDoc as import("./types").DIDDocument,
+    );
     const tokens = await issueDIDSession(userId, c);
-    return c.json({ verified: true, did: result.did, method: result.method, ...tokens });
+    return c.json({
+      verified: true,
+      did: result.did,
+      method: result.method,
+      ...tokens,
+    });
   } catch {
     return c.json({ error: "did_login_failed" }, 500);
   }

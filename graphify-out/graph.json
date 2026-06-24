@@ -61,7 +61,7 @@
       "source_location": "L2",
       "community": 99,
       "norm_label": "parser",
-      "id": "zeroauth_eslintrc_parser"
+      "id": "zerotrust_eslintrc_parser"
     },
     {
       "label": "parserOptions",
@@ -70,7 +70,7 @@
       "source_location": "L3",
       "community": 99,
       "norm_label": "parseroptions",
-      "id": "zeroauth_eslintrc_parseroptions"
+      "id": "zerotrust_eslintrc_parseroptions"
     },
     {
       "label": "ecmaVersion",
@@ -79,7 +79,7 @@
       "source_location": "L4",
       "community": 99,
       "norm_label": "ecmaversion",
-      "id": "zeroauth_eslintrc_parseroptions_ecmaversion"
+      "id": "zerotrust_eslintrc_parseroptions_ecmaversion"
     },
     {
       "label": "sourceType",
@@ -88,7 +88,7 @@
       "source_location": "L5",
       "community": 99,
       "norm_label": "sourcetype",
-      "id": "zeroauth_eslintrc_parseroptions_sourcetype"
+      "id": "zerotrust_eslintrc_parseroptions_sourcetype"
     },
     {
       "label": "project",
@@ -97,7 +97,7 @@
       "source_location": "L6",
       "community": 99,
       "norm_label": "project",
-      "id": "zeroauth_eslintrc_parseroptions_project"
+      "id": "zerotrust_eslintrc_parseroptions_project"
     },
     {
       "label": "extends",
@@ -106,7 +106,7 @@
       "source_location": "L8",
       "community": 99,
       "norm_label": "extends",
-      "id": "zeroauth_eslintrc_extends"
+      "id": "zerotrust_eslintrc_extends"
     },
     {
       "label": "rules",
@@ -115,7 +115,7 @@
       "source_location": "L9",
       "community": 99,
       "norm_label": "rules",
-      "id": "zeroauth_eslintrc_rules"
+      "id": "zerotrust_eslintrc_rules"
     },
     {
       "label": "@typescript-eslint/no-unused-vars",
@@ -124,7 +124,7 @@
       "source_location": "L10",
       "community": 99,
       "norm_label": "@typescript-eslint/no-unused-vars",
-      "id": "zeroauth_eslintrc_rules_typescript_eslint_no_unused_vars"
+      "id": "zerotrust_eslintrc_rules_typescript_eslint_no_unused_vars"
     },
     {
       "label": "@typescript-eslint/no-floating-promises",
@@ -133,7 +133,7 @@
       "source_location": "L17",
       "community": 99,
       "norm_label": "@typescript-eslint/no-floating-promises",
-      "id": "zeroauth_eslintrc_rules_typescript_eslint_no_floating_promises"
+      "id": "zerotrust_eslintrc_rules_typescript_eslint_no_floating_promises"
     },
     {
       "label": "@typescript-eslint/no-misused-promises",
@@ -142,7 +142,7 @@
       "source_location": "L18",
       "community": 99,
       "norm_label": "@typescript-eslint/no-misused-promises",
-      "id": "zeroauth_eslintrc_rules_typescript_eslint_no_misused_promises"
+      "id": "zerotrust_eslintrc_rules_typescript_eslint_no_misused_promises"
     },
     {
       "label": "@typescript-eslint/await-thenable",
@@ -151,7 +151,7 @@
       "source_location": "L19",
       "community": 99,
       "norm_label": "@typescript-eslint/await-thenable",
-      "id": "zeroauth_eslintrc_rules_typescript_eslint_await_thenable"
+      "id": "zerotrust_eslintrc_rules_typescript_eslint_await_thenable"
     },
     {
       "label": "@typescript-eslint/no-explicit-any",
@@ -160,7 +160,7 @@
       "source_location": "L20",
       "community": 99,
       "norm_label": "@typescript-eslint/no-explicit-any",
-      "id": "zeroauth_eslintrc_rules_typescript_eslint_no_explicit_any"
+      "id": "zerotrust_eslintrc_rules_typescript_eslint_no_explicit_any"
     },
     {
       "label": "no-console",
@@ -169,7 +169,7 @@
       "source_location": "L21",
       "community": 99,
       "norm_label": "no-console",
-      "id": "zeroauth_eslintrc_rules_no_console"
+      "id": "zerotrust_eslintrc_rules_no_console"
     },
     {
       "label": "prefer-const",
@@ -178,7 +178,7 @@
       "source_location": "L27",
       "community": 99,
       "norm_label": "prefer-const",
-      "id": "zeroauth_eslintrc_rules_prefer_const"
+      "id": "zerotrust_eslintrc_rules_prefer_const"
     },
     {
       "label": "no-var",
@@ -187,7 +187,7 @@
       "source_location": "L28",
       "community": 99,
       "norm_label": "no-var",
-      "id": "zeroauth_eslintrc_rules_no_var"
+      "id": "zerotrust_eslintrc_rules_no_var"
     },
     {
       "label": "ignorePatterns",
@@ -196,7 +196,7 @@
       "source_location": "L30",
       "community": 99,
       "norm_label": "ignorepatterns",
-      "id": "zeroauth_eslintrc_ignorepatterns"
+      "id": "zerotrust_eslintrc_ignorepatterns"
     },
     {
       "label": ".mcp.json",
@@ -214,7 +214,7 @@
       "source_location": "L2",
       "community": 278,
       "norm_label": "mcpservers",
-      "id": "zeroauth_mcp_mcpservers"
+      "id": "zerotrust_mcp_mcpservers"
     },
     {
       "label": "nextjs",
@@ -223,7 +223,7 @@
       "source_location": "L3",
       "community": 278,
       "norm_label": "nextjs",
-      "id": "zeroauth_mcp_mcpservers_nextjs"
+      "id": "zerotrust_mcp_mcpservers_nextjs"
     },
     {
       "label": "type",
@@ -232,7 +232,7 @@
       "source_location": "L4",
       "community": 278,
       "norm_label": "type",
-      "id": "zeroauth_mcp_nextjs_type"
+      "id": "zerotrust_mcp_nextjs_type"
     },
     {
       "label": "url",
@@ -241,7 +241,7 @@
       "source_location": "L5",
       "community": 278,
       "norm_label": "url",
-      "id": "zeroauth_mcp_nextjs_url"
+      "id": "zerotrust_mcp_nextjs_url"
     },
     {
       "label": ".prettierrc.json",
@@ -259,7 +259,7 @@
       "source_location": "L2",
       "community": 183,
       "norm_label": "semi",
-      "id": "zeroauth_prettierrc_semi"
+      "id": "zerotrust_prettierrc_semi"
     },
     {
       "label": "singleQuote",
@@ -268,7 +268,7 @@
       "source_location": "L3",
       "community": 183,
       "norm_label": "singlequote",
-      "id": "zeroauth_prettierrc_singlequote"
+      "id": "zerotrust_prettierrc_singlequote"
     },
     {
       "label": "printWidth",
@@ -277,7 +277,7 @@
       "source_location": "L4",
       "community": 183,
       "norm_label": "printwidth",
-      "id": "zeroauth_prettierrc_printwidth"
+      "id": "zerotrust_prettierrc_printwidth"
     },
     {
       "label": "tabWidth",
@@ -286,7 +286,7 @@
       "source_location": "L5",
       "community": 183,
       "norm_label": "tabwidth",
-      "id": "zeroauth_prettierrc_tabwidth"
+      "id": "zerotrust_prettierrc_tabwidth"
     },
     {
       "label": "trailingComma",
@@ -295,7 +295,7 @@
       "source_location": "L6",
       "community": 183,
       "norm_label": "trailingcomma",
-      "id": "zeroauth_prettierrc_trailingcomma"
+      "id": "zerotrust_prettierrc_trailingcomma"
     },
     {
       "label": "bracketSpacing",
@@ -304,7 +304,7 @@
       "source_location": "L7",
       "community": 183,
       "norm_label": "bracketspacing",
-      "id": "zeroauth_prettierrc_bracketspacing"
+      "id": "zerotrust_prettierrc_bracketspacing"
     },
     {
       "label": "arrowParens",
@@ -313,7 +313,7 @@
       "source_location": "L8",
       "community": 183,
       "norm_label": "arrowparens",
-      "id": "zeroauth_prettierrc_arrowparens"
+      "id": "zerotrust_prettierrc_arrowparens"
     },
     {
       "label": ".releaserc.json",
@@ -331,7 +331,7 @@
       "source_location": "L2",
       "community": 287,
       "norm_label": "branches",
-      "id": "zeroauth_releaserc_branches"
+      "id": "zerotrust_releaserc_branches"
     },
     {
       "label": "plugins",
@@ -340,7 +340,7 @@
       "source_location": "L7",
       "community": 287,
       "norm_label": "plugins",
-      "id": "zeroauth_releaserc_plugins"
+      "id": "zerotrust_releaserc_plugins"
     },
     {
       "label": "commitlint.config.js",
@@ -376,7 +376,7 @@
       "source_location": "L2",
       "community": 194,
       "norm_label": "name",
-      "id": "zeroauth_package_name"
+      "id": "zerotrust_package_name"
     },
     {
       "label": "version",
@@ -385,7 +385,7 @@
       "source_location": "L3",
       "community": 194,
       "norm_label": "version",
-      "id": "zeroauth_package_version"
+      "id": "zerotrust_package_version"
     },
     {
       "label": "private",
@@ -394,7 +394,7 @@
       "source_location": "L4",
       "community": 194,
       "norm_label": "private",
-      "id": "zeroauth_package_private"
+      "id": "zerotrust_package_private"
     },
     {
       "label": "workspaces",
@@ -403,7 +403,7 @@
       "source_location": "L5",
       "community": 194,
       "norm_label": "workspaces",
-      "id": "zeroauth_package_workspaces"
+      "id": "zerotrust_package_workspaces"
     },
     {
       "label": "scripts",
@@ -412,7 +412,7 @@
       "source_location": "L8",
       "community": 58,
       "norm_label": "scripts",
-      "id": "zeroauth_package_scripts"
+      "id": "zerotrust_package_scripts"
     },
     {
       "label": "postinstall",
@@ -421,7 +421,7 @@
       "source_location": "L9",
       "community": 58,
       "norm_label": "postinstall",
-      "id": "zeroauth_package_scripts_postinstall"
+      "id": "zerotrust_package_scripts_postinstall"
     },
     {
       "label": "dev",
@@ -430,7 +430,7 @@
       "source_location": "L10",
       "community": 58,
       "norm_label": "dev",
-      "id": "zeroauth_package_scripts_dev"
+      "id": "zerotrust_package_scripts_dev"
     },
     {
       "label": "dev:api",
@@ -439,7 +439,7 @@
       "source_location": "L11",
       "community": 58,
       "norm_label": "dev:api",
-      "id": "zeroauth_package_scripts_dev_api"
+      "id": "zerotrust_package_scripts_dev_api"
     },
     {
       "label": "dev:ui",
@@ -448,7 +448,7 @@
       "source_location": "L12",
       "community": 58,
       "norm_label": "dev:ui",
-      "id": "zeroauth_package_scripts_dev_ui"
+      "id": "zerotrust_package_scripts_dev_ui"
     },
     {
       "label": "build",
@@ -457,7 +457,7 @@
       "source_location": "L13",
       "community": 58,
       "norm_label": "build",
-      "id": "zeroauth_package_scripts_build"
+      "id": "zerotrust_package_scripts_build"
     },
     {
       "label": "db:generate",
@@ -466,7 +466,7 @@
       "source_location": "L14",
       "community": 58,
       "norm_label": "db:generate",
-      "id": "zeroauth_package_scripts_db_generate"
+      "id": "zerotrust_package_scripts_db_generate"
     },
     {
       "label": "db:migrate",
@@ -475,7 +475,7 @@
       "source_location": "L15",
       "community": 58,
       "norm_label": "db:migrate",
-      "id": "zeroauth_package_scripts_db_migrate"
+      "id": "zerotrust_package_scripts_db_migrate"
     },
     {
       "label": "db:push",
@@ -484,7 +484,7 @@
       "source_location": "L16",
       "community": 58,
       "norm_label": "db:push",
-      "id": "zeroauth_package_scripts_db_push"
+      "id": "zerotrust_package_scripts_db_push"
     },
     {
       "label": "db:studio",
@@ -493,7 +493,7 @@
       "source_location": "L17",
       "community": 58,
       "norm_label": "db:studio",
-      "id": "zeroauth_package_scripts_db_studio"
+      "id": "zerotrust_package_scripts_db_studio"
     },
     {
       "label": "db:backup",
@@ -502,7 +502,7 @@
       "source_location": "L18",
       "community": 58,
       "norm_label": "db:backup",
-      "id": "zeroauth_package_scripts_db_backup"
+      "id": "zerotrust_package_scripts_db_backup"
     },
     {
       "label": "start",
@@ -511,7 +511,7 @@
       "source_location": "L20",
       "community": 58,
       "norm_label": "start",
-      "id": "zeroauth_package_scripts_start"
+      "id": "zerotrust_package_scripts_start"
     },
     {
       "label": "test",
@@ -520,7 +520,7 @@
       "source_location": "L21",
       "community": 58,
       "norm_label": "test",
-      "id": "zeroauth_package_scripts_test"
+      "id": "zerotrust_package_scripts_test"
     },
     {
       "label": "test:watch",
@@ -529,7 +529,7 @@
       "source_location": "L22",
       "community": 58,
       "norm_label": "test:watch",
-      "id": "zeroauth_package_scripts_test_watch"
+      "id": "zerotrust_package_scripts_test_watch"
     },
     {
       "label": "test:coverage",
@@ -538,7 +538,7 @@
       "source_location": "L23",
       "community": 58,
       "norm_label": "test:coverage",
-      "id": "zeroauth_package_scripts_test_coverage"
+      "id": "zerotrust_package_scripts_test_coverage"
     },
     {
       "label": "lint",
@@ -547,7 +547,7 @@
       "source_location": "L24",
       "community": 58,
       "norm_label": "lint",
-      "id": "zeroauth_package_scripts_lint"
+      "id": "zerotrust_package_scripts_lint"
     },
     {
       "label": "lint:fix",
@@ -556,7 +556,7 @@
       "source_location": "L25",
       "community": 58,
       "norm_label": "lint:fix",
-      "id": "zeroauth_package_scripts_lint_fix"
+      "id": "zerotrust_package_scripts_lint_fix"
     },
     {
       "label": "format",
@@ -565,7 +565,7 @@
       "source_location": "L26",
       "community": 58,
       "norm_label": "format",
-      "id": "zeroauth_package_scripts_format"
+      "id": "zerotrust_package_scripts_format"
     },
     {
       "label": "type-check",
@@ -574,7 +574,7 @@
       "source_location": "L28",
       "community": 58,
       "norm_label": "type-check",
-      "id": "zeroauth_package_scripts_type_check"
+      "id": "zerotrust_package_scripts_type_check"
     },
     {
       "label": "prepare",
@@ -583,7 +583,7 @@
       "source_location": "L29",
       "community": 58,
       "norm_label": "prepare",
-      "id": "zeroauth_package_scripts_prepare"
+      "id": "zerotrust_package_scripts_prepare"
     },
     {
       "label": "lint-staged",
@@ -592,7 +592,7 @@
       "source_location": "L30",
       "community": 58,
       "norm_label": "lint-staged",
-      "id": "zeroauth_package_scripts_lint_staged"
+      "id": "zerotrust_package_scripts_lint_staged"
     },
     {
       "label": "release",
@@ -601,7 +601,7 @@
       "source_location": "L31",
       "community": 58,
       "norm_label": "release",
-      "id": "zeroauth_package_scripts_release"
+      "id": "zerotrust_package_scripts_release"
     },
     {
       "label": "release:dry",
@@ -610,7 +610,7 @@
       "source_location": "L32",
       "community": 58,
       "norm_label": "release:dry",
-      "id": "zeroauth_package_scripts_release_dry"
+      "id": "zerotrust_package_scripts_release_dry"
     },
     {
       "label": "lint-staged",
@@ -619,7 +619,7 @@
       "source_location": "L34",
       "community": 223,
       "norm_label": "lint-staged",
-      "id": "zeroauth_package_lint_staged"
+      "id": "zerotrust_package_lint_staged"
     },
     {
       "label": "src/**/*.ts",
@@ -628,7 +628,7 @@
       "source_location": "L33",
       "community": 223,
       "norm_label": "src/**/*.ts",
-      "id": "zeroauth_package_lint_staged_src_ts"
+      "id": "zerotrust_package_lint_staged_src_ts"
     },
     {
       "label": "src/**/!(*.test|*.spec).ts",
@@ -637,7 +637,7 @@
       "source_location": "L36",
       "community": 223,
       "norm_label": "src/**/!(*.test|*.spec).ts",
-      "id": "zeroauth_package_lint_staged_src_test_spec_ts"
+      "id": "zerotrust_package_lint_staged_src_test_spec_ts"
     },
     {
       "label": "packages/ui/src/**/*.{ts,tsx}",
@@ -646,7 +646,7 @@
       "source_location": "L39",
       "community": 223,
       "norm_label": "packages/ui/src/**/*.{ts,tsx}",
-      "id": "zeroauth_package_lint_staged_packages_ui_src_ts_tsx"
+      "id": "zerotrust_package_lint_staged_packages_ui_src_ts_tsx"
     },
     {
       "label": "*.{json,md}",
@@ -655,7 +655,7 @@
       "source_location": "L42",
       "community": 223,
       "norm_label": "*.{json,md}",
-      "id": "zeroauth_package_lint_staged_json_md"
+      "id": "zerotrust_package_lint_staged_json_md"
     },
     {
       "label": "dependencies",
@@ -664,7 +664,7 @@
       "source_location": "L39",
       "community": 25,
       "norm_label": "dependencies",
-      "id": "zeroauth_package_dependencies"
+      "id": "zerotrust_package_dependencies"
     },
     {
       "label": "@hono/node-server",
@@ -673,7 +673,7 @@
       "source_location": "L41",
       "community": 25,
       "norm_label": "@hono/node-server",
-      "id": "zeroauth_package_dependencies_hono_node_server"
+      "id": "zerotrust_package_dependencies_hono_node_server"
     },
     {
       "label": "@opentelemetry/api",
@@ -682,7 +682,7 @@
       "source_location": "L45",
       "community": 25,
       "norm_label": "@opentelemetry/api",
-      "id": "zeroauth_package_dependencies_opentelemetry_api"
+      "id": "zerotrust_package_dependencies_opentelemetry_api"
     },
     {
       "label": "@opentelemetry/auto-instrumentations-node",
@@ -691,7 +691,7 @@
       "source_location": "L46",
       "community": 25,
       "norm_label": "@opentelemetry/auto-instrumentations-node",
-      "id": "zeroauth_package_dependencies_opentelemetry_auto_instrumentations_node"
+      "id": "zerotrust_package_dependencies_opentelemetry_auto_instrumentations_node"
     },
     {
       "label": "@opentelemetry/exporter-trace-otlp-http",
@@ -700,7 +700,7 @@
       "source_location": "L47",
       "community": 25,
       "norm_label": "@opentelemetry/exporter-trace-otlp-http",
-      "id": "zeroauth_package_dependencies_opentelemetry_exporter_trace_otlp_http"
+      "id": "zerotrust_package_dependencies_opentelemetry_exporter_trace_otlp_http"
     },
     {
       "label": "@opentelemetry/resources",
@@ -709,7 +709,7 @@
       "source_location": "L48",
       "community": 25,
       "norm_label": "@opentelemetry/resources",
-      "id": "zeroauth_package_dependencies_opentelemetry_resources"
+      "id": "zerotrust_package_dependencies_opentelemetry_resources"
     },
     {
       "label": "@opentelemetry/sdk-node",
@@ -718,7 +718,7 @@
       "source_location": "L49",
       "community": 25,
       "norm_label": "@opentelemetry/sdk-node",
-      "id": "zeroauth_package_dependencies_opentelemetry_sdk_node"
+      "id": "zerotrust_package_dependencies_opentelemetry_sdk_node"
     },
     {
       "label": "@opentelemetry/semantic-conventions",
@@ -727,7 +727,7 @@
       "source_location": "L50",
       "community": 25,
       "norm_label": "@opentelemetry/semantic-conventions",
-      "id": "zeroauth_package_dependencies_opentelemetry_semantic_conventions"
+      "id": "zerotrust_package_dependencies_opentelemetry_semantic_conventions"
     },
     {
       "label": "@sentry/node",
@@ -736,7 +736,7 @@
       "source_location": "L51",
       "community": 25,
       "norm_label": "@sentry/node",
-      "id": "zeroauth_package_dependencies_sentry_node"
+      "id": "zerotrust_package_dependencies_sentry_node"
     },
     {
       "label": "@simplewebauthn/server",
@@ -745,7 +745,7 @@
       "source_location": "L52",
       "community": 25,
       "norm_label": "@simplewebauthn/server",
-      "id": "zeroauth_package_dependencies_simplewebauthn_server"
+      "id": "zerotrust_package_dependencies_simplewebauthn_server"
     },
     {
       "label": "@simplewebauthn/types",
@@ -754,7 +754,7 @@
       "source_location": "L53",
       "community": 25,
       "norm_label": "@simplewebauthn/types",
-      "id": "zeroauth_package_dependencies_simplewebauthn_types"
+      "id": "zerotrust_package_dependencies_simplewebauthn_types"
     },
     {
       "label": "@swc/core-win32-x64-msvc",
@@ -763,7 +763,7 @@
       "source_location": "L54",
       "community": 25,
       "norm_label": "@swc/core-win32-x64-msvc",
-      "id": "zeroauth_package_dependencies_swc_core_win32_x64_msvc"
+      "id": "zerotrust_package_dependencies_swc_core_win32_x64_msvc"
     },
     {
       "label": "bcryptjs",
@@ -772,7 +772,7 @@
       "source_location": "L56",
       "community": 25,
       "norm_label": "bcryptjs",
-      "id": "zeroauth_package_dependencies_bcryptjs"
+      "id": "zerotrust_package_dependencies_bcryptjs"
     },
     {
       "label": "bullmq",
@@ -781,7 +781,7 @@
       "source_location": "L57",
       "community": 25,
       "norm_label": "bullmq",
-      "id": "zeroauth_package_dependencies_bullmq"
+      "id": "zerotrust_package_dependencies_bullmq"
     },
     {
       "label": "dotenv",
@@ -790,7 +790,7 @@
       "source_location": "L58",
       "community": 25,
       "norm_label": "dotenv",
-      "id": "zeroauth_package_dependencies_dotenv"
+      "id": "zerotrust_package_dependencies_dotenv"
     },
     {
       "label": "drizzle-orm",
@@ -799,7 +799,7 @@
       "source_location": "L59",
       "community": 25,
       "norm_label": "drizzle-orm",
-      "id": "zeroauth_package_dependencies_drizzle_orm"
+      "id": "zerotrust_package_dependencies_drizzle_orm"
     },
     {
       "label": "geoip-lite",
@@ -808,7 +808,7 @@
       "source_location": "L60",
       "community": 25,
       "norm_label": "geoip-lite",
-      "id": "zeroauth_package_dependencies_geoip_lite"
+      "id": "zerotrust_package_dependencies_geoip_lite"
     },
     {
       "label": "hono",
@@ -817,7 +817,7 @@
       "source_location": "L61",
       "community": 25,
       "norm_label": "hono",
-      "id": "zeroauth_package_dependencies_hono"
+      "id": "zerotrust_package_dependencies_hono"
     },
     {
       "label": "ioredis",
@@ -826,7 +826,7 @@
       "source_location": "L62",
       "community": 25,
       "norm_label": "ioredis",
-      "id": "zeroauth_package_dependencies_ioredis"
+      "id": "zerotrust_package_dependencies_ioredis"
     },
     {
       "label": "nanoid",
@@ -835,7 +835,7 @@
       "source_location": "L63",
       "community": 13,
       "norm_label": "nanoid",
-      "id": "zeroauth_package_dependencies_nanoid"
+      "id": "zerotrust_package_dependencies_nanoid"
     },
     {
       "label": "nodemailer",
@@ -844,7 +844,7 @@
       "source_location": "L64",
       "community": 25,
       "norm_label": "nodemailer",
-      "id": "zeroauth_package_dependencies_nodemailer"
+      "id": "zerotrust_package_dependencies_nodemailer"
     },
     {
       "label": "otpauth",
@@ -853,7 +853,7 @@
       "source_location": "L65",
       "community": 25,
       "norm_label": "otpauth",
-      "id": "zeroauth_package_dependencies_otpauth"
+      "id": "zerotrust_package_dependencies_otpauth"
     },
     {
       "label": "postgres",
@@ -862,7 +862,7 @@
       "source_location": "L66",
       "community": 42,
       "norm_label": "postgres",
-      "id": "zeroauth_package_dependencies_postgres"
+      "id": "zerotrust_package_dependencies_postgres"
     },
     {
       "label": "prom-client",
@@ -871,7 +871,7 @@
       "source_location": "L67",
       "community": 25,
       "norm_label": "prom-client",
-      "id": "zeroauth_package_dependencies_prom_client"
+      "id": "zerotrust_package_dependencies_prom_client"
     },
     {
       "label": "qrcode",
@@ -880,7 +880,7 @@
       "source_location": "L68",
       "community": 25,
       "norm_label": "qrcode",
-      "id": "zeroauth_package_dependencies_qrcode"
+      "id": "zerotrust_package_dependencies_qrcode"
     },
     {
       "label": "samlify",
@@ -889,7 +889,7 @@
       "source_location": "L69",
       "community": 25,
       "norm_label": "samlify",
-      "id": "zeroauth_package_dependencies_samlify"
+      "id": "zerotrust_package_dependencies_samlify"
     },
     {
       "label": "stripe",
@@ -898,7 +898,7 @@
       "source_location": "L70",
       "community": 25,
       "norm_label": "stripe",
-      "id": "zeroauth_package_dependencies_stripe"
+      "id": "zerotrust_package_dependencies_stripe"
     },
     {
       "label": "twilio",
@@ -907,7 +907,7 @@
       "source_location": "L72",
       "community": 4,
       "norm_label": "twilio",
-      "id": "zeroauth_package_dependencies_twilio"
+      "id": "zerotrust_package_dependencies_twilio"
     },
     {
       "label": "ua-parser-js",
@@ -916,7 +916,7 @@
       "source_location": "L73",
       "community": 25,
       "norm_label": "ua-parser-js",
-      "id": "zeroauth_package_dependencies_ua_parser_js"
+      "id": "zerotrust_package_dependencies_ua_parser_js"
     },
     {
       "label": "xpath",
@@ -925,7 +925,7 @@
       "source_location": "L75",
       "community": 25,
       "norm_label": "xpath",
-      "id": "zeroauth_package_dependencies_xpath"
+      "id": "zerotrust_package_dependencies_xpath"
     },
     {
       "label": "zod",
@@ -934,7 +934,7 @@
       "source_location": "L76",
       "community": 25,
       "norm_label": "zod",
-      "id": "zeroauth_package_dependencies_zod"
+      "id": "zerotrust_package_dependencies_zod"
     },
     {
       "label": "devDependencies",
@@ -943,7 +943,7 @@
       "source_location": "L78",
       "community": 43,
       "norm_label": "devdependencies",
-      "id": "zeroauth_package_devdependencies"
+      "id": "zerotrust_package_devdependencies"
     },
     {
       "label": "@commitlint/cli",
@@ -952,7 +952,7 @@
       "source_location": "L81",
       "community": 43,
       "norm_label": "@commitlint/cli",
-      "id": "zeroauth_package_devdependencies_commitlint_cli"
+      "id": "zerotrust_package_devdependencies_commitlint_cli"
     },
     {
       "label": "@commitlint/config-conventional",
@@ -961,7 +961,7 @@
       "source_location": "L82",
       "community": 43,
       "norm_label": "@commitlint/config-conventional",
-      "id": "zeroauth_package_devdependencies_commitlint_config_conventional"
+      "id": "zerotrust_package_devdependencies_commitlint_config_conventional"
     },
     {
       "label": "@rollup/rollup-linux-x64-gnu",
@@ -970,7 +970,7 @@
       "source_location": "L83",
       "community": 43,
       "norm_label": "@rollup/rollup-linux-x64-gnu",
-      "id": "zeroauth_package_devdependencies_rollup_rollup_linux_x64_gnu"
+      "id": "zerotrust_package_devdependencies_rollup_rollup_linux_x64_gnu"
     },
     {
       "label": "@semantic-release/changelog",
@@ -979,7 +979,7 @@
       "source_location": "L84",
       "community": 43,
       "norm_label": "@semantic-release/changelog",
-      "id": "zeroauth_package_devdependencies_semantic_release_changelog"
+      "id": "zerotrust_package_devdependencies_semantic_release_changelog"
     },
     {
       "label": "@semantic-release/commit-analyzer",
@@ -988,7 +988,7 @@
       "source_location": "L85",
       "community": 43,
       "norm_label": "@semantic-release/commit-analyzer",
-      "id": "zeroauth_package_devdependencies_semantic_release_commit_analyzer"
+      "id": "zerotrust_package_devdependencies_semantic_release_commit_analyzer"
     },
     {
       "label": "@semantic-release/git",
@@ -997,7 +997,7 @@
       "source_location": "L86",
       "community": 43,
       "norm_label": "@semantic-release/git",
-      "id": "zeroauth_package_devdependencies_semantic_release_git"
+      "id": "zerotrust_package_devdependencies_semantic_release_git"
     },
     {
       "label": "@semantic-release/github",
@@ -1006,7 +1006,7 @@
       "source_location": "L87",
       "community": 43,
       "norm_label": "@semantic-release/github",
-      "id": "zeroauth_package_devdependencies_semantic_release_github"
+      "id": "zerotrust_package_devdependencies_semantic_release_github"
     },
     {
       "label": "@semantic-release/release-notes-generator",
@@ -1015,7 +1015,7 @@
       "source_location": "L88",
       "community": 43,
       "norm_label": "@semantic-release/release-notes-generator",
-      "id": "zeroauth_package_devdependencies_semantic_release_release_notes_generator"
+      "id": "zerotrust_package_devdependencies_semantic_release_release_notes_generator"
     },
     {
       "label": "@types/bcryptjs",
@@ -1024,7 +1024,7 @@
       "source_location": "L89",
       "community": 43,
       "norm_label": "@types/bcryptjs",
-      "id": "zeroauth_package_devdependencies_types_bcryptjs"
+      "id": "zerotrust_package_devdependencies_types_bcryptjs"
     },
     {
       "label": "@types/node",
@@ -1033,7 +1033,7 @@
       "source_location": "L90",
       "community": 43,
       "norm_label": "@types/node",
-      "id": "zeroauth_package_devdependencies_types_node"
+      "id": "zerotrust_package_devdependencies_types_node"
     },
     {
       "label": "@types/nodemailer",
@@ -1042,7 +1042,7 @@
       "source_location": "L91",
       "community": 43,
       "norm_label": "@types/nodemailer",
-      "id": "zeroauth_package_devdependencies_types_nodemailer"
+      "id": "zerotrust_package_devdependencies_types_nodemailer"
     },
     {
       "label": "@types/qrcode",
@@ -1051,7 +1051,7 @@
       "source_location": "L92",
       "community": 43,
       "norm_label": "@types/qrcode",
-      "id": "zeroauth_package_devdependencies_types_qrcode"
+      "id": "zerotrust_package_devdependencies_types_qrcode"
     },
     {
       "label": "@types/ua-parser-js",
@@ -1060,7 +1060,7 @@
       "source_location": "L93",
       "community": 43,
       "norm_label": "@types/ua-parser-js",
-      "id": "zeroauth_package_devdependencies_types_ua_parser_js"
+      "id": "zerotrust_package_devdependencies_types_ua_parser_js"
     },
     {
       "label": "@typescript-eslint/eslint-plugin",
@@ -1069,7 +1069,7 @@
       "source_location": "L98",
       "community": 43,
       "norm_label": "@typescript-eslint/eslint-plugin",
-      "id": "zeroauth_package_devdependencies_typescript_eslint_eslint_plugin"
+      "id": "zerotrust_package_devdependencies_typescript_eslint_eslint_plugin"
     },
     {
       "label": "@typescript-eslint/parser",
@@ -1078,7 +1078,7 @@
       "source_location": "L99",
       "community": 43,
       "norm_label": "@typescript-eslint/parser",
-      "id": "zeroauth_package_devdependencies_typescript_eslint_parser"
+      "id": "zerotrust_package_devdependencies_typescript_eslint_parser"
     },
     {
       "label": "@vitest/coverage-v8",
@@ -1087,7 +1087,7 @@
       "source_location": "L94",
       "community": 43,
       "norm_label": "@vitest/coverage-v8",
-      "id": "zeroauth_package_devdependencies_vitest_coverage_v8"
+      "id": "zerotrust_package_devdependencies_vitest_coverage_v8"
     },
     {
       "label": "@vitest/ui",
@@ -1096,7 +1096,7 @@
       "source_location": "L95",
       "community": 43,
       "norm_label": "@vitest/ui",
-      "id": "zeroauth_package_devdependencies_vitest_ui"
+      "id": "zerotrust_package_devdependencies_vitest_ui"
     },
     {
       "label": "concurrently",
@@ -1105,7 +1105,7 @@
       "source_location": "L96",
       "community": 43,
       "norm_label": "concurrently",
-      "id": "zeroauth_package_devdependencies_concurrently"
+      "id": "zerotrust_package_devdependencies_concurrently"
     },
     {
       "label": "conventional-changelog-conventionalcommits",
@@ -1114,7 +1114,7 @@
       "source_location": "L97",
       "community": 43,
       "norm_label": "conventional-changelog-conventionalcommits",
-      "id": "zeroauth_package_devdependencies_conventional_changelog_conventionalcommits"
+      "id": "zerotrust_package_devdependencies_conventional_changelog_conventionalcommits"
     },
     {
       "label": "drizzle-kit",
@@ -1123,7 +1123,7 @@
       "source_location": "L98",
       "community": 43,
       "norm_label": "drizzle-kit",
-      "id": "zeroauth_package_devdependencies_drizzle_kit"
+      "id": "zerotrust_package_devdependencies_drizzle_kit"
     },
     {
       "label": "eslint",
@@ -1132,7 +1132,7 @@
       "source_location": "L105",
       "community": 43,
       "norm_label": "eslint",
-      "id": "zeroauth_package_devdependencies_eslint"
+      "id": "zerotrust_package_devdependencies_eslint"
     },
     {
       "label": "husky",
@@ -1141,7 +1141,7 @@
       "source_location": "L99",
       "community": 43,
       "norm_label": "husky",
-      "id": "zeroauth_package_devdependencies_husky"
+      "id": "zerotrust_package_devdependencies_husky"
     },
     {
       "label": "lint-staged",
@@ -1150,7 +1150,7 @@
       "source_location": "L107",
       "community": 43,
       "norm_label": "lint-staged",
-      "id": "zeroauth_package_devdependencies_lint_staged"
+      "id": "zerotrust_package_devdependencies_lint_staged"
     },
     {
       "label": "prettier",
@@ -1159,7 +1159,7 @@
       "source_location": "L108",
       "community": 43,
       "norm_label": "prettier",
-      "id": "zeroauth_package_devdependencies_prettier"
+      "id": "zerotrust_package_devdependencies_prettier"
     },
     {
       "label": "semantic-release",
@@ -1168,7 +1168,7 @@
       "source_location": "L100",
       "community": 133,
       "norm_label": "semantic-release",
-      "id": "zeroauth_package_devdependencies_semantic_release"
+      "id": "zerotrust_package_devdependencies_semantic_release"
     },
     {
       "label": "tsx",
@@ -1177,7 +1177,7 @@
       "source_location": "L101",
       "community": 43,
       "norm_label": "tsx",
-      "id": "zeroauth_package_devdependencies_tsx"
+      "id": "zerotrust_package_devdependencies_tsx"
     },
     {
       "label": "typescript",
@@ -1186,7 +1186,7 @@
       "source_location": "L102",
       "community": 43,
       "norm_label": "typescript",
-      "id": "zeroauth_package_devdependencies_typescript"
+      "id": "zerotrust_package_devdependencies_typescript"
     },
     {
       "label": "vitest",
@@ -1195,7 +1195,7 @@
       "source_location": "L103",
       "community": 43,
       "norm_label": "vitest",
-      "id": "zeroauth_package_devdependencies_vitest"
+      "id": "zerotrust_package_devdependencies_vitest"
     },
     {
       "label": "overrides",
@@ -1204,7 +1204,7 @@
       "source_location": "L105",
       "community": 194,
       "norm_label": "overrides",
-      "id": "zeroauth_package_overrides"
+      "id": "zerotrust_package_overrides"
     },
     {
       "label": "postcss",
@@ -1213,7 +1213,7 @@
       "source_location": "L106",
       "community": 194,
       "norm_label": "postcss",
-      "id": "zeroauth_package_overrides_postcss"
+      "id": "zerotrust_package_overrides_postcss"
     },
     {
       "label": "optionalDependencies",
@@ -1222,7 +1222,7 @@
       "source_location": "L108",
       "community": 110,
       "norm_label": "optionaldependencies",
-      "id": "zeroauth_package_optionaldependencies"
+      "id": "zerotrust_package_optionaldependencies"
     },
     {
       "label": "@parcel/watcher-darwin-arm64",
@@ -1231,7 +1231,7 @@
       "source_location": "L109",
       "community": 110,
       "norm_label": "@parcel/watcher-darwin-arm64",
-      "id": "zeroauth_package_optionaldependencies_parcel_watcher_darwin_arm64"
+      "id": "zerotrust_package_optionaldependencies_parcel_watcher_darwin_arm64"
     },
     {
       "label": "@parcel/watcher-darwin-x64",
@@ -1240,7 +1240,7 @@
       "source_location": "L110",
       "community": 110,
       "norm_label": "@parcel/watcher-darwin-x64",
-      "id": "zeroauth_package_optionaldependencies_parcel_watcher_darwin_x64"
+      "id": "zerotrust_package_optionaldependencies_parcel_watcher_darwin_x64"
     },
     {
       "label": "@parcel/watcher-linux-x64-glibc",
@@ -1249,7 +1249,7 @@
       "source_location": "L111",
       "community": 110,
       "norm_label": "@parcel/watcher-linux-x64-glibc",
-      "id": "zeroauth_package_optionaldependencies_parcel_watcher_linux_x64_glibc"
+      "id": "zerotrust_package_optionaldependencies_parcel_watcher_linux_x64_glibc"
     },
     {
       "label": "@swc/core-linux-x64-gnu",
@@ -1258,7 +1258,7 @@
       "source_location": "L112",
       "community": 110,
       "norm_label": "@swc/core-linux-x64-gnu",
-      "id": "zeroauth_package_optionaldependencies_swc_core_linux_x64_gnu"
+      "id": "zerotrust_package_optionaldependencies_swc_core_linux_x64_gnu"
     },
     {
       "label": "@next/swc-win32-x64-msvc",
@@ -1267,7 +1267,7 @@
       "source_location": "L113",
       "community": 110,
       "norm_label": "@next/swc-win32-x64-msvc",
-      "id": "zeroauth_package_optionaldependencies_next_swc_win32_x64_msvc"
+      "id": "zerotrust_package_optionaldependencies_next_swc_win32_x64_msvc"
     },
     {
       "label": "@next/swc-wasm-nodejs",
@@ -1276,7 +1276,7 @@
       "source_location": "L114",
       "community": 110,
       "norm_label": "@next/swc-wasm-nodejs",
-      "id": "zeroauth_package_optionaldependencies_next_swc_wasm_nodejs"
+      "id": "zerotrust_package_optionaldependencies_next_swc_wasm_nodejs"
     },
     {
       "label": "@next/swc-wasm-web",
@@ -1285,7 +1285,7 @@
       "source_location": "L115",
       "community": 110,
       "norm_label": "@next/swc-wasm-web",
-      "id": "zeroauth_package_optionaldependencies_next_swc_wasm_web"
+      "id": "zerotrust_package_optionaldependencies_next_swc_wasm_web"
     },
     {
       "label": "@parcel/watcher-win32-x64",
@@ -1294,7 +1294,7 @@
       "source_location": "L116",
       "community": 110,
       "norm_label": "@parcel/watcher-win32-x64",
-      "id": "zeroauth_package_optionaldependencies_parcel_watcher_win32_x64"
+      "id": "zerotrust_package_optionaldependencies_parcel_watcher_win32_x64"
     },
     {
       "label": "@swc/core-win32-x64-msvc",
@@ -1303,7 +1303,7 @@
       "source_location": "L117",
       "community": 110,
       "norm_label": "@swc/core-win32-x64-msvc",
-      "id": "zeroauth_package_optionaldependencies_swc_core_win32_x64_msvc"
+      "id": "zerotrust_package_optionaldependencies_swc_core_win32_x64_msvc"
     },
     {
       "label": "@rolldown/binding-darwin-arm64",
@@ -1312,7 +1312,7 @@
       "source_location": "L118",
       "community": 110,
       "norm_label": "@rolldown/binding-darwin-arm64",
-      "id": "zeroauth_package_optionaldependencies_rolldown_binding_darwin_arm64"
+      "id": "zerotrust_package_optionaldependencies_rolldown_binding_darwin_arm64"
     },
     {
       "label": "@rolldown/binding-darwin-x64",
@@ -1321,7 +1321,7 @@
       "source_location": "L119",
       "community": 110,
       "norm_label": "@rolldown/binding-darwin-x64",
-      "id": "zeroauth_package_optionaldependencies_rolldown_binding_darwin_x64"
+      "id": "zerotrust_package_optionaldependencies_rolldown_binding_darwin_x64"
     },
     {
       "label": "@rolldown/binding-linux-x64-gnu",
@@ -1330,7 +1330,7 @@
       "source_location": "L120",
       "community": 110,
       "norm_label": "@rolldown/binding-linux-x64-gnu",
-      "id": "zeroauth_package_optionaldependencies_rolldown_binding_linux_x64_gnu"
+      "id": "zerotrust_package_optionaldependencies_rolldown_binding_linux_x64_gnu"
     },
     {
       "label": "@rolldown/binding-win32-x64-msvc",
@@ -1339,7 +1339,7 @@
       "source_location": "L121",
       "community": 110,
       "norm_label": "@rolldown/binding-win32-x64-msvc",
-      "id": "zeroauth_package_optionaldependencies_rolldown_binding_win32_x64_msvc"
+      "id": "zerotrust_package_optionaldependencies_rolldown_binding_win32_x64_msvc"
     },
     {
       "label": "@swc/core-darwin-arm64",
@@ -1348,7 +1348,7 @@
       "source_location": "L122",
       "community": 110,
       "norm_label": "@swc/core-darwin-arm64",
-      "id": "zeroauth_package_optionaldependencies_swc_core_darwin_arm64"
+      "id": "zerotrust_package_optionaldependencies_swc_core_darwin_arm64"
     },
     {
       "label": "@swc/core-darwin-x64",
@@ -1357,7 +1357,7 @@
       "source_location": "L123",
       "community": 110,
       "norm_label": "@swc/core-darwin-x64",
-      "id": "zeroauth_package_optionaldependencies_swc_core_darwin_x64"
+      "id": "zerotrust_package_optionaldependencies_swc_core_darwin_x64"
     },
     {
       "label": "tsconfig.json",
@@ -1375,7 +1375,7 @@
       "source_location": "L2",
       "community": 10,
       "norm_label": "compileroptions",
-      "id": "zeroauth_tsconfig_compileroptions"
+      "id": "zerotrust_tsconfig_compileroptions"
     },
     {
       "label": "target",
@@ -1384,7 +1384,7 @@
       "source_location": "L3",
       "community": 10,
       "norm_label": "target",
-      "id": "zeroauth_tsconfig_compileroptions_target"
+      "id": "zerotrust_tsconfig_compileroptions_target"
     },
     {
       "label": "lib",
@@ -1393,7 +1393,7 @@
       "source_location": "L4",
       "community": 10,
       "norm_label": "lib",
-      "id": "zeroauth_tsconfig_compileroptions_lib"
+      "id": "zerotrust_tsconfig_compileroptions_lib"
     },
     {
       "label": "types",
@@ -1402,7 +1402,7 @@
       "source_location": "L5",
       "community": 10,
       "norm_label": "types",
-      "id": "zeroauth_tsconfig_compileroptions_types"
+      "id": "zerotrust_tsconfig_compileroptions_types"
     },
     {
       "label": "module",
@@ -1411,7 +1411,7 @@
       "source_location": "L6",
       "community": 10,
       "norm_label": "module",
-      "id": "zeroauth_tsconfig_compileroptions_module"
+      "id": "zerotrust_tsconfig_compileroptions_module"
     },
     {
       "label": "moduleResolution",
@@ -1420,7 +1420,7 @@
       "source_location": "L7",
       "community": 10,
       "norm_label": "moduleresolution",
-      "id": "zeroauth_tsconfig_compileroptions_moduleresolution"
+      "id": "zerotrust_tsconfig_compileroptions_moduleresolution"
     },
     {
       "label": "rootDir",
@@ -1429,7 +1429,7 @@
       "source_location": "L8",
       "community": 10,
       "norm_label": "rootdir",
-      "id": "zeroauth_tsconfig_compileroptions_rootdir"
+      "id": "zerotrust_tsconfig_compileroptions_rootdir"
     },
     {
       "label": "outDir",
@@ -1438,7 +1438,7 @@
       "source_location": "L9",
       "community": 10,
       "norm_label": "outdir",
-      "id": "zeroauth_tsconfig_compileroptions_outdir"
+      "id": "zerotrust_tsconfig_compileroptions_outdir"
     },
     {
       "label": "resolveJsonModule",
@@ -1447,7 +1447,7 @@
       "source_location": "L10",
       "community": 10,
       "norm_label": "resolvejsonmodule",
-      "id": "zeroauth_tsconfig_compileroptions_resolvejsonmodule"
+      "id": "zerotrust_tsconfig_compileroptions_resolvejsonmodule"
     },
     {
       "label": "skipLibCheck",
@@ -1456,7 +1456,7 @@
       "source_location": "L11",
       "community": 10,
       "norm_label": "skiplibcheck",
-      "id": "zeroauth_tsconfig_compileroptions_skiplibcheck"
+      "id": "zerotrust_tsconfig_compileroptions_skiplibcheck"
     },
     {
       "label": "strict",
@@ -1465,7 +1465,7 @@
       "source_location": "L12",
       "community": 10,
       "norm_label": "strict",
-      "id": "zeroauth_tsconfig_compileroptions_strict"
+      "id": "zerotrust_tsconfig_compileroptions_strict"
     },
     {
       "label": "esModuleInterop",
@@ -1474,7 +1474,7 @@
       "source_location": "L13",
       "community": 10,
       "norm_label": "esmoduleinterop",
-      "id": "zeroauth_tsconfig_compileroptions_esmoduleinterop"
+      "id": "zerotrust_tsconfig_compileroptions_esmoduleinterop"
     },
     {
       "label": "declaration",
@@ -1483,7 +1483,7 @@
       "source_location": "L14",
       "community": 10,
       "norm_label": "declaration",
-      "id": "zeroauth_tsconfig_compileroptions_declaration"
+      "id": "zerotrust_tsconfig_compileroptions_declaration"
     },
     {
       "label": "declarationMap",
@@ -1492,7 +1492,7 @@
       "source_location": "L15",
       "community": 10,
       "norm_label": "declarationmap",
-      "id": "zeroauth_tsconfig_compileroptions_declarationmap"
+      "id": "zerotrust_tsconfig_compileroptions_declarationmap"
     },
     {
       "label": "sourceMap",
@@ -1501,7 +1501,7 @@
       "source_location": "L16",
       "community": 10,
       "norm_label": "sourcemap",
-      "id": "zeroauth_tsconfig_compileroptions_sourcemap"
+      "id": "zerotrust_tsconfig_compileroptions_sourcemap"
     },
     {
       "label": "allowSyntheticDefaultImports",
@@ -1510,7 +1510,7 @@
       "source_location": "L17",
       "community": 10,
       "norm_label": "allowsyntheticdefaultimports",
-      "id": "zeroauth_tsconfig_compileroptions_allowsyntheticdefaultimports"
+      "id": "zerotrust_tsconfig_compileroptions_allowsyntheticdefaultimports"
     },
     {
       "label": "allowImportingTsExtensions",
@@ -1519,7 +1519,7 @@
       "source_location": "L18",
       "community": 10,
       "norm_label": "allowimportingtsextensions",
-      "id": "zeroauth_tsconfig_compileroptions_allowimportingtsextensions"
+      "id": "zerotrust_tsconfig_compileroptions_allowimportingtsextensions"
     },
     {
       "label": "rewriteRelativeImportExtensions",
@@ -1528,7 +1528,7 @@
       "source_location": "L19",
       "community": 10,
       "norm_label": "rewriterelativeimportextensions",
-      "id": "zeroauth_tsconfig_compileroptions_rewriterelativeimportextensions"
+      "id": "zerotrust_tsconfig_compileroptions_rewriterelativeimportextensions"
     },
     {
       "label": "noEmit",
@@ -1537,7 +1537,7 @@
       "source_location": "L20",
       "community": 10,
       "norm_label": "noemit",
-      "id": "zeroauth_tsconfig_compileroptions_noemit"
+      "id": "zerotrust_tsconfig_compileroptions_noemit"
     },
     {
       "label": "forceConsistentCasingInFileNames",
@@ -1546,7 +1546,7 @@
       "source_location": "L21",
       "community": 10,
       "norm_label": "forceconsistentcasinginfilenames",
-      "id": "zeroauth_tsconfig_compileroptions_forceconsistentcasinginfilenames"
+      "id": "zerotrust_tsconfig_compileroptions_forceconsistentcasinginfilenames"
     },
     {
       "label": "noImplicitAny",
@@ -1555,7 +1555,7 @@
       "source_location": "L22",
       "community": 10,
       "norm_label": "noimplicitany",
-      "id": "zeroauth_tsconfig_compileroptions_noimplicitany"
+      "id": "zerotrust_tsconfig_compileroptions_noimplicitany"
     },
     {
       "label": "strictNullChecks",
@@ -1564,7 +1564,7 @@
       "source_location": "L23",
       "community": 10,
       "norm_label": "strictnullchecks",
-      "id": "zeroauth_tsconfig_compileroptions_strictnullchecks"
+      "id": "zerotrust_tsconfig_compileroptions_strictnullchecks"
     },
     {
       "label": "strictFunctionTypes",
@@ -1573,7 +1573,7 @@
       "source_location": "L24",
       "community": 10,
       "norm_label": "strictfunctiontypes",
-      "id": "zeroauth_tsconfig_compileroptions_strictfunctiontypes"
+      "id": "zerotrust_tsconfig_compileroptions_strictfunctiontypes"
     },
     {
       "label": "strictBindCallApply",
@@ -1582,7 +1582,7 @@
       "source_location": "L25",
       "community": 10,
       "norm_label": "strictbindcallapply",
-      "id": "zeroauth_tsconfig_compileroptions_strictbindcallapply"
+      "id": "zerotrust_tsconfig_compileroptions_strictbindcallapply"
     },
     {
       "label": "strictPropertyInitialization",
@@ -1591,7 +1591,7 @@
       "source_location": "L26",
       "community": 10,
       "norm_label": "strictpropertyinitialization",
-      "id": "zeroauth_tsconfig_compileroptions_strictpropertyinitialization"
+      "id": "zerotrust_tsconfig_compileroptions_strictpropertyinitialization"
     },
     {
       "label": "noImplicitThis",
@@ -1600,7 +1600,7 @@
       "source_location": "L27",
       "community": 10,
       "norm_label": "noimplicitthis",
-      "id": "zeroauth_tsconfig_compileroptions_noimplicitthis"
+      "id": "zerotrust_tsconfig_compileroptions_noimplicitthis"
     },
     {
       "label": "alwaysStrict",
@@ -1609,7 +1609,7 @@
       "source_location": "L28",
       "community": 10,
       "norm_label": "alwaysstrict",
-      "id": "zeroauth_tsconfig_compileroptions_alwaysstrict"
+      "id": "zerotrust_tsconfig_compileroptions_alwaysstrict"
     },
     {
       "label": "noUnusedLocals",
@@ -1618,7 +1618,7 @@
       "source_location": "L29",
       "community": 10,
       "norm_label": "nounusedlocals",
-      "id": "zeroauth_tsconfig_compileroptions_nounusedlocals"
+      "id": "zerotrust_tsconfig_compileroptions_nounusedlocals"
     },
     {
       "label": "noUnusedParameters",
@@ -1627,7 +1627,7 @@
       "source_location": "L30",
       "community": 10,
       "norm_label": "nounusedparameters",
-      "id": "zeroauth_tsconfig_compileroptions_nounusedparameters"
+      "id": "zerotrust_tsconfig_compileroptions_nounusedparameters"
     },
     {
       "label": "noImplicitReturns",
@@ -1636,7 +1636,7 @@
       "source_location": "L31",
       "community": 10,
       "norm_label": "noimplicitreturns",
-      "id": "zeroauth_tsconfig_compileroptions_noimplicitreturns"
+      "id": "zerotrust_tsconfig_compileroptions_noimplicitreturns"
     },
     {
       "label": "noFallthroughCasesInSwitch",
@@ -1645,7 +1645,7 @@
       "source_location": "L32",
       "community": 10,
       "norm_label": "nofallthroughcasesinswitch",
-      "id": "zeroauth_tsconfig_compileroptions_nofallthroughcasesinswitch"
+      "id": "zerotrust_tsconfig_compileroptions_nofallthroughcasesinswitch"
     },
     {
       "label": "paths",
@@ -1654,7 +1654,7 @@
       "source_location": "L33",
       "community": 10,
       "norm_label": "paths",
-      "id": "zeroauth_tsconfig_compileroptions_paths"
+      "id": "zerotrust_tsconfig_compileroptions_paths"
     },
     {
       "label": "@/*",
@@ -1663,7 +1663,7 @@
       "source_location": "L34",
       "community": 10,
       "norm_label": "@/*",
-      "id": "zeroauth_tsconfig_paths"
+      "id": "zerotrust_tsconfig_paths"
     },
     {
       "label": "@config",
@@ -1672,7 +1672,7 @@
       "source_location": "L35",
       "community": 10,
       "norm_label": "@config",
-      "id": "zeroauth_tsconfig_paths_config"
+      "id": "zerotrust_tsconfig_paths_config"
     },
     {
       "label": "@db",
@@ -1681,7 +1681,7 @@
       "source_location": "L36",
       "community": 10,
       "norm_label": "@db",
-      "id": "zeroauth_tsconfig_paths_db"
+      "id": "zerotrust_tsconfig_paths_db"
     },
     {
       "label": "@crypto",
@@ -1690,7 +1690,7 @@
       "source_location": "L37",
       "community": 10,
       "norm_label": "@crypto",
-      "id": "zeroauth_tsconfig_paths_crypto"
+      "id": "zerotrust_tsconfig_paths_crypto"
     },
     {
       "label": "@logger",
@@ -1699,7 +1699,7 @@
       "source_location": "L38",
       "community": 10,
       "norm_label": "@logger",
-      "id": "zeroauth_tsconfig_paths_logger"
+      "id": "zerotrust_tsconfig_paths_logger"
     },
     {
       "label": "@models",
@@ -1708,7 +1708,7 @@
       "source_location": "L39",
       "community": 10,
       "norm_label": "@models",
-      "id": "zeroauth_tsconfig_paths_models"
+      "id": "zerotrust_tsconfig_paths_models"
     },
     {
       "label": "@services",
@@ -1717,7 +1717,7 @@
       "source_location": "L40",
       "community": 10,
       "norm_label": "@services",
-      "id": "zeroauth_tsconfig_paths_services"
+      "id": "zerotrust_tsconfig_paths_services"
     },
     {
       "label": "@middleware",
@@ -1726,7 +1726,7 @@
       "source_location": "L41",
       "community": 10,
       "norm_label": "@middleware",
-      "id": "zeroauth_tsconfig_paths_middleware"
+      "id": "zerotrust_tsconfig_paths_middleware"
     },
     {
       "label": "@types",
@@ -1735,7 +1735,7 @@
       "source_location": "L42",
       "community": 10,
       "norm_label": "@types",
-      "id": "zeroauth_tsconfig_paths_types"
+      "id": "zerotrust_tsconfig_paths_types"
     },
     {
       "label": "include",
@@ -1744,7 +1744,7 @@
       "source_location": "L45",
       "community": 10,
       "norm_label": "include",
-      "id": "zeroauth_tsconfig_include"
+      "id": "zerotrust_tsconfig_include"
     },
     {
       "label": "exclude",
@@ -1753,7 +1753,7 @@
       "source_location": "L46",
       "community": 10,
       "norm_label": "exclude",
-      "id": "zeroauth_tsconfig_exclude"
+      "id": "zerotrust_tsconfig_exclude"
     },
     {
       "label": "vitest.config.ts",
@@ -15841,22 +15841,22 @@
       "id": "src_index_ts"
     },
     {
-      "label": "initializeZeroAuth()",
+      "label": "initializezerotrust()",
       "file_type": "code",
       "source_file": "src/index.ts",
       "source_location": "L314",
       "community": 42,
-      "norm_label": "initializezeroauth()",
-      "id": "src_index_initializezeroauth"
+      "norm_label": "initializezerotrust()",
+      "id": "src_index_initializezerotrust"
     },
     {
-      "label": "shutdownZeroAuth()",
+      "label": "shutdownzerotrust()",
       "file_type": "code",
       "source_file": "src/index.ts",
       "source_location": "L356",
       "community": 102,
-      "norm_label": "shutdownzeroauth()",
-      "id": "src_index_shutdownzeroauth"
+      "norm_label": "shutdownzerotrust()",
+      "id": "src_index_shutdownzerotrust"
     },
     {
       "label": "instrument.ts",
@@ -28117,13 +28117,13 @@
       "id": "src_shared_types_ts"
     },
     {
-      "label": "ZeroAuthConfig",
+      "label": "zerotrustConfig",
       "file_type": "code",
       "source_file": "src/shared/types.ts",
       "source_location": "L3",
       "community": 48,
-      "norm_label": "zeroauthconfig",
-      "id": "shared_types_zeroauthconfig"
+      "norm_label": "zerotrustconfig",
+      "id": "shared_types_zerotrustconfig"
     },
     {
       "label": "TokenPayload",
@@ -28315,13 +28315,13 @@
       "id": "shared_types_honoenv"
     },
     {
-      "label": "ZeroAuthError",
+      "label": "zerotrustError",
       "file_type": "code",
       "source_file": "src/shared/types.ts",
       "source_location": "L385",
       "community": 37,
-      "norm_label": "zeroautherror",
-      "id": "shared_types_zeroautherror"
+      "norm_label": "zerotrusterror",
+      "id": "shared_types_zerotrusterror"
     },
     {
       "label": ".constructor()",
@@ -28330,7 +28330,7 @@
       "source_location": "L386",
       "community": 37,
       "norm_label": ".constructor()",
-      "id": "shared_types_zeroautherror_constructor"
+      "id": "shared_types_zerotrusterror_constructor"
     },
     {
       "label": "ErrorCodes",
@@ -30484,7 +30484,7 @@
       "id": "load_session_revocation_k6_revokeres"
     },
     {
-      "label": "ZeroAuth Project",
+      "label": "zerotrust Project",
       "file_type": "document",
       "source_file": "README.md",
       "source_location": null,
@@ -30493,8 +30493,8 @@
       "author": null,
       "contributor": null,
       "community": 119,
-      "norm_label": "zeroauth project",
-      "id": "readme_zeroauth_project"
+      "norm_label": "zerotrust project",
+      "id": "readme_zerotrust_project"
     },
     {
       "label": "Hono API Server",
@@ -30887,7 +30887,7 @@
       "id": "readme_pm2"
     },
     {
-      "label": "ZeroAuth Monorepo Structure",
+      "label": "zerotrust Monorepo Structure",
       "file_type": "document",
       "source_file": "CLAUDE.md",
       "source_location": null,
@@ -30896,7 +30896,7 @@
       "author": null,
       "contributor": null,
       "community": 119,
-      "norm_label": "zeroauth monorepo structure",
+      "norm_label": "zerotrust monorepo structure",
       "id": "claude_md_monorepo"
     },
     {
@@ -30991,7 +30991,7 @@
       "id": "docker_compose_kibana_service"
     },
     {
-      "label": "ZeroAuth API Docker Service",
+      "label": "zerotrust API Docker Service",
       "file_type": "document",
       "source_file": "docker-compose.yml",
       "source_location": null,
@@ -31000,8 +31000,8 @@
       "author": null,
       "contributor": null,
       "community": 120,
-      "norm_label": "zeroauth api docker service",
-      "id": "docker_compose_zeroauth_service"
+      "norm_label": "zerotrust api docker service",
+      "id": "docker_compose_zerotrust_service"
     },
     {
       "label": "Jaeger Distributed Tracing Viewer",
@@ -31095,7 +31095,7 @@
       "id": "security_md_policy"
     },
     {
-      "label": "ZeroAuth SaaS Starter Guide",
+      "label": "zerotrust SaaS Starter Guide",
       "file_type": "document",
       "source_file": "STARTER.md",
       "source_location": null,
@@ -31104,7 +31104,7 @@
       "author": null,
       "contributor": null,
       "community": 85,
-      "norm_label": "zeroauth saas starter guide",
+      "norm_label": "zerotrust saas starter guide",
       "id": "starter_md_saas_starter"
     },
     {
@@ -31342,7 +31342,7 @@
       "id": "perf_ui_polling"
     },
     {
-      "label": "ZeroAuth Kibana Dashboards",
+      "label": "zerotrust Kibana Dashboards",
       "file_type": "document",
       "source_file": "kibana/README.md",
       "source_location": null,
@@ -31351,7 +31351,7 @@
       "author": null,
       "contributor": null,
       "community": 120,
-      "norm_label": "zeroauth kibana dashboards",
+      "norm_label": "zerotrust kibana dashboards",
       "id": "kibana_readme"
     },
     {
@@ -31420,20 +31420,20 @@
       "id": "kibana_anomaly_dashboard"
     },
     {
-      "label": "ZeroAuth Overview Dashboard",
+      "label": "zerotrust Overview Dashboard",
       "file_type": "document",
       "source_file": "kibana/README.md",
-      "source_location": "kibana/zeroauth-overview.ndjson",
+      "source_location": "kibana/zerotrust-overview.ndjson",
       "source_url": null,
       "captured_at": null,
       "author": null,
       "contributor": null,
       "community": 120,
-      "norm_label": "zeroauth overview dashboard",
+      "norm_label": "zerotrust overview dashboard",
       "id": "kibana_overview_dashboard"
     },
     {
-      "label": "ZeroAuth LLM Index (llms.txt)",
+      "label": "zerotrust LLM Index (llms.txt)",
       "file_type": "document",
       "source_file": "packages/ui/public/llms.txt",
       "source_location": null,
@@ -31442,8 +31442,8 @@
       "author": null,
       "contributor": null,
       "community": 119,
-      "norm_label": "zeroauth llm index (llms.txt)",
-      "id": "llms_txt_zeroauth_llm_index"
+      "norm_label": "zerotrust llm index (llms.txt)",
+      "id": "llms_txt_zerotrust_llm_index"
     },
     {
       "label": "App Icon (192px)",
@@ -31563,7 +31563,7 @@
       "id": "icon512_profile_photo"
     },
     {
-      "label": "ZeroAuth UI Public Assets",
+      "label": "zerotrust UI Public Assets",
       "file_type": "image",
       "source_file": "packages/ui/public/icon-512.png",
       "source_location": null,
@@ -31572,8 +31572,8 @@
       "author": null,
       "contributor": null,
       "community": 200,
-      "norm_label": "zeroauth ui public assets",
-      "id": "icon512_zeroauth_ui"
+      "norm_label": "zerotrust ui public assets",
+      "id": "icon512_zerotrust_ui"
     },
     {
       "label": "components.json",
@@ -33520,7 +33520,7 @@
       "id": "lib_auth_getrefreshtoken"
     },
     {
-      "label": "ZeroAuth SaaS Starter",
+      "label": "zerotrust SaaS Starter",
       "file_type": "document",
       "source_file": "README.md",
       "source_location": null,
@@ -33529,11 +33529,11 @@
       "author": null,
       "contributor": null,
       "community": 39,
-      "norm_label": "zeroauth saas starter",
-      "id": "readme_zeroauth"
+      "norm_label": "zerotrust saas starter",
+      "id": "readme_zerotrust"
     },
     {
-      "label": "ZeroAuth Feature Catalog & Roadmap",
+      "label": "zerotrust Feature Catalog & Roadmap",
       "file_type": "document",
       "source_file": "STARTER.md",
       "source_location": null,
@@ -33542,11 +33542,11 @@
       "author": null,
       "contributor": null,
       "community": 39,
-      "norm_label": "zeroauth feature catalog & roadmap",
+      "norm_label": "zerotrust feature catalog & roadmap",
       "id": "starter_feature_catalog"
     },
     {
-      "label": "ZeroAuth Roadmap",
+      "label": "zerotrust Roadmap",
       "file_type": "document",
       "source_file": "ROADMAP.md",
       "source_location": null,
@@ -33555,8 +33555,8 @@
       "author": null,
       "contributor": null,
       "community": 39,
-      "norm_label": "zeroauth roadmap",
-      "id": "roadmap_zeroauth"
+      "norm_label": "zerotrust roadmap",
+      "id": "roadmap_zerotrust"
     },
     {
       "label": "Dashboard Route Guard",
@@ -34782,7 +34782,7 @@
       "source_location": "L71",
       "community": 25,
       "norm_label": "tailwindcss-animate",
-      "id": "zeroauth_package_dependencies_tailwindcss_animate"
+      "id": "zerotrust_package_dependencies_tailwindcss_animate"
     },
     {
       "label": "page.tsx",
@@ -34890,7 +34890,7 @@
       "source_location": "L42",
       "community": 25,
       "norm_label": "@noble/ciphers",
-      "id": "zeroauth_package_dependencies_noble_ciphers"
+      "id": "zerotrust_package_dependencies_noble_ciphers"
     },
     {
       "label": "@noble/hashes",
@@ -34899,7 +34899,7 @@
       "source_location": "L43",
       "community": 25,
       "norm_label": "@noble/hashes",
-      "id": "zeroauth_package_dependencies_noble_hashes"
+      "id": "zerotrust_package_dependencies_noble_hashes"
     },
     {
       "label": "@noble/post-quantum",
@@ -34908,7 +34908,7 @@
       "source_location": "L44",
       "community": 25,
       "norm_label": "@noble/post-quantum",
-      "id": "zeroauth_package_dependencies_noble_post_quantum"
+      "id": "zerotrust_package_dependencies_noble_post_quantum"
     },
     {
       "label": "@types/web-push",
@@ -34917,7 +34917,7 @@
       "source_location": "L55",
       "community": 25,
       "norm_label": "@types/web-push",
-      "id": "zeroauth_package_dependencies_types_web_push"
+      "id": "zerotrust_package_dependencies_types_web_push"
     },
     {
       "label": "web-push",
@@ -34926,7 +34926,7 @@
       "source_location": "L74",
       "community": 25,
       "norm_label": "web-push",
-      "id": "zeroauth_package_dependencies_web_push"
+      "id": "zerotrust_package_dependencies_web_push"
     },
     {
       "label": "id",
@@ -35964,7 +35964,7 @@
       "id": "fixtures_paseto_v4_vectors_tests"
     },
     {
-      "label": "ZeroAuth Monorepo Package",
+      "label": "zerotrust Monorepo Package",
       "file_type": "document",
       "source_file": "package.json",
       "source_location": null,
@@ -35973,8 +35973,8 @@
       "author": null,
       "contributor": null,
       "community": 294,
-      "norm_label": "zeroauth monorepo package",
-      "id": "package_zeroauth"
+      "norm_label": "zerotrust monorepo package",
+      "id": "package_zerotrust"
     },
     {
       "label": "bun dev (concurrent API+UI)",
@@ -36887,7 +36887,7 @@
       "id": "offlinehtml_OfflineAppShell"
     },
     {
-      "label": "ZeroAuth README overview",
+      "label": "zerotrust README overview",
       "file_type": "document",
       "source_file": "README.md",
       "source_location": null,
@@ -36896,8 +36896,8 @@
       "author": null,
       "contributor": null,
       "community": 30,
-      "norm_label": "zeroauth readme overview",
-      "id": "readme_ZeroAuthOverview"
+      "norm_label": "zerotrust readme overview",
+      "id": "readme_zerotrustOverview"
     },
     {
       "label": "STARTER feature catalog",
@@ -36913,7 +36913,7 @@
       "id": "starter_FeatureCatalog"
     },
     {
-      "label": "ZeroAuth Roadmap",
+      "label": "zerotrust Roadmap",
       "file_type": "document",
       "source_file": "ROADMAP.md",
       "source_location": null,
@@ -36922,7 +36922,7 @@
       "author": null,
       "contributor": null,
       "community": 30,
-      "norm_label": "zeroauth roadmap",
+      "norm_label": "zerotrust roadmap",
       "id": "roadmap_Roadmap"
     },
     {
@@ -36965,7 +36965,7 @@
       "id": "roadmap_WebPushConcept"
     },
     {
-      "label": "ZeroAuth Claude Code guide",
+      "label": "zerotrust Claude Code guide",
       "file_type": "document",
       "source_file": "CLAUDE.md",
       "source_location": null,
@@ -36974,7 +36974,7 @@
       "author": null,
       "contributor": null,
       "community": 30,
-      "norm_label": "zeroauth claude code guide",
+      "norm_label": "zerotrust claude code guide",
       "id": "claudemd_ProjectGuide"
     },
     {
@@ -37552,7 +37552,7 @@
       "id": "webPush_service_test"
     },
     {
-      "label": "ZeroAuth MFA/auth capability concept",
+      "label": "zerotrust MFA/auth capability concept",
       "file_type": "rationale",
       "source_file": "CLAUDE.md",
       "source_location": null,
@@ -37561,7 +37561,7 @@
       "author": null,
       "contributor": null,
       "community": 90,
-      "norm_label": "zeroauth mfa/auth capability concept",
+      "norm_label": "zerotrust mfa/auth capability concept",
       "id": "claudemd_mfa_capability"
     },
     {
@@ -37734,7 +37734,7 @@
       "file_type": "code",
       "source_file": "biome.json",
       "source_location": "L2",
-      "id": "zeroauth_biome_schema",
+      "id": "zerotrust_biome_schema",
       "community": 9,
       "norm_label": "$schema"
     },
@@ -37743,7 +37743,7 @@
       "file_type": "code",
       "source_file": "biome.json",
       "source_location": "L3",
-      "id": "zeroauth_biome_vcs",
+      "id": "zerotrust_biome_vcs",
       "community": 9,
       "norm_label": "vcs"
     },
@@ -37752,7 +37752,7 @@
       "file_type": "code",
       "source_file": "biome.json",
       "source_location": "L4",
-      "id": "zeroauth_biome_vcs_enabled",
+      "id": "zerotrust_biome_vcs_enabled",
       "community": 9,
       "norm_label": "enabled"
     },
@@ -37761,7 +37761,7 @@
       "file_type": "code",
       "source_file": "biome.json",
       "source_location": "L5",
-      "id": "zeroauth_biome_vcs_clientkind",
+      "id": "zerotrust_biome_vcs_clientkind",
       "community": 9,
       "norm_label": "clientkind"
     },
@@ -37770,7 +37770,7 @@
       "file_type": "code",
       "source_file": "biome.json",
       "source_location": "L6",
-      "id": "zeroauth_biome_vcs_useignorefile",
+      "id": "zerotrust_biome_vcs_useignorefile",
       "community": 9,
       "norm_label": "useignorefile"
     },
@@ -37779,7 +37779,7 @@
       "file_type": "code",
       "source_file": "biome.json",
       "source_location": "L8",
-      "id": "zeroauth_biome_files",
+      "id": "zerotrust_biome_files",
       "community": 9,
       "norm_label": "files"
     },
@@ -37788,7 +37788,7 @@
       "file_type": "code",
       "source_file": "biome.json",
       "source_location": "L9",
-      "id": "zeroauth_biome_files_includes",
+      "id": "zerotrust_biome_files_includes",
       "community": 9,
       "norm_label": "includes"
     },
@@ -37797,7 +37797,7 @@
       "file_type": "code",
       "source_file": "biome.json",
       "source_location": "L44",
-      "id": "zeroauth_biome_formatter",
+      "id": "zerotrust_biome_formatter",
       "community": 9,
       "norm_label": "formatter"
     },
@@ -37806,7 +37806,7 @@
       "file_type": "code",
       "source_file": "biome.json",
       "source_location": "L45",
-      "id": "zeroauth_biome_formatter_enabled",
+      "id": "zerotrust_biome_formatter_enabled",
       "community": 9,
       "norm_label": "enabled"
     },
@@ -37815,7 +37815,7 @@
       "file_type": "code",
       "source_file": "biome.json",
       "source_location": "L46",
-      "id": "zeroauth_biome_formatter_indentstyle",
+      "id": "zerotrust_biome_formatter_indentstyle",
       "community": 9,
       "norm_label": "indentstyle"
     },
@@ -37824,7 +37824,7 @@
       "file_type": "code",
       "source_file": "biome.json",
       "source_location": "L47",
-      "id": "zeroauth_biome_formatter_indentwidth",
+      "id": "zerotrust_biome_formatter_indentwidth",
       "community": 9,
       "norm_label": "indentwidth"
     },
@@ -37833,7 +37833,7 @@
       "file_type": "code",
       "source_file": "biome.json",
       "source_location": "L48",
-      "id": "zeroauth_biome_formatter_linewidth",
+      "id": "zerotrust_biome_formatter_linewidth",
       "community": 9,
       "norm_label": "linewidth"
     },
@@ -37842,7 +37842,7 @@
       "file_type": "code",
       "source_file": "biome.json",
       "source_location": "L49",
-      "id": "zeroauth_biome_formatter_lineending",
+      "id": "zerotrust_biome_formatter_lineending",
       "community": 9,
       "norm_label": "lineending"
     },
@@ -37851,7 +37851,7 @@
       "file_type": "code",
       "source_file": "biome.json",
       "source_location": "L50",
-      "id": "zeroauth_biome_formatter_attributeposition",
+      "id": "zerotrust_biome_formatter_attributeposition",
       "community": 9,
       "norm_label": "attributeposition"
     },
@@ -37860,7 +37860,7 @@
       "file_type": "code",
       "source_file": "biome.json",
       "source_location": "L52",
-      "id": "zeroauth_biome_javascript",
+      "id": "zerotrust_biome_javascript",
       "community": 9,
       "norm_label": "javascript"
     },
@@ -37869,7 +37869,7 @@
       "file_type": "code",
       "source_file": "biome.json",
       "source_location": "L53",
-      "id": "zeroauth_biome_javascript_formatter",
+      "id": "zerotrust_biome_javascript_formatter",
       "community": 9,
       "norm_label": "formatter"
     },
@@ -37878,7 +37878,7 @@
       "file_type": "code",
       "source_file": "biome.json",
       "source_location": "L54",
-      "id": "zeroauth_biome_formatter_quotestyle",
+      "id": "zerotrust_biome_formatter_quotestyle",
       "community": 9,
       "norm_label": "quotestyle"
     },
@@ -37887,7 +37887,7 @@
       "file_type": "code",
       "source_file": "biome.json",
       "source_location": "L55",
-      "id": "zeroauth_biome_formatter_semicolons",
+      "id": "zerotrust_biome_formatter_semicolons",
       "community": 9,
       "norm_label": "semicolons"
     },
@@ -37896,7 +37896,7 @@
       "file_type": "code",
       "source_file": "biome.json",
       "source_location": "L56",
-      "id": "zeroauth_biome_formatter_trailingcommas",
+      "id": "zerotrust_biome_formatter_trailingcommas",
       "community": 9,
       "norm_label": "trailingcommas"
     },
@@ -37905,7 +37905,7 @@
       "file_type": "code",
       "source_file": "biome.json",
       "source_location": "L57",
-      "id": "zeroauth_biome_formatter_arrowparentheses",
+      "id": "zerotrust_biome_formatter_arrowparentheses",
       "community": 9,
       "norm_label": "arrowparentheses"
     },
@@ -37914,7 +37914,7 @@
       "file_type": "code",
       "source_file": "biome.json",
       "source_location": "L58",
-      "id": "zeroauth_biome_formatter_bracketspacing",
+      "id": "zerotrust_biome_formatter_bracketspacing",
       "community": 9,
       "norm_label": "bracketspacing"
     },
@@ -37923,7 +37923,7 @@
       "file_type": "code",
       "source_file": "biome.json",
       "source_location": "L59",
-      "id": "zeroauth_biome_formatter_jsxquotestyle",
+      "id": "zerotrust_biome_formatter_jsxquotestyle",
       "community": 9,
       "norm_label": "jsxquotestyle"
     },
@@ -37932,7 +37932,7 @@
       "file_type": "code",
       "source_file": "biome.json",
       "source_location": "L62",
-      "id": "zeroauth_biome_json",
+      "id": "zerotrust_biome_json",
       "community": 9,
       "norm_label": "json"
     },
@@ -37941,7 +37941,7 @@
       "file_type": "code",
       "source_file": "biome.json",
       "source_location": "L63",
-      "id": "zeroauth_biome_json_formatter",
+      "id": "zerotrust_biome_json_formatter",
       "community": 9,
       "norm_label": "formatter"
     },
@@ -37950,7 +37950,7 @@
       "file_type": "code",
       "source_file": "biome.json",
       "source_location": "L68",
-      "id": "zeroauth_biome_css",
+      "id": "zerotrust_biome_css",
       "community": 9,
       "norm_label": "css"
     },
@@ -37959,7 +37959,7 @@
       "file_type": "code",
       "source_file": "biome.json",
       "source_location": "L69",
-      "id": "zeroauth_biome_css_formatter",
+      "id": "zerotrust_biome_css_formatter",
       "community": 9,
       "norm_label": "formatter"
     },
@@ -37968,7 +37968,7 @@
       "file_type": "code",
       "source_file": "biome.json",
       "source_location": "L74",
-      "id": "zeroauth_biome_linter",
+      "id": "zerotrust_biome_linter",
       "community": 9,
       "norm_label": "linter"
     },
@@ -37977,7 +37977,7 @@
       "file_type": "code",
       "source_file": "biome.json",
       "source_location": "L75",
-      "id": "zeroauth_biome_linter_enabled",
+      "id": "zerotrust_biome_linter_enabled",
       "community": 9,
       "norm_label": "enabled"
     },
@@ -37986,7 +37986,7 @@
       "file_type": "code",
       "source_file": "biome.json",
       "source_location": "L76",
-      "id": "zeroauth_biome_linter_rules",
+      "id": "zerotrust_biome_linter_rules",
       "community": 9,
       "norm_label": "rules"
     },
@@ -37995,7 +37995,7 @@
       "file_type": "code",
       "source_file": "biome.json",
       "source_location": "L77",
-      "id": "zeroauth_biome_rules_preset",
+      "id": "zerotrust_biome_rules_preset",
       "community": 9,
       "norm_label": "preset"
     },
@@ -38004,7 +38004,7 @@
       "file_type": "code",
       "source_file": "biome.json",
       "source_location": "L78",
-      "id": "zeroauth_biome_rules_suspicious",
+      "id": "zerotrust_biome_rules_suspicious",
       "community": 9,
       "norm_label": "suspicious"
     },
@@ -38013,7 +38013,7 @@
       "file_type": "code",
       "source_file": "biome.json",
       "source_location": "L79",
-      "id": "zeroauth_biome_suspicious_noexplicitany",
+      "id": "zerotrust_biome_suspicious_noexplicitany",
       "community": 9,
       "norm_label": "noexplicitany"
     },
@@ -38022,7 +38022,7 @@
       "file_type": "code",
       "source_file": "biome.json",
       "source_location": "L80",
-      "id": "zeroauth_biome_suspicious_noconsole",
+      "id": "zerotrust_biome_suspicious_noconsole",
       "community": 9,
       "norm_label": "noconsole"
     },
@@ -38031,7 +38031,7 @@
       "file_type": "code",
       "source_file": "biome.json",
       "source_location": "L81",
-      "id": "zeroauth_biome_noconsole_level",
+      "id": "zerotrust_biome_noconsole_level",
       "community": 9,
       "norm_label": "level"
     },
@@ -38040,7 +38040,7 @@
       "file_type": "code",
       "source_file": "biome.json",
       "source_location": "L82",
-      "id": "zeroauth_biome_noconsole_options",
+      "id": "zerotrust_biome_noconsole_options",
       "community": 9,
       "norm_label": "options"
     },
@@ -38049,7 +38049,7 @@
       "file_type": "code",
       "source_file": "biome.json",
       "source_location": "L83",
-      "id": "zeroauth_biome_options_allow",
+      "id": "zerotrust_biome_options_allow",
       "community": 9,
       "norm_label": "allow"
     },
@@ -38058,7 +38058,7 @@
       "file_type": "code",
       "source_file": "biome.json",
       "source_location": "L87",
-      "id": "zeroauth_biome_rules_style",
+      "id": "zerotrust_biome_rules_style",
       "community": 9,
       "norm_label": "style"
     },
@@ -38067,7 +38067,7 @@
       "file_type": "code",
       "source_file": "biome.json",
       "source_location": "L88",
-      "id": "zeroauth_biome_style_useconst",
+      "id": "zerotrust_biome_style_useconst",
       "community": 9,
       "norm_label": "useconst"
     },
@@ -38076,7 +38076,7 @@
       "file_type": "code",
       "source_file": "biome.json",
       "source_location": "L90",
-      "id": "zeroauth_biome_rules_nursery",
+      "id": "zerotrust_biome_rules_nursery",
       "community": 9,
       "norm_label": "nursery"
     },
@@ -38085,7 +38085,7 @@
       "file_type": "code",
       "source_file": "biome.json",
       "source_location": "L91",
-      "id": "zeroauth_biome_nursery_nofloatingpromises",
+      "id": "zerotrust_biome_nursery_nofloatingpromises",
       "community": 9,
       "norm_label": "nofloatingpromises"
     },
@@ -38094,7 +38094,7 @@
       "file_type": "code",
       "source_file": "biome.json",
       "source_location": "L92",
-      "id": "zeroauth_biome_nursery_nomisusedpromises",
+      "id": "zerotrust_biome_nursery_nomisusedpromises",
       "community": 9,
       "norm_label": "nomisusedpromises"
     },
@@ -38103,7 +38103,7 @@
       "file_type": "code",
       "source_file": "biome.json",
       "source_location": "L96",
-      "id": "zeroauth_biome_assist",
+      "id": "zerotrust_biome_assist",
       "community": 9,
       "norm_label": "assist"
     },
@@ -38112,7 +38112,7 @@
       "file_type": "code",
       "source_file": "biome.json",
       "source_location": "L97",
-      "id": "zeroauth_biome_assist_actions",
+      "id": "zerotrust_biome_assist_actions",
       "community": 9,
       "norm_label": "actions"
     },
@@ -38121,7 +38121,7 @@
       "file_type": "code",
       "source_file": "biome.json",
       "source_location": "L98",
-      "id": "zeroauth_biome_actions_source",
+      "id": "zerotrust_biome_actions_source",
       "community": 9,
       "norm_label": "source"
     },
@@ -38130,7 +38130,7 @@
       "file_type": "code",
       "source_file": "biome.json",
       "source_location": "L99",
-      "id": "zeroauth_biome_source_recommended",
+      "id": "zerotrust_biome_source_recommended",
       "community": 9,
       "norm_label": "recommended"
     },
@@ -38139,7 +38139,7 @@
       "file_type": "code",
       "source_file": "package.json",
       "source_location": "L19",
-      "id": "zeroauth_package_scripts_db_restore",
+      "id": "zerotrust_package_scripts_db_restore",
       "community": 58,
       "norm_label": "db:restore"
     },
@@ -38148,7 +38148,7 @@
       "file_type": "code",
       "source_file": "package.json",
       "source_location": "L27",
-      "id": "zeroauth_package_scripts_lint_ci",
+      "id": "zerotrust_package_scripts_lint_ci",
       "community": 58,
       "norm_label": "lint:ci"
     },
@@ -38157,7 +38157,7 @@
       "file_type": "code",
       "source_file": "package.json",
       "source_location": "L35",
-      "id": "zeroauth_package_lint_staged_ts_tsx_js_mjs_cjs_json_jsonc_css",
+      "id": "zerotrust_package_lint_staged_ts_tsx_js_mjs_cjs_json_jsonc_css",
       "community": 223,
       "norm_label": "*.{ts,tsx,js,mjs,cjs,json,jsonc,css}"
     },
@@ -38166,7 +38166,7 @@
       "file_type": "code",
       "source_file": "package.json",
       "source_location": "L40",
-      "id": "zeroauth_package_dependencies_aws_sdk_client_s3",
+      "id": "zerotrust_package_dependencies_aws_sdk_client_s3",
       "community": 25,
       "norm_label": "@aws-sdk/client-s3"
     },
@@ -38175,7 +38175,7 @@
       "file_type": "code",
       "source_file": "package.json",
       "source_location": "L79",
-      "id": "zeroauth_package_devdependencies_biomejs_biome",
+      "id": "zerotrust_package_devdependencies_biomejs_biome",
       "community": 43,
       "norm_label": "@biomejs/biome"
     },
@@ -38184,7 +38184,7 @@
       "file_type": "code",
       "source_file": "package.json",
       "source_location": "L80",
-      "id": "zeroauth_package_devdependencies_biomejs_cli_win32_x64",
+      "id": "zerotrust_package_devdependencies_biomejs_cli_win32_x64",
       "community": 43,
       "norm_label": "@biomejs/cli-win32-x64"
     },
@@ -41582,7 +41582,7 @@
       "norm_label": "app"
     },
     {
-      "label": "ZeroAuth Assistant Agent",
+      "label": "zerotrust Assistant Agent",
       "file_type": "document",
       "source_file": ".agent.md",
       "source_location": null,
@@ -41590,9 +41590,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "agent_zeroauth_assistant",
+      "id": "agent_zerotrust_assistant",
       "community": 77,
-      "norm_label": "zeroauth assistant agent"
+      "norm_label": "zerotrust assistant agent"
     },
     {
       "label": "Agent Safety & Review Points",
@@ -41621,7 +41621,7 @@
       "norm_label": "agent tool preferences"
     },
     {
-      "label": "ZeroAuth Changelog",
+      "label": "zerotrust Changelog",
       "file_type": "document",
       "source_file": "CHANGELOG.md",
       "source_location": null,
@@ -41631,7 +41631,7 @@
       "contributor": null,
       "id": "changelog_doc",
       "community": 133,
-      "norm_label": "zeroauth changelog"
+      "norm_label": "zerotrust changelog"
     },
     {
       "label": "semantic-release",
@@ -41660,7 +41660,7 @@
       "norm_label": "conventional commits"
     },
     {
-      "label": "ZeroAuth Claude Code Guide",
+      "label": "zerotrust Claude Code Guide",
       "file_type": "document",
       "source_file": "CLAUDE.md",
       "source_location": null,
@@ -41670,7 +41670,7 @@
       "contributor": null,
       "id": "claudemd_guide",
       "community": 77,
-      "norm_label": "zeroauth claude code guide"
+      "norm_label": "zerotrust claude code guide"
     },
     {
       "label": "Monorepo Structure (API + UI)",
@@ -41816,7 +41816,7 @@
       "norm_label": "graphify knowledge graph"
     },
     {
-      "label": "ZeroAuth README (SaaS Starter)",
+      "label": "zerotrust README (SaaS Starter)",
       "file_type": "document",
       "source_file": "README.md",
       "source_location": null,
@@ -41826,7 +41826,7 @@
       "contributor": null,
       "id": "readme_doc",
       "community": 78,
-      "norm_label": "zeroauth readme (saas starter)"
+      "norm_label": "zerotrust readme (saas starter)"
     },
     {
       "label": "PASETO v4 Tokens",
@@ -41920,7 +41920,7 @@
       "norm_label": "plan config (free/pro/enterprise)"
     },
     {
-      "label": "ZeroAuth Implemented Features",
+      "label": "zerotrust Implemented Features",
       "file_type": "document",
       "source_file": "implemented.md",
       "source_location": null,
@@ -41930,7 +41930,7 @@
       "contributor": null,
       "id": "implemented_doc",
       "community": 84,
-      "norm_label": "zeroauth implemented features"
+      "norm_label": "zerotrust implemented features"
     },
     {
       "label": "Auth & Identity Suite",
@@ -42180,7 +42180,7 @@
       "norm_label": "i18n (next-intl, en/es/fr)"
     },
     {
-      "label": "ZeroAuth Not-Yet-Implemented Backlog",
+      "label": "zerotrust Not-Yet-Implemented Backlog",
       "file_type": "document",
       "source_file": "not-implemented.md",
       "source_location": null,
@@ -42190,7 +42190,7 @@
       "contributor": null,
       "id": "notimpl_doc",
       "community": 133,
-      "norm_label": "zeroauth not-yet-implemented backlog"
+      "norm_label": "zerotrust not-yet-implemented backlog"
     },
     {
       "label": "Self-serve SSO per Org",
@@ -42410,7 +42410,7 @@
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "eslintrc_json",
-      "target": "zeroauth_eslintrc_parser"
+      "target": "zerotrust_eslintrc_parser"
     },
     {
       "relation": "contains",
@@ -42420,7 +42420,7 @@
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "eslintrc_json",
-      "target": "zeroauth_eslintrc_parseroptions"
+      "target": "zerotrust_eslintrc_parseroptions"
     },
     {
       "relation": "contains",
@@ -42430,7 +42430,7 @@
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "eslintrc_json",
-      "target": "zeroauth_eslintrc_extends"
+      "target": "zerotrust_eslintrc_extends"
     },
     {
       "relation": "contains",
@@ -42440,7 +42440,7 @@
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "eslintrc_json",
-      "target": "zeroauth_eslintrc_rules"
+      "target": "zerotrust_eslintrc_rules"
     },
     {
       "relation": "contains",
@@ -42450,7 +42450,7 @@
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "eslintrc_json",
-      "target": "zeroauth_eslintrc_ignorepatterns"
+      "target": "zerotrust_eslintrc_ignorepatterns"
     },
     {
       "relation": "contains",
@@ -42459,8 +42459,8 @@
       "source_location": "L4",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_eslintrc_parseroptions",
-      "target": "zeroauth_eslintrc_parseroptions_ecmaversion"
+      "source": "zerotrust_eslintrc_parseroptions",
+      "target": "zerotrust_eslintrc_parseroptions_ecmaversion"
     },
     {
       "relation": "contains",
@@ -42469,8 +42469,8 @@
       "source_location": "L5",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_eslintrc_parseroptions",
-      "target": "zeroauth_eslintrc_parseroptions_sourcetype"
+      "source": "zerotrust_eslintrc_parseroptions",
+      "target": "zerotrust_eslintrc_parseroptions_sourcetype"
     },
     {
       "relation": "contains",
@@ -42479,8 +42479,8 @@
       "source_location": "L6",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_eslintrc_parseroptions",
-      "target": "zeroauth_eslintrc_parseroptions_project"
+      "source": "zerotrust_eslintrc_parseroptions",
+      "target": "zerotrust_eslintrc_parseroptions_project"
     },
     {
       "relation": "contains",
@@ -42489,8 +42489,8 @@
       "source_location": "L10",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_eslintrc_rules",
-      "target": "zeroauth_eslintrc_rules_typescript_eslint_no_unused_vars"
+      "source": "zerotrust_eslintrc_rules",
+      "target": "zerotrust_eslintrc_rules_typescript_eslint_no_unused_vars"
     },
     {
       "relation": "contains",
@@ -42499,8 +42499,8 @@
       "source_location": "L17",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_eslintrc_rules",
-      "target": "zeroauth_eslintrc_rules_typescript_eslint_no_floating_promises"
+      "source": "zerotrust_eslintrc_rules",
+      "target": "zerotrust_eslintrc_rules_typescript_eslint_no_floating_promises"
     },
     {
       "relation": "contains",
@@ -42509,8 +42509,8 @@
       "source_location": "L18",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_eslintrc_rules",
-      "target": "zeroauth_eslintrc_rules_typescript_eslint_no_misused_promises"
+      "source": "zerotrust_eslintrc_rules",
+      "target": "zerotrust_eslintrc_rules_typescript_eslint_no_misused_promises"
     },
     {
       "relation": "contains",
@@ -42519,8 +42519,8 @@
       "source_location": "L19",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_eslintrc_rules",
-      "target": "zeroauth_eslintrc_rules_typescript_eslint_await_thenable"
+      "source": "zerotrust_eslintrc_rules",
+      "target": "zerotrust_eslintrc_rules_typescript_eslint_await_thenable"
     },
     {
       "relation": "contains",
@@ -42529,8 +42529,8 @@
       "source_location": "L20",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_eslintrc_rules",
-      "target": "zeroauth_eslintrc_rules_typescript_eslint_no_explicit_any"
+      "source": "zerotrust_eslintrc_rules",
+      "target": "zerotrust_eslintrc_rules_typescript_eslint_no_explicit_any"
     },
     {
       "relation": "contains",
@@ -42539,8 +42539,8 @@
       "source_location": "L21",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_eslintrc_rules",
-      "target": "zeroauth_eslintrc_rules_no_console"
+      "source": "zerotrust_eslintrc_rules",
+      "target": "zerotrust_eslintrc_rules_no_console"
     },
     {
       "relation": "contains",
@@ -42549,8 +42549,8 @@
       "source_location": "L27",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_eslintrc_rules",
-      "target": "zeroauth_eslintrc_rules_prefer_const"
+      "source": "zerotrust_eslintrc_rules",
+      "target": "zerotrust_eslintrc_rules_prefer_const"
     },
     {
       "relation": "contains",
@@ -42559,8 +42559,8 @@
       "source_location": "L28",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_eslintrc_rules",
-      "target": "zeroauth_eslintrc_rules_no_var"
+      "source": "zerotrust_eslintrc_rules",
+      "target": "zerotrust_eslintrc_rules_no_var"
     },
     {
       "relation": "contains",
@@ -42570,7 +42570,7 @@
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "mcp_json",
-      "target": "zeroauth_mcp_mcpservers"
+      "target": "zerotrust_mcp_mcpservers"
     },
     {
       "relation": "contains",
@@ -42579,8 +42579,8 @@
       "source_location": "L3",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_mcp_mcpservers",
-      "target": "zeroauth_mcp_mcpservers_nextjs"
+      "source": "zerotrust_mcp_mcpservers",
+      "target": "zerotrust_mcp_mcpservers_nextjs"
     },
     {
       "relation": "contains",
@@ -42589,8 +42589,8 @@
       "source_location": "L4",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_mcp_mcpservers_nextjs",
-      "target": "zeroauth_mcp_nextjs_type"
+      "source": "zerotrust_mcp_mcpservers_nextjs",
+      "target": "zerotrust_mcp_nextjs_type"
     },
     {
       "relation": "contains",
@@ -42599,8 +42599,8 @@
       "source_location": "L5",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_mcp_mcpservers_nextjs",
-      "target": "zeroauth_mcp_nextjs_url"
+      "source": "zerotrust_mcp_mcpservers_nextjs",
+      "target": "zerotrust_mcp_nextjs_url"
     },
     {
       "relation": "contains",
@@ -42610,7 +42610,7 @@
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "prettierrc_json",
-      "target": "zeroauth_prettierrc_semi"
+      "target": "zerotrust_prettierrc_semi"
     },
     {
       "relation": "contains",
@@ -42620,7 +42620,7 @@
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "prettierrc_json",
-      "target": "zeroauth_prettierrc_singlequote"
+      "target": "zerotrust_prettierrc_singlequote"
     },
     {
       "relation": "contains",
@@ -42630,7 +42630,7 @@
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "prettierrc_json",
-      "target": "zeroauth_prettierrc_printwidth"
+      "target": "zerotrust_prettierrc_printwidth"
     },
     {
       "relation": "contains",
@@ -42640,7 +42640,7 @@
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "prettierrc_json",
-      "target": "zeroauth_prettierrc_tabwidth"
+      "target": "zerotrust_prettierrc_tabwidth"
     },
     {
       "relation": "contains",
@@ -42650,7 +42650,7 @@
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "prettierrc_json",
-      "target": "zeroauth_prettierrc_trailingcomma"
+      "target": "zerotrust_prettierrc_trailingcomma"
     },
     {
       "relation": "contains",
@@ -42660,7 +42660,7 @@
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "prettierrc_json",
-      "target": "zeroauth_prettierrc_bracketspacing"
+      "target": "zerotrust_prettierrc_bracketspacing"
     },
     {
       "relation": "contains",
@@ -42670,7 +42670,7 @@
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "prettierrc_json",
-      "target": "zeroauth_prettierrc_arrowparens"
+      "target": "zerotrust_prettierrc_arrowparens"
     },
     {
       "relation": "contains",
@@ -42680,7 +42680,7 @@
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "releaserc_json",
-      "target": "zeroauth_releaserc_branches"
+      "target": "zerotrust_releaserc_branches"
     },
     {
       "relation": "contains",
@@ -42690,7 +42690,7 @@
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "releaserc_json",
-      "target": "zeroauth_releaserc_plugins"
+      "target": "zerotrust_releaserc_plugins"
     },
     {
       "relation": "contains",
@@ -42700,7 +42700,7 @@
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "package_json",
-      "target": "zeroauth_package_name"
+      "target": "zerotrust_package_name"
     },
     {
       "relation": "contains",
@@ -42710,7 +42710,7 @@
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "package_json",
-      "target": "zeroauth_package_version"
+      "target": "zerotrust_package_version"
     },
     {
       "relation": "contains",
@@ -42720,7 +42720,7 @@
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "package_json",
-      "target": "zeroauth_package_private"
+      "target": "zerotrust_package_private"
     },
     {
       "relation": "contains",
@@ -42730,7 +42730,7 @@
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "package_json",
-      "target": "zeroauth_package_workspaces"
+      "target": "zerotrust_package_workspaces"
     },
     {
       "relation": "contains",
@@ -42740,7 +42740,7 @@
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "package_json",
-      "target": "zeroauth_package_scripts"
+      "target": "zerotrust_package_scripts"
     },
     {
       "relation": "contains",
@@ -42750,7 +42750,7 @@
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "package_json",
-      "target": "zeroauth_package_lint_staged"
+      "target": "zerotrust_package_lint_staged"
     },
     {
       "relation": "contains",
@@ -42760,7 +42760,7 @@
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "package_json",
-      "target": "zeroauth_package_dependencies"
+      "target": "zerotrust_package_dependencies"
     },
     {
       "relation": "contains",
@@ -42770,7 +42770,7 @@
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "package_json",
-      "target": "zeroauth_package_devdependencies"
+      "target": "zerotrust_package_devdependencies"
     },
     {
       "relation": "contains",
@@ -42780,7 +42780,7 @@
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "package_json",
-      "target": "zeroauth_package_overrides"
+      "target": "zerotrust_package_overrides"
     },
     {
       "relation": "contains",
@@ -42790,7 +42790,7 @@
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "package_json",
-      "target": "zeroauth_package_optionaldependencies"
+      "target": "zerotrust_package_optionaldependencies"
     },
     {
       "relation": "contains",
@@ -42799,8 +42799,8 @@
       "source_location": "L9",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_scripts",
-      "target": "zeroauth_package_scripts_postinstall"
+      "source": "zerotrust_package_scripts",
+      "target": "zerotrust_package_scripts_postinstall"
     },
     {
       "relation": "contains",
@@ -42809,8 +42809,8 @@
       "source_location": "L10",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_scripts",
-      "target": "zeroauth_package_scripts_dev"
+      "source": "zerotrust_package_scripts",
+      "target": "zerotrust_package_scripts_dev"
     },
     {
       "relation": "contains",
@@ -42819,8 +42819,8 @@
       "source_location": "L11",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_scripts",
-      "target": "zeroauth_package_scripts_dev_api"
+      "source": "zerotrust_package_scripts",
+      "target": "zerotrust_package_scripts_dev_api"
     },
     {
       "relation": "contains",
@@ -42829,8 +42829,8 @@
       "source_location": "L12",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_scripts",
-      "target": "zeroauth_package_scripts_dev_ui"
+      "source": "zerotrust_package_scripts",
+      "target": "zerotrust_package_scripts_dev_ui"
     },
     {
       "relation": "contains",
@@ -42839,8 +42839,8 @@
       "source_location": "L13",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_scripts",
-      "target": "zeroauth_package_scripts_build"
+      "source": "zerotrust_package_scripts",
+      "target": "zerotrust_package_scripts_build"
     },
     {
       "relation": "contains",
@@ -42849,8 +42849,8 @@
       "source_location": "L14",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_scripts",
-      "target": "zeroauth_package_scripts_db_generate"
+      "source": "zerotrust_package_scripts",
+      "target": "zerotrust_package_scripts_db_generate"
     },
     {
       "relation": "contains",
@@ -42859,8 +42859,8 @@
       "source_location": "L15",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_scripts",
-      "target": "zeroauth_package_scripts_db_migrate"
+      "source": "zerotrust_package_scripts",
+      "target": "zerotrust_package_scripts_db_migrate"
     },
     {
       "relation": "contains",
@@ -42869,8 +42869,8 @@
       "source_location": "L16",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_scripts",
-      "target": "zeroauth_package_scripts_db_push"
+      "source": "zerotrust_package_scripts",
+      "target": "zerotrust_package_scripts_db_push"
     },
     {
       "relation": "contains",
@@ -42879,8 +42879,8 @@
       "source_location": "L17",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_scripts",
-      "target": "zeroauth_package_scripts_db_studio"
+      "source": "zerotrust_package_scripts",
+      "target": "zerotrust_package_scripts_db_studio"
     },
     {
       "relation": "contains",
@@ -42889,8 +42889,8 @@
       "source_location": "L18",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_scripts",
-      "target": "zeroauth_package_scripts_db_backup"
+      "source": "zerotrust_package_scripts",
+      "target": "zerotrust_package_scripts_db_backup"
     },
     {
       "relation": "contains",
@@ -42899,8 +42899,8 @@
       "source_location": "L20",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_scripts",
-      "target": "zeroauth_package_scripts_start"
+      "source": "zerotrust_package_scripts",
+      "target": "zerotrust_package_scripts_start"
     },
     {
       "relation": "contains",
@@ -42909,8 +42909,8 @@
       "source_location": "L21",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_scripts",
-      "target": "zeroauth_package_scripts_test"
+      "source": "zerotrust_package_scripts",
+      "target": "zerotrust_package_scripts_test"
     },
     {
       "relation": "contains",
@@ -42919,8 +42919,8 @@
       "source_location": "L22",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_scripts",
-      "target": "zeroauth_package_scripts_test_watch"
+      "source": "zerotrust_package_scripts",
+      "target": "zerotrust_package_scripts_test_watch"
     },
     {
       "relation": "contains",
@@ -42929,8 +42929,8 @@
       "source_location": "L23",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_scripts",
-      "target": "zeroauth_package_scripts_test_coverage"
+      "source": "zerotrust_package_scripts",
+      "target": "zerotrust_package_scripts_test_coverage"
     },
     {
       "relation": "contains",
@@ -42939,8 +42939,8 @@
       "source_location": "L24",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_scripts",
-      "target": "zeroauth_package_scripts_lint"
+      "source": "zerotrust_package_scripts",
+      "target": "zerotrust_package_scripts_lint"
     },
     {
       "relation": "contains",
@@ -42949,8 +42949,8 @@
       "source_location": "L25",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_scripts",
-      "target": "zeroauth_package_scripts_lint_fix"
+      "source": "zerotrust_package_scripts",
+      "target": "zerotrust_package_scripts_lint_fix"
     },
     {
       "relation": "contains",
@@ -42959,8 +42959,8 @@
       "source_location": "L26",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_scripts",
-      "target": "zeroauth_package_scripts_format"
+      "source": "zerotrust_package_scripts",
+      "target": "zerotrust_package_scripts_format"
     },
     {
       "relation": "contains",
@@ -42969,8 +42969,8 @@
       "source_location": "L28",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_scripts",
-      "target": "zeroauth_package_scripts_type_check"
+      "source": "zerotrust_package_scripts",
+      "target": "zerotrust_package_scripts_type_check"
     },
     {
       "relation": "contains",
@@ -42979,8 +42979,8 @@
       "source_location": "L29",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_scripts",
-      "target": "zeroauth_package_scripts_prepare"
+      "source": "zerotrust_package_scripts",
+      "target": "zerotrust_package_scripts_prepare"
     },
     {
       "relation": "contains",
@@ -42989,8 +42989,8 @@
       "source_location": "L30",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_scripts",
-      "target": "zeroauth_package_scripts_lint_staged"
+      "source": "zerotrust_package_scripts",
+      "target": "zerotrust_package_scripts_lint_staged"
     },
     {
       "relation": "contains",
@@ -42999,8 +42999,8 @@
       "source_location": "L31",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_scripts",
-      "target": "zeroauth_package_scripts_release"
+      "source": "zerotrust_package_scripts",
+      "target": "zerotrust_package_scripts_release"
     },
     {
       "relation": "contains",
@@ -43009,8 +43009,8 @@
       "source_location": "L32",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_scripts",
-      "target": "zeroauth_package_scripts_release_dry"
+      "source": "zerotrust_package_scripts",
+      "target": "zerotrust_package_scripts_release_dry"
     },
     {
       "relation": "contains",
@@ -43018,8 +43018,8 @@
       "source_file": "package.json",
       "source_location": "L19",
       "weight": 1.0,
-      "source": "zeroauth_package_scripts",
-      "target": "zeroauth_package_scripts_db_restore",
+      "source": "zerotrust_package_scripts",
+      "target": "zerotrust_package_scripts_db_restore",
       "confidence_score": 1.0
     },
     {
@@ -43028,8 +43028,8 @@
       "source_file": "package.json",
       "source_location": "L27",
       "weight": 1.0,
-      "source": "zeroauth_package_scripts",
-      "target": "zeroauth_package_scripts_lint_ci",
+      "source": "zerotrust_package_scripts",
+      "target": "zerotrust_package_scripts_lint_ci",
       "confidence_score": 1.0
     },
     {
@@ -43039,8 +43039,8 @@
       "source_location": "L33",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_lint_staged",
-      "target": "zeroauth_package_lint_staged_src_ts"
+      "source": "zerotrust_package_lint_staged",
+      "target": "zerotrust_package_lint_staged_src_ts"
     },
     {
       "relation": "contains",
@@ -43049,8 +43049,8 @@
       "source_location": "L36",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_lint_staged",
-      "target": "zeroauth_package_lint_staged_src_test_spec_ts"
+      "source": "zerotrust_package_lint_staged",
+      "target": "zerotrust_package_lint_staged_src_test_spec_ts"
     },
     {
       "relation": "contains",
@@ -43059,8 +43059,8 @@
       "source_location": "L39",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_lint_staged",
-      "target": "zeroauth_package_lint_staged_packages_ui_src_ts_tsx"
+      "source": "zerotrust_package_lint_staged",
+      "target": "zerotrust_package_lint_staged_packages_ui_src_ts_tsx"
     },
     {
       "relation": "contains",
@@ -43069,8 +43069,8 @@
       "source_location": "L42",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_lint_staged",
-      "target": "zeroauth_package_lint_staged_json_md"
+      "source": "zerotrust_package_lint_staged",
+      "target": "zerotrust_package_lint_staged_json_md"
     },
     {
       "relation": "contains",
@@ -43078,8 +43078,8 @@
       "source_file": "package.json",
       "source_location": "L35",
       "weight": 1.0,
-      "source": "zeroauth_package_lint_staged",
-      "target": "zeroauth_package_lint_staged_ts_tsx_js_mjs_cjs_json_jsonc_css",
+      "source": "zerotrust_package_lint_staged",
+      "target": "zerotrust_package_lint_staged_ts_tsx_js_mjs_cjs_json_jsonc_css",
       "confidence_score": 1.0
     },
     {
@@ -43089,8 +43089,8 @@
       "source_location": "L41",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_dependencies",
-      "target": "zeroauth_package_dependencies_hono_node_server"
+      "source": "zerotrust_package_dependencies",
+      "target": "zerotrust_package_dependencies_hono_node_server"
     },
     {
       "relation": "contains",
@@ -43099,8 +43099,8 @@
       "source_location": "L45",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_dependencies",
-      "target": "zeroauth_package_dependencies_opentelemetry_api"
+      "source": "zerotrust_package_dependencies",
+      "target": "zerotrust_package_dependencies_opentelemetry_api"
     },
     {
       "relation": "contains",
@@ -43109,8 +43109,8 @@
       "source_location": "L46",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_dependencies",
-      "target": "zeroauth_package_dependencies_opentelemetry_auto_instrumentations_node"
+      "source": "zerotrust_package_dependencies",
+      "target": "zerotrust_package_dependencies_opentelemetry_auto_instrumentations_node"
     },
     {
       "relation": "contains",
@@ -43119,8 +43119,8 @@
       "source_location": "L47",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_dependencies",
-      "target": "zeroauth_package_dependencies_opentelemetry_exporter_trace_otlp_http"
+      "source": "zerotrust_package_dependencies",
+      "target": "zerotrust_package_dependencies_opentelemetry_exporter_trace_otlp_http"
     },
     {
       "relation": "contains",
@@ -43129,8 +43129,8 @@
       "source_location": "L48",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_dependencies",
-      "target": "zeroauth_package_dependencies_opentelemetry_resources"
+      "source": "zerotrust_package_dependencies",
+      "target": "zerotrust_package_dependencies_opentelemetry_resources"
     },
     {
       "relation": "contains",
@@ -43139,8 +43139,8 @@
       "source_location": "L49",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_dependencies",
-      "target": "zeroauth_package_dependencies_opentelemetry_sdk_node"
+      "source": "zerotrust_package_dependencies",
+      "target": "zerotrust_package_dependencies_opentelemetry_sdk_node"
     },
     {
       "relation": "contains",
@@ -43149,8 +43149,8 @@
       "source_location": "L50",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_dependencies",
-      "target": "zeroauth_package_dependencies_opentelemetry_semantic_conventions"
+      "source": "zerotrust_package_dependencies",
+      "target": "zerotrust_package_dependencies_opentelemetry_semantic_conventions"
     },
     {
       "relation": "contains",
@@ -43159,8 +43159,8 @@
       "source_location": "L51",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_dependencies",
-      "target": "zeroauth_package_dependencies_sentry_node"
+      "source": "zerotrust_package_dependencies",
+      "target": "zerotrust_package_dependencies_sentry_node"
     },
     {
       "relation": "contains",
@@ -43169,8 +43169,8 @@
       "source_location": "L52",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_dependencies",
-      "target": "zeroauth_package_dependencies_simplewebauthn_server"
+      "source": "zerotrust_package_dependencies",
+      "target": "zerotrust_package_dependencies_simplewebauthn_server"
     },
     {
       "relation": "contains",
@@ -43179,8 +43179,8 @@
       "source_location": "L53",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_dependencies",
-      "target": "zeroauth_package_dependencies_simplewebauthn_types"
+      "source": "zerotrust_package_dependencies",
+      "target": "zerotrust_package_dependencies_simplewebauthn_types"
     },
     {
       "relation": "contains",
@@ -43189,8 +43189,8 @@
       "source_location": "L54",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_dependencies",
-      "target": "zeroauth_package_dependencies_swc_core_win32_x64_msvc"
+      "source": "zerotrust_package_dependencies",
+      "target": "zerotrust_package_dependencies_swc_core_win32_x64_msvc"
     },
     {
       "relation": "contains",
@@ -43199,8 +43199,8 @@
       "source_location": "L56",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_dependencies",
-      "target": "zeroauth_package_dependencies_bcryptjs"
+      "source": "zerotrust_package_dependencies",
+      "target": "zerotrust_package_dependencies_bcryptjs"
     },
     {
       "relation": "contains",
@@ -43209,8 +43209,8 @@
       "source_location": "L57",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_dependencies",
-      "target": "zeroauth_package_dependencies_bullmq"
+      "source": "zerotrust_package_dependencies",
+      "target": "zerotrust_package_dependencies_bullmq"
     },
     {
       "relation": "contains",
@@ -43219,8 +43219,8 @@
       "source_location": "L58",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_dependencies",
-      "target": "zeroauth_package_dependencies_dotenv"
+      "source": "zerotrust_package_dependencies",
+      "target": "zerotrust_package_dependencies_dotenv"
     },
     {
       "relation": "contains",
@@ -43229,8 +43229,8 @@
       "source_location": "L59",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_dependencies",
-      "target": "zeroauth_package_dependencies_drizzle_orm"
+      "source": "zerotrust_package_dependencies",
+      "target": "zerotrust_package_dependencies_drizzle_orm"
     },
     {
       "relation": "contains",
@@ -43239,8 +43239,8 @@
       "source_location": "L60",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_dependencies",
-      "target": "zeroauth_package_dependencies_geoip_lite"
+      "source": "zerotrust_package_dependencies",
+      "target": "zerotrust_package_dependencies_geoip_lite"
     },
     {
       "relation": "contains",
@@ -43249,8 +43249,8 @@
       "source_location": "L61",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_dependencies",
-      "target": "zeroauth_package_dependencies_hono"
+      "source": "zerotrust_package_dependencies",
+      "target": "zerotrust_package_dependencies_hono"
     },
     {
       "relation": "contains",
@@ -43259,8 +43259,8 @@
       "source_location": "L62",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_dependencies",
-      "target": "zeroauth_package_dependencies_ioredis"
+      "source": "zerotrust_package_dependencies",
+      "target": "zerotrust_package_dependencies_ioredis"
     },
     {
       "relation": "contains",
@@ -43269,8 +43269,8 @@
       "source_location": "L63",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_dependencies",
-      "target": "zeroauth_package_dependencies_nanoid"
+      "source": "zerotrust_package_dependencies",
+      "target": "zerotrust_package_dependencies_nanoid"
     },
     {
       "relation": "contains",
@@ -43279,8 +43279,8 @@
       "source_location": "L64",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_dependencies",
-      "target": "zeroauth_package_dependencies_nodemailer"
+      "source": "zerotrust_package_dependencies",
+      "target": "zerotrust_package_dependencies_nodemailer"
     },
     {
       "relation": "contains",
@@ -43289,8 +43289,8 @@
       "source_location": "L65",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_dependencies",
-      "target": "zeroauth_package_dependencies_otpauth"
+      "source": "zerotrust_package_dependencies",
+      "target": "zerotrust_package_dependencies_otpauth"
     },
     {
       "relation": "contains",
@@ -43299,8 +43299,8 @@
       "source_location": "L66",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_dependencies",
-      "target": "zeroauth_package_dependencies_postgres"
+      "source": "zerotrust_package_dependencies",
+      "target": "zerotrust_package_dependencies_postgres"
     },
     {
       "relation": "contains",
@@ -43309,8 +43309,8 @@
       "source_location": "L67",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_dependencies",
-      "target": "zeroauth_package_dependencies_prom_client"
+      "source": "zerotrust_package_dependencies",
+      "target": "zerotrust_package_dependencies_prom_client"
     },
     {
       "relation": "contains",
@@ -43319,8 +43319,8 @@
       "source_location": "L68",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_dependencies",
-      "target": "zeroauth_package_dependencies_qrcode"
+      "source": "zerotrust_package_dependencies",
+      "target": "zerotrust_package_dependencies_qrcode"
     },
     {
       "relation": "contains",
@@ -43329,8 +43329,8 @@
       "source_location": "L69",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_dependencies",
-      "target": "zeroauth_package_dependencies_samlify"
+      "source": "zerotrust_package_dependencies",
+      "target": "zerotrust_package_dependencies_samlify"
     },
     {
       "relation": "contains",
@@ -43339,8 +43339,8 @@
       "source_location": "L70",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_dependencies",
-      "target": "zeroauth_package_dependencies_stripe"
+      "source": "zerotrust_package_dependencies",
+      "target": "zerotrust_package_dependencies_stripe"
     },
     {
       "relation": "contains",
@@ -43349,8 +43349,8 @@
       "source_location": "L72",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_dependencies",
-      "target": "zeroauth_package_dependencies_twilio"
+      "source": "zerotrust_package_dependencies",
+      "target": "zerotrust_package_dependencies_twilio"
     },
     {
       "relation": "contains",
@@ -43359,8 +43359,8 @@
       "source_location": "L73",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_dependencies",
-      "target": "zeroauth_package_dependencies_ua_parser_js"
+      "source": "zerotrust_package_dependencies",
+      "target": "zerotrust_package_dependencies_ua_parser_js"
     },
     {
       "relation": "contains",
@@ -43369,8 +43369,8 @@
       "source_location": "L75",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_dependencies",
-      "target": "zeroauth_package_dependencies_xpath"
+      "source": "zerotrust_package_dependencies",
+      "target": "zerotrust_package_dependencies_xpath"
     },
     {
       "relation": "contains",
@@ -43379,8 +43379,8 @@
       "source_location": "L76",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_dependencies",
-      "target": "zeroauth_package_dependencies_zod"
+      "source": "zerotrust_package_dependencies",
+      "target": "zerotrust_package_dependencies_zod"
     },
     {
       "relation": "contains",
@@ -43389,8 +43389,8 @@
       "source_location": "L71",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_dependencies",
-      "target": "zeroauth_package_dependencies_tailwindcss_animate"
+      "source": "zerotrust_package_dependencies",
+      "target": "zerotrust_package_dependencies_tailwindcss_animate"
     },
     {
       "relation": "contains",
@@ -43399,8 +43399,8 @@
       "source_location": "L42",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_dependencies",
-      "target": "zeroauth_package_dependencies_noble_ciphers"
+      "source": "zerotrust_package_dependencies",
+      "target": "zerotrust_package_dependencies_noble_ciphers"
     },
     {
       "relation": "contains",
@@ -43409,8 +43409,8 @@
       "source_location": "L43",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_dependencies",
-      "target": "zeroauth_package_dependencies_noble_hashes"
+      "source": "zerotrust_package_dependencies",
+      "target": "zerotrust_package_dependencies_noble_hashes"
     },
     {
       "relation": "contains",
@@ -43419,8 +43419,8 @@
       "source_location": "L44",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_dependencies",
-      "target": "zeroauth_package_dependencies_noble_post_quantum"
+      "source": "zerotrust_package_dependencies",
+      "target": "zerotrust_package_dependencies_noble_post_quantum"
     },
     {
       "relation": "contains",
@@ -43429,8 +43429,8 @@
       "source_location": "L55",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_dependencies",
-      "target": "zeroauth_package_dependencies_types_web_push"
+      "source": "zerotrust_package_dependencies",
+      "target": "zerotrust_package_dependencies_types_web_push"
     },
     {
       "relation": "contains",
@@ -43439,8 +43439,8 @@
       "source_location": "L74",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_dependencies",
-      "target": "zeroauth_package_dependencies_web_push"
+      "source": "zerotrust_package_dependencies",
+      "target": "zerotrust_package_dependencies_web_push"
     },
     {
       "relation": "contains",
@@ -43448,8 +43448,8 @@
       "source_file": "package.json",
       "source_location": "L40",
       "weight": 1.0,
-      "source": "zeroauth_package_dependencies",
-      "target": "zeroauth_package_dependencies_aws_sdk_client_s3",
+      "source": "zerotrust_package_dependencies",
+      "target": "zerotrust_package_dependencies_aws_sdk_client_s3",
       "confidence_score": 1.0
     },
     {
@@ -43461,7 +43461,7 @@
       "source_location": "L52",
       "weight": 1.0,
       "source": "routes_auth_routes_generateoauthstate",
-      "target": "zeroauth_package_dependencies_nanoid"
+      "target": "zerotrust_package_dependencies_nanoid"
     },
     {
       "relation": "calls",
@@ -43471,7 +43471,7 @@
       "source_file": "src/oidc/provider.ts",
       "source_location": "L73",
       "weight": 1.0,
-      "source": "zeroauth_package_dependencies_nanoid",
+      "source": "zerotrust_package_dependencies_nanoid",
       "target": "oidc_provider_generateauthcode"
     },
     {
@@ -43482,7 +43482,7 @@
       "source_file": "src/db/index.ts",
       "source_location": "L33",
       "weight": 1.0,
-      "source": "zeroauth_package_dependencies_postgres",
+      "source": "zerotrust_package_dependencies_postgres",
       "target": "db_index_initializedatabase"
     },
     {
@@ -43493,7 +43493,7 @@
       "source_file": "src/mfa/channels/sms.ts",
       "source_location": "L13",
       "weight": 1.0,
-      "source": "zeroauth_package_dependencies_twilio",
+      "source": "zerotrust_package_dependencies_twilio",
       "target": "channels_sms_sendsmsotp"
     },
     {
@@ -43504,7 +43504,7 @@
       "source_file": "src/mfa/channels/whatsapp.ts",
       "source_location": "L13",
       "weight": 1.0,
-      "source": "zeroauth_package_dependencies_twilio",
+      "source": "zerotrust_package_dependencies_twilio",
       "target": "channels_whatsapp_sendwhatsappotp"
     },
     {
@@ -43514,8 +43514,8 @@
       "source_location": "L81",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_devdependencies",
-      "target": "zeroauth_package_devdependencies_commitlint_cli"
+      "source": "zerotrust_package_devdependencies",
+      "target": "zerotrust_package_devdependencies_commitlint_cli"
     },
     {
       "relation": "contains",
@@ -43524,8 +43524,8 @@
       "source_location": "L82",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_devdependencies",
-      "target": "zeroauth_package_devdependencies_commitlint_config_conventional"
+      "source": "zerotrust_package_devdependencies",
+      "target": "zerotrust_package_devdependencies_commitlint_config_conventional"
     },
     {
       "relation": "contains",
@@ -43534,8 +43534,8 @@
       "source_location": "L83",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_devdependencies",
-      "target": "zeroauth_package_devdependencies_rollup_rollup_linux_x64_gnu"
+      "source": "zerotrust_package_devdependencies",
+      "target": "zerotrust_package_devdependencies_rollup_rollup_linux_x64_gnu"
     },
     {
       "relation": "contains",
@@ -43544,8 +43544,8 @@
       "source_location": "L84",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_devdependencies",
-      "target": "zeroauth_package_devdependencies_semantic_release_changelog"
+      "source": "zerotrust_package_devdependencies",
+      "target": "zerotrust_package_devdependencies_semantic_release_changelog"
     },
     {
       "relation": "contains",
@@ -43554,8 +43554,8 @@
       "source_location": "L85",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_devdependencies",
-      "target": "zeroauth_package_devdependencies_semantic_release_commit_analyzer"
+      "source": "zerotrust_package_devdependencies",
+      "target": "zerotrust_package_devdependencies_semantic_release_commit_analyzer"
     },
     {
       "relation": "contains",
@@ -43564,8 +43564,8 @@
       "source_location": "L86",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_devdependencies",
-      "target": "zeroauth_package_devdependencies_semantic_release_git"
+      "source": "zerotrust_package_devdependencies",
+      "target": "zerotrust_package_devdependencies_semantic_release_git"
     },
     {
       "relation": "contains",
@@ -43574,8 +43574,8 @@
       "source_location": "L87",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_devdependencies",
-      "target": "zeroauth_package_devdependencies_semantic_release_github"
+      "source": "zerotrust_package_devdependencies",
+      "target": "zerotrust_package_devdependencies_semantic_release_github"
     },
     {
       "relation": "contains",
@@ -43584,8 +43584,8 @@
       "source_location": "L88",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_devdependencies",
-      "target": "zeroauth_package_devdependencies_semantic_release_release_notes_generator"
+      "source": "zerotrust_package_devdependencies",
+      "target": "zerotrust_package_devdependencies_semantic_release_release_notes_generator"
     },
     {
       "relation": "contains",
@@ -43594,8 +43594,8 @@
       "source_location": "L89",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_devdependencies",
-      "target": "zeroauth_package_devdependencies_types_bcryptjs"
+      "source": "zerotrust_package_devdependencies",
+      "target": "zerotrust_package_devdependencies_types_bcryptjs"
     },
     {
       "relation": "contains",
@@ -43604,8 +43604,8 @@
       "source_location": "L90",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_devdependencies",
-      "target": "zeroauth_package_devdependencies_types_node"
+      "source": "zerotrust_package_devdependencies",
+      "target": "zerotrust_package_devdependencies_types_node"
     },
     {
       "relation": "contains",
@@ -43614,8 +43614,8 @@
       "source_location": "L91",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_devdependencies",
-      "target": "zeroauth_package_devdependencies_types_nodemailer"
+      "source": "zerotrust_package_devdependencies",
+      "target": "zerotrust_package_devdependencies_types_nodemailer"
     },
     {
       "relation": "contains",
@@ -43624,8 +43624,8 @@
       "source_location": "L92",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_devdependencies",
-      "target": "zeroauth_package_devdependencies_types_qrcode"
+      "source": "zerotrust_package_devdependencies",
+      "target": "zerotrust_package_devdependencies_types_qrcode"
     },
     {
       "relation": "contains",
@@ -43634,8 +43634,8 @@
       "source_location": "L93",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_devdependencies",
-      "target": "zeroauth_package_devdependencies_types_ua_parser_js"
+      "source": "zerotrust_package_devdependencies",
+      "target": "zerotrust_package_devdependencies_types_ua_parser_js"
     },
     {
       "relation": "contains",
@@ -43644,8 +43644,8 @@
       "source_location": "L98",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_devdependencies",
-      "target": "zeroauth_package_devdependencies_typescript_eslint_eslint_plugin"
+      "source": "zerotrust_package_devdependencies",
+      "target": "zerotrust_package_devdependencies_typescript_eslint_eslint_plugin"
     },
     {
       "relation": "contains",
@@ -43654,8 +43654,8 @@
       "source_location": "L99",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_devdependencies",
-      "target": "zeroauth_package_devdependencies_typescript_eslint_parser"
+      "source": "zerotrust_package_devdependencies",
+      "target": "zerotrust_package_devdependencies_typescript_eslint_parser"
     },
     {
       "relation": "contains",
@@ -43664,8 +43664,8 @@
       "source_location": "L94",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_devdependencies",
-      "target": "zeroauth_package_devdependencies_vitest_coverage_v8"
+      "source": "zerotrust_package_devdependencies",
+      "target": "zerotrust_package_devdependencies_vitest_coverage_v8"
     },
     {
       "relation": "contains",
@@ -43674,8 +43674,8 @@
       "source_location": "L95",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_devdependencies",
-      "target": "zeroauth_package_devdependencies_vitest_ui"
+      "source": "zerotrust_package_devdependencies",
+      "target": "zerotrust_package_devdependencies_vitest_ui"
     },
     {
       "relation": "contains",
@@ -43684,8 +43684,8 @@
       "source_location": "L96",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_devdependencies",
-      "target": "zeroauth_package_devdependencies_concurrently"
+      "source": "zerotrust_package_devdependencies",
+      "target": "zerotrust_package_devdependencies_concurrently"
     },
     {
       "relation": "contains",
@@ -43694,8 +43694,8 @@
       "source_location": "L97",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_devdependencies",
-      "target": "zeroauth_package_devdependencies_conventional_changelog_conventionalcommits"
+      "source": "zerotrust_package_devdependencies",
+      "target": "zerotrust_package_devdependencies_conventional_changelog_conventionalcommits"
     },
     {
       "relation": "contains",
@@ -43704,8 +43704,8 @@
       "source_location": "L98",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_devdependencies",
-      "target": "zeroauth_package_devdependencies_drizzle_kit"
+      "source": "zerotrust_package_devdependencies",
+      "target": "zerotrust_package_devdependencies_drizzle_kit"
     },
     {
       "relation": "contains",
@@ -43714,8 +43714,8 @@
       "source_location": "L105",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_devdependencies",
-      "target": "zeroauth_package_devdependencies_eslint"
+      "source": "zerotrust_package_devdependencies",
+      "target": "zerotrust_package_devdependencies_eslint"
     },
     {
       "relation": "contains",
@@ -43724,8 +43724,8 @@
       "source_location": "L99",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_devdependencies",
-      "target": "zeroauth_package_devdependencies_husky"
+      "source": "zerotrust_package_devdependencies",
+      "target": "zerotrust_package_devdependencies_husky"
     },
     {
       "relation": "contains",
@@ -43734,8 +43734,8 @@
       "source_location": "L107",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_devdependencies",
-      "target": "zeroauth_package_devdependencies_lint_staged"
+      "source": "zerotrust_package_devdependencies",
+      "target": "zerotrust_package_devdependencies_lint_staged"
     },
     {
       "relation": "contains",
@@ -43744,8 +43744,8 @@
       "source_location": "L108",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_devdependencies",
-      "target": "zeroauth_package_devdependencies_prettier"
+      "source": "zerotrust_package_devdependencies",
+      "target": "zerotrust_package_devdependencies_prettier"
     },
     {
       "relation": "contains",
@@ -43754,8 +43754,8 @@
       "source_location": "L100",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_devdependencies",
-      "target": "zeroauth_package_devdependencies_semantic_release"
+      "source": "zerotrust_package_devdependencies",
+      "target": "zerotrust_package_devdependencies_semantic_release"
     },
     {
       "relation": "contains",
@@ -43764,8 +43764,8 @@
       "source_location": "L101",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_devdependencies",
-      "target": "zeroauth_package_devdependencies_tsx"
+      "source": "zerotrust_package_devdependencies",
+      "target": "zerotrust_package_devdependencies_tsx"
     },
     {
       "relation": "contains",
@@ -43774,8 +43774,8 @@
       "source_location": "L102",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_devdependencies",
-      "target": "zeroauth_package_devdependencies_typescript"
+      "source": "zerotrust_package_devdependencies",
+      "target": "zerotrust_package_devdependencies_typescript"
     },
     {
       "relation": "contains",
@@ -43784,8 +43784,8 @@
       "source_location": "L103",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_devdependencies",
-      "target": "zeroauth_package_devdependencies_vitest"
+      "source": "zerotrust_package_devdependencies",
+      "target": "zerotrust_package_devdependencies_vitest"
     },
     {
       "relation": "contains",
@@ -43793,8 +43793,8 @@
       "source_file": "package.json",
       "source_location": "L79",
       "weight": 1.0,
-      "source": "zeroauth_package_devdependencies",
-      "target": "zeroauth_package_devdependencies_biomejs_biome",
+      "source": "zerotrust_package_devdependencies",
+      "target": "zerotrust_package_devdependencies_biomejs_biome",
       "confidence_score": 1.0
     },
     {
@@ -43803,8 +43803,8 @@
       "source_file": "package.json",
       "source_location": "L80",
       "weight": 1.0,
-      "source": "zeroauth_package_devdependencies",
-      "target": "zeroauth_package_devdependencies_biomejs_cli_win32_x64",
+      "source": "zerotrust_package_devdependencies",
+      "target": "zerotrust_package_devdependencies_biomejs_cli_win32_x64",
       "confidence_score": 1.0
     },
     {
@@ -43814,7 +43814,7 @@
       "source_location": "L100",
       "weight": 1.0,
       "context": "import",
-      "source": "zeroauth_package_devdependencies_semantic_release",
+      "source": "zerotrust_package_devdependencies_semantic_release",
       "target": "semantic_release",
       "confidence_score": 1.0
     },
@@ -43825,8 +43825,8 @@
       "source_location": "L106",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_overrides",
-      "target": "zeroauth_package_overrides_postcss"
+      "source": "zerotrust_package_overrides",
+      "target": "zerotrust_package_overrides_postcss"
     },
     {
       "relation": "contains",
@@ -43835,8 +43835,8 @@
       "source_location": "L109",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_optionaldependencies",
-      "target": "zeroauth_package_optionaldependencies_parcel_watcher_darwin_arm64"
+      "source": "zerotrust_package_optionaldependencies",
+      "target": "zerotrust_package_optionaldependencies_parcel_watcher_darwin_arm64"
     },
     {
       "relation": "contains",
@@ -43845,8 +43845,8 @@
       "source_location": "L110",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_optionaldependencies",
-      "target": "zeroauth_package_optionaldependencies_parcel_watcher_darwin_x64"
+      "source": "zerotrust_package_optionaldependencies",
+      "target": "zerotrust_package_optionaldependencies_parcel_watcher_darwin_x64"
     },
     {
       "relation": "contains",
@@ -43855,8 +43855,8 @@
       "source_location": "L111",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_optionaldependencies",
-      "target": "zeroauth_package_optionaldependencies_parcel_watcher_linux_x64_glibc"
+      "source": "zerotrust_package_optionaldependencies",
+      "target": "zerotrust_package_optionaldependencies_parcel_watcher_linux_x64_glibc"
     },
     {
       "relation": "contains",
@@ -43865,8 +43865,8 @@
       "source_location": "L112",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_optionaldependencies",
-      "target": "zeroauth_package_optionaldependencies_swc_core_linux_x64_gnu"
+      "source": "zerotrust_package_optionaldependencies",
+      "target": "zerotrust_package_optionaldependencies_swc_core_linux_x64_gnu"
     },
     {
       "relation": "contains",
@@ -43875,8 +43875,8 @@
       "source_location": "L113",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_optionaldependencies",
-      "target": "zeroauth_package_optionaldependencies_next_swc_win32_x64_msvc"
+      "source": "zerotrust_package_optionaldependencies",
+      "target": "zerotrust_package_optionaldependencies_next_swc_win32_x64_msvc"
     },
     {
       "relation": "contains",
@@ -43885,8 +43885,8 @@
       "source_location": "L114",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_optionaldependencies",
-      "target": "zeroauth_package_optionaldependencies_next_swc_wasm_nodejs"
+      "source": "zerotrust_package_optionaldependencies",
+      "target": "zerotrust_package_optionaldependencies_next_swc_wasm_nodejs"
     },
     {
       "relation": "contains",
@@ -43895,8 +43895,8 @@
       "source_location": "L115",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_optionaldependencies",
-      "target": "zeroauth_package_optionaldependencies_next_swc_wasm_web"
+      "source": "zerotrust_package_optionaldependencies",
+      "target": "zerotrust_package_optionaldependencies_next_swc_wasm_web"
     },
     {
       "relation": "contains",
@@ -43905,8 +43905,8 @@
       "source_location": "L116",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_optionaldependencies",
-      "target": "zeroauth_package_optionaldependencies_parcel_watcher_win32_x64"
+      "source": "zerotrust_package_optionaldependencies",
+      "target": "zerotrust_package_optionaldependencies_parcel_watcher_win32_x64"
     },
     {
       "relation": "contains",
@@ -43915,8 +43915,8 @@
       "source_location": "L117",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_optionaldependencies",
-      "target": "zeroauth_package_optionaldependencies_swc_core_win32_x64_msvc"
+      "source": "zerotrust_package_optionaldependencies",
+      "target": "zerotrust_package_optionaldependencies_swc_core_win32_x64_msvc"
     },
     {
       "relation": "contains",
@@ -43925,8 +43925,8 @@
       "source_location": "L118",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_optionaldependencies",
-      "target": "zeroauth_package_optionaldependencies_rolldown_binding_darwin_arm64"
+      "source": "zerotrust_package_optionaldependencies",
+      "target": "zerotrust_package_optionaldependencies_rolldown_binding_darwin_arm64"
     },
     {
       "relation": "contains",
@@ -43935,8 +43935,8 @@
       "source_location": "L119",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_optionaldependencies",
-      "target": "zeroauth_package_optionaldependencies_rolldown_binding_darwin_x64"
+      "source": "zerotrust_package_optionaldependencies",
+      "target": "zerotrust_package_optionaldependencies_rolldown_binding_darwin_x64"
     },
     {
       "relation": "contains",
@@ -43945,8 +43945,8 @@
       "source_location": "L120",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_optionaldependencies",
-      "target": "zeroauth_package_optionaldependencies_rolldown_binding_linux_x64_gnu"
+      "source": "zerotrust_package_optionaldependencies",
+      "target": "zerotrust_package_optionaldependencies_rolldown_binding_linux_x64_gnu"
     },
     {
       "relation": "contains",
@@ -43955,8 +43955,8 @@
       "source_location": "L121",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_optionaldependencies",
-      "target": "zeroauth_package_optionaldependencies_rolldown_binding_win32_x64_msvc"
+      "source": "zerotrust_package_optionaldependencies",
+      "target": "zerotrust_package_optionaldependencies_rolldown_binding_win32_x64_msvc"
     },
     {
       "relation": "contains",
@@ -43965,8 +43965,8 @@
       "source_location": "L122",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_optionaldependencies",
-      "target": "zeroauth_package_optionaldependencies_swc_core_darwin_arm64"
+      "source": "zerotrust_package_optionaldependencies",
+      "target": "zerotrust_package_optionaldependencies_swc_core_darwin_arm64"
     },
     {
       "relation": "contains",
@@ -43975,8 +43975,8 @@
       "source_location": "L123",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_package_optionaldependencies",
-      "target": "zeroauth_package_optionaldependencies_swc_core_darwin_x64"
+      "source": "zerotrust_package_optionaldependencies",
+      "target": "zerotrust_package_optionaldependencies_swc_core_darwin_x64"
     },
     {
       "relation": "contains",
@@ -43986,7 +43986,7 @@
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "tsconfig_json",
-      "target": "zeroauth_tsconfig_compileroptions"
+      "target": "zerotrust_tsconfig_compileroptions"
     },
     {
       "relation": "contains",
@@ -43996,7 +43996,7 @@
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "tsconfig_json",
-      "target": "zeroauth_tsconfig_include"
+      "target": "zerotrust_tsconfig_include"
     },
     {
       "relation": "contains",
@@ -44006,7 +44006,7 @@
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "tsconfig_json",
-      "target": "zeroauth_tsconfig_exclude"
+      "target": "zerotrust_tsconfig_exclude"
     },
     {
       "relation": "contains",
@@ -44015,8 +44015,8 @@
       "source_location": "L3",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_tsconfig_compileroptions",
-      "target": "zeroauth_tsconfig_compileroptions_target"
+      "source": "zerotrust_tsconfig_compileroptions",
+      "target": "zerotrust_tsconfig_compileroptions_target"
     },
     {
       "relation": "contains",
@@ -44025,8 +44025,8 @@
       "source_location": "L4",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_tsconfig_compileroptions",
-      "target": "zeroauth_tsconfig_compileroptions_lib"
+      "source": "zerotrust_tsconfig_compileroptions",
+      "target": "zerotrust_tsconfig_compileroptions_lib"
     },
     {
       "relation": "contains",
@@ -44035,8 +44035,8 @@
       "source_location": "L5",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_tsconfig_compileroptions",
-      "target": "zeroauth_tsconfig_compileroptions_types"
+      "source": "zerotrust_tsconfig_compileroptions",
+      "target": "zerotrust_tsconfig_compileroptions_types"
     },
     {
       "relation": "contains",
@@ -44045,8 +44045,8 @@
       "source_location": "L6",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_tsconfig_compileroptions",
-      "target": "zeroauth_tsconfig_compileroptions_module"
+      "source": "zerotrust_tsconfig_compileroptions",
+      "target": "zerotrust_tsconfig_compileroptions_module"
     },
     {
       "relation": "contains",
@@ -44055,8 +44055,8 @@
       "source_location": "L7",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_tsconfig_compileroptions",
-      "target": "zeroauth_tsconfig_compileroptions_moduleresolution"
+      "source": "zerotrust_tsconfig_compileroptions",
+      "target": "zerotrust_tsconfig_compileroptions_moduleresolution"
     },
     {
       "relation": "contains",
@@ -44065,8 +44065,8 @@
       "source_location": "L8",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_tsconfig_compileroptions",
-      "target": "zeroauth_tsconfig_compileroptions_rootdir"
+      "source": "zerotrust_tsconfig_compileroptions",
+      "target": "zerotrust_tsconfig_compileroptions_rootdir"
     },
     {
       "relation": "contains",
@@ -44075,8 +44075,8 @@
       "source_location": "L9",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_tsconfig_compileroptions",
-      "target": "zeroauth_tsconfig_compileroptions_outdir"
+      "source": "zerotrust_tsconfig_compileroptions",
+      "target": "zerotrust_tsconfig_compileroptions_outdir"
     },
     {
       "relation": "contains",
@@ -44085,8 +44085,8 @@
       "source_location": "L10",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_tsconfig_compileroptions",
-      "target": "zeroauth_tsconfig_compileroptions_resolvejsonmodule"
+      "source": "zerotrust_tsconfig_compileroptions",
+      "target": "zerotrust_tsconfig_compileroptions_resolvejsonmodule"
     },
     {
       "relation": "contains",
@@ -44095,8 +44095,8 @@
       "source_location": "L11",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_tsconfig_compileroptions",
-      "target": "zeroauth_tsconfig_compileroptions_skiplibcheck"
+      "source": "zerotrust_tsconfig_compileroptions",
+      "target": "zerotrust_tsconfig_compileroptions_skiplibcheck"
     },
     {
       "relation": "contains",
@@ -44105,8 +44105,8 @@
       "source_location": "L12",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_tsconfig_compileroptions",
-      "target": "zeroauth_tsconfig_compileroptions_strict"
+      "source": "zerotrust_tsconfig_compileroptions",
+      "target": "zerotrust_tsconfig_compileroptions_strict"
     },
     {
       "relation": "contains",
@@ -44115,8 +44115,8 @@
       "source_location": "L13",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_tsconfig_compileroptions",
-      "target": "zeroauth_tsconfig_compileroptions_esmoduleinterop"
+      "source": "zerotrust_tsconfig_compileroptions",
+      "target": "zerotrust_tsconfig_compileroptions_esmoduleinterop"
     },
     {
       "relation": "contains",
@@ -44125,8 +44125,8 @@
       "source_location": "L14",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_tsconfig_compileroptions",
-      "target": "zeroauth_tsconfig_compileroptions_declaration"
+      "source": "zerotrust_tsconfig_compileroptions",
+      "target": "zerotrust_tsconfig_compileroptions_declaration"
     },
     {
       "relation": "contains",
@@ -44135,8 +44135,8 @@
       "source_location": "L15",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_tsconfig_compileroptions",
-      "target": "zeroauth_tsconfig_compileroptions_declarationmap"
+      "source": "zerotrust_tsconfig_compileroptions",
+      "target": "zerotrust_tsconfig_compileroptions_declarationmap"
     },
     {
       "relation": "contains",
@@ -44145,8 +44145,8 @@
       "source_location": "L16",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_tsconfig_compileroptions",
-      "target": "zeroauth_tsconfig_compileroptions_sourcemap"
+      "source": "zerotrust_tsconfig_compileroptions",
+      "target": "zerotrust_tsconfig_compileroptions_sourcemap"
     },
     {
       "relation": "contains",
@@ -44155,8 +44155,8 @@
       "source_location": "L17",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_tsconfig_compileroptions",
-      "target": "zeroauth_tsconfig_compileroptions_allowsyntheticdefaultimports"
+      "source": "zerotrust_tsconfig_compileroptions",
+      "target": "zerotrust_tsconfig_compileroptions_allowsyntheticdefaultimports"
     },
     {
       "relation": "contains",
@@ -44165,8 +44165,8 @@
       "source_location": "L18",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_tsconfig_compileroptions",
-      "target": "zeroauth_tsconfig_compileroptions_allowimportingtsextensions"
+      "source": "zerotrust_tsconfig_compileroptions",
+      "target": "zerotrust_tsconfig_compileroptions_allowimportingtsextensions"
     },
     {
       "relation": "contains",
@@ -44175,8 +44175,8 @@
       "source_location": "L19",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_tsconfig_compileroptions",
-      "target": "zeroauth_tsconfig_compileroptions_rewriterelativeimportextensions"
+      "source": "zerotrust_tsconfig_compileroptions",
+      "target": "zerotrust_tsconfig_compileroptions_rewriterelativeimportextensions"
     },
     {
       "relation": "contains",
@@ -44185,8 +44185,8 @@
       "source_location": "L20",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_tsconfig_compileroptions",
-      "target": "zeroauth_tsconfig_compileroptions_noemit"
+      "source": "zerotrust_tsconfig_compileroptions",
+      "target": "zerotrust_tsconfig_compileroptions_noemit"
     },
     {
       "relation": "contains",
@@ -44195,8 +44195,8 @@
       "source_location": "L21",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_tsconfig_compileroptions",
-      "target": "zeroauth_tsconfig_compileroptions_forceconsistentcasinginfilenames"
+      "source": "zerotrust_tsconfig_compileroptions",
+      "target": "zerotrust_tsconfig_compileroptions_forceconsistentcasinginfilenames"
     },
     {
       "relation": "contains",
@@ -44205,8 +44205,8 @@
       "source_location": "L22",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_tsconfig_compileroptions",
-      "target": "zeroauth_tsconfig_compileroptions_noimplicitany"
+      "source": "zerotrust_tsconfig_compileroptions",
+      "target": "zerotrust_tsconfig_compileroptions_noimplicitany"
     },
     {
       "relation": "contains",
@@ -44215,8 +44215,8 @@
       "source_location": "L23",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_tsconfig_compileroptions",
-      "target": "zeroauth_tsconfig_compileroptions_strictnullchecks"
+      "source": "zerotrust_tsconfig_compileroptions",
+      "target": "zerotrust_tsconfig_compileroptions_strictnullchecks"
     },
     {
       "relation": "contains",
@@ -44225,8 +44225,8 @@
       "source_location": "L24",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_tsconfig_compileroptions",
-      "target": "zeroauth_tsconfig_compileroptions_strictfunctiontypes"
+      "source": "zerotrust_tsconfig_compileroptions",
+      "target": "zerotrust_tsconfig_compileroptions_strictfunctiontypes"
     },
     {
       "relation": "contains",
@@ -44235,8 +44235,8 @@
       "source_location": "L25",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_tsconfig_compileroptions",
-      "target": "zeroauth_tsconfig_compileroptions_strictbindcallapply"
+      "source": "zerotrust_tsconfig_compileroptions",
+      "target": "zerotrust_tsconfig_compileroptions_strictbindcallapply"
     },
     {
       "relation": "contains",
@@ -44245,8 +44245,8 @@
       "source_location": "L26",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_tsconfig_compileroptions",
-      "target": "zeroauth_tsconfig_compileroptions_strictpropertyinitialization"
+      "source": "zerotrust_tsconfig_compileroptions",
+      "target": "zerotrust_tsconfig_compileroptions_strictpropertyinitialization"
     },
     {
       "relation": "contains",
@@ -44255,8 +44255,8 @@
       "source_location": "L27",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_tsconfig_compileroptions",
-      "target": "zeroauth_tsconfig_compileroptions_noimplicitthis"
+      "source": "zerotrust_tsconfig_compileroptions",
+      "target": "zerotrust_tsconfig_compileroptions_noimplicitthis"
     },
     {
       "relation": "contains",
@@ -44265,8 +44265,8 @@
       "source_location": "L28",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_tsconfig_compileroptions",
-      "target": "zeroauth_tsconfig_compileroptions_alwaysstrict"
+      "source": "zerotrust_tsconfig_compileroptions",
+      "target": "zerotrust_tsconfig_compileroptions_alwaysstrict"
     },
     {
       "relation": "contains",
@@ -44275,8 +44275,8 @@
       "source_location": "L29",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_tsconfig_compileroptions",
-      "target": "zeroauth_tsconfig_compileroptions_nounusedlocals"
+      "source": "zerotrust_tsconfig_compileroptions",
+      "target": "zerotrust_tsconfig_compileroptions_nounusedlocals"
     },
     {
       "relation": "contains",
@@ -44285,8 +44285,8 @@
       "source_location": "L30",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_tsconfig_compileroptions",
-      "target": "zeroauth_tsconfig_compileroptions_nounusedparameters"
+      "source": "zerotrust_tsconfig_compileroptions",
+      "target": "zerotrust_tsconfig_compileroptions_nounusedparameters"
     },
     {
       "relation": "contains",
@@ -44295,8 +44295,8 @@
       "source_location": "L31",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_tsconfig_compileroptions",
-      "target": "zeroauth_tsconfig_compileroptions_noimplicitreturns"
+      "source": "zerotrust_tsconfig_compileroptions",
+      "target": "zerotrust_tsconfig_compileroptions_noimplicitreturns"
     },
     {
       "relation": "contains",
@@ -44305,8 +44305,8 @@
       "source_location": "L32",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_tsconfig_compileroptions",
-      "target": "zeroauth_tsconfig_compileroptions_nofallthroughcasesinswitch"
+      "source": "zerotrust_tsconfig_compileroptions",
+      "target": "zerotrust_tsconfig_compileroptions_nofallthroughcasesinswitch"
     },
     {
       "relation": "contains",
@@ -44315,8 +44315,8 @@
       "source_location": "L33",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_tsconfig_compileroptions",
-      "target": "zeroauth_tsconfig_compileroptions_paths"
+      "source": "zerotrust_tsconfig_compileroptions",
+      "target": "zerotrust_tsconfig_compileroptions_paths"
     },
     {
       "relation": "contains",
@@ -44325,8 +44325,8 @@
       "source_location": "L34",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_tsconfig_compileroptions_paths",
-      "target": "zeroauth_tsconfig_paths"
+      "source": "zerotrust_tsconfig_compileroptions_paths",
+      "target": "zerotrust_tsconfig_paths"
     },
     {
       "relation": "contains",
@@ -44335,8 +44335,8 @@
       "source_location": "L35",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_tsconfig_compileroptions_paths",
-      "target": "zeroauth_tsconfig_paths_config"
+      "source": "zerotrust_tsconfig_compileroptions_paths",
+      "target": "zerotrust_tsconfig_paths_config"
     },
     {
       "relation": "contains",
@@ -44345,8 +44345,8 @@
       "source_location": "L36",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_tsconfig_compileroptions_paths",
-      "target": "zeroauth_tsconfig_paths_db"
+      "source": "zerotrust_tsconfig_compileroptions_paths",
+      "target": "zerotrust_tsconfig_paths_db"
     },
     {
       "relation": "contains",
@@ -44355,8 +44355,8 @@
       "source_location": "L37",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_tsconfig_compileroptions_paths",
-      "target": "zeroauth_tsconfig_paths_crypto"
+      "source": "zerotrust_tsconfig_compileroptions_paths",
+      "target": "zerotrust_tsconfig_paths_crypto"
     },
     {
       "relation": "contains",
@@ -44365,8 +44365,8 @@
       "source_location": "L38",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_tsconfig_compileroptions_paths",
-      "target": "zeroauth_tsconfig_paths_logger"
+      "source": "zerotrust_tsconfig_compileroptions_paths",
+      "target": "zerotrust_tsconfig_paths_logger"
     },
     {
       "relation": "contains",
@@ -44375,8 +44375,8 @@
       "source_location": "L39",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_tsconfig_compileroptions_paths",
-      "target": "zeroauth_tsconfig_paths_models"
+      "source": "zerotrust_tsconfig_compileroptions_paths",
+      "target": "zerotrust_tsconfig_paths_models"
     },
     {
       "relation": "contains",
@@ -44385,8 +44385,8 @@
       "source_location": "L40",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_tsconfig_compileroptions_paths",
-      "target": "zeroauth_tsconfig_paths_services"
+      "source": "zerotrust_tsconfig_compileroptions_paths",
+      "target": "zerotrust_tsconfig_paths_services"
     },
     {
       "relation": "contains",
@@ -44395,8 +44395,8 @@
       "source_location": "L41",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_tsconfig_compileroptions_paths",
-      "target": "zeroauth_tsconfig_paths_middleware"
+      "source": "zerotrust_tsconfig_compileroptions_paths",
+      "target": "zerotrust_tsconfig_paths_middleware"
     },
     {
       "relation": "contains",
@@ -44405,8 +44405,8 @@
       "source_location": "L42",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "zeroauth_tsconfig_compileroptions_paths",
-      "target": "zeroauth_tsconfig_paths_types"
+      "source": "zerotrust_tsconfig_compileroptions_paths",
+      "target": "zerotrust_tsconfig_paths_types"
     },
     {
       "relation": "contains",
@@ -64732,7 +64732,7 @@
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "src_index_ts",
-      "target": "src_index_initializezeroauth"
+      "target": "src_index_initializezerotrust"
     },
     {
       "relation": "contains",
@@ -64742,7 +64742,7 @@
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "src_index_ts",
-      "target": "src_index_shutdownzeroauth"
+      "target": "src_index_shutdownzerotrust"
     },
     {
       "relation": "imports_from",
@@ -64762,7 +64762,7 @@
       "source_location": "L315",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "src_index_initializezeroauth",
+      "source": "src_index_initializezerotrust",
       "target": "src_config_index_ts"
     },
     {
@@ -64772,7 +64772,7 @@
       "source_location": "L316",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "src_index_initializezeroauth",
+      "source": "src_index_initializezerotrust",
       "target": "src_db_index_ts"
     },
     {
@@ -64782,7 +64782,7 @@
       "source_location": "L317",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "src_index_initializezeroauth",
+      "source": "src_index_initializezerotrust",
       "target": "src_crypto_csfle_ts"
     },
     {
@@ -64792,7 +64792,7 @@
       "source_location": "L318",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "src_index_initializezeroauth",
+      "source": "src_index_initializezerotrust",
       "target": "src_logger_index_ts"
     },
     {
@@ -64802,7 +64802,7 @@
       "source_location": "L331",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "src_index_initializezeroauth",
+      "source": "src_index_initializezerotrust",
       "target": "src_middleware_ratelimiting_ts"
     },
     {
@@ -64812,7 +64812,7 @@
       "source_location": "L339",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "src_index_initializezeroauth",
+      "source": "src_index_initializezerotrust",
       "target": "src_audit_index_ts"
     },
     {
@@ -64822,7 +64822,7 @@
       "source_location": "L346",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "src_index_initializezeroauth",
+      "source": "src_index_initializezerotrust",
       "target": "src_middleware_auth_ts"
     },
     {
@@ -64833,7 +64833,7 @@
       "source_location": "L6",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "src_index_initializezeroauth",
+      "source": "src_index_initializezerotrust",
       "target": "src_api_server_ts"
     },
     {
@@ -64844,7 +64844,7 @@
       "source_file": "src/index.ts",
       "source_location": "L320",
       "weight": 1.0,
-      "source": "src_index_initializezeroauth",
+      "source": "src_index_initializezerotrust",
       "target": "config_index_getconfig"
     },
     {
@@ -64855,7 +64855,7 @@
       "source_file": "src/index.ts",
       "source_location": "L321",
       "weight": 1.0,
-      "source": "src_index_initializezeroauth",
+      "source": "src_index_initializezerotrust",
       "target": "logger_index_initializelogger"
     },
     {
@@ -64866,7 +64866,7 @@
       "source_file": "src/index.ts",
       "source_location": "L325",
       "weight": 1.0,
-      "source": "src_index_initializezeroauth",
+      "source": "src_index_initializezerotrust",
       "target": "db_index_initializedatabase"
     },
     {
@@ -64877,7 +64877,7 @@
       "source_file": "src/index.ts",
       "source_location": "L326",
       "weight": 1.0,
-      "source": "src_index_initializezeroauth",
+      "source": "src_index_initializezerotrust",
       "target": "db_index_checkpendingmigrations"
     },
     {
@@ -64888,7 +64888,7 @@
       "source_file": "src/index.ts",
       "source_location": "L328",
       "weight": 1.0,
-      "source": "src_index_initializezeroauth",
+      "source": "src_index_initializezerotrust",
       "target": "crypto_csfle_initializecsfle"
     },
     {
@@ -64899,7 +64899,7 @@
       "source_file": "src/index.ts",
       "source_location": "L332",
       "weight": 1.0,
-      "source": "src_index_initializezeroauth",
+      "source": "src_index_initializezerotrust",
       "target": "middleware_ratelimiting_initratelimiter"
     },
     {
@@ -64910,7 +64910,7 @@
       "source_file": "src/index.ts",
       "source_location": "L340",
       "weight": 1.0,
-      "source": "src_index_initializezeroauth",
+      "source": "src_index_initializezerotrust",
       "target": "audit_index_initauditpipeline"
     },
     {
@@ -64921,7 +64921,7 @@
       "source_file": "src/index.ts",
       "source_location": "L347",
       "weight": 1.0,
-      "source": "src_index_initializezeroauth",
+      "source": "src_index_initializezerotrust",
       "target": "middleware_auth_initauthmiddleware"
     },
     {
@@ -64932,7 +64932,7 @@
       "source_file": "src/api/server.ts",
       "source_location": "L49",
       "weight": 1.0,
-      "source": "src_index_initializezeroauth",
+      "source": "src_index_initializezerotrust",
       "target": "api_server_createserver"
     },
     {
@@ -64942,7 +64942,7 @@
       "source_location": "L357",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "src_index_shutdownzeroauth",
+      "source": "src_index_shutdownzerotrust",
       "target": "src_logger_index_ts"
     },
     {
@@ -64952,7 +64952,7 @@
       "source_location": "L358",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "src_index_shutdownzeroauth",
+      "source": "src_index_shutdownzerotrust",
       "target": "src_db_index_ts"
     },
     {
@@ -64962,7 +64962,7 @@
       "source_location": "L364",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "src_index_shutdownzeroauth",
+      "source": "src_index_shutdownzerotrust",
       "target": "src_audit_index_ts"
     },
     {
@@ -64973,7 +64973,7 @@
       "source_file": "src/index.ts",
       "source_location": "L360",
       "weight": 1.0,
-      "source": "src_index_shutdownzeroauth",
+      "source": "src_index_shutdownzerotrust",
       "target": "logger_index_getlogger"
     },
     {
@@ -64984,7 +64984,7 @@
       "source_file": "src/index.ts",
       "source_location": "L365",
       "weight": 1.0,
-      "source": "src_index_shutdownzeroauth",
+      "source": "src_index_shutdownzerotrust",
       "target": "audit_index_shutdownauditpipeline"
     },
     {
@@ -64995,7 +64995,7 @@
       "source_file": "src/index.ts",
       "source_location": "L371",
       "weight": 1.0,
-      "source": "src_index_shutdownzeroauth",
+      "source": "src_index_shutdownzerotrust",
       "target": "db_index_closedatabase"
     },
     {
@@ -76857,7 +76857,7 @@
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "src_config_index_ts",
-      "target": "shared_types_zeroauthconfig"
+      "target": "shared_types_zerotrustconfig"
     },
     {
       "relation": "contains",
@@ -77390,7 +77390,7 @@
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "src_crypto_csfle_ts",
-      "target": "shared_types_zeroauthconfig"
+      "target": "shared_types_zerotrustconfig"
     },
     {
       "relation": "contains",
@@ -83567,7 +83567,7 @@
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "src_logger_index_ts",
-      "target": "shared_types_zeroauthconfig"
+      "target": "shared_types_zerotrustconfig"
     },
     {
       "relation": "contains",
@@ -87238,7 +87238,7 @@
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "src_middleware_auth_ts",
-      "target": "shared_types_zeroautherror"
+      "target": "shared_types_zerotrusterror"
     },
     {
       "relation": "contains",
@@ -87465,7 +87465,7 @@
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "src_middleware_continuouseval_ts",
-      "target": "shared_types_zeroautherror"
+      "target": "shared_types_zerotrusterror"
     },
     {
       "relation": "imports_from",
@@ -87802,7 +87802,7 @@
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "src_middleware_deviceattestation_ts",
-      "target": "shared_types_zeroautherror"
+      "target": "shared_types_zerotrusterror"
     },
     {
       "relation": "contains",
@@ -94789,7 +94789,7 @@
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "src_shared_types_ts",
-      "target": "shared_types_zeroauthconfig"
+      "target": "shared_types_zerotrustconfig"
     },
     {
       "relation": "contains",
@@ -95009,7 +95009,7 @@
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "src_shared_types_ts",
-      "target": "shared_types_zeroautherror"
+      "target": "shared_types_zerotrusterror"
     },
     {
       "relation": "contains",
@@ -95226,8 +95226,8 @@
       "source_location": "L386",
       "weight": 1.0,
       "confidence_score": 1.0,
-      "source": "shared_types_zeroautherror",
-      "target": "shared_types_zeroautherror_constructor"
+      "source": "shared_types_zerotrusterror",
+      "target": "shared_types_zerotrusterror_constructor"
     },
     {
       "relation": "contains",
@@ -97767,7 +97767,7 @@
       "source_file": "README.md",
       "source_location": null,
       "weight": 1.0,
-      "source": "readme_zeroauth_project",
+      "source": "readme_zerotrust_project",
       "target": "readme_hono_api"
     },
     {
@@ -97777,7 +97777,7 @@
       "source_file": "README.md",
       "source_location": null,
       "weight": 1.0,
-      "source": "readme_zeroauth_project",
+      "source": "readme_zerotrust_project",
       "target": "readme_nextjs_ui"
     },
     {
@@ -97787,7 +97787,7 @@
       "source_file": "STARTER.md",
       "source_location": null,
       "weight": 1.0,
-      "source": "readme_zeroauth_project",
+      "source": "readme_zerotrust_project",
       "target": "starter_md_saas_starter"
     },
     {
@@ -97797,8 +97797,8 @@
       "source_file": "packages/ui/public/llms.txt",
       "source_location": null,
       "weight": 1.0,
-      "source": "readme_zeroauth_project",
-      "target": "llms_txt_zeroauth_llm_index"
+      "source": "readme_zerotrust_project",
+      "target": "llms_txt_zerotrust_llm_index"
     },
     {
       "relation": "references",
@@ -98548,7 +98548,7 @@
       "source_location": null,
       "weight": 1.0,
       "source": "docker_compose_postgres_service",
-      "target": "docker_compose_zeroauth_service"
+      "target": "docker_compose_zerotrust_service"
     },
     {
       "relation": "references",
@@ -98558,7 +98558,7 @@
       "source_location": null,
       "weight": 1.0,
       "source": "docker_compose_redis_service",
-      "target": "docker_compose_zeroauth_service"
+      "target": "docker_compose_zerotrust_service"
     },
     {
       "relation": "references",
@@ -98568,7 +98568,7 @@
       "source_location": null,
       "weight": 1.0,
       "source": "docker_compose_elasticsearch_service",
-      "target": "docker_compose_zeroauth_service"
+      "target": "docker_compose_zerotrust_service"
     },
     {
       "relation": "references",
@@ -98908,7 +98908,7 @@
       "source_location": null,
       "weight": 1.0,
       "source": "icon512_app_icon",
-      "target": "icon512_zeroauth_ui"
+      "target": "icon512_zerotrust_ui"
     },
     {
       "relation": "not_a_branded_logo_but_personal_photo_of",
@@ -98948,7 +98948,7 @@
       "source_location": null,
       "weight": 0.75,
       "source": "icon512_person",
-      "target": "icon512_zeroauth_ui"
+      "target": "icon512_zerotrust_ui"
     },
     {
       "relation": "depicts",
@@ -98978,7 +98978,7 @@
       "source_location": null,
       "weight": 0.85,
       "source": "icon512_profile_photo",
-      "target": "icon512_zeroauth_ui"
+      "target": "icon512_zerotrust_ui"
     },
     {
       "relation": "contains",
@@ -101190,7 +101190,7 @@
       "source_file": "README.md",
       "source_location": null,
       "weight": 1.0,
-      "source": "readme_zeroauth",
+      "source": "readme_zerotrust",
       "target": "starter_feature_catalog"
     },
     {
@@ -101200,8 +101200,8 @@
       "source_file": "README.md",
       "source_location": null,
       "weight": 1.0,
-      "source": "readme_zeroauth",
-      "target": "roadmap_zeroauth"
+      "source": "readme_zerotrust",
+      "target": "roadmap_zerotrust"
     },
     {
       "relation": "references",
@@ -101211,7 +101211,7 @@
       "source_location": null,
       "weight": 1.0,
       "source": "starter_feature_catalog",
-      "target": "roadmap_zeroauth"
+      "target": "roadmap_zerotrust"
     },
     {
       "relation": "references",
@@ -103505,7 +103505,7 @@
       "source_file": "package.json",
       "source_location": null,
       "weight": 1.0,
-      "source": "package_zeroauth",
+      "source": "package_zerotrust",
       "target": "package_devScript"
     },
     {
@@ -104296,7 +104296,7 @@
       "source_location": null,
       "weight": 0.6,
       "source": "schema_usersTable",
-      "target": "readme_ZeroAuthOverview"
+      "target": "readme_zerotrustOverview"
     },
     {
       "relation": "references",
@@ -104375,7 +104375,7 @@
       "source_file": "README.md",
       "source_location": null,
       "weight": 1.0,
-      "source": "readme_ZeroAuthOverview",
+      "source": "readme_zerotrustOverview",
       "target": "starter_FeatureCatalog"
     },
     {
@@ -104855,7 +104855,7 @@
       "source_location": "L2",
       "weight": 1.0,
       "source": "biome_json",
-      "target": "zeroauth_biome_schema",
+      "target": "zerotrust_biome_schema",
       "confidence_score": 1.0
     },
     {
@@ -104865,7 +104865,7 @@
       "source_location": "L3",
       "weight": 1.0,
       "source": "biome_json",
-      "target": "zeroauth_biome_vcs",
+      "target": "zerotrust_biome_vcs",
       "confidence_score": 1.0
     },
     {
@@ -104875,7 +104875,7 @@
       "source_location": "L8",
       "weight": 1.0,
       "source": "biome_json",
-      "target": "zeroauth_biome_files",
+      "target": "zerotrust_biome_files",
       "confidence_score": 1.0
     },
     {
@@ -104885,7 +104885,7 @@
       "source_location": "L44",
       "weight": 1.0,
       "source": "biome_json",
-      "target": "zeroauth_biome_formatter",
+      "target": "zerotrust_biome_formatter",
       "confidence_score": 1.0
     },
     {
@@ -104895,7 +104895,7 @@
       "source_location": "L52",
       "weight": 1.0,
       "source": "biome_json",
-      "target": "zeroauth_biome_javascript",
+      "target": "zerotrust_biome_javascript",
       "confidence_score": 1.0
     },
     {
@@ -104905,7 +104905,7 @@
       "source_location": "L62",
       "weight": 1.0,
       "source": "biome_json",
-      "target": "zeroauth_biome_json",
+      "target": "zerotrust_biome_json",
       "confidence_score": 1.0
     },
     {
@@ -104915,7 +104915,7 @@
       "source_location": "L68",
       "weight": 1.0,
       "source": "biome_json",
-      "target": "zeroauth_biome_css",
+      "target": "zerotrust_biome_css",
       "confidence_score": 1.0
     },
     {
@@ -104925,7 +104925,7 @@
       "source_location": "L74",
       "weight": 1.0,
       "source": "biome_json",
-      "target": "zeroauth_biome_linter",
+      "target": "zerotrust_biome_linter",
       "confidence_score": 1.0
     },
     {
@@ -104935,7 +104935,7 @@
       "source_location": "L96",
       "weight": 1.0,
       "source": "biome_json",
-      "target": "zeroauth_biome_assist",
+      "target": "zerotrust_biome_assist",
       "confidence_score": 1.0
     },
     {
@@ -104944,8 +104944,8 @@
       "source_file": "biome.json",
       "source_location": "L4",
       "weight": 1.0,
-      "source": "zeroauth_biome_vcs",
-      "target": "zeroauth_biome_vcs_enabled",
+      "source": "zerotrust_biome_vcs",
+      "target": "zerotrust_biome_vcs_enabled",
       "confidence_score": 1.0
     },
     {
@@ -104954,8 +104954,8 @@
       "source_file": "biome.json",
       "source_location": "L5",
       "weight": 1.0,
-      "source": "zeroauth_biome_vcs",
-      "target": "zeroauth_biome_vcs_clientkind",
+      "source": "zerotrust_biome_vcs",
+      "target": "zerotrust_biome_vcs_clientkind",
       "confidence_score": 1.0
     },
     {
@@ -104964,8 +104964,8 @@
       "source_file": "biome.json",
       "source_location": "L6",
       "weight": 1.0,
-      "source": "zeroauth_biome_vcs",
-      "target": "zeroauth_biome_vcs_useignorefile",
+      "source": "zerotrust_biome_vcs",
+      "target": "zerotrust_biome_vcs_useignorefile",
       "confidence_score": 1.0
     },
     {
@@ -104974,8 +104974,8 @@
       "source_file": "biome.json",
       "source_location": "L9",
       "weight": 1.0,
-      "source": "zeroauth_biome_files",
-      "target": "zeroauth_biome_files_includes",
+      "source": "zerotrust_biome_files",
+      "target": "zerotrust_biome_files_includes",
       "confidence_score": 1.0
     },
     {
@@ -104984,8 +104984,8 @@
       "source_file": "biome.json",
       "source_location": "L45",
       "weight": 1.0,
-      "source": "zeroauth_biome_formatter",
-      "target": "zeroauth_biome_formatter_enabled",
+      "source": "zerotrust_biome_formatter",
+      "target": "zerotrust_biome_formatter_enabled",
       "confidence_score": 1.0
     },
     {
@@ -104994,8 +104994,8 @@
       "source_file": "biome.json",
       "source_location": "L46",
       "weight": 1.0,
-      "source": "zeroauth_biome_formatter",
-      "target": "zeroauth_biome_formatter_indentstyle",
+      "source": "zerotrust_biome_formatter",
+      "target": "zerotrust_biome_formatter_indentstyle",
       "confidence_score": 1.0
     },
     {
@@ -105004,8 +105004,8 @@
       "source_file": "biome.json",
       "source_location": "L47",
       "weight": 1.0,
-      "source": "zeroauth_biome_formatter",
-      "target": "zeroauth_biome_formatter_indentwidth",
+      "source": "zerotrust_biome_formatter",
+      "target": "zerotrust_biome_formatter_indentwidth",
       "confidence_score": 1.0
     },
     {
@@ -105014,8 +105014,8 @@
       "source_file": "biome.json",
       "source_location": "L48",
       "weight": 1.0,
-      "source": "zeroauth_biome_formatter",
-      "target": "zeroauth_biome_formatter_linewidth",
+      "source": "zerotrust_biome_formatter",
+      "target": "zerotrust_biome_formatter_linewidth",
       "confidence_score": 1.0
     },
     {
@@ -105024,8 +105024,8 @@
       "source_file": "biome.json",
       "source_location": "L49",
       "weight": 1.0,
-      "source": "zeroauth_biome_formatter",
-      "target": "zeroauth_biome_formatter_lineending",
+      "source": "zerotrust_biome_formatter",
+      "target": "zerotrust_biome_formatter_lineending",
       "confidence_score": 1.0
     },
     {
@@ -105034,8 +105034,8 @@
       "source_file": "biome.json",
       "source_location": "L50",
       "weight": 1.0,
-      "source": "zeroauth_biome_formatter",
-      "target": "zeroauth_biome_formatter_attributeposition",
+      "source": "zerotrust_biome_formatter",
+      "target": "zerotrust_biome_formatter_attributeposition",
       "confidence_score": 1.0
     },
     {
@@ -105044,8 +105044,8 @@
       "source_file": "biome.json",
       "source_location": "L70",
       "weight": 1.0,
-      "source": "zeroauth_biome_css_formatter",
-      "target": "zeroauth_biome_formatter_enabled",
+      "source": "zerotrust_biome_css_formatter",
+      "target": "zerotrust_biome_formatter_enabled",
       "confidence_score": 1.0
     },
     {
@@ -105054,8 +105054,8 @@
       "source_file": "biome.json",
       "source_location": "L64",
       "weight": 1.0,
-      "source": "zeroauth_biome_json_formatter",
-      "target": "zeroauth_biome_formatter_indentwidth",
+      "source": "zerotrust_biome_json_formatter",
+      "target": "zerotrust_biome_formatter_indentwidth",
       "confidence_score": 1.0
     },
     {
@@ -105064,8 +105064,8 @@
       "source_file": "biome.json",
       "source_location": "L53",
       "weight": 1.0,
-      "source": "zeroauth_biome_javascript",
-      "target": "zeroauth_biome_javascript_formatter",
+      "source": "zerotrust_biome_javascript",
+      "target": "zerotrust_biome_javascript_formatter",
       "confidence_score": 1.0
     },
     {
@@ -105074,8 +105074,8 @@
       "source_file": "biome.json",
       "source_location": "L54",
       "weight": 1.0,
-      "source": "zeroauth_biome_javascript_formatter",
-      "target": "zeroauth_biome_formatter_quotestyle",
+      "source": "zerotrust_biome_javascript_formatter",
+      "target": "zerotrust_biome_formatter_quotestyle",
       "confidence_score": 1.0
     },
     {
@@ -105084,8 +105084,8 @@
       "source_file": "biome.json",
       "source_location": "L55",
       "weight": 1.0,
-      "source": "zeroauth_biome_javascript_formatter",
-      "target": "zeroauth_biome_formatter_semicolons",
+      "source": "zerotrust_biome_javascript_formatter",
+      "target": "zerotrust_biome_formatter_semicolons",
       "confidence_score": 1.0
     },
     {
@@ -105094,8 +105094,8 @@
       "source_file": "biome.json",
       "source_location": "L56",
       "weight": 1.0,
-      "source": "zeroauth_biome_javascript_formatter",
-      "target": "zeroauth_biome_formatter_trailingcommas",
+      "source": "zerotrust_biome_javascript_formatter",
+      "target": "zerotrust_biome_formatter_trailingcommas",
       "confidence_score": 1.0
     },
     {
@@ -105104,8 +105104,8 @@
       "source_file": "biome.json",
       "source_location": "L57",
       "weight": 1.0,
-      "source": "zeroauth_biome_javascript_formatter",
-      "target": "zeroauth_biome_formatter_arrowparentheses",
+      "source": "zerotrust_biome_javascript_formatter",
+      "target": "zerotrust_biome_formatter_arrowparentheses",
       "confidence_score": 1.0
     },
     {
@@ -105114,8 +105114,8 @@
       "source_file": "biome.json",
       "source_location": "L58",
       "weight": 1.0,
-      "source": "zeroauth_biome_javascript_formatter",
-      "target": "zeroauth_biome_formatter_bracketspacing",
+      "source": "zerotrust_biome_javascript_formatter",
+      "target": "zerotrust_biome_formatter_bracketspacing",
       "confidence_score": 1.0
     },
     {
@@ -105124,8 +105124,8 @@
       "source_file": "biome.json",
       "source_location": "L59",
       "weight": 1.0,
-      "source": "zeroauth_biome_javascript_formatter",
-      "target": "zeroauth_biome_formatter_jsxquotestyle",
+      "source": "zerotrust_biome_javascript_formatter",
+      "target": "zerotrust_biome_formatter_jsxquotestyle",
       "confidence_score": 1.0
     },
     {
@@ -105134,8 +105134,8 @@
       "source_file": "biome.json",
       "source_location": "L71",
       "weight": 1.0,
-      "source": "zeroauth_biome_css_formatter",
-      "target": "zeroauth_biome_formatter_quotestyle",
+      "source": "zerotrust_biome_css_formatter",
+      "target": "zerotrust_biome_formatter_quotestyle",
       "confidence_score": 1.0
     },
     {
@@ -105144,8 +105144,8 @@
       "source_file": "biome.json",
       "source_location": "L65",
       "weight": 1.0,
-      "source": "zeroauth_biome_json_formatter",
-      "target": "zeroauth_biome_formatter_trailingcommas",
+      "source": "zerotrust_biome_json_formatter",
+      "target": "zerotrust_biome_formatter_trailingcommas",
       "confidence_score": 1.0
     },
     {
@@ -105154,8 +105154,8 @@
       "source_file": "biome.json",
       "source_location": "L63",
       "weight": 1.0,
-      "source": "zeroauth_biome_json",
-      "target": "zeroauth_biome_json_formatter",
+      "source": "zerotrust_biome_json",
+      "target": "zerotrust_biome_json_formatter",
       "confidence_score": 1.0
     },
     {
@@ -105164,8 +105164,8 @@
       "source_file": "biome.json",
       "source_location": "L69",
       "weight": 1.0,
-      "source": "zeroauth_biome_css",
-      "target": "zeroauth_biome_css_formatter",
+      "source": "zerotrust_biome_css",
+      "target": "zerotrust_biome_css_formatter",
       "confidence_score": 1.0
     },
     {
@@ -105174,8 +105174,8 @@
       "source_file": "biome.json",
       "source_location": "L75",
       "weight": 1.0,
-      "source": "zeroauth_biome_linter",
-      "target": "zeroauth_biome_linter_enabled",
+      "source": "zerotrust_biome_linter",
+      "target": "zerotrust_biome_linter_enabled",
       "confidence_score": 1.0
     },
     {
@@ -105184,8 +105184,8 @@
       "source_file": "biome.json",
       "source_location": "L76",
       "weight": 1.0,
-      "source": "zeroauth_biome_linter",
-      "target": "zeroauth_biome_linter_rules",
+      "source": "zerotrust_biome_linter",
+      "target": "zerotrust_biome_linter_rules",
       "confidence_score": 1.0
     },
     {
@@ -105194,8 +105194,8 @@
       "source_file": "biome.json",
       "source_location": "L77",
       "weight": 1.0,
-      "source": "zeroauth_biome_linter_rules",
-      "target": "zeroauth_biome_rules_preset",
+      "source": "zerotrust_biome_linter_rules",
+      "target": "zerotrust_biome_rules_preset",
       "confidence_score": 1.0
     },
     {
@@ -105204,8 +105204,8 @@
       "source_file": "biome.json",
       "source_location": "L78",
       "weight": 1.0,
-      "source": "zeroauth_biome_linter_rules",
-      "target": "zeroauth_biome_rules_suspicious",
+      "source": "zerotrust_biome_linter_rules",
+      "target": "zerotrust_biome_rules_suspicious",
       "confidence_score": 1.0
     },
     {
@@ -105214,8 +105214,8 @@
       "source_file": "biome.json",
       "source_location": "L87",
       "weight": 1.0,
-      "source": "zeroauth_biome_linter_rules",
-      "target": "zeroauth_biome_rules_style",
+      "source": "zerotrust_biome_linter_rules",
+      "target": "zerotrust_biome_rules_style",
       "confidence_score": 1.0
     },
     {
@@ -105224,8 +105224,8 @@
       "source_file": "biome.json",
       "source_location": "L90",
       "weight": 1.0,
-      "source": "zeroauth_biome_linter_rules",
-      "target": "zeroauth_biome_rules_nursery",
+      "source": "zerotrust_biome_linter_rules",
+      "target": "zerotrust_biome_rules_nursery",
       "confidence_score": 1.0
     },
     {
@@ -105234,8 +105234,8 @@
       "source_file": "biome.json",
       "source_location": "L79",
       "weight": 1.0,
-      "source": "zeroauth_biome_rules_suspicious",
-      "target": "zeroauth_biome_suspicious_noexplicitany",
+      "source": "zerotrust_biome_rules_suspicious",
+      "target": "zerotrust_biome_suspicious_noexplicitany",
       "confidence_score": 1.0
     },
     {
@@ -105244,8 +105244,8 @@
       "source_file": "biome.json",
       "source_location": "L80",
       "weight": 1.0,
-      "source": "zeroauth_biome_rules_suspicious",
-      "target": "zeroauth_biome_suspicious_noconsole",
+      "source": "zerotrust_biome_rules_suspicious",
+      "target": "zerotrust_biome_suspicious_noconsole",
       "confidence_score": 1.0
     },
     {
@@ -105254,8 +105254,8 @@
       "source_file": "biome.json",
       "source_location": "L81",
       "weight": 1.0,
-      "source": "zeroauth_biome_suspicious_noconsole",
-      "target": "zeroauth_biome_noconsole_level",
+      "source": "zerotrust_biome_suspicious_noconsole",
+      "target": "zerotrust_biome_noconsole_level",
       "confidence_score": 1.0
     },
     {
@@ -105264,8 +105264,8 @@
       "source_file": "biome.json",
       "source_location": "L82",
       "weight": 1.0,
-      "source": "zeroauth_biome_suspicious_noconsole",
-      "target": "zeroauth_biome_noconsole_options",
+      "source": "zerotrust_biome_suspicious_noconsole",
+      "target": "zerotrust_biome_noconsole_options",
       "confidence_score": 1.0
     },
     {
@@ -105274,8 +105274,8 @@
       "source_file": "biome.json",
       "source_location": "L83",
       "weight": 1.0,
-      "source": "zeroauth_biome_noconsole_options",
-      "target": "zeroauth_biome_options_allow",
+      "source": "zerotrust_biome_noconsole_options",
+      "target": "zerotrust_biome_options_allow",
       "confidence_score": 1.0
     },
     {
@@ -105284,8 +105284,8 @@
       "source_file": "biome.json",
       "source_location": "L88",
       "weight": 1.0,
-      "source": "zeroauth_biome_rules_style",
-      "target": "zeroauth_biome_style_useconst",
+      "source": "zerotrust_biome_rules_style",
+      "target": "zerotrust_biome_style_useconst",
       "confidence_score": 1.0
     },
     {
@@ -105294,8 +105294,8 @@
       "source_file": "biome.json",
       "source_location": "L91",
       "weight": 1.0,
-      "source": "zeroauth_biome_rules_nursery",
-      "target": "zeroauth_biome_nursery_nofloatingpromises",
+      "source": "zerotrust_biome_rules_nursery",
+      "target": "zerotrust_biome_nursery_nofloatingpromises",
       "confidence_score": 1.0
     },
     {
@@ -105304,8 +105304,8 @@
       "source_file": "biome.json",
       "source_location": "L92",
       "weight": 1.0,
-      "source": "zeroauth_biome_rules_nursery",
-      "target": "zeroauth_biome_nursery_nomisusedpromises",
+      "source": "zerotrust_biome_rules_nursery",
+      "target": "zerotrust_biome_nursery_nomisusedpromises",
       "confidence_score": 1.0
     },
     {
@@ -105314,8 +105314,8 @@
       "source_file": "biome.json",
       "source_location": "L97",
       "weight": 1.0,
-      "source": "zeroauth_biome_assist",
-      "target": "zeroauth_biome_assist_actions",
+      "source": "zerotrust_biome_assist",
+      "target": "zerotrust_biome_assist_actions",
       "confidence_score": 1.0
     },
     {
@@ -105324,8 +105324,8 @@
       "source_file": "biome.json",
       "source_location": "L98",
       "weight": 1.0,
-      "source": "zeroauth_biome_assist_actions",
-      "target": "zeroauth_biome_actions_source",
+      "source": "zerotrust_biome_assist_actions",
+      "target": "zerotrust_biome_actions_source",
       "confidence_score": 1.0
     },
     {
@@ -105334,8 +105334,8 @@
       "source_file": "biome.json",
       "source_location": "L99",
       "weight": 1.0,
-      "source": "zeroauth_biome_actions_source",
-      "target": "zeroauth_biome_source_recommended",
+      "source": "zerotrust_biome_actions_source",
+      "target": "zerotrust_biome_source_recommended",
       "confidence_score": 1.0
     },
     {
@@ -109870,7 +109870,7 @@
       "source_location": null,
       "weight": 1.0,
       "source": "agent_safety_review_points",
-      "target": "agent_zeroauth_assistant"
+      "target": "agent_zerotrust_assistant"
     },
     {
       "relation": "references",
@@ -109879,7 +109879,7 @@
       "source_file": ".agent.md",
       "source_location": null,
       "weight": 1.0,
-      "source": "agent_zeroauth_assistant",
+      "source": "agent_zerotrust_assistant",
       "target": "agent_tool_preferences"
     },
     {
@@ -109889,7 +109889,7 @@
       "source_file": ".agent.md",
       "source_location": null,
       "weight": 1.0,
-      "source": "agent_zeroauth_assistant",
+      "source": "agent_zerotrust_assistant",
       "target": "claudemd_drizzle"
     },
     {
@@ -109899,7 +109899,7 @@
       "source_file": ".agent.md",
       "source_location": null,
       "weight": 1.0,
-      "source": "agent_zeroauth_assistant",
+      "source": "agent_zerotrust_assistant",
       "target": "claudemd_nextjs_mcp"
     },
     {
@@ -109909,7 +109909,7 @@
       "source_file": ".agent.md",
       "source_location": null,
       "weight": 1.0,
-      "source": "agent_zeroauth_assistant",
+      "source": "agent_zerotrust_assistant",
       "target": "claudemd_bun"
     },
     {
@@ -109919,7 +109919,7 @@
       "source_file": ".agent.md",
       "source_location": null,
       "weight": 1.0,
-      "source": "agent_zeroauth_assistant",
+      "source": "agent_zerotrust_assistant",
       "target": "readme_doc"
     },
     {
@@ -109929,7 +109929,7 @@
       "source_file": ".agent.md",
       "source_location": null,
       "weight": 1.0,
-      "source": "agent_zeroauth_assistant",
+      "source": "agent_zerotrust_assistant",
       "target": "implemented_doc"
     },
     {
@@ -109939,7 +109939,7 @@
       "source_file": ".agent.md",
       "source_location": null,
       "weight": 1.0,
-      "source": "agent_zeroauth_assistant",
+      "source": "agent_zerotrust_assistant",
       "target": "notimpl_doc"
     },
     {

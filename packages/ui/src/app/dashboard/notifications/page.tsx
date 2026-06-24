@@ -7,7 +7,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/context/ToastContext";
 import { api } from "@/lib/api";
-import { isPushSupported, isSubscribed, subscribeToPush, unsubscribeFromPush } from "@/lib/push";
+import {
+  isPushSupported,
+  isSubscribed,
+  subscribeToPush,
+  unsubscribeFromPush,
+} from "@/lib/push";
 
 interface NotificationPreferences {
   emailFallback: boolean;
@@ -50,7 +55,10 @@ export default function NotificationSettingsPage() {
     try {
       await api.put("/notifications/preferences", next);
     } catch {
-      toast({ type: "error", message: "Couldn't save notification preferences." });
+      toast({
+        type: "error",
+        message: "Couldn't save notification preferences.",
+      });
     } finally {
       setSavingPrefs(false);
     }
@@ -71,14 +79,23 @@ export default function NotificationSettingsPage() {
           return;
         }
         setPushOn(true);
-        toast({ type: "success", message: "Push notifications enabled on this device." });
+        toast({
+          type: "success",
+          message: "Push notifications enabled on this device.",
+        });
       } else {
         await unsubscribeFromPush();
         setPushOn(false);
-        toast({ type: "info", message: "Push notifications disabled on this device." });
+        toast({
+          type: "info",
+          message: "Push notifications disabled on this device.",
+        });
       }
     } catch {
-      toast({ type: "error", message: "Something went wrong updating push notifications." });
+      toast({
+        type: "error",
+        message: "Something went wrong updating push notifications.",
+      });
     } finally {
       setPushBusy(false);
     }
@@ -91,7 +108,8 @@ export default function NotificationSettingsPage() {
           Notifications
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Choose how ZeroAuth reaches you about security events and account activity.
+          Choose how zerotrust reaches you about security events and account
+          activity.
         </p>
       </div>
 
@@ -99,7 +117,11 @@ export default function NotificationSettingsPage() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
-            {pushOn ? <Bell className="h-4 w-4" /> : <BellOff className="h-4 w-4" />}
+            {pushOn ? (
+              <Bell className="h-4 w-4" />
+            ) : (
+              <BellOff className="h-4 w-4" />
+            )}
             Push notifications
           </CardTitle>
         </CardHeader>
@@ -113,16 +135,21 @@ export default function NotificationSettingsPage() {
                     Enable on this device
                   </Label>
                   <p className="mt-0.5 text-xs text-muted-foreground">
-                    Get real-time alerts even when ZeroAuth isn't open. Manage this per device.
+                    Get real-time alerts even when zerotrust isn't open. Manage
+                    this per device.
                   </p>
                 </div>
               </div>
-              <Toggle checked={pushOn} onChange={togglePush} disabled={pushBusy} />
+              <Toggle
+                checked={pushOn}
+                onChange={togglePush}
+                disabled={pushBusy}
+              />
             </div>
           ) : (
             <p className="text-sm text-muted-foreground">
-              This browser doesn't support web push notifications. Install ZeroAuth as an app or use
-              a supported browser to enable them.
+              This browser doesn't support web push notifications. Install
+              zerotrust as an app or use a supported browser to enable them.
             </p>
           )}
         </CardContent>
@@ -136,9 +163,12 @@ export default function NotificationSettingsPage() {
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <Label className="text-sm font-medium text-foreground">Email me when I'm away</Label>
+              <Label className="text-sm font-medium text-foreground">
+                Email me when I'm away
+              </Label>
               <p className="mt-0.5 text-xs text-muted-foreground">
-                If you haven't seen an important notification in-app, send it to your email too.
+                If you haven't seen an important notification in-app, send it to
+                your email too.
               </p>
             </div>
             <Toggle

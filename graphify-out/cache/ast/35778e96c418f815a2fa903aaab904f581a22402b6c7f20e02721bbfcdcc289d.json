@@ -1,1 +1,205 @@
-{"nodes": [{"id": "c_users_alfamas_desktop_zeroauth_packages_ui_src_components_feedbackwidget_tsx", "label": "FeedbackWidget.tsx", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\components\\FeedbackWidget.tsx", "source_location": "L1"}, {"id": "components_feedbackwidget_feedbacktype", "label": "FeedbackType", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\components\\FeedbackWidget.tsx", "source_location": "L6"}, {"id": "components_feedbackwidget_props", "label": "Props", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\components\\FeedbackWidget.tsx", "source_location": "L8"}, {"id": "components_feedbackwidget_gettoken", "label": "getToken()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\components\\FeedbackWidget.tsx", "source_location": "L19"}, {"id": "components_feedbackwidget_submitfeedback", "label": "submitFeedback()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\components\\FeedbackWidget.tsx", "source_location": "L24"}, {"id": "components_feedbackwidget_feedbackwidget", "label": "FeedbackWidget()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\components\\FeedbackWidget.tsx", "source_location": "L42"}], "edges": [{"source": "c_users_alfamas_desktop_zeroauth_packages_ui_src_components_feedbackwidget_tsx", "target": "react", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\components\\FeedbackWidget.tsx", "source_location": "L3", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_packages_ui_src_components_feedbackwidget_tsx", "target": "c_users_alfamas_desktop_zeroauth_packages_ui_src_config_brand_ts", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\components\\FeedbackWidget.tsx", "source_location": "L4", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_packages_ui_src_components_feedbackwidget_tsx", "target": "config_brand_brand", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\components\\FeedbackWidget.tsx", "source_location": "L4", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_packages_ui_src_components_feedbackwidget_tsx", "target": "components_feedbackwidget_feedbacktype", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\components\\FeedbackWidget.tsx", "source_location": "L6", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_packages_ui_src_components_feedbackwidget_tsx", "target": "components_feedbackwidget_props", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\components\\FeedbackWidget.tsx", "source_location": "L8", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_packages_ui_src_components_feedbackwidget_tsx", "target": "components_feedbackwidget_gettoken", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\components\\FeedbackWidget.tsx", "source_location": "L19", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_packages_ui_src_components_feedbackwidget_tsx", "target": "components_feedbackwidget_submitfeedback", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\components\\FeedbackWidget.tsx", "source_location": "L24", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_packages_ui_src_components_feedbackwidget_tsx", "target": "components_feedbackwidget_feedbackwidget", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\components\\FeedbackWidget.tsx", "source_location": "L42", "weight": 1.0}, {"source": "components_feedbackwidget_submitfeedback", "target": "components_feedbackwidget_gettoken", "relation": "calls", "context": "call", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\components\\FeedbackWidget.tsx", "source_location": "L30", "weight": 1.0}], "raw_calls": [{"caller_nid": "components_feedbackwidget_gettoken", "callee": "getItem", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\components\\FeedbackWidget.tsx", "source_location": "L21"}, {"caller_nid": "components_feedbackwidget_submitfeedback", "callee": "fetch", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\components\\FeedbackWidget.tsx", "source_location": "L32"}, {"caller_nid": "components_feedbackwidget_submitfeedback", "callee": "stringify", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\components\\FeedbackWidget.tsx", "source_location": "L38"}, {"caller_nid": "components_feedbackwidget_feedbackwidget", "callee": "useState", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\components\\FeedbackWidget.tsx", "source_location": "L48"}, {"caller_nid": "components_feedbackwidget_feedbackwidget", "callee": "useState", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\components\\FeedbackWidget.tsx", "source_location": "L49"}, {"caller_nid": "components_feedbackwidget_feedbackwidget", "callee": "useState", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\components\\FeedbackWidget.tsx", "source_location": "L50"}, {"caller_nid": "components_feedbackwidget_feedbackwidget", "callee": "useState", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\components\\FeedbackWidget.tsx", "source_location": "L51"}, {"caller_nid": "components_feedbackwidget_feedbackwidget", "callee": "useState", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\components\\FeedbackWidget.tsx", "source_location": "L52"}, {"caller_nid": "components_feedbackwidget_feedbackwidget", "callee": "useEffect", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\components\\FeedbackWidget.tsx", "source_location": "L54"}, {"caller_nid": "components_feedbackwidget_feedbackwidget", "callee": "from", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\components\\FeedbackWidget.tsx", "source_location": "L108"}]}
+{
+    "nodes": [
+        {
+            "id": "c_users_alfamas_desktop_zerotrust_packages_ui_src_components_feedbackwidget_tsx",
+            "label": "FeedbackWidget.tsx",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\components\\FeedbackWidget.tsx",
+            "source_location": "L1"
+        },
+        {
+            "id": "components_feedbackwidget_feedbacktype",
+            "label": "FeedbackType",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\components\\FeedbackWidget.tsx",
+            "source_location": "L6"
+        },
+        {
+            "id": "components_feedbackwidget_props",
+            "label": "Props",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\components\\FeedbackWidget.tsx",
+            "source_location": "L8"
+        },
+        {
+            "id": "components_feedbackwidget_gettoken",
+            "label": "getToken()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\components\\FeedbackWidget.tsx",
+            "source_location": "L19"
+        },
+        {
+            "id": "components_feedbackwidget_submitfeedback",
+            "label": "submitFeedback()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\components\\FeedbackWidget.tsx",
+            "source_location": "L24"
+        },
+        {
+            "id": "components_feedbackwidget_feedbackwidget",
+            "label": "FeedbackWidget()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\components\\FeedbackWidget.tsx",
+            "source_location": "L42"
+        }
+    ],
+    "edges": [
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_packages_ui_src_components_feedbackwidget_tsx",
+            "target": "react",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\components\\FeedbackWidget.tsx",
+            "source_location": "L3",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_packages_ui_src_components_feedbackwidget_tsx",
+            "target": "c_users_alfamas_desktop_zerotrust_packages_ui_src_config_brand_ts",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\components\\FeedbackWidget.tsx",
+            "source_location": "L4",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_packages_ui_src_components_feedbackwidget_tsx",
+            "target": "config_brand_brand",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\components\\FeedbackWidget.tsx",
+            "source_location": "L4",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_packages_ui_src_components_feedbackwidget_tsx",
+            "target": "components_feedbackwidget_feedbacktype",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\components\\FeedbackWidget.tsx",
+            "source_location": "L6",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_packages_ui_src_components_feedbackwidget_tsx",
+            "target": "components_feedbackwidget_props",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\components\\FeedbackWidget.tsx",
+            "source_location": "L8",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_packages_ui_src_components_feedbackwidget_tsx",
+            "target": "components_feedbackwidget_gettoken",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\components\\FeedbackWidget.tsx",
+            "source_location": "L19",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_packages_ui_src_components_feedbackwidget_tsx",
+            "target": "components_feedbackwidget_submitfeedback",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\components\\FeedbackWidget.tsx",
+            "source_location": "L24",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_packages_ui_src_components_feedbackwidget_tsx",
+            "target": "components_feedbackwidget_feedbackwidget",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\components\\FeedbackWidget.tsx",
+            "source_location": "L42",
+            "weight": 1.0
+        },
+        {
+            "source": "components_feedbackwidget_submitfeedback",
+            "target": "components_feedbackwidget_gettoken",
+            "relation": "calls",
+            "context": "call",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\components\\FeedbackWidget.tsx",
+            "source_location": "L30",
+            "weight": 1.0
+        }
+    ],
+    "raw_calls": [
+        {
+            "caller_nid": "components_feedbackwidget_gettoken",
+            "callee": "getItem",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\components\\FeedbackWidget.tsx",
+            "source_location": "L21"
+        },
+        {
+            "caller_nid": "components_feedbackwidget_submitfeedback",
+            "callee": "fetch",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\components\\FeedbackWidget.tsx",
+            "source_location": "L32"
+        },
+        {
+            "caller_nid": "components_feedbackwidget_submitfeedback",
+            "callee": "stringify",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\components\\FeedbackWidget.tsx",
+            "source_location": "L38"
+        },
+        {
+            "caller_nid": "components_feedbackwidget_feedbackwidget",
+            "callee": "useState",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\components\\FeedbackWidget.tsx",
+            "source_location": "L48"
+        },
+        {
+            "caller_nid": "components_feedbackwidget_feedbackwidget",
+            "callee": "useState",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\components\\FeedbackWidget.tsx",
+            "source_location": "L49"
+        },
+        {
+            "caller_nid": "components_feedbackwidget_feedbackwidget",
+            "callee": "useState",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\components\\FeedbackWidget.tsx",
+            "source_location": "L50"
+        },
+        {
+            "caller_nid": "components_feedbackwidget_feedbackwidget",
+            "callee": "useState",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\components\\FeedbackWidget.tsx",
+            "source_location": "L51"
+        },
+        {
+            "caller_nid": "components_feedbackwidget_feedbackwidget",
+            "callee": "useState",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\components\\FeedbackWidget.tsx",
+            "source_location": "L52"
+        },
+        {
+            "caller_nid": "components_feedbackwidget_feedbackwidget",
+            "callee": "useEffect",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\components\\FeedbackWidget.tsx",
+            "source_location": "L54"
+        },
+        {
+            "caller_nid": "components_feedbackwidget_feedbackwidget",
+            "callee": "from",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\components\\FeedbackWidget.tsx",
+            "source_location": "L108"
+        }
+    ]
+}

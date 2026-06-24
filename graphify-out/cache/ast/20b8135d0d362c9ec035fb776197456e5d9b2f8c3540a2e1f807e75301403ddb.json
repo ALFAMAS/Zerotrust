@@ -1,1 +1,367 @@
-{"nodes": [{"id": "c_users_alfamas_desktop_zeroauth_changelog_md", "label": "CHANGELOG.md", "file_type": "document", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\CHANGELOG.md", "source_location": "L1"}, {"id": "zeroauth_changelog_changelog", "label": "Changelog", "file_type": "document", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\CHANGELOG.md", "source_location": "L1"}, {"id": "zeroauth_changelog_1_0_0_2026_05_20", "label": "[1.0.0] - 2026-05-20", "file_type": "document", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\CHANGELOG.md", "source_location": "L8"}, {"id": "zeroauth_changelog_added_phase_1_foundation_configuration", "label": "Added - Phase 1: Foundation & Configuration", "file_type": "document", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\CHANGELOG.md", "source_location": "L10"}, {"id": "zeroauth_changelog_configuration_management", "label": "Configuration Management", "file_type": "document", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\CHANGELOG.md", "source_location": "L12"}, {"id": "zeroauth_changelog_database_persistence", "label": "Database & Persistence", "file_type": "document", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\CHANGELOG.md", "source_location": "L22"}, {"id": "zeroauth_changelog_encryption_security", "label": "Encryption & Security", "file_type": "document", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\CHANGELOG.md", "source_location": "L29"}, {"id": "zeroauth_changelog_logging_observability", "label": "Logging & Observability", "file_type": "document", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\CHANGELOG.md", "source_location": "L37"}, {"id": "zeroauth_changelog_core_models", "label": "Core Models", "file_type": "document", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\CHANGELOG.md", "source_location": "L44"}, {"id": "zeroauth_changelog_core_services", "label": "Core Services", "file_type": "document", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\CHANGELOG.md", "source_location": "L53"}, {"id": "zeroauth_changelog_type_system", "label": "Type System", "file_type": "document", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\CHANGELOG.md", "source_location": "L58"}, {"id": "zeroauth_changelog_development_infrastructure", "label": "Development Infrastructure", "file_type": "document", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\CHANGELOG.md", "source_location": "L67"}, {"id": "zeroauth_changelog_deployment", "label": "Deployment", "file_type": "document", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\CHANGELOG.md", "source_location": "L76"}, {"id": "zeroauth_changelog_documentation", "label": "Documentation", "file_type": "document", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\CHANGELOG.md", "source_location": "L86"}, {"id": "zeroauth_changelog_npm_scripts", "label": "NPM Scripts", "file_type": "document", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\CHANGELOG.md", "source_location": "L94"}, {"id": "zeroauth_changelog_dependencies_added", "label": "Dependencies Added", "file_type": "document", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\CHANGELOG.md", "source_location": "L106"}, {"id": "zeroauth_changelog_architecture", "label": "Architecture", "file_type": "document", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\CHANGELOG.md", "source_location": "L112"}, {"id": "zeroauth_changelog_security", "label": "Security", "file_type": "document", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\CHANGELOG.md", "source_location": "L118"}, {"id": "zeroauth_changelog_upcoming_releases", "label": "Upcoming Releases", "file_type": "document", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\CHANGELOG.md", "source_location": "L127"}, {"id": "zeroauth_changelog_phase_2_pending", "label": "Phase 2 [Pending]", "file_type": "document", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\CHANGELOG.md", "source_location": "L129"}, {"id": "zeroauth_changelog_phase_3_pending", "label": "Phase 3 [Pending]", "file_type": "document", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\CHANGELOG.md", "source_location": "L136"}, {"id": "zeroauth_changelog_phase_4_pending", "label": "Phase 4 [Pending]", "file_type": "document", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\CHANGELOG.md", "source_location": "L144"}, {"id": "zeroauth_changelog_notes", "label": "Notes", "file_type": "document", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\CHANGELOG.md", "source_location": "L153"}], "edges": [{"source": "c_users_alfamas_desktop_zeroauth_changelog_md", "target": "zeroauth_changelog_changelog", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\CHANGELOG.md", "source_location": "L1", "weight": 1.0}, {"source": "zeroauth_changelog_changelog", "target": "zeroauth_changelog_1_0_0_2026_05_20", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\CHANGELOG.md", "source_location": "L8", "weight": 1.0}, {"source": "zeroauth_changelog_1_0_0_2026_05_20", "target": "zeroauth_changelog_added_phase_1_foundation_configuration", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\CHANGELOG.md", "source_location": "L10", "weight": 1.0}, {"source": "zeroauth_changelog_added_phase_1_foundation_configuration", "target": "zeroauth_changelog_configuration_management", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\CHANGELOG.md", "source_location": "L12", "weight": 1.0}, {"source": "zeroauth_changelog_added_phase_1_foundation_configuration", "target": "zeroauth_changelog_database_persistence", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\CHANGELOG.md", "source_location": "L22", "weight": 1.0}, {"source": "zeroauth_changelog_added_phase_1_foundation_configuration", "target": "zeroauth_changelog_encryption_security", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\CHANGELOG.md", "source_location": "L29", "weight": 1.0}, {"source": "zeroauth_changelog_added_phase_1_foundation_configuration", "target": "zeroauth_changelog_logging_observability", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\CHANGELOG.md", "source_location": "L37", "weight": 1.0}, {"source": "zeroauth_changelog_added_phase_1_foundation_configuration", "target": "zeroauth_changelog_core_models", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\CHANGELOG.md", "source_location": "L44", "weight": 1.0}, {"source": "zeroauth_changelog_added_phase_1_foundation_configuration", "target": "zeroauth_changelog_core_services", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\CHANGELOG.md", "source_location": "L53", "weight": 1.0}, {"source": "zeroauth_changelog_added_phase_1_foundation_configuration", "target": "zeroauth_changelog_type_system", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\CHANGELOG.md", "source_location": "L58", "weight": 1.0}, {"source": "zeroauth_changelog_added_phase_1_foundation_configuration", "target": "zeroauth_changelog_development_infrastructure", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\CHANGELOG.md", "source_location": "L67", "weight": 1.0}, {"source": "zeroauth_changelog_added_phase_1_foundation_configuration", "target": "zeroauth_changelog_deployment", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\CHANGELOG.md", "source_location": "L76", "weight": 1.0}, {"source": "zeroauth_changelog_added_phase_1_foundation_configuration", "target": "zeroauth_changelog_documentation", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\CHANGELOG.md", "source_location": "L86", "weight": 1.0}, {"source": "zeroauth_changelog_added_phase_1_foundation_configuration", "target": "zeroauth_changelog_npm_scripts", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\CHANGELOG.md", "source_location": "L94", "weight": 1.0}, {"source": "zeroauth_changelog_1_0_0_2026_05_20", "target": "zeroauth_changelog_dependencies_added", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\CHANGELOG.md", "source_location": "L106", "weight": 1.0}, {"source": "zeroauth_changelog_1_0_0_2026_05_20", "target": "zeroauth_changelog_architecture", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\CHANGELOG.md", "source_location": "L112", "weight": 1.0}, {"source": "zeroauth_changelog_1_0_0_2026_05_20", "target": "zeroauth_changelog_security", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\CHANGELOG.md", "source_location": "L118", "weight": 1.0}, {"source": "zeroauth_changelog_changelog", "target": "zeroauth_changelog_upcoming_releases", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\CHANGELOG.md", "source_location": "L127", "weight": 1.0}, {"source": "zeroauth_changelog_upcoming_releases", "target": "zeroauth_changelog_phase_2_pending", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\CHANGELOG.md", "source_location": "L129", "weight": 1.0}, {"source": "zeroauth_changelog_upcoming_releases", "target": "zeroauth_changelog_phase_3_pending", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\CHANGELOG.md", "source_location": "L136", "weight": 1.0}, {"source": "zeroauth_changelog_upcoming_releases", "target": "zeroauth_changelog_phase_4_pending", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\CHANGELOG.md", "source_location": "L144", "weight": 1.0}, {"source": "zeroauth_changelog_changelog", "target": "zeroauth_changelog_notes", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\CHANGELOG.md", "source_location": "L153", "weight": 1.0}], "input_tokens": 0, "output_tokens": 0}
+{
+    "nodes": [
+        {
+            "id": "c_users_alfamas_desktop_zerotrust_changelog_md",
+            "label": "CHANGELOG.md",
+            "file_type": "document",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\CHANGELOG.md",
+            "source_location": "L1"
+        },
+        {
+            "id": "zerotrust_changelog_changelog",
+            "label": "Changelog",
+            "file_type": "document",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\CHANGELOG.md",
+            "source_location": "L1"
+        },
+        {
+            "id": "zerotrust_changelog_1_0_0_2026_05_20",
+            "label": "[1.0.0] - 2026-05-20",
+            "file_type": "document",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\CHANGELOG.md",
+            "source_location": "L8"
+        },
+        {
+            "id": "zerotrust_changelog_added_phase_1_foundation_configuration",
+            "label": "Added - Phase 1: Foundation & Configuration",
+            "file_type": "document",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\CHANGELOG.md",
+            "source_location": "L10"
+        },
+        {
+            "id": "zerotrust_changelog_configuration_management",
+            "label": "Configuration Management",
+            "file_type": "document",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\CHANGELOG.md",
+            "source_location": "L12"
+        },
+        {
+            "id": "zerotrust_changelog_database_persistence",
+            "label": "Database & Persistence",
+            "file_type": "document",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\CHANGELOG.md",
+            "source_location": "L22"
+        },
+        {
+            "id": "zerotrust_changelog_encryption_security",
+            "label": "Encryption & Security",
+            "file_type": "document",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\CHANGELOG.md",
+            "source_location": "L29"
+        },
+        {
+            "id": "zerotrust_changelog_logging_observability",
+            "label": "Logging & Observability",
+            "file_type": "document",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\CHANGELOG.md",
+            "source_location": "L37"
+        },
+        {
+            "id": "zerotrust_changelog_core_models",
+            "label": "Core Models",
+            "file_type": "document",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\CHANGELOG.md",
+            "source_location": "L44"
+        },
+        {
+            "id": "zerotrust_changelog_core_services",
+            "label": "Core Services",
+            "file_type": "document",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\CHANGELOG.md",
+            "source_location": "L53"
+        },
+        {
+            "id": "zerotrust_changelog_type_system",
+            "label": "Type System",
+            "file_type": "document",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\CHANGELOG.md",
+            "source_location": "L58"
+        },
+        {
+            "id": "zerotrust_changelog_development_infrastructure",
+            "label": "Development Infrastructure",
+            "file_type": "document",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\CHANGELOG.md",
+            "source_location": "L67"
+        },
+        {
+            "id": "zerotrust_changelog_deployment",
+            "label": "Deployment",
+            "file_type": "document",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\CHANGELOG.md",
+            "source_location": "L76"
+        },
+        {
+            "id": "zerotrust_changelog_documentation",
+            "label": "Documentation",
+            "file_type": "document",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\CHANGELOG.md",
+            "source_location": "L86"
+        },
+        {
+            "id": "zerotrust_changelog_npm_scripts",
+            "label": "NPM Scripts",
+            "file_type": "document",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\CHANGELOG.md",
+            "source_location": "L94"
+        },
+        {
+            "id": "zerotrust_changelog_dependencies_added",
+            "label": "Dependencies Added",
+            "file_type": "document",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\CHANGELOG.md",
+            "source_location": "L106"
+        },
+        {
+            "id": "zerotrust_changelog_architecture",
+            "label": "Architecture",
+            "file_type": "document",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\CHANGELOG.md",
+            "source_location": "L112"
+        },
+        {
+            "id": "zerotrust_changelog_security",
+            "label": "Security",
+            "file_type": "document",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\CHANGELOG.md",
+            "source_location": "L118"
+        },
+        {
+            "id": "zerotrust_changelog_upcoming_releases",
+            "label": "Upcoming Releases",
+            "file_type": "document",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\CHANGELOG.md",
+            "source_location": "L127"
+        },
+        {
+            "id": "zerotrust_changelog_phase_2_pending",
+            "label": "Phase 2 [Pending]",
+            "file_type": "document",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\CHANGELOG.md",
+            "source_location": "L129"
+        },
+        {
+            "id": "zerotrust_changelog_phase_3_pending",
+            "label": "Phase 3 [Pending]",
+            "file_type": "document",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\CHANGELOG.md",
+            "source_location": "L136"
+        },
+        {
+            "id": "zerotrust_changelog_phase_4_pending",
+            "label": "Phase 4 [Pending]",
+            "file_type": "document",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\CHANGELOG.md",
+            "source_location": "L144"
+        },
+        {
+            "id": "zerotrust_changelog_notes",
+            "label": "Notes",
+            "file_type": "document",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\CHANGELOG.md",
+            "source_location": "L153"
+        }
+    ],
+    "edges": [
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_changelog_md",
+            "target": "zerotrust_changelog_changelog",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\CHANGELOG.md",
+            "source_location": "L1",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_changelog_changelog",
+            "target": "zerotrust_changelog_1_0_0_2026_05_20",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\CHANGELOG.md",
+            "source_location": "L8",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_changelog_1_0_0_2026_05_20",
+            "target": "zerotrust_changelog_added_phase_1_foundation_configuration",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\CHANGELOG.md",
+            "source_location": "L10",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_changelog_added_phase_1_foundation_configuration",
+            "target": "zerotrust_changelog_configuration_management",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\CHANGELOG.md",
+            "source_location": "L12",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_changelog_added_phase_1_foundation_configuration",
+            "target": "zerotrust_changelog_database_persistence",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\CHANGELOG.md",
+            "source_location": "L22",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_changelog_added_phase_1_foundation_configuration",
+            "target": "zerotrust_changelog_encryption_security",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\CHANGELOG.md",
+            "source_location": "L29",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_changelog_added_phase_1_foundation_configuration",
+            "target": "zerotrust_changelog_logging_observability",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\CHANGELOG.md",
+            "source_location": "L37",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_changelog_added_phase_1_foundation_configuration",
+            "target": "zerotrust_changelog_core_models",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\CHANGELOG.md",
+            "source_location": "L44",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_changelog_added_phase_1_foundation_configuration",
+            "target": "zerotrust_changelog_core_services",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\CHANGELOG.md",
+            "source_location": "L53",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_changelog_added_phase_1_foundation_configuration",
+            "target": "zerotrust_changelog_type_system",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\CHANGELOG.md",
+            "source_location": "L58",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_changelog_added_phase_1_foundation_configuration",
+            "target": "zerotrust_changelog_development_infrastructure",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\CHANGELOG.md",
+            "source_location": "L67",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_changelog_added_phase_1_foundation_configuration",
+            "target": "zerotrust_changelog_deployment",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\CHANGELOG.md",
+            "source_location": "L76",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_changelog_added_phase_1_foundation_configuration",
+            "target": "zerotrust_changelog_documentation",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\CHANGELOG.md",
+            "source_location": "L86",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_changelog_added_phase_1_foundation_configuration",
+            "target": "zerotrust_changelog_npm_scripts",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\CHANGELOG.md",
+            "source_location": "L94",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_changelog_1_0_0_2026_05_20",
+            "target": "zerotrust_changelog_dependencies_added",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\CHANGELOG.md",
+            "source_location": "L106",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_changelog_1_0_0_2026_05_20",
+            "target": "zerotrust_changelog_architecture",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\CHANGELOG.md",
+            "source_location": "L112",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_changelog_1_0_0_2026_05_20",
+            "target": "zerotrust_changelog_security",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\CHANGELOG.md",
+            "source_location": "L118",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_changelog_changelog",
+            "target": "zerotrust_changelog_upcoming_releases",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\CHANGELOG.md",
+            "source_location": "L127",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_changelog_upcoming_releases",
+            "target": "zerotrust_changelog_phase_2_pending",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\CHANGELOG.md",
+            "source_location": "L129",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_changelog_upcoming_releases",
+            "target": "zerotrust_changelog_phase_3_pending",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\CHANGELOG.md",
+            "source_location": "L136",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_changelog_upcoming_releases",
+            "target": "zerotrust_changelog_phase_4_pending",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\CHANGELOG.md",
+            "source_location": "L144",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_changelog_changelog",
+            "target": "zerotrust_changelog_notes",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\CHANGELOG.md",
+            "source_location": "L153",
+            "weight": 1.0
+        }
+    ],
+    "input_tokens": 0,
+    "output_tokens": 0
+}

@@ -4,7 +4,7 @@ Owner: Mas Yasin Arafat
 Review cadence: Before implementation, then annually  
 Status: Design draft, not implemented
 
-ZeroAuth already has a tamper-evident audit log hash chain. This plan covers the
+zerotrust already has a tamper-evident audit log hash chain. This plan covers the
 optional hardening step: anchoring the latest `entry_hash` outside the primary
 database so database-level tampering is easier to prove.
 
@@ -31,7 +31,7 @@ Acceptable anchor targets:
 
 ```json
 {
-  "system": "zeroauth",
+  "system": "zerotrust",
   "environment": "production",
   "anchoredAt": "ISO-8601 timestamp",
   "latestSeq": 123,

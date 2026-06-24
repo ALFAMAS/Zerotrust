@@ -1,1 +1,161 @@
-{"nodes": [{"id": "c_users_alfamas_desktop_zeroauth_src_tests_unsubscribe_service_test_ts", "label": "unsubscribe.service.test.ts", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\unsubscribe.service.test.ts", "source_location": "L1"}, {"id": "tests_unsubscribe_service_test_token", "label": "token", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\unsubscribe.service.test.ts", "source_location": "L10"}, {"id": "tests_unsubscribe_service_test_result", "label": "result", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\unsubscribe.service.test.ts", "source_location": "L11"}, {"id": "tests_unsubscribe_service_test_parts", "label": "parts", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\unsubscribe.service.test.ts", "source_location": "L25"}, {"id": "tests_unsubscribe_service_test_t1", "label": "t1", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\unsubscribe.service.test.ts", "source_location": "L36"}, {"id": "tests_unsubscribe_service_test_t2", "label": "t2", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\unsubscribe.service.test.ts", "source_location": "L37"}], "edges": [{"source": "c_users_alfamas_desktop_zeroauth_src_tests_unsubscribe_service_test_ts", "target": "vitest", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\unsubscribe.service.test.ts", "source_location": "L1", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_tests_unsubscribe_service_test_ts", "target": "c_users_alfamas_desktop_zeroauth_src_services_unsubscribe_ts", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\unsubscribe.service.test.ts", "source_location": "L2", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_tests_unsubscribe_service_test_ts", "target": "services_unsubscribe_generateunsubscribetoken", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\unsubscribe.service.test.ts", "source_location": "L2", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_tests_unsubscribe_service_test_ts", "target": "services_unsubscribe_verifyunsubscribetoken", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\unsubscribe.service.test.ts", "source_location": "L2", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_tests_unsubscribe_service_test_ts", "target": "tests_unsubscribe_service_test_token", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\unsubscribe.service.test.ts", "source_location": "L10", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_tests_unsubscribe_service_test_ts", "target": "tests_unsubscribe_service_test_result", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\unsubscribe.service.test.ts", "source_location": "L11", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_tests_unsubscribe_service_test_ts", "target": "tests_unsubscribe_service_test_token", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\unsubscribe.service.test.ts", "source_location": "L18", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_tests_unsubscribe_service_test_ts", "target": "tests_unsubscribe_service_test_token", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\unsubscribe.service.test.ts", "source_location": "L24", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_tests_unsubscribe_service_test_ts", "target": "tests_unsubscribe_service_test_parts", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\unsubscribe.service.test.ts", "source_location": "L25", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_tests_unsubscribe_service_test_ts", "target": "tests_unsubscribe_service_test_t1", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\unsubscribe.service.test.ts", "source_location": "L36", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_tests_unsubscribe_service_test_ts", "target": "tests_unsubscribe_service_test_t2", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\unsubscribe.service.test.ts", "source_location": "L37", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_tests_unsubscribe_service_test_ts", "target": "tests_unsubscribe_service_test_token", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\unsubscribe.service.test.ts", "source_location": "L45", "weight": 1.0}], "raw_calls": []}
+{
+    "nodes": [
+        {
+            "id": "c_users_alfamas_desktop_zerotrust_src_tests_unsubscribe_service_test_ts",
+            "label": "unsubscribe.service.test.ts",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\unsubscribe.service.test.ts",
+            "source_location": "L1"
+        },
+        {
+            "id": "tests_unsubscribe_service_test_token",
+            "label": "token",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\unsubscribe.service.test.ts",
+            "source_location": "L10"
+        },
+        {
+            "id": "tests_unsubscribe_service_test_result",
+            "label": "result",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\unsubscribe.service.test.ts",
+            "source_location": "L11"
+        },
+        {
+            "id": "tests_unsubscribe_service_test_parts",
+            "label": "parts",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\unsubscribe.service.test.ts",
+            "source_location": "L25"
+        },
+        {
+            "id": "tests_unsubscribe_service_test_t1",
+            "label": "t1",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\unsubscribe.service.test.ts",
+            "source_location": "L36"
+        },
+        {
+            "id": "tests_unsubscribe_service_test_t2",
+            "label": "t2",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\unsubscribe.service.test.ts",
+            "source_location": "L37"
+        }
+    ],
+    "edges": [
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_tests_unsubscribe_service_test_ts",
+            "target": "vitest",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\unsubscribe.service.test.ts",
+            "source_location": "L1",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_tests_unsubscribe_service_test_ts",
+            "target": "c_users_alfamas_desktop_zerotrust_src_services_unsubscribe_ts",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\unsubscribe.service.test.ts",
+            "source_location": "L2",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_tests_unsubscribe_service_test_ts",
+            "target": "services_unsubscribe_generateunsubscribetoken",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\unsubscribe.service.test.ts",
+            "source_location": "L2",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_tests_unsubscribe_service_test_ts",
+            "target": "services_unsubscribe_verifyunsubscribetoken",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\unsubscribe.service.test.ts",
+            "source_location": "L2",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_tests_unsubscribe_service_test_ts",
+            "target": "tests_unsubscribe_service_test_token",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\unsubscribe.service.test.ts",
+            "source_location": "L10",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_tests_unsubscribe_service_test_ts",
+            "target": "tests_unsubscribe_service_test_result",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\unsubscribe.service.test.ts",
+            "source_location": "L11",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_tests_unsubscribe_service_test_ts",
+            "target": "tests_unsubscribe_service_test_token",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\unsubscribe.service.test.ts",
+            "source_location": "L18",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_tests_unsubscribe_service_test_ts",
+            "target": "tests_unsubscribe_service_test_token",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\unsubscribe.service.test.ts",
+            "source_location": "L24",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_tests_unsubscribe_service_test_ts",
+            "target": "tests_unsubscribe_service_test_parts",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\unsubscribe.service.test.ts",
+            "source_location": "L25",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_tests_unsubscribe_service_test_ts",
+            "target": "tests_unsubscribe_service_test_t1",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\unsubscribe.service.test.ts",
+            "source_location": "L36",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_tests_unsubscribe_service_test_ts",
+            "target": "tests_unsubscribe_service_test_t2",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\unsubscribe.service.test.ts",
+            "source_location": "L37",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_tests_unsubscribe_service_test_ts",
+            "target": "tests_unsubscribe_service_test_token",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\unsubscribe.service.test.ts",
+            "source_location": "L45",
+            "weight": 1.0
+        }
+    ],
+    "raw_calls": []
+}

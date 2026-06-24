@@ -1,1 +1,70 @@
-{"nodes": [{"id": "c_users_alfamas_desktop_zeroauth_packages_ui_src_components_sitefooter_tsx", "label": "SiteFooter.tsx", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\components\\SiteFooter.tsx", "source_location": "L1"}, {"id": "components_sitefooter_sitefooter", "label": "SiteFooter()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\components\\SiteFooter.tsx", "source_location": "L6"}], "edges": [{"source": "c_users_alfamas_desktop_zeroauth_packages_ui_src_components_sitefooter_tsx", "target": "link", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\components\\SiteFooter.tsx", "source_location": "L1", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_packages_ui_src_components_sitefooter_tsx", "target": "lucide_react", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\components\\SiteFooter.tsx", "source_location": "L2", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_packages_ui_src_components_sitefooter_tsx", "target": "c_users_alfamas_desktop_zeroauth_packages_ui_src_config_brand_ts", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\components\\SiteFooter.tsx", "source_location": "L3", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_packages_ui_src_components_sitefooter_tsx", "target": "config_brand_brand", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\components\\SiteFooter.tsx", "source_location": "L3", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_packages_ui_src_components_sitefooter_tsx", "target": "components_sitefooter_sitefooter", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\components\\SiteFooter.tsx", "source_location": "L6", "weight": 1.0}], "raw_calls": []}
+{
+    "nodes": [
+        {
+            "id": "c_users_alfamas_desktop_zerotrust_packages_ui_src_components_sitefooter_tsx",
+            "label": "SiteFooter.tsx",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\components\\SiteFooter.tsx",
+            "source_location": "L1"
+        },
+        {
+            "id": "components_sitefooter_sitefooter",
+            "label": "SiteFooter()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\components\\SiteFooter.tsx",
+            "source_location": "L6"
+        }
+    ],
+    "edges": [
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_packages_ui_src_components_sitefooter_tsx",
+            "target": "link",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\components\\SiteFooter.tsx",
+            "source_location": "L1",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_packages_ui_src_components_sitefooter_tsx",
+            "target": "lucide_react",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\components\\SiteFooter.tsx",
+            "source_location": "L2",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_packages_ui_src_components_sitefooter_tsx",
+            "target": "c_users_alfamas_desktop_zerotrust_packages_ui_src_config_brand_ts",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\components\\SiteFooter.tsx",
+            "source_location": "L3",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_packages_ui_src_components_sitefooter_tsx",
+            "target": "config_brand_brand",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\components\\SiteFooter.tsx",
+            "source_location": "L3",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_packages_ui_src_components_sitefooter_tsx",
+            "target": "components_sitefooter_sitefooter",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\components\\SiteFooter.tsx",
+            "source_location": "L6",
+            "weight": 1.0
+        }
+    ],
+    "raw_calls": []
+}

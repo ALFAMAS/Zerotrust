@@ -10,12 +10,18 @@ import { rateLimit } from "../middleware/rateLimiting.js";
 import { TokenService } from "../services/token.service.js";
 import { getClientIp } from "../shared/clientIp.js";
 import type { HonoEnv } from "../shared/types.js";
-import { buildAuthnRequest, buildSPMetadata, consumeRelayState, parseSAMLResponse } from "./sp.js";
+import {
+  buildAuthnRequest,
+  buildSPMetadata,
+  consumeRelayState,
+  parseSAMLResponse,
+} from "./sp.js";
 
 const router = new Hono<HonoEnv>();
 const logger = getLogger("saml-routes");
 
-const SP_ENTITY_ID = process.env.SAML_SP_ENTITY_ID ?? "http://localhost:3000/saml/metadata";
+const SP_ENTITY_ID =
+  process.env.SAML_SP_ENTITY_ID ?? "http://localhost:3000/saml/metadata";
 const ACS_URL = process.env.SAML_ACS_URL ?? "http://localhost:3000/saml/acs";
 const IDP_ENTITY_ID = process.env.SAML_IDP_ENTITY_ID ?? "";
 const IDP_SSO_URL = process.env.SAML_IDP_SSO_URL ?? "";
@@ -36,7 +42,10 @@ let tokenServiceInstance: TokenService | null = null;
 async function getTokenService(): Promise<TokenService> {
   if (tokenServiceInstance) return tokenServiceInstance;
   const cfg = getConfig();
-  tokenServiceInstance = new TokenService(cfg.security.tokenSecretHex, cfg.session);
+  tokenServiceInstance = new TokenService(
+    cfg.security.tokenSecretHex,
+    cfg.session,
+  );
   await tokenServiceInstance.init();
   return tokenServiceInstance;
 }
@@ -63,177 +72,197 @@ router.get("/saml/login", rateLimit({ points: 20, windowSecs: 60 }), (c) => {
         message: "SAML IdP is not configured. Set SAML_IDP_* env vars.",
         details: [],
       },
-      503
+      503,
     );
   }
 
   const redirect = c.req.query("redirect");
-  const { redirectUrl } = buildAuthnRequest(spConfig, idpConfig, { redirectUrl: redirect });
+  const { redirectUrl } = buildAuthnRequest(spConfig, idpConfig, {
+    redirectUrl: redirect,
+  });
 
   return c.redirect(redirectUrl);
 });
 
 // ─── Assertion Consumer Service (POST binding) ────────────────────────────────
 
-router.post("/saml/acs", rateLimit({ points: 20, windowSecs: 60 }), async (c) => {
-  try {
-    // Parse form-urlencoded body
-    let SAMLResponse: string | undefined;
-    let RelayState: string | undefined;
-
+router.post(
+  "/saml/acs",
+  rateLimit({ points: 20, windowSecs: 60 }),
+  async (c) => {
     try {
-      const formData = await c.req.formData();
-      SAMLResponse = formData.get("SAMLResponse")?.toString();
-      RelayState = formData.get("RelayState")?.toString();
-    } catch {
-      const body = (await c.req.json()) as Record<string, string>;
-      SAMLResponse = body.SAMLResponse;
-      RelayState = body.RelayState;
-    }
+      // Parse form-urlencoded body
+      let SAMLResponse: string | undefined;
+      let RelayState: string | undefined;
 
-    if (!SAMLResponse) {
-      return c.json(
-        { code: "INVALID_REQUEST", message: "SAMLResponse is required", details: [] },
-        400
-      );
-    }
+      try {
+        const formData = await c.req.formData();
+        SAMLResponse = formData.get("SAMLResponse")?.toString();
+        RelayState = formData.get("RelayState")?.toString();
+      } catch {
+        const body = (await c.req.json()) as Record<string, string>;
+        SAMLResponse = body.SAMLResponse;
+        RelayState = body.RelayState;
+      }
 
-    const relayEntry = RelayState ? consumeRelayState(RelayState) : null;
+      if (!SAMLResponse) {
+        return c.json(
+          {
+            code: "INVALID_REQUEST",
+            message: "SAMLResponse is required",
+            details: [],
+          },
+          400,
+        );
+      }
 
-    let assertion: ReturnType<typeof parseSAMLResponse>;
-    try {
-      assertion = parseSAMLResponse(SAMLResponse, idpConfig, spConfig);
-    } catch (parseErr) {
-      logger.warn("SAML assertion parse failed", { error: String(parseErr) });
-      return c.json(
-        {
-          code: "SAML_ASSERTION_INVALID",
-          message: (parseErr as Error).message,
-          details: [],
-        },
-        401
-      );
-    }
+      const relayEntry = RelayState ? consumeRelayState(RelayState) : null;
 
-    // Map NameID or attributes to email
-    const email = assertion.nameId.includes("@")
-      ? assertion.nameId
-      : (assertion.attributes.email as string) ||
+      let assertion: ReturnType<typeof parseSAMLResponse>;
+      try {
+        assertion = parseSAMLResponse(SAMLResponse, idpConfig, spConfig);
+      } catch (parseErr) {
+        logger.warn("SAML assertion parse failed", { error: String(parseErr) });
+        return c.json(
+          {
+            code: "SAML_ASSERTION_INVALID",
+            message: (parseErr as Error).message,
+            details: [],
+          },
+          401,
+        );
+      }
+
+      // Map NameID or attributes to email
+      const email = assertion.nameId.includes("@")
+        ? assertion.nameId
+        : (assertion.attributes.email as string) ||
+          (assertion.attributes[
+            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+          ] as string);
+
+      if (!email) {
+        return c.json(
+          {
+            code: "SAML_NO_EMAIL",
+            message: "IdP did not provide an email in the assertion",
+            details: [],
+          },
+          400,
+        );
+      }
+
+      const displayName =
+        (assertion.attributes.displayName as string) ||
+        (assertion.attributes.name as string) ||
         (assertion.attributes[
-          "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
-        ] as string);
+          "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"
+        ] as string) ||
+        email.split("@")[0];
 
-    if (!email) {
-      return c.json(
-        {
-          code: "SAML_NO_EMAIL",
-          message: "IdP did not provide an email in the assertion",
-          details: [],
-        },
-        400
-      );
-    }
+      // Provision or retrieve user
+      const db = getDb();
+      const normalizedEmail = email.toLowerCase();
 
-    const displayName =
-      (assertion.attributes.displayName as string) ||
-      (assertion.attributes.name as string) ||
-      (assertion.attributes[
-        "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"
-      ] as string) ||
-      email.split("@")[0];
-
-    // Provision or retrieve user
-    const db = getDb();
-    const normalizedEmail = email.toLowerCase();
-
-    let userRows = await db
-      .select()
-      .from(usersTable)
-      .where(eq(usersTable.email, normalizedEmail))
-      .limit(1);
-
-    if (userRows.length === 0) {
-      await db.insert(usersTable).values({
-        email: normalizedEmail,
-        displayName: displayName ?? normalizedEmail,
-        roles: ["user"],
-        status: "active",
-      });
-      userRows = await db
+      let userRows = await db
         .select()
         .from(usersTable)
         .where(eq(usersTable.email, normalizedEmail))
         .limit(1);
-    }
 
-    if (userRows.length === 0) {
+      if (userRows.length === 0) {
+        await db.insert(usersTable).values({
+          email: normalizedEmail,
+          displayName: displayName ?? normalizedEmail,
+          roles: ["user"],
+          status: "active",
+        });
+        userRows = await db
+          .select()
+          .from(usersTable)
+          .where(eq(usersTable.email, normalizedEmail))
+          .limit(1);
+      }
+
+      if (userRows.length === 0) {
+        return c.json(
+          {
+            code: "INTERNAL_ERROR",
+            message: "User provisioning failed",
+            details: [],
+          },
+          500,
+        );
+      }
+
+      const userRow = userRows[0];
+      const svc = await getTokenService();
+      const cfg = getConfig();
+      const sessionId = nanoid();
+
+      const accessToken = await svc.signAccessToken({
+        sub: userRow.id,
+        email: userRow.email,
+        sid: sessionId,
+        aud: "zerotrust",
+        scope: ["openid"],
+      });
+
+      const tokenPayload = await svc.verifyAccessToken(accessToken);
+
+      await db.insert(sessionsTable).values({
+        userId: userRow.id,
+        tokenId: tokenPayload.jti,
+        deviceFingerprint: {
+          hash: "saml",
+          languages: [],
+          isTrusted: false,
+          firstSeenAt: new Date(),
+          lastSeenAt: new Date(),
+        },
+        ipAddress: getClientIp(c) || "unknown",
+        userAgent: c.req.header("user-agent") ?? "",
+        expiresAt: new Date(tokenPayload.exp * 1000),
+        isActive: true,
+      });
+
+      const refreshPlain = await svc.signRefreshToken();
+
+      const sessionRows = await db
+        .select()
+        .from(sessionsTable)
+        .where(eq(sessionsTable.tokenId, tokenPayload.jti))
+        .limit(1);
+
+      if (sessionRows.length > 0) {
+        await db.insert(refreshTokensTable).values({
+          userId: userRow.id,
+          sessionId: sessionRows[0].id,
+          tokenHash: hashToken(refreshPlain),
+          expiresAt: new Date(Date.now() + cfg.session.refreshTokenTTL * 1000),
+        });
+      }
+
+      const redirectTo =
+        relayEntry?.redirectUrl ?? process.env.LOGIN_SUCCESS_URL ?? "/";
+      const successUrl = new URL(
+        redirectTo,
+        process.env.APP_URL ??
+          process.env.APP_BASE_URL ??
+          "http://localhost:3000",
+      );
+      successUrl.searchParams.set("access_token", accessToken);
+      successUrl.searchParams.set("refresh_token", refreshPlain);
+
+      return c.redirect(successUrl.toString());
+    } catch (err) {
+      logger.warn("SAML ACS error", { error: String(err) });
       return c.json(
-        { code: "INTERNAL_ERROR", message: "User provisioning failed", details: [] },
-        500
+        { code: "INTERNAL_ERROR", message: "SAML login failed", details: [] },
+        500,
       );
     }
-
-    const userRow = userRows[0];
-    const svc = await getTokenService();
-    const cfg = getConfig();
-    const sessionId = nanoid();
-
-    const accessToken = await svc.signAccessToken({
-      sub: userRow.id,
-      email: userRow.email,
-      sid: sessionId,
-      aud: "zeroauth",
-      scope: ["openid"],
-    });
-
-    const tokenPayload = await svc.verifyAccessToken(accessToken);
-
-    await db.insert(sessionsTable).values({
-      userId: userRow.id,
-      tokenId: tokenPayload.jti,
-      deviceFingerprint: {
-        hash: "saml",
-        languages: [],
-        isTrusted: false,
-        firstSeenAt: new Date(),
-        lastSeenAt: new Date(),
-      },
-      ipAddress: getClientIp(c) || "unknown",
-      userAgent: c.req.header("user-agent") ?? "",
-      expiresAt: new Date(tokenPayload.exp * 1000),
-      isActive: true,
-    });
-
-    const refreshPlain = await svc.signRefreshToken();
-
-    const sessionRows = await db
-      .select()
-      .from(sessionsTable)
-      .where(eq(sessionsTable.tokenId, tokenPayload.jti))
-      .limit(1);
-
-    if (sessionRows.length > 0) {
-      await db.insert(refreshTokensTable).values({
-        userId: userRow.id,
-        sessionId: sessionRows[0].id,
-        tokenHash: hashToken(refreshPlain),
-        expiresAt: new Date(Date.now() + cfg.session.refreshTokenTTL * 1000),
-      });
-    }
-
-    const redirectTo = relayEntry?.redirectUrl ?? process.env.LOGIN_SUCCESS_URL ?? "/";
-    const successUrl = new URL(
-      redirectTo,
-      process.env.APP_URL ?? process.env.APP_BASE_URL ?? "http://localhost:3000"
-    );
-    successUrl.searchParams.set("access_token", accessToken);
-    successUrl.searchParams.set("refresh_token", refreshPlain);
-
-    return c.redirect(successUrl.toString());
-  } catch (err) {
-    logger.warn("SAML ACS error", { error: String(err) });
-    return c.json({ code: "INTERNAL_ERROR", message: "SAML login failed", details: [] }, 500);
-  }
-});
+  },
+);
 
 export default router;

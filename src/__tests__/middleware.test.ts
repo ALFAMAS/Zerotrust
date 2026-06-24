@@ -9,7 +9,9 @@ vi.mock("../models/index", () => ({
   },
   UserModel: { findById: vi.fn().mockResolvedValue(null) },
   RoleModel: {
-    findOne: vi.fn().mockImplementation(() => ({ lean: () => Promise.resolve(null) })),
+    findOne: vi
+      .fn()
+      .mockImplementation(() => ({ lean: () => Promise.resolve(null) })),
   },
   JITModel: {
     find: vi.fn().mockImplementation(() => ({
@@ -21,7 +23,11 @@ vi.mock("../models/index", () => ({
 
 vi.mock("../config", () => ({
   getConfig: () => ({
-    session: { defaultTTL: 3600, refreshTokenTTL: 604800, maxConcurrentDevices: 5 },
+    session: {
+      defaultTTL: 3600,
+      refreshTokenTTL: 604800,
+      maxConcurrentDevices: 5,
+    },
     security: {
       bcryptRounds: 4,
       tokenSecretHex: "a".repeat(64),
@@ -42,7 +48,12 @@ vi.mock("../config", () => ({
       },
     },
     oauth: { providers: {} },
-    elasticsearch: { enabled: false, host: "localhost", port: 9200, indexPrefix: "zeroauth" },
+    elasticsearch: {
+      enabled: false,
+      host: "localhost",
+      port: 9200,
+      indexPrefix: "zerotrust",
+    },
     logging: { level: "error", format: "json" },
   }),
 }));
@@ -109,7 +120,8 @@ describe("Account Lockout Middleware", () => {
   });
 
   it("records failed logins and tracks count", async () => {
-    const { recordFailedLogin, isAccountLocked } = await import("../middleware/accountLockout");
+    const { recordFailedLogin, isAccountLocked } =
+      await import("../middleware/accountLockout");
     const email = `lockout-test-${Date.now()}@example.com`;
     await recordFailedLogin(email);
     await recordFailedLogin(email);
@@ -155,7 +167,8 @@ describe("Geo-Fencing Middleware", () => {
 
 describe("Temporal Access Middleware", () => {
   it("allows access when no schedule restriction is set", async () => {
-    const { temporalAccessMiddleware } = await import("../middleware/temporalAccess");
+    const { temporalAccessMiddleware } =
+      await import("../middleware/temporalAccess");
     const app = new Hono<any>();
     app.use("*", async (c, next) => {
       c.set("user", {
@@ -193,8 +206,11 @@ describe("Security Headers Middleware", () => {
     app.use(
       "*",
       securityHeaders({
-        cspDirectives: { "default-src": "'self'", "img-src": ["'self'", "data:"] },
-      })
+        cspDirectives: {
+          "default-src": "'self'",
+          "img-src": ["'self'", "data:"],
+        },
+      }),
     );
     app.get("/test", (c) => c.json({ ok: true }));
     const res = await app.request("/test");
@@ -222,7 +238,11 @@ describe("Audit Pipeline", () => {
 
   it("queues and flushes docs gracefully when ES unavailable", async () => {
     const { queueAuditDoc, flushAuditPipeline } = await import("../audit");
-    queueAuditDoc({ action: "test.event", success: true, timestamp: new Date() } as any);
+    queueAuditDoc({
+      action: "test.event",
+      success: true,
+      timestamp: new Date(),
+    } as any);
     await expect(flushAuditPipeline()).resolves.toBeUndefined();
   });
 
@@ -234,7 +254,7 @@ describe("Audit Pipeline", () => {
         success: true,
         timestamp: new Date(),
         resourceDetails: { token: "secret-value", otherField: "visible" },
-      } as any)
+      } as any),
     ).resolves.toBeUndefined();
   });
 });

@@ -1,1 +1,676 @@
-{"nodes": [{"id": "c_users_alfamas_desktop_zeroauth_src_services_authz_service_ts", "label": "authz.service.ts", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L1"}, {"id": "services_authz_service_authorizationengine", "label": "AuthorizationEngine", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L6"}, {"id": "services_authz_service_authorizationengine_evaluate", "label": ".evaluate()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L7"}, {"id": "services_authz_service_authorizationengine_resolveeffectiveroles", "label": ".resolveEffectiveRoles()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L39"}, {"id": "services_authz_service_authorizationengine_collectpermissionsfromhierarchy", "label": ".collectPermissionsFromHierarchy()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L65"}, {"id": "services_authz_service_authorizationengine_evaluateconditions", "label": ".evaluateConditions()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L87"}, {"id": "services_authz_service_authorizationengine_resolveattribute", "label": ".resolveAttribute()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L96"}, {"id": "services_authz_service_authorizationengine_checkcondition", "label": ".checkCondition()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L113"}, {"id": "services_authz_service_authorizationengine_matchesresource", "label": ".matchesResource()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L144"}, {"id": "services_authz_service_authorizationengine_checkschedule", "label": ".checkSchedule()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L151"}, {"id": "services_authz_service_authorizationengine_checkgeorestriction", "label": ".checkGeoRestriction()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L167"}], "edges": [{"source": "c_users_alfamas_desktop_zeroauth_src_services_authz_service_ts", "target": "drizzle_orm", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L1", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_authz_service_ts", "target": "c_users_alfamas_desktop_zeroauth_src_db_index_ts", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L2", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_authz_service_ts", "target": "db_index_getdb", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L2", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_authz_service_ts", "target": "c_users_alfamas_desktop_zeroauth_src_db_schema_ts", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L3", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_authz_service_ts", "target": "db_schema_rolestable", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L3", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_authz_service_ts", "target": "db_schema_jitaccesstable", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L3", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_authz_service_ts", "target": "c_users_alfamas_desktop_zeroauth_src_shared_types_ts", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L4", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_authz_service_ts", "target": "shared_types_permission", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L4", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_authz_service_ts", "target": "shared_types_abaccondition", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L4", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_authz_service_ts", "target": "shared_types_user", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L4", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_authz_service_ts", "target": "shared_types_authzcontext", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L4", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_authz_service_ts", "target": "shared_types_authzresult", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L4", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_authz_service_ts", "target": "services_authz_service_authorizationengine", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L6", "weight": 1.0}, {"source": "services_authz_service_authorizationengine", "target": "services_authz_service_authorizationengine_evaluate", "relation": "method", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L7", "weight": 1.0}, {"source": "services_authz_service_authorizationengine", "target": "services_authz_service_authorizationengine_resolveeffectiveroles", "relation": "method", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L39", "weight": 1.0}, {"source": "services_authz_service_authorizationengine", "target": "services_authz_service_authorizationengine_collectpermissionsfromhierarchy", "relation": "method", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L65", "weight": 1.0}, {"source": "services_authz_service_authorizationengine", "target": "services_authz_service_authorizationengine_evaluateconditions", "relation": "method", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L87", "weight": 1.0}, {"source": "services_authz_service_authorizationengine", "target": "services_authz_service_authorizationengine_resolveattribute", "relation": "method", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L96", "weight": 1.0}, {"source": "services_authz_service_authorizationengine", "target": "services_authz_service_authorizationengine_checkcondition", "relation": "method", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L113", "weight": 1.0}, {"source": "services_authz_service_authorizationengine", "target": "services_authz_service_authorizationengine_matchesresource", "relation": "method", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L144", "weight": 1.0}, {"source": "services_authz_service_authorizationengine", "target": "services_authz_service_authorizationengine_checkschedule", "relation": "method", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L151", "weight": 1.0}, {"source": "services_authz_service_authorizationengine", "target": "services_authz_service_authorizationengine_checkgeorestriction", "relation": "method", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L167", "weight": 1.0}, {"source": "services_authz_service_authorizationengine_evaluate", "target": "services_authz_service_authorizationengine_checkschedule", "relation": "calls", "context": "call", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L11", "weight": 1.0}, {"source": "services_authz_service_authorizationengine_evaluate", "target": "services_authz_service_authorizationengine_checkgeorestriction", "relation": "calls", "context": "call", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L14", "weight": 1.0}, {"source": "services_authz_service_authorizationengine_evaluate", "target": "services_authz_service_authorizationengine_resolveeffectiveroles", "relation": "calls", "context": "call", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L17", "weight": 1.0}, {"source": "services_authz_service_authorizationengine_evaluate", "target": "services_authz_service_authorizationengine_collectpermissionsfromhierarchy", "relation": "calls", "context": "call", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L25", "weight": 1.0}, {"source": "services_authz_service_authorizationengine_evaluate", "target": "services_authz_service_authorizationengine_matchesresource", "relation": "calls", "context": "call", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L28", "weight": 1.0}, {"source": "services_authz_service_authorizationengine_evaluate", "target": "services_authz_service_authorizationengine_evaluateconditions", "relation": "calls", "context": "call", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L31", "weight": 1.0}, {"source": "services_authz_service_authorizationengine_evaluateconditions", "target": "services_authz_service_authorizationengine_resolveattribute", "relation": "calls", "context": "call", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L90", "weight": 1.0}, {"source": "services_authz_service_authorizationengine_evaluateconditions", "target": "services_authz_service_authorizationengine_checkcondition", "relation": "calls", "context": "call", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L91", "weight": 1.0}], "raw_calls": [{"caller_nid": "services_authz_service_authorizationengine_evaluate", "callee": "getDb", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L20"}, {"caller_nid": "services_authz_service_authorizationengine_evaluate", "callee": "limit", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L21"}, {"caller_nid": "services_authz_service_authorizationengine_evaluate", "callee": "where", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L21"}, {"caller_nid": "services_authz_service_authorizationengine_evaluate", "callee": "from", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L21"}, {"caller_nid": "services_authz_service_authorizationengine_evaluate", "callee": "select", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L21"}, {"caller_nid": "services_authz_service_authorizationengine_evaluate", "callee": "eq", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L21"}, {"caller_nid": "services_authz_service_authorizationengine_evaluate", "callee": "includes", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L29"}, {"caller_nid": "services_authz_service_authorizationengine_evaluate", "callee": "includes", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L29"}, {"caller_nid": "services_authz_service_authorizationengine_resolveeffectiveroles", "callee": "getDb", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L43"}, {"caller_nid": "services_authz_service_authorizationengine_resolveeffectiveroles", "callee": "where", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L45"}, {"caller_nid": "services_authz_service_authorizationengine_resolveeffectiveroles", "callee": "from", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L45"}, {"caller_nid": "services_authz_service_authorizationengine_resolveeffectiveroles", "callee": "select", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L45"}, {"caller_nid": "services_authz_service_authorizationengine_resolveeffectiveroles", "callee": "and", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L46"}, {"caller_nid": "services_authz_service_authorizationengine_resolveeffectiveroles", "callee": "eq", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L47"}, {"caller_nid": "services_authz_service_authorizationengine_resolveeffectiveroles", "callee": "eq", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L48"}, {"caller_nid": "services_authz_service_authorizationengine_resolveeffectiveroles", "callee": "gt", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L49"}, {"caller_nid": "services_authz_service_authorizationengine_resolveeffectiveroles", "callee": "limit", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L54"}, {"caller_nid": "services_authz_service_authorizationengine_resolveeffectiveroles", "callee": "where", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L54"}, {"caller_nid": "services_authz_service_authorizationengine_resolveeffectiveroles", "callee": "from", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L54"}, {"caller_nid": "services_authz_service_authorizationengine_resolveeffectiveroles", "callee": "select", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L54"}, {"caller_nid": "services_authz_service_authorizationengine_resolveeffectiveroles", "callee": "eq", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L54"}, {"caller_nid": "services_authz_service_authorizationengine_resolveeffectiveroles", "callee": "includes", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L56"}, {"caller_nid": "services_authz_service_authorizationengine_resolveeffectiveroles", "callee": "push", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L56"}, {"caller_nid": "services_authz_service_authorizationengine_collectpermissionsfromhierarchy", "callee": "traverse", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L83"}, {"caller_nid": "services_authz_service_authorizationengine_resolveattribute", "callee": "split", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L97"}, {"caller_nid": "services_authz_service_authorizationengine_resolveattribute", "callee": "slice", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L99"}, {"caller_nid": "services_authz_service_authorizationengine_resolveattribute", "callee": "reduce", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L107"}, {"caller_nid": "services_authz_service_authorizationengine_checkcondition", "callee": "isArray", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L124"}, {"caller_nid": "services_authz_service_authorizationengine_checkcondition", "callee": "includes", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L124"}, {"caller_nid": "services_authz_service_authorizationengine_checkcondition", "callee": "isArray", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L126"}, {"caller_nid": "services_authz_service_authorizationengine_checkcondition", "callee": "includes", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L126"}, {"caller_nid": "services_authz_service_authorizationengine_checkcondition", "callee": "isArray", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L136"}, {"caller_nid": "services_authz_service_authorizationengine_checkcondition", "callee": "includes", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L136"}, {"caller_nid": "services_authz_service_authorizationengine_checkcondition", "callee": "includes", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L137"}, {"caller_nid": "services_authz_service_authorizationengine_checkcondition", "callee": "String", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L137"}, {"caller_nid": "services_authz_service_authorizationengine_matchesresource", "callee": "endsWith", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L147"}, {"caller_nid": "services_authz_service_authorizationengine_matchesresource", "callee": "startsWith", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L147"}, {"caller_nid": "services_authz_service_authorizationengine_matchesresource", "callee": "slice", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L147"}, {"caller_nid": "services_authz_service_authorizationengine_checkschedule", "callee": "toLocaleString", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L155"}, {"caller_nid": "services_authz_service_authorizationengine_checkschedule", "callee": "getDay", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L156"}, {"caller_nid": "services_authz_service_authorizationengine_checkschedule", "callee": "getHours", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L157"}, {"caller_nid": "services_authz_service_authorizationengine_checkschedule", "callee": "includes", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L158"}, {"caller_nid": "services_authz_service_authorizationengine_checkgeorestriction", "callee": "includes", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\authz.service.ts", "source_location": "L171"}]}
+{
+    "nodes": [
+        {
+            "id": "c_users_alfamas_desktop_zerotrust_src_services_authz_service_ts",
+            "label": "authz.service.ts",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L1"
+        },
+        {
+            "id": "services_authz_service_authorizationengine",
+            "label": "AuthorizationEngine",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L6"
+        },
+        {
+            "id": "services_authz_service_authorizationengine_evaluate",
+            "label": ".evaluate()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L7"
+        },
+        {
+            "id": "services_authz_service_authorizationengine_resolveeffectiveroles",
+            "label": ".resolveEffectiveRoles()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L39"
+        },
+        {
+            "id": "services_authz_service_authorizationengine_collectpermissionsfromhierarchy",
+            "label": ".collectPermissionsFromHierarchy()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L65"
+        },
+        {
+            "id": "services_authz_service_authorizationengine_evaluateconditions",
+            "label": ".evaluateConditions()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L87"
+        },
+        {
+            "id": "services_authz_service_authorizationengine_resolveattribute",
+            "label": ".resolveAttribute()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L96"
+        },
+        {
+            "id": "services_authz_service_authorizationengine_checkcondition",
+            "label": ".checkCondition()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L113"
+        },
+        {
+            "id": "services_authz_service_authorizationengine_matchesresource",
+            "label": ".matchesResource()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L144"
+        },
+        {
+            "id": "services_authz_service_authorizationengine_checkschedule",
+            "label": ".checkSchedule()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L151"
+        },
+        {
+            "id": "services_authz_service_authorizationengine_checkgeorestriction",
+            "label": ".checkGeoRestriction()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L167"
+        }
+    ],
+    "edges": [
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_authz_service_ts",
+            "target": "drizzle_orm",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L1",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_authz_service_ts",
+            "target": "c_users_alfamas_desktop_zerotrust_src_db_index_ts",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L2",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_authz_service_ts",
+            "target": "db_index_getdb",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L2",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_authz_service_ts",
+            "target": "c_users_alfamas_desktop_zerotrust_src_db_schema_ts",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L3",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_authz_service_ts",
+            "target": "db_schema_rolestable",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L3",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_authz_service_ts",
+            "target": "db_schema_jitaccesstable",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L3",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_authz_service_ts",
+            "target": "c_users_alfamas_desktop_zerotrust_src_shared_types_ts",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L4",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_authz_service_ts",
+            "target": "shared_types_permission",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L4",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_authz_service_ts",
+            "target": "shared_types_abaccondition",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L4",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_authz_service_ts",
+            "target": "shared_types_user",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L4",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_authz_service_ts",
+            "target": "shared_types_authzcontext",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L4",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_authz_service_ts",
+            "target": "shared_types_authzresult",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L4",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_authz_service_ts",
+            "target": "services_authz_service_authorizationengine",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L6",
+            "weight": 1.0
+        },
+        {
+            "source": "services_authz_service_authorizationengine",
+            "target": "services_authz_service_authorizationengine_evaluate",
+            "relation": "method",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L7",
+            "weight": 1.0
+        },
+        {
+            "source": "services_authz_service_authorizationengine",
+            "target": "services_authz_service_authorizationengine_resolveeffectiveroles",
+            "relation": "method",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L39",
+            "weight": 1.0
+        },
+        {
+            "source": "services_authz_service_authorizationengine",
+            "target": "services_authz_service_authorizationengine_collectpermissionsfromhierarchy",
+            "relation": "method",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L65",
+            "weight": 1.0
+        },
+        {
+            "source": "services_authz_service_authorizationengine",
+            "target": "services_authz_service_authorizationengine_evaluateconditions",
+            "relation": "method",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L87",
+            "weight": 1.0
+        },
+        {
+            "source": "services_authz_service_authorizationengine",
+            "target": "services_authz_service_authorizationengine_resolveattribute",
+            "relation": "method",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L96",
+            "weight": 1.0
+        },
+        {
+            "source": "services_authz_service_authorizationengine",
+            "target": "services_authz_service_authorizationengine_checkcondition",
+            "relation": "method",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L113",
+            "weight": 1.0
+        },
+        {
+            "source": "services_authz_service_authorizationengine",
+            "target": "services_authz_service_authorizationengine_matchesresource",
+            "relation": "method",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L144",
+            "weight": 1.0
+        },
+        {
+            "source": "services_authz_service_authorizationengine",
+            "target": "services_authz_service_authorizationengine_checkschedule",
+            "relation": "method",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L151",
+            "weight": 1.0
+        },
+        {
+            "source": "services_authz_service_authorizationengine",
+            "target": "services_authz_service_authorizationengine_checkgeorestriction",
+            "relation": "method",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L167",
+            "weight": 1.0
+        },
+        {
+            "source": "services_authz_service_authorizationengine_evaluate",
+            "target": "services_authz_service_authorizationengine_checkschedule",
+            "relation": "calls",
+            "context": "call",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L11",
+            "weight": 1.0
+        },
+        {
+            "source": "services_authz_service_authorizationengine_evaluate",
+            "target": "services_authz_service_authorizationengine_checkgeorestriction",
+            "relation": "calls",
+            "context": "call",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L14",
+            "weight": 1.0
+        },
+        {
+            "source": "services_authz_service_authorizationengine_evaluate",
+            "target": "services_authz_service_authorizationengine_resolveeffectiveroles",
+            "relation": "calls",
+            "context": "call",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L17",
+            "weight": 1.0
+        },
+        {
+            "source": "services_authz_service_authorizationengine_evaluate",
+            "target": "services_authz_service_authorizationengine_collectpermissionsfromhierarchy",
+            "relation": "calls",
+            "context": "call",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L25",
+            "weight": 1.0
+        },
+        {
+            "source": "services_authz_service_authorizationengine_evaluate",
+            "target": "services_authz_service_authorizationengine_matchesresource",
+            "relation": "calls",
+            "context": "call",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L28",
+            "weight": 1.0
+        },
+        {
+            "source": "services_authz_service_authorizationengine_evaluate",
+            "target": "services_authz_service_authorizationengine_evaluateconditions",
+            "relation": "calls",
+            "context": "call",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L31",
+            "weight": 1.0
+        },
+        {
+            "source": "services_authz_service_authorizationengine_evaluateconditions",
+            "target": "services_authz_service_authorizationengine_resolveattribute",
+            "relation": "calls",
+            "context": "call",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L90",
+            "weight": 1.0
+        },
+        {
+            "source": "services_authz_service_authorizationengine_evaluateconditions",
+            "target": "services_authz_service_authorizationengine_checkcondition",
+            "relation": "calls",
+            "context": "call",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L91",
+            "weight": 1.0
+        }
+    ],
+    "raw_calls": [
+        {
+            "caller_nid": "services_authz_service_authorizationengine_evaluate",
+            "callee": "getDb",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L20"
+        },
+        {
+            "caller_nid": "services_authz_service_authorizationengine_evaluate",
+            "callee": "limit",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L21"
+        },
+        {
+            "caller_nid": "services_authz_service_authorizationengine_evaluate",
+            "callee": "where",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L21"
+        },
+        {
+            "caller_nid": "services_authz_service_authorizationengine_evaluate",
+            "callee": "from",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L21"
+        },
+        {
+            "caller_nid": "services_authz_service_authorizationengine_evaluate",
+            "callee": "select",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L21"
+        },
+        {
+            "caller_nid": "services_authz_service_authorizationengine_evaluate",
+            "callee": "eq",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L21"
+        },
+        {
+            "caller_nid": "services_authz_service_authorizationengine_evaluate",
+            "callee": "includes",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L29"
+        },
+        {
+            "caller_nid": "services_authz_service_authorizationengine_evaluate",
+            "callee": "includes",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L29"
+        },
+        {
+            "caller_nid": "services_authz_service_authorizationengine_resolveeffectiveroles",
+            "callee": "getDb",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L43"
+        },
+        {
+            "caller_nid": "services_authz_service_authorizationengine_resolveeffectiveroles",
+            "callee": "where",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L45"
+        },
+        {
+            "caller_nid": "services_authz_service_authorizationengine_resolveeffectiveroles",
+            "callee": "from",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L45"
+        },
+        {
+            "caller_nid": "services_authz_service_authorizationengine_resolveeffectiveroles",
+            "callee": "select",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L45"
+        },
+        {
+            "caller_nid": "services_authz_service_authorizationengine_resolveeffectiveroles",
+            "callee": "and",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L46"
+        },
+        {
+            "caller_nid": "services_authz_service_authorizationengine_resolveeffectiveroles",
+            "callee": "eq",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L47"
+        },
+        {
+            "caller_nid": "services_authz_service_authorizationengine_resolveeffectiveroles",
+            "callee": "eq",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L48"
+        },
+        {
+            "caller_nid": "services_authz_service_authorizationengine_resolveeffectiveroles",
+            "callee": "gt",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L49"
+        },
+        {
+            "caller_nid": "services_authz_service_authorizationengine_resolveeffectiveroles",
+            "callee": "limit",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L54"
+        },
+        {
+            "caller_nid": "services_authz_service_authorizationengine_resolveeffectiveroles",
+            "callee": "where",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L54"
+        },
+        {
+            "caller_nid": "services_authz_service_authorizationengine_resolveeffectiveroles",
+            "callee": "from",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L54"
+        },
+        {
+            "caller_nid": "services_authz_service_authorizationengine_resolveeffectiveroles",
+            "callee": "select",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L54"
+        },
+        {
+            "caller_nid": "services_authz_service_authorizationengine_resolveeffectiveroles",
+            "callee": "eq",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L54"
+        },
+        {
+            "caller_nid": "services_authz_service_authorizationengine_resolveeffectiveroles",
+            "callee": "includes",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L56"
+        },
+        {
+            "caller_nid": "services_authz_service_authorizationengine_resolveeffectiveroles",
+            "callee": "push",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L56"
+        },
+        {
+            "caller_nid": "services_authz_service_authorizationengine_collectpermissionsfromhierarchy",
+            "callee": "traverse",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L83"
+        },
+        {
+            "caller_nid": "services_authz_service_authorizationengine_resolveattribute",
+            "callee": "split",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L97"
+        },
+        {
+            "caller_nid": "services_authz_service_authorizationengine_resolveattribute",
+            "callee": "slice",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L99"
+        },
+        {
+            "caller_nid": "services_authz_service_authorizationengine_resolveattribute",
+            "callee": "reduce",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L107"
+        },
+        {
+            "caller_nid": "services_authz_service_authorizationengine_checkcondition",
+            "callee": "isArray",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L124"
+        },
+        {
+            "caller_nid": "services_authz_service_authorizationengine_checkcondition",
+            "callee": "includes",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L124"
+        },
+        {
+            "caller_nid": "services_authz_service_authorizationengine_checkcondition",
+            "callee": "isArray",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L126"
+        },
+        {
+            "caller_nid": "services_authz_service_authorizationengine_checkcondition",
+            "callee": "includes",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L126"
+        },
+        {
+            "caller_nid": "services_authz_service_authorizationengine_checkcondition",
+            "callee": "isArray",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L136"
+        },
+        {
+            "caller_nid": "services_authz_service_authorizationengine_checkcondition",
+            "callee": "includes",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L136"
+        },
+        {
+            "caller_nid": "services_authz_service_authorizationengine_checkcondition",
+            "callee": "includes",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L137"
+        },
+        {
+            "caller_nid": "services_authz_service_authorizationengine_checkcondition",
+            "callee": "String",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L137"
+        },
+        {
+            "caller_nid": "services_authz_service_authorizationengine_matchesresource",
+            "callee": "endsWith",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L147"
+        },
+        {
+            "caller_nid": "services_authz_service_authorizationengine_matchesresource",
+            "callee": "startsWith",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L147"
+        },
+        {
+            "caller_nid": "services_authz_service_authorizationengine_matchesresource",
+            "callee": "slice",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L147"
+        },
+        {
+            "caller_nid": "services_authz_service_authorizationengine_checkschedule",
+            "callee": "toLocaleString",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L155"
+        },
+        {
+            "caller_nid": "services_authz_service_authorizationengine_checkschedule",
+            "callee": "getDay",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L156"
+        },
+        {
+            "caller_nid": "services_authz_service_authorizationengine_checkschedule",
+            "callee": "getHours",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L157"
+        },
+        {
+            "caller_nid": "services_authz_service_authorizationengine_checkschedule",
+            "callee": "includes",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L158"
+        },
+        {
+            "caller_nid": "services_authz_service_authorizationengine_checkgeorestriction",
+            "callee": "includes",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\authz.service.ts",
+            "source_location": "L171"
+        }
+    ]
+}

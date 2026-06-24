@@ -1,8 +1,14 @@
 {
   "branches": [
     "main",
-    { "name": "beta", "prerelease": true },
-    { "name": "alpha", "prerelease": true }
+    {
+      "name": "beta",
+      "prerelease": true
+    },
+    {
+      "name": "alpha",
+      "prerelease": true
+    }
   ],
   "plugins": [
     [
@@ -10,12 +16,31 @@
       {
         "preset": "conventionalcommits",
         "releaseRules": [
-          { "type": "feat", "release": "minor" },
-          { "type": "fix", "release": "patch" },
-          { "type": "perf", "release": "patch" },
-          { "type": "refactor", "release": "patch" },
-          { "type": "docs", "scope": "readme", "release": "patch" },
-          { "breaking": true, "release": "major" }
+          {
+            "type": "feat",
+            "release": "minor"
+          },
+          {
+            "type": "fix",
+            "release": "patch"
+          },
+          {
+            "type": "perf",
+            "release": "patch"
+          },
+          {
+            "type": "refactor",
+            "release": "patch"
+          },
+          {
+            "type": "docs",
+            "scope": "readme",
+            "release": "patch"
+          },
+          {
+            "breaking": true,
+            "release": "major"
+          }
         ]
       }
     ],
@@ -25,15 +50,45 @@
         "preset": "conventionalcommits",
         "presetConfig": {
           "types": [
-            { "type": "feat", "section": "🚀 Features" },
-            { "type": "fix", "section": "🐛 Bug Fixes" },
-            { "type": "perf", "section": "⚡ Performance Improvements" },
-            { "type": "refactor", "section": "♻️ Code Refactoring" },
-            { "type": "docs", "section": "📚 Documentation" },
-            { "type": "test", "section": "✅ Tests", "hidden": false },
-            { "type": "chore", "section": "🔧 Maintenance", "hidden": false },
-            { "type": "ci", "section": "👷 CI/CD", "hidden": false },
-            { "type": "security", "section": "🔒 Security" }
+            {
+              "type": "feat",
+              "section": "🚀 Features"
+            },
+            {
+              "type": "fix",
+              "section": "🐛 Bug Fixes"
+            },
+            {
+              "type": "perf",
+              "section": "⚡ Performance Improvements"
+            },
+            {
+              "type": "refactor",
+              "section": "♻️ Code Refactoring"
+            },
+            {
+              "type": "docs",
+              "section": "📚 Documentation"
+            },
+            {
+              "type": "test",
+              "section": "✅ Tests",
+              "hidden": false
+            },
+            {
+              "type": "chore",
+              "section": "🔧 Maintenance",
+              "hidden": false
+            },
+            {
+              "type": "ci",
+              "section": "👷 CI/CD",
+              "hidden": false
+            },
+            {
+              "type": "security",
+              "section": "🔒 Security"
+            }
           ]
         }
       }
@@ -42,7 +97,7 @@
       "@semantic-release/changelog",
       {
         "changelogFile": "CHANGELOG.md",
-        "changelogTitle": "# Changelog\n\nAll notable changes to ZeroAuth are documented here.\nThis project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and [Conventional Commits](https://www.conventionalcommits.org/).\n"
+        "changelogTitle": "# Changelog\n\nAll notable changes to zerotrust are documented here.\nThis project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and [Conventional Commits](https://www.conventionalcommits.org/).\n"
       }
     ],
     [
@@ -54,7 +109,10 @@
     [
       "@semantic-release/git",
       {
-        "assets": ["CHANGELOG.md", "package.json"],
+        "assets": [
+          "CHANGELOG.md",
+          "package.json"
+        ],
         "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
       }
     ],

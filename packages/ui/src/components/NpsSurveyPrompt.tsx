@@ -41,13 +41,15 @@ export function NpsSurveyPrompt() {
       <div className="rounded-xl border border-border bg-card p-5 shadow-2xl">
         {submitted ? (
           <div className="text-center">
-            <p className="text-sm font-medium text-foreground">Thank you for your feedback! 🎉</p>
+            <p className="text-sm font-medium text-foreground">
+              Thank you for your feedback! 🎉
+            </p>
           </div>
         ) : (
           <>
             <div className="mb-3 flex items-center justify-between">
               <h3 className="text-sm font-semibold text-foreground">
-                How likely are you to recommend ZeroAuth?
+                How likely are you to recommend zerotrust?
               </h3>
               <button
                 type="button"

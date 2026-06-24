@@ -1,6 +1,6 @@
 // ─── Configuration Types ─────────────────────────────────────────────────────
 
-export interface ZeroAuthConfig {
+export interface zerotrustConfig {
   database: {
     databaseUrl: string;
     databaseUrlReadReplica?: string;
@@ -234,7 +234,16 @@ export interface Permission {
 
 export interface ABACCondition {
   attribute: string;
-  operator: "eq" | "ne" | "in" | "nin" | "gt" | "lt" | "gte" | "lte" | "contains";
+  operator:
+    | "eq"
+    | "ne"
+    | "in"
+    | "nin"
+    | "gt"
+    | "lt"
+    | "gte"
+    | "lte"
+    | "contains";
   value: unknown;
 }
 
@@ -391,9 +400,19 @@ export type HonoEnv = {
     /** ID of the per-org SCIM token that authenticated the request. */
     scimTokenId?: string;
     /** Audit principal (agent/human + delegation chain) derived in auth middleware. */
-    auditPrincipal?: { type: "human" | "agent"; id: string; workloadId?: string; actAs?: string[] };
+    auditPrincipal?: {
+      type: "human" | "agent";
+      id: string;
+      workloadId?: string;
+      actAs?: string[];
+    };
     /** MCP principal for MCP-protected resource access. */
-    mcpPrincipal?: { type: "human" | "agent"; id: string; workloadId?: string; actAs?: string[] };
+    mcpPrincipal?: {
+      type: "human" | "agent";
+      id: string;
+      workloadId?: string;
+      actAs?: string[];
+    };
     /** MCP token payload. */
     mcpToken?: Record<string, unknown>;
   };
@@ -401,15 +420,15 @@ export type HonoEnv = {
 
 // ─── Error Types ──────────────────────────────────────────────────────────
 
-export class ZeroAuthError extends Error {
+export class zerotrustError extends Error {
   constructor(
     public code: string,
     message: string,
     public statusCode: number = 400,
-    public details?: Record<string, unknown>
+    public details?: Record<string, unknown>,
   ) {
     super(message);
-    this.name = "ZeroAuthError";
+    this.name = "zerotrustError";
   }
 }
 

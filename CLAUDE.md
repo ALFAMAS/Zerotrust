@@ -1,4 +1,4 @@
-# ZeroAuth — Claude Code Guide
+# zerotrust — Claude Code Guide
 
 ## Project structure
 

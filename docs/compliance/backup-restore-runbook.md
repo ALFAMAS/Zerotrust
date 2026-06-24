@@ -4,7 +4,7 @@ Owner: Mas Yasin Arafat
 Review cadence: Quarterly restore drill  
 Status: Draft, needs periodic evidence
 
-ZeroAuth has backup tooling in `scripts/db-backup.js`, `scripts/db-restore.js`,
+zerotrust has backup tooling in `scripts/db-backup.js`, `scripts/db-restore.js`,
 and `src/services/dbBackup.service.ts`. Neon PITR may also be available depending
 on the active database plan.
 

@@ -9,14 +9,14 @@
 
 import { nanoid } from "nanoid";
 import { decrypt, encrypt, PasetoError } from "../crypto/paseto-v4";
-import type { TokenPayload, ZeroAuthConfig } from "../shared/types";
+import type { TokenPayload, zerotrustConfig } from "../shared/types";
 import { DEFAULT_ACCESS_TOKEN_TTL } from "../shared/types";
 
 export class TokenService {
   private key!: Uint8Array;
-  private config: ZeroAuthConfig["session"] & { secretKeyHex: string };
+  private config: zerotrustConfig["session"] & { secretKeyHex: string };
 
-  constructor(secretKeyHex: string, sessionConfig: ZeroAuthConfig["session"]) {
+  constructor(secretKeyHex: string, sessionConfig: zerotrustConfig["session"]) {
     this.config = { ...sessionConfig, secretKeyHex };
   }
 
@@ -24,14 +24,16 @@ export class TokenService {
   async init() {
     const keyBytes = this.hexToBytes(this.config.secretKeyHex);
     if (keyBytes.length !== 32) {
-      throw new Error("TOKEN_SECRET_INVALID: expected a 32-byte (64 hex char) key");
+      throw new Error(
+        "TOKEN_SECRET_INVALID: expected a 32-byte (64 hex char) key",
+      );
     }
     this.key = keyBytes;
   }
 
   async signAccessToken(
     payload: Omit<TokenPayload, "iat" | "exp" | "jti">,
-    ttl = DEFAULT_ACCESS_TOKEN_TTL
+    ttl = DEFAULT_ACCESS_TOKEN_TTL,
   ): Promise<string> {
     const now = Math.floor(Date.now() / 1000);
     const full: TokenPayload = {
@@ -63,7 +65,11 @@ export class TokenService {
     } catch {
       throw new Error("TOKEN_INVALID");
     }
-    if (payload === null || typeof payload !== "object" || typeof payload.exp !== "number") {
+    if (
+      payload === null ||
+      typeof payload !== "object" ||
+      typeof payload.exp !== "number"
+    ) {
       throw new Error("TOKEN_INVALID");
     }
     const now = Math.floor(Date.now() / 1000);

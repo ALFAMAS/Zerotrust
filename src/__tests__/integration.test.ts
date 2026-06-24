@@ -1,4 +1,12 @@
-import { describe, it, expect, vi, beforeAll, afterAll, beforeEach } from "vitest";
+import {
+  describe,
+  it,
+  expect,
+  vi,
+  beforeAll,
+  afterAll,
+  beforeEach,
+} from "vitest";
 
 vi.mock("mongoose", () => {
   const Schema: any = function (definition: any, opts?: any) {
@@ -23,7 +31,9 @@ vi.mock("mongoose", () => {
   const makeModel = (name: string) => {
     const docs: any[] = [];
     return {
-      create: vi.fn().mockImplementation((data: any) => Promise.resolve(mockDoc(data))),
+      create: vi
+        .fn()
+        .mockImplementation((data: any) => Promise.resolve(mockDoc(data))),
       findOne: vi.fn().mockResolvedValue(null),
       findById: vi.fn().mockResolvedValue(null),
       findByIdAndUpdate: vi.fn().mockResolvedValue(null),
@@ -47,7 +57,11 @@ vi.mock("mongoose", () => {
 
 vi.mock("../config", () => ({
   getConfig: () => ({
-    session: { defaultTTL: 3600, refreshTokenTTL: 604800, maxConcurrentDevices: 5 },
+    session: {
+      defaultTTL: 3600,
+      refreshTokenTTL: 604800,
+      maxConcurrentDevices: 5,
+    },
     security: {
       bcryptRounds: 4,
       tokenSecretHex: "a".repeat(64),
@@ -68,7 +82,12 @@ vi.mock("../config", () => ({
       },
     },
     oauth: { providers: {} },
-    elasticsearch: { enabled: false, host: "localhost", port: 9200, indexPrefix: "zeroauth" },
+    elasticsearch: {
+      enabled: false,
+      host: "localhost",
+      port: 9200,
+      indexPrefix: "zerotrust",
+    },
     logging: { level: "error", format: "json" },
   }),
   resetConfig: vi.fn(),
@@ -106,7 +125,12 @@ describe("Integration: Auth flow (mocked DB)", () => {
       maxConcurrentDevices: 5,
     });
     await svc.init();
-    const access = await svc.signAccessToken({ sub: "u1", email: "u@t.com", aud: "za", scope: [] });
+    const access = await svc.signAccessToken({
+      sub: "u1",
+      email: "u@t.com",
+      aud: "za",
+      scope: [],
+    });
     const refresh = await svc.signRefreshToken();
     expect(access).toMatch(/^v4\.local\./);
     expect(refresh.length).toBeGreaterThan(0);
@@ -119,7 +143,12 @@ describe("Integration: Auth flow (mocked DB)", () => {
       maxConcurrentDevices: 5,
     });
     await svc.init();
-    const access = await svc.signAccessToken({ sub: "u1", email: "u@t.com", aud: "za", scope: [] });
+    const access = await svc.signAccessToken({
+      sub: "u1",
+      email: "u@t.com",
+      aud: "za",
+      scope: [],
+    });
     const payload = await svc.verifyAccessToken(access);
     expect(payload.sub).toBe("u1");
   });
@@ -152,7 +181,10 @@ describe("Integration: CSFLE encrypt/decrypt", () => {
     resetCSFLE();
 
     const manager = await initializeCSFLE({
-      security: { csfleMasterKeyHex: "c".repeat(64), csflekeyRotationIntervalDays: 90 },
+      security: {
+        csfleMasterKeyHex: "c".repeat(64),
+        csflekeyRotationIntervalDays: 90,
+      },
     } as any);
 
     const plain = "integration-test@example.com";

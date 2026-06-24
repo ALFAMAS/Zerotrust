@@ -1,1 +1,118 @@
-{"nodes": [{"id": "c_users_alfamas_desktop_zeroauth_packages_ui_src_app_auth_callback_page_tsx", "label": "page.tsx", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\app\\(auth)\\callback\\page.tsx", "source_location": "L1"}, {"id": "callback_page_callbackinner", "label": "CallbackInner()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\app\\(auth)\\callback\\page.tsx", "source_location": "L8"}, {"id": "callback_page_callbackpage", "label": "CallbackPage()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\app\\(auth)\\callback\\page.tsx", "source_location": "L29"}], "edges": [{"source": "c_users_alfamas_desktop_zeroauth_packages_ui_src_app_auth_callback_page_tsx", "target": "react", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\app\\(auth)\\callback\\page.tsx", "source_location": "L3", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_packages_ui_src_app_auth_callback_page_tsx", "target": "navigation", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\app\\(auth)\\callback\\page.tsx", "source_location": "L4", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_packages_ui_src_app_auth_callback_page_tsx", "target": "c_users_alfamas_desktop_zeroauth_packages_ui_src_lib_auth_ts", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\app\\(auth)\\callback\\page.tsx", "source_location": "L5", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_packages_ui_src_app_auth_callback_page_tsx", "target": "lib_auth_settoken", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\app\\(auth)\\callback\\page.tsx", "source_location": "L5", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_packages_ui_src_app_auth_callback_page_tsx", "target": "react", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\app\\(auth)\\callback\\page.tsx", "source_location": "L6", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_packages_ui_src_app_auth_callback_page_tsx", "target": "callback_page_callbackinner", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\app\\(auth)\\callback\\page.tsx", "source_location": "L8", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_packages_ui_src_app_auth_callback_page_tsx", "target": "callback_page_callbackpage", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\app\\(auth)\\callback\\page.tsx", "source_location": "L29", "weight": 1.0}], "raw_calls": [{"caller_nid": "callback_page_callbackinner", "callee": "useRouter", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\app\\(auth)\\callback\\page.tsx", "source_location": "L9"}, {"caller_nid": "callback_page_callbackinner", "callee": "useSearchParams", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\app\\(auth)\\callback\\page.tsx", "source_location": "L10"}, {"caller_nid": "callback_page_callbackinner", "callee": "useEffect", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\app\\(auth)\\callback\\page.tsx", "source_location": "L12"}]}
+{
+    "nodes": [
+        {
+            "id": "c_users_alfamas_desktop_zerotrust_packages_ui_src_app_auth_callback_page_tsx",
+            "label": "page.tsx",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\app\\(auth)\\callback\\page.tsx",
+            "source_location": "L1"
+        },
+        {
+            "id": "callback_page_callbackinner",
+            "label": "CallbackInner()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\app\\(auth)\\callback\\page.tsx",
+            "source_location": "L8"
+        },
+        {
+            "id": "callback_page_callbackpage",
+            "label": "CallbackPage()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\app\\(auth)\\callback\\page.tsx",
+            "source_location": "L29"
+        }
+    ],
+    "edges": [
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_packages_ui_src_app_auth_callback_page_tsx",
+            "target": "react",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\app\\(auth)\\callback\\page.tsx",
+            "source_location": "L3",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_packages_ui_src_app_auth_callback_page_tsx",
+            "target": "navigation",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\app\\(auth)\\callback\\page.tsx",
+            "source_location": "L4",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_packages_ui_src_app_auth_callback_page_tsx",
+            "target": "c_users_alfamas_desktop_zerotrust_packages_ui_src_lib_auth_ts",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\app\\(auth)\\callback\\page.tsx",
+            "source_location": "L5",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_packages_ui_src_app_auth_callback_page_tsx",
+            "target": "lib_auth_settoken",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\app\\(auth)\\callback\\page.tsx",
+            "source_location": "L5",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_packages_ui_src_app_auth_callback_page_tsx",
+            "target": "react",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\app\\(auth)\\callback\\page.tsx",
+            "source_location": "L6",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_packages_ui_src_app_auth_callback_page_tsx",
+            "target": "callback_page_callbackinner",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\app\\(auth)\\callback\\page.tsx",
+            "source_location": "L8",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_packages_ui_src_app_auth_callback_page_tsx",
+            "target": "callback_page_callbackpage",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\app\\(auth)\\callback\\page.tsx",
+            "source_location": "L29",
+            "weight": 1.0
+        }
+    ],
+    "raw_calls": [
+        {
+            "caller_nid": "callback_page_callbackinner",
+            "callee": "useRouter",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\app\\(auth)\\callback\\page.tsx",
+            "source_location": "L9"
+        },
+        {
+            "caller_nid": "callback_page_callbackinner",
+            "callee": "useSearchParams",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\app\\(auth)\\callback\\page.tsx",
+            "source_location": "L10"
+        },
+        {
+            "caller_nid": "callback_page_callbackinner",
+            "callee": "useEffect",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\app\\(auth)\\callback\\page.tsx",
+            "source_location": "L12"
+        }
+    ]
+}

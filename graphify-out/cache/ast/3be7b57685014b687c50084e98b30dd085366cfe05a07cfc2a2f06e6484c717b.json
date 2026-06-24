@@ -1,1 +1,62 @@
-{"nodes": [{"id": "c_users_alfamas_desktop_zeroauth_packages_ui_src_components_badge_tsx", "label": "Badge.tsx", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\components\\Badge.tsx", "source_location": "L1"}, {"id": "components_badge_badgeprops", "label": "BadgeProps", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\components\\Badge.tsx", "source_location": "L1"}, {"id": "components_badge_colormap", "label": "colorMap", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\components\\Badge.tsx", "source_location": "L6"}, {"id": "components_badge_badge", "label": "Badge()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\components\\Badge.tsx", "source_location": "L17"}], "edges": [{"source": "c_users_alfamas_desktop_zeroauth_packages_ui_src_components_badge_tsx", "target": "components_badge_badgeprops", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\components\\Badge.tsx", "source_location": "L1", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_packages_ui_src_components_badge_tsx", "target": "components_badge_colormap", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\components\\Badge.tsx", "source_location": "L6", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_packages_ui_src_components_badge_tsx", "target": "components_badge_badge", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\components\\Badge.tsx", "source_location": "L17", "weight": 1.0}], "raw_calls": []}
+{
+    "nodes": [
+        {
+            "id": "c_users_alfamas_desktop_zerotrust_packages_ui_src_components_badge_tsx",
+            "label": "Badge.tsx",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\components\\Badge.tsx",
+            "source_location": "L1"
+        },
+        {
+            "id": "components_badge_badgeprops",
+            "label": "BadgeProps",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\components\\Badge.tsx",
+            "source_location": "L1"
+        },
+        {
+            "id": "components_badge_colormap",
+            "label": "colorMap",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\components\\Badge.tsx",
+            "source_location": "L6"
+        },
+        {
+            "id": "components_badge_badge",
+            "label": "Badge()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\components\\Badge.tsx",
+            "source_location": "L17"
+        }
+    ],
+    "edges": [
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_packages_ui_src_components_badge_tsx",
+            "target": "components_badge_badgeprops",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\components\\Badge.tsx",
+            "source_location": "L1",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_packages_ui_src_components_badge_tsx",
+            "target": "components_badge_colormap",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\components\\Badge.tsx",
+            "source_location": "L6",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_packages_ui_src_components_badge_tsx",
+            "target": "components_badge_badge",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\components\\Badge.tsx",
+            "source_location": "L17",
+            "weight": 1.0
+        }
+    ],
+    "raw_calls": []
+}

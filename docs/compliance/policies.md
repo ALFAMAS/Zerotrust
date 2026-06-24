@@ -7,7 +7,7 @@ Status: Draft, pending approval
 
 ## 1. Information Security Policy
 
-ZeroAuth protects customer data through least privilege, secure-by-default
+zerotrust protects customer data through least privilege, secure-by-default
 engineering, encryption, monitoring, and documented incident response.
 
 ### Requirements
@@ -110,7 +110,7 @@ before use and periodically thereafter.
 
 ## 6. Business Continuity And Disaster Recovery Policy
 
-ZeroAuth must be able to restore critical service after operational failure,
+zerotrust must be able to restore critical service after operational failure,
 data loss, or regional provider incident.
 
 ### Requirements
@@ -122,11 +122,11 @@ data loss, or regional provider incident.
 
 ### Recovery Targets
 
-| System | RPO | RTO |
-| --- | --- | --- |
+| System              | RPO                | RTO     |
+| ------------------- | ------------------ | ------- |
 | Production database | 24 hours or better | 4 hours |
-| Application API/UI | 1 hour | 2 hours |
-| Audit evidence | 24 hours | 8 hours |
+| Application API/UI  | 1 hour             | 2 hours |
+| Audit evidence      | 24 hours           | 8 hours |
 
 ### Evidence
 

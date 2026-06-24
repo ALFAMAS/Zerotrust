@@ -1,5 +1,5 @@
 /*
- * ZeroAuth service worker — PWA offline support + web push.
+ * zerotrust service worker — PWA offline support + web push.
  *
  * Strategy:
  *   - App shell + static assets: cache-first, populated on install + on access.
@@ -12,14 +12,14 @@
  * list or caching behaviour changes.
  */
 const VERSION = "v1";
-const SHELL_CACHE = `zeroauth-shell-${VERSION}`;
-const RUNTIME_CACHE = `zeroauth-runtime-${VERSION}`;
+const SHELL_CACHE = `zerotrust-shell-${VERSION}`;
+const RUNTIME_CACHE = `zerotrust-runtime-${VERSION}`;
 const OFFLINE_URL = "/offline.html";
 
 const PRECACHE_URLS = ["/", OFFLINE_URL, "/manifest.json", "/icon-192.png", "/icon-512.png"];
 
-const SYNC_TAG = "zeroauth-write-queue";
-const DB_NAME = "zeroauth-pwa";
+const SYNC_TAG = "zerotrust-write-queue";
+const DB_NAME = "zerotrust-pwa";
 const STORE_NAME = "write-queue";
 
 // ─── Install / activate ───────────────────────────────────────────────────────
@@ -174,15 +174,15 @@ self.addEventListener("push", (event) => {
   try {
     data = event.data ? event.data.json() : {};
   } catch {
-    data = { title: "ZeroAuth", body: event.data ? event.data.text() : "" };
+    data = { title: "zerotrust", body: event.data ? event.data.text() : "" };
   }
 
-  const title = data.title || "ZeroAuth";
+  const title = data.title || "zerotrust";
   const options = {
     body: data.body || "",
     icon: "/icon-192.png",
     badge: "/icon-192.png",
-    tag: data.tag || data.type || "zeroauth",
+    tag: data.tag || data.type || "zerotrust",
     data: { link: data.link || "/dashboard" },
     renotify: Boolean(data.tag),
   };

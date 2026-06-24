@@ -39,9 +39,9 @@ function ensureConfigured(): boolean {
   if (configured) return true;
   if (!isWebPushConfigured()) return false;
   webpush.setVapidDetails(
-    process.env.VAPID_SUBJECT ?? "mailto:admin@zeroauth.local",
+    process.env.VAPID_SUBJECT ?? "mailto:admin@zerotrust.local",
     process.env.VAPID_PUBLIC_KEY!,
-    process.env.VAPID_PRIVATE_KEY!
+    process.env.VAPID_PRIVATE_KEY!,
   );
   configured = true;
   return true;
@@ -54,7 +54,7 @@ function ensureConfigured(): boolean {
 export async function saveSubscription(
   userId: string,
   sub: { endpoint: string; keys: { p256dh: string; auth: string } },
-  userAgent?: string
+  userAgent?: string,
 ): Promise<void> {
   const db = getDb();
   await db
@@ -77,12 +77,18 @@ export async function saveSubscription(
     });
 }
 
-export async function removeSubscription(userId: string, endpoint: string): Promise<void> {
+export async function removeSubscription(
+  userId: string,
+  endpoint: string,
+): Promise<void> {
   const db = getDb();
   await db
     .delete(pushSubscriptionsTable)
     .where(
-      and(eq(pushSubscriptionsTable.endpoint, endpoint), eq(pushSubscriptionsTable.userId, userId))
+      and(
+        eq(pushSubscriptionsTable.endpoint, endpoint),
+        eq(pushSubscriptionsTable.userId, userId),
+      ),
     );
 }
 
@@ -91,7 +97,10 @@ export async function removeSubscription(userId: string, endpoint: string): Prom
  * (404/410 — unsubscribed or expired) are pruned automatically. Returns the
  * number of subscriptions that accepted the message.
  */
-export async function sendWebPush(userId: string, payload: PushPayload): Promise<number> {
+export async function sendWebPush(
+  userId: string,
+  payload: PushPayload,
+): Promise<number> {
   if (!ensureConfigured()) return 0;
 
   const db = getDb();
@@ -111,7 +120,7 @@ export async function sendWebPush(userId: string, payload: PushPayload): Promise
       try {
         await webpush.sendNotification(
           { endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } },
-          body
+          body,
         );
         delivered++;
       } catch (err) {
@@ -119,17 +128,22 @@ export async function sendWebPush(userId: string, payload: PushPayload): Promise
         if (statusCode === 404 || statusCode === 410) {
           deadEndpoints.push(s.endpoint);
         } else {
-          logger.warn("Web push delivery failed", { statusCode, endpoint: s.endpoint });
+          logger.warn("Web push delivery failed", {
+            statusCode,
+            endpoint: s.endpoint,
+          });
         }
       }
-    })
+    }),
   );
 
   if (deadEndpoints.length > 0) {
     await db
       .delete(pushSubscriptionsTable)
       .where(inArray(pushSubscriptionsTable.endpoint, deadEndpoints));
-    logger.info("Pruned expired push subscriptions", { count: deadEndpoints.length });
+    logger.info("Pruned expired push subscriptions", {
+      count: deadEndpoints.length,
+    });
   }
 
   return delivered;

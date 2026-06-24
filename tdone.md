@@ -1,6 +1,6 @@
-# ZeroAuth — Implemented Features
+# zerotrust — Implemented Features
 
-This file is the authoritative list of what ZeroAuth ships today, plus the latest
+This file is the authoritative list of what zerotrust ships today, plus the latest
 repository audit snapshot. Keep planned work in issues or the product backlog, not
 in this shipped-feature ledger.
 
@@ -97,7 +97,7 @@ needs surfacing
 - ✅ Revoke — instant revocation via `revokedAt`
 - ✅ Key scopes — `read:data`, `write:data`, etc. enforced in middleware
 - ✅ `apiKeyAuth` middleware — `Bearer <key>` or `X-API-Key` header
-- ✅ Sandbox / test-mode keys — `api_keys.environment` column (migration `0006`); `zak_live_` / `zak_test_` prefix; `X-ZeroAuth-Environment` response header; Live/Test selector in dashboard
+- ✅ Sandbox / test-mode keys — `api_keys.environment` column (migration `0006`); `zak_live_` / `zak_test_` prefix; `X-zerotrust-Environment` response header; Live/Test selector in dashboard
 
 ---
 
@@ -226,7 +226,7 @@ needs surfacing
 
 - ✅ Endpoint management — `/dashboard/webhooks` UI + REST CRUD
 - ✅ Event catalog — typed `WebhookEventType` covering auth, user, session, anomaly
-- ✅ Signed payloads — HMAC-SHA256 `X-ZeroAuth-Signature` header
+- ✅ Signed payloads — HMAC-SHA256 `X-zerotrust-Signature` header
 - ✅ Test delivery — ping button sends a signed test event
 - ✅ Retry with backoff — automatic retry on 5xx / timeout per endpoint retry policy
 - ✅ `[~]` Delivery logs UI — bounded in-memory ring buffer (`webhookDeliveryLog`); per-attempt history via `GET /webhooks/:id/deliveries` (full Postgres durability deferred)
@@ -436,7 +436,7 @@ needs surfacing
 
 ## Reliability & Scale (2026-06-23)
 
-- ✅ **Read replicas + connection pooling** — `DATABASE_URL_READ_REPLICA` env var creates a separate Drizzle read-replica connection; `getReadDb()` returns replica when configured, falls back to primary; configurable pool sizes (`DB_POOL_SIZE` for primary, `DB_READ_POOL_SIZE` for replica, default 20); `hasReadReplica()` checks status; replica health reported in `/health`; `DB_READ_REPLICA_STRICT=true` enables PostgreSQL `default_transaction_read_only`; `DatabaseHealth` interface exported; wired into `initializeZeroAuth()` startup
+- ✅ **Read replicas + connection pooling** — `DATABASE_URL_READ_REPLICA` env var creates a separate Drizzle read-replica connection; `getReadDb()` returns replica when configured, falls back to primary; configurable pool sizes (`DB_POOL_SIZE` for primary, `DB_READ_POOL_SIZE` for replica, default 20); `hasReadReplica()` checks status; replica health reported in `/health`; `DB_READ_REPLICA_STRICT=true` enables PostgreSQL `default_transaction_read_only`; `DatabaseHealth` interface exported; wired into `initializezerotrust()` startup
 - ✅ **SLO dashboards** — `src/services/slo.service.ts` computes error budget + burn rate from existing Prometheus metrics; tracks availability (99.9%) and latency P500ms (99.5%) SLOs with configurable targets (`SLO_AVAILABILITY_TARGET`, `SLO_LATENCY_TARGET`); `GET /admin/slo` endpoint returns current status (error budgets, burn rates, metrics); burn-rate alerts fire via existing notification dispatcher (Slack/Teams/PagerDuty) when burn rate exceeds `SLO_BURN_ALERT_THRESHOLD` (default 6×); debounced checks (60s) + cooldown to prevent alert flooding; `"slo.burn"` added to `NotificationEvent` type
 - ✅ **Load + chaos harness** — `tests/load/full-suite.k6.js` with 4 scenarios (login storm up to 200 VUs, session refresh 100 rps, mixed reads 200 rps, API key calls); `tests/load/chaos-fault.k6.js` with 5 scenarios (health under 500 rps load, login degraded, metrics availability, SLO endpoint, circuit breaker rapid-fire); CI workflow (`.github/workflows/ci.yml`) runs both suites against a real server with PG + Redis, uploads JSON results as artifacts
 
@@ -469,7 +469,7 @@ needs surfacing
 
 ## Developer Platform — Auto-generated SDK (2026-06-23)
 
-- ✅ **Auto-generated TypeScript SDK** — `scripts/generate-sdk.ts` (`bun run sdk:generate`) reads `src/api/openapi.json` and emits a dependency-free client to `packages/client/src/index.ts`: an interface per `components.schemas` entry, a `ZeroAuthClient` class with one typed method per OpenAPI operation (typed path params, query bags, request bodies, and 2xx response types), a `ZeroAuthError` runtime error, and a global-`fetch`-based `request()` helper (bearer auth, query-string building, JSON encode/decode, non-2xx → `ZeroAuthError`). Generated **46 operations / 3 schemas**; the output type-checks under its own `tsconfig.json`. Publish-ready workspace package `@zeroauth/client` (`type: module`, `exports` map, `publishConfig.access: public`, `prepublishOnly` regenerates + builds); `bun run sdk:build` regenerates + emits `dist/`. Generator core functions are exported and unit-tested (`src/__tests__/generate-sdk.test.ts`, 19 tests).
+- ✅ **Auto-generated TypeScript SDK** — `scripts/generate-sdk.ts` (`bun run sdk:generate`) reads `src/api/openapi.json` and emits a dependency-free client to `packages/client/src/index.ts`: an interface per `components.schemas` entry, a `zerotrustClient` class with one typed method per OpenAPI operation (typed path params, query bags, request bodies, and 2xx response types), a `zerotrustError` runtime error, and a global-`fetch`-based `request()` helper (bearer auth, query-string building, JSON encode/decode, non-2xx → `zerotrustError`). Generated **46 operations / 3 schemas**; the output type-checks under its own `tsconfig.json`. Publish-ready workspace package `@zerotrust/client` (`type: module`, `exports` map, `publishConfig.access: public`, `prepublishOnly` regenerates + builds); `bun run sdk:build` regenerates + emits `dist/`. Generator core functions are exported and unit-tested (`src/__tests__/generate-sdk.test.ts`, 19 tests).
 
 ## File Storage & Uploads — CDN delivery (2026-06-23)
 
@@ -555,7 +555,7 @@ counts and behavioral conclusions.
 - ✅ **Documentation drift fixed** — `README.md` no longer points at deleted `implemented.md` / `not-implemented.md`; it now points to this file, includes newer collaboration/search/wallet/compliance/agentic surfaces, documents the generated SDK package, and reflects Arabic/RTL i18n.
 - ✅ **Recent feature ledger reconciled** — 2026-06-23 entries for generated SDK, CDN uploads, RTL support, collaboration, globalization/tax, tenant branding/residency, compliance, search, wallet/referrals, MCP auth, delegation, approval, and agent-aware audit logging are present in this file.
 - ⚠️ **Local dependency install is inconsistent** — top-level `node_modules` contains broken workspace/package reparse points. `bun run type-check`, `bun run test -- --run`, and `bun run lint` fail through missing package entrypoints such as `node_modules/typescript/lib/tsc.js`, `node_modules/vitest/vitest.mjs`, and `node_modules/@biomejs/biome/bin/biome`.
-- ⚠️ **`bun install` repair attempt failed** — Bun reports `EEXIST: File exists: failed to symlink dependencies` for the root workspace, `@zeroauth/ui`, and `@zeroauth/client`, then fails the `prepare` script because `node_modules/husky/bin.js` cannot be resolved.
+- ⚠️ **`bun install` repair attempt failed** — Bun reports `EEXIST: File exists: failed to symlink dependencies` for the root workspace, `@zerotrust/ui`, and `@zerotrust/client`, then fails the `prepare` script because `node_modules/husky/bin.js` cannot be resolved.
 - ⚠️ **Direct Bun-store verification is still partial** — invoking TypeScript from `node_modules/.bun/typescript@5.9.3/.../tsc.js` reaches the compiler but fails at `TS2688: Cannot find type definition file for 'node'`; invoking Vitest from the Bun store fails to resolve `vitest/config`.
 - ⚠️ **Biome source audit ran through the Bun store** — `node node_modules/.bun/@biomejs+biome@2.5.0/node_modules/@biomejs/biome/bin/biome check` checked 340 files and reported 279 errors, 44 warnings, and 8 infos. The visible leading errors are mostly UI a11y and React correctness issues: missing `button type`, labels without associated controls, missing hook dependencies, and floating promises.
 - ⚠️ **Optional Elasticsearch dependency is intentionally soft** — `src/services/search.service.ts` dynamically requires `@elastic/elasticsearch` and falls back to DB search if absent; keep README wording as optional unless the dependency is added to `package.json`.
@@ -575,6 +575,7 @@ A full audit pass that resolves the three "recommended next actions" above and
 hardens the security, build, and CI surfaces. All changes shipped with tests.
 
 ### Toolchain / CI (previously blocking)
+
 - ✅ **Bun install repaired** — a clean `bun install` restores a working tree; the
   636-test suite, `type-check`, and the UI build all run. The README/this file's
   "verification blocked by broken workspace links" note is now stale.
@@ -588,11 +589,13 @@ hardens the security, build, and CI surfaces. All changes shipped with tests.
   rules tuned with rationale; experimental nursery promise rules set to `warn`.
 
 ### Production build (previously failing)
+
 - ✅ **Next.js build fixed** — React 19's `useRef<T>()` requires an argument (7
   admin pages); `<SsoSettingsForm>` was rendered but never imported. `next build`
   now compiles 52 routes.
 
 ### Security findings (each fixed + tested)
+
 - ✅ **OTP RNG** — email-verification + step-up re-verification + referral codes
   moved off `Math.random()` to `crypto.randomInt` (`src/crypto/codes.ts`). CWE-330.
 - ✅ **Wallet double-spend** — `spendFromWallet` now decrements with one atomic
@@ -605,16 +608,18 @@ hardens the security, build, and CI surfaces. All changes shipped with tests.
   unregistered `redirect_uri` (OAuth 2.0 Security BCP).
 
 ### Bugs found via new tests
+
 - ✅ **API client deadlock** — a GET that hit 401→refresh→replay returned the
   parent's own in-flight promise from the dedup map, hanging every token-refreshed
   GET. Replays now bypass the cache/dedup.
 - ✅ **Rules-of-Hooks violation** — `SetupChecklist` called `useEffect` after an
   early return; hoisted above it.
 - ✅ **Referral routes** — were registered at `POST /wallet` / `GET
-  /wallet/dashboard` instead of `…/referrals[/dashboard]`; corrected to match the
+/wallet/dashboard` instead of `…/referrals[/dashboard]`; corrected to match the
   README + SDK, and surfaced in a new `/dashboard/referrals` UI.
 
 ### Tests
+
 - Backend: +30 (`codes`, `wallet.spend`, `wallet.routes`, `uploadSafety`, `cors`,
   `oidc.authorize`). Frontend (new harness wired into root Vitest): +11
   (`lib/auth`, `lib/api`). Suite: 636 → 677 passing.

@@ -3,12 +3,19 @@ import { and, eq, isNull } from "drizzle-orm";
 import { createMiddleware } from "hono/factory";
 import { getDb } from "../db";
 import { apiKeysTable, usersTable } from "../db/schema";
-import { apiKeyUsageMetric, getUsage, incrementUsage } from "../services/usage.service";
+import {
+  apiKeyUsageMetric,
+  getUsage,
+  incrementUsage,
+} from "../services/usage.service";
 import { runUsageNudges } from "../services/usageNudge.service";
 import type { HonoEnv, User } from "../shared/types";
 import { consumeRateLimit } from "./rateLimiting";
 
-export function requireApiKeyScopes(required: string | string[], mode: "all" | "any" = "all") {
+export function requireApiKeyScopes(
+  required: string | string[],
+  mode: "all" | "any" = "all",
+) {
   const requiredScopes = Array.isArray(required) ? required : [required];
   return createMiddleware<HonoEnv>(async (c, next) => {
     const granted = c.get("apiKeyScopes") ?? [];
@@ -24,7 +31,7 @@ export function requireApiKeyScopes(required: string | string[], mode: "all" | "
           required: requiredScopes,
           granted,
         },
-        403
+        403,
       );
     }
 
@@ -34,7 +41,9 @@ export function requireApiKeyScopes(required: string | string[], mode: "all" | "
 
 export const apiKeyAuth = createMiddleware<HonoEnv>(async (c, next) => {
   const authHeader = c.req.header("Authorization") ?? "";
-  const keyRaw = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : c.req.header("X-API-Key");
+  const keyRaw = authHeader.startsWith("Bearer ")
+    ? authHeader.slice(7)
+    : c.req.header("X-API-Key");
 
   if (!keyRaw) {
     return c.json({ error: "UNAUTHORIZED" }, 401);
@@ -47,7 +56,9 @@ export const apiKeyAuth = createMiddleware<HonoEnv>(async (c, next) => {
     .select({ key: apiKeysTable, user: usersTable })
     .from(apiKeysTable)
     .innerJoin(usersTable, eq(usersTable.id, apiKeysTable.userId))
-    .where(and(eq(apiKeysTable.keyHash, keyHash), isNull(apiKeysTable.revokedAt)))
+    .where(
+      and(eq(apiKeysTable.keyHash, keyHash), isNull(apiKeysTable.revokedAt)),
+    )
     .limit(1);
 
   if (!row) {
@@ -61,10 +72,20 @@ export const apiKeyAuth = createMiddleware<HonoEnv>(async (c, next) => {
   }
 
   if (key.rateLimitPerMinute && key.rateLimitPerMinute > 0) {
-    const result = await consumeRateLimit(`api-key:${key.id}`, key.rateLimitPerMinute, 60);
+    const result = await consumeRateLimit(
+      `api-key:${key.id}`,
+      key.rateLimitPerMinute,
+      60,
+    );
     if (!result.allowed) {
       c.header("Retry-After", String(result.retryAfterSecs));
-      return c.json({ error: "RATE_LIMIT_EXCEEDED", message: "API key rate limit exceeded" }, 429);
+      return c.json(
+        {
+          error: "RATE_LIMIT_EXCEEDED",
+          message: "API key rate limit exceeded",
+        },
+        429,
+      );
     }
   }
 
@@ -83,7 +104,7 @@ export const apiKeyAuth = createMiddleware<HonoEnv>(async (c, next) => {
           used,
           quota: key.monthlyQuota,
         },
-        429
+        429,
       );
     }
   }
@@ -99,7 +120,9 @@ export const apiKeyAuth = createMiddleware<HonoEnv>(async (c, next) => {
   void incrementUsage(keyMetric, scope);
 
   // Proactive upsell nudge when usage crosses a quota threshold (throttled).
-  void runUsageNudges(scope, (user as any).id, { email: (user as any).email }).catch(() => {});
+  void runUsageNudges(scope, (user as any).id, {
+    email: (user as any).email,
+  }).catch(() => {});
 
   c.set("user", user as unknown as User);
   c.set("apiKeyId", key.id);
@@ -107,6 +130,9 @@ export const apiKeyAuth = createMiddleware<HonoEnv>(async (c, next) => {
   // Expose the key's environment so downstream handlers can route test-mode
   // traffic to sandbox data. Defaults to "live" for keys issued before 0006.
   c.set("apiKeyEnvironment", key.environment === "test" ? "test" : "live");
-  c.header("X-ZeroAuth-Environment", key.environment === "test" ? "test" : "live");
+  c.header(
+    "X-zerotrust-Environment",
+    key.environment === "test" ? "test" : "live",
+  );
   return next();
 });

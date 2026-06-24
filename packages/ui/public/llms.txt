@@ -1,8 +1,8 @@
-# ZeroAuth
+# zerotrust
 
 > Zero Trust Authentication for Modern Apps. Enterprise-grade authentication for modern applications: PASETO tokens, WebAuthn passkeys, MFA, RBAC, and more.
 
-ZeroAuth is a self-hostable authentication platform with a Node/Hono REST API and a Next.js dashboard. It provides end-user auth flows (password, magic link, OAuth, SAML SSO, passkeys), multi-factor authentication, session and device management, organizations with role-based access control, API keys, webhooks, Stripe billing, GDPR tooling, and login-anomaly detection.
+zerotrust is a self-hostable authentication platform with a Node/Hono REST API and a Next.js dashboard. It provides end-user auth flows (password, magic link, OAuth, SAML SSO, passkeys), multi-factor authentication, session and device management, organizations with role-based access control, API keys, webhooks, Stripe billing, GDPR tooling, and login-anomaly detection.
 
 ## Authentication
 

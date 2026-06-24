@@ -20,13 +20,16 @@ router.post("/totp/setup", async (c) => {
   try {
     const settings = await getSettings();
     if (!settings.totpEnabled) {
-      return c.json({ error: "FEATURE_DISABLED", message: "TOTP is disabled" }, 403);
+      return c.json(
+        { error: "FEATURE_DISABLED", message: "TOTP is disabled" },
+        403,
+      );
     }
 
     const user = c.get("user");
     const userId = user.id;
     const userEmail = user.email;
-    const appName = settings.appName || "ZeroAuth";
+    const appName = settings.appName || "zerotrust";
 
     let secret: string;
     let qrCodeUrl: string;
@@ -47,7 +50,10 @@ router.post("/totp/setup", async (c) => {
       qrCodeUrl = await QRCode.toDataURL(otpauthUri);
     } catch (libErr) {
       logger.error("TOTP library error", libErr as Error);
-      return c.json({ error: "INTERNAL_ERROR", message: "TOTP setup failed" }, 500);
+      return c.json(
+        { error: "INTERNAL_ERROR", message: "TOTP setup failed" },
+        500,
+      );
     }
 
     const db = getDb();
@@ -64,7 +70,10 @@ router.post("/totp/setup", async (c) => {
     await db
       .update(usersTable)
       .set({
-        mfa: { ...currentMfa, totp: { ...currentMfa.totp, secret, enabled: false } },
+        mfa: {
+          ...currentMfa,
+          totp: { ...currentMfa.totp, secret, enabled: false },
+        },
         updatedAt: new Date(),
       })
       .where(eq(usersTable.id, userId));
@@ -72,7 +81,10 @@ router.post("/totp/setup", async (c) => {
     return c.json({ secret, qrCodeUrl });
   } catch (err) {
     logger.error("TOTP setup error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR", message: "TOTP setup failed" }, 500);
+    return c.json(
+      { error: "INTERNAL_ERROR", message: "TOTP setup failed" },
+      500,
+    );
   }
 });
 
@@ -81,12 +93,18 @@ router.post("/totp/verify", async (c) => {
   try {
     const settings = await getSettings();
     if (!settings.totpEnabled) {
-      return c.json({ error: "FEATURE_DISABLED", message: "TOTP is disabled" }, 403);
+      return c.json(
+        { error: "FEATURE_DISABLED", message: "TOTP is disabled" },
+        403,
+      );
     }
 
     const { code } = await c.req.json();
     if (!code) {
-      return c.json({ error: "INVALID_REQUEST", message: "code is required" }, 400);
+      return c.json(
+        { error: "INVALID_REQUEST", message: "code is required" },
+        400,
+      );
     }
 
     const userId = c.get("user").id;
@@ -101,8 +119,11 @@ router.post("/totp/verify", async (c) => {
 
     if (!user || !mfa?.totp?.secret) {
       return c.json(
-        { error: "TOTP_NOT_SETUP", message: "TOTP not set up yet. Call /totp/setup first" },
-        400
+        {
+          error: "TOTP_NOT_SETUP",
+          message: "TOTP not set up yet. Call /totp/setup first",
+        },
+        400,
       );
     }
 
@@ -121,7 +142,10 @@ router.post("/totp/verify", async (c) => {
     }
 
     if (!valid) {
-      return c.json({ error: "INVALID_CODE", message: "Invalid TOTP code" }, 401);
+      return c.json(
+        { error: "INVALID_CODE", message: "Invalid TOTP code" },
+        401,
+      );
     }
 
     // Generate one-time recovery codes the first time TOTP is enabled so a user
@@ -136,10 +160,10 @@ router.post("/totp/verify", async (c) => {
     if (!alreadyEnabled) {
       backupCodes = Array.from(
         { length: 10 },
-        () => crypto.randomBytes(5).toString("hex") // 10 hex chars per code
+        () => crypto.randomBytes(5).toString("hex"), // 10 hex chars per code
       );
       backupCodeHashes = backupCodes.map((code) =>
-        crypto.createHash("sha256").update(code.toLowerCase()).digest("hex")
+        crypto.createHash("sha256").update(code.toLowerCase()).digest("hex"),
       );
     }
 
@@ -159,10 +183,15 @@ router.post("/totp/verify", async (c) => {
       })
       .where(eq(usersTable.id, userId));
 
-    return c.json(backupCodes ? { enabled: true, backupCodes } : { enabled: true });
+    return c.json(
+      backupCodes ? { enabled: true, backupCodes } : { enabled: true },
+    );
   } catch (err) {
     logger.error("TOTP verify error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR", message: "TOTP verification failed" }, 500);
+    return c.json(
+      { error: "INTERNAL_ERROR", message: "TOTP verification failed" },
+      500,
+    );
   }
 });
 
@@ -186,7 +215,12 @@ router.delete("/totp", async (c) => {
       .set({
         mfa: {
           ...currentMfa,
-          totp: { enabled: false, backupCodes: [], secret: undefined, verifiedAt: undefined },
+          totp: {
+            enabled: false,
+            backupCodes: [],
+            secret: undefined,
+            verifiedAt: undefined,
+          },
         },
         updatedAt: new Date(),
       })
@@ -195,7 +229,10 @@ router.delete("/totp", async (c) => {
     return c.json({ disabled: true });
   } catch (err) {
     logger.error("TOTP disable error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR", message: "Failed to disable TOTP" }, 500);
+    return c.json(
+      { error: "INTERNAL_ERROR", message: "Failed to disable TOTP" },
+      500,
+    );
   }
 });
 
@@ -206,20 +243,35 @@ router.post("/otp/send", async (c) => {
     const { channel } = await c.req.json();
 
     if (!channel || !["email", "sms"].includes(channel)) {
-      return c.json({ error: "INVALID_REQUEST", message: "channel must be 'email' or 'sms'" }, 400);
+      return c.json(
+        {
+          error: "INVALID_REQUEST",
+          message: "channel must be 'email' or 'sms'",
+        },
+        400,
+      );
     }
     if (channel === "email" && !settings.emailOtpEnabled) {
-      return c.json({ error: "FEATURE_DISABLED", message: "Email OTP is disabled" }, 403);
+      return c.json(
+        { error: "FEATURE_DISABLED", message: "Email OTP is disabled" },
+        403,
+      );
     }
     if (channel === "sms" && !settings.smsOtpEnabled) {
-      return c.json({ error: "FEATURE_DISABLED", message: "SMS OTP is disabled" }, 403);
+      return c.json(
+        { error: "FEATURE_DISABLED", message: "SMS OTP is disabled" },
+        403,
+      );
     }
 
     const user = c.get("user");
     const target = channel === "email" ? user.email : user.phone || "";
 
     if (channel === "sms" && !target) {
-      return c.json({ error: "NO_PHONE", message: "No phone number on account" }, 400);
+      return c.json(
+        { error: "NO_PHONE", message: "No phone number on account" },
+        400,
+      );
     }
 
     const code = String(crypto.randomInt(100000, 999999));
@@ -247,7 +299,10 @@ router.post("/otp/send", async (c) => {
     return c.json({ sent: true, channel });
   } catch (err) {
     logger.error("OTP send error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR", message: "Failed to send OTP" }, 500);
+    return c.json(
+      { error: "INTERNAL_ERROR", message: "Failed to send OTP" },
+      500,
+    );
   }
 });
 
@@ -256,7 +311,10 @@ router.post("/otp/verify", async (c) => {
   try {
     const { channel, code } = await c.req.json();
     if (!channel || !code) {
-      return c.json({ error: "INVALID_REQUEST", message: "channel and code are required" }, 400);
+      return c.json(
+        { error: "INVALID_REQUEST", message: "channel and code are required" },
+        400,
+      );
     }
 
     const userId = c.get("user").id;
@@ -272,20 +330,26 @@ router.post("/otp/verify", async (c) => {
           eq(otpsTable.channel, channel),
           eq(otpsTable.type, "login"),
           eq(otpsTable.code, code),
-          gt(otpsTable.expiresAt, now)
-        )
+          gt(otpsTable.expiresAt, now),
+        ),
       )
       .limit(1);
 
     if (records.length === 0) {
-      return c.json({ error: "INVALID_CODE", message: "Invalid or expired OTP" }, 401);
+      return c.json(
+        { error: "INVALID_CODE", message: "Invalid or expired OTP" },
+        401,
+      );
     }
 
     await db.delete(otpsTable).where(eq(otpsTable.id, records[0].id));
     return c.json({ verified: true });
   } catch (err) {
     logger.error("OTP verify error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR", message: "OTP verification failed" }, 500);
+    return c.json(
+      { error: "INTERNAL_ERROR", message: "OTP verification failed" },
+      500,
+    );
   }
 });
 

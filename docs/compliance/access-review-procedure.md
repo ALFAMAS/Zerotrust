@@ -4,7 +4,7 @@ Owner: Mas Yasin Arafat
 Review cadence: Quarterly  
 Status: Draft, maps to shipped access-review tooling
 
-ZeroAuth ships access review tooling under `/admin/access-reviews`, backed by
+zerotrust ships access review tooling under `/admin/access-reviews`, backed by
 `access_reviews` and `access_review_items`.
 
 ## Scope
@@ -31,11 +31,11 @@ Review all privileged access, including:
 
 ## Evidence
 
-- Completed access review record from ZeroAuth.
+- Completed access review record from zerotrust.
 - List of reviewers and review date.
 - Exceptions with owner and expiry.
 - Proof of removals for revoked access.
-- External access exports for systems not managed by ZeroAuth.
+- External access exports for systems not managed by zerotrust.
 
 ## Quarterly Record Template
 

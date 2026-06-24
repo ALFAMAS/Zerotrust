@@ -50,10 +50,14 @@ export interface DiscoverableAuthenticator {
 export async function generateDiscoverableRegistrationOptions(
   userId: string,
   userName: string,
-  existingCredentials: string[]
-): Promise<ReturnType<typeof generateRegistrationOptions> extends Promise<infer T> ? T : never> {
+  existingCredentials: string[],
+): Promise<
+  ReturnType<typeof generateRegistrationOptions> extends Promise<infer T>
+    ? T
+    : never
+> {
   const opts: GenerateRegistrationOptionsOpts = {
-    rpName: process.env.RP_NAME || "ZeroAuth",
+    rpName: process.env.RP_NAME || "zerotrust",
     rpID: process.env.RP_ID || "localhost",
     userName,
     userID: new TextEncoder().encode(userId),
@@ -83,7 +87,7 @@ export async function verifyDiscoverableRegistration(
   response: VerifyRegistrationResponseOpts["response"],
   expectedChallenge: string,
   expectedOrigin: string,
-  expectedRPID: string
+  expectedRPID: string,
 ): Promise<VerifiedRegistrationResponse> {
   return verifyRegistrationResponse({
     response,
@@ -105,8 +109,12 @@ export async function verifyDiscoverableRegistration(
  * @param rpId - The Relying Party identifier (e.g. "example.com")
  */
 export async function generateDiscoverableAuthenticationOptions(
-  rpId: string
-): Promise<ReturnType<typeof generateAuthenticationOptions> extends Promise<infer T> ? T : never> {
+  rpId: string,
+): Promise<
+  ReturnType<typeof generateAuthenticationOptions> extends Promise<infer T>
+    ? T
+    : never
+> {
   const opts: GenerateAuthenticationOptionsOpts = {
     rpID: rpId,
     // Empty allowCredentials triggers the discoverable / usernameless flow
@@ -131,7 +139,7 @@ export async function verifyDiscoverableAuthentication(
   expectedChallenge: string,
   expectedOrigin: string,
   expectedRPID: string,
-  authenticator: DiscoverableAuthenticator
+  authenticator: DiscoverableAuthenticator,
 ): Promise<VerifiedAuthenticationResponse> {
   return verifyAuthenticationResponse({
     response,
@@ -140,7 +148,8 @@ export async function verifyDiscoverableAuthentication(
     expectedRPID,
     credential: {
       id: Buffer.from(authenticator.credentialID).toString("base64url"),
-      publicKey: authenticator.credentialPublicKey as unknown as Uint8Array<ArrayBuffer>,
+      publicKey:
+        authenticator.credentialPublicKey as unknown as Uint8Array<ArrayBuffer>,
       counter: authenticator.counter,
       transports: authenticator.transports,
     },

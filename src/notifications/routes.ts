@@ -13,7 +13,10 @@ app.use("*", authMiddleware);
 app.use("*", async (c, next) => {
   const user = c.get("user");
   if (!user) {
-    return c.json({ error: "UNAUTHORIZED", message: "Authentication required" }, 401);
+    return c.json(
+      { error: "UNAUTHORIZED", message: "Authentication required" },
+      401,
+    );
   }
   if (!user.roles?.includes("admin")) {
     return c.json({ error: "FORBIDDEN", message: "Admin role required" }, 403);
@@ -23,13 +26,17 @@ app.use("*", async (c, next) => {
 
 // POST /test — send a test notification
 app.post("/test", async (c) => {
-  const body = await c.req.json<{ channel?: string; target?: string; message?: string }>();
+  const body = await c.req.json<{
+    channel?: string;
+    target?: string;
+    message?: string;
+  }>();
   const { message } = body;
 
   try {
     await notificationDispatcher.dispatch("anomaly.detected", {
       type: "test",
-      message: message ?? "This is a test notification from ZeroAuth",
+      message: message ?? "This is a test notification from zerotrust",
       timestamp: new Date().toISOString(),
     });
     return c.json({ sent: true });
@@ -85,7 +92,7 @@ app.post("/channels/:id/test", async (c) => {
   try {
     await notificationDispatcher.dispatch("anomaly.detected", {
       type: "test",
-      message: "This is a test notification from ZeroAuth",
+      message: "This is a test notification from zerotrust",
       timestamp: new Date().toISOString(),
     });
     return c.json({ sent: true });

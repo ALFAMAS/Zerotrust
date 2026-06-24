@@ -4,7 +4,10 @@ import { getNodeAutoInstrumentations } from "@opentelemetry/auto-instrumentation
 import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-http";
 import { resourceFromAttributes } from "@opentelemetry/resources";
 import { NodeSDK } from "@opentelemetry/sdk-node";
-import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from "@opentelemetry/semantic-conventions";
+import {
+  ATTR_SERVICE_NAME,
+  ATTR_SERVICE_VERSION,
+} from "@opentelemetry/semantic-conventions";
 
 let sdk: NodeSDK | undefined;
 
@@ -16,14 +19,18 @@ export interface InitTelemetryOptions {
 }
 
 export function initTelemetry(options: InitTelemetryOptions = {}): void {
-  const enabled = options.enabled !== false && process.env.OTEL_ENABLED !== "false";
+  const enabled =
+    options.enabled !== false && process.env.OTEL_ENABLED !== "false";
 
   if (!enabled) return;
 
   const endpoint =
-    options.endpoint ?? process.env.OTEL_EXPORTER_OTLP_ENDPOINT ?? "http://localhost:4318";
+    options.endpoint ??
+    process.env.OTEL_EXPORTER_OTLP_ENDPOINT ??
+    "http://localhost:4318";
 
-  const serviceName = options.serviceName ?? process.env.OTEL_SERVICE_NAME ?? "zeroauth";
+  const serviceName =
+    options.serviceName ?? process.env.OTEL_SERVICE_NAME ?? "zerotrust";
 
   const serviceVersion = options.serviceVersion ?? "1.0.0";
 
@@ -45,14 +52,14 @@ export function initTelemetry(options: InitTelemetryOptions = {}): void {
   });
 }
 
-export function getTracer(name = "zeroauth"): Tracer {
+export function getTracer(name = "zerotrust"): Tracer {
   return trace.getTracer(name);
 }
 
 export async function withSpan<T>(
   name: string,
   fn: (span: Span) => Promise<T>,
-  options?: SpanOptions
+  options?: SpanOptions,
 ): Promise<T> {
   const tracer = getTracer();
   const span = tracer.startSpan(name, options);

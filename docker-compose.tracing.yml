@@ -9,7 +9,7 @@
 services:
   jaeger:
     image: jaegertracing/all-in-one:1.62
-    container_name: zeroauth-jaeger
+    container_name: zerotrust-jaeger
     environment:
       - COLLECTOR_OTLP_ENABLED=true
     ports:

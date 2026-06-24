@@ -1,1 +1,163 @@
-{"nodes": [{"id": "icon512_app_icon", "label": "App Icon (512px)", "file_type": "image", "source_file": "packages/ui/public/icon-512.png", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "icon512_person", "label": "Person (Young Male)", "file_type": "image", "source_file": "packages/ui/public/icon-512.png", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "icon512_sydney_opera_house", "label": "Sydney Opera House", "file_type": "image", "source_file": "packages/ui/public/icon-512.png", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "icon512_outdoor_setting", "label": "Outdoor Public Space", "file_type": "image", "source_file": "packages/ui/public/icon-512.png", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "icon512_profile_photo", "label": "Personal Profile Photo", "file_type": "image", "source_file": "packages/ui/public/icon-512.png", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "icon512_zeroauth_ui", "label": "ZeroAuth UI Public Assets", "file_type": "image", "source_file": "packages/ui/public/icon-512.png", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}], "edges": [{"source": "icon512_app_icon", "target": "icon512_profile_photo", "relation": "contains", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "packages/ui/public/icon-512.png", "source_location": null, "weight": 1.0}, {"source": "icon512_profile_photo", "target": "icon512_person", "relation": "depicts", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "packages/ui/public/icon-512.png", "source_location": null, "weight": 1.0}, {"source": "icon512_profile_photo", "target": "icon512_sydney_opera_house", "relation": "depicts", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "packages/ui/public/icon-512.png", "source_location": null, "weight": 1.0}, {"source": "icon512_sydney_opera_house", "target": "icon512_outdoor_setting", "relation": "is_part_of", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "packages/ui/public/icon-512.png", "source_location": null, "weight": 1.0}, {"source": "icon512_person", "target": "icon512_outdoor_setting", "relation": "located_in", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "packages/ui/public/icon-512.png", "source_location": null, "weight": 1.0}, {"source": "icon512_app_icon", "target": "icon512_zeroauth_ui", "relation": "belongs_to", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "packages/ui/public/icon-512.png", "source_location": null, "weight": 1.0}, {"source": "icon512_profile_photo", "target": "icon512_zeroauth_ui", "relation": "used_as_icon_in", "confidence": "INFERRED", "confidence_score": 0.85, "source_file": "packages/ui/public/icon-512.png", "source_location": null, "weight": 0.85}, {"source": "icon512_person", "target": "icon512_zeroauth_ui", "relation": "likely_represents_developer_or_owner_of", "confidence": "INFERRED", "confidence_score": 0.75, "source_file": "packages/ui/public/icon-512.png", "source_location": null, "weight": 0.75}, {"source": "icon512_app_icon", "target": "icon512_person", "relation": "not_a_branded_logo_but_personal_photo_of", "confidence": "AMBIGUOUS", "confidence_score": 0.2, "source_file": "packages/ui/public/icon-512.png", "source_location": null, "weight": 0.2}], "hyperedges": []}
+{
+    "nodes": [
+        {
+            "id": "icon512_app_icon",
+            "label": "App Icon (512px)",
+            "file_type": "image",
+            "source_file": "packages/ui/public/icon-512.png",
+            "source_location": null,
+            "source_url": null,
+            "captured_at": null,
+            "author": null,
+            "contributor": null
+        },
+        {
+            "id": "icon512_person",
+            "label": "Person (Young Male)",
+            "file_type": "image",
+            "source_file": "packages/ui/public/icon-512.png",
+            "source_location": null,
+            "source_url": null,
+            "captured_at": null,
+            "author": null,
+            "contributor": null
+        },
+        {
+            "id": "icon512_sydney_opera_house",
+            "label": "Sydney Opera House",
+            "file_type": "image",
+            "source_file": "packages/ui/public/icon-512.png",
+            "source_location": null,
+            "source_url": null,
+            "captured_at": null,
+            "author": null,
+            "contributor": null
+        },
+        {
+            "id": "icon512_outdoor_setting",
+            "label": "Outdoor Public Space",
+            "file_type": "image",
+            "source_file": "packages/ui/public/icon-512.png",
+            "source_location": null,
+            "source_url": null,
+            "captured_at": null,
+            "author": null,
+            "contributor": null
+        },
+        {
+            "id": "icon512_profile_photo",
+            "label": "Personal Profile Photo",
+            "file_type": "image",
+            "source_file": "packages/ui/public/icon-512.png",
+            "source_location": null,
+            "source_url": null,
+            "captured_at": null,
+            "author": null,
+            "contributor": null
+        },
+        {
+            "id": "icon512_zerotrust_ui",
+            "label": "zerotrust UI Public Assets",
+            "file_type": "image",
+            "source_file": "packages/ui/public/icon-512.png",
+            "source_location": null,
+            "source_url": null,
+            "captured_at": null,
+            "author": null,
+            "contributor": null
+        }
+    ],
+    "edges": [
+        {
+            "source": "icon512_app_icon",
+            "target": "icon512_profile_photo",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "confidence_score": 1.0,
+            "source_file": "packages/ui/public/icon-512.png",
+            "source_location": null,
+            "weight": 1.0
+        },
+        {
+            "source": "icon512_profile_photo",
+            "target": "icon512_person",
+            "relation": "depicts",
+            "confidence": "EXTRACTED",
+            "confidence_score": 1.0,
+            "source_file": "packages/ui/public/icon-512.png",
+            "source_location": null,
+            "weight": 1.0
+        },
+        {
+            "source": "icon512_profile_photo",
+            "target": "icon512_sydney_opera_house",
+            "relation": "depicts",
+            "confidence": "EXTRACTED",
+            "confidence_score": 1.0,
+            "source_file": "packages/ui/public/icon-512.png",
+            "source_location": null,
+            "weight": 1.0
+        },
+        {
+            "source": "icon512_sydney_opera_house",
+            "target": "icon512_outdoor_setting",
+            "relation": "is_part_of",
+            "confidence": "EXTRACTED",
+            "confidence_score": 1.0,
+            "source_file": "packages/ui/public/icon-512.png",
+            "source_location": null,
+            "weight": 1.0
+        },
+        {
+            "source": "icon512_person",
+            "target": "icon512_outdoor_setting",
+            "relation": "located_in",
+            "confidence": "EXTRACTED",
+            "confidence_score": 1.0,
+            "source_file": "packages/ui/public/icon-512.png",
+            "source_location": null,
+            "weight": 1.0
+        },
+        {
+            "source": "icon512_app_icon",
+            "target": "icon512_zerotrust_ui",
+            "relation": "belongs_to",
+            "confidence": "EXTRACTED",
+            "confidence_score": 1.0,
+            "source_file": "packages/ui/public/icon-512.png",
+            "source_location": null,
+            "weight": 1.0
+        },
+        {
+            "source": "icon512_profile_photo",
+            "target": "icon512_zerotrust_ui",
+            "relation": "used_as_icon_in",
+            "confidence": "INFERRED",
+            "confidence_score": 0.85,
+            "source_file": "packages/ui/public/icon-512.png",
+            "source_location": null,
+            "weight": 0.85
+        },
+        {
+            "source": "icon512_person",
+            "target": "icon512_zerotrust_ui",
+            "relation": "likely_represents_developer_or_owner_of",
+            "confidence": "INFERRED",
+            "confidence_score": 0.75,
+            "source_file": "packages/ui/public/icon-512.png",
+            "source_location": null,
+            "weight": 0.75
+        },
+        {
+            "source": "icon512_app_icon",
+            "target": "icon512_person",
+            "relation": "not_a_branded_logo_but_personal_photo_of",
+            "confidence": "AMBIGUOUS",
+            "confidence_score": 0.2,
+            "source_file": "packages/ui/public/icon-512.png",
+            "source_location": null,
+            "weight": 0.2
+        }
+    ],
+    "hyperedges": []
+}

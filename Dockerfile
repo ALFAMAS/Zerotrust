@@ -1,6 +1,6 @@
 # Multi-stage Dockerfile supporting both Bun and Node.js
-# Build with: docker build -t zeroauth:latest .
-# Build with Node: docker build -t zeroauth:node --build-arg RUNTIME=node .
+# Build with: docker build -t zerotrust:latest .
+# Build with Node: docker build -t zerotrust:node --build-arg RUNTIME=node .
 
 ARG RUNTIME=bun
 ARG BUN_VERSION=1.1.0
@@ -44,8 +44,8 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY package.json ./
 
 # Create non-root user for security
-RUN useradd -m -u 1000 zeroauth && chown -R zeroauth:zeroauth /app
-USER zeroauth
+RUN useradd -m -u 1000 zerotrust && chown -R zerotrust:zerotrust /app
+USER zerotrust
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \

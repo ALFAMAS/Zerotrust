@@ -9,7 +9,11 @@ vi.mock("../db", () => ({
 
 vi.mock("../config", () => ({
   getConfig: () => ({
-    session: { defaultTTL: 3600, refreshTokenTTL: 604800, maxConcurrentDevices: 5 },
+    session: {
+      defaultTTL: 3600,
+      refreshTokenTTL: 604800,
+      maxConcurrentDevices: 5,
+    },
     security: {
       bcryptRounds: 4,
       tokenSecretHex: "a".repeat(64),
@@ -30,7 +34,12 @@ vi.mock("../config", () => ({
       },
     },
     oauth: { providers: {} },
-    elasticsearch: { enabled: false, host: "localhost", port: 9200, indexPrefix: "zeroauth" },
+    elasticsearch: {
+      enabled: false,
+      host: "localhost",
+      port: 9200,
+      indexPrefix: "zerotrust",
+    },
     logging: { level: "error", format: "json" },
   }),
 }));
@@ -48,8 +57,11 @@ vi.mock("../middleware/auth", () => ({
     const uid = c.req.header("x-test-user-id");
     if (!uid) {
       return c.json(
-        { error: "TOKEN_INVALID", message: "Missing or malformed Authorization header" },
-        401
+        {
+          error: "TOKEN_INVALID",
+          message: "Missing or malformed Authorization header",
+        },
+        401,
       );
     }
     c.set("user", { id: uid, email: "alice@example.com", roles: ["user"] });
@@ -77,7 +89,9 @@ vi.mock("../oauth/provider.factory", () => ({
 // a real breach corpus.
 vi.mock("../services/passwordBreach.service", () => ({
   isBreachCheckEnabled: () => false,
-  checkPasswordBreached: vi.fn().mockResolvedValue({ breached: false, count: 0 }),
+  checkPasswordBreached: vi
+    .fn()
+    .mockResolvedValue({ breached: false, count: 0 }),
   rejectIfBreached: vi.fn().mockResolvedValue(null),
 }));
 
@@ -86,7 +100,9 @@ vi.mock("../services/passwordBreach.service", () => ({
 vi.mock("../services/accountTakeover.service", () => ({
   recordAndRespond: vi.fn().mockResolvedValue(false),
   recordSensitiveChange: vi.fn().mockResolvedValue(undefined),
-  assessTakeoverRisk: vi.fn().mockResolvedValue({ flagged: false, recentEvents: [] }),
+  assessTakeoverRisk: vi
+    .fn()
+    .mockResolvedValue({ flagged: false, recentEvents: [] }),
 }));
 
 // ── Helpers ────────────────────────────────────────────────────────────────
@@ -114,11 +130,15 @@ function makeActiveUser(overrides: Record<string, unknown> = {}) {
   return {
     id: USER_ID,
     email: "alice@example.com",
-    passwordHash: "$2a$04$aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    passwordHash:
+      "$2a$04$aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
     displayName: "Alice",
     roles: ["user"],
     attributes: {},
-    mfa: { totp: { enabled: false, backupCodes: [] }, webauthn: { enabled: false } },
+    mfa: {
+      totp: { enabled: false, backupCodes: [] },
+      webauthn: { enabled: false },
+    },
     passkeys: [],
     oauthProviders: [],
     status: "active",
@@ -218,7 +238,10 @@ describe("POST /register", () => {
     const res = await app.request("/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: "alice@mailinator.com", password: "pass123" }),
+      body: JSON.stringify({
+        email: "alice@mailinator.com",
+        password: "pass123",
+      }),
     });
     expect(res.status).toBe(422);
     const body = await res.json();
@@ -245,7 +268,9 @@ describe("POST /register", () => {
 
   it("normalizes email to lowercase", async () => {
     db.limit.mockResolvedValueOnce([]);
-    db.returning.mockResolvedValueOnce([makeActiveUser({ email: "alice@example.com" })]);
+    db.returning.mockResolvedValueOnce([
+      makeActiveUser({ email: "alice@example.com" }),
+    ]);
     const router = await getRouter();
     const app = new Hono().route("/", router);
     const res = await app.request("/register", {
@@ -342,7 +367,10 @@ describe("POST /login", () => {
     const res = await app.request("/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: "alice@example.com", password: "wrongpass" }),
+      body: JSON.stringify({
+        email: "alice@example.com",
+        password: "wrongpass",
+      }),
     });
     expect(res.status).toBe(401);
     const body = await res.json();
@@ -428,14 +456,20 @@ describe("POST /login credential-stuffing defense", () => {
     for (let i = 0; i < 10; i++) {
       await app.request("/login", {
         method: "POST",
-        headers: { "Content-Type": "application/json", "x-forwarded-for": "203.0.113.99" },
+        headers: {
+          "Content-Type": "application/json",
+          "x-forwarded-for": "203.0.113.99",
+        },
         body: JSON.stringify({ email: `v${i}@example.com`, password: "wrong" }),
       });
     }
     // A clean IP is unaffected (still just invalid credentials, not 429).
     const res = await app.request("/login", {
       method: "POST",
-      headers: { "Content-Type": "application/json", "x-forwarded-for": "198.51.100.7" },
+      headers: {
+        "Content-Type": "application/json",
+        "x-forwarded-for": "198.51.100.7",
+      },
       body: JSON.stringify({ email: "v0@example.com", password: "wrong" }),
     });
     expect(res.status).toBe(401);
@@ -463,7 +497,10 @@ describe("POST /login with MFA enabled + POST /login/mfa", () => {
     const secret = new Secret({ size: 20 }).base32;
     const user = makeActiveUser({
       passwordHash: hash,
-      mfa: { totp: { enabled: true, secret, backupCodes: [] }, webauthn: { enabled: false } },
+      mfa: {
+        totp: { enabled: true, secret, backupCodes: [] },
+        webauthn: { enabled: false },
+      },
     });
     return { user, secret };
   }
@@ -561,7 +598,7 @@ describe("POST /login with MFA enabled + POST /login/mfa", () => {
       sub: USER_ID,
       email: "alice@example.com",
       sid: "x",
-      aud: "zeroauth",
+      aud: "zerotrust",
       scope: ["openid"],
     });
     const res = await app.request("/login/mfa", {
@@ -604,15 +641,28 @@ describe("GET /me", () => {
           webauthn: { enabled: false },
         },
         passkeys: [
-          { credentialId: "cred-1", name: "YubiKey", publicKey: "PUBKEYDONOTLEAK", createdAt: new Date() },
+          {
+            credentialId: "cred-1",
+            name: "YubiKey",
+            publicKey: "PUBKEYDONOTLEAK",
+            createdAt: new Date(),
+          },
         ],
-        oauthProviders: [{ provider: "google", email: "alice@example.com", connectedAt: new Date() }],
+        oauthProviders: [
+          {
+            provider: "google",
+            email: "alice@example.com",
+            connectedAt: new Date(),
+          },
+        ],
       },
     ]);
 
     const router = await getRouter();
     const app = new Hono().route("/", router);
-    const res = await app.request("/me", { headers: { "x-test-user-id": USER_ID } });
+    const res = await app.request("/me", {
+      headers: { "x-test-user-id": USER_ID },
+    });
     expect(res.status).toBe(200);
     const body = await res.json();
 
@@ -631,11 +681,20 @@ describe("GET /me", () => {
 
   it("returns disabled MFA defaults when the user has no mfa object", async () => {
     db.limit.mockResolvedValueOnce([
-      { id: USER_ID, email: "alice@example.com", emailVerifiedAt: null, mfa: null, passkeys: null, oauthProviders: null },
+      {
+        id: USER_ID,
+        email: "alice@example.com",
+        emailVerifiedAt: null,
+        mfa: null,
+        passkeys: null,
+        oauthProviders: null,
+      },
     ]);
     const router = await getRouter();
     const app = new Hono().route("/", router);
-    const res = await app.request("/me", { headers: { "x-test-user-id": USER_ID } });
+    const res = await app.request("/me", {
+      headers: { "x-test-user-id": USER_ID },
+    });
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.mfa.totp.enabled).toBe(false);
@@ -661,7 +720,9 @@ describe("DELETE /oauth/:provider", () => {
   async function del(provider: string, auth = true) {
     const router = await getRouter();
     const app = new Hono().route("/", router);
-    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
     if (auth) headers["x-test-user-id"] = USER_ID;
     return app.request(`/oauth/${provider}`, { method: "DELETE", headers });
   }
@@ -688,12 +749,17 @@ describe("DELETE /oauth/:provider", () => {
     expect(body.provider).toBe("google");
     // The remaining provider list is persisted without google.
     const setArg = db.set.mock.calls.at(-1)?.[0];
-    expect(setArg.oauthProviders).toEqual([{ provider: "github", providerId: "h1" }]);
+    expect(setArg.oauthProviders).toEqual([
+      { provider: "github", providerId: "h1" },
+    ]);
   });
 
   it("returns 404 when the provider is not linked", async () => {
     db.limit.mockResolvedValueOnce([
-      { passwordHash: "$2a$04$hash", oauthProviders: [{ provider: "github", providerId: "h1" }] },
+      {
+        passwordHash: "$2a$04$hash",
+        oauthProviders: [{ provider: "github", providerId: "h1" }],
+      },
     ]);
     const res = await del("google");
     expect(res.status).toBe(404);
@@ -702,7 +768,10 @@ describe("DELETE /oauth/:provider", () => {
 
   it("refuses to remove the only login method (no password, last provider)", async () => {
     db.limit.mockResolvedValueOnce([
-      { passwordHash: null, oauthProviders: [{ provider: "google", providerId: "g1" }] },
+      {
+        passwordHash: null,
+        oauthProviders: [{ provider: "google", providerId: "g1" }],
+      },
     ]);
     const res = await del("google");
     expect(res.status).toBe(409);
@@ -907,7 +976,9 @@ describe("GET /oauth/:provider/callback", () => {
   it("returns 400 when state is invalid", async () => {
     const router = await getRouter();
     const app = new Hono().route("/", router);
-    const res = await app.request("/oauth/google/callback?code=abc&state=invalid-state");
+    const res = await app.request(
+      "/oauth/google/callback?code=abc&state=invalid-state",
+    );
     expect(res.status).toBe(400);
     const body = await res.json();
     expect(body.error).toBe("INVALID_STATE");
@@ -925,7 +996,9 @@ describe("GET /oauth/:provider/callback", () => {
       exchangeCode: vi.fn().mockResolvedValue({ profile: null }),
     } as any);
 
-    const res = await app.request(`/oauth/google/callback?code=abc&state=${state}`);
+    const res = await app.request(
+      `/oauth/google/callback?code=abc&state=${state}`,
+    );
     expect(res.status).toBe(502);
     const body = await res.json();
     expect(body.error).toBe("PROVIDER_ERROR");
@@ -941,17 +1014,26 @@ describe("GET /oauth/:provider/callback", () => {
     vi.mocked(getProviderAdapter).mockReturnValue({
       exchangeCode: vi.fn().mockResolvedValue({
         tokens: {},
-        profile: { id: "g-123", email: "new@example.com", name: "New User", emailVerified: true },
+        profile: {
+          id: "g-123",
+          email: "new@example.com",
+          name: "New User",
+          emailVerified: true,
+        },
       }),
     } as any);
 
     db.limit.mockResolvedValueOnce([]); // no existing user → create path
     db.returning
-      .mockResolvedValueOnce([makeActiveUser({ id: USER_ID, email: "new@example.com" })]) // user
+      .mockResolvedValueOnce([
+        makeActiveUser({ id: USER_ID, email: "new@example.com" }),
+      ]) // user
       .mockResolvedValueOnce([makeSession()]) // session insert
       .mockResolvedValueOnce([{ id: "rt-1" }]); // refresh token insert
 
-    const res = await app.request(`/oauth/google/callback?code=abc&state=${state}`);
+    const res = await app.request(
+      `/oauth/google/callback?code=abc&state=${state}`,
+    );
     expect(res.status).toBe(302);
     expect(res.headers.get("location")).toContain("/login?oauth_code=");
   });
@@ -989,7 +1071,11 @@ describe("GET /oauth/:provider/authorize (configured)", () => {
     vi.resetModules();
     vi.doMock("../config", () => ({
       getConfig: () => ({
-        session: { defaultTTL: 3600, refreshTokenTTL: 604800, maxConcurrentDevices: 5 },
+        session: {
+          defaultTTL: 3600,
+          refreshTokenTTL: 604800,
+          maxConcurrentDevices: 5,
+        },
         security: {
           bcryptRounds: 4,
           tokenSecretHex: "a".repeat(64),
@@ -997,7 +1083,11 @@ describe("GET /oauth/:provider/authorize (configured)", () => {
           csflekeyRotationIntervalDays: 90,
         },
         rateLimiting: { enabled: false, perIpLimit: 100, windowSecs: 60 },
-        geofencing: { enabled: false, allowedCountries: [], allowedIpRanges: [] },
+        geofencing: {
+          enabled: false,
+          allowedCountries: [],
+          allowedIpRanges: [],
+        },
         mfa: {
           totpWindow: 1,
           otpExpirySecs: 900,
@@ -1018,7 +1108,12 @@ describe("GET /oauth/:provider/authorize (configured)", () => {
             },
           },
         },
-        elasticsearch: { enabled: false, host: "localhost", port: 9200, indexPrefix: "zeroauth" },
+        elasticsearch: {
+          enabled: false,
+          host: "localhost",
+          port: 9200,
+          indexPrefix: "zerotrust",
+        },
         logging: { level: "error", format: "json" },
       }),
     }));
@@ -1036,7 +1131,9 @@ describe("GET /oauth/:provider/authorize (configured)", () => {
     const res = await app.request("/oauth/google/authorize");
     expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body.authorizeUrl).toContain("https://accounts.google.com/o/oauth2/v2/auth");
+    expect(body.authorizeUrl).toContain(
+      "https://accounts.google.com/o/oauth2/v2/auth",
+    );
     const url = new URL(body.authorizeUrl);
     expect(url.searchParams.get("client_id")).toBe("gid");
     expect(url.searchParams.get("response_type")).toBe("code");
@@ -1114,7 +1211,11 @@ describe("Route-level rate limiting", () => {
     // Re-enable rate limiting for this suite
     vi.doMock("../config", () => ({
       getConfig: () => ({
-        session: { defaultTTL: 3600, refreshTokenTTL: 604800, maxConcurrentDevices: 5 },
+        session: {
+          defaultTTL: 3600,
+          refreshTokenTTL: 604800,
+          maxConcurrentDevices: 5,
+        },
         security: {
           bcryptRounds: 4,
           tokenSecretHex: "a".repeat(64),
@@ -1122,7 +1223,11 @@ describe("Route-level rate limiting", () => {
           csflekeyRotationIntervalDays: 90,
         },
         rateLimiting: { enabled: true, perIpLimit: 3, windowSecs: 60 },
-        geofencing: { enabled: false, allowedCountries: [], allowedIpRanges: [] },
+        geofencing: {
+          enabled: false,
+          allowedCountries: [],
+          allowedIpRanges: [],
+        },
         mfa: {
           totpWindow: 1,
           otpExpirySecs: 900,
@@ -1135,7 +1240,12 @@ describe("Route-level rate limiting", () => {
           },
         },
         oauth: { providers: {} },
-        elasticsearch: { enabled: false, host: "localhost", port: 9200, indexPrefix: "zeroauth" },
+        elasticsearch: {
+          enabled: false,
+          host: "localhost",
+          port: 9200,
+          indexPrefix: "zerotrust",
+        },
         logging: { level: "error", format: "json" },
       }),
     }));
@@ -1178,7 +1288,8 @@ describe("Account lockout after failed login attempts", () => {
   afterEach(() => vi.clearAllMocks());
 
   it("records failed login attempts on the account", async () => {
-    const { recordFailedLogin, isAccountLocked } = await import("../middleware/accountLockout");
+    const { recordFailedLogin, isAccountLocked } =
+      await import("../middleware/accountLockout");
     const email = `fail-test-${Date.now()}@example.com`;
 
     // Under the threshold (default MAX_ATTEMPTS = 5)
@@ -1187,7 +1298,8 @@ describe("Account lockout after failed login attempts", () => {
   });
 
   it("locks account after exceeding attempt threshold", async () => {
-    const { recordFailedLogin, isAccountLocked } = await import("../middleware/accountLockout");
+    const { recordFailedLogin, isAccountLocked } =
+      await import("../middleware/accountLockout");
     const email = `lock-test-${Date.now()}@example.com`;
 
     for (let i = 0; i < 5; i++) recordFailedLogin(email);
@@ -1195,7 +1307,8 @@ describe("Account lockout after failed login attempts", () => {
   });
 
   it("remains locked until lockout duration expires", async () => {
-    const { recordFailedLogin, isAccountLocked } = await import("../middleware/accountLockout");
+    const { recordFailedLogin, isAccountLocked } =
+      await import("../middleware/accountLockout");
     const email = `persist-lock-${Date.now()}@example.com`;
 
     for (let i = 0; i < 5; i++) recordFailedLogin(email);
@@ -1235,7 +1348,9 @@ describe("POST /verify-email", () => {
   async function post(body: unknown, auth = true) {
     const router = await getRouter();
     const app = new Hono().route("/", router);
-    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
     if (auth) headers["x-test-user-id"] = USER_ID;
     return app.request("/verify-email", {
       method: "POST",
@@ -1265,7 +1380,9 @@ describe("POST /verify-email", () => {
   it("verifies on a valid, unexpired code (happy path)", async () => {
     db.limit
       .mockResolvedValueOnce([makeActiveUser({ emailVerifiedAt: null })]) // user lookup
-      .mockResolvedValueOnce([{ id: "otp-1", userId: USER_ID, code: "123456" }]); // otp lookup
+      .mockResolvedValueOnce([
+        { id: "otp-1", userId: USER_ID, code: "123456" },
+      ]); // otp lookup
     const res = await post({ code: "123456" });
     expect(res.status).toBe(200);
     expect((await res.json()).success).toBe(true);
@@ -1275,7 +1392,9 @@ describe("POST /verify-email", () => {
   it("looks the user up by session id, never the request body", async () => {
     db.limit
       .mockResolvedValueOnce([makeActiveUser({ emailVerifiedAt: null })])
-      .mockResolvedValueOnce([{ id: "otp-1", userId: USER_ID, code: "123456" }]);
+      .mockResolvedValueOnce([
+        { id: "otp-1", userId: USER_ID, code: "123456" },
+      ]);
     // Even if a different email is smuggled in the body, it is ignored.
     const res = await post({ code: "123456", email: "attacker@example.com" });
     expect(res.status).toBe(200);
@@ -1292,7 +1411,9 @@ describe("POST /verify-email", () => {
   });
 
   it("is idempotent for an already-verified account", async () => {
-    db.limit.mockResolvedValueOnce([makeActiveUser({ emailVerifiedAt: new Date() })]);
+    db.limit.mockResolvedValueOnce([
+      makeActiveUser({ emailVerifiedAt: new Date() }),
+    ]);
     const res = await post({ code: "123456" });
     expect(res.status).toBe(200);
     const body = await res.json();

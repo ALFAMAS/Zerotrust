@@ -97,7 +97,7 @@ function Ensure-DirectDeps([string]$pkgJsonPath, [string]$nodeModulesRoot) {
   foreach ($sect in @("dependencies", "devDependencies", "optionalDependencies")) {
     if ($pkg.$sect) { $names += $pkg.$sect.PSObject.Properties.Name }
   }
-  $names = $names | Where-Object { $_ -and $_ -notlike "@zeroauth/*" } | Sort-Object -Unique
+  $names = $names | Where-Object { $_ -and $_ -notlike "@zerotrust/*" } | Sort-Object -Unique
 
   $created = 0; $missing = @()
   foreach ($name in $names) {

@@ -4,8 +4,10 @@ import type { ApexOptions } from "apexcharts";
 import dynamic from "next/dynamic";
 
 // ApexCharts touches `window`, so load it client-only (same pattern as the
-// TailAdmin chart components, re-skinned to ZeroAuth's indigo palette).
-const ReactApexChart = dynamic(() => import("react-apexcharts"), { ssr: false });
+// TailAdmin chart components, re-skinned to zerotrust's indigo palette).
+const ReactApexChart = dynamic(() => import("react-apexcharts"), {
+  ssr: false,
+});
 
 interface RadialGaugeProps {
   /** 0–100 */
@@ -14,9 +16,17 @@ interface RadialGaugeProps {
   caption?: string;
 }
 
-export default function RadialGauge({ value, label, caption }: RadialGaugeProps) {
+export default function RadialGauge({
+  value,
+  label,
+  caption,
+}: RadialGaugeProps) {
   const options: ApexOptions = {
-    chart: { type: "radialBar", sparkline: { enabled: true }, fontFamily: "inherit" },
+    chart: {
+      type: "radialBar",
+      sparkline: { enabled: true },
+      fontFamily: "inherit",
+    },
     colors: ["#6366f1"],
     plotOptions: {
       radialBar: {
@@ -49,8 +59,17 @@ export default function RadialGauge({ value, label, caption }: RadialGaugeProps)
 
   return (
     <div className="flex flex-col items-center">
-      <ReactApexChart options={options} series={[value]} type="radialBar" height={240} />
-      {caption && <p className="-mt-2 text-center text-sm text-muted-foreground">{caption}</p>}
+      <ReactApexChart
+        options={options}
+        series={[value]}
+        type="radialBar"
+        height={240}
+      />
+      {caption && (
+        <p className="-mt-2 text-center text-sm text-muted-foreground">
+          {caption}
+        </p>
+      )}
     </div>
   );
 }

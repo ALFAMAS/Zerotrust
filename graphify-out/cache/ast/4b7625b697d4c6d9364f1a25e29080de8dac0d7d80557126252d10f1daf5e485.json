@@ -1,1 +1,204 @@
-{"nodes": [{"id": "c_users_alfamas_desktop_zeroauth_src_metrics_counters_ts", "label": "counters.ts", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\metrics\\counters.ts", "source_location": "L1"}, {"id": "metrics_counters_authattemptstotal", "label": "authAttemptsTotal", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\metrics\\counters.ts", "source_location": "L6"}, {"id": "metrics_counters_mfaeventstotal", "label": "mfaEventsTotal", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\metrics\\counters.ts", "source_location": "L13"}, {"id": "metrics_counters_sessioneventstotal", "label": "sessionEventsTotal", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\metrics\\counters.ts", "source_location": "L20"}, {"id": "metrics_counters_ratelimithitstotal", "label": "rateLimitHitsTotal", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\metrics\\counters.ts", "source_location": "L27"}, {"id": "metrics_counters_anomalyeventstotal", "label": "anomalyEventsTotal", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\metrics\\counters.ts", "source_location": "L34"}, {"id": "metrics_counters_webhookdeliveriestotal", "label": "webhookDeliveriesTotal", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\metrics\\counters.ts", "source_location": "L41"}, {"id": "metrics_counters_authdurationseconds", "label": "authDurationSeconds", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\metrics\\counters.ts", "source_location": "L50"}, {"id": "metrics_counters_requestdurationseconds", "label": "requestDurationSeconds", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\metrics\\counters.ts", "source_location": "L58"}, {"id": "metrics_counters_activesessions", "label": "activeSessions", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\metrics\\counters.ts", "source_location": "L68"}, {"id": "metrics_counters_activeusers", "label": "activeUsers", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\metrics\\counters.ts", "source_location": "L75"}], "edges": [{"source": "c_users_alfamas_desktop_zeroauth_src_metrics_counters_ts", "target": "prom_client", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\metrics\\counters.ts", "source_location": "L1", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_metrics_counters_ts", "target": "c_users_alfamas_desktop_zeroauth_src_metrics_registry_ts", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\metrics\\counters.ts", "source_location": "L2", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_metrics_counters_ts", "target": "metrics_registry_metricsregistry", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\metrics\\counters.ts", "source_location": "L2", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_metrics_counters_ts", "target": "metrics_counters_authattemptstotal", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\metrics\\counters.ts", "source_location": "L6", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_metrics_counters_ts", "target": "metrics_counters_mfaeventstotal", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\metrics\\counters.ts", "source_location": "L13", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_metrics_counters_ts", "target": "metrics_counters_sessioneventstotal", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\metrics\\counters.ts", "source_location": "L20", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_metrics_counters_ts", "target": "metrics_counters_ratelimithitstotal", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\metrics\\counters.ts", "source_location": "L27", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_metrics_counters_ts", "target": "metrics_counters_anomalyeventstotal", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\metrics\\counters.ts", "source_location": "L34", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_metrics_counters_ts", "target": "metrics_counters_webhookdeliveriestotal", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\metrics\\counters.ts", "source_location": "L41", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_metrics_counters_ts", "target": "metrics_counters_authdurationseconds", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\metrics\\counters.ts", "source_location": "L50", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_metrics_counters_ts", "target": "metrics_counters_requestdurationseconds", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\metrics\\counters.ts", "source_location": "L58", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_metrics_counters_ts", "target": "metrics_counters_activesessions", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\metrics\\counters.ts", "source_location": "L68", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_metrics_counters_ts", "target": "metrics_counters_activeusers", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\metrics\\counters.ts", "source_location": "L75", "weight": 1.0}], "raw_calls": []}
+{
+    "nodes": [
+        {
+            "id": "c_users_alfamas_desktop_zerotrust_src_metrics_counters_ts",
+            "label": "counters.ts",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\metrics\\counters.ts",
+            "source_location": "L1"
+        },
+        {
+            "id": "metrics_counters_authattemptstotal",
+            "label": "authAttemptsTotal",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\metrics\\counters.ts",
+            "source_location": "L6"
+        },
+        {
+            "id": "metrics_counters_mfaeventstotal",
+            "label": "mfaEventsTotal",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\metrics\\counters.ts",
+            "source_location": "L13"
+        },
+        {
+            "id": "metrics_counters_sessioneventstotal",
+            "label": "sessionEventsTotal",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\metrics\\counters.ts",
+            "source_location": "L20"
+        },
+        {
+            "id": "metrics_counters_ratelimithitstotal",
+            "label": "rateLimitHitsTotal",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\metrics\\counters.ts",
+            "source_location": "L27"
+        },
+        {
+            "id": "metrics_counters_anomalyeventstotal",
+            "label": "anomalyEventsTotal",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\metrics\\counters.ts",
+            "source_location": "L34"
+        },
+        {
+            "id": "metrics_counters_webhookdeliveriestotal",
+            "label": "webhookDeliveriesTotal",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\metrics\\counters.ts",
+            "source_location": "L41"
+        },
+        {
+            "id": "metrics_counters_authdurationseconds",
+            "label": "authDurationSeconds",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\metrics\\counters.ts",
+            "source_location": "L50"
+        },
+        {
+            "id": "metrics_counters_requestdurationseconds",
+            "label": "requestDurationSeconds",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\metrics\\counters.ts",
+            "source_location": "L58"
+        },
+        {
+            "id": "metrics_counters_activesessions",
+            "label": "activeSessions",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\metrics\\counters.ts",
+            "source_location": "L68"
+        },
+        {
+            "id": "metrics_counters_activeusers",
+            "label": "activeUsers",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\metrics\\counters.ts",
+            "source_location": "L75"
+        }
+    ],
+    "edges": [
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_metrics_counters_ts",
+            "target": "prom_client",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\metrics\\counters.ts",
+            "source_location": "L1",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_metrics_counters_ts",
+            "target": "c_users_alfamas_desktop_zerotrust_src_metrics_registry_ts",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\metrics\\counters.ts",
+            "source_location": "L2",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_metrics_counters_ts",
+            "target": "metrics_registry_metricsregistry",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\metrics\\counters.ts",
+            "source_location": "L2",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_metrics_counters_ts",
+            "target": "metrics_counters_authattemptstotal",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\metrics\\counters.ts",
+            "source_location": "L6",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_metrics_counters_ts",
+            "target": "metrics_counters_mfaeventstotal",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\metrics\\counters.ts",
+            "source_location": "L13",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_metrics_counters_ts",
+            "target": "metrics_counters_sessioneventstotal",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\metrics\\counters.ts",
+            "source_location": "L20",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_metrics_counters_ts",
+            "target": "metrics_counters_ratelimithitstotal",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\metrics\\counters.ts",
+            "source_location": "L27",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_metrics_counters_ts",
+            "target": "metrics_counters_anomalyeventstotal",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\metrics\\counters.ts",
+            "source_location": "L34",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_metrics_counters_ts",
+            "target": "metrics_counters_webhookdeliveriestotal",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\metrics\\counters.ts",
+            "source_location": "L41",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_metrics_counters_ts",
+            "target": "metrics_counters_authdurationseconds",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\metrics\\counters.ts",
+            "source_location": "L50",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_metrics_counters_ts",
+            "target": "metrics_counters_requestdurationseconds",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\metrics\\counters.ts",
+            "source_location": "L58",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_metrics_counters_ts",
+            "target": "metrics_counters_activesessions",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\metrics\\counters.ts",
+            "source_location": "L68",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_metrics_counters_ts",
+            "target": "metrics_counters_activeusers",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\metrics\\counters.ts",
+            "source_location": "L75",
+            "weight": 1.0
+        }
+    ],
+    "raw_calls": []
+}

@@ -8,7 +8,10 @@ import { refreshTokensTable, sessionsTable, usersTable } from "../../db/schema";
 import { getLogger } from "../../logger";
 import { rateLimit } from "../../middleware/rateLimiting";
 import { getSettings } from "../../models/settings.model";
-import { sendMagicLink, verifyMagicLink } from "../../services/magicLink.service";
+import {
+  sendMagicLink,
+  verifyMagicLink,
+} from "../../services/magicLink.service";
 import { TokenService } from "../../services/token.service";
 import { getClientIp } from "../../shared/clientIp";
 import type { HonoEnv } from "../../shared/types";
@@ -34,7 +37,11 @@ async function issueTokensForUser(userId: string, c: Context<HonoEnv>) {
   const tokenSvc = await getTokenService();
   const db = getDb();
 
-  const userRows = await db.select().from(usersTable).where(eq(usersTable.id, userId)).limit(1);
+  const userRows = await db
+    .select()
+    .from(usersTable)
+    .where(eq(usersTable.id, userId))
+    .limit(1);
   const user = userRows[0];
   if (!user) throw new Error("User not found");
 
@@ -43,7 +50,7 @@ async function issueTokensForUser(userId: string, c: Context<HonoEnv>) {
     sub: user.id,
     email: user.email,
     sid: sessionId,
-    aud: "zeroauth",
+    aud: "zerotrust",
     scope: ["openid"],
   });
   const payload = await tokenSvc.verifyAccessToken(accessToken);
@@ -74,7 +81,11 @@ async function issueTokensForUser(userId: string, c: Context<HonoEnv>) {
     expiresAt: new Date(Date.now() + cfg.session.refreshTokenTTL * 1000),
   });
 
-  return { accessToken, refreshToken: refreshTokenPlain, expiresIn: cfg.session.defaultTTL };
+  return {
+    accessToken,
+    refreshToken: refreshTokenPlain,
+    expiresIn: cfg.session.defaultTTL,
+  };
 }
 
 // POST /send
@@ -82,12 +93,18 @@ router.post("/send", rateLimit({ points: 5, windowSecs: 60 }), async (c) => {
   try {
     const settings = await getSettings();
     if (!settings.magicLinkEnabled) {
-      return c.json({ error: "FEATURE_DISABLED", message: "Magic link is disabled" }, 403);
+      return c.json(
+        { error: "FEATURE_DISABLED", message: "Magic link is disabled" },
+        403,
+      );
     }
 
     const { email, redirectUrl } = await c.req.json();
     if (!email) {
-      return c.json({ error: "INVALID_REQUEST", message: "email is required" }, 400);
+      return c.json(
+        { error: "INVALID_REQUEST", message: "email is required" },
+        400,
+      );
     }
 
     await sendMagicLink(email, redirectUrl);
@@ -103,7 +120,10 @@ router.get("/verify", async (c) => {
   try {
     const settings = await getSettings();
     if (!settings.magicLinkEnabled) {
-      return c.json({ error: "FEATURE_DISABLED", message: "Magic link is disabled" }, 403);
+      return c.json(
+        { error: "FEATURE_DISABLED", message: "Magic link is disabled" },
+        403,
+      );
     }
 
     const email = c.req.query("email");
@@ -111,12 +131,18 @@ router.get("/verify", async (c) => {
     const redirect = c.req.query("redirect");
 
     if (!email || !token) {
-      return c.json({ error: "INVALID_REQUEST", message: "email and token required" }, 400);
+      return c.json(
+        { error: "INVALID_REQUEST", message: "email and token required" },
+        400,
+      );
     }
 
     const result = await verifyMagicLink(email, token);
     if (!result) {
-      return c.json({ error: "INVALID_TOKEN", message: "Invalid or expired magic link" }, 401);
+      return c.json(
+        { error: "INVALID_TOKEN", message: "Invalid or expired magic link" },
+        401,
+      );
     }
 
     const tokens = await issueTokensForUser(result.userId, c);
@@ -130,7 +156,10 @@ router.get("/verify", async (c) => {
     return c.redirect(callbackUrl, 302);
   } catch (err) {
     logger.error("Magic link GET verify error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR", message: "Verification failed" }, 500);
+    return c.json(
+      { error: "INTERNAL_ERROR", message: "Verification failed" },
+      500,
+    );
   }
 });
 
@@ -139,24 +168,36 @@ router.post("/verify", async (c) => {
   try {
     const settings = await getSettings();
     if (!settings.magicLinkEnabled) {
-      return c.json({ error: "FEATURE_DISABLED", message: "Magic link is disabled" }, 403);
+      return c.json(
+        { error: "FEATURE_DISABLED", message: "Magic link is disabled" },
+        403,
+      );
     }
 
     const { email, token } = await c.req.json();
     if (!email || !token) {
-      return c.json({ error: "INVALID_REQUEST", message: "email and token required" }, 400);
+      return c.json(
+        { error: "INVALID_REQUEST", message: "email and token required" },
+        400,
+      );
     }
 
     const result = await verifyMagicLink(email, token);
     if (!result) {
-      return c.json({ error: "INVALID_TOKEN", message: "Invalid or expired magic link" }, 401);
+      return c.json(
+        { error: "INVALID_TOKEN", message: "Invalid or expired magic link" },
+        401,
+      );
     }
 
     const tokens = await issueTokensForUser(result.userId, c);
     return c.json(tokens);
   } catch (err) {
     logger.error("Magic link POST verify error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR", message: "Verification failed" }, 500);
+    return c.json(
+      { error: "INTERNAL_ERROR", message: "Verification failed" },
+      500,
+    );
   }
 });
 

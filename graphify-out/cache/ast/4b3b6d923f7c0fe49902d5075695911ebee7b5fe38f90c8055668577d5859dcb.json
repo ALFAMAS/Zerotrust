@@ -1,1 +1,503 @@
-{"nodes": [{"id": "c_users_alfamas_desktop_zeroauth_src_services_featureflags_service_ts", "label": "featureFlags.service.ts", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\featureFlags.service.ts", "source_location": "L1"}, {"id": "services_featureflags_service_logger", "label": "logger", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\featureFlags.service.ts", "source_location": "L13"}, {"id": "services_featureflags_service_flagrow", "label": "FlagRow", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\featureFlags.service.ts", "source_location": "L15"}, {"id": "services_featureflags_service_cache", "label": "cache", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\featureFlags.service.ts", "source_location": "L18"}, {"id": "services_featureflags_service_bucketfor", "label": "bucketFor()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\featureFlags.service.ts", "source_location": "L21"}, {"id": "services_featureflags_service_loadflag", "label": "loadFlag()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\featureFlags.service.ts", "source_location": "L32"}, {"id": "services_featureflags_service_isfeatureenabled", "label": "isFeatureEnabled()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\featureFlags.service.ts", "source_location": "L52"}, {"id": "services_featureflags_service_clearflagcache", "label": "clearFlagCache()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\featureFlags.service.ts", "source_location": "L63"}, {"id": "services_featureflags_service_listflags", "label": "listFlags()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\featureFlags.service.ts", "source_location": "L69"}, {"id": "services_featureflags_service_upsertflag", "label": "upsertFlag()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\featureFlags.service.ts", "source_location": "L74"}, {"id": "services_featureflags_service_deleteflag", "label": "deleteFlag()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\featureFlags.service.ts", "source_location": "L108"}], "edges": [{"source": "c_users_alfamas_desktop_zeroauth_src_services_featureflags_service_ts", "target": "drizzle_orm", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\featureFlags.service.ts", "source_location": "L8", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_featureflags_service_ts", "target": "c_users_alfamas_desktop_zeroauth_src_db_index_ts", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\featureFlags.service.ts", "source_location": "L9", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_featureflags_service_ts", "target": "db_index_getdb", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\featureFlags.service.ts", "source_location": "L9", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_featureflags_service_ts", "target": "c_users_alfamas_desktop_zeroauth_src_db_schema_ts", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\featureFlags.service.ts", "source_location": "L10", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_featureflags_service_ts", "target": "db_schema_featureflagstable", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\featureFlags.service.ts", "source_location": "L10", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_featureflags_service_ts", "target": "c_users_alfamas_desktop_zeroauth_src_logger_index_ts", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\featureFlags.service.ts", "source_location": "L11", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_featureflags_service_ts", "target": "logger_index_getlogger", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\featureFlags.service.ts", "source_location": "L11", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_featureflags_service_ts", "target": "services_featureflags_service_logger", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\featureFlags.service.ts", "source_location": "L13", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_featureflags_service_ts", "target": "services_featureflags_service_flagrow", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\featureFlags.service.ts", "source_location": "L15", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_featureflags_service_ts", "target": "services_featureflags_service_cache", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\featureFlags.service.ts", "source_location": "L18", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_featureflags_service_ts", "target": "services_featureflags_service_bucketfor", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\featureFlags.service.ts", "source_location": "L21", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_featureflags_service_ts", "target": "services_featureflags_service_loadflag", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\featureFlags.service.ts", "source_location": "L32", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_featureflags_service_ts", "target": "services_featureflags_service_isfeatureenabled", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\featureFlags.service.ts", "source_location": "L52", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_featureflags_service_ts", "target": "services_featureflags_service_clearflagcache", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\featureFlags.service.ts", "source_location": "L63", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_featureflags_service_ts", "target": "services_featureflags_service_listflags", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\featureFlags.service.ts", "source_location": "L69", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_featureflags_service_ts", "target": "services_featureflags_service_upsertflag", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\featureFlags.service.ts", "source_location": "L74", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_featureflags_service_ts", "target": "services_featureflags_service_deleteflag", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\featureFlags.service.ts", "source_location": "L108", "weight": 1.0}, {"source": "services_featureflags_service_isfeatureenabled", "target": "services_featureflags_service_loadflag", "relation": "calls", "context": "call", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\featureFlags.service.ts", "source_location": "L53", "weight": 1.0}, {"source": "services_featureflags_service_isfeatureenabled", "target": "services_featureflags_service_bucketfor", "relation": "calls", "context": "call", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\featureFlags.service.ts", "source_location": "L58", "weight": 1.0}], "raw_calls": [{"caller_nid": "services_featureflags_service_bucketfor", "callee": "charCodeAt", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\featureFlags.service.ts", "source_location": "L26"}, {"caller_nid": "services_featureflags_service_bucketfor", "callee": "imul", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\featureFlags.service.ts", "source_location": "L27"}, {"caller_nid": "services_featureflags_service_loadflag", "callee": "get", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\featureFlags.service.ts", "source_location": "L33"}, {"caller_nid": "services_featureflags_service_loadflag", "callee": "now", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\featureFlags.service.ts", "source_location": "L34"}, {"caller_nid": "services_featureflags_service_loadflag", "callee": "getDb", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\featureFlags.service.ts", "source_location": "L37"}, {"caller_nid": "services_featureflags_service_loadflag", "callee": "limit", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\featureFlags.service.ts", "source_location": "L38"}, {"caller_nid": "services_featureflags_service_loadflag", "callee": "where", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\featureFlags.service.ts", "source_location": "L38"}, {"caller_nid": "services_featureflags_service_loadflag", "callee": "from", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\featureFlags.service.ts", "source_location": "L38"}, {"caller_nid": "services_featureflags_service_loadflag", "callee": "select", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\featureFlags.service.ts", "source_location": "L38"}, {"caller_nid": "services_featureflags_service_loadflag", "callee": "eq", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\featureFlags.service.ts", "source_location": "L41"}, {"caller_nid": "services_featureflags_service_loadflag", "callee": "set", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\featureFlags.service.ts", "source_location": "L43"}, {"caller_nid": "services_featureflags_service_loadflag", "callee": "now", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\featureFlags.service.ts", "source_location": "L43"}, {"caller_nid": "services_featureflags_service_loadflag", "callee": "error", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\featureFlags.service.ts", "source_location": "L46"}, {"caller_nid": "services_featureflags_service_isfeatureenabled", "callee": "includes", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\featureFlags.service.ts", "source_location": "L57"}, {"caller_nid": "services_featureflags_service_clearflagcache", "callee": "clear", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\featureFlags.service.ts", "source_location": "L64"}, {"caller_nid": "services_featureflags_service_listflags", "callee": "getDb", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\featureFlags.service.ts", "source_location": "L70"}, {"caller_nid": "services_featureflags_service_listflags", "callee": "from", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\featureFlags.service.ts", "source_location": "L71"}, {"caller_nid": "services_featureflags_service_listflags", "callee": "select", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\featureFlags.service.ts", "source_location": "L71"}, {"caller_nid": "services_featureflags_service_upsertflag", "callee": "getDb", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\featureFlags.service.ts", "source_location": "L81"}, {"caller_nid": "services_featureflags_service_upsertflag", "callee": "returning", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\featureFlags.service.ts", "source_location": "L82"}, {"caller_nid": "services_featureflags_service_upsertflag", "callee": "onConflictDoUpdate", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\featureFlags.service.ts", "source_location": "L82"}, {"caller_nid": "services_featureflags_service_upsertflag", "callee": "values", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\featureFlags.service.ts", "source_location": "L82"}, {"caller_nid": "services_featureflags_service_upsertflag", "callee": "insert", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\featureFlags.service.ts", "source_location": "L82"}, {"caller_nid": "services_featureflags_service_upsertflag", "callee": "min", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\featureFlags.service.ts", "source_location": "L89"}, {"caller_nid": "services_featureflags_service_upsertflag", "callee": "max", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\featureFlags.service.ts", "source_location": "L89"}, {"caller_nid": "services_featureflags_service_upsertflag", "callee": "min", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\featureFlags.service.ts", "source_location": "L98"}, {"caller_nid": "services_featureflags_service_upsertflag", "callee": "max", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\featureFlags.service.ts", "source_location": "L98"}, {"caller_nid": "services_featureflags_service_upsertflag", "callee": "delete", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\featureFlags.service.ts", "source_location": "L104"}, {"caller_nid": "services_featureflags_service_deleteflag", "callee": "getDb", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\featureFlags.service.ts", "source_location": "L109"}, {"caller_nid": "services_featureflags_service_deleteflag", "callee": "returning", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\featureFlags.service.ts", "source_location": "L110"}, {"caller_nid": "services_featureflags_service_deleteflag", "callee": "where", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\featureFlags.service.ts", "source_location": "L110"}, {"caller_nid": "services_featureflags_service_deleteflag", "callee": "delete", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\featureFlags.service.ts", "source_location": "L110"}, {"caller_nid": "services_featureflags_service_deleteflag", "callee": "eq", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\featureFlags.service.ts", "source_location": "L112"}, {"caller_nid": "services_featureflags_service_deleteflag", "callee": "delete", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\featureFlags.service.ts", "source_location": "L114"}]}
+{
+    "nodes": [
+        {
+            "id": "c_users_alfamas_desktop_zerotrust_src_services_featureflags_service_ts",
+            "label": "featureFlags.service.ts",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\featureFlags.service.ts",
+            "source_location": "L1"
+        },
+        {
+            "id": "services_featureflags_service_logger",
+            "label": "logger",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\featureFlags.service.ts",
+            "source_location": "L13"
+        },
+        {
+            "id": "services_featureflags_service_flagrow",
+            "label": "FlagRow",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\featureFlags.service.ts",
+            "source_location": "L15"
+        },
+        {
+            "id": "services_featureflags_service_cache",
+            "label": "cache",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\featureFlags.service.ts",
+            "source_location": "L18"
+        },
+        {
+            "id": "services_featureflags_service_bucketfor",
+            "label": "bucketFor()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\featureFlags.service.ts",
+            "source_location": "L21"
+        },
+        {
+            "id": "services_featureflags_service_loadflag",
+            "label": "loadFlag()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\featureFlags.service.ts",
+            "source_location": "L32"
+        },
+        {
+            "id": "services_featureflags_service_isfeatureenabled",
+            "label": "isFeatureEnabled()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\featureFlags.service.ts",
+            "source_location": "L52"
+        },
+        {
+            "id": "services_featureflags_service_clearflagcache",
+            "label": "clearFlagCache()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\featureFlags.service.ts",
+            "source_location": "L63"
+        },
+        {
+            "id": "services_featureflags_service_listflags",
+            "label": "listFlags()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\featureFlags.service.ts",
+            "source_location": "L69"
+        },
+        {
+            "id": "services_featureflags_service_upsertflag",
+            "label": "upsertFlag()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\featureFlags.service.ts",
+            "source_location": "L74"
+        },
+        {
+            "id": "services_featureflags_service_deleteflag",
+            "label": "deleteFlag()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\featureFlags.service.ts",
+            "source_location": "L108"
+        }
+    ],
+    "edges": [
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_featureflags_service_ts",
+            "target": "drizzle_orm",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\featureFlags.service.ts",
+            "source_location": "L8",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_featureflags_service_ts",
+            "target": "c_users_alfamas_desktop_zerotrust_src_db_index_ts",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\featureFlags.service.ts",
+            "source_location": "L9",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_featureflags_service_ts",
+            "target": "db_index_getdb",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\featureFlags.service.ts",
+            "source_location": "L9",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_featureflags_service_ts",
+            "target": "c_users_alfamas_desktop_zerotrust_src_db_schema_ts",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\featureFlags.service.ts",
+            "source_location": "L10",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_featureflags_service_ts",
+            "target": "db_schema_featureflagstable",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\featureFlags.service.ts",
+            "source_location": "L10",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_featureflags_service_ts",
+            "target": "c_users_alfamas_desktop_zerotrust_src_logger_index_ts",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\featureFlags.service.ts",
+            "source_location": "L11",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_featureflags_service_ts",
+            "target": "logger_index_getlogger",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\featureFlags.service.ts",
+            "source_location": "L11",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_featureflags_service_ts",
+            "target": "services_featureflags_service_logger",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\featureFlags.service.ts",
+            "source_location": "L13",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_featureflags_service_ts",
+            "target": "services_featureflags_service_flagrow",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\featureFlags.service.ts",
+            "source_location": "L15",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_featureflags_service_ts",
+            "target": "services_featureflags_service_cache",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\featureFlags.service.ts",
+            "source_location": "L18",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_featureflags_service_ts",
+            "target": "services_featureflags_service_bucketfor",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\featureFlags.service.ts",
+            "source_location": "L21",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_featureflags_service_ts",
+            "target": "services_featureflags_service_loadflag",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\featureFlags.service.ts",
+            "source_location": "L32",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_featureflags_service_ts",
+            "target": "services_featureflags_service_isfeatureenabled",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\featureFlags.service.ts",
+            "source_location": "L52",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_featureflags_service_ts",
+            "target": "services_featureflags_service_clearflagcache",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\featureFlags.service.ts",
+            "source_location": "L63",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_featureflags_service_ts",
+            "target": "services_featureflags_service_listflags",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\featureFlags.service.ts",
+            "source_location": "L69",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_featureflags_service_ts",
+            "target": "services_featureflags_service_upsertflag",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\featureFlags.service.ts",
+            "source_location": "L74",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_featureflags_service_ts",
+            "target": "services_featureflags_service_deleteflag",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\featureFlags.service.ts",
+            "source_location": "L108",
+            "weight": 1.0
+        },
+        {
+            "source": "services_featureflags_service_isfeatureenabled",
+            "target": "services_featureflags_service_loadflag",
+            "relation": "calls",
+            "context": "call",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\featureFlags.service.ts",
+            "source_location": "L53",
+            "weight": 1.0
+        },
+        {
+            "source": "services_featureflags_service_isfeatureenabled",
+            "target": "services_featureflags_service_bucketfor",
+            "relation": "calls",
+            "context": "call",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\featureFlags.service.ts",
+            "source_location": "L58",
+            "weight": 1.0
+        }
+    ],
+    "raw_calls": [
+        {
+            "caller_nid": "services_featureflags_service_bucketfor",
+            "callee": "charCodeAt",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\featureFlags.service.ts",
+            "source_location": "L26"
+        },
+        {
+            "caller_nid": "services_featureflags_service_bucketfor",
+            "callee": "imul",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\featureFlags.service.ts",
+            "source_location": "L27"
+        },
+        {
+            "caller_nid": "services_featureflags_service_loadflag",
+            "callee": "get",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\featureFlags.service.ts",
+            "source_location": "L33"
+        },
+        {
+            "caller_nid": "services_featureflags_service_loadflag",
+            "callee": "now",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\featureFlags.service.ts",
+            "source_location": "L34"
+        },
+        {
+            "caller_nid": "services_featureflags_service_loadflag",
+            "callee": "getDb",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\featureFlags.service.ts",
+            "source_location": "L37"
+        },
+        {
+            "caller_nid": "services_featureflags_service_loadflag",
+            "callee": "limit",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\featureFlags.service.ts",
+            "source_location": "L38"
+        },
+        {
+            "caller_nid": "services_featureflags_service_loadflag",
+            "callee": "where",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\featureFlags.service.ts",
+            "source_location": "L38"
+        },
+        {
+            "caller_nid": "services_featureflags_service_loadflag",
+            "callee": "from",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\featureFlags.service.ts",
+            "source_location": "L38"
+        },
+        {
+            "caller_nid": "services_featureflags_service_loadflag",
+            "callee": "select",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\featureFlags.service.ts",
+            "source_location": "L38"
+        },
+        {
+            "caller_nid": "services_featureflags_service_loadflag",
+            "callee": "eq",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\featureFlags.service.ts",
+            "source_location": "L41"
+        },
+        {
+            "caller_nid": "services_featureflags_service_loadflag",
+            "callee": "set",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\featureFlags.service.ts",
+            "source_location": "L43"
+        },
+        {
+            "caller_nid": "services_featureflags_service_loadflag",
+            "callee": "now",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\featureFlags.service.ts",
+            "source_location": "L43"
+        },
+        {
+            "caller_nid": "services_featureflags_service_loadflag",
+            "callee": "error",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\featureFlags.service.ts",
+            "source_location": "L46"
+        },
+        {
+            "caller_nid": "services_featureflags_service_isfeatureenabled",
+            "callee": "includes",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\featureFlags.service.ts",
+            "source_location": "L57"
+        },
+        {
+            "caller_nid": "services_featureflags_service_clearflagcache",
+            "callee": "clear",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\featureFlags.service.ts",
+            "source_location": "L64"
+        },
+        {
+            "caller_nid": "services_featureflags_service_listflags",
+            "callee": "getDb",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\featureFlags.service.ts",
+            "source_location": "L70"
+        },
+        {
+            "caller_nid": "services_featureflags_service_listflags",
+            "callee": "from",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\featureFlags.service.ts",
+            "source_location": "L71"
+        },
+        {
+            "caller_nid": "services_featureflags_service_listflags",
+            "callee": "select",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\featureFlags.service.ts",
+            "source_location": "L71"
+        },
+        {
+            "caller_nid": "services_featureflags_service_upsertflag",
+            "callee": "getDb",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\featureFlags.service.ts",
+            "source_location": "L81"
+        },
+        {
+            "caller_nid": "services_featureflags_service_upsertflag",
+            "callee": "returning",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\featureFlags.service.ts",
+            "source_location": "L82"
+        },
+        {
+            "caller_nid": "services_featureflags_service_upsertflag",
+            "callee": "onConflictDoUpdate",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\featureFlags.service.ts",
+            "source_location": "L82"
+        },
+        {
+            "caller_nid": "services_featureflags_service_upsertflag",
+            "callee": "values",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\featureFlags.service.ts",
+            "source_location": "L82"
+        },
+        {
+            "caller_nid": "services_featureflags_service_upsertflag",
+            "callee": "insert",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\featureFlags.service.ts",
+            "source_location": "L82"
+        },
+        {
+            "caller_nid": "services_featureflags_service_upsertflag",
+            "callee": "min",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\featureFlags.service.ts",
+            "source_location": "L89"
+        },
+        {
+            "caller_nid": "services_featureflags_service_upsertflag",
+            "callee": "max",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\featureFlags.service.ts",
+            "source_location": "L89"
+        },
+        {
+            "caller_nid": "services_featureflags_service_upsertflag",
+            "callee": "min",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\featureFlags.service.ts",
+            "source_location": "L98"
+        },
+        {
+            "caller_nid": "services_featureflags_service_upsertflag",
+            "callee": "max",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\featureFlags.service.ts",
+            "source_location": "L98"
+        },
+        {
+            "caller_nid": "services_featureflags_service_upsertflag",
+            "callee": "delete",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\featureFlags.service.ts",
+            "source_location": "L104"
+        },
+        {
+            "caller_nid": "services_featureflags_service_deleteflag",
+            "callee": "getDb",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\featureFlags.service.ts",
+            "source_location": "L109"
+        },
+        {
+            "caller_nid": "services_featureflags_service_deleteflag",
+            "callee": "returning",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\featureFlags.service.ts",
+            "source_location": "L110"
+        },
+        {
+            "caller_nid": "services_featureflags_service_deleteflag",
+            "callee": "where",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\featureFlags.service.ts",
+            "source_location": "L110"
+        },
+        {
+            "caller_nid": "services_featureflags_service_deleteflag",
+            "callee": "delete",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\featureFlags.service.ts",
+            "source_location": "L110"
+        },
+        {
+            "caller_nid": "services_featureflags_service_deleteflag",
+            "callee": "eq",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\featureFlags.service.ts",
+            "source_location": "L112"
+        },
+        {
+            "caller_nid": "services_featureflags_service_deleteflag",
+            "callee": "delete",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\featureFlags.service.ts",
+            "source_location": "L114"
+        }
+    ]
+}

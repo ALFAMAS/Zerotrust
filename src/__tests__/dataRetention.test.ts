@@ -18,7 +18,10 @@ const { mockDb, setCount, setHeld, resetDb } = vi.hoisted(() => {
     return c;
   };
   return {
-    mockDb: { delete: (table: any) => makeDeleteChain(table), select: () => makeSelectChain() },
+    mockDb: {
+      delete: (table: any) => makeDeleteChain(table),
+      select: () => makeSelectChain(),
+    },
     setCount: (tag: string, rowCount: number) => {
       counts[tag] = { rowCount };
     },
@@ -49,7 +52,11 @@ vi.mock("drizzle-orm", () => ({
 }));
 vi.mock("../config", () => ({
   getConfig: () => ({
-    session: { defaultTTL: 3600, refreshTokenTTL: 604800, maxConcurrentDevices: 5 },
+    session: {
+      defaultTTL: 3600,
+      refreshTokenTTL: 604800,
+      maxConcurrentDevices: 5,
+    },
     security: {
       bcryptRounds: 4,
       tokenSecretHex: "a".repeat(64),
@@ -70,7 +77,12 @@ vi.mock("../config", () => ({
       },
     },
     oauth: { providers: {} },
-    elasticsearch: { enabled: false, host: "localhost", port: 9200, indexPrefix: "zeroauth" },
+    elasticsearch: {
+      enabled: false,
+      host: "localhost",
+      port: 9200,
+      indexPrefix: "zerotrust",
+    },
     logging: { level: "error", format: "json" },
   }),
 }));
@@ -108,7 +120,8 @@ describe("Data Retention Service", () => {
 
   it("purgeExpiredRefreshTokens returns row count", async () => {
     setCount("refresh", 7);
-    const { purgeExpiredRefreshTokens } = await import("../services/dataRetention");
+    const { purgeExpiredRefreshTokens } =
+      await import("../services/dataRetention");
     const count = await purgeExpiredRefreshTokens(30);
     expect(count).toBe(7);
   });

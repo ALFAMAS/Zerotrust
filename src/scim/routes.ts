@@ -13,7 +13,13 @@ import { rolesTable, usersTable } from "../db/schema.js";
 import { validateOrgScimToken } from "../services/orgScimToken.service.js";
 import type { HonoEnv } from "../shared/types.js";
 import type { SCIMGroup, SCIMListResponse, SCIMUser } from "./types.js";
-import { groupToSCIM, parseSCIMFilter, scimError, scimToUserFields, userToSCIM } from "./utils.js";
+import {
+  groupToSCIM,
+  parseSCIMFilter,
+  scimError,
+  scimToUserFields,
+  userToSCIM,
+} from "./utils.js";
 
 const router = new Hono<HonoEnv>();
 
@@ -36,7 +42,10 @@ router.use("*", async (c, next) => {
   const legacyToken = process.env.SCIM_API_TOKEN;
   if (legacyToken) {
     if (!match || match[1] !== legacyToken) {
-      return c.json(scimError(401, "Invalid or missing Bearer token", "invalidValue"), 401);
+      return c.json(
+        scimError(401, "Invalid or missing Bearer token", "invalidValue"),
+        401,
+      );
     }
     // No org scoping in legacy mode — handlers continue to operate on the
     // global user table, matching pre-existing behavior.
@@ -51,7 +60,10 @@ router.use("*", async (c, next) => {
   // Per-org token validation.
   const result = await validateOrgScimToken(match[1]);
   if (!result) {
-    return c.json(scimError(401, "Invalid or missing Bearer token", "invalidValue"), 401);
+    return c.json(
+      scimError(401, "Invalid or missing Bearer token", "invalidValue"),
+      401,
+    );
   }
   c.set("scimOrgId", result.orgId);
   c.set("scimTokenId", result.tokenId);
@@ -97,7 +109,12 @@ router.get("/Schemas", (c) => {
       description: "User Account",
       schemas: ["urn:ietf:params:scim:meta:schemas:User"],
       attributes: [
-        { name: "userName", type: "string", required: true, uniqueness: "server" },
+        {
+          name: "userName",
+          type: "string",
+          required: true,
+          uniqueness: "server",
+        },
         {
           name: "name",
           type: "complex",
@@ -147,7 +164,7 @@ router.get("/Schemas", (c) => {
     {
       id: "urn:ietf:params:scim:schemas:core:2.0:Group",
       name: "Group",
-      description: "Group (maps to ZeroAuth Role)",
+      description: "Group (maps to zerotrust Role)",
       schemas: ["urn:ietf:params:scim:meta:schemas:Group"],
       attributes: [
         { name: "displayName", type: "string", required: true },
@@ -164,7 +181,8 @@ router.get("/Schemas", (c) => {
       ],
       meta: {
         resourceType: "Schema",
-        location: "/scim/v2/Schemas/urn:ietf:params:scim:schemas:core:2.0:Group",
+        location:
+          "/scim/v2/Schemas/urn:ietf:params:scim:schemas:core:2.0:Group",
       },
     },
   ]);
@@ -175,8 +193,14 @@ router.get("/Schemas", (c) => {
 router.get("/Users", async (c) => {
   try {
     const baseUrl = getBaseUrl(c);
-    const startIndex = Math.max(1, parseInt(c.req.query("startIndex") ?? "1", 10));
-    const count = Math.min(200, Math.max(1, parseInt(c.req.query("count") ?? "100", 10)));
+    const startIndex = Math.max(
+      1,
+      parseInt(c.req.query("startIndex") ?? "1", 10),
+    );
+    const count = Math.min(
+      200,
+      Math.max(1, parseInt(c.req.query("count") ?? "100", 10)),
+    );
     const filterStr = c.req.query("filter");
     const skip = startIndex - 1;
 
@@ -187,7 +211,11 @@ router.get("/Users", async (c) => {
 
     if (filterStr) {
       const parsed = parseSCIMFilter(filterStr);
-      if (parsed && parsed.attribute === "userName" && parsed.operator === "eq") {
+      if (
+        parsed &&
+        parsed.attribute === "userName" &&
+        parsed.operator === "eq"
+      ) {
         const rows = await db
           .select()
           .from(usersTable)
@@ -200,19 +228,31 @@ router.get("/Users", async (c) => {
           .where(ilike(usersTable.email, parsed.value));
         users = rows;
         totalResults = countResult[0]?.count ?? 0;
-      } else if (parsed && parsed.attribute === "externalId" && parsed.operator === "eq") {
+      } else if (
+        parsed &&
+        parsed.attribute === "externalId" &&
+        parsed.operator === "eq"
+      ) {
         // No scimExternalId column — return empty
         users = [];
         totalResults = 0;
       } else {
-        const rows = await db.select().from(usersTable).offset(skip).limit(count);
-        const countResult = await db.select({ count: sql<number>`count(*)::int` }).from(usersTable);
+        const rows = await db
+          .select()
+          .from(usersTable)
+          .offset(skip)
+          .limit(count);
+        const countResult = await db
+          .select({ count: sql<number>`count(*)::int` })
+          .from(usersTable);
         users = rows;
         totalResults = countResult[0]?.count ?? 0;
       }
     } else {
       const rows = await db.select().from(usersTable).offset(skip).limit(count);
-      const countResult = await db.select({ count: sql<number>`count(*)::int` }).from(usersTable);
+      const countResult = await db
+        .select({ count: sql<number>`count(*)::int` })
+        .from(usersTable);
       users = rows;
       totalResults = countResult[0]?.count ?? 0;
     }
@@ -240,26 +280,38 @@ router.post("/Users", async (c) => {
     const scimUser = (await c.req.json()) as SCIMUser;
 
     if (!scimUser.userName) {
-      return c.json(scimError(400, "userName is required", "invalidValue"), 400);
+      return c.json(
+        scimError(400, "userName is required", "invalidValue"),
+        400,
+      );
     }
 
     const fields = scimToUserFields(scimUser);
     const email = fields.email ?? scimUser.userName;
 
     const db = getDb();
-    const existing = await db.select().from(usersTable).where(eq(usersTable.email, email)).limit(1);
+    const existing = await db
+      .select()
+      .from(usersTable)
+      .where(eq(usersTable.email, email))
+      .limit(1);
 
     if (existing.length > 0) {
       return c.json(
-        scimError(409, `User with userName '${scimUser.userName}' already exists`, "uniqueness"),
-        409
+        scimError(
+          409,
+          `User with userName '${scimUser.userName}' already exists`,
+          "uniqueness",
+        ),
+        409,
       );
     }
 
     const nameParts = [scimUser.name?.givenName, scimUser.name?.familyName]
       .filter(Boolean)
       .join(" ");
-    const displayName: string = (fields as any).displayName ?? (nameParts || scimUser.userName);
+    const displayName: string =
+      (fields as any).displayName ?? (nameParts || scimUser.userName);
 
     const newUser: typeof usersTable.$inferInsert = {
       email,
@@ -274,7 +326,11 @@ router.post("/Users", async (c) => {
 
     await db.insert(usersTable).values(newUser);
 
-    const inserted = await db.select().from(usersTable).where(eq(usersTable.email, email)).limit(1);
+    const inserted = await db
+      .select()
+      .from(usersTable)
+      .where(eq(usersTable.email, email))
+      .limit(1);
 
     const scimResponse = userToSCIM(inserted[0], baseUrl);
     c.header("Location", scimResponse.meta?.location ?? "");
@@ -292,7 +348,11 @@ router.get("/Users/:id", async (c) => {
     const baseUrl = getBaseUrl(c);
     const id = c.req.param("id");
     const db = getDb();
-    const rows = await db.select().from(usersTable).where(eq(usersTable.id, id)).limit(1);
+    const rows = await db
+      .select()
+      .from(usersTable)
+      .where(eq(usersTable.id, id))
+      .limit(1);
 
     if (rows.length === 0) {
       return c.json(scimError(404, "User not found"), 404);
@@ -318,7 +378,10 @@ router.patch("/Users/:id", async (c) => {
     const { Operations } = body;
 
     if (!Array.isArray(Operations)) {
-      return c.json(scimError(400, "Operations array is required", "invalidValue"), 400);
+      return c.json(
+        scimError(400, "Operations array is required", "invalidValue"),
+        400,
+      );
     }
 
     const update: Record<string, unknown> = {};
@@ -332,7 +395,8 @@ router.patch("/Users/:id", async (c) => {
 
       if (!path && typeof value === "object" && value !== null) {
         const obj = value as Record<string, unknown>;
-        if (obj.active !== undefined) update.status = obj.active ? "active" : "suspended";
+        if (obj.active !== undefined)
+          update.status = obj.active ? "active" : "suspended";
         if (obj.userName) update.email = obj.userName;
         if (typeof obj.name === "object" && obj.name) {
           const name = obj.name as Record<string, string>;
@@ -341,9 +405,9 @@ router.patch("/Users/:id", async (c) => {
           else if (name.formatted) update.displayName = name.formatted;
         }
         if (Array.isArray(obj.emails)) {
-          const primary = (obj.emails as Array<{ value: string; primary?: boolean }>).find(
-            (e) => e.primary
-          );
+          const primary = (
+            obj.emails as Array<{ value: string; primary?: boolean }>
+          ).find((e) => e.primary);
           if (primary) update.email = primary.value;
         }
         if (Array.isArray(obj.phoneNumbers)) {
@@ -359,12 +423,15 @@ router.patch("/Users/:id", async (c) => {
       } else if (path === 'emails[type eq "work"].value' || path === "emails") {
         if (typeof value === "string") update.email = value;
         else if (Array.isArray(value)) {
-          const primary = (value as Array<{ value: string; primary?: boolean }>).find(
-            (e) => e.primary
-          );
+          const primary = (
+            value as Array<{ value: string; primary?: boolean }>
+          ).find((e) => e.primary);
           if (primary) update.email = primary.value;
         }
-      } else if (path === 'phoneNumbers[type eq "work"].value' || path === "phoneNumbers") {
+      } else if (
+        path === 'phoneNumbers[type eq "work"].value' ||
+        path === "phoneNumbers"
+      ) {
         if (typeof value === "string") update.phone = value;
         else if (Array.isArray(value)) {
           update.phone = (value as Array<{ value: string }>)[0]?.value;
@@ -377,12 +444,19 @@ router.patch("/Users/:id", async (c) => {
     const familyName = (update as any).__name__familyName;
     if (givenName !== undefined || familyName !== undefined) {
       const db = getDb();
-      const current = await db.select().from(usersTable).where(eq(usersTable.id, id)).limit(1);
+      const current = await db
+        .select()
+        .from(usersTable)
+        .where(eq(usersTable.id, id))
+        .limit(1);
       if (current.length > 0) {
         const currentParts = (current[0].displayName ?? "").split(/\s+/);
         const g = givenName ?? currentParts[0] ?? "";
-        const f = familyName ?? (currentParts.length > 1 ? currentParts.slice(1).join(" ") : "");
-        update.displayName = [g, f].filter(Boolean).join(" ") || current[0].displayName;
+        const f =
+          familyName ??
+          (currentParts.length > 1 ? currentParts.slice(1).join(" ") : "");
+        update.displayName =
+          [g, f].filter(Boolean).join(" ") || current[0].displayName;
       }
       delete (update as any).__name__givenName;
       delete (update as any).__name__familyName;
@@ -441,7 +515,9 @@ router.delete("/Users/:id", async (c) => {
 type RoleRow = typeof rolesTable.$inferSelect;
 
 /** Users whose `roles` array contains the given role name (group members). */
-async function getGroupMembers(roleName: string): Promise<(typeof usersTable.$inferSelect)[]> {
+async function getGroupMembers(
+  roleName: string,
+): Promise<(typeof usersTable.$inferSelect)[]> {
   const db = getDb();
   return db
     .select()
@@ -454,31 +530,52 @@ async function addRoleToUser(userId: string, roleName: string): Promise<void> {
   const db = getDb();
   await db
     .update(usersTable)
-    .set({ roles: sql`array_append(${usersTable.roles}, ${roleName})`, updatedAt: new Date() })
-    .where(and(eq(usersTable.id, userId), sql`NOT (${roleName} = ANY(${usersTable.roles}))`));
+    .set({
+      roles: sql`array_append(${usersTable.roles}, ${roleName})`,
+      updatedAt: new Date(),
+    })
+    .where(
+      and(
+        eq(usersTable.id, userId),
+        sql`NOT (${roleName} = ANY(${usersTable.roles}))`,
+      ),
+    );
 }
 
 /** Remove a role name from a user's `roles` array. */
-async function removeRoleFromUser(userId: string, roleName: string): Promise<void> {
+async function removeRoleFromUser(
+  userId: string,
+  roleName: string,
+): Promise<void> {
   const db = getDb();
   await db
     .update(usersTable)
-    .set({ roles: sql`array_remove(${usersTable.roles}, ${roleName})`, updatedAt: new Date() })
+    .set({
+      roles: sql`array_remove(${usersTable.roles}, ${roleName})`,
+      updatedAt: new Date(),
+    })
     .where(eq(usersTable.id, userId));
 }
 
 /** Reconcile a group's membership to exactly `memberIds` (used by POST/PUT). */
-async function setGroupMembers(roleName: string, memberIds: string[]): Promise<void> {
+async function setGroupMembers(
+  roleName: string,
+  memberIds: string[],
+): Promise<void> {
   const current = await getGroupMembers(roleName);
   const currentIds = new Set(current.map((u) => u.id));
   const wanted = new Set(memberIds);
-  for (const id of wanted) if (!currentIds.has(id)) await addRoleToUser(id, roleName);
-  for (const u of current) if (!wanted.has(u.id)) await removeRoleFromUser(u.id, roleName);
+  for (const id of wanted)
+    if (!currentIds.has(id)) await addRoleToUser(id, roleName);
+  for (const u of current)
+    if (!wanted.has(u.id)) await removeRoleFromUser(u.id, roleName);
 }
 
 function memberIdsFromValue(value: unknown): string[] {
   if (!Array.isArray(value)) return [];
-  return (value as Array<{ value?: string }>).map((m) => m?.value).filter(Boolean) as string[];
+  return (value as Array<{ value?: string }>)
+    .map((m) => m?.value)
+    .filter(Boolean) as string[];
 }
 
 async function groupResponse(c: Context, role: RoleRow): Promise<SCIMGroup> {
@@ -490,8 +587,14 @@ async function groupResponse(c: Context, role: RoleRow): Promise<SCIMGroup> {
 
 router.get("/Groups", async (c) => {
   try {
-    const startIndex = Math.max(1, parseInt(c.req.query("startIndex") ?? "1", 10));
-    const count = Math.min(200, Math.max(1, parseInt(c.req.query("count") ?? "100", 10)));
+    const startIndex = Math.max(
+      1,
+      parseInt(c.req.query("startIndex") ?? "1", 10),
+    );
+    const count = Math.min(
+      200,
+      Math.max(1, parseInt(c.req.query("count") ?? "100", 10)),
+    );
     const filterStr = c.req.query("filter");
     const skip = startIndex - 1;
     const db = getDb();
@@ -500,7 +603,11 @@ router.get("/Groups", async (c) => {
     let totalResults: number;
 
     const parsed = filterStr ? parseSCIMFilter(filterStr) : null;
-    if (parsed && parsed.attribute === "displayName" && parsed.operator === "eq") {
+    if (
+      parsed &&
+      parsed.attribute === "displayName" &&
+      parsed.operator === "eq"
+    ) {
       roles = await db
         .select()
         .from(rolesTable)
@@ -514,7 +621,9 @@ router.get("/Groups", async (c) => {
       totalResults = countResult[0]?.count ?? 0;
     } else {
       roles = await db.select().from(rolesTable).offset(skip).limit(count);
-      const countResult = await db.select({ count: sql<number>`count(*)::int` }).from(rolesTable);
+      const countResult = await db
+        .select({ count: sql<number>`count(*)::int` })
+        .from(rolesTable);
       totalResults = countResult[0]?.count ?? 0;
     }
 
@@ -539,7 +648,10 @@ router.post("/Groups", async (c) => {
   try {
     const group = (await c.req.json()) as SCIMGroup;
     if (!group.displayName) {
-      return c.json(scimError(400, "displayName is required", "invalidValue"), 400);
+      return c.json(
+        scimError(400, "displayName is required", "invalidValue"),
+        400,
+      );
     }
 
     const db = getDb();
@@ -550,8 +662,12 @@ router.post("/Groups", async (c) => {
       .limit(1);
     if (existing.length > 0) {
       return c.json(
-        scimError(409, `Group '${group.displayName}' already exists`, "uniqueness"),
-        409
+        scimError(
+          409,
+          `Group '${group.displayName}' already exists`,
+          "uniqueness",
+        ),
+        409,
       );
     }
 
@@ -577,8 +693,13 @@ router.get("/Groups/:id", async (c) => {
   try {
     const id = c.req.param("id");
     const db = getDb();
-    const rows = await db.select().from(rolesTable).where(eq(rolesTable.id, id)).limit(1);
-    if (rows.length === 0) return c.json(scimError(404, "Group not found"), 404);
+    const rows = await db
+      .select()
+      .from(rolesTable)
+      .where(eq(rolesTable.id, id))
+      .limit(1);
+    if (rows.length === 0)
+      return c.json(scimError(404, "Group not found"), 404);
     return c.json(await groupResponse(c, rows[0]));
   } catch (err) {
     void err;
@@ -593,8 +714,13 @@ router.put("/Groups/:id", async (c) => {
     const id = c.req.param("id");
     const group = (await c.req.json()) as SCIMGroup;
     const db = getDb();
-    const rows = await db.select().from(rolesTable).where(eq(rolesTable.id, id)).limit(1);
-    if (rows.length === 0) return c.json(scimError(404, "Group not found"), 404);
+    const rows = await db
+      .select()
+      .from(rolesTable)
+      .where(eq(rolesTable.id, id))
+      .limit(1);
+    if (rows.length === 0)
+      return c.json(scimError(404, "Group not found"), 404);
 
     if (group.displayName && group.displayName !== rows[0].displayName) {
       await db
@@ -604,7 +730,11 @@ router.put("/Groups/:id", async (c) => {
     }
     await setGroupMembers(rows[0].name, memberIdsFromValue(group.members));
 
-    const [updated] = await db.select().from(rolesTable).where(eq(rolesTable.id, id)).limit(1);
+    const [updated] = await db
+      .select()
+      .from(rolesTable)
+      .where(eq(rolesTable.id, id))
+      .limit(1);
     return c.json(await groupResponse(c, updated));
   } catch (err) {
     void err;
@@ -621,12 +751,20 @@ router.patch("/Groups/:id", async (c) => {
       Operations?: Array<{ op: string; path?: string; value?: unknown }>;
     };
     if (!Array.isArray(body.Operations)) {
-      return c.json(scimError(400, "Operations array is required", "invalidValue"), 400);
+      return c.json(
+        scimError(400, "Operations array is required", "invalidValue"),
+        400,
+      );
     }
 
     const db = getDb();
-    const rows = await db.select().from(rolesTable).where(eq(rolesTable.id, id)).limit(1);
-    if (rows.length === 0) return c.json(scimError(404, "Group not found"), 404);
+    const rows = await db
+      .select()
+      .from(rolesTable)
+      .where(eq(rolesTable.id, id))
+      .limit(1);
+    if (rows.length === 0)
+      return c.json(scimError(404, "Group not found"), 404);
     const roleName = rows[0].name;
 
     for (const op of body.Operations) {
@@ -660,14 +798,16 @@ router.patch("/Groups/:id", async (c) => {
       // Member mutations.
       if (path === "members") {
         if (operation === "add") {
-          for (const uid of memberIdsFromValue(op.value)) await addRoleToUser(uid, roleName);
+          for (const uid of memberIdsFromValue(op.value))
+            await addRoleToUser(uid, roleName);
         } else if (operation === "replace") {
           await setGroupMembers(roleName, memberIdsFromValue(op.value));
         } else if (operation === "remove") {
           // No value → remove all members.
           if (op.value === undefined) await setGroupMembers(roleName, []);
           else
-            for (const uid of memberIdsFromValue(op.value)) await removeRoleFromUser(uid, roleName);
+            for (const uid of memberIdsFromValue(op.value))
+              await removeRoleFromUser(uid, roleName);
         }
         continue;
       }
@@ -679,7 +819,11 @@ router.patch("/Groups/:id", async (c) => {
       }
     }
 
-    const [updated] = await db.select().from(rolesTable).where(eq(rolesTable.id, id)).limit(1);
+    const [updated] = await db
+      .select()
+      .from(rolesTable)
+      .where(eq(rolesTable.id, id))
+      .limit(1);
     return c.json(await groupResponse(c, updated));
   } catch (err) {
     void err;
@@ -693,8 +837,13 @@ router.delete("/Groups/:id", async (c) => {
   try {
     const id = c.req.param("id");
     const db = getDb();
-    const rows = await db.select().from(rolesTable).where(eq(rolesTable.id, id)).limit(1);
-    if (rows.length === 0) return c.json(scimError(404, "Group not found"), 404);
+    const rows = await db
+      .select()
+      .from(rolesTable)
+      .where(eq(rolesTable.id, id))
+      .limit(1);
+    if (rows.length === 0)
+      return c.json(scimError(404, "Group not found"), 404);
 
     // Strip the role from every member, then delete the role itself.
     await setGroupMembers(rows[0].name, []);

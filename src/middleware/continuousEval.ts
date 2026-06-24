@@ -6,7 +6,7 @@ import { sessionsTable } from "../db/schema";
 import { getLogger } from "../logger";
 import { AuthorizationEngine } from "../services/authz.service";
 import type { AuthzContext, HonoEnv } from "../shared/types";
-import { ErrorCodes, ZeroAuthError } from "../shared/types";
+import { ErrorCodes, zerotrustError } from "../shared/types";
 
 const logger = getLogger("continuous-eval");
 
@@ -32,7 +32,9 @@ const DEFAULT_CONFIG: ContinuousEvalConfig = {
 
 const authzEngine = new AuthorizationEngine();
 
-export function createContinuousEvalMiddleware(config?: Partial<ContinuousEvalConfig>) {
+export function createContinuousEvalMiddleware(
+  config?: Partial<ContinuousEvalConfig>,
+) {
   return createMiddleware<HonoEnv>(async (c, next) => {
     try {
       const user = c.get("user");
@@ -51,7 +53,8 @@ export function createContinuousEvalMiddleware(config?: Partial<ContinuousEvalCo
         action,
         environment: {
           currentTime: new Date(),
-          currentIp: c.req.header("x-forwarded-for")?.split(",")[0].trim() || "",
+          currentIp:
+            c.req.header("x-forwarded-for")?.split(",")[0].trim() || "",
           userAgent: c.req.header("user-agent") || "",
           riskScore: 0,
         },
@@ -61,11 +64,19 @@ export function createContinuousEvalMiddleware(config?: Partial<ContinuousEvalCo
       const anomalyFlags = session.anomalyFlags as any;
 
       if (anomalyFlags?.deviceChangeDetected) riskScore += 25;
-      if (evalConfig.enableLocationAnomaly && anomalyFlags?.locationChangeDetected) riskScore += 30;
-      if (evalConfig.enableTimeAnomaly && anomalyFlags?.timeAnomalyDetected) riskScore += 20;
+      if (
+        evalConfig.enableLocationAnomaly &&
+        anomalyFlags?.locationChangeDetected
+      )
+        riskScore += 30;
+      if (evalConfig.enableTimeAnomaly && anomalyFlags?.timeAnomalyDetected)
+        riskScore += 20;
 
       const authzResult = await authzEngine.evaluate(authzContext);
-      authzContext.environment.riskScore = Math.min(100, riskScore + (authzResult.riskScore || 0));
+      authzContext.environment.riskScore = Math.min(
+        100,
+        riskScore + (authzResult.riskScore || 0),
+      );
 
       const db = getDb();
       await db
@@ -94,41 +105,53 @@ export function createContinuousEvalMiddleware(config?: Partial<ContinuousEvalCo
       });
 
       if (authzContext.environment.riskScore >= evalConfig.riskThreshold) {
-        throw new ZeroAuthError(
+        throw new zerotrustError(
           ErrorCodes.ACCESS_DENIED,
           "Access denied due to suspicious activity. Please re-authenticate.",
           403,
-          { riskScore: authzContext.environment.riskScore }
+          { riskScore: authzContext.environment.riskScore },
         );
       }
 
       if (authzResult.decision === "deny") {
-        throw new ZeroAuthError(
+        throw new zerotrustError(
           ErrorCodes.ACCESS_DENIED,
           authzResult.reason || "Access denied by policy",
-          403
+          403,
         );
       }
 
       if (
-        authzContext.environment.riskScore >= evalConfig.requireStepUpAboveRisk &&
+        authzContext.environment.riskScore >=
+          evalConfig.requireStepUpAboveRisk &&
         !c.req.header("x-step-up-verified")
       ) {
-        throw new ZeroAuthError(ErrorCodes.MFA_REQUIRED, "Additional verification required", 403, {
-          riskScore: authzContext.environment.riskScore,
-        });
+        throw new zerotrustError(
+          ErrorCodes.MFA_REQUIRED,
+          "Additional verification required",
+          403,
+          {
+            riskScore: authzContext.environment.riskScore,
+          },
+        );
       }
 
       return next();
     } catch (error) {
-      if (error instanceof ZeroAuthError) {
+      if (error instanceof zerotrustError) {
         return c.json(
           { error: error.code, message: error.message, details: error.details },
-          error.statusCode as any
+          error.statusCode as any,
         );
       }
       logger.error("Continuous evaluation error", error as Error);
-      return c.json({ error: ErrorCodes.INTERNAL_ERROR, message: "Access evaluation failed" }, 500);
+      return c.json(
+        {
+          error: ErrorCodes.INTERNAL_ERROR,
+          message: "Access evaluation failed",
+        },
+        500,
+      );
     }
   });
 }

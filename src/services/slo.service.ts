@@ -40,12 +40,18 @@ let lastBurnAlertAt = 0;
 
 function cfg() {
   return {
-    availabilityTarget: parseFloat(process.env.SLO_AVAILABILITY_TARGET ?? "0.999"),
+    availabilityTarget: parseFloat(
+      process.env.SLO_AVAILABILITY_TARGET ?? "0.999",
+    ),
     latencyTarget: parseFloat(process.env.SLO_LATENCY_TARGET ?? "0.995"),
-    latencyThresholdMs: parseInt(process.env.SLO_LATENCY_THRESHOLD_MS ?? "500", 10),
+    latencyThresholdMs: parseInt(
+      process.env.SLO_LATENCY_THRESHOLD_MS ?? "500",
+      10,
+    ),
     windowDays: parseInt(process.env.SLO_WINDOW_DAYS ?? "30", 10),
     burnAlertThreshold: parseFloat(process.env.SLO_BURN_ALERT_THRESHOLD ?? "6"),
-    alertCooldownMs: parseInt(process.env.SLO_ALERT_COOLDOWN_SECS ?? "300", 10) * 1000,
+    alertCooldownMs:
+      parseInt(process.env.SLO_ALERT_COOLDOWN_SECS ?? "300", 10) * 1000,
     enabled: process.env.SLO_ALERT_ENABLED !== "false",
   };
 }
@@ -73,7 +79,7 @@ async function queryMetrics(): Promise<{
     // Parse request_duration_seconds histogram for totals + bucket counts
 
     for (const line of lines) {
-      if (line.startsWith("zeroauth_request_duration_seconds{")) {
+      if (line.startsWith("zerotrust_request_duration_seconds{")) {
         // Extract method/route/status_code from labels
         const statusMatch = line.match(/status_code="(\d+)"/);
         const status = statusMatch ? parseInt(statusMatch[1], 10) : 200;
@@ -89,7 +95,7 @@ async function queryMetrics(): Promise<{
       }
 
       // Histogram bucket: cumulative count up to each bucket
-      if (line.includes("zeroauth_request_duration_seconds_bucket")) {
+      if (line.includes("zerotrust_request_duration_seconds_bucket")) {
         const bucketMatch = line.match(/le="(\d+(?:\.\d+)?)"/);
         const valueMatch = line.match(/\} (\d+(?:\.\d+)?(?:e[+-]?\d+)?)/);
         if (bucketMatch && valueMatch) {
@@ -102,7 +108,7 @@ async function queryMetrics(): Promise<{
       }
 
       // Also track from the _total counter if available
-      if (line.startsWith("zeroauth_request_duration_seconds_count")) {
+      if (line.startsWith("zerotrust_request_duration_seconds_count")) {
         const valueMatch = line.match(/\} (\d+(?:\.\d+)?(?:e[+-]?\d+)?)/);
         if (valueMatch) {
           totalRequests = Math.max(totalRequests, parseFloat(valueMatch[1]));
@@ -112,7 +118,9 @@ async function queryMetrics(): Promise<{
 
     return { totalRequests, errorRequests, slowRequests };
   } catch (err) {
-    logger.warn("Failed to query Prometheus metrics for SLO", { error: String(err) });
+    logger.warn("Failed to query Prometheus metrics for SLO", {
+      error: String(err),
+    });
     return { totalRequests: 0, errorRequests: 0, slowRequests: 0 };
   }
 }
@@ -183,9 +191,13 @@ export async function computeSLOStatus(): Promise<SLOStatus> {
   const windowFraction = Math.min(1, (now - _windowStartMs) / windowMs);
   const sustainableRate = 1; // 1× = consume full budget over full window
   const availBurnRate =
-    windowFraction > 0 ? (1 - availBudgetRemaining) / (windowFraction * sustainableRate) : 0;
+    windowFraction > 0
+      ? (1 - availBudgetRemaining) / (windowFraction * sustainableRate)
+      : 0;
   const latBurnRate =
-    windowFraction > 0 ? (1 - latBudgetRemaining) / (windowFraction * sustainableRate) : 0;
+    windowFraction > 0
+      ? (1 - latBudgetRemaining) / (windowFraction * sustainableRate)
+      : 0;
 
   return {
     window: {
@@ -209,7 +221,9 @@ export async function computeSLOStatus(): Promise<SLOStatus> {
       availability: Math.round(availBurnRate * 100) / 100,
       latency: Math.round(latBurnRate * 100) / 100,
       alerting:
-        c.enabled && (availBurnRate >= c.burnAlertThreshold || latBurnRate >= c.burnAlertThreshold),
+        c.enabled &&
+        (availBurnRate >= c.burnAlertThreshold ||
+          latBurnRate >= c.burnAlertThreshold),
     },
     metrics: {
       totalRequests: Math.round(totalRequests),
@@ -247,12 +261,12 @@ export async function checkBurnRateAlerts(): Promise<void> {
     const reasons: string[] = [];
     if (burnRates.availability >= cfg().burnAlertThreshold) {
       reasons.push(
-        `Availability burn rate ${burnRates.availability}× (target: 99.9%, budget remaining: ${(status.availability.errorBudgetRemaining * 100).toFixed(1)}%)`
+        `Availability burn rate ${burnRates.availability}× (target: 99.9%, budget remaining: ${(status.availability.errorBudgetRemaining * 100).toFixed(1)}%)`,
       );
     }
     if (burnRates.latency >= cfg().burnAlertThreshold) {
       reasons.push(
-        `Latency burn rate ${burnRates.latency}× (target: P${cfg().latencyThresholdMs}ms ≥ ${cfg().latencyTarget * 100}%, budget remaining: ${(status.latency.errorBudgetRemaining * 100).toFixed(1)}%)`
+        `Latency burn rate ${burnRates.latency}× (target: P${cfg().latencyThresholdMs}ms ≥ ${cfg().latencyTarget * 100}%, budget remaining: ${(status.latency.errorBudgetRemaining * 100).toFixed(1)}%)`,
       );
     }
 

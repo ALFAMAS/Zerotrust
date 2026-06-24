@@ -1,1 +1,163 @@
-{"nodes": [{"id": "c_users_alfamas_desktop_zeroauth_src_tests_featureflags_service_test_ts", "label": "featureFlags.service.test.ts", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\featureFlags.service.test.ts", "source_location": "L1"}, {"id": "tests_featureflags_service_test_makedbreturning", "label": "makeDbReturning()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\featureFlags.service.test.ts", "source_location": "L19"}, {"id": "tests_featureflags_service_test_flagrow", "label": "flagRow()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\featureFlags.service.test.ts", "source_location": "L28"}], "edges": [{"source": "c_users_alfamas_desktop_zeroauth_src_tests_featureflags_service_test_ts", "target": "vitest", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\featureFlags.service.test.ts", "source_location": "L1", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_tests_featureflags_service_test_ts", "target": "c_users_alfamas_desktop_zeroauth_src_db_index_ts", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\featureFlags.service.test.ts", "source_location": "L16", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_tests_featureflags_service_test_ts", "target": "db_index_getdb", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\featureFlags.service.test.ts", "source_location": "L16", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_tests_featureflags_service_test_ts", "target": "c_users_alfamas_desktop_zeroauth_src_services_featureflags_service_ts", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\featureFlags.service.test.ts", "source_location": "L17", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_tests_featureflags_service_test_ts", "target": "services_featureflags_service_isfeatureenabled", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\featureFlags.service.test.ts", "source_location": "L17", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_tests_featureflags_service_test_ts", "target": "services_featureflags_service_clearflagcache", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\featureFlags.service.test.ts", "source_location": "L17", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_tests_featureflags_service_test_ts", "target": "tests_featureflags_service_test_makedbreturning", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\featureFlags.service.test.ts", "source_location": "L19", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_tests_featureflags_service_test_ts", "target": "tests_featureflags_service_test_flagrow", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\featureFlags.service.test.ts", "source_location": "L28", "weight": 1.0}], "raw_calls": [{"caller_nid": "tests_featureflags_service_test_makedbreturning", "callee": "mockReturnThis", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\featureFlags.service.test.ts", "source_location": "L21"}, {"caller_nid": "tests_featureflags_service_test_makedbreturning", "callee": "fn", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\featureFlags.service.test.ts", "source_location": "L21"}, {"caller_nid": "tests_featureflags_service_test_makedbreturning", "callee": "mockReturnThis", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\featureFlags.service.test.ts", "source_location": "L22"}, {"caller_nid": "tests_featureflags_service_test_makedbreturning", "callee": "fn", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\featureFlags.service.test.ts", "source_location": "L22"}, {"caller_nid": "tests_featureflags_service_test_makedbreturning", "callee": "mockReturnThis", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\featureFlags.service.test.ts", "source_location": "L23"}, {"caller_nid": "tests_featureflags_service_test_makedbreturning", "callee": "fn", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\featureFlags.service.test.ts", "source_location": "L23"}, {"caller_nid": "tests_featureflags_service_test_makedbreturning", "callee": "mockResolvedValue", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\featureFlags.service.test.ts", "source_location": "L24"}, {"caller_nid": "tests_featureflags_service_test_makedbreturning", "callee": "fn", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\__tests__\\featureFlags.service.test.ts", "source_location": "L24"}]}
+{
+    "nodes": [
+        {
+            "id": "c_users_alfamas_desktop_zerotrust_src_tests_featureflags_service_test_ts",
+            "label": "featureFlags.service.test.ts",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\featureFlags.service.test.ts",
+            "source_location": "L1"
+        },
+        {
+            "id": "tests_featureflags_service_test_makedbreturning",
+            "label": "makeDbReturning()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\featureFlags.service.test.ts",
+            "source_location": "L19"
+        },
+        {
+            "id": "tests_featureflags_service_test_flagrow",
+            "label": "flagRow()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\featureFlags.service.test.ts",
+            "source_location": "L28"
+        }
+    ],
+    "edges": [
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_tests_featureflags_service_test_ts",
+            "target": "vitest",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\featureFlags.service.test.ts",
+            "source_location": "L1",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_tests_featureflags_service_test_ts",
+            "target": "c_users_alfamas_desktop_zerotrust_src_db_index_ts",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\featureFlags.service.test.ts",
+            "source_location": "L16",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_tests_featureflags_service_test_ts",
+            "target": "db_index_getdb",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\featureFlags.service.test.ts",
+            "source_location": "L16",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_tests_featureflags_service_test_ts",
+            "target": "c_users_alfamas_desktop_zerotrust_src_services_featureflags_service_ts",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\featureFlags.service.test.ts",
+            "source_location": "L17",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_tests_featureflags_service_test_ts",
+            "target": "services_featureflags_service_isfeatureenabled",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\featureFlags.service.test.ts",
+            "source_location": "L17",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_tests_featureflags_service_test_ts",
+            "target": "services_featureflags_service_clearflagcache",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\featureFlags.service.test.ts",
+            "source_location": "L17",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_tests_featureflags_service_test_ts",
+            "target": "tests_featureflags_service_test_makedbreturning",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\featureFlags.service.test.ts",
+            "source_location": "L19",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_tests_featureflags_service_test_ts",
+            "target": "tests_featureflags_service_test_flagrow",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\featureFlags.service.test.ts",
+            "source_location": "L28",
+            "weight": 1.0
+        }
+    ],
+    "raw_calls": [
+        {
+            "caller_nid": "tests_featureflags_service_test_makedbreturning",
+            "callee": "mockReturnThis",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\featureFlags.service.test.ts",
+            "source_location": "L21"
+        },
+        {
+            "caller_nid": "tests_featureflags_service_test_makedbreturning",
+            "callee": "fn",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\featureFlags.service.test.ts",
+            "source_location": "L21"
+        },
+        {
+            "caller_nid": "tests_featureflags_service_test_makedbreturning",
+            "callee": "mockReturnThis",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\featureFlags.service.test.ts",
+            "source_location": "L22"
+        },
+        {
+            "caller_nid": "tests_featureflags_service_test_makedbreturning",
+            "callee": "fn",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\featureFlags.service.test.ts",
+            "source_location": "L22"
+        },
+        {
+            "caller_nid": "tests_featureflags_service_test_makedbreturning",
+            "callee": "mockReturnThis",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\featureFlags.service.test.ts",
+            "source_location": "L23"
+        },
+        {
+            "caller_nid": "tests_featureflags_service_test_makedbreturning",
+            "callee": "fn",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\featureFlags.service.test.ts",
+            "source_location": "L23"
+        },
+        {
+            "caller_nid": "tests_featureflags_service_test_makedbreturning",
+            "callee": "mockResolvedValue",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\featureFlags.service.test.ts",
+            "source_location": "L24"
+        },
+        {
+            "caller_nid": "tests_featureflags_service_test_makedbreturning",
+            "callee": "fn",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\__tests__\\featureFlags.service.test.ts",
+            "source_location": "L24"
+        }
+    ]
+}

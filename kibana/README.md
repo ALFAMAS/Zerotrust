@@ -1,23 +1,23 @@
-# ZeroAuth Kibana Dashboards
+# zerotrust Kibana Dashboards
 
-Pre-built Kibana 8.x dashboards for monitoring your ZeroAuth deployment.
+Pre-built Kibana 8.x dashboards for monitoring your zerotrust deployment.
 
 ## Dashboards Included
 
-| File | Dashboard | Description |
-|------|-----------|-------------|
-| `auth-success-failure-rates.ndjson` | Auth Success/Failure Rates | Login success %, failure trends, top failing actions |
-| `mfa-adoption.ndjson` | MFA Adoption | MFA coverage %, breakdown by method, 30-day trend |
-| `denied-access-patterns.ndjson` | Denied Access Patterns | Geo map, top denied IPs, denial-by-error-code breakdown |
-| `rate-limit-heatmap.ndjson` | Rate Limit Heatmap | Hour×day heatmap, top offending IPs, P95 latency |
-| `device-anomaly-alerts.ndjson` | Device Anomaly Alerts | Anomaly counts, affected users, risk score distribution |
-| `zeroauth-overview.ndjson` | ZeroAuth Overview | All key metrics on a single combined dashboard |
+| File                                | Dashboard                  | Description                                             |
+| ----------------------------------- | -------------------------- | ------------------------------------------------------- |
+| `auth-success-failure-rates.ndjson` | Auth Success/Failure Rates | Login success %, failure trends, top failing actions    |
+| `mfa-adoption.ndjson`               | MFA Adoption               | MFA coverage %, breakdown by method, 30-day trend       |
+| `denied-access-patterns.ndjson`     | Denied Access Patterns     | Geo map, top denied IPs, denial-by-error-code breakdown |
+| `rate-limit-heatmap.ndjson`         | Rate Limit Heatmap         | Hour×day heatmap, top offending IPs, P95 latency        |
+| `device-anomaly-alerts.ndjson`      | Device Anomaly Alerts      | Anomaly counts, affected users, risk score distribution |
+| `zerotrust-overview.ndjson`         | zerotrust Overview         | All key metrics on a single combined dashboard          |
 
 ## Prerequisites
 
 - Kibana 8.x connected to your Elasticsearch cluster
-- ZeroAuth audit pipeline enabled (`ELASTICSEARCH_ENABLED=true` in `.env`)
-- Audit data flowing into the `zeroauth-audit-YYYY.MM.DD` index pattern
+- zerotrust audit pipeline enabled (`ELASTICSEARCH_ENABLED=true` in `.env`)
+- Audit data flowing into the `zerotrust-audit-YYYY.MM.DD` index pattern
 
 ## Import Instructions
 
@@ -52,14 +52,14 @@ done
 curl -X POST "http://localhost:5601/api/saved_objects/_import" \
   -H "kbn-xsrf: true" \
   -H "Authorization: Basic $(echo -n 'elastic:yourpassword' | base64)" \
-  -F file=@kibana/zeroauth-overview.ndjson
+  -F file=@kibana/zerotrust-overview.ndjson
 ```
 
 ## Index Pattern
 
-All dashboards use the index pattern **`zeroauth-audit-*`** with `timestamp` as the time field.
+All dashboards use the index pattern **`zerotrust-audit-*`** with `timestamp` as the time field.
 
-The ZeroAuth audit pipeline writes to daily indices: `zeroauth-audit-2026.05.21`
+The zerotrust audit pipeline writes to daily indices: `zerotrust-audit-2026.05.21`
 
 ## Customisation
 
@@ -70,10 +70,12 @@ The ZeroAuth audit pipeline writes to daily indices: `zeroauth-audit-2026.05.21`
 ## Troubleshooting
 
 **No data shown?**
+
 1. Check `ELASTICSEARCH_ENABLED=true` in your `.env`
-2. Verify the index exists: `GET zeroauth-audit-*/_count`
+2. Verify the index exists: `GET zerotrust-audit-*/_count`
 3. Ensure the time range includes your data
-4. Confirm the index pattern matches exactly: `zeroauth-audit-*`
+4. Confirm the index pattern matches exactly: `zerotrust-audit-*`
 
 **Import fails with "already exists"?**
+
 - Select **Overwrite all conflicts** in the import dialog.

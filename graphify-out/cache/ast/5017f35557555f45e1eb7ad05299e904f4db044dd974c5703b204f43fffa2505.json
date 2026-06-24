@@ -1,1 +1,114 @@
-{"nodes": [{"id": "c_users_alfamas_desktop_zeroauth_tests_load_session_revocation_k6_js", "label": "session-revocation.k6.js", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\tests\\load\\session-revocation.k6.js", "source_location": "L1"}, {"id": "load_session_revocation_k6_options", "label": "options", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\tests\\load\\session-revocation.k6.js", "source_location": "L4"}, {"id": "load_session_revocation_k6_headers", "label": "headers", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\tests\\load\\session-revocation.k6.js", "source_location": "L23"}, {"id": "load_session_revocation_k6_sessionsres", "label": "sessionsRes", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\tests\\load\\session-revocation.k6.js", "source_location": "L28"}, {"id": "load_session_revocation_k6_data", "label": "data", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\tests\\load\\session-revocation.k6.js", "source_location": "L33"}, {"id": "load_session_revocation_k6_revokeres", "label": "revokeRes", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\tests\\load\\session-revocation.k6.js", "source_location": "L36"}], "edges": [{"source": "c_users_alfamas_desktop_zeroauth_tests_load_session_revocation_k6_js", "target": "http", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\tests\\load\\session-revocation.k6.js", "source_location": "L1", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_tests_load_session_revocation_k6_js", "target": "k6", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\tests\\load\\session-revocation.k6.js", "source_location": "L2", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_tests_load_session_revocation_k6_js", "target": "load_session_revocation_k6_options", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\tests\\load\\session-revocation.k6.js", "source_location": "L4", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_tests_load_session_revocation_k6_js", "target": "load_session_revocation_k6_headers", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\tests\\load\\session-revocation.k6.js", "source_location": "L23", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_tests_load_session_revocation_k6_js", "target": "load_session_revocation_k6_sessionsres", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\tests\\load\\session-revocation.k6.js", "source_location": "L28", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_tests_load_session_revocation_k6_js", "target": "load_session_revocation_k6_data", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\tests\\load\\session-revocation.k6.js", "source_location": "L33", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_tests_load_session_revocation_k6_js", "target": "load_session_revocation_k6_revokeres", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\tests\\load\\session-revocation.k6.js", "source_location": "L36", "weight": 1.0}], "raw_calls": []}
+{
+    "nodes": [
+        {
+            "id": "c_users_alfamas_desktop_zerotrust_tests_load_session_revocation_k6_js",
+            "label": "session-revocation.k6.js",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\tests\\load\\session-revocation.k6.js",
+            "source_location": "L1"
+        },
+        {
+            "id": "load_session_revocation_k6_options",
+            "label": "options",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\tests\\load\\session-revocation.k6.js",
+            "source_location": "L4"
+        },
+        {
+            "id": "load_session_revocation_k6_headers",
+            "label": "headers",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\tests\\load\\session-revocation.k6.js",
+            "source_location": "L23"
+        },
+        {
+            "id": "load_session_revocation_k6_sessionsres",
+            "label": "sessionsRes",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\tests\\load\\session-revocation.k6.js",
+            "source_location": "L28"
+        },
+        {
+            "id": "load_session_revocation_k6_data",
+            "label": "data",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\tests\\load\\session-revocation.k6.js",
+            "source_location": "L33"
+        },
+        {
+            "id": "load_session_revocation_k6_revokeres",
+            "label": "revokeRes",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\tests\\load\\session-revocation.k6.js",
+            "source_location": "L36"
+        }
+    ],
+    "edges": [
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_tests_load_session_revocation_k6_js",
+            "target": "http",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\tests\\load\\session-revocation.k6.js",
+            "source_location": "L1",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_tests_load_session_revocation_k6_js",
+            "target": "k6",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\tests\\load\\session-revocation.k6.js",
+            "source_location": "L2",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_tests_load_session_revocation_k6_js",
+            "target": "load_session_revocation_k6_options",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\tests\\load\\session-revocation.k6.js",
+            "source_location": "L4",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_tests_load_session_revocation_k6_js",
+            "target": "load_session_revocation_k6_headers",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\tests\\load\\session-revocation.k6.js",
+            "source_location": "L23",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_tests_load_session_revocation_k6_js",
+            "target": "load_session_revocation_k6_sessionsres",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\tests\\load\\session-revocation.k6.js",
+            "source_location": "L28",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_tests_load_session_revocation_k6_js",
+            "target": "load_session_revocation_k6_data",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\tests\\load\\session-revocation.k6.js",
+            "source_location": "L33",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_tests_load_session_revocation_k6_js",
+            "target": "load_session_revocation_k6_revokeres",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\tests\\load\\session-revocation.k6.js",
+            "source_location": "L36",
+            "weight": 1.0
+        }
+    ],
+    "raw_calls": []
+}

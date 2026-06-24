@@ -9,7 +9,11 @@ vi.mock("../db", () => ({
 
 vi.mock("../config", () => ({
   getConfig: () => ({
-    session: { defaultTTL: 3600, refreshTokenTTL: 604800, maxConcurrentDevices: 5 },
+    session: {
+      defaultTTL: 3600,
+      refreshTokenTTL: 604800,
+      maxConcurrentDevices: 5,
+    },
     security: {
       bcryptRounds: 4,
       tokenSecretHex: "a".repeat(64),
@@ -30,7 +34,12 @@ vi.mock("../config", () => ({
       },
     },
     oauth: { providers: {} },
-    elasticsearch: { enabled: false, host: "localhost", port: 9200, indexPrefix: "zeroauth" },
+    elasticsearch: {
+      enabled: false,
+      host: "localhost",
+      port: 9200,
+      indexPrefix: "zerotrust",
+    },
     logging: { level: "error", format: "json" },
   }),
 }));
@@ -94,7 +103,11 @@ async function getApp(db: ReturnType<typeof makeDbChain>) {
   // Stub out authMiddleware so every request is treated as authenticated
   vi.doMock("../middleware/auth", () => ({
     authMiddleware: async (c: any, next: any) => {
-      c.set("user", { id: USER_ID, email: "alice@example.com", roles: ["user"] });
+      c.set("user", {
+        id: USER_ID,
+        email: "alice@example.com",
+        roles: ["user"],
+      });
       return next();
     },
   }));
@@ -112,7 +125,10 @@ async function getUnauthApp() {
 
   vi.doMock("../middleware/auth", () => ({
     authMiddleware: async (c: any) => {
-      return c.json({ error: "UNAUTHORIZED", message: "Authentication required" }, 401);
+      return c.json(
+        { error: "UNAUTHORIZED", message: "Authentication required" },
+        401,
+      );
     },
   }));
 
@@ -145,7 +161,10 @@ describe("GET /notifications", () => {
   });
 
   it("returns notifications ordered by createdAt desc (up to 20)", async () => {
-    const notifications = [makeNotification(), makeNotification({ id: "00000000-0000-0000-0000-000000000011" })];
+    const notifications = [
+      makeNotification(),
+      makeNotification({ id: "00000000-0000-0000-0000-000000000011" }),
+    ];
     const db = makeDbChain(notifications);
     db.limit.mockResolvedValue(notifications);
     const app = await getApp(db);
@@ -184,7 +203,10 @@ describe("GET /notifications/unread-count", () => {
 
   it("returns the correct unread count", async () => {
     const db = makeDbChain([]);
-    const unreadNotifs = [makeNotification(), makeNotification({ id: "00000000-0000-0000-0000-000000000012" })];
+    const unreadNotifs = [
+      makeNotification(),
+      makeNotification({ id: "00000000-0000-0000-0000-000000000012" }),
+    ];
     db.where.mockResolvedValue(unreadNotifs);
     const app = await getApp(db);
     const res = await app.request("/unread-count");
@@ -224,7 +246,10 @@ describe("POST /notifications/:id/read", () => {
     const db = makeDbChain([]);
     db.returning.mockResolvedValue([]);
     const app = await getApp(db);
-    const res = await app.request("/00000000-0000-0000-0000-000000000099/read", { method: "POST" });
+    const res = await app.request(
+      "/00000000-0000-0000-0000-000000000099/read",
+      { method: "POST" },
+    );
     expect(res.status).toBe(404);
     const body = await res.json();
     expect(body.error).toBe("NOT_FOUND");

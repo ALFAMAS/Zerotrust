@@ -1,1 +1,371 @@
-{"nodes": [{"id": "c_users_alfamas_desktop_zeroauth_src_services_proofofwork_service_ts", "label": "proofOfWork.service.ts", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\proofOfWork.service.ts", "source_location": "L1"}, {"id": "services_proofofwork_service_default_difficulty", "label": "DEFAULT_DIFFICULTY", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\proofOfWork.service.ts", "source_location": "L15"}, {"id": "services_proofofwork_service_ttl_ms", "label": "TTL_MS", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\proofOfWork.service.ts", "source_location": "L16"}, {"id": "services_proofofwork_service_issignuppowenabled", "label": "isSignupPowEnabled()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\proofOfWork.service.ts", "source_location": "L18"}, {"id": "services_proofofwork_service_secret", "label": "secret()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\proofOfWork.service.ts", "source_location": "L22"}, {"id": "services_proofofwork_service_sign", "label": "sign()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\proofOfWork.service.ts", "source_location": "L27"}, {"id": "services_proofofwork_service_powchallenge", "label": "PowChallenge", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\proofOfWork.service.ts", "source_location": "L31"}, {"id": "services_proofofwork_service_createpowchallenge", "label": "createPowChallenge()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\proofOfWork.service.ts", "source_location": "L38"}, {"id": "services_proofofwork_service_leadingzerobits", "label": "leadingZeroBits()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\proofOfWork.service.ts", "source_location": "L47"}, {"id": "services_proofofwork_service_powresult", "label": "PowResult", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\proofOfWork.service.ts", "source_location": "L65"}, {"id": "services_proofofwork_service_verifypowsolution", "label": "verifyPowSolution()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\proofOfWork.service.ts", "source_location": "L68"}], "edges": [{"source": "c_users_alfamas_desktop_zeroauth_src_services_proofofwork_service_ts", "target": "crypto", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\proofOfWork.service.ts", "source_location": "L12", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_proofofwork_service_ts", "target": "c_users_alfamas_desktop_zeroauth_src_config_index_ts", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\proofOfWork.service.ts", "source_location": "L13", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_proofofwork_service_ts", "target": "config_index_getconfig", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\proofOfWork.service.ts", "source_location": "L13", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_proofofwork_service_ts", "target": "services_proofofwork_service_default_difficulty", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\proofOfWork.service.ts", "source_location": "L15", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_proofofwork_service_ts", "target": "services_proofofwork_service_ttl_ms", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\proofOfWork.service.ts", "source_location": "L16", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_proofofwork_service_ts", "target": "services_proofofwork_service_issignuppowenabled", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\proofOfWork.service.ts", "source_location": "L18", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_proofofwork_service_ts", "target": "services_proofofwork_service_secret", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\proofOfWork.service.ts", "source_location": "L22", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_proofofwork_service_ts", "target": "services_proofofwork_service_sign", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\proofOfWork.service.ts", "source_location": "L27", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_proofofwork_service_ts", "target": "services_proofofwork_service_powchallenge", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\proofOfWork.service.ts", "source_location": "L31", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_proofofwork_service_ts", "target": "services_proofofwork_service_createpowchallenge", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\proofOfWork.service.ts", "source_location": "L38", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_proofofwork_service_ts", "target": "services_proofofwork_service_leadingzerobits", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\proofOfWork.service.ts", "source_location": "L47", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_proofofwork_service_ts", "target": "services_proofofwork_service_powresult", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\proofOfWork.service.ts", "source_location": "L65", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_services_proofofwork_service_ts", "target": "services_proofofwork_service_verifypowsolution", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\proofOfWork.service.ts", "source_location": "L68", "weight": 1.0}, {"source": "services_proofofwork_service_sign", "target": "services_proofofwork_service_secret", "relation": "calls", "context": "call", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\proofOfWork.service.ts", "source_location": "L28", "weight": 1.0}, {"source": "services_proofofwork_service_createpowchallenge", "target": "services_proofofwork_service_sign", "relation": "calls", "context": "call", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\proofOfWork.service.ts", "source_location": "L42", "weight": 1.0}, {"source": "services_proofofwork_service_verifypowsolution", "target": "services_proofofwork_service_sign", "relation": "calls", "context": "call", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\proofOfWork.service.ts", "source_location": "L77", "weight": 1.0}, {"source": "services_proofofwork_service_verifypowsolution", "target": "services_proofofwork_service_leadingzerobits", "relation": "calls", "context": "call", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\proofOfWork.service.ts", "source_location": "L89", "weight": 1.0}], "raw_calls": [{"caller_nid": "services_proofofwork_service_secret", "callee": "getConfig", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\proofOfWork.service.ts", "source_location": "L24"}, {"caller_nid": "services_proofofwork_service_sign", "callee": "digest", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\proofOfWork.service.ts", "source_location": "L28"}, {"caller_nid": "services_proofofwork_service_sign", "callee": "update", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\proofOfWork.service.ts", "source_location": "L28"}, {"caller_nid": "services_proofofwork_service_sign", "callee": "createHmac", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\proofOfWork.service.ts", "source_location": "L28"}, {"caller_nid": "services_proofofwork_service_createpowchallenge", "callee": "toString", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\proofOfWork.service.ts", "source_location": "L39"}, {"caller_nid": "services_proofofwork_service_createpowchallenge", "callee": "randomBytes", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\proofOfWork.service.ts", "source_location": "L39"}, {"caller_nid": "services_proofofwork_service_createpowchallenge", "callee": "now", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\proofOfWork.service.ts", "source_location": "L40"}, {"caller_nid": "services_proofofwork_service_verifypowsolution", "callee": "split", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\proofOfWork.service.ts", "source_location": "L71"}, {"caller_nid": "services_proofofwork_service_verifypowsolution", "callee": "from", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\proofOfWork.service.ts", "source_location": "L78"}, {"caller_nid": "services_proofofwork_service_verifypowsolution", "callee": "from", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\proofOfWork.service.ts", "source_location": "L79"}, {"caller_nid": "services_proofofwork_service_verifypowsolution", "callee": "timingSafeEqual", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\proofOfWork.service.ts", "source_location": "L80"}, {"caller_nid": "services_proofofwork_service_verifypowsolution", "callee": "Number", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\proofOfWork.service.ts", "source_location": "L83"}, {"caller_nid": "services_proofofwork_service_verifypowsolution", "callee": "isFinite", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\proofOfWork.service.ts", "source_location": "L84"}, {"caller_nid": "services_proofofwork_service_verifypowsolution", "callee": "now", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\proofOfWork.service.ts", "source_location": "L84"}, {"caller_nid": "services_proofofwork_service_verifypowsolution", "callee": "Number", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\proofOfWork.service.ts", "source_location": "L87"}, {"caller_nid": "services_proofofwork_service_verifypowsolution", "callee": "digest", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\proofOfWork.service.ts", "source_location": "L88"}, {"caller_nid": "services_proofofwork_service_verifypowsolution", "callee": "update", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\proofOfWork.service.ts", "source_location": "L88"}, {"caller_nid": "services_proofofwork_service_verifypowsolution", "callee": "createHash", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\services\\proofOfWork.service.ts", "source_location": "L88"}]}
+{
+    "nodes": [
+        {
+            "id": "c_users_alfamas_desktop_zerotrust_src_services_proofofwork_service_ts",
+            "label": "proofOfWork.service.ts",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\proofOfWork.service.ts",
+            "source_location": "L1"
+        },
+        {
+            "id": "services_proofofwork_service_default_difficulty",
+            "label": "DEFAULT_DIFFICULTY",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\proofOfWork.service.ts",
+            "source_location": "L15"
+        },
+        {
+            "id": "services_proofofwork_service_ttl_ms",
+            "label": "TTL_MS",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\proofOfWork.service.ts",
+            "source_location": "L16"
+        },
+        {
+            "id": "services_proofofwork_service_issignuppowenabled",
+            "label": "isSignupPowEnabled()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\proofOfWork.service.ts",
+            "source_location": "L18"
+        },
+        {
+            "id": "services_proofofwork_service_secret",
+            "label": "secret()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\proofOfWork.service.ts",
+            "source_location": "L22"
+        },
+        {
+            "id": "services_proofofwork_service_sign",
+            "label": "sign()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\proofOfWork.service.ts",
+            "source_location": "L27"
+        },
+        {
+            "id": "services_proofofwork_service_powchallenge",
+            "label": "PowChallenge",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\proofOfWork.service.ts",
+            "source_location": "L31"
+        },
+        {
+            "id": "services_proofofwork_service_createpowchallenge",
+            "label": "createPowChallenge()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\proofOfWork.service.ts",
+            "source_location": "L38"
+        },
+        {
+            "id": "services_proofofwork_service_leadingzerobits",
+            "label": "leadingZeroBits()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\proofOfWork.service.ts",
+            "source_location": "L47"
+        },
+        {
+            "id": "services_proofofwork_service_powresult",
+            "label": "PowResult",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\proofOfWork.service.ts",
+            "source_location": "L65"
+        },
+        {
+            "id": "services_proofofwork_service_verifypowsolution",
+            "label": "verifyPowSolution()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\proofOfWork.service.ts",
+            "source_location": "L68"
+        }
+    ],
+    "edges": [
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_proofofwork_service_ts",
+            "target": "crypto",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\proofOfWork.service.ts",
+            "source_location": "L12",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_proofofwork_service_ts",
+            "target": "c_users_alfamas_desktop_zerotrust_src_config_index_ts",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\proofOfWork.service.ts",
+            "source_location": "L13",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_proofofwork_service_ts",
+            "target": "config_index_getconfig",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\proofOfWork.service.ts",
+            "source_location": "L13",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_proofofwork_service_ts",
+            "target": "services_proofofwork_service_default_difficulty",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\proofOfWork.service.ts",
+            "source_location": "L15",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_proofofwork_service_ts",
+            "target": "services_proofofwork_service_ttl_ms",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\proofOfWork.service.ts",
+            "source_location": "L16",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_proofofwork_service_ts",
+            "target": "services_proofofwork_service_issignuppowenabled",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\proofOfWork.service.ts",
+            "source_location": "L18",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_proofofwork_service_ts",
+            "target": "services_proofofwork_service_secret",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\proofOfWork.service.ts",
+            "source_location": "L22",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_proofofwork_service_ts",
+            "target": "services_proofofwork_service_sign",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\proofOfWork.service.ts",
+            "source_location": "L27",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_proofofwork_service_ts",
+            "target": "services_proofofwork_service_powchallenge",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\proofOfWork.service.ts",
+            "source_location": "L31",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_proofofwork_service_ts",
+            "target": "services_proofofwork_service_createpowchallenge",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\proofOfWork.service.ts",
+            "source_location": "L38",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_proofofwork_service_ts",
+            "target": "services_proofofwork_service_leadingzerobits",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\proofOfWork.service.ts",
+            "source_location": "L47",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_proofofwork_service_ts",
+            "target": "services_proofofwork_service_powresult",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\proofOfWork.service.ts",
+            "source_location": "L65",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_services_proofofwork_service_ts",
+            "target": "services_proofofwork_service_verifypowsolution",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\proofOfWork.service.ts",
+            "source_location": "L68",
+            "weight": 1.0
+        },
+        {
+            "source": "services_proofofwork_service_sign",
+            "target": "services_proofofwork_service_secret",
+            "relation": "calls",
+            "context": "call",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\proofOfWork.service.ts",
+            "source_location": "L28",
+            "weight": 1.0
+        },
+        {
+            "source": "services_proofofwork_service_createpowchallenge",
+            "target": "services_proofofwork_service_sign",
+            "relation": "calls",
+            "context": "call",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\proofOfWork.service.ts",
+            "source_location": "L42",
+            "weight": 1.0
+        },
+        {
+            "source": "services_proofofwork_service_verifypowsolution",
+            "target": "services_proofofwork_service_sign",
+            "relation": "calls",
+            "context": "call",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\proofOfWork.service.ts",
+            "source_location": "L77",
+            "weight": 1.0
+        },
+        {
+            "source": "services_proofofwork_service_verifypowsolution",
+            "target": "services_proofofwork_service_leadingzerobits",
+            "relation": "calls",
+            "context": "call",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\proofOfWork.service.ts",
+            "source_location": "L89",
+            "weight": 1.0
+        }
+    ],
+    "raw_calls": [
+        {
+            "caller_nid": "services_proofofwork_service_secret",
+            "callee": "getConfig",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\proofOfWork.service.ts",
+            "source_location": "L24"
+        },
+        {
+            "caller_nid": "services_proofofwork_service_sign",
+            "callee": "digest",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\proofOfWork.service.ts",
+            "source_location": "L28"
+        },
+        {
+            "caller_nid": "services_proofofwork_service_sign",
+            "callee": "update",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\proofOfWork.service.ts",
+            "source_location": "L28"
+        },
+        {
+            "caller_nid": "services_proofofwork_service_sign",
+            "callee": "createHmac",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\proofOfWork.service.ts",
+            "source_location": "L28"
+        },
+        {
+            "caller_nid": "services_proofofwork_service_createpowchallenge",
+            "callee": "toString",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\proofOfWork.service.ts",
+            "source_location": "L39"
+        },
+        {
+            "caller_nid": "services_proofofwork_service_createpowchallenge",
+            "callee": "randomBytes",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\proofOfWork.service.ts",
+            "source_location": "L39"
+        },
+        {
+            "caller_nid": "services_proofofwork_service_createpowchallenge",
+            "callee": "now",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\proofOfWork.service.ts",
+            "source_location": "L40"
+        },
+        {
+            "caller_nid": "services_proofofwork_service_verifypowsolution",
+            "callee": "split",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\proofOfWork.service.ts",
+            "source_location": "L71"
+        },
+        {
+            "caller_nid": "services_proofofwork_service_verifypowsolution",
+            "callee": "from",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\proofOfWork.service.ts",
+            "source_location": "L78"
+        },
+        {
+            "caller_nid": "services_proofofwork_service_verifypowsolution",
+            "callee": "from",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\proofOfWork.service.ts",
+            "source_location": "L79"
+        },
+        {
+            "caller_nid": "services_proofofwork_service_verifypowsolution",
+            "callee": "timingSafeEqual",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\proofOfWork.service.ts",
+            "source_location": "L80"
+        },
+        {
+            "caller_nid": "services_proofofwork_service_verifypowsolution",
+            "callee": "Number",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\proofOfWork.service.ts",
+            "source_location": "L83"
+        },
+        {
+            "caller_nid": "services_proofofwork_service_verifypowsolution",
+            "callee": "isFinite",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\proofOfWork.service.ts",
+            "source_location": "L84"
+        },
+        {
+            "caller_nid": "services_proofofwork_service_verifypowsolution",
+            "callee": "now",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\proofOfWork.service.ts",
+            "source_location": "L84"
+        },
+        {
+            "caller_nid": "services_proofofwork_service_verifypowsolution",
+            "callee": "Number",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\proofOfWork.service.ts",
+            "source_location": "L87"
+        },
+        {
+            "caller_nid": "services_proofofwork_service_verifypowsolution",
+            "callee": "digest",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\proofOfWork.service.ts",
+            "source_location": "L88"
+        },
+        {
+            "caller_nid": "services_proofofwork_service_verifypowsolution",
+            "callee": "update",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\proofOfWork.service.ts",
+            "source_location": "L88"
+        },
+        {
+            "caller_nid": "services_proofofwork_service_verifypowsolution",
+            "callee": "createHash",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\services\\proofOfWork.service.ts",
+            "source_location": "L88"
+        }
+    ]
+}

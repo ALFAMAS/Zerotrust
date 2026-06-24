@@ -9,7 +9,7 @@ import type { HonoEnv } from "../../shared/types";
 const router = new Hono<HonoEnv>();
 const logger = getLogger("unsubscribe-routes");
 
-const APP_NAME = process.env.APP_NAME ?? "ZeroAuth";
+const APP_NAME = process.env.APP_NAME ?? "zerotrust";
 const APP_URL = process.env.APP_URL ?? "http://localhost:3000";
 
 function successPage(message: string): string {
@@ -72,7 +72,10 @@ router.get("/unsubscribe", async (c) => {
 
   const data = verifyUnsubscribeToken(token);
   if (!data) {
-    return c.html(errorPage("This unsubscribe link is invalid or has expired."), 400);
+    return c.html(
+      errorPage("This unsubscribe link is invalid or has expired."),
+      400,
+    );
   }
 
   try {
@@ -88,7 +91,8 @@ router.get("/unsubscribe", async (c) => {
     }
 
     const meta = (user.metadata as Record<string, unknown>) ?? {};
-    const prefs = (meta.notificationPreferences as Record<string, unknown>) ?? {};
+    const prefs =
+      (meta.notificationPreferences as Record<string, unknown>) ?? {};
 
     let updatedPrefs: Record<string, unknown>;
     let message: string;
@@ -112,7 +116,10 @@ router.get("/unsubscribe", async (c) => {
       })
       .where(eq(usersTable.id, user.id));
 
-    logger.info("User unsubscribed", { userId: user.id, emailType: data.emailType });
+    logger.info("User unsubscribed", {
+      userId: user.id,
+      emailType: data.emailType,
+    });
     return c.html(successPage(message));
   } catch (err) {
     logger.error("Unsubscribe error", err as Error);

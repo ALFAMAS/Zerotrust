@@ -1,1 +1,645 @@
-{"nodes": [{"id": "c_users_alfamas_desktop_zeroauth_src_api_routes_notification_routes_ts", "label": "notification.routes.ts", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\notification.routes.ts", "source_location": "L1"}, {"id": "routes_notification_routes_notificationpreferences", "label": "NotificationPreferences", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\notification.routes.ts", "source_location": "L17"}, {"id": "routes_notification_routes_router", "label": "router", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\notification.routes.ts", "source_location": "L22"}, {"id": "routes_notification_routes_logger", "label": "logger", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\notification.routes.ts", "source_location": "L23"}, {"id": "routes_notification_routes_ssecontroller", "label": "SSEController", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\notification.routes.ts", "source_location": "L27"}, {"id": "routes_notification_routes_sseclients", "label": "sseClients", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\notification.routes.ts", "source_location": "L32"}, {"id": "routes_notification_routes_broadcastnotification", "label": "broadcastNotification()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\notification.routes.ts", "source_location": "L39"}, {"id": "routes_notification_routes_user", "label": "user", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\notification.routes.ts", "source_location": "L98"}, {"id": "routes_notification_routes_db", "label": "db", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\notification.routes.ts", "source_location": "L102"}, {"id": "routes_notification_routes_id", "label": "id", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\notification.routes.ts", "source_location": "L144"}, {"id": "routes_notification_routes_stream", "label": "stream", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\notification.routes.ts", "source_location": "L193"}, {"id": "routes_notification_routes_prefs", "label": "prefs", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\notification.routes.ts", "source_location": "L269"}, {"id": "routes_notification_routes_prefsschema", "label": "prefsSchema", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\notification.routes.ts", "source_location": "L284"}, {"id": "routes_notification_routes_parsed", "label": "parsed", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\notification.routes.ts", "source_location": "L292"}, {"id": "routes_notification_routes_subscribeschema", "label": "subscribeSchema", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\notification.routes.ts", "source_location": "L334"}], "edges": [{"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_notification_routes_ts", "target": "hono", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\notification.routes.ts", "source_location": "L1", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_notification_routes_ts", "target": "drizzle_orm", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\notification.routes.ts", "source_location": "L2", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_notification_routes_ts", "target": "zod", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\notification.routes.ts", "source_location": "L3", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_notification_routes_ts", "target": "c_users_alfamas_desktop_zeroauth_src_db_index_ts", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\notification.routes.ts", "source_location": "L4", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_notification_routes_ts", "target": "db_index_getdb", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\notification.routes.ts", "source_location": "L4", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_notification_routes_ts", "target": "c_users_alfamas_desktop_zeroauth_src_db_schema_ts", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\notification.routes.ts", "source_location": "L5", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_notification_routes_ts", "target": "db_schema_notificationstable", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\notification.routes.ts", "source_location": "L5", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_notification_routes_ts", "target": "db_schema_userstable", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\notification.routes.ts", "source_location": "L5", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_notification_routes_ts", "target": "c_users_alfamas_desktop_zeroauth_src_middleware_auth_ts", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\notification.routes.ts", "source_location": "L6", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_notification_routes_ts", "target": "middleware_auth_authmiddleware", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\notification.routes.ts", "source_location": "L6", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_notification_routes_ts", "target": "c_users_alfamas_desktop_zeroauth_src_logger_index_ts", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\notification.routes.ts", "source_location": "L7", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_notification_routes_ts", "target": "logger_index_getlogger", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\notification.routes.ts", "source_location": "L7", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_notification_routes_ts", "target": "c_users_alfamas_desktop_zeroauth_src_services_email_service_ts", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\notification.routes.ts", "source_location": "L8", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_notification_routes_ts", "target": "services_email_service_sendnotificationemail", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\notification.routes.ts", "source_location": "L8", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_notification_routes_ts", "target": "c_users_alfamas_desktop_zeroauth_src_services_webpush_service_ts", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\notification.routes.ts", "source_location": "L9", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_notification_routes_ts", "target": "services_webpush_service_getvapidpublickey", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\notification.routes.ts", "source_location": "L9", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_notification_routes_ts", "target": "services_webpush_service_savesubscription", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\notification.routes.ts", "source_location": "L9", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_notification_routes_ts", "target": "services_webpush_service_removesubscription", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\notification.routes.ts", "source_location": "L9", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_notification_routes_ts", "target": "services_webpush_service_sendwebpush", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\notification.routes.ts", "source_location": "L9", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_notification_routes_ts", "target": "c_users_alfamas_desktop_zeroauth_src_shared_types_ts", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\notification.routes.ts", "source_location": "L15", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_notification_routes_ts", "target": "shared_types_honoenv", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\notification.routes.ts", "source_location": "L15", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_notification_routes_ts", "target": "routes_notification_routes_notificationpreferences", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\notification.routes.ts", "source_location": "L17", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_notification_routes_ts", "target": "routes_notification_routes_router", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\notification.routes.ts", "source_location": "L22", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_notification_routes_ts", "target": "routes_notification_routes_logger", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\notification.routes.ts", "source_location": "L23", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_notification_routes_ts", "target": "routes_notification_routes_ssecontroller", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\notification.routes.ts", "source_location": "L27", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_notification_routes_ts", "target": "routes_notification_routes_sseclients", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\notification.routes.ts", "source_location": "L32", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_notification_routes_ts", "target": "routes_notification_routes_broadcastnotification", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\notification.routes.ts", "source_location": "L39", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_notification_routes_ts", "target": "routes_notification_routes_user", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\notification.routes.ts", "source_location": "L98", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_notification_routes_ts", "target": "routes_notification_routes_db", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\notification.routes.ts", "source_location": "L102", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_notification_routes_ts", "target": "routes_notification_routes_user", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\notification.routes.ts", "source_location": "L120", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_notification_routes_ts", "target": "routes_notification_routes_db", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\notification.routes.ts", "source_location": "L124", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_notification_routes_ts", "target": "routes_notification_routes_user", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\notification.routes.ts", "source_location": "L140", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_notification_routes_ts", "target": "routes_notification_routes_id", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\notification.routes.ts", "source_location": "L144", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_notification_routes_ts", "target": "routes_notification_routes_db", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\notification.routes.ts", "source_location": "L145", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_notification_routes_ts", "target": "routes_notification_routes_user", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\notification.routes.ts", "source_location": "L165", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_notification_routes_ts", "target": "routes_notification_routes_db", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\notification.routes.ts", "source_location": "L169", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_notification_routes_ts", "target": "routes_notification_routes_user", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\notification.routes.ts", "source_location": "L187", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_notification_routes_ts", "target": "routes_notification_routes_stream", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\notification.routes.ts", "source_location": "L193", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_notification_routes_ts", "target": "routes_notification_routes_user", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\notification.routes.ts", "source_location": "L261", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_notification_routes_ts", "target": "routes_notification_routes_db", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\notification.routes.ts", "source_location": "L263", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_notification_routes_ts", "target": "routes_notification_routes_prefs", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\notification.routes.ts", "source_location": "L269", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_notification_routes_ts", "target": "routes_notification_routes_prefsschema", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\notification.routes.ts", "source_location": "L284", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_notification_routes_ts", "target": "routes_notification_routes_user", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\notification.routes.ts", "source_location": "L290", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_notification_routes_ts", "target": "routes_notification_routes_parsed", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\notification.routes.ts", "source_location": "L292", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_notification_routes_ts", "target": "routes_notification_routes_db", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\notification.routes.ts", "source_location": "L297", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_notification_routes_ts", "target": "routes_notification_routes_subscribeschema", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\notification.routes.ts", "source_location": "L334", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_notification_routes_ts", "target": "routes_notification_routes_user", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\notification.routes.ts", "source_location": "L344", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_notification_routes_ts", "target": "routes_notification_routes_parsed", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\notification.routes.ts", "source_location": "L349", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_api_routes_notification_routes_ts", "target": "routes_notification_routes_user", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\notification.routes.ts", "source_location": "L364", "weight": 1.0}], "raw_calls": [{"caller_nid": "routes_notification_routes_broadcastnotification", "callee": "get", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\notification.routes.ts", "source_location": "L40"}, {"caller_nid": "routes_notification_routes_broadcastnotification", "callee": "catch", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\notification.routes.ts", "source_location": "L45"}, {"caller_nid": "routes_notification_routes_broadcastnotification", "callee": "sendWebPush", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\notification.routes.ts", "source_location": "L45"}, {"caller_nid": "routes_notification_routes_broadcastnotification", "callee": "String", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\notification.routes.ts", "source_location": "L46"}, {"caller_nid": "routes_notification_routes_broadcastnotification", "callee": "String", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\notification.routes.ts", "source_location": "L47"}, {"caller_nid": "routes_notification_routes_broadcastnotification", "callee": "String", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\notification.routes.ts", "source_location": "L48"}, {"caller_nid": "routes_notification_routes_broadcastnotification", "callee": "String", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\notification.routes.ts", "source_location": "L49"}, {"caller_nid": "routes_notification_routes_broadcastnotification", "callee": "(async () => {\r\n      try {\r\n        const db = getDb();\r\n        const userRows = await db\r\n          .select({ email: usersTable.email, displayName: usersTable.displayName })\r\n          .from(usersTable)\r\n          .where(eq(usersTable.id, userId))\r\n          .limit(1);\r\n        const user = userRows[0];\r\n        if (user?.email) {\r\n          void sendNotificationEmail(user.email, {\r\n            name: user.displayName ?? user.email,\r\n            title: String(notification.title ?? \"New notification\"),\r\n            body: String(notification.body ?? notification.message ?? \"\"),\r\n            link: notification.link ? String(notification.link) : undefined,\r\n          });\r\n        }\r\n      } catch {\r\n        // non-blocking \u2014 ignore errors\r\n      }\r\n    })", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\notification.routes.ts", "source_location": "L56"}, {"caller_nid": "routes_notification_routes_broadcastnotification", "callee": "stringify", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\notification.routes.ts", "source_location": "L80"}, {"caller_nid": "routes_notification_routes_broadcastnotification", "callee": "send", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\api\\routes\\notification.routes.ts", "source_location": "L83"}]}
+{
+    "nodes": [
+        {
+            "id": "c_users_alfamas_desktop_zerotrust_src_api_routes_notification_routes_ts",
+            "label": "notification.routes.ts",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\notification.routes.ts",
+            "source_location": "L1"
+        },
+        {
+            "id": "routes_notification_routes_notificationpreferences",
+            "label": "NotificationPreferences",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\notification.routes.ts",
+            "source_location": "L17"
+        },
+        {
+            "id": "routes_notification_routes_router",
+            "label": "router",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\notification.routes.ts",
+            "source_location": "L22"
+        },
+        {
+            "id": "routes_notification_routes_logger",
+            "label": "logger",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\notification.routes.ts",
+            "source_location": "L23"
+        },
+        {
+            "id": "routes_notification_routes_ssecontroller",
+            "label": "SSEController",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\notification.routes.ts",
+            "source_location": "L27"
+        },
+        {
+            "id": "routes_notification_routes_sseclients",
+            "label": "sseClients",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\notification.routes.ts",
+            "source_location": "L32"
+        },
+        {
+            "id": "routes_notification_routes_broadcastnotification",
+            "label": "broadcastNotification()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\notification.routes.ts",
+            "source_location": "L39"
+        },
+        {
+            "id": "routes_notification_routes_user",
+            "label": "user",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\notification.routes.ts",
+            "source_location": "L98"
+        },
+        {
+            "id": "routes_notification_routes_db",
+            "label": "db",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\notification.routes.ts",
+            "source_location": "L102"
+        },
+        {
+            "id": "routes_notification_routes_id",
+            "label": "id",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\notification.routes.ts",
+            "source_location": "L144"
+        },
+        {
+            "id": "routes_notification_routes_stream",
+            "label": "stream",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\notification.routes.ts",
+            "source_location": "L193"
+        },
+        {
+            "id": "routes_notification_routes_prefs",
+            "label": "prefs",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\notification.routes.ts",
+            "source_location": "L269"
+        },
+        {
+            "id": "routes_notification_routes_prefsschema",
+            "label": "prefsSchema",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\notification.routes.ts",
+            "source_location": "L284"
+        },
+        {
+            "id": "routes_notification_routes_parsed",
+            "label": "parsed",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\notification.routes.ts",
+            "source_location": "L292"
+        },
+        {
+            "id": "routes_notification_routes_subscribeschema",
+            "label": "subscribeSchema",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\notification.routes.ts",
+            "source_location": "L334"
+        }
+    ],
+    "edges": [
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_notification_routes_ts",
+            "target": "hono",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\notification.routes.ts",
+            "source_location": "L1",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_notification_routes_ts",
+            "target": "drizzle_orm",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\notification.routes.ts",
+            "source_location": "L2",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_notification_routes_ts",
+            "target": "zod",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\notification.routes.ts",
+            "source_location": "L3",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_notification_routes_ts",
+            "target": "c_users_alfamas_desktop_zerotrust_src_db_index_ts",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\notification.routes.ts",
+            "source_location": "L4",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_notification_routes_ts",
+            "target": "db_index_getdb",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\notification.routes.ts",
+            "source_location": "L4",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_notification_routes_ts",
+            "target": "c_users_alfamas_desktop_zerotrust_src_db_schema_ts",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\notification.routes.ts",
+            "source_location": "L5",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_notification_routes_ts",
+            "target": "db_schema_notificationstable",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\notification.routes.ts",
+            "source_location": "L5",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_notification_routes_ts",
+            "target": "db_schema_userstable",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\notification.routes.ts",
+            "source_location": "L5",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_notification_routes_ts",
+            "target": "c_users_alfamas_desktop_zerotrust_src_middleware_auth_ts",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\notification.routes.ts",
+            "source_location": "L6",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_notification_routes_ts",
+            "target": "middleware_auth_authmiddleware",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\notification.routes.ts",
+            "source_location": "L6",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_notification_routes_ts",
+            "target": "c_users_alfamas_desktop_zerotrust_src_logger_index_ts",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\notification.routes.ts",
+            "source_location": "L7",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_notification_routes_ts",
+            "target": "logger_index_getlogger",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\notification.routes.ts",
+            "source_location": "L7",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_notification_routes_ts",
+            "target": "c_users_alfamas_desktop_zerotrust_src_services_email_service_ts",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\notification.routes.ts",
+            "source_location": "L8",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_notification_routes_ts",
+            "target": "services_email_service_sendnotificationemail",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\notification.routes.ts",
+            "source_location": "L8",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_notification_routes_ts",
+            "target": "c_users_alfamas_desktop_zerotrust_src_services_webpush_service_ts",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\notification.routes.ts",
+            "source_location": "L9",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_notification_routes_ts",
+            "target": "services_webpush_service_getvapidpublickey",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\notification.routes.ts",
+            "source_location": "L9",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_notification_routes_ts",
+            "target": "services_webpush_service_savesubscription",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\notification.routes.ts",
+            "source_location": "L9",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_notification_routes_ts",
+            "target": "services_webpush_service_removesubscription",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\notification.routes.ts",
+            "source_location": "L9",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_notification_routes_ts",
+            "target": "services_webpush_service_sendwebpush",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\notification.routes.ts",
+            "source_location": "L9",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_notification_routes_ts",
+            "target": "c_users_alfamas_desktop_zerotrust_src_shared_types_ts",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\notification.routes.ts",
+            "source_location": "L15",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_notification_routes_ts",
+            "target": "shared_types_honoenv",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\notification.routes.ts",
+            "source_location": "L15",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_notification_routes_ts",
+            "target": "routes_notification_routes_notificationpreferences",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\notification.routes.ts",
+            "source_location": "L17",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_notification_routes_ts",
+            "target": "routes_notification_routes_router",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\notification.routes.ts",
+            "source_location": "L22",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_notification_routes_ts",
+            "target": "routes_notification_routes_logger",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\notification.routes.ts",
+            "source_location": "L23",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_notification_routes_ts",
+            "target": "routes_notification_routes_ssecontroller",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\notification.routes.ts",
+            "source_location": "L27",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_notification_routes_ts",
+            "target": "routes_notification_routes_sseclients",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\notification.routes.ts",
+            "source_location": "L32",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_notification_routes_ts",
+            "target": "routes_notification_routes_broadcastnotification",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\notification.routes.ts",
+            "source_location": "L39",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_notification_routes_ts",
+            "target": "routes_notification_routes_user",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\notification.routes.ts",
+            "source_location": "L98",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_notification_routes_ts",
+            "target": "routes_notification_routes_db",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\notification.routes.ts",
+            "source_location": "L102",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_notification_routes_ts",
+            "target": "routes_notification_routes_user",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\notification.routes.ts",
+            "source_location": "L120",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_notification_routes_ts",
+            "target": "routes_notification_routes_db",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\notification.routes.ts",
+            "source_location": "L124",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_notification_routes_ts",
+            "target": "routes_notification_routes_user",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\notification.routes.ts",
+            "source_location": "L140",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_notification_routes_ts",
+            "target": "routes_notification_routes_id",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\notification.routes.ts",
+            "source_location": "L144",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_notification_routes_ts",
+            "target": "routes_notification_routes_db",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\notification.routes.ts",
+            "source_location": "L145",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_notification_routes_ts",
+            "target": "routes_notification_routes_user",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\notification.routes.ts",
+            "source_location": "L165",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_notification_routes_ts",
+            "target": "routes_notification_routes_db",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\notification.routes.ts",
+            "source_location": "L169",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_notification_routes_ts",
+            "target": "routes_notification_routes_user",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\notification.routes.ts",
+            "source_location": "L187",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_notification_routes_ts",
+            "target": "routes_notification_routes_stream",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\notification.routes.ts",
+            "source_location": "L193",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_notification_routes_ts",
+            "target": "routes_notification_routes_user",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\notification.routes.ts",
+            "source_location": "L261",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_notification_routes_ts",
+            "target": "routes_notification_routes_db",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\notification.routes.ts",
+            "source_location": "L263",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_notification_routes_ts",
+            "target": "routes_notification_routes_prefs",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\notification.routes.ts",
+            "source_location": "L269",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_notification_routes_ts",
+            "target": "routes_notification_routes_prefsschema",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\notification.routes.ts",
+            "source_location": "L284",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_notification_routes_ts",
+            "target": "routes_notification_routes_user",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\notification.routes.ts",
+            "source_location": "L290",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_notification_routes_ts",
+            "target": "routes_notification_routes_parsed",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\notification.routes.ts",
+            "source_location": "L292",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_notification_routes_ts",
+            "target": "routes_notification_routes_db",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\notification.routes.ts",
+            "source_location": "L297",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_notification_routes_ts",
+            "target": "routes_notification_routes_subscribeschema",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\notification.routes.ts",
+            "source_location": "L334",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_notification_routes_ts",
+            "target": "routes_notification_routes_user",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\notification.routes.ts",
+            "source_location": "L344",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_notification_routes_ts",
+            "target": "routes_notification_routes_parsed",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\notification.routes.ts",
+            "source_location": "L349",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_api_routes_notification_routes_ts",
+            "target": "routes_notification_routes_user",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\notification.routes.ts",
+            "source_location": "L364",
+            "weight": 1.0
+        }
+    ],
+    "raw_calls": [
+        {
+            "caller_nid": "routes_notification_routes_broadcastnotification",
+            "callee": "get",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\notification.routes.ts",
+            "source_location": "L40"
+        },
+        {
+            "caller_nid": "routes_notification_routes_broadcastnotification",
+            "callee": "catch",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\notification.routes.ts",
+            "source_location": "L45"
+        },
+        {
+            "caller_nid": "routes_notification_routes_broadcastnotification",
+            "callee": "sendWebPush",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\notification.routes.ts",
+            "source_location": "L45"
+        },
+        {
+            "caller_nid": "routes_notification_routes_broadcastnotification",
+            "callee": "String",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\notification.routes.ts",
+            "source_location": "L46"
+        },
+        {
+            "caller_nid": "routes_notification_routes_broadcastnotification",
+            "callee": "String",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\notification.routes.ts",
+            "source_location": "L47"
+        },
+        {
+            "caller_nid": "routes_notification_routes_broadcastnotification",
+            "callee": "String",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\notification.routes.ts",
+            "source_location": "L48"
+        },
+        {
+            "caller_nid": "routes_notification_routes_broadcastnotification",
+            "callee": "String",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\notification.routes.ts",
+            "source_location": "L49"
+        },
+        {
+            "caller_nid": "routes_notification_routes_broadcastnotification",
+            "callee": "(async () => {\r\n      try {\r\n        const db = getDb();\r\n        const userRows = await db\r\n          .select({ email: usersTable.email, displayName: usersTable.displayName })\r\n          .from(usersTable)\r\n          .where(eq(usersTable.id, userId))\r\n          .limit(1);\r\n        const user = userRows[0];\r\n        if (user?.email) {\r\n          void sendNotificationEmail(user.email, {\r\n            name: user.displayName ?? user.email,\r\n            title: String(notification.title ?? \"New notification\"),\r\n            body: String(notification.body ?? notification.message ?? \"\"),\r\n            link: notification.link ? String(notification.link) : undefined,\r\n          });\r\n        }\r\n      } catch {\r\n        // non-blocking \u2014 ignore errors\r\n      }\r\n    })",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\notification.routes.ts",
+            "source_location": "L56"
+        },
+        {
+            "caller_nid": "routes_notification_routes_broadcastnotification",
+            "callee": "stringify",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\notification.routes.ts",
+            "source_location": "L80"
+        },
+        {
+            "caller_nid": "routes_notification_routes_broadcastnotification",
+            "callee": "send",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\api\\routes\\notification.routes.ts",
+            "source_location": "L83"
+        }
+    ]
+}

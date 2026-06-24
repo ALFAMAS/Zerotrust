@@ -11,31 +11,37 @@
  *   SIEM_ENDPOINT=https://http-intake.logs.datadoghq.com/api/v2/logs
  *   SIEM_AUTH_HEADER=DD-API-KEY        # header name carrying the key (optional)
  *   SIEM_API_KEY=...                   # value for SIEM_AUTH_HEADER (optional)
- *   SIEM_SOURCE=zeroauth               # tag added to each event (optional)
+ *   SIEM_SOURCE=zerotrust               # tag added to each event (optional)
  */
 // NB: intentionally no logger import — this module is called from auditLog()
 // inside the logger, so importing the logger back would be circular.
 
 export function isSiemEnabled(): boolean {
-  return process.env.SIEM_ENABLED === "true" && Boolean(process.env.SIEM_ENDPOINT);
+  return (
+    process.env.SIEM_ENABLED === "true" && Boolean(process.env.SIEM_ENDPOINT)
+  );
 }
 
 /**
  * Send one audit/security event to the configured SIEM. Returns true if a
  * delivery was attempted (endpoint configured), false if SIEM is disabled.
  */
-export async function streamToSiem(event: Record<string, unknown>): Promise<boolean> {
+export async function streamToSiem(
+  event: Record<string, unknown>,
+): Promise<boolean> {
   if (!isSiemEnabled()) return false;
 
   const endpoint = process.env.SIEM_ENDPOINT as string;
-  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
   const authHeader = process.env.SIEM_AUTH_HEADER;
   const apiKey = process.env.SIEM_API_KEY;
   if (authHeader && apiKey) headers[authHeader] = apiKey;
 
   const payload = {
-    source: process.env.SIEM_SOURCE ?? "zeroauth",
-    ddsource: process.env.SIEM_SOURCE ?? "zeroauth",
+    source: process.env.SIEM_SOURCE ?? "zerotrust",
+    ddsource: process.env.SIEM_SOURCE ?? "zerotrust",
     "@timestamp": new Date().toISOString(),
     ...event,
   };

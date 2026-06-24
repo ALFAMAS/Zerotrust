@@ -6,7 +6,7 @@ import { sendNotificationEmail } from "./email.service";
 
 const logger = getLogger("lifecycle-emails");
 
-const APP_NAME = process.env.APP_NAME ?? "ZeroAuth";
+const APP_NAME = process.env.APP_NAME ?? "zerotrust";
 const APP_URL = process.env.APP_URL ?? "http://localhost:3000";
 
 /**
@@ -42,8 +42,8 @@ export async function sendLifecycleEmails() {
         gte(usersTable.createdAt, d1Start),
         lte(usersTable.createdAt, d1End),
         // Only send if not already sent (tracked in metadata)
-        sql`(${usersTable.metadata}->>'lifecycleD1Sent') IS NULL`
-      )
+        sql`(${usersTable.metadata}->>'lifecycleD1Sent') IS NULL`,
+      ),
     );
 
   let d1Sent = 0;
@@ -67,7 +67,10 @@ export async function sendLifecycleEmails() {
         .where(eq(usersTable.id, user.id));
       d1Sent++;
     } catch (err) {
-      logger.warn("Failed to send D1 email", { userId: user.id, error: String(err) });
+      logger.warn("Failed to send D1 email", {
+        userId: user.id,
+        error: String(err),
+      });
     }
   }
   results.push({ day: 1, sent: d1Sent });
@@ -79,14 +82,18 @@ export async function sendLifecycleEmails() {
   d3End.setHours(23, 59, 59, 999);
 
   const d3Users = await db
-    .select({ id: usersTable.id, email: usersTable.email, displayName: usersTable.displayName })
+    .select({
+      id: usersTable.id,
+      email: usersTable.email,
+      displayName: usersTable.displayName,
+    })
     .from(usersTable)
     .where(
       and(
         gte(usersTable.createdAt, d3Start),
         lte(usersTable.createdAt, d3End),
-        sql`(${usersTable.metadata}->>'lifecycleD3Sent') IS NULL`
-      )
+        sql`(${usersTable.metadata}->>'lifecycleD3Sent') IS NULL`,
+      ),
     );
 
   let d3Sent = 0;
@@ -109,7 +116,10 @@ export async function sendLifecycleEmails() {
         .where(eq(usersTable.id, user.id));
       d3Sent++;
     } catch (err) {
-      logger.warn("Failed to send D3 email", { userId: user.id, error: String(err) });
+      logger.warn("Failed to send D3 email", {
+        userId: user.id,
+        error: String(err),
+      });
     }
   }
   results.push({ day: 3, sent: d3Sent });
@@ -121,14 +131,18 @@ export async function sendLifecycleEmails() {
   d7End.setHours(23, 59, 59, 999);
 
   const d7Users = await db
-    .select({ id: usersTable.id, email: usersTable.email, displayName: usersTable.displayName })
+    .select({
+      id: usersTable.id,
+      email: usersTable.email,
+      displayName: usersTable.displayName,
+    })
     .from(usersTable)
     .where(
       and(
         gte(usersTable.createdAt, d7Start),
         lte(usersTable.createdAt, d7End),
-        sql`(${usersTable.metadata}->>'lifecycleD7Sent') IS NULL`
-      )
+        sql`(${usersTable.metadata}->>'lifecycleD7Sent') IS NULL`,
+      ),
     );
 
   let d7Sent = 0;
@@ -151,7 +165,10 @@ export async function sendLifecycleEmails() {
         .where(eq(usersTable.id, user.id));
       d7Sent++;
     } catch (err) {
-      logger.warn("Failed to send D7 email", { userId: user.id, error: String(err) });
+      logger.warn("Failed to send D7 email", {
+        userId: user.id,
+        error: String(err),
+      });
     }
   }
   results.push({ day: 7, sent: d7Sent });
@@ -175,14 +192,16 @@ export async function sendLifecycleEmails() {
       and(
         gte(subscriptionsTable.trialEnd, d14Start),
         lte(subscriptionsTable.trialEnd, d14End),
-        sql`(${usersTable.metadata}->>'lifecycleD14Sent') IS NULL`
-      )
+        sql`(${usersTable.metadata}->>'lifecycleD14Sent') IS NULL`,
+      ),
     );
 
   let d14Sent = 0;
   for (const user of d14Users) {
     try {
-      const trialEndDate = user.trialEnd ? new Date(user.trialEnd).toLocaleDateString() : "soon";
+      const trialEndDate = user.trialEnd
+        ? new Date(user.trialEnd).toLocaleDateString()
+        : "soon";
       await sendNotificationEmail(user.email, {
         name: user.displayName ?? user.email,
         title: `Your ${APP_NAME} trial expires on ${trialEndDate}`,
@@ -200,7 +219,10 @@ export async function sendLifecycleEmails() {
         .where(eq(usersTable.id, user.id));
       d14Sent++;
     } catch (err) {
-      logger.warn("Failed to send D14 email", { userId: user.id, error: String(err) });
+      logger.warn("Failed to send D14 email", {
+        userId: user.id,
+        error: String(err),
+      });
     }
   }
   results.push({ day: 14, sent: d14Sent });

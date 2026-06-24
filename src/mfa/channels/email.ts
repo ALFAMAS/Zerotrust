@@ -32,12 +32,17 @@ export async function sendEmailOTP(to: string, subject: string, body: string) {
   const t = getTransporter();
   try {
     const info = await t.sendMail({
-      from: process.env.SMTP_FROM || `no-reply@${process.env.AUTH_DOMAIN || "zeroauth.local"}`,
+      from:
+        process.env.SMTP_FROM ||
+        `no-reply@${process.env.AUTH_DOMAIN || "zerotrust.local"}`,
       to,
       subject,
       text: body,
     });
-    logger.info("Email OTP sent", { to, id: (info as any).messageId || "json" });
+    logger.info("Email OTP sent", {
+      to,
+      id: (info as any).messageId || "json",
+    });
     return true;
   } catch (err) {
     logger.error("Failed to send email OTP", err as Error);

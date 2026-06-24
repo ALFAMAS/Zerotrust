@@ -1,1 +1,349 @@
-{"nodes": [{"id": "roadmap_zeroauth", "label": "ZeroAuth Roadmap", "file_type": "document", "source_file": "ROADMAP.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "readme_dashboard_auth_guard", "label": "Dashboard Route Guard", "file_type": "rationale", "source_file": "ROADMAP.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "readme_disposable_email_blocking", "label": "Disposable-Email Blocking", "file_type": "rationale", "source_file": "ROADMAP.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "readme_bearer_auth", "label": "Bearer Token Auth", "file_type": "rationale", "source_file": "ROADMAP.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "readme_csfle", "label": "CSFLE Field Encryption", "file_type": "rationale", "source_file": "ROADMAP.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "roadmap_did", "label": "Decentralized Identifiers (DID)", "file_type": "concept", "source_file": "ROADMAP.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "roadmap_post_quantum", "label": "Post-Quantum Crypto (Hybrid KEM)", "file_type": "concept", "source_file": "ROADMAP.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "roadmap_token_exchange", "label": "Token Exchange / Identity Federation (RFC 8693)", "file_type": "concept", "source_file": "ROADMAP.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "roadmap_fido_attestation", "label": "FIDO Attestation & MDS3", "file_type": "concept", "source_file": "ROADMAP.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "roadmap_cross_tenant_jit", "label": "Cross-Tenant JIT Access", "file_type": "concept", "source_file": "ROADMAP.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "roadmap_agent_identity", "label": "Agent / Workload Identity", "file_type": "concept", "source_file": "ROADMAP.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "roadmap_self_serve_sso", "label": "Self-Serve SSO per Org", "file_type": "concept", "source_file": "ROADMAP.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}], "edges": [{"source": "roadmap_zeroauth", "target": "starter_feature_catalog", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "ROADMAP.md", "source_location": null, "weight": 1.0}, {"source": "readme_silent_token_refresh", "target": "readme_token_refresh_endpoint", "relation": "calls", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "ROADMAP.md", "source_location": null, "weight": 1.0}, {"source": "readme_dashboard_auth_guard", "target": "readme_session_management", "relation": "conceptually_related_to", "confidence": "INFERRED", "confidence_score": 0.75, "source_file": "ROADMAP.md", "source_location": null, "weight": 1.0}, {"source": "readme_silent_token_refresh", "target": "readme_dashboard_auth_guard", "relation": "conceptually_related_to", "confidence": "INFERRED", "confidence_score": 0.85, "source_file": "ROADMAP.md", "source_location": null, "weight": 1.0}, {"source": "readme_gdpr_export_delete", "target": "readme_bearer_auth", "relation": "conceptually_related_to", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "ROADMAP.md", "source_location": null, "weight": 1.0}, {"source": "readme_disposable_email_blocking", "target": "readme_hibp_check", "relation": "conceptually_related_to", "confidence": "INFERRED", "confidence_score": 0.75, "source_file": "ROADMAP.md", "source_location": null, "weight": 1.0}, {"source": "readme_disposable_email_blocking", "target": "readme_anomaly_detection", "relation": "conceptually_related_to", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "ROADMAP.md", "source_location": null, "weight": 1.0}, {"source": "readme_disposable_email_blocking", "target": "readme_account_lockout", "relation": "conceptually_related_to", "confidence": "INFERRED", "confidence_score": 0.65, "source_file": "ROADMAP.md", "source_location": null, "weight": 1.0}, {"source": "readme_stripe_billing", "target": "readme_organizations", "relation": "conceptually_related_to", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "ROADMAP.md", "source_location": null, "weight": 1.0}, {"source": "readme_oidc_provider", "target": "roadmap_token_exchange", "relation": "conceptually_related_to", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "ROADMAP.md", "source_location": null, "weight": 1.0}, {"source": "roadmap_agent_identity", "target": "roadmap_token_exchange", "relation": "conceptually_related_to", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "ROADMAP.md", "source_location": null, "weight": 1.0}, {"source": "roadmap_agent_identity", "target": "readme_api_keys", "relation": "conceptually_related_to", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "ROADMAP.md", "source_location": null, "weight": 1.0}, {"source": "roadmap_fido_attestation", "target": "readme_passkeys_webauthn", "relation": "conceptually_related_to", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "ROADMAP.md", "source_location": null, "weight": 1.0}, {"source": "roadmap_cross_tenant_jit", "target": "readme_rbac_abac", "relation": "conceptually_related_to", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "ROADMAP.md", "source_location": null, "weight": 1.0}, {"source": "roadmap_self_serve_sso", "target": "readme_saml_sso", "relation": "conceptually_related_to", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "ROADMAP.md", "source_location": null, "weight": 1.0}, {"source": "roadmap_self_serve_sso", "target": "readme_scim", "relation": "conceptually_related_to", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "ROADMAP.md", "source_location": null, "weight": 1.0}, {"source": "roadmap_did", "target": "readme_passkeys_webauthn", "relation": "semantically_similar_to", "confidence": "INFERRED", "confidence_score": 0.65, "source_file": "ROADMAP.md", "source_location": null, "weight": 1.0}, {"source": "readme_csfle", "target": "readme_paseto_tokens", "relation": "conceptually_related_to", "confidence": "INFERRED", "confidence_score": 0.65, "source_file": "ROADMAP.md", "source_location": null, "weight": 1.0}], "hyperedges": [{"id": "silent_refresh_flow", "label": "Silent Token Refresh Session Flow", "nodes": ["readme_silent_token_refresh", "readme_token_refresh_endpoint", "readme_refresh_tokens", "readme_dashboard_auth_guard"], "relation": "participate_in", "confidence": "INFERRED", "confidence_score": 0.85, "source_file": "ROADMAP.md"}, {"id": "abuse_prevention_stack", "label": "Trust & Abuse Prevention Stack", "nodes": ["readme_disposable_email_blocking", "readme_hibp_check", "readme_anomaly_detection", "readme_account_lockout", "readme_account_takeover_detection"], "relation": "participate_in", "confidence": "INFERRED", "confidence_score": 0.75, "source_file": "ROADMAP.md"}]}
+{
+    "nodes": [
+        {
+            "id": "roadmap_zerotrust",
+            "label": "zerotrust Roadmap",
+            "file_type": "document",
+            "source_file": "ROADMAP.md",
+            "source_location": null,
+            "source_url": null,
+            "captured_at": null,
+            "author": null,
+            "contributor": null
+        },
+        {
+            "id": "readme_dashboard_auth_guard",
+            "label": "Dashboard Route Guard",
+            "file_type": "rationale",
+            "source_file": "ROADMAP.md",
+            "source_location": null,
+            "source_url": null,
+            "captured_at": null,
+            "author": null,
+            "contributor": null
+        },
+        {
+            "id": "readme_disposable_email_blocking",
+            "label": "Disposable-Email Blocking",
+            "file_type": "rationale",
+            "source_file": "ROADMAP.md",
+            "source_location": null,
+            "source_url": null,
+            "captured_at": null,
+            "author": null,
+            "contributor": null
+        },
+        {
+            "id": "readme_bearer_auth",
+            "label": "Bearer Token Auth",
+            "file_type": "rationale",
+            "source_file": "ROADMAP.md",
+            "source_location": null,
+            "source_url": null,
+            "captured_at": null,
+            "author": null,
+            "contributor": null
+        },
+        {
+            "id": "readme_csfle",
+            "label": "CSFLE Field Encryption",
+            "file_type": "rationale",
+            "source_file": "ROADMAP.md",
+            "source_location": null,
+            "source_url": null,
+            "captured_at": null,
+            "author": null,
+            "contributor": null
+        },
+        {
+            "id": "roadmap_did",
+            "label": "Decentralized Identifiers (DID)",
+            "file_type": "concept",
+            "source_file": "ROADMAP.md",
+            "source_location": null,
+            "source_url": null,
+            "captured_at": null,
+            "author": null,
+            "contributor": null
+        },
+        {
+            "id": "roadmap_post_quantum",
+            "label": "Post-Quantum Crypto (Hybrid KEM)",
+            "file_type": "concept",
+            "source_file": "ROADMAP.md",
+            "source_location": null,
+            "source_url": null,
+            "captured_at": null,
+            "author": null,
+            "contributor": null
+        },
+        {
+            "id": "roadmap_token_exchange",
+            "label": "Token Exchange / Identity Federation (RFC 8693)",
+            "file_type": "concept",
+            "source_file": "ROADMAP.md",
+            "source_location": null,
+            "source_url": null,
+            "captured_at": null,
+            "author": null,
+            "contributor": null
+        },
+        {
+            "id": "roadmap_fido_attestation",
+            "label": "FIDO Attestation & MDS3",
+            "file_type": "concept",
+            "source_file": "ROADMAP.md",
+            "source_location": null,
+            "source_url": null,
+            "captured_at": null,
+            "author": null,
+            "contributor": null
+        },
+        {
+            "id": "roadmap_cross_tenant_jit",
+            "label": "Cross-Tenant JIT Access",
+            "file_type": "concept",
+            "source_file": "ROADMAP.md",
+            "source_location": null,
+            "source_url": null,
+            "captured_at": null,
+            "author": null,
+            "contributor": null
+        },
+        {
+            "id": "roadmap_agent_identity",
+            "label": "Agent / Workload Identity",
+            "file_type": "concept",
+            "source_file": "ROADMAP.md",
+            "source_location": null,
+            "source_url": null,
+            "captured_at": null,
+            "author": null,
+            "contributor": null
+        },
+        {
+            "id": "roadmap_self_serve_sso",
+            "label": "Self-Serve SSO per Org",
+            "file_type": "concept",
+            "source_file": "ROADMAP.md",
+            "source_location": null,
+            "source_url": null,
+            "captured_at": null,
+            "author": null,
+            "contributor": null
+        }
+    ],
+    "edges": [
+        {
+            "source": "roadmap_zerotrust",
+            "target": "starter_feature_catalog",
+            "relation": "references",
+            "confidence": "EXTRACTED",
+            "confidence_score": 1.0,
+            "source_file": "ROADMAP.md",
+            "source_location": null,
+            "weight": 1.0
+        },
+        {
+            "source": "readme_silent_token_refresh",
+            "target": "readme_token_refresh_endpoint",
+            "relation": "calls",
+            "confidence": "EXTRACTED",
+            "confidence_score": 1.0,
+            "source_file": "ROADMAP.md",
+            "source_location": null,
+            "weight": 1.0
+        },
+        {
+            "source": "readme_dashboard_auth_guard",
+            "target": "readme_session_management",
+            "relation": "conceptually_related_to",
+            "confidence": "INFERRED",
+            "confidence_score": 0.75,
+            "source_file": "ROADMAP.md",
+            "source_location": null,
+            "weight": 1.0
+        },
+        {
+            "source": "readme_silent_token_refresh",
+            "target": "readme_dashboard_auth_guard",
+            "relation": "conceptually_related_to",
+            "confidence": "INFERRED",
+            "confidence_score": 0.85,
+            "source_file": "ROADMAP.md",
+            "source_location": null,
+            "weight": 1.0
+        },
+        {
+            "source": "readme_gdpr_export_delete",
+            "target": "readme_bearer_auth",
+            "relation": "conceptually_related_to",
+            "confidence": "EXTRACTED",
+            "confidence_score": 1.0,
+            "source_file": "ROADMAP.md",
+            "source_location": null,
+            "weight": 1.0
+        },
+        {
+            "source": "readme_disposable_email_blocking",
+            "target": "readme_hibp_check",
+            "relation": "conceptually_related_to",
+            "confidence": "INFERRED",
+            "confidence_score": 0.75,
+            "source_file": "ROADMAP.md",
+            "source_location": null,
+            "weight": 1.0
+        },
+        {
+            "source": "readme_disposable_email_blocking",
+            "target": "readme_anomaly_detection",
+            "relation": "conceptually_related_to",
+            "confidence": "EXTRACTED",
+            "confidence_score": 1.0,
+            "source_file": "ROADMAP.md",
+            "source_location": null,
+            "weight": 1.0
+        },
+        {
+            "source": "readme_disposable_email_blocking",
+            "target": "readme_account_lockout",
+            "relation": "conceptually_related_to",
+            "confidence": "INFERRED",
+            "confidence_score": 0.65,
+            "source_file": "ROADMAP.md",
+            "source_location": null,
+            "weight": 1.0
+        },
+        {
+            "source": "readme_stripe_billing",
+            "target": "readme_organizations",
+            "relation": "conceptually_related_to",
+            "confidence": "EXTRACTED",
+            "confidence_score": 1.0,
+            "source_file": "ROADMAP.md",
+            "source_location": null,
+            "weight": 1.0
+        },
+        {
+            "source": "readme_oidc_provider",
+            "target": "roadmap_token_exchange",
+            "relation": "conceptually_related_to",
+            "confidence": "EXTRACTED",
+            "confidence_score": 1.0,
+            "source_file": "ROADMAP.md",
+            "source_location": null,
+            "weight": 1.0
+        },
+        {
+            "source": "roadmap_agent_identity",
+            "target": "roadmap_token_exchange",
+            "relation": "conceptually_related_to",
+            "confidence": "EXTRACTED",
+            "confidence_score": 1.0,
+            "source_file": "ROADMAP.md",
+            "source_location": null,
+            "weight": 1.0
+        },
+        {
+            "source": "roadmap_agent_identity",
+            "target": "readme_api_keys",
+            "relation": "conceptually_related_to",
+            "confidence": "EXTRACTED",
+            "confidence_score": 1.0,
+            "source_file": "ROADMAP.md",
+            "source_location": null,
+            "weight": 1.0
+        },
+        {
+            "source": "roadmap_fido_attestation",
+            "target": "readme_passkeys_webauthn",
+            "relation": "conceptually_related_to",
+            "confidence": "EXTRACTED",
+            "confidence_score": 1.0,
+            "source_file": "ROADMAP.md",
+            "source_location": null,
+            "weight": 1.0
+        },
+        {
+            "source": "roadmap_cross_tenant_jit",
+            "target": "readme_rbac_abac",
+            "relation": "conceptually_related_to",
+            "confidence": "EXTRACTED",
+            "confidence_score": 1.0,
+            "source_file": "ROADMAP.md",
+            "source_location": null,
+            "weight": 1.0
+        },
+        {
+            "source": "roadmap_self_serve_sso",
+            "target": "readme_saml_sso",
+            "relation": "conceptually_related_to",
+            "confidence": "EXTRACTED",
+            "confidence_score": 1.0,
+            "source_file": "ROADMAP.md",
+            "source_location": null,
+            "weight": 1.0
+        },
+        {
+            "source": "roadmap_self_serve_sso",
+            "target": "readme_scim",
+            "relation": "conceptually_related_to",
+            "confidence": "EXTRACTED",
+            "confidence_score": 1.0,
+            "source_file": "ROADMAP.md",
+            "source_location": null,
+            "weight": 1.0
+        },
+        {
+            "source": "roadmap_did",
+            "target": "readme_passkeys_webauthn",
+            "relation": "semantically_similar_to",
+            "confidence": "INFERRED",
+            "confidence_score": 0.65,
+            "source_file": "ROADMAP.md",
+            "source_location": null,
+            "weight": 1.0
+        },
+        {
+            "source": "readme_csfle",
+            "target": "readme_paseto_tokens",
+            "relation": "conceptually_related_to",
+            "confidence": "INFERRED",
+            "confidence_score": 0.65,
+            "source_file": "ROADMAP.md",
+            "source_location": null,
+            "weight": 1.0
+        }
+    ],
+    "hyperedges": [
+        {
+            "id": "silent_refresh_flow",
+            "label": "Silent Token Refresh Session Flow",
+            "nodes": [
+                "readme_silent_token_refresh",
+                "readme_token_refresh_endpoint",
+                "readme_refresh_tokens",
+                "readme_dashboard_auth_guard"
+            ],
+            "relation": "participate_in",
+            "confidence": "INFERRED",
+            "confidence_score": 0.85,
+            "source_file": "ROADMAP.md"
+        },
+        {
+            "id": "abuse_prevention_stack",
+            "label": "Trust & Abuse Prevention Stack",
+            "nodes": [
+                "readme_disposable_email_blocking",
+                "readme_hibp_check",
+                "readme_anomaly_detection",
+                "readme_account_lockout",
+                "readme_account_takeover_detection"
+            ],
+            "relation": "participate_in",
+            "confidence": "INFERRED",
+            "confidence_score": 0.75,
+            "source_file": "ROADMAP.md"
+        }
+    ]
+}

@@ -15,7 +15,7 @@
  *   k6 run tests/load/chaos-fault.k6.js -e BASE_URL=http://localhost:1337
  *
  * For actual fault injection, stop Redis/ES before running:
- *   docker stop zeroauth-redis
+ *   docker stop zerotrust-redis
  *   k6 run tests/load/chaos-fault.k6.js -e BASE_URL=http://localhost:1337
  */
 
@@ -159,7 +159,7 @@ export function metrics_available() {
       "metrics has prometheus format": (r) => {
         try {
           const body = r.body;
-          return body.includes("zeroauth_") || body.includes("process_") || body.includes("nodejs_");
+          return body.includes("zerotrust_") || body.includes("process_") || body.includes("nodejs_");
         } catch { return false; }
       },
     });

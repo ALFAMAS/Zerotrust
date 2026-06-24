@@ -25,7 +25,7 @@ const retentionDays = parseInt(process.env.BACKUP_RETENTION_DAYS || "30", 10);
 mkdirSync(dir, { recursive: true });
 
 const stamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
-const file = path.join(dir, `zeroauth-${stamp}.dump`);
+const file = path.join(dir, `zerotrust-${stamp}.dump`);
 
 function run(cmd, args) {
   return new Promise((resolve, reject) => {
@@ -42,7 +42,7 @@ function pruneLocal() {
   const cutoff = Date.now() - retentionDays * 86400000;
   let pruned = 0;
   for (const name of readdirSync(dir)) {
-    if (!name.startsWith("zeroauth-") || !name.endsWith(".dump")) continue;
+    if (!name.startsWith("zerotrust-") || !name.endsWith(".dump")) continue;
     const full = path.join(dir, name);
     if (statSync(full).mtimeMs < cutoff) {
       unlinkSync(full);

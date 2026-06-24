@@ -1,1 +1,46 @@
-{"nodes": [{"id": "c_users_alfamas_desktop_zeroauth_src_templates_emails_welcome_ts", "label": "welcome.ts", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\templates\\emails\\welcome.ts", "source_location": "L1"}, {"id": "emails_welcome_welcomeemaildata", "label": "WelcomeEmailData", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\templates\\emails\\welcome.ts", "source_location": "L1"}, {"id": "emails_welcome_welcomeemailtemplate", "label": "welcomeEmailTemplate()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\templates\\emails\\welcome.ts", "source_location": "L8"}], "edges": [{"source": "c_users_alfamas_desktop_zeroauth_src_templates_emails_welcome_ts", "target": "emails_welcome_welcomeemaildata", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\templates\\emails\\welcome.ts", "source_location": "L1", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_templates_emails_welcome_ts", "target": "emails_welcome_welcomeemailtemplate", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\templates\\emails\\welcome.ts", "source_location": "L8", "weight": 1.0}], "raw_calls": []}
+{
+    "nodes": [
+        {
+            "id": "c_users_alfamas_desktop_zerotrust_src_templates_emails_welcome_ts",
+            "label": "welcome.ts",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\templates\\emails\\welcome.ts",
+            "source_location": "L1"
+        },
+        {
+            "id": "emails_welcome_welcomeemaildata",
+            "label": "WelcomeEmailData",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\templates\\emails\\welcome.ts",
+            "source_location": "L1"
+        },
+        {
+            "id": "emails_welcome_welcomeemailtemplate",
+            "label": "welcomeEmailTemplate()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\templates\\emails\\welcome.ts",
+            "source_location": "L8"
+        }
+    ],
+    "edges": [
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_templates_emails_welcome_ts",
+            "target": "emails_welcome_welcomeemaildata",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\templates\\emails\\welcome.ts",
+            "source_location": "L1",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_templates_emails_welcome_ts",
+            "target": "emails_welcome_welcomeemailtemplate",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\templates\\emails\\welcome.ts",
+            "source_location": "L8",
+            "weight": 1.0
+        }
+    ],
+    "raw_calls": []
+}

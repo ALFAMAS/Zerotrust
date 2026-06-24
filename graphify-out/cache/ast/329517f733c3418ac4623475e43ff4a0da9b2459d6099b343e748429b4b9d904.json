@@ -1,1 +1,720 @@
-{"nodes": [{"id": "c_users_alfamas_desktop_zeroauth_src_scim_routes_ts", "label": "routes.ts", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L1"}, {"id": "scim_routes_router", "label": "router", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L18"}, {"id": "scim_routes_match", "label": "match", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L33"}, {"id": "scim_routes_getbaseurl", "label": "getBaseUrl()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L63"}, {"id": "scim_routes_baseurl", "label": "baseUrl", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L177"}, {"id": "scim_routes_startindex", "label": "startIndex", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L178"}, {"id": "scim_routes_count", "label": "count", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L179"}, {"id": "scim_routes_filterstr", "label": "filterStr", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L180"}, {"id": "scim_routes_db", "label": "db", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L183"}, {"id": "scim_routes_parsed", "label": "parsed", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L189"}, {"id": "scim_routes_response", "label": "response", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L220"}, {"id": "scim_routes_scimuser", "label": "scimUser", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L240"}, {"id": "scim_routes_fields", "label": "fields", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L246"}, {"id": "scim_routes_nameparts", "label": "nameParts", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L259"}, {"id": "scim_routes_newuser", "label": "newUser", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L264"}, {"id": "scim_routes_scimresponse", "label": "scimResponse", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L279"}, {"id": "scim_routes_id", "label": "id", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L293"}, {"id": "scim_routes_body", "label": "body", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L314"}, {"id": "scim_routes_update", "label": "update", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L324"}, {"id": "scim_routes_operation", "label": "operation", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L327"}, {"id": "scim_routes_obj", "label": "obj", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L334"}, {"id": "scim_routes_name", "label": "name", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L338"}, {"id": "scim_routes_parts", "label": "parts", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L339"}, {"id": "scim_routes_primary", "label": "primary", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L344"}, {"id": "scim_routes_currentparts", "label": "currentParts", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L382"}], "edges": [{"source": "c_users_alfamas_desktop_zeroauth_src_scim_routes_ts", "target": "drizzle_orm", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L8", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_scim_routes_ts", "target": "hono", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L9", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_scim_routes_ts", "target": "hono", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L10", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_scim_routes_ts", "target": "c_users_alfamas_desktop_zeroauth_src_db_index_ts", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L11", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_scim_routes_ts", "target": "db_index_getdb", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L11", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_scim_routes_ts", "target": "c_users_alfamas_desktop_zeroauth_src_db_schema_ts", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L12", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_scim_routes_ts", "target": "db_schema_userstable", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L12", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_scim_routes_ts", "target": "c_users_alfamas_desktop_zeroauth_src_services_orgscimtoken_service_ts", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L13", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_scim_routes_ts", "target": "services_orgscimtoken_service_validateorgscimtoken", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L13", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_scim_routes_ts", "target": "c_users_alfamas_desktop_zeroauth_src_shared_types_ts", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L14", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_scim_routes_ts", "target": "shared_types_honoenv", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L14", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_scim_routes_ts", "target": "c_users_alfamas_desktop_zeroauth_src_scim_types_ts", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L15", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_scim_routes_ts", "target": "scim_types_scimlistresponse", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L15", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_scim_routes_ts", "target": "scim_types_scimuser", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L15", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_scim_routes_ts", "target": "c_users_alfamas_desktop_zeroauth_src_scim_utils_ts", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L16", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_scim_routes_ts", "target": "scim_utils_parsescimfilter", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L16", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_scim_routes_ts", "target": "scim_utils_scimerror", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L16", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_scim_routes_ts", "target": "scim_utils_scimtouserfields", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L16", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_scim_routes_ts", "target": "scim_utils_usertoscim", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L16", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_scim_routes_ts", "target": "scim_routes_router", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L18", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_scim_routes_ts", "target": "scim_routes_match", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L33", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_scim_routes_ts", "target": "scim_routes_getbaseurl", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L63", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_scim_routes_ts", "target": "scim_routes_baseurl", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L177", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_scim_routes_ts", "target": "scim_routes_startindex", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L178", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_scim_routes_ts", "target": "scim_routes_count", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L179", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_scim_routes_ts", "target": "scim_routes_filterstr", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L180", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_scim_routes_ts", "target": "scim_routes_db", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L183", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_scim_routes_ts", "target": "scim_routes_parsed", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L189", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_scim_routes_ts", "target": "scim_routes_response", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L220", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_scim_routes_ts", "target": "scim_routes_baseurl", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L239", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_scim_routes_ts", "target": "scim_routes_scimuser", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L240", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_scim_routes_ts", "target": "scim_routes_fields", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L246", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_scim_routes_ts", "target": "scim_routes_db", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L249", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_scim_routes_ts", "target": "scim_routes_nameparts", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L259", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_scim_routes_ts", "target": "scim_routes_newuser", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L264", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_scim_routes_ts", "target": "scim_routes_scimresponse", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L279", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_scim_routes_ts", "target": "scim_routes_baseurl", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L292", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_scim_routes_ts", "target": "scim_routes_id", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L293", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_scim_routes_ts", "target": "scim_routes_db", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L294", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_scim_routes_ts", "target": "scim_routes_baseurl", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L312", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_scim_routes_ts", "target": "scim_routes_id", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L313", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_scim_routes_ts", "target": "scim_routes_body", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L314", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_scim_routes_ts", "target": "scim_routes_update", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L324", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_scim_routes_ts", "target": "scim_routes_operation", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L327", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_scim_routes_ts", "target": "scim_routes_obj", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L334", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_scim_routes_ts", "target": "scim_routes_name", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L338", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_scim_routes_ts", "target": "scim_routes_parts", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L339", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_scim_routes_ts", "target": "scim_routes_primary", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L344", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_scim_routes_ts", "target": "scim_routes_primary", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L362", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_scim_routes_ts", "target": "scim_routes_db", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L379", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_scim_routes_ts", "target": "scim_routes_currentparts", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L382", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_scim_routes_ts", "target": "scim_routes_db", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L391", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_scim_routes_ts", "target": "scim_routes_id", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L413", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_scim_routes_ts", "target": "scim_routes_db", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L414", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_scim_routes_ts", "target": "scim_routes_startindex", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L435", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_scim_routes_ts", "target": "scim_routes_response", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L436", "weight": 1.0}], "raw_calls": [{"caller_nid": "scim_routes_getbaseurl", "callee": "header", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L64"}, {"caller_nid": "scim_routes_getbaseurl", "callee": "header", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\scim\\routes.ts", "source_location": "L65"}]}
+{
+    "nodes": [
+        {
+            "id": "c_users_alfamas_desktop_zerotrust_src_scim_routes_ts",
+            "label": "routes.ts",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L1"
+        },
+        {
+            "id": "scim_routes_router",
+            "label": "router",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L18"
+        },
+        {
+            "id": "scim_routes_match",
+            "label": "match",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L33"
+        },
+        {
+            "id": "scim_routes_getbaseurl",
+            "label": "getBaseUrl()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L63"
+        },
+        {
+            "id": "scim_routes_baseurl",
+            "label": "baseUrl",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L177"
+        },
+        {
+            "id": "scim_routes_startindex",
+            "label": "startIndex",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L178"
+        },
+        {
+            "id": "scim_routes_count",
+            "label": "count",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L179"
+        },
+        {
+            "id": "scim_routes_filterstr",
+            "label": "filterStr",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L180"
+        },
+        {
+            "id": "scim_routes_db",
+            "label": "db",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L183"
+        },
+        {
+            "id": "scim_routes_parsed",
+            "label": "parsed",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L189"
+        },
+        {
+            "id": "scim_routes_response",
+            "label": "response",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L220"
+        },
+        {
+            "id": "scim_routes_scimuser",
+            "label": "scimUser",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L240"
+        },
+        {
+            "id": "scim_routes_fields",
+            "label": "fields",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L246"
+        },
+        {
+            "id": "scim_routes_nameparts",
+            "label": "nameParts",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L259"
+        },
+        {
+            "id": "scim_routes_newuser",
+            "label": "newUser",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L264"
+        },
+        {
+            "id": "scim_routes_scimresponse",
+            "label": "scimResponse",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L279"
+        },
+        {
+            "id": "scim_routes_id",
+            "label": "id",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L293"
+        },
+        {
+            "id": "scim_routes_body",
+            "label": "body",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L314"
+        },
+        {
+            "id": "scim_routes_update",
+            "label": "update",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L324"
+        },
+        {
+            "id": "scim_routes_operation",
+            "label": "operation",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L327"
+        },
+        {
+            "id": "scim_routes_obj",
+            "label": "obj",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L334"
+        },
+        {
+            "id": "scim_routes_name",
+            "label": "name",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L338"
+        },
+        {
+            "id": "scim_routes_parts",
+            "label": "parts",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L339"
+        },
+        {
+            "id": "scim_routes_primary",
+            "label": "primary",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L344"
+        },
+        {
+            "id": "scim_routes_currentparts",
+            "label": "currentParts",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L382"
+        }
+    ],
+    "edges": [
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_scim_routes_ts",
+            "target": "drizzle_orm",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L8",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_scim_routes_ts",
+            "target": "hono",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L9",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_scim_routes_ts",
+            "target": "hono",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L10",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_scim_routes_ts",
+            "target": "c_users_alfamas_desktop_zerotrust_src_db_index_ts",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L11",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_scim_routes_ts",
+            "target": "db_index_getdb",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L11",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_scim_routes_ts",
+            "target": "c_users_alfamas_desktop_zerotrust_src_db_schema_ts",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L12",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_scim_routes_ts",
+            "target": "db_schema_userstable",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L12",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_scim_routes_ts",
+            "target": "c_users_alfamas_desktop_zerotrust_src_services_orgscimtoken_service_ts",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L13",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_scim_routes_ts",
+            "target": "services_orgscimtoken_service_validateorgscimtoken",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L13",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_scim_routes_ts",
+            "target": "c_users_alfamas_desktop_zerotrust_src_shared_types_ts",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L14",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_scim_routes_ts",
+            "target": "shared_types_honoenv",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L14",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_scim_routes_ts",
+            "target": "c_users_alfamas_desktop_zerotrust_src_scim_types_ts",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L15",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_scim_routes_ts",
+            "target": "scim_types_scimlistresponse",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L15",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_scim_routes_ts",
+            "target": "scim_types_scimuser",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L15",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_scim_routes_ts",
+            "target": "c_users_alfamas_desktop_zerotrust_src_scim_utils_ts",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L16",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_scim_routes_ts",
+            "target": "scim_utils_parsescimfilter",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L16",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_scim_routes_ts",
+            "target": "scim_utils_scimerror",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L16",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_scim_routes_ts",
+            "target": "scim_utils_scimtouserfields",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L16",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_scim_routes_ts",
+            "target": "scim_utils_usertoscim",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L16",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_scim_routes_ts",
+            "target": "scim_routes_router",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L18",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_scim_routes_ts",
+            "target": "scim_routes_match",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L33",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_scim_routes_ts",
+            "target": "scim_routes_getbaseurl",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L63",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_scim_routes_ts",
+            "target": "scim_routes_baseurl",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L177",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_scim_routes_ts",
+            "target": "scim_routes_startindex",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L178",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_scim_routes_ts",
+            "target": "scim_routes_count",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L179",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_scim_routes_ts",
+            "target": "scim_routes_filterstr",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L180",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_scim_routes_ts",
+            "target": "scim_routes_db",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L183",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_scim_routes_ts",
+            "target": "scim_routes_parsed",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L189",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_scim_routes_ts",
+            "target": "scim_routes_response",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L220",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_scim_routes_ts",
+            "target": "scim_routes_baseurl",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L239",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_scim_routes_ts",
+            "target": "scim_routes_scimuser",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L240",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_scim_routes_ts",
+            "target": "scim_routes_fields",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L246",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_scim_routes_ts",
+            "target": "scim_routes_db",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L249",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_scim_routes_ts",
+            "target": "scim_routes_nameparts",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L259",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_scim_routes_ts",
+            "target": "scim_routes_newuser",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L264",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_scim_routes_ts",
+            "target": "scim_routes_scimresponse",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L279",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_scim_routes_ts",
+            "target": "scim_routes_baseurl",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L292",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_scim_routes_ts",
+            "target": "scim_routes_id",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L293",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_scim_routes_ts",
+            "target": "scim_routes_db",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L294",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_scim_routes_ts",
+            "target": "scim_routes_baseurl",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L312",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_scim_routes_ts",
+            "target": "scim_routes_id",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L313",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_scim_routes_ts",
+            "target": "scim_routes_body",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L314",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_scim_routes_ts",
+            "target": "scim_routes_update",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L324",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_scim_routes_ts",
+            "target": "scim_routes_operation",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L327",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_scim_routes_ts",
+            "target": "scim_routes_obj",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L334",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_scim_routes_ts",
+            "target": "scim_routes_name",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L338",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_scim_routes_ts",
+            "target": "scim_routes_parts",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L339",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_scim_routes_ts",
+            "target": "scim_routes_primary",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L344",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_scim_routes_ts",
+            "target": "scim_routes_primary",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L362",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_scim_routes_ts",
+            "target": "scim_routes_db",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L379",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_scim_routes_ts",
+            "target": "scim_routes_currentparts",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L382",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_scim_routes_ts",
+            "target": "scim_routes_db",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L391",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_scim_routes_ts",
+            "target": "scim_routes_id",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L413",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_scim_routes_ts",
+            "target": "scim_routes_db",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L414",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_scim_routes_ts",
+            "target": "scim_routes_startindex",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L435",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_scim_routes_ts",
+            "target": "scim_routes_response",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L436",
+            "weight": 1.0
+        }
+    ],
+    "raw_calls": [
+        {
+            "caller_nid": "scim_routes_getbaseurl",
+            "callee": "header",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L64"
+        },
+        {
+            "caller_nid": "scim_routes_getbaseurl",
+            "callee": "header",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\scim\\routes.ts",
+            "source_location": "L65"
+        }
+    ]
+}

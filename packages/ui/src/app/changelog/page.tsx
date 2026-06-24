@@ -5,16 +5,31 @@ import { brand } from "@/config/brand";
 import { changelog } from "@/data/changelog";
 
 export const metadata: Metadata = {
-  title: `Changelog — ${process.env.NEXT_PUBLIC_APP_NAME ?? "ZeroAuth"}`,
+  title: `Changelog — ${process.env.NEXT_PUBLIC_APP_NAME ?? "zerotrust"}`,
   description: "What's new in each release.",
 };
 
 const TYPE_STYLES: Record<string, { label: string; classes: string }> = {
-  added: { label: "Added", classes: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" },
-  changed: { label: "Changed", classes: "bg-blue-500/10 text-blue-400 border-blue-500/20" },
-  fixed: { label: "Fixed", classes: "bg-amber-500/10 text-amber-400 border-amber-500/20" },
-  security: { label: "Security", classes: "bg-red-500/10 text-red-400 border-red-500/20" },
-  removed: { label: "Removed", classes: "bg-muted text-muted-foreground border-border" },
+  added: {
+    label: "Added",
+    classes: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+  },
+  changed: {
+    label: "Changed",
+    classes: "bg-blue-500/10 text-blue-400 border-blue-500/20",
+  },
+  fixed: {
+    label: "Fixed",
+    classes: "bg-amber-500/10 text-amber-400 border-amber-500/20",
+  },
+  security: {
+    label: "Security",
+    classes: "bg-red-500/10 text-red-400 border-red-500/20",
+  },
+  removed: {
+    label: "Removed",
+    classes: "bg-muted text-muted-foreground border-border",
+  },
 };
 
 export default function ChangelogPage() {
@@ -56,7 +71,8 @@ export default function ChangelogPage() {
 
                 <div className="space-y-4">
                   {entry.sections.map((section, si) => {
-                    const style = TYPE_STYLES[section.type] ?? TYPE_STYLES.changed;
+                    const style =
+                      TYPE_STYLES[section.type] ?? TYPE_STYLES.changed;
                     return (
                       <div key={si}>
                         <span

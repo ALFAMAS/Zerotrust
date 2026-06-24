@@ -1,1 +1,2553 @@
-{"nodes": [{"id": "c_users_alfamas_desktop_zeroauth_package_json", "label": "package.json", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L1"}, {"id": "zeroauth_package_name", "label": "name", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L2"}, {"id": "zeroauth_package_version", "label": "version", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L3"}, {"id": "zeroauth_package_private", "label": "private", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L4"}, {"id": "zeroauth_package_workspaces", "label": "workspaces", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L5"}, {"id": "zeroauth_package_scripts", "label": "scripts", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L8"}, {"id": "zeroauth_package_scripts_postinstall", "label": "postinstall", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L9"}, {"id": "zeroauth_package_scripts_dev", "label": "dev", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L10"}, {"id": "zeroauth_package_scripts_dev_api", "label": "dev:api", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L11"}, {"id": "zeroauth_package_scripts_dev_ui", "label": "dev:ui", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L12"}, {"id": "zeroauth_package_scripts_build", "label": "build", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L13"}, {"id": "zeroauth_package_scripts_db_generate", "label": "db:generate", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L14"}, {"id": "zeroauth_package_scripts_db_migrate", "label": "db:migrate", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L15"}, {"id": "zeroauth_package_scripts_db_push", "label": "db:push", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L16"}, {"id": "zeroauth_package_scripts_db_studio", "label": "db:studio", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L17"}, {"id": "zeroauth_package_scripts_db_backup", "label": "db:backup", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L18"}, {"id": "zeroauth_package_scripts_start", "label": "start", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L19"}, {"id": "zeroauth_package_scripts_test", "label": "test", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L20"}, {"id": "zeroauth_package_scripts_test_watch", "label": "test:watch", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L21"}, {"id": "zeroauth_package_scripts_test_coverage", "label": "test:coverage", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L22"}, {"id": "zeroauth_package_scripts_lint", "label": "lint", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L23"}, {"id": "zeroauth_package_scripts_lint_fix", "label": "lint:fix", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L24"}, {"id": "zeroauth_package_scripts_format", "label": "format", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L25"}, {"id": "zeroauth_package_scripts_type_check", "label": "type-check", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L26"}, {"id": "zeroauth_package_scripts_prepare", "label": "prepare", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L27"}, {"id": "zeroauth_package_scripts_lint_staged", "label": "lint-staged", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L28"}, {"id": "zeroauth_package_scripts_release", "label": "release", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L29"}, {"id": "zeroauth_package_scripts_release_dry", "label": "release:dry", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L30"}, {"id": "zeroauth_package_lint_staged", "label": "lint-staged", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L32"}, {"id": "zeroauth_package_lint_staged_src_ts", "label": "src/**/*.ts", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L33"}, {"id": "zeroauth_package_lint_staged_src_test_spec_ts", "label": "src/**/!(*.test|*.spec).ts", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L36"}, {"id": "zeroauth_package_lint_staged_packages_ui_src_ts_tsx", "label": "packages/ui/src/**/*.{ts,tsx}", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L39"}, {"id": "zeroauth_package_lint_staged_json_md", "label": "*.{json,md}", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L42"}, {"id": "zeroauth_package_dependencies", "label": "dependencies", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L46"}, {"id": "zeroauth_package_dependencies_hono_node_server", "label": "@hono/node-server", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L47"}, {"id": "zeroauth_package_dependencies_opentelemetry_api", "label": "@opentelemetry/api", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L48"}, {"id": "zeroauth_package_dependencies_opentelemetry_auto_instrumentations_node", "label": "@opentelemetry/auto-instrumentations-node", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L49"}, {"id": "zeroauth_package_dependencies_opentelemetry_exporter_trace_otlp_http", "label": "@opentelemetry/exporter-trace-otlp-http", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L50"}, {"id": "zeroauth_package_dependencies_opentelemetry_resources", "label": "@opentelemetry/resources", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L51"}, {"id": "zeroauth_package_dependencies_opentelemetry_sdk_node", "label": "@opentelemetry/sdk-node", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L52"}, {"id": "zeroauth_package_dependencies_opentelemetry_semantic_conventions", "label": "@opentelemetry/semantic-conventions", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L53"}, {"id": "zeroauth_package_dependencies_sentry_node", "label": "@sentry/node", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L54"}, {"id": "zeroauth_package_dependencies_simplewebauthn_server", "label": "@simplewebauthn/server", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L55"}, {"id": "zeroauth_package_dependencies_simplewebauthn_types", "label": "@simplewebauthn/types", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L56"}, {"id": "zeroauth_package_dependencies_swc_core_win32_x64_msvc", "label": "@swc/core-win32-x64-msvc", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L57"}, {"id": "zeroauth_package_dependencies_bcryptjs", "label": "bcryptjs", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L58"}, {"id": "zeroauth_package_dependencies_bullmq", "label": "bullmq", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L59"}, {"id": "zeroauth_package_dependencies_dotenv", "label": "dotenv", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L60"}, {"id": "zeroauth_package_dependencies_drizzle_orm", "label": "drizzle-orm", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L61"}, {"id": "zeroauth_package_dependencies_geoip_lite", "label": "geoip-lite", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L62"}, {"id": "zeroauth_package_dependencies_hono", "label": "hono", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L63"}, {"id": "zeroauth_package_dependencies_ioredis", "label": "ioredis", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L64"}, {"id": "zeroauth_package_dependencies_nanoid", "label": "nanoid", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L65"}, {"id": "zeroauth_package_dependencies_nodemailer", "label": "nodemailer", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L66"}, {"id": "zeroauth_package_dependencies_otpauth", "label": "otpauth", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L67"}, {"id": "zeroauth_package_dependencies_postgres", "label": "postgres", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L68"}, {"id": "zeroauth_package_dependencies_prom_client", "label": "prom-client", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L69"}, {"id": "zeroauth_package_dependencies_qrcode", "label": "qrcode", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L70"}, {"id": "zeroauth_package_dependencies_samlify", "label": "samlify", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L71"}, {"id": "zeroauth_package_dependencies_stripe", "label": "stripe", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L72"}, {"id": "zeroauth_package_dependencies_twilio", "label": "twilio", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L73"}, {"id": "zeroauth_package_dependencies_ua_parser_js", "label": "ua-parser-js", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L74"}, {"id": "zeroauth_package_dependencies_xpath", "label": "xpath", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L75"}, {"id": "zeroauth_package_dependencies_zod", "label": "zod", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L76"}, {"id": "zeroauth_package_devdependencies", "label": "devDependencies", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L78"}, {"id": "zeroauth_package_devdependencies_commitlint_cli", "label": "@commitlint/cli", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L79"}, {"id": "zeroauth_package_devdependencies_commitlint_config_conventional", "label": "@commitlint/config-conventional", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L80"}, {"id": "zeroauth_package_devdependencies_rollup_rollup_linux_x64_gnu", "label": "@rollup/rollup-linux-x64-gnu", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L81"}, {"id": "zeroauth_package_devdependencies_semantic_release_changelog", "label": "@semantic-release/changelog", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L82"}, {"id": "zeroauth_package_devdependencies_semantic_release_commit_analyzer", "label": "@semantic-release/commit-analyzer", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L83"}, {"id": "zeroauth_package_devdependencies_semantic_release_git", "label": "@semantic-release/git", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L84"}, {"id": "zeroauth_package_devdependencies_semantic_release_github", "label": "@semantic-release/github", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L85"}, {"id": "zeroauth_package_devdependencies_semantic_release_release_notes_generator", "label": "@semantic-release/release-notes-generator", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L86"}, {"id": "zeroauth_package_devdependencies_types_bcryptjs", "label": "@types/bcryptjs", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L87"}, {"id": "zeroauth_package_devdependencies_types_node", "label": "@types/node", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L88"}, {"id": "zeroauth_package_devdependencies_types_nodemailer", "label": "@types/nodemailer", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L89"}, {"id": "zeroauth_package_devdependencies_types_qrcode", "label": "@types/qrcode", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L90"}, {"id": "zeroauth_package_devdependencies_types_ua_parser_js", "label": "@types/ua-parser-js", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L91"}, {"id": "zeroauth_package_devdependencies_typescript_eslint_eslint_plugin", "label": "@typescript-eslint/eslint-plugin", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L92"}, {"id": "zeroauth_package_devdependencies_typescript_eslint_parser", "label": "@typescript-eslint/parser", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L93"}, {"id": "zeroauth_package_devdependencies_vitest_coverage_v8", "label": "@vitest/coverage-v8", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L94"}, {"id": "zeroauth_package_devdependencies_vitest_ui", "label": "@vitest/ui", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L95"}, {"id": "zeroauth_package_devdependencies_concurrently", "label": "concurrently", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L96"}, {"id": "zeroauth_package_devdependencies_conventional_changelog_conventionalcommits", "label": "conventional-changelog-conventionalcommits", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L97"}, {"id": "zeroauth_package_devdependencies_drizzle_kit", "label": "drizzle-kit", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L98"}, {"id": "zeroauth_package_devdependencies_eslint", "label": "eslint", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L99"}, {"id": "zeroauth_package_devdependencies_husky", "label": "husky", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L100"}, {"id": "zeroauth_package_devdependencies_lint_staged", "label": "lint-staged", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L101"}, {"id": "zeroauth_package_devdependencies_prettier", "label": "prettier", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L102"}, {"id": "zeroauth_package_devdependencies_semantic_release", "label": "semantic-release", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L103"}, {"id": "zeroauth_package_devdependencies_tsx", "label": "tsx", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L104"}, {"id": "zeroauth_package_devdependencies_typescript", "label": "typescript", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L105"}, {"id": "zeroauth_package_devdependencies_vitest", "label": "vitest", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L106"}, {"id": "zeroauth_package_overrides", "label": "overrides", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L108"}, {"id": "zeroauth_package_overrides_postcss", "label": "postcss", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L109"}, {"id": "zeroauth_package_optionaldependencies", "label": "optionalDependencies", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L111"}, {"id": "zeroauth_package_optionaldependencies_parcel_watcher_darwin_arm64", "label": "@parcel/watcher-darwin-arm64", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L112"}, {"id": "zeroauth_package_optionaldependencies_parcel_watcher_darwin_x64", "label": "@parcel/watcher-darwin-x64", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L113"}, {"id": "zeroauth_package_optionaldependencies_parcel_watcher_linux_x64_glibc", "label": "@parcel/watcher-linux-x64-glibc", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L114"}, {"id": "zeroauth_package_optionaldependencies_swc_core_linux_x64_gnu", "label": "@swc/core-linux-x64-gnu", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L115"}, {"id": "zeroauth_package_optionaldependencies_next_swc_win32_x64_msvc", "label": "@next/swc-win32-x64-msvc", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L116"}, {"id": "zeroauth_package_optionaldependencies_next_swc_wasm_nodejs", "label": "@next/swc-wasm-nodejs", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L117"}, {"id": "zeroauth_package_optionaldependencies_next_swc_wasm_web", "label": "@next/swc-wasm-web", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L118"}, {"id": "zeroauth_package_optionaldependencies_parcel_watcher_win32_x64", "label": "@parcel/watcher-win32-x64", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L119"}, {"id": "zeroauth_package_optionaldependencies_swc_core_win32_x64_msvc", "label": "@swc/core-win32-x64-msvc", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L120"}, {"id": "zeroauth_package_optionaldependencies_rolldown_binding_darwin_arm64", "label": "@rolldown/binding-darwin-arm64", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L121"}, {"id": "zeroauth_package_optionaldependencies_rolldown_binding_darwin_x64", "label": "@rolldown/binding-darwin-x64", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L122"}, {"id": "zeroauth_package_optionaldependencies_rolldown_binding_linux_x64_gnu", "label": "@rolldown/binding-linux-x64-gnu", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L123"}, {"id": "zeroauth_package_optionaldependencies_rolldown_binding_win32_x64_msvc", "label": "@rolldown/binding-win32-x64-msvc", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L124"}, {"id": "zeroauth_package_optionaldependencies_swc_core_darwin_arm64", "label": "@swc/core-darwin-arm64", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L125"}, {"id": "zeroauth_package_optionaldependencies_swc_core_darwin_x64", "label": "@swc/core-darwin-x64", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L126"}], "edges": [{"source": "c_users_alfamas_desktop_zeroauth_package_json", "target": "zeroauth_package_name", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L2", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_package_json", "target": "zeroauth_package_version", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L3", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_package_json", "target": "zeroauth_package_private", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L4", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_package_json", "target": "zeroauth_package_workspaces", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L5", "weight": 1.0}, {"source": "zeroauth_package_workspaces", "target": "ref_packages", "relation": "extends", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L5", "weight": 1.0, "context": "import"}, {"source": "c_users_alfamas_desktop_zeroauth_package_json", "target": "zeroauth_package_scripts", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L8", "weight": 1.0}, {"source": "zeroauth_package_scripts", "target": "zeroauth_package_scripts_postinstall", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L9", "weight": 1.0}, {"source": "zeroauth_package_scripts", "target": "zeroauth_package_scripts_dev", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L10", "weight": 1.0}, {"source": "zeroauth_package_scripts", "target": "zeroauth_package_scripts_dev_api", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L11", "weight": 1.0}, {"source": "zeroauth_package_scripts", "target": "zeroauth_package_scripts_dev_ui", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L12", "weight": 1.0}, {"source": "zeroauth_package_scripts", "target": "zeroauth_package_scripts_build", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L13", "weight": 1.0}, {"source": "zeroauth_package_scripts", "target": "zeroauth_package_scripts_db_generate", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L14", "weight": 1.0}, {"source": "zeroauth_package_scripts", "target": "zeroauth_package_scripts_db_migrate", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L15", "weight": 1.0}, {"source": "zeroauth_package_scripts", "target": "zeroauth_package_scripts_db_push", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L16", "weight": 1.0}, {"source": "zeroauth_package_scripts", "target": "zeroauth_package_scripts_db_studio", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L17", "weight": 1.0}, {"source": "zeroauth_package_scripts", "target": "zeroauth_package_scripts_db_backup", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L18", "weight": 1.0}, {"source": "zeroauth_package_scripts", "target": "zeroauth_package_scripts_start", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L19", "weight": 1.0}, {"source": "zeroauth_package_scripts", "target": "zeroauth_package_scripts_test", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L20", "weight": 1.0}, {"source": "zeroauth_package_scripts", "target": "zeroauth_package_scripts_test_watch", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L21", "weight": 1.0}, {"source": "zeroauth_package_scripts", "target": "zeroauth_package_scripts_test_coverage", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L22", "weight": 1.0}, {"source": "zeroauth_package_scripts", "target": "zeroauth_package_scripts_lint", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L23", "weight": 1.0}, {"source": "zeroauth_package_scripts", "target": "zeroauth_package_scripts_lint_fix", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L24", "weight": 1.0}, {"source": "zeroauth_package_scripts", "target": "zeroauth_package_scripts_format", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L25", "weight": 1.0}, {"source": "zeroauth_package_scripts", "target": "zeroauth_package_scripts_type_check", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L26", "weight": 1.0}, {"source": "zeroauth_package_scripts", "target": "zeroauth_package_scripts_prepare", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L27", "weight": 1.0}, {"source": "zeroauth_package_scripts", "target": "zeroauth_package_scripts_lint_staged", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L28", "weight": 1.0}, {"source": "zeroauth_package_scripts", "target": "zeroauth_package_scripts_release", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L29", "weight": 1.0}, {"source": "zeroauth_package_scripts", "target": "zeroauth_package_scripts_release_dry", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L30", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_package_json", "target": "zeroauth_package_lint_staged", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L32", "weight": 1.0}, {"source": "zeroauth_package_lint_staged", "target": "zeroauth_package_lint_staged_src_ts", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L33", "weight": 1.0}, {"source": "zeroauth_package_lint_staged_src_ts", "target": "ref_bunx_prettier_write", "relation": "extends", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L33", "weight": 1.0, "context": "import"}, {"source": "zeroauth_package_lint_staged", "target": "zeroauth_package_lint_staged_src_test_spec_ts", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L36", "weight": 1.0}, {"source": "zeroauth_package_lint_staged_src_test_spec_ts", "target": "ref_bunx_eslint_fix_max_warnings_0", "relation": "extends", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L36", "weight": 1.0, "context": "import"}, {"source": "zeroauth_package_lint_staged", "target": "zeroauth_package_lint_staged_packages_ui_src_ts_tsx", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L39", "weight": 1.0}, {"source": "zeroauth_package_lint_staged_packages_ui_src_ts_tsx", "target": "ref_bunx_prettier_write", "relation": "extends", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L39", "weight": 1.0, "context": "import"}, {"source": "zeroauth_package_lint_staged", "target": "zeroauth_package_lint_staged_json_md", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L42", "weight": 1.0}, {"source": "zeroauth_package_lint_staged_json_md", "target": "ref_bunx_prettier_write", "relation": "extends", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L42", "weight": 1.0, "context": "import"}, {"source": "c_users_alfamas_desktop_zeroauth_package_json", "target": "zeroauth_package_dependencies", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L46", "weight": 1.0}, {"source": "zeroauth_package_dependencies", "target": "zeroauth_package_dependencies_hono_node_server", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L47", "weight": 1.0}, {"source": "zeroauth_package_dependencies_hono_node_server", "target": "hono_node_server", "relation": "imports", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L47", "weight": 1.0, "context": "import"}, {"source": "zeroauth_package_dependencies", "target": "zeroauth_package_dependencies_opentelemetry_api", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L48", "weight": 1.0}, {"source": "zeroauth_package_dependencies_opentelemetry_api", "target": "opentelemetry_api", "relation": "imports", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L48", "weight": 1.0, "context": "import"}, {"source": "zeroauth_package_dependencies", "target": "zeroauth_package_dependencies_opentelemetry_auto_instrumentations_node", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L49", "weight": 1.0}, {"source": "zeroauth_package_dependencies_opentelemetry_auto_instrumentations_node", "target": "opentelemetry_auto_instrumentations_node", "relation": "imports", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L49", "weight": 1.0, "context": "import"}, {"source": "zeroauth_package_dependencies", "target": "zeroauth_package_dependencies_opentelemetry_exporter_trace_otlp_http", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L50", "weight": 1.0}, {"source": "zeroauth_package_dependencies_opentelemetry_exporter_trace_otlp_http", "target": "opentelemetry_exporter_trace_otlp_http", "relation": "imports", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L50", "weight": 1.0, "context": "import"}, {"source": "zeroauth_package_dependencies", "target": "zeroauth_package_dependencies_opentelemetry_resources", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L51", "weight": 1.0}, {"source": "zeroauth_package_dependencies_opentelemetry_resources", "target": "opentelemetry_resources", "relation": "imports", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L51", "weight": 1.0, "context": "import"}, {"source": "zeroauth_package_dependencies", "target": "zeroauth_package_dependencies_opentelemetry_sdk_node", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L52", "weight": 1.0}, {"source": "zeroauth_package_dependencies_opentelemetry_sdk_node", "target": "opentelemetry_sdk_node", "relation": "imports", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L52", "weight": 1.0, "context": "import"}, {"source": "zeroauth_package_dependencies", "target": "zeroauth_package_dependencies_opentelemetry_semantic_conventions", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L53", "weight": 1.0}, {"source": "zeroauth_package_dependencies_opentelemetry_semantic_conventions", "target": "opentelemetry_semantic_conventions", "relation": "imports", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L53", "weight": 1.0, "context": "import"}, {"source": "zeroauth_package_dependencies", "target": "zeroauth_package_dependencies_sentry_node", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L54", "weight": 1.0}, {"source": "zeroauth_package_dependencies_sentry_node", "target": "sentry_node", "relation": "imports", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L54", "weight": 1.0, "context": "import"}, {"source": "zeroauth_package_dependencies", "target": "zeroauth_package_dependencies_simplewebauthn_server", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L55", "weight": 1.0}, {"source": "zeroauth_package_dependencies_simplewebauthn_server", "target": "simplewebauthn_server", "relation": "imports", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L55", "weight": 1.0, "context": "import"}, {"source": "zeroauth_package_dependencies", "target": "zeroauth_package_dependencies_simplewebauthn_types", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L56", "weight": 1.0}, {"source": "zeroauth_package_dependencies_simplewebauthn_types", "target": "simplewebauthn_types", "relation": "imports", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L56", "weight": 1.0, "context": "import"}, {"source": "zeroauth_package_dependencies", "target": "zeroauth_package_dependencies_swc_core_win32_x64_msvc", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L57", "weight": 1.0}, {"source": "zeroauth_package_dependencies_swc_core_win32_x64_msvc", "target": "swc_core_win32_x64_msvc", "relation": "imports", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L57", "weight": 1.0, "context": "import"}, {"source": "zeroauth_package_dependencies", "target": "zeroauth_package_dependencies_bcryptjs", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L58", "weight": 1.0}, {"source": "zeroauth_package_dependencies_bcryptjs", "target": "bcryptjs", "relation": "imports", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L58", "weight": 1.0, "context": "import"}, {"source": "zeroauth_package_dependencies", "target": "zeroauth_package_dependencies_bullmq", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L59", "weight": 1.0}, {"source": "zeroauth_package_dependencies_bullmq", "target": "bullmq", "relation": "imports", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L59", "weight": 1.0, "context": "import"}, {"source": "zeroauth_package_dependencies", "target": "zeroauth_package_dependencies_dotenv", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L60", "weight": 1.0}, {"source": "zeroauth_package_dependencies_dotenv", "target": "dotenv", "relation": "imports", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L60", "weight": 1.0, "context": "import"}, {"source": "zeroauth_package_dependencies", "target": "zeroauth_package_dependencies_drizzle_orm", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L61", "weight": 1.0}, {"source": "zeroauth_package_dependencies_drizzle_orm", "target": "drizzle_orm", "relation": "imports", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L61", "weight": 1.0, "context": "import"}, {"source": "zeroauth_package_dependencies", "target": "zeroauth_package_dependencies_geoip_lite", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L62", "weight": 1.0}, {"source": "zeroauth_package_dependencies_geoip_lite", "target": "geoip_lite", "relation": "imports", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L62", "weight": 1.0, "context": "import"}, {"source": "zeroauth_package_dependencies", "target": "zeroauth_package_dependencies_hono", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L63", "weight": 1.0}, {"source": "zeroauth_package_dependencies_hono", "target": "hono", "relation": "imports", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L63", "weight": 1.0, "context": "import"}, {"source": "zeroauth_package_dependencies", "target": "zeroauth_package_dependencies_ioredis", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L64", "weight": 1.0}, {"source": "zeroauth_package_dependencies_ioredis", "target": "ioredis", "relation": "imports", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L64", "weight": 1.0, "context": "import"}, {"source": "zeroauth_package_dependencies", "target": "zeroauth_package_dependencies_nanoid", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L65", "weight": 1.0}, {"source": "zeroauth_package_dependencies_nanoid", "target": "nanoid", "relation": "imports", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L65", "weight": 1.0, "context": "import"}, {"source": "zeroauth_package_dependencies", "target": "zeroauth_package_dependencies_nodemailer", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L66", "weight": 1.0}, {"source": "zeroauth_package_dependencies_nodemailer", "target": "nodemailer", "relation": "imports", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L66", "weight": 1.0, "context": "import"}, {"source": "zeroauth_package_dependencies", "target": "zeroauth_package_dependencies_otpauth", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L67", "weight": 1.0}, {"source": "zeroauth_package_dependencies_otpauth", "target": "otpauth", "relation": "imports", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L67", "weight": 1.0, "context": "import"}, {"source": "zeroauth_package_dependencies", "target": "zeroauth_package_dependencies_postgres", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L68", "weight": 1.0}, {"source": "zeroauth_package_dependencies_postgres", "target": "postgres", "relation": "imports", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L68", "weight": 1.0, "context": "import"}, {"source": "zeroauth_package_dependencies", "target": "zeroauth_package_dependencies_prom_client", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L69", "weight": 1.0}, {"source": "zeroauth_package_dependencies_prom_client", "target": "prom_client", "relation": "imports", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L69", "weight": 1.0, "context": "import"}, {"source": "zeroauth_package_dependencies", "target": "zeroauth_package_dependencies_qrcode", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L70", "weight": 1.0}, {"source": "zeroauth_package_dependencies_qrcode", "target": "qrcode", "relation": "imports", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L70", "weight": 1.0, "context": "import"}, {"source": "zeroauth_package_dependencies", "target": "zeroauth_package_dependencies_samlify", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L71", "weight": 1.0}, {"source": "zeroauth_package_dependencies_samlify", "target": "samlify", "relation": "imports", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L71", "weight": 1.0, "context": "import"}, {"source": "zeroauth_package_dependencies", "target": "zeroauth_package_dependencies_stripe", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L72", "weight": 1.0}, {"source": "zeroauth_package_dependencies_stripe", "target": "stripe", "relation": "imports", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L72", "weight": 1.0, "context": "import"}, {"source": "zeroauth_package_dependencies", "target": "zeroauth_package_dependencies_twilio", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L73", "weight": 1.0}, {"source": "zeroauth_package_dependencies_twilio", "target": "twilio", "relation": "imports", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L73", "weight": 1.0, "context": "import"}, {"source": "zeroauth_package_dependencies", "target": "zeroauth_package_dependencies_ua_parser_js", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L74", "weight": 1.0}, {"source": "zeroauth_package_dependencies_ua_parser_js", "target": "ua_parser_js", "relation": "imports", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L74", "weight": 1.0, "context": "import"}, {"source": "zeroauth_package_dependencies", "target": "zeroauth_package_dependencies_xpath", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L75", "weight": 1.0}, {"source": "zeroauth_package_dependencies_xpath", "target": "xpath", "relation": "imports", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L75", "weight": 1.0, "context": "import"}, {"source": "zeroauth_package_dependencies", "target": "zeroauth_package_dependencies_zod", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L76", "weight": 1.0}, {"source": "zeroauth_package_dependencies_zod", "target": "zod", "relation": "imports", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L76", "weight": 1.0, "context": "import"}, {"source": "c_users_alfamas_desktop_zeroauth_package_json", "target": "zeroauth_package_devdependencies", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L78", "weight": 1.0}, {"source": "zeroauth_package_devdependencies", "target": "zeroauth_package_devdependencies_commitlint_cli", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L79", "weight": 1.0}, {"source": "zeroauth_package_devdependencies_commitlint_cli", "target": "commitlint_cli", "relation": "imports", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L79", "weight": 1.0, "context": "import"}, {"source": "zeroauth_package_devdependencies", "target": "zeroauth_package_devdependencies_commitlint_config_conventional", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L80", "weight": 1.0}, {"source": "zeroauth_package_devdependencies_commitlint_config_conventional", "target": "commitlint_config_conventional", "relation": "imports", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L80", "weight": 1.0, "context": "import"}, {"source": "zeroauth_package_devdependencies", "target": "zeroauth_package_devdependencies_rollup_rollup_linux_x64_gnu", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L81", "weight": 1.0}, {"source": "zeroauth_package_devdependencies_rollup_rollup_linux_x64_gnu", "target": "rollup_rollup_linux_x64_gnu", "relation": "imports", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L81", "weight": 1.0, "context": "import"}, {"source": "zeroauth_package_devdependencies", "target": "zeroauth_package_devdependencies_semantic_release_changelog", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L82", "weight": 1.0}, {"source": "zeroauth_package_devdependencies_semantic_release_changelog", "target": "semantic_release_changelog", "relation": "imports", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L82", "weight": 1.0, "context": "import"}, {"source": "zeroauth_package_devdependencies", "target": "zeroauth_package_devdependencies_semantic_release_commit_analyzer", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L83", "weight": 1.0}, {"source": "zeroauth_package_devdependencies_semantic_release_commit_analyzer", "target": "semantic_release_commit_analyzer", "relation": "imports", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L83", "weight": 1.0, "context": "import"}, {"source": "zeroauth_package_devdependencies", "target": "zeroauth_package_devdependencies_semantic_release_git", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L84", "weight": 1.0}, {"source": "zeroauth_package_devdependencies_semantic_release_git", "target": "semantic_release_git", "relation": "imports", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L84", "weight": 1.0, "context": "import"}, {"source": "zeroauth_package_devdependencies", "target": "zeroauth_package_devdependencies_semantic_release_github", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L85", "weight": 1.0}, {"source": "zeroauth_package_devdependencies_semantic_release_github", "target": "semantic_release_github", "relation": "imports", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L85", "weight": 1.0, "context": "import"}, {"source": "zeroauth_package_devdependencies", "target": "zeroauth_package_devdependencies_semantic_release_release_notes_generator", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L86", "weight": 1.0}, {"source": "zeroauth_package_devdependencies_semantic_release_release_notes_generator", "target": "semantic_release_release_notes_generator", "relation": "imports", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L86", "weight": 1.0, "context": "import"}, {"source": "zeroauth_package_devdependencies", "target": "zeroauth_package_devdependencies_types_bcryptjs", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L87", "weight": 1.0}, {"source": "zeroauth_package_devdependencies_types_bcryptjs", "target": "types_bcryptjs", "relation": "imports", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L87", "weight": 1.0, "context": "import"}, {"source": "zeroauth_package_devdependencies", "target": "zeroauth_package_devdependencies_types_node", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L88", "weight": 1.0}, {"source": "zeroauth_package_devdependencies_types_node", "target": "types_node", "relation": "imports", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L88", "weight": 1.0, "context": "import"}, {"source": "zeroauth_package_devdependencies", "target": "zeroauth_package_devdependencies_types_nodemailer", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L89", "weight": 1.0}, {"source": "zeroauth_package_devdependencies_types_nodemailer", "target": "types_nodemailer", "relation": "imports", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L89", "weight": 1.0, "context": "import"}, {"source": "zeroauth_package_devdependencies", "target": "zeroauth_package_devdependencies_types_qrcode", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L90", "weight": 1.0}, {"source": "zeroauth_package_devdependencies_types_qrcode", "target": "types_qrcode", "relation": "imports", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L90", "weight": 1.0, "context": "import"}, {"source": "zeroauth_package_devdependencies", "target": "zeroauth_package_devdependencies_types_ua_parser_js", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L91", "weight": 1.0}, {"source": "zeroauth_package_devdependencies_types_ua_parser_js", "target": "types_ua_parser_js", "relation": "imports", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L91", "weight": 1.0, "context": "import"}, {"source": "zeroauth_package_devdependencies", "target": "zeroauth_package_devdependencies_typescript_eslint_eslint_plugin", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L92", "weight": 1.0}, {"source": "zeroauth_package_devdependencies_typescript_eslint_eslint_plugin", "target": "typescript_eslint_eslint_plugin", "relation": "imports", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L92", "weight": 1.0, "context": "import"}, {"source": "zeroauth_package_devdependencies", "target": "zeroauth_package_devdependencies_typescript_eslint_parser", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L93", "weight": 1.0}, {"source": "zeroauth_package_devdependencies_typescript_eslint_parser", "target": "typescript_eslint_parser", "relation": "imports", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L93", "weight": 1.0, "context": "import"}, {"source": "zeroauth_package_devdependencies", "target": "zeroauth_package_devdependencies_vitest_coverage_v8", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L94", "weight": 1.0}, {"source": "zeroauth_package_devdependencies_vitest_coverage_v8", "target": "vitest_coverage_v8", "relation": "imports", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L94", "weight": 1.0, "context": "import"}, {"source": "zeroauth_package_devdependencies", "target": "zeroauth_package_devdependencies_vitest_ui", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L95", "weight": 1.0}, {"source": "zeroauth_package_devdependencies_vitest_ui", "target": "vitest_ui", "relation": "imports", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L95", "weight": 1.0, "context": "import"}, {"source": "zeroauth_package_devdependencies", "target": "zeroauth_package_devdependencies_concurrently", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L96", "weight": 1.0}, {"source": "zeroauth_package_devdependencies_concurrently", "target": "concurrently", "relation": "imports", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L96", "weight": 1.0, "context": "import"}, {"source": "zeroauth_package_devdependencies", "target": "zeroauth_package_devdependencies_conventional_changelog_conventionalcommits", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L97", "weight": 1.0}, {"source": "zeroauth_package_devdependencies_conventional_changelog_conventionalcommits", "target": "conventional_changelog_conventionalcommits", "relation": "imports", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L97", "weight": 1.0, "context": "import"}, {"source": "zeroauth_package_devdependencies", "target": "zeroauth_package_devdependencies_drizzle_kit", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L98", "weight": 1.0}, {"source": "zeroauth_package_devdependencies_drizzle_kit", "target": "drizzle_kit", "relation": "imports", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L98", "weight": 1.0, "context": "import"}, {"source": "zeroauth_package_devdependencies", "target": "zeroauth_package_devdependencies_eslint", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L99", "weight": 1.0}, {"source": "zeroauth_package_devdependencies_eslint", "target": "eslint", "relation": "imports", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L99", "weight": 1.0, "context": "import"}, {"source": "zeroauth_package_devdependencies", "target": "zeroauth_package_devdependencies_husky", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L100", "weight": 1.0}, {"source": "zeroauth_package_devdependencies_husky", "target": "husky", "relation": "imports", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L100", "weight": 1.0, "context": "import"}, {"source": "zeroauth_package_devdependencies", "target": "zeroauth_package_devdependencies_lint_staged", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L101", "weight": 1.0}, {"source": "zeroauth_package_devdependencies_lint_staged", "target": "lint_staged", "relation": "imports", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L101", "weight": 1.0, "context": "import"}, {"source": "zeroauth_package_devdependencies", "target": "zeroauth_package_devdependencies_prettier", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L102", "weight": 1.0}, {"source": "zeroauth_package_devdependencies_prettier", "target": "prettier", "relation": "imports", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L102", "weight": 1.0, "context": "import"}, {"source": "zeroauth_package_devdependencies", "target": "zeroauth_package_devdependencies_semantic_release", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L103", "weight": 1.0}, {"source": "zeroauth_package_devdependencies_semantic_release", "target": "semantic_release", "relation": "imports", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L103", "weight": 1.0, "context": "import"}, {"source": "zeroauth_package_devdependencies", "target": "zeroauth_package_devdependencies_tsx", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L104", "weight": 1.0}, {"source": "zeroauth_package_devdependencies_tsx", "target": "tsx", "relation": "imports", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L104", "weight": 1.0, "context": "import"}, {"source": "zeroauth_package_devdependencies", "target": "zeroauth_package_devdependencies_typescript", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L105", "weight": 1.0}, {"source": "zeroauth_package_devdependencies_typescript", "target": "typescript", "relation": "imports", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L105", "weight": 1.0, "context": "import"}, {"source": "zeroauth_package_devdependencies", "target": "zeroauth_package_devdependencies_vitest", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L106", "weight": 1.0}, {"source": "zeroauth_package_devdependencies_vitest", "target": "vitest", "relation": "imports", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L106", "weight": 1.0, "context": "import"}, {"source": "c_users_alfamas_desktop_zeroauth_package_json", "target": "zeroauth_package_overrides", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L108", "weight": 1.0}, {"source": "zeroauth_package_overrides", "target": "zeroauth_package_overrides_postcss", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L109", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_package_json", "target": "zeroauth_package_optionaldependencies", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L111", "weight": 1.0}, {"source": "zeroauth_package_optionaldependencies", "target": "zeroauth_package_optionaldependencies_parcel_watcher_darwin_arm64", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L112", "weight": 1.0}, {"source": "zeroauth_package_optionaldependencies_parcel_watcher_darwin_arm64", "target": "parcel_watcher_darwin_arm64", "relation": "imports", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L112", "weight": 1.0, "context": "import"}, {"source": "zeroauth_package_optionaldependencies", "target": "zeroauth_package_optionaldependencies_parcel_watcher_darwin_x64", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L113", "weight": 1.0}, {"source": "zeroauth_package_optionaldependencies_parcel_watcher_darwin_x64", "target": "parcel_watcher_darwin_x64", "relation": "imports", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L113", "weight": 1.0, "context": "import"}, {"source": "zeroauth_package_optionaldependencies", "target": "zeroauth_package_optionaldependencies_parcel_watcher_linux_x64_glibc", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L114", "weight": 1.0}, {"source": "zeroauth_package_optionaldependencies_parcel_watcher_linux_x64_glibc", "target": "parcel_watcher_linux_x64_glibc", "relation": "imports", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L114", "weight": 1.0, "context": "import"}, {"source": "zeroauth_package_optionaldependencies", "target": "zeroauth_package_optionaldependencies_swc_core_linux_x64_gnu", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L115", "weight": 1.0}, {"source": "zeroauth_package_optionaldependencies_swc_core_linux_x64_gnu", "target": "swc_core_linux_x64_gnu", "relation": "imports", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L115", "weight": 1.0, "context": "import"}, {"source": "zeroauth_package_optionaldependencies", "target": "zeroauth_package_optionaldependencies_next_swc_win32_x64_msvc", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L116", "weight": 1.0}, {"source": "zeroauth_package_optionaldependencies_next_swc_win32_x64_msvc", "target": "next_swc_win32_x64_msvc", "relation": "imports", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L116", "weight": 1.0, "context": "import"}, {"source": "zeroauth_package_optionaldependencies", "target": "zeroauth_package_optionaldependencies_next_swc_wasm_nodejs", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L117", "weight": 1.0}, {"source": "zeroauth_package_optionaldependencies_next_swc_wasm_nodejs", "target": "next_swc_wasm_nodejs", "relation": "imports", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L117", "weight": 1.0, "context": "import"}, {"source": "zeroauth_package_optionaldependencies", "target": "zeroauth_package_optionaldependencies_next_swc_wasm_web", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L118", "weight": 1.0}, {"source": "zeroauth_package_optionaldependencies_next_swc_wasm_web", "target": "next_swc_wasm_web", "relation": "imports", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L118", "weight": 1.0, "context": "import"}, {"source": "zeroauth_package_optionaldependencies", "target": "zeroauth_package_optionaldependencies_parcel_watcher_win32_x64", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L119", "weight": 1.0}, {"source": "zeroauth_package_optionaldependencies_parcel_watcher_win32_x64", "target": "parcel_watcher_win32_x64", "relation": "imports", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L119", "weight": 1.0, "context": "import"}, {"source": "zeroauth_package_optionaldependencies", "target": "zeroauth_package_optionaldependencies_swc_core_win32_x64_msvc", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L120", "weight": 1.0}, {"source": "zeroauth_package_optionaldependencies_swc_core_win32_x64_msvc", "target": "swc_core_win32_x64_msvc", "relation": "imports", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L120", "weight": 1.0, "context": "import"}, {"source": "zeroauth_package_optionaldependencies", "target": "zeroauth_package_optionaldependencies_rolldown_binding_darwin_arm64", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L121", "weight": 1.0}, {"source": "zeroauth_package_optionaldependencies_rolldown_binding_darwin_arm64", "target": "rolldown_binding_darwin_arm64", "relation": "imports", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L121", "weight": 1.0, "context": "import"}, {"source": "zeroauth_package_optionaldependencies", "target": "zeroauth_package_optionaldependencies_rolldown_binding_darwin_x64", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L122", "weight": 1.0}, {"source": "zeroauth_package_optionaldependencies_rolldown_binding_darwin_x64", "target": "rolldown_binding_darwin_x64", "relation": "imports", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L122", "weight": 1.0, "context": "import"}, {"source": "zeroauth_package_optionaldependencies", "target": "zeroauth_package_optionaldependencies_rolldown_binding_linux_x64_gnu", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L123", "weight": 1.0}, {"source": "zeroauth_package_optionaldependencies_rolldown_binding_linux_x64_gnu", "target": "rolldown_binding_linux_x64_gnu", "relation": "imports", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L123", "weight": 1.0, "context": "import"}, {"source": "zeroauth_package_optionaldependencies", "target": "zeroauth_package_optionaldependencies_rolldown_binding_win32_x64_msvc", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L124", "weight": 1.0}, {"source": "zeroauth_package_optionaldependencies_rolldown_binding_win32_x64_msvc", "target": "rolldown_binding_win32_x64_msvc", "relation": "imports", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L124", "weight": 1.0, "context": "import"}, {"source": "zeroauth_package_optionaldependencies", "target": "zeroauth_package_optionaldependencies_swc_core_darwin_arm64", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L125", "weight": 1.0}, {"source": "zeroauth_package_optionaldependencies_swc_core_darwin_arm64", "target": "swc_core_darwin_arm64", "relation": "imports", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L125", "weight": 1.0, "context": "import"}, {"source": "zeroauth_package_optionaldependencies", "target": "zeroauth_package_optionaldependencies_swc_core_darwin_x64", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L126", "weight": 1.0}, {"source": "zeroauth_package_optionaldependencies_swc_core_darwin_x64", "target": "swc_core_darwin_x64", "relation": "imports", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\package.json", "source_location": "L126", "weight": 1.0, "context": "import"}]}
+{
+    "nodes": [
+        {
+            "id": "c_users_alfamas_desktop_zerotrust_package_json",
+            "label": "package.json",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L1"
+        },
+        {
+            "id": "zerotrust_package_name",
+            "label": "name",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L2"
+        },
+        {
+            "id": "zerotrust_package_version",
+            "label": "version",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L3"
+        },
+        {
+            "id": "zerotrust_package_private",
+            "label": "private",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L4"
+        },
+        {
+            "id": "zerotrust_package_workspaces",
+            "label": "workspaces",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L5"
+        },
+        {
+            "id": "zerotrust_package_scripts",
+            "label": "scripts",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L8"
+        },
+        {
+            "id": "zerotrust_package_scripts_postinstall",
+            "label": "postinstall",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L9"
+        },
+        {
+            "id": "zerotrust_package_scripts_dev",
+            "label": "dev",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L10"
+        },
+        {
+            "id": "zerotrust_package_scripts_dev_api",
+            "label": "dev:api",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L11"
+        },
+        {
+            "id": "zerotrust_package_scripts_dev_ui",
+            "label": "dev:ui",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L12"
+        },
+        {
+            "id": "zerotrust_package_scripts_build",
+            "label": "build",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L13"
+        },
+        {
+            "id": "zerotrust_package_scripts_db_generate",
+            "label": "db:generate",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L14"
+        },
+        {
+            "id": "zerotrust_package_scripts_db_migrate",
+            "label": "db:migrate",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L15"
+        },
+        {
+            "id": "zerotrust_package_scripts_db_push",
+            "label": "db:push",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L16"
+        },
+        {
+            "id": "zerotrust_package_scripts_db_studio",
+            "label": "db:studio",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L17"
+        },
+        {
+            "id": "zerotrust_package_scripts_db_backup",
+            "label": "db:backup",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L18"
+        },
+        {
+            "id": "zerotrust_package_scripts_start",
+            "label": "start",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L19"
+        },
+        {
+            "id": "zerotrust_package_scripts_test",
+            "label": "test",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L20"
+        },
+        {
+            "id": "zerotrust_package_scripts_test_watch",
+            "label": "test:watch",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L21"
+        },
+        {
+            "id": "zerotrust_package_scripts_test_coverage",
+            "label": "test:coverage",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L22"
+        },
+        {
+            "id": "zerotrust_package_scripts_lint",
+            "label": "lint",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L23"
+        },
+        {
+            "id": "zerotrust_package_scripts_lint_fix",
+            "label": "lint:fix",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L24"
+        },
+        {
+            "id": "zerotrust_package_scripts_format",
+            "label": "format",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L25"
+        },
+        {
+            "id": "zerotrust_package_scripts_type_check",
+            "label": "type-check",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L26"
+        },
+        {
+            "id": "zerotrust_package_scripts_prepare",
+            "label": "prepare",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L27"
+        },
+        {
+            "id": "zerotrust_package_scripts_lint_staged",
+            "label": "lint-staged",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L28"
+        },
+        {
+            "id": "zerotrust_package_scripts_release",
+            "label": "release",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L29"
+        },
+        {
+            "id": "zerotrust_package_scripts_release_dry",
+            "label": "release:dry",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L30"
+        },
+        {
+            "id": "zerotrust_package_lint_staged",
+            "label": "lint-staged",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L32"
+        },
+        {
+            "id": "zerotrust_package_lint_staged_src_ts",
+            "label": "src/**/*.ts",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L33"
+        },
+        {
+            "id": "zerotrust_package_lint_staged_src_test_spec_ts",
+            "label": "src/**/!(*.test|*.spec).ts",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L36"
+        },
+        {
+            "id": "zerotrust_package_lint_staged_packages_ui_src_ts_tsx",
+            "label": "packages/ui/src/**/*.{ts,tsx}",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L39"
+        },
+        {
+            "id": "zerotrust_package_lint_staged_json_md",
+            "label": "*.{json,md}",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L42"
+        },
+        {
+            "id": "zerotrust_package_dependencies",
+            "label": "dependencies",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L46"
+        },
+        {
+            "id": "zerotrust_package_dependencies_hono_node_server",
+            "label": "@hono/node-server",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L47"
+        },
+        {
+            "id": "zerotrust_package_dependencies_opentelemetry_api",
+            "label": "@opentelemetry/api",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L48"
+        },
+        {
+            "id": "zerotrust_package_dependencies_opentelemetry_auto_instrumentations_node",
+            "label": "@opentelemetry/auto-instrumentations-node",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L49"
+        },
+        {
+            "id": "zerotrust_package_dependencies_opentelemetry_exporter_trace_otlp_http",
+            "label": "@opentelemetry/exporter-trace-otlp-http",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L50"
+        },
+        {
+            "id": "zerotrust_package_dependencies_opentelemetry_resources",
+            "label": "@opentelemetry/resources",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L51"
+        },
+        {
+            "id": "zerotrust_package_dependencies_opentelemetry_sdk_node",
+            "label": "@opentelemetry/sdk-node",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L52"
+        },
+        {
+            "id": "zerotrust_package_dependencies_opentelemetry_semantic_conventions",
+            "label": "@opentelemetry/semantic-conventions",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L53"
+        },
+        {
+            "id": "zerotrust_package_dependencies_sentry_node",
+            "label": "@sentry/node",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L54"
+        },
+        {
+            "id": "zerotrust_package_dependencies_simplewebauthn_server",
+            "label": "@simplewebauthn/server",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L55"
+        },
+        {
+            "id": "zerotrust_package_dependencies_simplewebauthn_types",
+            "label": "@simplewebauthn/types",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L56"
+        },
+        {
+            "id": "zerotrust_package_dependencies_swc_core_win32_x64_msvc",
+            "label": "@swc/core-win32-x64-msvc",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L57"
+        },
+        {
+            "id": "zerotrust_package_dependencies_bcryptjs",
+            "label": "bcryptjs",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L58"
+        },
+        {
+            "id": "zerotrust_package_dependencies_bullmq",
+            "label": "bullmq",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L59"
+        },
+        {
+            "id": "zerotrust_package_dependencies_dotenv",
+            "label": "dotenv",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L60"
+        },
+        {
+            "id": "zerotrust_package_dependencies_drizzle_orm",
+            "label": "drizzle-orm",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L61"
+        },
+        {
+            "id": "zerotrust_package_dependencies_geoip_lite",
+            "label": "geoip-lite",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L62"
+        },
+        {
+            "id": "zerotrust_package_dependencies_hono",
+            "label": "hono",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L63"
+        },
+        {
+            "id": "zerotrust_package_dependencies_ioredis",
+            "label": "ioredis",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L64"
+        },
+        {
+            "id": "zerotrust_package_dependencies_nanoid",
+            "label": "nanoid",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L65"
+        },
+        {
+            "id": "zerotrust_package_dependencies_nodemailer",
+            "label": "nodemailer",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L66"
+        },
+        {
+            "id": "zerotrust_package_dependencies_otpauth",
+            "label": "otpauth",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L67"
+        },
+        {
+            "id": "zerotrust_package_dependencies_postgres",
+            "label": "postgres",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L68"
+        },
+        {
+            "id": "zerotrust_package_dependencies_prom_client",
+            "label": "prom-client",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L69"
+        },
+        {
+            "id": "zerotrust_package_dependencies_qrcode",
+            "label": "qrcode",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L70"
+        },
+        {
+            "id": "zerotrust_package_dependencies_samlify",
+            "label": "samlify",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L71"
+        },
+        {
+            "id": "zerotrust_package_dependencies_stripe",
+            "label": "stripe",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L72"
+        },
+        {
+            "id": "zerotrust_package_dependencies_twilio",
+            "label": "twilio",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L73"
+        },
+        {
+            "id": "zerotrust_package_dependencies_ua_parser_js",
+            "label": "ua-parser-js",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L74"
+        },
+        {
+            "id": "zerotrust_package_dependencies_xpath",
+            "label": "xpath",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L75"
+        },
+        {
+            "id": "zerotrust_package_dependencies_zod",
+            "label": "zod",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L76"
+        },
+        {
+            "id": "zerotrust_package_devdependencies",
+            "label": "devDependencies",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L78"
+        },
+        {
+            "id": "zerotrust_package_devdependencies_commitlint_cli",
+            "label": "@commitlint/cli",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L79"
+        },
+        {
+            "id": "zerotrust_package_devdependencies_commitlint_config_conventional",
+            "label": "@commitlint/config-conventional",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L80"
+        },
+        {
+            "id": "zerotrust_package_devdependencies_rollup_rollup_linux_x64_gnu",
+            "label": "@rollup/rollup-linux-x64-gnu",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L81"
+        },
+        {
+            "id": "zerotrust_package_devdependencies_semantic_release_changelog",
+            "label": "@semantic-release/changelog",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L82"
+        },
+        {
+            "id": "zerotrust_package_devdependencies_semantic_release_commit_analyzer",
+            "label": "@semantic-release/commit-analyzer",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L83"
+        },
+        {
+            "id": "zerotrust_package_devdependencies_semantic_release_git",
+            "label": "@semantic-release/git",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L84"
+        },
+        {
+            "id": "zerotrust_package_devdependencies_semantic_release_github",
+            "label": "@semantic-release/github",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L85"
+        },
+        {
+            "id": "zerotrust_package_devdependencies_semantic_release_release_notes_generator",
+            "label": "@semantic-release/release-notes-generator",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L86"
+        },
+        {
+            "id": "zerotrust_package_devdependencies_types_bcryptjs",
+            "label": "@types/bcryptjs",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L87"
+        },
+        {
+            "id": "zerotrust_package_devdependencies_types_node",
+            "label": "@types/node",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L88"
+        },
+        {
+            "id": "zerotrust_package_devdependencies_types_nodemailer",
+            "label": "@types/nodemailer",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L89"
+        },
+        {
+            "id": "zerotrust_package_devdependencies_types_qrcode",
+            "label": "@types/qrcode",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L90"
+        },
+        {
+            "id": "zerotrust_package_devdependencies_types_ua_parser_js",
+            "label": "@types/ua-parser-js",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L91"
+        },
+        {
+            "id": "zerotrust_package_devdependencies_typescript_eslint_eslint_plugin",
+            "label": "@typescript-eslint/eslint-plugin",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L92"
+        },
+        {
+            "id": "zerotrust_package_devdependencies_typescript_eslint_parser",
+            "label": "@typescript-eslint/parser",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L93"
+        },
+        {
+            "id": "zerotrust_package_devdependencies_vitest_coverage_v8",
+            "label": "@vitest/coverage-v8",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L94"
+        },
+        {
+            "id": "zerotrust_package_devdependencies_vitest_ui",
+            "label": "@vitest/ui",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L95"
+        },
+        {
+            "id": "zerotrust_package_devdependencies_concurrently",
+            "label": "concurrently",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L96"
+        },
+        {
+            "id": "zerotrust_package_devdependencies_conventional_changelog_conventionalcommits",
+            "label": "conventional-changelog-conventionalcommits",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L97"
+        },
+        {
+            "id": "zerotrust_package_devdependencies_drizzle_kit",
+            "label": "drizzle-kit",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L98"
+        },
+        {
+            "id": "zerotrust_package_devdependencies_eslint",
+            "label": "eslint",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L99"
+        },
+        {
+            "id": "zerotrust_package_devdependencies_husky",
+            "label": "husky",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L100"
+        },
+        {
+            "id": "zerotrust_package_devdependencies_lint_staged",
+            "label": "lint-staged",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L101"
+        },
+        {
+            "id": "zerotrust_package_devdependencies_prettier",
+            "label": "prettier",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L102"
+        },
+        {
+            "id": "zerotrust_package_devdependencies_semantic_release",
+            "label": "semantic-release",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L103"
+        },
+        {
+            "id": "zerotrust_package_devdependencies_tsx",
+            "label": "tsx",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L104"
+        },
+        {
+            "id": "zerotrust_package_devdependencies_typescript",
+            "label": "typescript",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L105"
+        },
+        {
+            "id": "zerotrust_package_devdependencies_vitest",
+            "label": "vitest",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L106"
+        },
+        {
+            "id": "zerotrust_package_overrides",
+            "label": "overrides",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L108"
+        },
+        {
+            "id": "zerotrust_package_overrides_postcss",
+            "label": "postcss",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L109"
+        },
+        {
+            "id": "zerotrust_package_optionaldependencies",
+            "label": "optionalDependencies",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L111"
+        },
+        {
+            "id": "zerotrust_package_optionaldependencies_parcel_watcher_darwin_arm64",
+            "label": "@parcel/watcher-darwin-arm64",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L112"
+        },
+        {
+            "id": "zerotrust_package_optionaldependencies_parcel_watcher_darwin_x64",
+            "label": "@parcel/watcher-darwin-x64",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L113"
+        },
+        {
+            "id": "zerotrust_package_optionaldependencies_parcel_watcher_linux_x64_glibc",
+            "label": "@parcel/watcher-linux-x64-glibc",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L114"
+        },
+        {
+            "id": "zerotrust_package_optionaldependencies_swc_core_linux_x64_gnu",
+            "label": "@swc/core-linux-x64-gnu",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L115"
+        },
+        {
+            "id": "zerotrust_package_optionaldependencies_next_swc_win32_x64_msvc",
+            "label": "@next/swc-win32-x64-msvc",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L116"
+        },
+        {
+            "id": "zerotrust_package_optionaldependencies_next_swc_wasm_nodejs",
+            "label": "@next/swc-wasm-nodejs",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L117"
+        },
+        {
+            "id": "zerotrust_package_optionaldependencies_next_swc_wasm_web",
+            "label": "@next/swc-wasm-web",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L118"
+        },
+        {
+            "id": "zerotrust_package_optionaldependencies_parcel_watcher_win32_x64",
+            "label": "@parcel/watcher-win32-x64",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L119"
+        },
+        {
+            "id": "zerotrust_package_optionaldependencies_swc_core_win32_x64_msvc",
+            "label": "@swc/core-win32-x64-msvc",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L120"
+        },
+        {
+            "id": "zerotrust_package_optionaldependencies_rolldown_binding_darwin_arm64",
+            "label": "@rolldown/binding-darwin-arm64",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L121"
+        },
+        {
+            "id": "zerotrust_package_optionaldependencies_rolldown_binding_darwin_x64",
+            "label": "@rolldown/binding-darwin-x64",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L122"
+        },
+        {
+            "id": "zerotrust_package_optionaldependencies_rolldown_binding_linux_x64_gnu",
+            "label": "@rolldown/binding-linux-x64-gnu",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L123"
+        },
+        {
+            "id": "zerotrust_package_optionaldependencies_rolldown_binding_win32_x64_msvc",
+            "label": "@rolldown/binding-win32-x64-msvc",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L124"
+        },
+        {
+            "id": "zerotrust_package_optionaldependencies_swc_core_darwin_arm64",
+            "label": "@swc/core-darwin-arm64",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L125"
+        },
+        {
+            "id": "zerotrust_package_optionaldependencies_swc_core_darwin_x64",
+            "label": "@swc/core-darwin-x64",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L126"
+        }
+    ],
+    "edges": [
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_package_json",
+            "target": "zerotrust_package_name",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L2",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_package_json",
+            "target": "zerotrust_package_version",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L3",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_package_json",
+            "target": "zerotrust_package_private",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L4",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_package_json",
+            "target": "zerotrust_package_workspaces",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L5",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_workspaces",
+            "target": "ref_packages",
+            "relation": "extends",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L5",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_package_json",
+            "target": "zerotrust_package_scripts",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L8",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_scripts",
+            "target": "zerotrust_package_scripts_postinstall",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L9",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_scripts",
+            "target": "zerotrust_package_scripts_dev",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L10",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_scripts",
+            "target": "zerotrust_package_scripts_dev_api",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L11",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_scripts",
+            "target": "zerotrust_package_scripts_dev_ui",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L12",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_scripts",
+            "target": "zerotrust_package_scripts_build",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L13",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_scripts",
+            "target": "zerotrust_package_scripts_db_generate",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L14",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_scripts",
+            "target": "zerotrust_package_scripts_db_migrate",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L15",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_scripts",
+            "target": "zerotrust_package_scripts_db_push",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L16",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_scripts",
+            "target": "zerotrust_package_scripts_db_studio",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L17",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_scripts",
+            "target": "zerotrust_package_scripts_db_backup",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L18",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_scripts",
+            "target": "zerotrust_package_scripts_start",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L19",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_scripts",
+            "target": "zerotrust_package_scripts_test",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L20",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_scripts",
+            "target": "zerotrust_package_scripts_test_watch",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L21",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_scripts",
+            "target": "zerotrust_package_scripts_test_coverage",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L22",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_scripts",
+            "target": "zerotrust_package_scripts_lint",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L23",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_scripts",
+            "target": "zerotrust_package_scripts_lint_fix",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L24",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_scripts",
+            "target": "zerotrust_package_scripts_format",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L25",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_scripts",
+            "target": "zerotrust_package_scripts_type_check",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L26",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_scripts",
+            "target": "zerotrust_package_scripts_prepare",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L27",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_scripts",
+            "target": "zerotrust_package_scripts_lint_staged",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L28",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_scripts",
+            "target": "zerotrust_package_scripts_release",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L29",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_scripts",
+            "target": "zerotrust_package_scripts_release_dry",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L30",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_package_json",
+            "target": "zerotrust_package_lint_staged",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L32",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_lint_staged",
+            "target": "zerotrust_package_lint_staged_src_ts",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L33",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_lint_staged_src_ts",
+            "target": "ref_bunx_prettier_write",
+            "relation": "extends",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L33",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "zerotrust_package_lint_staged",
+            "target": "zerotrust_package_lint_staged_src_test_spec_ts",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L36",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_lint_staged_src_test_spec_ts",
+            "target": "ref_bunx_eslint_fix_max_warnings_0",
+            "relation": "extends",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L36",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "zerotrust_package_lint_staged",
+            "target": "zerotrust_package_lint_staged_packages_ui_src_ts_tsx",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L39",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_lint_staged_packages_ui_src_ts_tsx",
+            "target": "ref_bunx_prettier_write",
+            "relation": "extends",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L39",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "zerotrust_package_lint_staged",
+            "target": "zerotrust_package_lint_staged_json_md",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L42",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_lint_staged_json_md",
+            "target": "ref_bunx_prettier_write",
+            "relation": "extends",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L42",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_package_json",
+            "target": "zerotrust_package_dependencies",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L46",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_dependencies",
+            "target": "zerotrust_package_dependencies_hono_node_server",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L47",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_dependencies_hono_node_server",
+            "target": "hono_node_server",
+            "relation": "imports",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L47",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "zerotrust_package_dependencies",
+            "target": "zerotrust_package_dependencies_opentelemetry_api",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L48",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_dependencies_opentelemetry_api",
+            "target": "opentelemetry_api",
+            "relation": "imports",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L48",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "zerotrust_package_dependencies",
+            "target": "zerotrust_package_dependencies_opentelemetry_auto_instrumentations_node",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L49",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_dependencies_opentelemetry_auto_instrumentations_node",
+            "target": "opentelemetry_auto_instrumentations_node",
+            "relation": "imports",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L49",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "zerotrust_package_dependencies",
+            "target": "zerotrust_package_dependencies_opentelemetry_exporter_trace_otlp_http",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L50",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_dependencies_opentelemetry_exporter_trace_otlp_http",
+            "target": "opentelemetry_exporter_trace_otlp_http",
+            "relation": "imports",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L50",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "zerotrust_package_dependencies",
+            "target": "zerotrust_package_dependencies_opentelemetry_resources",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L51",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_dependencies_opentelemetry_resources",
+            "target": "opentelemetry_resources",
+            "relation": "imports",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L51",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "zerotrust_package_dependencies",
+            "target": "zerotrust_package_dependencies_opentelemetry_sdk_node",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L52",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_dependencies_opentelemetry_sdk_node",
+            "target": "opentelemetry_sdk_node",
+            "relation": "imports",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L52",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "zerotrust_package_dependencies",
+            "target": "zerotrust_package_dependencies_opentelemetry_semantic_conventions",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L53",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_dependencies_opentelemetry_semantic_conventions",
+            "target": "opentelemetry_semantic_conventions",
+            "relation": "imports",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L53",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "zerotrust_package_dependencies",
+            "target": "zerotrust_package_dependencies_sentry_node",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L54",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_dependencies_sentry_node",
+            "target": "sentry_node",
+            "relation": "imports",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L54",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "zerotrust_package_dependencies",
+            "target": "zerotrust_package_dependencies_simplewebauthn_server",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L55",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_dependencies_simplewebauthn_server",
+            "target": "simplewebauthn_server",
+            "relation": "imports",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L55",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "zerotrust_package_dependencies",
+            "target": "zerotrust_package_dependencies_simplewebauthn_types",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L56",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_dependencies_simplewebauthn_types",
+            "target": "simplewebauthn_types",
+            "relation": "imports",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L56",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "zerotrust_package_dependencies",
+            "target": "zerotrust_package_dependencies_swc_core_win32_x64_msvc",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L57",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_dependencies_swc_core_win32_x64_msvc",
+            "target": "swc_core_win32_x64_msvc",
+            "relation": "imports",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L57",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "zerotrust_package_dependencies",
+            "target": "zerotrust_package_dependencies_bcryptjs",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L58",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_dependencies_bcryptjs",
+            "target": "bcryptjs",
+            "relation": "imports",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L58",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "zerotrust_package_dependencies",
+            "target": "zerotrust_package_dependencies_bullmq",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L59",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_dependencies_bullmq",
+            "target": "bullmq",
+            "relation": "imports",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L59",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "zerotrust_package_dependencies",
+            "target": "zerotrust_package_dependencies_dotenv",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L60",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_dependencies_dotenv",
+            "target": "dotenv",
+            "relation": "imports",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L60",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "zerotrust_package_dependencies",
+            "target": "zerotrust_package_dependencies_drizzle_orm",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L61",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_dependencies_drizzle_orm",
+            "target": "drizzle_orm",
+            "relation": "imports",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L61",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "zerotrust_package_dependencies",
+            "target": "zerotrust_package_dependencies_geoip_lite",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L62",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_dependencies_geoip_lite",
+            "target": "geoip_lite",
+            "relation": "imports",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L62",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "zerotrust_package_dependencies",
+            "target": "zerotrust_package_dependencies_hono",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L63",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_dependencies_hono",
+            "target": "hono",
+            "relation": "imports",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L63",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "zerotrust_package_dependencies",
+            "target": "zerotrust_package_dependencies_ioredis",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L64",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_dependencies_ioredis",
+            "target": "ioredis",
+            "relation": "imports",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L64",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "zerotrust_package_dependencies",
+            "target": "zerotrust_package_dependencies_nanoid",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L65",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_dependencies_nanoid",
+            "target": "nanoid",
+            "relation": "imports",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L65",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "zerotrust_package_dependencies",
+            "target": "zerotrust_package_dependencies_nodemailer",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L66",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_dependencies_nodemailer",
+            "target": "nodemailer",
+            "relation": "imports",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L66",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "zerotrust_package_dependencies",
+            "target": "zerotrust_package_dependencies_otpauth",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L67",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_dependencies_otpauth",
+            "target": "otpauth",
+            "relation": "imports",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L67",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "zerotrust_package_dependencies",
+            "target": "zerotrust_package_dependencies_postgres",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L68",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_dependencies_postgres",
+            "target": "postgres",
+            "relation": "imports",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L68",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "zerotrust_package_dependencies",
+            "target": "zerotrust_package_dependencies_prom_client",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L69",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_dependencies_prom_client",
+            "target": "prom_client",
+            "relation": "imports",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L69",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "zerotrust_package_dependencies",
+            "target": "zerotrust_package_dependencies_qrcode",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L70",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_dependencies_qrcode",
+            "target": "qrcode",
+            "relation": "imports",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L70",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "zerotrust_package_dependencies",
+            "target": "zerotrust_package_dependencies_samlify",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L71",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_dependencies_samlify",
+            "target": "samlify",
+            "relation": "imports",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L71",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "zerotrust_package_dependencies",
+            "target": "zerotrust_package_dependencies_stripe",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L72",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_dependencies_stripe",
+            "target": "stripe",
+            "relation": "imports",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L72",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "zerotrust_package_dependencies",
+            "target": "zerotrust_package_dependencies_twilio",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L73",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_dependencies_twilio",
+            "target": "twilio",
+            "relation": "imports",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L73",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "zerotrust_package_dependencies",
+            "target": "zerotrust_package_dependencies_ua_parser_js",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L74",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_dependencies_ua_parser_js",
+            "target": "ua_parser_js",
+            "relation": "imports",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L74",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "zerotrust_package_dependencies",
+            "target": "zerotrust_package_dependencies_xpath",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L75",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_dependencies_xpath",
+            "target": "xpath",
+            "relation": "imports",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L75",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "zerotrust_package_dependencies",
+            "target": "zerotrust_package_dependencies_zod",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L76",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_dependencies_zod",
+            "target": "zod",
+            "relation": "imports",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L76",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_package_json",
+            "target": "zerotrust_package_devdependencies",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L78",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_devdependencies",
+            "target": "zerotrust_package_devdependencies_commitlint_cli",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L79",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_devdependencies_commitlint_cli",
+            "target": "commitlint_cli",
+            "relation": "imports",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L79",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "zerotrust_package_devdependencies",
+            "target": "zerotrust_package_devdependencies_commitlint_config_conventional",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L80",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_devdependencies_commitlint_config_conventional",
+            "target": "commitlint_config_conventional",
+            "relation": "imports",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L80",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "zerotrust_package_devdependencies",
+            "target": "zerotrust_package_devdependencies_rollup_rollup_linux_x64_gnu",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L81",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_devdependencies_rollup_rollup_linux_x64_gnu",
+            "target": "rollup_rollup_linux_x64_gnu",
+            "relation": "imports",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L81",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "zerotrust_package_devdependencies",
+            "target": "zerotrust_package_devdependencies_semantic_release_changelog",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L82",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_devdependencies_semantic_release_changelog",
+            "target": "semantic_release_changelog",
+            "relation": "imports",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L82",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "zerotrust_package_devdependencies",
+            "target": "zerotrust_package_devdependencies_semantic_release_commit_analyzer",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L83",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_devdependencies_semantic_release_commit_analyzer",
+            "target": "semantic_release_commit_analyzer",
+            "relation": "imports",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L83",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "zerotrust_package_devdependencies",
+            "target": "zerotrust_package_devdependencies_semantic_release_git",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L84",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_devdependencies_semantic_release_git",
+            "target": "semantic_release_git",
+            "relation": "imports",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L84",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "zerotrust_package_devdependencies",
+            "target": "zerotrust_package_devdependencies_semantic_release_github",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L85",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_devdependencies_semantic_release_github",
+            "target": "semantic_release_github",
+            "relation": "imports",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L85",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "zerotrust_package_devdependencies",
+            "target": "zerotrust_package_devdependencies_semantic_release_release_notes_generator",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L86",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_devdependencies_semantic_release_release_notes_generator",
+            "target": "semantic_release_release_notes_generator",
+            "relation": "imports",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L86",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "zerotrust_package_devdependencies",
+            "target": "zerotrust_package_devdependencies_types_bcryptjs",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L87",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_devdependencies_types_bcryptjs",
+            "target": "types_bcryptjs",
+            "relation": "imports",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L87",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "zerotrust_package_devdependencies",
+            "target": "zerotrust_package_devdependencies_types_node",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L88",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_devdependencies_types_node",
+            "target": "types_node",
+            "relation": "imports",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L88",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "zerotrust_package_devdependencies",
+            "target": "zerotrust_package_devdependencies_types_nodemailer",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L89",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_devdependencies_types_nodemailer",
+            "target": "types_nodemailer",
+            "relation": "imports",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L89",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "zerotrust_package_devdependencies",
+            "target": "zerotrust_package_devdependencies_types_qrcode",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L90",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_devdependencies_types_qrcode",
+            "target": "types_qrcode",
+            "relation": "imports",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L90",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "zerotrust_package_devdependencies",
+            "target": "zerotrust_package_devdependencies_types_ua_parser_js",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L91",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_devdependencies_types_ua_parser_js",
+            "target": "types_ua_parser_js",
+            "relation": "imports",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L91",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "zerotrust_package_devdependencies",
+            "target": "zerotrust_package_devdependencies_typescript_eslint_eslint_plugin",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L92",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_devdependencies_typescript_eslint_eslint_plugin",
+            "target": "typescript_eslint_eslint_plugin",
+            "relation": "imports",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L92",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "zerotrust_package_devdependencies",
+            "target": "zerotrust_package_devdependencies_typescript_eslint_parser",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L93",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_devdependencies_typescript_eslint_parser",
+            "target": "typescript_eslint_parser",
+            "relation": "imports",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L93",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "zerotrust_package_devdependencies",
+            "target": "zerotrust_package_devdependencies_vitest_coverage_v8",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L94",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_devdependencies_vitest_coverage_v8",
+            "target": "vitest_coverage_v8",
+            "relation": "imports",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L94",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "zerotrust_package_devdependencies",
+            "target": "zerotrust_package_devdependencies_vitest_ui",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L95",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_devdependencies_vitest_ui",
+            "target": "vitest_ui",
+            "relation": "imports",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L95",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "zerotrust_package_devdependencies",
+            "target": "zerotrust_package_devdependencies_concurrently",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L96",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_devdependencies_concurrently",
+            "target": "concurrently",
+            "relation": "imports",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L96",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "zerotrust_package_devdependencies",
+            "target": "zerotrust_package_devdependencies_conventional_changelog_conventionalcommits",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L97",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_devdependencies_conventional_changelog_conventionalcommits",
+            "target": "conventional_changelog_conventionalcommits",
+            "relation": "imports",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L97",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "zerotrust_package_devdependencies",
+            "target": "zerotrust_package_devdependencies_drizzle_kit",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L98",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_devdependencies_drizzle_kit",
+            "target": "drizzle_kit",
+            "relation": "imports",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L98",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "zerotrust_package_devdependencies",
+            "target": "zerotrust_package_devdependencies_eslint",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L99",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_devdependencies_eslint",
+            "target": "eslint",
+            "relation": "imports",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L99",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "zerotrust_package_devdependencies",
+            "target": "zerotrust_package_devdependencies_husky",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L100",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_devdependencies_husky",
+            "target": "husky",
+            "relation": "imports",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L100",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "zerotrust_package_devdependencies",
+            "target": "zerotrust_package_devdependencies_lint_staged",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L101",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_devdependencies_lint_staged",
+            "target": "lint_staged",
+            "relation": "imports",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L101",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "zerotrust_package_devdependencies",
+            "target": "zerotrust_package_devdependencies_prettier",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L102",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_devdependencies_prettier",
+            "target": "prettier",
+            "relation": "imports",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L102",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "zerotrust_package_devdependencies",
+            "target": "zerotrust_package_devdependencies_semantic_release",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L103",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_devdependencies_semantic_release",
+            "target": "semantic_release",
+            "relation": "imports",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L103",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "zerotrust_package_devdependencies",
+            "target": "zerotrust_package_devdependencies_tsx",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L104",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_devdependencies_tsx",
+            "target": "tsx",
+            "relation": "imports",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L104",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "zerotrust_package_devdependencies",
+            "target": "zerotrust_package_devdependencies_typescript",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L105",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_devdependencies_typescript",
+            "target": "typescript",
+            "relation": "imports",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L105",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "zerotrust_package_devdependencies",
+            "target": "zerotrust_package_devdependencies_vitest",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L106",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_devdependencies_vitest",
+            "target": "vitest",
+            "relation": "imports",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L106",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_package_json",
+            "target": "zerotrust_package_overrides",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L108",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_overrides",
+            "target": "zerotrust_package_overrides_postcss",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L109",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_package_json",
+            "target": "zerotrust_package_optionaldependencies",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L111",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_optionaldependencies",
+            "target": "zerotrust_package_optionaldependencies_parcel_watcher_darwin_arm64",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L112",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_optionaldependencies_parcel_watcher_darwin_arm64",
+            "target": "parcel_watcher_darwin_arm64",
+            "relation": "imports",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L112",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "zerotrust_package_optionaldependencies",
+            "target": "zerotrust_package_optionaldependencies_parcel_watcher_darwin_x64",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L113",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_optionaldependencies_parcel_watcher_darwin_x64",
+            "target": "parcel_watcher_darwin_x64",
+            "relation": "imports",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L113",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "zerotrust_package_optionaldependencies",
+            "target": "zerotrust_package_optionaldependencies_parcel_watcher_linux_x64_glibc",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L114",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_optionaldependencies_parcel_watcher_linux_x64_glibc",
+            "target": "parcel_watcher_linux_x64_glibc",
+            "relation": "imports",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L114",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "zerotrust_package_optionaldependencies",
+            "target": "zerotrust_package_optionaldependencies_swc_core_linux_x64_gnu",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L115",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_optionaldependencies_swc_core_linux_x64_gnu",
+            "target": "swc_core_linux_x64_gnu",
+            "relation": "imports",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L115",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "zerotrust_package_optionaldependencies",
+            "target": "zerotrust_package_optionaldependencies_next_swc_win32_x64_msvc",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L116",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_optionaldependencies_next_swc_win32_x64_msvc",
+            "target": "next_swc_win32_x64_msvc",
+            "relation": "imports",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L116",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "zerotrust_package_optionaldependencies",
+            "target": "zerotrust_package_optionaldependencies_next_swc_wasm_nodejs",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L117",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_optionaldependencies_next_swc_wasm_nodejs",
+            "target": "next_swc_wasm_nodejs",
+            "relation": "imports",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L117",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "zerotrust_package_optionaldependencies",
+            "target": "zerotrust_package_optionaldependencies_next_swc_wasm_web",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L118",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_optionaldependencies_next_swc_wasm_web",
+            "target": "next_swc_wasm_web",
+            "relation": "imports",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L118",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "zerotrust_package_optionaldependencies",
+            "target": "zerotrust_package_optionaldependencies_parcel_watcher_win32_x64",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L119",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_optionaldependencies_parcel_watcher_win32_x64",
+            "target": "parcel_watcher_win32_x64",
+            "relation": "imports",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L119",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "zerotrust_package_optionaldependencies",
+            "target": "zerotrust_package_optionaldependencies_swc_core_win32_x64_msvc",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L120",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_optionaldependencies_swc_core_win32_x64_msvc",
+            "target": "swc_core_win32_x64_msvc",
+            "relation": "imports",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L120",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "zerotrust_package_optionaldependencies",
+            "target": "zerotrust_package_optionaldependencies_rolldown_binding_darwin_arm64",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L121",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_optionaldependencies_rolldown_binding_darwin_arm64",
+            "target": "rolldown_binding_darwin_arm64",
+            "relation": "imports",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L121",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "zerotrust_package_optionaldependencies",
+            "target": "zerotrust_package_optionaldependencies_rolldown_binding_darwin_x64",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L122",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_optionaldependencies_rolldown_binding_darwin_x64",
+            "target": "rolldown_binding_darwin_x64",
+            "relation": "imports",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L122",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "zerotrust_package_optionaldependencies",
+            "target": "zerotrust_package_optionaldependencies_rolldown_binding_linux_x64_gnu",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L123",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_optionaldependencies_rolldown_binding_linux_x64_gnu",
+            "target": "rolldown_binding_linux_x64_gnu",
+            "relation": "imports",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L123",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "zerotrust_package_optionaldependencies",
+            "target": "zerotrust_package_optionaldependencies_rolldown_binding_win32_x64_msvc",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L124",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_optionaldependencies_rolldown_binding_win32_x64_msvc",
+            "target": "rolldown_binding_win32_x64_msvc",
+            "relation": "imports",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L124",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "zerotrust_package_optionaldependencies",
+            "target": "zerotrust_package_optionaldependencies_swc_core_darwin_arm64",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L125",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_optionaldependencies_swc_core_darwin_arm64",
+            "target": "swc_core_darwin_arm64",
+            "relation": "imports",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L125",
+            "weight": 1.0,
+            "context": "import"
+        },
+        {
+            "source": "zerotrust_package_optionaldependencies",
+            "target": "zerotrust_package_optionaldependencies_swc_core_darwin_x64",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L126",
+            "weight": 1.0
+        },
+        {
+            "source": "zerotrust_package_optionaldependencies_swc_core_darwin_x64",
+            "target": "swc_core_darwin_x64",
+            "relation": "imports",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\package.json",
+            "source_location": "L126",
+            "weight": 1.0,
+            "context": "import"
+        }
+    ]
+}

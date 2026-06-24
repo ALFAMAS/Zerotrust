@@ -4,7 +4,7 @@ import { useState } from "react";
 import { api } from "@/lib/api";
 import { getToken } from "@/lib/auth";
 
-const API = process.env.NEXT_PUBLIC_ZEROAUTH_URL ?? "http://localhost:3000";
+const API = process.env.NEXT_PUBLIC_zerotrust_URL ?? "http://localhost:3000";
 
 export default function AccountPage() {
   const [exportLoading, setExportLoading] = useState(false);
@@ -46,7 +46,10 @@ export default function AccountPage() {
     if (deleteConfirm !== "DELETE") return;
     setDeleteLoading(true);
     try {
-      const data = await api.delete<{ scheduledFor?: string; message?: string }>("/gdpr/account");
+      const data = await api.delete<{
+        scheduledFor?: string;
+        message?: string;
+      }>("/gdpr/account");
       setDeleteStatus({
         scheduled: true,
         scheduledFor: data.scheduledFor,
@@ -77,15 +80,19 @@ export default function AccountPage() {
         <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
           Account
         </h1>
-        <p className="mt-1 text-sm text-muted-foreground">Manage your data and account status</p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Manage your data and account status
+        </p>
       </div>
 
       {/* Data Export */}
       <section className="bg-card rounded-xl border border-border p-6 space-y-4">
-        <h2 className="text-lg font-semibold text-foreground">Export your data</h2>
+        <h2 className="text-lg font-semibold text-foreground">
+          Export your data
+        </h2>
         <p className="text-sm text-muted-foreground">
-          Download a copy of all data associated with your account, including your profile,
-          sessions, and activity logs.
+          Download a copy of all data associated with your account, including
+          your profile, sessions, and activity logs.
         </p>
         <button
           type="button"
@@ -106,13 +113,17 @@ export default function AccountPage() {
             <div className="rounded-lg bg-red-950/50 border border-red-800 p-4 text-sm text-red-300">
               <p className="font-medium">Account deletion scheduled</p>
               <p className="mt-1 text-red-400">
-                Your account and all associated data will be permanently deleted on{" "}
+                Your account and all associated data will be permanently deleted
+                on{" "}
                 <span className="font-mono text-red-300">
-                  {new Date(deleteStatus.scheduledFor!).toLocaleDateString(undefined, {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  })}
+                  {new Date(deleteStatus.scheduledFor!).toLocaleDateString(
+                    undefined,
+                    {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    },
+                  )}
                 </span>
                 .
               </p>
@@ -128,8 +139,8 @@ export default function AccountPage() {
         ) : (
           <>
             <p className="text-sm text-muted-foreground">
-              Once you delete your account, all of your data will be permanently removed after a
-              30-day grace period. This action cannot be undone.
+              Once you delete your account, all of your data will be permanently
+              removed after a 30-day grace period. This action cannot be undone.
             </p>
 
             {deleteStatus?.error && (
@@ -139,8 +150,13 @@ export default function AccountPage() {
             )}
 
             <div className="space-y-3">
-              <label htmlFor="page-f0" className="block text-sm text-muted-foreground">
-                Type <span className="font-mono font-bold text-red-400">DELETE</span> to confirm
+              <label
+                htmlFor="page-f0"
+                className="block text-sm text-muted-foreground"
+              >
+                Type{" "}
+                <span className="font-mono font-bold text-red-400">DELETE</span>{" "}
+                to confirm
               </label>
               <input
                 id="page-f0"

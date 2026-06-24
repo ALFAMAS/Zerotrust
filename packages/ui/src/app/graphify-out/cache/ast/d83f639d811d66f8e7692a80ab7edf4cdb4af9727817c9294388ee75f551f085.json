@@ -1,1 +1,226 @@
-{"nodes": [{"id": "c_users_alfamas_desktop_zeroauth_packages_ui_src_app_admin_did_page_tsx", "label": "page.tsx", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\app\\admin\\did\\page.tsx", "source_location": "L1"}, {"id": "did_page_verificationmethod", "label": "VerificationMethod", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\app\\admin\\did\\page.tsx", "source_location": "L7"}, {"id": "did_page_diddocument", "label": "DIDDocument", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\app\\admin\\did\\page.tsx", "source_location": "L15"}, {"id": "did_page_resolveresponse", "label": "ResolveResponse", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\app\\admin\\did\\page.tsx", "source_location": "L24"}, {"id": "did_page_challengeresponse", "label": "ChallengeResponse", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\app\\admin\\did\\page.tsx", "source_location": "L29"}, {"id": "did_page_admindidpage", "label": "AdminDIDPage()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\app\\admin\\did\\page.tsx", "source_location": "L38"}], "edges": [{"source": "c_users_alfamas_desktop_zeroauth_packages_ui_src_app_admin_did_page_tsx", "target": "react", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\app\\admin\\did\\page.tsx", "source_location": "L3", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_packages_ui_src_app_admin_did_page_tsx", "target": "lucide_react", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\app\\admin\\did\\page.tsx", "source_location": "L4", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_packages_ui_src_app_admin_did_page_tsx", "target": "c_users_alfamas_desktop_zeroauth_packages_ui_src_lib_api_ts", "relation": "imports_from", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\app\\admin\\did\\page.tsx", "source_location": "L5", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_packages_ui_src_app_admin_did_page_tsx", "target": "lib_api_api", "relation": "imports", "context": "import", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\app\\admin\\did\\page.tsx", "source_location": "L5", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_packages_ui_src_app_admin_did_page_tsx", "target": "did_page_verificationmethod", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\app\\admin\\did\\page.tsx", "source_location": "L7", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_packages_ui_src_app_admin_did_page_tsx", "target": "did_page_diddocument", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\app\\admin\\did\\page.tsx", "source_location": "L15", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_packages_ui_src_app_admin_did_page_tsx", "target": "did_page_resolveresponse", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\app\\admin\\did\\page.tsx", "source_location": "L24", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_packages_ui_src_app_admin_did_page_tsx", "target": "did_page_challengeresponse", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\app\\admin\\did\\page.tsx", "source_location": "L29", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_packages_ui_src_app_admin_did_page_tsx", "target": "did_page_admindidpage", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\app\\admin\\did\\page.tsx", "source_location": "L38", "weight": 1.0}], "raw_calls": [{"caller_nid": "did_page_admindidpage", "callee": "useState", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\app\\admin\\did\\page.tsx", "source_location": "L40"}, {"caller_nid": "did_page_admindidpage", "callee": "useState", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\app\\admin\\did\\page.tsx", "source_location": "L41"}, {"caller_nid": "did_page_admindidpage", "callee": "useState", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\app\\admin\\did\\page.tsx", "source_location": "L42"}, {"caller_nid": "did_page_admindidpage", "callee": "useState", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\app\\admin\\did\\page.tsx", "source_location": "L43"}, {"caller_nid": "did_page_admindidpage", "callee": "useState", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\app\\admin\\did\\page.tsx", "source_location": "L46"}, {"caller_nid": "did_page_admindidpage", "callee": "useState", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\app\\admin\\did\\page.tsx", "source_location": "L47"}, {"caller_nid": "did_page_admindidpage", "callee": "useState", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\app\\admin\\did\\page.tsx", "source_location": "L48"}, {"caller_nid": "did_page_admindidpage", "callee": "useState", "is_member_call": false, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\app\\admin\\did\\page.tsx", "source_location": "L49"}, {"caller_nid": "did_page_admindidpage", "callee": "trim", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\app\\admin\\did\\page.tsx", "source_location": "L128"}, {"caller_nid": "did_page_admindidpage", "callee": "map", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\app\\admin\\did\\page.tsx", "source_location": "L163"}, {"caller_nid": "did_page_admindidpage", "callee": "stringify", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\app\\admin\\did\\page.tsx", "source_location": "L178"}, {"caller_nid": "did_page_admindidpage", "callee": "trim", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\app\\admin\\did\\page.tsx", "source_location": "L207"}, {"caller_nid": "did_page_admindidpage", "callee": "toLocaleString", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\packages\\ui\\src\\app\\admin\\did\\page.tsx", "source_location": "L239"}]}
+{
+    "nodes": [
+        {
+            "id": "c_users_alfamas_desktop_zerotrust_packages_ui_src_app_admin_did_page_tsx",
+            "label": "page.tsx",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\app\\admin\\did\\page.tsx",
+            "source_location": "L1"
+        },
+        {
+            "id": "did_page_verificationmethod",
+            "label": "VerificationMethod",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\app\\admin\\did\\page.tsx",
+            "source_location": "L7"
+        },
+        {
+            "id": "did_page_diddocument",
+            "label": "DIDDocument",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\app\\admin\\did\\page.tsx",
+            "source_location": "L15"
+        },
+        {
+            "id": "did_page_resolveresponse",
+            "label": "ResolveResponse",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\app\\admin\\did\\page.tsx",
+            "source_location": "L24"
+        },
+        {
+            "id": "did_page_challengeresponse",
+            "label": "ChallengeResponse",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\app\\admin\\did\\page.tsx",
+            "source_location": "L29"
+        },
+        {
+            "id": "did_page_admindidpage",
+            "label": "AdminDIDPage()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\app\\admin\\did\\page.tsx",
+            "source_location": "L38"
+        }
+    ],
+    "edges": [
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_packages_ui_src_app_admin_did_page_tsx",
+            "target": "react",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\app\\admin\\did\\page.tsx",
+            "source_location": "L3",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_packages_ui_src_app_admin_did_page_tsx",
+            "target": "lucide_react",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\app\\admin\\did\\page.tsx",
+            "source_location": "L4",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_packages_ui_src_app_admin_did_page_tsx",
+            "target": "c_users_alfamas_desktop_zerotrust_packages_ui_src_lib_api_ts",
+            "relation": "imports_from",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\app\\admin\\did\\page.tsx",
+            "source_location": "L5",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_packages_ui_src_app_admin_did_page_tsx",
+            "target": "lib_api_api",
+            "relation": "imports",
+            "context": "import",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\app\\admin\\did\\page.tsx",
+            "source_location": "L5",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_packages_ui_src_app_admin_did_page_tsx",
+            "target": "did_page_verificationmethod",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\app\\admin\\did\\page.tsx",
+            "source_location": "L7",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_packages_ui_src_app_admin_did_page_tsx",
+            "target": "did_page_diddocument",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\app\\admin\\did\\page.tsx",
+            "source_location": "L15",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_packages_ui_src_app_admin_did_page_tsx",
+            "target": "did_page_resolveresponse",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\app\\admin\\did\\page.tsx",
+            "source_location": "L24",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_packages_ui_src_app_admin_did_page_tsx",
+            "target": "did_page_challengeresponse",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\app\\admin\\did\\page.tsx",
+            "source_location": "L29",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_packages_ui_src_app_admin_did_page_tsx",
+            "target": "did_page_admindidpage",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\app\\admin\\did\\page.tsx",
+            "source_location": "L38",
+            "weight": 1.0
+        }
+    ],
+    "raw_calls": [
+        {
+            "caller_nid": "did_page_admindidpage",
+            "callee": "useState",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\app\\admin\\did\\page.tsx",
+            "source_location": "L40"
+        },
+        {
+            "caller_nid": "did_page_admindidpage",
+            "callee": "useState",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\app\\admin\\did\\page.tsx",
+            "source_location": "L41"
+        },
+        {
+            "caller_nid": "did_page_admindidpage",
+            "callee": "useState",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\app\\admin\\did\\page.tsx",
+            "source_location": "L42"
+        },
+        {
+            "caller_nid": "did_page_admindidpage",
+            "callee": "useState",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\app\\admin\\did\\page.tsx",
+            "source_location": "L43"
+        },
+        {
+            "caller_nid": "did_page_admindidpage",
+            "callee": "useState",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\app\\admin\\did\\page.tsx",
+            "source_location": "L46"
+        },
+        {
+            "caller_nid": "did_page_admindidpage",
+            "callee": "useState",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\app\\admin\\did\\page.tsx",
+            "source_location": "L47"
+        },
+        {
+            "caller_nid": "did_page_admindidpage",
+            "callee": "useState",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\app\\admin\\did\\page.tsx",
+            "source_location": "L48"
+        },
+        {
+            "caller_nid": "did_page_admindidpage",
+            "callee": "useState",
+            "is_member_call": false,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\app\\admin\\did\\page.tsx",
+            "source_location": "L49"
+        },
+        {
+            "caller_nid": "did_page_admindidpage",
+            "callee": "trim",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\app\\admin\\did\\page.tsx",
+            "source_location": "L128"
+        },
+        {
+            "caller_nid": "did_page_admindidpage",
+            "callee": "map",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\app\\admin\\did\\page.tsx",
+            "source_location": "L163"
+        },
+        {
+            "caller_nid": "did_page_admindidpage",
+            "callee": "stringify",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\app\\admin\\did\\page.tsx",
+            "source_location": "L178"
+        },
+        {
+            "caller_nid": "did_page_admindidpage",
+            "callee": "trim",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\app\\admin\\did\\page.tsx",
+            "source_location": "L207"
+        },
+        {
+            "caller_nid": "did_page_admindidpage",
+            "callee": "toLocaleString",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\packages\\ui\\src\\app\\admin\\did\\page.tsx",
+            "source_location": "L239"
+        }
+    ]
+}

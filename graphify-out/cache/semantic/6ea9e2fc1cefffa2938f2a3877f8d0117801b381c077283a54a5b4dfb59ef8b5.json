@@ -1,1 +1,130 @@
-{"nodes": [{"id": "agent_zeroauth_assistant", "label": "ZeroAuth Assistant Agent", "file_type": "document", "source_file": ".agent.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "agent_safety_review_points", "label": "Agent Safety & Review Points", "file_type": "rationale", "source_file": ".agent.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "agent_tool_preferences", "label": "Agent Tool Preferences", "file_type": "rationale", "source_file": ".agent.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}], "edges": [{"source": "agent_zeroauth_assistant", "target": "agent_safety_review_points", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".agent.md", "source_location": null, "weight": 1.0}, {"source": "agent_zeroauth_assistant", "target": "agent_tool_preferences", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".agent.md", "source_location": null, "weight": 1.0}, {"source": "agent_zeroauth_assistant", "target": "claudemd_drizzle", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".agent.md", "source_location": null, "weight": 1.0}, {"source": "agent_zeroauth_assistant", "target": "claudemd_nextjs_mcp", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".agent.md", "source_location": null, "weight": 1.0}, {"source": "agent_zeroauth_assistant", "target": "claudemd_bun", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".agent.md", "source_location": null, "weight": 1.0}, {"source": "agent_zeroauth_assistant", "target": "readme_doc", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".agent.md", "source_location": null, "weight": 1.0}, {"source": "agent_zeroauth_assistant", "target": "implemented_doc", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".agent.md", "source_location": null, "weight": 1.0}, {"source": "agent_zeroauth_assistant", "target": "notimpl_doc", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".agent.md", "source_location": null, "weight": 1.0}, {"source": "agent_safety_review_points", "target": "agent_zeroauth_assistant", "relation": "rationale_for", "confidence": "INFERRED", "confidence_score": 0.85, "source_file": ".agent.md", "source_location": null, "weight": 1.0}], "hyperedges": []}
+{
+    "nodes": [
+        {
+            "id": "agent_zerotrust_assistant",
+            "label": "zerotrust Assistant Agent",
+            "file_type": "document",
+            "source_file": ".agent.md",
+            "source_location": null,
+            "source_url": null,
+            "captured_at": null,
+            "author": null,
+            "contributor": null
+        },
+        {
+            "id": "agent_safety_review_points",
+            "label": "Agent Safety & Review Points",
+            "file_type": "rationale",
+            "source_file": ".agent.md",
+            "source_location": null,
+            "source_url": null,
+            "captured_at": null,
+            "author": null,
+            "contributor": null
+        },
+        {
+            "id": "agent_tool_preferences",
+            "label": "Agent Tool Preferences",
+            "file_type": "rationale",
+            "source_file": ".agent.md",
+            "source_location": null,
+            "source_url": null,
+            "captured_at": null,
+            "author": null,
+            "contributor": null
+        }
+    ],
+    "edges": [
+        {
+            "source": "agent_zerotrust_assistant",
+            "target": "agent_safety_review_points",
+            "relation": "references",
+            "confidence": "EXTRACTED",
+            "confidence_score": 1.0,
+            "source_file": ".agent.md",
+            "source_location": null,
+            "weight": 1.0
+        },
+        {
+            "source": "agent_zerotrust_assistant",
+            "target": "agent_tool_preferences",
+            "relation": "references",
+            "confidence": "EXTRACTED",
+            "confidence_score": 1.0,
+            "source_file": ".agent.md",
+            "source_location": null,
+            "weight": 1.0
+        },
+        {
+            "source": "agent_zerotrust_assistant",
+            "target": "claudemd_drizzle",
+            "relation": "references",
+            "confidence": "EXTRACTED",
+            "confidence_score": 1.0,
+            "source_file": ".agent.md",
+            "source_location": null,
+            "weight": 1.0
+        },
+        {
+            "source": "agent_zerotrust_assistant",
+            "target": "claudemd_nextjs_mcp",
+            "relation": "references",
+            "confidence": "EXTRACTED",
+            "confidence_score": 1.0,
+            "source_file": ".agent.md",
+            "source_location": null,
+            "weight": 1.0
+        },
+        {
+            "source": "agent_zerotrust_assistant",
+            "target": "claudemd_bun",
+            "relation": "references",
+            "confidence": "EXTRACTED",
+            "confidence_score": 1.0,
+            "source_file": ".agent.md",
+            "source_location": null,
+            "weight": 1.0
+        },
+        {
+            "source": "agent_zerotrust_assistant",
+            "target": "readme_doc",
+            "relation": "references",
+            "confidence": "EXTRACTED",
+            "confidence_score": 1.0,
+            "source_file": ".agent.md",
+            "source_location": null,
+            "weight": 1.0
+        },
+        {
+            "source": "agent_zerotrust_assistant",
+            "target": "implemented_doc",
+            "relation": "references",
+            "confidence": "EXTRACTED",
+            "confidence_score": 1.0,
+            "source_file": ".agent.md",
+            "source_location": null,
+            "weight": 1.0
+        },
+        {
+            "source": "agent_zerotrust_assistant",
+            "target": "notimpl_doc",
+            "relation": "references",
+            "confidence": "EXTRACTED",
+            "confidence_score": 1.0,
+            "source_file": ".agent.md",
+            "source_location": null,
+            "weight": 1.0
+        },
+        {
+            "source": "agent_safety_review_points",
+            "target": "agent_zerotrust_assistant",
+            "relation": "rationale_for",
+            "confidence": "INFERRED",
+            "confidence_score": 0.85,
+            "source_file": ".agent.md",
+            "source_location": null,
+            "weight": 1.0
+        }
+    ],
+    "hyperedges": []
+}

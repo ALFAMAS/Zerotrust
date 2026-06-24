@@ -32,7 +32,12 @@ vi.mock("@aws-sdk/client-s3", () => {
 });
 
 vi.mock("../logger", () => ({
-  getLogger: () => ({ info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() }),
+  getLogger: () => ({
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+    debug: vi.fn(),
+  }),
 }));
 
 import {
@@ -360,17 +365,17 @@ describe("uploadFile", () => {
       BACKUP_S3_PREFIX: "backups/",
     });
     sendMock.mockResolvedValueOnce({});
-    const file = join(tmpDir, "zeroauth-2026.dump");
+    const file = join(tmpDir, "zerotrust-2026.dump");
     writeFileSync(file, "fake-dump-content");
     try {
-      const res = await uploadFile(file, "zeroauth-2026.dump");
-      expect(res.key).toBe("backups/zeroauth-2026.dump");
+      const res = await uploadFile(file, "zerotrust-2026.dump");
+      expect(res.key).toBe("backups/zerotrust-2026.dump");
       expect(res.size).toBeGreaterThan(0);
       expect(sendMock).toHaveBeenCalledTimes(1);
       const cmd = sendMock.mock.calls[0][0];
       expect(cmd.__type).toBe("PutObject");
       expect(cmd.input.Bucket).toBe("b");
-      expect(cmd.input.Key).toBe("backups/zeroauth-2026.dump");
+      expect(cmd.input.Key).toBe("backups/zerotrust-2026.dump");
     } finally {
       restore();
     }
@@ -399,7 +404,9 @@ describe("uploadFile", () => {
     const file = join(tmpDir, "x.dump");
     writeFileSync(file, "x");
     try {
-      await expect(uploadFile(file, "x.dump")).rejects.toThrow(/not configured/);
+      await expect(uploadFile(file, "x.dump")).rejects.toThrow(
+        /not configured/,
+      );
     } finally {
       restore();
     }
@@ -422,7 +429,11 @@ describe("listObjects", () => {
           Size: 1024,
           LastModified: new Date("2026-06-01T00:00:00Z"),
         },
-        { Key: "backups/b.dump", Size: 2048, LastModified: new Date("2026-06-02T00:00:00Z") },
+        {
+          Key: "backups/b.dump",
+          Size: 2048,
+          LastModified: new Date("2026-06-02T00:00:00Z"),
+        },
       ],
     });
     try {
@@ -443,11 +454,15 @@ describe("listObjects", () => {
     });
     sendMock
       .mockResolvedValueOnce({
-        Contents: [{ Key: "backups/a.dump", Size: 1, LastModified: new Date() }],
+        Contents: [
+          { Key: "backups/a.dump", Size: 1, LastModified: new Date() },
+        ],
         NextContinuationToken: "page-2",
       })
       .mockResolvedValueOnce({
-        Contents: [{ Key: "backups/b.dump", Size: 2, LastModified: new Date() }],
+        Contents: [
+          { Key: "backups/b.dump", Size: 2, LastModified: new Date() },
+        ],
       });
     try {
       const list = await listObjects();
@@ -536,7 +551,9 @@ describe("pruneOldBackups", () => {
       BACKUP_S3_BUCKET: "b",
     });
     sendMock.mockResolvedValueOnce({
-      Contents: [{ Key: "backups/recent.dump", Size: 100, LastModified: new Date() }],
+      Contents: [
+        { Key: "backups/recent.dump", Size: 100, LastModified: new Date() },
+      ],
     });
     try {
       const pruned = await pruneOldBackups(30);
@@ -607,7 +624,7 @@ describe("uploadBuffer", () => {
       expect(result.key).toBe("uploads/avatars/u1-1.jpg");
       expect(result.size).toBe("binary-data".length);
       expect(result.url).toBe(
-        "https://s3.eu-central-003.backblazeb2.com/my-bucket/uploads/avatars/u1-1.jpg"
+        "https://s3.eu-central-003.backblazeb2.com/my-bucket/uploads/avatars/u1-1.jpg",
       );
       const cmd = sendMock.mock.calls[0][0];
       expect(cmd.__type).toBe("PutObject");
@@ -615,7 +632,9 @@ describe("uploadBuffer", () => {
       expect(cmd.input.Key).toBe("uploads/avatars/u1-1.jpg");
       expect(cmd.input.ContentType).toBe("image/jpeg");
       // Stamped with the default long-lived immutable Cache-Control for the edge.
-      expect(cmd.input.CacheControl).toBe("public, max-age=31536000, immutable");
+      expect(cmd.input.CacheControl).toBe(
+        "public, max-age=31536000, immutable",
+      );
     } finally {
       restore();
     }
@@ -637,7 +656,9 @@ describe("uploadBuffer", () => {
         contentType: "application/octet-stream",
         cacheControl: "private, no-store",
       });
-      expect(sendMock.mock.calls[0][0].input.CacheControl).toBe("private, no-store");
+      expect(sendMock.mock.calls[0][0].input.CacheControl).toBe(
+        "private, no-store",
+      );
     } finally {
       restore();
     }
@@ -650,7 +671,7 @@ describe("uploadBuffer", () => {
       BACKUP_S3_BUCKET: "b",
       BACKUP_S3_ENDPOINT: "https://s3.eu-central-003.backblazeb2.com",
       BACKUP_S3_FORCE_PATH_STYLE: "true",
-      UPLOADS_CDN_URL: "https://cdn.zeroauth.app/",
+      UPLOADS_CDN_URL: "https://cdn.zerotrust.app/",
     });
     sendMock.mockResolvedValueOnce({});
     try {
@@ -660,7 +681,9 @@ describe("uploadBuffer", () => {
         contentType: "image/jpeg",
       });
       // CDN host + path, not the origin bucket host; trailing slash trimmed.
-      expect(result.url).toBe("https://cdn.zeroauth.app/uploads/avatars/u1-1.jpg");
+      expect(result.url).toBe(
+        "https://cdn.zerotrust.app/uploads/avatars/u1-1.jpg",
+      );
     } finally {
       restore();
     }
@@ -691,7 +714,11 @@ describe("uploadBuffer", () => {
     const restore = setEnv({});
     try {
       await expect(
-        uploadBuffer({ key: "x", body: Buffer.from("x"), contentType: "text/plain" })
+        uploadBuffer({
+          key: "x",
+          body: Buffer.from("x"),
+          contentType: "text/plain",
+        }),
       ).rejects.toThrow(/not configured/);
     } finally {
       restore();
@@ -713,7 +740,9 @@ describe("publicURLForKey", () => {
       forcePathStyle: true,
     };
     const url = publicURLForKey(cfg, "uploads/avatars/u1-1.jpg");
-    expect(url).toBe("https://s3.eu-central-003.backblazeb2.com/my-bucket/uploads/avatars/u1-1.jpg");
+    expect(url).toBe(
+      "https://s3.eu-central-003.backblazeb2.com/my-bucket/uploads/avatars/u1-1.jpg",
+    );
   });
 
   it("encodes keys with special characters", () => {
@@ -727,7 +756,9 @@ describe("publicURLForKey", () => {
       forcePathStyle: true,
     };
     const url = publicURLForKey(cfg, "avatars/has space & plus.jpg");
-    expect(url).toBe("https://s3.eu-central-003.backblazeb2.com/b/avatars/has%20space%20%26%20plus.jpg");
+    expect(url).toBe(
+      "https://s3.eu-central-003.backblazeb2.com/b/avatars/has%20space%20%26%20plus.jpg",
+    );
   });
 
   it("strips trailing slashes from the endpoint", () => {
@@ -754,7 +785,7 @@ describe("publicURLForKey", () => {
       forcePathStyle: false,
     };
     expect(publicURLForKey(cfg, "x.jpg")).toBe(
-      "https://my-bucket.s3.us-east-1.amazonaws.com/x.jpg"
+      "https://my-bucket.s3.us-east-1.amazonaws.com/x.jpg",
     );
   });
 
@@ -772,11 +803,11 @@ describe("publicURLForKey", () => {
       BACKUP_S3_ACCESS_KEY_ID: "k",
       BACKUP_S3_SECRET_ACCESS_KEY: "s",
       BACKUP_S3_BUCKET: "b",
-      BACKUP_S3_PUBLIC_URL_TEMPLATE: "https://cdn.example.com/zeroauth/{key}",
+      BACKUP_S3_PUBLIC_URL_TEMPLATE: "https://cdn.example.com/zerotrust/{key}",
     });
     try {
       expect(publicURLForKey(cfg, "avatars/u1.jpg")).toBe(
-        "https://cdn.example.com/zeroauth/avatars/u1.jpg"
+        "https://cdn.example.com/zerotrust/avatars/u1.jpg",
       );
     } finally {
       restore();
@@ -790,7 +821,9 @@ describe("getUploadCacheControl", () => {
   it("defaults to a long-lived immutable policy", () => {
     const restore = setEnv({});
     try {
-      expect(getUploadCacheControl()).toBe("public, max-age=31536000, immutable");
+      expect(getUploadCacheControl()).toBe(
+        "public, max-age=31536000, immutable",
+      );
     } finally {
       restore();
     }
@@ -841,7 +874,7 @@ describe("cdnURLForKey", () => {
     const restore = setEnv({ UPLOADS_CDN_URL: "https://cdn.example.com" });
     try {
       expect(cdnURLForKey(cfg, "uploads/avatars/u1.jpg")).toBe(
-        "https://cdn.example.com/uploads/avatars/u1.jpg"
+        "https://cdn.example.com/uploads/avatars/u1.jpg",
       );
     } finally {
       restore();
@@ -852,7 +885,7 @@ describe("cdnURLForKey", () => {
     const restore = setEnv({ UPLOADS_CDN_URL: "https://cdn.example.com" });
     try {
       expect(cdnURLForKey(cfg, "uploads/has space & plus.jpg")).toBe(
-        "https://cdn.example.com/uploads/has%20space%20%26%20plus.jpg"
+        "https://cdn.example.com/uploads/has%20space%20%26%20plus.jpg",
       );
     } finally {
       restore();
@@ -863,7 +896,7 @@ describe("cdnURLForKey", () => {
     const restore = setEnv({});
     try {
       expect(cdnURLForKey(cfg, "uploads/avatars/u1.jpg")).toBe(
-        "https://s3.eu-central-003.backblazeb2.com/my-bucket/uploads/avatars/u1.jpg"
+        "https://s3.eu-central-003.backblazeb2.com/my-bucket/uploads/avatars/u1.jpg",
       );
     } finally {
       restore();
@@ -875,7 +908,8 @@ describe("cdnURLForKey", () => {
 
 describe("parseObjectKeyFromPublicUrl", () => {
   it("extracts the key from a Backblaze B2 path-style URL", () => {
-    const url = "https://s3.eu-central-003.backblazeb2.com/my-bucket/uploads/avatars/u1.jpg";
+    const url =
+      "https://s3.eu-central-003.backblazeb2.com/my-bucket/uploads/avatars/u1.jpg";
     expect(parseObjectKeyFromPublicUrl(url)).toBe("uploads/avatars/u1.jpg");
   });
 
@@ -885,7 +919,11 @@ describe("parseObjectKeyFromPublicUrl", () => {
   });
 
   it("returns null for a local-disk URL", () => {
-    expect(parseObjectKeyFromPublicUrl("http://localhost:3000/uploads/avatars/x.jpg")).toBeNull();
+    expect(
+      parseObjectKeyFromPublicUrl(
+        "http://localhost:3000/uploads/avatars/x.jpg",
+      ),
+    ).toBeNull();
   });
 
   it("returns null for invalid URLs", () => {
@@ -893,7 +931,8 @@ describe("parseObjectKeyFromPublicUrl", () => {
   });
 
   it("decodes percent-encoded paths", () => {
-    const url = "https://s3.eu-central-003.backblazeb2.com/b/avatars/has%20space.jpg";
+    const url =
+      "https://s3.eu-central-003.backblazeb2.com/b/avatars/has%20space.jpg";
     expect(parseObjectKeyFromPublicUrl(url)).toBe("avatars/has space.jpg");
   });
 });

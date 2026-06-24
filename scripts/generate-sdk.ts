@@ -1,13 +1,13 @@
 /**
- * Auto-generate the `@zeroauth/client` TypeScript SDK from the OpenAPI spec.
+ * Auto-generate the `@zerotrust/client` TypeScript SDK from the OpenAPI spec.
  *
  *   bun run sdk:generate          # or: npx tsx scripts/generate-sdk.ts
  *
  * Reads `src/api/openapi.json` and emits a single, dependency-free
  * `packages/client/src/index.ts` containing:
  *   - interfaces/types for every `components.schemas` entry,
- *   - a `ZeroAuthError` runtime error,
- *   - a `ZeroAuthClient` class with one typed method per OpenAPI operation.
+ *   - a `zerotrustError` runtime error,
+ *   - a `zerotrustClient` class with one typed method per OpenAPI operation.
  *
  * The generated client targets the global `fetch` (Node 18+, Bun, browsers) and
  * has zero runtime dependencies. The core string-building functions are exported
@@ -55,7 +55,10 @@ export interface OpenApiOperation {
   };
   responses?: Record<
     string,
-    { description?: string; content?: Record<string, { schema?: OpenApiSchema }> }
+    {
+      description?: string;
+      content?: Record<string, { schema?: OpenApiSchema }>;
+    }
   >;
   security?: Record<string, string[]>[];
 }
@@ -80,7 +83,9 @@ function camelCase(input: string): string {
     .split(/\s+/);
   return parts
     .map((p, i) =>
-      i === 0 ? p.charAt(0).toLowerCase() + p.slice(1) : p.charAt(0).toUpperCase() + p.slice(1)
+      i === 0
+        ? p.charAt(0).toLowerCase() + p.slice(1)
+        : p.charAt(0).toUpperCase() + p.slice(1),
     )
     .join("");
 }
@@ -104,8 +109,10 @@ export function tsTypeForSchema(schema: OpenApiSchema | undefined): string {
   if (schema.allOf?.length) {
     return schema.allOf.map(tsTypeForSchema).join(" & ");
   }
-  if (schema.oneOf?.length) return schema.oneOf.map(tsTypeForSchema).join(" | ");
-  if (schema.anyOf?.length) return schema.anyOf.map(tsTypeForSchema).join(" | ");
+  if (schema.oneOf?.length)
+    return schema.oneOf.map(tsTypeForSchema).join(" | ");
+  if (schema.anyOf?.length)
+    return schema.anyOf.map(tsTypeForSchema).join(" | ");
 
   if (schema.enum?.length) {
     return schema.enum
@@ -113,7 +120,11 @@ export function tsTypeForSchema(schema: OpenApiSchema | undefined): string {
       .join(" | ");
   }
 
-  const types = Array.isArray(schema.type) ? schema.type : schema.type ? [schema.type] : [];
+  const types = Array.isArray(schema.type)
+    ? schema.type
+    : schema.type
+      ? [schema.type]
+      : [];
   const nullable = types.includes("null");
   const primary = types.find((t) => t !== "null");
 
@@ -147,7 +158,10 @@ function objectType(schema: OpenApiSchema): string {
   const keys = Object.keys(props);
   if (keys.length === 0) {
     // Free-form object.
-    if (schema.additionalProperties && typeof schema.additionalProperties === "object") {
+    if (
+      schema.additionalProperties &&
+      typeof schema.additionalProperties === "object"
+    ) {
       return `Record<string, ${tsTypeForSchema(schema.additionalProperties)}>`;
     }
     return "Record<string, unknown>";
@@ -163,7 +177,10 @@ function objectType(schema: OpenApiSchema): string {
 }
 
 /** Emit the top-level `export interface`/`export type` block for one named schema. */
-export function emitSchemaDeclaration(name: string, schema: OpenApiSchema): string {
+export function emitSchemaDeclaration(
+  name: string,
+  schema: OpenApiSchema,
+): string {
   const doc = schema.description ? `/** ${schema.description} */\n` : "";
   const isObject =
     (schema.type === "object" || (!schema.type && schema.properties)) &&
@@ -172,7 +189,11 @@ export function emitSchemaDeclaration(name: string, schema: OpenApiSchema): stri
     !schema.anyOf &&
     !schema.allOf;
 
-  if (isObject && schema.properties && Object.keys(schema.properties).length > 0) {
+  if (
+    isObject &&
+    schema.properties &&
+    Object.keys(schema.properties).length > 0
+  ) {
     const required = new Set(schema.required ?? []);
     const body = Object.entries(schema.properties)
       .map(([k, v]) => {
@@ -222,9 +243,11 @@ function buildMethod(
   method: HttpMethod,
   route: string,
   op: OpenApiOperation,
-  usedNames: Set<string>
+  usedNames: Set<string>,
 ): BuiltMethod {
-  let name = op.operationId ? camelCase(op.operationId) : operationMethodName(method, route);
+  let name = op.operationId
+    ? camelCase(op.operationId)
+    : operationMethodName(method, route);
   // Guarantee uniqueness across the client.
   if (usedNames.has(name)) {
     let i = 2;
@@ -251,7 +274,10 @@ function buildMethod(
   if (queryParams.length > 0) {
     const anyRequired = queryParams.some((p) => p.required);
     const fields = queryParams
-      .map((p) => `${safeKey(p.name)}${p.required ? "" : "?"}: ${tsTypeForSchema(p.schema)}`)
+      .map(
+        (p) =>
+          `${safeKey(p.name)}${p.required ? "" : "?"}: ${tsTypeForSchema(p.schema)}`,
+      )
       .join("; ");
     args.push(`query${anyRequired ? "" : "?"}: { ${fields} }`);
   }
@@ -259,7 +285,7 @@ function buildMethod(
   // URL template with encoded path params.
   const urlTemplate = route.replace(
     /\{([^}]+)}/g,
-    (_m, raw) => `\${encodeURIComponent(${camelCase(raw)})}`
+    (_m, raw) => `\${encodeURIComponent(${camelCase(raw)})}`,
   );
 
   // request() options object.
@@ -271,10 +297,13 @@ function buildMethod(
   // JSDoc.
   const docLines: string[] = [];
   if (op.summary) docLines.push(op.summary);
-  if (op.description && op.description !== op.summary) docLines.push("", op.description);
+  if (op.description && op.description !== op.summary)
+    docLines.push("", op.description);
   docLines.push("", `@route ${method.toUpperCase()} ${route}`);
   for (const p of pathParams)
-    docLines.push(`@param ${camelCase(p.name)} ${p.description ?? "path parameter"}`);
+    docLines.push(
+      `@param ${camelCase(p.name)} ${p.description ?? "path parameter"}`,
+    );
   const doc = `  /**\n${docLines.map((l) => `   *${l ? ` ${l}` : ""}`).join("\n")}\n   */\n`;
 
   const code =
@@ -287,10 +316,10 @@ function buildMethod(
 // ── Full SDK assembly ─────────────────────────────────────────────────────────
 
 const RUNTIME_PREAMBLE = `/**
- * Options for constructing a {@link ZeroAuthClient}.
+ * Options for constructing a {@link zerotrustClient}.
  */
-export interface ZeroAuthClientOptions {
-  /** API base URL, e.g. "https://api.zeroauth.app". Defaults to the spec server. */
+export interface zerotrustClientOptions {
+  /** API base URL, e.g. "https://api.zerotrust.app". Defaults to the spec server. */
   baseUrl?: string;
   /** Bearer token (PASETO) sent as the Authorization header on every request. */
   token?: string;
@@ -300,20 +329,20 @@ export interface ZeroAuthClientOptions {
   headers?: Record<string, string>;
 }
 
-export interface ZeroAuthRequestOptions {
+export interface zerotrustRequestOptions {
   query?: Record<string, unknown>;
   body?: unknown;
   headers?: Record<string, string>;
 }
 
 /** Thrown for any non-2xx response. Carries the HTTP status and parsed body. */
-export class ZeroAuthError extends Error {
+export class zerotrustError extends Error {
   readonly status: number;
   readonly code?: string;
   readonly details?: unknown;
   constructor(message: string, status: number, code?: string, details?: unknown) {
     super(message);
-    this.name = "ZeroAuthError";
+    this.name = "zerotrustError";
     this.status = status;
     this.code = code;
     this.details = details;
@@ -324,16 +353,16 @@ function clientClass(spec: OpenApiSpec, methods: BuiltMethod[]): string {
   const defaultBase = spec.servers?.[0]?.url ?? "";
   const methodBlocks = methods.map((m) => m.code).join("\n\n");
   return `/**
- * Typed client for the ${spec.info?.title ?? "ZeroAuth API"} (v${spec.info?.version ?? "1.0.0"}).
+ * Typed client for the ${spec.info?.title ?? "zerotrust API"} (v${spec.info?.version ?? "1.0.0"}).
  * Auto-generated — do not edit by hand. Regenerate with \`bun run sdk:generate\`.
  */
-export class ZeroAuthClient {
+export class zerotrustClient {
   private baseUrl: string;
   private fetchImpl: typeof fetch;
   private defaultHeaders: Record<string, string>;
   token?: string;
 
-  constructor(options: ZeroAuthClientOptions = {}) {
+  constructor(options: zerotrustClientOptions = {}) {
     this.baseUrl = (options.baseUrl ?? ${JSON.stringify(defaultBase)}).replace(/\\/+$/, "");
     this.token = options.token;
     const f = options.fetch ?? globalThis.fetch;
@@ -348,7 +377,7 @@ export class ZeroAuthClient {
   }
 
   /** Low-level request helper used by every generated method. */
-  async request<T>(method: string, path: string, options: ZeroAuthRequestOptions = {}): Promise<T> {
+  async request<T>(method: string, path: string, options: zerotrustRequestOptions = {}): Promise<T> {
     let url = this.baseUrl + path;
     if (options.query) {
       const sp = new URLSearchParams();
@@ -378,7 +407,7 @@ export class ZeroAuthClient {
 
     if (!res.ok) {
       const env = parsed as { code?: string; message?: string; error?: string; details?: unknown } | undefined;
-      throw new ZeroAuthError(
+      throw new zerotrustError(
         env?.message ?? env?.error ?? \`Request failed with status \${res.status}\`,
         res.status,
         env?.code ?? env?.error,
@@ -397,10 +426,15 @@ export function generateSdk(spec: OpenApiSpec): string {
   const schemas = spec.components?.schemas ?? {};
   // Use the exact schema key as the type name — $ref resolution depends on it.
   const typeBlocks = Object.entries(schemas).map(([name, schema]) =>
-    emitSchemaDeclaration(name, schema)
+    emitSchemaDeclaration(name, schema),
   );
 
-  const usedNames = new Set<string>(["request", "setToken", "constructor", "token"]);
+  const usedNames = new Set<string>([
+    "request",
+    "setToken",
+    "constructor",
+    "token",
+  ]);
   const methods: BuiltMethod[] = [];
   for (const [route, ops] of Object.entries(spec.paths ?? {})) {
     for (const method of HTTP_METHODS) {
@@ -411,9 +445,9 @@ export function generateSdk(spec: OpenApiSpec): string {
 
   const header = `/* eslint-disable */
 // ─────────────────────────────────────────────────────────────────────────────
-// @zeroauth/client — AUTO-GENERATED from src/api/openapi.json. DO NOT EDIT.
+// @zerotrust/client — AUTO-GENERATED from src/api/openapi.json. DO NOT EDIT.
 // Regenerate with \`bun run sdk:generate\`.
-// ${spec.info?.title ?? "ZeroAuth API"} v${spec.info?.version ?? "1.0.0"}
+// ${spec.info?.title ?? "zerotrust API"} v${spec.info?.version ?? "1.0.0"}
 // ─────────────────────────────────────────────────────────────────────────────`;
 
   return [
@@ -447,12 +481,12 @@ export function main(): void {
 
   const methodCount = Object.values(spec.paths ?? {}).reduce(
     (n, ops) => n + HTTP_METHODS.filter((m) => ops[m]).length,
-    0
+    0,
   );
   const schemaCount = Object.keys(spec.components?.schemas ?? {}).length;
   // biome-ignore lint/suspicious/noConsole: CLI progress output for the generator
   console.log(
-    `✓ Generated @zeroauth/client → ${path.relative(repoRoot, outFile)} (${methodCount} operations, ${schemaCount} schemas)`
+    `✓ Generated @zerotrust/client → ${path.relative(repoRoot, outFile)} (${methodCount} operations, ${schemaCount} schemas)`,
   );
 }
 

@@ -44,7 +44,11 @@ vi.mock("drizzle-orm", () => ({
 }));
 vi.mock("../middleware/auth", () => ({
   authMiddleware: vi.fn().mockImplementation(async (c: any, next: any) => {
-    c.set("user", { id: "user-1", email: "test@example.com", displayName: "Test User" });
+    c.set("user", {
+      id: "user-1",
+      email: "test@example.com",
+      displayName: "Test User",
+    });
     await next();
   }),
 }));
@@ -53,7 +57,11 @@ vi.mock("../middleware/rateLimiting", () => ({
 }));
 vi.mock("../config", () => ({
   getConfig: () => ({
-    session: { defaultTTL: 3600, refreshTokenTTL: 604800, maxConcurrentDevices: 5 },
+    session: {
+      defaultTTL: 3600,
+      refreshTokenTTL: 604800,
+      maxConcurrentDevices: 5,
+    },
     security: {
       bcryptRounds: 4,
       tokenSecretHex: "a".repeat(64),
@@ -74,7 +82,12 @@ vi.mock("../config", () => ({
       },
     },
     oauth: { providers: {} },
-    elasticsearch: { enabled: false, host: "localhost", port: 9200, indexPrefix: "zeroauth" },
+    elasticsearch: {
+      enabled: false,
+      host: "localhost",
+      port: 9200,
+      indexPrefix: "zerotrust",
+    },
     logging: { level: "error", format: "json" },
   }),
 }));
@@ -174,7 +187,9 @@ describe("GDPR Routes", () => {
     enqueueDb([{}]); // update
 
     const app = await buildApp();
-    const res = await app.request("/gdpr/account/deletion/cancel", { method: "POST" });
+    const res = await app.request("/gdpr/account/deletion/cancel", {
+      method: "POST",
+    });
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.message).toContain("cancelled");
@@ -184,7 +199,9 @@ describe("GDPR Routes", () => {
     enqueueDb([mockProfile]); // profile with no deletion metadata
 
     const app = await buildApp();
-    const res = await app.request("/gdpr/account/deletion/cancel", { method: "POST" });
+    const res = await app.request("/gdpr/account/deletion/cancel", {
+      method: "POST",
+    });
     expect(res.status).toBe(400);
     const body = await res.json();
     expect(body.error).toBe("NO_DELETION_PENDING");

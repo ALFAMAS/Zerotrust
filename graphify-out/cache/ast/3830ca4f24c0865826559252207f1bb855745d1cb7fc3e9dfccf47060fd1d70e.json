@@ -1,1 +1,93 @@
-{"nodes": [{"id": "c_users_alfamas_desktop_zeroauth_src_shared_permissions_ts", "label": "permissions.ts", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\shared\\permissions.ts", "source_location": "L1"}, {"id": "shared_permissions_org_permissions", "label": "ORG_PERMISSIONS", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\shared\\permissions.ts", "source_location": "L1"}, {"id": "shared_permissions_orgpermission", "label": "OrgPermission", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\shared\\permissions.ts", "source_location": "L14"}, {"id": "shared_permissions_system_role_permissions", "label": "SYSTEM_ROLE_PERMISSIONS", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\shared\\permissions.ts", "source_location": "L16"}, {"id": "shared_permissions_hasorgpermission", "label": "hasOrgPermission()", "file_type": "code", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\shared\\permissions.ts", "source_location": "L43"}], "edges": [{"source": "c_users_alfamas_desktop_zeroauth_src_shared_permissions_ts", "target": "shared_permissions_org_permissions", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\shared\\permissions.ts", "source_location": "L1", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_shared_permissions_ts", "target": "shared_permissions_orgpermission", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\shared\\permissions.ts", "source_location": "L14", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_shared_permissions_ts", "target": "shared_permissions_system_role_permissions", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\shared\\permissions.ts", "source_location": "L16", "weight": 1.0}, {"source": "c_users_alfamas_desktop_zeroauth_src_shared_permissions_ts", "target": "shared_permissions_hasorgpermission", "relation": "contains", "confidence": "EXTRACTED", "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\shared\\permissions.ts", "source_location": "L43", "weight": 1.0}], "raw_calls": [{"caller_nid": "shared_permissions_hasorgpermission", "callee": "includes", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\shared\\permissions.ts", "source_location": "L49"}, {"caller_nid": "shared_permissions_hasorgpermission", "callee": "includes", "is_member_call": true, "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zeroauth\\src\\shared\\permissions.ts", "source_location": "L51"}]}
+{
+    "nodes": [
+        {
+            "id": "c_users_alfamas_desktop_zerotrust_src_shared_permissions_ts",
+            "label": "permissions.ts",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\shared\\permissions.ts",
+            "source_location": "L1"
+        },
+        {
+            "id": "shared_permissions_org_permissions",
+            "label": "ORG_PERMISSIONS",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\shared\\permissions.ts",
+            "source_location": "L1"
+        },
+        {
+            "id": "shared_permissions_orgpermission",
+            "label": "OrgPermission",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\shared\\permissions.ts",
+            "source_location": "L14"
+        },
+        {
+            "id": "shared_permissions_system_role_permissions",
+            "label": "SYSTEM_ROLE_PERMISSIONS",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\shared\\permissions.ts",
+            "source_location": "L16"
+        },
+        {
+            "id": "shared_permissions_hasorgpermission",
+            "label": "hasOrgPermission()",
+            "file_type": "code",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\shared\\permissions.ts",
+            "source_location": "L43"
+        }
+    ],
+    "edges": [
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_shared_permissions_ts",
+            "target": "shared_permissions_org_permissions",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\shared\\permissions.ts",
+            "source_location": "L1",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_shared_permissions_ts",
+            "target": "shared_permissions_orgpermission",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\shared\\permissions.ts",
+            "source_location": "L14",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_shared_permissions_ts",
+            "target": "shared_permissions_system_role_permissions",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\shared\\permissions.ts",
+            "source_location": "L16",
+            "weight": 1.0
+        },
+        {
+            "source": "c_users_alfamas_desktop_zerotrust_src_shared_permissions_ts",
+            "target": "shared_permissions_hasorgpermission",
+            "relation": "contains",
+            "confidence": "EXTRACTED",
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\shared\\permissions.ts",
+            "source_location": "L43",
+            "weight": 1.0
+        }
+    ],
+    "raw_calls": [
+        {
+            "caller_nid": "shared_permissions_hasorgpermission",
+            "callee": "includes",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\shared\\permissions.ts",
+            "source_location": "L49"
+        },
+        {
+            "caller_nid": "shared_permissions_hasorgpermission",
+            "callee": "includes",
+            "is_member_call": true,
+            "source_file": "C:\\Users\\ALFAMAS\\Desktop\\zerotrust\\src\\shared\\permissions.ts",
+            "source_location": "L51"
+        }
+    ]
+}

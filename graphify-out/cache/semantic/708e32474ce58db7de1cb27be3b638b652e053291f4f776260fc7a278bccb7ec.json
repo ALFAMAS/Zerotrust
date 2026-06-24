@@ -1,1 +1,126 @@
-{"nodes": [{"id": "docker_compose_postgres_service", "label": "PostgreSQL Docker Service", "file_type": "document", "source_file": "docker-compose.yml", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "docker_compose_redis_service", "label": "Redis Docker Service", "file_type": "document", "source_file": "docker-compose.yml", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "docker_compose_elasticsearch_service", "label": "Elasticsearch Docker Service", "file_type": "document", "source_file": "docker-compose.yml", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "docker_compose_kibana_service", "label": "Kibana Docker Service", "file_type": "document", "source_file": "docker-compose.yml", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "docker_compose_zeroauth_service", "label": "ZeroAuth API Docker Service", "file_type": "document", "source_file": "docker-compose.yml", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}], "edges": [{"source": "docker_compose_zeroauth_service", "target": "docker_compose_postgres_service", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docker-compose.yml", "source_location": null, "weight": 1.0}, {"source": "docker_compose_zeroauth_service", "target": "docker_compose_redis_service", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docker-compose.yml", "source_location": null, "weight": 1.0}, {"source": "docker_compose_zeroauth_service", "target": "docker_compose_elasticsearch_service", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docker-compose.yml", "source_location": null, "weight": 1.0}, {"source": "docker_compose_kibana_service", "target": "docker_compose_elasticsearch_service", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docker-compose.yml", "source_location": null, "weight": 1.0}, {"source": "readme_elasticsearch", "target": "kibana_readme", "relation": "references", "confidence": "INFERRED", "confidence_score": 0.95, "source_file": "docker-compose.yml", "source_location": null, "weight": 1.0}], "hyperedges": [{"id": "infrastructure_services", "label": "Infrastructure Services (PostgreSQL + Redis + Elasticsearch)", "nodes": ["docker_compose_postgres_service", "docker_compose_redis_service", "docker_compose_elasticsearch_service"], "relation": "participate_in", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docker-compose.yml"}]}
+{
+    "nodes": [
+        {
+            "id": "docker_compose_postgres_service",
+            "label": "PostgreSQL Docker Service",
+            "file_type": "document",
+            "source_file": "docker-compose.yml",
+            "source_location": null,
+            "source_url": null,
+            "captured_at": null,
+            "author": null,
+            "contributor": null
+        },
+        {
+            "id": "docker_compose_redis_service",
+            "label": "Redis Docker Service",
+            "file_type": "document",
+            "source_file": "docker-compose.yml",
+            "source_location": null,
+            "source_url": null,
+            "captured_at": null,
+            "author": null,
+            "contributor": null
+        },
+        {
+            "id": "docker_compose_elasticsearch_service",
+            "label": "Elasticsearch Docker Service",
+            "file_type": "document",
+            "source_file": "docker-compose.yml",
+            "source_location": null,
+            "source_url": null,
+            "captured_at": null,
+            "author": null,
+            "contributor": null
+        },
+        {
+            "id": "docker_compose_kibana_service",
+            "label": "Kibana Docker Service",
+            "file_type": "document",
+            "source_file": "docker-compose.yml",
+            "source_location": null,
+            "source_url": null,
+            "captured_at": null,
+            "author": null,
+            "contributor": null
+        },
+        {
+            "id": "docker_compose_zerotrust_service",
+            "label": "zerotrust API Docker Service",
+            "file_type": "document",
+            "source_file": "docker-compose.yml",
+            "source_location": null,
+            "source_url": null,
+            "captured_at": null,
+            "author": null,
+            "contributor": null
+        }
+    ],
+    "edges": [
+        {
+            "source": "docker_compose_zerotrust_service",
+            "target": "docker_compose_postgres_service",
+            "relation": "references",
+            "confidence": "EXTRACTED",
+            "confidence_score": 1.0,
+            "source_file": "docker-compose.yml",
+            "source_location": null,
+            "weight": 1.0
+        },
+        {
+            "source": "docker_compose_zerotrust_service",
+            "target": "docker_compose_redis_service",
+            "relation": "references",
+            "confidence": "EXTRACTED",
+            "confidence_score": 1.0,
+            "source_file": "docker-compose.yml",
+            "source_location": null,
+            "weight": 1.0
+        },
+        {
+            "source": "docker_compose_zerotrust_service",
+            "target": "docker_compose_elasticsearch_service",
+            "relation": "references",
+            "confidence": "EXTRACTED",
+            "confidence_score": 1.0,
+            "source_file": "docker-compose.yml",
+            "source_location": null,
+            "weight": 1.0
+        },
+        {
+            "source": "docker_compose_kibana_service",
+            "target": "docker_compose_elasticsearch_service",
+            "relation": "references",
+            "confidence": "EXTRACTED",
+            "confidence_score": 1.0,
+            "source_file": "docker-compose.yml",
+            "source_location": null,
+            "weight": 1.0
+        },
+        {
+            "source": "readme_elasticsearch",
+            "target": "kibana_readme",
+            "relation": "references",
+            "confidence": "INFERRED",
+            "confidence_score": 0.95,
+            "source_file": "docker-compose.yml",
+            "source_location": null,
+            "weight": 1.0
+        }
+    ],
+    "hyperedges": [
+        {
+            "id": "infrastructure_services",
+            "label": "Infrastructure Services (PostgreSQL + Redis + Elasticsearch)",
+            "nodes": [
+                "docker_compose_postgres_service",
+                "docker_compose_redis_service",
+                "docker_compose_elasticsearch_service"
+            ],
+            "relation": "participate_in",
+            "confidence": "EXTRACTED",
+            "confidence_score": 1.0,
+            "source_file": "docker-compose.yml"
+        }
+    ]
+}

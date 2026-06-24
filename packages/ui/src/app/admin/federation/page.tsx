@@ -30,7 +30,9 @@ export default function AdminFederationPage() {
     trustedTenantId: "",
   });
 
-  const toastTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const toastTimer = useRef<ReturnType<typeof setTimeout> | undefined>(
+    undefined,
+  );
 
   const showToast = useCallback((msg: string) => {
     setToast(msg);
@@ -40,7 +42,9 @@ export default function AdminFederationPage() {
 
   const load = useCallback(async () => {
     try {
-      const data = await api.get<{ providers: FederatedProvider[] }>("/federation/providers");
+      const data = await api.get<{ providers: FederatedProvider[] }>(
+        "/federation/providers",
+      );
       setProviders(data.providers ?? []);
     } catch {
       setProviders([]);
@@ -77,7 +81,9 @@ export default function AdminFederationPage() {
       setShowForm(false);
       load();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to register provider");
+      setError(
+        err instanceof Error ? err.message : "Failed to register provider",
+      );
     } finally {
       setSaving(false);
     }
@@ -110,9 +116,12 @@ export default function AdminFederationPage() {
             Identity federation
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Trusted external identity providers for RFC 8693 token exchange. A subject token from a
-            registered provider can be exchanged for a ZeroAuth access token at{" "}
-            <code className="rounded bg-muted px-1 py-0.5 text-xs">/federation/token-exchange</code>
+            Trusted external identity providers for RFC 8693 token exchange. A
+            subject token from a registered provider can be exchanged for a
+            zerotrust access token at{" "}
+            <code className="rounded bg-muted px-1 py-0.5 text-xs">
+              /federation/token-exchange
+            </code>
             .
           </p>
         </div>
@@ -132,7 +141,10 @@ export default function AdminFederationPage() {
         >
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
-              <label htmlFor="page-f0" className="text-sm font-medium text-foreground">
+              <label
+                htmlFor="page-f0"
+                className="text-sm font-medium text-foreground"
+              >
                 Provider ID
               </label>
               <input
@@ -145,7 +157,10 @@ export default function AdminFederationPage() {
               />
             </div>
             <div className="space-y-1.5">
-              <label htmlFor="page-f1" className="text-sm font-medium text-foreground">
+              <label
+                htmlFor="page-f1"
+                className="text-sm font-medium text-foreground"
+              >
                 Display name
               </label>
               <input
@@ -159,7 +174,10 @@ export default function AdminFederationPage() {
             </div>
           </div>
           <div className="space-y-1.5">
-            <label htmlFor="page-f2" className="text-sm font-medium text-foreground">
+            <label
+              htmlFor="page-f2"
+              className="text-sm font-medium text-foreground"
+            >
               Issuer URL
             </label>
             <input
@@ -173,7 +191,10 @@ export default function AdminFederationPage() {
           </div>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
-              <label htmlFor="page-f3" className="text-sm font-medium text-foreground">
+              <label
+                htmlFor="page-f3"
+                className="text-sm font-medium text-foreground"
+              >
                 JWKS URI (optional)
               </label>
               <input
@@ -185,13 +206,18 @@ export default function AdminFederationPage() {
               />
             </div>
             <div className="space-y-1.5">
-              <label htmlFor="page-f4" className="text-sm font-medium text-foreground">
+              <label
+                htmlFor="page-f4"
+                className="text-sm font-medium text-foreground"
+              >
                 Trusted tenant (optional)
               </label>
               <input
                 id="page-f4"
                 value={form.trustedTenantId}
-                onChange={(e) => setForm({ ...form, trustedTenantId: e.target.value })}
+                onChange={(e) =>
+                  setForm({ ...form, trustedTenantId: e.target.value })
+                }
                 placeholder="acme-corp"
                 className="w-full rounded-lg border border-border bg-muted px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none"
               />
@@ -217,7 +243,11 @@ export default function AdminFederationPage() {
               disabled={saving}
               className="flex items-center gap-2 rounded-lg bg-primary px-5 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
             >
-              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+              {saving ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Plus className="h-4 w-4" />
+              )}
               Register
             </button>
           </div>
@@ -231,7 +261,9 @@ export default function AdminFederationPage() {
       ) : providers.length === 0 ? (
         <div className="rounded-xl border border-dashed border-border bg-card p-10 text-center">
           <Network className="mx-auto mb-3 h-8 w-8 text-muted-foreground" />
-          <p className="text-sm text-muted-foreground">No federated providers registered yet.</p>
+          <p className="text-sm text-muted-foreground">
+            No federated providers registered yet.
+          </p>
         </div>
       ) : (
         <ul className="space-y-2">
@@ -243,7 +275,9 @@ export default function AdminFederationPage() {
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="font-medium text-foreground">{p.name}</span>
-                  <span className="font-mono text-xs text-muted-foreground">{p.id}</span>
+                  <span className="font-mono text-xs text-muted-foreground">
+                    {p.id}
+                  </span>
                   <span
                     className={`rounded-full border px-2 py-0.5 text-xs font-medium ${
                       p.enabled

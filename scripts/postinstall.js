@@ -224,7 +224,7 @@ function ensureBindingPackage(fullName, destPkgDir, version) {
   // 2. Fetch via npm into a clean temp dir, then copy into place.
   let tmp;
   try {
-    tmp = mkdtempSync(join(tmpdir(), "zeroauth-binding-"));
+    tmp = mkdtempSync(join(tmpdir(), "zerotrust-binding-"));
     const spec = version ? `${fullName}@${version}` : fullName;
     spawnSync(
       "npm",

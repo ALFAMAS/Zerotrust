@@ -1,5 +1,5 @@
 /**
- * LDAP / Active Directory client for ZeroAuth
+ * LDAP / Active Directory client for zerotrust
  *
  * Production use: requires the `ldapts` npm package.
  *   npm install ldapts
@@ -49,7 +49,7 @@ try {
   LdaptsClient = require("ldapts").Client;
 } catch {
   logger.warn(
-    "ldapts package not installed — LDAP client is in mock mode. Run: npm install ldapts"
+    "ldapts package not installed — LDAP client is in mock mode. Run: npm install ldapts",
   );
 }
 
@@ -76,8 +76,11 @@ export class LDAPClient {
         connectTimeout: this.config.timeout ?? 5000,
         tlsOptions: isLdaps
           ? {
-              rejectUnauthorized: this.config.tlsOptions?.rejectUnauthorized ?? true,
-              ...(this.config.tlsOptions?.ca ? { ca: this.config.tlsOptions.ca } : {}),
+              rejectUnauthorized:
+                this.config.tlsOptions?.rejectUnauthorized ?? true,
+              ...(this.config.tlsOptions?.ca
+                ? { ca: this.config.tlsOptions.ca }
+                : {}),
             }
           : undefined,
       });
@@ -89,15 +92,23 @@ export class LDAPClient {
   private buildFilter(template: string, vars: Record<string, string>): string {
     return Object.entries(vars).reduce(
       (f, [k, v]) => f.replace(new RegExp(`{{${k}}}`, "g"), v),
-      template
+      template,
     );
   }
 
   private entryToLDAPUser(entry: Record<string, any>): LDAPUser {
     const str = (v: any): string | undefined =>
-      v === undefined || v === null ? undefined : Array.isArray(v) ? v[0] : String(v);
+      v === undefined || v === null
+        ? undefined
+        : Array.isArray(v)
+          ? v[0]
+          : String(v);
     const arr = (v: any): string[] | undefined =>
-      v === undefined || v === null ? undefined : Array.isArray(v) ? v.map(String) : [String(v)];
+      v === undefined || v === null
+        ? undefined
+        : Array.isArray(v)
+          ? v.map(String)
+          : [String(v)];
 
     return {
       dn: str(entry.dn) ?? "",
@@ -117,7 +128,11 @@ export class LDAPClient {
   private entryToLDAPGroup(entry: Record<string, any>): LDAPGroup {
     const str = (v: any): string => (Array.isArray(v) ? v[0] : String(v ?? ""));
     const arr = (v: any): string[] | undefined =>
-      v === undefined || v === null ? undefined : Array.isArray(v) ? v.map(String) : [String(v)];
+      v === undefined || v === null
+        ? undefined
+        : Array.isArray(v)
+          ? v.map(String)
+          : [String(v)];
 
     return {
       dn: str(entry.dn),
@@ -154,7 +169,10 @@ export class LDAPClient {
    *   3. Attempt a bind as the found user's DN with the provided password.
    *   4. If bind succeeds, return the user attributes; if it fails, return null.
    */
-  async authenticate(username: string, password: string): Promise<LDAPUser | null> {
+  async authenticate(
+    username: string,
+    password: string,
+  ): Promise<LDAPUser | null> {
     if (!LdaptsClient) {
       logger.warn("[LDAP mock] authenticate() called — ldapts not installed");
       return null;
@@ -163,7 +181,9 @@ export class LDAPClient {
     try {
       await this.bind();
       const users = await this.searchUsers(
-        this.buildFilter(this.config.userSearchFilter ?? DEFAULT_USER_FILTER, { username })
+        this.buildFilter(this.config.userSearchFilter ?? DEFAULT_USER_FILTER, {
+          username,
+        }),
       );
 
       if (users.length === 0) {
@@ -197,7 +217,10 @@ export class LDAPClient {
    * @param filter    - LDAP search filter (overrides config default)
    * @param attributes - Attributes to retrieve (defaults to common AD attributes)
    */
-  async searchUsers(filter?: string, attributes?: string[]): Promise<LDAPUser[]> {
+  async searchUsers(
+    filter?: string,
+    attributes?: string[],
+  ): Promise<LDAPUser[]> {
     if (!LdaptsClient) {
       logger.warn("[LDAP mock] searchUsers() called — ldapts not installed");
       return [];
@@ -207,7 +230,8 @@ export class LDAPClient {
 
     const client = this.getClient();
     const searchBase = this.config.userSearchBase ?? this.config.baseDN;
-    const searchFilter = filter ?? this.config.userSearchFilter ?? "(objectClass=person)";
+    const searchFilter =
+      filter ?? this.config.userSearchFilter ?? "(objectClass=person)";
     const attrs = attributes ?? DEFAULT_USER_ATTRS;
 
     const { searchEntries } = await client.search(searchBase, {
@@ -232,9 +256,12 @@ export class LDAPClient {
 
     const client = this.getClient();
     const searchBase = this.config.groupSearchBase ?? this.config.baseDN;
-    const searchFilter = this.buildFilter(this.config.groupSearchFilter ?? DEFAULT_GROUP_FILTER, {
-      dn: userDN,
-    });
+    const searchFilter = this.buildFilter(
+      this.config.groupSearchFilter ?? DEFAULT_GROUP_FILTER,
+      {
+        dn: userDN,
+      },
+    );
 
     const { searchEntries } = await client.search(searchBase, {
       scope: "sub",
@@ -246,22 +273,27 @@ export class LDAPClient {
   }
 
   /**
-   * Upsert an LDAP user into ZeroAuth's UserModel and map groups to roles.
+   * Upsert an LDAP user into zerotrust's UserModel and map groups to roles.
    *
    * - Uses userPrincipalName or mail as the email address.
-   * - Maps the CN of each group to a ZeroAuth role by name (case-insensitive).
+   * - Maps the CN of each group to a zerotrust role by name (case-insensitive).
    */
   async syncUser(ldapUser: LDAPUser, tenantId?: string): Promise<void> {
     const email = ldapUser.userPrincipalName ?? ldapUser.mail;
     if (!email) {
-      logger.warn("LDAP syncUser: skipping user with no email/UPN", { dn: ldapUser.dn });
+      logger.warn("LDAP syncUser: skipping user with no email/UPN", {
+        dn: ldapUser.dn,
+      });
       return;
     }
 
-    const fullName = [ldapUser.givenName, ldapUser.sn].filter(Boolean).join(" ");
-    const displayName = ldapUser.displayName ?? (fullName || (ldapUser.sAMAccountName ?? email));
+    const fullName = [ldapUser.givenName, ldapUser.sn]
+      .filter(Boolean)
+      .join(" ");
+    const displayName =
+      ldapUser.displayName ?? (fullName || (ldapUser.sAMAccountName ?? email));
 
-    // Resolve group CNs to ZeroAuth role names
+    // Resolve group CNs to zerotrust role names
     const memberOf = ldapUser.memberOf ?? [];
     const groupCNs = memberOf
       .map((dn) => {
@@ -270,7 +302,7 @@ export class LDAPClient {
       })
       .filter((cn): cn is string => cn !== null);
 
-    // Find matching roles in ZeroAuth via Drizzle
+    // Find matching roles in zerotrust via Drizzle
     let roles: string[] = [];
     if (groupCNs.length > 0) {
       const db = getDb();
@@ -366,12 +398,17 @@ export function createLDAPClient(config?: Partial<LDAPConfig>): LDAPClient {
     bindDN: config?.bindDN ?? process.env.LDAP_BIND_DN ?? "",
     bindPassword: config?.bindPassword ?? process.env.LDAP_BIND_PASSWORD ?? "",
     userSearchBase: config?.userSearchBase ?? process.env.LDAP_USER_SEARCH_BASE,
-    userSearchFilter: config?.userSearchFilter ?? process.env.LDAP_USER_SEARCH_FILTER,
-    groupSearchBase: config?.groupSearchBase ?? process.env.LDAP_GROUP_SEARCH_BASE,
-    groupSearchFilter: config?.groupSearchFilter ?? process.env.LDAP_GROUP_SEARCH_FILTER,
+    userSearchFilter:
+      config?.userSearchFilter ?? process.env.LDAP_USER_SEARCH_FILTER,
+    groupSearchBase:
+      config?.groupSearchBase ?? process.env.LDAP_GROUP_SEARCH_BASE,
+    groupSearchFilter:
+      config?.groupSearchFilter ?? process.env.LDAP_GROUP_SEARCH_FILTER,
     timeout:
       config?.timeout ??
-      (process.env.LDAP_TIMEOUT_MS ? parseInt(process.env.LDAP_TIMEOUT_MS, 10) : 5000),
+      (process.env.LDAP_TIMEOUT_MS
+        ? parseInt(process.env.LDAP_TIMEOUT_MS, 10)
+        : 5000),
     tlsOptions: {
       rejectUnauthorized: process.env.LDAP_TLS_REJECT_UNAUTHORIZED !== "false",
       ...(config?.tlsOptions ?? {}),

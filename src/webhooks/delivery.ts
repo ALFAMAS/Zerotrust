@@ -1,7 +1,11 @@
 import { createHmac, randomUUID } from "node:crypto";
 import { webhookDeliveryLog } from "./deliveryLog";
 import { webhookStore } from "./store";
-import type { WebhookDelivery, WebhookEndpoint, WebhookEventType } from "./types";
+import type {
+  WebhookDelivery,
+  WebhookEndpoint,
+  WebhookEventType,
+} from "./types";
 
 export function signPayload(secret: string, body: string): string {
   const hmac = createHmac("sha256", secret);
@@ -13,7 +17,7 @@ export async function deliverWebhook(
   endpoint: WebhookEndpoint,
   event: WebhookEventType,
   payload: Record<string, unknown>,
-  attempt = 1
+  attempt = 1,
 ): Promise<WebhookDelivery> {
   const deliveryId = randomUUID();
   const messageId = randomUUID();
@@ -29,9 +33,9 @@ export async function deliverWebhook(
 
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
-    "X-ZeroAuth-Event": event,
-    "X-ZeroAuth-Signature": signature,
-    "X-ZeroAuth-Delivery": deliveryId,
+    "X-zerotrust-Event": event,
+    "X-zerotrust-Signature": signature,
+    "X-zerotrust-Delivery": deliveryId,
     ...(endpoint.headers ?? {}),
   };
 
@@ -40,7 +44,12 @@ export async function deliverWebhook(
 
   const base: Omit<
     WebhookDelivery,
-    "status" | "responseStatus" | "responseBody" | "error" | "deliveredAt" | "nextRetryAt"
+    | "status"
+    | "responseStatus"
+    | "responseBody"
+    | "error"
+    | "deliveredAt"
+    | "nextRetryAt"
   > = {
     id: deliveryId,
     endpointId: endpoint.id,
@@ -90,11 +99,14 @@ async function retryDelivery(
   endpoint: WebhookEndpoint,
   event: WebhookEventType,
   payload: Record<string, unknown>,
-  attempt: number
+  attempt: number,
 ): Promise<void> {
   const result = await deliverWebhook(endpoint, event, payload, attempt);
 
-  if (result.status !== "delivered" && attempt < endpoint.retryPolicy.maxRetries) {
+  if (
+    result.status !== "delivered" &&
+    attempt < endpoint.retryPolicy.maxRetries
+  ) {
     const delay = endpoint.retryPolicy.backoffMs * 2 ** (attempt - 1);
     setTimeout(() => {
       retryDelivery(endpoint, event, payload, attempt + 1).catch(() => {
@@ -107,7 +119,7 @@ async function retryDelivery(
 export async function dispatchEvent(
   event: WebhookEventType,
   payload: Record<string, unknown>,
-  tenantId?: string
+  tenantId?: string,
 ): Promise<void> {
   const endpoints = webhookStore.getEndpointsForEvent(event, tenantId);
 
@@ -115,7 +127,10 @@ export async function dispatchEvent(
     endpoints.map(async (endpoint) => {
       const delivery = await deliverWebhook(endpoint, event, payload, 1);
 
-      if (delivery.status !== "delivered" && endpoint.retryPolicy.maxRetries > 0) {
+      if (
+        delivery.status !== "delivered" &&
+        endpoint.retryPolicy.maxRetries > 0
+      ) {
         const delay = endpoint.retryPolicy.backoffMs;
         setTimeout(() => {
           retryDelivery(endpoint, event, payload, 2).catch(() => {
@@ -123,6 +138,6 @@ export async function dispatchEvent(
           });
         }, delay);
       }
-    })
+    }),
   );
 }
