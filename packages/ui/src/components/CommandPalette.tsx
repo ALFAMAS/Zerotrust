@@ -1,8 +1,8 @@
 "use client";
 
-import { Search, File, User, Settings, ArrowRight } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { ArrowRight, File, Search, Settings, User } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
@@ -79,7 +79,7 @@ export function CommandPalette() {
       setLoading(true);
       try {
         const data = await api.get<{ results: SearchResult[] }>(
-          `/collab/search?q=${encodeURIComponent(query)}`,
+          `/collab/search?q=${encodeURIComponent(query)}`
         );
         setResults(data.results || []);
       } catch {
@@ -92,7 +92,17 @@ export function CommandPalette() {
     return () => clearTimeout(timer);
   }, [query]);
 
-  // Keyboard navigation
+  const navigateTo = useCallback(
+    (result: SearchResult) => {
+      setOpen(false);
+      setQuery("");
+      router.push(result.href);
+    },
+    [router]
+  );
+
+  // Keyboard navigation. navigateTo is declared above so the hook order and the
+  // dependency list stay valid (no temporal-dead-zone reference).
   useEffect(() => {
     if (!open || results.length === 0) return;
     function handleNav(e: KeyboardEvent) {
@@ -111,23 +121,16 @@ export function CommandPalette() {
     }
     document.addEventListener("keydown", handleNav);
     return () => document.removeEventListener("keydown", handleNav);
-  }, [open, results, selectedIndex]);
-
-  const navigateTo = useCallback(
-    (result: SearchResult) => {
-      setOpen(false);
-      setQuery("");
-      router.push(result.href);
-    },
-    [router],
-  );
+  }, [open, results, selectedIndex, navigateTo]);
 
   if (!open) return null;
 
   return (
     <div className="fixed inset-0 z-[100] flex items-start justify-center pt-[15vh]">
       {/* Backdrop */}
-      <div
+      <button
+        type="button"
+        aria-label="Close command palette"
         className="fixed inset-0 bg-background/80 backdrop-blur-sm"
         onClick={() => {
           setOpen(false);
@@ -162,9 +165,7 @@ export function CommandPalette() {
         {/* Results */}
         <div className="max-h-80 overflow-y-auto p-2">
           {loading && (
-            <div className="px-3 py-6 text-center text-sm text-muted-foreground">
-              Searching…
-            </div>
+            <div className="px-3 py-6 text-center text-sm text-muted-foreground">Searching…</div>
           )}
 
           {!loading && query.length >= 2 && results.length === 0 && (
@@ -177,6 +178,7 @@ export function CommandPalette() {
             <div role="listbox">
               {results.map((result, i) => (
                 <button
+                  type="button"
                   key={`${result.type}-${result.href}-${i}`}
                   role="option"
                   aria-selected={i === selectedIndex}
@@ -186,7 +188,7 @@ export function CommandPalette() {
                     "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors",
                     i === selectedIndex
                       ? "bg-accent text-accent-foreground"
-                      : "text-foreground hover:bg-accent hover:text-accent-foreground",
+                      : "text-foreground hover:bg-accent hover:text-accent-foreground"
                   )}
                 >
                   <span
@@ -194,7 +196,7 @@ export function CommandPalette() {
                       "flex h-7 w-7 items-center justify-center rounded-md",
                       i === selectedIndex
                         ? "bg-primary/10 text-primary"
-                        : "bg-muted text-muted-foreground",
+                        : "bg-muted text-muted-foreground"
                     )}
                   >
                     <ResultIcon icon={result.icon} type={result.type} />

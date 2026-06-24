@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { and, desc, eq, gt, ilike, ne, or, sql } from "drizzle-orm";
 import { Hono } from "hono";
 import { verifyAuditChain } from "../../audit/chain";
@@ -14,6 +15,10 @@ import { getLogger } from "../../logger";
 import { authMiddleware } from "../../middleware/auth";
 import { revokeAllSessionsForUser, revokeSession } from "../../middleware/sessionControl";
 import { getSettings, updateSettings } from "../../models/settings.model";
+import {
+  ALLOWED_UPLOAD_CONTENT_TYPES,
+  safeExtensionForContentType,
+} from "../../services/uploadSafety";
 import type { HonoEnv } from "../../shared/types";
 
 const router = new Hono<HonoEnv>();
@@ -1029,20 +1034,16 @@ router.post("/attachments/upload", authMiddleware, async (c) => {
       return c.json({ error: "INVALID_REQUEST", message: "file and feature required" }, 400);
     }
 
-    // Validate file type and size
-    const allowedTypes = [
-      "image/jpeg",
-      "image/png",
-      "image/gif",
-      "image/webp",
-      "application/pdf",
-      "text/plain",
-      "application/msword",
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    ];
-    if (!allowedTypes.includes(file.type)) {
+    // Validate file type and size. The stored extension is derived from the
+    // server-validated content type (never the client filename) so a file that
+    // claims image/png cannot be persisted/served as .html/.svg → stored XSS.
+    const safeExt = safeExtensionForContentType(file.type);
+    if (!safeExt) {
       return c.json(
-        { error: "INVALID_FILE_TYPE", message: `Allowed types: ${allowedTypes.join(", ")}` },
+        {
+          error: "INVALID_FILE_TYPE",
+          message: `Allowed types: ${ALLOWED_UPLOAD_CONTENT_TYPES.join(", ")}`,
+        },
         400
       );
     }
@@ -1058,8 +1059,7 @@ router.post("/attachments/upload", authMiddleware, async (c) => {
       "../../services/objectStorage.service.js"
     );
     const cacheControl = getUploadCacheControl();
-    const ext = file.name.split(".").pop() || "bin";
-    const storageKey = `attachments/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+    const storageKey = `attachments/${Date.now()}-${randomUUID()}.${safeExt}`;
     const buffer = Buffer.from(await file.arrayBuffer());
 
     let url: string;

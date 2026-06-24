@@ -50,18 +50,21 @@ export async function recordLogin(userId: string) {
       .update(streaksTable)
       .set({ lastLoginAt: now, updatedAt: now })
       .where(eq(streaksTable.userId, userId));
-    return { currentStreak: streaks.currentStreak, longestStreak: streaks.longestStreak, isNew: false };
+    return {
+      currentStreak: streaks.currentStreak,
+      longestStreak: streaks.longestStreak,
+      isNew: false,
+    };
   }
 
   // Check if this login continues the streak (yesterday or within grace period)
-  const lastLogin = streaks.lastLoginDate
-    ? new Date(streaks.lastLoginDate + "T00:00:00Z")
-    : null;
+  const lastLogin = streaks.lastLoginDate ? new Date(`${streaks.lastLoginDate}T00:00:00Z`) : null;
   const hoursSinceLastLogin = lastLogin
     ? (now.getTime() - lastLogin.getTime()) / 3_600_000
     : Infinity;
 
-  const continuesStreak = streaks.lastLoginDate === yesterday || hoursSinceLastLogin <= GRACE_PERIOD_HOURS + 24;
+  const continuesStreak =
+    streaks.lastLoginDate === yesterday || hoursSinceLastLogin <= GRACE_PERIOD_HOURS + 24;
 
   const newStreak = continuesStreak ? streaks.currentStreak + 1 : 1;
   const newLongest = Math.max(streaks.longestStreak, newStreak);

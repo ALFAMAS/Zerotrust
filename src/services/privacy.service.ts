@@ -34,12 +34,42 @@ export function generateRopa(orgId: string, orgName: string): PrivacyRecord {
     createdAt: now,
     metadata: {
       processingActivities: [
-        { purpose: "Authentication", dataCategories: ["email", "password_hash", "ip"], legalBasis: "contract", retentionDays: 365 },
-        { purpose: "Multi-factor auth", dataCategories: ["phone", "totp_secret"], legalBasis: "contract", retentionDays: 365 },
-        { purpose: "Session management", dataCategories: ["ip", "user_agent", "session_token"], legalBasis: "contract", retentionDays: 30 },
-        { purpose: "Security audit", dataCategories: ["action", "ip", "timestamp"], legalBasis: "legal_obligation", retentionDays: 730 },
-        { purpose: "Email delivery", dataCategories: ["email", "name"], legalBasis: "contract", retentionDays: 365 },
-        { purpose: "Analytics", dataCategories: ["feature_usage", "login_timestamp"], legalBasis: "legitimate_interest", retentionDays: 365 },
+        {
+          purpose: "Authentication",
+          dataCategories: ["email", "password_hash", "ip"],
+          legalBasis: "contract",
+          retentionDays: 365,
+        },
+        {
+          purpose: "Multi-factor auth",
+          dataCategories: ["phone", "totp_secret"],
+          legalBasis: "contract",
+          retentionDays: 365,
+        },
+        {
+          purpose: "Session management",
+          dataCategories: ["ip", "user_agent", "session_token"],
+          legalBasis: "contract",
+          retentionDays: 30,
+        },
+        {
+          purpose: "Security audit",
+          dataCategories: ["action", "ip", "timestamp"],
+          legalBasis: "legal_obligation",
+          retentionDays: 730,
+        },
+        {
+          purpose: "Email delivery",
+          dataCategories: ["email", "name"],
+          legalBasis: "contract",
+          retentionDays: 365,
+        },
+        {
+          purpose: "Analytics",
+          dataCategories: ["feature_usage", "login_timestamp"],
+          legalBasis: "legitimate_interest",
+          retentionDays: 365,
+        },
       ],
       dataProtectionOfficer: process.env.DPO_EMAIL || "dpo@example.com",
       lastReviewedAt: now,
@@ -52,7 +82,7 @@ export function generateConsentReceipt(
   orgId: string,
   userId: string,
   purpose: string,
-  legalBasis: string,
+  legalBasis: string
 ): PrivacyRecord {
   return {
     id: `consent-${orgId}-${userId}-${Date.now()}`,
@@ -84,7 +114,8 @@ export function generateDpa(orgId: string, orgName: string): PrivacyRecord {
       processor: process.env.APP_NAME || "ZeroAuth",
       subprocessors: ["PostgreSQL (AWS)", "Redis (AWS)", "S3 (AWS)"],
       dataCategories: ["authentication", "security_logs", "user_profile"],
-      retentionPolicy: "Data retained per service terms; deleted within 30 days of account termination",
+      retentionPolicy:
+        "Data retained per service terms; deleted within 30 days of account termination",
       breachNotificationHours: 72,
       lastReviewedAt: new Date().toISOString(),
     },
@@ -92,7 +123,11 @@ export function generateDpa(orgId: string, orgName: string): PrivacyRecord {
 }
 
 /** Generate a SAR (Subject Access Request) record. */
-export function generateDataRequest(orgId: string, userId: string, requestType: "access" | "deletion" | "portability"): PrivacyRecord {
+export function generateDataRequest(
+  orgId: string,
+  userId: string,
+  requestType: "access" | "deletion" | "portability"
+): PrivacyRecord {
   return {
     id: `sar-${orgId}-${userId}-${Date.now()}`,
     orgId,

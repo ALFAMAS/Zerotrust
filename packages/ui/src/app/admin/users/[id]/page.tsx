@@ -55,6 +55,7 @@ export default function UserDetailPage() {
       }
     }
     load();
+    // biome-ignore lint/correctness/useExhaustiveDependencies: loads on mount / when the route key changes; closes over stable setters
   }, [id, showToast]);
 
   async function handleForceLogout() {
@@ -126,6 +127,7 @@ export default function UserDetailPage() {
 
       <div className="flex items-center gap-3">
         <button
+          type="button"
           onClick={() => router.back()}
           className="text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
@@ -262,6 +264,7 @@ export default function UserDetailPage() {
             </p>
           </div>
           <button
+            type="button"
             onClick={handleForceLogout}
             disabled={actionLoading || sessionCount === 0}
             className="rounded-lg bg-orange-900/40 border border-orange-500/30 px-4 py-2 text-sm text-orange-400 hover:bg-orange-900/60 disabled:opacity-40 transition-colors"
@@ -276,6 +279,7 @@ export default function UserDetailPage() {
         <h3 className="font-semibold text-red-400">Danger Zone</h3>
         <div className="flex flex-wrap gap-3">
           <button
+            type="button"
             onClick={handleToggleStatus}
             disabled={actionLoading}
             className="rounded-lg bg-orange-900/30 border border-orange-500/30 px-4 py-2 text-sm font-medium text-orange-400 hover:bg-orange-900/50 disabled:opacity-50 transition-colors"
@@ -283,6 +287,7 @@ export default function UserDetailPage() {
             {user.status === "active" ? "Suspend User" : "Activate User"}
           </button>
           <button
+            type="button"
             onClick={handleDelete}
             disabled={actionLoading}
             className="rounded-lg bg-red-900/30 border border-red-500/30 px-4 py-2 text-sm font-medium text-red-400 hover:bg-red-900/50 disabled:opacity-50 transition-colors"

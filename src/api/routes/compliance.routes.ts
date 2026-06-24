@@ -3,12 +3,12 @@ import { z } from "zod";
 import { getLogger } from "../../logger";
 import { authMiddleware } from "../../middleware/auth";
 import {
+  addRiskAssessment,
+  getRiskAssessment,
   getSoc2Controls,
   getSoc2Readiness,
-  updateSoc2Control,
-  getRiskAssessment,
-  addRiskAssessment,
   updateRiskStatus,
+  updateSoc2Control,
 } from "../../services/compliance.service";
 import type { HonoEnv } from "../../shared/types";
 
@@ -55,7 +55,8 @@ router.put("/soc2/controls/:controlId", async (c) => {
     const controlId = c.req.param("controlId");
     const body = await c.req.json().catch(() => ({}));
     const parsed = soc2UpdateSchema.safeParse(body);
-    if (!parsed.success) return c.json({ error: "INVALID_REQUEST", issues: parsed.error.issues }, 400);
+    if (!parsed.success)
+      return c.json({ error: "INVALID_REQUEST", issues: parsed.error.issues }, 400);
     await updateSoc2Control(controlId, parsed.data);
     return c.json({ success: true });
   } catch (err) {
@@ -70,7 +71,7 @@ router.put("/soc2/controls/:controlId", async (c) => {
 router.get("/risk-assessment/:year", async (c) => {
   try {
     const year = parseInt(c.req.param("year"), 10);
-    if (isNaN(year) || year < 2020 || year > 2100) {
+    if (Number.isNaN(year) || year < 2020 || year > 2100) {
       return c.json({ error: "INVALID_REQUEST", message: "Invalid year" }, 400);
     }
     const assessment = await getRiskAssessment(year);
@@ -99,12 +100,13 @@ const riskSchema = z.object({
 router.post("/risk-assessment/:year", async (c) => {
   try {
     const year = parseInt(c.req.param("year"), 10);
-    if (isNaN(year) || year < 2020 || year > 2100) {
+    if (Number.isNaN(year) || year < 2020 || year > 2100) {
       return c.json({ error: "INVALID_REQUEST", message: "Invalid year" }, 400);
     }
     const body = await c.req.json().catch(() => ({}));
     const parsed = riskSchema.safeParse(body);
-    if (!parsed.success) return c.json({ error: "INVALID_REQUEST", issues: parsed.error.issues }, 400);
+    if (!parsed.success)
+      return c.json({ error: "INVALID_REQUEST", issues: parsed.error.issues }, 400);
     await addRiskAssessment({ ...parsed.data, year });
     return c.json({ success: true }, 201);
   } catch (err) {
@@ -122,10 +124,11 @@ router.put("/risk-assessment/:year/:riskId", async (c) => {
   try {
     const year = parseInt(c.req.param("year"), 10);
     const riskId = c.req.param("riskId");
-    if (isNaN(year)) return c.json({ error: "INVALID_REQUEST" }, 400);
+    if (Number.isNaN(year)) return c.json({ error: "INVALID_REQUEST" }, 400);
     const body = await c.req.json().catch(() => ({}));
     const parsed = riskStatusSchema.safeParse(body);
-    if (!parsed.success) return c.json({ error: "INVALID_REQUEST", issues: parsed.error.issues }, 400);
+    if (!parsed.success)
+      return c.json({ error: "INVALID_REQUEST", issues: parsed.error.issues }, 400);
     await updateRiskStatus(year, riskId, parsed.data.status);
     return c.json({ success: true });
   } catch (err) {

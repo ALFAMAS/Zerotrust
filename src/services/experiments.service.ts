@@ -91,10 +91,18 @@ export function recordExposure(experimentKey: string, variant: string): void {
 async function persistExposure(experimentKey: string, variant: string): Promise<void> {
   try {
     const db = getDb();
-    await db.insert(experimentResultsTable).values({
-      experimentKey, variant, subjectId: "_aggregate_", converted: false,
-    }).onConflictDoNothing();
-  } catch { /* non-fatal */ }
+    await db
+      .insert(experimentResultsTable)
+      .values({
+        experimentKey,
+        variant,
+        subjectId: "_aggregate_",
+        converted: false,
+      })
+      .onConflictDoNothing();
+  } catch {
+    /* non-fatal */
+  }
 }
 
 /** Record a conversion for variant of experimentKey. */
@@ -106,14 +114,19 @@ export function recordConversion(experimentKey: string, variant: string): void {
 async function persistConversion(experimentKey: string, variant: string): Promise<void> {
   try {
     const db = getDb();
-    await db.update(experimentResultsTable)
+    await db
+      .update(experimentResultsTable)
       .set({ converted: true })
-      .where(and(
-        eq(experimentResultsTable.experimentKey, experimentKey),
-        eq(experimentResultsTable.variant, variant),
-        eq(experimentResultsTable.subjectId, "_aggregate_")
-      ));
-  } catch { /* non-fatal */ }
+      .where(
+        and(
+          eq(experimentResultsTable.experimentKey, experimentKey),
+          eq(experimentResultsTable.variant, variant),
+          eq(experimentResultsTable.subjectId, "_aggregate_")
+        )
+      );
+  } catch {
+    /* non-fatal */
+  }
 }
 
 export interface VariantResult {

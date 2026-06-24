@@ -205,7 +205,12 @@ export async function queueBillingEventEmail(
   data: { name: string; title: string; body: string; ctaLabel?: string; ctaUrl?: string }
 ): Promise<void> {
   const { enqueueEmail } = await import("./emailQueue.js");
-  await enqueueEmail("notification", to, { ...data, appName: APP_NAME, appUrl: APP_URL, isBilling: true });
+  await enqueueEmail("notification", to, {
+    ...data,
+    appName: APP_NAME,
+    appUrl: APP_URL,
+    isBilling: true,
+  });
 }
 
 export async function queueNotificationEmail(

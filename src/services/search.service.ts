@@ -1,7 +1,7 @@
+import { sql } from "drizzle-orm";
 import { getConfig } from "../config";
 import { getDb } from "../db";
 import { getLogger } from "../logger";
-import { sql } from "drizzle-orm";
 import type { StorageRegion } from "./region.service";
 
 const logger = getLogger("search-service");
@@ -172,7 +172,7 @@ async function searchElasticsearch(
   orgId: string | undefined,
   type: SearchableType | undefined,
   region: StorageRegion | undefined,
-  limit: number,
+  limit: number
 ): Promise<SearchResults> {
   const client = getEsClient();
   const must: any[] = [
@@ -188,7 +188,9 @@ async function searchElasticsearch(
   if (orgId) filter.push({ term: { orgId } });
   if (region) filter.push({ term: { region } });
 
-  const indices = type ? [indexName(type)] : ["zeroauth-user", "zeroauth-org", "zeroauth-note", "zeroauth-ticket"];
+  const indices = type
+    ? [indexName(type)]
+    : ["zeroauth-user", "zeroauth-org", "zeroauth-note", "zeroauth-ticket"];
 
   try {
     const result = await client.search({
@@ -227,7 +229,7 @@ async function searchDatabase(
   orgId: string | undefined,
   type: SearchableType | undefined,
   _region: StorageRegion | undefined,
-  limit: number,
+  limit: number
 ): Promise<SearchResults> {
   const db = getDb();
   const hits: SearchHit[] = [];
@@ -235,18 +237,18 @@ async function searchDatabase(
 
   if (!type || type === "user") {
     const rows = await db.execute(
-      sql`SELECT id, title, email FROM users WHERE email ILIKE ${q} OR display_name ILIKE ${q} LIMIT ${limit}`,
+      sql`SELECT id, title, email FROM users WHERE email ILIKE ${q} OR display_name ILIKE ${q} LIMIT ${limit}`
     );
-    for (const r of (rows as any[])) {
+    for (const r of rows as any[]) {
       hits.push({ id: r.id, type: "user", title: r.title ?? r.email, score: 1 });
     }
   }
 
   if (!type || type === "org") {
     const rows = await db.execute(
-      sql`SELECT id, name FROM organizations WHERE name ILIKE ${q} LIMIT ${limit}`,
+      sql`SELECT id, name FROM organizations WHERE name ILIKE ${q} LIMIT ${limit}`
     );
-    for (const r of (rows as any[])) {
+    for (const r of rows as any[]) {
       hits.push({ id: r.id, type: "org", title: r.name, score: 1 });
     }
   }
@@ -256,9 +258,9 @@ async function searchDatabase(
       ? sql`(title ILIKE ${q} OR content ILIKE ${q}) AND org_id = ${orgId} AND archived = false`
       : sql`(title ILIKE ${q} OR content ILIKE ${q}) AND archived = false`;
     const rows = await db.execute(
-      sql`SELECT id, title FROM shared_notes WHERE ${filter} LIMIT ${limit}`,
+      sql`SELECT id, title FROM shared_notes WHERE ${filter} LIMIT ${limit}`
     );
-    for (const r of (rows as any[])) {
+    for (const r of rows as any[]) {
       hits.push({ id: r.id, type: "note", title: r.title, score: 1 });
     }
   }
@@ -302,7 +304,7 @@ async function embeddingSearch(
   orgId: string | undefined,
   region: StorageRegion | undefined,
   limit: number,
-  provider: string,
+  provider: string
 ): Promise<SearchResults> {
   // Placeholder: in production this would call the embedding API,
   // embed the query, and run a kNN search against an ES dense_vector field.

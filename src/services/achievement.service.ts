@@ -50,7 +50,12 @@ export async function unlockAchievement(userId: string, key: AchievementKey) {
     try {
       const { handleLevelUpEvent } = await import("./levelUp.service.js");
       const def = ACHIEVEMENT_DEFS[key];
-      await handleLevelUpEvent(userId, { type: "achievement", key, label: def.label, icon: def.icon });
+      await handleLevelUpEvent(userId, {
+        type: "achievement",
+        key,
+        label: def.label,
+        icon: def.icon,
+      });
     } catch (err) {
       logger.warn("Failed to fire achievement level-up event", { userId, key, error: String(err) });
     }

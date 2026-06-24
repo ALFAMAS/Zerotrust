@@ -88,6 +88,7 @@ export default function AccountPage() {
           sessions, and activity logs.
         </p>
         <button
+          type="button"
           onClick={handleExport}
           disabled={exportLoading}
           className="px-4 py-2 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-medium disabled:opacity-50 transition-colors"
@@ -117,6 +118,7 @@ export default function AccountPage() {
               </p>
             </div>
             <button
+              type="button"
               onClick={handleCancelDeletion}
               className="px-4 py-2 rounded-lg border border-border hover:border-border text-foreground/80 text-sm transition-colors"
             >
@@ -137,10 +139,11 @@ export default function AccountPage() {
             )}
 
             <div className="space-y-3">
-              <label className="block text-sm text-muted-foreground">
+              <label htmlFor="page-f0" className="block text-sm text-muted-foreground">
                 Type <span className="font-mono font-bold text-red-400">DELETE</span> to confirm
               </label>
               <input
+                id="page-f0"
                 type="text"
                 value={deleteConfirm}
                 onChange={(e) => setDeleteConfirm(e.target.value)}
@@ -148,6 +151,7 @@ export default function AccountPage() {
                 className="w-full px-3 py-2 rounded-lg bg-muted border border-border text-foreground text-sm placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-red-500"
               />
               <button
+                type="button"
                 onClick={handleDelete}
                 disabled={deleteConfirm !== "DELETE" || deleteLoading}
                 className="px-4 py-2 rounded-lg bg-red-700 hover:bg-red-600 text-foreground text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed transition-colors"

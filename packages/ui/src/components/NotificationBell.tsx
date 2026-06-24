@@ -18,11 +18,16 @@ interface Notification {
 
 function typeIcon(type: Notification["type"]): string {
   switch (type) {
-    case "security": return "🔒";
-    case "success": return "✓";
-    case "warning": return "⚠️";
-    case "error": return "✕";
-    default: return "ℹ️";
+    case "security":
+      return "🔒";
+    case "success":
+      return "✓";
+    case "warning":
+      return "⚠️";
+    case "error":
+      return "✕";
+    default:
+      return "ℹ️";
   }
 }
 
@@ -132,6 +137,7 @@ export function NotificationBell() {
   return (
     <div ref={containerRef} className="relative">
       <button
+        type="button"
         aria-label="Notifications"
         aria-haspopup="dialog"
         aria-expanded={open}
@@ -156,7 +162,11 @@ export function NotificationBell() {
           <div className="flex items-center justify-between border-b border-border px-4 py-3">
             <span className="text-sm font-semibold text-foreground">Notifications</span>
             {unreadCount > 0 && (
-              <button onClick={markAllRead} className="text-xs text-primary transition-colors hover:text-primary/80">
+              <button
+                type="button"
+                onClick={markAllRead}
+                className="text-xs text-primary transition-colors hover:text-primary/80"
+              >
                 Mark all read
               </button>
             )}
@@ -166,10 +176,13 @@ export function NotificationBell() {
             {loadingList ? (
               <div className="px-4 py-6 text-center text-sm text-muted-foreground">Loading…</div>
             ) : notifications.length === 0 ? (
-              <div className="px-4 py-6 text-center text-sm text-muted-foreground">No notifications</div>
+              <div className="px-4 py-6 text-center text-sm text-muted-foreground">
+                No notifications
+              </div>
             ) : (
               notifications.map((n) => (
                 <button
+                  type="button"
                   key={n.id}
                   onClick={() => handleNotificationClick(n)}
                   className={cn(
@@ -198,6 +211,7 @@ export function NotificationBell() {
           {notifications.length > 0 && (
             <div className="border-t border-border px-4 py-2">
               <button
+                type="button"
                 onClick={markAllRead}
                 className="w-full py-1 text-center text-xs text-primary transition-colors hover:text-primary/80"
               >

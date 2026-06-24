@@ -1,8 +1,8 @@
 import { and, eq, gte, lte, sql } from "drizzle-orm";
 import { getDb } from "../db";
 import { subscriptionsTable, usersTable } from "../db/schema";
-import { sendNotificationEmail } from "./email.service";
 import { getLogger } from "../logger";
+import { sendNotificationEmail } from "./email.service";
 
 const logger = getLogger("lifecycle-emails");
 
@@ -30,7 +30,12 @@ export async function sendLifecycleEmails() {
   d1End.setHours(23, 59, 59, 999);
 
   const d1Users = await db
-    .select({ id: usersTable.id, email: usersTable.email, displayName: usersTable.displayName, locale: usersTable.locale })
+    .select({
+      id: usersTable.id,
+      email: usersTable.email,
+      displayName: usersTable.displayName,
+      locale: usersTable.locale,
+    })
     .from(usersTable)
     .where(
       and(
@@ -53,7 +58,12 @@ export async function sendLifecycleEmails() {
       // Mark as sent
       await db
         .update(usersTable)
-        .set({ metadata: { ...((user as any).metadata ?? {}), lifecycleD1Sent: new Date().toISOString() } })
+        .set({
+          metadata: {
+            ...((user as any).metadata ?? {}),
+            lifecycleD1Sent: new Date().toISOString(),
+          },
+        })
         .where(eq(usersTable.id, user.id));
       d1Sent++;
     } catch (err) {
@@ -90,7 +100,12 @@ export async function sendLifecycleEmails() {
       });
       await db
         .update(usersTable)
-        .set({ metadata: { ...((user as any).metadata ?? {}), lifecycleD3Sent: new Date().toISOString() } })
+        .set({
+          metadata: {
+            ...((user as any).metadata ?? {}),
+            lifecycleD3Sent: new Date().toISOString(),
+          },
+        })
         .where(eq(usersTable.id, user.id));
       d3Sent++;
     } catch (err) {
@@ -127,7 +142,12 @@ export async function sendLifecycleEmails() {
       });
       await db
         .update(usersTable)
-        .set({ metadata: { ...((user as any).metadata ?? {}), lifecycleD7Sent: new Date().toISOString() } })
+        .set({
+          metadata: {
+            ...((user as any).metadata ?? {}),
+            lifecycleD7Sent: new Date().toISOString(),
+          },
+        })
         .where(eq(usersTable.id, user.id));
       d7Sent++;
     } catch (err) {
@@ -171,7 +191,12 @@ export async function sendLifecycleEmails() {
       });
       await db
         .update(usersTable)
-        .set({ metadata: { ...((user as any).metadata ?? {}), lifecycleD14Sent: new Date().toISOString() } })
+        .set({
+          metadata: {
+            ...((user as any).metadata ?? {}),
+            lifecycleD14Sent: new Date().toISOString(),
+          },
+        })
         .where(eq(usersTable.id, user.id));
       d14Sent++;
     } catch (err) {

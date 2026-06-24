@@ -1,7 +1,7 @@
 import { eq, sql } from "drizzle-orm";
+import { getConfig } from "../config";
 import { getDb } from "../db";
 import { organizationsTable } from "../db/schema";
-import { getConfig } from "../config";
 
 // ── Region constants ─────────────────────────────────────────────────────────
 
@@ -12,17 +12,62 @@ const VALID_REGIONS: StorageRegion[] = ["us", "eu", "apac"];
 /** Map country codes to their data-residency region. */
 const COUNTRY_TO_REGION: Record<string, StorageRegion> = {
   // EU/EEA
-  DE: "eu", FR: "eu", IT: "eu", ES: "eu", NL: "eu", BE: "eu", AT: "eu",
-  PL: "eu", SE: "eu", DK: "eu", FI: "eu", IE: "eu", PT: "eu", GR: "eu",
-  CZ: "eu", RO: "eu", HU: "eu", BG: "eu", HR: "eu", SK: "eu", SI: "eu",
-  EE: "eu", LV: "eu", LT: "eu", LU: "eu", MT: "eu", CY: "eu",
-  GB: "eu", CH: "eu", NO: "eu", IS: "eu",
+  DE: "eu",
+  FR: "eu",
+  IT: "eu",
+  ES: "eu",
+  NL: "eu",
+  BE: "eu",
+  AT: "eu",
+  PL: "eu",
+  SE: "eu",
+  DK: "eu",
+  FI: "eu",
+  IE: "eu",
+  PT: "eu",
+  GR: "eu",
+  CZ: "eu",
+  RO: "eu",
+  HU: "eu",
+  BG: "eu",
+  HR: "eu",
+  SK: "eu",
+  SI: "eu",
+  EE: "eu",
+  LV: "eu",
+  LT: "eu",
+  LU: "eu",
+  MT: "eu",
+  CY: "eu",
+  GB: "eu",
+  CH: "eu",
+  NO: "eu",
+  IS: "eu",
   // APAC
-  JP: "apac", CN: "apac", KR: "apac", IN: "apac", SG: "apac", AU: "apac",
-  NZ: "apac", TW: "apac", HK: "apac", MY: "apac", TH: "apac", VN: "apac",
-  PH: "apac", ID: "apac", BD: "apac", PK: "apac",
+  JP: "apac",
+  CN: "apac",
+  KR: "apac",
+  IN: "apac",
+  SG: "apac",
+  AU: "apac",
+  NZ: "apac",
+  TW: "apac",
+  HK: "apac",
+  MY: "apac",
+  TH: "apac",
+  VN: "apac",
+  PH: "apac",
+  ID: "apac",
+  BD: "apac",
+  PK: "apac",
   // US (default for everything else)
-  US: "us", CA: "us", MX: "us", BR: "us", AR: "us", CO: "us", CL: "us",
+  US: "us",
+  CA: "us",
+  MX: "us",
+  BR: "us",
+  AR: "us",
+  CO: "us",
+  CL: "us",
 };
 
 export function regionForCountry(countryCode: string | null | undefined): StorageRegion {
@@ -156,10 +201,7 @@ export async function getOrgBranding(orgId: string): Promise<ResolvedBranding> {
   return branding;
 }
 
-export function canAccessRegion(
-  requestRegion: StorageRegion,
-  dataRegion: StorageRegion,
-): boolean {
+export function canAccessRegion(requestRegion: StorageRegion, dataRegion: StorageRegion): boolean {
   const cfg = getConfig();
   if ((cfg as any).residency?.strictMode) {
     return requestRegion === dataRegion;
@@ -176,7 +218,9 @@ export async function setOrgCustomDomain(orgId: string, domain: string | null): 
     const [existing] = await db
       .select({ id: organizationsTable.id })
       .from(organizationsTable)
-      .where(sql`${organizationsTable.customDomain} = ${domain} AND ${organizationsTable.id} != ${orgId}`)
+      .where(
+        sql`${organizationsTable.customDomain} = ${domain} AND ${organizationsTable.id} != ${orgId}`
+      )
       .limit(1);
     if (existing) throw new Error(`Domain ${domain} is already in use`);
   }
@@ -190,7 +234,7 @@ export async function setOrgCustomDomain(orgId: string, domain: string | null): 
 
 export async function setOrgBranding(
   orgId: string,
-  branding: Partial<ResolvedBranding>,
+  branding: Partial<ResolvedBranding>
 ): Promise<void> {
   const db = getDb();
   const [existing] = await db
@@ -206,10 +250,7 @@ export async function setOrgBranding(
   orgCache.clear();
 }
 
-export async function setOrgStorageRegion(
-  orgId: string,
-  region: StorageRegion,
-): Promise<void> {
+export async function setOrgStorageRegion(orgId: string, region: StorageRegion): Promise<void> {
   if (!isValidRegion(region)) throw new Error(`Invalid region: ${region}`);
   const db = getDb();
   await db

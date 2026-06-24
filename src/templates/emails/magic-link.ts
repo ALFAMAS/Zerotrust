@@ -1,5 +1,5 @@
-import { tr, htmlLang } from "./i18n";
 import type { Locale } from "../../shared/locale";
+import { htmlLang, tr } from "./i18n";
 
 export interface MagicLinkEmailData {
   name: string;
@@ -16,7 +16,8 @@ export function magicLinkEmailTemplate(data: MagicLinkEmailData): {
   text: string;
 } {
   const { name, magicLinkUrl, expiresInMinutes, appName, appUrl, locale } = data;
-  const t = (key: string, vars: Record<string, string | number> = {}) => tr(locale, key, { ...vars, name, appName, appUrl, minutes: expiresInMinutes });
+  const t = (key: string, vars: Record<string, string | number> = {}) =>
+    tr(locale, key, { ...vars, name, appName, appUrl, minutes: expiresInMinutes });
   const subject = t("magiclink_subject");
 
   const html = `<!DOCTYPE html>

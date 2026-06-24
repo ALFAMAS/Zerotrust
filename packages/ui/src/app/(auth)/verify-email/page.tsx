@@ -56,6 +56,7 @@ function VerifyEmailInner() {
       autoTried.current = true;
       void verify(qCode);
     }
+    // biome-ignore lint/correctness/useExhaustiveDependencies: loads on mount / when the route key changes; closes over stable setters
   }, [params, verify]);
 
   if (status === "success") {

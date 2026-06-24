@@ -132,7 +132,12 @@ export default function ProductTour() {
     >
       {/* Dimming overlay (click-through prevented). A spotlight cut-out is drawn
           via a ring box when a target exists. */}
-      <div className="absolute inset-0 bg-black/60" onClick={finish} />
+      <button
+        type="button"
+        aria-label="Skip tour"
+        className="absolute inset-0 bg-black/60"
+        onClick={finish}
+      />
 
       {rect && (
         <div
@@ -150,7 +155,6 @@ export default function ProductTour() {
       <div
         className="absolute w-80 max-w-[calc(100vw-24px)] rounded-xl border border-border bg-popover p-5 shadow-2xl"
         style={tooltipStyle}
-        onClick={(e) => e.stopPropagation()}
       >
         <h2 className="font-display text-base font-semibold tracking-tight text-foreground">
           {current.title}
@@ -170,6 +174,7 @@ export default function ProductTour() {
           </div>
           <div className="flex items-center gap-2">
             <button
+              type="button"
               onClick={finish}
               className="text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
             >

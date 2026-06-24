@@ -1,5 +1,5 @@
-import { tr, htmlLang } from "./i18n";
 import type { Locale } from "../../shared/locale";
+import { htmlLang, tr } from "./i18n";
 
 export interface PasswordResetEmailData {
   name: string;
@@ -16,7 +16,8 @@ export function passwordResetEmailTemplate(data: PasswordResetEmailData): {
   text: string;
 } {
   const { name, resetUrl, expiresInMinutes, appName, appUrl, locale } = data;
-  const t = (key: string, vars: Record<string, string | number> = {}) => tr(locale, key, { ...vars, name, appName, appUrl, minutes: expiresInMinutes });
+  const t = (key: string, vars: Record<string, string | number> = {}) =>
+    tr(locale, key, { ...vars, name, appName, appUrl, minutes: expiresInMinutes });
   const subject = t("reset_subject");
 
   const html = `<!DOCTYPE html>

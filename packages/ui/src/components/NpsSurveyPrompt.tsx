@@ -50,6 +50,7 @@ export function NpsSurveyPrompt() {
                 How likely are you to recommend ZeroAuth?
               </h3>
               <button
+                type="button"
                 onClick={() => setDismissed(true)}
                 className="text-muted-foreground hover:text-foreground"
               >
@@ -59,6 +60,7 @@ export function NpsSurveyPrompt() {
             <div className="mb-3 flex gap-1">
               {Array.from({ length: 11 }, (_, i) => (
                 <button
+                  type="button"
                   key={i}
                   onClick={() => setScore(i)}
                   className={`flex h-9 w-9 items-center justify-center rounded-lg text-xs font-medium transition-colors ${
@@ -85,6 +87,7 @@ export function NpsSurveyPrompt() {
                   className="mb-3 w-full rounded-lg border border-border bg-muted px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-ring"
                 />
                 <button
+                  type="button"
                   onClick={handleSubmit}
                   className="w-full rounded-lg bg-primary py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
                 >

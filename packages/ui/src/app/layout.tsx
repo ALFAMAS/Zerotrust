@@ -39,9 +39,7 @@ export const metadata: Metadata = {
   alternates: {
     canonical: brand.url,
     languages: {
-      ...Object.fromEntries(
-        SUPPORTED_LOCALES.map((locale) => [locale, `${brand.url}/${locale}`])
-      ),
+      ...Object.fromEntries(SUPPORTED_LOCALES.map((locale) => [locale, `${brand.url}/${locale}`])),
       "x-default": brand.url,
     },
   },

@@ -37,6 +37,7 @@ export default function MagicLinkPage() {
           expires in 15 minutes.
         </p>
         <button
+          type="button"
           onClick={(): any => setSent(false)}
           className="text-sm text-primary hover:text-primary/80"
         >

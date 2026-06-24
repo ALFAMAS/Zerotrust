@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { SkeletonCard } from "@/components/Skeleton";
 import { useToast } from "@/context/ToastContext";
 import { api } from "../../../../../lib/api";
+import { SsoSettingsForm } from "./SsoSettingsForm";
 
 interface OrgDetails {
   id: string;
@@ -311,16 +312,22 @@ export default function OrgSettingsPage() {
       <form onSubmit={handleSave} className="bg-card border border-border rounded-xl p-5 space-y-4">
         <h2 className="font-semibold text-foreground">General</h2>
         <div className="space-y-1">
-          <label className="text-xs text-muted-foreground">Organization name</label>
+          <label htmlFor="page-f0" className="text-xs text-muted-foreground">
+            Organization name
+          </label>
           <input
+            id="page-f0"
             value={editName}
             onChange={(e) => setEditName(e.target.value)}
             className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:border-ring"
           />
         </div>
         <div className="space-y-1">
-          <label className="text-xs text-muted-foreground">Billing email</label>
+          <label htmlFor="page-f1" className="text-xs text-muted-foreground">
+            Billing email
+          </label>
           <input
+            id="page-f1"
             type="email"
             value={editBillingEmail}
             onChange={(e) => setEditBillingEmail(e.target.value)}
@@ -329,8 +336,11 @@ export default function OrgSettingsPage() {
           />
         </div>
         <div className="space-y-1">
-          <label className="text-xs text-muted-foreground">Logo URL</label>
+          <label htmlFor="page-f2" className="text-xs text-muted-foreground">
+            Logo URL
+          </label>
           <input
+            id="page-f2"
             type="url"
             value={editLogoUrl}
             onChange={(e) => setEditLogoUrl(e.target.value)}
@@ -395,10 +405,11 @@ export default function OrgSettingsPage() {
           </label>
 
           <div className="space-y-1">
-            <label className="text-xs text-muted-foreground">
+            <label htmlFor="page-f3" className="text-xs text-muted-foreground">
               Allowed AAGUIDs (comma or space separated — leave blank to allow all)
             </label>
             <input
+              id="page-f3"
               value={allowedAaguids}
               onChange={(e) => setAllowedAaguids(e.target.value)}
               placeholder="ee882879-721c-4913-9775-3dfcce97072a"
@@ -407,8 +418,11 @@ export default function OrgSettingsPage() {
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs text-muted-foreground">Denied AAGUIDs</label>
+            <label htmlFor="page-f4" className="text-xs text-muted-foreground">
+              Denied AAGUIDs
+            </label>
             <input
+              id="page-f4"
               value={deniedAaguids}
               onChange={(e) => setDeniedAaguids(e.target.value)}
               placeholder="00000000-0000-0000-0000-000000000000"
@@ -417,10 +431,11 @@ export default function OrgSettingsPage() {
           </div>
 
           <div className="border-t border-border pt-4 space-y-1">
-            <label className="text-xs text-muted-foreground">
+            <label htmlFor="page-f5" className="text-xs text-muted-foreground">
               IP allowlist (IPv4 CIDRs, comma or space separated — leave blank to allow all)
             </label>
             <input
+              id="page-f5"
               value={ipAllowlist}
               onChange={(e) => setIpAllowlist(e.target.value)}
               placeholder="203.0.113.0/24, 198.51.100.10"
@@ -439,8 +454,11 @@ export default function OrgSettingsPage() {
             </p>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
               <div className="space-y-1">
-                <label className="text-xs text-muted-foreground">Max session age (minutes)</label>
+                <label htmlFor="page-f6" className="text-xs text-muted-foreground">
+                  Max session age (minutes)
+                </label>
                 <input
+                  id="page-f6"
                   type="number"
                   min={0}
                   value={Math.round((policy.maxSessionAgeSeconds ?? 0) / 60)}
@@ -454,8 +472,11 @@ export default function OrgSettingsPage() {
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-xs text-muted-foreground">Idle timeout (minutes)</label>
+                <label htmlFor="page-f7" className="text-xs text-muted-foreground">
+                  Idle timeout (minutes)
+                </label>
                 <input
+                  id="page-f7"
                   type="number"
                   min={0}
                   value={Math.round((policy.idleTimeoutSeconds ?? 0) / 60)}
@@ -469,8 +490,11 @@ export default function OrgSettingsPage() {
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-xs text-muted-foreground">Max concurrent sessions</label>
+                <label htmlFor="page-f8" className="text-xs text-muted-foreground">
+                  Max concurrent sessions
+                </label>
                 <input
+                  id="page-f8"
                   type="number"
                   min={0}
                   value={policy.maxConcurrentSessions ?? 0}
@@ -485,11 +509,12 @@ export default function OrgSettingsPage() {
               </div>
             </div>
             <div className="space-y-1">
-              <label className="text-xs text-muted-foreground">
+              <label htmlFor="page-f9" className="text-xs text-muted-foreground">
                 Allowed countries (ISO 3166-1 alpha-2, comma or space separated — leave blank to
                 allow all)
               </label>
               <input
+                id="page-f9"
                 value={allowedCountries}
                 onChange={(e) => setAllowedCountries(e.target.value)}
                 placeholder="US, GB, DE"
@@ -623,8 +648,11 @@ export default function OrgSettingsPage() {
           className="flex items-end gap-3 border-t border-border pt-4"
         >
           <div className="flex-1 space-y-1">
-            <label className="text-xs text-muted-foreground">New token name</label>
+            <label htmlFor="page-f10" className="text-xs text-muted-foreground">
+              New token name
+            </label>
             <input
+              id="page-f10"
               value={newScimName}
               onChange={(e) => setNewScimName(e.target.value)}
               placeholder="e.g. Okta production"
@@ -656,8 +684,11 @@ export default function OrgSettingsPage() {
             You will become an admin after transferring ownership.
           </p>
           <div className="space-y-1">
-            <label className="text-xs text-muted-foreground">New owner</label>
+            <label htmlFor="page-f11" className="text-xs text-muted-foreground">
+              New owner
+            </label>
             <select
+              id="page-f11"
               value={transferTo}
               onChange={(e) => setTransferTo(e.target.value)}
               required
@@ -693,10 +724,11 @@ export default function OrgSettingsPage() {
             name to confirm.
           </p>
           <div className="space-y-1">
-            <label className="text-xs text-muted-foreground">
+            <label htmlFor="page-f12" className="text-xs text-muted-foreground">
               Type <span className="font-mono text-foreground">{org.name}</span> to confirm
             </label>
             <input
+              id="page-f12"
               value={deleteConfirm}
               onChange={(e) => setDeleteConfirm(e.target.value)}
               placeholder={org.name}

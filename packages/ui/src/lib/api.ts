@@ -128,8 +128,12 @@ async function request<T>(
   if (token && !skipAuth) headers.Authorization = `Bearer ${token}`;
   const serializedBody = body !== undefined ? JSON.stringify(body) : undefined;
 
-  // GET requests: check cache first, dedup concurrent requests
-  if (method === "GET") {
+  // GET requests: check cache first, dedup concurrent requests.
+  // A replay after a 401→refresh (isRetry) must NOT consult the dedup map: the
+  // parent request is still in flight under the same key, so returning it here
+  // would make the replay await the very promise it is running inside — a
+  // deadlock that hangs every token-refreshed GET.
+  if (method === "GET" && !isRetry) {
     const key = cacheKey(method, path);
     const cached = getCached<T>(key);
     if (cached !== null) return cached;
@@ -144,7 +148,7 @@ async function request<T>(
 
     for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
       if (attempt > 0) {
-        await sleep(BASE_RETRY_DELAY_MS * Math.pow(2, attempt - 1));
+        await sleep(BASE_RETRY_DELAY_MS * 2 ** (attempt - 1));
       }
 
       let res: Response;
@@ -212,8 +216,8 @@ async function request<T>(
     throw lastErr;
   })();
 
-  // Track in-flight GET requests for dedup
-  if (method === "GET") {
+  // Track in-flight GET requests for dedup (never for a replay — see above).
+  if (method === "GET" && !isRetry) {
     const key = cacheKey(method, path);
     inFlightRequests.set(key, requestPromise);
     try {
@@ -227,7 +231,8 @@ async function request<T>(
 }
 
 export const api = {
-  get: <T>(path: string, cacheTtlMs?: number) => request<T>("GET", path, undefined, false, false, cacheTtlMs),
+  get: <T>(path: string, cacheTtlMs?: number) =>
+    request<T>("GET", path, undefined, false, false, cacheTtlMs),
   post: <T>(path: string, body?: unknown, skipAuth = false) => {
     // Invalidate related cache entries on mutation
     invalidateCache(path.split("/").slice(0, -1).join("/"));

@@ -2,7 +2,6 @@ import { desc, eq } from "drizzle-orm";
 import { getDb } from "../db";
 import { webhookDeliveryLogsTable } from "../db/schema";
 
-
 export interface DeliveryLogEntry {
   id: string;
   webhookId: string;

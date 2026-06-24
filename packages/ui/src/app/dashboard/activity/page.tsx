@@ -1,9 +1,9 @@
 "use client";
 
-import { Activity, FileText, UserPlus, AtSign, Settings } from "lucide-react";
+import { Activity, AtSign, FileText, Settings, UserPlus } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import { api } from "@/lib/api";
 import { SkeletonCard } from "@/components/Skeleton";
+import { api } from "@/lib/api";
 
 interface ActivityEvent {
   id: string;
@@ -47,7 +47,7 @@ export default function ActivityFeedPage() {
     setLoading(true);
     try {
       const data = await api.get<{ events: ActivityEvent[] }>(
-        `/collab/activity?orgId=${orgId}&limit=30`,
+        `/collab/activity?orgId=${orgId}&limit=30`
       );
       setEvents(data.events || []);
     } catch {
@@ -86,9 +86,7 @@ export default function ActivityFeedPage() {
         <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
           Team Activity
         </h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          See what your team has been working on
-        </p>
+        <p className="mt-1 text-sm text-muted-foreground">See what your team has been working on</p>
       </div>
 
       {loading ? (

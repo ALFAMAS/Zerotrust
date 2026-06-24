@@ -40,7 +40,7 @@ export default function UsersPage() {
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviting, setInviting] = useState(false);
 
-  const toastTimer = useRef<ReturnType<typeof setTimeout>>();
+  const toastTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const showToast = useCallback((msg: string) => {
     setToast(msg);
@@ -48,6 +48,7 @@ export default function UsersPage() {
     toastTimer.current = setTimeout(() => setToast(null), 3000);
   }, []);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: data loader intentionally runs on mount / when the route key changes; it closes over stable state setters
   const loadUsers = useCallback(async () => {
     setLoading(true);
     try {
@@ -134,6 +135,7 @@ export default function UsersPage() {
           <p className="mt-1 text-sm text-muted-foreground">{total} total users</p>
         </div>
         <button
+          type="button"
           onClick={() => setShowInviteModal(true)}
           className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-foreground hover:bg-primary/90 transition-colors"
         >
@@ -273,6 +275,7 @@ export default function UsersPage() {
                           View
                         </Link>
                         <button
+                          type="button"
                           onClick={() => handleToggleStatus(u)}
                           className={`rounded px-2 py-1 text-xs transition-colors ${
                             u.status === "active"
@@ -283,6 +286,7 @@ export default function UsersPage() {
                           {u.status === "active" ? "Suspend" : "Activate"}
                         </button>
                         <button
+                          type="button"
                           onClick={() => handleDelete(u)}
                           className="rounded px-2 py-1 text-xs text-red-400 hover:bg-red-900/30 transition-colors"
                         >
@@ -304,6 +308,7 @@ export default function UsersPage() {
         </span>
         <div className="flex gap-2">
           <button
+            type="button"
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page <= 1}
             className="rounded px-3 py-1.5 bg-muted border border-border disabled:opacity-40 hover:bg-accent transition-colors"
@@ -311,6 +316,7 @@ export default function UsersPage() {
             Previous
           </button>
           <button
+            type="button"
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page >= totalPages}
             className="rounded px-3 py-1.5 bg-muted border border-border disabled:opacity-40 hover:bg-accent transition-colors"
@@ -325,10 +331,14 @@ export default function UsersPage() {
         <Modal title="Invite User" onClose={() => setShowInviteModal(false)}>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-foreground/80 mb-1">
+              <label
+                htmlFor="page-f0"
+                className="block text-sm font-medium text-foreground/80 mb-1"
+              >
                 Email address
               </label>
               <input
+                id="page-f0"
                 type="email"
                 placeholder="user@example.com"
                 value={inviteEmail}
@@ -339,12 +349,14 @@ export default function UsersPage() {
             </div>
             <div className="flex justify-end gap-3">
               <button
+                type="button"
                 onClick={() => setShowInviteModal(false)}
                 className="rounded-lg px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
                 Cancel
               </button>
               <button
+                type="button"
                 onClick={handleInvite}
                 disabled={inviting || !inviteEmail.trim()}
                 className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors"

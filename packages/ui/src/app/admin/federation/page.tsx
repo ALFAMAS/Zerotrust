@@ -30,7 +30,7 @@ export default function AdminFederationPage() {
     trustedTenantId: "",
   });
 
-  const toastTimer = useRef<ReturnType<typeof setTimeout>>();
+  const toastTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const showToast = useCallback((msg: string) => {
     setToast(msg);
@@ -117,6 +117,7 @@ export default function AdminFederationPage() {
           </p>
         </div>
         <button
+          type="button"
           onClick={() => setShowForm((v) => !v)}
           className="flex shrink-0 items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
         >
@@ -131,8 +132,11 @@ export default function AdminFederationPage() {
         >
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-foreground">Provider ID</label>
+              <label htmlFor="page-f0" className="text-sm font-medium text-foreground">
+                Provider ID
+              </label>
               <input
+                id="page-f0"
                 value={form.id}
                 onChange={(e) => setForm({ ...form, id: e.target.value })}
                 placeholder="partner-idp"
@@ -141,8 +145,11 @@ export default function AdminFederationPage() {
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-foreground">Display name</label>
+              <label htmlFor="page-f1" className="text-sm font-medium text-foreground">
+                Display name
+              </label>
               <input
+                id="page-f1"
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
                 placeholder="Partner IdP"
@@ -152,8 +159,11 @@ export default function AdminFederationPage() {
             </div>
           </div>
           <div className="space-y-1.5">
-            <label className="text-sm font-medium text-foreground">Issuer URL</label>
+            <label htmlFor="page-f2" className="text-sm font-medium text-foreground">
+              Issuer URL
+            </label>
             <input
+              id="page-f2"
               value={form.issuerUrl}
               onChange={(e) => setForm({ ...form, issuerUrl: e.target.value })}
               placeholder="https://idp.partner.com"
@@ -163,8 +173,11 @@ export default function AdminFederationPage() {
           </div>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-foreground">JWKS URI (optional)</label>
+              <label htmlFor="page-f3" className="text-sm font-medium text-foreground">
+                JWKS URI (optional)
+              </label>
               <input
+                id="page-f3"
                 value={form.jwksUri}
                 onChange={(e) => setForm({ ...form, jwksUri: e.target.value })}
                 placeholder="https://idp.partner.com/.well-known/jwks.json"
@@ -172,10 +185,11 @@ export default function AdminFederationPage() {
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-foreground">
+              <label htmlFor="page-f4" className="text-sm font-medium text-foreground">
                 Trusted tenant (optional)
               </label>
               <input
+                id="page-f4"
                 value={form.trustedTenantId}
                 onChange={(e) => setForm({ ...form, trustedTenantId: e.target.value })}
                 placeholder="acme-corp"
@@ -250,6 +264,7 @@ export default function AdminFederationPage() {
                 )}
               </div>
               <button
+                type="button"
                 onClick={(): any => handleDelete(p.id)}
                 disabled={deleting === p.id}
                 aria-label={`Remove ${p.name}`}

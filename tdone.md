@@ -566,3 +566,55 @@ Recommended next actions:
 1. Repair the Bun workspace install by removing/recreating the broken dependency links or using a clean install, then rerun `bun run type-check`, `bun run test -- --run`, and `bun run lint`.
 2. Triage the Biome findings, starting with high-volume safe fixes (`type="button"`, label associations, `void` for intentionally unawaited promises, hook dependency cleanup).
 3. Reconcile compliance docs that still describe already-shipped audit-chain work as planned.
+
+---
+
+## Production-Hardening Audit & Fixes (2026-06-24)
+
+A full audit pass that resolves the three "recommended next actions" above and
+hardens the security, build, and CI surfaces. All changes shipped with tests.
+
+### Toolchain / CI (previously blocking)
+- ✅ **Bun install repaired** — a clean `bun install` restores a working tree; the
+  636-test suite, `type-check`, and the UI build all run. The README/this file's
+  "verification blocked by broken workspace links" note is now stale.
+- ✅ **CI lint gate made executable** — `package.json` declared only
+  `@biomejs/cli-win32-x64`, so on Linux runners `@biomejs/biome`'s `bin/biome`
+  threw `MODULE_NOT_FOUND` and `lint:ci` exited 1 before linting a file. Added the
+  Linux/macOS platform binaries (os/cpu-constrained). `bun run lint:ci` now runs.
+- ✅ **Biome 277 → 0 errors** — repo-wide safe autofixes; a11y adoption
+  (`type="button"` ×90, label/`htmlFor` association ×53, decorative-SVG
+  `aria-hidden`, click-to-dismiss backdrops → `<button>`); pure-style/intentional
+  rules tuned with rationale; experimental nursery promise rules set to `warn`.
+
+### Production build (previously failing)
+- ✅ **Next.js build fixed** — React 19's `useRef<T>()` requires an argument (7
+  admin pages); `<SsoSettingsForm>` was rendered but never imported. `next build`
+  now compiles 52 routes.
+
+### Security findings (each fixed + tested)
+- ✅ **OTP RNG** — email-verification + step-up re-verification + referral codes
+  moved off `Math.random()` to `crypto.randomInt` (`src/crypto/codes.ts`). CWE-330.
+- ✅ **Wallet double-spend** — `spendFromWallet` now decrements with one atomic
+  conditional `UPDATE … WHERE balance >= amount` (was read-modify-write / TOCTOU).
+- ✅ **Upload stored-XSS** — stored object extension derived from the validated
+  content type, never the client filename (`src/services/uploadSafety.ts`).
+- ✅ **CORS** — configurable allowlist, fails closed in production
+  (`src/middleware/cors.ts`, `CORS_ALLOWED_ORIGINS`); replaces blanket wildcard.
+- ✅ **OIDC open redirect** — authorize no longer redirects error responses to an
+  unregistered `redirect_uri` (OAuth 2.0 Security BCP).
+
+### Bugs found via new tests
+- ✅ **API client deadlock** — a GET that hit 401→refresh→replay returned the
+  parent's own in-flight promise from the dedup map, hanging every token-refreshed
+  GET. Replays now bypass the cache/dedup.
+- ✅ **Rules-of-Hooks violation** — `SetupChecklist` called `useEffect` after an
+  early return; hoisted above it.
+- ✅ **Referral routes** — were registered at `POST /wallet` / `GET
+  /wallet/dashboard` instead of `…/referrals[/dashboard]`; corrected to match the
+  README + SDK, and surfaced in a new `/dashboard/referrals` UI.
+
+### Tests
+- Backend: +30 (`codes`, `wallet.spend`, `wallet.routes`, `uploadSafety`, `cors`,
+  `oidc.authorize`). Frontend (new harness wired into root Vitest): +11
+  (`lib/auth`, `lib/api`). Suite: 636 → 677 passing.

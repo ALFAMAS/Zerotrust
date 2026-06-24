@@ -115,6 +115,7 @@ export default function SupportPage() {
           </p>
         </div>
         <button
+          type="button"
           onClick={() => setCreateOpen(true)}
           className="shrink-0 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
         >
@@ -143,6 +144,7 @@ export default function SupportPage() {
           {tickets.map((t) => (
             <li key={t.id}>
               <button
+                type="button"
                 onClick={() => openThread(t.id)}
                 className="flex w-full items-center justify-between gap-4 rounded-xl border border-border bg-card p-4 text-left transition-colors hover:border-primary/50"
               >
@@ -175,8 +177,11 @@ export default function SupportPage() {
         <Modal title="New support ticket" onClose={() => setCreateOpen(false)}>
           <div className="space-y-4">
             <div>
-              <label className="mb-1.5 block text-sm text-foreground/80">Subject</label>
+              <label htmlFor="page-f0" className="mb-1.5 block text-sm text-foreground/80">
+                Subject
+              </label>
               <input
+                id="page-f0"
                 value={form.subject}
                 onChange={(e) => setForm({ ...form, subject: e.target.value })}
                 placeholder="Brief summary of the issue"
@@ -184,8 +189,11 @@ export default function SupportPage() {
               />
             </div>
             <div>
-              <label className="mb-1.5 block text-sm text-foreground/80">Message</label>
+              <label htmlFor="page-f1" className="mb-1.5 block text-sm text-foreground/80">
+                Message
+              </label>
               <textarea
+                id="page-f1"
                 value={form.message}
                 onChange={(e) => setForm({ ...form, message: e.target.value })}
                 rows={5}
@@ -194,8 +202,11 @@ export default function SupportPage() {
               />
             </div>
             <div>
-              <label className="mb-1.5 block text-sm text-foreground/80">Priority</label>
+              <label htmlFor="page-f2" className="mb-1.5 block text-sm text-foreground/80">
+                Priority
+              </label>
               <select
+                id="page-f2"
                 value={form.priority}
                 onChange={(e) => setForm({ ...form, priority: e.target.value })}
                 className="w-full rounded-lg border border-border bg-muted px-3 py-2 text-sm text-foreground"
@@ -207,6 +218,7 @@ export default function SupportPage() {
             </div>
             {error && <p className="text-sm text-red-400">{error}</p>}
             <button
+              type="button"
               onClick={createTicket}
               disabled={!form.subject.trim() || !form.message.trim()}
               className="w-full rounded-lg bg-primary py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
@@ -265,12 +277,14 @@ export default function SupportPage() {
                   />
                   <div className="flex items-center justify-between">
                     <button
+                      type="button"
                       onClick={closeTicket}
                       className="text-xs text-muted-foreground transition-colors hover:text-foreground"
                     >
                       Close ticket
                     </button>
                     <button
+                      type="button"
                       onClick={sendReply}
                       disabled={!reply.trim() || sending}
                       className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"

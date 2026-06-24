@@ -45,6 +45,10 @@
       },
       "devDependencies": {
         "@biomejs/biome": "^2.5.0",
+        "@biomejs/cli-darwin-arm64": "^2.5.0",
+        "@biomejs/cli-darwin-x64": "^2.5.0",
+        "@biomejs/cli-linux-arm64": "^2.5.0",
+        "@biomejs/cli-linux-x64": "^2.5.0",
         "@biomejs/cli-win32-x64": "^2.5.0",
         "@commitlint/cli": "^21.0.2",
         "@commitlint/config-conventional": "^21.0.2",

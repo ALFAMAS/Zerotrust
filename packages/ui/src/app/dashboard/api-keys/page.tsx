@@ -86,6 +86,7 @@ export default function ApiKeysPage() {
               {newKey}
             </code>
             <button
+              type="button"
               onClick={() => copy(newKey)}
               className="px-3 py-1.5 bg-secondary hover:bg-secondary/80 text-secondary-foreground text-xs rounded-lg transition-colors whitespace-nowrap"
             >
@@ -93,6 +94,7 @@ export default function ApiKeysPage() {
             </button>
           </div>
           <button
+            type="button"
             onClick={() => setNewKey(null)}
             className="mt-3 text-xs text-muted-foreground hover:text-foreground/80"
           >
@@ -183,6 +185,7 @@ export default function ApiKeysPage() {
                   )}
                 </div>
                 <button
+                  type="button"
                   onClick={() => handleRevoke(key.id)}
                   className="px-3 py-1.5 text-xs text-red-400 hover:text-red-300 hover:bg-red-900/20 rounded-lg transition-colors"
                 >

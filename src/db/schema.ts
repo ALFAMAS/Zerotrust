@@ -392,28 +392,32 @@ export const notificationsTable = pgTable(
   })
 );
 
-export const organizationsTable = pgTable("organizations", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  name: text("name").notNull(),
-  slug: text("slug").notNull().unique(),
-  logoUrl: text("logo_url"),
-  billingEmail: text("billing_email"),
-  ownerId: uuid("owner_id").references(() => usersTable.id, { onDelete: "cascade" }),
-  // Self-serve SSO config — org admins configure SAML/OIDC from the dashboard.
-  ssoConfig: jsonb("sso_config").$type<OrgSsoConfig>(),
-  // Multi-tenant enterprise: custom domain, branding overrides, data residency.
-  customDomain: text("custom_domain"),
-  branding: jsonb("branding").$type<OrgBranding>(),
-  storageRegion: text("storage_region").notNull().default("us"),
-  // References the tenant this org belongs to (for multi-tenant platform).
-  tenantId: uuid("tenant_id"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
-}, (t) => ({
-  organizationsCustomDomainIdx: index("organizations_custom_domain_idx").on(t.customDomain),
-  organizationsStorageRegionIdx: index("organizations_storage_region_idx").on(t.storageRegion),
-  organizationsTenantIdx: index("organizations_tenant_idx").on(t.tenantId),
-}));
+export const organizationsTable = pgTable(
+  "organizations",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    name: text("name").notNull(),
+    slug: text("slug").notNull().unique(),
+    logoUrl: text("logo_url"),
+    billingEmail: text("billing_email"),
+    ownerId: uuid("owner_id").references(() => usersTable.id, { onDelete: "cascade" }),
+    // Self-serve SSO config — org admins configure SAML/OIDC from the dashboard.
+    ssoConfig: jsonb("sso_config").$type<OrgSsoConfig>(),
+    // Multi-tenant enterprise: custom domain, branding overrides, data residency.
+    customDomain: text("custom_domain"),
+    branding: jsonb("branding").$type<OrgBranding>(),
+    storageRegion: text("storage_region").notNull().default("us"),
+    // References the tenant this org belongs to (for multi-tenant platform).
+    tenantId: uuid("tenant_id"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (t) => ({
+    organizationsCustomDomainIdx: index("organizations_custom_domain_idx").on(t.customDomain),
+    organizationsStorageRegionIdx: index("organizations_storage_region_idx").on(t.storageRegion),
+    organizationsTenantIdx: index("organizations_tenant_idx").on(t.tenantId),
+  })
+);
 
 export const orgSecurityPoliciesTable = pgTable("org_security_policies", {
   orgId: uuid("org_id")
@@ -1103,21 +1107,28 @@ export const walletsTable = pgTable("wallets", {
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().default(sql`now()`),
 });
 
-export const walletTransactionsTable = pgTable("wallet_transactions", {
-  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: uuid("user_id")
-    .notNull()
-    .references(() => usersTable.id, { onDelete: "cascade" }),
-  amount: integer("amount").notNull(), // positive = top-up, negative = spend
-  balanceAfter: integer("balance_after").notNull(),
-  type: text("type").notNull(), // "top_up" | "spend" | "refund" | "referral_credit" | "tier_bonus"
-  description: text("description"),
-  stripePaymentIntentId: text("stripe_payment_intent_id"),
-  metadata: jsonb("metadata"),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
-}, (t) => ({
-  walletTransactionsUserIdCreatedIdx: index("wallet_transactions_user_id_created_idx").on(t.userId, t.createdAt),
-}));
+export const walletTransactionsTable = pgTable(
+  "wallet_transactions",
+  {
+    id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => usersTable.id, { onDelete: "cascade" }),
+    amount: integer("amount").notNull(), // positive = top-up, negative = spend
+    balanceAfter: integer("balance_after").notNull(),
+    type: text("type").notNull(), // "top_up" | "spend" | "refund" | "referral_credit" | "tier_bonus"
+    description: text("description"),
+    stripePaymentIntentId: text("stripe_payment_intent_id"),
+    metadata: jsonb("metadata"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
+  },
+  (t) => ({
+    walletTransactionsUserIdCreatedIdx: index("wallet_transactions_user_id_created_idx").on(
+      t.userId,
+      t.createdAt
+    ),
+  })
+);
 
 // ── Tier system ───────────────────────────────────────────────────────────────
 // Bronze / Silver / Gold / Platinum tiers with perks.
@@ -1160,64 +1171,78 @@ export const redemptionsCatalogTable = pgTable("redemptions_catalog", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
 });
 
-export const redemptionsTable = pgTable("redemptions", {
-  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: uuid("user_id")
-    .notNull()
-    .references(() => usersTable.id, { onDelete: "cascade" }),
-  catalogId: uuid("catalog_id")
-    .notNull()
-    .references(() => redemptionsCatalogTable.id, { onDelete: "restrict" }),
-  pointsSpent: integer("points_spent").notNull(),
-  status: text("status").notNull().default("completed"), // "completed" | "pending" | "failed"
-  fulfilledAt: timestamp("fulfilled_at", { withTimezone: true }),
-  metadata: jsonb("metadata"),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
-}, (t) => ({
-  redemptionsUserIdCreatedIdx: index("redemptions_user_id_created_idx").on(t.userId, t.createdAt),
-}));
+export const redemptionsTable = pgTable(
+  "redemptions",
+  {
+    id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => usersTable.id, { onDelete: "cascade" }),
+    catalogId: uuid("catalog_id")
+      .notNull()
+      .references(() => redemptionsCatalogTable.id, { onDelete: "restrict" }),
+    pointsSpent: integer("points_spent").notNull(),
+    status: text("status").notNull().default("completed"), // "completed" | "pending" | "failed"
+    fulfilledAt: timestamp("fulfilled_at", { withTimezone: true }),
+    metadata: jsonb("metadata"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
+  },
+  (t) => ({
+    redemptionsUserIdCreatedIdx: index("redemptions_user_id_created_idx").on(t.userId, t.createdAt),
+  })
+);
 
 // ── Referrals ─────────────────────────────────────────────────────────────────
 // Unique referral links, tracking, and reward attribution.
 
-export const referralsTable = pgTable("referrals", {
-  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
-  referrerUserId: uuid("referrer_user_id")
-    .notNull()
-    .references(() => usersTable.id, { onDelete: "cascade" }),
-  code: text("code").notNull().unique(), // short signed link code
-  slug: text("slug").notNull().unique(), // URL-friendly slug
-  clicks: integer("clicks").notNull().default(0),
-  signups: integer("signups").notNull().default(0),
-  conversions: integer("conversions").notNull().default(0), // signed up + paid
-  rewardsEarned: integer("rewards_earned").notNull().default(0), // points earned from this link
-  active: boolean("active").notNull().default(true),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
-}, (t) => ({
-  referralsReferrerIdx: index("referrals_referrer_idx").on(t.referrerUserId),
-  referralsCodeIdx: index("referrals_code_idx").on(t.code),
-}));
+export const referralsTable = pgTable(
+  "referrals",
+  {
+    id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+    referrerUserId: uuid("referrer_user_id")
+      .notNull()
+      .references(() => usersTable.id, { onDelete: "cascade" }),
+    code: text("code").notNull().unique(), // short signed link code
+    slug: text("slug").notNull().unique(), // URL-friendly slug
+    clicks: integer("clicks").notNull().default(0),
+    signups: integer("signups").notNull().default(0),
+    conversions: integer("conversions").notNull().default(0), // signed up + paid
+    rewardsEarned: integer("rewards_earned").notNull().default(0), // points earned from this link
+    active: boolean("active").notNull().default(true),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
+  },
+  (t) => ({
+    referralsReferrerIdx: index("referrals_referrer_idx").on(t.referrerUserId),
+    referralsCodeIdx: index("referrals_code_idx").on(t.code),
+  })
+);
 
-export const referralTrackingTable = pgTable("referral_tracking", {
-  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
-  referralId: uuid("referral_id")
-    .notNull()
-    .references(() => referralsTable.id, { onDelete: "cascade" }),
-  referredUserId: uuid("referred_user_id").references(() => usersTable.id, { onDelete: "set null" }),
-  ipAddress: text("ip_address"),
-  userAgent: text("user_agent"),
-  utmSource: text("utm_source"),
-  utmMedium: text("utm_medium"),
-  utmCampaign: text("utm_campaign"),
-  status: text("status").notNull().default("clicked"), // "clicked" | "signed_up" | "converted" | "rewarded"
-  clickedAt: timestamp("clicked_at", { withTimezone: true }).notNull().default(sql`now()`),
-  signedUpAt: timestamp("signed_up_at", { withTimezone: true }),
-  convertedAt: timestamp("converted_at", { withTimezone: true }),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
-}, (t) => ({
-  referralTrackingReferralIdx: index("referral_tracking_referral_idx").on(t.referralId),
-  referralTrackingReferredIdx: index("referral_tracking_referred_idx").on(t.referredUserId),
-}));
+export const referralTrackingTable = pgTable(
+  "referral_tracking",
+  {
+    id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+    referralId: uuid("referral_id")
+      .notNull()
+      .references(() => referralsTable.id, { onDelete: "cascade" }),
+    referredUserId: uuid("referred_user_id").references(() => usersTable.id, {
+      onDelete: "set null",
+    }),
+    ipAddress: text("ip_address"),
+    userAgent: text("user_agent"),
+    utmSource: text("utm_source"),
+    utmMedium: text("utm_medium"),
+    utmCampaign: text("utm_campaign"),
+    status: text("status").notNull().default("clicked"), // "clicked" | "signed_up" | "converted" | "rewarded"
+    clickedAt: timestamp("clicked_at", { withTimezone: true }).notNull().default(sql`now()`),
+    signedUpAt: timestamp("signed_up_at", { withTimezone: true }),
+    convertedAt: timestamp("converted_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
+  },
+  (t) => ({
+    referralTrackingReferralIdx: index("referral_tracking_referral_idx").on(t.referralId),
+    referralTrackingReferredIdx: index("referral_tracking_referred_idx").on(t.referredUserId),
+  })
+);
 
 // ── SOC 2 controls ────────────────────────────────────────────────────────────
 // Documented control implementation evidence for SOC 2 Type II audits.
@@ -1240,23 +1265,27 @@ export const soc2ControlsTable = pgTable("soc2_controls", {
 // ── Risk assessment ───────────────────────────────────────────────────────────
 // Annual risk register with treatment plans.
 
-export const riskAssessmentsTable = pgTable("risk_assessments", {
-  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
-  year: integer("year").notNull(), // assessment year
-  riskId: text("risk_id").notNull(), // "R-001" | "R-002" | ...
-  category: text("category").notNull(), // "security" | "availability" | "compliance" | "financial"
-  title: text("title").notNull(),
-  description: text("description"),
-  likelihood: integer("likelihood").notNull(), // 1-5
-  impact: integer("impact").notNull(), // 1-5
-  riskScore: integer("risk_score").notNull(), // likelihood * impact
-  treatment: text("treatment").notNull(), // "mitigate" | "accept" | "transfer" | "avoid"
-  mitigation: text("mitigation"),
-  owner: text("owner"),
-  status: text("status").notNull().default("open"), // "open" | "mitigated" | "closed"
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().default(sql`now()`),
-}, (t) => ({
-  riskAssessmentsYearIdx: index("risk_assessments_year_idx").on(t.year),
-  riskAssessmentsRiskIdUnq: unique().on(t.year, t.riskId),
-}));
+export const riskAssessmentsTable = pgTable(
+  "risk_assessments",
+  {
+    id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+    year: integer("year").notNull(), // assessment year
+    riskId: text("risk_id").notNull(), // "R-001" | "R-002" | ...
+    category: text("category").notNull(), // "security" | "availability" | "compliance" | "financial"
+    title: text("title").notNull(),
+    description: text("description"),
+    likelihood: integer("likelihood").notNull(), // 1-5
+    impact: integer("impact").notNull(), // 1-5
+    riskScore: integer("risk_score").notNull(), // likelihood * impact
+    treatment: text("treatment").notNull(), // "mitigate" | "accept" | "transfer" | "avoid"
+    mitigation: text("mitigation"),
+    owner: text("owner"),
+    status: text("status").notNull().default("open"), // "open" | "mitigated" | "closed"
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().default(sql`now()`),
+  },
+  (t) => ({
+    riskAssessmentsYearIdx: index("risk_assessments_year_idx").on(t.year),
+    riskAssessmentsRiskIdUnq: unique().on(t.year, t.riskId),
+  })
+);

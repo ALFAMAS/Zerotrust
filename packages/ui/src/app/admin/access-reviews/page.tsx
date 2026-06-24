@@ -24,7 +24,7 @@ export default function AccessReviewsPage() {
   const [creating, setCreating] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
 
-  const toastTimer = useRef<ReturnType<typeof setTimeout>>();
+  const toastTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const showToast = useCallback((msg: string) => {
     setToast(msg);
@@ -32,6 +32,7 @@ export default function AccessReviewsPage() {
     toastTimer.current = setTimeout(() => setToast(null), 3000);
   }, []);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: data loader intentionally runs on mount / when the route key changes; it closes over stable state setters
   const load = useCallback(async () => {
     setLoading(true);
     try {
@@ -79,6 +80,7 @@ export default function AccessReviewsPage() {
           </p>
         </div>
         <button
+          type="button"
           onClick={startReview}
           disabled={creating}
           className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors"

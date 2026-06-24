@@ -81,8 +81,11 @@ interface NumberInputProps {
 function NumberInput({ label, value, onChange, min, max }: NumberInputProps) {
   return (
     <div className="flex items-center justify-between py-3">
-      <label className="text-sm font-medium text-foreground">{label}</label>
+      <label htmlFor="page-f0" className="text-sm font-medium text-foreground">
+        {label}
+      </label>
       <input
+        id="page-f0"
         type="number"
         min={min}
         max={max}
@@ -103,7 +106,7 @@ export default function AuthSettingsPage() {
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
 
-  const toastTimer = useRef<ReturnType<typeof setTimeout>>();
+  const toastTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const showToast = useCallback((msg: string) => {
     setToast(msg);
@@ -231,10 +234,11 @@ export default function AuthSettingsPage() {
               />
             </div>
             <div className="mt-4">
-              <label className="block text-sm font-medium text-foreground mb-1">
+              <label htmlFor="page-f1" className="block text-sm font-medium text-foreground mb-1">
                 Allowed Email Domains
               </label>
               <input
+                id="page-f1"
                 type="text"
                 placeholder="acme.com, corp.com (leave blank for all)"
                 value={settings.allowedEmailDomains}
@@ -333,13 +337,19 @@ export default function AuthSettingsPage() {
       {/* Save Button */}
       <div className="flex justify-end pt-2">
         <button
+          type="button"
           onClick={handleSave}
           disabled={saving}
           className="flex items-center gap-2 rounded-lg bg-primary px-6 py-2.5 text-sm font-medium text-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors min-w-[140px] justify-center"
         >
           {saving ? (
             <>
-              <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+              <svg
+                aria-hidden="true"
+                className="h-4 w-4 animate-spin"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
                 <circle
                   className="opacity-25"
                   cx="12"

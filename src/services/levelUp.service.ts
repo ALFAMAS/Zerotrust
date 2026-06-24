@@ -1,11 +1,10 @@
 import { eq } from "drizzle-orm";
 import { getDb } from "../db";
 import { notificationsTable, usersTable } from "../db/schema";
-import { sendNotificationEmail } from "./email.service";
 import { getLogger } from "../logger";
+import { sendNotificationEmail } from "./email.service";
 
 const logger = getLogger("level-up");
-
 
 const APP_URL = process.env.APP_URL ?? "http://localhost:3000";
 
@@ -18,7 +17,11 @@ export type LevelUpEvent =
 export async function handleLevelUpEvent(userId: string, event: LevelUpEvent): Promise<void> {
   const db = getDb();
   const [user] = await db
-    .select({ email: usersTable.email, displayName: usersTable.displayName, locale: usersTable.locale })
+    .select({
+      email: usersTable.email,
+      displayName: usersTable.displayName,
+      locale: usersTable.locale,
+    })
     .from(usersTable)
     .where(eq(usersTable.id, userId))
     .limit(1);
@@ -54,10 +57,14 @@ export async function handleLevelUpEvent(userId: string, event: LevelUpEvent): P
       type: "success",
       title,
       body,
-      link: event.type === "points_milestone" ? `${APP_URL}/dashboard/points` : `${APP_URL}/dashboard`,
+      link:
+        event.type === "points_milestone" ? `${APP_URL}/dashboard/points` : `${APP_URL}/dashboard`,
     });
   } catch (err) {
-    logger.warn("Failed to create in-app notification for level-up", { userId, error: String(err) });
+    logger.warn("Failed to create in-app notification for level-up", {
+      userId,
+      error: String(err),
+    });
   }
 
   // Send email for significant events

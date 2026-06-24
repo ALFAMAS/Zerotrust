@@ -200,6 +200,7 @@ export default function OrgDetailPage() {
           )}
           {myRole !== "owner" && (
             <button
+              type="button"
               onClick={handleLeave}
               className="text-sm text-red-400 hover:text-red-300 border border-red-800 px-3 py-1.5 rounded-lg hover:bg-red-950 transition-colors"
             >
@@ -260,8 +261,11 @@ export default function OrgDetailPage() {
             className="bg-card border border-border rounded-xl p-4 flex flex-wrap gap-3 items-end"
           >
             <div className="flex-1 min-w-48 space-y-1">
-              <label className="text-xs text-muted-foreground">Email</label>
+              <label htmlFor="page-f0" className="text-xs text-muted-foreground">
+                Email
+              </label>
               <input
+                id="page-f0"
                 type="email"
                 value={inviteEmail}
                 onChange={(e) => setInviteEmail(e.target.value)}
@@ -271,8 +275,11 @@ export default function OrgDetailPage() {
               />
             </div>
             <div className="space-y-1">
-              <label className="text-xs text-muted-foreground">Role</label>
+              <label htmlFor="page-f1" className="text-xs text-muted-foreground">
+                Role
+              </label>
               <select
+                id="page-f1"
                 value={inviteRole}
                 onChange={(e) => setInviteRole(e.target.value)}
                 className="bg-muted border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:border-ring"
@@ -321,6 +328,7 @@ export default function OrgDetailPage() {
                   {new Date(invite.expiresAt).toLocaleDateString()}
                 </span>
                 <button
+                  type="button"
                   onClick={() => handleRevokeInvite(invite.id)}
                   className="text-xs text-red-400 hover:text-red-300 border border-red-800 px-2 py-0.5 rounded hover:bg-red-950 transition-colors whitespace-nowrap"
                 >

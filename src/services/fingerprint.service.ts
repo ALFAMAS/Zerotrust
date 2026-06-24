@@ -10,6 +10,7 @@ export interface FingerprintInput {
   platform?: string;
 }
 
+// biome-ignore lint/complexity/noStaticOnlyClass: intentional namespace for fingerprint helpers; consumed as FingerprintService.* across the codebase
 export class FingerprintService {
   static compute(
     input: FingerprintInput

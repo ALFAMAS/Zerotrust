@@ -46,6 +46,18 @@ export function getOIDCClient(clientId: string): OIDCClient | null {
   return clientStore.get(clientId) ?? null;
 }
 
+/**
+ * Whether `redirectUri` is exactly registered for `clientId`. The authorize
+ * endpoint MUST only ever redirect (even error responses) to a registered URI;
+ * redirecting to an unverified `redirect_uri` is an open redirect and leaks
+ * OAuth error/state params to an attacker-controlled destination
+ * (OAuth 2.0 Security BCP §4.1.1).
+ */
+export function isRegisteredRedirectUri(clientId: string, redirectUri: string): boolean {
+  const client = clientStore.get(clientId);
+  return !!client && client.redirectUris.includes(redirectUri);
+}
+
 // ─── Auth Code Store ──────────────────────────────────────────────────────────
 
 interface AuthCodeEntry {

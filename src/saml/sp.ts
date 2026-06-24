@@ -171,14 +171,12 @@ export function parseSAMLResponse(
   // Extract attributes
   const attributes: Record<string, string | string[]> = {};
   const attrRegex = /<saml:?Attribute[^>]*Name="([^"]+)"[^>]*>([\s\S]*?)<\/saml:?Attribute>/g;
-  let attrMatch: RegExpExecArray | null;
-  while ((attrMatch = attrRegex.exec(xml)) !== null) {
+  for (const attrMatch of xml.matchAll(attrRegex)) {
     const attrName = attrMatch[1];
     const valuesStr = attrMatch[2];
     const values: string[] = [];
     const valRegex = /<saml:?AttributeValue[^>]*>([^<]*)<\/saml:?AttributeValue>/g;
-    let valMatch: RegExpExecArray | null;
-    while ((valMatch = valRegex.exec(valuesStr)) !== null) {
+    for (const valMatch of valuesStr.matchAll(valRegex)) {
       values.push(valMatch[1].trim());
     }
     attributes[attrName] = values.length === 1 ? values[0] : values;

@@ -54,6 +54,7 @@ export default function OrganizationsPage() {
 
   useEffect(() => {
     fetchOrgs();
+    // biome-ignore lint/correctness/useExhaustiveDependencies: loads on mount / when the route key changes; closes over stable setters
   }, [fetchOrgs]);
 
   function autoSlug(name: string): string {
@@ -102,6 +103,7 @@ export default function OrganizationsPage() {
           Organizations
         </h1>
         <button
+          type="button"
           onClick={() => setShowCreateForm((v) => !v)}
           className="text-sm bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-lg transition-colors"
         >
@@ -116,8 +118,11 @@ export default function OrganizationsPage() {
         >
           <h2 className="text-sm font-semibold text-foreground">New organization</h2>
           <div className="space-y-1">
-            <label className="text-xs text-muted-foreground">Name</label>
+            <label htmlFor="page-f0" className="text-xs text-muted-foreground">
+              Name
+            </label>
             <input
+              id="page-f0"
               value={orgName}
               onChange={(e) => handleNameChange(e.target.value)}
               required
@@ -126,10 +131,11 @@ export default function OrganizationsPage() {
             />
           </div>
           <div className="space-y-1">
-            <label className="text-xs text-muted-foreground">
+            <label htmlFor="page-f1" className="text-xs text-muted-foreground">
               Slug (optional — auto-generated from name)
             </label>
             <input
+              id="page-f1"
               value={orgSlug}
               onChange={(e) => {
                 setSlugManual(true);
@@ -165,6 +171,7 @@ export default function OrganizationsPage() {
         <div className="text-center py-16 text-muted-foreground">
           <p className="mb-3">You don&apos;t belong to any organizations yet.</p>
           <button
+            type="button"
             onClick={() => setShowCreateForm(true)}
             className="text-sm text-primary hover:text-primary/80 underline"
           >
@@ -194,6 +201,7 @@ export default function OrganizationsPage() {
                   <p className="text-xs text-muted-foreground mt-0.5 font-mono">{org.slug}</p>
                 </div>
                 <svg
+                  aria-hidden="true"
                   xmlns="http://www.w3.org/2000/svg"
                   className="w-4 h-4 text-muted-foreground"
                   viewBox="0 0 24 24"

@@ -1,5 +1,5 @@
 "use client";
-import { Award, Flame, KeyRound, Monitor, ShieldCheck, User } from "lucide-react";
+import { Award, KeyRound, Monitor, ShieldCheck, User } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { AchievementBadges } from "@/components/AchievementBadges";

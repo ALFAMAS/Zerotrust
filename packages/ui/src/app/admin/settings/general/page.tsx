@@ -23,7 +23,7 @@ export default function GeneralSettingsPage() {
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
 
-  const toastTimer = useRef<ReturnType<typeof setTimeout>>();
+  const toastTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const showToast = useCallback((msg: string) => {
     setToast(msg);
@@ -88,8 +88,11 @@ export default function GeneralSettingsPage() {
       <form onSubmit={handleSave} className="rounded-xl bg-card border border-border p-6 space-y-5">
         {/* App Name */}
         <div>
-          <label className="block text-sm font-medium text-foreground mb-1">App Name</label>
+          <label htmlFor="page-f0" className="block text-sm font-medium text-foreground mb-1">
+            App Name
+          </label>
           <input
+            id="page-f0"
             type="text"
             value={settings.appName}
             onChange={(e) => set("appName", e.target.value)}
@@ -101,8 +104,11 @@ export default function GeneralSettingsPage() {
 
         {/* App URL */}
         <div>
-          <label className="block text-sm font-medium text-foreground mb-1">App URL</label>
+          <label htmlFor="page-f1" className="block text-sm font-medium text-foreground mb-1">
+            App URL
+          </label>
           <input
+            id="page-f1"
             type="url"
             value={settings.appUrl}
             onChange={(e) => set("appUrl", e.target.value)}
@@ -116,8 +122,11 @@ export default function GeneralSettingsPage() {
 
         {/* Support Email */}
         <div>
-          <label className="block text-sm font-medium text-foreground mb-1">Support Email</label>
+          <label htmlFor="page-f2" className="block text-sm font-medium text-foreground mb-1">
+            Support Email
+          </label>
           <input
+            id="page-f2"
             type="email"
             value={settings.supportEmail}
             onChange={(e) => set("supportEmail", e.target.value)}
@@ -131,8 +140,11 @@ export default function GeneralSettingsPage() {
 
         {/* Logo URL */}
         <div>
-          <label className="block text-sm font-medium text-foreground mb-1">Logo URL</label>
+          <label htmlFor="page-f3" className="block text-sm font-medium text-foreground mb-1">
+            Logo URL
+          </label>
           <input
+            id="page-f3"
             type="text"
             value={settings.logoUrl}
             onChange={(e) => set("logoUrl", e.target.value)}
@@ -170,7 +182,12 @@ export default function GeneralSettingsPage() {
           >
             {saving ? (
               <>
-                <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                <svg
+                  aria-hidden="true"
+                  className="h-4 w-4 animate-spin"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
                   <circle
                     className="opacity-25"
                     cx="12"

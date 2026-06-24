@@ -114,7 +114,7 @@ export function SsoSettingsForm({
     setTesting(true);
     setTestResults(null);
     try {
-      const res = await api.post(`/orgs/${orgId}/sso/test`, {});
+      const res = await api.post<{ results: unknown }>(`/orgs/${orgId}/sso/test`, {});
       setTestResults(res.results);
       toast({ message: "Connection test complete", type: "success" });
     } catch (err: any) {
@@ -193,7 +193,10 @@ export function SsoSettingsForm({
               ) : (
                 <X className="h-4 w-4" />
               )}
-              SAML: {testResults.saml.status === "success" ? "Connection successful" : testResults.saml.error}
+              SAML:{" "}
+              {testResults.saml.status === "success"
+                ? "Connection successful"
+                : testResults.saml.error}
             </div>
           )}
           {testResults.oidc && (
@@ -209,7 +212,10 @@ export function SsoSettingsForm({
               ) : (
                 <X className="h-4 w-4" />
               )}
-              OIDC: {testResults.oidc.status === "success" ? "Connection successful" : testResults.oidc.error}
+              OIDC:{" "}
+              {testResults.oidc.status === "success"
+                ? "Connection successful"
+                : testResults.oidc.error}
             </div>
           )}
         </div>
@@ -242,8 +248,11 @@ export function SsoSettingsForm({
         {samlEnabled && (
           <div className="space-y-3 pl-7">
             <div className="space-y-1">
-              <label className="text-xs text-muted-foreground">IdP Entity ID</label>
+              <label htmlFor="SsoSettingsForm-f0" className="text-xs text-muted-foreground">
+                IdP Entity ID
+              </label>
               <input
+                id="SsoSettingsForm-f0"
                 value={samlEntityId}
                 onChange={(e) => setSamlEntityId(e.target.value)}
                 placeholder="https://idp.example.com/metadata"
@@ -252,8 +261,11 @@ export function SsoSettingsForm({
               />
             </div>
             <div className="space-y-1">
-              <label className="text-xs text-muted-foreground">IdP SSO URL</label>
+              <label htmlFor="SsoSettingsForm-f1" className="text-xs text-muted-foreground">
+                IdP SSO URL
+              </label>
               <input
+                id="SsoSettingsForm-f1"
                 value={samlSsoUrl}
                 onChange={(e) => setSamlSsoUrl(e.target.value)}
                 placeholder="https://idp.example.com/sso"
@@ -262,8 +274,11 @@ export function SsoSettingsForm({
               />
             </div>
             <div className="space-y-1">
-              <label className="text-xs text-muted-foreground">IdP Certificate (PEM)</label>
+              <label htmlFor="SsoSettingsForm-f2" className="text-xs text-muted-foreground">
+                IdP Certificate (PEM)
+              </label>
               <textarea
+                id="SsoSettingsForm-f2"
                 value={samlCert}
                 onChange={(e) => setSamlCert(e.target.value)}
                 placeholder="-----BEGIN CERTIFICATE-----&#10;…&#10;-----END CERTIFICATE-----"
@@ -303,8 +318,11 @@ export function SsoSettingsForm({
         {oidcEnabled && (
           <div className="space-y-3 pl-7">
             <div className="space-y-1">
-              <label className="text-xs text-muted-foreground">Issuer URL</label>
+              <label htmlFor="SsoSettingsForm-f3" className="text-xs text-muted-foreground">
+                Issuer URL
+              </label>
               <input
+                id="SsoSettingsForm-f3"
                 value={oidcIssuer}
                 onChange={(e) => setOidcIssuer(e.target.value)}
                 placeholder="https://accounts.example.com"
@@ -313,8 +331,11 @@ export function SsoSettingsForm({
               />
             </div>
             <div className="space-y-1">
-              <label className="text-xs text-muted-foreground">Client ID</label>
+              <label htmlFor="SsoSettingsForm-f4" className="text-xs text-muted-foreground">
+                Client ID
+              </label>
               <input
+                id="SsoSettingsForm-f4"
                 value={oidcClientId}
                 onChange={(e) => setOidcClientId(e.target.value)}
                 disabled={!canEdit}
@@ -322,8 +343,11 @@ export function SsoSettingsForm({
               />
             </div>
             <div className="space-y-1">
-              <label className="text-xs text-muted-foreground">Client Secret</label>
+              <label htmlFor="SsoSettingsForm-f5" className="text-xs text-muted-foreground">
+                Client Secret
+              </label>
               <input
+                id="SsoSettingsForm-f5"
                 type="password"
                 value={oidcClientSecret}
                 onChange={(e) => setOidcClientSecret(e.target.value)}
@@ -333,8 +357,11 @@ export function SsoSettingsForm({
               />
             </div>
             <div className="space-y-1">
-              <label className="text-xs text-muted-foreground">Redirect URIs (one per line)</label>
+              <label htmlFor="SsoSettingsForm-f6" className="text-xs text-muted-foreground">
+                Redirect URIs (one per line)
+              </label>
               <textarea
+                id="SsoSettingsForm-f6"
                 value={oidcRedirectUris}
                 onChange={(e) => setOidcRedirectUris(e.target.value)}
                 placeholder="https://yourapp.com/auth/callback"

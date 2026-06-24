@@ -13,10 +13,9 @@ export function StreakDisplay({ streak }: { streak: StreakData }) {
 
   if (currentStreak === 0) return null;
 
-  const nextMilestone = currentStreak < 7 ? 7 : currentStreak < 30 ? 30 : currentStreak < 100 ? 100 : null;
-  const progressToNext = nextMilestone
-    ? Math.round((currentStreak / nextMilestone) * 100)
-    : 100;
+  const nextMilestone =
+    currentStreak < 7 ? 7 : currentStreak < 30 ? 30 : currentStreak < 100 ? 100 : null;
+  const progressToNext = nextMilestone ? Math.round((currentStreak / nextMilestone) * 100) : 100;
 
   return (
     <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -27,7 +26,10 @@ export function StreakDisplay({ streak }: { streak: StreakData }) {
         <div>
           <p className="text-sm text-muted-foreground">Current streak</p>
           <p className="font-display text-2xl font-bold text-foreground">
-            {currentStreak} <span className="text-sm font-normal text-muted-foreground">day{currentStreak !== 1 ? "s" : ""}</span>
+            {currentStreak}{" "}
+            <span className="text-sm font-normal text-muted-foreground">
+              day{currentStreak !== 1 ? "s" : ""}
+            </span>
           </p>
         </div>
       </div>
@@ -39,12 +41,17 @@ export function StreakDisplay({ streak }: { streak: StreakData }) {
         <div className="min-w-0 flex-1">
           <p className="text-sm text-muted-foreground">Longest streak</p>
           <p className="font-display text-2xl font-bold text-foreground">
-            {longestStreak} <span className="text-sm font-normal text-muted-foreground">day{longestStreak !== 1 ? "s" : ""}</span>
+            {longestStreak}{" "}
+            <span className="text-sm font-normal text-muted-foreground">
+              day{longestStreak !== 1 ? "s" : ""}
+            </span>
           </p>
           {nextMilestone && (
             <div className="mt-2">
               <div className="flex items-center justify-between text-xs text-muted-foreground">
-                <span>{currentStreak}/{nextMilestone} to next milestone</span>
+                <span>
+                  {currentStreak}/{nextMilestone} to next milestone
+                </span>
                 <span>{progressToNext}%</span>
               </div>
               <div className="mt-1 h-1.5 rounded-full bg-muted">

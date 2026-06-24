@@ -46,7 +46,6 @@ let LdaptsClient: any = null;
 
 try {
   // Dynamic require so the module still loads when ldapts is absent
-  // biome-ignore lint/style/noRequireImports: dynamic require so the module still loads when ldapts is absent
   LdaptsClient = require("ldapts").Client;
 } catch {
   logger.warn(

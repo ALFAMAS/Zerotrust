@@ -3,12 +3,12 @@ import { z } from "zod";
 import { getLogger } from "../../logger";
 import { authMiddleware } from "../../middleware/auth";
 import {
-  search,
-  smartSearch,
-  indexDocument,
   deleteDocument,
-  searchProvider,
+  indexDocument,
   type SearchableType,
+  search,
+  searchProvider,
+  smartSearch,
 } from "../../services/search.service";
 import type { HonoEnv } from "../../shared/types";
 

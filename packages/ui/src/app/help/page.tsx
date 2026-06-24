@@ -54,6 +54,7 @@ export default function HelpPage() {
         {!query && (
           <div className="mb-8 flex flex-wrap justify-center gap-2">
             <button
+              type="button"
               onClick={() => setActiveCategory(null)}
               className={`rounded-full px-3 py-1.5 text-sm transition-colors ${
                 activeCategory === null
@@ -65,6 +66,7 @@ export default function HelpPage() {
             </button>
             {CATEGORIES.map((cat) => (
               <button
+                type="button"
                 key={cat}
                 onClick={() => setActiveCategory(cat === activeCategory ? null : cat)}
                 className={`rounded-full px-3 py-1.5 text-sm transition-colors ${
@@ -83,6 +85,7 @@ export default function HelpPage() {
           <div className="py-16 text-center">
             <p className="text-sm text-muted-foreground">No results for &ldquo;{query}&rdquo;.</p>
             <button
+              type="button"
               onClick={() => {
                 setQuery("");
                 setActiveCategory(null);
@@ -102,6 +105,7 @@ export default function HelpPage() {
                   className="overflow-hidden rounded-xl border border-border bg-card"
                 >
                   <button
+                    type="button"
                     onClick={() => setOpenId(isOpen ? null : item.id)}
                     className="flex w-full items-center justify-between gap-4 px-6 py-4 text-left transition-colors hover:bg-accent/50"
                   >

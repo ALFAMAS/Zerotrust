@@ -32,7 +32,7 @@ export default function AdminJITPage() {
   const [acting, setActing] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
 
-  const toastTimer = useRef<ReturnType<typeof setTimeout>>();
+  const toastTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const showToast = useCallback((msg: string) => {
     setToast(msg);
@@ -126,6 +126,7 @@ export default function AdminJITPage() {
                       </div>
                       <div className="flex shrink-0 gap-2">
                         <button
+                          type="button"
                           onClick={() => act(r.id, "approve")}
                           disabled={acting === r.id}
                           className="flex items-center gap-1.5 rounded-lg bg-green-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-green-500 disabled:opacity-50"
@@ -138,6 +139,7 @@ export default function AdminJITPage() {
                           Approve
                         </button>
                         <button
+                          type="button"
                           onClick={() => act(r.id, "deny")}
                           disabled={acting === r.id}
                           className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:border-red-700 hover:text-red-400 disabled:opacity-50"

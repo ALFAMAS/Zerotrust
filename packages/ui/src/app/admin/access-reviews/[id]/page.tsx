@@ -45,7 +45,7 @@ export default function AccessReviewDetailPage() {
   const [busy, setBusy] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
 
-  const toastTimer = useRef<ReturnType<typeof setTimeout>>();
+  const toastTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const showToast = useCallback((msg: string) => {
     setToast(msg);
@@ -53,6 +53,7 @@ export default function AccessReviewDetailPage() {
     toastTimer.current = setTimeout(() => setToast(null), 3000);
   }, []);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: data loader intentionally runs on mount / when the route key changes; it closes over stable state setters
   const load = useCallback(async () => {
     setLoading(true);
     try {
@@ -129,6 +130,7 @@ export default function AccessReviewDetailPage() {
       <div className="flex items-start justify-between gap-4">
         <div>
           <button
+            type="button"
             onClick={() => router.back()}
             className="text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
@@ -148,6 +150,7 @@ export default function AccessReviewDetailPage() {
         </div>
         {isOpen && (
           <button
+            type="button"
             onClick={complete}
             disabled={busy === "complete" || pending > 0}
             title={pending > 0 ? `${pending} item(s) still pending` : "Mark review complete"}
@@ -234,6 +237,7 @@ export default function AccessReviewDetailPage() {
                     {isOpen ? (
                       <div className="flex items-center justify-end gap-1.5">
                         <button
+                          type="button"
                           onClick={() => decide(item, "approved")}
                           disabled={busy === item.id}
                           className="rounded px-2 py-1 text-xs text-green-400 hover:bg-green-900/30 disabled:opacity-40 transition-colors"
@@ -241,6 +245,7 @@ export default function AccessReviewDetailPage() {
                           Approve
                         </button>
                         <button
+                          type="button"
                           onClick={() => decide(item, "flagged")}
                           disabled={busy === item.id}
                           className="rounded px-2 py-1 text-xs text-orange-400 hover:bg-orange-900/30 disabled:opacity-40 transition-colors"
@@ -248,6 +253,7 @@ export default function AccessReviewDetailPage() {
                           Flag
                         </button>
                         <button
+                          type="button"
                           onClick={() => decide(item, "revoked")}
                           disabled={busy === item.id}
                           className="rounded px-2 py-1 text-xs text-red-400 hover:bg-red-900/30 disabled:opacity-40 transition-colors"

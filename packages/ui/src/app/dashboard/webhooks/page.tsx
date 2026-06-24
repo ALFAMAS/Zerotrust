@@ -127,6 +127,7 @@ export default function WebhooksPage() {
           </p>
         </div>
         <button
+          type="button"
           onClick={() => setCreateOpen(true)}
           className="shrink-0 px-4 py-2 bg-primary hover:bg-primary/90 text-foreground text-sm font-medium rounded-lg transition-colors"
         >
@@ -171,24 +172,28 @@ export default function WebhooksPage() {
               </div>
               <div className="flex items-center gap-2 shrink-0">
                 <button
+                  type="button"
                   onClick={() => pingEndpoint(ep.id)}
                   className="px-3 py-1.5 bg-muted hover:bg-accent text-foreground/80 text-xs rounded-lg transition-colors"
                 >
                   Test
                 </button>
                 <button
+                  type="button"
                   onClick={() => openDeliveries(ep.id)}
                   className="px-3 py-1.5 bg-muted hover:bg-accent text-foreground/80 text-xs rounded-lg transition-colors"
                 >
                   Deliveries
                 </button>
                 <button
+                  type="button"
                   onClick={() => toggleActive(ep)}
                   className="px-3 py-1.5 bg-muted hover:bg-accent text-foreground/80 text-xs rounded-lg transition-colors"
                 >
                   {ep.active ? "Disable" : "Enable"}
                 </button>
                 <button
+                  type="button"
                   onClick={() => deleteEndpoint(ep.id)}
                   className="px-3 py-1.5 bg-red-900/50 hover:bg-red-900 text-red-300 text-xs rounded-lg transition-colors"
                 >
@@ -204,8 +209,11 @@ export default function WebhooksPage() {
         <Modal title="Add webhook endpoint" onClose={() => setCreateOpen(false)}>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm text-foreground/80 mb-1.5">Endpoint URL</label>
+              <label htmlFor="page-f0" className="block text-sm text-foreground/80 mb-1.5">
+                Endpoint URL
+              </label>
               <input
+                id="page-f0"
                 value={form.url}
                 onChange={(e) => setForm({ ...form, url: e.target.value })}
                 placeholder="https://example.com/webhooks/zeroauth"
@@ -213,8 +221,11 @@ export default function WebhooksPage() {
               />
             </div>
             <div>
-              <label className="block text-sm text-foreground/80 mb-1.5">Signing secret</label>
+              <label htmlFor="page-f1" className="block text-sm text-foreground/80 mb-1.5">
+                Signing secret
+              </label>
               <input
+                id="page-f1"
                 value={form.secret}
                 onChange={(e) => setForm({ ...form, secret: e.target.value })}
                 placeholder="whsec_…"
@@ -225,7 +236,7 @@ export default function WebhooksPage() {
               </p>
             </div>
             <div>
-              <label className="block text-sm text-foreground/80 mb-1.5">Events</label>
+              <span className="block text-sm text-foreground/80 mb-1.5">Events</span>
               <div className="grid grid-cols-2 gap-2">
                 {EVENT_OPTIONS.map((ev) => (
                   <label key={ev} className="flex items-center gap-2 text-xs text-foreground/80">
@@ -242,6 +253,7 @@ export default function WebhooksPage() {
             </div>
             {error && <p className="text-sm text-red-400">{error}</p>}
             <button
+              type="button"
               onClick={createEndpoint}
               disabled={!form.url || !form.secret || form.events.length === 0}
               className="w-full py-2 bg-primary hover:bg-primary/90 disabled:opacity-50 text-foreground text-sm font-medium rounded-lg transition-colors"

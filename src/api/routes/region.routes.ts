@@ -2,14 +2,14 @@ import { Hono } from "hono";
 import { z } from "zod";
 import { authMiddleware } from "../../middleware/auth";
 import {
-  resolveOrgByDomain,
   getOrgBranding,
-  setOrgCustomDomain,
-  setOrgBranding,
-  setOrgStorageRegion,
   regionForCountry,
   regionHealth,
+  resolveOrgByDomain,
   type StorageRegion,
+  setOrgBranding,
+  setOrgCustomDomain,
+  setOrgStorageRegion,
 } from "../../services/region.service";
 import type { HonoEnv } from "../../shared/types";
 
@@ -68,7 +68,10 @@ router.get("/orgs/:orgId/branding", async (c) => {
 
 const brandingSchema = z.object({
   appName: z.string().max(100).optional(),
-  brandColor: z.string().regex(/^#[0-9a-fA-F]{6}$/).optional(),
+  brandColor: z
+    .string()
+    .regex(/^#[0-9a-fA-F]{6}$/)
+    .optional(),
   logoUrl: z.string().url().optional(),
   faviconUrl: z.string().url().optional(),
   hidePoweredBy: z.boolean().optional(),

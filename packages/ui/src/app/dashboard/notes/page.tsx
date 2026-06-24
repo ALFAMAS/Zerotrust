@@ -1,10 +1,10 @@
 "use client";
 
-import { FileText, Plus, Search, Archive, Clock } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { Clock, FileText, Plus, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { api } from "@/lib/api";
+import { useCallback, useEffect, useState } from "react";
 import { SkeletonCard } from "@/components/Skeleton";
+import { api } from "@/lib/api";
 
 interface Note {
   id: string;
@@ -40,9 +40,7 @@ export default function NotesPage() {
     if (!orgId) return;
     setLoading(true);
     try {
-      const data = await api.get<{ notes: Note[] }>(
-        `/collab/notes?orgId=${orgId}`,
-      );
+      const data = await api.get<{ notes: Note[] }>(`/collab/notes?orgId=${orgId}`);
       setNotes(data.notes || []);
     } catch {
       setNotes([]);
@@ -73,7 +71,7 @@ export default function NotesPage() {
     ? notes.filter(
         (n) =>
           n.title.toLowerCase().includes(search.toLowerCase()) ||
-          n.content.toLowerCase().includes(search.toLowerCase()),
+          n.content.toLowerCase().includes(search.toLowerCase())
       )
     : notes;
 
@@ -96,11 +94,10 @@ export default function NotesPage() {
           <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
             Shared Notes
           </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Collaborative notes for your team
-          </p>
+          <p className="mt-1 text-sm text-muted-foreground">Collaborative notes for your team</p>
         </div>
         <button
+          type="button"
           onClick={createNote}
           className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
         >
@@ -141,6 +138,7 @@ export default function NotesPage() {
         <div className="space-y-3">
           {filteredNotes.map((note) => (
             <button
+              type="button"
               key={note.id}
               onClick={() => router.push(`/dashboard/notes/${note.id}`)}
               className="w-full rounded-xl border border-border bg-card p-5 text-left transition-colors hover:border-primary/50"
@@ -160,9 +158,7 @@ export default function NotesPage() {
                 </div>
               </div>
               {note.creatorName && (
-                <div className="mt-2 text-[11px] text-muted-foreground">
-                  by {note.creatorName}
-                </div>
+                <div className="mt-2 text-[11px] text-muted-foreground">by {note.creatorName}</div>
               )}
             </button>
           ))}

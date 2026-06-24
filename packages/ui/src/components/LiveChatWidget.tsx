@@ -64,7 +64,11 @@ function ThirdPartyChatWidget() {
         s.async = true;
         s.src = `https://widget.intercom.io/widget/${chatId}`;
         s.onload = () => {
-          try { w.Intercom?.("boot", w.intercomSettings); } catch { /* ignore */ }
+          try {
+            w.Intercom?.("boot", w.intercomSettings);
+          } catch {
+            /* ignore */
+          }
         };
         document.head.appendChild(s);
       } else if (chatProvider === "tawk") {
@@ -86,7 +90,9 @@ function ThirdPartyChatWidget() {
     }
 
     getIdentity().then(inject);
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   return null;
@@ -101,6 +107,7 @@ function NativeChatWidget() {
   const [ticketId, setTicketId] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: data loader intentionally runs on mount / when the route key changes; it closes over stable state setters
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -123,7 +130,10 @@ function NativeChatWidget() {
         setTicketId(res.ticket.id);
         setMessages((prev) => [
           ...prev,
-          { role: "system", text: "Thanks for reaching out! A support agent will respond shortly. Your ticket has been created." },
+          {
+            role: "system",
+            text: "Thanks for reaching out! A support agent will respond shortly. Your ticket has been created.",
+          },
         ]);
       } else {
         // Add message to existing ticket
@@ -147,6 +157,7 @@ function NativeChatWidget() {
     <>
       {/* Chat toggle button */}
       <button
+        type="button"
         onClick={() => setOpen(!open)}
         className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform hover:scale-105"
         aria-label="Open support chat"

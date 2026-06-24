@@ -186,6 +186,7 @@ function BillingContent() {
             <div className="flex items-center gap-2">
               {sub.cancelAtPeriodEnd ? (
                 <button
+                  type="button"
                   onClick={handleReactivate}
                   className="px-4 py-2 bg-green-700 hover:bg-green-600 text-foreground text-sm rounded-lg transition-colors"
                 >
@@ -193,6 +194,7 @@ function BillingContent() {
                 </button>
               ) : (
                 <button
+                  type="button"
                   onClick={() => setCancelOpen(true)}
                   className="px-4 py-2 bg-muted hover:bg-accent text-foreground/80 text-sm rounded-lg transition-colors"
                 >
@@ -200,6 +202,7 @@ function BillingContent() {
                 </button>
               )}
               <button
+                type="button"
                 onClick={handlePortal}
                 disabled={portalLoading}
                 className="px-4 py-2 bg-secondary hover:bg-secondary/80 disabled:opacity-50 text-foreground text-sm rounded-lg transition-colors"
@@ -246,6 +249,7 @@ function BillingContent() {
             </div>
             <div className="flex gap-2">
               <button
+                type="button"
                 onClick={() => handleCancel("pause")}
                 disabled={cancelBusy}
                 className="flex-1 py-2 bg-primary hover:bg-primary/90 disabled:opacity-50 text-foreground text-sm font-medium rounded-lg transition-colors"
@@ -253,6 +257,7 @@ function BillingContent() {
                 Pause instead
               </button>
               <button
+                type="button"
                 onClick={() => handleCancel("cancel")}
                 disabled={cancelBusy || !cancelReason}
                 className="flex-1 py-2 bg-red-900/60 hover:bg-red-900 disabled:opacity-50 text-red-200 text-sm font-medium rounded-lg transition-colors"
@@ -294,6 +299,7 @@ function BillingContent() {
               </ul>
               {isCurrent ? (
                 <button
+                  type="button"
                   disabled
                   className="py-2 rounded-lg text-sm font-medium bg-secondary text-muted-foreground cursor-default"
                 >
@@ -308,6 +314,7 @@ function BillingContent() {
                 </a>
               ) : plan.priceId ? (
                 <button
+                  type="button"
                   onClick={() => handleCheckout(plan.priceId!)}
                   disabled={checkoutLoading === plan.priceId}
                   className={`py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 ${
@@ -320,6 +327,7 @@ function BillingContent() {
                 </button>
               ) : (
                 <button
+                  type="button"
                   disabled
                   className="py-2 rounded-lg text-sm font-medium bg-secondary text-muted-foreground cursor-default"
                 >
