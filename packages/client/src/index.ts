@@ -569,4 +569,195 @@ export class zerotrustClient {
   getHealthz(): Promise<{ status?: "ok"; redis?: string; elasticsearch?: string }> {
     return this.request("GET", `/healthz`);
   }
+
+  /**
+   * List organizations the current user belongs to
+   *
+   * @route GET /orgs
+   */
+  getOrgs(): Promise<unknown> {
+    return this.request("GET", `/orgs`);
+  }
+
+  /**
+   * Create an organization (creator becomes owner)
+   *
+   * @route POST /orgs
+   */
+  postOrgs(body: { name: string; slug?: string }): Promise<unknown> {
+    return this.request("POST", `/orgs`, { body });
+  }
+
+  /**
+   * Get an organization
+   *
+   * @route GET /orgs/{orgId}
+   * @param orgId path parameter
+   */
+  getOrgsByOrgId(orgId: string): Promise<unknown> {
+    return this.request("GET", `/orgs/${encodeURIComponent(orgId)}`);
+  }
+
+  /**
+   * Update organization settings
+   *
+   * @route PUT /orgs/{orgId}
+   * @param orgId path parameter
+   */
+  putOrgsByOrgId(orgId: string, body: { name?: string; slug?: string; logoUrl?: string; billingEmail?: string }): Promise<unknown> {
+    return this.request("PUT", `/orgs/${encodeURIComponent(orgId)}`, { body });
+  }
+
+  /**
+   * Delete an organization
+   *
+   * @route DELETE /orgs/{orgId}
+   * @param orgId path parameter
+   */
+  deleteOrgsByOrgId(orgId: string): Promise<unknown> {
+    return this.request("DELETE", `/orgs/${encodeURIComponent(orgId)}`);
+  }
+
+  /**
+   * List organization members
+   *
+   * @route GET /orgs/{orgId}/members
+   * @param orgId path parameter
+   */
+  getOrgsByOrgIdMembers(orgId: string): Promise<unknown> {
+    return this.request("GET", `/orgs/${encodeURIComponent(orgId)}/members`);
+  }
+
+  /**
+   * Remove a member (cannot remove the last owner)
+   *
+   * @route DELETE /orgs/{orgId}/members/{userId}
+   * @param orgId path parameter
+   * @param userId path parameter
+   */
+  deleteOrgsByOrgIdMembersByUserId(orgId: string, userId: string): Promise<unknown> {
+    return this.request("DELETE", `/orgs/${encodeURIComponent(orgId)}/members/${encodeURIComponent(userId)}`);
+  }
+
+  /**
+   * Transfer organization ownership
+   *
+   * @route POST /orgs/{orgId}/transfer
+   * @param orgId path parameter
+   */
+  postOrgsByOrgIdTransfer(orgId: string, body: { newOwnerId: string }): Promise<unknown> {
+    return this.request("POST", `/orgs/${encodeURIComponent(orgId)}/transfer`, { body });
+  }
+
+  /**
+   * List pending invites
+   *
+   * @route GET /orgs/{orgId}/invites
+   * @param orgId path parameter
+   */
+  getOrgsByOrgIdInvites(orgId: string): Promise<unknown> {
+    return this.request("GET", `/orgs/${encodeURIComponent(orgId)}/invites`);
+  }
+
+  /**
+   * Invite a user by email
+   *
+   * @route POST /orgs/{orgId}/invites
+   * @param orgId path parameter
+   */
+  postOrgsByOrgIdInvites(orgId: string, body: { email: string; role?: string }): Promise<unknown> {
+    return this.request("POST", `/orgs/${encodeURIComponent(orgId)}/invites`, { body });
+  }
+
+  /**
+   * Revoke a pending invite
+   *
+   * @route DELETE /orgs/{orgId}/invites/{inviteId}
+   * @param orgId path parameter
+   * @param inviteId path parameter
+   */
+  deleteOrgsByOrgIdInvitesByInviteId(orgId: string, inviteId: string): Promise<unknown> {
+    return this.request("DELETE", `/orgs/${encodeURIComponent(orgId)}/invites/${encodeURIComponent(inviteId)}`);
+  }
+
+  /**
+   * Get per-org SSO configuration
+   *
+   * @route GET /orgs/{orgId}/sso
+   * @param orgId path parameter
+   */
+  getOrgsByOrgIdSso(orgId: string): Promise<unknown> {
+    return this.request("GET", `/orgs/${encodeURIComponent(orgId)}/sso`);
+  }
+
+  /**
+   * Update per-org SSO configuration
+   *
+   * @route PUT /orgs/{orgId}/sso
+   * @param orgId path parameter
+   */
+  putOrgsByOrgIdSso(orgId: string, body: Record<string, unknown>): Promise<unknown> {
+    return this.request("PUT", `/orgs/${encodeURIComponent(orgId)}/sso`, { body });
+  }
+
+  /**
+   * Validate the org SSO configuration
+   *
+   * @route POST /orgs/{orgId}/sso/test
+   * @param orgId path parameter
+   */
+  postOrgsByOrgIdSsoTest(orgId: string): Promise<unknown> {
+    return this.request("POST", `/orgs/${encodeURIComponent(orgId)}/sso/test`);
+  }
+
+  /**
+   * Get the org security policy (session/device/geo limits)
+   *
+   * @route GET /orgs/{orgId}/security/policy
+   * @param orgId path parameter
+   */
+  getOrgsByOrgIdSecurityPolicy(orgId: string): Promise<unknown> {
+    return this.request("GET", `/orgs/${encodeURIComponent(orgId)}/security/policy`);
+  }
+
+  /**
+   * Update the org security policy
+   *
+   * @route PUT /orgs/{orgId}/security/policy
+   * @param orgId path parameter
+   */
+  putOrgsByOrgIdSecurityPolicy(orgId: string, body: Record<string, unknown>): Promise<unknown> {
+    return this.request("PUT", `/orgs/${encodeURIComponent(orgId)}/security/policy`, { body });
+  }
+
+  /**
+   * List SCIM provisioning tokens
+   *
+   * @route GET /orgs/{orgId}/scim/tokens
+   * @param orgId path parameter
+   */
+  getOrgsByOrgIdScimTokens(orgId: string): Promise<unknown> {
+    return this.request("GET", `/orgs/${encodeURIComponent(orgId)}/scim/tokens`);
+  }
+
+  /**
+   * Create a SCIM provisioning token (shown once)
+   *
+   * @route POST /orgs/{orgId}/scim/tokens
+   * @param orgId path parameter
+   */
+  postOrgsByOrgIdScimTokens(orgId: string, body?: { name?: string }): Promise<unknown> {
+    return this.request("POST", `/orgs/${encodeURIComponent(orgId)}/scim/tokens`, { body });
+  }
+
+  /**
+   * Rotate a SCIM provisioning token
+   *
+   * @route POST /orgs/{orgId}/scim/tokens/{tokenId}/rotate
+   * @param orgId path parameter
+   * @param tokenId path parameter
+   */
+  postOrgsByOrgIdScimTokensByTokenIdRotate(orgId: string, tokenId: string): Promise<unknown> {
+    return this.request("POST", `/orgs/${encodeURIComponent(orgId)}/scim/tokens/${encodeURIComponent(tokenId)}/rotate`);
+  }
 }

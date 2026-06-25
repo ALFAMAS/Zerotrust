@@ -51,8 +51,8 @@ lines.push(`**${opCount} operations** across ${tags.length} groups.`);
 lines.push("");
 lines.push(
   "> **Coverage note:** this lists the operations currently described in " +
-    "`openapi.json` (the auth/admin/MFA/sessions/OAuth core). Several mounted " +
-    "route modules — billing, orgs, wallet, search, collaboration, compliance, " +
+    "`openapi.json` (auth/admin/MFA/sessions/OAuth + organizations). Several " +
+    "mounted route modules — billing, wallet, search, collaboration, compliance, " +
     "etc. — are not yet in the spec; see the [README API overview](../README.md#api-overview) " +
     "and `src/api/server.ts` for the full mounted surface. Expanding `openapi.json` " +
     "to the whole API (so the SDK + this reference cover it) is tracked as an " +
