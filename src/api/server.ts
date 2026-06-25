@@ -12,7 +12,7 @@ import { initSentry } from "../instrument";
 import jitRoutes from "../jit/routes";
 import ldapRoutes from "../ldap/routes";
 import { getLogger } from "../logger";
-import { metricsMiddleware, metricsRoute } from "../metrics";
+import { metricsAuthMiddleware, metricsMiddleware, metricsRoute } from "../metrics";
 import { API_VERSIONS, apiVersioning, CURRENT_API_VERSION } from "../middleware/apiVersioning";
 import { authMiddleware, requireAdmin } from "../middleware/auth";
 import { corsOptionsFromEnv } from "../middleware/cors";
@@ -109,8 +109,9 @@ export async function createServer() {
   // Public registry of supported API versions and their lifecycle status
   app.get("/api/versions", (c) => c.json({ current: CURRENT_API_VERSION, versions: API_VERSIONS }));
 
-  // Prometheus scrape endpoint. Keep this public for scraper compatibility; restrict at ingress if needed.
-  app.get("/metrics", metricsRoute);
+  // Prometheus scrape endpoint. Open by default for scraper compatibility;
+  // set METRICS_AUTH_TOKEN to require `Authorization: Bearer <token>`.
+  app.get("/metrics", metricsAuthMiddleware(), metricsRoute);
 
   // Error-spike + latency alerting (Slack / Teams / PagerDuty)
   app.use("*", alertingMiddleware());
