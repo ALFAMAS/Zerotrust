@@ -1,8 +1,18 @@
 "use client";
 
 import { AlertTriangle, ShieldCheck } from "lucide-react";
-import { useEffect, useState } from "react";
-import Badge from "@/components/Badge";
+import { useCallback, useEffect, useState } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { api } from "@/lib/api";
 
 interface Session {
@@ -45,26 +55,26 @@ export default function SessionsPage() {
   const [tab, setTab] = useState<TabFilter>("all");
   const [toast, setToast] = useState<string | null>(null);
 
-  function showToast(msg: string) {
+  const showToast = useCallback((msg: string) => {
     setToast(msg);
     setTimeout(() => setToast(null), 3000);
-  }
+  }, []);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = await api.get<Session[] | { sessions: Session[] }>("/admin/sessions");
+      setSessions(Array.isArray(data) ? data : (data.sessions ?? []));
+    } catch {
+      showToast("Failed to load sessions");
+    } finally {
+      setLoading(false);
+    }
+  }, [showToast]);
 
   useEffect(() => {
-    async function load() {
-      setLoading(true);
-      try {
-        const data = await api.get<Session[] | { sessions: Session[] }>("/admin/sessions");
-        setSessions(Array.isArray(data) ? data : (data.sessions ?? []));
-      } catch {
-        showToast("Failed to load sessions");
-      } finally {
-        setLoading(false);
-      }
-    }
-    load();
-    // biome-ignore lint/correctness/useExhaustiveDependencies: loads once on mount; closes over stable state setters
-  }, [showToast]);
+    void load();
+  }, [load]);
 
   async function handleRevoke(session: Session) {
     try {
@@ -115,7 +125,7 @@ export default function SessionsPage() {
   return (
     <div className="space-y-6">
       {toast && (
-        <div className="fixed top-4 right-4 z-50 rounded-lg bg-primary px-4 py-3 text-sm text-foreground shadow-lg">
+        <div className="fixed top-4 right-4 z-50 rounded-lg bg-primary px-4 py-3 text-sm text-primary-foreground shadow-lg">
           {toast}
         </div>
       )}
@@ -146,137 +156,135 @@ export default function SessionsPage() {
         ))}
       </div>
 
-      {/* Table */}
-      <div className="rounded-xl bg-card border border-border overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border bg-card/80">
-                <th className="px-5 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  User
-                </th>
-                <th className="px-5 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  Device
-                </th>
-                <th className="px-5 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  Location
-                </th>
-                <th className="px-5 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  Created
-                </th>
-                <th className="px-5 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  Last Active
-                </th>
-                <th className="px-5 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  Expires
-                </th>
-                <th className="px-5 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-5 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {loading && (
-                <tr>
-                  <td colSpan={8} className="px-5 py-8 text-center text-muted-foreground">
-                    Loading…
-                  </td>
-                </tr>
-              )}
-              {!loading && filtered.length === 0 && (
-                <tr>
-                  <td colSpan={8} className="px-5 py-8 text-center text-muted-foreground">
-                    No sessions found.
-                  </td>
-                </tr>
-              )}
-              {!loading &&
-                filtered.map((s) => {
-                  const fp = s.deviceFingerprint;
-                  const active = isActiveSession(s);
-                  const label = statusLabel(s);
-                  const anomalies = anomalyCount(s.anomalyFlags);
-                  const deviceLabel =
-                    fp?.browser || fp?.os
-                      ? `${fp?.browser || "Unknown"} on ${fp?.os || "Unknown OS"}`
-                      : s.userAgent || "Unknown device";
-                  return (
-                    <tr key={s.id} className="hover:bg-accent/50 transition-colors align-top">
-                      <td className="px-5 py-4 text-foreground">
-                        <div className="font-medium">
-                          {s.userEmail ?? `User ${s.userId ?? "unknown"}`}
-                        </div>
-                        {s.userDisplayName && (
-                          <div className="text-xs text-muted-foreground">{s.userDisplayName}</div>
-                        )}
-                      </td>
-                      <td
-                        className="px-5 py-4 text-muted-foreground"
-                        title={s.userAgent ?? undefined}
-                      >
-                        <div className="flex items-center gap-1.5 text-foreground">
-                          {deviceLabel}
-                          {fp?.isTrusted && (
-                            <span title="Trusted device">
-                              <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />
-                            </span>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">
+            {tab === "all"
+              ? "All sessions"
+              : tab === "active"
+                ? "Active sessions"
+                : "Inactive sessions"}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>User</TableHead>
+                  <TableHead>Device</TableHead>
+                  <TableHead>Location</TableHead>
+                  <TableHead>Created</TableHead>
+                  <TableHead>Last Active</TableHead>
+                  <TableHead>Expires</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {loading && (
+                  <TableRow>
+                    <TableCell colSpan={8} className="py-8 text-center text-muted-foreground">
+                      Loading…
+                    </TableCell>
+                  </TableRow>
+                )}
+                {!loading && filtered.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={8} className="py-8 text-center text-muted-foreground">
+                      No sessions found.
+                    </TableCell>
+                  </TableRow>
+                )}
+                {!loading &&
+                  filtered.map((s) => {
+                    const fp = s.deviceFingerprint;
+                    const active = isActiveSession(s);
+                    const label = statusLabel(s);
+                    const anomalies = anomalyCount(s.anomalyFlags);
+                    const deviceLabel =
+                      fp?.browser || fp?.os
+                        ? `${fp?.browser || "Unknown"} on ${fp?.os || "Unknown OS"}`
+                        : s.userAgent || "Unknown device";
+                    const badgeVariant =
+                      label === "revoked" ? "destructive" : active ? "success" : "secondary";
+                    return (
+                      <TableRow key={s.id} className="align-top">
+                        <TableCell className="text-foreground">
+                          <div className="font-medium">
+                            {s.userEmail ?? `User ${s.userId ?? "unknown"}`}
+                          </div>
+                          {s.userDisplayName && (
+                            <div className="text-xs text-muted-foreground">{s.userDisplayName}</div>
                           )}
-                        </div>
-                        {fp?.platform && <div className="text-xs">{fp.platform}</div>}
-                      </td>
-                      <td className="px-5 py-4 text-muted-foreground">
-                        <div className="font-mono text-xs">{s.ipAddress ?? "—"}</div>
-                        {s.country && <div className="text-xs">{s.country}</div>}
-                      </td>
-                      <td className="px-5 py-4 text-muted-foreground text-xs">
-                        {fmt(s.createdAt)}
-                      </td>
-                      <td className="px-5 py-4 text-muted-foreground text-xs">
-                        {fmt(s.lastActivityAt)}
-                      </td>
-                      <td className="px-5 py-4 text-muted-foreground text-xs">
-                        {fmt(s.expiresAt)}
-                      </td>
-                      <td className="px-5 py-4">
-                        <div className="flex flex-col items-start gap-1">
-                          <Badge status={active ? "active" : "expired"} label={label} />
-                          {label === "revoked" && s.revokedReason && (
-                            <span className="text-[10px] text-muted-foreground">
-                              {s.revokedReason}
-                            </span>
-                          )}
-                          {anomalies > 0 && (
-                            <span
-                              className="inline-flex items-center gap-1 text-[10px] font-medium text-orange-400"
-                              title="Anomaly flags raised for this session"
+                        </TableCell>
+                        <TableCell
+                          className="text-muted-foreground"
+                          title={s.userAgent ?? undefined}
+                        >
+                          <div className="flex items-center gap-1.5 text-foreground">
+                            {deviceLabel}
+                            {fp?.isTrusted && (
+                              <span title="Trusted device">
+                                <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
+                              </span>
+                            )}
+                          </div>
+                          {fp?.platform && <div className="text-xs">{fp.platform}</div>}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          <div className="font-mono text-xs">{s.ipAddress ?? "—"}</div>
+                          {s.country && <div className="text-xs">{s.country}</div>}
+                        </TableCell>
+                        <TableCell className="text-xs text-muted-foreground">
+                          {fmt(s.createdAt)}
+                        </TableCell>
+                        <TableCell className="text-xs text-muted-foreground">
+                          {fmt(s.lastActivityAt)}
+                        </TableCell>
+                        <TableCell className="text-xs text-muted-foreground">
+                          {fmt(s.expiresAt)}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex flex-col items-start gap-1">
+                            <Badge variant={badgeVariant}>{label}</Badge>
+                            {label === "revoked" && s.revokedReason && (
+                              <span className="text-[10px] text-muted-foreground">
+                                {s.revokedReason}
+                              </span>
+                            )}
+                            {anomalies > 0 && (
+                              <span
+                                className="inline-flex items-center gap-1 text-[10px] font-medium text-amber-500"
+                                title="Anomaly flags raised for this session"
+                              >
+                                <AlertTriangle className="h-3 w-3" />
+                                {anomalies} {anomalies === 1 ? "anomaly" : "anomalies"}
+                              </span>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {active && (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleRevoke(s)}
+                              className="text-destructive hover:text-destructive"
                             >
-                              <AlertTriangle className="h-3 w-3" />
-                              {anomalies} {anomalies === 1 ? "anomaly" : "anomalies"}
-                            </span>
+                              Revoke
+                            </Button>
                           )}
-                        </div>
-                      </td>
-                      <td className="px-5 py-4 text-right">
-                        {active && (
-                          <button
-                            type="button"
-                            onClick={() => handleRevoke(s)}
-                            className="rounded px-2 py-1 text-xs text-red-400 hover:bg-red-900/30 transition-colors"
-                          >
-                            Revoke
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
-            </tbody>
-          </table>
-        </div>
-      </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
