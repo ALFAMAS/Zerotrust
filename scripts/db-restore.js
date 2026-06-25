@@ -46,7 +46,10 @@ function run(cmd, cmdArgs) {
   return new Promise((resolve, reject) => {
     const child = spawn(cmd, cmdArgs, {
       stdio: ["ignore", "inherit", "inherit"],
-      shell: process.platform === "win32",
+      // SECURITY (CWE-78): never use shell:true — args are passed as a literal
+      // argv array so shell metacharacters in DATABASE_URL or file paths cannot
+      // be interpreted. pg_dump / pg_restore resolve on PATH without a shell.
+      shell: false,
     });
     child.on("error", reject);
     child.on("close", (code) => (code === 0 ? resolve() : reject(new Error(`${cmd} exited ${code}`))));
@@ -70,6 +73,14 @@ function encryptionKey() {
   }
   const base64 = Buffer.from(raw, "base64");
   if (base64.length === 32 && base64.toString("base64") === raw) return base64;
+  // SECURITY (CWE-327): static-salt scrypt is a legacy fallback. Prefer
+  // BACKUP_ENCRYPTION_KEY_HEX (32 raw bytes as hex) — a static salt means the
+  // same passphrase always derives the same key. This path is kept for
+  // backwards compatibility with existing encrypted backups only.
+  console.warn(
+    "⚠ DEPRECATED: BACKUP_ENCRYPTION_KEY with a non-base64 value uses a static salt (CWE-327). " +
+      "Set BACKUP_ENCRYPTION_KEY_HEX to a 32-byte hex string instead."
+  );
   return scryptSync(raw, "zerotrust-db-backup", 32);
 }
 

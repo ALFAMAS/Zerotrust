@@ -2,9 +2,15 @@ import crypto from "node:crypto";
 import { eq } from "drizzle-orm";
 import type { Context } from "hono";
 import { Hono } from "hono";
+import { nanoid } from "nanoid";
 import { getConfig } from "../../config";
 import { getDb } from "../../db";
-import { refreshTokensTable, sessionsTable, usersTable } from "../../db/schema";
+import {
+  oauthExchangeCodesTable,
+  refreshTokensTable,
+  sessionsTable,
+  usersTable,
+} from "../../db/schema";
 import { getLogger } from "../../logger";
 import { rateLimit } from "../../middleware/rateLimiting";
 import { getSettings } from "../../models/settings.model";
@@ -78,6 +84,7 @@ async function issueTokensForUser(userId: string, c: Context<HonoEnv>) {
   return {
     accessToken,
     refreshToken: refreshTokenPlain,
+    sessionId: session.id,
     expiresIn: cfg.session.defaultTTL,
   };
 }
@@ -127,14 +134,24 @@ router.get("/verify", async (c) => {
     const tokens = await issueTokensForUser(result.userId, c);
 
     const appUrl = settings.appUrl || "http://localhost:3000";
-    // SECURITY (CWE-601): never use an attacker-supplied `redirect` as the
-    // callback base — tokens must only be handed to a same-origin path. Use
-    // safeRelativeRedirect to collapse anything else to a safe default.
+    // SECURITY (CWE-601 + CWE-532): never put access/refresh tokens in a
+    // redirect URL — they land in browser history, access logs, and the
+    // Referer header. Use the same short-lived exchange-code pattern as the
+    // OAuth callback: store tokens server-side, redirect with a one-time code,
+    // and let the SPA redeem it via POST /oauth/exchange.
     const safePath = safeRelativeRedirect(redirect, "/auth/callback");
-    const callbackUrl =
-      `${appUrl}${safePath}?accessToken=${encodeURIComponent(tokens.accessToken)}` +
-      `&refreshToken=${encodeURIComponent(tokens.refreshToken)}`;
+    const exchangeCode = nanoid(32);
+    const EXCHANGE_CODE_TTL_SECS = 60;
+    await getDb().insert(oauthExchangeCodesTable).values({
+      code: exchangeCode,
+      userId: result.userId,
+      sessionId: tokens.sessionId,
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+      expiresAt: new Date(Date.now() + EXCHANGE_CODE_TTL_SECS * 1000),
+    });
 
+    const callbackUrl = `${appUrl}${safePath}?oauth_code=${exchangeCode}`;
     return c.redirect(callbackUrl, 302);
   } catch (err) {
     logger.error("Magic link GET verify error", err as Error);

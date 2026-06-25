@@ -229,7 +229,7 @@ function ensureBindingPackage(fullName, destPkgDir, version) {
     spawnSync(
       "npm",
       ["install", "--no-save", "--ignore-scripts", "--no-package-lock", "--prefix", tmp, spec],
-      { cwd: tmp, stdio: "inherit", shell: true }
+      { cwd: tmp, stdio: "inherit", shell: process.platform === "win32" }
     );
     const installed = join(tmp, "node_modules", ...fullName.split("/"));
     if (existsSync(installed)) {
@@ -346,7 +346,7 @@ if (esbuildInfo && esbuildBindingName) {
     spawnSync(
       "npm",
       ["install", "--no-save", "--ignore-scripts", `@esbuild/${esbuildBindingName}@${version}`],
-      { cwd: dirname(esbuildDir), stdio: "inherit", shell: true }
+      { cwd: dirname(esbuildDir), stdio: "inherit", shell: process.platform === "win32" }
     );
     if (existsSync(binaryDest)) {
       console.log(`✓ @esbuild/${esbuildBindingName}@${version} placed for drizzle-kit`);

@@ -1,4 +1,4 @@
-import { isIP } from "node:net";
+import { assertSafeFetchHost } from "../shared/safeFetch.js";
 import type { DIDDocument, VerificationMethod } from "./types";
 
 // Base58 alphabet (Bitcoin variant used by did:key)
@@ -110,32 +110,9 @@ export async function resolveDIDWeb(did: string): Promise<DIDDocument> {
   return res.json() as Promise<DIDDocument>;
 }
 
-/**
- * Reject hosts that would let a caller drive server-side requests at private
- * infrastructure (SSRF). did:web is HTTPS-only on the default port; IP-literal
- * hosts and any host resolving to a non-public address are refused.
- */
-function assertSafeFetchHost(host: string): void {
-  if (!host) throw new Error("Empty did:web host");
-  if (host.includes(":")) throw new Error("did:web host must not specify a port");
-  // Block raw IP literals — only DNS names are permitted.
-  if (isIP(host) !== 0) throw new Error("did:web host must be a DNS name, not an IP literal");
-  // Block obvious internal/loopback hostnames without needing DNS.
-  const lower = host.toLowerCase();
-  if (
-    lower === "localhost" ||
-    lower.endsWith(".localhost") ||
-    lower.endsWith(".local") ||
-    lower === "metadata.google.internal"
-  ) {
-    throw new Error(`did:web host not allowed: ${host}`);
-  }
-  // Synchronous guard is intentionally cheap; DNS-rebinding mitigation would
-  // require pinning the resolved IP for the fetch. dns.lookup is async-only, so
-  // callers that need full rebinding protection should resolve once and fetch by
-  // IP with a Host header. The checks above cover the common SSRF vectors
-  // (169.254.169.254, localhost, .local).
-}
+// assertSafeFetchHost is now imported from src/shared/safeFetch.ts — the
+// canonical SSRF guard used by did:web, federation, and any other server-side
+// fetch whose host derives from user input.
 
 export async function resolveDID(did: string): Promise<DIDDocument | null> {
   try {
