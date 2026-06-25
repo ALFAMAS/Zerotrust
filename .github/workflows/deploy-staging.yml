@@ -1,0 +1,87 @@
+name: Deploy to Staging
+
+# Manual promotion only — this never auto-deploys on push. It ships the chosen
+# ref to a staging host that matches the README's PM2 + nginx model, then you run
+# Staging Validation (Lighthouse / ZAP / ops-smoke) against it.
+#
+# Wire these before first use (Settings → Secrets and variables → Actions):
+#   secrets: STAGING_SSH_HOST, STAGING_SSH_USER, STAGING_SSH_KEY, STAGING_APP_DIR
+#   variables (optional): STAGING_API_URL  (enables the post-deploy health gate)
+# Without the secrets this workflow is a safe no-op template (see docs/deployment.md).
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Git ref to deploy (branch / tag / SHA)"
+        required: false
+        default: main
+        type: string
+
+concurrency:
+  group: deploy-staging
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: SSH deploy + health gate
+    runs-on: ubuntu-latest
+    # Add required reviewers to the "staging" Environment to gate promotion.
+    environment: staging
+    steps:
+      - name: Deploy ${{ inputs.ref }} over SSH
+        env:
+          SSH_HOST: ${{ secrets.STAGING_SSH_HOST }}
+          SSH_USER: ${{ secrets.STAGING_SSH_USER }}
+          SSH_KEY: ${{ secrets.STAGING_SSH_KEY }}
+          APP_DIR: ${{ secrets.STAGING_APP_DIR }}
+          DEPLOY_REF: ${{ inputs.ref }}
+        run: |
+          set -euo pipefail
+          if [ -z "${SSH_HOST:-}" ] || [ -z "${SSH_KEY:-}" ]; then
+            echo "::notice::STAGING_SSH_* secrets are not set — template no-op. Configure them per docs/deployment.md."
+            exit 0
+          fi
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/id_deploy
+          chmod 600 ~/.ssh/id_deploy
+          ssh-keyscan -H "$SSH_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+          # Mirrors the README "Deploying updates" steps on the host.
+          ssh -i ~/.ssh/id_deploy "$SSH_USER@$SSH_HOST" bash -se <<EOF
+          set -euo pipefail
+          cd "$APP_DIR"
+          git fetch --all --prune
+          git checkout "$DEPLOY_REF"
+          git pull --ff-only origin "$DEPLOY_REF" || true
+          bun install --frozen-lockfile
+          bun run db:migrate
+          bun run build
+          pm2 restart zerotrust-api
+          cd packages/ui
+          bun install --frozen-lockfile
+          bun run build
+          pm2 restart zerotrust-ui
+          pm2 save
+          EOF
+
+      - name: Post-deploy health gate
+        env:
+          API_URL: ${{ vars.STAGING_API_URL }}
+        run: |
+          set -euo pipefail
+          if [ -z "${API_URL:-}" ]; then
+            echo "::notice::STAGING_API_URL variable not set — skipping health gate."
+            exit 0
+          fi
+          for i in $(seq 1 30); do
+            if curl -fsS "$API_URL/health" >/dev/null 2>&1; then
+              echo "✓ staging API healthy at $API_URL"; exit 0
+            fi
+            echo "waiting for staging API… ($i/30)"; sleep 5
+          done
+          echo "::error::staging API did not become healthy at $API_URL"; exit 1
+
+      - name: Next step
+        run: |
+          echo "Deploy done. Now run the 'Staging Validation' workflow against the"
+          echo "staging URLs to measure Lighthouse / ZAP / ops-smoke (exit criteria)."

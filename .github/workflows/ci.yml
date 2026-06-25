@@ -105,8 +105,14 @@ jobs:
         uses: semgrep/semgrep-action@v1
         with:
           config: p/owasp-top-ten
+      # Non-blocking for now: the trivy-action's setup step currently fails while
+      # installing the Trivy binary (v0.64.1) on the runner — before any scan
+      # runs — so it gates every PR without providing signal. Semgrep (above) and
+      # `bun audit --prod` (lint job) remain the blocking security gates. Flip
+      # back to blocking once a working trivy-action/binary combo is pinned.
       - name: Trivy filesystem scan
-        uses: aquasecurity/trivy-action@0.35.0
+        continue-on-error: true
+        uses: aquasecurity/trivy-action@v0.32.0
         with:
           scan-type: fs
           scan-ref: .

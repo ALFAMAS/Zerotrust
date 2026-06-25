@@ -126,4 +126,44 @@ describe("TokenService", () => {
     const payload = await svc.verifyAccessToken(token);
     expect(payload.pop_key).toBe("my-public-key");
   });
+
+  // ─── Security regression guards ───────────────────────────────────────────
+
+  it("rejects a token signed under a different key (cross-key isolation)", async () => {
+    // The core security property behind key rotation: a token minted with key A
+    // must never authenticate against key B.
+    const other = new TokenService("b".repeat(64), SESSION_CONFIG);
+    await other.init();
+    const token = await svc.signAccessToken({ sub: "u", email: "u@test.com", aud: "a", scope: [] });
+    await expect(other.verifyAccessToken(token)).rejects.toThrow("TOKEN_INVALID");
+  });
+
+  it("init() rejects a key that is not exactly 32 bytes", async () => {
+    await expect(new TokenService("abcd", SESSION_CONFIG).init()).rejects.toThrow(
+      "TOKEN_SECRET_INVALID"
+    );
+    await expect(new TokenService("a".repeat(62), SESSION_CONFIG).init()).rejects.toThrow(
+      "TOKEN_SECRET_INVALID"
+    );
+  });
+
+  it("rejects a single-byte tamper in the ciphertext body (AEAD integrity)", async () => {
+    const token = await svc.signAccessToken({ sub: "u", email: "u@test.com", aud: "a", scope: [] });
+    // Flip one character in the middle of the encoded body — the BLAKE2b tag
+    // must catch it rather than decrypting to attacker-chosen bytes.
+    const mid = Math.floor(token.length / 2);
+    const flipped = token[mid] === "A" ? "B" : "A";
+    const tampered = token.slice(0, mid) + flipped + token.slice(mid + 1);
+    await expect(svc.verifyAccessToken(tampered)).rejects.toThrow("TOKEN_INVALID");
+  });
+
+  it("produces refresh tokens that are hex-only and collision-free across many draws", async () => {
+    const seen = new Set<string>();
+    for (let i = 0; i < 200; i++) {
+      const rt = await svc.signRefreshToken();
+      expect(rt).toMatch(/^[0-9a-f]{96}$/);
+      expect(seen.has(rt)).toBe(false);
+      seen.add(rt);
+    }
+  });
 });

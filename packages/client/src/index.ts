@@ -59,12 +59,7 @@ export class zerotrustError extends Error {
   readonly status: number;
   readonly code?: string;
   readonly details?: unknown;
-  constructor(
-    message: string,
-    status: number,
-    code?: string,
-    details?: unknown,
-  ) {
+  constructor(message: string, status: number, code?: string, details?: unknown) {
     super(message);
     this.name = "zerotrustError";
     this.status = status;
@@ -85,14 +80,10 @@ export class zerotrustClient {
   token?: string;
 
   constructor(options: zerotrustClientOptions = {}) {
-    this.baseUrl = (options.baseUrl ?? "http://localhost:3000").replace(
-      /\/+$/,
-      "",
-    );
+    this.baseUrl = (options.baseUrl ?? "http://localhost:3000").replace(/\/+$/, "");
     this.token = options.token;
     const f = options.fetch ?? globalThis.fetch;
-    if (!f)
-      throw new Error("No fetch implementation available; pass options.fetch");
+    if (!f) throw new Error("No fetch implementation available; pass options.fetch");
     this.fetchImpl = f.bind(globalThis);
     this.defaultHeaders = options.headers ?? {};
   }
@@ -103,11 +94,7 @@ export class zerotrustClient {
   }
 
   /** Low-level request helper used by every generated method. */
-  async request<T>(
-    method: string,
-    path: string,
-    options: zerotrustRequestOptions = {},
-  ): Promise<T> {
+  async request<T>(method: string, path: string, options: zerotrustRequestOptions = {}): Promise<T> {
     let url = this.baseUrl + path;
     if (options.query) {
       const sp = new URLSearchParams();
@@ -118,10 +105,7 @@ export class zerotrustClient {
       if (qs) url += (url.includes("?") ? "&" : "?") + qs;
     }
 
-    const headers: Record<string, string> = {
-      ...this.defaultHeaders,
-      ...options.headers,
-    };
+    const headers: Record<string, string> = { ...this.defaultHeaders, ...options.headers };
     if (this.token) headers.Authorization = `Bearer ${this.token}`;
     let body: string | undefined;
     if (options.body !== undefined) {
@@ -139,13 +123,9 @@ export class zerotrustClient {
     }
 
     if (!res.ok) {
-      const env = parsed as
-        | { code?: string; message?: string; error?: string; details?: unknown }
-        | undefined;
+      const env = parsed as { code?: string; message?: string; error?: string; details?: unknown } | undefined;
       throw new zerotrustError(
-        env?.message ??
-          env?.error ??
-          `Request failed with status ${res.status}`,
+        env?.message ?? env?.error ?? `Request failed with status ${res.status}`,
         res.status,
         env?.code ?? env?.error,
         env?.details ?? parsed,
@@ -159,11 +139,7 @@ export class zerotrustClient {
    *
    * @route POST /auth/register
    */
-  postAuthRegister(body: {
-    email: string;
-    password: string;
-    displayName?: string;
-  }): Promise<{ success?: boolean; userId?: string }> {
+  postAuthRegister(body: { email: string; password: string; displayName?: string }): Promise<{ success?: boolean; userId?: string }> {
     return this.request("POST", `/auth/register`, { body });
   }
 
@@ -172,10 +148,7 @@ export class zerotrustClient {
    *
    * @route POST /auth/login
    */
-  postAuthLogin(body: {
-    email: string;
-    password: string;
-  }): Promise<TokenResponse> {
+  postAuthLogin(body: { email: string; password: string }): Promise<TokenResponse> {
     return this.request("POST", `/auth/login`, { body });
   }
 
@@ -211,10 +184,7 @@ export class zerotrustClient {
    *
    * @route POST /auth/oauth/state
    */
-  postAuthOauthState(body?: {
-    codeChallenge?: string;
-    redirectUri?: string;
-  }): Promise<{ state?: string; nonce?: string; ttlSeconds?: number }> {
+  postAuthOauthState(body?: { codeChallenge?: string; redirectUri?: string }): Promise<{ state?: string; nonce?: string; ttlSeconds?: number }> {
     return this.request("POST", `/auth/oauth/state`, { body });
   }
 
@@ -226,13 +196,8 @@ export class zerotrustClient {
    * @route GET /auth/oauth/{provider}/authorize
    * @param provider path parameter
    */
-  getAuthOauthByProviderAuthorize(
-    provider: "google" | "github" | "facebook",
-  ): Promise<{ authorizeUrl?: string; state?: string }> {
-    return this.request(
-      "GET",
-      `/auth/oauth/${encodeURIComponent(provider)}/authorize`,
-    );
+  getAuthOauthByProviderAuthorize(provider: "google" | "github" | "facebook"): Promise<{ authorizeUrl?: string; state?: string }> {
+    return this.request("GET", `/auth/oauth/${encodeURIComponent(provider)}/authorize`);
   }
 
   /**
@@ -243,15 +208,8 @@ export class zerotrustClient {
    * @route GET /auth/oauth/{provider}/callback
    * @param provider path parameter
    */
-  getAuthOauthByProviderCallback(
-    provider: "google" | "github" | "facebook",
-    query: { code: string; state: string },
-  ): Promise<unknown> {
-    return this.request(
-      "GET",
-      `/auth/oauth/${encodeURIComponent(provider)}/callback`,
-      { query },
-    );
+  getAuthOauthByProviderCallback(provider: "google" | "github" | "facebook", query: { code: string; state: string }): Promise<unknown> {
+    return this.request("GET", `/auth/oauth/${encodeURIComponent(provider)}/callback`, { query });
   }
 
   /**
@@ -261,9 +219,7 @@ export class zerotrustClient {
    *
    * @route POST /auth/oauth/exchange
    */
-  postAuthOauthExchange(body: {
-    code: string;
-  }): Promise<{ accessToken?: string; refreshToken?: string }> {
+  postAuthOauthExchange(body: { code: string }): Promise<{ accessToken?: string; refreshToken?: string }> {
     return this.request("POST", `/auth/oauth/exchange`, { body });
   }
 
@@ -272,10 +228,7 @@ export class zerotrustClient {
    *
    * @route POST /auth/password-reset/request
    */
-  postAuthPasswordResetRequest(body: {
-    email: string;
-    channel?: "email" | "sms" | "whatsapp" | "telegram";
-  }): Promise<{ success?: boolean; message?: string }> {
+  postAuthPasswordResetRequest(body: { email: string; channel?: "email" | "sms" | "whatsapp" | "telegram" }): Promise<{ success?: boolean; message?: string }> {
     return this.request("POST", `/auth/password-reset/request`, { body });
   }
 
@@ -284,11 +237,7 @@ export class zerotrustClient {
    *
    * @route POST /auth/password-reset/confirm
    */
-  postAuthPasswordResetConfirm(body: {
-    email: string;
-    code: string;
-    newPassword: string;
-  }): Promise<{ success?: boolean }> {
+  postAuthPasswordResetConfirm(body: { email: string; code: string; newPassword: string }): Promise<{ success?: boolean }> {
     return this.request("POST", `/auth/password-reset/confirm`, { body });
   }
 
@@ -306,10 +255,7 @@ export class zerotrustClient {
    *
    * @route POST /auth/passkey/register
    */
-  postAuthPasskeyRegister(body: {
-    body: Record<string, unknown>;
-    name?: string;
-  }): Promise<{ success?: boolean; credentialId?: string }> {
+  postAuthPasskeyRegister(body: { body: Record<string, unknown>; name?: string }): Promise<{ success?: boolean; credentialId?: string }> {
     return this.request("POST", `/auth/passkey/register`, { body });
   }
 
@@ -318,9 +264,7 @@ export class zerotrustClient {
    *
    * @route POST /auth/passkey/authenticate/options
    */
-  postAuthPasskeyAuthenticateOptions(body?: {
-    email?: string;
-  }): Promise<unknown> {
+  postAuthPasskeyAuthenticateOptions(body?: { email?: string }): Promise<unknown> {
     return this.request("POST", `/auth/passkey/authenticate/options`, { body });
   }
 
@@ -329,10 +273,7 @@ export class zerotrustClient {
    *
    * @route POST /auth/passkey/authenticate
    */
-  postAuthPasskeyAuthenticate(body: {
-    body: Record<string, unknown>;
-    challengeKey: string;
-  }): Promise<TokenResponse> {
+  postAuthPasskeyAuthenticate(body: { body: Record<string, unknown>; challengeKey: string }): Promise<TokenResponse> {
     return this.request("POST", `/auth/passkey/authenticate`, { body });
   }
 
@@ -343,10 +284,7 @@ export class zerotrustClient {
    * @param credentialId path parameter
    */
   deleteAuthPasskeyByCredentialId(credentialId: string): Promise<unknown> {
-    return this.request(
-      "DELETE",
-      `/auth/passkey/${encodeURIComponent(credentialId)}`,
-    );
+    return this.request("DELETE", `/auth/passkey/${encodeURIComponent(credentialId)}`);
   }
 
   /**
@@ -354,11 +292,7 @@ export class zerotrustClient {
    *
    * @route POST /auth/mfa/totp/setup
    */
-  postAuthMfaTotpSetup(): Promise<{
-    secret?: string;
-    otpAuthUrl?: string;
-    qrDataUrl?: string;
-  }> {
+  postAuthMfaTotpSetup(): Promise<{ secret?: string; otpAuthUrl?: string; qrDataUrl?: string }> {
     return this.request("POST", `/auth/mfa/totp/setup`);
   }
 
@@ -367,9 +301,7 @@ export class zerotrustClient {
    *
    * @route POST /auth/mfa/totp/verify
    */
-  postAuthMfaTotpVerify(body: {
-    code: string;
-  }): Promise<{ success?: boolean; backupCodes?: string[] }> {
+  postAuthMfaTotpVerify(body: { code: string }): Promise<{ success?: boolean; backupCodes?: string[] }> {
     return this.request("POST", `/auth/mfa/totp/verify`, { body });
   }
 
@@ -387,9 +319,7 @@ export class zerotrustClient {
    *
    * @route POST /auth/mfa/backup-codes/regenerate
    */
-  postAuthMfaBackupCodesRegenerate(body: {
-    code: string;
-  }): Promise<{ backupCodes?: string[] }> {
+  postAuthMfaBackupCodesRegenerate(body: { code: string }): Promise<{ backupCodes?: string[] }> {
     return this.request("POST", `/auth/mfa/backup-codes/regenerate`, { body });
   }
 
@@ -398,9 +328,7 @@ export class zerotrustClient {
    *
    * @route POST /auth/mfa/backup-codes/redeem
    */
-  postAuthMfaBackupCodesRedeem(body: {
-    code: string;
-  }): Promise<{ success?: boolean; remainingCodes?: number }> {
+  postAuthMfaBackupCodesRedeem(body: { code: string }): Promise<{ success?: boolean; remainingCodes?: number }> {
     return this.request("POST", `/auth/mfa/backup-codes/redeem`, { body });
   }
 
@@ -409,10 +337,7 @@ export class zerotrustClient {
    *
    * @route POST /auth/mfa/otp/send
    */
-  postAuthMfaOtpSend(body: {
-    channel: "email" | "sms" | "whatsapp" | "telegram";
-    target: string;
-  }): Promise<{ success?: boolean; expiresIn?: number }> {
+  postAuthMfaOtpSend(body: { channel: "email" | "sms" | "whatsapp" | "telegram"; target: string }): Promise<{ success?: boolean; expiresIn?: number }> {
     return this.request("POST", `/auth/mfa/otp/send`, { body });
   }
 
@@ -421,10 +346,7 @@ export class zerotrustClient {
    *
    * @route POST /auth/mfa/otp/verify
    */
-  postAuthMfaOtpVerify(body: {
-    code: string;
-    channel: "email" | "sms" | "whatsapp" | "telegram";
-  }): Promise<unknown> {
+  postAuthMfaOtpVerify(body: { code: string; channel: "email" | "sms" | "whatsapp" | "telegram" }): Promise<unknown> {
     return this.request("POST", `/auth/mfa/otp/verify`, { body });
   }
 
@@ -433,16 +355,7 @@ export class zerotrustClient {
    *
    * @route GET /sessions
    */
-  getSessions(query?: {
-    limit?: number;
-    offset?: number;
-    activeOnly?: boolean;
-  }): Promise<{
-    sessions?: Session[];
-    total?: number;
-    limit?: number;
-    offset?: number;
-  }> {
+  getSessions(query?: { limit?: number; offset?: number; activeOnly?: boolean }): Promise<{ sessions?: Session[]; total?: number; limit?: number; offset?: number }> {
     return this.request("GET", `/sessions`, { query });
   }
 
@@ -488,11 +401,7 @@ export class zerotrustClient {
    *
    * @route GET /admin/users
    */
-  getAdminUsers(query?: {
-    limit?: number;
-    offset?: number;
-    search?: string;
-  }): Promise<unknown> {
+  getAdminUsers(query?: { limit?: number; offset?: number; search?: string }): Promise<unknown> {
     return this.request("GET", `/admin/users`, { query });
   }
 
@@ -512,17 +421,8 @@ export class zerotrustClient {
    * @route PATCH /admin/users/{id}
    * @param id path parameter
    */
-  patchAdminUsersById(
-    id: string,
-    body?: {
-      status?: "active" | "suspended" | "deleted";
-      roles?: string[];
-      displayName?: string;
-    },
-  ): Promise<unknown> {
-    return this.request("PATCH", `/admin/users/${encodeURIComponent(id)}`, {
-      body,
-    });
+  patchAdminUsersById(id: string, body?: { status?: "active" | "suspended" | "deleted"; roles?: string[]; displayName?: string }): Promise<unknown> {
+    return this.request("PATCH", `/admin/users/${encodeURIComponent(id)}`, { body });
   }
 
   /**
@@ -541,15 +441,8 @@ export class zerotrustClient {
    * @route POST /admin/users/{id}/roles
    * @param id path parameter
    */
-  postAdminUsersByIdRoles(
-    id: string,
-    body: { roleName: string },
-  ): Promise<unknown> {
-    return this.request(
-      "POST",
-      `/admin/users/${encodeURIComponent(id)}/roles`,
-      { body },
-    );
+  postAdminUsersByIdRoles(id: string, body: { roleName: string }): Promise<unknown> {
+    return this.request("POST", `/admin/users/${encodeURIComponent(id)}/roles`, { body });
   }
 
   /**
@@ -559,14 +452,8 @@ export class zerotrustClient {
    * @param id path parameter
    * @param roleName path parameter
    */
-  deleteAdminUsersByIdRolesByRoleName(
-    id: string,
-    roleName: string,
-  ): Promise<unknown> {
-    return this.request(
-      "DELETE",
-      `/admin/users/${encodeURIComponent(id)}/roles/${encodeURIComponent(roleName)}`,
-    );
+  deleteAdminUsersByIdRolesByRoleName(id: string, roleName: string): Promise<unknown> {
+    return this.request("DELETE", `/admin/users/${encodeURIComponent(id)}/roles/${encodeURIComponent(roleName)}`);
   }
 
   /**
@@ -576,10 +463,7 @@ export class zerotrustClient {
    * @param id path parameter
    */
   getAdminUsersByIdSessions(id: string): Promise<unknown> {
-    return this.request(
-      "GET",
-      `/admin/users/${encodeURIComponent(id)}/sessions`,
-    );
+    return this.request("GET", `/admin/users/${encodeURIComponent(id)}/sessions`);
   }
 
   /**
@@ -589,10 +473,7 @@ export class zerotrustClient {
    * @param id path parameter
    */
   deleteAdminUsersByIdSessions(id: string): Promise<unknown> {
-    return this.request(
-      "DELETE",
-      `/admin/users/${encodeURIComponent(id)}/sessions`,
-    );
+    return this.request("DELETE", `/admin/users/${encodeURIComponent(id)}/sessions`);
   }
 
   /**
@@ -619,13 +500,7 @@ export class zerotrustClient {
    *
    * @route POST /admin/roles
    */
-  postAdminRoles(body: {
-    name: string;
-    displayName: string;
-    description?: string;
-    parentRoleName?: string;
-    permissions?: unknown[];
-  }): Promise<unknown> {
+  postAdminRoles(body: { name: string; displayName: string; description?: string; parentRoleName?: string; permissions?: unknown[] }): Promise<unknown> {
     return this.request("POST", `/admin/roles`, { body });
   }
 
@@ -634,9 +509,7 @@ export class zerotrustClient {
    *
    * @route GET /admin/jit-grants
    */
-  getAdminJitGrants(query?: {
-    status?: "pending" | "approved" | "denied" | "expired" | "revoked";
-  }): Promise<unknown> {
+  getAdminJitGrants(query?: { status?: "pending" | "approved" | "denied" | "expired" | "revoked" }): Promise<unknown> {
     return this.request("GET", `/admin/jit-grants`, { query });
   }
 
@@ -647,10 +520,7 @@ export class zerotrustClient {
    * @param id path parameter
    */
   postAdminJitGrantsByIdApprove(id: string): Promise<unknown> {
-    return this.request(
-      "POST",
-      `/admin/jit-grants/${encodeURIComponent(id)}/approve`,
-    );
+    return this.request("POST", `/admin/jit-grants/${encodeURIComponent(id)}/approve`);
   }
 
   /**
@@ -660,10 +530,7 @@ export class zerotrustClient {
    * @param id path parameter
    */
   postAdminJitGrantsByIdDeny(id: string): Promise<unknown> {
-    return this.request(
-      "POST",
-      `/admin/jit-grants/${encodeURIComponent(id)}/deny`,
-    );
+    return this.request("POST", `/admin/jit-grants/${encodeURIComponent(id)}/deny`);
   }
 
   /**
@@ -673,10 +540,7 @@ export class zerotrustClient {
    * @param id path parameter
    */
   deleteAdminJitGrantsById(id: string): Promise<unknown> {
-    return this.request(
-      "DELETE",
-      `/admin/jit-grants/${encodeURIComponent(id)}`,
-    );
+    return this.request("DELETE", `/admin/jit-grants/${encodeURIComponent(id)}`);
   }
 
   /**
@@ -684,12 +548,7 @@ export class zerotrustClient {
    *
    * @route GET /admin/audit-logs
    */
-  getAdminAuditLogs(query?: {
-    limit?: number;
-    offset?: number;
-    action?: string;
-    actorId?: string;
-  }): Promise<unknown> {
+  getAdminAuditLogs(query?: { limit?: number; offset?: number; action?: string; actorId?: string }): Promise<unknown> {
     return this.request("GET", `/admin/audit-logs`, { query });
   }
 
@@ -707,11 +566,198 @@ export class zerotrustClient {
    *
    * @route GET /healthz
    */
-  getHealthz(): Promise<{
-    status?: "ok";
-    redis?: string;
-    elasticsearch?: string;
-  }> {
+  getHealthz(): Promise<{ status?: "ok"; redis?: string; elasticsearch?: string }> {
     return this.request("GET", `/healthz`);
+  }
+
+  /**
+   * List organizations the current user belongs to
+   *
+   * @route GET /orgs
+   */
+  getOrgs(): Promise<unknown> {
+    return this.request("GET", `/orgs`);
+  }
+
+  /**
+   * Create an organization (creator becomes owner)
+   *
+   * @route POST /orgs
+   */
+  postOrgs(body: { name: string; slug?: string }): Promise<unknown> {
+    return this.request("POST", `/orgs`, { body });
+  }
+
+  /**
+   * Get an organization
+   *
+   * @route GET /orgs/{orgId}
+   * @param orgId path parameter
+   */
+  getOrgsByOrgId(orgId: string): Promise<unknown> {
+    return this.request("GET", `/orgs/${encodeURIComponent(orgId)}`);
+  }
+
+  /**
+   * Update organization settings
+   *
+   * @route PUT /orgs/{orgId}
+   * @param orgId path parameter
+   */
+  putOrgsByOrgId(orgId: string, body: { name?: string; slug?: string; logoUrl?: string; billingEmail?: string }): Promise<unknown> {
+    return this.request("PUT", `/orgs/${encodeURIComponent(orgId)}`, { body });
+  }
+
+  /**
+   * Delete an organization
+   *
+   * @route DELETE /orgs/{orgId}
+   * @param orgId path parameter
+   */
+  deleteOrgsByOrgId(orgId: string): Promise<unknown> {
+    return this.request("DELETE", `/orgs/${encodeURIComponent(orgId)}`);
+  }
+
+  /**
+   * List organization members
+   *
+   * @route GET /orgs/{orgId}/members
+   * @param orgId path parameter
+   */
+  getOrgsByOrgIdMembers(orgId: string): Promise<unknown> {
+    return this.request("GET", `/orgs/${encodeURIComponent(orgId)}/members`);
+  }
+
+  /**
+   * Remove a member (cannot remove the last owner)
+   *
+   * @route DELETE /orgs/{orgId}/members/{userId}
+   * @param orgId path parameter
+   * @param userId path parameter
+   */
+  deleteOrgsByOrgIdMembersByUserId(orgId: string, userId: string): Promise<unknown> {
+    return this.request("DELETE", `/orgs/${encodeURIComponent(orgId)}/members/${encodeURIComponent(userId)}`);
+  }
+
+  /**
+   * Transfer organization ownership
+   *
+   * @route POST /orgs/{orgId}/transfer
+   * @param orgId path parameter
+   */
+  postOrgsByOrgIdTransfer(orgId: string, body: { newOwnerId: string }): Promise<unknown> {
+    return this.request("POST", `/orgs/${encodeURIComponent(orgId)}/transfer`, { body });
+  }
+
+  /**
+   * List pending invites
+   *
+   * @route GET /orgs/{orgId}/invites
+   * @param orgId path parameter
+   */
+  getOrgsByOrgIdInvites(orgId: string): Promise<unknown> {
+    return this.request("GET", `/orgs/${encodeURIComponent(orgId)}/invites`);
+  }
+
+  /**
+   * Invite a user by email
+   *
+   * @route POST /orgs/{orgId}/invites
+   * @param orgId path parameter
+   */
+  postOrgsByOrgIdInvites(orgId: string, body: { email: string; role?: string }): Promise<unknown> {
+    return this.request("POST", `/orgs/${encodeURIComponent(orgId)}/invites`, { body });
+  }
+
+  /**
+   * Revoke a pending invite
+   *
+   * @route DELETE /orgs/{orgId}/invites/{inviteId}
+   * @param orgId path parameter
+   * @param inviteId path parameter
+   */
+  deleteOrgsByOrgIdInvitesByInviteId(orgId: string, inviteId: string): Promise<unknown> {
+    return this.request("DELETE", `/orgs/${encodeURIComponent(orgId)}/invites/${encodeURIComponent(inviteId)}`);
+  }
+
+  /**
+   * Get per-org SSO configuration
+   *
+   * @route GET /orgs/{orgId}/sso
+   * @param orgId path parameter
+   */
+  getOrgsByOrgIdSso(orgId: string): Promise<unknown> {
+    return this.request("GET", `/orgs/${encodeURIComponent(orgId)}/sso`);
+  }
+
+  /**
+   * Update per-org SSO configuration
+   *
+   * @route PUT /orgs/{orgId}/sso
+   * @param orgId path parameter
+   */
+  putOrgsByOrgIdSso(orgId: string, body: Record<string, unknown>): Promise<unknown> {
+    return this.request("PUT", `/orgs/${encodeURIComponent(orgId)}/sso`, { body });
+  }
+
+  /**
+   * Validate the org SSO configuration
+   *
+   * @route POST /orgs/{orgId}/sso/test
+   * @param orgId path parameter
+   */
+  postOrgsByOrgIdSsoTest(orgId: string): Promise<unknown> {
+    return this.request("POST", `/orgs/${encodeURIComponent(orgId)}/sso/test`);
+  }
+
+  /**
+   * Get the org security policy (session/device/geo limits)
+   *
+   * @route GET /orgs/{orgId}/security/policy
+   * @param orgId path parameter
+   */
+  getOrgsByOrgIdSecurityPolicy(orgId: string): Promise<unknown> {
+    return this.request("GET", `/orgs/${encodeURIComponent(orgId)}/security/policy`);
+  }
+
+  /**
+   * Update the org security policy
+   *
+   * @route PUT /orgs/{orgId}/security/policy
+   * @param orgId path parameter
+   */
+  putOrgsByOrgIdSecurityPolicy(orgId: string, body: Record<string, unknown>): Promise<unknown> {
+    return this.request("PUT", `/orgs/${encodeURIComponent(orgId)}/security/policy`, { body });
+  }
+
+  /**
+   * List SCIM provisioning tokens
+   *
+   * @route GET /orgs/{orgId}/scim/tokens
+   * @param orgId path parameter
+   */
+  getOrgsByOrgIdScimTokens(orgId: string): Promise<unknown> {
+    return this.request("GET", `/orgs/${encodeURIComponent(orgId)}/scim/tokens`);
+  }
+
+  /**
+   * Create a SCIM provisioning token (shown once)
+   *
+   * @route POST /orgs/{orgId}/scim/tokens
+   * @param orgId path parameter
+   */
+  postOrgsByOrgIdScimTokens(orgId: string, body?: { name?: string }): Promise<unknown> {
+    return this.request("POST", `/orgs/${encodeURIComponent(orgId)}/scim/tokens`, { body });
+  }
+
+  /**
+   * Rotate a SCIM provisioning token
+   *
+   * @route POST /orgs/{orgId}/scim/tokens/{tokenId}/rotate
+   * @param orgId path parameter
+   * @param tokenId path parameter
+   */
+  postOrgsByOrgIdScimTokensByTokenIdRotate(orgId: string, tokenId: string): Promise<unknown> {
+    return this.request("POST", `/orgs/${encodeURIComponent(orgId)}/scim/tokens/${encodeURIComponent(tokenId)}/rotate`);
   }
 }
