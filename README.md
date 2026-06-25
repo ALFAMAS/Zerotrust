@@ -303,6 +303,9 @@ zerotrust runs anywhere Bun and Node run. The reference setup below is **Ubuntu 
 with PM2 + nginx; managed PostgreSQL/Redis (e.g. Neon + Upstash) is recommended over
 self-hosting the data stores.
 
+> For the **CI/CD pipeline**, automated **staging deploy**, and how the
+> Lighthouse/ZAP/k6/DR gates fit together, see [docs/deployment.md](./docs/deployment.md).
+
 ### 1. System dependencies
 
 ```bash
@@ -415,7 +418,8 @@ cd packages/ui && npm install && npm run build && pm2 restart zerotrust-ui
 
 A condensed map of the most-used endpoints (auth-gated routes noted). The API mounts
 31 route modules in `src/api/server.ts`; browse Swagger at `/docs` (dev) for the full
-surface.
+surface, or the generated [API reference](./docs/api-reference.md)
+(`bun run docs:api`) for a static, browsable list.
 
 ```
 # Auth
@@ -493,6 +497,9 @@ GET    /health · /healthz · /metrics (Prometheus)
 ---
 
 ## Customizing
+
+> **Adding a third-party integration** (OAuth provider, email/SMS, S3-compatible
+> storage)? See the [Extension guide](./docs/extending.md).
 
 **Rename the app** — replace `zerotrust` across `packages/ui/src/` (start with
 `app/layout.tsx` metadata and `app/page.tsx`) and set `NEXT_PUBLIC_APP_NAME`.
