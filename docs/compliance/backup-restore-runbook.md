@@ -1,12 +1,41 @@
 # Backup And Restore Runbook
 
 Owner: Mas Yasin Arafat  
-Review cadence: Quarterly restore drill  
-Status: Draft, needs periodic evidence
+Review cadence: Quarterly manual drill + the automated `dr-restore-drill.yml` CI run  
+Status: Active — automated restore drill in CI; record manual-drill evidence below
 
 zerotrust has backup tooling in `scripts/db-backup.js`, `scripts/db-restore.js`,
 and `src/services/dbBackup.service.ts`. Neon PITR may also be available depending
 on the active database plan.
+
+## Recovery Objectives (RTO / RPO)
+
+| Objective | Target | How it is met |
+| --- | --- | --- |
+| **RPO** — max acceptable data loss | **≤ 24 h** with scheduled dumps; **~minutes** with provider PITR | `BACKUP_ENABLED=true` runs a daily `pg_dump` (`startBackupScheduler`, default 24 h interval) with local + S3 retention; managed-Postgres PITR (e.g. Neon) closes the gap to minutes when enabled. |
+| **RTO** — max acceptable downtime | **≤ 1 h** to restore a dump into a fresh database | `bun run db:restore` into a clean target; **measured each drill** and recorded below. RTO scales with DB size — re-measure as data grows. |
+
+A warm standby / PITR gives the lowest RTO; the encrypted dump is the portable,
+provider-independent safety net. Always record the **measured** restore time from
+the latest drill so these targets stay honest rather than aspirational.
+
+## Backup Cadence & Retention
+
+- Scheduled backups: `BACKUP_ENABLED=true` (daily via the in-server scheduler);
+  otherwise drive `bun run db:backup` from cron/CI.
+- Retention: `BACKUP_RETENTION_DAYS` (local, default 30) and
+  `BACKUP_S3_RETENTION_DAYS` (S3; falls back to the local value).
+- Production/staging: set `BACKUP_ENCRYPTION_KEY`/`_HEX` **and**
+  `BACKUP_REQUIRE_ENCRYPTION=true` so a missing/invalid key fails closed before
+  `pg_dump` ever writes a plaintext dump.
+
+## Automated Validation (recurring evidence)
+
+The **`dr-restore-drill.yml`** workflow runs the full backup → encrypt → restore
+cycle into an **isolated** Postgres on a schedule (and on demand), verifies the
+restored data, and uploads the backup artifact. This is the recurring, dated
+evidence for the "validated" half of the DR control — link each green run in the
+evidence section below. **A failed drill is a DR regression: page the owner.**
 
 ## Backup Configuration
 

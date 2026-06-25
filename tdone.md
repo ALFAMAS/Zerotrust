@@ -42,6 +42,7 @@ needs surfacing
 - ✅ Continuous-access-evaluation tests — 15 cases for `sessionRisk.service` (`assessSessionRisk` hard/soft/none escalation incl. the `>0.8` anomaly boundary and hard-over-soft precedence; `computeRiskFactors` location/device/anomaly derivation + malformed-input tolerance). Previously untested abuse defense.
 - ✅ Performance sub-plan — `docs/audit/D3-performance-subplan.md`: owned/measurable task breakdown (session+user JOIN → 1 round-trip, optional Redis user-state cache, k6 p95 capture) with staging-validation steps, since auth-path DB rewrites can't be validated in the agent sandbox.
 - ✅ Disposable-email defense tests — 13 cases for `disposableEmail.service` (domain normalization incl. last-`@`/malformed handling, blocklist/allowlist precedence, and `validateSignupEmail` MX paths with a hoisted DNS mock: off / records / no-records / lookup-throws-fails-closed). Previously untested abuse defense.
+- ✅ DR runbook completed — added **RTO/RPO targets** (RPO ≤24h scheduled / ~minutes PITR; RTO ≤1h restore-from-dump), backup cadence/retention/encryption config, and a reference to the automated `dr-restore-drill.yml` as recurring "validated" evidence. Closes the documented half of the DR exit criterion (`docs/compliance/backup-restore-runbook.md`).
 
 ## Auth & Identity
 
