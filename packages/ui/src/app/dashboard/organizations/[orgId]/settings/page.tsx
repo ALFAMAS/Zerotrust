@@ -2,6 +2,13 @@
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { SkeletonCard } from "@/components/Skeleton";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useToast } from "@/context/ToastContext";
 import { api } from "../../../../../lib/api";
 import { SsoSettingsForm } from "./SsoSettingsForm";
@@ -684,23 +691,19 @@ export default function OrgSettingsPage() {
             You will become an admin after transferring ownership.
           </p>
           <div className="space-y-1">
-            <label htmlFor="page-f11" className="text-xs text-muted-foreground">
-              New owner
-            </label>
-            <select
-              id="page-f11"
-              value={transferTo}
-              onChange={(e) => setTransferTo(e.target.value)}
-              required
-              className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:border-ring"
-            >
-              <option value="">Select a member…</option>
-              {nonOwnerMembers.map(({ member, user }) => (
-                <option key={member.userId} value={member.userId}>
-                  {user.displayName} ({user.email}) — {member.role}
-                </option>
-              ))}
-            </select>
+            <span className="text-xs text-muted-foreground">New owner</span>
+            <Select value={transferTo} onValueChange={setTransferTo}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select a member…" />
+              </SelectTrigger>
+              <SelectContent>
+                {nonOwnerMembers.map(({ member, user }) => (
+                  <SelectItem key={member.userId} value={member.userId}>
+                    {user.displayName} ({user.email}) — {member.role}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <button
             type="submit"

@@ -13,6 +13,13 @@ import { useEffect, useState } from "react";
 import DonutChart from "@/components/admin/DonutChart";
 import MetricCard from "@/components/admin/MetricCard";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { api } from "@/lib/api";
 
 interface RevenueData {
@@ -109,17 +116,21 @@ export default function RevenuePage() {
             className={inputClasses}
           />
           <div className="flex flex-wrap items-center gap-3">
-            <select
+            <Select
               value={broadcast.segment}
-              onChange={(e) => setBroadcast({ ...broadcast, segment: e.target.value })}
-              className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-ring focus:outline-none"
+              onValueChange={(v) => setBroadcast({ ...broadcast, segment: v })}
             >
-              <option value="all">All users</option>
-              <option value="free">Free plan</option>
-              <option value="pro">Pro plan</option>
-              <option value="enterprise">Enterprise plan</option>
-              <option value="inactive">Inactive 30+ days</option>
-            </select>
+              <SelectTrigger className="w-48">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All users</SelectItem>
+                <SelectItem value="free">Free plan</SelectItem>
+                <SelectItem value="pro">Pro plan</SelectItem>
+                <SelectItem value="enterprise">Enterprise plan</SelectItem>
+                <SelectItem value="inactive">Inactive 30+ days</SelectItem>
+              </SelectContent>
+            </Select>
             <Button
               onClick={sendBroadcast}
               disabled={!broadcast.title || !broadcast.message}

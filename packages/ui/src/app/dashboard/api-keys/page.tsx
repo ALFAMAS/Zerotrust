@@ -1,6 +1,17 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { Badge } from "../../../components/ui/badge";
+import { Button } from "../../../components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "../../../components/ui/card";
+import { Input } from "../../../components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../../../components/ui/select";
 import { api } from "../../../lib/api";
 
 interface ApiKey {
@@ -72,130 +83,139 @@ export default function ApiKeysPage() {
       <h1 className="mb-1 font-display text-2xl font-semibold tracking-tight text-foreground">
         API Keys
       </h1>
-      <p className="text-muted-foreground text-sm mb-8">
+      <p className="mb-8 text-sm text-muted-foreground">
         Use API keys to authenticate programmatic access to your account.
       </p>
 
       {newKey && (
-        <div className="mb-6 bg-green-900/30 border border-green-700 rounded-xl p-4">
-          <p className="text-green-300 text-sm font-semibold mb-2">
-            API key created — copy it now, you won't see it again.
+        <div className="mb-6 rounded-xl border border-emerald-700 bg-emerald-900/30 p-4">
+          <p className="mb-2 text-sm font-semibold text-emerald-300">
+            API key created — copy it now, you won&apos;t see it again.
           </p>
           <div className="flex items-center gap-2">
-            <code className="flex-1 bg-background text-green-300 text-xs p-2 rounded-lg font-mono break-all">
+            <code className="flex-1 break-all rounded-lg bg-background p-2 font-mono text-xs text-emerald-300">
               {newKey}
             </code>
-            <button
-              type="button"
-              onClick={() => copy(newKey)}
-              className="px-3 py-1.5 bg-secondary hover:bg-secondary/80 text-secondary-foreground text-xs rounded-lg transition-colors whitespace-nowrap"
-            >
+            <Button type="button" variant="secondary" size="sm" onClick={() => copy(newKey)}>
               {copied ? "Copied!" : "Copy"}
-            </button>
+            </Button>
           </div>
-          <button
+          <Button
             type="button"
+            variant="link"
+            className="mt-2 h-auto p-0 text-xs text-muted-foreground"
             onClick={() => setNewKey(null)}
-            className="mt-3 text-xs text-muted-foreground hover:text-foreground/80"
           >
             Dismiss
-          </button>
+          </Button>
         </div>
       )}
 
-      <div className="bg-card border border-border rounded-xl p-6 mb-6">
-        <h2 className="font-semibold text-foreground mb-4">Create new key</h2>
-        <form onSubmit={handleCreate} className="flex flex-col gap-3">
-          <div className="flex gap-3">
-            <input
-              value={form.name}
-              onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-              placeholder="Key name (e.g. CI/CD pipeline)"
-              className="flex-1 bg-muted border border-border rounded-lg px-3 py-2 text-foreground text-sm focus:outline-none focus:border-ring"
-            />
-            <select
-              value={form.environment}
-              onChange={(e) => setForm((f) => ({ ...f, environment: e.target.value }))}
-              className="bg-muted border border-border rounded-lg px-3 py-2 text-foreground text-sm focus:outline-none focus:border-ring"
-            >
-              <option value="live">Live</option>
-              <option value="test">Test</option>
-            </select>
-            <select
-              value={form.expiresInDays}
-              onChange={(e) => setForm((f) => ({ ...f, expiresInDays: e.target.value }))}
-              className="bg-muted border border-border rounded-lg px-3 py-2 text-foreground text-sm focus:outline-none focus:border-ring"
-            >
-              <option value="">No expiry</option>
-              <option value="30">30 days</option>
-              <option value="90">90 days</option>
-              <option value="365">1 year</option>
-            </select>
-          </div>
-          <p className="text-muted-foreground text-xs">
-            Test keys are prefixed <span className="font-mono">zak_test_</span> and meant for
-            sandbox/non-production use.
-          </p>
-          {error && <p className="text-red-400 text-xs">{error}</p>}
-          <button
-            type="submit"
-            disabled={creating}
-            className="self-start px-4 py-2 bg-primary hover:bg-primary/90 disabled:opacity-50 text-primary-foreground text-sm rounded-lg transition-colors"
-          >
-            {creating ? "Creating…" : "Create key"}
-          </button>
-        </form>
-      </div>
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className="text-base">Create new key</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleCreate} className="flex flex-col gap-3">
+            <div className="flex flex-wrap gap-3">
+              <Input
+                value={form.name}
+                onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+                placeholder="Key name (e.g. CI/CD pipeline)"
+                className="flex-1"
+              />
+              <Select
+                value={form.environment}
+                onValueChange={(v) => setForm((f) => ({ ...f, environment: v }))}
+              >
+                <SelectTrigger className="w-32">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="live">Live</SelectItem>
+                  <SelectItem value="test">Test</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select
+                value={form.expiresInDays || "none"}
+                onValueChange={(v) =>
+                  setForm((f) => ({ ...f, expiresInDays: v === "none" ? "" : v }))
+                }
+              >
+                <SelectTrigger className="w-36">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">No expiry</SelectItem>
+                  <SelectItem value="30">30 days</SelectItem>
+                  <SelectItem value="90">90 days</SelectItem>
+                  <SelectItem value="365">1 year</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Test keys are prefixed <span className="font-mono">zak_test_</span> and meant for
+              sandbox/non-production use.
+            </p>
+            {error && <p className="text-xs text-destructive">{error}</p>}
+            <Button type="submit" disabled={creating} className="self-start">
+              {creating ? "Creating…" : "Create key"}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
 
-      <div className="bg-card border border-border rounded-xl overflow-hidden">
-        <div className="px-6 py-4 border-b border-border">
-          <h2 className="font-semibold text-foreground">Active keys</h2>
-        </div>
-        {loading ? (
-          <div className="p-6 text-muted-foreground text-sm">Loading…</div>
-        ) : keys.length === 0 ? (
-          <div className="p-6 text-muted-foreground text-sm">
-            No active API keys. Create one above.
-          </div>
-        ) : (
-          <ul className="divide-y divide-border">
-            {keys.map((key) => (
-              <li key={key.id} className="flex items-center justify-between px-6 py-4">
-                <div>
-                  <p className="text-foreground text-sm font-medium flex items-center gap-2">
-                    {key.name}
-                    {key.environment === "test" && (
-                      <span className="rounded bg-yellow-900/40 text-yellow-400 text-[10px] font-semibold uppercase px-1.5 py-0.5 tracking-wide">
-                        Test
-                      </span>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Active keys</CardTitle>
+        </CardHeader>
+        <CardContent className="p-0">
+          {loading ? (
+            <div className="p-6 text-sm text-muted-foreground">Loading…</div>
+          ) : keys.length === 0 ? (
+            <div className="p-6 text-sm text-muted-foreground">
+              No active API keys. Create one above.
+            </div>
+          ) : (
+            <ul className="divide-y divide-border">
+              {keys.map((key) => (
+                <li key={key.id} className="flex items-center justify-between px-6 py-4">
+                  <div>
+                    <p className="flex items-center gap-2 text-sm font-medium text-foreground">
+                      {key.name}
+                      {key.environment === "test" && <Badge variant="warning">Test</Badge>}
+                    </p>
+                    <p className="mt-0.5 font-mono text-xs text-muted-foreground">
+                      {key.keyPrefix}…
+                    </p>
+                    {key.lastUsedAt ? (
+                      <p className="mt-0.5 text-xs text-muted-foreground">
+                        Last used {new Date(key.lastUsedAt).toLocaleString()}
+                      </p>
+                    ) : (
+                      <p className="mt-0.5 text-xs text-muted-foreground">Never used</p>
                     )}
-                  </p>
-                  <p className="text-muted-foreground text-xs mt-0.5 font-mono">{key.keyPrefix}…</p>
-                  {key.lastUsedAt ? (
-                    <p className="text-muted-foreground text-xs mt-0.5">
-                      Last used {new Date(key.lastUsedAt).toLocaleString()}
-                    </p>
-                  ) : (
-                    <p className="text-muted-foreground text-xs mt-0.5">Never used</p>
-                  )}
-                  {key.expiresAt && (
-                    <p className="text-yellow-600 text-xs mt-0.5">
-                      Expires {new Date(key.expiresAt).toLocaleDateString()}
-                    </p>
-                  )}
-                </div>
-                <button
-                  type="button"
-                  onClick={() => handleRevoke(key.id)}
-                  className="px-3 py-1.5 text-xs text-red-400 hover:text-red-300 hover:bg-red-900/20 rounded-lg transition-colors"
-                >
-                  Revoke
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
+                    {key.expiresAt && (
+                      <p className="mt-0.5 text-xs text-amber-600">
+                        Expires {new Date(key.expiresAt).toLocaleDateString()}
+                      </p>
+                    )}
+                  </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="text-destructive hover:text-destructive"
+                    onClick={() => handleRevoke(key.id)}
+                  >
+                    Revoke
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
