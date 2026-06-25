@@ -2,8 +2,34 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
-import Badge from "@/components/Badge";
-import Modal from "@/components/Modal";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { api } from "@/lib/api";
 
 interface User {
@@ -18,6 +44,12 @@ interface User {
 }
 
 const fmt = (d?: string | null) => (d ? new Date(d).toLocaleString() : null);
+
+const STATUS_VARIANT: Record<string, "success" | "secondary" | "destructive"> = {
+  active: "success",
+  suspended: "secondary",
+  deleted: "destructive",
+};
 
 interface UsersResponse {
   users?: User[];
@@ -48,7 +80,6 @@ export default function UsersPage() {
     toastTimer.current = setTimeout(() => setToast(null), 3000);
   }, []);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: data loader intentionally runs on mount / when the route key changes; it closes over stable state setters
   const loadUsers = useCallback(async () => {
     setLoading(true);
     try {
@@ -71,10 +102,10 @@ export default function UsersPage() {
     } finally {
       setLoading(false);
     }
-  }, [page, search, statusFilter]);
+  }, [page, search, statusFilter, showToast]);
 
   useEffect(() => {
-    loadUsers();
+    void loadUsers();
   }, [loadUsers]);
 
   async function handleToggleStatus(user: User) {
@@ -120,9 +151,8 @@ export default function UsersPage() {
 
   return (
     <div className="space-y-6">
-      {/* Toast */}
       {toast && (
-        <div className="fixed top-4 right-4 z-50 rounded-lg bg-primary px-4 py-3 text-sm text-foreground shadow-lg">
+        <div className="fixed top-4 right-4 z-50 rounded-lg bg-primary px-4 py-3 text-sm text-primary-foreground shadow-lg">
           {toast}
         </div>
       )}
@@ -134,172 +164,152 @@ export default function UsersPage() {
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">{total} total users</p>
         </div>
-        <button
-          type="button"
-          onClick={() => setShowInviteModal(true)}
-          className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-foreground hover:bg-primary/90 transition-colors"
-        >
+        <Button type="button" onClick={() => setShowInviteModal(true)}>
           Invite user
-        </button>
+        </Button>
       </div>
 
       {/* Filters */}
       <div className="flex flex-wrap gap-3">
-        <input
+        <Input
           type="text"
-          placeholder="Search by email or name..."
+          placeholder="Search by email or name…"
           value={search}
           onChange={(e) => {
             setSearch(e.target.value);
             setPage(1);
           }}
-          className="rounded-lg bg-card border border-border px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none w-64"
+          className="w-64"
         />
-        <select
+        <Select
           value={statusFilter}
-          onChange={(e) => {
-            setStatusFilter(e.target.value);
+          onValueChange={(v) => {
+            setStatusFilter(v);
             setPage(1);
           }}
-          className="rounded-lg bg-card border border-border px-3 py-2 text-sm text-foreground focus:border-ring focus:outline-none"
         >
-          <option value="all">All Status</option>
-          <option value="active">Active</option>
-          <option value="suspended">Suspended</option>
-        </select>
+          <SelectTrigger className="w-40">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Status</SelectItem>
+            <SelectItem value="active">Active</SelectItem>
+            <SelectItem value="suspended">Suspended</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
-      {/* Table */}
-      <div className="rounded-xl bg-card border border-border overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border bg-card/80">
-                <th className="px-5 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  User
-                </th>
-                <th className="px-5 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  Roles
-                </th>
-                <th className="px-5 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-5 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  Created
-                </th>
-                <th className="px-5 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  Last Login
-                </th>
-                <th className="px-5 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {loading && (
-                <tr>
-                  <td colSpan={6} className="px-5 py-8 text-center text-muted-foreground">
-                    Loading…
-                  </td>
-                </tr>
-              )}
-              {!loading && users.length === 0 && (
-                <tr>
-                  <td colSpan={6} className="px-5 py-8 text-center text-muted-foreground">
-                    No users found.
-                  </td>
-                </tr>
-              )}
-              {!loading &&
-                users.map((u) => (
-                  <tr key={u.id} className="hover:bg-accent/50 transition-colors">
-                    <td className="px-5 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-primary/15 text-xs font-medium text-primary">
-                          {(u.displayName?.[0] ?? u.email[0]).toUpperCase()}
-                        </div>
-                        <div>
-                          <p className="font-medium text-foreground">{u.displayName ?? u.email}</p>
-                          <div className="flex items-center gap-1.5">
-                            <p className="text-xs text-muted-foreground">{u.email}</p>
-                            {u.emailVerifiedAt ? (
-                              <span
-                                className="text-[10px] text-green-400"
-                                title={`Verified ${fmt(u.emailVerifiedAt)}`}
-                              >
-                                ✓ verified
-                              </span>
-                            ) : (
-                              <span
-                                className="text-[10px] text-yellow-400"
-                                title="Email not verified"
-                              >
-                                unverified
-                              </span>
-                            )}
+      <Card>
+        <CardContent className="pt-6">
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>User</TableHead>
+                  <TableHead>Roles</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Created</TableHead>
+                  <TableHead>Last Login</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {loading && (
+                  <TableRow>
+                    <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
+                      Loading…
+                    </TableCell>
+                  </TableRow>
+                )}
+                {!loading && users.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
+                      No users found.
+                    </TableCell>
+                  </TableRow>
+                )}
+                {!loading &&
+                  users.map((u) => (
+                    <TableRow key={u.id}>
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-primary/15 text-xs font-medium text-primary">
+                            {(u.displayName?.[0] ?? u.email[0]).toUpperCase()}
+                          </div>
+                          <div>
+                            <p className="font-medium text-foreground">
+                              {u.displayName ?? u.email}
+                            </p>
+                            <div className="flex items-center gap-1.5">
+                              <p className="text-xs text-muted-foreground">{u.email}</p>
+                              {u.emailVerifiedAt ? (
+                                <span
+                                  className="text-[10px] text-emerald-500"
+                                  title={`Verified ${fmt(u.emailVerifiedAt)}`}
+                                >
+                                  ✓ verified
+                                </span>
+                              ) : (
+                                <span
+                                  className="text-[10px] text-amber-500"
+                                  title="Email not verified"
+                                >
+                                  unverified
+                                </span>
+                              )}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </td>
-                    <td className="px-5 py-4">
-                      <div className="flex flex-wrap gap-1">
-                        {(u.roles?.length ? u.roles : ["user"]).map((r) => (
-                          <span
-                            key={r}
-                            className={`rounded-full px-2 py-0.5 text-[10px] font-medium ring-1 ${
-                              r === "admin"
-                                ? "bg-primary/15 text-primary ring-primary/30"
-                                : "bg-muted text-muted-foreground ring-border"
-                            }`}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-wrap gap-1">
+                          {(u.roles?.length ? u.roles : ["user"]).map((r) => (
+                            <Badge key={r} variant={r === "admin" ? "default" : "secondary"}>
+                              {r}
+                            </Badge>
+                          ))}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={STATUS_VARIANT[u.status] ?? "outline"}>{u.status}</Badge>
+                      </TableCell>
+                      <TableCell className="text-xs text-muted-foreground">
+                        {fmt(u.createdAt) ?? "—"}
+                      </TableCell>
+                      <TableCell className="text-xs text-muted-foreground">
+                        {fmt(u.lastLoginAt) ?? "Never"}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-1">
+                          <Button asChild variant="ghost" size="sm">
+                            <Link href={`/admin/users/${u.id}`}>View</Link>
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleToggleStatus(u)}
                           >
-                            {r}
-                          </span>
-                        ))}
-                      </div>
-                    </td>
-                    <td className="px-5 py-4">
-                      <Badge status={u.status} />
-                    </td>
-                    <td className="px-5 py-4 text-muted-foreground text-xs">
-                      {fmt(u.createdAt) ?? "—"}
-                    </td>
-                    <td className="px-5 py-4 text-muted-foreground text-xs">
-                      {fmt(u.lastLoginAt) ?? "Never"}
-                    </td>
-                    <td className="px-5 py-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <Link
-                          href={`/admin/users/${u.id}`}
-                          className="rounded px-2 py-1 text-xs text-primary hover:bg-primary/10 transition-colors"
-                        >
-                          View
-                        </Link>
-                        <button
-                          type="button"
-                          onClick={() => handleToggleStatus(u)}
-                          className={`rounded px-2 py-1 text-xs transition-colors ${
-                            u.status === "active"
-                              ? "text-orange-400 hover:bg-orange-900/30"
-                              : "text-green-400 hover:bg-green-900/30"
-                          }`}
-                        >
-                          {u.status === "active" ? "Suspend" : "Activate"}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleDelete(u)}
-                          className="rounded px-2 py-1 text-xs text-red-400 hover:bg-red-900/30 transition-colors"
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+                            {u.status === "active" ? "Suspend" : "Activate"}
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="text-destructive hover:text-destructive"
+                            onClick={() => handleDelete(u)}
+                          >
+                            Delete
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Pagination */}
       <div className="flex items-center justify-between text-sm text-muted-foreground">
@@ -307,66 +317,55 @@ export default function UsersPage() {
           Page {page} of {totalPages}
         </span>
         <div className="flex gap-2">
-          <button
+          <Button
             type="button"
+            variant="outline"
+            size="sm"
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page <= 1}
-            className="rounded px-3 py-1.5 bg-muted border border-border disabled:opacity-40 hover:bg-accent transition-colors"
           >
             Previous
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
+            variant="outline"
+            size="sm"
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page >= totalPages}
-            className="rounded px-3 py-1.5 bg-muted border border-border disabled:opacity-40 hover:bg-accent transition-colors"
           >
             Next
-          </button>
+          </Button>
         </div>
       </div>
 
       {/* Invite Modal */}
-      {showInviteModal && (
-        <Modal title="Invite User" onClose={() => setShowInviteModal(false)}>
-          <div className="space-y-4">
-            <div>
-              <label
-                htmlFor="page-f0"
-                className="block text-sm font-medium text-foreground/80 mb-1"
-              >
-                Email address
-              </label>
-              <input
-                id="page-f0"
-                type="email"
-                placeholder="user@example.com"
-                value={inviteEmail}
-                onChange={(e) => setInviteEmail(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleInvite()}
-                className="w-full rounded-lg bg-muted border border-border px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none"
-              />
-            </div>
-            <div className="flex justify-end gap-3">
-              <button
-                type="button"
-                onClick={() => setShowInviteModal(false)}
-                className="rounded-lg px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleInvite}
-                disabled={inviting || !inviteEmail.trim()}
-                className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors"
-              >
-                {inviting ? "Sending…" : "Send invite"}
-              </button>
-            </div>
+      <Dialog open={showInviteModal} onOpenChange={setShowInviteModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Invite user</DialogTitle>
+            <DialogDescription>Send an invitation email to a new user.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-1.5">
+            <Label htmlFor="invite-email">Email address</Label>
+            <Input
+              id="invite-email"
+              type="email"
+              placeholder="user@example.com"
+              value={inviteEmail}
+              onChange={(e) => setInviteEmail(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleInvite()}
+            />
           </div>
-        </Modal>
-      )}
+          <DialogFooter>
+            <Button type="button" variant="ghost" onClick={() => setShowInviteModal(false)}>
+              Cancel
+            </Button>
+            <Button type="button" onClick={handleInvite} disabled={inviting || !inviteEmail.trim()}>
+              {inviting ? "Sending…" : "Send invite"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
