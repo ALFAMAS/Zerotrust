@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  Activity,
   ArrowLeft,
   Bell,
   Bot,
@@ -32,6 +33,7 @@ const navItems: NavItem[] = [
   { href: "/admin/users", icon: Users, label: "Users" },
   { href: "/admin/revenue", icon: Wallet, label: "Revenue" },
   { href: "/admin/sessions", icon: Monitor, label: "Sessions" },
+  { href: "/admin/anomaly", icon: Activity, label: "Anomaly Detection" },
   { href: "/admin/settings/auth", icon: KeyRound, label: "Auth Settings" },
   { href: "/admin/did", icon: Fingerprint, label: "Decentralized ID" },
   { href: "/admin/jit", icon: ShieldQuestion, label: "JIT Requests" },
