@@ -85,7 +85,9 @@ async function getMembership(orgId: string, userId: string) {
   const [membership] = await db
     .select()
     .from(organizationMembersTable)
-    .where(and(eq(organizationMembersTable.orgId, orgId), eq(organizationMembersTable.userId, userId)))
+    .where(
+      and(eq(organizationMembersTable.orgId, orgId), eq(organizationMembersTable.userId, userId))
+    )
     .limit(1);
   return membership;
 }
@@ -173,7 +175,11 @@ router.get("/:orgId", async (c) => {
     return c.json({ error: "FORBIDDEN", message: "Not a member of this organization" }, 403);
   }
   const db = getDb();
-  const [org] = await db.select().from(organizationsTable).where(eq(organizationsTable.id, orgId)).limit(1);
+  const [org] = await db
+    .select()
+    .from(organizationsTable)
+    .where(eq(organizationsTable.id, orgId))
+    .limit(1);
   if (!org) return c.json({ error: "NOT_FOUND", message: "Organization not found" }, 404);
   const [memberCount] = await db
     .select({ count: count() })
@@ -187,7 +193,8 @@ router.put("/:orgId", async (c) => {
   const orgId = c.req.param("orgId");
   if (!(await requireAdmin(orgId, user.id))) return c.json({ error: "FORBIDDEN" }, 403);
   const parsed = updateOrgSchema.safeParse(await c.req.json().catch(() => ({})));
-  if (!parsed.success) return c.json({ error: "VALIDATION_ERROR", message: parsed.error.issues[0]?.message }, 400);
+  if (!parsed.success)
+    return c.json({ error: "VALIDATION_ERROR", message: parsed.error.issues[0]?.message }, 400);
   const db = getDb();
   const [org] = await db
     .update(organizationsTable)
@@ -240,7 +247,9 @@ router.delete("/:orgId/members/:userId", async (c) => {
   }
   await getDb()
     .delete(organizationMembersTable)
-    .where(and(eq(organizationMembersTable.orgId, orgId), eq(organizationMembersTable.userId, userId)));
+    .where(
+      and(eq(organizationMembersTable.orgId, orgId), eq(organizationMembersTable.userId, userId))
+    );
   return c.json({ ok: true });
 });
 
@@ -249,14 +258,31 @@ router.post("/:orgId/transfer", async (c) => {
   const orgId = c.req.param("orgId");
   if (!(await requireOwner(orgId, user.id))) return c.json({ error: "FORBIDDEN" }, 403);
   const parsed = transferSchema.safeParse(await c.req.json().catch(() => ({})));
-  if (!parsed.success) return c.json({ error: "VALIDATION_ERROR", message: parsed.error.issues[0]?.message }, 400);
+  if (!parsed.success)
+    return c.json({ error: "VALIDATION_ERROR", message: parsed.error.issues[0]?.message }, 400);
   const db = getDb();
   const newOwner = await getMembership(orgId, parsed.data.newOwnerId);
   if (!newOwner) return c.json({ error: "NOT_FOUND", message: "New owner must be a member" }, 404);
   await db.transaction(async (tx) => {
-    await tx.update(organizationsTable).set({ ownerId: parsed.data.newOwnerId, updatedAt: new Date() }).where(eq(organizationsTable.id, orgId));
-    await tx.update(organizationMembersTable).set({ role: "admin" }).where(and(eq(organizationMembersTable.orgId, orgId), eq(organizationMembersTable.userId, user.id)));
-    await tx.update(organizationMembersTable).set({ role: "owner" }).where(and(eq(organizationMembersTable.orgId, orgId), eq(organizationMembersTable.userId, parsed.data.newOwnerId)));
+    await tx
+      .update(organizationsTable)
+      .set({ ownerId: parsed.data.newOwnerId, updatedAt: new Date() })
+      .where(eq(organizationsTable.id, orgId));
+    await tx
+      .update(organizationMembersTable)
+      .set({ role: "admin" })
+      .where(
+        and(eq(organizationMembersTable.orgId, orgId), eq(organizationMembersTable.userId, user.id))
+      );
+    await tx
+      .update(organizationMembersTable)
+      .set({ role: "owner" })
+      .where(
+        and(
+          eq(organizationMembersTable.orgId, orgId),
+          eq(organizationMembersTable.userId, parsed.data.newOwnerId)
+        )
+      );
   });
   return c.json({ ok: true });
 });
@@ -265,7 +291,10 @@ router.get("/:orgId/invites", async (c) => {
   const user = c.get("user");
   const orgId = c.req.param("orgId");
   if (!(await requireAdmin(orgId, user.id))) return c.json({ error: "FORBIDDEN" }, 403);
-  const invites = await getDb().select().from(organizationInvitesTable).where(eq(organizationInvitesTable.orgId, orgId));
+  const invites = await getDb()
+    .select()
+    .from(organizationInvitesTable)
+    .where(eq(organizationInvitesTable.orgId, orgId));
   return c.json({ invites });
 });
 
@@ -274,12 +303,20 @@ router.post("/:orgId/invites", async (c) => {
   const orgId = c.req.param("orgId");
   if (!(await requireAdmin(orgId, user.id))) return c.json({ error: "FORBIDDEN" }, 403);
   const parsed = inviteSchema.safeParse(await c.req.json().catch(() => ({})));
-  if (!parsed.success) return c.json({ error: "VALIDATION_ERROR", message: parsed.error.issues[0]?.message }, 400);
+  if (!parsed.success)
+    return c.json({ error: "VALIDATION_ERROR", message: parsed.error.issues[0]?.message }, 400);
   const token = randomBytes(24).toString("hex");
   const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
   const [invite] = await getDb()
     .insert(organizationInvitesTable)
-    .values({ orgId, email: parsed.data.email.toLowerCase(), role: parsed.data.role, token, invitedBy: user.id, expiresAt })
+    .values({
+      orgId,
+      email: parsed.data.email.toLowerCase(),
+      role: parsed.data.role,
+      token,
+      invitedBy: user.id,
+      expiresAt,
+    })
     .returning();
   return c.json({ invite }, 201);
 });
@@ -290,7 +327,12 @@ router.delete("/:orgId/invites/:inviteId", async (c) => {
   if (!(await requireAdmin(orgId, user.id))) return c.json({ error: "FORBIDDEN" }, 403);
   await getDb()
     .delete(organizationInvitesTable)
-    .where(and(eq(organizationInvitesTable.orgId, orgId), eq(organizationInvitesTable.id, c.req.param("inviteId"))));
+    .where(
+      and(
+        eq(organizationInvitesTable.orgId, orgId),
+        eq(organizationInvitesTable.id, c.req.param("inviteId"))
+      )
+    );
   return c.json({ ok: true });
 });
 
@@ -349,7 +391,11 @@ router.get("/:orgId/security/policy", async (c) => {
   const orgId = c.req.param("orgId");
   if (!(await requireAdmin(orgId, user.id))) return c.json({ error: "FORBIDDEN" }, 403);
   const db = getDb();
-  const [policy] = await db.select().from(orgSecurityPoliciesTable).where(eq(orgSecurityPoliciesTable.orgId, orgId)).limit(1);
+  const [policy] = await db
+    .select()
+    .from(orgSecurityPoliciesTable)
+    .where(eq(orgSecurityPoliciesTable.orgId, orgId))
+    .limit(1);
   return c.json({
     policy: policy ?? {
       orgId,
@@ -371,7 +417,8 @@ router.put("/:orgId/security/policy", async (c) => {
   const orgId = c.req.param("orgId");
   if (!(await requireAdmin(orgId, user.id))) return c.json({ error: "FORBIDDEN" }, 403);
   const parsed = securityPolicySchema.safeParse(await c.req.json().catch(() => ({})));
-  if (!parsed.success) return c.json({ error: "VALIDATION_ERROR", message: parsed.error.issues[0]?.message }, 400);
+  if (!parsed.success)
+    return c.json({ error: "VALIDATION_ERROR", message: parsed.error.issues[0]?.message }, 400);
   const [policy] = await getDb()
     .insert(orgSecurityPoliciesTable)
     .values({ orgId, ...parsed.data, updatedBy: user.id })
@@ -395,15 +442,23 @@ router.post("/:orgId/scim/tokens", async (c) => {
   const orgId = c.req.param("orgId");
   if (!(await requireAdmin(orgId, user.id))) return c.json({ error: "FORBIDDEN" }, 403);
   const parsed = scimTokenSchema.safeParse(await c.req.json().catch(() => ({})));
-  if (!parsed.success) return c.json({ error: "VALIDATION_ERROR", message: parsed.error.issues[0]?.message }, 400);
-  return c.json(await createOrgScimToken({ orgId, name: parsed.data.name, createdBy: user.id }), 201);
+  if (!parsed.success)
+    return c.json({ error: "VALIDATION_ERROR", message: parsed.error.issues[0]?.message }, 400);
+  return c.json(
+    await createOrgScimToken({ orgId, name: parsed.data.name, createdBy: user.id }),
+    201
+  );
 });
 
 router.post("/:orgId/scim/tokens/:tokenId/rotate", async (c) => {
   const user = c.get("user");
   const orgId = c.req.param("orgId");
   if (!(await requireAdmin(orgId, user.id))) return c.json({ error: "FORBIDDEN" }, 403);
-  const result = await rotateOrgScimToken({ orgId, tokenId: c.req.param("tokenId"), rotatedBy: user.id });
+  const result = await rotateOrgScimToken({
+    orgId,
+    tokenId: c.req.param("tokenId"),
+    rotatedBy: user.id,
+  });
   if (!result) return c.json({ error: "NOT_FOUND" }, 404);
   return c.json(result);
 });
