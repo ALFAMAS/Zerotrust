@@ -1493,3 +1493,165 @@ describe("POST /verify-email", () => {
     expect(body.alreadyVerified).toBe(true);
   });
 });
+
+// ── OAuth account-takeover defense (callback identity merge) ──────────────────
+//
+// When an OAuth callback resolves an email that already belongs to an existing
+// account, the new social identity may only be merged in when the IdP asserts
+// the email is verified. Otherwise an attacker who registers at the provider
+// with a victim's address could log straight into the victim's account.
+describe("GET /oauth/:provider/callback — account-linking safety", () => {
+  let db: ReturnType<typeof makeDbChain>;
+
+  beforeEach(async () => {
+    vi.resetModules();
+    db = makeDbChain([]);
+    const { getDb } = await import("../db");
+    vi.mocked(getDb).mockReturnValue(db as any);
+  });
+
+  afterEach(() => vi.clearAllMocks());
+
+  async function callbackWithProfile(profile: any) {
+    const router = await getRouter();
+    const app = new Hono().route("/", router);
+    const stateRes = await app.request("/oauth/state", { method: "POST" });
+    const { state } = await stateRes.json();
+    const { getProviderAdapter } = await import("../oauth/provider.factory");
+    vi.mocked(getProviderAdapter).mockReturnValue({
+      exchangeCode: vi.fn().mockResolvedValue({ tokens: {}, profile }),
+    } as any);
+    return { app, state };
+  }
+
+  it("refuses to merge an UNVERIFIED provider email into a pre-existing account", async () => {
+    // Existing local account for the same email, no google identity linked yet.
+    db.limit.mockResolvedValueOnce([
+      makeActiveUser({ email: "victim@example.com", oauthProviders: [] }),
+    ]);
+    const { app, state } = await callbackWithProfile({
+      id: "attacker-google-id",
+      email: "victim@example.com",
+      name: "Mallory",
+      emailVerified: false,
+    });
+
+    const res = await app.request(`/oauth/google/callback?code=abc&state=${state}`);
+    expect(res.status).toBe(403);
+    expect((await res.json()).error).toBe("OAUTH_EMAIL_UNVERIFIED");
+    // Critically: no session/identity write happened.
+    expect(db.update).not.toHaveBeenCalled();
+  });
+
+  it("merges + logs in when the provider email IS verified", async () => {
+    db.limit.mockResolvedValueOnce([
+      makeActiveUser({ email: "user@example.com", oauthProviders: [] }),
+    ]);
+    db.returning.mockResolvedValueOnce([makeSession()]); // session insert
+    const { app, state } = await callbackWithProfile({
+      id: "g-verified",
+      email: "user@example.com",
+      name: "User",
+      emailVerified: true,
+    });
+
+    const res = await app.request(`/oauth/google/callback?code=abc&state=${state}`);
+    expect(res.status).toBe(302);
+    expect(res.headers.get("location")).toContain("/login?oauth_code=");
+  });
+
+  it("allows an already-linked identity through even if emailVerified is now false", async () => {
+    db.limit.mockResolvedValueOnce([
+      makeActiveUser({
+        email: "user@example.com",
+        oauthProviders: [{ provider: "google", providerId: "g-known" }],
+      }),
+    ]);
+    db.returning.mockResolvedValueOnce([makeSession()]);
+    const { app, state } = await callbackWithProfile({
+      id: "g-known",
+      email: "user@example.com",
+      emailVerified: false,
+    });
+
+    const res = await app.request(`/oauth/google/callback?code=abc&state=${state}`);
+    expect(res.status).toBe(302);
+  });
+});
+
+// ── POST /auth/me/link — verified-only OAuth linking ─────────────────────────
+//
+// Linking must be driven by a real code exchange, never a self-asserted provider
+// user id. These tests lock in that the endpoint verifies the identity.
+describe("POST /auth/me/link", () => {
+  let db: ReturnType<typeof makeDbChain>;
+
+  beforeEach(async () => {
+    vi.resetModules();
+    db = makeDbChain([]);
+    const { getDb } = await import("../db");
+    vi.mocked(getDb).mockReturnValue(db as any);
+  });
+
+  afterEach(() => vi.clearAllMocks());
+
+  async function link(body: unknown, auth = true) {
+    const router = await getRouter();
+    const app = new Hono().route("/", router);
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    if (auth) headers["x-test-user-id"] = USER_ID;
+    return app.request("/me/link", { method: "POST", headers, body: JSON.stringify(body) });
+  }
+
+  function mockAdapter(profile: any) {
+    return import("../oauth/provider.factory").then(({ getProviderAdapter }) => {
+      vi.mocked(getProviderAdapter).mockReturnValue({
+        exchangeCode: vi.fn().mockResolvedValue({ tokens: {}, profile }),
+      } as any);
+    });
+  }
+
+  it("401s when unauthenticated", async () => {
+    const res = await link({ provider: "google", code: "x" }, false);
+    expect(res.status).toBe(401);
+  });
+
+  it("400s without provider or code", async () => {
+    const res = await link({ provider: "google" });
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toBe("INVALID_REQUEST");
+  });
+
+  it("400s for an unsupported provider", async () => {
+    const res = await link({ provider: "twitter", code: "x" });
+    expect(res.status).toBe(400);
+  });
+
+  it("rejects an unverified provider email (no self-asserted identity trusted)", async () => {
+    await mockAdapter({ id: "g-1", email: "u@example.com", emailVerified: false });
+    const res = await link({ provider: "google", code: "abc" });
+    expect(res.status).toBe(403);
+    expect((await res.json()).error).toBe("OAUTH_EMAIL_UNVERIFIED");
+    expect(db.update).not.toHaveBeenCalled();
+  });
+
+  it("409s when the verified identity already belongs to another user", async () => {
+    await mockAdapter({ id: "g-1", email: "u@example.com", emailVerified: true });
+    db.limit.mockResolvedValueOnce([{ id: "different-user" }]); // existingLink lookup
+    const res = await link({ provider: "google", code: "abc" });
+    expect(res.status).toBe(409);
+    expect((await res.json()).error).toBe("ALREADY_LINKED");
+  });
+
+  it("links a verified identity to the current account", async () => {
+    await mockAdapter({ id: "g-1", email: "u@example.com", emailVerified: true });
+    db.limit
+      .mockResolvedValueOnce([]) // no other account holds the identity
+      .mockResolvedValueOnce([{ oauthProviders: [] }]); // current user
+    const res = await link({ provider: "google", code: "abc" });
+    expect(res.status).toBe(200);
+    expect((await res.json()).linked).toBe(true);
+    const setArg = db.set.mock.calls.at(-1)?.[0];
+    expect(setArg.oauthProviders[0]).toMatchObject({ provider: "google", providerId: "g-1" });
+  });
+});

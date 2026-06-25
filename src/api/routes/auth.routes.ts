@@ -995,6 +995,25 @@ router.get("/oauth/:provider/callback", rateLimit({ points: 20, windowSecs: 60 }
       const providers: any[] = (user.oauthProviders as any[]) || [];
       const has = providers.some((p) => p.provider === provider && p.providerId === providerId);
       if (!has) {
+        // SECURITY (OAuth account-takeover defense): only merge a *new* social
+        // identity into a pre-existing account when the IdP asserts the email is
+        // verified. Several providers will hand back an address the user has not
+        // proven they own; without this gate an attacker who signs up at the IdP
+        // with a victim's email could link into — and thus authenticate as — the
+        // victim's existing account. Already-linked identities skip this check
+        // (the link was established through a prior successful flow).
+        if (profile.emailVerified !== true) {
+          return c.json(
+            {
+              error: "OAUTH_EMAIL_UNVERIFIED",
+              message:
+                `An account already exists for this email. Sign in with your existing method, ` +
+                `then link ${provider} from account settings. (${provider} did not return a ` +
+                `verified email, so we can't merge the accounts automatically.)`,
+            },
+            403
+          );
+        }
         await db
           .update(usersTable)
           .set({
@@ -1392,44 +1411,85 @@ router.delete("/oauth/:provider", authMiddleware, async (c) => {
 
 // ── POST /auth/me/link — link an OAuth identity to the current account ───────
 // Allows a signed-in user to link an additional OAuth provider to their existing
-// account instead of creating a duplicate. Requires the OAuth flow to complete
-// first, then the frontend calls this with the provider + providerUserId.
-router.post("/me/link", authMiddleware, async (c) => {
+// account instead of creating a duplicate.
+//
+// SECURITY: the identity to link is established by exchanging a real OAuth
+// authorization `code` through the provider adapter — never by trusting a
+// client-supplied provider user id. The previous contract accepted a raw
+// `providerUserId`, which let any signed-in user attach an arbitrary (or a
+// victim's) provider identity to their account with no proof of control. The
+// caller drives the standard `GET /oauth/:provider/authorize` flow, captures the
+// returned `code` (+ `codeVerifier` for PKCE providers), and posts it here.
+router.post("/me/link", authMiddleware, rateLimit({ points: 10, windowSecs: 60 }), async (c) => {
   try {
     const user = c.get("user");
-    const { provider, providerUserId, providerEmail } = await c.req.json().catch(() => ({}));
+    const { provider, code, codeVerifier } = await c.req.json().catch(() => ({}));
 
-    if (!provider || !providerUserId) {
+    if (!provider || !code) {
       return c.json(
         {
           error: "INVALID_REQUEST",
-          message: "provider and providerUserId required",
+          message: "provider and code are required",
         },
         400
       );
     }
 
-    const supported = ["google", "github", "apple", "facebook"];
-    if (!supported.includes(provider)) {
+    if (!isSupportedProvider(provider)) {
       return c.json(
         {
           error: "INVALID_REQUEST",
-          message: `Unsupported provider. Supported: ${supported.join(", ")}`,
+          message: `Unsupported provider '${provider}'`,
         },
         400
+      );
+    }
+
+    // Exchange the code for a verified provider profile. We never trust the
+    // client to tell us *who* they are on the provider side.
+    const adapter = getProviderAdapter(provider);
+    let result: Awaited<ReturnType<typeof adapter.exchangeCode>>;
+    try {
+      result = await adapter.exchangeCode(code, codeVerifier ?? undefined);
+    } catch (err) {
+      logger.warn("OAuth link code exchange failed", {
+        provider,
+        error: err instanceof Error ? err.message : String(err),
+      });
+      return c.json(
+        { error: "PROVIDER_ERROR", message: "Could not verify the OAuth authorization" },
+        502
+      );
+    }
+
+    const profile: any = result?.profile;
+    const providerUserId = profile?.id != null ? String(profile.id) : undefined;
+    if (!profile || !providerUserId) {
+      return c.json(
+        { error: "PROVIDER_ERROR", message: "Provider did not return an identity" },
+        502
+      );
+    }
+    if (profile.emailVerified !== true) {
+      return c.json(
+        {
+          error: "OAUTH_EMAIL_UNVERIFIED",
+          message: `${provider} did not return a verified email; cannot link this identity.`,
+        },
+        403
       );
     }
 
     const db = getDb();
 
-    // Check if this provider account is already linked to someone else
+    // Refuse to attach a provider identity already bound to a different account.
     const [existingLink] = await db
-      .select({ id: usersTable.id, email: usersTable.email })
+      .select({ id: usersTable.id })
       .from(usersTable)
       .where(
         and(
           eq(usersTable.status, "active"),
-          sql`${usersTable.oauthProviders} @> ${JSON.stringify([{ provider, providerUserId }])}::jsonb`
+          sql`${usersTable.oauthProviders} @> ${JSON.stringify([{ provider, providerId: providerUserId }])}::jsonb`
         )
       )
       .limit(1);
@@ -1444,7 +1504,6 @@ router.post("/me/link", authMiddleware, async (c) => {
       );
     }
 
-    // Check if already linked to current user
     const [currentUser] = await db
       .select({ oauthProviders: usersTable.oauthProviders })
       .from(usersTable)
@@ -1452,22 +1511,15 @@ router.post("/me/link", authMiddleware, async (c) => {
       .limit(1);
 
     const providers: any[] = (currentUser?.oauthProviders as any) ?? [];
-    if (providers.some((p: any) => p.provider === provider)) {
-      return c.json(
-        {
-          error: "ALREADY_LINKED",
-          message: `This account already has ${provider} linked`,
-        },
-        409
-      );
+    if (providers.some((p: any) => p.provider === provider && p.providerId === providerUserId)) {
+      return c.json({ linked: true, provider, alreadyLinked: true });
     }
 
-    // Link the provider
     const newProvider = {
       provider,
-      providerUserId,
-      email: providerEmail ?? null,
-      linkedAt: new Date().toISOString(),
+      providerId: providerUserId,
+      email: profile.email ?? null,
+      connectedAt: new Date(),
     };
 
     await db
