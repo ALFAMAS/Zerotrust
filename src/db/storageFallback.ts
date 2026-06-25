@@ -2,6 +2,13 @@
  * Helpers for treating optional feature tables as unavailable when a deployment
  * has not run the latest migrations yet.
  */
+function escapeRegExp(s: string): string {
+  // SECURITY (CWE-1333): table/column names are interpolated into a RegExp;
+  // escape metacharacters so a name containing regex syntax can't break the
+  // pattern or cause exponential backtracking.
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 export function isUnavailableStorageError(
   error: unknown,
   tableNames: string[],
@@ -15,7 +22,7 @@ export function isUnavailableStorageError(
     const message = typeof candidate.message === "string" ? candidate.message : "";
     if (
       tableNames.some((table) =>
-        new RegExp(`relation\\s+["']?(?:\\w+\\.)?${table}["']?\\s+does not exist`, "i").test(
+        new RegExp(`relation\\s+["']?(?:\\w+\\.)?${escapeRegExp(table)}["']?\\s+does not exist`, "i").test(
           message
         )
       )
@@ -24,7 +31,7 @@ export function isUnavailableStorageError(
     }
     if (
       columnNames.some((column) =>
-        new RegExp(`column\\s+["']?${column}["']?\\s+does not exist`, "i").test(message)
+        new RegExp(`column\\s+["']?${escapeRegExp(column)}["']?\\s+does not exist`, "i").test(message)
       )
     ) {
       return true;

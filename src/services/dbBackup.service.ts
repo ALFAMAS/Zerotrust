@@ -132,8 +132,10 @@ function run(cmd: string, args: string[], env?: NodeJS.ProcessEnv): Promise<numb
     const child = spawn(cmd, args, {
       env: { ...process.env, ...env },
       stdio: ["ignore", "ignore", "pipe"],
-      // shell:true keeps Windows compatibility for .cmd/.exe resolution
-      shell: process.platform === "win32",
+      // SECURITY (CWE-78): never use shell:true — args are passed as a literal
+      // argv array so shell metacharacters in DATABASE_URL or file paths cannot
+      // be interpreted. pg_dump / pg_restore resolve on PATH without a shell.
+      shell: false,
     });
     let stderr = "";
     child.stderr?.on("data", (d) => (stderr += d.toString()));

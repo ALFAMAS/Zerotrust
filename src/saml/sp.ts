@@ -15,7 +15,7 @@ export interface SAMLIdPConfig {
   ssoUrl: string;
   certificate: string; // PEM or base64 DER
   wantAssertionsSigned?: boolean;
-  signatureAlgorithm?: "sha1" | "sha256" | "sha512";
+  signatureAlgorithm?: "sha256" | "sha512";
 }
 
 export interface SAMLSPConfig {

@@ -9,6 +9,7 @@ import { getLogger } from "../logger/index.js";
 import { rateLimit } from "../middleware/rateLimiting.js";
 import { TokenService } from "../services/token.service.js";
 import { getClientIp } from "../shared/clientIp.js";
+import { safeRelativeRedirect } from "../shared/safeRedirect.js";
 import type { HonoEnv } from "../shared/types.js";
 import { buildAuthnRequest, buildSPMetadata, consumeRelayState, parseSAMLResponse } from "./sp.js";
 
@@ -67,7 +68,10 @@ router.get("/saml/login", rateLimit({ points: 20, windowSecs: 60 }), (c) => {
     );
   }
 
-  const redirect = c.req.query("redirect");
+  // SECURITY (CWE-601): sanitize the user-supplied `redirect` before it is
+  // stored in RelayState and later used as the post-login success URL (which
+  // carries access/refresh tokens). Only same-origin relative paths are allowed.
+  const redirect = safeRelativeRedirect(c.req.query("redirect"), "/");
   const { redirectUrl } = buildAuthnRequest(spConfig, idpConfig, {
     redirectUrl: redirect,
   });
@@ -232,8 +236,11 @@ router.post("/saml/acs", rateLimit({ points: 20, windowSecs: 60 }), async (c) =>
     }
 
     const redirectTo = relayEntry?.redirectUrl ?? process.env.LOGIN_SUCCESS_URL ?? "/";
+    // redirectTo was sanitized at /saml/login entry; re-validate defensively in
+    // case RelayState was replayed/tampered after storage.
+    const safeRedirectTo = safeRelativeRedirect(redirectTo, "/");
     const successUrl = new URL(
-      redirectTo,
+      safeRedirectTo,
       process.env.APP_URL ?? process.env.APP_BASE_URL ?? "http://localhost:3000"
     );
     successUrl.searchParams.set("access_token", accessToken);

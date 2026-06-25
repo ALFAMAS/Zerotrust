@@ -87,8 +87,28 @@ export class LDAPClient {
   }
 
   private buildFilter(template: string, vars: Record<string, string>): string {
+    // SECURITY (CWE-1427 / CWE-90): LDAP filter injection — user-controlled
+    // values (e.g. `username`) are substituted into an RFC 4515 filter. Escape
+    // the metacharacters `*`, `(`, `)`, `\`, and NUL per RFC 4515 §3.
+    const escapeLDAPValue = (v: string): string =>
+      v.replace(/[*()\\\x00]/g, (m) => {
+        switch (m) {
+          case "*":
+            return "\\2a";
+          case "(":
+            return "\\28";
+          case ")":
+            return "\\29";
+          case "\\":
+            return "\\5c";
+          default:
+            return "\\00"; // NUL
+        }
+      });
+    // Use split+join (literal) instead of new RegExp(...) so a `k` containing
+    // regex metacharacters can't break the substitution (CWE-1333).
     return Object.entries(vars).reduce(
-      (f, [k, v]) => f.replace(new RegExp(`{{${k}}}`, "g"), v),
+      (f, [k, v]) => f.split(`{{${k}}}`).join(escapeLDAPValue(v)),
       template
     );
   }

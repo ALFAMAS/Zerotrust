@@ -114,3 +114,25 @@ These global skills map to the work this repo involves (invoke with `/<name>`):
 | `/verify` · `/run`         | Confirm a change works in the running app, not just in tests             |
 | `/changelog-generator`     | Release notes (repo uses semantic-release + conventional commits)        |
 | `/graphify`                | Refresh the knowledge graph (`graphify-out/`) — first step of shipping   |
+
+## Security hardening rules (mandatory for all agents)
+
+These rules close the CWE classes found in the 2026-06-26 audit. Every agent
+working in this repo (Claude Code, Codex, OpenCode, Hermes) MUST follow them.
+Re-introducing any of these patterns is a review blocker.
+
+| CWE | Rule | Canonical fix |
+| --- | --- | --- |
+| **CWE-601** Open redirect | Never use a request-supplied URL as a redirect target. Sanitize with `safeRelativeRedirect()` from `src/shared/safeRedirect.ts` — only same-origin relative paths (`/...`, no `//`, no `/\`, no control chars). For OAuth/OIDC clients use `isRegisteredRedirectUri()` allowlist. | `src/shared/safeRedirect.ts` |
+| **CWE-918** SSRF | Any server-side `fetch`/HTTP whose host comes from user input (DID, webhook URL, federation provider config, image proxy, etc.) must reject IP literals, private/loopback/link-local/metadata hosts, non-default ports, and follow `redirect: "error"` with a timeout. | `assertSafeFetchHost` in `src/did/resolver.ts` |
+| **CWE-78** OS command injection | Never `spawn(cmd, args, { shell: true })`. Always pass args as a literal argv with `shell: false`. Never interpolate user input into a command string. If a Windows `.cmd` shim is unavoidable, gate `shell:true` on the command literally ending in `.cmd`. | `run()` in `src/services/dbBackup.service.ts` |
+| **CWE-22** Path traversal | Filenames/object keys written to disk or S3 must be server-derived (uuid + timestamp + validated extension). Never use the client filename directly. Validate extensions against an allowlist map (`safeExtensionForContentType`, `ALLOWED_AVATAR_TYPES`). | `src/api/routes/admin.routes.ts`, `auth.routes.ts` avatar upload |
+| **CWE-532** Secrets in logs | Log only identifiers (userId, providerId, scope, client_id). Never log raw token/secret/password values. Do not put access/refresh tokens in redirect URLs — use the short-lived exchange-code pattern (see `POST /oauth/exchange`). | OAuth exchange flow in `auth.routes.ts` |
+| **CWE-1333** ReDoS / regex injection | Never `new RegExp(\`...${interpolated}...\`)` with unescaped interpolation. Escape metacharacters (`escapeRegExp`) or use `String.split().join()` for literal substitution. Avoid nested quantifiers `(a+)+` in patterns run on attacker input; cap input length for regex parsers over untrusted data (e.g. SAML XML). | `escapeRegExp` in `src/db/storageFallback.ts`, `buildFilter` in `src/ldap/client.ts` |
+| **CWE-327** Broken/risky crypto | Use SHA-256+ for hashes, AES-256-GCM for encryption, `crypto.randomBytes`/`randomUUID` for tokens. SHA-1 is only permitted for the HIBP k-anonymity breach check (`passwordBreach.service.ts`). SAML `signatureAlgorithm` must be `sha256`/`sha512` (never `sha1`). Use `scryptSync`/`argon2` with a per-key random salt, never a hardcoded salt. | `src/saml/sp.ts`, `src/services/dbBackup.service.ts` |
+| **CWE-1427** External control of identifier | When user input selects a system identifier (LDAP filter/DN, DB table/column, object key, hostname), it must be escaped/validated before use. LDAP filter values are RFC-4515-escaped; DB identifiers go through Drizzle's parameterized `sql` tag, never string interpolation. | `buildFilter` in `src/ldap/client.ts` |
+
+**Before opening a PR on auth- or crypto-touching code**, re-scan the diff
+against this table. Add a `/security-review` pass for changes to OAuth, SAML,
+MFA, WebAuthn, CSFLE, breach checks, or any new `fetch`/`spawn`/`fs.writeFile`.
+

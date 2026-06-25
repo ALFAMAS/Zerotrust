@@ -11,6 +11,7 @@ import { getSettings } from "../../models/settings.model";
 import { sendMagicLink, verifyMagicLink } from "../../services/magicLink.service";
 import { TokenService } from "../../services/token.service";
 import { getClientIp } from "../../shared/clientIp";
+import { safeRelativeRedirect } from "../../shared/safeRedirect";
 import type { HonoEnv } from "../../shared/types";
 
 const router = new Hono<HonoEnv>();
@@ -126,9 +127,12 @@ router.get("/verify", async (c) => {
     const tokens = await issueTokensForUser(result.userId, c);
 
     const appUrl = settings.appUrl || "http://localhost:3000";
-    const callbackBase = redirect || `${appUrl}/auth/callback`;
+    // SECURITY (CWE-601): never use an attacker-supplied `redirect` as the
+    // callback base — tokens must only be handed to a same-origin path. Use
+    // safeRelativeRedirect to collapse anything else to a safe default.
+    const safePath = safeRelativeRedirect(redirect, "/auth/callback");
     const callbackUrl =
-      `${callbackBase}?accessToken=${encodeURIComponent(tokens.accessToken)}` +
+      `${appUrl}${safePath}?accessToken=${encodeURIComponent(tokens.accessToken)}` +
       `&refreshToken=${encodeURIComponent(tokens.refreshToken)}`;
 
     return c.redirect(callbackUrl, 302);
