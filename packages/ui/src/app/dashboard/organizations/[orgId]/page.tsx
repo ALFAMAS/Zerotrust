@@ -3,6 +3,13 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { SkeletonCard, SkeletonTable } from "@/components/Skeleton";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useToast } from "@/context/ToastContext";
 import { api } from "../../../../lib/api";
 
@@ -275,19 +282,17 @@ export default function OrgDetailPage() {
               />
             </div>
             <div className="space-y-1">
-              <label htmlFor="page-f1" className="text-xs text-muted-foreground">
-                Role
-              </label>
-              <select
-                id="page-f1"
-                value={inviteRole}
-                onChange={(e) => setInviteRole(e.target.value)}
-                className="bg-muted border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:border-ring"
-              >
-                <option value="viewer">Viewer</option>
-                <option value="member">Member</option>
-                <option value="admin">Admin</option>
-              </select>
+              <span className="text-xs text-muted-foreground">Role</span>
+              <Select value={inviteRole} onValueChange={setInviteRole}>
+                <SelectTrigger className="w-32">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="viewer">Viewer</SelectItem>
+                  <SelectItem value="member">Member</SelectItem>
+                  <SelectItem value="admin">Admin</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <button
               type="submit"

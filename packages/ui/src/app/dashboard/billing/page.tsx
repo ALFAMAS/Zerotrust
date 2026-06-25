@@ -4,6 +4,13 @@ import { Check } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import Modal from "../../../components/Modal";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../../../components/ui/select";
 import { api } from "../../../lib/api";
 
 interface Subscription {
@@ -304,21 +311,19 @@ function BillingContent() {
         <h2 className="font-display text-lg font-semibold text-foreground">Plans</h2>
         {currencies.length > 0 && (
           <div className="flex items-center gap-2">
-            <label htmlFor="billing-currency" className="text-sm text-muted-foreground">
-              Currency
-            </label>
-            <select
-              id="billing-currency"
-              value={currency}
-              onChange={(e) => setCurrency(e.target.value)}
-              className="rounded-lg border border-border bg-card px-2 py-1 text-sm text-foreground"
-            >
-              {currencies.map((c) => (
-                <option key={c.code} value={c.code}>
-                  {c.code} · {c.symbol}
-                </option>
-              ))}
-            </select>
+            <span className="text-sm text-muted-foreground">Currency</span>
+            <Select value={currency} onValueChange={setCurrency}>
+              <SelectTrigger className="h-8 w-28">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {currencies.map((c) => (
+                  <SelectItem key={c.code} value={c.code}>
+                    {c.code} · {c.symbol}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         )}
       </div>

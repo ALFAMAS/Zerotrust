@@ -3,6 +3,13 @@
 import { useCallback, useEffect, useState } from "react";
 import EmptyState from "../../../components/EmptyState";
 import Modal from "../../../components/Modal";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../../../components/ui/select";
 import { api } from "../../../lib/api";
 
 interface Ticket {
@@ -202,19 +209,20 @@ export default function SupportPage() {
               />
             </div>
             <div>
-              <label htmlFor="page-f2" className="mb-1.5 block text-sm text-foreground/80">
-                Priority
-              </label>
-              <select
-                id="page-f2"
+              <span className="mb-1.5 block text-sm text-foreground/80">Priority</span>
+              <Select
                 value={form.priority}
-                onChange={(e) => setForm({ ...form, priority: e.target.value })}
-                className="w-full rounded-lg border border-border bg-muted px-3 py-2 text-sm text-foreground"
+                onValueChange={(v) => setForm({ ...form, priority: v })}
               >
-                <option value="low">Low</option>
-                <option value="normal">Normal</option>
-                <option value="high">High</option>
-              </select>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="low">Low</SelectItem>
+                  <SelectItem value="normal">Normal</SelectItem>
+                  <SelectItem value="high">High</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             {error && <p className="text-sm text-red-400">{error}</p>}
             <button

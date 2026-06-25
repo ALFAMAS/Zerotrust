@@ -2,7 +2,17 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
-import Badge from "@/components/Badge";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { api } from "@/lib/api";
 
 interface Review {
@@ -32,7 +42,6 @@ export default function AccessReviewsPage() {
     toastTimer.current = setTimeout(() => setToast(null), 3000);
   }, []);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: data loader intentionally runs on mount / when the route key changes; it closes over stable state setters
   const load = useCallback(async () => {
     setLoading(true);
     try {
@@ -43,10 +52,10 @@ export default function AccessReviewsPage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [showToast]);
 
   useEffect(() => {
-    load();
+    void load();
   }, [load]);
 
   async function startReview() {
@@ -65,7 +74,7 @@ export default function AccessReviewsPage() {
   return (
     <div className="space-y-6">
       {toast && (
-        <div className="fixed top-4 right-4 z-50 rounded-lg bg-primary px-4 py-3 text-sm text-foreground shadow-lg">
+        <div className="fixed top-4 right-4 z-50 rounded-lg bg-primary px-4 py-3 text-sm text-primary-foreground shadow-lg">
           {toast}
         </div>
       )}
@@ -79,92 +88,78 @@ export default function AccessReviewsPage() {
             Periodic review of privileged (non-default) role grants — SOC 2 CC6 evidence.
           </p>
         </div>
-        <button
-          type="button"
-          onClick={startReview}
-          disabled={creating}
-          className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors"
-        >
+        <Button type="button" onClick={startReview} disabled={creating}>
           {creating ? "Starting…" : "Start new review"}
-        </button>
+        </Button>
       </div>
 
-      <div className="rounded-xl bg-card border border-border overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border bg-card/80">
-                <th className="px-5 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  Review
-                </th>
-                <th className="px-5 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-5 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  Progress
-                </th>
-                <th className="px-5 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  Started by
-                </th>
-                <th className="px-5 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  Created
-                </th>
-                <th className="px-5 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  Completed
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {loading && (
-                <tr>
-                  <td colSpan={6} className="px-5 py-8 text-center text-muted-foreground">
-                    Loading…
-                  </td>
-                </tr>
-              )}
-              {!loading && reviews.length === 0 && (
-                <tr>
-                  <td colSpan={6} className="px-5 py-8 text-center text-muted-foreground">
-                    No access reviews yet. Start one to snapshot current privileged grants.
-                  </td>
-                </tr>
-              )}
-              {!loading &&
-                reviews.map((r) => (
-                  <tr key={r.id} className="hover:bg-accent/50 transition-colors">
-                    <td className="px-5 py-4">
-                      <Link
-                        href={`/admin/access-reviews/${r.id}`}
-                        className="font-medium text-primary hover:underline"
-                      >
-                        {r.title}
-                      </Link>
-                    </td>
-                    <td className="px-5 py-4">
-                      <Badge
-                        status={r.status === "completed" ? "success" : "pending"}
-                        label={r.status}
-                      />
-                    </td>
-                    <td className="px-5 py-4 text-muted-foreground text-xs">
-                      {r.itemCount - r.pendingCount}/{r.itemCount} decided
-                      {r.pendingCount > 0 && (
-                        <span className="ml-1 text-yellow-400">({r.pendingCount} pending)</span>
-                      )}
-                    </td>
-                    <td className="px-5 py-4 text-muted-foreground text-xs">
-                      {r.createdByEmail ?? "—"}
-                    </td>
-                    <td className="px-5 py-4 text-muted-foreground text-xs">{fmt(r.createdAt)}</td>
-                    <td className="px-5 py-4 text-muted-foreground text-xs">
-                      {fmt(r.completedAt)}
-                    </td>
-                  </tr>
-                ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <Card>
+        <CardContent className="pt-6">
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Review</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Progress</TableHead>
+                  <TableHead>Started by</TableHead>
+                  <TableHead>Created</TableHead>
+                  <TableHead>Completed</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {loading && (
+                  <TableRow>
+                    <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
+                      Loading…
+                    </TableCell>
+                  </TableRow>
+                )}
+                {!loading && reviews.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
+                      No access reviews yet. Start one to snapshot current privileged grants.
+                    </TableCell>
+                  </TableRow>
+                )}
+                {!loading &&
+                  reviews.map((r) => (
+                    <TableRow key={r.id}>
+                      <TableCell>
+                        <Link
+                          href={`/admin/access-reviews/${r.id}`}
+                          className="font-medium text-primary hover:underline"
+                        >
+                          {r.title}
+                        </Link>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={r.status === "completed" ? "success" : "warning"}>
+                          {r.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-xs text-muted-foreground">
+                        {r.itemCount - r.pendingCount}/{r.itemCount} decided
+                        {r.pendingCount > 0 && (
+                          <span className="ml-1 text-amber-500">({r.pendingCount} pending)</span>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-xs text-muted-foreground">
+                        {r.createdByEmail ?? "—"}
+                      </TableCell>
+                      <TableCell className="text-xs text-muted-foreground">
+                        {fmt(r.createdAt)}
+                      </TableCell>
+                      <TableCell className="text-xs text-muted-foreground">
+                        {fmt(r.completedAt)}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

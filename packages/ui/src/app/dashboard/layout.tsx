@@ -17,6 +17,7 @@ import {
   ShieldQuestion,
   User,
   UserCog,
+  Wallet,
   Webhook,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -46,6 +47,7 @@ const navItems: NavItem[] = [
   { href: "/dashboard/webhooks", label: "Webhooks", icon: Webhook },
   { href: "/dashboard/billing", label: "Billing", icon: CreditCard },
   { href: "/dashboard/points", label: "Points & Rewards", icon: Award },
+  { href: "/dashboard/wallet", label: "Wallet", icon: Wallet },
   { href: "/dashboard/referrals", label: "Referrals", icon: Share2 },
   { href: "/dashboard/jit", label: "Cross-tenant", icon: ShieldQuestion },
   { href: "/dashboard/settings", label: "Connected Apps", icon: Plug },

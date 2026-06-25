@@ -2,7 +2,17 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
-import Badge from "@/components/Badge";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { api } from "@/lib/api";
 
 interface ReviewItem {
@@ -29,11 +39,11 @@ interface Review {
 
 const fmt = (d?: string | null) => (d ? new Date(d).toLocaleString() : "—");
 
-const DECISION_BADGE: Record<string, string> = {
+const DECISION_VARIANT: Record<string, "success" | "destructive" | "warning" | "secondary"> = {
   approved: "success",
-  revoked: "error",
+  revoked: "destructive",
   flagged: "warning",
-  pending: "pending",
+  pending: "secondary",
 };
 
 export default function AccessReviewDetailPage() {
@@ -53,7 +63,6 @@ export default function AccessReviewDetailPage() {
     toastTimer.current = setTimeout(() => setToast(null), 3000);
   }, []);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: data loader intentionally runs on mount / when the route key changes; it closes over stable state setters
   const load = useCallback(async () => {
     setLoading(true);
     try {
@@ -67,10 +76,10 @@ export default function AccessReviewDetailPage() {
     } finally {
       setLoading(false);
     }
-  }, [id]);
+  }, [id, showToast]);
 
   useEffect(() => {
-    load();
+    void load();
   }, [load]);
 
   async function decide(item: ReviewItem, decision: "approved" | "revoked" | "flagged") {
@@ -122,26 +131,26 @@ export default function AccessReviewDetailPage() {
   return (
     <div className="space-y-6">
       {toast && (
-        <div className="fixed top-4 right-4 z-50 rounded-lg bg-primary px-4 py-3 text-sm text-foreground shadow-lg">
+        <div className="fixed top-4 right-4 z-50 rounded-lg bg-primary px-4 py-3 text-sm text-primary-foreground shadow-lg">
           {toast}
         </div>
       )}
 
       <div className="flex items-start justify-between gap-4">
         <div>
-          <button
+          <Button
             type="button"
+            variant="link"
+            className="h-auto p-0 text-muted-foreground"
             onClick={() => router.back()}
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             ← Back
-          </button>
-          <h1 className="mt-2 font-display text-2xl font-semibold tracking-tight text-foreground flex items-center gap-3">
+          </Button>
+          <h1 className="mt-2 flex items-center gap-3 font-display text-2xl font-semibold tracking-tight text-foreground">
             {review.title}
-            <Badge
-              status={review.status === "completed" ? "success" : "pending"}
-              label={review.status}
-            />
+            <Badge variant={review.status === "completed" ? "success" : "warning"}>
+              {review.status}
+            </Badge>
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Started by {review.createdByEmail ?? "—"} on {fmt(review.createdAt)}
@@ -149,128 +158,117 @@ export default function AccessReviewDetailPage() {
           </p>
         </div>
         {isOpen && (
-          <button
+          <Button
             type="button"
             onClick={complete}
             disabled={busy === "complete" || pending > 0}
             title={pending > 0 ? `${pending} item(s) still pending` : "Mark review complete"}
-            className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors"
           >
             {busy === "complete" ? "Completing…" : "Complete review"}
-          </button>
+          </Button>
         )}
       </div>
 
-      <div className="rounded-xl bg-card border border-border overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border bg-card/80">
-                <th className="px-5 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  User
-                </th>
-                <th className="px-5 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  Roles (at snapshot)
-                </th>
-                <th className="px-5 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  Decision
-                </th>
-                <th className="px-5 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  Decided
-                </th>
-                <th className="px-5 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  Action
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {items.length === 0 && (
-                <tr>
-                  <td colSpan={5} className="px-5 py-8 text-center text-muted-foreground">
-                    No privileged users were found at snapshot time.
-                  </td>
-                </tr>
-              )}
-              {items.map((item) => (
-                <tr key={item.id} className="hover:bg-accent/50 transition-colors">
-                  <td className="px-5 py-4">
-                    <div className="font-medium text-foreground">
-                      {item.userDisplayName ?? item.userEmail}
-                    </div>
-                    {item.userDisplayName && (
-                      <div className="text-xs text-muted-foreground">{item.userEmail}</div>
-                    )}
-                  </td>
-                  <td className="px-5 py-4">
-                    <div className="flex flex-wrap gap-1">
-                      {item.rolesSnapshot.map((r) => (
-                        <span
-                          key={r}
-                          className={`rounded-full px-2 py-0.5 text-[10px] font-medium ring-1 ${
-                            r === "admin"
-                              ? "bg-primary/15 text-primary ring-primary/30"
-                              : "bg-muted text-muted-foreground ring-border"
-                          }`}
-                        >
-                          {r}
-                        </span>
-                      ))}
-                    </div>
-                  </td>
-                  <td className="px-5 py-4">
-                    <Badge
-                      status={DECISION_BADGE[item.decision] ?? "pending"}
-                      label={item.decision}
-                    />
-                  </td>
-                  <td className="px-5 py-4 text-muted-foreground text-xs">
-                    {item.decidedAt ? (
-                      <>
-                        {fmt(item.decidedAt)}
-                        {item.decidedByEmail && <div>by {item.decidedByEmail}</div>}
-                      </>
-                    ) : (
-                      "—"
-                    )}
-                  </td>
-                  <td className="px-5 py-4 text-right">
-                    {isOpen ? (
-                      <div className="flex items-center justify-end gap-1.5">
-                        <button
-                          type="button"
-                          onClick={() => decide(item, "approved")}
-                          disabled={busy === item.id}
-                          className="rounded px-2 py-1 text-xs text-green-400 hover:bg-green-900/30 disabled:opacity-40 transition-colors"
-                        >
-                          Approve
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => decide(item, "flagged")}
-                          disabled={busy === item.id}
-                          className="rounded px-2 py-1 text-xs text-orange-400 hover:bg-orange-900/30 disabled:opacity-40 transition-colors"
-                        >
-                          Flag
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => decide(item, "revoked")}
-                          disabled={busy === item.id}
-                          className="rounded px-2 py-1 text-xs text-red-400 hover:bg-red-900/30 disabled:opacity-40 transition-colors"
-                        >
-                          Revoke
-                        </button>
+      <Card>
+        <CardContent className="pt-6">
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>User</TableHead>
+                  <TableHead>Roles (at snapshot)</TableHead>
+                  <TableHead>Decision</TableHead>
+                  <TableHead>Decided</TableHead>
+                  <TableHead className="text-right">Action</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {items.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={5} className="py-8 text-center text-muted-foreground">
+                      No privileged users were found at snapshot time.
+                    </TableCell>
+                  </TableRow>
+                )}
+                {items.map((item) => (
+                  <TableRow key={item.id}>
+                    <TableCell>
+                      <div className="font-medium text-foreground">
+                        {item.userDisplayName ?? item.userEmail}
                       </div>
-                    ) : (
-                      <span className="text-xs text-muted-foreground">locked</span>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+                      {item.userDisplayName && (
+                        <div className="text-xs text-muted-foreground">{item.userEmail}</div>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-wrap gap-1">
+                        {item.rolesSnapshot.map((r) => (
+                          <Badge key={r} variant={r === "admin" ? "default" : "secondary"}>
+                            {r}
+                          </Badge>
+                        ))}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={DECISION_VARIANT[item.decision] ?? "secondary"}>
+                        {item.decision}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-xs text-muted-foreground">
+                      {item.decidedAt ? (
+                        <>
+                          {fmt(item.decidedAt)}
+                          {item.decidedByEmail && <div>by {item.decidedByEmail}</div>}
+                        </>
+                      ) : (
+                        "—"
+                      )}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {isOpen ? (
+                        <div className="flex items-center justify-end gap-1">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="text-emerald-600 hover:text-emerald-600"
+                            onClick={() => decide(item, "approved")}
+                            disabled={busy === item.id}
+                          >
+                            Approve
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="text-amber-600 hover:text-amber-600"
+                            onClick={() => decide(item, "flagged")}
+                            disabled={busy === item.id}
+                          >
+                            Flag
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="text-destructive hover:text-destructive"
+                            onClick={() => decide(item, "revoked")}
+                            disabled={busy === item.id}
+                          >
+                            Revoke
+                          </Button>
+                        </div>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">locked</span>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

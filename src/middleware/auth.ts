@@ -244,6 +244,22 @@ export const authMiddleware = createMiddleware<HonoEnv>(async (c, next) => {
   }
 });
 
+/**
+ * Require the authenticated principal to hold the `admin` role. Must run after
+ * `authMiddleware` (it reads the user it sets). Use this to guard one-off admin
+ * endpoints mounted directly on the app rather than through an admin router.
+ */
+export const requireAdmin = createMiddleware<HonoEnv>(async (c, next) => {
+  const user = c.get("user");
+  if (!user) {
+    return c.json({ error: ErrorCodes.TOKEN_INVALID, message: "Authentication required" }, 401);
+  }
+  if (!user.roles?.includes("admin")) {
+    return c.json({ error: "FORBIDDEN", message: "Admin role required" }, 403);
+  }
+  return next();
+});
+
 export const optionalAuthMiddleware = createMiddleware<HonoEnv>(async (c, next) => {
   try {
     const authHeader = c.req.header("authorization");

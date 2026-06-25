@@ -12,7 +12,7 @@ import jitRoutes from "../jit/routes";
 import ldapRoutes from "../ldap/routes";
 import { getLogger } from "../logger";
 import { API_VERSIONS, apiVersioning, CURRENT_API_VERSION } from "../middleware/apiVersioning";
-import { authMiddleware } from "../middleware/auth";
+import { authMiddleware, requireAdmin } from "../middleware/auth";
 import { corsOptionsFromEnv } from "../middleware/cors";
 import { geoFencingMiddleware } from "../middleware/geoFencing";
 import { rateLimit } from "../middleware/rateLimiting";
@@ -107,8 +107,10 @@ export async function createServer() {
   // SLO burn-rate alerting (debounced, checks Prometheus metrics)
   app.use("*", sloAlertingMiddleware());
 
-  // SLO status endpoint — current error budget + burn rates
-  app.get("/admin/slo", sloRouteHandler);
+  // SLO status endpoint — current error budget + burn rates.
+  // Guarded: lives under /admin/* and exposes internal reliability metrics, so
+  // it must require an authenticated admin like the rest of the namespace.
+  app.get("/admin/slo", authMiddleware, requireAdmin, sloRouteHandler);
 
   // ─── Static uploads (avatars, etc.) ──────────────────────────────────────
   app.use("/uploads/*", serveStatic({ root: "./" }));

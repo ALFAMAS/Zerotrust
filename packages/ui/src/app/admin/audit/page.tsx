@@ -1,8 +1,18 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Badge from "@/components/Badge";
-import Modal from "@/components/Modal";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { api } from "@/lib/api";
 
 interface AuditEntry {
@@ -112,7 +122,7 @@ export default function AuditPage() {
         setLoading(false);
       }
     }
-    load();
+    void load();
   }, []);
 
   async function runVerify() {
@@ -156,6 +166,11 @@ export default function AuditPage() {
     return entry.metadata ?? entry.details ?? entry.resourceDetails ?? {};
   }
 
+  function statusBadge(status: string) {
+    const failed = status === "failure" || status === "error";
+    return <Badge variant={failed ? "destructive" : "success"}>{status}</Badge>;
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-start justify-between gap-4">
@@ -167,22 +182,17 @@ export default function AuditPage() {
             Recent authentication and admin events
           </p>
         </div>
-        <button
-          type="button"
-          onClick={runVerify}
-          disabled={verifying}
-          className="rounded-lg border border-border bg-card px-4 py-2 text-sm font-medium text-foreground hover:bg-accent disabled:opacity-50 transition-colors"
-        >
+        <Button type="button" variant="outline" onClick={runVerify} disabled={verifying}>
           {verifying ? "Verifying…" : "Verify integrity"}
-        </button>
+        </Button>
       </div>
 
       {verify && (
         <div
           className={`rounded-lg border px-4 py-3 text-sm ${
             verify.ok
-              ? "border-green-500/30 bg-green-900/20 text-green-400"
-              : "border-red-500/30 bg-red-900/20 text-red-400"
+              ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+              : "border-destructive/30 bg-destructive/10 text-destructive"
           }`}
         >
           {verify.ok ? (
@@ -200,125 +210,105 @@ export default function AuditPage() {
         </div>
       )}
 
-      <div className="rounded-xl bg-card border border-border overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border bg-card/80">
-                <th className="px-5 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  Timestamp
-                </th>
-                <th className="px-5 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  User
-                </th>
-                <th className="px-5 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  Action
-                </th>
-                <th className="px-5 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  IP
-                </th>
-                <th className="px-5 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  Status
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {loading && (
-                <tr>
-                  <td colSpan={5} className="px-5 py-8 text-center text-muted-foreground">
-                    Loading…
-                  </td>
-                </tr>
-              )}
-              {!loading && entries.length === 0 && (
-                <tr>
-                  <td colSpan={5} className="px-5 py-8 text-center text-muted-foreground">
-                    No audit entries found.
-                  </td>
-                </tr>
-              )}
-              {!loading &&
-                entries.map((entry) => (
-                  <tr
-                    key={entry.id}
-                    onClick={() => setSelected(entry)}
-                    className="hover:bg-accent/50 cursor-pointer transition-colors"
-                  >
-                    <td className="px-5 py-4 text-muted-foreground text-xs whitespace-nowrap">
-                      {getTimestamp(entry)}
-                    </td>
-                    <td className="px-5 py-4 text-foreground">{getUser(entry)}</td>
-                    <td className="px-5 py-4">
-                      <code className="rounded bg-muted px-1.5 py-0.5 text-xs text-primary">
-                        {entry.action}
-                      </code>
-                    </td>
-                    <td className="px-5 py-4 text-muted-foreground font-mono text-xs">
-                      {getIp(entry)}
-                    </td>
-                    <td className="px-5 py-4">
-                      <Badge
-                        status={
-                          getStatus(entry) === "failure" || getStatus(entry) === "error"
-                            ? "error"
-                            : "success"
-                        }
-                        label={getStatus(entry)}
-                      />
-                    </td>
-                  </tr>
-                ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* Detail Modal */}
-      {selected && (
-        <Modal title="Audit Log Detail" onClose={() => setSelected(null)}>
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-3 text-sm">
-              <div>
-                <p className="text-xs text-muted-foreground mb-0.5">Timestamp</p>
-                <p className="text-foreground">{getTimestamp(selected)}</p>
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground mb-0.5">User</p>
-                <p className="text-foreground">{getUser(selected)}</p>
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground mb-0.5">Action</p>
-                <code className="text-primary text-xs bg-muted rounded px-1.5 py-0.5">
-                  {selected.action}
-                </code>
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground mb-0.5">IP Address</p>
-                <p className="text-foreground font-mono text-xs">{getIp(selected)}</p>
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground mb-0.5">Status</p>
-                <Badge
-                  status={
-                    getStatus(selected) === "failure" || getStatus(selected) === "error"
-                      ? "error"
-                      : "success"
-                  }
-                  label={getStatus(selected)}
-                />
-              </div>
-            </div>
-            {Object.keys(getDetail(selected)).length > 0 && (
-              <div>
-                <p className="text-xs text-muted-foreground mb-2">Details</p>
-                <pre className="rounded-lg bg-muted p-3 text-xs text-foreground/80 overflow-auto max-h-48">
-                  {JSON.stringify(getDetail(selected), null, 2)}
-                </pre>
-              </div>
-            )}
+      <Card>
+        <CardContent className="pt-6">
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Timestamp</TableHead>
+                  <TableHead>User</TableHead>
+                  <TableHead>Action</TableHead>
+                  <TableHead>IP</TableHead>
+                  <TableHead>Status</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {loading && (
+                  <TableRow>
+                    <TableCell colSpan={5} className="py-8 text-center text-muted-foreground">
+                      Loading…
+                    </TableCell>
+                  </TableRow>
+                )}
+                {!loading && entries.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={5} className="py-8 text-center text-muted-foreground">
+                      No audit entries found.
+                    </TableCell>
+                  </TableRow>
+                )}
+                {!loading &&
+                  entries.map((entry) => (
+                    <TableRow
+                      key={entry.id}
+                      onClick={() => setSelected(entry)}
+                      className="cursor-pointer"
+                    >
+                      <TableCell className="whitespace-nowrap text-xs text-muted-foreground">
+                        {getTimestamp(entry)}
+                      </TableCell>
+                      <TableCell className="text-foreground">{getUser(entry)}</TableCell>
+                      <TableCell>
+                        <code className="rounded bg-muted px-1.5 py-0.5 text-xs text-primary">
+                          {entry.action}
+                        </code>
+                      </TableCell>
+                      <TableCell className="font-mono text-xs text-muted-foreground">
+                        {getIp(entry)}
+                      </TableCell>
+                      <TableCell>{statusBadge(getStatus(entry))}</TableCell>
+                    </TableRow>
+                  ))}
+              </TableBody>
+            </Table>
           </div>
-        </Modal>
-      )}
+        </CardContent>
+      </Card>
+
+      <Dialog open={selected !== null} onOpenChange={(open) => !open && setSelected(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Audit log detail</DialogTitle>
+          </DialogHeader>
+          {selected && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div>
+                  <p className="mb-0.5 text-xs text-muted-foreground">Timestamp</p>
+                  <p className="text-foreground">{getTimestamp(selected)}</p>
+                </div>
+                <div>
+                  <p className="mb-0.5 text-xs text-muted-foreground">User</p>
+                  <p className="text-foreground">{getUser(selected)}</p>
+                </div>
+                <div>
+                  <p className="mb-0.5 text-xs text-muted-foreground">Action</p>
+                  <code className="rounded bg-muted px-1.5 py-0.5 text-xs text-primary">
+                    {selected.action}
+                  </code>
+                </div>
+                <div>
+                  <p className="mb-0.5 text-xs text-muted-foreground">IP Address</p>
+                  <p className="font-mono text-xs text-foreground">{getIp(selected)}</p>
+                </div>
+                <div>
+                  <p className="mb-0.5 text-xs text-muted-foreground">Status</p>
+                  {statusBadge(getStatus(selected))}
+                </div>
+              </div>
+              {Object.keys(getDetail(selected)).length > 0 && (
+                <div>
+                  <p className="mb-2 text-xs text-muted-foreground">Details</p>
+                  <pre className="max-h-48 overflow-auto rounded-lg bg-muted p-3 text-xs text-foreground/80">
+                    {JSON.stringify(getDetail(selected), null, 2)}
+                  </pre>
+                </div>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
