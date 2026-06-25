@@ -43,6 +43,7 @@ needs surfacing
 - ✅ Performance sub-plan — `docs/audit/D3-performance-subplan.md`: owned/measurable task breakdown (session+user JOIN → 1 round-trip, optional Redis user-state cache, k6 p95 capture) with staging-validation steps, since auth-path DB rewrites can't be validated in the agent sandbox.
 - ✅ Disposable-email defense tests — 13 cases for `disposableEmail.service` (domain normalization incl. last-`@`/malformed handling, blocklist/allowlist precedence, and `validateSignupEmail` MX paths with a hoisted DNS mock: off / records / no-records / lookup-throws-fails-closed). Previously untested abuse defense.
 - ✅ DR runbook completed — added **RTO/RPO targets** (RPO ≤24h scheduled / ~minutes PITR; RTO ≤1h restore-from-dump), backup cadence/retention/encryption config, and a reference to the automated `dr-restore-drill.yml` as recurring "validated" evidence. Closes the documented half of the DR exit criterion (`docs/compliance/backup-restore-runbook.md`).
+- ✅ Extension guide (D7) — `docs/extending.md`: code-grounded steps to plug in third-party integrations (add an OAuth provider via the `provider.factory.ts` adapter pattern, swap/configure the email SMTP transport, point object storage at any S3-compatible provider, SMS/OTP channels) + a pluggability checklist (config-over-code, fail-closed, graceful-when-unset, isolated adapter tests). Linked from the README. Delivers the "architecture is pluggable and well-documented" requirement.
 
 ## Auth & Identity
 

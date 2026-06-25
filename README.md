@@ -494,6 +494,9 @@ GET    /health · /healthz · /metrics (Prometheus)
 
 ## Customizing
 
+> **Adding a third-party integration** (OAuth provider, email/SMS, S3-compatible
+> storage)? See the [Extension guide](./docs/extending.md).
+
 **Rename the app** — replace `zerotrust` across `packages/ui/src/` (start with
 `app/layout.tsx` metadata and `app/page.tsx`) and set `NEXT_PUBLIC_APP_NAME`.
 
