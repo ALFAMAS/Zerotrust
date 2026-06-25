@@ -10,7 +10,7 @@ export {
   sessionEventsTotal,
   webhookDeliveriesTotal,
 } from "./counters";
-export { metricsMiddleware, metricsRoute } from "./middleware";
+export { metricsAuthMiddleware, metricsMiddleware, metricsRoute } from "./middleware";
 export { metricsRegistry, register } from "./registry";
 
 // ─── Helper functions ─────────────────────────────────────────────────────────

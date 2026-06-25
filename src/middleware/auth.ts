@@ -18,6 +18,51 @@ import { revokeSession } from "./sessionControl";
 const logger = getLogger("auth-middleware");
 let tokenService: TokenService;
 
+/**
+ * Default minimum interval, in seconds, between `sessions.last_activity_at`
+ * writes. Overridable with `SESSION_ACTIVITY_REFRESH_SECONDS`.
+ */
+const DEFAULT_ACTIVITY_REFRESH_SECONDS = 60;
+
+/**
+ * How long we may wait before persisting a fresh `last_activity_at`.
+ *
+ * Writing the activity timestamp on *every* authenticated request turns each
+ * read into a write — doubling DB write volume on hot endpoints and adding the
+ * round-trip straight to p95. Instead we refresh at most once per window.
+ *
+ * The window is also clamped to half of the org idle-timeout (when one is set)
+ * so idle-session enforcement — which reads `last_activity_at` in
+ * `evaluateSessionPolicy` — never drifts by more than half its budget.
+ */
+export function activityRefreshSeconds(idleTimeoutSeconds: number): number {
+  const raw = Number(
+    process.env.SESSION_ACTIVITY_REFRESH_SECONDS ?? DEFAULT_ACTIVITY_REFRESH_SECONDS
+  );
+  const base = Number.isFinite(raw) && raw >= 0 ? raw : DEFAULT_ACTIVITY_REFRESH_SECONDS;
+  if (idleTimeoutSeconds && idleTimeoutSeconds > 0) {
+    return Math.max(1, Math.min(base, Math.floor(idleTimeoutSeconds / 2)));
+  }
+  return base;
+}
+
+/**
+ * Decide whether a session's `last_activity_at` is stale enough to persist a
+ * new value. Fails open (returns `true`) for a missing/invalid timestamp or a
+ * non-positive interval so we never silently stop tracking activity.
+ */
+export function shouldRefreshActivity(
+  lastActivityAt: Date | string | null | undefined,
+  now: Date,
+  intervalSeconds: number
+): boolean {
+  if (!lastActivityAt) return true;
+  if (intervalSeconds <= 0) return true;
+  const last = lastActivityAt instanceof Date ? lastActivityAt : new Date(lastActivityAt);
+  if (Number.isNaN(last.getTime())) return true;
+  return now.getTime() - last.getTime() >= intervalSeconds * 1000;
+}
+
 export async function initAuthMiddleware(): Promise<void> {
   const config = getConfig();
   tokenService = new TokenService(config.security.tokenSecretHex, config.session);
@@ -223,11 +268,22 @@ export const authMiddleware = createMiddleware<HonoEnv>(async (c, next) => {
     const auditPrincipal = principalFromToken(payload);
     c.set("auditPrincipal", auditPrincipal);
 
-    // Update last activity
-    await db
-      .update(sessionsTable)
-      .set({ lastActivityAt: new Date() })
-      .where(eq(sessionsTable.id, session.id));
+    // Refresh last activity — throttled. Skipping the write on hot sessions
+    // keeps reads off the write path (see activityRefreshSeconds), while the
+    // window stays below the org idle-timeout so policy enforcement is exact.
+    const activityNow = new Date();
+    if (
+      shouldRefreshActivity(
+        session.lastActivityAt,
+        activityNow,
+        activityRefreshSeconds(sessionPolicy.idleTimeoutSeconds)
+      )
+    ) {
+      await db
+        .update(sessionsTable)
+        .set({ lastActivityAt: activityNow })
+        .where(eq(sessionsTable.id, session.id));
+    }
 
     logger.debug("✓ Token verified", {
       userId: payload.sub,

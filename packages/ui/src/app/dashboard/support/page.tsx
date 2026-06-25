@@ -124,11 +124,7 @@ export default function SupportPage() {
             Open a ticket and our team will reply here. You&apos;ll also be notified by email.
           </p>
         </div>
-        <Button
-          type="button"
-          onClick={() => setCreateOpen(true)}
-          className="shrink-0"
-        >
+        <Button type="button" onClick={() => setCreateOpen(true)} className="shrink-0">
           New ticket
         </Button>
       </div>
@@ -297,11 +293,7 @@ export default function SupportPage() {
                     >
                       Close ticket
                     </Button>
-                    <Button
-                      type="button"
-                      onClick={sendReply}
-                      disabled={!reply.trim() || sending}
-                    >
+                    <Button type="button" onClick={sendReply} disabled={!reply.trim() || sending}>
                       {sending ? "Sending…" : "Send reply"}
                     </Button>
                   </div>

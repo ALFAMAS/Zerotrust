@@ -1191,7 +1191,7 @@ export const tiersTable = pgTable("tiers", {
   description: text("description"),
   minPoints: integer("min_points").notNull(), // points required to reach this tier
   multiplier: integer("multiplier").notNull().default(100), // points earning multiplier (100 = 1x)
-  perks: jsonb("perks").$type<string[]>().notNull().default(sql`ARRAY[]::text[]`),
+  perks: jsonb("perks").$type<string[]>().notNull().default(sql`'[]'::jsonb`),
   color: text("color"), // hex color for badge display
   icon: text("icon"), // lucide icon name
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
