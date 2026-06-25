@@ -36,13 +36,14 @@ open recommendation with a severity.
 
 ## 2. Test coverage
 
-- **Coverage regression introduced on `main`:** the recent org-routes rewrite
-  (`fix organization routes`, merged to `main`) **deleted `src/__tests__/org.routes.test.ts`
-  (~699 lines / ~27 tests)**. `org.routes.ts` — a core multi-tenant surface
-  (members, invites, roles, RBAC permission checks) — is now **untested**.
-  **Recommendation (P1):** write fresh route tests against the new org module,
-  focusing on permission enforcement (`members:manage`, `roles:manage`,
-  `billing:manage`) and invite/membership lifecycle.
+- **Coverage regression introduced on `main` — ✅ addressed (this PR):** the
+  org-routes rewrite (`fix organization routes`, merged to `main`) deleted
+  `src/__tests__/org.routes.test.ts` (~699 lines), leaving `org.routes.ts` — a
+  core multi-tenant surface — untested. This PR adds a fresh
+  `src/__tests__/org.routes.test.ts` (14 tests) covering the owner/admin/member
+  RBAC boundaries: non-members blocked, members can't update, admins can invite
+  but only owners can delete/transfer, and the owner can't be removed. Deeper
+  invite/membership-lifecycle coverage remains a good follow-up.
 - **Added this PR:** OAuth account-linking safety (×3), `/auth/me/link`
   verified-linking (×6), `requireAdmin` guard (×4), client PoW solver (×3),
   anomaly `riskBand` (×4).
