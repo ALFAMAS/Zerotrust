@@ -115,7 +115,8 @@
     "vitest": "^4.1.8"
   },
   "overrides": {
-    "postcss": "^8.5.10"
+    "postcss": "^8.5.10",
+    "undici": "^7.28.0"
   },
   "optionalDependencies": {
     "@parcel/watcher-darwin-arm64": "2.5.6",
