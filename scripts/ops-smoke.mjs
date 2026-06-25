@@ -1,5 +1,8 @@
 #!/usr/bin/env node
-const baseUrl = (process.env.API_URL || process.env.BASE_URL || "http://localhost:1337").replace(/\/$/, "");
+const baseUrl = (process.env.API_URL || process.env.BASE_URL || "http://localhost:1337").replace(
+  /\/$/,
+  ""
+);
 const checks = [
   {
     name: "health",
@@ -7,7 +10,11 @@ const checks = [
     expect: (res, body) => res.ok && body.length > 0 && Boolean(res.headers.get("x-trace-id")),
   },
   { name: "metrics", path: "/metrics", expect: (res, body) => res.ok && body.includes("http") },
-  { name: "versions", path: "/api/versions", expect: (res, body) => res.ok && body.includes("current") },
+  {
+    name: "versions",
+    path: "/api/versions",
+    expect: (res, body) => res.ok && body.includes("current"),
+  },
 ];
 
 let failed = 0;
@@ -24,7 +31,7 @@ for (const check of checks) {
     console.log(`PASS ${check.name}: HTTP ${res.status} ${url}`);
   } catch (err) {
     failed++;
-    console.error(`FAIL ${check.name}: ${url} ${(err && err.message) || err}`);
+    console.error(`FAIL ${check.name}: ${url} ${err?.message || err}`);
   }
 }
 

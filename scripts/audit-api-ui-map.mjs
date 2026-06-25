@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { readdirSync, readFileSync, writeFileSync, statSync, mkdirSync } from "node:fs";
+import { mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join, relative } from "node:path";
 
 const ROOT = process.cwd();
@@ -8,7 +8,8 @@ const OUT = join(ROOT, "docs/api-ui-integration-matrix.md");
 
 function walk(dir, files = []) {
   for (const entry of readdirSync(dir)) {
-    if (["node_modules", ".next", "dist", "coverage", "playwright-report"].includes(entry)) continue;
+    if (["node_modules", ".next", "dist", "coverage", "playwright-report"].includes(entry))
+      continue;
     const path = join(dir, entry);
     const st = statSync(path);
     if (st.isDirectory()) walk(path, files);
@@ -18,11 +19,13 @@ function walk(dir, files = []) {
 }
 
 function normalizePath(path) {
-  return path
-    .split("?")[0]
-    .replace(/\/+/g, "/")
-    .replace(/\/:([A-Za-z0-9_]+)/g, "/{$1}")
-    .replace(/\/$/, "") || "/";
+  return (
+    path
+      .split("?")[0]
+      .replace(/\/+/g, "/")
+      .replace(/\/:([A-Za-z0-9_]+)/g, "/{$1}")
+      .replace(/\/$/, "") || "/"
+  );
 }
 
 function joinRoute(prefix, routePath) {
@@ -64,7 +67,10 @@ function parseBackendRoutes() {
   for (const mount of parseServerMounts()) {
     if (!statExists(mount.file)) continue;
     const source = readFileSync(mount.file, "utf8");
-    const routeRe = new RegExp(`(?:router|app)\\.(${methods.join("|")})\\(\\s*[\"']([^\"']+)[\"']`, "g");
+    const routeRe = new RegExp(
+      `(?:router|app)\\.(${methods.join("|")})\\(\\s*["']([^"']+)["']`,
+      "g"
+    );
     for (const match of source.matchAll(routeRe)) {
       routes.push({
         method: match[1].toUpperCase(),
@@ -77,7 +83,11 @@ function parseBackendRoutes() {
   const server = readFileSync(SERVER, "utf8");
   const directRe = /app\.(get|post|put|patch|delete)\(\s*["']([^"']+)["']/g;
   for (const match of server.matchAll(directRe)) {
-    routes.push({ method: match[1].toUpperCase(), path: normalizePath(match[2]), file: "src/api/server.ts" });
+    routes.push({
+      method: match[1].toUpperCase(),
+      path: normalizePath(match[2]),
+      file: "src/api/server.ts",
+    });
   }
   return dedupe(routes);
 }
@@ -90,7 +100,11 @@ function parseFrontendCalls() {
   for (const file of files) {
     const source = readFileSync(file, "utf8");
     for (const match of source.matchAll(apiRe)) {
-      calls.push({ method: match[1].toUpperCase(), path: normalizePath(match[2]), file: relative(ROOT, file) });
+      calls.push({
+        method: match[1].toUpperCase(),
+        path: normalizePath(match[2]),
+        file: relative(ROOT, file),
+      });
     }
     for (const match of source.matchAll(fetchRe)) {
       calls.push({ method: "FETCH", path: normalizePath(match[1]), file: relative(ROOT, file) });
@@ -101,12 +115,14 @@ function parseFrontendCalls() {
 
 function dedupe(items) {
   const seen = new Set();
-  return items.filter((item) => {
-    const key = `${item.method} ${item.path} ${item.file}`;
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  }).sort((a, b) => `${a.path} ${a.method}`.localeCompare(`${b.path} ${b.method}`));
+  return items
+    .filter((item) => {
+      const key = `${item.method} ${item.path} ${item.file}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .sort((a, b) => `${a.path} ${a.method}`.localeCompare(`${b.path} ${b.method}`));
 }
 
 function prefixMatch(frontendPath, backendPath) {
@@ -121,13 +137,21 @@ const frontend = parseFrontendCalls();
 const backendByMethodPath = new Set(backend.map((r) => `${r.method} ${r.path}`));
 const uncoveredFrontend = frontend.filter((call) => {
   if (call.method === "FETCH") return !backend.some((route) => prefixMatch(call.path, route.path));
-  return !backendByMethodPath.has(`${call.method} ${call.path}`) && !backend.some((route) => route.method === call.method && prefixMatch(call.path, route.path));
+  return (
+    !backendByMethodPath.has(`${call.method} ${call.path}`) &&
+    !backend.some((route) => route.method === call.method && prefixMatch(call.path, route.path))
+  );
 });
-const unreferencedBackend = backend.filter((route) => !frontend.some((call) => prefixMatch(call.path, route.path)));
+const unreferencedBackend = backend.filter(
+  (route) => !frontend.some((call) => prefixMatch(call.path, route.path))
+);
 
 function rows(items, columns) {
   if (items.length === 0) return "| _None_ | | |\n";
-  return items.map((item) => `| ${columns.map((col) => item[col] ?? "").join(" | ")} |`).join("\n") + "\n";
+  return (
+    items.map((item) => `| ${columns.map((col) => item[col] ?? "").join(" | ")} |`).join("\n") +
+    "\n"
+  );
 }
 
 const markdown = `# API ↔ UI Integration Matrix
@@ -164,4 +188,6 @@ ${rows(frontend, ["method", "path", "file"])}
 
 mkdirSync(dirname(OUT), { recursive: true });
 writeFileSync(OUT, markdown);
-console.log(`Wrote ${relative(ROOT, OUT)} (${backend.length} backend routes, ${frontend.length} frontend calls).`);
+console.log(
+  `Wrote ${relative(ROOT, OUT)} (${backend.length} backend routes, ${frontend.length} frontend calls).`
+);

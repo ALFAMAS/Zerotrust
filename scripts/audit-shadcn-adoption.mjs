@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { readdirSync, readFileSync, statSync, mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join, relative } from "node:path";
 
 const ROOT = process.cwd();
@@ -10,7 +10,8 @@ const ALLOWED_PATH_PARTS = ["packages/ui/src/components/ui/", "packages/ui/src/c
 
 function walk(dir, files = []) {
   for (const entry of readdirSync(dir)) {
-    if (["node_modules", ".next", "dist", "coverage", "playwright-report"].includes(entry)) continue;
+    if (["node_modules", ".next", "dist", "coverage", "playwright-report"].includes(entry))
+      continue;
     const path = join(dir, entry);
     const st = statSync(path);
     if (st.isDirectory()) walk(path, files);
@@ -44,9 +45,13 @@ for (const finding of findings) {
   byFile.set(finding.file, (byFile.get(finding.file) ?? 0) + 1);
 }
 
-const topFiles = [...byFile.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).slice(0, 25);
+const topFiles = [...byFile.entries()]
+  .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+  .slice(0, 25);
 const details = findings
-  .sort((a, b) => a.file.localeCompare(b.file) || a.line - b.line || a.control.localeCompare(b.control))
+  .sort(
+    (a, b) => a.file.localeCompare(b.file) || a.line - b.line || a.control.localeCompare(b.control)
+  )
   .map((f) => `| ${f.file} | ${f.line} | \`<${f.control}>\` |`)
   .join("\n");
 
@@ -81,4 +86,6 @@ ${details || "| _None_ |  |  |"}
 
 mkdirSync(dirname(OUT), { recursive: true });
 writeFileSync(OUT, markdown);
-console.log(`Wrote ${relative(ROOT, OUT)} (${findings.length} raw controls across ${byFile.size} files).`);
+console.log(
+  `Wrote ${relative(ROOT, OUT)} (${findings.length} raw controls across ${byFile.size} files).`
+);
