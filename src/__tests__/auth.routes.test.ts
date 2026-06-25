@@ -910,14 +910,14 @@ describe("POST /token/refresh", () => {
     expect(body.error).toBe("TOKEN_INVALID");
   });
 
-  it("returns 401 when refresh token is revoked", async () => {
+  it("detects reuse of a revoked refresh token and revokes the whole family", async () => {
     db.limit.mockResolvedValueOnce([
       {
         id: "rt-1",
         userId: USER_ID,
         sessionId: SESSION_ID,
         tokenHash: "hash",
-        isRevoked: true,
+        isRevoked: true, // already rotated → replay = theft signal
         expiresAt: new Date(Date.now() + 3_600_000),
       },
     ]);
@@ -930,7 +930,14 @@ describe("POST /token/refresh", () => {
     });
     expect(res.status).toBe(401);
     const body = await res.json();
-    expect(body.error).toBe("TOKEN_INVALID");
+    expect(body.error).toBe("TOKEN_REUSE_DETECTED");
+    // The whole account's sessions are force-revoked on reuse.
+    const setArgs = db.set.mock.calls.map((c) => c[0]);
+    expect(setArgs).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ revokedReason: "refresh_token_reuse", isActive: false }),
+      ])
+    );
   });
 
   it("returns 401 when refresh token is expired", async () => {

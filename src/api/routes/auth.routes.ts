@@ -781,8 +781,38 @@ router.post(
         .where(eq(refreshTokensTable.tokenHash, tokenHash))
         .limit(1);
       const rt = rtRows[0];
-      if (!rt || rt.isRevoked || rt.expiresAt < new Date()) {
+      if (!rt || rt.expiresAt < new Date()) {
         return c.json({ error: "TOKEN_INVALID", message: "Invalid refresh token" }, 401);
+      }
+
+      // Refresh-token reuse detection: an already-rotated (revoked) token is
+      // being presented again. This is the canonical signal of a stolen refresh
+      // token — the legitimate client and the attacker each try to redeem it.
+      // Fail closed for the whole account: revoke every refresh token and active
+      // session so both parties are forced to re-authenticate.
+      if (rt.isRevoked) {
+        logger.warn("Refresh token reuse detected — revoking session family", {
+          userId: rt.userId,
+        });
+        await db
+          .update(refreshTokensTable)
+          .set({ isRevoked: true })
+          .where(eq(refreshTokensTable.userId, rt.userId));
+        await db
+          .update(sessionsTable)
+          .set({
+            isActive: false,
+            revokedAt: new Date(),
+            revokedReason: "refresh_token_reuse",
+          })
+          .where(eq(sessionsTable.userId, rt.userId));
+        return c.json(
+          {
+            error: "TOKEN_REUSE_DETECTED",
+            message: "This session has been ended for your security. Please sign in again.",
+          },
+          401
+        );
       }
 
       await db
