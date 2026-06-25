@@ -2,6 +2,9 @@
 
 import { MessageCircle, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { brand } from "@/config/brand";
 import { api } from "@/lib/api";
 import { getToken } from "@/lib/auth";
@@ -127,9 +130,9 @@ function NativeChatWidget() {
     try {
       if (!ticketId) {
         // Create a new support ticket
-        const res = await api.post<{ ticket: { id: string } }>("/support/tickets", {
+        const res = await api.post<{ ticket: { id: string } }>("/support", {
           subject: text.slice(0, 80),
-          body: text,
+          message: text,
         });
         setTicketId(res.ticket.id);
         setMessages((prev) => [
@@ -141,7 +144,7 @@ function NativeChatWidget() {
         ]);
       } else {
         // Add message to existing ticket
-        await api.post(`/support/tickets/${ticketId}/messages`, { body: text });
+        await api.post(`/support/${ticketId}/messages`, { body: text });
         setMessages((prev) => [
           ...prev,
           { role: "system", text: "Message sent. An agent will respond soon." },
@@ -160,24 +163,25 @@ function NativeChatWidget() {
   return (
     <>
       {/* Chat toggle button */}
-      <button
+      <Button
         type="button"
         onClick={() => setOpen(!open)}
-        className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform hover:scale-105"
+        className="fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full shadow-lg transition-transform hover:scale-105"
+        size="icon"
         aria-label="Open support chat"
       >
         {open ? <X className="h-6 w-6" /> : <MessageCircle className="h-6 w-6" />}
-      </button>
+      </Button>
 
       {/* Chat panel */}
       {open && (
-        <div className="fixed bottom-24 right-6 z-50 flex h-96 w-80 flex-col rounded-xl border border-border bg-card shadow-2xl">
-          <div className="flex items-center gap-2 border-b border-border px-4 py-3">
+        <Card className="fixed bottom-24 right-6 z-50 flex h-96 w-80 flex-col shadow-2xl">
+          <CardHeader className="flex-row items-center gap-2 space-y-0 border-b border-border px-4 py-3">
             <MessageCircle className="h-5 w-5 text-primary" />
             <span className="text-sm font-medium text-foreground">Support</span>
-          </div>
+          </CardHeader>
 
-          <div className="flex-1 overflow-y-auto p-4 space-y-3">
+          <CardContent className="flex-1 overflow-y-auto p-4 space-y-3">
             {messages.length === 0 && (
               <p className="text-center text-sm text-muted-foreground">
                 Hi! How can we help you today?
@@ -196,26 +200,23 @@ function NativeChatWidget() {
               </div>
             ))}
             <div ref={bottomRef} />
-          </div>
+          </CardContent>
 
-          <form onSubmit={handleSend} className="border-t border-border p-3">
-            <div className="flex gap-2">
-              <input
+          <CardFooter className="border-t border-border p-3">
+            <form onSubmit={handleSend} className="flex w-full gap-2">
+              <Input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Type a message…"
-                className="flex-1 rounded-lg border border-border bg-muted px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-ring"
+                aria-label="Support message"
+                className="flex-1 bg-muted"
               />
-              <button
-                type="submit"
-                disabled={sending || !input.trim()}
-                className="rounded-lg bg-primary px-3 py-2 text-sm font-medium text-primary-foreground disabled:opacity-50"
-              >
+              <Button type="submit" disabled={sending || !input.trim()}>
                 Send
-              </button>
-            </div>
-          </form>
-        </div>
+              </Button>
+            </form>
+          </CardFooter>
+        </Card>
       )}
     </>
   );

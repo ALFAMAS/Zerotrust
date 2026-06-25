@@ -1,0 +1,36 @@
+groups:
+  - name: zerotrust-slo
+    rules:
+      - alert: ZerotrustHighErrorRate
+        expr: |
+          sum(rate(http_request_duration_seconds_count{status_code=~"5.."}[5m]))
+          /
+          sum(rate(http_request_duration_seconds_count[5m])) > 0.01
+        for: 10m
+        labels:
+          severity: page
+          service: zerotrust-api
+        annotations:
+          summary: "zerotrust API 5xx error rate is above 1%"
+          description: "5xx responses exceeded 1% for 10 minutes. Check recent deploys, database health, and upstream dependencies."
+
+      - alert: ZerotrustLatencyP95High
+        expr: |
+          histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le, route, method)) > 0.1
+        for: 10m
+        labels:
+          severity: page
+          service: zerotrust-api
+        annotations:
+          summary: "zerotrust API p95 latency is above 100ms"
+          description: "Route {{ $labels.method }} {{ $labels.route }} has p95 latency above 100ms for 10 minutes."
+
+      - alert: ZerotrustMetricsMissing
+        expr: absent(up{job="zerotrust-api"} == 1)
+        for: 5m
+        labels:
+          severity: page
+          service: zerotrust-api
+        annotations:
+          summary: "zerotrust API metrics scrape is missing"
+          description: "Prometheus has not scraped the zerotrust API successfully for 5 minutes."

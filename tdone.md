@@ -13,6 +13,28 @@ needs surfacing
 
 ---
 
+## Enterprise Execution Ledger
+
+- ✅ Audit execution ledger — prioritized critical/high findings, concrete fixes, owner assignments, Week 1–4 milestones, staging handoff steps, and running changelog are documented in `docs/ENTERPRISE_EXECUTION_PLAN.md`.
+- ✅ CI coverage ratchet — Vitest global coverage thresholds now target 85% lines/functions/branches/statements and CI runs the coverage gate with artifact upload.
+- ✅ Performance guardrail — k6 full-suite thresholds now enforce API `http_req_duration` p95 <100ms and p99 <300ms to match the SaaS starter latency objective.
+- ✅ Security/E2E CI expansion — CI now includes Semgrep SAST, Trivy filesystem scanning, and a Playwright E2E job with trace/report artifacts.
+- ✅ Phase 1 integration audit — `scripts/audit-api-ui-map.mjs` generates `docs/api-ui-integration-matrix.md`, CI verifies the matrix is committed, and the current frontend call scan has zero unmatched backend routes.
+- ✅ Support chat contract fix — native live-chat fallback now creates tickets through `POST /support` and replies through `POST /support/:id/messages`, matching the mounted Hono support routes.
+- ✅ Phase 2 performance baseline — API compression, mounted Prometheus metrics, hot-path refresh-token/org-membership indexes, and an operations smoke script are documented in `docs/PHASE_2_PERFORMANCE_OBSERVABILITY.md`.
+- ✅ Phase 3 support-chat UI/integration — native support chat uses shadcn `Button`/`Input`/`Card` primitives and has a Playwright regression test for the mounted `POST /support` contract.
+- ✅ CI database bootstrap — CI Postgres URLs now match the service password and `db:push` runs before backend, E2E, and load-test jobs.
+- ✅ Phase 4 staging sign-off workflow — manual staging validation now runs ops smoke, Lighthouse, OWASP ZAP baseline, and strict k6 load validation with artifacts.
+- ✅ Phase 5 disaster-recovery drill — weekly/manual CI creates an encrypted backup, restores it into isolated Postgres, verifies evidence data, and uploads backup artifacts.
+- ✅ Phase 6 SDK drift gate — CI runs `bun run sdk:check` so OpenAPI changes must include regenerated `packages/client/src/index.ts`.
+- ✅ Phase 7 traceability — API startup initializes OpenTelemetry, mounts request-correlation middleware, and ops smoke verifies `X-Trace-Id` on `/health`.
+- ✅ Phase 9 alerting — Prometheus scrape config, SLO alert rules, and a local/staging Prometheus + Alertmanager compose overlay are available under `monitoring/` and `docker-compose.observability.yml`.
+- ✅ Phase 8 reproducible CI — `.bun-version` pins the Bun runtime and all workflows read that version instead of floating on `latest`.
+- ✅ Phase 10 shadcn enforcement baseline — `bun run ui:audit` generates a committed report of remaining raw controls and CI verifies the report is current.
+- ✅ Phase 11 shadcn migration slice — added shared `Textarea`, migrated FeedbackWidget/NpsSurveyPrompt to shadcn primitives, and reduced raw controls from 162 to 153.
+- ✅ Phase 12 shadcn migration slice — migrated LocaleSwitcher/ProductTour/SetupChecklist controls and reduced raw controls from 153 to 148.
+- ✅ Phase 13 shadcn migration slice — migrated `/dashboard/support` ticket/reply controls and reduced raw controls from 148 to 140.
+
 ## Auth & Identity
 
 - ✅ Email + password auth with account lockout (configurable threshold + auto-unlock)

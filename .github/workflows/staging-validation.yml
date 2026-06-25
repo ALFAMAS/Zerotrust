@@ -1,0 +1,81 @@
+name: Staging Validation
+
+on:
+  workflow_dispatch:
+    inputs:
+      staging_url:
+        description: "Public staging UI URL (for Lighthouse/ZAP)"
+        required: true
+        type: string
+      api_url:
+        description: "Public staging API URL (for ops smoke/k6)"
+        required: true
+        type: string
+
+jobs:
+  ops-smoke:
+    name: Operations Smoke
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: .bun-version
+      - run: bun install --frozen-lockfile
+      - name: Health, metrics, and version checks
+        run: bun run ops:smoke
+        env:
+          API_URL: ${{ inputs.api_url }}
+
+  lighthouse:
+    name: Lighthouse Performance
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run Lighthouse CI
+        uses: treosh/lighthouse-ci-action@v12
+        with:
+          urls: |
+            ${{ inputs.staging_url }}/
+            ${{ inputs.staging_url }}/login
+            ${{ inputs.staging_url }}/register
+          configPath: ./.lighthouserc.json
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+
+  dast:
+    name: OWASP ZAP Baseline
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: ZAP baseline scan
+        uses: zaproxy/action-baseline@v0.14.0
+        with:
+          target: ${{ inputs.staging_url }}
+          fail_action: true
+          allow_issue_writing: false
+          cmd_options: "-a"
+
+  load:
+    name: k6 Staging Load
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install k6
+        run: |
+          sudo gpg -k
+          sudo gpg --no-default-keyring --keyring /usr/share/keyrings/k6-archive-keyring.gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
+          echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
+          sudo apt-get update
+          sudo apt-get install -y k6
+      - name: Run strict staging load suite
+        run: k6 run --out json=staging-k6-results.json -e BASE_URL=${{ inputs.api_url }} tests/load/full-suite.k6.js
+      - name: Upload k6 results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: staging-k6-results
+          path: staging-k6-results.json

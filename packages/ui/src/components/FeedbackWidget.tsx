@@ -3,6 +3,8 @@
 import { X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
 import { brand } from "@/config/brand";
 
 type FeedbackType = "nps" | "thumbs";
@@ -94,19 +96,21 @@ export default function FeedbackWidget({
   if (!visible) return null;
 
   return (
-    <div
-      className="fixed bottom-20 right-4 z-40 w-80 rounded-xl border border-border bg-popover p-5 shadow-2xl transition-all"
+    <Card
+      className="fixed bottom-20 right-4 z-40 w-80 bg-popover p-5 shadow-2xl transition-all"
       role="dialog"
       aria-label="Feedback"
     >
-      <button
+      <Button
         type="button"
         onClick={dismiss}
-        className="absolute right-3 top-3 text-muted-foreground transition-colors hover:text-foreground"
+        className="absolute right-3 top-3 h-7 w-7 text-muted-foreground"
+        variant="ghost"
+        size="icon"
         aria-label="Close"
       >
         <X className="h-4 w-4" />
-      </button>
+      </Button>
 
       {step === "prompt" && type === "nps" && (
         <>
@@ -118,14 +122,15 @@ export default function FeedbackWidget({
           </p>
           <div className="flex flex-wrap gap-1">
             {Array.from({ length: 11 }, (_, i) => (
-              <button
+              <Button
                 type="button"
                 key={i}
                 onClick={() => handleScore(i)}
-                className="h-8 w-8 rounded-md border border-border text-xs text-muted-foreground transition-colors hover:border-primary hover:bg-primary hover:text-primary-foreground"
+                className="h-8 w-8 p-0 text-xs"
+                variant="outline"
               >
                 {i}
-              </button>
+              </Button>
             ))}
           </div>
         </>
@@ -135,22 +140,24 @@ export default function FeedbackWidget({
         <>
           <p className="mb-4 text-sm font-medium text-foreground">Was this page helpful?</p>
           <div className="flex gap-3">
-            <button
+            <Button
               type="button"
               onClick={() => handleScore(1)}
-              className="flex-1 rounded-lg border border-border py-2 text-xl text-muted-foreground transition-colors hover:border-emerald-500 hover:bg-emerald-900/30 hover:text-emerald-300"
+              className="flex-1 text-xl hover:border-emerald-500 hover:bg-emerald-900/30 hover:text-emerald-300"
+              variant="outline"
               aria-label="Thumbs up"
             >
               👍
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
               onClick={() => handleScore(-1)}
-              className="flex-1 rounded-lg border border-border py-2 text-xl text-muted-foreground transition-colors hover:border-red-500 hover:bg-red-900/30 hover:text-red-300"
+              className="flex-1 text-xl hover:border-red-500 hover:bg-red-900/30 hover:text-red-300"
+              variant="outline"
               aria-label="Thumbs down"
             >
               👎
-            </button>
+            </Button>
           </div>
         </>
       )}
@@ -164,12 +171,12 @@ export default function FeedbackWidget({
                 ? "Thanks! What could be better?"
                 : "Sorry to hear that. What would improve your experience?"}
           </p>
-          <textarea
+          <Textarea
             value={comment}
             onChange={(e) => setComment(e.target.value)}
             placeholder="Optional comment…"
             rows={3}
-            className="mb-3 w-full resize-none rounded-lg border border-input bg-transparent px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+            className="mb-3 resize-none"
           />
           <div className="flex gap-2">
             <Button onClick={handleSubmit} disabled={submitting} className="flex-1">
@@ -185,6 +192,6 @@ export default function FeedbackWidget({
       {step === "done" && (
         <p className="py-2 text-center text-sm text-emerald-400">Thanks for your feedback!</p>
       )}
-    </div>
+    </Card>
   );
 }

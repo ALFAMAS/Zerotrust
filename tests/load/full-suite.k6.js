@@ -10,7 +10,7 @@
  * Run with:
  *   k6 run tests/load/full-suite.k6.js -e BASE_URL=http://localhost:1337
  *
- * Thresholds are set conservatively for CI — tighten for production benchmarks.
+ * Thresholds enforce the production starter target: API p95 under 100ms for the hot auth/org paths.
  */
 
 import http from "k6/http";
@@ -62,8 +62,11 @@ export const options = {
     },
   },
   thresholds: {
-    // Overall: 95% of requests under 1s, 99% under 3s
-    http_req_duration: ["p(95)<1000", "p(99)<3000"],
+    // Overall SaaS-starter target: 95% of API requests under 100ms, 99% under 300ms.
+    http_req_duration: ["p(95)<100", "p(99)<300"],
+    // Hot auth-path latency budgets
+    login_duration_ms: ["p(95)<100"],
+    refresh_duration_ms: ["p(95)<100"],
     // Error rates per scenario
     login_error_rate: ["rate<0.05"],
     refresh_error_rate: ["rate<0.02"],

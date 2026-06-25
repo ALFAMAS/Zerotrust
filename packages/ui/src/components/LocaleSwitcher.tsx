@@ -2,6 +2,7 @@
 
 import { ChevronDown } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { Button } from "@/components/ui/button";
 import { api } from "@/lib/api";
 import { getToken } from "@/lib/auth";
 import { cn } from "@/lib/utils";
@@ -54,10 +55,12 @@ export default function LocaleSwitcher() {
 
   return (
     <div ref={ref} className="relative">
-      <button
+      <Button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+        className="gap-1.5 px-2.5 py-1.5 text-muted-foreground"
+        variant="ghost"
+        size="sm"
         aria-label="Switch language"
         aria-expanded={open}
         aria-haspopup="listbox"
@@ -65,7 +68,7 @@ export default function LocaleSwitcher() {
         <span>{active.flag}</span>
         <span className="hidden sm:inline">{active.label}</span>
         <ChevronDown className="h-3 w-3 opacity-60" />
-      </button>
+      </Button>
 
       {open && (
         <div
@@ -73,22 +76,21 @@ export default function LocaleSwitcher() {
           className="absolute end-0 z-50 mt-1 w-36 overflow-hidden rounded-xl border border-border bg-popover py-1 shadow-xl"
         >
           {LOCALES.map((locale) => (
-            <button
+            <Button
               key={locale.code}
               type="button"
               role="option"
               aria-selected={locale.code === current}
               onClick={() => switchLocale(locale.code)}
               className={cn(
-                "flex w-full items-center gap-2.5 px-3 py-2 text-sm transition-colors",
-                locale.code === current
-                  ? "bg-accent text-foreground"
-                  : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                "h-auto w-full justify-start gap-2.5 rounded-none px-3 py-2",
+                locale.code === current ? "bg-accent text-foreground" : "text-muted-foreground"
               )}
+              variant="ghost"
             >
               <span>{locale.flag}</span>
               {locale.label}
-            </button>
+            </Button>
           ))}
         </div>
       )}
