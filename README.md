@@ -303,6 +303,9 @@ zerotrust runs anywhere Bun and Node run. The reference setup below is **Ubuntu 
 with PM2 + nginx; managed PostgreSQL/Redis (e.g. Neon + Upstash) is recommended over
 self-hosting the data stores.
 
+> For the **CI/CD pipeline**, automated **staging deploy**, and how the
+> Lighthouse/ZAP/k6/DR gates fit together, see [docs/deployment.md](./docs/deployment.md).
+
 ### 1. System dependencies
 
 ```bash
