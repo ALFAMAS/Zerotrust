@@ -2,6 +2,7 @@ import { serve } from "@hono/node-server";
 import { serveStatic } from "@hono/node-server/serve-static";
 import dotenv from "dotenv";
 import { Hono } from "hono";
+import { compress } from "hono/compress";
 import { cors } from "hono/cors";
 import { secureHeaders } from "hono/secure-headers";
 import { initializezerotrust } from "..";
@@ -11,6 +12,7 @@ import { initSentry } from "../instrument";
 import jitRoutes from "../jit/routes";
 import ldapRoutes from "../ldap/routes";
 import { getLogger } from "../logger";
+import { metricsMiddleware, metricsRoute } from "../metrics";
 import { API_VERSIONS, apiVersioning, CURRENT_API_VERSION } from "../middleware/apiVersioning";
 import { authMiddleware, requireAdmin } from "../middleware/auth";
 import { corsOptionsFromEnv } from "../middleware/cors";
@@ -28,6 +30,7 @@ import { startBackupScheduler } from "../services/dbBackup.service";
 import { initEmailQueue } from "../services/emailQueue";
 import { startNotificationEmailFallbackScheduler } from "../services/notificationEmailFallback";
 import { sloAlertingMiddleware, sloRouteHandler } from "../services/slo.service";
+import { initTelemetry, telemetryMiddleware } from "../telemetry";
 import webhookManagementRoutes from "../webhooks/routes";
 import accessReviewRoutes from "./routes/access-review.routes";
 import adminRoutes from "./routes/admin.routes";
@@ -68,6 +71,7 @@ import type { HonoEnv } from "../shared/types";
 const logger = getLogger("api-server");
 export async function createServer() {
   initSentry();
+  initTelemetry();
   const { logger: initLogger } = await initializezerotrust();
   initLogger.info("Starting API server setup");
 
@@ -94,12 +98,19 @@ export async function createServer() {
 
   app.use("*", cors(corsOptionsFromEnv()));
   app.use("*", secureHeaders());
+  // Compress JSON, HTML, and text responses to reduce transfer time for dashboard/API reads.
+  app.use("*", compress());
+  app.use("*", metricsMiddleware());
+  app.use("*", telemetryMiddleware());
 
   // API version negotiation + deprecation/sunset headers
   app.use("*", apiVersioning());
 
   // Public registry of supported API versions and their lifecycle status
   app.get("/api/versions", (c) => c.json({ current: CURRENT_API_VERSION, versions: API_VERSIONS }));
+
+  // Prometheus scrape endpoint. Keep this public for scraper compatibility; restrict at ingress if needed.
+  app.get("/metrics", metricsRoute);
 
   // Error-spike + latency alerting (Slack / Teams / PagerDuty)
   app.use("*", alertingMiddleware());

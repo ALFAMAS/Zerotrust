@@ -3,6 +3,7 @@
 import { Check, Trophy } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { api } from "@/lib/api";
 
@@ -105,13 +106,9 @@ export default function SetupChecklist({ user }: { user: any }) {
     <Card className="mb-6 p-6">
       <div className="mb-1 flex items-center justify-between">
         <h2 className="text-sm font-semibold text-foreground">Get started</h2>
-        <button
-          type="button"
-          onClick={dismiss}
-          className="text-xs text-muted-foreground transition-colors hover:text-foreground"
-        >
+        <Button type="button" onClick={dismiss} variant="ghost" size="sm">
           Dismiss
-        </button>
+        </Button>
       </div>
       <p className="mb-4 text-xs text-muted-foreground">
         {completed.length}/{total} steps completed

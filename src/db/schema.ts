@@ -233,20 +233,31 @@ export const accessReviewItemsTable = pgTable(
   })
 );
 
-export const refreshTokensTable = pgTable("refresh_tokens", {
-  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: uuid("user_id")
-    .notNull()
-    .references(() => usersTable.id, { onDelete: "cascade" }),
-  sessionId: uuid("session_id")
-    .notNull()
-    .references(() => sessionsTable.id, { onDelete: "cascade" }),
-  tokenHash: text("token_hash").notNull().unique(),
-  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
-  usedAt: timestamp("used_at", { withTimezone: true }),
-  isRevoked: boolean("is_revoked").notNull().default(false),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
-});
+export const refreshTokensTable = pgTable(
+  "refresh_tokens",
+  {
+    id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => usersTable.id, { onDelete: "cascade" }),
+    sessionId: uuid("session_id")
+      .notNull()
+      .references(() => sessionsTable.id, { onDelete: "cascade" }),
+    tokenHash: text("token_hash").notNull().unique(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    usedAt: timestamp("used_at", { withTimezone: true }),
+    isRevoked: boolean("is_revoked").notNull().default(false),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
+  },
+  (t) => ({
+    refreshTokensUserRevokedExpiresIdx: index("refresh_tokens_user_revoked_expires_idx").on(
+      t.userId,
+      t.isRevoked,
+      t.expiresAt
+    ),
+    refreshTokensSessionIdIdx: index("refresh_tokens_session_id_idx").on(t.sessionId),
+  })
+);
 
 export const otpsTable = pgTable("otps", {
   id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -473,6 +484,11 @@ export const organizationMembersTable = pgTable(
   },
   (t) => ({
     uniq: unique().on(t.orgId, t.userId),
+    organizationMembersUserIdIdx: index("organization_members_user_id_idx").on(t.userId),
+    organizationMembersOrgIdRoleIdx: index("organization_members_org_id_role_idx").on(
+      t.orgId,
+      t.role
+    ),
   })
 );
 

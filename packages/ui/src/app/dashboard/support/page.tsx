@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useState } from "react";
 import EmptyState from "../../../components/EmptyState";
 import Modal from "../../../components/Modal";
+import { Button } from "../../../components/ui/button";
+import { Input } from "../../../components/ui/input";
 import {
   Select,
   SelectContent,
@@ -10,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../../components/ui/select";
+import { Textarea } from "../../../components/ui/textarea";
 import { api } from "../../../lib/api";
 
 interface Ticket {
@@ -121,13 +124,13 @@ export default function SupportPage() {
             Open a ticket and our team will reply here. You&apos;ll also be notified by email.
           </p>
         </div>
-        <button
+        <Button
           type="button"
           onClick={() => setCreateOpen(true)}
-          className="shrink-0 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+          className="shrink-0"
         >
           New ticket
-        </button>
+        </Button>
       </div>
 
       {loading ? (
@@ -150,10 +153,11 @@ export default function SupportPage() {
         <ul className="space-y-3">
           {tickets.map((t) => (
             <li key={t.id}>
-              <button
+              <Button
                 type="button"
                 onClick={() => openThread(t.id)}
-                className="flex w-full items-center justify-between gap-4 rounded-xl border border-border bg-card p-4 text-left transition-colors hover:border-primary/50"
+                variant="outline"
+                className="h-auto w-full justify-between gap-4 rounded-xl border-border bg-card p-4 text-left hover:border-primary/50"
               >
                 <div className="min-w-0">
                   <p className="truncate text-sm font-medium text-foreground">{t.subject}</p>
@@ -173,7 +177,7 @@ export default function SupportPage() {
                     {t.status}
                   </span>
                 </div>
-              </button>
+              </Button>
             </li>
           ))}
         </ul>
@@ -187,25 +191,25 @@ export default function SupportPage() {
               <label htmlFor="page-f0" className="mb-1.5 block text-sm text-foreground/80">
                 Subject
               </label>
-              <input
+              <Input
                 id="page-f0"
                 value={form.subject}
                 onChange={(e) => setForm({ ...form, subject: e.target.value })}
                 placeholder="Brief summary of the issue"
-                className="w-full rounded-lg border border-border bg-muted px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground"
+                className="bg-muted"
               />
             </div>
             <div>
               <label htmlFor="page-f1" className="mb-1.5 block text-sm text-foreground/80">
                 Message
               </label>
-              <textarea
+              <Textarea
                 id="page-f1"
                 value={form.message}
                 onChange={(e) => setForm({ ...form, message: e.target.value })}
                 rows={5}
                 placeholder="Describe what's happening, and any steps to reproduce."
-                className="w-full rounded-lg border border-border bg-muted px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground"
+                className="bg-muted"
               />
             </div>
             <div>
@@ -225,14 +229,14 @@ export default function SupportPage() {
               </Select>
             </div>
             {error && <p className="text-sm text-red-400">{error}</p>}
-            <button
+            <Button
               type="button"
               onClick={createTicket}
               disabled={!form.subject.trim() || !form.message.trim()}
-              className="w-full rounded-lg bg-primary py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
+              className="w-full"
             >
               Submit ticket
-            </button>
+            </Button>
           </div>
         </Modal>
       )}
@@ -276,29 +280,30 @@ export default function SupportPage() {
                 </p>
               ) : (
                 <div className="space-y-2">
-                  <textarea
+                  <Textarea
                     value={reply}
                     onChange={(e) => setReply(e.target.value)}
                     rows={3}
                     placeholder="Write a reply…"
-                    className="w-full rounded-lg border border-border bg-muted px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground"
+                    className="bg-muted"
                   />
                   <div className="flex items-center justify-between">
-                    <button
+                    <Button
                       type="button"
                       onClick={closeTicket}
-                      className="text-xs text-muted-foreground transition-colors hover:text-foreground"
+                      variant="ghost"
+                      size="sm"
+                      className="text-xs text-muted-foreground"
                     >
                       Close ticket
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                       type="button"
                       onClick={sendReply}
                       disabled={!reply.trim() || sending}
-                      className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
                     >
                       {sending ? "Sending…" : "Send reply"}
-                    </button>
+                    </Button>
                   </div>
                 </div>
               )}

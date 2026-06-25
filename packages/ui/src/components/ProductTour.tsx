@@ -132,10 +132,11 @@ export default function ProductTour() {
     >
       {/* Dimming overlay (click-through prevented). A spotlight cut-out is drawn
           via a ring box when a target exists. */}
-      <button
+      <Button
         type="button"
         aria-label="Skip tour"
-        className="absolute inset-0 bg-black/60"
+        className="absolute inset-0 h-auto rounded-none bg-black/60 hover:bg-black/60"
+        variant="ghost"
         onClick={finish}
       />
 
@@ -173,13 +174,9 @@ export default function ProductTour() {
             ))}
           </div>
           <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={finish}
-              className="text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
-            >
+            <Button type="button" onClick={finish} variant="ghost" size="sm">
               Skip
-            </button>
+            </Button>
             <Button size="sm" onClick={() => (isLast ? finish() : setStep((s) => s + 1))}>
               {isLast ? "Done" : "Next"}
             </Button>
