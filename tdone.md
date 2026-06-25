@@ -37,6 +37,7 @@ needs surfacing
 - ✅ Observability fix — the mounted Prometheus `/metrics` route served prom-client's *default* registry (empty); now serves the app's `metricsRegistry` so `zerotrust_*` counters/histograms actually appear. Optional `METRICS_AUTH_TOKEN` bearer gate. See `docs/audit/2026-06-25-production-readiness-audit.md`.
 - ✅ Auth hot-path perf — `authMiddleware` no longer writes `sessions.last_activity_at` on every request; throttled to once per `SESSION_ACTIVITY_REFRESH_SECONDS` (default 60s, auto-clamped below the org idle-timeout). Removes a write-on-every-read from the p95 path.
 - ✅ CI unblock — fixed `trivy-action` version pin (`@v0.32.0`), Biome lint/format errors in new `scripts/*` + support page, and made the 85%-vs-~56% coverage gate non-blocking so PRs stop deadlocking.
+- ✅ Security regression tests — added cross-key isolation, 32-byte key-length validation, and single-byte ciphertext-tamper (AEAD) guards to the PASETO `TokenService`, plus ciphertext-tamper + wrong-IV guards to CSFLE. Locks in the "PASETO/CSFLE defenses stay intact" baseline against forgery/rotation regressions.
 
 ## Auth & Identity
 

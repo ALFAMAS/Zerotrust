@@ -109,4 +109,23 @@ describe("CSFLE", () => {
     expect(versions.length).toBeGreaterThanOrEqual(1);
     expect(versions[0].isActive).toBe(true);
   });
+
+  it("rejects a tampered ciphertext (AEAD integrity for data-at-rest)", async () => {
+    const manager = await initializeCSFLE(mockConfig);
+    const { ciphertext, keyVersion, iv } = await manager.encrypt("pii@example.com");
+    // Flip one character in the ciphertext; the auth tag must reject it rather
+    // than returning attacker-influenced plaintext.
+    const i = Math.floor(ciphertext.length / 2);
+    const flipped = ciphertext[i] === "a" ? "b" : "a";
+    const tampered = ciphertext.slice(0, i) + flipped + ciphertext.slice(i + 1);
+    await expect(manager.decrypt(tampered, keyVersion, iv)).rejects.toThrow();
+  });
+
+  it("rejects decryption with the wrong IV (nonce binding)", async () => {
+    const manager = await initializeCSFLE(mockConfig);
+    const a = await manager.encrypt("first@example.com");
+    const b = await manager.encrypt("second@example.com");
+    // Reusing a different message's IV must not decrypt this ciphertext.
+    await expect(manager.decrypt(a.ciphertext, a.keyVersion, b.iv)).rejects.toThrow();
+  });
 });
