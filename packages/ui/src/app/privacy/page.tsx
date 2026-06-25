@@ -1,6 +1,14 @@
 import type { Metadata } from "next";
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { brand } from "@/config/brand";
 import { legal } from "@/config/legal";
 
@@ -118,33 +126,33 @@ export default function PrivacyPage() {
               5. Cookies &amp; Local Storage
             </h2>
             <p className="mb-3">{legal.companyName} uses the following types of browser storage:</p>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm text-muted-foreground border border-border rounded-lg overflow-hidden">
-                <thead>
-                  <tr className="bg-card text-foreground/80">
-                    <th className="px-4 py-3 text-left font-medium">Name</th>
-                    <th className="px-4 py-3 text-left font-medium">Purpose</th>
-                    <th className="px-4 py-3 text-left font-medium">Duration</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  <tr>
-                    <td className="px-4 py-3 font-mono text-primary">za_session</td>
-                    <td className="px-4 py-3">Authentication session token</td>
-                    <td className="px-4 py-3">Session</td>
-                  </tr>
-                  <tr>
-                    <td className="px-4 py-3 font-mono text-primary">za_cookie_consent</td>
-                    <td className="px-4 py-3">Stores your cookie consent choice</td>
-                    <td className="px-4 py-3">1 year</td>
-                  </tr>
-                  <tr>
-                    <td className="px-4 py-3 font-mono text-primary">za_csrf</td>
-                    <td className="px-4 py-3">CSRF protection token</td>
-                    <td className="px-4 py-3">Session</td>
-                  </tr>
-                </tbody>
-              </table>
+            <div className="overflow-x-auto rounded-lg border border-border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Purpose</TableHead>
+                    <TableHead>Duration</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  <TableRow>
+                    <TableCell className="font-mono text-primary">za_session</TableCell>
+                    <TableCell>Authentication session token</TableCell>
+                    <TableCell>Session</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="font-mono text-primary">za_cookie_consent</TableCell>
+                    <TableCell>Stores your cookie consent choice</TableCell>
+                    <TableCell>1 year</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="font-mono text-primary">za_csrf</TableCell>
+                    <TableCell>CSRF protection token</TableCell>
+                    <TableCell>Session</TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
             </div>
           </section>
 

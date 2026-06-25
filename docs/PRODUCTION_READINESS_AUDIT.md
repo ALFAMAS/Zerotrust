@@ -81,18 +81,22 @@ reference pattern (shadcn `Card`/`Table`/`Badge`/`Button`).
 
 ---
 
-## 4. UI / shadcn migration
+## 4. UI / shadcn migration — ✅ completed (this PR)
 
 - shadcn/ui is scaffolded (`components.json`, 18 primitives under
-  `components/ui/`), but most pages still use **raw HTML tables and bespoke
-  toasts** (e.g. `admin/sessions`, `admin/users`). This is stylistic debt, not
-  a bug, but it fragments a11y and theming.
-- **Pattern established (this PR):** the anomaly console is built entirely on
-  shadcn primitives and should be the template for migrating the remaining
-  admin/dashboard pages.
-- **Recommendation (P2):** migrate the high-traffic admin tables
-  (`sessions`, `users`, `revenue`) to `Table` + `Badge` + `Button`, and route
-  ad-hoc toasts through the existing `sonner` component.
+  `components/ui/`). This PR migrated the app onto those primitives:
+  - **Every interactive data table** now uses shadcn `Table`: `admin/sessions`,
+    `admin/users`, `admin/audit`, `admin/access-reviews` (+ `[id]`),
+    `dashboard/webhooks`, plus the new `admin/anomaly`/`admin/tenants`/
+    `dashboard/wallet` consoles. The only remaining `<table>` is the static
+    `privacy` cookie list — also converted.
+  - **Every native `<select>`** was replaced with the shadcn `Select`
+    (api-keys, admin revenue, support, billing, org invite-role + transfer).
+  - The legacy `Badge`/`Modal` helpers were already thin wrappers over the
+    shadcn `Badge`/`Dialog`, so pages using them are shadcn-backed.
+- Verified: `biome ci` 0 errors, UI `tsc` clean, `next build` green in CI.
+- **Remaining polish (P3):** route the various ad-hoc inline toasts through the
+  installed `sonner` component for one consistent toast system.
 
 ---
 
