@@ -41,6 +41,7 @@ needs surfacing
 - ✅ CI fully unblocked — regenerated the stale `@zerotrust/client` SDK (deterministic/idempotent; `sdk:check` now passes) and made the broken `trivy-action` *binary-install* step non-blocking (Semgrep + `bun audit --prod` stay blocking). With #39's fixes this returns CI to green for every PR.
 - ✅ Continuous-access-evaluation tests — 15 cases for `sessionRisk.service` (`assessSessionRisk` hard/soft/none escalation incl. the `>0.8` anomaly boundary and hard-over-soft precedence; `computeRiskFactors` location/device/anomaly derivation + malformed-input tolerance). Previously untested abuse defense.
 - ✅ Performance sub-plan — `docs/audit/D3-performance-subplan.md`: owned/measurable task breakdown (session+user JOIN → 1 round-trip, optional Redis user-state cache, k6 p95 capture) with staging-validation steps, since auth-path DB rewrites can't be validated in the agent sandbox.
+- ✅ Disposable-email defense tests — 13 cases for `disposableEmail.service` (domain normalization incl. last-`@`/malformed handling, blocklist/allowlist precedence, and `validateSignupEmail` MX paths with a hoisted DNS mock: off / records / no-records / lookup-throws-fails-closed). Previously untested abuse defense.
 
 ## Auth & Identity
 
