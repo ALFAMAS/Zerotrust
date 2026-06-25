@@ -13,6 +13,7 @@
     "build": "node ./node_modules/typescript/lib/tsc.js",
     "sdk:generate": "tsx scripts/generate-sdk.ts",
     "sdk:build": "npm run sdk:generate && node ./node_modules/typescript/lib/tsc.js -p packages/client/tsconfig.json",
+    "docs:api": "node scripts/generate-api-docs.mjs",
     "sdk:check": "bun run sdk:generate && git diff --exit-code -- packages/client/src/index.ts",
     "audit:integration": "node scripts/audit-api-ui-map.mjs",
     "ops:smoke": "node scripts/ops-smoke.mjs",

@@ -418,7 +418,8 @@ cd packages/ui && npm install && npm run build && pm2 restart zerotrust-ui
 
 A condensed map of the most-used endpoints (auth-gated routes noted). The API mounts
 31 route modules in `src/api/server.ts`; browse Swagger at `/docs` (dev) for the full
-surface.
+surface, or the generated [API reference](./docs/api-reference.md)
+(`bun run docs:api`) for a static, browsable list.
 
 ```
 # Auth
