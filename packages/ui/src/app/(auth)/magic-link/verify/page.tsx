@@ -5,17 +5,12 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useRef, useState } from "react";
 import { setToken } from "@/lib/auth";
+import { navigateToSafeRelative, safeRelativeRedirect } from "@/lib/safeRedirect";
 import { api } from "../../../../lib/api";
 
 type Status = "verifying" | "success" | "error";
 
 type Tokens = { accessToken: string; refreshToken?: string };
-
-/** Only allow same-origin, non-protocol-relative paths to avoid open redirects. */
-function safeRedirect(value: string | null): string {
-  if (value?.startsWith("/") && !value.startsWith("//")) return value;
-  return "/dashboard";
-}
 
 function VerifyMagicLinkInner() {
   const params = useSearchParams();
@@ -29,7 +24,7 @@ function VerifyMagicLinkInner() {
 
     const token = params.get("token");
     const email = params.get("email");
-    const redirect = safeRedirect(params.get("redirect"));
+    const redirect = safeRelativeRedirect(params.get("redirect"), "/dashboard");
 
     if (!token || !email) {
       setStatus("error");
@@ -43,7 +38,7 @@ function VerifyMagicLinkInner() {
         const tokens = await api.post<Tokens>("/auth/magic-link/verify", { email, token }, true);
         setToken(tokens.accessToken, tokens.refreshToken);
         setStatus("success");
-        window.location.href = redirect;
+        navigateToSafeRelative(redirect, "/dashboard");
       } catch (err: any) {
         setStatus("error");
         setError(err?.message || "This magic link is invalid or has expired. Request a new one.");

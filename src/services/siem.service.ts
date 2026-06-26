@@ -15,6 +15,7 @@
  */
 // NB: intentionally no logger import — this module is called from auditLog()
 // inside the logger, so importing the logger back would be circular.
+import { fetchFixedUrl } from "../shared/safeFetch";
 
 export function isSiemEnabled(): boolean {
   return process.env.SIEM_ENABLED === "true" && Boolean(process.env.SIEM_ENDPOINT);
@@ -43,15 +44,14 @@ export async function streamToSiem(event: Record<string, unknown>): Promise<bool
   };
 
   try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 5000);
-    await fetch(endpoint, {
+    // SIEM endpoint is operator-controlled env config and may legitimately be
+    // an internal collector, so do not apply the public-host SSRF guard here;
+    // still fail fast and refuse redirects.
+    await fetchFixedUrl(endpoint, {
       method: "POST",
       headers,
       body: JSON.stringify(payload),
-      signal: controller.signal,
     });
-    clearTimeout(timeout);
     return true;
   } catch (err) {
     // Never let SIEM delivery failures surface — just record locally.

@@ -1,10 +1,17 @@
 import { randomBytes } from "node:crypto";
 import { getLogger } from "../logger";
+import { safeExtensionForContentType } from "./uploadSafety";
 
 const logger = getLogger("presigned-upload");
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
-const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp", "application/pdf"];
+const ALLOWED_PRESIGNED_CONTENT_TYPES: readonly string[] = [
+  "image/jpeg",
+  "image/png",
+  "image/gif",
+  "image/webp",
+  "application/pdf",
+];
 const UPLOAD_TTL_SECS = 900;
 
 interface PresignedUrl {
@@ -12,7 +19,7 @@ interface PresignedUrl {
   key: string;
   expiresIn: number;
   maxSize: number;
-  allowedTypes: string[];
+  allowedTypes: readonly string[];
 }
 
 export async function generatePresignedUploadUrl(input: {
@@ -20,12 +27,19 @@ export async function generatePresignedUploadUrl(input: {
   fileName: string;
   maxSize?: number;
 }): Promise<PresignedUrl> {
-  if (!ALLOWED_TYPES.includes(input.contentType)) {
-    throw new Error(`Invalid content type. Allowed: ${ALLOWED_TYPES.join(", ")}`);
+  if (!ALLOWED_PRESIGNED_CONTENT_TYPES.includes(input.contentType)) {
+    throw new Error(`Invalid content type. Allowed: ${ALLOWED_PRESIGNED_CONTENT_TYPES.join(", ")}`);
+  }
+  const ext = safeExtensionForContentType(input.contentType);
+  if (!ext) {
+    throw new Error(`Invalid content type. Allowed: ${ALLOWED_PRESIGNED_CONTENT_TYPES.join(", ")}`);
   }
 
   const maxSize = Math.min(input.maxSize ?? MAX_FILE_SIZE, MAX_FILE_SIZE);
-  const ext = input.fileName.split(".").pop() || "bin";
+  // SECURITY (CWE-22): derive the object-key extension from the validated
+  // content type, never from the client-provided filename. Otherwise an upload
+  // with contentType=image/png and fileName=payload.html would be stored and
+  // served as active HTML from the application/CDN origin.
   const key = `uploads/${Date.now()}-${randomBytes(8).toString("hex")}.${ext}`;
 
   const { isS3BackupEnabled, getS3Config } = await import("./objectStorage.service.js");
@@ -66,5 +80,11 @@ export async function generatePresignedUploadUrl(input: {
     signature;
 
   logger.info("Pre-signed upload URL generated", { key, contentType: input.contentType });
-  return { url, key, expiresIn: UPLOAD_TTL_SECS, maxSize, allowedTypes: ALLOWED_TYPES };
+  return {
+    url,
+    key,
+    expiresIn: UPLOAD_TTL_SECS,
+    maxSize,
+    allowedTypes: ALLOWED_PRESIGNED_CONTENT_TYPES,
+  };
 }

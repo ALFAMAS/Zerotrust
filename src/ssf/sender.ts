@@ -1,10 +1,12 @@
 import { getLogger } from "../logger";
+import { fetchPublicUrl } from "../shared/safeFetch";
 
 const logger = getLogger("ssf-sender");
 
 export async function sendSSFEvent(targetUrl: string, event: any) {
   try {
-    await fetch(targetUrl, {
+    // SECURITY (CWE-918): SSF targets are externally configured receivers.
+    await fetchPublicUrl(targetUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(event),

@@ -13,6 +13,7 @@
 
 import { constants, createVerify, X509Certificate } from "node:crypto";
 import { getLogger } from "../logger";
+import { fetchFixedUrl, fetchPublicUrl } from "../shared/safeFetch";
 
 const logger = getLogger("fido-mds3");
 
@@ -254,7 +255,9 @@ async function refreshToc(): Promise<void> {
     headers.Authorization = `Bearer ${initApiKey}`;
   }
 
-  const response = await fetch(MDS3_TOC_URL, { headers });
+  const response = await fetchFixedUrl(MDS3_TOC_URL, {
+    headers,
+  });
   if (!response.ok) {
     throw new Error(`MDS3 TOC fetch failed: ${response.status} ${response.statusText}`);
   }
@@ -287,7 +290,11 @@ async function fetchEntryStatement(entry: MDS3Entry): Promise<void> {
     const headers: Record<string, string> = {};
     if (initApiKey) headers.Authorization = `Bearer ${initApiKey}`;
 
-    const response = await fetch(entry.url, { headers });
+    // SECURITY (CWE-918): entry URLs come from the remote MDS3 TOC. The TOC is
+    // signature-verified, but still treat embedded URLs as untrusted SSRF input.
+    const response = await fetchPublicUrl(entry.url, {
+      headers,
+    });
     if (!response.ok) {
       logger.warn("MDS3 entry statement fetch failed", { url: entry.url, status: response.status });
       return;

@@ -1,4 +1,5 @@
 import { createHmac, randomUUID } from "node:crypto";
+import { fetchPublicUrl } from "../shared/safeFetch";
 import { webhookDeliveryLog } from "./deliveryLog";
 import { webhookStore } from "./store";
 import type { WebhookDelivery, WebhookEndpoint, WebhookEventType } from "./types";
@@ -35,9 +36,6 @@ export async function deliverWebhook(
     ...(endpoint.headers ?? {}),
   };
 
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 30_000);
-
   const base: Omit<
     WebhookDelivery,
     "status" | "responseStatus" | "responseBody" | "error" | "deliveredAt" | "nextRetryAt"
@@ -50,14 +48,14 @@ export async function deliverWebhook(
   };
 
   try {
-    const response = await fetch(endpoint.url, {
+    // SECURITY (CWE-918): webhook endpoints are tenant/admin-configured and
+    // therefore user-influenced server-side fetch targets.
+    const response = await fetchPublicUrl(endpoint.url, {
       method: "POST",
       headers,
       body,
-      signal: controller.signal,
+      timeoutMs: 30_000,
     });
-
-    clearTimeout(timeout);
 
     const responseBody = await response.text().catch(() => "");
     const success = response.status >= 200 && response.status < 300;
@@ -74,7 +72,6 @@ export async function deliverWebhook(
     webhookDeliveryLog.record(delivery);
     return delivery;
   } catch (err) {
-    clearTimeout(timeout);
     const errorMessage = err instanceof Error ? err.message : String(err);
     const delivery: WebhookDelivery = {
       ...base,

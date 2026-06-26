@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from "../../../components/ui/select";
 import { api } from "../../../lib/api";
+import { navigateToSafeExternal } from "../../../lib/safeRedirect";
 
 interface Subscription {
   plan: string;
@@ -150,7 +151,7 @@ function BillingContent() {
     setCheckoutLoading(priceId);
     try {
       const { url } = await api.post<{ url: string }>("/billing/checkout", { priceId });
-      window.location.href = url;
+      navigateToSafeExternal(url, "/dashboard/billing");
     } catch {
       alert("Failed to start checkout. Please try again.");
     } finally {
@@ -162,7 +163,7 @@ function BillingContent() {
     setPortalLoading(true);
     try {
       const { url } = await api.post<{ url: string }>("/billing/portal", {});
-      window.location.href = url;
+      navigateToSafeExternal(url, "/dashboard/billing");
     } catch {
       alert("Failed to open billing portal.");
     } finally {

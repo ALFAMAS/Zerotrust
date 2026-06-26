@@ -20,6 +20,62 @@ const {
 const { join, dirname } = require("path");
 const { homedir, tmpdir } = require("os");
 
+// SECURITY (CWE-78): npm-invocation guard. The two spawnSync calls below
+// launch `npm install <spec>` and must therefore satisfy:
+//
+//   1. The program is `npm` — a closed allowlist (not env- or arg-driven).
+//   2. Every arg is either a known flag or a hardcoded `@scope/name@x.y.z`
+//      spec whose segments come from a platform map or a package.json on
+//      disk — never from request input or process.argv.
+//   3. `shell: process.platform === "win32"` matches the secure-coding
+//      skill's documented exception (npm.cmd requires shell:true on Win32).
+//
+// `assertSafeNpmSpec` enforces (2) so a future refactor that makes
+// `parcelBindingName`, `esbuildBindingName`, `version`, etc. env-driven
+// cannot silently introduce a CWE-78 sink.
+const NPM_INSTALL_FLAGS = new Set([
+  "install",
+  "--no-save",
+  "--ignore-scripts",
+  "--no-package-lock",
+  "--prefix",
+  "-g",
+  "--global",
+]);
+// @scope/name@x.y.z — strict: no tags, no git URLs, no file: paths.
+const NPM_SPEC_RE = /^@[a-z0-9][a-z0-9._-]*\/[a-z0-9][a-z0-9._-]*@\d+\.\d+\.\d+(?:-[a-z0-9.-]+)?$/i;
+function assertSafeNpmArg(arg, position, callSite) {
+  if (typeof arg !== "string" || arg.length === 0) {
+    throw new Error(`CWE-78: empty npm arg at position ${position} (${callSite})`);
+  }
+  if (arg.startsWith("-")) {
+    if (!NPM_INSTALL_FLAGS.has(arg)) {
+      throw new Error(
+        `CWE-78: npm flag not on allowlist at position ${position} (${callSite}): ${arg}`
+      );
+    }
+    return;
+  }
+  // The npm subcommand we actually call (only "install" today) is itself on
+  // the allowlist. New subcommands would need an explicit addition here.
+  if (NPM_INSTALL_FLAGS.has(arg)) {
+    return;
+  }
+  if (!NPM_SPEC_RE.test(arg)) {
+    throw new Error(
+      `CWE-78: npm spec does not match @scope/name@x.y.z at position ${position} (${callSite}): ${arg}`
+    );
+  }
+}
+function assertSafeNpmArgs(args, callSite) {
+  if (!Array.isArray(args)) {
+    throw new Error(`CWE-78: npm args must be an array (${callSite})`);
+  }
+  for (let i = 0; i < args.length; i++) {
+    assertSafeNpmArg(args[i], i, callSite);
+  }
+}
+
 const platform = process.platform; // 'linux' | 'darwin' | 'win32'
 const arch = process.arch; // 'x64' | 'arm64'
 const key = `${platform}-${arch}`;
@@ -222,15 +278,20 @@ function ensureBindingPackage(fullName, destPkgDir, version) {
   }
 
   // 2. Fetch via npm into a clean temp dir, then copy into place.
-  let tmp;
-  try {
-    tmp = mkdtempSync(join(tmpdir(), "zerotrust-binding-"));
-    const spec = version ? `${fullName}@${version}` : fullName;
-    spawnSync(
-      "npm",
-      ["install", "--no-save", "--ignore-scripts", "--no-package-lock", "--prefix", tmp, spec],
-      { cwd: tmp, stdio: "inherit", shell: process.platform === "win32" }
-    );
+    let tmp;
+    try {
+      tmp = mkdtempSync(join(tmpdir(), "zerotrust-binding-"));
+      const spec = version ? `${fullName}@${version}` : fullName;
+      // SECURITY (CWE-78): npm is invoked with `cwd: tmp`, so we drop
+      // `--prefix` (which would have introduced an attacker-controllable
+      // path arg into argv). The remaining argv is fully closed-allowlist.
+      const npmArgs = ["install", "--no-save", "--ignore-scripts", "--no-package-lock", spec];
+      assertSafeNpmArgs(npmArgs, "ensureBindingPackage");
+      spawnSync("npm", npmArgs, {
+        cwd: tmp,
+        stdio: "inherit",
+        shell: process.platform === "win32",
+      });
     const installed = join(tmp, "node_modules", ...fullName.split("/"));
     if (existsSync(installed)) {
       cpSync(installed, destPkgDir, { recursive: true });
@@ -343,11 +404,18 @@ if (esbuildInfo && esbuildBindingName) {
   const { version, esbuildDir } = esbuildInfo;
   const binaryDest = join(esbuildDir, "..", "@esbuild", esbuildBindingName);
   if (!existsSync(binaryDest)) {
-    spawnSync(
-      "npm",
-      ["install", "--no-save", "--ignore-scripts", `@esbuild/${esbuildBindingName}@${version}`],
-      { cwd: dirname(esbuildDir), stdio: "inherit", shell: process.platform === "win32" }
-    );
+    const npmArgs = [
+      "install",
+      "--no-save",
+      "--ignore-scripts",
+      `@esbuild/${esbuildBindingName}@${version}`,
+    ];
+    assertSafeNpmArgs(npmArgs, "esbuild-binding");
+    spawnSync("npm", npmArgs, {
+      cwd: dirname(esbuildDir),
+      stdio: "inherit",
+      shell: process.platform === "win32",
+    });
     if (existsSync(binaryDest)) {
       console.log(`✓ @esbuild/${esbuildBindingName}@${version} placed for drizzle-kit`);
     }

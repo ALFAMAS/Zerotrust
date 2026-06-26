@@ -1,5 +1,6 @@
 import { clearToken, getRefreshToken, getToken, setToken } from "./auth";
 import { enqueueWrite, isQueueableMethod } from "./offlineQueue";
+import { navigateToSafeRelative, safeRelativeRedirect } from "./safeRedirect";
 
 /** Thrown when a mutation is queued offline instead of reaching the server. */
 export class OfflineQueuedError extends Error {
@@ -55,8 +56,10 @@ async function refreshAccessToken(): Promise<boolean> {
 function redirectToLogin(): void {
   clearToken();
   if (typeof window !== "undefined" && !window.location.pathname.startsWith("/login")) {
-    const next = encodeURIComponent(window.location.pathname + window.location.search);
-    window.location.href = `/login?next=${next}`;
+    const next = encodeURIComponent(
+      safeRelativeRedirect(window.location.pathname + window.location.search, "/dashboard")
+    );
+    navigateToSafeRelative(`/login?next=${next}`, "/login");
   }
 }
 

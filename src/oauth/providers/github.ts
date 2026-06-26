@@ -1,4 +1,5 @@
 import { getLogger } from "../../logger";
+import { fetchFixedUrl } from "../../shared/safeFetch";
 
 const logger = getLogger("oauth-github");
 
@@ -30,7 +31,7 @@ export async function exchangeCode(
   params.set("client_secret", clientSecret);
   params.set("redirect_uri", redirectUri);
 
-  const tokenRes = await fetch("https://github.com/login/oauth/access_token", {
+  const tokenRes = await fetchFixedUrl("https://github.com/login/oauth/access_token", {
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
@@ -55,7 +56,7 @@ export async function exchangeCode(
     "User-Agent": "zerotrust",
   };
 
-  const profileRes = await fetch("https://api.github.com/user", {
+  const profileRes = await fetchFixedUrl("https://api.github.com/user", {
     headers: authHeaders,
   });
   if (!profileRes.ok) {
@@ -76,7 +77,7 @@ export async function exchangeCode(
   } else {
     // Email is private — resolve the verified primary via the emails endpoint
     // (needs the `user:email` scope, which we request at authorization time).
-    const emailsRes = await fetch("https://api.github.com/user/emails", {
+    const emailsRes = await fetchFixedUrl("https://api.github.com/user/emails", {
       headers: authHeaders,
     });
     if (emailsRes.ok) {

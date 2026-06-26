@@ -17,6 +17,7 @@ import {
   topUpWallet,
   trackReferralClick,
 } from "../../services/wallet.service";
+import { appRedirectUrl } from "../../shared/safeRedirect";
 import type { HonoEnv } from "../../shared/types";
 
 const router = new Hono<HonoEnv>();
@@ -241,10 +242,7 @@ router.get("/r/:slug", async (c) => {
 
     // Store tracking ID in cookie for later signup attribution
     c.header("Set-Cookie", `za_referral=${trackingId}; Path=/; Max-Age=2592000; SameSite=Lax`);
-    const redirectUrl = process.env.APP_URL
-      ? `${process.env.APP_URL}/register?ref=${ref.code}`
-      : `/register?ref=${ref.code}`;
-    return c.redirect(redirectUrl);
+    return c.redirect(appRedirectUrl(`/register?ref=${encodeURIComponent(ref.code)}`));
   } catch (err) {
     logger.error("Referral click error", err as Error);
     return c.redirect("/register");

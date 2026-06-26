@@ -22,6 +22,11 @@ const {
 } = require("fs");
 const os = require("node:os");
 const path = require("path");
+const {
+  assertSafeBackupPath,
+  assertSafeCommand,
+  safeSpawnOptions,
+} = require("./safe-backup-paths.cjs");
 
 const databaseUrl = process.env.DATABASE_URL;
 if (!databaseUrl) {
@@ -37,20 +42,19 @@ if (!fileArg) {
   process.exit(1);
 }
 const file = path.resolve(fileArg);
+// SECURITY (CWE-22 / CWE-78): reject non-artifact paths and shell metachars
+// before we let pg_restore read them. The CLI restores from a path the
+// operator typed on the command line; pin it to the expected artifact shape.
+assertSafeBackupPath(file);
 if (!existsSync(file)) {
   console.error(`✗ Backup file not found: ${file}`);
   process.exit(1);
 }
 
 function run(cmd, cmdArgs) {
+  assertSafeCommand(cmd); // CWE-78: closed allowlist
   return new Promise((resolve, reject) => {
-    const child = spawn(cmd, cmdArgs, {
-      stdio: ["ignore", "inherit", "inherit"],
-      // SECURITY (CWE-78): never use shell:true — args are passed as a literal
-      // argv array so shell metacharacters in DATABASE_URL or file paths cannot
-      // be interpreted. pg_dump / pg_restore resolve on PATH without a shell.
-      shell: false,
-    });
+    const child = spawn(cmd, cmdArgs, safeSpawnOptions({ stdio: ["ignore", "inherit", "inherit"] }));
     child.on("error", reject);
     child.on("close", (code) => (code === 0 ? resolve() : reject(new Error(`${cmd} exited ${code}`))));
   });

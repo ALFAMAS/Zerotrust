@@ -6,6 +6,7 @@
 import { getConfig } from "../config";
 import { streamToSiem } from "../services/siem.service";
 import { type AuditPrincipal, principalAuditFields } from "../shared/principal";
+import { fetchFixedUrl } from "../shared/safeFetch";
 import type { zerotrustConfig } from "../shared/types";
 
 export interface LogContext {
@@ -213,7 +214,7 @@ export function initializeLogger(config?: zerotrustConfig): Logger {
       index: async ({ index, document }: { index: string; document: Record<string, unknown> }) => {
         try {
           const url = `${base}/${index}/_doc`;
-          await fetch(url, {
+          await fetchFixedUrl(url, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(document),

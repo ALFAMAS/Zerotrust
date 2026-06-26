@@ -17,7 +17,7 @@ import { getSettings } from "../../models/settings.model";
 import { sendMagicLink, verifyMagicLink } from "../../services/magicLink.service";
 import { TokenService } from "../../services/token.service";
 import { getClientIp } from "../../shared/clientIp";
-import { safeRelativeRedirect } from "../../shared/safeRedirect";
+import { appRedirectUrl, safeRelativeRedirect } from "../../shared/safeRedirect";
 import type { HonoEnv } from "../../shared/types";
 
 const router = new Hono<HonoEnv>();
@@ -142,16 +142,18 @@ router.get("/verify", async (c) => {
     const safePath = safeRelativeRedirect(redirect, "/auth/callback");
     const exchangeCode = nanoid(32);
     const EXCHANGE_CODE_TTL_SECS = 60;
-    await getDb().insert(oauthExchangeCodesTable).values({
-      code: exchangeCode,
-      userId: result.userId,
-      sessionId: tokens.sessionId,
-      accessToken: tokens.accessToken,
-      refreshToken: tokens.refreshToken,
-      expiresAt: new Date(Date.now() + EXCHANGE_CODE_TTL_SECS * 1000),
-    });
+    await getDb()
+      .insert(oauthExchangeCodesTable)
+      .values({
+        code: exchangeCode,
+        userId: result.userId,
+        sessionId: tokens.sessionId,
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
+        expiresAt: new Date(Date.now() + EXCHANGE_CODE_TTL_SECS * 1000),
+      });
 
-    const callbackUrl = `${appUrl}${safePath}?oauth_code=${exchangeCode}`;
+    const callbackUrl = appRedirectUrl(`${safePath}?oauth_code=${exchangeCode}`, appUrl);
     return c.redirect(callbackUrl, 302);
   } catch (err) {
     logger.error("Magic link GET verify error", err as Error);

@@ -1,5 +1,5 @@
 import { getLogger } from "../logger/index.js";
-import { assertSafeFetchUrl } from "../shared/safeFetch.js";
+import { fetchPublicUrl } from "../shared/safeFetch.js";
 import type { FederatedClaim, FederatedProvider } from "./types.js";
 
 const logger = getLogger("federation-verify");
@@ -27,13 +27,8 @@ async function fetchJwks(uri: string): Promise<JwksKey[]> {
   const cached = jwksCache.get(uri);
   if (cached && Date.now() - cached.fetchedAt < JWKS_TTL_MS) return cached.keys;
 
-  // SECURITY (CWE-918): federation provider JWKS URI is user-configurable;
-  // validate the host before fetching, and follow no redirects.
-  assertSafeFetchUrl(uri);
-  const res = await fetch(uri, {
-    signal: AbortSignal.timeout(5000),
-    redirect: "error",
-  });
+  // SECURITY (CWE-918): federation provider JWKS URI is user-configurable.
+  const res = await fetchPublicUrl(uri);
   if (!res.ok) throw new Error(`JWKS fetch failed: ${res.status}`);
   const data = (await res.json()) as { keys: JwksKey[] };
   jwksCache.set(uri, { keys: data.keys, fetchedAt: Date.now() });
@@ -76,14 +71,10 @@ export async function verifySubjectToken(
   }
 
   // Fallback: introspect token against remote zerotrust /auth/me
-  // SECURITY (CWE-918): provider.issuerUrl is user-configurable; validate
-  // the host before fetching, and follow no redirects.
+  // SECURITY (CWE-918): provider.issuerUrl is user-configurable.
   const introspectionUrl = `${provider.issuerUrl}/auth/me`;
-  assertSafeFetchUrl(introspectionUrl);
-  const res = await fetch(introspectionUrl, {
+  const res = await fetchPublicUrl(introspectionUrl, {
     headers: { Authorization: `Bearer ${token}` },
-    signal: AbortSignal.timeout(5000),
-    redirect: "error",
   });
 
   if (!res.ok) {

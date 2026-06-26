@@ -24,6 +24,12 @@ const {
   writeFileSync,
 } = require("node:fs");
 const path = require("node:path");
+const {
+  assertSafeBackupDir,
+  assertSafeBackupPath,
+  assertSafeCommand,
+  safeSpawnOptions,
+} = require("./safe-backup-paths.cjs");
 
 const databaseUrl = process.env.DATABASE_URL;
 if (!databaseUrl) {
@@ -31,22 +37,20 @@ if (!databaseUrl) {
   process.exit(1);
 }
 
-const dir = path.resolve(process.env.BACKUP_DIR || "./backups");
+const dirRaw = process.env.BACKUP_DIR || "./backups";
+assertSafeBackupDir(dirRaw); // CWE-78 / CWE-22 defense-in-depth
+const dir = path.resolve(dirRaw);
 const retentionDays = parseInt(process.env.BACKUP_RETENTION_DAYS || "30", 10);
 mkdirSync(dir, { recursive: true });
 
 const stamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
 let file = path.join(dir, `zerotrust-${stamp}.dump`);
+assertSafeBackupPath(file, dir); // CWE-22 / CWE-78
 
 function run(cmd, args) {
+  assertSafeCommand(cmd); // CWE-78: closed allowlist
   return new Promise((resolve, reject) => {
-    const child = spawn(cmd, args, {
-      stdio: ["ignore", "inherit", "inherit"],
-      // SECURITY (CWE-78): never use shell:true — args are passed as a literal
-      // argv array so shell metacharacters in DATABASE_URL or file paths cannot
-      // be interpreted. pg_dump / pg_restore resolve on PATH without a shell.
-      shell: false,
-    });
+    const child = spawn(cmd, args, safeSpawnOptions({ stdio: ["ignore", "inherit", "inherit"] }));
     child.on("error", reject);
     child.on("close", (code) => (code === 0 ? resolve() : reject(new Error(`${cmd} exited ${code}`))));
   });

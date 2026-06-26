@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  isRegisteredPostLogoutRedirectUri,
   isRegisteredRedirectUri,
   registerOIDCClient,
   validateAuthorizeRequest,
@@ -40,6 +41,18 @@ describe("OIDC authorize — redirect_uri trust", () => {
 
   it("treats an unknown client as untrusted", () => {
     expect(isRegisteredRedirectUri("no-such-client", "https://client.example/callback")).toBe(
+      false
+    );
+  });
+
+  it("only allows post-logout redirects for a registered client URI", () => {
+    expect(
+      isRegisteredPostLogoutRedirectUri("test-client", "https://client.example/callback")
+    ).toBe(true);
+    expect(
+      isRegisteredPostLogoutRedirectUri("test-client", "https://evil.example/logout")
+    ).toBe(false);
+    expect(isRegisteredPostLogoutRedirectUri(undefined, "https://client.example/callback")).toBe(
       false
     );
   });

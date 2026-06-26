@@ -1,10 +1,14 @@
 /**
  * Shared SSRF guard — prevents server-side request forgery (CWE-918).
  *
- * Any server-side `fetch`/HTTP whose host derives from user input (DID, webhook
- * URL, federation provider config, image proxy, etc.) must call
- * `assertSafeFetchHost` on the hostname before issuing the request, and must use
- * `redirect: "error"` + `AbortSignal.timeout(...)` on the fetch itself.
+ * Any server-side HTTP whose host derives from user input (DID, webhook URL,
+ * federation provider config, image proxy, etc.) must go through
+ * `fetchPublicUrl()`, which validates the host before issuing the request and
+ * always applies `redirect: "error"` + `AbortSignal.timeout(...)`.
+ *
+ * Fixed SaaS/provider URLs and operator-controlled internal endpoints should use
+ * `fetchFixedUrl()` so they still get timeout + no-redirect defaults without the
+ * public-host restriction.
  *
  * Canonical reference: originally extracted from `src/did/resolver.ts`; see the
  * "Security hardening rules" table in CLAUDE.md.
@@ -29,7 +33,8 @@ export function assertSafeFetchHost(host: string): void {
   if (!host) throw new Error("SSRF guard: empty host");
   if (host.includes(":")) throw new Error(`SSRF guard: host must not specify a port: ${host}`);
   // Block raw IP literals — only DNS names are permitted.
-  if (isIP(host) !== 0) throw new Error(`SSRF guard: host must be a DNS name, not an IP literal: ${host}`);
+  if (isIP(host) !== 0)
+    throw new Error(`SSRF guard: host must be a DNS name, not an IP literal: ${host}`);
   // Block obvious internal/loopback hostnames without needing DNS.
   const lower = host.toLowerCase();
   if (
@@ -53,4 +58,46 @@ export function assertSafeFetchUrl(url: string): URL {
     throw new Error(`SSRF guard: non-default port not allowed: ${parsed.port}`);
   }
   return parsed;
+}
+
+export type SafeFetchInit = Omit<RequestInit, "redirect"> & {
+  /** Per-request timeout. Defaults to 5s. */
+  timeoutMs?: number;
+};
+
+const DEFAULT_FETCH_TIMEOUT_MS = 5000;
+
+function timeoutSignal(timeoutMs: number, callerSignal?: AbortSignal | null): AbortSignal {
+  const timeout = AbortSignal.timeout(timeoutMs);
+  if (!callerSignal) return timeout;
+  return AbortSignal.any([callerSignal, timeout]);
+}
+
+function withSafeFetchDefaults(init: SafeFetchInit = {}): RequestInit {
+  const { timeoutMs = DEFAULT_FETCH_TIMEOUT_MS, signal, ...rest } = init;
+  return {
+    ...rest,
+    signal: timeoutSignal(timeoutMs, signal),
+    redirect: "error",
+  };
+}
+
+/**
+ * Fetch a fixed/provider/operator-controlled URL with mandatory server-side HTTP
+ * safety defaults. This intentionally does NOT apply the public-host SSRF guard,
+ * because internal Elasticsearch/SIEM/rate-service endpoints are legitimate when
+ * they come from trusted operator config.
+ */
+export function fetchFixedUrl(input: RequestInfo | URL, init?: SafeFetchInit): Promise<Response> {
+  return fetch(input, withSafeFetchDefaults(init));
+}
+
+/**
+ * Fetch a tenant/admin/user-influenced public URL. Applies the canonical CWE-918
+ * SSRF guard before network I/O and also refuses redirects + enforces timeout.
+ */
+export function fetchPublicUrl(input: string | URL, init?: SafeFetchInit): Promise<Response> {
+  const url = input instanceof URL ? input.toString() : input;
+  assertSafeFetchUrl(url);
+  return fetchFixedUrl(url, init);
 }

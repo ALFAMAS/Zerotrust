@@ -16,6 +16,7 @@ import {
   generateAuthCode,
   getDiscoveryDocument,
   getOIDCClient,
+  isRegisteredPostLogoutRedirectUri,
   isRegisteredRedirectUri,
   validateAuthorizeRequest,
 } from "./provider.js";
@@ -346,9 +347,13 @@ router.get(
 // ─── End Session (Logout) ─────────────────────────────────────────────────────
 
 router.get("/oidc/logout", (c) => {
+  const client_id = c.req.query("client_id");
   const post_logout_redirect_uri = c.req.query("post_logout_redirect_uri");
   const state = c.req.query("state");
-  const logoutUrl = new URL(post_logout_redirect_uri ?? ISSUER);
+  const logoutTarget = isRegisteredPostLogoutRedirectUri(client_id, post_logout_redirect_uri)
+    ? post_logout_redirect_uri
+    : ISSUER;
+  const logoutUrl = new URL(logoutTarget ?? ISSUER);
   if (state) logoutUrl.searchParams.set("state", state);
   return c.redirect(logoutUrl.toString());
 });

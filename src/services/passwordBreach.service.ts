@@ -5,12 +5,15 @@
  * https://haveibeenpwned.com/API/v3#PwnedPasswords
  */
 
-import crypto from "node:crypto";
+import { sha1 } from "@noble/hashes/legacy.js";
+import { bytesToHex } from "@noble/hashes/utils.js";
 import { getLogger } from "../logger";
+import { fetchFixedUrl } from "../shared/safeFetch";
 
 const logger = getLogger("password-breach");
 
 const HIBP_RANGE_URL = "https://api.pwnedpasswords.com/range/";
+const encoder = new TextEncoder();
 
 export interface BreachCheckResult {
   breached: boolean;
@@ -25,6 +28,15 @@ export function isBreachCheckEnabled(): boolean {
 }
 
 /**
+ * HIBP's k-anonymity password API is specified in SHA-1 space, so this legacy
+ * hash is protocol compatibility only — never use it for app cryptography,
+ * token storage, password storage, signatures, or new security decisions.
+ */
+function hibpSha1Hex(password: string): string {
+  return bytesToHex(sha1(encoder.encode(password))).toUpperCase();
+}
+
+/**
  * Returns breach info for a password. Fails open: network problems never
  * block registration or password changes.
  */
@@ -32,13 +44,12 @@ export async function checkPasswordBreached(password: string): Promise<BreachChe
   if (!isBreachCheckEnabled()) return { breached: false, count: 0, skipped: true };
 
   try {
-    const sha1 = crypto.createHash("sha1").update(password).digest("hex").toUpperCase();
-    const prefix = sha1.slice(0, 5);
-    const suffix = sha1.slice(5);
+    const hibpHash = hibpSha1Hex(password);
+    const prefix = hibpHash.slice(0, 5);
+    const suffix = hibpHash.slice(5);
 
-    const res = await fetch(`${HIBP_RANGE_URL}${prefix}`, {
+    const res = await fetchFixedUrl(`${HIBP_RANGE_URL}${prefix}`, {
       headers: { "Add-Padding": "true" },
-      signal: AbortSignal.timeout(5000),
     });
     if (!res.ok) {
       logger.warn("HIBP range query failed", { status: res.status });

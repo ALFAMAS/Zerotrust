@@ -52,6 +52,7 @@ import {
 import { TokenService } from "../../services/token.service";
 import { getClientIp } from "../../shared/clientIp";
 import { localeFromAcceptLanguage, normalizeLocale, SUPPORTED_LOCALES } from "../../shared/locale";
+import { appRedirectUrl } from "../../shared/safeRedirect";
 import type { HonoEnv } from "../../shared/types";
 
 const router = new Hono<HonoEnv>();
@@ -1073,15 +1074,15 @@ router.get("/oauth/:provider/callback", rateLimit({ points: 20, windowSecs: 60 }
       expiresAt: new Date(Date.now() + EXCHANGE_CODE_TTL_SECS * 1000),
     });
 
-    const appUrl = process.env.APP_URL || "http://localhost:3000";
-    return c.redirect(`${appUrl}/login?oauth_code=${exchangeCode}`, 302);
+    return c.redirect(appRedirectUrl(`/login?oauth_code=${exchangeCode}`), 302);
   } catch (err) {
     logger.error("OAuth callback error", err as Error);
     // Redirect to frontend login with an error so the user isn't stuck on a
     // bare JSON error page at the API origin.
-    const appUrl = process.env.APP_URL || "http://localhost:3000";
     return c.redirect(
-      `${appUrl}/login?error=OAUTH_FAILED&message=${encodeURIComponent("OAuth callback failed")}`,
+      appRedirectUrl(
+        `/login?error=OAUTH_FAILED&message=${encodeURIComponent("OAuth callback failed")}`
+      ),
       302
     );
   }

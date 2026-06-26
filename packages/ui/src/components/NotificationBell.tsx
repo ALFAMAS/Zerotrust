@@ -4,6 +4,7 @@ import { Bell } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { api } from "@/lib/api";
 import { useFormat } from "@/lib/format";
+import { navigateToSafeRelative } from "@/lib/safeRedirect";
 import { cn } from "@/lib/utils";
 
 interface Notification {
@@ -131,7 +132,7 @@ export function NotificationBell() {
   function handleNotificationClick(n: Notification) {
     if (!n.read) markRead(n.id);
     setOpen(false);
-    if (n.link) window.location.href = n.link;
+    if (n.link) navigateToSafeRelative(n.link, "/dashboard");
   }
 
   return (

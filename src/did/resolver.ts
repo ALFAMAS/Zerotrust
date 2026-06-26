@@ -1,4 +1,4 @@
-import { assertSafeFetchHost } from "../shared/safeFetch.js";
+import { fetchPublicUrl } from "../shared/safeFetch.js";
 import type { DIDDocument, VerificationMethod } from "./types";
 
 // Base58 alphabet (Bitcoin variant used by did:key)
@@ -94,25 +94,19 @@ export async function resolveDIDWeb(did: string): Promise<DIDDocument> {
   const rest = did.slice("did:web:".length);
   const parts = rest.split(":");
   const host = decodeURIComponent(parts[0]);
-  // SECURITY (CWE-918): did:web fetches an attacker-influenced host. Block
-  // non-default ports, IP literals, and hosts that resolve to private /
-  // loopback / link-local / metadata ranges before issuing the request.
-  assertSafeFetchHost(host);
+  // SECURITY (CWE-918): did:web fetches an attacker-influenced host.
   const path = parts.slice(1).join("/");
   const url = path ? `https://${host}/${path}/did.json` : `https://${host}/.well-known/did.json`;
 
-  const res = await fetch(url, {
+  const res = await fetchPublicUrl(url, {
     headers: { Accept: "application/json" },
-    signal: AbortSignal.timeout(5000),
-    redirect: "error",
   });
   if (!res.ok) throw new Error(`Failed to fetch DID document from ${url}: ${res.status}`);
   return res.json() as Promise<DIDDocument>;
 }
 
-// assertSafeFetchHost is now imported from src/shared/safeFetch.ts — the
-// canonical SSRF guard used by did:web, federation, and any other server-side
-// fetch whose host derives from user input.
+// fetchPublicUrl is the canonical SSRF-safe server-side fetch for did:web,
+// federation, and any other fetch whose host derives from user input.
 
 export async function resolveDID(did: string): Promise<DIDDocument | null> {
   try {

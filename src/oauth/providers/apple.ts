@@ -1,4 +1,5 @@
 import { getLogger } from "../../logger";
+import { fetchFixedUrl } from "../../shared/safeFetch";
 
 const logger = getLogger("oauth-apple");
 
@@ -52,7 +53,7 @@ export async function exchangeCode(
   params.set("redirect_uri", redirectUri);
   if (codeVerifier) params.set("code_verifier", codeVerifier);
 
-  const tokenRes = await fetch("https://appleid.apple.com/auth/token", {
+  const tokenRes = await fetchFixedUrl("https://appleid.apple.com/auth/token", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: params.toString(),
@@ -93,7 +94,7 @@ export async function refreshAppleToken(
   params.set("client_id", clientId);
   params.set("client_secret", clientSecret);
 
-  const res = await fetch("https://appleid.apple.com/auth/token", {
+  const res = await fetchFixedUrl("https://appleid.apple.com/auth/token", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: params.toString(),

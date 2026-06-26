@@ -9,7 +9,7 @@ import { getLogger } from "../logger/index.js";
 import { rateLimit } from "../middleware/rateLimiting.js";
 import { TokenService } from "../services/token.service.js";
 import { getClientIp } from "../shared/clientIp.js";
-import { safeRelativeRedirect } from "../shared/safeRedirect.js";
+import { appRedirectUrl, safeRelativeRedirect } from "../shared/safeRedirect.js";
 import type { HonoEnv } from "../shared/types.js";
 import { buildAuthnRequest, buildSPMetadata, consumeRelayState, parseSAMLResponse } from "./sp.js";
 
@@ -240,8 +240,7 @@ router.post("/saml/acs", rateLimit({ points: 20, windowSecs: 60 }), async (c) =>
     // case RelayState was replayed/tampered after storage.
     const safeRedirectTo = safeRelativeRedirect(redirectTo, "/");
     const successUrl = new URL(
-      safeRedirectTo,
-      process.env.APP_URL ?? process.env.APP_BASE_URL ?? "http://localhost:3000"
+      appRedirectUrl(safeRedirectTo, process.env.APP_URL ?? process.env.APP_BASE_URL)
     );
     successUrl.searchParams.set("access_token", accessToken);
     successUrl.searchParams.set("refresh_token", refreshPlain);

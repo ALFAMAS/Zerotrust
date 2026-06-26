@@ -58,6 +58,18 @@ export function isRegisteredRedirectUri(clientId: string, redirectUri: string): 
   return !!client && client.redirectUris.includes(redirectUri);
 }
 
+/**
+ * End-session redirects must be allowlisted too. Until a dedicated
+ * post_logout_redirect_uris field exists, reuse the registered redirect URI
+ * allowlist so a request-supplied logout target cannot become an open redirect.
+ */
+export function isRegisteredPostLogoutRedirectUri(
+  clientId: string | undefined,
+  redirectUri: string | undefined
+): boolean {
+  return !!clientId && !!redirectUri && isRegisteredRedirectUri(clientId, redirectUri);
+}
+
 // ─── Auth Code Store ──────────────────────────────────────────────────────────
 
 interface AuthCodeEntry {

@@ -1,4 +1,5 @@
 import { getLogger } from "../../logger";
+import { fetchFixedUrl } from "../../shared/safeFetch";
 
 const logger = getLogger("oauth-google");
 
@@ -34,7 +35,7 @@ export async function exchangeCode(
   params.set("grant_type", "authorization_code");
   if (codeVerifier) params.set("code_verifier", codeVerifier);
 
-  const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
+  const tokenRes = await fetchFixedUrl("https://oauth2.googleapis.com/token", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: params.toString(),
@@ -48,7 +49,7 @@ export async function exchangeCode(
 
   const tokens = (await tokenRes.json()) as GoogleTokens;
 
-  const profileRes = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+  const profileRes = await fetchFixedUrl("https://www.googleapis.com/oauth2/v3/userinfo", {
     headers: { Authorization: `Bearer ${tokens.access_token}` },
   });
 
@@ -79,7 +80,7 @@ export async function refreshToken(
   params.set("client_id", clientId);
   params.set("client_secret", clientSecret);
 
-  const res = await fetch("https://oauth2.googleapis.com/token", {
+  const res = await fetchFixedUrl("https://oauth2.googleapis.com/token", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: params.toString(),

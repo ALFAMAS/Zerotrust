@@ -1,9 +1,9 @@
-import crypto from "node:crypto";
 import { and, eq, gt } from "drizzle-orm";
 import { getDb } from "../db";
 import { otpsTable, usersTable } from "../db/schema";
 import { getLogger } from "../logger";
 import { getSettings } from "../models/settings.model";
+import { hashTokenSha256 } from "../shared/cryptoHash";
 import { sendMagicLinkEmail } from "./email.service";
 
 const logger = getLogger("magic-link");
@@ -11,7 +11,7 @@ const logger = getLogger("magic-link");
 const MAGIC_LINK_TTL_MS = 15 * 60 * 1000;
 
 function hashToken(token: string): string {
-  return crypto.createHash("sha256").update(token).digest("hex");
+  return hashTokenSha256(token);
 }
 
 export async function sendMagicLink(

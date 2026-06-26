@@ -21,7 +21,11 @@ let failed = 0;
 for (const check of checks) {
   const url = `${baseUrl}${check.path}`;
   try {
-    const res = await fetch(url, { headers: { Accept: "text/plain, application/json" } });
+    const res = await fetch(url, {
+      headers: { Accept: "text/plain, application/json" },
+      signal: AbortSignal.timeout(5000),
+      redirect: "error",
+    });
     const body = await res.text();
     if (!check.expect(res, body)) {
       failed++;

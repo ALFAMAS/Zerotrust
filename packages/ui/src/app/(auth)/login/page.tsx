@@ -10,6 +10,7 @@ import { brand } from "@/config/brand";
 import { useToast } from "@/lib/toast";
 import { api } from "../../../lib/api";
 import { setToken } from "../../../lib/auth";
+import { navigateToSafeExternal, navigateToSafeRelative } from "../../../lib/safeRedirect";
 import { isWebAuthnAvailable, startAuthentication } from "../../../lib/webauthn";
 
 export default function LoginPage() {
@@ -65,8 +66,7 @@ export default function LoginPage() {
     setToken(data.accessToken, data.refreshToken);
     toast({ message: "Welcome back!", type: "success" });
     const next = new URLSearchParams(window.location.search).get("next");
-    const dest = next?.startsWith("/") && !next.startsWith("//") ? next : "/dashboard";
-    window.location.href = dest;
+    navigateToSafeRelative(next, "/dashboard");
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -164,7 +164,7 @@ export default function LoginPage() {
         return;
       }
       const { authorizeUrl } = await res.json();
-      window.location.href = authorizeUrl;
+      navigateToSafeExternal(authorizeUrl, "/login");
     } catch (err: any) {
       toast({
         message: err.message || `Failed to initiate ${provider} login`,

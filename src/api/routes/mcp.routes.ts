@@ -23,6 +23,34 @@ import { ErrorCodes, zerotrustError } from "../../shared/types.js";
 const router = new Hono<HonoEnv>();
 const logger = getLogger("mcp-auth");
 
+function allowedMcpRedirectOrigins(): Set<string> {
+  const raw = process.env.MCP_REDIRECT_ORIGINS ?? process.env.APP_URL ?? "http://localhost:3000";
+  const origins = new Set<string>();
+  for (const entry of raw.split(",")) {
+    try {
+      const parsed = new URL(entry.trim());
+      if (parsed.protocol === "http:" || parsed.protocol === "https:") origins.add(parsed.origin);
+    } catch {
+      // Ignore malformed operator config entries.
+    }
+  }
+  return origins;
+}
+
+function safeMcpRedirectBase(input: string | undefined): string | null {
+  const fallback = process.env.APP_URL ?? "http://localhost:3000";
+  try {
+    const parsed = new URL(input ?? fallback);
+    if (!allowedMcpRedirectOrigins().has(parsed.origin)) return null;
+    parsed.pathname = parsed.pathname.replace(/\/$/, "");
+    parsed.search = "";
+    parsed.hash = "";
+    return parsed.toString().replace(/\/$/, "");
+  } catch {
+    return null;
+  }
+}
+
 // ── Discovery ─────────────────────────────────────────────────────────────────
 
 router.get("/.well-known/oauth-authorization-server", (c) => {
@@ -65,6 +93,11 @@ router.post("/authorize", rateLimit({ points: 20, windowSecs: 60 }), async (c) =
     return c.json({ error: "invalid_client", message: "Invalid client credentials" }, 401);
   }
 
+  const redirectBase = safeMcpRedirectBase(parsed.data.redirect_uri);
+  if (!redirectBase) {
+    return c.json({ error: "invalid_request", message: "redirect_uri is not allowed" }, 400);
+  }
+
   // Issue a short-lived authorization code
   const code = crypto.randomUUID();
   const expiresAt = Date.now() + 5 * 60 * 1000; // 5 min
@@ -78,7 +111,6 @@ router.post("/authorize", rateLimit({ points: 20, windowSecs: 60 }), async (c) =
     expiresAt,
   });
 
-  const redirectBase = parsed.data.redirect_uri ?? process.env.APP_URL ?? "http://localhost:3000";
   const params = new URLSearchParams({ code });
   if (parsed.data.state) params.set("state", parsed.data.state);
 

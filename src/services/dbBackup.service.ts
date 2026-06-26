@@ -20,6 +20,17 @@
  *   BACKUP_S3_PREFIX             — default "backups/"
  *   BACKUP_S3_FORCE_PATH_STYLE   — "true" for Backblaze/MinIO; false (default) for AWS
  *   BACKUP_S3_RETENTION_DAYS     — S3-side retention; falls back to BACKUP_RETENTION_DAYS
+ *
+ * CWE-78 / CWE-22 hardening:
+ *   - All spawned programs come from a closed allowlist (`assertSafeCommand`).
+ *   - All `spawn()` calls use `shell: false` and a literal argv array
+ *     (`safeSpawnOptions`).
+ *   - `BACKUP_DIR` is rejected if it contains shell metachars or `..` traversal
+ *     segments (`assertSafeBackupDir`).
+ *   - Dump paths are pinned to `<dir>/zerotrust-<stamp>.<ext>` and verified
+ *     to stay inside `BACKUP_DIR` (`assertSafeBackupPath`).
+ *   - DATABASE_URL credentials are scrubbed from any error message that
+ *     reaches the caller (`scrubCredentials`).
  */
 
 import { spawn } from "node:child_process";
@@ -28,6 +39,12 @@ import { createReadStream, createWriteStream } from "node:fs";
 import { mkdir, readdir, stat, unlink, writeFile } from "node:fs/promises";
 import * as path from "node:path";
 import { getLogger } from "../logger";
+import {
+  assertSafeBackupDir,
+  assertSafeBackupPath,
+  assertSafeCommand,
+  safeSpawnOptions,
+} from "../shared/safeBackupPaths";
 import {
   isS3BackupEnabled,
   pruneOldBackups as pruneOldS3Backups,
@@ -47,8 +64,20 @@ export interface BackupResult {
   error?: string;
 }
 
+// Re-export the CWE-78 guards so callers (including the CLI scripts) get a
+// single canonical surface and tests can import them from the same module
+// path the service uses.
+export { assertSafeBackupDir, assertSafeBackupPath, assertSafeCommand };
+
 function backupDir(): string {
-  return path.resolve(process.env.BACKUP_DIR ?? "./backups");
+  const raw = process.env.BACKUP_DIR ?? "./backups";
+  // SECURITY (CWE-78 / CWE-22): reject shell metachars and path traversal in
+  // the operator-supplied BACKUP_DIR before it is ever concatenated with a
+  // filename. The spawn helper already uses shell:false, so this is
+  // defense-in-depth: a future helper that does invoke a shell cannot reach
+  // here with an attacker-controlled directory.
+  assertSafeBackupDir(raw);
+  return path.resolve(raw);
 }
 
 function retentionDays(): number {
@@ -135,22 +164,47 @@ function isBackupArtifact(name: string): boolean {
 }
 
 function run(cmd: string, args: string[], env?: NodeJS.ProcessEnv): Promise<number> {
+  // SECURITY (CWE-78): the program name must come from a closed allowlist.
+  // Even though `shell: false` prevents shell metachar interpretation, we
+  // also pin the program name so a future code path can't be tricked into
+  // spawning `bash` / `sh` / a path outside the backup toolchain.
+  assertSafeCommand(cmd);
+  for (const a of args) {
+    // Args must be strings — never a buffer or a number coerced into a
+    // shell-injection shape.
+    if (typeof a !== "string") {
+      throw new Error("CWE-78: spawn arg must be a string");
+    }
+  }
   return new Promise((resolve, reject) => {
-    const child = spawn(cmd, args, {
-      env: { ...process.env, ...env },
-      stdio: ["ignore", "ignore", "pipe"],
-      // SECURITY (CWE-78): never use shell:true — args are passed as a literal
-      // argv array so shell metacharacters in DATABASE_URL or file paths cannot
-      // be interpreted. pg_dump / pg_restore resolve on PATH without a shell.
-      shell: false,
-    });
+    const child = spawn(cmd, args, safeSpawnOptions({ env }));
     let stderr = "";
     child.stderr?.on("data", (d) => (stderr += d.toString()));
     child.on("error", reject);
     child.on("close", (code) =>
-      code === 0 ? resolve(0) : reject(new Error(`${cmd} exited ${code}: ${stderr.slice(0, 500)}`))
+      code === 0
+        ? resolve(0)
+        : // SECURITY (CWE-532): scrub the DATABASE_URL password from any
+          // pg_dump error before propagating. pg_dump may echo the
+          // connection string into its diagnostics.
+          reject(new Error(`${cmd} exited ${code}: ${scrubCredentials(stderr).slice(0, 500)}`))
     );
   });
+}
+
+/**
+ * Remove any `password=…` / embedded credentials from a string before it
+ * leaves the process. The patterns target the standard libpq forms so we
+ * cover pg_dump, pg_restore, and psql equally.
+ */
+export function scrubCredentials(input: string): string {
+  return (
+    input
+      .replace(/\bpassword=[^\s&]+/gi, "password=***")
+      // `user:pass@host` connection-string variant (capture the user so the
+      // URL shape is preserved without leaking the password).
+      .replace(/(\bpostgres:\/\/[^:\s]+):[^@\s]+@/gi, "$1:***@")
+  );
 }
 
 /** Delete local dumps older than the retention window. Returns pruned names. */
@@ -200,9 +254,12 @@ export async function runBackup(): Promise<BackupResult> {
 
   const stamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
   let file = path.join(dir, `zerotrust-${stamp}.dump`);
+  // SECURITY (CWE-22 / CWE-78): confirm the resolved dump path matches the
+  // canonical artifact shape and stays inside BACKUP_DIR before we spawn.
+  assertSafeBackupPath(file, dir);
 
   try {
-    // Custom format (-Fc) is compressed and restorable with pg_restore
+    // Custom format (-Fc) is compressed and restorable with pg_restore.
     await run("pg_dump", ["--format=custom", `--file=${file}`, databaseUrl]);
     logger.info("Database backup written", { file });
     const encryptedFile = await encryptBackup(file, key);

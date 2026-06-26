@@ -4,6 +4,7 @@ import { ArrowRight, File, Search, Settings, User } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { api } from "@/lib/api";
+import { safeRelativeRedirect } from "@/lib/safeRedirect";
 import { cn } from "@/lib/utils";
 
 interface SearchResult {
@@ -96,7 +97,7 @@ export function CommandPalette() {
     (result: SearchResult) => {
       setOpen(false);
       setQuery("");
-      router.push(result.href);
+      router.push(safeRelativeRedirect(result.href, "/dashboard"));
     },
     [router]
   );

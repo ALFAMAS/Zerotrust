@@ -13,6 +13,7 @@
  */
 
 import { getLogger } from "../logger";
+import { fetchFixedUrl } from "../shared/safeFetch";
 
 const logger = getLogger("globalization");
 
@@ -132,10 +133,9 @@ export async function getExchangeRates(): Promise<Record<string, number>> {
   const url = process.env.EXCHANGE_RATES_API_URL;
   if (url) {
     try {
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 4000);
-      const res = await fetch(url, { signal: controller.signal });
-      clearTimeout(timer);
+      // Operator-controlled env endpoint: allow private/internal rate services,
+      // but never hang or follow redirects from the configured URL.
+      const res = await fetchFixedUrl(url, { timeoutMs: 4000 });
       if (res.ok) {
         const body = (await res.json()) as { rates?: Record<string, number> };
         if (body.rates && typeof body.rates === "object") {
@@ -507,18 +507,14 @@ export async function validateVatNumber(vatNumber: string): Promise<VatCheckResu
   if (process.env.VIES_CHECK_ENABLED === "false") return base;
 
   try {
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 5000);
-    const res = await fetch(
+    const res = await fetchFixedUrl(
       "https://ec.europa.eu/taxation_customs/vies/rest-api/check-vat-number",
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ countryCode: fmt.countryPrefix, vatNumber: fmt.number }),
-        signal: controller.signal,
       }
     );
-    clearTimeout(timer);
     if (!res.ok) return base;
     const data = (await res.json()) as { valid?: boolean; name?: string; address?: string };
     return {

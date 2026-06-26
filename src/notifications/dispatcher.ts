@@ -1,5 +1,6 @@
 import crypto from "node:crypto";
 import { getLogger } from "../logger";
+import { fetchFixedUrl, fetchPublicUrl } from "../shared/safeFetch";
 import { formatPagerDutyPayload, formatSlackMessage, formatTeamsMessage } from "./formatters";
 import type {
   NotificationChannel,
@@ -81,7 +82,9 @@ export class NotificationDispatcher {
       username: config.username,
       icon_emoji: config.iconEmoji,
     };
-    const res = await fetch(config.webhookUrl, {
+    // SECURITY (CWE-918): Slack webhooks can be configured via the admin API,
+    // so the host is user-influenced.
+    const res = await fetchPublicUrl(config.webhookUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
@@ -90,7 +93,9 @@ export class NotificationDispatcher {
   }
 
   private async sendToTeams(config: TeamsConfig, payload: object): Promise<void> {
-    const res = await fetch(config.webhookUrl, {
+    // SECURITY (CWE-918): Teams webhooks can be configured via the admin API,
+    // so the host is user-influenced.
+    const res = await fetchPublicUrl(config.webhookUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -99,7 +104,7 @@ export class NotificationDispatcher {
   }
 
   private async sendToPagerDuty(_config: PagerDutyConfig, payload: object): Promise<void> {
-    const res = await fetch("https://events.pagerduty.com/v2/enqueue", {
+    const res = await fetchFixedUrl("https://events.pagerduty.com/v2/enqueue", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),

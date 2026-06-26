@@ -1,4 +1,5 @@
 import { getLogger } from "../../logger";
+import { fetchFixedUrl } from "../../shared/safeFetch";
 
 const logger = getLogger("oauth-facebook");
 
@@ -32,7 +33,11 @@ export async function exchangeCode(
   params.set("code", code);
   if (codeVerifier) params.set("code_verifier", codeVerifier);
 
-  const tokenRes = await fetch(`${GRAPH_BASE}/oauth/access_token?${params.toString()}`);
+  const tokenRes = await fetchFixedUrl(`${GRAPH_BASE}/oauth/access_token`, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: params.toString(),
+  });
 
   if (!tokenRes.ok) {
     const err = await tokenRes.text();
@@ -43,9 +48,9 @@ export async function exchangeCode(
   const tokens = (await tokenRes.json()) as FacebookTokens;
 
   const fields = "id,name,email,picture.type(large)";
-  const profileRes = await fetch(
-    `${GRAPH_BASE}/me?fields=${fields}&access_token=${tokens.access_token}`
-  );
+  const profileRes = await fetchFixedUrl(`${GRAPH_BASE}/me?fields=${encodeURIComponent(fields)}`, {
+    headers: { Authorization: `Bearer ${tokens.access_token}` },
+  });
 
   if (!profileRes.ok) {
     throw new Error(`Failed to fetch Facebook user profile: ${profileRes.status}`);
@@ -66,7 +71,11 @@ export async function refreshToken(
   params.set("client_secret", clientSecret);
   params.set("fb_exchange_token", shortLivedToken);
 
-  const res = await fetch(`${GRAPH_BASE}/oauth/access_token?${params.toString()}`);
+  const res = await fetchFixedUrl(`${GRAPH_BASE}/oauth/access_token`, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: params.toString(),
+  });
   if (!res.ok) throw new Error(`Facebook token refresh failed: ${res.status}`);
   return res.json() as Promise<FacebookTokens>;
 }

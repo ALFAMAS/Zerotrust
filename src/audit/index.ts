@@ -6,6 +6,7 @@
 
 import { getConfig } from "../config";
 import { getLogger } from "../logger";
+import { fetchFixedUrl } from "../shared/safeFetch";
 import type { AuditLog } from "../shared/types";
 
 const logger = getLogger("audit-pipeline");
@@ -61,7 +62,7 @@ async function buildEsClient() {
 
       const ndjson = `${body.map((line) => JSON.stringify(line)).join("\n")}\n`;
 
-      const response = await fetch(`${baseUrl}/_bulk`, {
+      const response = await fetchFixedUrl(`${baseUrl}/_bulk`, {
         method: "POST",
         headers: { "Content-Type": "application/x-ndjson" },
         body: ndjson,
@@ -77,9 +78,7 @@ async function buildEsClient() {
 
     async health(): Promise<{ status: string; available: boolean }> {
       try {
-        const response = await fetch(`${baseUrl}/_cluster/health`, {
-          signal: AbortSignal.timeout(3000),
-        });
+        const response = await fetchFixedUrl(`${baseUrl}/_cluster/health`, { timeoutMs: 3000 });
         const data = (await response.json()) as any;
         return { status: data.status || "unknown", available: response.ok };
       } catch {
@@ -110,7 +109,7 @@ async function buildEsClient() {
         },
       };
 
-      const response = await fetch(`${baseUrl}/_ilm/policy/${policyName}`, {
+      const response = await fetchFixedUrl(`${baseUrl}/_ilm/policy/${policyName}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(policy),

@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import { authMiddleware } from "../middleware/auth";
+import { assertSafeFetchUrl } from "../shared/safeFetch";
 import type { HonoEnv } from "../shared/types";
 import { deliverWebhook } from "./delivery";
 import { webhookDeliveryLog } from "./deliveryLog";
@@ -36,6 +37,19 @@ app.post("/", async (c) => {
       {
         code: "INVALID_INPUT",
         message: "url, secret, and events[] are required",
+        details: [],
+      },
+      400
+    );
+  }
+
+  try {
+    assertSafeFetchUrl(url);
+  } catch {
+    return c.json(
+      {
+        code: "INVALID_WEBHOOK_URL",
+        message: "Webhook URL must be a public HTTP(S) URL with a safe host",
         details: [],
       },
       400
@@ -79,6 +93,20 @@ app.get("/:id", (c) => {
 app.patch("/:id", async (c) => {
   const id = c.req.param("id");
   const body = await c.req.json<Record<string, unknown>>();
+  if (typeof body.url === "string") {
+    try {
+      assertSafeFetchUrl(body.url);
+    } catch {
+      return c.json(
+        {
+          code: "INVALID_WEBHOOK_URL",
+          message: "Webhook URL must be a public HTTP(S) URL with a safe host",
+          details: [],
+        },
+        400
+      );
+    }
+  }
   const updated = webhookStore.updateEndpoint(id, body);
 
   if (!updated) {

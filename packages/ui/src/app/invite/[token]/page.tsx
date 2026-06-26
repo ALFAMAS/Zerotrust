@@ -30,7 +30,7 @@ export default function InviteAcceptPage() {
     // If not logged in, redirect to login page preserving the invite URL
     const authToken = getToken();
     if (!authToken) {
-      router.replace(`/login?next=/invite/${token}`);
+      router.replace(`/login?next=/invite/${encodeURIComponent(token)}`);
       return;
     }
 
@@ -44,8 +44,7 @@ export default function InviteAcceptPage() {
         setErrorMessage(err.message || "Failed to accept invite");
         setStatus("error");
       });
-    // biome-ignore lint/correctness/useExhaustiveDependencies: fetch on token change only
-  }, [token, router.replace]);
+  }, [token, router]);
 
   if (status === "loading") {
     return (
