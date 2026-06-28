@@ -4,6 +4,35 @@ This note compares zerotrust against current production-oriented SaaS starter
 patterns and recommends maintenance/stability improvements. It is intentionally
 architecture-focused rather than feature-count-focused.
 
+> **Reconciled 2026-06-28** to the post-slim-down codebase. The maintenance
+> audit removed six heavy features — collaboration, decentralized identity,
+> post-quantum KEM, growth tooling, AI-native auth, and **enterprise federation
+> (OIDC/SAML/SCIM/LDAP)** — so recommendations that previously assumed those
+> exist have been updated. Read alongside:
+> - [`ARCHITECTURE.md`](./ARCHITECTURE.md) — current-state audit + the concrete
+>   proposals (P1 worker-process bug, etc.) this note references.
+> - [`PRODUCTION_SAFETY_TODO.md`](./PRODUCTION_SAFETY_TODO.md) — the CI/CD and
+>   release-safety execution list.
+> - [`MAINTENANCE_FEATURE_AUDIT.md`](./MAINTENANCE_FEATURE_AUDIT.md) — what was
+>   removed and why.
+
+## How zerotrust compares (maintainability & stability)
+
+| Dimension | MakerKit / supastarter | BoxyHQ | ixartz boilerplate | **zerotrust (today)** |
+| --- | --- | --- | --- | --- |
+| Runtime shape | modular monolith + edge | monolith | Next.js app | **modular monolith** (Hono API + Next UI + SDK) |
+| Background jobs | hosted queue / cron | minimal | none | BullMQ + in-process cron — **not worker-isolated** (gap) |
+| Boundaries | enforced package graph | feature folders | feature folders | flat `services/` — **no import-boundary check** (gap) |
+| Tests | Playwright + unit | unit + E2E | unit + E2E | Vitest + Playwright — **thin UI component layer** (gap) |
+| Typed UI↔API | tRPC / generated | API client | server actions | generated SDK + drift gate — **strong** |
+| Upgrade story | versioned + ADRs/docs | enterprise SLAs | docs | runbooks + audit — **ADRs missing** (gap) |
+| Deploy reference | Vercel/containers | docker | Vercel | PM2/nginx only — **single-mode** (gap) |
+
+The takeaway matches the templates' own positioning: the differentiator that
+keeps a template alive is a maintained **upgrade/operability path**, not feature
+count. zerotrust is feature-rich; the leverage is in boundaries, worker
+isolation, idempotency, and deterministic upgrades.
+
 ## External reference set
 
 - **MakerKit** emphasizes a maintained production foundation: secure
@@ -60,7 +89,7 @@ surfaces, so deterministic updates are the highest-leverage stability win.
 - `billing` — Stripe lifecycle, tax, plans, wallet/points.
 - `compliance` — audit chain, access reviews, retention, privacy, SIEM.
 - `ops` — metrics, tracing, alerting, health, backups, SLOs.
-- `integrations` — webhooks, notifications, email, storage, SSF, SAML/SCIM.
+- `integrations` — webhooks, notifications, email, storage, SSF, OTP channels.
 
 Add an import-boundary check (dependency-cruiser, eslint-plugin-boundaries, or a
 small `tsx` script) so routes depend on services, services depend on repositories
@@ -87,39 +116,53 @@ Prioritize:
 and Stripe webhook idempotency risks. A repository/transaction layer makes these
 flows easier to test under retries and concurrent requests.
 
-### P1 — Centralize background jobs and idempotency
+### P1 — Isolate and centralize background jobs (fixes a live bug)
 
-**Recommendation:** create a first-class job subsystem instead of scattered
-service-level queue usage.
+**Recommendation:** create a first-class job subsystem in a dedicated worker
+process instead of scattered service-level queue usage in the HTTP process.
 
+- **Fix the cluster-mode duplication bug first** (`ARCHITECTURE.md` P1): the
+  BullMQ consumer and the four 24h schedulers (retention, notification fallback,
+  billing lifecycle, `pg_dump` backup) start unconditionally in `startServer()`
+  with no instance guard. Under the documented PM2 cluster mode (`-i max`) every
+  instance runs them → N nightly backups and duplicate dunning emails. Extract a
+  single-instance `src/worker.ts`, or guard each scheduler with a Redis lock /
+  leader election.
 - Define job names, payload schemas, retry/backoff policies, dead-letter
   behavior, and idempotency keys in one module.
 - Add idempotency tables for Stripe events, webhook deliveries, email sends,
   notification fan-out, and long-running compliance exports.
 - Expose job health in `/metrics` and admin ops pages.
 
-**Why:** production SaaS templates commonly include billing, email, webhooks,
-and audit logs; zerotrust includes all of them, but stability depends on exactly
-once-or-effectively-once behavior under retries.
+**Why:** production SaaS templates run jobs in isolated, single-leader workers;
+zerotrust runs them inline and unguarded, which is both a correctness bug today
+and the main blocker to scaling the API horizontally. Exactly-once-under-retries
+behavior then depends on the idempotency keys above.
 
-### P1 — Convert enterprise features into capability plugins
+### P1 — Make the remaining optional-heavy capabilities first-class plugins
 
-**Recommendation:** keep the default runtime small by making enterprise-heavy
-capabilities optional modules with explicit enablement:
+The 2026-06-28 slim-down already deleted the heaviest always-on surfaces
+(enterprise federation: OIDC/SAML/SCIM/LDAP; AI-native auth; growth tooling).
+The lesson is the maintenance one: rather than delete-and-re-add as needs
+change, give the **remaining** optional-but-heavy capabilities an explicit
+plugin contract so they can be enabled per-deployment without bloating the
+default runtime or local dev:
 
-- SAML/OIDC enterprise federation,
-- SCIM/directory sync,
-- Elasticsearch/SIEM fan-out,
-- WhatsApp/SMS/Telegram OTP,
-- object storage providers,
-- advanced globalization/tax providers.
+- Elasticsearch / SIEM fan-out (already has a Postgres fallback — see
+  `ARCHITECTURE.md` P3),
+- WhatsApp / SMS / Telegram OTP (the `twilio` dependency),
+- object-storage providers (S3 / B2 / R2 / MinIO),
+- advanced globalization / tax / PPP providers.
 
 Each plugin should publish: config schema, health check, migrations, test
-fixtures, admin UI registration, and failure-mode documentation.
+fixtures, admin UI registration, and failure-mode documentation. A future
+enterprise add-on (SSO, directory sync) should re-enter through this same
+contract rather than as always-on code.
 
-**Why:** BoxyHQ's enterprise scope is valuable, but always-on enterprise breadth
-can make routine maintenance harder. A plugin contract preserves zerotrust's
-enterprise story while reducing local-dev and deployment complexity.
+**Why:** BoxyHQ's enterprise scope is valuable but always-on breadth is exactly
+what made routine maintenance costly here — it's why those features were removed.
+A plugin contract preserves the option to bring capabilities back without paying
+the standing maintenance tax.
 
 ### P1 — Move UI/API integration to generated, typed contracts by default
 
