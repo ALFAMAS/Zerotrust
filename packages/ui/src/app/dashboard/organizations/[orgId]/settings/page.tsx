@@ -11,7 +11,6 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/context/ToastContext";
 import { api } from "../../../../../lib/api";
-import { SsoSettingsForm } from "./SsoSettingsForm";
 
 interface OrgDetails {
   id: string;
@@ -55,17 +54,6 @@ interface SecurityPolicy {
   allowedCountries: string[];
 }
 
-interface ScimToken {
-  id: string;
-  orgId: string;
-  name: string;
-  tokenPrefix: string;
-  expiresAt: string | null;
-  lastUsedAt: string | null;
-  revokedAt: string | null;
-  createdAt: string;
-  createdBy: string | null;
-}
 
 export default function OrgSettingsPage() {
   const params = useParams();
@@ -100,23 +88,14 @@ export default function OrgSettingsPage() {
   const [allowedCountries, setAllowedCountries] = useState("");
   const [savingPolicy, setSavingPolicy] = useState(false);
 
-  // SCIM token state — admin+ can list, generate, rotate, revoke
-  const [scimTokens, setScimTokens] = useState<ScimToken[]>([]);
-  const [newScimName, setNewScimName] = useState("");
-  const [creatingScimToken, setCreatingScimToken] = useState(false);
-  // Plaintext of a freshly created/rotated token — surfaced once, then cleared.
-  const [revealedPlaintext, setRevealedPlaintext] = useState<string | null>(null);
-  const [revealedTokenName, setRevealedTokenName] = useState<string | null>(null);
-
   useEffect(() => {
     async function fetchAll() {
       try {
-        const [orgRes, meRes, membersRes, policyRes, scimRes] = await Promise.all([
+        const [orgRes, meRes, membersRes, policyRes] = await Promise.all([
           api.get<{ org: OrgDetails; memberCount: number }>(`/orgs/${orgId}`),
           api.get<CurrentUser>("/auth/me"),
           api.get<{ members: MemberRow[] }>(`/orgs/${orgId}/members`),
           api.get<{ policy: SecurityPolicy }>(`/orgs/${orgId}/security/policy`).catch(() => null),
-          api.get<{ tokens: ScimToken[] }>(`/orgs/${orgId}/scim/tokens`).catch(() => null),
         ]);
 
         setOrg(orgRes.org);
@@ -132,8 +111,6 @@ export default function OrgSettingsPage() {
           setIpAllowlist((policyRes.policy.ipAllowlist ?? []).join(", "));
           setAllowedCountries((policyRes.policy.allowedCountries ?? []).join(", "));
         }
-
-        setScimTokens(scimRes?.tokens ?? []);
 
         const me = membersRes.members.find((r) => r.user.id === meRes.id);
         setMyRole(me?.member.role ?? "");
@@ -217,54 +194,6 @@ export default function OrgSettingsPage() {
     }
   }
 
-  async function handleCreateScimToken(e: React.FormEvent) {
-    e.preventDefault();
-    if (!newScimName.trim()) return;
-    setCreatingScimToken(true);
-    try {
-      const res = await api.post<{ token: ScimToken; plaintext: string }>(
-        `/orgs/${orgId}/scim/tokens`,
-        { name: newScimName.trim() }
-      );
-      setScimTokens((prev) => [res.token, ...prev]);
-      setNewScimName("");
-      setRevealedPlaintext(res.plaintext);
-      setRevealedTokenName(res.token.name);
-    } catch (err: any) {
-      toast({ message: err.message || "Failed to create SCIM token", type: "error" });
-    } finally {
-      setCreatingScimToken(false);
-    }
-  }
-
-  async function handleRotateScimToken(tokenId: string) {
-    if (!confirm("Rotate this token? The current token will stop working immediately.")) return;
-    try {
-      const res = await api.post<{ token: ScimToken; plaintext: string }>(
-        `/orgs/${orgId}/scim/tokens/${tokenId}/rotate`,
-        {}
-      );
-      setScimTokens((prev) => [res.token, ...prev.filter((t) => t.id !== tokenId)]);
-      setRevealedPlaintext(res.plaintext);
-      setRevealedTokenName(res.token.name);
-    } catch (err: any) {
-      toast({ message: err.message || "Failed to rotate SCIM token", type: "error" });
-    }
-  }
-
-  async function handleRevokeScimToken(tokenId: string) {
-    if (!confirm("Revoke this token? It will stop working immediately and cannot be undone."))
-      return;
-    try {
-      await api.delete(`/orgs/${orgId}/scim/tokens/${tokenId}`);
-      setScimTokens((prev) =>
-        prev.map((t) => (t.id === tokenId ? { ...t, revokedAt: new Date().toISOString() } : t))
-      );
-      toast({ message: "SCIM token revoked", type: "success" });
-    } catch (err: any) {
-      toast({ message: err.message || "Failed to revoke SCIM token", type: "error" });
-    }
-  }
 
   async function handleDelete(e: React.FormEvent) {
     e.preventDefault();
@@ -539,146 +468,6 @@ export default function OrgSettingsPage() {
           </button>
         </form>
       )}
-
-      {/* SCIM tokens — admin+ can list/generate/rotate/revoke. SCIM 2.0 (RFC 7644)
-                    bearer tokens authenticate provisioning requests from the org's IdP
-                    (Okta, Azure AD, Google Workspace) against /scim/v2. The plaintext
-                    is shown exactly once after create/rotate. */}
-      <div className="bg-card border border-border rounded-xl p-5 space-y-4">
-        <div>
-          <h2 className="font-semibold text-foreground">SCIM provisioning tokens</h2>
-          <p className="text-sm text-muted-foreground mt-0.5">
-            Per-org bearer tokens for SCIM 2.0 user provisioning. Paste one into your IdP&apos;s
-            SCIM configuration to provision users into this organization.
-          </p>
-        </div>
-
-        {/* Plaintext reveal — surfaces once after create/rotate, then dismissed. */}
-        {revealedPlaintext && (
-          <div className="border border-amber-500/40 bg-amber-500/5 rounded-lg p-4 space-y-2">
-            <p className="text-sm font-semibold text-amber-500">
-              New token for &quot;{revealedTokenName}&quot; — copy it now, it won&apos;t be shown
-              again
-            </p>
-            <div className="flex items-center gap-2">
-              <code className="flex-1 bg-muted border border-border rounded px-3 py-2 text-xs font-mono text-foreground break-all">
-                {revealedPlaintext}
-              </code>
-              <button
-                type="button"
-                onClick={() => {
-                  navigator.clipboard.writeText(revealedPlaintext);
-                  toast({ message: "Copied to clipboard", type: "success" });
-                }}
-                className="bg-primary hover:bg-primary/90 text-primary-foreground text-xs px-3 py-2 rounded-lg transition-colors"
-              >
-                Copy
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setRevealedPlaintext(null);
-                  setRevealedTokenName(null);
-                }}
-                className="bg-muted hover:bg-muted/70 text-foreground text-xs px-3 py-2 rounded-lg transition-colors"
-              >
-                Dismiss
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Existing tokens */}
-        {scimTokens.length > 0 && (
-          <div className="space-y-2">
-            {scimTokens.map((t) => {
-              const isRevoked = !!t.revokedAt;
-              const isExpired = t.expiresAt ? new Date(t.expiresAt) < new Date() : false;
-              const status = isRevoked ? "revoked" : isExpired ? "expired" : "active";
-              return (
-                <div
-                  key={t.id}
-                  className="flex items-center justify-between gap-3 bg-muted border border-border rounded-lg px-3 py-2"
-                >
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-foreground truncate">{t.name}</span>
-                      <span
-                        className={`text-[10px] uppercase tracking-wide px-1.5 py-0.5 rounded ${
-                          status === "active"
-                            ? "bg-emerald-500/15 text-emerald-400"
-                            : status === "expired"
-                              ? "bg-amber-500/15 text-amber-400"
-                              : "bg-red-500/15 text-red-400"
-                        }`}
-                      >
-                        {status}
-                      </span>
-                    </div>
-                    <div className="text-xs text-muted-foreground font-mono mt-0.5">
-                      {t.tokenPrefix}
-                      {t.lastUsedAt
-                        ? ` · last used ${new Date(t.lastUsedAt).toLocaleString()}`
-                        : " · never used"}
-                      {t.expiresAt
-                        ? ` · expires ${new Date(t.expiresAt).toLocaleDateString()}`
-                        : ""}
-                    </div>
-                  </div>
-                  {!isRevoked && (
-                    <div className="flex items-center gap-2 shrink-0">
-                      <button
-                        type="button"
-                        onClick={() => handleRotateScimToken(t.id)}
-                        className="bg-muted hover:bg-muted/70 border border-border text-foreground text-xs px-3 py-1.5 rounded transition-colors"
-                      >
-                        Rotate
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleRevokeScimToken(t.id)}
-                        className="bg-red-700 hover:bg-red-600 text-foreground text-xs px-3 py-1.5 rounded transition-colors"
-                      >
-                        Revoke
-                      </button>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        )}
-
-        {/* Issue new token */}
-        <form
-          onSubmit={handleCreateScimToken}
-          className="flex items-end gap-3 border-t border-border pt-4"
-        >
-          <div className="flex-1 space-y-1">
-            <label htmlFor="page-f10" className="text-xs text-muted-foreground">
-              New token name
-            </label>
-            <input
-              id="page-f10"
-              value={newScimName}
-              onChange={(e) => setNewScimName(e.target.value)}
-              placeholder="e.g. Okta production"
-              maxLength={80}
-              className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-ring"
-            />
-          </div>
-          <button
-            type="submit"
-            disabled={!newScimName.trim() || creatingScimToken}
-            className="bg-primary hover:bg-primary/90 disabled:opacity-50 text-primary-foreground text-sm px-4 py-2 rounded-lg transition-colors"
-          >
-            {creatingScimToken ? "Generating…" : "Generate token"}
-          </button>
-        </form>
-      </div>
-
-      {/* SSO configuration — admin+ */}
-      <SsoSettingsForm orgId={orgId} myRole={myRole} toast={toast} />
 
       {/* Transfer ownership — owner only */}
       {myRole === "owner" && nonOwnerMembers.length > 0 && (

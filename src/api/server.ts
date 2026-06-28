@@ -6,10 +6,8 @@ import { compress } from "hono/compress";
 import { cors } from "hono/cors";
 import { secureHeaders } from "hono/secure-headers";
 import { initializezerotrust } from "..";
-import federationRoutes from "../federation/routes";
 import { initSentry } from "../instrument";
 import jitRoutes from "../jit/routes";
-import ldapRoutes from "../ldap/routes";
 import { getLogger } from "../logger";
 import { metricsAuthMiddleware, metricsMiddleware, metricsRoute } from "../metrics";
 import { API_VERSIONS, apiVersioning, CURRENT_API_VERSION } from "../middleware/apiVersioning";
@@ -19,9 +17,6 @@ import { geoFencingMiddleware } from "../middleware/geoFencing";
 import { rateLimit } from "../middleware/rateLimiting";
 import { temporalAccessMiddleware } from "../middleware/temporalAccess";
 import notificationChannelRoutes from "../notifications/routes";
-import oidcRoutes from "../oidc/routes";
-import samlRoutes from "../saml/routes";
-import scimRoutes from "../scim/routes";
 import { alertingMiddleware } from "../services/alerting.service";
 import { startBillingLifecycleScheduler } from "../services/billingLifecycle.service";
 import { startRetentionScheduler } from "../services/dataRetention";
@@ -141,22 +136,9 @@ export async function createServer() {
   // ─── Verification routes ──────────────────────────────────────────────────
   app.route("/auth/verify", verificationRoutes);
 
-  // ─── Federation routes ────────────────────────────────────────────────────
-  app.route("/federation", federationRoutes);
-
   // ─── Cross-tenant JIT access routes ───────────────────────────────────────
   // Request + admin approval for temporary elevated access across tenants.
   app.route("/jit/cross-tenant", jitRoutes);
-
-  // ─── Enterprise SSO & provisioning ────────────────────────────────────────
-  // SCIM 2.0 user provisioning (Azure AD / Okta), routes are /Users, /Groups…
-  app.route("/scim/v2", scimRoutes);
-  // LDAP directory sync admin endpoints (/ldap/test, /ldap/sync…)
-  app.route("/ldap", ldapRoutes);
-  // OIDC provider: paths are self-prefixed (/.well-known/…, /oidc/…) → mount at root.
-  app.route("/", oidcRoutes);
-  // SAML SP: paths are self-prefixed (/saml/metadata, /saml/acs…) → mount at root.
-  app.route("/", samlRoutes);
   // Tenant management (CRUD + per-tenant SSO config + plans).
   app.route("/admin/tenants", tenantRoutes);
 

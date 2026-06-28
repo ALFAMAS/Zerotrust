@@ -13,30 +13,6 @@ import {
 } from "drizzle-orm/pg-core";
 import type { OidcConfig, SamlConfig, TenantSettings } from "../models/tenant.model";
 
-/** Org-level SSO config — subset of tenant SSO, scoped to a single organization. */
-/** Org-level SSO config — subset of tenant SSO, scoped to a single organization. */
-export interface OrgSsoConfig {
-  saml?: {
-    enabled: boolean;
-    idpEntityId?: string;
-    idpSsoUrl?: string;
-    idpCert?: string;
-    lastTestedAt?: string;
-    lastTestStatus?: "success" | "error";
-    lastTestError?: string;
-  };
-  oidc?: {
-    enabled: boolean;
-    issuerUrl?: string;
-    clientId?: string;
-    clientSecret?: string;
-    redirectUris?: string[];
-    lastTestedAt?: string;
-    lastTestStatus?: "success" | "error";
-    lastTestError?: string;
-  };
-}
-
 /** Per-organization branding overrides (white-label). */
 export interface OrgBranding {
   appName?: string;
@@ -303,17 +279,6 @@ export const crossTenantJITRequestsTable = pgTable("cross_tenant_jit_requests", 
 
 // Trusted federation (RFC 8693 token-exchange) providers. Durable registry so
 // providers configured via the admin UI persist across restarts.
-export const federatedProvidersTable = pgTable("federated_providers", {
-  // Provider id is a caller-supplied slug (e.g. "okta-prod"), not a uuid.
-  id: text("id").primaryKey(),
-  name: text("name").notNull(),
-  issuerUrl: text("issuer_url").notNull(),
-  jwksUri: text("jwks_uri"),
-  trustedTenantId: text("trusted_tenant_id"),
-  enabled: boolean("enabled").notNull().default(true),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
-});
-
 export const userBehaviorBaselinesTable = pgTable("user_behavior_baselines", {
   id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: uuid("user_id")
@@ -395,8 +360,6 @@ export const organizationsTable = pgTable(
     ownerId: uuid("owner_id").references(() => usersTable.id, {
       onDelete: "cascade",
     }),
-    // Self-serve SSO config — org admins configure SAML/OIDC from the dashboard.
-    ssoConfig: jsonb("sso_config").$type<OrgSsoConfig>(),
     // Multi-tenant enterprise: custom domain, branding overrides, data residency.
     customDomain: text("custom_domain"),
     branding: jsonb("branding").$type<OrgBranding>(),
@@ -596,40 +559,6 @@ export const apiKeysTable = pgTable(
   },
   (t) => ({
     apiKeysUserIdIdx: index("api_keys_user_id_idx").on(t.userId),
-  })
-);
-
-// ── Org SCIM Tokens ───────────────────────────────────────────────────────────
-//
-// Per-org SCIM 2.0 (RFC 7644) bearer tokens. Each token authenticates SCIM
-// requests against the org that issued it. Plaintext is returned exactly once
-// at creation/rotation; only the SHA-256 hash is persisted, so a DB read alone
-// cannot impersonate a SCIM client.
-
-export const orgScimTokensTable = pgTable(
-  "org_scim_tokens",
-  {
-    id: uuid("id").primaryKey().defaultRandom(),
-    orgId: uuid("org_id")
-      .notNull()
-      .references(() => organizationsTable.id, { onDelete: "cascade" }),
-    name: text("name").notNull(),
-    // First 12 chars of the plaintext token, for display in the dashboard
-    // ("scim_a1b2c3d4…") so admins can identify which token is which.
-    tokenPrefix: text("token_prefix").notNull(),
-    // SHA-256 hex of the plaintext token. Unique so validation is an indexed
-    // point lookup. Plaintext is never recoverable from this column.
-    tokenHash: text("token_hash").notNull().unique(),
-    expiresAt: timestamp("expires_at"),
-    lastUsedAt: timestamp("last_used_at"),
-    revokedAt: timestamp("revoked_at"),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    createdBy: uuid("created_by").references(() => usersTable.id, {
-      onDelete: "set null",
-    }),
-  },
-  (t) => ({
-    orgIdIdx: index("org_scim_tokens_org_id_idx").on(t.orgId),
   })
 );
 

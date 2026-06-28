@@ -49,21 +49,6 @@ export {
   sessionsTable,
   usersTable,
 } from "./db/schema";
-export type {
-  FederatedProvider,
-  FederationTokenRequest,
-  FederationTokenResponse,
-} from "./federation/index";
-// ─── Cross-Tenant Federation ──────────────────────────────────────────────────
-export {
-  exchangeToken as exchangeFederatedToken,
-  getProvider as getFederationProvider,
-  initFederationFromEnv,
-  listProviders as listFederationProviders,
-  registerProvider as registerFederationProvider,
-  removeProvider as removeFederationProvider,
-  requireFederatedIdentity,
-} from "./federation/index";
 export type { CrossTenantJITRequest } from "./jit/cross-tenant";
 // ─── Cross-Tenant JIT ─────────────────────────────────────────────────────────
 export {
@@ -71,10 +56,6 @@ export {
   requestCrossTenantAccess,
   requireCrossTenantJIT,
 } from "./jit/cross-tenant";
-// ─── LDAP / Active Directory ─────────────────────────────────────────────────
-export { createLDAPClient, LDAPClient } from "./ldap/client";
-export { scheduleLDAPSync, syncAllUsers, syncModifiedUsers } from "./ldap/sync";
-export type { LDAPConfig, LDAPGroup, LDAPUser } from "./ldap/types";
 // ─── Logging ─────────────────────────────────────────────────────────────────
 export {
   auditLog,
@@ -213,26 +194,6 @@ export type {
   NotificationEvent,
 } from "./notifications/types";
 export { getProviderAdapter } from "./oauth/provider.factory";
-// ─── OIDC Provider ───────────────────────────────────────────────────────────
-export {
-  buildUserInfo,
-  exchangeAuthCode as exchangeOIDCCode,
-  generateAuthCode,
-  getDiscoveryDocument,
-  getOIDCClient,
-  registerOIDCClient,
-  validateAuthorizeRequest,
-} from "./oidc/provider";
-export type { SAMLAssertion, SAMLIdPConfig, SAMLSPConfig } from "./saml/sp";
-// ─── SAML 2.0 ────────────────────────────────────────────────────────────────
-export {
-  buildAuthnRequest,
-  buildSPMetadata,
-  parseSAMLResponse,
-} from "./saml/sp";
-export type { SCIMGroup, SCIMUser } from "./scim";
-// ─── SCIM 2.0 ────────────────────────────────────────────────────────────────
-export { scimRoutes } from "./scim";
 export type {
   AnomalySignals,
   BehaviorObservation,
