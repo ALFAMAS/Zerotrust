@@ -148,6 +148,13 @@
       "when": 1782645461296,
       "tag": "0020_drop_collaboration",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1782645761932,
+      "tag": "0021_drop_did_column",
+      "breakpoints": true
     }
   ]
 }

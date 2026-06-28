@@ -66,20 +66,6 @@ export {
   usersTable,
   workloadCredentialsTable,
 } from "./db/schema";
-// ─── Decentralized Identity (DID) ─────────────────────────────────────────────
-export { resolveDID, resolveDIDKey, resolveDIDWeb } from "./did/resolver";
-export type {
-  DIDAuthChallenge,
-  DIDAuthResult,
-  DIDDocument,
-  DIDProof,
-  VerificationMethod,
-} from "./did/types";
-export {
-  createDIDChallenge,
-  provisionDIDUser,
-  verifyDIDProof,
-} from "./did/verifier";
 export type {
   FederatedProvider,
   FederationTokenRequest,

@@ -57,10 +57,6 @@ export const usersTable = pgTable("users", {
   id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
   email: text("email").notNull().unique(),
   username: text("username").unique(),
-  // Decentralized Identifier (did:key / did:web) for login-via-DID. Nullable —
-  // only set for accounts provisioned through the DID auth flow. Unique allows
-  // many NULLs (Postgres), so non-DID users are unaffected.
-  did: text("did").unique(),
   passwordHash: text("password_hash"),
   phone: text("phone"),
   displayName: text("display_name").notNull(),
