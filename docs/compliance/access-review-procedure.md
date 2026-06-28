@@ -16,7 +16,7 @@ Review all privileged access, including:
 - Production database access.
 - Repository admin access.
 - Cloud and observability access.
-- Service accounts and workload credentials.
+- Service accounts and API keys.
 
 ## Procedure
 

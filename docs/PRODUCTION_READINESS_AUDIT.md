@@ -1,5 +1,13 @@
 # Production-Readiness Audit — 2026-06-25
 
+> **⚠️ Historical snapshot (predates the 2026-06-28 maintenance slim-down).**
+> Six features were removed since this audit — collaboration, decentralized
+> identity, post-quantum KEM, growth tooling, AI-native auth, and enterprise
+> federation (see [`MAINTENANCE_FEATURE_AUDIT.md`](./MAINTENANCE_FEATURE_AUDIT.md)).
+> Findings below that reference those areas are moot. For the current,
+> forward-looking hardening list, see
+> [`PRODUCTION_SAFETY_TODO.md`](./PRODUCTION_SAFETY_TODO.md).
+
 A whole-codebase audit covering security, correctness, test coverage, and the
 backend↔frontend surface. This document is the prioritized punch list of what
 stands between the current tree and a production-grade release. Items fixed in

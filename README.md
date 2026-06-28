@@ -135,7 +135,15 @@ rebuilding login for the hundredth time.
 
 ## Architecture
 
-zerotrust is a Bun monorepo: a standalone API server and a Next.js app that talks to it.
+zerotrust is a Bun monorepo: a standalone API server and a Next.js app that talks
+to it. It is a **modular monolith** — one Hono API process exposes ~27 route
+modules backed by ~48 services and ~20 middleware, persisting to PostgreSQL (47
+tables) with Redis for sessions, rate limiting, and the email queue. Domains call
+each other in-process; there are no internal network hops.
+
+> **Deep dive:** [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) audits the full
+> system (request lifecycle, module map, data/state, auth/crypto, background
+> jobs, observability) and proposes upgrades.
 
 ```
 ┌─────────────────────────┐         ┌──────────────────────────┐
@@ -159,6 +167,25 @@ zerotrust is a Bun monorepo: a standalone API server and a Next.js app that talk
 | Health / metrics    | `/healthz` · `/metrics`    | on the API port                        |
 | PostgreSQL          | localhost:5432             | or a managed provider (e.g. Neon)      |
 | Redis               | localhost:6379             | optional — in-memory fallback if unset |
+
+### Request lifecycle
+
+Global middleware runs in order — `cors` → `secureHeaders` → `compress` →
+metrics → OpenTelemetry → API versioning → alerting/SLO — then each route module
+applies its own guards (`authMiddleware` / `apiKeyAuth`, then rate limiting,
+`requirePlan`, `requireAdmin`, geo-fencing, temporal access, continuous
+verification, as needed). Access tokens are **PASETO v4.local** (XChaCha20 +
+BLAKE2b, 1-hour TTL); refresh tokens are opaque, SHA-256-hashed, and rotated on
+use. Sessions are Redis-cached with a Postgres fallback.
+
+### Background work
+
+A BullMQ email-queue consumer plus 24h schedulers (data retention, notification
+fallback, billing lifecycle, `pg_dump` backup) start with the API process.
+> **Note:** these are not yet instance-guarded, so running the API in PM2
+> **cluster** mode duplicates them — see proposal **P1** in
+> [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) and run a single worker
+> instance until that lands.
 
 ---
 
@@ -539,6 +566,9 @@ zerotrust tracks its state in the repository docs:
 | Doc                                              | What it covers                                              |
 | ------------------------------------------------ | ----------------------------------------------------------- |
 | [`tdone.md`](./tdone.md)                         | Everything that ships today, plus the latest codebase audit |
+| [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) | System architecture audit + proposed upgrades               |
+| [`docs/PRODUCTION_SAFETY_TODO.md`](./docs/PRODUCTION_SAFETY_TODO.md) | Forward-looking failsafe CI/CD + production-hardening punch list |
+| [`docs/MAINTENANCE_FEATURE_AUDIT.md`](./docs/MAINTENANCE_FEATURE_AUDIT.md) | Feature-removal audit (what was slimmed out and why)        |
 | [`docs/compliance`](./docs/compliance/README.md) | Compliance policies, procedures, and evidence templates     |
 | [`packages/client`](./packages/client/README.md) | Generated TypeScript SDK package and usage notes            |
 
