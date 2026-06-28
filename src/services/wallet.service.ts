@@ -14,6 +14,57 @@ import {
   walletTransactionsTable,
 } from "../db/schema";
 import { isUnavailableStorageError } from "../db/storageFallback";
+import { getLogger } from "../logger";
+
+const logger = getLogger("wallet-service");
+
+const WALLET_COLUMNS = [
+  "user_id",
+  "balance",
+  "lifetime_balance",
+  "currency",
+  "stripe_customer_id",
+  "auto_top_up",
+  "auto_top_up_threshold",
+  "auto_top_up_amount",
+  "created_at",
+  "updated_at",
+];
+const WALLET_TRANSACTION_COLUMNS = [
+  "id",
+  "user_id",
+  "amount",
+  "balance_after",
+  "type",
+  "description",
+  "stripe_payment_intent_id",
+  "metadata",
+  "created_at",
+];
+const POINTS_LEDGER_COLUMNS = [
+  "id",
+  "user_id",
+  "amount",
+  "balance",
+  "reason",
+  "description",
+  "metadata",
+  "created_at",
+];
+const TIER_COLUMNS = [
+  "key",
+  "name",
+  "description",
+  "min_points",
+  "multiplier",
+  "perks",
+  "color",
+  "icon",
+  "achieved_at",
+  "created_at",
+  "tier_key",
+  "user_id",
+];
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -52,15 +103,37 @@ export interface ReferralStats {
   rewardsEarned: number;
 }
 
+function emptyWallet(): WalletBalance {
+  return {
+    balance: 0,
+    lifetimeBalance: 0,
+    currency: "usd",
+    autoTopUp: false,
+    tier: null,
+  };
+}
+
+function warnUnavailableStorage(feature: string, userId: string, err: unknown) {
+  logger.warn(`${feature} storage is unavailable; returning empty read model`, {
+    userId,
+    error: String(err),
+  });
+}
+
 // ── Wallet ────────────────────────────────────────────────────────────────────
 
 export async function getWallet(userId: string): Promise<WalletBalance> {
   const db = getDb();
-  const [wallet] = await db
-    .select()
-    .from(walletsTable)
-    .where(eq(walletsTable.userId, userId))
-    .limit(1);
+  let wallet: typeof walletsTable.$inferSelect | undefined;
+  try {
+    [wallet] = await db.select().from(walletsTable).where(eq(walletsTable.userId, userId)).limit(1);
+  } catch (err) {
+    if (isUnavailableStorageError(err, ["wallets"], WALLET_COLUMNS)) {
+      warnUnavailableStorage("Wallet", userId, err);
+      return emptyWallet();
+    }
+    throw err;
+  }
 
   if (!wallet) {
     // Auto-create wallet
@@ -185,13 +258,21 @@ export async function spendFromWallet(
 
 export async function getWalletTransactions(userId: string, limit = 30, offset = 0) {
   const db = getDb();
-  return db
-    .select()
-    .from(walletTransactionsTable)
-    .where(eq(walletTransactionsTable.userId, userId))
-    .orderBy(desc(walletTransactionsTable.createdAt))
-    .limit(limit)
-    .offset(offset);
+  try {
+    return await db
+      .select()
+      .from(walletTransactionsTable)
+      .where(eq(walletTransactionsTable.userId, userId))
+      .orderBy(desc(walletTransactionsTable.createdAt))
+      .limit(limit)
+      .offset(offset);
+  } catch (err) {
+    if (isUnavailableStorageError(err, ["wallet_transactions"], WALLET_TRANSACTION_COLUMNS)) {
+      warnUnavailableStorage("Wallet transaction", userId, err);
+      return [];
+    }
+    throw err;
+  }
 }
 
 // ── Points engine ────────────────────────────────────────────────────────────
@@ -273,11 +354,16 @@ export async function getPointsBalance(
   userId: string
 ): Promise<{ balance: number; lifetimeBalance: number }> {
   const db = getDb();
-  const [wallet] = await db
-    .select()
-    .from(walletsTable)
-    .where(eq(walletsTable.userId, userId))
-    .limit(1);
+  let wallet: typeof walletsTable.$inferSelect | undefined;
+  try {
+    [wallet] = await db.select().from(walletsTable).where(eq(walletsTable.userId, userId)).limit(1);
+  } catch (err) {
+    if (isUnavailableStorageError(err, ["wallets"], WALLET_COLUMNS)) {
+      warnUnavailableStorage("Points balance", userId, err);
+      return { balance: 0, lifetimeBalance: 0 };
+    }
+    throw err;
+  }
   return {
     balance: wallet?.balance ?? 0,
     lifetimeBalance: wallet?.lifetimeBalance ?? 0,
@@ -286,13 +372,21 @@ export async function getPointsBalance(
 
 export async function getPointsHistory(userId: string, limit = 50, offset = 0) {
   const db = getDb();
-  return db
-    .select()
-    .from(pointsLedgerTable)
-    .where(eq(pointsLedgerTable.userId, userId))
-    .orderBy(desc(pointsLedgerTable.createdAt))
-    .limit(limit)
-    .offset(offset);
+  try {
+    return await db
+      .select()
+      .from(pointsLedgerTable)
+      .where(eq(pointsLedgerTable.userId, userId))
+      .orderBy(desc(pointsLedgerTable.createdAt))
+      .limit(limit)
+      .offset(offset);
+  } catch (err) {
+    if (isUnavailableStorageError(err, ["points_ledger"], POINTS_LEDGER_COLUMNS)) {
+      warnUnavailableStorage("Points history", userId, err);
+      return [];
+    }
+    throw err;
+  }
 }
 
 // ── Tier system ───────────────────────────────────────────────────────────────
@@ -349,12 +443,26 @@ export async function seedDefaultTiers(): Promise<void> {
 
 export async function getCurrentTier(userId: string): Promise<UserTierInfo | null> {
   const db = getDb();
-  const [userTier] = await db
-    .select({ tier: tiersTable, achievedAt: userTiersTable.achievedAt })
-    .from(userTiersTable)
-    .innerJoin(tiersTable, eq(userTiersTable.tierKey, tiersTable.key))
-    .where(eq(userTiersTable.userId, userId))
-    .limit(1);
+  let userTier:
+    | {
+        tier: typeof tiersTable.$inferSelect;
+        achievedAt: Date;
+      }
+    | undefined;
+  try {
+    [userTier] = await db
+      .select({ tier: tiersTable, achievedAt: userTiersTable.achievedAt })
+      .from(userTiersTable)
+      .innerJoin(tiersTable, eq(userTiersTable.tierKey, tiersTable.key))
+      .where(eq(userTiersTable.userId, userId))
+      .limit(1);
+  } catch (err) {
+    if (isUnavailableStorageError(err, ["user_tiers", "tiers"], TIER_COLUMNS)) {
+      warnUnavailableStorage("Tier", userId, err);
+      return null;
+    }
+    throw err;
+  }
 
   if (!userTier) return null;
 
