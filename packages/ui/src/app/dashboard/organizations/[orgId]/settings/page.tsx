@@ -54,7 +54,6 @@ interface SecurityPolicy {
   allowedCountries: string[];
 }
 
-
 export default function OrgSettingsPage() {
   const params = useParams();
   const router = useRouter();
@@ -193,7 +192,6 @@ export default function OrgSettingsPage() {
       setTransferring(false);
     }
   }
-
 
   async function handleDelete(e: React.FormEvent) {
     e.preventDefault();
