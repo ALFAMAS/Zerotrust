@@ -539,6 +539,8 @@ zerotrust tracks its state in the repository docs:
 | Doc                                              | What it covers                                              |
 | ------------------------------------------------ | ----------------------------------------------------------- |
 | [`tdone.md`](./tdone.md)                         | Everything that ships today, plus the latest codebase audit |
+| [`docs/PRODUCTION_SAFETY_TODO.md`](./docs/PRODUCTION_SAFETY_TODO.md) | Forward-looking failsafe CI/CD + production-hardening punch list |
+| [`docs/MAINTENANCE_FEATURE_AUDIT.md`](./docs/MAINTENANCE_FEATURE_AUDIT.md) | Feature-removal audit (what was slimmed out and why)        |
 | [`docs/compliance`](./docs/compliance/README.md) | Compliance policies, procedures, and evidence templates     |
 | [`packages/client`](./packages/client/README.md) | Generated TypeScript SDK package and usage notes            |
 

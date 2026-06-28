@@ -1,5 +1,12 @@
 # Production-Readiness Audit — 2026-06-25
 
+> **⚠️ Historical snapshot (predates the 2026-06-28 maintenance slim-down).**
+> Six features were removed since this audit (collaboration, decentralized
+> identity, post-quantum KEM, growth tooling, AI-native auth, enterprise
+> federation). The scope figures below — "31 route modules, 70+ services" — no
+> longer hold. See [`../MAINTENANCE_FEATURE_AUDIT.md`](../MAINTENANCE_FEATURE_AUDIT.md)
+> and the current [`../PRODUCTION_SAFETY_TODO.md`](../PRODUCTION_SAFETY_TODO.md).
+
 **Scope:** `src/` (API, 47k LOC, 31 route modules, 70+ services), `packages/ui`,
 `tests/`, CI config, and the observability/perf surfaces called out in the
 program goal (p95 < 100 ms, Lighthouse > 90, >85% coverage, 100% shadcn,
