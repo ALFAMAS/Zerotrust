@@ -4,7 +4,6 @@ import { createMiddleware } from "hono/factory";
 import { getDb } from "../db";
 import { apiKeysTable, usersTable } from "../db/schema";
 import { apiKeyUsageMetric, getUsage, incrementUsage } from "../services/usage.service";
-import { runUsageNudges } from "../services/usageNudge.service";
 import type { HonoEnv, User } from "../shared/types";
 import { consumeRateLimit } from "./rateLimiting";
 
@@ -103,11 +102,6 @@ export const apiKeyAuth = createMiddleware<HonoEnv>(async (c, next) => {
   // Metered usage: count this API call against the billing period
   void incrementUsage("api_calls", scope);
   void incrementUsage(keyMetric, scope);
-
-  // Proactive upsell nudge when usage crosses a quota threshold (throttled).
-  void runUsageNudges(scope, (user as any).id, {
-    email: (user as any).email,
-  }).catch(() => {});
 
   c.set("user", user as unknown as User);
   c.set("apiKeyId", key.id);

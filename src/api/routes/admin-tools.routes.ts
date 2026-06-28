@@ -1,6 +1,6 @@
 /**
  * Admin tools: impersonation, manual plan override, revenue dashboard,
- * broadcast email, CSV exports and feature flag management.
+ * broadcast email and CSV exports.
  * Mounted at /admin alongside admin.routes.ts (same guard).
  */
 
@@ -19,12 +19,6 @@ import {
 import { auditLog, getLogger } from "../../logger";
 import { authMiddleware } from "../../middleware/auth";
 import { sendNotificationEmail } from "../../services/email.service";
-import {
-  clearFlagCache,
-  deleteFlag,
-  listFlags,
-  upsertFlag,
-} from "../../services/featureFlags.service";
 import { setLegalHold } from "../../services/legalHold.service";
 import { TokenService } from "../../services/token.service";
 import { getClientIp } from "../../shared/clientIp";
@@ -408,46 +402,6 @@ router.get("/audit/export", async (c) => {
     logger.error("Audit export error", err as Error);
     return c.json({ error: "INTERNAL_ERROR" }, 500);
   }
-});
-
-// ── Feature flags admin CRUD ──────────────────────────────────────────────────
-
-// GET /admin/feature-flags
-router.get("/feature-flags", async (c) => {
-  const flags = await listFlags();
-  return c.json({ flags });
-});
-
-// PUT /admin/feature-flags/:key
-router.put("/feature-flags/:key", async (c) => {
-  try {
-    const admin = c.get("user");
-    const key = c.req.param("key");
-    const body = await c.req.json().catch(() => ({}));
-    const flag = await upsertFlag({
-      key,
-      description: body.description,
-      enabled: body.enabled,
-      enabledForUsers: body.enabledForUsers,
-      rolloutPercent: body.rolloutPercent,
-    });
-    await auditLog("admin.feature_flag_updated", admin.id, key, true, {
-      enabled: flag.enabled,
-      rolloutPercent: flag.rolloutPercent,
-    });
-    return c.json(flag);
-  } catch (err) {
-    logger.error("Feature flag upsert error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR" }, 500);
-  }
-});
-
-// DELETE /admin/feature-flags/:key
-router.delete("/feature-flags/:key", async (c) => {
-  const key = c.req.param("key");
-  const ok = await deleteFlag(key);
-  clearFlagCache();
-  return ok ? c.json({ success: true }) : c.json({ error: "NOT_FOUND" }, 404);
 });
 
 // POST /users/:id/legal-hold — place or lift a legal hold (admin only)

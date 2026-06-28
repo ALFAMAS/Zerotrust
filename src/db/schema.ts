@@ -758,19 +758,6 @@ export const pushSubscriptionsTable = pgTable("push_subscriptions", {
   lastUsedAt: timestamp("last_used_at", { withTimezone: true }),
 });
 
-export const featureFlagsTable = pgTable("feature_flags", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  key: text("key").notNull().unique(),
-  description: text("description"),
-  enabled: boolean("enabled").notNull().default(false),
-  // Optional per-user rollout: list of user IDs the flag is force-enabled for
-  enabledForUsers: text("enabled_for_users").array().notNull().default(sql`ARRAY[]::text[]`),
-  // Percentage rollout 0-100 (applies when enabled = false)
-  rolloutPercent: integer("rollout_percent").notNull().default(0),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
-
 // ── Login streaks ──────────────────────────────────────────────────────────────
 // Tracks daily login streak per user with a 1-day grace period.
 
@@ -904,70 +891,6 @@ export const passkeysTable = pgTable(
   (t) => ({
     passkeysUserIdIdx: index("passkeys_user_id_idx").on(t.userId),
     passkeysCredentialIdIdx: index("passkeys_credential_id_idx").on(t.credentialId),
-  })
-);
-
-// ── A/B experiment results (durable) ──────────────────────────────────────────
-
-export const experimentResultsTable = pgTable(
-  "experiment_results",
-  {
-    id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
-    experimentKey: text("experiment_key").notNull(),
-    variant: text("variant").notNull(),
-    subjectId: text("subject_id").notNull(),
-    converted: boolean("converted").notNull().default(false),
-    createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
-  },
-  (t) => ({
-    experimentResultsKeyVariantIdx: index("experiment_results_key_variant_idx").on(
-      t.experimentKey,
-      t.variant
-    ),
-    experimentResultsSubjectUnq: unique().on(t.experimentKey, t.subjectId),
-  })
-);
-
-// ── Analytics events (per-feature) ────────────────────────────────────────────
-
-export const analyticsEventsTable = pgTable(
-  "analytics_events",
-  {
-    id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
-    userId: uuid("user_id").references(() => usersTable.id, {
-      onDelete: "set null",
-    }),
-    feature: text("feature").notNull(),
-    action: text("action").notNull(),
-    metadata: jsonb("metadata"),
-    createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
-  },
-  (t) => ({
-    analyticsEventsFeatureIdx: index("analytics_events_feature_idx").on(t.feature, t.createdAt),
-    analyticsEventsUserIdx: index("analytics_events_user_id_idx").on(t.userId),
-  })
-);
-
-// ── Search analytics ──────────────────────────────────────────────────────────
-
-export const searchAnalyticsTable = pgTable(
-  "search_analytics",
-  {
-    id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
-    userId: uuid("user_id").references(() => usersTable.id, {
-      onDelete: "set null",
-    }),
-    query: text("query").notNull(),
-    resultCount: integer("result_count").notNull().default(0),
-    source: text("source").notNull().default("global"),
-    createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
-  },
-  (t) => ({
-    searchAnalyticsCreatedIdx: index("search_analytics_created_idx").on(t.createdAt),
-    searchAnalyticsZeroResultsIdx: index("search_analytics_zero_results_idx").on(
-      t.resultCount,
-      t.createdAt
-    ),
   })
 );
 
