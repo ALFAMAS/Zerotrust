@@ -26,22 +26,6 @@ export {
   SoftwareKeyProvider,
   TPMKeyProvider,
 } from "./crypto/hardware-key-store";
-export type {
-  KEMEncapsulation,
-  KEMPrivateKey,
-  KEMPublicKey,
-  PQKEMProvider,
-} from "./crypto/post-quantum";
-// ─── Post-Quantum Cryptography ────────────────────────────────────────────────
-export {
-  createKEMProvider,
-  establishPQSessionKey,
-  generatePQKeyPair,
-  hybridDecrypt,
-  hybridEncrypt,
-  NobleMLKEM,
-  SimulatedMLKEM,
-} from "./crypto/post-quantum";
 export type { DatabaseHealth } from "./db";
 // ─── Database ────────────────────────────────────────────────────────────────
 export {
