@@ -22,16 +22,19 @@ export function isUnavailableStorageError(
     const message = typeof candidate.message === "string" ? candidate.message : "";
     if (
       tableNames.some((table) =>
-        new RegExp(`relation\\s+["']?(?:\\w+\\.)?${escapeRegExp(table)}["']?\\s+does not exist`, "i").test(
-          message
-        )
+        new RegExp(
+          `relation\\s+["']?(?:\\w+\\.)?${escapeRegExp(table)}["']?\\s+does not exist`,
+          "i"
+        ).test(message)
       )
     ) {
       return true;
     }
     if (
       columnNames.some((column) =>
-        new RegExp(`column\\s+["']?${escapeRegExp(column)}["']?\\s+does not exist`, "i").test(message)
+        new RegExp(`column\\s+["']?${escapeRegExp(column)}["']?\\s+does not exist`, "i").test(
+          message
+        )
       )
     ) {
       return true;

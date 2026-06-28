@@ -1,11 +1,9 @@
 "use client";
 import {
-  Activity,
   Award,
   Bell,
   Building2,
   CreditCard,
-  FileText as FileTextIcon,
   KeyRound,
   LayoutDashboard,
   LifeBuoy,

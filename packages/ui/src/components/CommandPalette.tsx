@@ -18,16 +18,46 @@ interface SearchResult {
 const PAGES: SearchResult[] = [
   { type: "page", title: "Dashboard", description: "Overview", href: "/dashboard" },
   { type: "page", title: "Profile", description: "Your profile", href: "/dashboard/profile" },
-  { type: "page", title: "Security", description: "Passkeys, MFA, sessions", href: "/dashboard/security" },
+  {
+    type: "page",
+    title: "Security",
+    description: "Passkeys, MFA, sessions",
+    href: "/dashboard/security",
+  },
   { type: "page", title: "Sessions", description: "Active sessions", href: "/dashboard/sessions" },
-  { type: "page", title: "Notifications", description: "Notification center", href: "/dashboard/notifications" },
-  { type: "page", title: "Organizations", description: "Workspaces & teams", href: "/dashboard/organizations" },
+  {
+    type: "page",
+    title: "Notifications",
+    description: "Notification center",
+    href: "/dashboard/notifications",
+  },
+  {
+    type: "page",
+    title: "Organizations",
+    description: "Workspaces & teams",
+    href: "/dashboard/organizations",
+  },
   { type: "page", title: "API Keys", description: "Manage API keys", href: "/dashboard/api-keys" },
-  { type: "page", title: "Webhooks", description: "Outgoing webhooks", href: "/dashboard/webhooks" },
+  {
+    type: "page",
+    title: "Webhooks",
+    description: "Outgoing webhooks",
+    href: "/dashboard/webhooks",
+  },
   { type: "page", title: "Billing", description: "Plans & invoices", href: "/dashboard/billing" },
   { type: "page", title: "Support", description: "Contact support", href: "/dashboard/support" },
-  { type: "setting", title: "Account", description: "Account settings", href: "/dashboard/account" },
-  { type: "setting", title: "Connected Apps", description: "Connected applications", href: "/dashboard/settings" },
+  {
+    type: "setting",
+    title: "Account",
+    description: "Account settings",
+    href: "/dashboard/account",
+  },
+  {
+    type: "setting",
+    title: "Connected Apps",
+    description: "Connected applications",
+    href: "/dashboard/settings",
+  },
 ];
 
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -93,8 +123,7 @@ export function CommandPalette() {
     const q = query.toLowerCase();
     setResults(
       PAGES.filter(
-        (p) =>
-          p.title.toLowerCase().includes(q) || p.description?.toLowerCase().includes(q)
+        (p) => p.title.toLowerCase().includes(q) || p.description?.toLowerCase().includes(q)
       )
     );
     setSelectedIndex(0);

@@ -159,6 +159,7 @@ export default function GeneralSettingsPage() {
           {settings.logoUrl && (
             <div className="mt-3 flex items-center gap-3">
               <div className="rounded-lg bg-muted border border-border p-3 flex items-center justify-center">
+                {/* biome-ignore lint/performance/noImgElement: operator-supplied logo URL from any host; next/image needs known domains/dimensions */}
                 <img
                   src={settings.logoUrl}
                   alt="Logo preview"

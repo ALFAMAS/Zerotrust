@@ -1,3 +1,4 @@
+import { randomBytes } from "node:crypto";
 import { and, eq, gt } from "drizzle-orm";
 import { getDb } from "../db";
 import { otpsTable, usersTable } from "../db/schema";
@@ -32,7 +33,7 @@ export async function sendMagicLink(
     }
 
     const user = userRows[0];
-    const rawToken = crypto.randomBytes(32).toString("hex");
+    const rawToken = randomBytes(32).toString("hex");
     const tokenHash = hashToken(rawToken);
 
     await db.insert(otpsTable).values({
