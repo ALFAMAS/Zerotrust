@@ -23,7 +23,7 @@ router.use("*", authMiddleware);
 const searchSchema = z.object({
   q: z.string().min(1).max(200),
   orgId: z.string().uuid().optional(),
-  type: z.enum(["user", "org", "note", "ticket"]).optional(),
+  type: z.enum(["user", "org", "ticket"]).optional(),
   region: z.enum(["us", "eu", "apac"]).optional(),
   limit: z.coerce.number().int().min(1).max(50).optional(),
 });
@@ -82,7 +82,7 @@ router.get("/smart", async (c) => {
 
 const indexSchema = z.object({
   id: z.string().min(1),
-  type: z.enum(["user", "org", "note", "ticket"]),
+  type: z.enum(["user", "org", "ticket"]),
   orgId: z.string().uuid(),
   title: z.string().min(1).max(500),
   content: z.string().max(50_000).optional(),
@@ -113,7 +113,7 @@ router.post("/index", async (c) => {
 router.delete("/index/:type/:id", async (c) => {
   const type = c.req.param("type") as SearchableType;
   const id = c.req.param("id");
-  if (!["user", "org", "note", "ticket"].includes(type)) {
+  if (!["user", "org", "ticket"].includes(type)) {
     return c.json({ error: "INVALID_REQUEST" }, 400);
   }
   const ok = await deleteDocument(type, id);

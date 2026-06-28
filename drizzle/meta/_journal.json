@@ -141,6 +141,13 @@
       "when": 1782853200000,
       "tag": "0019_hot_path_indexes",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1782645461296,
+      "tag": "0020_drop_collaboration",
+      "breakpoints": true
     }
   ]
 }

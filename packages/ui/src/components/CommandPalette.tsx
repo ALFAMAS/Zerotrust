@@ -3,7 +3,6 @@
 import { ArrowRight, File, Search, Settings, User } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { api } from "@/lib/api";
 import { safeRelativeRedirect } from "@/lib/safeRedirect";
 import { cn } from "@/lib/utils";
 
@@ -14,6 +13,22 @@ interface SearchResult {
   href: string;
   icon?: string;
 }
+
+// Static dashboard destinations the command palette can jump to.
+const PAGES: SearchResult[] = [
+  { type: "page", title: "Dashboard", description: "Overview", href: "/dashboard" },
+  { type: "page", title: "Profile", description: "Your profile", href: "/dashboard/profile" },
+  { type: "page", title: "Security", description: "Passkeys, MFA, sessions", href: "/dashboard/security" },
+  { type: "page", title: "Sessions", description: "Active sessions", href: "/dashboard/sessions" },
+  { type: "page", title: "Notifications", description: "Notification center", href: "/dashboard/notifications" },
+  { type: "page", title: "Organizations", description: "Workspaces & teams", href: "/dashboard/organizations" },
+  { type: "page", title: "API Keys", description: "Manage API keys", href: "/dashboard/api-keys" },
+  { type: "page", title: "Webhooks", description: "Outgoing webhooks", href: "/dashboard/webhooks" },
+  { type: "page", title: "Billing", description: "Plans & invoices", href: "/dashboard/billing" },
+  { type: "page", title: "Support", description: "Contact support", href: "/dashboard/support" },
+  { type: "setting", title: "Account", description: "Account settings", href: "/dashboard/account" },
+  { type: "setting", title: "Connected Apps", description: "Connected applications", href: "/dashboard/settings" },
+];
 
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   LayoutDashboard: () => <ArrowRight className="h-4 w-4" />,
@@ -47,7 +62,6 @@ export function CommandPalette() {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
-  const [loading, setLoading] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -70,27 +84,20 @@ export function CommandPalette() {
     return () => document.removeEventListener("keydown", handleKey);
   }, [open]);
 
-  // Debounced search
+  // Client-side page navigator: filter the static page list by the query.
   useEffect(() => {
     if (query.length < 2) {
       setResults([]);
       return;
     }
-    const timer = setTimeout(async () => {
-      setLoading(true);
-      try {
-        const data = await api.get<{ results: SearchResult[] }>(
-          `/collab/search?q=${encodeURIComponent(query)}`
-        );
-        setResults(data.results || []);
-      } catch {
-        setResults([]);
-      } finally {
-        setLoading(false);
-        setSelectedIndex(0);
-      }
-    }, 200);
-    return () => clearTimeout(timer);
+    const q = query.toLowerCase();
+    setResults(
+      PAGES.filter(
+        (p) =>
+          p.title.toLowerCase().includes(q) || p.description?.toLowerCase().includes(q)
+      )
+    );
+    setSelectedIndex(0);
   }, [query]);
 
   const navigateTo = useCallback(
@@ -165,17 +172,13 @@ export function CommandPalette() {
 
         {/* Results */}
         <div className="max-h-80 overflow-y-auto p-2">
-          {loading && (
-            <div className="px-3 py-6 text-center text-sm text-muted-foreground">Searching…</div>
-          )}
-
-          {!loading && query.length >= 2 && results.length === 0 && (
+          {query.length >= 2 && results.length === 0 && (
             <div className="px-3 py-6 text-center text-sm text-muted-foreground">
               No results found
             </div>
           )}
 
-          {!loading && results.length > 0 && (
+          {results.length > 0 && (
             <div role="listbox">
               {results.map((result, i) => (
                 <button

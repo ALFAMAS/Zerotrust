@@ -41,7 +41,6 @@ import apiKeyRoutes from "./routes/api-keys.routes";
 import authRoutes from "./routes/auth.routes";
 import billingRoutes from "./routes/billing.routes";
 import billingWebhookRoutes from "./routes/billing.webhooks";
-import collaborationRoutes from "./routes/collaboration.routes";
 import complianceRoutes from "./routes/compliance.routes";
 import emailEventRoutes from "./routes/email-events.routes";
 import feedbackRoutes from "./routes/feedback.routes";
@@ -201,10 +200,6 @@ export async function createServer() {
   app.route("/billing", billingWebhookRoutes);
   // Multi-currency pricing, PPP, location tax, EU VAT + tax-exemption endpoints.
   app.route("/billing", globalizationRoutes);
-
-  // ─── Collaboration routes ─────────────────────────────────────────────────
-  // Shared notes, activity feed, @mentions, presence, and global search.
-  app.route("/collab", collaborationRoutes);
 
   // ─── Region / tenant routes ────────────────────────────────────────────────
   // Custom domain resolution, per-org branding, data residency.
