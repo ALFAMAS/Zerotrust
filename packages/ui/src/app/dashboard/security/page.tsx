@@ -186,6 +186,7 @@ export default function SecurityPage() {
               <p className="text-sm text-muted-foreground">
                 Scan this QR code with your authenticator app:
               </p>
+              {/* biome-ignore lint/performance/noImgElement: TOTP QR is a runtime data: URL, not optimizable by next/image */}
               <img
                 src={totpSetup.qrCodeUrl}
                 alt="TOTP QR Code"

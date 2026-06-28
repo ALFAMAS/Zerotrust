@@ -18,6 +18,20 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+// Hoisted to module top level (vitest hoists vi.mock regardless; keeping it here
+// reflects the real execution order and silences the nested-mock warning).
+vi.mock("node:fs/promises", () => ({
+  mkdir: vi.fn().mockResolvedValue(undefined),
+  readdir: vi.fn().mockResolvedValue([]),
+  stat: vi.fn().mockRejectedValue(Object.assign(new Error("ENOENT"), { code: "ENOENT" })),
+  unlink: vi.fn().mockResolvedValue(undefined),
+  writeFile: vi.fn().mockResolvedValue(undefined),
+}));
+
+// ESM does not allow vi.spyOn on a module's named export (`spawn`), so replace
+// the module with a controllable mock fn instead.
+vi.mock("node:child_process", () => ({ spawn: vi.fn() }));
+
 const REAL_ENV = { ...process.env };
 
 beforeEach(() => {
@@ -38,7 +52,8 @@ const childProcess = await import("node:child_process");
 
 describe("dbBackup — CWE-78 run() guard", () => {
   it("forwards argv as a literal array with shell:false", async () => {
-    const spawnSpy = vi.spyOn(childProcess, "spawn").mockReturnValue({
+    const spawnSpy = vi.mocked(childProcess.spawn);
+    spawnSpy.mockReturnValue({
       on: (event: string, cb: (code: number) => void) => {
         if (event === "close") setImmediate(() => cb(0));
       },
@@ -48,14 +63,6 @@ describe("dbBackup — CWE-78 run() guard", () => {
     // Force a successful backup to exercise run("pg_dump", ...)
     process.env.DATABASE_URL = "postgres://user:pass@host:5432/db";
     process.env.BACKUP_DIR = "./backups-test";
-
-    vi.mock("node:fs/promises", () => ({
-      mkdir: vi.fn().mockResolvedValue(undefined),
-      readdir: vi.fn().mockResolvedValue([]),
-      stat: vi.fn().mockRejectedValue(Object.assign(new Error("ENOENT"), { code: "ENOENT" })),
-      unlink: vi.fn().mockResolvedValue(undefined),
-      writeFile: vi.fn().mockResolvedValue(undefined),
-    }));
 
     const { runBackup } = await import("../services/dbBackup.service");
     const res = await runBackup();
@@ -76,21 +83,11 @@ describe("dbBackup — CWE-78 run() guard", () => {
     }
   });
 
-  it("rejects a BACKUP_DIR that contains shell metacharacters", () => {
-    process.env.BACKUP_DIR = "/tmp/innocent;rm -rf /";
-    // Import lazily after env is set.
-    return import("../services/dbBackup.service?metachars").then(
-      () => {
-        throw new Error("expected import to reject metachar BACKUP_DIR");
-      },
-      (err) => {
-        expect(String(err.message ?? err)).toMatch(/metachar|reject|invalid/i);
-      }
+  it("rejects a BACKUP_DIR that contains shell metacharacters", async () => {
+    const { assertSafeBackupDir } = await import("../services/dbBackup.service");
+    expect(() => assertSafeBackupDir("/tmp/innocent;rm -rf /")).toThrowError(
+      /metachar|reject|invalid/i
     );
-  }).catch?.(() => {
-    // The .then-fail pattern above is exercised; this catch exists only so
-    // vitest doesn't flag an unhandled rejection if the import synchronously
-    // throws (which is what we actually want).
   });
 
   it("rejects a BACKUP_DIR that contains path-traversal segments", async () => {
@@ -113,7 +110,8 @@ describe("dbBackup — DATABASE_URL credential safety (CWE-532)", () => {
     process.env.DATABASE_URL = "postgres://user:supersecret-pw@host:5432/db";
     process.env.BACKUP_DIR = "./backups-test";
 
-    const spawnSpy = vi.spyOn(childProcess, "spawn").mockReturnValue({
+    const spawnSpy = vi.mocked(childProcess.spawn);
+    spawnSpy.mockReturnValue({
       on: (event: string, cb: (code: number) => void) => {
         if (event === "close") setImmediate(() => cb(1)); // non-zero exit
       },

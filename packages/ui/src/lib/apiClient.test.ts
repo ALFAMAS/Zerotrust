@@ -28,12 +28,14 @@ import {
 } from "./apiClient";
 
 function jsonResponse(status: number, body: unknown): Response {
+  const text = JSON.stringify(body);
   return {
     ok: status >= 200 && status < 300,
     status,
     statusText: `HTTP ${status}`,
+    text: async () => text,
     json: async () => body,
-    blob: async () => new Blob([JSON.stringify(body)]),
+    blob: async () => new Blob([text]),
   } as unknown as Response;
 }
 

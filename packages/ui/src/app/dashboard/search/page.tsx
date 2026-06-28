@@ -175,7 +175,6 @@ function renderHighlight(raw: string): React.ReactNode[] {
   return raw.split(/(<em>.*?<\/em>)/g).map((part, i) => {
     const match = /^<em>([\s\S]*)<\/em>$/.exec(part);
     return match ? (
-      // biome-ignore lint/suspicious/noArrayIndexKey: static split of one string, never reordered
       <em key={i} className="font-medium text-foreground not-italic">
         {match[1]}
       </em>

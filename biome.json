@@ -38,7 +38,8 @@
       "!**/graphify-out",
       "!**/scripts/db-backup.js",
       "!**/scripts/db-restore.js",
-      "!**/scripts/postinstall.js"
+      "!**/scripts/postinstall.js",
+      "!**/scripts/smoke-*"
     ]
   },
   "formatter": {

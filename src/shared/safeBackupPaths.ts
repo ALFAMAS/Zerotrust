@@ -139,7 +139,7 @@ export function safeSpawnOptions(extra?: {
   stdio: ["ignore", "ignore", "pipe"] | ["ignore", "inherit", "inherit"];
   shell: false;
 } {
-  const defaultStdio = ["ignore", "ignore", "pipe"] as const;
+  const defaultStdio: ["ignore", "ignore", "pipe"] = ["ignore", "ignore", "pipe"];
   return {
     env: { ...process.env, ...(extra?.env ?? {}) },
     stdio: extra?.stdio ?? defaultStdio,

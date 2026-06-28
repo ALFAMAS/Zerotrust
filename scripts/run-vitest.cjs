@@ -26,10 +26,7 @@ Module.globalPaths.unshift(...searchRoots);
 
 // Now load vitest. Its own node_modules contains vitest's transitive deps
 // including @vitest/utils, but the require resolver needs them visible too.
-const vitestEntry = path.join(
-  BUN_STORE,
-  "vitest/dist/node/chunks/bin.js"
-);
+const vitestEntry = path.join(BUN_STORE, "vitest/dist/node/chunks/bin.js");
 if (!fs.existsSync(vitestEntry)) {
   // Fall back to direct CLI entry.
   const cli = path.join(BUN_STORE, "vitest/dist/cli.js");

@@ -99,12 +99,7 @@ async function dispatch<T>(
     options.timeoutMs ?? FETCH_TIMEOUT_MS
   );
 
-  if (
-    res.status === 401 &&
-    !options.skipAuth &&
-    !isRetry &&
-    getRefreshToken()
-  ) {
+  if (res.status === 401 && !options.skipAuth && !isRetry && getRefreshToken()) {
     const refreshed = await tryRefresh();
     if (refreshed) {
       return dispatch<T>(method, path, init, options, true);
@@ -138,12 +133,7 @@ async function dispatch<T>(
 
 /** GET a JSON resource. */
 export function apiGet<T>(path: string, options: ApiClientOptions = {}): Promise<T> {
-  return dispatch<T>(
-    "GET",
-    path,
-    {},
-    options
-  );
+  return dispatch<T>("GET", path, {}, options);
 }
 
 /** POST a JSON body. */
@@ -172,12 +162,7 @@ export function apiPostFormData<T>(
   formData: FormData,
   options: ApiClientOptions = {}
 ): Promise<T> {
-  return dispatch<T>(
-    "POST",
-    path,
-    { body: formData },
-    options
-  );
+  return dispatch<T>("POST", path, { body: formData }, options);
 }
 
 /**
@@ -194,10 +179,7 @@ export function apiPostRaw<T>(
 }
 
 /** GET a binary/blob response (CSV / JSON exports). Returns the raw Blob. */
-export async function apiGetBlob(
-  path: string,
-  options: ApiClientOptions = {}
-): Promise<Blob> {
+export async function apiGetBlob(path: string, options: ApiClientOptions = {}): Promise<Blob> {
   const url = `${BASE_URL}${path}`;
   const headers = {
     ...buildAuthHeaders(Boolean(options.skipAuth)),
@@ -218,16 +200,8 @@ export async function apiGetBlob(
 }
 
 /** DELETE a resource. */
-export function apiDelete<T = unknown>(
-  path: string,
-  options: ApiClientOptions = {}
-): Promise<T> {
-  return dispatch<T>(
-    "DELETE",
-    path,
-    {},
-    options
-  );
+export function apiDelete<T = unknown>(path: string, options: ApiClientOptions = {}): Promise<T> {
+  return dispatch<T>("DELETE", path, {}, options);
 }
 
 export { BASE_URL as API_BASE_URL };

@@ -95,8 +95,10 @@ export function fetchFixedUrl(input: RequestInfo | URL, init?: SafeFetchInit): P
  * Fetch a tenant/admin/user-influenced public URL. Applies the canonical CWE-918
  * SSRF guard before network I/O and also refuses redirects + enforces timeout.
  */
-export function fetchPublicUrl(input: string | URL, init?: SafeFetchInit): Promise<Response> {
+export async function fetchPublicUrl(input: string | URL, init?: SafeFetchInit): Promise<Response> {
   const url = input instanceof URL ? input.toString() : input;
+  // `async` so a guard failure surfaces as a promise rejection (callers may use
+  // `.catch()`), never a synchronous throw from a Promise-returning function.
   assertSafeFetchUrl(url);
   return fetchFixedUrl(url, init);
 }

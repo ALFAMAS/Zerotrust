@@ -12,7 +12,6 @@ import {
   Monitor,
   ScrollText,
   Settings,
-  ShieldAlert,
   ShieldCheck,
   ShieldQuestion,
   Users,
