@@ -283,21 +283,6 @@ export const oauthExchangeCodesTable = pgTable("oauth_exchange_codes", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
 });
 
-export const workloadCredentialsTable = pgTable("workload_credentials", {
-  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
-  workloadId: text("workload_id").notNull(),
-  workloadSecret: text("workload_secret").notNull(),
-  createdBy: uuid("created_by"),
-  scopes: text("scopes").array().notNull().default(sql`ARRAY[]::text[]`),
-  ttl: integer("ttl"),
-  autoRotate: boolean("auto_rotate").notNull().default(false),
-  lastRotatedAt: timestamp("last_rotated_at", { withTimezone: true }),
-  expiresAt: timestamp("expires_at", { withTimezone: true }),
-  isRevoked: boolean("is_revoked").notNull().default(false),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().default(sql`now()`),
-});
-
 // Cross-tenant JIT (just-in-time) privilege-escalation requests. Durable so
 // approvals + grants survive restarts and provide an audit trail.
 export const crossTenantJITRequestsTable = pgTable("cross_tenant_jit_requests", {

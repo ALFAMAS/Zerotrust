@@ -34,7 +34,6 @@ import webhookManagementRoutes from "../webhooks/routes";
 import accessReviewRoutes from "./routes/access-review.routes";
 import adminRoutes from "./routes/admin.routes";
 import adminToolsRoutes from "./routes/admin-tools.routes";
-import agenticRoutes from "./routes/agentic.routes";
 import anomalyRoutes from "./routes/anomaly.routes";
 import apiKeyRoutes from "./routes/api-keys.routes";
 import authRoutes from "./routes/auth.routes";
@@ -46,7 +45,6 @@ import feedbackRoutes from "./routes/feedback.routes";
 import gdprRoutes from "./routes/gdpr.routes";
 import globalizationRoutes from "./routes/globalization.routes";
 import magicLinkRoutes from "./routes/magic-link.routes";
-import mcpRoutes from "./routes/mcp.routes";
 import mfaRoutes from "./routes/mfa.routes";
 import notificationRoutes from "./routes/notification.routes";
 import orgRoutes from "./routes/org.routes";
@@ -60,7 +58,6 @@ import tenantRoutes from "./routes/tenant.routes";
 import unsubscribeRoutes from "./routes/unsubscribe.routes";
 import verificationRoutes from "./routes/verification.routes";
 import walletRoutes from "./routes/wallet.routes";
-import workloadRoutes from "./routes/workload.routes";
 
 dotenv.config();
 
@@ -141,9 +138,6 @@ export async function createServer() {
   app.route("/admin", adminToolsRoutes);
   app.route("/admin/access-reviews", accessReviewRoutes);
 
-  // ─── Workload routes ──────────────────────────────────────────────────────
-  app.route("/workload", workloadRoutes);
-
   // ─── Verification routes ──────────────────────────────────────────────────
   app.route("/auth/verify", verificationRoutes);
 
@@ -211,11 +205,6 @@ export async function createServer() {
   // ─── Compliance ────────────────────────────────────────────────────────────
   // SOC 2 readiness + controls, risk assessment.
   app.route("/compliance", complianceRoutes);
-
-  // ─── Agentic And AI-Native Auth ────────────────────────────────────────────
-  // MCP authorization server, delegation, human-in-the-loop approvals.
-  app.route("/mcp", mcpRoutes);
-  app.route("/agentic", agenticRoutes);
 
   // ─── User-facing webhook management (developer feature) ──────────────────
   app.route("/webhooks", webhookManagementRoutes);

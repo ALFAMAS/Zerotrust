@@ -162,6 +162,13 @@
       "when": 1782646147930,
       "tag": "0022_drop_growth_tooling",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1782646441178,
+      "tag": "0023_drop_workload_credentials",
+      "breakpoints": true
     }
   ]
 }

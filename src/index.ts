@@ -48,7 +48,6 @@ export {
   saasSettingsTable,
   sessionsTable,
   usersTable,
-  workloadCredentialsTable,
 } from "./db/schema";
 export type {
   FederatedProvider,
@@ -163,9 +162,6 @@ export {
   requireReverification,
 } from "./middleware/continuousVerification";
 export { geoFencingMiddleware } from "./middleware/geoFencing";
-export type { mTLSOptions, WorkloadIdentity } from "./middleware/mtls";
-// ─── mTLS Middleware ──────────────────────────────────────────────────────────
-export { mtlsMiddleware } from "./middleware/mtls";
 export {
   clearPoPNonces,
   requireProofOfPossession,
@@ -284,7 +280,6 @@ export type {
   Session,
   TokenPayload,
   User,
-  WorkloadCredential,
   zerotrustConfig,
 } from "./shared/types";
 export {
@@ -312,10 +307,6 @@ export type {
   WebhookEndpoint,
   WebhookEventType,
 } from "./webhooks/types";
-export {
-  createWorkloadCredential,
-  validateWorkloadCredential,
-} from "./workload";
 
 export async function initializezerotrust() {
   const { getConfig } = await import("./config/index.js");
