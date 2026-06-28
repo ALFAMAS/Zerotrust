@@ -13,6 +13,35 @@ needs surfacing
 
 ---
 
+## Removed — maintenance slim-down (2026-06-28)
+
+To reduce the template's maintenance surface, the following heavy/low-use
+features were **removed from the codebase**. Dated ledger sections below
+predate this change and still describe them as shipped — treat this section as
+authoritative for current state. See
+[`docs/MAINTENANCE_FEATURE_AUDIT.md`](./docs/MAINTENANCE_FEATURE_AUDIT.md) for
+the rationale and the full candidate list.
+
+- ❌ **Collaboration** — shared notes, activity feed, @mentions, presence
+  (`/collab/*`, 5 tables). The command palette is now a client-side page navigator.
+- ❌ **Decentralized identity** — `did:key` / `did:web` resolver, proof-of-control,
+  login-via-DID (`/auth/did`, `users.did` column).
+- ❌ **Post-quantum KEM** — ML-KEM module (was barrel-only, never wired in);
+  dropped the `@noble/post-quantum` dependency.
+- ❌ **Growth tooling** — experiments / A-B, feature flags, usage nudges, and
+  product analytics (funnel/feature/search). Metered usage billing is kept.
+- ❌ **AI-native auth** — workload/agent identity, RFC 8693 agentic delegation,
+  MCP OAuth authorization server, human-in-the-loop agent approvals, mTLS.
+- ❌ **Enterprise federation** — OIDC provider, SAML 2.0, SCIM 2.0, LDAP/AD sync,
+  RFC 8693 identity federation, per-org/tenant SSO config; dropped `ldapts` and
+  the unused `samlify` dependency.
+
+Still present and unchanged: OAuth social login, magic links, passkeys/WebAuthn,
+TOTP/Email/SMS OTP, organizations & teams, cross-tenant JIT, billing, wallet/
+loyalty, globalization, search, compliance, audit, and ops tooling.
+
+---
+
 ## Enterprise Execution Ledger
 
 - ✅ CWE security hardening sweep — audited CWE-918, CWE-1427, CWE-532, CWE-22, CWE-601, CWE-1333, CWE-327, and CWE-78 patterns; hardened every server-side/script `fetch` with timeout + no-redirect handling, added shared SSRF guards for tenant/admin-controlled notification webhooks, webhook delivery, SSF receivers, and FIDO MDS3 embedded URLs; moved Facebook OAuth tokens/secrets out of URLs; fixed presigned upload object keys to derive extensions from validated content type; and updated `CLAUDE.md`, `AGENTS.md`, and the Hermes `secure-coding` skill so future agents reuse the canonical patterns.

@@ -4,7 +4,15 @@
 **Goal:** Reduce the maintenance surface of the zerotrust SaaS template by
 identifying features that are *heavy* (lots of code, schema, deps, ongoing
 upkeep) but *peripheral* to the template's core promise — authentication &
-identity. This is an analysis/recommendation document; nothing is deleted here.
+identity.
+
+> **Status (2026-06-28):** Candidates **#2, #3, #5, #7, #9, and #10 have been
+> removed** from the codebase (one commit each; see git history and
+> [`tdone.md`](../tdone.md) → "Removed — maintenance slim-down"). The remaining
+> candidates — **#0 (unused deps), #1 (wallet/loyalty), #4 (globalization),
+> #6 (blog/changelog), and #8 (SMS/WhatsApp/Telegram OTP)** — are left in place
+> for review and can be actioned later. Footprint/coupling notes below are the
+> original analysis and are retained for that review.
 
 ## How candidates were scored
 
