@@ -52,8 +52,6 @@ const navItems: NavItem[] = [
   { href: "/dashboard/jit", label: "Cross-tenant", icon: ShieldQuestion },
   { href: "/dashboard/settings", label: "Connected Apps", icon: Plug },
   { href: "/dashboard/support", label: "Support", icon: LifeBuoy },
-  { href: "/dashboard/notes", label: "Shared Notes", icon: FileTextIcon },
-  { href: "/dashboard/activity", label: "Activity", icon: Activity },
   { href: "/dashboard/account", label: "Account", icon: UserCog },
 ];
 

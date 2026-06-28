@@ -6,11 +6,8 @@ import { compress } from "hono/compress";
 import { cors } from "hono/cors";
 import { secureHeaders } from "hono/secure-headers";
 import { initializezerotrust } from "..";
-import didRoutes from "../did/routes";
-import federationRoutes from "../federation/routes";
 import { initSentry } from "../instrument";
 import jitRoutes from "../jit/routes";
-import ldapRoutes from "../ldap/routes";
 import { getLogger } from "../logger";
 import { metricsAuthMiddleware, metricsMiddleware, metricsRoute } from "../metrics";
 import { API_VERSIONS, apiVersioning, CURRENT_API_VERSION } from "../middleware/apiVersioning";
@@ -20,9 +17,6 @@ import { geoFencingMiddleware } from "../middleware/geoFencing";
 import { rateLimit } from "../middleware/rateLimiting";
 import { temporalAccessMiddleware } from "../middleware/temporalAccess";
 import notificationChannelRoutes from "../notifications/routes";
-import oidcRoutes from "../oidc/routes";
-import samlRoutes from "../saml/routes";
-import scimRoutes from "../scim/routes";
 import { alertingMiddleware } from "../services/alerting.service";
 import { startBillingLifecycleScheduler } from "../services/billingLifecycle.service";
 import { startRetentionScheduler } from "../services/dataRetention";
@@ -35,20 +29,17 @@ import webhookManagementRoutes from "../webhooks/routes";
 import accessReviewRoutes from "./routes/access-review.routes";
 import adminRoutes from "./routes/admin.routes";
 import adminToolsRoutes from "./routes/admin-tools.routes";
-import agenticRoutes from "./routes/agentic.routes";
 import anomalyRoutes from "./routes/anomaly.routes";
 import apiKeyRoutes from "./routes/api-keys.routes";
 import authRoutes from "./routes/auth.routes";
 import billingRoutes from "./routes/billing.routes";
 import billingWebhookRoutes from "./routes/billing.webhooks";
-import collaborationRoutes from "./routes/collaboration.routes";
 import complianceRoutes from "./routes/compliance.routes";
 import emailEventRoutes from "./routes/email-events.routes";
 import feedbackRoutes from "./routes/feedback.routes";
 import gdprRoutes from "./routes/gdpr.routes";
 import globalizationRoutes from "./routes/globalization.routes";
 import magicLinkRoutes from "./routes/magic-link.routes";
-import mcpRoutes from "./routes/mcp.routes";
 import mfaRoutes from "./routes/mfa.routes";
 import notificationRoutes from "./routes/notification.routes";
 import orgRoutes from "./routes/org.routes";
@@ -62,7 +53,6 @@ import tenantRoutes from "./routes/tenant.routes";
 import unsubscribeRoutes from "./routes/unsubscribe.routes";
 import verificationRoutes from "./routes/verification.routes";
 import walletRoutes from "./routes/wallet.routes";
-import workloadRoutes from "./routes/workload.routes";
 
 dotenv.config();
 
@@ -143,32 +133,12 @@ export async function createServer() {
   app.route("/admin", adminToolsRoutes);
   app.route("/admin/access-reviews", accessReviewRoutes);
 
-  // ─── Workload routes ──────────────────────────────────────────────────────
-  app.route("/workload", workloadRoutes);
-
   // ─── Verification routes ──────────────────────────────────────────────────
   app.route("/auth/verify", verificationRoutes);
-
-  // ─── Federation routes ────────────────────────────────────────────────────
-  app.route("/federation", federationRoutes);
-
-  // ─── Decentralized Identifier (DID) routes ────────────────────────────────
-  // did:key + did:web resolver, challenge/verify proof-of-control.
-  app.route("/auth/did", didRoutes);
 
   // ─── Cross-tenant JIT access routes ───────────────────────────────────────
   // Request + admin approval for temporary elevated access across tenants.
   app.route("/jit/cross-tenant", jitRoutes);
-
-  // ─── Enterprise SSO & provisioning ────────────────────────────────────────
-  // SCIM 2.0 user provisioning (Azure AD / Okta), routes are /Users, /Groups…
-  app.route("/scim/v2", scimRoutes);
-  // LDAP directory sync admin endpoints (/ldap/test, /ldap/sync…)
-  app.route("/ldap", ldapRoutes);
-  // OIDC provider: paths are self-prefixed (/.well-known/…, /oidc/…) → mount at root.
-  app.route("/", oidcRoutes);
-  // SAML SP: paths are self-prefixed (/saml/metadata, /saml/acs…) → mount at root.
-  app.route("/", samlRoutes);
   // Tenant management (CRUD + per-tenant SSO config + plans).
   app.route("/admin/tenants", tenantRoutes);
 
@@ -202,10 +172,6 @@ export async function createServer() {
   // Multi-currency pricing, PPP, location tax, EU VAT + tax-exemption endpoints.
   app.route("/billing", globalizationRoutes);
 
-  // ─── Collaboration routes ─────────────────────────────────────────────────
-  // Shared notes, activity feed, @mentions, presence, and global search.
-  app.route("/collab", collaborationRoutes);
-
   // ─── Region / tenant routes ────────────────────────────────────────────────
   // Custom domain resolution, per-org branding, data residency.
   app.route("/regions", regionRoutes);
@@ -221,11 +187,6 @@ export async function createServer() {
   // ─── Compliance ────────────────────────────────────────────────────────────
   // SOC 2 readiness + controls, risk assessment.
   app.route("/compliance", complianceRoutes);
-
-  // ─── Agentic And AI-Native Auth ────────────────────────────────────────────
-  // MCP authorization server, delegation, human-in-the-loop approvals.
-  app.route("/mcp", mcpRoutes);
-  app.route("/agentic", agenticRoutes);
 
   // ─── User-facing webhook management (developer feature) ──────────────────
   app.route("/webhooks", webhookManagementRoutes);

@@ -330,23 +330,6 @@ export interface OTP {
   attempts: number;
 }
 
-// ─── Workload Identity Types ──────────────────────────────────────────────
-
-export interface WorkloadCredential {
-  id?: string;
-  workloadId: string;
-  workloadSecret: string;
-  createdBy?: string | null;
-  scopes: string[];
-  ttl?: number | null;
-  autoRotate: boolean;
-  lastRotatedAt?: Date | null;
-  expiresAt?: Date | null;
-  isRevoked: boolean;
-  createdAt?: Date;
-  updatedAt?: Date;
-}
-
 // ─── OAuth & MFA Response Types ────────────────────────────────────────────
 
 export interface OAuthAuthorizationRequest {

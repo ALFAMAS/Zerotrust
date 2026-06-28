@@ -5,7 +5,7 @@
 **Production-grade authentication & identity platform — batteries included.**
 
 A full-stack auth foundation you can clone, brand, and ship: a Hono + TypeScript API
-and a Next.js dashboard/admin app, with passkeys, OAuth, SSO, MFA, RBAC/ABAC,
+and a Next.js dashboard/admin app, with passkeys, OAuth, MFA, RBAC/ABAC,
 organizations, billing, and an audit trail already wired together.
 
 [![CI](https://github.com/ALFAMAS/zerotrust/actions/workflows/ci.yml/badge.svg)](https://github.com/ALFAMAS/zerotrust/actions/workflows/ci.yml)
@@ -43,15 +43,15 @@ organizations, billing, and an audit trail already wired together.
 
 Authentication is the part of every SaaS that is high-stakes, time-consuming, and
 easy to get subtly wrong. zerotrust gives you a complete, opinionated implementation
-of the hard parts — token issuance, session lifecycle, MFA, SSO, RBAC, abuse
+of the hard parts — token issuance, session lifecycle, MFA, RBAC, abuse
 defense, and an admin surface — so you can spend your time on product instead of
 rebuilding login for the hundredth time.
 
 - **Secure by default** — PASETO v4 tokens (no JWT footguns), bcrypt password
   hashing, client-side field encryption (CSFLE), HaveIBeenPwned breach checks, and
   per-IP credential-stuffing defense are on out of the box.
-- **Enterprise-ready** — OIDC provider, SAML 2.0, SCIM 2.0, LDAP sync, and
-  per-org security policies are first-class, not afterthoughts.
+- **Team-ready** — organizations, teams, custom roles with fine-grained
+  permissions, and per-org security policies are first-class, not afterthoughts.
 - **Operable** — Prometheus metrics, OpenTelemetry tracing, a public status page,
   structured logs, and Slack/Teams/PagerDuty alerting ship with the platform.
 
@@ -72,16 +72,10 @@ rebuilding login for the hundredth time.
 - PASETO v4 access tokens + rotating, hashed refresh tokens
 - Session management — list, revoke, device fingerprinting, concurrent-session caps
 
-### Enterprise & federation
+### Organizations & access
 
-- OIDC provider + SAML 2.0 SSO
-- SCIM 2.0 user provisioning · LDAP / Active Directory sync
-- Identity federation (RFC 8693 token exchange) with an admin provider registry
-- Workload / agent identity — scoped client-credential tokens
-- Decentralized identity — `did:key` / `did:web` resolver + proof-of-control
 - Organizations & teams — workspaces, invites, custom roles with fine-grained permissions
 - Cross-tenant JIT access — request + admin-approval inbox, auto-expiring
-- MCP OAuth authorization server plus agentic delegation with human approval gates
 
 ### Access control & abuse defense
 
@@ -102,13 +96,13 @@ rebuilding login for the hundredth time.
 ### Frontend (Next.js)
 
 - Landing page, user dashboard, and guarded admin panel in one app
-- Admin consoles — users, revenue, sessions, auth settings, federation, JIT,
-  agent approvals (human-in-the-loop), and SOC 2 / risk compliance
+- Admin consoles — users, revenue, sessions, auth settings, JIT, and
+  SOC 2 / risk compliance
 - PWA — installable, offline app-shell, web push (VAPID)
 - i18n (next-intl, EN/ES/FR/AR with RTL support), locale-aware `Intl.*` formatting, dark mode
 - GDPR — cookie consent, data export, 30-day soft-delete; privacy/terms pages
 - Notification center (SSE real-time + email fallback), feedback widget, product tour
-- Command palette, shared notes, team activity feed, mentions, and presence
+- Command palette (client-side page navigator)
 
 ### Compliance & operations
 
@@ -131,8 +125,8 @@ rebuilding login for the hundredth time.
 | Database      | PostgreSQL via [Drizzle ORM](https://orm.drizzle.team) (works with Neon)                    |
 | Cache / queue | Redis (ioredis) · [BullMQ](https://docs.bullmq.io) email queue                              |
 | Frontend      | [Next.js](https://nextjs.org) 16 (App Router) · Tailwind CSS · shadcn/ui                    |
-| Crypto        | PASETO v4, `@noble/*`, ML-KEM (post-quantum KEM), CSFLE field encryption                    |
-| Auth libs     | `@simplewebauthn/server` (WebAuthn) · `samlify` (SAML) · `otpauth` (TOTP)                   |
+| Crypto        | PASETO v4, `@noble/*`, CSFLE field encryption                                                |
+| Auth libs     | `@simplewebauthn/server` (WebAuthn) · `otpauth` (TOTP)                                       |
 | Observability | Prometheus (`prom-client`) · OpenTelemetry · Sentry                                         |
 | SDK           | Generated TypeScript client in `packages/client` from `src/api/openapi.json`                |
 | Tooling       | [Biome](https://biomejs.dev) (lint+format) · Vitest · Playwright · Husky · semantic-release |
@@ -417,7 +411,7 @@ cd packages/ui && npm install && npm run build && pm2 restart zerotrust-ui
 ## API overview
 
 A condensed map of the most-used endpoints (auth-gated routes noted). The API mounts
-31 route modules in `src/api/server.ts`; browse Swagger at `/docs` (dev) for the full
+its route modules in `src/api/server.ts`; browse Swagger at `/docs` (dev) for the full
 surface, or the generated [API reference](./docs/api-reference.md)
 (`bun run docs:api`) for a static, browsable list.
 
@@ -439,22 +433,10 @@ GET/POST/DELETE /api-keys                          (auth)
 POST   /billing/checkout|portal · POST /billing/webhook (Stripe)
 GET    /billing/pricing · POST /billing/tax/quote
 
-# Enterprise / federation
-/scim/v2/*   (SCIM)   ·   /ldap/*   ·   /federation/*
-OIDC discovery + SAML endpoints mounted at /
-GET /jwks · /.well-known/*
-
-# Collaboration, search, wallet, compliance
-GET    /collab/search · /collab/activity · /collab/presence/:orgId
-GET/POST/PUT/DELETE /collab/notes[/:id]
+# Search, wallet, compliance
 GET    /search · /search/smart · /search/provider
 GET    /wallet · /wallet/tier · /wallet/referrals/dashboard
 GET    /compliance/soc2/readiness · /compliance/risk-assessment/:year
-
-# AI-native / agentic auth
-GET    /.well-known/oauth-authorization-server
-GET    /mcp/authorize · POST /mcp/token
-POST   /agentic/auth/delegation/exchange
 
 # Ops
 GET    /status        (public status page data)
@@ -474,9 +456,9 @@ GET    /health · /healthz · /metrics (Prometheus)
 │   ├── db/                         # Drizzle schema + connection (PostgreSQL)
 │   ├── services/                   # token, email, MFA, OAuth, objectStorage, dbBackup…
 │   ├── middleware/                 # auth, rate limiting, CSRF, requirePlan, apiKeyAuth…
-│   ├── oidc/ · saml/ · scim/ · ldap/ · federation/ · did/ · jit/   # enterprise modules
-│   ├── audit/ · metrics/ · webhooks/ · workload/                   # ops + platform modules
-│   ├── crypto/                     # PASETO, CSFLE, hardware key store, post-quantum KEM
+│   ├── jit/                        # cross-tenant just-in-time access
+│   ├── audit/ · metrics/ · webhooks/                               # ops + platform modules
+│   ├── crypto/                     # PASETO, CSFLE, hardware key store
 │   └── __tests__/                  # Vitest unit + integration tests
 ├── packages/
 │   ├── client/                     # generated dependency-free TypeScript SDK

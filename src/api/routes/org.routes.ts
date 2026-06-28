@@ -12,12 +12,6 @@ import {
 } from "../../db/schema";
 import { getLogger } from "../../logger";
 import { authMiddleware } from "../../middleware/auth";
-import {
-  createOrgScimToken,
-  listOrgScimTokens,
-  revokeOrgScimToken,
-  rotateOrgScimToken,
-} from "../../services/orgScimToken.service";
 import type { HonoEnv } from "../../shared/types";
 
 const router = new Hono<HonoEnv>();
@@ -48,27 +42,6 @@ const securityPolicySchema = z.object({
   maxConcurrentSessions: z.number().int().min(0).default(0),
   allowedCountries: z.array(z.string().length(2)).default([]),
 });
-const scimTokenSchema = z.object({ name: z.string().trim().min(1).max(100) });
-const ssoConfigSchema = z.object({
-  saml: z
-    .object({
-      enabled: z.boolean(),
-      idpEntityId: z.string().optional(),
-      idpSsoUrl: z.string().optional(),
-      idpCert: z.string().optional(),
-    })
-    .optional(),
-  oidc: z
-    .object({
-      enabled: z.boolean(),
-      issuerUrl: z.string().optional(),
-      clientId: z.string().optional(),
-      clientSecret: z.string().optional(),
-      redirectUris: z.array(z.string()).optional(),
-    })
-    .optional(),
-});
-
 function slugify(value: string): string {
   const slug = value
     .toLowerCase()
@@ -336,56 +309,6 @@ router.delete("/:orgId/invites/:inviteId", async (c) => {
   return c.json({ ok: true });
 });
 
-router.get("/:orgId/sso", async (c) => {
-  const user = c.get("user");
-  const orgId = c.req.param("orgId");
-  if (!(await requireAdmin(orgId, user.id))) return c.json({ error: "FORBIDDEN" }, 403);
-  const [org] = await getDb()
-    .select({ ssoConfig: organizationsTable.ssoConfig })
-    .from(organizationsTable)
-    .where(eq(organizationsTable.id, orgId))
-    .limit(1);
-  return c.json({ sso: org?.ssoConfig ?? {} });
-});
-
-router.put("/:orgId/sso", async (c) => {
-  const user = c.get("user");
-  const orgId = c.req.param("orgId");
-  if (!(await requireAdmin(orgId, user.id))) return c.json({ error: "FORBIDDEN" }, 403);
-  const parsed = ssoConfigSchema.safeParse(await c.req.json().catch(() => ({})));
-  if (!parsed.success) {
-    return c.json({ error: "VALIDATION_ERROR", message: parsed.error.issues[0]?.message }, 400);
-  }
-  const [org] = await getDb()
-    .update(organizationsTable)
-    .set({ ssoConfig: parsed.data, updatedAt: new Date() })
-    .where(eq(organizationsTable.id, orgId))
-    .returning({ ssoConfig: organizationsTable.ssoConfig });
-  return c.json({ sso: org?.ssoConfig ?? {} });
-});
-
-router.post("/:orgId/sso/test", async (c) => {
-  const user = c.get("user");
-  const orgId = c.req.param("orgId");
-  if (!(await requireAdmin(orgId, user.id))) return c.json({ error: "FORBIDDEN" }, 403);
-  const [org] = await getDb()
-    .select({ ssoConfig: organizationsTable.ssoConfig })
-    .from(organizationsTable)
-    .where(eq(organizationsTable.id, orgId))
-    .limit(1);
-  const sso = org?.ssoConfig ?? {};
-  return c.json({
-    results: {
-      saml: sso.saml?.enabled
-        ? { status: sso.saml.idpEntityId && sso.saml.idpSsoUrl ? "success" : "error" }
-        : undefined,
-      oidc: sso.oidc?.enabled
-        ? { status: sso.oidc.issuerUrl && sso.oidc.clientId ? "success" : "error" }
-        : undefined,
-    },
-  });
-});
-
 router.get("/:orgId/security/policy", async (c) => {
   const user = c.get("user");
   const orgId = c.req.param("orgId");
@@ -428,47 +351,6 @@ router.put("/:orgId/security/policy", async (c) => {
     })
     .returning();
   return c.json({ policy });
-});
-
-router.get("/:orgId/scim/tokens", async (c) => {
-  const user = c.get("user");
-  const orgId = c.req.param("orgId");
-  if (!(await requireAdmin(orgId, user.id))) return c.json({ error: "FORBIDDEN" }, 403);
-  return c.json({ tokens: await listOrgScimTokens(orgId) });
-});
-
-router.post("/:orgId/scim/tokens", async (c) => {
-  const user = c.get("user");
-  const orgId = c.req.param("orgId");
-  if (!(await requireAdmin(orgId, user.id))) return c.json({ error: "FORBIDDEN" }, 403);
-  const parsed = scimTokenSchema.safeParse(await c.req.json().catch(() => ({})));
-  if (!parsed.success)
-    return c.json({ error: "VALIDATION_ERROR", message: parsed.error.issues[0]?.message }, 400);
-  return c.json(
-    await createOrgScimToken({ orgId, name: parsed.data.name, createdBy: user.id }),
-    201
-  );
-});
-
-router.post("/:orgId/scim/tokens/:tokenId/rotate", async (c) => {
-  const user = c.get("user");
-  const orgId = c.req.param("orgId");
-  if (!(await requireAdmin(orgId, user.id))) return c.json({ error: "FORBIDDEN" }, 403);
-  const result = await rotateOrgScimToken({
-    orgId,
-    tokenId: c.req.param("tokenId"),
-    rotatedBy: user.id,
-  });
-  if (!result) return c.json({ error: "NOT_FOUND" }, 404);
-  return c.json(result);
-});
-
-router.delete("/:orgId/scim/tokens/:tokenId", async (c) => {
-  const user = c.get("user");
-  const orgId = c.req.param("orgId");
-  if (!(await requireAdmin(orgId, user.id))) return c.json({ error: "FORBIDDEN" }, 403);
-  await revokeOrgScimToken(orgId, c.req.param("tokenId"));
-  return c.json({ ok: true });
 });
 
 export default router;

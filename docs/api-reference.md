@@ -4,7 +4,7 @@ _Generated from `src/api/openapi.json` (zerotrust API v1.0.0) — run `bun run d
 
 Live, interactive docs: **Swagger UI at `/docs`** (dev). Full request/response types: the generated **`@zerotrust/client`** SDK (`packages/client`). 🔒 = requires authentication.
 
-**65 operations** across 11 groups.
+**57 operations** across 10 groups.
 
 > **Coverage note:** this lists the operations currently described in `openapi.json` (auth/admin/MFA/sessions/OAuth + organizations). Several mounted route modules — billing, wallet, search, collaboration, compliance, etc. — are not yet in the spec; see the [README API overview](../README.md#api-overview) and `src/api/server.ts` for the full mounted surface. Expanding `openapi.json` to the whole API (so the SDK + this reference cover it) is tracked as an Integration-Completion (D5) follow-up.
 
@@ -15,12 +15,11 @@ Live, interactive docs: **Swagger UI at `/docs`** (dev). Full request/response t
 - [Health](#health) (1)
 - [MFA](#mfa) (7)
 - [OAuth](#oauth) (4)
-- [Organizations](#organizations) (19)
+- [Organizations](#organizations) (13)
 - [Passkeys](#passkeys) (5)
 - [Password Reset](#password-reset) (2)
 - [Sessions](#sessions) (3)
 - [Shared Signals](#shared-signals) (1)
-- [Workload Identity](#workload-identity) (2)
 
 ## Admin
 
@@ -94,14 +93,8 @@ Live, interactive docs: **Swagger UI at `/docs`** (dev). Full request/response t
 | DELETE | `/orgs/{orgId}/invites/{inviteId}` | Revoke a pending invite | 🔒 |
 | GET | `/orgs/{orgId}/members` | List organization members | 🔒 |
 | DELETE | `/orgs/{orgId}/members/{userId}` | Remove a member (cannot remove the last owner) | 🔒 |
-| GET | `/orgs/{orgId}/scim/tokens` | List SCIM provisioning tokens | 🔒 |
-| POST | `/orgs/{orgId}/scim/tokens` | Create a SCIM provisioning token (shown once) | 🔒 |
-| POST | `/orgs/{orgId}/scim/tokens/{tokenId}/rotate` | Rotate a SCIM provisioning token | 🔒 |
 | GET | `/orgs/{orgId}/security/policy` | Get the org security policy (session/device/geo limits) | 🔒 |
 | PUT | `/orgs/{orgId}/security/policy` | Update the org security policy | 🔒 |
-| GET | `/orgs/{orgId}/sso` | Get per-org SSO configuration | 🔒 |
-| PUT | `/orgs/{orgId}/sso` | Update per-org SSO configuration | 🔒 |
-| POST | `/orgs/{orgId}/sso/test` | Validate the org SSO configuration | 🔒 |
 | POST | `/orgs/{orgId}/transfer` | Transfer organization ownership | 🔒 |
 
 ## Passkeys
@@ -134,11 +127,4 @@ Live, interactive docs: **Swagger UI at `/docs`** (dev). Full request/response t
 | Method | Path | Summary | Auth |
 | --- | --- | --- | --- |
 | POST | `/ssf/events` | Receive a Security Event Token (SET) from a provider |  |
-
-## Workload Identity
-
-| Method | Path | Summary | Auth |
-| --- | --- | --- | --- |
-| POST | `/workload/credentials` | Issue a short-lived scoped workload credential | 🔒 |
-| POST | `/workload/validate` | Validate a workload credential |  |
 

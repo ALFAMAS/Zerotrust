@@ -6,7 +6,7 @@ import type { StorageRegion } from "./region.service";
 
 const logger = getLogger("search-service");
 
-export type SearchableType = "user" | "org" | "note" | "ticket";
+export type SearchableType = "user" | "org" | "ticket";
 
 export interface SearchDocument {
   id: string;
@@ -190,7 +190,7 @@ async function searchElasticsearch(
 
   const indices = type
     ? [indexName(type)]
-    : ["zerotrust-user", "zerotrust-org", "zerotrust-note", "zerotrust-ticket"];
+    : ["zerotrust-user", "zerotrust-org", "zerotrust-ticket"];
 
   try {
     const result = await client.search({
@@ -226,7 +226,7 @@ async function searchElasticsearch(
 
 async function searchDatabase(
   query: string,
-  orgId: string | undefined,
+  _orgId: string | undefined,
   type: SearchableType | undefined,
   _region: StorageRegion | undefined,
   limit: number
@@ -255,18 +255,6 @@ async function searchDatabase(
     );
     for (const r of rows as any[]) {
       hits.push({ id: r.id, type: "org", title: r.name, score: 1 });
-    }
-  }
-
-  if (!type || type === "note") {
-    const filter = orgId
-      ? sql`(title ILIKE ${q} OR content ILIKE ${q}) AND org_id = ${orgId} AND archived = false`
-      : sql`(title ILIKE ${q} OR content ILIKE ${q}) AND archived = false`;
-    const rows = await db.execute(
-      sql`SELECT id, title FROM shared_notes WHERE ${filter} LIMIT ${limit}`
-    );
-    for (const r of rows as any[]) {
-      hits.push({ id: r.id, type: "note", title: r.title, score: 1 });
     }
   }
 

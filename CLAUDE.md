@@ -64,7 +64,7 @@ the terminal via `logging.browserToTerminal: true` in
 ```
 src/
   api/routes/       18 Hono route modules (auth, users, orgs, billing…)
-  services/         Business logic (email, MFA, OAuth, SAML…)
+  services/         Business logic (email, MFA, OAuth, billing…)
   middleware/       Rate limiting, CSRF, auth guards
   db/               Drizzle ORM schema + migrations
   __tests__/        Vitest tests (unit + integration)
@@ -104,7 +104,7 @@ These global skills map to the work this repo involves (invoke with `/<name>`):
 
 | Skill                      | Use it for                                                               |
 | -------------------------- | ------------------------------------------------------------------------ |
-| `/security-review`         | Auth-critical changes (OAuth, SAML, MFA, WebAuthn, CSFLE, breach checks) |
+| `/security-review`         | Auth-critical changes (OAuth, MFA, WebAuthn, CSFLE, breach checks) |
 | `/code-review`             | Review the current diff before opening a PR                              |
 | `/test-driven-development` | New API routes/services — write the vitest first                         |
 | `/test-fixing`             | Triage and fix failing vitest runs                                       |
@@ -123,16 +123,16 @@ Re-introducing any of these patterns is a review blocker.
 
 | CWE | Rule | Canonical fix |
 | --- | --- | --- |
-| **CWE-601** Open redirect | Never use a request-supplied URL as a redirect target. Sanitize with `safeRelativeRedirect()` from `src/shared/safeRedirect.ts` — only same-origin relative paths (`/...`, no `//`, no `/\`, no control chars). For OAuth/OIDC clients use `isRegisteredRedirectUri()` allowlist. | `src/shared/safeRedirect.ts` |
-| **CWE-918** SSRF | Any server-side `fetch`/HTTP whose host comes from user input (DID, webhook URL, federation provider config, notification/webhook URL, remote metadata URL, image proxy, SSF receiver, etc.) must reject IP literals, private/loopback/link-local/metadata hosts, non-default ports, and fetch with `redirect: "error"` plus `AbortSignal.timeout(...)`. Fixed SaaS/provider URLs and operator-controlled internal URLs do not need the public-host guard, but still need timeout + no redirects. | `assertSafeFetchHost` / `assertSafeFetchUrl` in `src/shared/safeFetch.ts` (used by `src/did/resolver.ts`, `src/federation/verify.ts`, `src/notifications/dispatcher.ts`, `src/mfa/fido-mds3.ts`, `src/webhooks/delivery.ts`, `src/ssf/sender.ts`) |
+| **CWE-601** Open redirect | Never use a request-supplied URL as a redirect target. Sanitize with `safeRelativeRedirect()` from `src/shared/safeRedirect.ts` — only same-origin relative paths (`/...`, no `//`, no `/\`, no control chars). For OAuth clients use `isRegisteredRedirectUri()` allowlist. | `src/shared/safeRedirect.ts` |
+| **CWE-918** SSRF | Any server-side `fetch`/HTTP whose host comes from user input (webhook URL, notification/webhook URL, remote metadata URL, image proxy, SSF receiver, etc.) must reject IP literals, private/loopback/link-local/metadata hosts, non-default ports, and fetch with `redirect: "error"` plus `AbortSignal.timeout(...)`. Fixed SaaS/provider URLs and operator-controlled internal URLs do not need the public-host guard, but still need timeout + no redirects. | `assertSafeFetchHost` / `assertSafeFetchUrl` in `src/shared/safeFetch.ts` (used by `src/notifications/dispatcher.ts`, `src/mfa/fido-mds3.ts`, `src/webhooks/delivery.ts`, `src/ssf/sender.ts`) |
 | **CWE-78** OS command injection | Never `spawn(cmd, args, { shell: true })`. Always pass args as a literal argv with `shell: false`. Never interpolate user input into a command string. If a Windows `.cmd` shim is unavoidable, gate `shell:true` on the command literally ending in `.cmd` (or on `process.platform === "win32"` for npm). | `run()` in `src/services/dbBackup.service.ts`, `scripts/db-backup.js`, `scripts/db-restore.js`, `scripts/postinstall.js` |
 | **CWE-22** Path traversal | Filenames/object keys written to disk or S3 must be server-derived (uuid/random + timestamp + validated extension). Never use the client filename directly, even just for the extension. Validate extensions against an allowlist map (`safeExtensionForContentType`, `ALLOWED_AVATAR_TYPES`). | `src/services/uploadSafety.ts`, `src/services/presignedUpload.service.ts`, `src/api/routes/admin.routes.ts`, `auth.routes.ts` avatar upload |
 | **CWE-532** Secrets in logs | Log only identifiers (userId, providerId, scope, client_id). Never log raw token/secret/password values. Do not put access/refresh tokens in redirect URLs — use the short-lived exchange-code pattern (see `POST /oauth/exchange`). Do not put OAuth provider access tokens/client secrets in outbound request URLs; use POST bodies or `Authorization` headers. | OAuth exchange flow in `auth.routes.ts`; magic-link GET verify in `magic-link.routes.ts`; Facebook provider in `src/oauth/providers/facebook.ts` |
-| **CWE-1333** ReDoS / regex injection | Never `new RegExp(\`...${interpolated}...\`)` with unescaped interpolation. Escape metacharacters (`escapeRegExp`) or use `String.split().join()` for literal substitution. Avoid nested quantifiers `(a+)+` in patterns run on attacker input; cap input length for regex parsers over untrusted data (e.g. SAML XML). | `escapeRegExp` in `src/db/storageFallback.ts`, `buildFilter` in `src/ldap/client.ts` |
-| **CWE-327** Broken/risky crypto | Use SHA-256+ for hashes, AES-256-GCM for encryption, `crypto.randomBytes`/`randomUUID` for tokens. SHA-1 is only permitted for the HIBP k-anonymity breach check (`passwordBreach.service.ts`). SAML `signatureAlgorithm` must be `sha256`/`sha512` (never `sha1`). Use `scryptSync`/`argon2` with a per-key random salt, never a hardcoded salt. The static-salt `scryptSync(raw, "zerotrust-db-backup", 32)` fallback in backup scripts is deprecated — use `BACKUP_ENCRYPTION_KEY_HEX` (32 raw bytes). | `src/saml/sp.ts`, `src/services/dbBackup.service.ts`, `scripts/db-backup.js`, `scripts/db-restore.js` |
-| **CWE-1427** External control of identifier | When user input selects a system identifier (LDAP filter/DN, DB table/column, object key, hostname), it must be escaped/validated before use. LDAP filter values are RFC-4515-escaped; DB identifiers go through Drizzle's parameterized `sql` tag, never string interpolation. | `buildFilter` in `src/ldap/client.ts` |
+| **CWE-1333** ReDoS / regex injection | Never `new RegExp(\`...${interpolated}...\`)` with unescaped interpolation. Escape metacharacters (`escapeRegExp`) or use `String.split().join()` for literal substitution. Avoid nested quantifiers `(a+)+` in patterns run on attacker input; cap input length for regex parsers over untrusted data. | `escapeRegExp` in `src/db/storageFallback.ts` |
+| **CWE-327** Broken/risky crypto | Use SHA-256+ for hashes, AES-256-GCM for encryption, `crypto.randomBytes`/`randomUUID` for tokens. SHA-1 is only permitted for the HIBP k-anonymity breach check (`passwordBreach.service.ts`). Use `scryptSync`/`argon2` with a per-key random salt, never a hardcoded salt. The static-salt `scryptSync(raw, "zerotrust-db-backup", 32)` fallback in backup scripts is deprecated — use `BACKUP_ENCRYPTION_KEY_HEX` (32 raw bytes). | `src/services/dbBackup.service.ts`, `scripts/db-backup.js`, `scripts/db-restore.js` |
+| **CWE-1427** External control of identifier | When user input selects a system identifier (DB table/column, object key, hostname), it must be escaped/validated before use. DB identifiers go through Drizzle's parameterized `sql` tag, never string interpolation; object keys are server-derived and extension-validated. | `safeExtensionForContentType` in `src/services/uploadSafety.ts` |
 
 **Before opening a PR on auth- or crypto-touching code**, re-scan the diff
-against this table. Add a `/security-review` pass for changes to OAuth, SAML,
+against this table. Add a `/security-review` pass for changes to OAuth,
 MFA, WebAuthn, CSFLE, breach checks, or any new `fetch`/`spawn`/`fs.writeFile`.
 

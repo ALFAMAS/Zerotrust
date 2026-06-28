@@ -379,24 +379,6 @@ export class zerotrustClient {
   }
 
   /**
-   * Issue a short-lived scoped workload credential
-   *
-   * @route POST /workload/credentials
-   */
-  postWorkloadCredentials(): Promise<unknown> {
-    return this.request("POST", `/workload/credentials`);
-  }
-
-  /**
-   * Validate a workload credential
-   *
-   * @route POST /workload/validate
-   */
-  postWorkloadValidate(): Promise<unknown> {
-    return this.request("POST", `/workload/validate`);
-  }
-
-  /**
    * List all users (admin only)
    *
    * @route GET /admin/users
@@ -681,36 +663,6 @@ export class zerotrustClient {
   }
 
   /**
-   * Get per-org SSO configuration
-   *
-   * @route GET /orgs/{orgId}/sso
-   * @param orgId path parameter
-   */
-  getOrgsByOrgIdSso(orgId: string): Promise<unknown> {
-    return this.request("GET", `/orgs/${encodeURIComponent(orgId)}/sso`);
-  }
-
-  /**
-   * Update per-org SSO configuration
-   *
-   * @route PUT /orgs/{orgId}/sso
-   * @param orgId path parameter
-   */
-  putOrgsByOrgIdSso(orgId: string, body: Record<string, unknown>): Promise<unknown> {
-    return this.request("PUT", `/orgs/${encodeURIComponent(orgId)}/sso`, { body });
-  }
-
-  /**
-   * Validate the org SSO configuration
-   *
-   * @route POST /orgs/{orgId}/sso/test
-   * @param orgId path parameter
-   */
-  postOrgsByOrgIdSsoTest(orgId: string): Promise<unknown> {
-    return this.request("POST", `/orgs/${encodeURIComponent(orgId)}/sso/test`);
-  }
-
-  /**
    * Get the org security policy (session/device/geo limits)
    *
    * @route GET /orgs/{orgId}/security/policy
@@ -728,36 +680,5 @@ export class zerotrustClient {
    */
   putOrgsByOrgIdSecurityPolicy(orgId: string, body: Record<string, unknown>): Promise<unknown> {
     return this.request("PUT", `/orgs/${encodeURIComponent(orgId)}/security/policy`, { body });
-  }
-
-  /**
-   * List SCIM provisioning tokens
-   *
-   * @route GET /orgs/{orgId}/scim/tokens
-   * @param orgId path parameter
-   */
-  getOrgsByOrgIdScimTokens(orgId: string): Promise<unknown> {
-    return this.request("GET", `/orgs/${encodeURIComponent(orgId)}/scim/tokens`);
-  }
-
-  /**
-   * Create a SCIM provisioning token (shown once)
-   *
-   * @route POST /orgs/{orgId}/scim/tokens
-   * @param orgId path parameter
-   */
-  postOrgsByOrgIdScimTokens(orgId: string, body?: { name?: string }): Promise<unknown> {
-    return this.request("POST", `/orgs/${encodeURIComponent(orgId)}/scim/tokens`, { body });
-  }
-
-  /**
-   * Rotate a SCIM provisioning token
-   *
-   * @route POST /orgs/{orgId}/scim/tokens/{tokenId}/rotate
-   * @param orgId path parameter
-   * @param tokenId path parameter
-   */
-  postOrgsByOrgIdScimTokensByTokenIdRotate(orgId: string, tokenId: string): Promise<unknown> {
-    return this.request("POST", `/orgs/${encodeURIComponent(orgId)}/scim/tokens/${encodeURIComponent(tokenId)}/rotate`);
   }
 }

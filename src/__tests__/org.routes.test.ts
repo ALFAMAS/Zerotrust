@@ -22,13 +22,6 @@ vi.mock("../middleware/auth", () => ({
   },
 }));
 
-vi.mock("../services/orgScimToken.service", () => ({
-  createOrgScimToken: vi.fn(),
-  listOrgScimTokens: vi.fn(),
-  revokeOrgScimToken: vi.fn(),
-  rotateOrgScimToken: vi.fn(),
-}));
-
 const OWNER = "00000000-0000-0000-0000-0000000000a1";
 const ADMIN = "00000000-0000-0000-0000-0000000000a2";
 const MEMBER = "00000000-0000-0000-0000-0000000000a3";

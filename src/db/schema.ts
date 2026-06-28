@@ -13,30 +13,6 @@ import {
 } from "drizzle-orm/pg-core";
 import type { OidcConfig, SamlConfig, TenantSettings } from "../models/tenant.model";
 
-/** Org-level SSO config — subset of tenant SSO, scoped to a single organization. */
-/** Org-level SSO config — subset of tenant SSO, scoped to a single organization. */
-export interface OrgSsoConfig {
-  saml?: {
-    enabled: boolean;
-    idpEntityId?: string;
-    idpSsoUrl?: string;
-    idpCert?: string;
-    lastTestedAt?: string;
-    lastTestStatus?: "success" | "error";
-    lastTestError?: string;
-  };
-  oidc?: {
-    enabled: boolean;
-    issuerUrl?: string;
-    clientId?: string;
-    clientSecret?: string;
-    redirectUris?: string[];
-    lastTestedAt?: string;
-    lastTestStatus?: "success" | "error";
-    lastTestError?: string;
-  };
-}
-
 /** Per-organization branding overrides (white-label). */
 export interface OrgBranding {
   appName?: string;
@@ -57,10 +33,6 @@ export const usersTable = pgTable("users", {
   id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
   email: text("email").notNull().unique(),
   username: text("username").unique(),
-  // Decentralized Identifier (did:key / did:web) for login-via-DID. Nullable —
-  // only set for accounts provisioned through the DID auth flow. Unique allows
-  // many NULLs (Postgres), so non-DID users are unaffected.
-  did: text("did").unique(),
   passwordHash: text("password_hash"),
   phone: text("phone"),
   displayName: text("display_name").notNull(),
@@ -287,21 +259,6 @@ export const oauthExchangeCodesTable = pgTable("oauth_exchange_codes", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
 });
 
-export const workloadCredentialsTable = pgTable("workload_credentials", {
-  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
-  workloadId: text("workload_id").notNull(),
-  workloadSecret: text("workload_secret").notNull(),
-  createdBy: uuid("created_by"),
-  scopes: text("scopes").array().notNull().default(sql`ARRAY[]::text[]`),
-  ttl: integer("ttl"),
-  autoRotate: boolean("auto_rotate").notNull().default(false),
-  lastRotatedAt: timestamp("last_rotated_at", { withTimezone: true }),
-  expiresAt: timestamp("expires_at", { withTimezone: true }),
-  isRevoked: boolean("is_revoked").notNull().default(false),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().default(sql`now()`),
-});
-
 // Cross-tenant JIT (just-in-time) privilege-escalation requests. Durable so
 // approvals + grants survive restarts and provide an audit trail.
 export const crossTenantJITRequestsTable = pgTable("cross_tenant_jit_requests", {
@@ -322,17 +279,6 @@ export const crossTenantJITRequestsTable = pgTable("cross_tenant_jit_requests", 
 
 // Trusted federation (RFC 8693 token-exchange) providers. Durable registry so
 // providers configured via the admin UI persist across restarts.
-export const federatedProvidersTable = pgTable("federated_providers", {
-  // Provider id is a caller-supplied slug (e.g. "okta-prod"), not a uuid.
-  id: text("id").primaryKey(),
-  name: text("name").notNull(),
-  issuerUrl: text("issuer_url").notNull(),
-  jwksUri: text("jwks_uri"),
-  trustedTenantId: text("trusted_tenant_id"),
-  enabled: boolean("enabled").notNull().default(true),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
-});
-
 export const userBehaviorBaselinesTable = pgTable("user_behavior_baselines", {
   id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: uuid("user_id")
@@ -414,8 +360,6 @@ export const organizationsTable = pgTable(
     ownerId: uuid("owner_id").references(() => usersTable.id, {
       onDelete: "cascade",
     }),
-    // Self-serve SSO config — org admins configure SAML/OIDC from the dashboard.
-    ssoConfig: jsonb("sso_config").$type<OrgSsoConfig>(),
     // Multi-tenant enterprise: custom domain, branding overrides, data residency.
     customDomain: text("custom_domain"),
     branding: jsonb("branding").$type<OrgBranding>(),
@@ -618,40 +562,6 @@ export const apiKeysTable = pgTable(
   })
 );
 
-// ── Org SCIM Tokens ───────────────────────────────────────────────────────────
-//
-// Per-org SCIM 2.0 (RFC 7644) bearer tokens. Each token authenticates SCIM
-// requests against the org that issued it. Plaintext is returned exactly once
-// at creation/rotation; only the SHA-256 hash is persisted, so a DB read alone
-// cannot impersonate a SCIM client.
-
-export const orgScimTokensTable = pgTable(
-  "org_scim_tokens",
-  {
-    id: uuid("id").primaryKey().defaultRandom(),
-    orgId: uuid("org_id")
-      .notNull()
-      .references(() => organizationsTable.id, { onDelete: "cascade" }),
-    name: text("name").notNull(),
-    // First 12 chars of the plaintext token, for display in the dashboard
-    // ("scim_a1b2c3d4…") so admins can identify which token is which.
-    tokenPrefix: text("token_prefix").notNull(),
-    // SHA-256 hex of the plaintext token. Unique so validation is an indexed
-    // point lookup. Plaintext is never recoverable from this column.
-    tokenHash: text("token_hash").notNull().unique(),
-    expiresAt: timestamp("expires_at"),
-    lastUsedAt: timestamp("last_used_at"),
-    revokedAt: timestamp("revoked_at"),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    createdBy: uuid("created_by").references(() => usersTable.id, {
-      onDelete: "set null",
-    }),
-  },
-  (t) => ({
-    orgIdIdx: index("org_scim_tokens_org_id_idx").on(t.orgId),
-  })
-);
-
 // ── Subscriptions ─────────────────────────────────────────────────────────────
 
 export const subscriptionsTable = pgTable(
@@ -760,19 +670,6 @@ export const pushSubscriptionsTable = pgTable("push_subscriptions", {
   userAgent: text("user_agent"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
   lastUsedAt: timestamp("last_used_at", { withTimezone: true }),
-});
-
-export const featureFlagsTable = pgTable("feature_flags", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  key: text("key").notNull().unique(),
-  description: text("description"),
-  enabled: boolean("enabled").notNull().default(false),
-  // Optional per-user rollout: list of user IDs the flag is force-enabled for
-  enabledForUsers: text("enabled_for_users").array().notNull().default(sql`ARRAY[]::text[]`),
-  // Percentage rollout 0-100 (applies when enabled = false)
-  rolloutPercent: integer("rollout_percent").notNull().default(0),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
 // ── Login streaks ──────────────────────────────────────────────────────────────
@@ -911,70 +808,6 @@ export const passkeysTable = pgTable(
   })
 );
 
-// ── A/B experiment results (durable) ──────────────────────────────────────────
-
-export const experimentResultsTable = pgTable(
-  "experiment_results",
-  {
-    id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
-    experimentKey: text("experiment_key").notNull(),
-    variant: text("variant").notNull(),
-    subjectId: text("subject_id").notNull(),
-    converted: boolean("converted").notNull().default(false),
-    createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
-  },
-  (t) => ({
-    experimentResultsKeyVariantIdx: index("experiment_results_key_variant_idx").on(
-      t.experimentKey,
-      t.variant
-    ),
-    experimentResultsSubjectUnq: unique().on(t.experimentKey, t.subjectId),
-  })
-);
-
-// ── Analytics events (per-feature) ────────────────────────────────────────────
-
-export const analyticsEventsTable = pgTable(
-  "analytics_events",
-  {
-    id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
-    userId: uuid("user_id").references(() => usersTable.id, {
-      onDelete: "set null",
-    }),
-    feature: text("feature").notNull(),
-    action: text("action").notNull(),
-    metadata: jsonb("metadata"),
-    createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
-  },
-  (t) => ({
-    analyticsEventsFeatureIdx: index("analytics_events_feature_idx").on(t.feature, t.createdAt),
-    analyticsEventsUserIdx: index("analytics_events_user_id_idx").on(t.userId),
-  })
-);
-
-// ── Search analytics ──────────────────────────────────────────────────────────
-
-export const searchAnalyticsTable = pgTable(
-  "search_analytics",
-  {
-    id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
-    userId: uuid("user_id").references(() => usersTable.id, {
-      onDelete: "set null",
-    }),
-    query: text("query").notNull(),
-    resultCount: integer("result_count").notNull().default(0),
-    source: text("source").notNull().default("global"),
-    createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
-  },
-  (t) => ({
-    searchAnalyticsCreatedIdx: index("search_analytics_created_idx").on(t.createdAt),
-    searchAnalyticsZeroResultsIdx: index("search_analytics_zero_results_idx").on(
-      t.resultCount,
-      t.createdAt
-    ),
-  })
-);
-
 // ── File attachments ─────────────────────────────────────────────────────────
 
 export const fileAttachmentsTable = pgTable(
@@ -1003,115 +836,6 @@ export const fileAttachmentsTable = pgTable(
     ),
   })
 );
-
-// ── Shared notes (collaboration) ────────────────────────────────────────────
-
-export const sharedNotesTable = pgTable(
-  "shared_notes",
-  {
-    id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
-    orgId: uuid("org_id")
-      .notNull()
-      .references(() => organizationsTable.id, { onDelete: "cascade" }),
-    title: text("title").notNull(),
-    content: text("content").notNull().default(""),
-    createdBy: uuid("created_by")
-      .notNull()
-      .references(() => usersTable.id, { onDelete: "cascade" }),
-    updatedBy: uuid("updated_by").references(() => usersTable.id, {
-      onDelete: "set null",
-    }),
-    archived: boolean("archived").notNull().default(false),
-    createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
-    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().default(sql`now()`),
-  },
-  (t) => ({
-    sharedNotesOrgIdx: index("shared_notes_org_idx").on(t.orgId, t.archived),
-    sharedNotesCreatedByIdx: index("shared_notes_created_by_idx").on(t.createdBy),
-  })
-);
-
-export const sharedNoteRevisionsTable = pgTable(
-  "shared_note_revisions",
-  {
-    id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
-    noteId: uuid("note_id")
-      .notNull()
-      .references(() => sharedNotesTable.id, { onDelete: "cascade" }),
-    content: text("content").notNull(),
-    editedBy: uuid("edited_by")
-      .notNull()
-      .references(() => usersTable.id, { onDelete: "cascade" }),
-    createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
-  },
-  (t) => ({
-    sharedNoteRevisionsNoteIdx: index("shared_note_revisions_note_idx").on(t.noteId, t.createdAt),
-  })
-);
-
-// ── Activity events (team feed) ──────────────────────────────────────────────
-
-export const activityEventsTable = pgTable(
-  "activity_events",
-  {
-    id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
-    orgId: uuid("org_id")
-      .notNull()
-      .references(() => organizationsTable.id, { onDelete: "cascade" }),
-    userId: uuid("user_id")
-      .notNull()
-      .references(() => usersTable.id, { onDelete: "cascade" }),
-    type: text("type").notNull(), // "note_created" | "note_updated" | "mention" | "settings_changed" | "member_joined" | …
-    title: text("title").notNull(),
-    description: text("description"),
-    metadata: jsonb("metadata"),
-    createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
-  },
-  (t) => ({
-    activityEventsOrgIdx: index("activity_events_org_idx").on(t.orgId, t.createdAt),
-    activityEventsUserIdx: index("activity_events_user_idx").on(t.userId),
-  })
-);
-
-// ── @mentions log ────────────────────────────────────────────────────────────
-
-export const mentionsTable = pgTable(
-  "mentions",
-  {
-    id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
-    orgId: uuid("org_id")
-      .notNull()
-      .references(() => organizationsTable.id, { onDelete: "cascade" }),
-    mentionedUserId: uuid("mentioned_user_id")
-      .notNull()
-      .references(() => usersTable.id, { onDelete: "cascade" }),
-    mentionedByUserId: uuid("mentioned_by_user_id")
-      .notNull()
-      .references(() => usersTable.id, { onDelete: "cascade" }),
-    sourceType: text("source_type").notNull(), // "note", "activity"
-    sourceId: uuid("source_id"),
-    notificationSent: boolean("notification_sent").notNull().default(false),
-    createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
-  },
-  (t) => ({
-    mentionsUserIdx: index("mentions_user_idx").on(t.mentionedUserId, t.createdAt),
-  })
-);
-
-// ── Presence (real-time heartbeat) ───────────────────────────────────────────
-
-export const presenceTable = pgTable("presence", {
-  userId: uuid("user_id")
-    .primaryKey()
-    .references(() => usersTable.id, { onDelete: "cascade" }),
-  orgId: uuid("org_id")
-    .notNull()
-    .references(() => organizationsTable.id, { onDelete: "cascade" }),
-  status: text("status").notNull().default("online"), // "online" | "idle" | "offline"
-  lastSeenAt: timestamp("last_seen_at", { withTimezone: true }).notNull().default(sql`now()`),
-  displayName: text("display_name").notNull(),
-  avatarUrl: text("avatar_url"),
-});
 
 // ── Tax exemptions / VAT IDs (org-level) ──────────────────────────────────────
 

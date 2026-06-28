@@ -10,8 +10,7 @@
  * `fetchFixedUrl()` so they still get timeout + no-redirect defaults without the
  * public-host restriction.
  *
- * Canonical reference: originally extracted from `src/did/resolver.ts`; see the
- * "Security hardening rules" table in CLAUDE.md.
+ * Canonical reference: see the "Security hardening rules" table in CLAUDE.md.
  */
 import { isIP } from "node:net";
 

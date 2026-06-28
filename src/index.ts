@@ -26,22 +26,6 @@ export {
   SoftwareKeyProvider,
   TPMKeyProvider,
 } from "./crypto/hardware-key-store";
-export type {
-  KEMEncapsulation,
-  KEMPrivateKey,
-  KEMPublicKey,
-  PQKEMProvider,
-} from "./crypto/post-quantum";
-// ─── Post-Quantum Cryptography ────────────────────────────────────────────────
-export {
-  createKEMProvider,
-  establishPQSessionKey,
-  generatePQKeyPair,
-  hybridDecrypt,
-  hybridEncrypt,
-  NobleMLKEM,
-  SimulatedMLKEM,
-} from "./crypto/post-quantum";
 export type { DatabaseHealth } from "./db";
 // ─── Database ────────────────────────────────────────────────────────────────
 export {
@@ -64,37 +48,7 @@ export {
   saasSettingsTable,
   sessionsTable,
   usersTable,
-  workloadCredentialsTable,
 } from "./db/schema";
-// ─── Decentralized Identity (DID) ─────────────────────────────────────────────
-export { resolveDID, resolveDIDKey, resolveDIDWeb } from "./did/resolver";
-export type {
-  DIDAuthChallenge,
-  DIDAuthResult,
-  DIDDocument,
-  DIDProof,
-  VerificationMethod,
-} from "./did/types";
-export {
-  createDIDChallenge,
-  provisionDIDUser,
-  verifyDIDProof,
-} from "./did/verifier";
-export type {
-  FederatedProvider,
-  FederationTokenRequest,
-  FederationTokenResponse,
-} from "./federation/index";
-// ─── Cross-Tenant Federation ──────────────────────────────────────────────────
-export {
-  exchangeToken as exchangeFederatedToken,
-  getProvider as getFederationProvider,
-  initFederationFromEnv,
-  listProviders as listFederationProviders,
-  registerProvider as registerFederationProvider,
-  removeProvider as removeFederationProvider,
-  requireFederatedIdentity,
-} from "./federation/index";
 export type { CrossTenantJITRequest } from "./jit/cross-tenant";
 // ─── Cross-Tenant JIT ─────────────────────────────────────────────────────────
 export {
@@ -102,10 +56,6 @@ export {
   requestCrossTenantAccess,
   requireCrossTenantJIT,
 } from "./jit/cross-tenant";
-// ─── LDAP / Active Directory ─────────────────────────────────────────────────
-export { createLDAPClient, LDAPClient } from "./ldap/client";
-export { scheduleLDAPSync, syncAllUsers, syncModifiedUsers } from "./ldap/sync";
-export type { LDAPConfig, LDAPGroup, LDAPUser } from "./ldap/types";
 // ─── Logging ─────────────────────────────────────────────────────────────────
 export {
   auditLog,
@@ -193,9 +143,6 @@ export {
   requireReverification,
 } from "./middleware/continuousVerification";
 export { geoFencingMiddleware } from "./middleware/geoFencing";
-export type { mTLSOptions, WorkloadIdentity } from "./middleware/mtls";
-// ─── mTLS Middleware ──────────────────────────────────────────────────────────
-export { mtlsMiddleware } from "./middleware/mtls";
 export {
   clearPoPNonces,
   requireProofOfPossession,
@@ -247,26 +194,6 @@ export type {
   NotificationEvent,
 } from "./notifications/types";
 export { getProviderAdapter } from "./oauth/provider.factory";
-// ─── OIDC Provider ───────────────────────────────────────────────────────────
-export {
-  buildUserInfo,
-  exchangeAuthCode as exchangeOIDCCode,
-  generateAuthCode,
-  getDiscoveryDocument,
-  getOIDCClient,
-  registerOIDCClient,
-  validateAuthorizeRequest,
-} from "./oidc/provider";
-export type { SAMLAssertion, SAMLIdPConfig, SAMLSPConfig } from "./saml/sp";
-// ─── SAML 2.0 ────────────────────────────────────────────────────────────────
-export {
-  buildAuthnRequest,
-  buildSPMetadata,
-  parseSAMLResponse,
-} from "./saml/sp";
-export type { SCIMGroup, SCIMUser } from "./scim";
-// ─── SCIM 2.0 ────────────────────────────────────────────────────────────────
-export { scimRoutes } from "./scim";
 export type {
   AnomalySignals,
   BehaviorObservation,
@@ -314,7 +241,6 @@ export type {
   Session,
   TokenPayload,
   User,
-  WorkloadCredential,
   zerotrustConfig,
 } from "./shared/types";
 export {
@@ -342,10 +268,6 @@ export type {
   WebhookEndpoint,
   WebhookEventType,
 } from "./webhooks/types";
-export {
-  createWorkloadCredential,
-  validateWorkloadCredential,
-} from "./workload";
 
 export async function initializezerotrust() {
   const { getConfig } = await import("./config/index.js");

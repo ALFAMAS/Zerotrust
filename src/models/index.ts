@@ -15,8 +15,6 @@ export {
   sessionsTable as SessionModel,
   usersTable,
   usersTable as UserModel,
-  workloadCredentialsTable,
-  workloadCredentialsTable as WorkloadCredentialModel,
 } from "../db/schema";
 // Re-export types
 export type {

@@ -138,30 +138,6 @@ describe("Tenant routes", () => {
     expect(res.status).toBe(404);
   });
 
-  it("configures OIDC SSO on a tenant", async () => {
-    const a = app();
-    await req(a, "/", { method: "POST", body: { slug: "acme", name: "Acme" } });
-    const res = await req(a, "/acme/sso/oidc", {
-      method: "POST",
-      body: { clientId: "cid", redirectUris: ["https://acme.example/cb"] },
-    });
-    expect(res.status).toBe(200);
-    const body = await res.json();
-    expect(body.oidcConfig.enabled).toBe(true);
-    expect(body.oidcConfig.clientId).toBe("cid");
-  });
-
-  it("configures SAML SSO on a tenant", async () => {
-    const a = app();
-    await req(a, "/", { method: "POST", body: { slug: "acme", name: "Acme" } });
-    const res = await req(a, "/acme/sso/saml", {
-      method: "POST",
-      body: { idpEntityId: "idp", idpSsoUrl: "https://idp/sso", idpCert: "CERT" },
-    });
-    expect(res.status).toBe(200);
-    expect((await res.json()).samlConfig.enabled).toBe(true);
-  });
-
   it("changes a plan and updates maxUsers", async () => {
     const a = app();
     await req(a, "/", { method: "POST", body: { slug: "acme", name: "Acme" } });

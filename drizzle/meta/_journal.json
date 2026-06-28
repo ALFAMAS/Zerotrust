@@ -141,6 +141,41 @@
       "when": 1782853200000,
       "tag": "0019_hot_path_indexes",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1782645461296,
+      "tag": "0020_drop_collaboration",
+      "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1782645761932,
+      "tag": "0021_drop_did_column",
+      "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1782646147930,
+      "tag": "0022_drop_growth_tooling",
+      "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1782646441178,
+      "tag": "0023_drop_workload_credentials",
+      "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1782647072507,
+      "tag": "0024_drop_enterprise_federation",
+      "breakpoints": true
     }
   ]
 }
