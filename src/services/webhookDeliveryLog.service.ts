@@ -1,4 +1,4 @@
-import { desc, eq } from "drizzle-orm";
+import { desc, eq, sql } from "drizzle-orm";
 import { getDb } from "../db";
 import { webhookDeliveryLogsTable } from "../db/schema";
 
@@ -45,15 +45,29 @@ export async function logDelivery(input: {
   return entry as DeliveryLogEntry;
 }
 
-export async function getDeliveryLogs(webhookId: string, limit = 50): Promise<DeliveryLogEntry[]> {
+export async function getDeliveryLogs(
+  webhookId: string,
+  limit = 50,
+  offset = 0,
+): Promise<DeliveryLogEntry[]> {
   const db = getDb();
   const rows = await db
     .select()
     .from(webhookDeliveryLogsTable)
     .where(eq(webhookDeliveryLogsTable.webhookId, webhookId))
     .orderBy(desc(webhookDeliveryLogsTable.createdAt))
+    .offset(offset)
     .limit(limit);
   return rows as DeliveryLogEntry[];
+}
+
+export async function countDeliveryLogs(webhookId: string): Promise<number> {
+  const db = getDb();
+  const [result] = await db
+    .select({ count: sql<number>`count(*)::int` })
+    .from(webhookDeliveryLogsTable)
+    .where(eq(webhookDeliveryLogsTable.webhookId, webhookId));
+  return result?.count ?? 0;
 }
 
 export async function getDeliveryLogById(logId: string): Promise<DeliveryLogEntry | null> {

@@ -1,9 +1,11 @@
 import type { Context } from "hono";
 import { Hono } from "hono";
+import { desc, sql } from "drizzle-orm";
 import { getDb } from "../../db/index.js";
 import { userBehaviorBaselinesTable } from "../../db/schema.js";
 import { getLogger } from "../../logger/index.js";
 import { authMiddleware } from "../../middleware/auth.js";
+import { paginated, parsePaginatedQuery } from "../../shared/pagination.js";
 import {
   getBaseline,
   resetBaseline,
@@ -25,11 +27,18 @@ router.use("*", authMiddleware);
 router.get("/baselines", async (c) => {
   if (!isAdmin(c)) return c.json({ error: "FORBIDDEN" }, 403);
   try {
-    const limit = Math.min(100, parseInt(c.req.query("limit") ?? "20", 10));
-    const offset = parseInt(c.req.query("offset") ?? "0", 10);
+    const { page, limit, offset } = parsePaginatedQuery(c.req.query);
     const db = getDb();
-    const rows = await db.select().from(userBehaviorBaselinesTable).limit(limit).offset(offset);
-    return c.json({ baselines: rows, limit, offset });
+    const [rows, countResult] = await Promise.all([
+      db
+        .select()
+        .from(userBehaviorBaselinesTable)
+        .orderBy(desc(userBehaviorBaselinesTable.userId))
+        .offset(offset)
+        .limit(limit),
+      db.select({ count: sql<number>`count(*)::int` }).from(userBehaviorBaselinesTable),
+    ]);
+    return c.json(paginated(rows, { page, limit, total: countResult[0]?.count ?? 0 }));
   } catch (err) {
     logger.warn("Failed to list baselines", { error: String(err) });
     return c.json({ error: "INTERNAL_ERROR" }, 500);

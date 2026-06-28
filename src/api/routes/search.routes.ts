@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { z } from "zod";
 import { getLogger } from "../../logger";
 import { authMiddleware } from "../../middleware/auth";
+import { paginated, parsePaginatedQuery } from "../../shared/pagination";
 import {
   deleteDocument,
   indexDocument,
@@ -20,29 +21,22 @@ router.use("*", authMiddleware);
 
 // ── Global search ─────────────────────────────────────────────────────────────
 
-const searchSchema = z.object({
-  q: z.string().min(1).max(200),
-  orgId: z.string().uuid().optional(),
-  type: z.enum(["user", "org", "ticket"]).optional(),
-  region: z.enum(["us", "eu", "apac"]).optional(),
-  limit: z.coerce.number().int().min(1).max(50).optional(),
-});
-
-// GET /search?q=...&orgId=...&type=...&region=...&limit=...
+// GET /search?q=...&orgId=...&type=...&region=...&page=...&limit=...
 router.get("/", async (c) => {
-  const parsed = searchSchema.safeParse(c.req.query());
-  if (!parsed.success) {
-    return c.json({ error: "INVALID_REQUEST", issues: parsed.error.issues }, 400);
+  const { page, limit } = parsePaginatedQuery(c.req.query, { defaultLimit: 20, maxLimit: 50 });
+  const type = c.req.query("type") as SearchableType | undefined;
+  const region = c.req.query("region") as any;
+  const q = c.req.query("q");
+  const orgId = c.req.query("orgId");
+  if (!q || q.length < 1 || q.length > 200) {
+    return c.json({ error: "INVALID_REQUEST", message: "q must be 1-200 chars" }, 400);
   }
   try {
-    const results = await search({
-      query: parsed.data.q,
-      orgId: parsed.data.orgId,
-      type: parsed.data.type as SearchableType | undefined,
-      region: parsed.data.region as any,
-      limit: parsed.data.limit ?? 20,
+    const results = await search({ query: q, orgId, type, region, limit });
+    return c.json({
+      provider: results.provider,
+      ...paginated(results.hits, { page, limit, total: results.total }),
     });
-    return c.json(results);
   } catch (err) {
     logger.error("Search error", err as Error);
     return c.json({ error: "INTERNAL_ERROR" }, 500);

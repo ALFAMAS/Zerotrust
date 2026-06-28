@@ -690,3 +690,13 @@ hardens the security, build, and CI surfaces. All changes shipped with tests.
 - Backend: +30 (`codes`, `wallet.spend`, `wallet.routes`, `uploadSafety`, `cors`,
   `oidc.authorize`). Frontend (new harness wired into root Vitest): +11
   (`lib/auth`, `lib/api`). Suite: 636 → 677 passing.
+
+---
+
+## Pagination Standardization (2026-07-29)
+
+- ✅ Created shared `src/shared/pagination.ts` with `parsePaginatedQuery()` (parses `page`/`limit` with sane bounds, defaults, max) and `paginated()` (builds standardized `{ data, pagination: { page, limit, total, totalPages, hasNext, hasPrev } }` envelope).
+- ✅ Standardized 15+ list endpoints to use the unified envelope: `GET /admin/users`, `GET /admin/sessions`, `GET /admin/audit-logs`, `GET /admin/feedback`, `GET /admin/attachments`, `GET /admin/webhooks/:id/deliveries`, `GET /admin/users/segments`, `GET /notifications`, `GET /org/:orgId/members`, `GET /org/:orgId/invites`, `GET /access-review`, `GET /access-review/:id`, `GET /sessions`, `GET /search`, `GET /anomaly/baselines`, `GET /compliance/soc2/controls`, `GET /wallet/transactions`, `GET /points/history`.
+- ✅ Migrated offset-based endpoints to cursor/page model (`audit-logs`, `feedback`, `attachments`).
+- ✅ Added `countDeliveryLogs()`, `countWalletTransactions()`, `countPointsHistory()` service functions with storage-fallback safety.
+- ✅ Skipped `GET /gdpr/export` (GDPR requires full data export, pagination would violate compliance).

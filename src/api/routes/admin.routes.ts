@@ -15,6 +15,7 @@ import { getLogger } from "../../logger";
 import { authMiddleware } from "../../middleware/auth";
 import { revokeAllSessionsForUser, revokeSession } from "../../middleware/sessionControl";
 import { getSettings, updateSettings } from "../../models/settings.model";
+import { paginated, parsePaginatedQuery } from "../../shared/pagination";
 import {
   ALLOWED_UPLOAD_CONTENT_TYPES,
   safeExtensionForContentType,
@@ -105,7 +106,7 @@ router.get("/users", async (c) => {
       lastLoginAt: u.lastLoginAt,
     }));
 
-    return c.json({ users: sanitized, total: countResult[0]?.count ?? 0, page, limit });
+    return c.json(paginated(sanitized, { page, limit, total: countResult[0]?.count ?? 0 }));
   } catch (err) {
     logger.error("Admin list users error", err as Error);
     return c.json({ error: "INTERNAL_ERROR", message: "Failed to list users" }, 500);
@@ -293,11 +294,7 @@ router.get("/sessions", async (c) => {
       db.select({ count: sql<number>`count(*)::int` }).from(sessionsTable).where(whereClause),
     ]);
 
-    const total = countResult[0]?.count ?? 0;
-    return c.json({
-      sessions,
-      pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
-    });
+    return c.json(paginated(sessions, { page, limit, total: countResult[0]?.count ?? 0 }));
   } catch (err) {
     logger.error("Admin list sessions error", err as Error);
     return c.json({ error: "INTERNAL_ERROR", message: "Failed to list sessions" }, 500);
@@ -615,11 +612,10 @@ router.delete("/jit-grants/:id", async (c) => {
 
 // ── Audit Logs ───────────────────────────────────────────────────────────────
 
-// GET /audit-logs?limit=50&offset=0&action=&actorId=
+// GET /audit-logs?page=1&limit=50&action=&actorId=
 router.get("/audit-logs", async (c) => {
   try {
-    const limit = Math.min(parseInt(c.req.query("limit") || "50", 10), 200);
-    const offset = parseInt(c.req.query("offset") || "0", 10);
+    const { page, limit, offset } = parsePaginatedQuery(c.req.query, { defaultLimit: 50, maxLimit: 200 });
     const action = c.req.query("action");
     const actorId = c.req.query("actorId");
 
@@ -641,7 +637,7 @@ router.get("/audit-logs", async (c) => {
       db.select({ count: sql<number>`count(*)::int` }).from(auditLogsTable).where(whereClause),
     ]);
 
-    return c.json({ logs, total: countResult[0]?.count ?? 0, limit, offset });
+    return c.json(paginated(logs, { page, limit, total: countResult[0]?.count ?? 0 }));
   } catch (err) {
     logger.error("Admin audit logs error", err as Error);
     return c.json({ error: "INTERNAL_ERROR", message: "Failed to fetch audit logs" }, 500);
@@ -664,26 +660,23 @@ router.get("/audit-logs/verify", async (c) => {
 
 router.get("/feedback", async (c) => {
   try {
-    const limit = Math.min(parseInt(c.req.query("limit") ?? "50", 10), 200);
-    const offset = parseInt(c.req.query("offset") ?? "0", 10);
+    const { page, limit, offset } = parsePaginatedQuery(c.req.query, { defaultLimit: 50, maxLimit: 200 });
     const type = c.req.query("type");
 
     const db = getDb();
     const where = type ? eq(feedbackTable.type, type) : undefined;
-    const rows = await db
-      .select()
-      .from(feedbackTable)
-      .where(where)
-      .orderBy(desc(feedbackTable.createdAt))
-      .limit(limit)
-      .offset(offset);
+    const [rows, countResult] = await Promise.all([
+      db
+        .select()
+        .from(feedbackTable)
+        .where(where)
+        .orderBy(desc(feedbackTable.createdAt))
+        .offset(offset)
+        .limit(limit),
+      db.select({ count: sql<number>`count(*)::int` }).from(feedbackTable).where(where),
+    ]);
 
-    const [countResult] = await db
-      .select({ count: sql<number>`count(*)::int` })
-      .from(feedbackTable)
-      .where(where);
-
-    return c.json({ feedback: rows, total: countResult?.count ?? 0, limit, offset });
+    return c.json(paginated(rows, { page, limit, total: countResult[0]?.count ?? 0 }));
   } catch (err) {
     logger.error("Admin feedback error", err as Error);
     return c.json({ error: "INTERNAL_ERROR" }, 500);
@@ -695,35 +688,42 @@ router.get("/feedback", async (c) => {
 
 const VALID_SEGMENTS = ["champion", "at_risk", "expansion", "new"] as const;
 
-// GET /admin/users/segments — list users by segment
+// GET /admin/users/segments?segment=&page=&limit= — list users by segment (or counts if no segment)
 router.get("/users/segments", async (c) => {
   try {
     const segment = c.req.query("segment");
     const db = getDb();
 
-    let rows: any[];
     if (segment && VALID_SEGMENTS.includes(segment as any)) {
-      rows = await db
-        .select({
-          id: usersTable.id,
-          email: usersTable.email,
-          displayName: usersTable.displayName,
-          customerSegment: usersTable.customerSegment,
-        })
-        .from(usersTable)
-        .where(eq(usersTable.customerSegment, segment));
-    } else {
-      // Return counts per segment
-      rows = await db
-        .select({
-          segment: usersTable.customerSegment,
-          count: sql<number>`count(*)::int`,
-        })
-        .from(usersTable)
-        .where(sql`${usersTable.customerSegment} IS NOT NULL`)
-        .groupBy(usersTable.customerSegment);
+      const { page, limit, offset } = parsePaginatedQuery(c.req.query);
+      const where = eq(usersTable.customerSegment, segment);
+      const [rows, countResult] = await Promise.all([
+        db
+          .select({
+            id: usersTable.id,
+            email: usersTable.email,
+            displayName: usersTable.displayName,
+            customerSegment: usersTable.customerSegment,
+          })
+          .from(usersTable)
+          .where(where)
+          .orderBy(desc(usersTable.createdAt))
+          .offset(offset)
+          .limit(limit),
+        db.select({ count: sql<number>`count(*)::int` }).from(usersTable).where(where),
+      ]);
+      return c.json(paginated(rows, { page, limit, total: countResult[0]?.count ?? 0 }));
     }
 
+    // No segment specified — return bounded counts per segment
+    const rows = await db
+      .select({
+        segment: usersTable.customerSegment,
+        count: sql<number>`count(*)::int`,
+      })
+      .from(usersTable)
+      .where(sql`${usersTable.customerSegment} IS NOT NULL`)
+      .groupBy(usersTable.customerSegment);
     return c.json({ segments: rows });
   } catch (err) {
     logger.error("Admin segments error", err as Error);
@@ -787,10 +787,13 @@ export default router;
 router.get("/webhooks/:webhookId/deliveries", async (c) => {
   try {
     const { webhookId } = c.req.param();
-    const limit = Math.min(parseInt(c.req.query("limit") ?? "50", 10), 200);
-    const { getDeliveryLogs } = await import("../../services/webhookDeliveryLog.service.js");
-    const logs = await getDeliveryLogs(webhookId, limit);
-    return c.json({ deliveries: logs });
+    const { page, limit, offset } = parsePaginatedQuery(c.req.query, { defaultLimit: 50, maxLimit: 200 });
+    const { getDeliveryLogs, countDeliveryLogs } = await import("../../services/webhookDeliveryLog.service.js");
+    const [logs, total] = await Promise.all([
+      getDeliveryLogs(webhookId, limit, offset),
+      countDeliveryLogs(webhookId),
+    ]);
+    return c.json(paginated(logs, { page, limit, total }));
   } catch (err) {
     logger.error("Admin webhook deliveries error", err as Error);
     return c.json({ error: "INTERNAL_ERROR" }, 500);
@@ -827,19 +830,21 @@ import { fileAttachmentsTable } from "../../db/schema";
 // GET /admin/attachments — list file attachments (admin)
 router.get("/attachments", async (c) => {
   try {
-    const limit = Math.min(parseInt(c.req.query("limit") ?? "50", 10), 200);
-    const offset = parseInt(c.req.query("offset") ?? "0", 10);
+    const { page, limit, offset } = parsePaginatedQuery(c.req.query, { defaultLimit: 50, maxLimit: 200 });
     const feature = c.req.query("feature");
     const db = getDb();
     const conditions = feature ? eq(fileAttachmentsTable.feature, feature) : undefined;
-    const rows = await db
-      .select()
-      .from(fileAttachmentsTable)
-      .where(conditions)
-      .orderBy(desc(fileAttachmentsTable.createdAt))
-      .limit(limit)
-      .offset(offset);
-    return c.json({ attachments: rows });
+    const [rows, countResult] = await Promise.all([
+      db
+        .select()
+        .from(fileAttachmentsTable)
+        .where(conditions)
+        .orderBy(desc(fileAttachmentsTable.createdAt))
+        .offset(offset)
+        .limit(limit),
+      db.select({ count: sql<number>`count(*)::int` }).from(fileAttachmentsTable).where(conditions),
+    ]);
+    return c.json(paginated(rows, { page, limit, total: countResult[0]?.count ?? 0 }));
   } catch (err) {
     logger.error("Admin attachments error", err as Error);
     return c.json({ error: "INTERNAL_ERROR" }, 500);

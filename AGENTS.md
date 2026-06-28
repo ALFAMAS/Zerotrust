@@ -16,3 +16,16 @@ The Security hardening rules table in `CLAUDE.md` is authoritative. Re-introduci
 - **CWE-1427 External control of identifier:** escape/validate LDAP filters, DB identifiers, object keys, and hostnames; use Drizzle parameterized `sql`/query builder, not raw interpolation.
 
 Before opening a PR touching auth, crypto, uploads, webhooks/fetches, filesystem, command execution, OAuth/OIDC/SAML/MFA/WebAuthn, or logging, re-scan the diff against these rules.
+
+## Canonical shared modules (reuse, don't re-implement)
+
+The "Canonical shared modules" table in `CLAUDE.md` is authoritative. Key entries every agent must know:
+
+- **List endpoints** → `src/shared/pagination.ts` (`parsePaginatedQuery` + `paginated()`)
+- **Server redirects** → `src/shared/safeRedirect.ts`
+- **Server fetch** → `src/shared/safeFetch.ts`
+- **Token hashing** → `src/shared/cryptoHash.ts`
+- **UI API calls** → `packages/ui/src/lib/apiClient.ts`
+- **Client redirects** → `packages/ui/src/lib/safeRedirect.ts`
+
+When adding a new feature that matches one of these patterns, extend the canonical module — never inline a new implementation.

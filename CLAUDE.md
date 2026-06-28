@@ -136,3 +136,18 @@ Re-introducing any of these patterns is a review blocker.
 against this table. Add a `/security-review` pass for changes to OAuth,
 MFA, WebAuthn, CSFLE, breach checks, or any new `fetch`/`spawn`/`fs.writeFile`.
 
+## Canonical shared modules (extend, don't duplicate)
+
+Every agent working in this repo MUST reuse these modules instead of re-implementing the pattern:
+
+| Module | Exports | Use it for |
+| --- | --- | --- |
+| `src/shared/pagination.ts` | `parsePaginatedQuery(query, opts?)`, `paginated(data, {page,limit,total})` | Any list endpoint returning DB rows. Enforces bounded page/limit, returns `{ data, pagination: { page, limit, total, totalPages, hasNext, hasPrev } }`. Default limit 20, default max 200. |
+| `src/shared/safeRedirect.ts` | `safeRelativeRedirect()`, `appRedirectUrl()`, `isRegisteredRedirectUri()` | All server-side redirects (CWE-601). |
+| `src/shared/safeFetch.ts` | `assertSafeFetchHost()`, `assertSafeFetchUrl()`, `fetchPublicUrl()`, `fetchFixedUrl()` | Any server-side HTTP to non-fixed hosts (CWE-918). |
+| `src/shared/cryptoHash.ts` | `hashTokenSha256()`, `hashTokensSha256()`, `hashFingerprint()`, `hashBase64Url()` | Hashing tokens/fingerprints — never inline `createHash()`. |
+| `packages/ui/src/lib/apiClient.ts` | `apiGet()`, `apiPost()`, `apiPostFormData()`, `apiGetBlob()`, `apiDelete()` | All UI→API calls — never raw `fetch()`. |
+| `packages/ui/src/lib/safeRedirect.ts` | `clientSafeRedirect()` | Client-side redirects in React/Next.js. |
+
+When adding a new list endpoint: use `parsePaginatedQuery` + `paginated()`. When adding a new crypto hash: use `cryptoHash.ts`. When adding a redirect: use `safeRedirect.ts`. When adding a server fetch: use `safeFetch.ts`. Extracting/replacing inline implementations with these modules is always preferred.
+

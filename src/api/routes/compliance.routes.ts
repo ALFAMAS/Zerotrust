@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { z } from "zod";
 import { getLogger } from "../../logger";
 import { authMiddleware } from "../../middleware/auth";
+import { paginated, parsePaginatedQuery } from "../../shared/pagination";
 import {
   addRiskAssessment,
   getRiskAssessment,
@@ -34,8 +35,12 @@ router.get("/soc2/readiness", async (c) => {
 // GET /compliance/soc2/controls — list all controls
 router.get("/soc2/controls", async (c) => {
   try {
+    const { page, limit, offset } = parsePaginatedQuery(c.req.query, { defaultLimit: 50, maxLimit: 200 });
     const controls = await getSoc2Controls();
-    return c.json({ controls });
+    // Slice in-memory from preloaded controls (static config, not DB-driven)
+    const total = controls.length;
+    const sliced = controls.slice(offset, offset + limit);
+    return c.json(paginated(sliced, { page, limit, total }));
   } catch (err) {
     logger.error("SOC 2 controls error", err as Error);
     return c.json({ error: "INTERNAL_ERROR" }, 500);

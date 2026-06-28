@@ -5,6 +5,7 @@ import { getDb } from "../../db";
 import { accessReviewItemsTable, accessReviewsTable, usersTable } from "../../db/schema";
 import { getLogger } from "../../logger";
 import { authMiddleware } from "../../middleware/auth";
+import { paginated, parsePaginatedQuery } from "../../shared/pagination";
 import type { HonoEnv } from "../../shared/types";
 
 const router = new Hono<HonoEnv>();
@@ -86,20 +87,27 @@ router.post("/", async (c) => {
 // GET / — list reviews with item / pending counts
 router.get("/", async (c) => {
   try {
+    const { page, limit, offset } = parsePaginatedQuery(c.req.query);
     const db = getDb();
-    const reviews = await db
-      .select()
-      .from(accessReviewsTable)
-      .orderBy(desc(accessReviewsTable.createdAt));
-
-    const counts = await db
-      .select({
-        reviewId: accessReviewItemsTable.reviewId,
-        total: sql<number>`count(*)::int`,
-        pending: sql<number>`count(*) filter (where ${accessReviewItemsTable.decision} = 'pending')::int`,
-      })
-      .from(accessReviewItemsTable)
-      .groupBy(accessReviewItemsTable.reviewId);
+    const where = undefined; // could add status filter later
+    const [reviews, countResult, counts] = await Promise.all([
+      db
+        .select()
+        .from(accessReviewsTable)
+        .where(where)
+        .orderBy(desc(accessReviewsTable.createdAt))
+        .offset(offset)
+        .limit(limit),
+      db.select({ count: sql<number>`count(*)::int` }).from(accessReviewsTable).where(where),
+      db
+        .select({
+          reviewId: accessReviewItemsTable.reviewId,
+          total: sql<number>`count(*)::int`,
+          pending: sql<number>`count(*) filter (where ${accessReviewItemsTable.decision} = 'pending')::int`,
+        })
+        .from(accessReviewItemsTable)
+        .groupBy(accessReviewItemsTable.reviewId),
+    ]);
 
     const byId = new Map(counts.map((r) => [r.reviewId, r]));
     const enriched = reviews.map((r) => ({
@@ -108,17 +116,18 @@ router.get("/", async (c) => {
       pendingCount: byId.get(r.id)?.pending ?? 0,
     }));
 
-    return c.json({ reviews: enriched, total: enriched.length });
+    return c.json(paginated(enriched, { page, limit, total: countResult[0]?.count ?? 0 }));
   } catch (err) {
     logger.error("List access reviews error", err as Error);
     return c.json({ error: "INTERNAL_ERROR", message: "Failed to list access reviews" }, 500);
   }
 });
 
-// GET /:id — review with its items
+// GET /:id — review with its items (paginated)
 router.get("/:id", async (c) => {
   try {
     const id = c.req.param("id");
+    const { page, limit, offset } = parsePaginatedQuery(c.req.query);
     const db = getDb();
     const [review] = await db
       .select()
@@ -127,13 +136,22 @@ router.get("/:id", async (c) => {
       .limit(1);
     if (!review) return c.json({ error: "NOT_FOUND", message: "Access review not found" }, 404);
 
-    const items = await db
-      .select()
-      .from(accessReviewItemsTable)
-      .where(eq(accessReviewItemsTable.reviewId, id))
-      .orderBy(desc(accessReviewItemsTable.createdAt));
+    const where = eq(accessReviewItemsTable.reviewId, id);
+    const [items, countResult] = await Promise.all([
+      db
+        .select()
+        .from(accessReviewItemsTable)
+        .where(where)
+        .orderBy(desc(accessReviewItemsTable.createdAt))
+        .offset(offset)
+        .limit(limit),
+      db.select({ count: sql<number>`count(*)::int` }).from(accessReviewItemsTable).where(where),
+    ]);
 
-    return c.json({ review, items });
+    return c.json({
+      review,
+      items: paginated(items, { page, limit, total: countResult[0]?.count ?? 0 }),
+    });
   } catch (err) {
     logger.error("Get access review error", err as Error);
     return c.json({ error: "INTERNAL_ERROR", message: "Failed to get access review" }, 500);

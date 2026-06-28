@@ -7,6 +7,9 @@
 
 ## SaaS template architecture maintenance / stability backlog
 
+### P0 — Shared infrastructure
+- [x] **Pagination standardization** — created `src/shared/pagination.ts` with `parsePaginatedQuery()` + `paginated()` envelope; standardized 15+ list endpoints to return `{ data, pagination: { page, limit, total, totalPages, hasNext, hasPrev } }` consistently. Added count service functions where needed. Done 2026-07-29.
+
 Based on the production-ready SaaS template architecture review, prioritize stability and maintenance work over adding more headline features.
 
 ### P0 — Release reproducibility and dependency drift

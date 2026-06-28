@@ -1,9 +1,10 @@
-import { and, eq } from "drizzle-orm";
+import { and, desc, eq, sql } from "drizzle-orm";
 import { Hono } from "hono";
 import { getDb } from "../../db";
 import { sessionsTable } from "../../db/schema";
 import { getLogger } from "../../logger";
 import { authMiddleware } from "../../middleware/auth";
+import { paginated, parsePaginatedQuery } from "../../shared/pagination";
 import { revokeAllSessionsForUser, revokeSession } from "../../middleware/sessionControl";
 import type { HonoEnv } from "../../shared/types";
 
@@ -17,13 +18,19 @@ router.get("/", async (c) => {
   try {
     const userId = c.get("user").id;
     const currentSessionId = c.get("session")?.id;
+    const { page, limit, offset } = parsePaginatedQuery(c.req.query);
     const db = getDb();
-
-    const sessions = await db
-      .select()
-      .from(sessionsTable)
-      .where(eq(sessionsTable.userId, userId))
-      .orderBy(sessionsTable.lastActivityAt);
+    const where = eq(sessionsTable.userId, userId);
+    const [sessions, countResult] = await Promise.all([
+      db
+        .select()
+        .from(sessionsTable)
+        .where(where)
+        .orderBy(desc(sessionsTable.lastActivityAt))
+        .offset(offset)
+        .limit(limit),
+      db.select({ count: sql<number>`count(*)::int` }).from(sessionsTable).where(where),
+    ]);
 
     const sanitized = sessions.map((s) => ({
       id: s.id,
@@ -45,7 +52,7 @@ router.get("/", async (c) => {
       isCurrent: currentSessionId === s.id,
     }));
 
-    return c.json({ sessions: sanitized, total: sanitized.length });
+    return c.json(paginated(sanitized, { page, limit, total: countResult[0]?.count ?? 0 }));
   } catch (err) {
     logger.error("List sessions error", err as Error);
     return c.json({ error: "INTERNAL_ERROR", message: "Failed to list sessions" }, 500);

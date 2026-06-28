@@ -1,10 +1,11 @@
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, sql } from "drizzle-orm";
 import { Hono } from "hono";
 import { z } from "zod";
 import { getDb } from "../../db";
 import { notificationsTable, usersTable } from "../../db/schema";
 import { getLogger } from "../../logger";
 import { authMiddleware } from "../../middleware/auth";
+import { paginated, parsePaginatedQuery } from "../../shared/pagination";
 import { sendNotificationEmail } from "../../services/email.service";
 import {
   getVapidPublicKey,
@@ -99,14 +100,23 @@ router.get("/", async (c) => {
     if (!user) {
       return c.json({ error: "UNAUTHORIZED", message: "Authentication required" }, 401);
     }
+    const { page, limit, offset } = parsePaginatedQuery(c.req.query, { defaultLimit: 20 });
+    const unreadOnly = c.req.query("unread") === "true";
     const db = getDb();
-    const rows = await db
-      .select()
-      .from(notificationsTable)
-      .where(eq(notificationsTable.userId, user.id))
-      .orderBy(desc(notificationsTable.createdAt))
-      .limit(20);
-    return c.json(rows);
+    const conditions = [eq(notificationsTable.userId, user.id)];
+    if (unreadOnly) conditions.push(eq(notificationsTable.read, false));
+    const where = and(...conditions);
+    const [rows, countResult] = await Promise.all([
+      db
+        .select()
+        .from(notificationsTable)
+        .where(where)
+        .orderBy(desc(notificationsTable.createdAt))
+        .offset(offset)
+        .limit(limit),
+      db.select({ count: sql<number>`count(*)::int` }).from(notificationsTable).where(where),
+    ]);
+    return c.json(paginated(rows, { page, limit, total: countResult[0]?.count ?? 0 }));
   } catch (err) {
     logger.error("Get notifications error", err as Error);
     return c.json({ error: "INTERNAL_ERROR", message: "Failed to retrieve notifications" }, 500);

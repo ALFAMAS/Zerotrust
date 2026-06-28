@@ -3,6 +3,8 @@ import { z } from "zod";
 import { getLogger } from "../../logger";
 import { authMiddleware } from "../../middleware/auth";
 import {
+  countPointsHistory,
+  countWalletTransactions,
   createReferralLink,
   getCurrentTier,
   getPointsBalance,
@@ -17,6 +19,7 @@ import {
   topUpWallet,
   trackReferralClick,
 } from "../../services/wallet.service";
+import { paginated, parsePaginatedQuery } from "../../shared/pagination";
 import { appRedirectUrl } from "../../shared/safeRedirect";
 import type { HonoEnv } from "../../shared/types";
 
@@ -46,10 +49,12 @@ router.get("/transactions", async (c) => {
   try {
     const user = c.get("user");
     if (!user) return c.json({ error: "UNAUTHORIZED" }, 401);
-    const limit = Math.min(parseInt(c.req.query("limit") ?? "30", 10), 100);
-    const offset = parseInt(c.req.query("offset") ?? "0", 10);
-    const txs = await getWalletTransactions(user.id, limit, offset);
-    return c.json({ transactions: txs });
+    const { page, limit, offset } = parsePaginatedQuery(c.req.query, { defaultLimit: 30, maxLimit: 100 });
+    const [txs, total] = await Promise.all([
+      getWalletTransactions(user.id, limit, offset),
+      countWalletTransactions(user.id),
+    ]);
+    return c.json(paginated(txs, { page, limit, total }));
   } catch (err) {
     logger.error("Get wallet transactions error", err as Error);
     return c.json({ error: "INTERNAL_ERROR" }, 500);
@@ -125,10 +130,12 @@ router.get("/points/history", async (c) => {
   try {
     const user = c.get("user");
     if (!user) return c.json({ error: "UNAUTHORIZED" }, 401);
-    const limit = Math.min(parseInt(c.req.query("limit") ?? "50", 10), 200);
-    const offset = parseInt(c.req.query("offset") ?? "0", 10);
-    const history = await getPointsHistory(user.id, limit, offset);
-    return c.json({ history });
+    const { page, limit, offset } = parsePaginatedQuery(c.req.query, { defaultLimit: 50, maxLimit: 200 });
+    const [history, total] = await Promise.all([
+      getPointsHistory(user.id, limit, offset),
+      countPointsHistory(user.id),
+    ]);
+    return c.json(paginated(history, { page, limit, total }));
   } catch (err) {
     logger.error("Get points history error", err as Error);
     return c.json({ error: "INTERNAL_ERROR" }, 500);
