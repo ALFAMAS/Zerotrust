@@ -100,11 +100,13 @@ export function assertSafeBackupPath(file: string, backupDirResolved?: string): 
   if (typeof file !== "string" || file.length === 0) {
     throw new Error("CWE-22: empty backup path");
   }
-  if (SHELL_METACHARS.test(file)) {
+
+  const basename = path.basename(file);
+  const directoryWithoutSeparators = path.dirname(file).replace(/[\\/]/g, "");
+  if (SHELL_METACHARS.test(basename) || SHELL_METACHARS.test(directoryWithoutSeparators)) {
     throw new Error(`CWE-78: backup path contains shell metacharacters`);
   }
 
-  const basename = path.basename(file);
   const ARTIFACT_RE = /^zerotrust-[0-9TZ:_-]+\.dump(?:\.enc(?:\.meta)?)?$/;
   if (!ARTIFACT_RE.test(basename)) {
     throw new Error(

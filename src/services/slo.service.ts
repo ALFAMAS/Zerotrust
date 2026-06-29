@@ -25,6 +25,7 @@
 
 import type { Context } from "hono";
 import { createMiddleware } from "hono/factory";
+import { internalErrorResponse } from "../api/errorHandler";
 import { getLogger } from "../logger";
 import { metricsRegistry } from "../metrics/registry";
 import { notificationDispatcher } from "../notifications";
@@ -300,7 +301,7 @@ export async function sloRouteHandler(c: Context<HonoEnv>): Promise<Response> {
     const status = await computeSLOStatus();
     return c.json(status);
   } catch (err) {
-    return c.json({ error: String(err) }, 500);
+    return internalErrorResponse(c, logger, "SLO status failed", err);
   }
 }
 

@@ -57,6 +57,7 @@ import walletRoutes from "./routes/wallet.routes";
 dotenv.config();
 
 import type { HonoEnv } from "../shared/types";
+import { registerGlobalErrorHandler } from "./errorHandler";
 
 const logger = getLogger("api-server");
 export async function createServer() {
@@ -66,6 +67,7 @@ export async function createServer() {
   initLogger.info("Starting API server setup");
 
   const app = new Hono<HonoEnv>();
+  registerGlobalErrorHandler(app, logger);
 
   // Start email queue worker when Redis is available
   if (process.env.REDIS_URI) {
