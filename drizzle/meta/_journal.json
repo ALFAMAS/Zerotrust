@@ -176,6 +176,13 @@
       "when": 1782647072507,
       "tag": "0024_drop_enterprise_federation",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1782766571805,
+      "tag": "0025_burly_mindworm",
+      "breakpoints": true
     }
   ]
 }

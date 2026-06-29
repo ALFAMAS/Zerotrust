@@ -2,6 +2,10 @@ import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 import Stripe from "stripe";
 import { getDb } from "../../db";
+import {
+  claimStripeEvent,
+  releaseStripeEvent,
+} from "../../db/repositories/stripeEvents.repository";
 import { subscriptionsTable } from "../../db/schema";
 import { getLogger } from "../../logger";
 import { internalError } from "../../shared/httpErrors";
@@ -47,6 +51,14 @@ router.post("/webhook", async (c) => {
   }
 
   const db = getDb();
+
+  // Idempotency: claim this event id before applying it. Stripe delivers
+  // at-least-once, so a redelivered or replayed event must be a no-op.
+  const claimed = await claimStripeEvent(event.id, event.type);
+  if (!claimed) {
+    logger.info("Duplicate Stripe event ignored", { eventId: event.id, type: event.type });
+    return c.json({ received: true, duplicate: true });
+  }
 
   try {
     switch (event.type) {
@@ -162,6 +174,11 @@ router.post("/webhook", async (c) => {
         logger.info("Unhandled Stripe event", { type: event.type });
     }
   } catch (err) {
+    // Processing failed after we claimed the event — release the claim so
+    // Stripe's next retry reprocesses it instead of being skipped as a dupe.
+    await releaseStripeEvent(event.id).catch((releaseErr) =>
+      logger.error("Failed to release Stripe event claim after error", releaseErr as Error)
+    );
     return internalError(c, logger, "Webhook processing error", err);
   }
 

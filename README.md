@@ -87,7 +87,7 @@ rebuilding login for the hundredth time.
 
 ### Billing & growth
 
-- Stripe billing — checkout, customer portal, webhooks, per-org subscriptions
+- Stripe billing — checkout, customer portal, idempotent webhooks (replay-safe), per-org subscriptions
 - Plan feature gates (`requirePlan()`), 14-day trials, dunning, win-back, cancellation flow
 - API key management — named keys, SHA-256 hashed, scopes, revoke
 - Multi-currency pricing, PPP discounts, tax quotes, VAT validation, and tax exemptions

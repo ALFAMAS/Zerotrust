@@ -595,6 +595,25 @@ export const subscriptionsTable = pgTable(
   })
 );
 
+// ── Processed Stripe events (webhook idempotency) ─────────────────────────────
+// Records every Stripe event id we have already applied so a redelivered or
+// replayed webhook is a no-op (CWE-/ checklist #94: idempotency on money paths).
+// The event id is Stripe's globally-unique `evt_...` identifier and is the
+// primary key, so a duplicate insert conflicts and is skipped atomically.
+export const processedStripeEventsTable = pgTable(
+  "processed_stripe_events",
+  {
+    eventId: text("event_id").primaryKey(),
+    type: text("type").notNull(),
+    processedAt: timestamp("processed_at", { withTimezone: true }).notNull().default(sql`now()`),
+  },
+  (t) => ({
+    processedStripeEventsProcessedIdx: index("processed_stripe_events_processed_idx").on(
+      t.processedAt
+    ),
+  })
+);
+
 // ── Security events (account takeover detection) ──────────────────────────────
 
 export const securityEventsTable = pgTable("security_events", {

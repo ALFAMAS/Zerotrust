@@ -13,6 +13,19 @@ needs surfacing
 
 ---
 
+## Audit snapshot — production-readiness pass (2026-06-29)
+
+Full audit recorded in [`docs/AUDIT.md`](./docs/AUDIT.md); prioritized follow-ups
+in [`todo.md`](./todo.md). Shipped in this pass:
+
+- ✅ **Stripe webhook idempotency** — `POST /billing/webhook` now records each
+  Stripe event id in `processed_stripe_events` and skips redeliveries/replays
+  (claim-before-apply, release-on-error). Migration `0025_burly_mindworm.sql`.
+- ✅ **Repository layer seeded** — `src/db/repositories/stripeEvents.repository.ts`
+  is the first member of the hot-path-write repository layer (`todo.md` P1.1).
+- ✅ **Docs** — `.env.example` now lists the required `STRIPE_SECRET_KEY` /
+  `STRIPE_WEBHOOK_SECRET` / `STRIPE_PRODUCT_*` vars (were used but undocumented).
+
 ## Removed — maintenance slim-down (2026-06-28)
 
 To reduce the template's maintenance surface, the following heavy/low-use
