@@ -6,6 +6,8 @@ import { supportTicketMessagesTable, supportTicketsTable } from "../../db/schema
 import { getLogger } from "../../logger";
 import { authMiddleware } from "../../middleware/auth";
 import { rateLimit } from "../../middleware/rateLimiting";
+import { internalError } from "../../shared/httpErrors";
+import { hasAnyRole } from "../../shared/roles";
 import type { HonoEnv } from "../../shared/types";
 
 const router = new Hono<HonoEnv>();
@@ -26,7 +28,7 @@ const replySchema = z.object({ body: z.string().min(1).max(5000) });
 const statusSchema = z.object({ status: z.enum(TICKET_STATUSES) });
 
 function isAgent(user: { roles?: string[] }): boolean {
-  return Boolean(user.roles?.includes("admin") || user.roles?.includes("support"));
+  return hasAnyRole(user, ["admin", "support"]);
 }
 
 // POST /support — open a ticket with its first message
@@ -63,8 +65,7 @@ router.post("/", rateLimit({ points: 20, windowSecs: 3600 }), async (c) => {
     logger.info("Support ticket opened", { ticketId: ticket.id, userId: user.id });
     return c.json({ ticket, messages: [message] }, 201);
   } catch (err) {
-    logger.error("Create ticket error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR" }, 500);
+    return internalError(c, logger, "Create ticket error", err);
   }
 });
 
@@ -82,8 +83,7 @@ router.get("/", async (c) => {
       .orderBy(desc(supportTicketsTable.updatedAt));
     return c.json({ tickets, scope: showAll ? "all" : "mine" });
   } catch (err) {
-    logger.error("List tickets error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR" }, 500);
+    return internalError(c, logger, "List tickets error", err);
   }
 });
 
@@ -111,8 +111,7 @@ router.get("/:id", async (c) => {
 
     return c.json({ ticket, messages });
   } catch (err) {
-    logger.error("Get ticket error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR" }, 500);
+    return internalError(c, logger, "Get ticket error", err);
   }
 });
 
@@ -160,8 +159,7 @@ router.post("/:id/messages", rateLimit({ points: 60, windowSecs: 3600 }), async 
 
     return c.json({ message }, 201);
   } catch (err) {
-    logger.error("Reply ticket error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR" }, 500);
+    return internalError(c, logger, "Reply ticket error", err);
   }
 });
 
@@ -200,8 +198,7 @@ router.patch("/:id", async (c) => {
 
     return c.json({ ticket: updated });
   } catch (err) {
-    logger.error("Update ticket status error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR" }, 500);
+    return internalError(c, logger, "Update ticket status error", err);
   }
 });
 

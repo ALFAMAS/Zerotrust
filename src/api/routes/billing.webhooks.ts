@@ -4,6 +4,7 @@ import Stripe from "stripe";
 import { getDb } from "../../db";
 import { subscriptionsTable } from "../../db/schema";
 import { getLogger } from "../../logger";
+import { internalError } from "../../shared/httpErrors";
 import type { HonoEnv } from "../../shared/types";
 
 const router = new Hono<HonoEnv>();
@@ -161,8 +162,7 @@ router.post("/webhook", async (c) => {
         logger.info("Unhandled Stripe event", { type: event.type });
     }
   } catch (err) {
-    logger.error("Webhook processing error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR" }, 500);
+    return internalError(c, logger, "Webhook processing error", err);
   }
 
   return c.json({ received: true });

@@ -6,6 +6,7 @@ import { feedbackTable } from "../../db/schema";
 import { getLogger } from "../../logger";
 import { authMiddleware } from "../../middleware/auth";
 import { rateLimit } from "../../middleware/rateLimiting";
+import { internalError } from "../../shared/httpErrors";
 import type { HonoEnv } from "../../shared/types";
 
 const router = new Hono<HonoEnv>();
@@ -46,8 +47,7 @@ router.post("/", authMiddleware, rateLimit({ points: 10, windowSecs: 3600 }), as
     logger.info("Feedback submitted", { userId: user.id, type: parsed.data.type });
     return c.json(entry, 201);
   } catch (err) {
-    logger.error("Submit feedback error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR" }, 500);
+    return internalError(c, logger, "Submit feedback error", err);
   }
 });
 

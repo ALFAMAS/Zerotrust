@@ -12,6 +12,7 @@ import {
   type TenantSettings,
   updateTenant,
 } from "../../models/tenant.model.js";
+import { isAdmin } from "../../shared/roles";
 import type { HonoEnv } from "../../shared/types";
 
 const router = new Hono<HonoEnv>();
@@ -38,7 +39,7 @@ async function findByIdOrSlug(idOrSlug: string) {
 
 router.use("/*", async (c, next) => {
   const user = c.get("user");
-  if (!user?.roles.includes("admin")) {
+  if (!isAdmin(user)) {
     return c.json({ code: "ACCESS_DENIED", message: "Admin role required", details: [] }, 403);
   }
   return next();

@@ -1,11 +1,13 @@
-import { and, desc, eq, sql } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { getDb } from "../../db";
 import { sessionsTable } from "../../db/schema";
 import { getLogger } from "../../logger";
 import { authMiddleware } from "../../middleware/auth";
-import { paginated, parsePaginatedQuery } from "../../shared/pagination";
 import { revokeAllSessionsForUser, revokeSession } from "../../middleware/sessionControl";
+import { countRows } from "../../shared/dbCount";
+import { internalError } from "../../shared/httpErrors";
+import { paginated, parsePaginatedQuery } from "../../shared/pagination";
 import type { HonoEnv } from "../../shared/types";
 
 const router = new Hono<HonoEnv>();
@@ -21,7 +23,7 @@ router.get("/", async (c) => {
     const { page, limit, offset } = parsePaginatedQuery(c.req.query());
     const db = getDb();
     const where = eq(sessionsTable.userId, userId);
-    const [sessions, countResult] = await Promise.all([
+    const [sessions, total] = await Promise.all([
       db
         .select()
         .from(sessionsTable)
@@ -29,7 +31,7 @@ router.get("/", async (c) => {
         .orderBy(desc(sessionsTable.lastActivityAt))
         .offset(offset)
         .limit(limit),
-      db.select({ count: sql<number>`count(*)::int` }).from(sessionsTable).where(where),
+      countRows(db, sessionsTable, where),
     ]);
 
     const sanitized = sessions.map((s) => ({
@@ -52,10 +54,9 @@ router.get("/", async (c) => {
       isCurrent: currentSessionId === s.id,
     }));
 
-    return c.json(paginated(sanitized, { page, limit, total: countResult[0]?.count ?? 0 }));
+    return c.json(paginated(sanitized, { page, limit, total }));
   } catch (err) {
-    logger.error("List sessions error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR", message: "Failed to list sessions" }, 500);
+    return internalError(c, logger, "List sessions error", err, "Failed to list sessions");
   }
 });
 
@@ -67,8 +68,7 @@ router.delete("/", async (c) => {
     const count = await revokeAllSessionsForUser(userId, currentSessionId);
     return c.json({ revoked: count });
   } catch (err) {
-    logger.error("Revoke all sessions error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR", message: "Failed to revoke sessions" }, 500);
+    return internalError(c, logger, "Revoke all sessions error", err, "Failed to revoke sessions");
   }
 });
 
@@ -92,8 +92,7 @@ router.delete("/:id", async (c) => {
     await revokeSession(sessionId, "USER_REVOKED");
     return c.json({ revoked: true });
   } catch (err) {
-    logger.error("Revoke session error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR", message: "Failed to revoke session" }, 500);
+    return internalError(c, logger, "Revoke session error", err, "Failed to revoke session");
   }
 });
 

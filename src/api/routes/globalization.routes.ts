@@ -26,6 +26,8 @@ import {
   setExemptionStatus,
   submitTaxExemption,
 } from "../../services/taxExemption.service";
+import { internalError } from "../../shared/httpErrors";
+import { isAdmin } from "../../shared/roles";
 import type { HonoEnv } from "../../shared/types";
 
 const router = new Hono<HonoEnv>();
@@ -64,8 +66,7 @@ router.get("/currencies", authMiddleware, async (c) => {
     const rates = await getExchangeRates();
     return c.json({ currencies: SUPPORTED_CURRENCIES, rates });
   } catch (err) {
-    logger.error("Currencies error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR" }, 500);
+    return internalError(c, logger, "Currencies error", err);
   }
 });
 
@@ -84,8 +85,7 @@ router.get("/pricing", authMiddleware, async (c) => {
     const plans = await getLocalizedPricing(currency, country, locale);
     return c.json({ currency, country, ppp: pppForCountry(country), plans });
   } catch (err) {
-    logger.error("Pricing error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR" }, 500);
+    return internalError(c, logger, "Pricing error", err);
   }
 });
 
@@ -124,8 +124,7 @@ router.post("/tax/quote", authMiddleware, async (c) => {
     const quote = calculateTax(amount, { country, region }, { exempt, reverseCharge });
     return c.json({ currency: currency.toUpperCase(), ...quote });
   } catch (err) {
-    logger.error("Tax quote error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR" }, 500);
+    return internalError(c, logger, "Tax quote error", err);
   }
 });
 
@@ -137,8 +136,7 @@ router.get("/vat/validate", authMiddleware, async (c) => {
     const result = await validateVatNumber(vat);
     return c.json(result);
   } catch (err) {
-    logger.error("VAT validate error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR" }, 500);
+    return internalError(c, logger, "VAT validate error", err);
   }
 });
 
@@ -169,8 +167,7 @@ router.post("/tax-exemptions", authMiddleware, async (c) => {
     }
     return c.json({ exemption: result.exemption }, 201);
   } catch (err) {
-    logger.error("Submit exemption error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR" }, 500);
+    return internalError(c, logger, "Submit exemption error", err);
   }
 });
 
@@ -186,8 +183,7 @@ router.get("/tax-exemptions", authMiddleware, async (c) => {
     const exemptions = await listTaxExemptions(orgId);
     return c.json({ exemptions });
   } catch (err) {
-    logger.error("List exemptions error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR" }, 500);
+    return internalError(c, logger, "List exemptions error", err);
   }
 });
 
@@ -197,7 +193,7 @@ const statusSchema = z.object({ status: z.enum(["verified", "rejected", "pending
 router.post("/tax-exemptions/:id/status", authMiddleware, async (c) => {
   try {
     const user = c.get("user");
-    if (!user.roles?.includes("admin")) {
+    if (!isAdmin(user)) {
       return c.json({ error: "FORBIDDEN", message: "Admin role required" }, 403);
     }
     const body = await c.req.json().catch(() => ({}));
@@ -209,8 +205,7 @@ router.post("/tax-exemptions/:id/status", authMiddleware, async (c) => {
     if (!updated) return c.json({ error: "NOT_FOUND" }, 404);
     return c.json({ exemption: updated });
   } catch (err) {
-    logger.error("Set exemption status error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR" }, 500);
+    return internalError(c, logger, "Set exemption status error", err);
   }
 });
 

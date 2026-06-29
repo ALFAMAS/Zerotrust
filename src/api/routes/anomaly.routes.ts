@@ -1,24 +1,25 @@
+import { desc } from "drizzle-orm";
 import type { Context } from "hono";
 import { Hono } from "hono";
-import { desc, sql } from "drizzle-orm";
 import { getDb } from "../../db/index.js";
 import { userBehaviorBaselinesTable } from "../../db/schema.js";
 import { getLogger } from "../../logger/index.js";
 import { authMiddleware } from "../../middleware/auth.js";
-import { paginated, parsePaginatedQuery } from "../../shared/pagination.js";
 import {
   getBaseline,
   resetBaseline,
   scoreAnomaly,
 } from "../../services/anomalyDetection.service.js";
+import { countRows } from "../../shared/dbCount.js";
+import { paginated, parsePaginatedQuery } from "../../shared/pagination.js";
+import { hasRole } from "../../shared/roles.js";
 import type { HonoEnv } from "../../shared/types.js";
 
 const router = new Hono<HonoEnv>();
 const logger = getLogger("anomaly-routes");
 
 function isAdmin(c: Context<HonoEnv>): boolean {
-  const user = c.get("user");
-  return Array.isArray(user?.roles) && user.roles.includes("admin");
+  return hasRole(c.get("user"), "admin");
 }
 
 router.use("*", authMiddleware);
@@ -29,16 +30,16 @@ router.get("/baselines", async (c) => {
   try {
     const { page, limit, offset } = parsePaginatedQuery(c.req.query());
     const db = getDb();
-    const [rows, countResult] = await Promise.all([
+    const [rows, total] = await Promise.all([
       db
         .select()
         .from(userBehaviorBaselinesTable)
         .orderBy(desc(userBehaviorBaselinesTable.userId))
         .offset(offset)
         .limit(limit),
-      db.select({ count: sql<number>`count(*)::int` }).from(userBehaviorBaselinesTable),
+      countRows(db, userBehaviorBaselinesTable),
     ]);
-    return c.json(paginated(rows, { page, limit, total: countResult[0]?.count ?? 0 }));
+    return c.json(paginated(rows, { page, limit, total }));
   } catch (err) {
     logger.warn("Failed to list baselines", { error: String(err) });
     return c.json({ error: "INTERNAL_ERROR" }, 500);

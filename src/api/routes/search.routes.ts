@@ -2,7 +2,6 @@ import { Hono } from "hono";
 import { z } from "zod";
 import { getLogger } from "../../logger";
 import { authMiddleware } from "../../middleware/auth";
-import { paginated, parsePaginatedQuery } from "../../shared/pagination";
 import {
   deleteDocument,
   indexDocument,
@@ -11,6 +10,8 @@ import {
   searchProvider,
   smartSearch,
 } from "../../services/search.service";
+import { internalError } from "../../shared/httpErrors";
+import { paginated, parsePaginatedQuery } from "../../shared/pagination";
 import type { HonoEnv } from "../../shared/types";
 
 const router = new Hono<HonoEnv>();
@@ -38,8 +39,7 @@ router.get("/", async (c) => {
       ...paginated(results.hits, { page, limit, total: results.total }),
     });
   } catch (err) {
-    logger.error("Search error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR" }, 500);
+    return internalError(c, logger, "Search error", err);
   }
 });
 
@@ -67,8 +67,7 @@ router.get("/smart", async (c) => {
     });
     return c.json(results);
   } catch (err) {
-    logger.error("Smart search error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR" }, 500);
+    return internalError(c, logger, "Smart search error", err);
   }
 });
 

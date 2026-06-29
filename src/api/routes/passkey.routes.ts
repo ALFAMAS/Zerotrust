@@ -19,6 +19,7 @@ import {
 } from "../../services/orgSecurityPolicy.service";
 import { TokenService } from "../../services/token.service";
 import { getClientIp } from "../../shared/clientIp";
+import { internalError } from "../../shared/httpErrors";
 import type { HonoEnv } from "../../shared/types";
 
 const router = new Hono<HonoEnv>();
@@ -131,8 +132,13 @@ router.post("/register/options", authMiddleware, async (c) => {
     if ((err as Error).message === "ORG_MEMBERSHIP_REQUIRED") {
       return c.json({ error: "FORBIDDEN", message: "Not a member of this organization" }, 403);
     }
-    logger.error("Passkey register options error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR", message: "Failed to generate options" }, 500);
+    return internalError(
+      c,
+      logger,
+      "Passkey register options error",
+      err,
+      "Failed to generate options"
+    );
   }
 });
 
@@ -263,8 +269,13 @@ router.post("/register/verify", authMiddleware, async (c) => {
     if ((err as Error).message === "ORG_MEMBERSHIP_REQUIRED") {
       return c.json({ error: "FORBIDDEN", message: "Not a member of this organization" }, 403);
     }
-    logger.error("Passkey register verify error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR", message: "Registration verification failed" }, 500);
+    return internalError(
+      c,
+      logger,
+      "Passkey register verify error",
+      err,
+      "Registration verification failed"
+    );
   }
 });
 
@@ -307,8 +318,13 @@ router.post("/authenticate/options", async (c) => {
 
     return c.json({ ...options, _challengeKey: challengeKey });
   } catch (err) {
-    logger.error("Passkey auth options error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR", message: "Failed to generate options" }, 500);
+    return internalError(
+      c,
+      logger,
+      "Passkey auth options error",
+      err,
+      "Failed to generate options"
+    );
   }
 });
 

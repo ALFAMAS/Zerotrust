@@ -1,11 +1,10 @@
-import { and, desc, eq, sql } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { z } from "zod";
 import { getDb } from "../../db";
 import { notificationsTable, usersTable } from "../../db/schema";
 import { getLogger } from "../../logger";
 import { authMiddleware } from "../../middleware/auth";
-import { paginated, parsePaginatedQuery } from "../../shared/pagination";
 import { sendNotificationEmail } from "../../services/email.service";
 import {
   getVapidPublicKey,
@@ -13,6 +12,9 @@ import {
   saveSubscription,
   sendWebPush,
 } from "../../services/webPush.service";
+import { countRows } from "../../shared/dbCount";
+import { internalError } from "../../shared/httpErrors";
+import { paginated, parsePaginatedQuery } from "../../shared/pagination";
 import type { HonoEnv } from "../../shared/types";
 
 export interface NotificationPreferences {
@@ -106,7 +108,7 @@ router.get("/", async (c) => {
     const conditions = [eq(notificationsTable.userId, user.id)];
     if (unreadOnly) conditions.push(eq(notificationsTable.read, false));
     const where = and(...conditions);
-    const [rows, countResult] = await Promise.all([
+    const [rows, total] = await Promise.all([
       db
         .select()
         .from(notificationsTable)
@@ -114,12 +116,17 @@ router.get("/", async (c) => {
         .orderBy(desc(notificationsTable.createdAt))
         .offset(offset)
         .limit(limit),
-      db.select({ count: sql<number>`count(*)::int` }).from(notificationsTable).where(where),
+      countRows(db, notificationsTable, where),
     ]);
-    return c.json(paginated(rows, { page, limit, total: countResult[0]?.count ?? 0 }));
+    return c.json(paginated(rows, { page, limit, total }));
   } catch (err) {
-    logger.error("Get notifications error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR", message: "Failed to retrieve notifications" }, 500);
+    return internalError(
+      c,
+      logger,
+      "Get notifications error",
+      err,
+      "Failed to retrieve notifications"
+    );
   }
 });
 
@@ -138,8 +145,13 @@ router.get("/unread-count", async (c) => {
       .where(and(eq(notificationsTable.userId, user.id), eq(notificationsTable.read, false)));
     return c.json({ count: rows.length });
   } catch (err) {
-    logger.error("Get unread count error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR", message: "Failed to retrieve unread count" }, 500);
+    return internalError(
+      c,
+      logger,
+      "Get unread count error",
+      err,
+      "Failed to retrieve unread count"
+    );
   }
 });
 
@@ -163,8 +175,13 @@ router.post("/:id/read", async (c) => {
     }
     return c.json(updated[0]);
   } catch (err) {
-    logger.error("Mark notification read error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR", message: "Failed to mark notification as read" }, 500);
+    return internalError(
+      c,
+      logger,
+      "Mark notification read error",
+      err,
+      "Failed to mark notification as read"
+    );
   }
 });
 
@@ -183,10 +200,12 @@ router.post("/read-all", async (c) => {
       .where(and(eq(notificationsTable.userId, user.id), eq(notificationsTable.read, false)));
     return c.json({ success: true });
   } catch (err) {
-    logger.error("Mark all notifications read error", err as Error);
-    return c.json(
-      { error: "INTERNAL_ERROR", message: "Failed to mark all notifications as read" },
-      500
+    return internalError(
+      c,
+      logger,
+      "Mark all notifications read error",
+      err,
+      "Failed to mark all notifications as read"
     );
   }
 });
@@ -284,8 +303,7 @@ router.get("/preferences", async (c) => {
     };
     return c.json(prefs);
   } catch (err) {
-    logger.error("Get notification preferences error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR" }, 500);
+    return internalError(c, logger, "Get notification preferences error", err);
   }
 });
 
@@ -328,8 +346,7 @@ router.put("/preferences", async (c) => {
 
     return c.json({ ...existingPrefs, ...parsed.data });
   } catch (err) {
-    logger.error("Update notification preferences error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR" }, 500);
+    return internalError(c, logger, "Update notification preferences error", err);
   }
 });
 
@@ -364,8 +381,13 @@ router.post("/push/subscribe", async (c) => {
     await saveSubscription(user.id, parsed.data, c.req.header("user-agent") ?? undefined);
     return c.json({ success: true });
   } catch (err) {
-    logger.error("Save push subscription error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR", message: "Failed to save subscription" }, 500);
+    return internalError(
+      c,
+      logger,
+      "Save push subscription error",
+      err,
+      "Failed to save subscription"
+    );
   }
 });
 
@@ -384,8 +406,13 @@ router.post("/push/unsubscribe", async (c) => {
     await removeSubscription(user.id, endpoint);
     return c.json({ success: true });
   } catch (err) {
-    logger.error("Remove push subscription error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR", message: "Failed to remove subscription" }, 500);
+    return internalError(
+      c,
+      logger,
+      "Remove push subscription error",
+      err,
+      "Failed to remove subscription"
+    );
   }
 });
 

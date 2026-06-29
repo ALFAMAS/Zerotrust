@@ -11,6 +11,7 @@ import {
 } from "../services/sessionPolicy.service";
 import { TokenService } from "../services/token.service";
 import { describePrincipal, principalFromToken } from "../shared/principal";
+import { isAdmin } from "../shared/roles";
 import type { HonoEnv, TokenPayload } from "../shared/types";
 import { ErrorCodes, zerotrustError } from "../shared/types";
 import { revokeSession } from "./sessionControl";
@@ -109,7 +110,7 @@ export const authMiddleware = createMiddleware<HonoEnv>(async (c, next) => {
 
     const db = getDb();
 
-    let sessionRows: typeof sessionsTable.$inferSelect[];
+    let sessionRows: (typeof sessionsTable.$inferSelect)[];
     try {
       sessionRows = await db
         .select()
@@ -319,7 +320,7 @@ export const requireAdmin = createMiddleware<HonoEnv>(async (c, next) => {
   if (!user) {
     return c.json({ error: ErrorCodes.TOKEN_INVALID, message: "Authentication required" }, 401);
   }
-  if (!user.roles?.includes("admin")) {
+  if (!isAdmin(user)) {
     return c.json({ error: "FORBIDDEN", message: "Admin role required" }, 403);
   }
   return next();
@@ -338,7 +339,7 @@ export const optionalAuthMiddleware = createMiddleware<HonoEnv>(async (c, next) 
       const payload = await tokenService.verifyAccessToken(token);
       const db = getDb();
 
-      let sessionRows: typeof sessionsTable.$inferSelect[];
+      let sessionRows: (typeof sessionsTable.$inferSelect)[];
       try {
         sessionRows = await db
           .select()
