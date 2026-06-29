@@ -56,6 +56,9 @@ interface UsersResponse {
   total?: number;
   page?: number;
   limit?: number;
+  // Paginated envelope shape (`paginated()` on the API side).
+  data?: User[];
+  pagination?: { total?: number; totalPages?: number; hasNext?: boolean; hasPrev?: boolean };
 }
 
 const PAGE_SIZE = 20;

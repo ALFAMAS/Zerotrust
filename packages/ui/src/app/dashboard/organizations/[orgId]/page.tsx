@@ -99,7 +99,7 @@ export default function OrgDetailPage() {
       setCurrentUser(meRes);
       setMembers(membersRes.data ?? []);
 
-      const me = (membersRes.data ?? []).find
+      const me = (membersRes.data ?? []).find((m) => m.member.userId === meRes.id);
       setMyRole(me?.member.role ?? "");
 
       if (me && (me.member.role === "admin" || me.member.role === "owner")) {

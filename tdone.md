@@ -42,6 +42,26 @@ loyalty, globalization, search, compliance, audit, and ops tooling.
 
 ---
 
+## Maintenance & hardening (2026-06-29)
+
+- ✅ **Global input sanitization (XSS / CWE-79)** — `inputSanitizationMiddleware()`
+  strips dangerous HTML tags and neutralizes `javascript:`/event-handler payloads
+  across request bodies, query, path, and form fields; sensitive fields
+  (passwords/tokens/secrets) and signed/SSF payloads are skipped. Mounted globally
+  in `src/api/server.ts`.
+- ✅ **Reusable backend helpers** — consolidated route boilerplate into
+  `src/shared/httpErrors.ts` (`internalError`, the canonical 500 for ~115 route
+  catch blocks), `src/shared/dbCount.ts` (`countRows`), and `src/shared/roles.ts`
+  (`hasRole`/`hasAnyRole`/`isAdmin`); routers reuse the shared `requireAdmin`
+  middleware instead of re-implementing the guard.
+- ✅ **Release reproducibility** — pinned Biome + drizzle-kit to exact versions,
+  added a single `verify:generated` drift gate (SDK + API reference + integration
+  matrix + shadcn report), and a weekly grouped dependency-update workflow.
+- ✅ **Dependency refresh** — upgraded all dependencies to latest, including
+  TypeScript 6 (API + UI type-check clean).
+
+---
+
 ## Enterprise Execution Ledger
 
 - ✅ CWE security hardening sweep — audited CWE-918, CWE-1427, CWE-532, CWE-22, CWE-601, CWE-1333, CWE-327, and CWE-78 patterns; hardened every server-side/script `fetch` with timeout + no-redirect handling, added shared SSRF guards for tenant/admin-controlled notification webhooks, webhook delivery, SSF receivers, and FIDO MDS3 embedded URLs; moved Facebook OAuth tokens/secrets out of URLs; fixed presigned upload object keys to derive extensions from validated content type; and updated `CLAUDE.md`, `AGENTS.md`, and the Hermes `secure-coding` skill so future agents reuse the canonical patterns.

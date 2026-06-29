@@ -1,0 +1,64 @@
+name: Dependency update
+
+# Scheduled dependency refresh. Bumps every dependency to its latest version,
+# runs the full required gate (lint, type-check, tests, generated-output drift,
+# UI build), and opens a single grouped PR so the bumps are reviewed together
+# rather than as dozens of individual PRs. The same gates run again via ci.yml
+# on the PR itself, so a bump that breaks the build cannot merge.
+
+on:
+  schedule:
+    # Mondays 06:17 UTC (off the :00 mark to avoid the scheduler stampede).
+    - cron: "17 6 * * 1"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: dependency-update
+  cancel-in-progress: true
+
+jobs:
+  update:
+    name: Bump dependencies and open grouped PR
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: .bun-version
+
+      - name: Update dependencies to latest
+        run: |
+          bun update --latest
+          bun install
+
+      - name: Lint & format
+        run: bun run lint:ci
+      - name: Type-check (API)
+        run: bun run type-check
+      - name: Tests
+        run: bun run test --run
+      - name: Generated-output drift
+        run: bun run verify:generated
+      - name: Build UI
+        run: bun run --cwd packages/ui build
+
+      - name: Open grouped dependency PR
+        uses: peter-evans/create-pull-request@v7
+        with:
+          commit-message: "chore(deps): scheduled dependency update"
+          branch: deps/scheduled-update
+          delete-branch: true
+          title: "chore(deps): scheduled dependency update"
+          body: |
+            Automated weekly dependency refresh (`bun update --latest`).
+
+            All required gates ran green in this workflow before the PR was
+            opened: lint, type-check, tests, generated-output drift, and the UI
+            build. CI re-runs the same gates on this PR.
+
+            Review the lockfile and any major version bumps before merging.
+          labels: dependencies

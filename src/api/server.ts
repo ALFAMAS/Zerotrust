@@ -56,9 +56,9 @@ import walletRoutes from "./routes/wallet.routes";
 
 dotenv.config();
 
+import { inputSanitizationMiddleware } from "../middleware/inputSanitization";
 import type { HonoEnv } from "../shared/types";
 import { registerGlobalErrorHandler } from "./errorHandler";
-import { inputSanitizationMiddleware } from "../middleware/inputSanitization";
 
 const logger = getLogger("api-server");
 export async function createServer() {

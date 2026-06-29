@@ -15,17 +15,19 @@ test.describe("public pages", () => {
   test("landing page exposes hreflang alternates", async ({ page }) => {
     await page.goto("/");
 
+    // hreflang alternates are path-based (`<brand.url>/<locale>`), per the
+    // `alternates.languages` map in src/app/layout.tsx — not `?locale=` query params.
     await expect(page.locator('link[rel="alternate"][hreflang="en"]')).toHaveAttribute(
       "href",
-      /locale=en/
+      /\/en$/
     );
     await expect(page.locator('link[rel="alternate"][hreflang="es"]')).toHaveAttribute(
       "href",
-      /locale=es/
+      /\/es$/
     );
     await expect(page.locator('link[rel="alternate"][hreflang="fr"]')).toHaveAttribute(
       "href",
-      /locale=fr/
+      /\/fr$/
     );
     await expect(page.locator('link[rel="alternate"][hreflang="x-default"]')).toHaveAttribute(
       "href",

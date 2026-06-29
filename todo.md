@@ -2,8 +2,13 @@
 
 ## Environment / verification blockers
 
-- [ ] Repair the local Bun/Windows `node_modules` junction state so full `bun run type-check`, `bun run lint`, `bun run build`, and `bun run test` can run locally again. Current CWE/fetch hardening verification used `bunx biome check` on touched files and `bun build --packages external` because the local install reports workspace symlink/EACCES issues.
-  - Latest blocker: `bun run build` cannot resolve `node_modules/typescript/lib/tsc.js`, local `biome` shim cannot resolve, `bunx vitest run ...` cannot resolve `vitest/config`, and importing modules that depend on `nanoid` can hit `EACCES`; use CI/full reinstall to run the complete suite. CWE-601 verification used Biome-on-touched-files, `bun build --packages external`, and direct safeRedirect smoke checks.
+- [x] Repair the local toolchain so the full suite runs. Root cause was missing
+  platform-specific native binaries that Bun did not fetch for this host
+  (`@rolldown/binding-linux-x64-gnu`, which `vitest` needs, and
+  `@esbuild/linux-x64`, which `tsx` needs). With those present, `bun run type-check`,
+  `bun run lint:ci`, `bun run test`, `bun run verify:generated`, and the API/UI
+  `tsc` builds all run clean locally. (CI installs these binaries normally, so it
+  was never affected.) Done 2026-06-29.
 
 ## SaaS template architecture maintenance / stability backlog
 
@@ -14,10 +19,17 @@ Based on the production-ready SaaS template architecture review, prioritize stab
 
 ### P0 — Release reproducibility and dependency drift
 
-- [ ] Pin formatters and code generators to exact versions, starting with `@biomejs/biome` and any generated-client/doc tooling.
-- [ ] Add a single `verify:generated` script that checks OpenAPI output, `packages/client`, API docs/reference output, and shadcn adoption reports for drift.
-- [ ] Add a scheduled dependency-update workflow with grouped PRs and required `bun run lint:ci`, `bun run type-check`, `bun run test`, SDK drift, and UI build checks.
-- [ ] Require CI on `main` and block direct pushes so formatting or generated-output drift cannot land outside PR gates.
+- [x] Pin formatters and code generators to exact versions — `@biomejs/biome`
+  (+ its platform CLIs) and `drizzle-kit` are now pinned without a caret so the
+  formatter/migration output is reproducible across machines. Done 2026-06-29.
+- [x] Add a single `verify:generated` script that checks `packages/client`, the
+  API reference docs, the API/UI integration matrix, and the shadcn adoption
+  report for drift (regenerates each from `src/api/openapi.json` + source, then
+  `git diff --exit-code`). Done 2026-06-29.
+- [x] Add a scheduled dependency-update workflow with a grouped PR and required
+  `lint:ci`, `type-check`, `test`, generated-output drift, and UI build gates —
+  `.github/workflows/dependency-update.yml` (weekly + manual dispatch). Done 2026-06-29.
+- [ ] Require CI on `main` and block direct pushes so formatting or generated-output drift cannot land outside PR gates. _(Repo branch-protection setting — must be configured in GitHub repo settings, not in-repo.)_
 
 ### P0 — Bounded modules and dependency direction
 

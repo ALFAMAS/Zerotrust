@@ -41,7 +41,7 @@ const SENSITIVE_FIELDS = new Set([
 
 /**
  * Tags removed WITH their content. These are the ones browsers execute
- * (scripts) or use to exfiltrude (svg with animate, iframe, object).
+ * (scripts) or use to exfiltrate (svg with animate, iframe, object).
  */
 const DANGEROUS_TAGS = new Set([
   "script",
@@ -96,10 +96,7 @@ export function sanitizeInputString(input: string): string {
   // 1. Remove dangerous tags WITH their content (pair match, then self-closing)
   for (const tag of DANGEROUS_TAGS) {
     // <tag ...>...</tag> (non-greedy)
-    const pairRegex = new RegExp(
-      `<\\s*${tag}\\b[^>]*>[\\s\\S]*?<\\s*\\/\\s*${tag}\\s*>`,
-      "gi"
-    );
+    const pairRegex = new RegExp(`<\\s*${tag}\\b[^>]*>[\\s\\S]*?<\\s*\\/\\s*${tag}\\s*>`, "gi");
     result = result.replace(pairRegex, "");
     // Self-closing or unpaired: <tag ...> and <tag .../>
     const unpairedRegex = new RegExp(`<\\s*${tag}\\b[^>]*\\/?>`, "gi");
@@ -107,18 +104,12 @@ export function sanitizeInputString(input: string): string {
   }
 
   // 2. Strip event-handler attributes from remaining tags (onclick=, onerror=, onbegin=, ...)
-  const eventAttrRegex = new RegExp(
-    `\\s+\\bon\\w+\\s*=\\s*(?:"[^"]*"|'[^']*'|[^\\s>]+)`,
-    "gi"
-  );
+  const eventAttrRegex = /\s+\bon\w+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi;
   result = result.replace(eventAttrRegex, "");
 
   // 3. Neutralize javascript: URLs — replace the entire URL value
   //    when it starts with javascript: (preserve surrounding quotes)
-  const jsUrlRegex = new RegExp(
-    `(\\s+(?:href|src|action)\\s*=\\s*)["']javascript:[^"'>]*["']?`,
-    "gi"
-  );
+  const jsUrlRegex = /(\s+(?:href|src|action)\s*=\s*)["']javascript:[^"'>]*["']?/gi;
   result = result.replace(jsUrlRegex, '$1"#"');
 
   // 4. Strip HTML comments (can be used to break out of attribute contexts)
@@ -128,7 +119,9 @@ export function sanitizeInputString(input: string): string {
   //    tags (<img>, <a>, <div>) render as text, not markup
   result = htmlEncodeTags(result);
 
-  // 6. Strip control characters (except \n \r \t)
+  // 6. Strip C0 control characters (except \n \r \t). Matching them literally
+  // is the intent here, so the control-char-in-regex lint is suppressed.
+  // biome-ignore lint/suspicious/noControlCharactersInRegex: deliberately strips C0 control chars
   result = result.replace(/[\x00-\x08\x0b\x0c\x0e-\x1f]/g, "");
 
   return result;
@@ -232,9 +225,7 @@ export function inputSanitizationMiddleware() {
     // Sanitize query params (override accessor)
     const rawQueries: Record<string, string> = {};
     for (const [key, value] of Object.entries(c.req.query())) {
-      rawQueries[key] = SENSITIVE_FIELDS.has(key)
-        ? value
-        : sanitizeInputString(value);
+      rawQueries[key] = SENSITIVE_FIELDS.has(key) ? value : sanitizeInputString(value);
     }
     c.req.query = ((key?: string) => {
       if (key === undefined) return rawQueries;
@@ -247,9 +238,7 @@ export function inputSanitizationMiddleware() {
     try {
       const params = c.req.param();
       for (const [key, value] of Object.entries(params)) {
-        rawParams[key] = SENSITIVE_FIELDS.has(key)
-          ? value
-          : sanitizeInputString(value);
+        rawParams[key] = SENSITIVE_FIELDS.has(key) ? value : sanitizeInputString(value);
       }
     } catch {
       // params not populated yet — wrap the accessor to sanitize on demand
