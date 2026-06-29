@@ -91,20 +91,20 @@ export default function OrgDetailPage() {
       const [orgRes, meRes, membersRes] = await Promise.all([
         api.get<{ org: OrgDetails; memberCount: number }>(`/orgs/${orgId}`),
         api.get<CurrentUser>("/auth/me"),
-        api.get<{ members: MemberRow[] }>(`/orgs/${orgId}/members`),
+        api.get<{ data: MemberRow[]; pagination: any }>(`/orgs/${orgId}/members`),
       ]);
 
       setOrg(orgRes.org);
       setMemberCount(orgRes.memberCount);
       setCurrentUser(meRes);
-      setMembers(membersRes.members);
+      setMembers(membersRes.data ?? []);
 
-      const me = membersRes.members.find((r) => r.user.id === meRes.id);
+      const me = (membersRes.data ?? []).find
       setMyRole(me?.member.role ?? "");
 
       if (me && (me.member.role === "admin" || me.member.role === "owner")) {
-        const invRes = await api.get<{ invites: Invite[] }>(`/orgs/${orgId}/invites`);
-        setInvites(invRes.invites);
+        const invRes = await api.get<{ data: Invite[]; pagination: any }>(`/orgs/${orgId}/invites`);
+        setInvites(invRes.data ?? []);
       }
     } catch {
       // handled below

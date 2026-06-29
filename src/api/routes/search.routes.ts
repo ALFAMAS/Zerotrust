@@ -23,7 +23,7 @@ router.use("*", authMiddleware);
 
 // GET /search?q=...&orgId=...&type=...&region=...&page=...&limit=...
 router.get("/", async (c) => {
-  const { page, limit } = parsePaginatedQuery(c.req.query, { defaultLimit: 20, maxLimit: 50 });
+  const { page, limit } = parsePaginatedQuery(c.req.query(), { defaultLimit: 20, maxLimit: 50 });
   const type = c.req.query("type") as SearchableType | undefined;
   const region = c.req.query("region") as any;
   const q = c.req.query("q");

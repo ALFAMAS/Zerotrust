@@ -27,7 +27,7 @@ router.use("*", authMiddleware);
 router.get("/baselines", async (c) => {
   if (!isAdmin(c)) return c.json({ error: "FORBIDDEN" }, 403);
   try {
-    const { page, limit, offset } = parsePaginatedQuery(c.req.query);
+    const { page, limit, offset } = parsePaginatedQuery(c.req.query());
     const db = getDb();
     const [rows, countResult] = await Promise.all([
       db

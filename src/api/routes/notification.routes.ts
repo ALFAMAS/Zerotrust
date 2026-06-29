@@ -100,7 +100,7 @@ router.get("/", async (c) => {
     if (!user) {
       return c.json({ error: "UNAUTHORIZED", message: "Authentication required" }, 401);
     }
-    const { page, limit, offset } = parsePaginatedQuery(c.req.query, { defaultLimit: 20 });
+    const { page, limit, offset } = parsePaginatedQuery(c.req.query(), { defaultLimit: 20 });
     const unreadOnly = c.req.query("unread") === "true";
     const db = getDb();
     const conditions = [eq(notificationsTable.userId, user.id)];

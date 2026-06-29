@@ -109,17 +109,26 @@ export const authMiddleware = createMiddleware<HonoEnv>(async (c, next) => {
 
     const db = getDb();
 
-    const sessionRows = await db
-      .select()
-      .from(sessionsTable)
-      .where(
-        and(
-          eq(sessionsTable.tokenId, payload.jti),
-          eq(sessionsTable.userId, payload.sub),
-          eq(sessionsTable.isActive, true)
+    let sessionRows: typeof sessionsTable.$inferSelect[];
+    try {
+      sessionRows = await db
+        .select()
+        .from(sessionsTable)
+        .where(
+          and(
+            eq(sessionsTable.tokenId, payload.jti),
+            eq(sessionsTable.userId, payload.sub),
+            eq(sessionsTable.isActive, true)
+          )
         )
-      )
-      .limit(1);
+        .limit(1);
+    } catch (dbErr) {
+      logger.error("Auth middleware DB error", dbErr as Error);
+      return c.json(
+        { error: "SERVICE_UNAVAILABLE", message: "Database temporarily unavailable" },
+        503
+      );
+    }
 
     if (sessionRows.length === 0) {
       return c.json(
@@ -329,17 +338,25 @@ export const optionalAuthMiddleware = createMiddleware<HonoEnv>(async (c, next) 
       const payload = await tokenService.verifyAccessToken(token);
       const db = getDb();
 
-      const sessionRows = await db
-        .select()
-        .from(sessionsTable)
-        .where(
-          and(
-            eq(sessionsTable.tokenId, payload.jti),
-            eq(sessionsTable.userId, payload.sub),
-            eq(sessionsTable.isActive, true)
+      let sessionRows: typeof sessionsTable.$inferSelect[];
+      try {
+        sessionRows = await db
+          .select()
+          .from(sessionsTable)
+          .where(
+            and(
+              eq(sessionsTable.tokenId, payload.jti),
+              eq(sessionsTable.userId, payload.sub),
+              eq(sessionsTable.isActive, true)
+            )
           )
-        )
-        .limit(1);
+          .limit(1);
+      } catch (dbErr) {
+        // Optional auth — DB failure should not block the request
+        logger.warn("Optional auth DB error", { error: String(dbErr) });
+        await next();
+        return;
+      }
 
       if (sessionRows.length > 0) {
         const session = sessionRows[0];

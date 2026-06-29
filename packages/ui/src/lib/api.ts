@@ -17,7 +17,7 @@ const BASE_URL = process.env.NEXT_PUBLIC_ZEROTRUST_URL || "http://localhost:3000
 const FETCH_TIMEOUT_MS = 15_000;
 
 /** Maximum number of retry attempts for transient failures (network error or 5xx). */
-const MAX_RETRIES = 3;
+const MAX_RETRIES = 2;
 
 /** Base delay for exponential backoff (ms). Actual delay = BASE_RETRY_DELAY * 2^attempt. */
 const BASE_RETRY_DELAY_MS = 500;

@@ -615,7 +615,7 @@ router.delete("/jit-grants/:id", async (c) => {
 // GET /audit-logs?page=1&limit=50&action=&actorId=
 router.get("/audit-logs", async (c) => {
   try {
-    const { page, limit, offset } = parsePaginatedQuery(c.req.query, { defaultLimit: 50, maxLimit: 200 });
+    const { page, limit, offset } = parsePaginatedQuery(c.req.query(), { defaultLimit: 50, maxLimit: 200 });
     const action = c.req.query("action");
     const actorId = c.req.query("actorId");
 
@@ -660,7 +660,7 @@ router.get("/audit-logs/verify", async (c) => {
 
 router.get("/feedback", async (c) => {
   try {
-    const { page, limit, offset } = parsePaginatedQuery(c.req.query, { defaultLimit: 50, maxLimit: 200 });
+    const { page, limit, offset } = parsePaginatedQuery(c.req.query(), { defaultLimit: 50, maxLimit: 200 });
     const type = c.req.query("type");
 
     const db = getDb();
@@ -787,7 +787,7 @@ export default router;
 router.get("/webhooks/:webhookId/deliveries", async (c) => {
   try {
     const { webhookId } = c.req.param();
-    const { page, limit, offset } = parsePaginatedQuery(c.req.query, { defaultLimit: 50, maxLimit: 200 });
+    const { page, limit, offset } = parsePaginatedQuery(c.req.query(), { defaultLimit: 50, maxLimit: 200 });
     const { getDeliveryLogs, countDeliveryLogs } = await import("../../services/webhookDeliveryLog.service.js");
     const [logs, total] = await Promise.all([
       getDeliveryLogs(webhookId, limit, offset),
@@ -830,7 +830,7 @@ import { fileAttachmentsTable } from "../../db/schema";
 // GET /admin/attachments — list file attachments (admin)
 router.get("/attachments", async (c) => {
   try {
-    const { page, limit, offset } = parsePaginatedQuery(c.req.query, { defaultLimit: 50, maxLimit: 200 });
+    const { page, limit, offset } = parsePaginatedQuery(c.req.query(), { defaultLimit: 50, maxLimit: 200 });
     const feature = c.req.query("feature");
     const db = getDb();
     const conditions = feature ? eq(fileAttachmentsTable.feature, feature) : undefined;

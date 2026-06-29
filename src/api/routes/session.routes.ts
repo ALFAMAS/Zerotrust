@@ -18,7 +18,7 @@ router.get("/", async (c) => {
   try {
     const userId = c.get("user").id;
     const currentSessionId = c.get("session")?.id;
-    const { page, limit, offset } = parsePaginatedQuery(c.req.query);
+    const { page, limit, offset } = parsePaginatedQuery(c.req.query());
     const db = getDb();
     const where = eq(sessionsTable.userId, userId);
     const [sessions, countResult] = await Promise.all([

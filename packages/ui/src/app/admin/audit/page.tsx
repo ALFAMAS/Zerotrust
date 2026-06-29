@@ -112,8 +112,8 @@ export default function AuditPage() {
   useEffect(() => {
     async function load() {
       try {
-        const data = await api.get<{ logs: AuditEntry[] } | AuditEntry[]>("/admin/audit-logs");
-        const logs = Array.isArray(data) ? data : (data.logs ?? []);
+        const data = await api.get<{ data: AuditEntry[]; pagination: any } | AuditEntry[]>("/admin/audit-logs");
+        const logs = Array.isArray(data) ? data : (data.data ?? []);
         setEntries(logs.length ? logs : MOCK_ENTRIES);
       } catch {
         // API unreachable — fall back to illustrative mock data

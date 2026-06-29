@@ -35,15 +35,35 @@ const DEFAULT_LIMIT = 20;
 const MAX_LIMIT = 200;
 
 /**
- * Parse page/limit from a query source (c.req.query() or plain object).
+ * Parse page/limit from a query source.
+ *
+ * Accepts either:
+ *   - c.req (Hono Context or Hono Request) — extracts query params via .req.query() or .query()
+ *   - A plain object: { page: "1", limit: "20" }
+ *   - A no-arg function returning query params (e.g. c.req.query.bind(c.req))
+ *
  * Enforces sane bounds: page >= 1, 1 <= limit <= MAX_LIMIT.
  */
 export function parsePaginatedQuery(
-  query: Record<string, string | string[] | undefined> | (() => Record<string, string>),
+  query:
+    | Record<string, string | string[] | undefined>
+    | { query: (key?: string) => string | Record<string, string> }
+    | (() => Record<string, string>),
   opts?: { defaultLimit?: number; maxLimit?: number },
 ): PaginationParams {
-  const get = typeof query === "function" ? query : () => query;
-  const raw = get();
+  let raw: Record<string, string | string[] | undefined>;
+  if (typeof query === "function") {
+    try {
+      raw = query();
+    } catch {
+      raw = {};
+    }
+  } else if (query && typeof query === "object" && "query" in query && typeof query.query === "function") {
+    // Hono Context or Request — call .query() to get all params
+    raw = query.query() as Record<string, string>;
+  } else {
+    raw = query as Record<string, string | string[] | undefined>;
+  }
 
   const maxLimit = opts?.maxLimit ?? MAX_LIMIT;
   const defaultLimit = opts?.defaultLimit ?? DEFAULT_LIMIT;

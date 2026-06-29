@@ -35,7 +35,7 @@ router.get("/soc2/readiness", async (c) => {
 // GET /compliance/soc2/controls — list all controls
 router.get("/soc2/controls", async (c) => {
   try {
-    const { page, limit, offset } = parsePaginatedQuery(c.req.query, { defaultLimit: 50, maxLimit: 200 });
+    const { page, limit, offset } = parsePaginatedQuery(c.req.query(), { defaultLimit: 50, maxLimit: 200 });
     const controls = await getSoc2Controls();
     // Slice in-memory from preloaded controls (static config, not DB-driven)
     const total = controls.length;

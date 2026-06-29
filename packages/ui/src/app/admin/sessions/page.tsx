@@ -63,8 +63,8 @@ export default function SessionsPage() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await api.get<Session[] | { sessions: Session[] }>("/admin/sessions");
-      setSessions(Array.isArray(data) ? data : (data.sessions ?? []));
+      const data = await api.get<Session[] | { data: Session[]; pagination: any }>("/admin/sessions");
+      setSessions(Array.isArray(data) ? data : (data.data ?? []));
     } catch {
       showToast("Failed to load sessions");
     } finally {

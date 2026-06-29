@@ -55,10 +55,10 @@ export default function WalletPage() {
     try {
       const [w, t] = await Promise.all([
         api.get<Wallet>("/wallet"),
-        api.get<{ transactions: WalletTx[] }>("/wallet/transactions?limit=30"),
+        api.get<{ data: WalletTx[]; pagination: any }>("/wallet/transactions?limit=30"),
       ]);
       setWallet(w);
-      setTxs(t.transactions ?? []);
+      setTxs(t.data ?? []);
     } catch {
       showToast("Failed to load wallet");
     } finally {

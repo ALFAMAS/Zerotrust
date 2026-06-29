@@ -190,7 +190,7 @@ router.get("/:orgId/members", async (c) => {
   const user = c.get("user");
   const orgId = c.req.param("orgId");
   if (!(await requireMember(orgId, user.id))) return c.json({ error: "FORBIDDEN" }, 403);
-  const { page, limit, offset } = parsePaginatedQuery(c.req.query);
+  const { page, limit, offset } = parsePaginatedQuery(c.req.query());
   const where = eq(organizationMembersTable.orgId, orgId);
   const [members, countResult] = await Promise.all([
     getDb()
@@ -276,7 +276,7 @@ router.get("/:orgId/invites", async (c) => {
   const user = c.get("user");
   const orgId = c.req.param("orgId");
   if (!(await requireAdmin(orgId, user.id))) return c.json({ error: "FORBIDDEN" }, 403);
-  const { page, limit, offset } = parsePaginatedQuery(c.req.query);
+  const { page, limit, offset } = parsePaginatedQuery(c.req.query());
   const where = eq(organizationInvitesTable.orgId, orgId);
   const [invites, countResult] = await Promise.all([
     getDb()

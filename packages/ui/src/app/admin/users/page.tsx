@@ -93,6 +93,9 @@ export default function UsersPage() {
       if (Array.isArray(data)) {
         setUsers(data);
         setTotal(data.length);
+      } else if (data.data) {
+        setUsers(data.data);
+        setTotal(data.pagination?.total ?? data.data.length);
       } else {
         setUsers(data.users ?? []);
         setTotal(data.total ?? data.users?.length ?? 0);

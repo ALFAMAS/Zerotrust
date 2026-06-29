@@ -49,7 +49,7 @@ router.get("/transactions", async (c) => {
   try {
     const user = c.get("user");
     if (!user) return c.json({ error: "UNAUTHORIZED" }, 401);
-    const { page, limit, offset } = parsePaginatedQuery(c.req.query, { defaultLimit: 30, maxLimit: 100 });
+    const { page, limit, offset } = parsePaginatedQuery(c.req.query(), { defaultLimit: 30, maxLimit: 100 });
     const [txs, total] = await Promise.all([
       getWalletTransactions(user.id, limit, offset),
       countWalletTransactions(user.id),
@@ -130,7 +130,7 @@ router.get("/points/history", async (c) => {
   try {
     const user = c.get("user");
     if (!user) return c.json({ error: "UNAUTHORIZED" }, 401);
-    const { page, limit, offset } = parsePaginatedQuery(c.req.query, { defaultLimit: 50, maxLimit: 200 });
+    const { page, limit, offset } = parsePaginatedQuery(c.req.query(), { defaultLimit: 50, maxLimit: 200 });
     const [history, total] = await Promise.all([
       getPointsHistory(user.id, limit, offset),
       countPointsHistory(user.id),
@@ -190,6 +190,20 @@ router.post("/redemptions", async (c) => {
 });
 
 // ── Referrals ─────────────────────────────────────────────────────────────────
+
+// GET /referrals/resolve?slug=xxx — public slug → code resolution (used by /r/[slug] page)
+router.get("/referrals/resolve", async (c) => {
+  try {
+    const slug = c.req.query("slug");
+    if (!slug) return c.json({ error: "MISSING_SLUG" }, 400);
+    const ref = await getReferralBySlug(slug);
+    if (!ref) return c.json({ error: "NOT_FOUND" }, 404);
+    return c.json({ code: ref.code, slug: ref.slug });
+  } catch (err) {
+    logger.error("Resolve referral error", err as Error);
+    return c.json({ error: "INTERNAL_ERROR" }, 500);
+  }
+});
 
 const referralSchema = z.object({ slug: z.string().min(3).max(50).optional() });
 

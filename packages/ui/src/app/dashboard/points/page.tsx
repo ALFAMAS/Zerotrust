@@ -67,7 +67,7 @@ export default function PointsHistoryPage() {
           .catch(() => ({ items: [] })),
       ]);
       setBalance(points.balance ?? 0);
-      setHistory(points.history ?? []);
+      setHistory(points.data ?? points.history ?? []);
       setTier(tierRes.tier);
       setCatalog(cat.items ?? []);
     } finally {

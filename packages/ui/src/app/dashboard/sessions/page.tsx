@@ -27,7 +27,7 @@ export default function SessionsPage() {
     setLoading(true);
     api
       .get<any>("/sessions")
-      .then((d) => setSessions(d.sessions || d || []))
+      .then((d) => setSessions(d.data || d.sessions || []))
       .catch(() => setSessions([]))
       .finally(() => setLoading(false));
   };

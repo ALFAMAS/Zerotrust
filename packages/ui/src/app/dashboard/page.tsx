@@ -24,7 +24,7 @@ export default function DashboardPage() {
         .catch(() => {}),
       api
         .get<any>("/sessions")
-        .then((d) => setSessions(d.sessions || d || []))
+        .then((d) => setSessions(d.data || d.sessions || d || []))
         .catch(() => {}),
       api
         .get<any>("/auth/me/streak")

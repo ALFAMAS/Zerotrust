@@ -73,8 +73,8 @@ export default function AnomalyPage() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await api.get<{ baselines: Baseline[] }>("/admin/anomaly/baselines?limit=100");
-      setBaselines(data.baselines ?? []);
+      const data = await api.get<{ data: Baseline[]; pagination: any }>("/admin/anomaly/baselines?limit=100");
+      setBaselines(data.data ?? []);
     } catch {
       showToast("Failed to load behavior baselines");
     } finally {

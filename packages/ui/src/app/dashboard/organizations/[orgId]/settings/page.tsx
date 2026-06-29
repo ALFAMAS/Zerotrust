@@ -93,7 +93,7 @@ export default function OrgSettingsPage() {
         const [orgRes, meRes, membersRes, policyRes] = await Promise.all([
           api.get<{ org: OrgDetails; memberCount: number }>(`/orgs/${orgId}`),
           api.get<CurrentUser>("/auth/me"),
-          api.get<{ members: MemberRow[] }>(`/orgs/${orgId}/members`),
+          api.get<{ data: MemberRow[]; pagination: any }>(`/orgs/${orgId}/members`),
           api.get<{ policy: SecurityPolicy }>(`/orgs/${orgId}/security/policy`).catch(() => null),
         ]);
 
@@ -101,7 +101,7 @@ export default function OrgSettingsPage() {
         setEditName(orgRes.org.name);
         setEditBillingEmail(orgRes.org.billingEmail ?? "");
         setEditLogoUrl(orgRes.org.logoUrl ?? "");
-        setMembers(membersRes.members);
+        setMembers(membersRes.data ?? []);
 
         if (policyRes?.policy) {
           setPolicy(policyRes.policy);

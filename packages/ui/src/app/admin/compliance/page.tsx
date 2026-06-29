@@ -95,11 +95,11 @@ export default function CompliancePage() {
     try {
       const [r, c, ra] = await Promise.all([
         api.get<Soc2Readiness>("/compliance/soc2/readiness"),
-        api.get<{ controls: Soc2Control[] }>("/compliance/soc2/controls"),
+        api.get<{ data: Soc2Control[]; pagination: any }>("/compliance/soc2/controls"),
         api.get<RiskAssessment>(`/compliance/risk-assessment/${year}`),
       ]);
       setReadiness(r);
-      setControls(c.controls ?? []);
+      setControls(c.data ?? []);
       setRisk(ra);
     } catch {
       toast({ message: "Failed to load compliance data", type: "error" });

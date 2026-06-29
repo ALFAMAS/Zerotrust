@@ -87,7 +87,7 @@ router.post("/", async (c) => {
 // GET / — list reviews with item / pending counts
 router.get("/", async (c) => {
   try {
-    const { page, limit, offset } = parsePaginatedQuery(c.req.query);
+    const { page, limit, offset } = parsePaginatedQuery(c.req.query());
     const db = getDb();
     const where = undefined; // could add status filter later
     const [reviews, countResult, counts] = await Promise.all([
@@ -127,7 +127,7 @@ router.get("/", async (c) => {
 router.get("/:id", async (c) => {
   try {
     const id = c.req.param("id");
-    const { page, limit, offset } = parsePaginatedQuery(c.req.query);
+    const { page, limit, offset } = parsePaginatedQuery(c.req.query());
     const db = getDb();
     const [review] = await db
       .select()
