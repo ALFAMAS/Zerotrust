@@ -58,6 +58,7 @@ dotenv.config();
 
 import type { HonoEnv } from "../shared/types";
 import { registerGlobalErrorHandler } from "./errorHandler";
+import { inputSanitizationMiddleware } from "../middleware/inputSanitization";
 
 const logger = getLogger("api-server");
 export async function createServer() {
@@ -90,6 +91,7 @@ export async function createServer() {
 
   app.use("*", cors(corsOptionsFromEnv()));
   app.use("*", secureHeaders());
+  app.use("*", inputSanitizationMiddleware());
   // Compress JSON, HTML, and text responses to reduce transfer time for dashboard/API reads.
   app.use("*", compress());
   app.use("*", metricsMiddleware());

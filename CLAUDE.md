@@ -147,7 +147,11 @@ Every agent working in this repo MUST reuse these modules instead of re-implemen
 | `src/shared/safeFetch.ts` | `assertSafeFetchHost()`, `assertSafeFetchUrl()`, `fetchPublicUrl()`, `fetchFixedUrl()` | Any server-side HTTP to non-fixed hosts (CWE-918). |
 | `src/shared/cryptoHash.ts` | `hashTokenSha256()`, `hashTokensSha256()`, `hashFingerprint()`, `hashBase64Url()` | Hashing tokens/fingerprints — never inline `createHash()`. |
 | `packages/ui/src/lib/apiClient.ts` | `apiGet()`, `apiPost()`, `apiPostFormData()`, `apiGetBlob()`, `apiDelete()` | All UI→API calls — never raw `fetch()`. |
-| `packages/ui/src/lib/safeRedirect.ts` | `clientSafeRedirect()` | Client-side redirects in React/Next.js. |
+| `packages/ui/src/lib/safeRedirect.ts` | `clientSafeRedirect()` | Client-side redirects in React/Next.js |
+| `src/shared/apiHelpers.ts` | `routeHandler()`, `ok()`, `fail()`, `internalError()`, `HttpError`, `dbGuard()` | Wrap route handlers with auto error handling; standardize responses; guard Drizzle queries against missing tables. |
+| `src/api/errorHandler.ts` | `registerGlobalErrorHandler()`, `internalErrorResponse()` | Global Hono error handler with request IDs and CWE-532 safe redaction. |
+| `packages/ui/src/lib/hooks/useApi.ts` | `useApi(path, opts)`, `usePaginatedApi(path, opts)` | Data-fetch hooks that replace useEffect+api.get+loading+error boilerplate. |
+| `packages/ui/src/components/ui/States.tsx` | `LoadingSpinner`, `EmptyState`, `ErrorState`, `SkeletonList` | Shared UI states — replaces repeated loading/error/empty JSX patterns. |
 
-When adding a new list endpoint: use `parsePaginatedQuery` + `paginated()`. When adding a new crypto hash: use `cryptoHash.ts`. When adding a redirect: use `safeRedirect.ts`. When adding a server fetch: use `safeFetch.ts`. Extracting/replacing inline implementations with these modules is always preferred.
+When adding a new list endpoint: use `routeHandler()` + `parsePaginatedQuery` + `paginated()`. When adding a new crypto hash: use `cryptoHash.ts`. When adding a redirect: use `safeRedirect.ts`. When adding a server fetch: use `safeFetch.ts`. When adding a DB query: use `dbGuard()` if it touches tables that might not exist yet. Use `useApi`/`usePaginatedApi` for frontend data fetching. Extracting/replacing inline implementations with these modules is always preferred.
 

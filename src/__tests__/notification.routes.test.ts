@@ -159,8 +159,6 @@ describe("GET /notifications", () => {
     const body = await res.json();
     expect(Array.isArray(body.data)).toBe(true);
     expect(body.data).toHaveLength(0);
-<<<<<<< Updated upstream
-=======
     expect(body.pagination).toEqual(
       expect.objectContaining({
         limit: 20,
@@ -168,7 +166,6 @@ describe("GET /notifications", () => {
         total: 0,
       })
     );
->>>>>>> Stashed changes
   });
 
   it("returns notifications ordered by createdAt desc (up to 20)", async () => {
