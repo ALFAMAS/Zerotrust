@@ -92,6 +92,7 @@ incident under load or attack) · **Medium** (correctness/maintainability debt) 
 | C1 | **Hot-path writes are not transactional.** Only 2 files use `db.transaction` (`audit/chain.ts`, `org.routes.ts`). Refresh-token rotation, session lifecycle, billing mutations, wallet/points ledger, and org role transitions run as sequential statements — a crash between them leaves partial state. | High | TODO P1 |
 | C2 | The Stripe webhook body is typed `any` end-to-end (`event: any`, `event.data.object as any`). A shape change from Stripe fails silently at runtime rather than at compile time. | Medium | TODO P2 |
 | C3 | Background schedulers (retention, billing lifecycle, backups, notification fallback) are fire-and-forget `setInterval`s started in-process with no shared job registry, retry/backoff, dead-letter, or idempotency keys. A second API replica runs every scheduler twice. | High | TODO P1 |
+| C4 | **`compress()` middleware crashed the API under the pinned runtime.** Hono's `compress()` needs the global `CompressionStream`, absent in Bun < 1.3 (`.bun-version` pins 1.2.23, used by CI + dev). Every compressible response threw `ReferenceError: CompressionStream is not defined` → HTTP 500; this is why the Playwright E2E smoke was red (162× on `/auth/login`). Pre-existing on `main`, not introduced by this PR. | High | **Fixed this PR** — see §6 |
 
 ### 4.3 Maintainability
 
@@ -146,8 +147,16 @@ incident under load or attack) · **Medium** (correctness/maintainability debt) 
     become a logged no-op) and releases the claim if processing throws, so
     Stripe's retry can reprocess. Atomic via `INSERT … ON CONFLICT DO NOTHING`.
   - Unit tests: `src/__tests__/stripeEvents.repository.test.ts`.
+- **Fixed C4 (High): `compress()` 500s under Bun < 1.3.** Guarded the middleware
+  mount in `src/api/server.ts` with `"CompressionStream" in globalThis` so
+  compression is skipped (not fatal) on runtimes lacking the global. Unblocks the
+  Playwright E2E smoke; Node 18+ / Bun ≥ 1.3 still compress normally.
 - Authored this `docs/AUDIT.md` and a prioritized, acceptance-criteria-driven
   [`todo.md`](../todo.md).
+
+> **Pre-existing CI note:** the **SAST & Dependency Scans (Semgrep)** check is
+> also red on `main` (independent of this PR's diff). Triaged as out of scope for
+> this change; tracked separately rather than fixed here.
 
 All changes verified: type-check clean, `biome` clean, 726 tests passing,
 `verify:generated` clean.

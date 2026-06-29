@@ -24,7 +24,17 @@ maintainability/refactor · P3 scalability/performance · P4 docs/DX.
   claim released if processing throws so retries reprocess; unit tests green. ✅
 - **Risk:** Low (additive table + early-return; no behavior change for new events).
 
-### P0.2 — Idempotency for the remaining event consumers  — _Status: Pending_
+### P0.2 — Fix `compress()` 500 under Bun < 1.3  — _Status: Done (2026-06-29)_
+- **Why:** Hono's `compress()` needs the global `CompressionStream`, absent in
+  Bun 1.2.23 (`.bun-version`, used by CI + dev), so every compressible response
+  threw `ReferenceError: CompressionStream is not defined` → HTTP 500. This is
+  what kept the Playwright E2E smoke red (pre-existing on `main`).
+- **Files:** `src/api/server.ts`.
+- **Acceptance:** mount `compress()` only when `"CompressionStream" in globalThis`;
+  compression still runs on Node 18+ / Bun ≥ 1.3; E2E login flow returns 200. ✅
+- **Risk:** Low (guarded mount; behavior unchanged where the global exists).
+
+### P0.3 — Idempotency for the remaining event consumers  — _Status: Pending_
 - **Why:** Email-event webhooks (`/webhooks/email`), SSF (`/ssf/events`), and
   user-defined webhook deliveries verify signatures but don't persist a
   processed-event id, so a valid replay is reprocessed (AUDIT S2).
@@ -35,7 +45,7 @@ maintainability/refactor · P3 scalability/performance · P4 docs/DX.
   tests cover the duplicate path.
 - **Risk:** Medium (touches multiple ingress paths; keep per-consumer keys distinct).
 
-### P0.3 — Require CI on `main` + block direct pushes  — _Status: Pending (repo setting)_
+### P0.4 — Require CI on `main` + block direct pushes  — _Status: Pending (repo setting)_
 - **Why:** Formatting / generated-output drift must not land outside PR gates.
 - **Files:** GitHub branch-protection settings (not in-repo).
 - **Acceptance:** `main` requires PR + green `lint:ci`, `type-check`, `test`,
