@@ -121,7 +121,7 @@ rebuilding login for the hundredth time.
 
 | Layer         | Technology                                                                                  |
 | ------------- | ------------------------------------------------------------------------------------------- |
-| API           | [Hono](https://hono.dev) 4 · TypeScript 5 · run on [Bun](https://bun.sh)                    |
+| API           | [Hono](https://hono.dev) 4 · TypeScript 6 · run on [Bun](https://bun.sh)                    |
 | Database      | PostgreSQL via [Drizzle ORM](https://orm.drizzle.team) (works with Neon)                    |
 | Cache / queue | Redis (ioredis) · [BullMQ](https://docs.bullmq.io) email queue                              |
 | Frontend      | [Next.js](https://nextjs.org) 16 (App Router) · Tailwind CSS · shadcn/ui                    |
@@ -301,17 +301,22 @@ local disk. Set `BACKUP_ENCRYPTION_KEY` (or `BACKUP_ENCRYPTION_KEY_HEX`) to encr
 ## Testing & code quality
 
 ```bash
-bun run test            # run the Vitest suite
+bun run test            # run the Vitest suite (723 tests)
 bun run test:watch      # watch mode
 bun run test:coverage   # coverage report
 
 bun run lint            # Biome lint (check only)
 bun run lint:fix        # Biome autofix (lint + format) — also runs on commit via Husky
 bun run type-check      # tsc --noEmit
+bun run verify:generated # regenerate SDK + API docs + drift reports, fail on any diff
 ```
 
 Tests live in `src/__tests__/`. CI ([`.github/workflows/ci.yml`](./.github/workflows/ci.yml))
-runs lint, type-check, the test suite, and the UI build on every push and PR to `main`.
+runs lint, type-check, the test suite, generated-output drift checks (SDK, API
+reference, integration matrix, shadcn report), and the UI build on every push and
+PR to `main`. A scheduled
+[dependency-update workflow](./.github/workflows/dependency-update.yml) opens a
+grouped PR each week after the same gates pass.
 
 > Note: the HaveIBeenPwned breach check is enabled by default and reaches the network
 > during `register` tests. Set `HIBP_CHECK_ENABLED=false` for fully offline test runs.
@@ -482,7 +487,8 @@ GET    /health · /healthz · /metrics (Prometheus)
 │   │   └── routes/                 # auth, mfa, passkey, admin, orgs, billing, wallet, search…
 │   ├── db/                         # Drizzle schema + connection (PostgreSQL)
 │   ├── services/                   # token, email, MFA, OAuth, objectStorage, dbBackup…
-│   ├── middleware/                 # auth, rate limiting, CSRF, requirePlan, apiKeyAuth…
+│   ├── middleware/                 # auth, rate limiting, CSRF, inputSanitization, requirePlan…
+│   ├── shared/                     # reusable helpers: pagination, dbCount, httpErrors, roles, safeFetch/safeRedirect…
 │   ├── jit/                        # cross-tenant just-in-time access
 │   ├── audit/ · metrics/ · webhooks/                               # ops + platform modules
 │   ├── crypto/                     # PASETO, CSFLE, hardware key store
@@ -498,7 +504,7 @@ GET    /health · /healthz · /metrics (Prometheus)
 ├── drizzle/                        # SQL migrations + journal
 ├── docs/compliance/                # compliance policies, runbooks, and evidence templates
 ├── scripts/                        # db-backup, db-restore, postinstall…
-├── .github/workflows/ci.yml        # CI: lint + type-check + test + UI build
+├── .github/workflows/             # CI (lint + type-check + test + drift + UI build) + weekly deps
 ├── .env.example                    # all env vars, documented inline
 └── tdone.md                        # shipped feature catalog + latest audit snapshot
 ```
@@ -547,6 +553,9 @@ locale in `src/i18n/request.ts` and the `LocaleSwitcher` component.
   key-version rotation; bcrypt password hashing.
 - **Abuse defense** — per-account lockout, per-IP credential-stuffing throttle,
   HaveIBeenPwned breach checks on register/password-change, optional signup PoW.
+- **Input sanitization** — a global middleware strips dangerous HTML and neutralizes
+  `javascript:`/event-handler payloads in request bodies, query, path, and form
+  fields (XSS / CWE-79), skipping sensitive fields and signed/SSF payloads.
 - **Audit** — tamper-evident SHA-256 hash-chained audit log, optional Elasticsearch +
   SIEM streaming.
 - **Disclosure** — `/.well-known/security.txt` (RFC 9116); set `SECURITY_CONTACT`.

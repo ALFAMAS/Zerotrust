@@ -20,7 +20,8 @@ covers SOC 2 policies, runbooks, and evidence.
 bun dev          # starts API + UI concurrently
 bun dev:api      # API only
 bun dev:ui       # UI only (also starts MCP server)
-bun run test     # vitest test suite (236 tests)
+bun run test     # vitest test suite (723 tests)
+bun run verify:generated # regenerate SDK + API docs + drift reports and fail on diff
 bun run db:backup # one-shot pg_dump backup with local + S3 retention (any S3-compatible provider)
 bun run build    # tsc for API; next build for UI
 ```
@@ -131,6 +132,7 @@ Re-introducing any of these patterns is a review blocker.
 | **CWE-1333** ReDoS / regex injection | Never `new RegExp(\`...${interpolated}...\`)` with unescaped interpolation. Escape metacharacters (`escapeRegExp`) or use `String.split().join()` for literal substitution. Avoid nested quantifiers `(a+)+` in patterns run on attacker input; cap input length for regex parsers over untrusted data. | `escapeRegExp` in `src/db/storageFallback.ts` |
 | **CWE-327** Broken/risky crypto | Use SHA-256+ for hashes, AES-256-GCM for encryption, `crypto.randomBytes`/`randomUUID` for tokens. SHA-1 is only permitted for the HIBP k-anonymity breach check (`passwordBreach.service.ts`). Use `scryptSync`/`argon2` with a per-key random salt, never a hardcoded salt. The static-salt `scryptSync(raw, "zerotrust-db-backup", 32)` fallback in backup scripts is deprecated — use `BACKUP_ENCRYPTION_KEY_HEX` (32 raw bytes). | `src/services/dbBackup.service.ts`, `scripts/db-backup.js`, `scripts/db-restore.js` |
 | **CWE-1427** External control of identifier | When user input selects a system identifier (DB table/column, object key, hostname), it must be escaped/validated before use. DB identifiers go through Drizzle's parameterized `sql` tag, never string interpolation; object keys are server-derived and extension-validated. | `safeExtensionForContentType` in `src/services/uploadSafety.ts` |
+| **CWE-79** Stored/reflected XSS | Don't hand-roll per-field HTML escaping. Request strings (JSON body, query, path, form) are sanitized globally by `inputSanitizationMiddleware()` (dangerous tags stripped, event handlers/`javascript:` neutralized, remaining angle brackets entity-encoded). Sensitive fields and signed/SSF payloads are skipped. Build regexes from constants or escaped input (never from raw user input) and keep the sensitive-field/excluded-path lists current. | `src/middleware/inputSanitization.ts` (mounted in `src/api/server.ts`) |
 
 **Before opening a PR on auth- or crypto-touching code**, re-scan the diff
 against this table. Add a `/security-review` pass for changes to OAuth,
@@ -143,15 +145,20 @@ Every agent working in this repo MUST reuse these modules instead of re-implemen
 | Module | Exports | Use it for |
 | --- | --- | --- |
 | `src/shared/pagination.ts` | `parsePaginatedQuery(query, opts?)`, `paginated(data, {page,limit,total})` | Any list endpoint returning DB rows. Enforces bounded page/limit, returns `{ data, pagination: { page, limit, total, totalPages, hasNext, hasPrev } }`. Default limit 20, default max 200. |
+| `src/shared/dbCount.ts` | `countRows(db, table, where?)` | `COUNT(*)` for list endpoints — pairs with `paginated()` inside a `Promise.all`. Never inline `select({ count: sql\`count(*)::int\` })`. |
+| `src/shared/httpErrors.ts` | `internalError(c, logger, logLabel, err, clientMessage?)` | **The** helper for explicit route `catch` blocks: logs the error, returns the canonical `{ error: "INTERNAL_ERROR" }` 500 (CWE-532 — never serialize the raw error). Used in ~115 handlers. |
+| `src/shared/roles.ts` | `hasRole(user, role)`, `hasAnyRole(user, roles)`, `isAdmin(user)` | System-level role checks on the principal's `roles` array. Null-safe / fail-closed; never inline `user.roles?.includes(...)`. (Org-scoped permissions live in `permissions.ts`.) |
 | `src/shared/safeRedirect.ts` | `safeRelativeRedirect()`, `appRedirectUrl()`, `isRegisteredRedirectUri()` | All server-side redirects (CWE-601). |
 | `src/shared/safeFetch.ts` | `assertSafeFetchHost()`, `assertSafeFetchUrl()`, `fetchPublicUrl()`, `fetchFixedUrl()` | Any server-side HTTP to non-fixed hosts (CWE-918). |
 | `src/shared/cryptoHash.ts` | `hashTokenSha256()`, `hashTokensSha256()`, `hashFingerprint()`, `hashBase64Url()` | Hashing tokens/fingerprints — never inline `createHash()`. |
+| `src/middleware/auth.ts` | `authMiddleware`, `requireAdmin`, `optionalAuthMiddleware` | Auth guards. Reuse `requireAdmin` — do not re-implement the admin check inline in a router. |
+| `src/middleware/inputSanitization.ts` | `inputSanitizationMiddleware()`, `sanitizeInputString()` | Global XSS sanitization of request bodies/query/params (CWE-79). Mounted once in `server.ts`; sensitive fields and signed/SSF payloads are skipped. |
 | `packages/ui/src/lib/apiClient.ts` | `apiGet()`, `apiPost()`, `apiPostFormData()`, `apiGetBlob()`, `apiDelete()` | All UI→API calls — never raw `fetch()`. |
 | `packages/ui/src/lib/safeRedirect.ts` | `clientSafeRedirect()` | Client-side redirects in React/Next.js |
-| `src/shared/apiHelpers.ts` | `routeHandler()`, `ok()`, `fail()`, `internalError()`, `HttpError`, `dbGuard()` | Wrap route handlers with auto error handling; standardize responses; guard Drizzle queries against missing tables. |
+| `src/shared/apiHelpers.ts` | `routeHandler()`, `ok()`, `fail()`, `HttpError`, `dbGuard()` | Wrapper-style scaffolding for **new** routes: `routeHandler()` removes the try/catch; `dbGuard()` guards Drizzle queries against not-yet-migrated tables. (Its `internalError(c, err, label)` is the wrapper's internal convenience — for explicit catch blocks use `httpErrors.internalError`.) |
 | `src/api/errorHandler.ts` | `registerGlobalErrorHandler()`, `internalErrorResponse()` | Global Hono error handler with request IDs and CWE-532 safe redaction. |
 | `packages/ui/src/lib/hooks/useApi.ts` | `useApi(path, opts)`, `usePaginatedApi(path, opts)` | Data-fetch hooks that replace useEffect+api.get+loading+error boilerplate. |
 | `packages/ui/src/components/ui/States.tsx` | `LoadingSpinner`, `EmptyState`, `ErrorState`, `SkeletonList` | Shared UI states — replaces repeated loading/error/empty JSX patterns. |
 
-When adding a new list endpoint: use `routeHandler()` + `parsePaginatedQuery` + `paginated()`. When adding a new crypto hash: use `cryptoHash.ts`. When adding a redirect: use `safeRedirect.ts`. When adding a server fetch: use `safeFetch.ts`. When adding a DB query: use `dbGuard()` if it touches tables that might not exist yet. Use `useApi`/`usePaginatedApi` for frontend data fetching. Extracting/replacing inline implementations with these modules is always preferred.
+When adding a new list endpoint: use `parsePaginatedQuery` + `countRows` + `paginated()` (or `routeHandler()` to drop the try/catch). In a route `catch` block, use `httpErrors.internalError`. For an admin-only router, mount `requireAdmin`. For a role check, use `roles.ts`. When adding a new crypto hash: use `cryptoHash.ts`. When adding a redirect: use `safeRedirect.ts`. When adding a server fetch: use `safeFetch.ts`. When adding a DB query that may hit a not-yet-migrated table: use `dbGuard()`. Use `useApi`/`usePaginatedApi` for frontend data fetching. Extracting/replacing inline implementations with these modules is always preferred.
 
