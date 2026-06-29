@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { z } from "zod";
 import { getLogger } from "../../logger";
 import { suppressEmail } from "../../services/emailSuppression.service";
+import { internalError } from "../../shared/httpErrors";
 import type { HonoEnv } from "../../shared/types";
 
 const router = new Hono<HonoEnv>();
@@ -41,8 +42,7 @@ router.post("/event", async (c) => {
     });
     return c.json({ suppressed: true });
   } catch (err) {
-    logger.error("Failed to process email event", err as Error);
-    return c.json({ error: "INTERNAL_ERROR" }, 500);
+    return internalError(c, logger, "Failed to process email event", err);
   }
 });
 

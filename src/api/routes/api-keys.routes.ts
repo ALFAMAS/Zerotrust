@@ -7,6 +7,7 @@ import { apiKeysTable, organizationMembersTable } from "../../db/schema";
 import { getLogger } from "../../logger";
 import { authMiddleware } from "../../middleware/auth";
 import { rateLimit } from "../../middleware/rateLimiting";
+import { internalError } from "../../shared/httpErrors";
 import type { HonoEnv } from "../../shared/types";
 
 const router = new Hono<HonoEnv>();
@@ -105,8 +106,7 @@ router.post("/", authMiddleware, rateLimit({ points: 20, windowSecs: 3600 }), as
     logger.info("API key created", { userId: user.id, keyId: entry.id });
     return c.json({ ...entry, key: rawKey }, 201);
   } catch (err) {
-    logger.error("Create API key error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR" }, 500);
+    return internalError(c, logger, "Create API key error", err);
   }
 });
 

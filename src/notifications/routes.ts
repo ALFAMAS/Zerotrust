@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import { authMiddleware } from "../middleware/auth";
+import { isAdmin } from "../shared/roles";
 import type { HonoEnv } from "../shared/types";
 import { notificationDispatcher } from "./dispatcher";
 
@@ -15,7 +16,7 @@ app.use("*", async (c, next) => {
   if (!user) {
     return c.json({ error: "UNAUTHORIZED", message: "Authentication required" }, 401);
   }
-  if (!user.roles?.includes("admin")) {
+  if (!isAdmin(user)) {
     return c.json({ error: "FORBIDDEN", message: "Admin role required" }, 403);
   }
   return next();

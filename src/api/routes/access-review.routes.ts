@@ -4,7 +4,9 @@ import { insertAuditLog } from "../../audit/chain";
 import { getDb } from "../../db";
 import { accessReviewItemsTable, accessReviewsTable, usersTable } from "../../db/schema";
 import { getLogger } from "../../logger";
-import { authMiddleware } from "../../middleware/auth";
+import { authMiddleware, requireAdmin } from "../../middleware/auth";
+import { countRows } from "../../shared/dbCount";
+import { internalError } from "../../shared/httpErrors";
 import { paginated, parsePaginatedQuery } from "../../shared/pagination";
 import type { HonoEnv } from "../../shared/types";
 
@@ -13,14 +15,7 @@ const logger = getLogger("access-review-routes");
 
 // Auth + admin guard on all routes
 router.use("*", authMiddleware);
-router.use("*", async (c, next) => {
-  const user = c.get("user");
-  if (!user) return c.json({ error: "UNAUTHORIZED", message: "Authentication required" }, 401);
-  if (!user.roles?.includes("admin")) {
-    return c.json({ error: "FORBIDDEN", message: "Admin role required" }, 403);
-  }
-  return next();
-});
+router.use("*", requireAdmin);
 
 const isPrivileged = (roles: string[] | null | undefined) =>
   Array.isArray(roles) && roles.some((r) => r && r !== "user");
@@ -79,8 +74,13 @@ router.post("/", async (c) => {
 
     return c.json({ review, itemCount: privileged.length }, 201);
   } catch (err) {
-    logger.error("Create access review error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR", message: "Failed to create access review" }, 500);
+    return internalError(
+      c,
+      logger,
+      "Create access review error",
+      err,
+      "Failed to create access review"
+    );
   }
 });
 
@@ -90,7 +90,7 @@ router.get("/", async (c) => {
     const { page, limit, offset } = parsePaginatedQuery(c.req.query());
     const db = getDb();
     const where = undefined; // could add status filter later
-    const [reviews, countResult, counts] = await Promise.all([
+    const [reviews, total, counts] = await Promise.all([
       db
         .select()
         .from(accessReviewsTable)
@@ -98,7 +98,7 @@ router.get("/", async (c) => {
         .orderBy(desc(accessReviewsTable.createdAt))
         .offset(offset)
         .limit(limit),
-      db.select({ count: sql<number>`count(*)::int` }).from(accessReviewsTable).where(where),
+      countRows(db, accessReviewsTable, where),
       db
         .select({
           reviewId: accessReviewItemsTable.reviewId,
@@ -116,10 +116,15 @@ router.get("/", async (c) => {
       pendingCount: byId.get(r.id)?.pending ?? 0,
     }));
 
-    return c.json(paginated(enriched, { page, limit, total: countResult[0]?.count ?? 0 }));
+    return c.json(paginated(enriched, { page, limit, total }));
   } catch (err) {
-    logger.error("List access reviews error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR", message: "Failed to list access reviews" }, 500);
+    return internalError(
+      c,
+      logger,
+      "List access reviews error",
+      err,
+      "Failed to list access reviews"
+    );
   }
 });
 
@@ -137,7 +142,7 @@ router.get("/:id", async (c) => {
     if (!review) return c.json({ error: "NOT_FOUND", message: "Access review not found" }, 404);
 
     const where = eq(accessReviewItemsTable.reviewId, id);
-    const [items, countResult] = await Promise.all([
+    const [items, total] = await Promise.all([
       db
         .select()
         .from(accessReviewItemsTable)
@@ -145,16 +150,15 @@ router.get("/:id", async (c) => {
         .orderBy(desc(accessReviewItemsTable.createdAt))
         .offset(offset)
         .limit(limit),
-      db.select({ count: sql<number>`count(*)::int` }).from(accessReviewItemsTable).where(where),
+      countRows(db, accessReviewItemsTable, where),
     ]);
 
     return c.json({
       review,
-      items: paginated(items, { page, limit, total: countResult[0]?.count ?? 0 }),
+      items: paginated(items, { page, limit, total }),
     });
   } catch (err) {
-    logger.error("Get access review error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR", message: "Failed to get access review" }, 500);
+    return internalError(c, logger, "Get access review error", err, "Failed to get access review");
   }
 });
 
@@ -216,8 +220,13 @@ router.patch("/:id/items/:itemId", async (c) => {
 
     return c.json({ item: updated, rolesRevoked });
   } catch (err) {
-    logger.error("Decide access review item error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR", message: "Failed to record decision" }, 500);
+    return internalError(
+      c,
+      logger,
+      "Decide access review item error",
+      err,
+      "Failed to record decision"
+    );
   }
 });
 
@@ -228,16 +237,15 @@ router.post("/:id/complete", async (c) => {
     const id = c.req.param("id");
     const db = getDb();
 
-    const [pending] = await db
-      .select({ count: sql<number>`count(*)::int` })
-      .from(accessReviewItemsTable)
-      .where(
-        and(eq(accessReviewItemsTable.reviewId, id), eq(accessReviewItemsTable.decision, "pending"))
-      );
+    const pendingCount = await countRows(
+      db,
+      accessReviewItemsTable,
+      and(eq(accessReviewItemsTable.reviewId, id), eq(accessReviewItemsTable.decision, "pending"))
+    );
 
-    if ((pending?.count ?? 0) > 0) {
+    if (pendingCount > 0) {
       return c.json(
-        { error: "INCOMPLETE", message: `${pending.count} item(s) still pending a decision` },
+        { error: "INCOMPLETE", message: `${pendingCount} item(s) still pending a decision` },
         400
       );
     }
@@ -260,8 +268,13 @@ router.post("/:id/complete", async (c) => {
 
     return c.json({ review });
   } catch (err) {
-    logger.error("Complete access review error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR", message: "Failed to complete access review" }, 500);
+    return internalError(
+      c,
+      logger,
+      "Complete access review error",
+      err,
+      "Failed to complete access review"
+    );
   }
 });
 

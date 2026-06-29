@@ -51,6 +51,7 @@ import {
 } from "../../services/proofOfWork.service";
 import { TokenService } from "../../services/token.service";
 import { getClientIp } from "../../shared/clientIp";
+import { internalError } from "../../shared/httpErrors";
 import { localeFromAcceptLanguage, normalizeLocale, SUPPORTED_LOCALES } from "../../shared/locale";
 import { appRedirectUrl } from "../../shared/safeRedirect";
 import type { HonoEnv } from "../../shared/types";
@@ -490,8 +491,7 @@ router.post("/register", rateLimit({ points: 10, windowSecs: 60 }), async (c) =>
 
     return c.json({ success: true, userId: user.id }, 201);
   } catch (err) {
-    logger.error("Registration error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR", message: "Registration failed" }, 500);
+    return internalError(c, logger, "Registration error", err, "Registration failed");
   }
 });
 
@@ -551,8 +551,7 @@ router.post(
 
       return c.json({ success: true });
     } catch (err) {
-      logger.error("Email verification error", err as Error);
-      return c.json({ error: "INTERNAL_ERROR", message: "Verification failed" }, 500);
+      return internalError(c, logger, "Email verification error", err, "Verification failed");
     }
   }
 );
@@ -582,8 +581,7 @@ router.post(
       await issueVerification(row);
       return c.json({ success: true });
     } catch (err) {
-      logger.error("Resend verification error", err as Error);
-      return c.json({ error: "INTERNAL_ERROR" }, 500);
+      return internalError(c, logger, "Resend verification error", err);
     }
   }
 );
@@ -656,8 +654,7 @@ router.post("/login", rateLimit({ points: 20, windowSecs: 60 }), async (c) => {
     const { body } = await issueAuthenticatedSession(c, user);
     return c.json(body);
   } catch (err) {
-    logger.error("Login error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR", message: "Login failed" }, 500);
+    return internalError(c, logger, "Login error", err, "Login failed");
   }
 });
 
@@ -756,8 +753,7 @@ router.post("/login/mfa", rateLimit({ points: 10, windowSecs: 60 }), async (c) =
     const { body } = await issueAuthenticatedSession(c, user);
     return c.json(body);
   } catch (err) {
-    logger.error("Login MFA error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR", message: "MFA verification failed" }, 500);
+    return internalError(c, logger, "Login MFA error", err, "MFA verification failed");
   }
 });
 
@@ -878,8 +874,7 @@ router.post(
         tokenType: "Bearer",
       });
     } catch (err) {
-      logger.error("Refresh token error", err as Error);
-      return c.json({ error: "INTERNAL_ERROR", message: "Refresh failed" }, 500);
+      return internalError(c, logger, "Refresh token error", err, "Refresh failed");
     }
   }
 );
@@ -1119,8 +1114,7 @@ router.post("/oauth/exchange", rateLimit({ points: 10, windowSecs: 60 }), async 
       refreshToken: row.refreshToken,
     });
   } catch (err) {
-    logger.error("OAuth exchange error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR", message: "Token exchange failed" }, 500);
+    return internalError(c, logger, "OAuth exchange error", err, "Token exchange failed");
   }
 });
 
@@ -1132,8 +1126,7 @@ router.get("/me/streak", authMiddleware, async (c) => {
     const streak = await getStreak(user.id);
     return c.json({ streak });
   } catch (err) {
-    logger.error("Get streak error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR" }, 500);
+    return internalError(c, logger, "Get streak error", err);
   }
 });
 
@@ -1157,8 +1150,7 @@ router.get("/me/achievements", authMiddleware, async (c) => {
     });
     return c.json({ achievements });
   } catch (err) {
-    logger.error("Get achievements error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR" }, 500);
+    return internalError(c, logger, "Get achievements error", err);
   }
 });
 
@@ -1229,8 +1221,7 @@ router.get("/me", authMiddleware, async (c) => {
       oauthProviders,
     });
   } catch (err) {
-    logger.error("Get current user error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR" }, 500);
+    return internalError(c, logger, "Get current user error", err);
   }
 });
 
@@ -1278,8 +1269,7 @@ router.patch("/me", authMiddleware, async (c) => {
     if (!updated) return c.json({ error: "USER_NOT_FOUND" }, 404);
     return c.json(updated);
   } catch (err) {
-    logger.error("Patch current user error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR" }, 500);
+    return internalError(c, logger, "Patch current user error", err);
   }
 });
 
@@ -1343,8 +1333,7 @@ router.get("/me/points", authMiddleware, async (c) => {
     const { entries, total } = await getPointsHistory(user.id);
     return c.json({ balance, history: entries, total });
   } catch (err) {
-    logger.error("Get points error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR" }, 500);
+    return internalError(c, logger, "Get points error", err);
   }
 });
 
@@ -1375,8 +1364,7 @@ router.post("/me/nps", authMiddleware, async (c) => {
     await recordNpsFeedback(user.id, score, comment, context);
     return c.json({ success: true });
   } catch (err) {
-    logger.error("NPS submit error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR" }, 500);
+    return internalError(c, logger, "NPS submit error", err);
   }
 });
 
@@ -1435,8 +1423,7 @@ router.delete("/oauth/:provider", authMiddleware, async (c) => {
 
     return c.json({ unlinked: true, provider });
   } catch (err) {
-    logger.error("OAuth unlink error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR", message: "Failed to disconnect account" }, 500);
+    return internalError(c, logger, "OAuth unlink error", err, "Failed to disconnect account");
   }
 });
 
@@ -1564,8 +1551,7 @@ router.post("/me/link", authMiddleware, rateLimit({ points: 10, windowSecs: 60 }
     logger.info("OAuth provider linked", { userId: user.id, provider });
     return c.json({ linked: true, provider });
   } catch (err) {
-    logger.error("Account link error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR", message: "Failed to link account" }, 500);
+    return internalError(c, logger, "Account link error", err, "Failed to link account");
   }
 });
 
@@ -1631,8 +1617,7 @@ router.post("/me/email", authMiddleware, rateLimit({ points: 5, windowSecs: 60 }
 
     return c.json({ success: true, email: normalized });
   } catch (err) {
-    logger.error("Email change error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR" }, 500);
+    return internalError(c, logger, "Email change error", err);
   }
 });
 
@@ -1724,8 +1709,7 @@ router.post("/me/avatar", authMiddleware, async (c) => {
 
     return c.json({ avatarUrl });
   } catch (err) {
-    logger.error("Avatar upload error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR" }, 500);
+    return internalError(c, logger, "Avatar upload error", err);
   }
 });
 

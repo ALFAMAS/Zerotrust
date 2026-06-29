@@ -17,12 +17,14 @@ import {
   usersTable,
 } from "../../db/schema";
 import { auditLog, getLogger } from "../../logger";
-import { authMiddleware } from "../../middleware/auth";
+import { authMiddleware, requireAdmin } from "../../middleware/auth";
 import { sendNotificationEmail } from "../../services/email.service";
 import { setLegalHold } from "../../services/legalHold.service";
 import { TokenService } from "../../services/token.service";
 import { getClientIp } from "../../shared/clientIp";
+import { internalError } from "../../shared/httpErrors";
 import { PLAN_CONFIGS, PLANS, type Plan } from "../../shared/plans";
+import { hasRole } from "../../shared/roles";
 import type { HonoEnv } from "../../shared/types";
 
 const router = new Hono<HonoEnv>();
@@ -30,16 +32,7 @@ const logger = getLogger("admin-tools");
 
 // Auth + admin guard on all routes in this module
 router.use("*", authMiddleware);
-router.use("*", async (c, next) => {
-  const user = c.get("user");
-  if (!user) {
-    return c.json({ error: "UNAUTHORIZED", message: "Authentication required" }, 401);
-  }
-  if (!user.roles?.includes("admin")) {
-    return c.json({ error: "FORBIDDEN", message: "Admin role required" }, 403);
-  }
-  return next();
-});
+router.use("*", requireAdmin);
 
 let tokenServiceInstance: TokenService | null = null;
 async function getTokenService() {
@@ -61,7 +54,7 @@ router.post("/users/:id/impersonate", async (c) => {
     const db = getDb();
     const [target] = await db.select().from(usersTable).where(eq(usersTable.id, targetId)).limit(1);
     if (!target) return c.json({ error: "USER_NOT_FOUND" }, 404);
-    if (target.roles?.includes("admin")) {
+    if (hasRole(target, "admin")) {
       return c.json({ error: "FORBIDDEN", message: "Cannot impersonate another admin" }, 403);
     }
 
@@ -110,8 +103,7 @@ router.post("/users/:id/impersonate", async (c) => {
       },
     });
   } catch (err) {
-    logger.error("Impersonation error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR" }, 500);
+    return internalError(c, logger, "Impersonation error", err);
   }
 });
 
@@ -166,8 +158,7 @@ router.put("/users/:id/plan", async (c) => {
 
     return c.json({ success: true, subscription: sub });
   } catch (err) {
-    logger.error("Plan override error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR" }, 500);
+    return internalError(c, logger, "Plan override error", err);
   }
 });
 
@@ -206,8 +197,7 @@ router.get("/revenue", async (c) => {
       churnRatePercent: churnRate,
     });
   } catch (err) {
-    logger.error("Revenue dashboard error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR" }, 500);
+    return internalError(c, logger, "Revenue dashboard error", err);
   }
 });
 
@@ -317,8 +307,7 @@ router.post("/broadcast", async (c) => {
 
     return c.json({ success: true, recipients: recipients.length });
   } catch (err) {
-    logger.error("Broadcast error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR" }, 500);
+    return internalError(c, logger, "Broadcast error", err);
   }
 });
 
@@ -367,8 +356,7 @@ router.get("/users/export", async (c) => {
     c.header("Content-Disposition", `attachment; filename="users-${Date.now()}.csv"`);
     return c.body(csv);
   } catch (err) {
-    logger.error("User export error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR" }, 500);
+    return internalError(c, logger, "User export error", err);
   }
 });
 
@@ -399,8 +387,7 @@ router.get("/audit/export", async (c) => {
     c.header("Content-Disposition", `attachment; filename="audit-${Date.now()}.csv"`);
     return c.body(csv);
   } catch (err) {
-    logger.error("Audit export error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR" }, 500);
+    return internalError(c, logger, "Audit export error", err);
   }
 });
 

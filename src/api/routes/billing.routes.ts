@@ -6,6 +6,7 @@ import { feedbackTable, organizationMembersTable, subscriptionsTable } from "../
 import { auditLog, getLogger } from "../../logger";
 import { authMiddleware } from "../../middleware/auth";
 import { getUsageSummary } from "../../services/usage.service";
+import { internalError } from "../../shared/httpErrors";
 import type { HonoEnv } from "../../shared/types";
 
 const router = new Hono<HonoEnv>();
@@ -117,8 +118,7 @@ router.post("/checkout", authMiddleware, async (c) => {
 
     return c.json({ url: session.url });
   } catch (err) {
-    logger.error("Checkout session error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR" }, 500);
+    return internalError(c, logger, "Checkout session error", err);
   }
 });
 
@@ -161,8 +161,7 @@ router.post("/change-plan", authMiddleware, async (c) => {
       effective: when,
     });
   } catch (err) {
-    logger.error("Plan change error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR" }, 500);
+    return internalError(c, logger, "Plan change error", err);
   }
 });
 
@@ -229,8 +228,7 @@ router.post("/cancel", authMiddleware, async (c) => {
       ...(winbackCoupon && { offer: { type: "coupon", code: winbackCoupon } }),
     });
   } catch (err) {
-    logger.error("Cancel error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR" }, 500);
+    return internalError(c, logger, "Cancel error", err);
   }
 });
 
@@ -264,8 +262,7 @@ router.post("/reactivate", authMiddleware, async (c) => {
 
     return c.json({ success: true });
   } catch (err) {
-    logger.error("Reactivate error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR" }, 500);
+    return internalError(c, logger, "Reactivate error", err);
   }
 });
 
@@ -295,8 +292,7 @@ router.post("/portal", authMiddleware, async (c) => {
 
     return c.json({ url: session.url });
   } catch (err) {
-    logger.error("Portal session error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR" }, 500);
+    return internalError(c, logger, "Portal session error", err);
   }
 });
 

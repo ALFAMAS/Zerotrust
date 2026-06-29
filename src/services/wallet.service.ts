@@ -15,6 +15,7 @@ import {
 } from "../db/schema";
 import { isUnavailableStorageError } from "../db/storageFallback";
 import { getLogger } from "../logger";
+import { countRows } from "../shared/dbCount";
 
 const logger = getLogger("wallet-service");
 
@@ -278,11 +279,7 @@ export async function getWalletTransactions(userId: string, limit = 30, offset =
 export async function countWalletTransactions(userId: string): Promise<number> {
   const db = getDb();
   try {
-    const [result] = await db
-      .select({ count: sql<number>`count(*)::int` })
-      .from(walletTransactionsTable)
-      .where(eq(walletTransactionsTable.userId, userId));
-    return result?.count ?? 0;
+    return await countRows(db, walletTransactionsTable, eq(walletTransactionsTable.userId, userId));
   } catch (err) {
     if (isUnavailableStorageError(err, ["wallet_transactions"], WALLET_TRANSACTION_COLUMNS)) {
       return 0;
@@ -408,11 +405,7 @@ export async function getPointsHistory(userId: string, limit = 50, offset = 0) {
 export async function countPointsHistory(userId: string): Promise<number> {
   const db = getDb();
   try {
-    const [result] = await db
-      .select({ count: sql<number>`count(*)::int` })
-      .from(pointsLedgerTable)
-      .where(eq(pointsLedgerTable.userId, userId));
-    return result?.count ?? 0;
+    return await countRows(db, pointsLedgerTable, eq(pointsLedgerTable.userId, userId));
   } catch (err) {
     if (isUnavailableStorageError(err, ["points_ledger"], POINTS_LEDGER_COLUMNS)) {
       return 0;

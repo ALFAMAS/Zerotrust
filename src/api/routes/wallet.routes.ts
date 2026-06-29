@@ -19,6 +19,7 @@ import {
   topUpWallet,
   trackReferralClick,
 } from "../../services/wallet.service";
+import { internalError } from "../../shared/httpErrors";
 import { paginated, parsePaginatedQuery } from "../../shared/pagination";
 import { appRedirectUrl } from "../../shared/safeRedirect";
 import type { HonoEnv } from "../../shared/types";
@@ -39,8 +40,7 @@ router.get("/", async (c) => {
     const wallet = await getWallet(user.id);
     return c.json(wallet);
   } catch (err) {
-    logger.error("Get wallet error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR" }, 500);
+    return internalError(c, logger, "Get wallet error", err);
   }
 });
 
@@ -49,15 +49,17 @@ router.get("/transactions", async (c) => {
   try {
     const user = c.get("user");
     if (!user) return c.json({ error: "UNAUTHORIZED" }, 401);
-    const { page, limit, offset } = parsePaginatedQuery(c.req.query(), { defaultLimit: 30, maxLimit: 100 });
+    const { page, limit, offset } = parsePaginatedQuery(c.req.query(), {
+      defaultLimit: 30,
+      maxLimit: 100,
+    });
     const [txs, total] = await Promise.all([
       getWalletTransactions(user.id, limit, offset),
       countWalletTransactions(user.id),
     ]);
     return c.json(paginated(txs, { page, limit, total }));
   } catch (err) {
-    logger.error("Get wallet transactions error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR" }, 500);
+    return internalError(c, logger, "Get wallet transactions error", err);
   }
 });
 
@@ -120,8 +122,7 @@ router.get("/points/balance", async (c) => {
     const tier = await getCurrentTier(user.id);
     return c.json({ ...balance, tier });
   } catch (err) {
-    logger.error("Get points balance error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR" }, 500);
+    return internalError(c, logger, "Get points balance error", err);
   }
 });
 
@@ -130,15 +131,17 @@ router.get("/points/history", async (c) => {
   try {
     const user = c.get("user");
     if (!user) return c.json({ error: "UNAUTHORIZED" }, 401);
-    const { page, limit, offset } = parsePaginatedQuery(c.req.query(), { defaultLimit: 50, maxLimit: 200 });
+    const { page, limit, offset } = parsePaginatedQuery(c.req.query(), {
+      defaultLimit: 50,
+      maxLimit: 200,
+    });
     const [history, total] = await Promise.all([
       getPointsHistory(user.id, limit, offset),
       countPointsHistory(user.id),
     ]);
     return c.json(paginated(history, { page, limit, total }));
   } catch (err) {
-    logger.error("Get points history error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR" }, 500);
+    return internalError(c, logger, "Get points history error", err);
   }
 });
 
@@ -152,8 +155,7 @@ router.get("/tier", async (c) => {
     const tier = await getCurrentTier(user.id);
     return c.json({ tier });
   } catch (err) {
-    logger.error("Get tier error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR" }, 500);
+    return internalError(c, logger, "Get tier error", err);
   }
 });
 
@@ -165,8 +167,7 @@ router.get("/redemptions/catalog", async (c) => {
     const items = await getRedemptionCatalog();
     return c.json({ items });
   } catch (err) {
-    logger.error("Get redemption catalog error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR" }, 500);
+    return internalError(c, logger, "Get redemption catalog error", err);
   }
 });
 
@@ -200,8 +201,7 @@ router.get("/referrals/resolve", async (c) => {
     if (!ref) return c.json({ error: "NOT_FOUND" }, 404);
     return c.json({ code: ref.code, slug: ref.slug });
   } catch (err) {
-    logger.error("Resolve referral error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR" }, 500);
+    return internalError(c, logger, "Resolve referral error", err);
   }
 });
 
@@ -219,8 +219,7 @@ router.post("/referrals", async (c) => {
     const result = await createReferralLink(user.id, parsed.data.slug);
     return c.json(result, 201);
   } catch (err) {
-    logger.error("Create referral error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR" }, 500);
+    return internalError(c, logger, "Create referral error", err);
   }
 });
 
@@ -232,8 +231,7 @@ router.get("/referrals/dashboard", async (c) => {
     const dashboard = await getReferralDashboard(user.id);
     return c.json(dashboard);
   } catch (err) {
-    logger.error("Referral dashboard error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR" }, 500);
+    return internalError(c, logger, "Referral dashboard error", err);
   }
 });
 

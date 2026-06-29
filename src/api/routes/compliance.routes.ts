@@ -2,7 +2,6 @@ import { Hono } from "hono";
 import { z } from "zod";
 import { getLogger } from "../../logger";
 import { authMiddleware } from "../../middleware/auth";
-import { paginated, parsePaginatedQuery } from "../../shared/pagination";
 import {
   addRiskAssessment,
   getRiskAssessment,
@@ -11,6 +10,8 @@ import {
   updateRiskStatus,
   updateSoc2Control,
 } from "../../services/compliance.service";
+import { internalError } from "../../shared/httpErrors";
+import { paginated, parsePaginatedQuery } from "../../shared/pagination";
 import type { HonoEnv } from "../../shared/types";
 
 const router = new Hono<HonoEnv>();
@@ -27,23 +28,24 @@ router.get("/soc2/readiness", async (c) => {
     const readiness = await getSoc2Readiness();
     return c.json(readiness);
   } catch (err) {
-    logger.error("SOC 2 readiness error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR" }, 500);
+    return internalError(c, logger, "SOC 2 readiness error", err);
   }
 });
 
 // GET /compliance/soc2/controls — list all controls
 router.get("/soc2/controls", async (c) => {
   try {
-    const { page, limit, offset } = parsePaginatedQuery(c.req.query(), { defaultLimit: 50, maxLimit: 200 });
+    const { page, limit, offset } = parsePaginatedQuery(c.req.query(), {
+      defaultLimit: 50,
+      maxLimit: 200,
+    });
     const controls = await getSoc2Controls();
     // Slice in-memory from preloaded controls (static config, not DB-driven)
     const total = controls.length;
     const sliced = controls.slice(offset, offset + limit);
     return c.json(paginated(sliced, { page, limit, total }));
   } catch (err) {
-    logger.error("SOC 2 controls error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR" }, 500);
+    return internalError(c, logger, "SOC 2 controls error", err);
   }
 });
 
@@ -65,8 +67,7 @@ router.put("/soc2/controls/:controlId", async (c) => {
     await updateSoc2Control(controlId, parsed.data);
     return c.json({ success: true });
   } catch (err) {
-    logger.error("SOC 2 update error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR" }, 500);
+    return internalError(c, logger, "SOC 2 update error", err);
   }
 });
 
@@ -82,8 +83,7 @@ router.get("/risk-assessment/:year", async (c) => {
     const assessment = await getRiskAssessment(year);
     return c.json(assessment);
   } catch (err) {
-    logger.error("Risk assessment error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR" }, 500);
+    return internalError(c, logger, "Risk assessment error", err);
   }
 });
 
@@ -115,8 +115,7 @@ router.post("/risk-assessment/:year", async (c) => {
     await addRiskAssessment({ ...parsed.data, year });
     return c.json({ success: true }, 201);
   } catch (err) {
-    logger.error("Add risk error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR" }, 500);
+    return internalError(c, logger, "Add risk error", err);
   }
 });
 
@@ -137,8 +136,7 @@ router.put("/risk-assessment/:year/:riskId", async (c) => {
     await updateRiskStatus(year, riskId, parsed.data.status);
     return c.json({ success: true });
   } catch (err) {
-    logger.error("Update risk status error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR" }, 500);
+    return internalError(c, logger, "Update risk status error", err);
   }
 });
 

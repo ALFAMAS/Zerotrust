@@ -8,6 +8,7 @@ import { sendOTP } from "../../mfa";
 import { authMiddleware } from "../../middleware/auth";
 import { getSettings } from "../../models/settings.model";
 import { sendOtpEmail } from "../../services/email.service";
+import { internalError } from "../../shared/httpErrors";
 import type { HonoEnv } from "../../shared/types";
 
 const router = new Hono<HonoEnv>();
@@ -46,8 +47,7 @@ router.post("/totp/setup", async (c) => {
       const QRCode = await import("qrcode");
       qrCodeUrl = await QRCode.toDataURL(otpauthUri);
     } catch (libErr) {
-      logger.error("TOTP library error", libErr as Error);
-      return c.json({ error: "INTERNAL_ERROR", message: "TOTP setup failed" }, 500);
+      return internalError(c, logger, "TOTP library error", libErr, "TOTP setup failed");
     }
 
     const db = getDb();
@@ -74,8 +74,7 @@ router.post("/totp/setup", async (c) => {
 
     return c.json({ secret, qrCodeUrl });
   } catch (err) {
-    logger.error("TOTP setup error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR", message: "TOTP setup failed" }, 500);
+    return internalError(c, logger, "TOTP setup error", err, "TOTP setup failed");
   }
 });
 
@@ -167,8 +166,7 @@ router.post("/totp/verify", async (c) => {
 
     return c.json(backupCodes ? { enabled: true, backupCodes } : { enabled: true });
   } catch (err) {
-    logger.error("TOTP verify error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR", message: "TOTP verification failed" }, 500);
+    return internalError(c, logger, "TOTP verify error", err, "TOTP verification failed");
   }
 });
 
@@ -205,8 +203,7 @@ router.delete("/totp", async (c) => {
 
     return c.json({ disabled: true });
   } catch (err) {
-    logger.error("TOTP disable error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR", message: "Failed to disable TOTP" }, 500);
+    return internalError(c, logger, "TOTP disable error", err, "Failed to disable TOTP");
   }
 });
 
@@ -263,8 +260,7 @@ router.post("/otp/send", async (c) => {
 
     return c.json({ sent: true, channel });
   } catch (err) {
-    logger.error("OTP send error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR", message: "Failed to send OTP" }, 500);
+    return internalError(c, logger, "OTP send error", err, "Failed to send OTP");
   }
 });
 
@@ -301,8 +297,7 @@ router.post("/otp/verify", async (c) => {
     await db.delete(otpsTable).where(eq(otpsTable.id, records[0].id));
     return c.json({ verified: true });
   } catch (err) {
-    logger.error("OTP verify error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR", message: "OTP verification failed" }, 500);
+    return internalError(c, logger, "OTP verify error", err, "OTP verification failed");
   }
 });
 

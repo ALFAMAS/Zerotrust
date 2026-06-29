@@ -63,6 +63,7 @@ function makeDbChain(returnValue: any = []) {
     select: vi.fn().mockReturnThis(),
     from: vi.fn().mockReturnThis(),
     where: vi.fn().mockReturnThis(),
+    offset: vi.fn().mockReturnThis(),
     limit: vi.fn().mockResolvedValue(returnValue),
     orderBy: vi.fn().mockReturnThis(),
     insert: vi.fn().mockReturnThis(),
@@ -156,8 +157,8 @@ describe("GET /notifications", () => {
     const res = await app.request("/");
     expect(res.status).toBe(200);
     const body = await res.json();
-    expect(Array.isArray(body)).toBe(true);
-    expect(body).toHaveLength(0);
+    expect(Array.isArray(body.data)).toBe(true);
+    expect(body.data).toHaveLength(0);
   });
 
   it("returns notifications ordered by createdAt desc (up to 20)", async () => {
@@ -171,7 +172,7 @@ describe("GET /notifications", () => {
     const res = await app.request("/");
     expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body).toHaveLength(2);
+    expect(body.data).toHaveLength(2);
   });
 
   it("returns 401 for unauthenticated requests", async () => {

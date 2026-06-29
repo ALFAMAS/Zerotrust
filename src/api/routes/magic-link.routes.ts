@@ -17,6 +17,7 @@ import { getSettings } from "../../models/settings.model";
 import { sendMagicLink, verifyMagicLink } from "../../services/magicLink.service";
 import { TokenService } from "../../services/token.service";
 import { getClientIp } from "../../shared/clientIp";
+import { internalError } from "../../shared/httpErrors";
 import { appRedirectUrl, safeRelativeRedirect } from "../../shared/safeRedirect";
 import type { HonoEnv } from "../../shared/types";
 
@@ -156,8 +157,7 @@ router.get("/verify", async (c) => {
     const callbackUrl = appRedirectUrl(`${safePath}?oauth_code=${exchangeCode}`, appUrl);
     return c.redirect(callbackUrl, 302);
   } catch (err) {
-    logger.error("Magic link GET verify error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR", message: "Verification failed" }, 500);
+    return internalError(c, logger, "Magic link GET verify error", err, "Verification failed");
   }
 });
 
@@ -182,8 +182,7 @@ router.post("/verify", async (c) => {
     const tokens = await issueTokensForUser(result.userId, c);
     return c.json(tokens);
   } catch (err) {
-    logger.error("Magic link POST verify error", err as Error);
-    return c.json({ error: "INTERNAL_ERROR", message: "Verification failed" }, 500);
+    return internalError(c, logger, "Magic link POST verify error", err, "Verification failed");
   }
 });
 
