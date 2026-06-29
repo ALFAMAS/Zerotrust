@@ -1,26 +1,11 @@
 /**
- * Canonical shared modules barrel export.
+ * Frontend hooks barrel.
  *
- * Backend: import { ok, fail, routeHandler, dbGuard } from "@/shared/apiHelpers"
- * Frontend: import { useApi, usePaginatedApi } from "@/hooks/useApi"
- *           import { LoadingSpinner, EmptyState, ErrorState } from "@/components/ui/States"
+ *   import { useApi, usePaginatedApi } from "@/lib/hooks";
+ *
+ * Backend helpers (`apiHelpers`, `pagination`) live in the server-side
+ * `src/shared/*` tree and must not be re-exported here — importing them would
+ * pull server code into the client bundle.
  */
 
-// Backend helpers
-export {
-  ok,
-  fail,
-  internalError,
-  routeHandler,
-  HttpError,
-  dbGuard,
-} from "../../../shared/apiHelpers.js";
-
-// Pagination (already exists)
-export {
-  parsePaginatedQuery,
-  paginated,
-  type PaginationParams,
-  type PaginatedMeta,
-  type PaginatedResponse,
-} from "../../../shared/pagination.js";
+export { useApi, usePaginatedApi } from "./useApi";

@@ -9,7 +9,7 @@ interface UseApiState<T> {
   error: string | null;
 }
 
-interface UseApiOptions {
+interface UseApiOptions<T = unknown> {
   /** Skip the initial fetch (fetch manually via refetch). */
   lazy?: boolean;
   /** Called after successful fetch. */
@@ -33,7 +33,7 @@ interface UseApiOptions {
  */
 export function useApi<T = any>(
   path: string | null,
-  opts: UseApiOptions = {},
+  opts: UseApiOptions<T> = {}
 ): UseApiState<T> & { refetch: () => Promise<void> } {
   const [state, setState] = useState<UseApiState<T>>({
     data: null,
@@ -42,6 +42,10 @@ export function useApi<T = any>(
   });
   const mountedRef = useRef(true);
 
+  // Re-fetch only when the path changes; onSuccess/onError are caller-provided
+  // and typically inline, so depending on them would recreate the callback every
+  // render and loop the effect below.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentionally keyed on path only
   const fetch = useCallback(async () => {
     if (!path) {
       setState((s) => ({ ...s, loading: false }));
@@ -87,7 +91,7 @@ export function useApi<T = any>(
  */
 export function usePaginatedApi<T = any>(
   path: string | null,
-  opts: UseApiOptions & { defaultLimit?: number; defaultPage?: number } = {},
+  opts: UseApiOptions & { defaultLimit?: number; defaultPage?: number } = {}
 ) {
   const { defaultLimit = 20, defaultPage = 1, ...apiOpts } = opts;
   const [page, setPage] = useState(defaultPage);
@@ -97,7 +101,10 @@ export function usePaginatedApi<T = any>(
     ? `${path}${path.includes("?") ? "&" : "?"}page=${page}&limit=${limit}`
     : null;
 
-  const result = useApi<{ data: T[]; pagination: { total: number; totalPages: number; hasNext: boolean; hasPrev: boolean } }>(paginatedPath, apiOpts);
+  const result = useApi<{
+    data: T[];
+    pagination: { total: number; totalPages: number; hasNext: boolean; hasPrev: boolean };
+  }>(paginatedPath, apiOpts);
 
   return {
     ...result,

@@ -49,7 +49,7 @@ export function parsePaginatedQuery(
     | Record<string, string | string[] | undefined>
     | { query: (key?: string) => string | Record<string, string> }
     | (() => Record<string, string>),
-  opts?: { defaultLimit?: number; maxLimit?: number },
+  opts?: { defaultLimit?: number; maxLimit?: number }
 ): PaginationParams {
   let raw: Record<string, string | string[] | undefined>;
   if (typeof query === "function") {
@@ -58,7 +58,12 @@ export function parsePaginatedQuery(
     } catch {
       raw = {};
     }
-  } else if (query && typeof query === "object" && "query" in query && typeof query.query === "function") {
+  } else if (
+    query &&
+    typeof query === "object" &&
+    "query" in query &&
+    typeof query.query === "function"
+  ) {
     // Hono Context or Request — call .query() to get all params
     raw = query.query() as Record<string, string>;
   } else {
@@ -86,7 +91,7 @@ export function parsePaginatedQuery(
  */
 export function paginated<T>(
   data: T[],
-  meta: { page: number; limit: number; total: number },
+  meta: { page: number; limit: number; total: number }
 ): PaginatedResponse<T> {
   const total = Math.max(0, meta.total);
   const totalPages = Math.ceil(total / meta.limit);

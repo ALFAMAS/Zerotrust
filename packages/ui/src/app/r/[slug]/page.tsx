@@ -10,16 +10,11 @@ import { redirect } from "next/navigation";
  * this page just needs to resolve the slug → code and pass it to the register
  * form so signup can attribute the new account.
  */
-export default async function ReferralPage({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
+export default async function ReferralPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
 
   // Resolve slug → referral code via API
-  const apiUrl =
-    process.env.NEXT_PUBLIC_ZEROTRUST_URL ?? "http://localhost:1337";
+  const apiUrl = process.env.NEXT_PUBLIC_ZEROTRUST_URL ?? "http://localhost:1337";
 
   try {
     const res = await fetch(`${apiUrl}/wallet/referrals/resolve?slug=${encodeURIComponent(slug)}`, {

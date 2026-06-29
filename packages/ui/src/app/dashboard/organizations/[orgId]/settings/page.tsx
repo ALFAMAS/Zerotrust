@@ -111,7 +111,7 @@ export default function OrgSettingsPage() {
           setAllowedCountries((policyRes.policy.allowedCountries ?? []).join(", "));
         }
 
-        const me = membersRes.members.find((r) => r.user.id === meRes.id);
+        const me = (membersRes.data ?? []).find((r) => r.user.id === meRes.id);
         setMyRole(me?.member.role ?? "");
       } catch {
         // handled

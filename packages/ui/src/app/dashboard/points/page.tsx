@@ -60,7 +60,9 @@ export default function PointsHistoryPage() {
   const load = useCallback(async () => {
     try {
       const [points, tierRes, cat] = await Promise.all([
-        api.get<{ balance?: number; history?: PointsEntry[] }>("/auth/me/points"),
+        api.get<{ balance?: number; history?: PointsEntry[]; data?: PointsEntry[] }>(
+          "/auth/me/points"
+        ),
         api.get<{ tier: Tier | null }>("/wallet/tier").catch(() => ({ tier: null })),
         api
           .get<{ items: RedemptionItem[] }>("/wallet/redemptions/catalog")
