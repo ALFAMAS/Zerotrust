@@ -14,6 +14,31 @@ import type { HonoEnv } from "../../shared/types";
 const router = new Hono<HonoEnv>();
 const logger = getLogger("billing-webhooks");
 
+// Minimal shapes for the exact fields we read from the 2024-04-10 webhook
+// payloads. We model these explicitly instead of using the SDK's `Stripe.*`
+// types because the installed SDK is pinned to a newer apiVersion whose types
+// have relocated some of these fields (e.g. `current_period_*` moved off
+// `Subscription`). This removes the broad `as any` while staying truthful to
+// the JSON we actually receive.
+interface StripeSubscriptionPayload {
+  id: string;
+  status: string;
+  cancel_at_period_end: boolean;
+  current_period_start: number;
+  current_period_end: number;
+  trial_end: number | null;
+  items: { data: Array<{ price?: { id?: string | null; product?: string | null } | null }> };
+}
+interface StripeCheckoutSessionPayload {
+  mode: string | null;
+  customer: string | null;
+  subscription: string | null;
+  metadata: { userId?: string; orgId?: string } | null;
+}
+interface StripeInvoicePayload {
+  subscription: string | null;
+}
+
 function getStripe() {
   const key = process.env.STRIPE_SECRET_KEY;
   if (!key) throw new Error("STRIPE_SECRET_KEY not configured");
@@ -40,7 +65,7 @@ router.post("/webhook", async (c) => {
   const sig = c.req.header("stripe-signature");
   if (!sig) return c.json({ error: "MISSING_SIGNATURE" }, 400);
 
-  let event: any;
+  let event: Stripe.Event;
   try {
     const stripe = getStripe();
     const rawBody = await c.req.raw.arrayBuffer();
@@ -63,14 +88,14 @@ router.post("/webhook", async (c) => {
   try {
     switch (event.type) {
       case "checkout.session.completed": {
-        const session = event.data.object as any;
+        const session = event.data.object as unknown as StripeCheckoutSessionPayload;
         if (session.mode !== "subscription") break;
         const userId: string | undefined = session.metadata?.userId;
         const orgId: string | undefined = session.metadata?.orgId;
         if (!userId && !orgId) break;
         const sub = (await getStripe().subscriptions.retrieve(
           session.subscription as string
-        )) as any;
+        )) as unknown as StripeSubscriptionPayload;
         const item = sub.items.data[0];
 
         const values = {
@@ -101,7 +126,7 @@ router.post("/webhook", async (c) => {
 
       case "customer.subscription.updated":
       case "customer.subscription.deleted": {
-        const sub = event.data.object as any;
+        const sub = event.data.object as unknown as StripeSubscriptionPayload;
         const item = sub.items.data[0];
         const status = event.type === "customer.subscription.deleted" ? "canceled" : sub.status;
 
@@ -125,7 +150,8 @@ router.post("/webhook", async (c) => {
       }
 
       case "invoice.payment_failed": {
-        const invoice = event.data.object as any;
+        const invoice = event.data.object as unknown as StripeInvoicePayload;
+        if (!invoice.subscription) break;
         const [existing] = await db
           .select()
           .from(subscriptionsTable)
@@ -150,7 +176,7 @@ router.post("/webhook", async (c) => {
 
       case "invoice.payment_succeeded": {
         // Recovered payment clears the dunning sequence
-        const invoice = event.data.object as any;
+        const invoice = event.data.object as unknown as StripeInvoicePayload;
         if (!invoice.subscription) break;
         const [existing] = await db
           .select()

@@ -96,13 +96,16 @@ maintainability/refactor · P3 scalability/performance · P4 docs/DX.
 
 ## P2 — Maintainability and refactoring
 
-### P2.1 — Type the Stripe / webhook payloads  — _Status: Pending_
+### P2.1 — Type the Stripe / webhook payloads  — _Status: Done (2026-06-30)_
 - **Why:** `event: any` end-to-end means a Stripe shape change fails at runtime,
   not compile time (AUDIT C2); part of the 213 `as any` in `src/` (M2).
-- **Files:** `src/api/routes/billing.webhooks.ts`, `src/api/routes/billing.routes.ts`.
-- **Acceptance:** use Stripe's typed `Stripe.Event` / discriminated `event.type`
-  narrowing; remove `as any` from the webhook handler; type-check stays green.
-- **Risk:** Medium (must preserve exact runtime behavior).
+- **Files:** `src/api/routes/billing.webhooks.ts`.
+- **Acceptance:** `event` typed as `Stripe.Event`; per-case payloads modelled as
+  explicit local interfaces (the SDK is pinned to a newer apiVersion that moved
+  some fields) so the broad `as any` is gone; behavior preserved (guarded by
+  `billing.webhooks.test.ts`); type-check green. ✅ Only the isolated
+  `apiVersion` SDK-version cast remains (changing it would alter payload shape).
+- **Risk:** Medium (must preserve exact runtime behavior) — covered by tests.
 
 ### P2.2 — Module boundaries + import-linter  — _Status: Pending_
 - **Why:** No enforced partition (`identity`/`tenancy`/`billing`/`compliance`/
