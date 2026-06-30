@@ -85,7 +85,7 @@ maintainability/refactor · P3 scalability/performance · P4 docs/DX.
   dead-letter, idempotency-key convention; queue/job health surfaced in `/metrics`.
 - **Risk:** High (changes runtime scheduling — feature-flag the cutover).
 
-### P1.3 — End-to-end test for billing-webhook idempotency  — _Status: Pending_
+### P1.3 — End-to-end test for billing-webhook idempotency  — _Status: Done (2026-06-30)_
 - **Why:** The repository is unit-tested; the full handler path (signature →
   claim → skip duplicate → release on error) is not (AUDIT T2).
 - **Files:** `src/__tests__/billing.webhooks.test.ts` (new).
@@ -96,13 +96,16 @@ maintainability/refactor · P3 scalability/performance · P4 docs/DX.
 
 ## P2 — Maintainability and refactoring
 
-### P2.1 — Type the Stripe / webhook payloads  — _Status: Pending_
+### P2.1 — Type the Stripe / webhook payloads  — _Status: Done (2026-06-30)_
 - **Why:** `event: any` end-to-end means a Stripe shape change fails at runtime,
   not compile time (AUDIT C2); part of the 213 `as any` in `src/` (M2).
-- **Files:** `src/api/routes/billing.webhooks.ts`, `src/api/routes/billing.routes.ts`.
-- **Acceptance:** use Stripe's typed `Stripe.Event` / discriminated `event.type`
-  narrowing; remove `as any` from the webhook handler; type-check stays green.
-- **Risk:** Medium (must preserve exact runtime behavior).
+- **Files:** `src/api/routes/billing.webhooks.ts`.
+- **Acceptance:** `event` typed as `Stripe.Event`; per-case payloads modelled as
+  explicit local interfaces (the SDK is pinned to a newer apiVersion that moved
+  some fields) so the broad `as any` is gone; behavior preserved (guarded by
+  `billing.webhooks.test.ts`); type-check green. ✅ Only the isolated
+  `apiVersion` SDK-version cast remains (changing it would alter payload shape).
+- **Risk:** Medium (must preserve exact runtime behavior) — covered by tests.
 
 ### P2.2 — Module boundaries + import-linter  — _Status: Pending_
 - **Why:** No enforced partition (`identity`/`tenancy`/`billing`/`compliance`/
@@ -193,7 +196,7 @@ maintainability/refactor · P3 scalability/performance · P4 docs/DX.
 - **Acceptance:** a template + the first filled-in quarter.
 - **Risk:** Low.
 
-### P4.3 — `/metrics` default-closed guidance  — _Status: Pending_
+### P4.3 — `/metrics` default-closed guidance  — _Status: Done (2026-06-30)_
 - **Why:** `/metrics` is open unless `METRICS_AUTH_TOKEN` is set; a public
   deploy leaks internal labels (AUDIT S3).
 - **Files:** `.env.example`, `docs/deployment.md`, `README.md`.
@@ -212,7 +215,7 @@ maintainability/refactor · P3 scalability/performance · P4 docs/DX.
   restore RTO/RPO, and a service dependency diagram.
 - **Risk:** Low (docs).
 
-### P4.5 — CI gate hardening  — _Status: Pending_
+### P4.5 — CI gate hardening  — _Status: In Progress (concurrency group added 2026-06-30; coverage-gate decision + SAST triage pending)_
 - **Why:** Beyond branch protection (P0.4): the 85% coverage check is
   non-blocking, and there's no run-cancellation concurrency group. (Carried over
   from the archived Production Safety TODO §C/§D.)

@@ -89,7 +89,7 @@ incident under load or attack) · **Medium** (correctness/maintainability debt) 
 | # | Finding | Risk | Status |
 | --- | --- | --- | --- |
 | C1 | **Hot-path writes are not transactional.** Only 2 files use `db.transaction` (`audit/chain.ts`, `org.routes.ts`). Refresh-token rotation, session lifecycle, billing mutations, wallet/points ledger, and org role transitions run as sequential statements — a crash between them leaves partial state. | High | TODO P1 |
-| C2 | The Stripe webhook body is typed `any` end-to-end (`event: any`, `event.data.object as any`). A shape change from Stripe fails silently at runtime rather than at compile time. | Medium | TODO P2 |
+| C2 | The Stripe webhook body is typed `any` end-to-end (`event: any`, `event.data.object as any`). A shape change from Stripe fails silently at runtime rather than at compile time. | Medium | **Fixed** (P2.1) — `Stripe.Event` + explicit per-case payload interfaces |
 | C3 | Background schedulers (retention, billing lifecycle, backups, notification fallback) are fire-and-forget `setInterval`s started in-process with no shared job registry, retry/backoff, dead-letter, or idempotency keys. A second API replica runs every scheduler twice. | High | TODO P1 |
 | C4 | **`compress()` middleware crashed the API under the pinned runtime.** Hono's `compress()` needs the global `CompressionStream`, absent in Bun < 1.3 (`.bun-version` pins 1.2.23, used by CI + dev). Every compressible response threw `ReferenceError: CompressionStream is not defined` → HTTP 500; this is why the Playwright E2E smoke was red (162× on `/auth/login`). Pre-existing on `main`, not introduced by this PR. | High | **Fixed this PR** — see §6 |
 
