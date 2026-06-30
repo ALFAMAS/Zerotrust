@@ -107,6 +107,7 @@ rebuilding login for the hundredth time.
 ### Compliance & operations
 
 - Tamper-evident audit log (SHA-256 hash-chain) + Elasticsearch + SIEM fan-out
+- Replay-safe email bounce/complaint, SSF, and user-defined webhook event handling
 - Access reviews tooling, data-retention auto-purge
 - SOC 2 readiness controls, risk register, privacy records, and compliance runbooks
 - Prometheus metrics, OpenTelemetry tracing, public `/status` page
@@ -137,7 +138,7 @@ rebuilding login for the hundredth time.
 
 zerotrust is a Bun monorepo: a standalone API server and a Next.js app that talks
 to it. It is a **modular monolith** — one Hono API process exposes ~27 route
-modules backed by ~48 services and ~20 middleware, persisting to PostgreSQL (47
+modules backed by ~48 services and ~20 middleware, persisting to PostgreSQL (49
 tables) with Redis for sessions, rate limiting, and the email queue. Domains call
 each other in-process; there are no internal network hops.
 
@@ -301,7 +302,7 @@ local disk. Set `BACKUP_ENCRYPTION_KEY` (or `BACKUP_ENCRYPTION_KEY_HEX`) to encr
 ## Testing & code quality
 
 ```bash
-bun run test            # run the Vitest suite (723 tests)
+bun run test            # run the Vitest suite
 bun run test:watch      # watch mode
 bun run test:coverage   # coverage report
 

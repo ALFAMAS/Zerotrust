@@ -37,15 +37,24 @@ maintainability/refactor · P3 scalability/performance · P4 docs/DX.
   compression still runs on Node 18+ / Bun ≥ 1.3; E2E login flow returns 200. ✅
 - **Risk:** Low (guarded mount; behavior unchanged where the global exists).
 
-### P0.3 — Idempotency for the remaining event consumers  — _Status: Pending_
+### P0.3 — Idempotency for the remaining event consumers  — _Status: Done (2026-06-30)_
 - **Why:** Email-event webhooks (`/webhooks/email`), SSF (`/ssf/events`), and
-  user-defined webhook deliveries verify signatures but don't persist a
-  processed-event id, so a valid replay is reprocessed (AUDIT S2).
+  user-defined webhook deliveries did not persist a processed-event id, so a
+  valid replay could be reprocessed (AUDIT S2).
 - **Files:** `src/api/routes/email-events.routes.ts`, `src/ssf/receiver.ts`,
-  `src/webhooks/delivery.ts`, `src/db/schema.ts`, `src/db/repositories/`.
+  `src/webhooks/delivery.ts`, `src/db/schema.ts`, `src/db/repositories/`,
+  `drizzle/0026_processed_webhook_events.sql`.
 - **Acceptance:** each consumer records and checks an idempotency key (provider
   event id where available, otherwise a content hash); replays are a no-op;
-  tests cover the duplicate path.
+  tests cover the duplicate path. ✅
+- **Progress:** `processed_webhook_events` now covers email events
+  (`consumer="email"`), SSF events (`consumer="ssf"`), and user-defined outbound
+  webhook dispatches (`consumer="webhook:<endpointId>"`). Each path uses an
+  explicit event id where available, falls back to a SHA-256 content hash, and
+  treats duplicates as no-ops. Failed email processing and terminal failed
+  outbound deliveries release the claim so retries can reprocess. Covered by
+  `email-events.routes.test.ts`, `ssf.receiver.test.ts`,
+  `webhooks.delivery.test.ts`, and `processedWebhookEvents.repository.test.ts`.
 - **Risk:** Medium (touches multiple ingress paths; keep per-consumer keys distinct).
 
 ### P0.4 — Require CI on `main` + block direct pushes  — _Status: Pending (repo setting)_

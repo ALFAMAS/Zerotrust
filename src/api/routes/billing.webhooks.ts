@@ -38,6 +38,11 @@ interface StripeCheckoutSessionPayload {
 interface StripeInvoicePayload {
   subscription: string | null;
 }
+interface StripeWebhookEvent {
+  id: string;
+  type: string;
+  data: { object: unknown };
+}
 
 function getStripe() {
   const key = process.env.STRIPE_SECRET_KEY;
@@ -65,11 +70,15 @@ router.post("/webhook", async (c) => {
   const sig = c.req.header("stripe-signature");
   if (!sig) return c.json({ error: "MISSING_SIGNATURE" }, 400);
 
-  let event: Stripe.Event;
+  let event: StripeWebhookEvent;
   try {
     const stripe = getStripe();
     const rawBody = await c.req.raw.arrayBuffer();
-    event = stripe.webhooks.constructEvent(Buffer.from(rawBody), sig, webhookSecret);
+    event = stripe.webhooks.constructEvent(
+      Buffer.from(rawBody),
+      sig,
+      webhookSecret
+    ) as StripeWebhookEvent;
   } catch (err) {
     logger.error("Webhook signature verification failed", err as Error);
     return c.json({ error: "INVALID_SIGNATURE" }, 400);

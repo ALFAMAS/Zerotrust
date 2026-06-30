@@ -17,7 +17,7 @@ zerotrust is a **Bun monorepo** with three deployables:
 | `packages/client/` | Generated, dependency-free TypeScript SDK (from `src/api/openapi.json`) | — |
 
 It is a **modular monolith**: one API process exposes ~27 route modules backed
-by ~48 services and ~20 middleware, persisting to PostgreSQL (47 tables) with
+by ~48 services and ~20 middleware, persisting to PostgreSQL (49 tables) with
 Redis for sessions/rate-limiting/queue. There are no internal network hops
 between domains — modules call each other in-process.
 
@@ -32,7 +32,7 @@ between domains — modules call each other in-process.
                   ▼                      ▼              ▼               ▼                 ▼
             PostgreSQL (5432)      Redis (6379)    Elasticsearch    S3-compatible    SMTP / Stripe /
             Drizzle ORM            sessions·rate   (9200, optional) (backups·uploads) Twilio / web-push
-            47 tables              limit·BullMQ    audit·search                       (external)
+            49 tables              limit·BullMQ    audit·search                       (external)
 ```
 
 ## 2. Request lifecycle
@@ -60,7 +60,7 @@ read it via `c.get("user")`.
 | HTTP | `api/` | Hono app, route mounting, OpenAPI spec |
 | Domain logic | `services/` (~48) | token, session, email/queue, MFA, OAuth, billing, wallet, globalization, search, compliance, backup, SLO, alerting… |
 | Middleware | `middleware/` (~20) | auth, rate limiting, CSRF/headers, plan gating, abuse defense, API versioning |
-| Data | `db/` | Drizzle schema (47 tables) + connection; `models/` thin table re-exports |
+| Data | `db/` | Drizzle schema (49 tables) + connection; `models/` thin table re-exports |
 | Crypto | `crypto/` | `paseto-v4` (v4.local), `csfle` (field encryption), `hardware-key-store`, `codes` |
 | MFA | `mfa/` | TOTP, Email/SMS/WhatsApp/Telegram OTP channels, FIDO MDS3 |
 | OAuth | `oauth/` | provider factory + adapters (Google/GitHub/Apple/Facebook) |
@@ -70,8 +70,8 @@ read it via `c.get("user")`.
 
 ## 4. State & data
 
-- **PostgreSQL** (Drizzle ORM, `postgres` driver) — system of record, 47 tables,
-  25 versioned migrations in `drizzle/`. Sensitive columns use **CSFLE**
+- **PostgreSQL** (Drizzle ORM, `postgres` driver) — system of record, 49 tables,
+  27 versioned migrations in `drizzle/`. Sensitive columns use **CSFLE**
   (client-side field encryption) with key-version rotation.
 - **Redis** (ioredis) — session validation cache (`session:{tokenId}` with
   debounced `lastActivityAt` writes and **DB fallback when Redis is down**),
@@ -162,7 +162,7 @@ interim fix: guard each scheduler behind a Redis lock or
 
 ### P2 — Migration safety
 
-47 tables / 25 migrations, several recent ones `DROP … CASCADE`. Add a
+49 tables / 27 migrations, several recent ones `DROP … CASCADE`. Add a
 "deploy code that stops using the column → ship → drop in a later release"
 (expand/contract) discipline and a pre-migration verified backup step (see
 [`../todo.md`](../todo.md) P3.5). Consider a CI check that flags `DROP`/`ALTER …

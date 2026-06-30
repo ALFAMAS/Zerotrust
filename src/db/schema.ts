@@ -614,6 +614,30 @@ export const processedStripeEventsTable = pgTable(
   })
 );
 
+// ── Processed webhook events (generic idempotency) ────────────────────────────
+// Records replay-sensitive event consumers outside Stripe. The `(consumer,
+// event_key)` pair is unique so each consumer gets an isolated idempotency
+// namespace and redeliveries become no-ops.
+export const processedWebhookEventsTable = pgTable(
+  "processed_webhook_events",
+  {
+    id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+    consumer: text("consumer").notNull(),
+    eventKey: text("event_key").notNull(),
+    eventType: text("event_type").notNull(),
+    processedAt: timestamp("processed_at", { withTimezone: true }).notNull().default(sql`now()`),
+  },
+  (t) => ({
+    processedWebhookEventsConsumerKeyUnq: unique("processed_webhook_events_consumer_key_unq").on(
+      t.consumer,
+      t.eventKey
+    ),
+    processedWebhookEventsProcessedIdx: index("processed_webhook_events_processed_idx").on(
+      t.processedAt
+    ),
+  })
+);
+
 // ── Security events (account takeover detection) ──────────────────────────────
 
 export const securityEventsTable = pgTable("security_events", {

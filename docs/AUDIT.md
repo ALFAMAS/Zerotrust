@@ -25,7 +25,7 @@ with three deployables:
 | `packages/client/` | Dependency-free TypeScript SDK generated from `src/api/openapi.json` | — |
 
 **Stack:** Bun (package manager + runtime for the API), Hono 4, Drizzle ORM on
-PostgreSQL (48 tables, 26 migrations), Redis (ioredis) for sessions / rate
+PostgreSQL (49 tables, 27 migrations), Redis (ioredis) for sessions / rate
 limiting / BullMQ email queue, Stripe billing, Sentry + OpenTelemetry +
 prom-client for observability, Biome for lint/format, Vitest for tests,
 semantic-release for releases.
@@ -81,7 +81,7 @@ incident under load or attack) · **Medium** (correctness/maintainability debt) 
 | # | Finding | Risk | Status |
 | --- | --- | --- | --- |
 | S1 | **Stripe webhook had no idempotency.** `POST /billing/webhook` verified the signature but processed every delivery, so a Stripe retry or a replayed (still-valid) event reprocessed subscription mutations — a money-path correctness hole (checklist #94). | Critical | **Fixed this PR** — see §6 |
-| S2 | Other webhook/event consumers (email events `/webhooks/email`, SSF `/ssf/events`, user-defined webhook deliveries) verify signatures but do not persist a processed-event id, so a valid replay is reprocessed. Lower blast radius than billing but the same class. | High | TODO P0 |
+| S2 | Other webhook/event consumers (email events `/webhooks/email`, SSF `/ssf/events`, user-defined webhook deliveries) did not persist a processed-event id, so a valid replay could be reprocessed. Lower blast radius than billing but the same class. | High | **Fixed** (P0.3) — email events, SSF, and user webhook deliveries now share `processed_webhook_events` |
 | S3 | `/metrics` is open by default (only gated when `METRICS_AUTH_TOKEN` is set). Acceptable for a private scrape network, but a public deployment leaks internal cardinality/labels. Documented but easy to miss. | Medium | TODO P4 (doc/deploy default) |
 
 ### 4.2 Stability / correctness
@@ -114,7 +114,7 @@ incident under load or attack) · **Medium** (correctness/maintainability debt) 
 | # | Finding | Risk | Status |
 | --- | --- | --- | --- |
 | T1 | **No UI component/integration tests.** `packages/ui` has only `lib/*.test.ts`; auth/billing/admin page flows are untested. | Medium | TODO P3 |
-| T2 | No route-level test for billing-webhook idempotency end-to-end (the new repository is unit-tested; the handler path is not). | Low | TODO P1 |
+| T2 | No route-level test for billing-webhook idempotency end-to-end (the new repository is unit-tested; the handler path is not). | Low | **Fixed** (P1.3) |
 | T3 | 2 dashboard E2E tests had drifted from the shipped UI (asserted copy/behavior no component renders); they were red on `main`, masked by the login-500 crash (C4). | Medium | **Fixed this PR** — see §6 |
 
 ### 4.6 Documentation gaps
@@ -126,16 +126,14 @@ incident under load or attack) · **Medium** (correctness/maintainability debt) 
 
 ## 5. Recommended upgrades (suggested implementation order)
 
-1. **Webhook/event idempotency** — billing (done), then email-events, SSF, and
-   user webhook deliveries (S1 → S2).
-2. **Repository + transaction layer** for refresh-token rotation, session
+1. **Repository + transaction layer** for refresh-token rotation, session
    lifecycle, billing, wallet/points ledger, org role transitions (C1, M1).
-3. **Centralized jobs module** with Zod payloads, retry/backoff, dead-letter,
+2. **Centralized jobs module** with Zod payloads, retry/backoff, dead-letter,
    idempotency keys, and single-leader scheduling (C3, P1).
-4. **Module boundaries + import-linter** and an ADR for dependency direction (M3).
-5. **Typed Stripe/event payloads**, chip away at `as any` (C2, M2).
-6. **UI component/integration tests** for auth/billing/admin flows (T1).
-7. **ADRs + maintenance scorecard** (D2).
+3. **Module boundaries + import-linter** and an ADR for dependency direction (M3).
+4. **Typed event payloads**, chip away at `as any` (M2).
+5. **UI component/integration tests** for auth/billing/admin flows (T1).
+6. **ADRs + maintenance scorecard** (D2).
 
 ## 6. Changes made in this audit pass
 
@@ -162,9 +160,30 @@ incident under load or attack) · **Medium** (correctness/maintainability debt) 
 - Authored this `docs/AUDIT.md` and a prioritized, acceptance-criteria-driven
   [`todo.md`](../todo.md).
 
+Follow-up since the audit pass:
+
+- **Fixed S2 (High): remaining webhook/event idempotency.**
+  - New generic `processed_webhook_events` table (migration
+    `0026_processed_webhook_events.sql`) with a per-consumer unique key.
+  - New repository `src/db/repositories/processedWebhookEvents.repository.ts`
+    (`claimProcessedWebhookEvent` / `releaseProcessedWebhookEvent`).
+  - `POST /webhooks/email/event` claims optional provider `eventId`, falls back
+    to a SHA-256 content hash when absent, skips duplicates, and releases the
+    claim on processing failure so provider retries can reprocess.
+  - `handleSSFEvent()` claims `jti`/`id`/`eventId` or a SHA-256 content hash
+    before audit/session side effects and skips duplicate SSF events.
+  - `dispatchEvent()` claims per outbound webhook endpoint, skips duplicate
+    dispatches, and releases the claim after terminal delivery failure so a later
+    retry can reprocess.
+  - Unit tests: `email-events.routes.test.ts`, `ssf.receiver.test.ts`,
+    `webhooks.delivery.test.ts`, and `processedWebhookEvents.repository.test.ts`.
+
 > **Pre-existing CI note:** the **SAST & Dependency Scans (Semgrep)** check is
 > also red on `main` (independent of this PR's diff). Triaged as out of scope for
 > this change; tracked separately rather than fixed here.
 
-All changes verified: type-check clean, `biome` clean, 726 tests passing,
-`verify:generated` clean.
+Verification as of 2026-06-30: type-check clean, `db:generate` reports no drift,
+`verify:generated` clean, and 746 Vitest tests passing. Targeted Biome on the
+touched backend/test files passes, with the existing CLI `console.log` warning in
+`scripts/audit-api-ui-map.mjs`. Full `lint:ci` remains red from pre-existing
+`packages/ui` lint debt (154 errors / 24 warnings), independent of this slice.

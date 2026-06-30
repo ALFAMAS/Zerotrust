@@ -28,6 +28,10 @@ function normalizePath(path) {
   );
 }
 
+function relativePath(path) {
+  return relative(ROOT, path).replaceAll("\\", "/");
+}
+
 function joinRoute(prefix, routePath) {
   const full = `${prefix === "/" ? "" : prefix}${routePath === "/" ? "" : routePath}`;
   return normalizePath(full || "/");
@@ -75,7 +79,7 @@ function parseBackendRoutes() {
       routes.push({
         method: match[1].toUpperCase(),
         path: joinRoute(mount.prefix, match[2]),
-        file: relative(ROOT, mount.file),
+        file: relativePath(mount.file),
       });
     }
   }
@@ -103,11 +107,11 @@ function parseFrontendCalls() {
       calls.push({
         method: match[1].toUpperCase(),
         path: normalizePath(match[2]),
-        file: relative(ROOT, file),
+        file: relativePath(file),
       });
     }
     for (const match of source.matchAll(fetchRe)) {
-      calls.push({ method: "FETCH", path: normalizePath(match[1]), file: relative(ROOT, file) });
+      calls.push({ method: "FETCH", path: normalizePath(match[1]), file: relativePath(file) });
     }
   }
   return dedupe(calls);
@@ -189,5 +193,5 @@ ${rows(frontend, ["method", "path", "file"])}
 mkdirSync(dirname(OUT), { recursive: true });
 writeFileSync(OUT, markdown);
 console.log(
-  `Wrote ${relative(ROOT, OUT)} (${backend.length} backend routes, ${frontend.length} frontend calls).`
+  `Wrote ${relativePath(OUT)} (${backend.length} backend routes, ${frontend.length} frontend calls).`
 );

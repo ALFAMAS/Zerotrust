@@ -25,6 +25,17 @@ in [`todo.md`](./todo.md). Shipped in this pass:
   is the first member of the hot-path-write repository layer (`todo.md` P1.1).
 - ✅ **Docs** — `.env.example` now lists the required `STRIPE_SECRET_KEY` /
   `STRIPE_WEBHOOK_SECRET` / `STRIPE_PRODUCT_*` vars (were used but undocumented).
+- ✅ **Email-event webhook idempotency** — `POST /webhooks/email/event` now records
+  each provider event id (or a SHA-256 content hash when no id is supplied) in
+  `processed_webhook_events` with `consumer="email"`, skips replays, and releases
+  the claim on processing failure. Migration `0026_processed_webhook_events.sql`.
+- ✅ **SSF event idempotency** — `handleSSFEvent()` records `jti`/`id`/`eventId`
+  (or a SHA-256 content hash) in `processed_webhook_events` with
+  `consumer="ssf"` before audit/session side effects and skips duplicate SETs.
+- ✅ **User webhook delivery idempotency** — outbound `dispatchEvent()` claims
+  per endpoint (`consumer="webhook:<endpointId>"`), supports explicit
+  `eventId`/`webhookEventId`/`idempotencyKey` values plus hash fallback, skips
+  duplicate dispatches, and releases terminal failed deliveries for later retry.
 
 ## Removed — maintenance slim-down (2026-06-28)
 
@@ -217,7 +228,7 @@ loyalty, globalization, search, compliance, audit, and ops tooling.
 - ✅ Win-back emails — D7 / D30 / D90 after cancellation
 - ✅ Security alert emails — new-device login, account-takeover pattern
 - ✅ Billing-event template — reusable title/body/CTA layout for lifecycle emails
-- ✅ Email suppression list — `email_suppressions` table (migration `0011`); `sendEmail()` skips suppressed recipients; provider-agnostic `POST /webhooks/email/event` for bounce/complaint
+- ✅ Email suppression list — `email_suppressions` table (migration `0011`); `sendEmail()` skips suppressed recipients; provider-agnostic, replay-safe `POST /webhooks/email/event` for bounce/complaint
 - ✅ Email deliverability hardening — SPF/DKIM/DMARC runbook + suppression enforcement
 
 ### Notification center

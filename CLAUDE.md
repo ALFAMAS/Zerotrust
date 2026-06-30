@@ -20,7 +20,7 @@ covers SOC 2 policies, runbooks, and evidence.
 bun dev          # starts API + UI concurrently
 bun dev:api      # API only
 bun dev:ui       # UI only (also starts MCP server)
-bun run test     # vitest test suite (723 tests)
+bun run test     # vitest test suite
 bun run verify:generated # regenerate SDK + API docs + drift reports and fail on diff
 bun run db:backup # one-shot pg_dump backup with local + S3 retention (any S3-compatible provider)
 bun run build    # tsc for API; next build for UI
