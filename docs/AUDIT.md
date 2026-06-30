@@ -116,6 +116,7 @@ incident under load or attack) · **Medium** (correctness/maintainability debt) 
 | --- | --- | --- | --- |
 | T1 | **No UI component/integration tests.** `packages/ui` has only `lib/*.test.ts`; auth/billing/admin page flows are untested. | Medium | TODO P3 |
 | T2 | No route-level test for billing-webhook idempotency end-to-end (the new repository is unit-tested; the handler path is not). | Low | TODO P1 |
+| T3 | 2 dashboard E2E tests had drifted from the shipped UI (asserted copy/behavior no component renders); they were red on `main`, masked by the login-500 crash (C4). | Medium | **Fixed this PR** — see §6 |
 
 ### 4.6 Documentation gaps
 
@@ -151,6 +152,14 @@ incident under load or attack) · **Medium** (correctness/maintainability debt) 
   mount in `src/api/server.ts` with `"CompressionStream" in globalThis` so
   compression is skipped (not fatal) on runtimes lacking the global. Unblocks the
   Playwright E2E smoke; Node 18+ / Bun ≥ 1.3 still compress normally.
+- **Reconciled 2 drifted E2E tests (T3).** `packages/ui/e2e/dashboard-polish.spec.ts`
+  asserted dashboard copy/behavior that no shipped component provides ("Setup
+  progress"/"Profile strength"/"Usage readiness"/"4/4" + a `localStorage`
+  `za_onboarding_completed` flag). The actual dashboard renders `ProgressBars`
+  ("Your Progress"/"Profile completeness"/"4/4 fields") and `SetupChecklist`
+  (completion card + POST `/auth/me/onboarding-complete`). The tests had been
+  failing on `main` too but were masked by the login-500 crash above; updated them
+  to the shipped behavior. No product/UI change.
 - Authored this `docs/AUDIT.md` and a prioritized, acceptance-criteria-driven
   [`todo.md`](../todo.md).
 
