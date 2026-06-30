@@ -2,7 +2,10 @@
 
 Prioritized, acceptance-criteria-driven backlog. Findings come from
 [`docs/AUDIT.md`](./docs/AUDIT.md) (2026-06-29) and the standing architecture
-reviews. Shipped features are tracked in [`tdone.md`](./tdone.md), not here.
+reviews. This is the single backlog — it absorbs the forward-looking items from
+the now-archived `PRODUCTION_SAFETY_TODO.md` and `SAAS_TEMPLATE_ARCHITECTURE_RECOMMENDATIONS.md`
+(see [`docs/PROJECT_HISTORY.md`](./docs/PROJECT_HISTORY.md)). Shipped features are
+tracked in [`tdone.md`](./tdone.md), not here.
 
 **Priorities:** P0 critical/security · P1 stability/correctness · P2
 maintainability/refactor · P3 scalability/performance · P4 docs/DX.
@@ -66,15 +69,20 @@ maintainability/refactor · P3 scalability/performance · P4 docs/DX.
   ledger appends are atomic; unit tests assert rollback on failure.
 - **Risk:** High (touches auth/billing core — land incrementally, one domain per PR).
 
-### P1.2 — Centralized background-jobs module  — _Status: Pending_
-- **Why:** Schedulers are in-process `setInterval`s with no registry, retry,
-  dead-letter, or idempotency, and double-run under >1 replica (AUDIT C3/P1).
-- **Files:** new `src/jobs/`, `src/api/server.ts`, `src/services/emailQueue.ts`,
-  `src/services/dataRetention.ts`, `src/services/billingLifecycle.service.ts`,
-  `src/services/dbBackup.service.ts`, `src/services/notificationEmailFallback.ts`.
-- **Acceptance:** job names + Zod payload schemas, retry/backoff, dead-letter,
-  idempotency-key convention; single-leader (or queue-backed) scheduling so
-  replicas don't duplicate; queue/job health surfaced in `/metrics`.
+### P1.2 — Centralized background-jobs module (+ fix cluster-mode duplication)  — _Status: Pending_
+- **Why:** The BullMQ consumer and the four 24h schedulers (retention,
+  notification fallback, billing lifecycle, `pg_dump` backup) start
+  unconditionally in the HTTP process with no instance guard. Under PM2 cluster
+  mode (`-i max`) **every** instance runs them → N nightly backups + duplicate
+  dunning emails. They are also plain `setInterval`s with no registry, retry,
+  dead-letter, or idempotency (AUDIT C3/P1).
+- **Files:** new `src/jobs/` (or `src/worker.ts`), `src/api/server.ts`,
+  `src/services/emailQueue.ts`, `src/services/dataRetention.ts`,
+  `src/services/billingLifecycle.service.ts`, `src/services/dbBackup.service.ts`,
+  `src/services/notificationEmailFallback.ts`.
+- **Acceptance:** extract a single-instance worker (or guard each scheduler with a
+  Redis lock / leader election); job names + Zod payload schemas, retry/backoff,
+  dead-letter, idempotency-key convention; queue/job health surfaced in `/metrics`.
 - **Risk:** High (changes runtime scheduling — feature-flag the cutover).
 
 ### P1.3 — End-to-end test for billing-webhook idempotency  — _Status: Pending_
@@ -141,6 +149,33 @@ maintainability/refactor · P3 scalability/performance · P4 docs/DX.
   DB writes idempotently.
 - **Risk:** Medium (depends on P1.2).
 
+### P3.4 — Plugin/capability contract for optional-heavy integrations  — _Status: Pending_
+- **Why:** Optional-but-heavy capabilities are always-on, which is the
+  maintenance tax that motivated the 2026-06-28 slim-down. Give them an explicit
+  plugin contract so they enable per-deployment without bloating default/dev
+  runtime. (Carried over from the archived architecture recommendations.)
+- **Files:** new `src/plugins/` contract; `src/services/search.service.ts`
+  (Elasticsearch/SIEM), `src/services/*` OTP channels (Twilio SMS/WhatsApp/
+  Telegram), `src/services/objectStorage.service.ts` (S3/B2/R2/MinIO),
+  `src/services/globalization.service.ts` (tax/PPP providers).
+- **Acceptance:** each plugin publishes config schema, health check, migrations,
+  fixtures, admin-UI registration, and failure-mode docs; a future SSO/directory
+  add-on re-enters through this contract rather than always-on code.
+- **Risk:** Medium.
+
+### P3.5 — Deploy & release safety (expand/contract, rollback, DR drills)  — _Status: Pending_
+- **Why:** Migrations `0020`–`0024` are irreversible `DROP TABLE … CASCADE` /
+  `DROP COLUMN`; there is no documented one-command rollback or periodic restore
+  drill, and destructive schema changes ship without expand/contract. (Carried
+  over from the archived Production Safety TODO §B.)
+- **Files:** `docs/deployment.md`, `docs/compliance/backup-restore-runbook.md`,
+  `docs/compliance/incident-response-runbook.md`, future migration workflow.
+- **Acceptance:** verify a `db:backup` before destructive migrations + apply on a
+  staging replica first; document a one-command app rollback; schedule + record a
+  restore drill; adopt expand/contract for future destructive changes; confirm
+  `BACKUP_REQUIRE_ENCRYPTION=true` and `BACKUP_ENCRYPTION_KEY_HEX` set in prod.
+- **Risk:** Medium (process + ops; mostly docs/runbooks).
+
 ## P4 — Documentation and developer experience
 
 ### P4.1 — ADRs for load-bearing decisions  — _Status: Pending_
@@ -164,6 +199,27 @@ maintainability/refactor · P3 scalability/performance · P4 docs/DX.
 - **Files:** `.env.example`, `docs/deployment.md`, `README.md`.
 - **Acceptance:** deployment docs flag `METRICS_AUTH_TOKEN` as required for
   internet-facing deploys; `.env.example` calls it out.
+- **Risk:** Low.
+
+### P4.4 — Operational reference architecture (deployment blueprints)  — _Status: Pending_
+- **Why:** `docs/deployment.md` covers local/staging; production buyers need a
+  target operating model. (Carried over from the archived architecture
+  recommendations.)
+- **Files:** `docs/deployment.md` or new `docs/reference-architecture.md`.
+- **Acceptance:** blueprints for (1) single VM/PM2/nginx, (2) container platform
+  with managed Postgres/Redis/object storage, (3) Kubernetes with separate
+  web/API/workers; include worker topology, migration ordering, rollback, backup
+  restore RTO/RPO, and a service dependency diagram.
+- **Risk:** Low (docs).
+
+### P4.5 — CI gate hardening  — _Status: Pending_
+- **Why:** Beyond branch protection (P0.4): the 85% coverage check is
+  non-blocking, and there's no run-cancellation concurrency group. (Carried over
+  from the archived Production Safety TODO §C/§D.)
+- **Files:** `.github/workflows/ci.yml`, PR template / `CONTRIBUTING`.
+- **Acceptance:** decide whether coverage should block; keep `bun audit --prod`
+  + Semgrep/Trivy blocking with per-release triage; add a `concurrency` group to
+  cancel superseded runs; document the "re-run generators before push" rule.
 - **Risk:** Low.
 
 ---
