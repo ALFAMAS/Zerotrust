@@ -3,8 +3,8 @@
 Audited 2026-06-28, after the maintenance slim-down
 ([`MAINTENANCE_FEATURE_AUDIT.md`](./MAINTENANCE_FEATURE_AUDIT.md)). Describes
 the system as it is today, then proposes upgrades. Forward-looking operational
-fixes that overlap with CI/deploy safety live in
-[`PRODUCTION_SAFETY_TODO.md`](./PRODUCTION_SAFETY_TODO.md).
+fixes that overlap with CI/deploy safety live in the backlog
+([`../todo.md`](../todo.md)); the standing audit is [`AUDIT.md`](./AUDIT.md).
 
 ## 1. Overview
 
@@ -165,7 +165,7 @@ interim fix: guard each scheduler behind a Redis lock or
 47 tables / 25 migrations, several recent ones `DROP … CASCADE`. Add a
 "deploy code that stops using the column → ship → drop in a later release"
 (expand/contract) discipline and a pre-migration verified backup step (see
-`PRODUCTION_SAFETY_TODO.md` §B1). Consider a CI check that flags `DROP`/`ALTER …
+[`../todo.md`](../todo.md) P3.5). Consider a CI check that flags `DROP`/`ALTER …
 DROP` in new migrations for explicit human sign-off.
 
 ### P3 — Reconsider Elasticsearch
@@ -207,4 +207,4 @@ that the feature set is smaller and more focused.
 ---
 
 These proposals are advisory. P1 and P2 are the highest-leverage and map to open
-items in [`PRODUCTION_SAFETY_TODO.md`](./PRODUCTION_SAFETY_TODO.md).
+items in the backlog ([`../todo.md`](../todo.md)).

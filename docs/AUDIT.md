@@ -6,10 +6,9 @@
 **Baseline at audit time:** type-check clean, `biome ci` clean, **726 tests passing**
 (78 files), `verify:generated` clean.
 
-This document is the standing audit. It complements — and does not replace — the
-existing deep-dives in [`docs/ARCHITECTURE.md`](./ARCHITECTURE.md),
-[`docs/PRODUCTION_READINESS_AUDIT.md`](./PRODUCTION_READINESS_AUDIT.md), and
-[`docs/SAAS_TEMPLATE_ARCHITECTURE_RECOMMENDATIONS.md`](./SAAS_TEMPLATE_ARCHITECTURE_RECOMMENDATIONS.md).
+This document is the standing audit. It complements [`docs/ARCHITECTURE.md`](./ARCHITECTURE.md)
+(current-state architecture) and supersedes the earlier dated audit/recommendation
+snapshots now consolidated in [`docs/PROJECT_HISTORY.md`](./PROJECT_HISTORY.md).
 Actionable follow-ups live in [`todo.md`](../todo.md).
 
 ---

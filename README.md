@@ -576,9 +576,10 @@ zerotrust tracks its state in the repository docs:
 | ------------------------------------------------ | ----------------------------------------------------------- |
 | [`tdone.md`](./tdone.md)                         | Everything that ships today, plus the latest codebase audit |
 | [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) | System architecture audit + proposed upgrades               |
-| [`docs/SAAS_TEMPLATE_ARCHITECTURE_RECOMMENDATIONS.md`](./docs/SAAS_TEMPLATE_ARCHITECTURE_RECOMMENDATIONS.md) | Benchmark vs. production SaaS templates + maintenance/stability recommendations |
-| [`docs/PRODUCTION_SAFETY_TODO.md`](./docs/PRODUCTION_SAFETY_TODO.md) | Forward-looking failsafe CI/CD + production-hardening punch list |
+| [`docs/AUDIT.md`](./docs/AUDIT.md)               | Standing production-readiness audit (findings + risk + order) |
+| [`todo.md`](./todo.md)                           | Prioritized backlog (P0–P4) with acceptance criteria        |
 | [`docs/MAINTENANCE_FEATURE_AUDIT.md`](./docs/MAINTENANCE_FEATURE_AUDIT.md) | Feature-removal audit (what was slimmed out and why)        |
+| [`docs/PROJECT_HISTORY.md`](./docs/PROJECT_HISTORY.md) | Archived dated planning/audit/phase docs (consolidated)     |
 | [`docs/compliance`](./docs/compliance/README.md) | Compliance policies, procedures, and evidence templates     |
 | [`packages/client`](./packages/client/README.md) | Generated TypeScript SDK package and usage notes            |
 
