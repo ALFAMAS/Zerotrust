@@ -85,7 +85,7 @@ maintainability/refactor · P3 scalability/performance · P4 docs/DX.
   dead-letter, idempotency-key convention; queue/job health surfaced in `/metrics`.
 - **Risk:** High (changes runtime scheduling — feature-flag the cutover).
 
-### P1.3 — End-to-end test for billing-webhook idempotency  — _Status: Pending_
+### P1.3 — End-to-end test for billing-webhook idempotency  — _Status: Done (2026-06-30)_
 - **Why:** The repository is unit-tested; the full handler path (signature →
   claim → skip duplicate → release on error) is not (AUDIT T2).
 - **Files:** `src/__tests__/billing.webhooks.test.ts` (new).
@@ -193,7 +193,7 @@ maintainability/refactor · P3 scalability/performance · P4 docs/DX.
 - **Acceptance:** a template + the first filled-in quarter.
 - **Risk:** Low.
 
-### P4.3 — `/metrics` default-closed guidance  — _Status: Pending_
+### P4.3 — `/metrics` default-closed guidance  — _Status: Done (2026-06-30)_
 - **Why:** `/metrics` is open unless `METRICS_AUTH_TOKEN` is set; a public
   deploy leaks internal labels (AUDIT S3).
 - **Files:** `.env.example`, `docs/deployment.md`, `README.md`.
@@ -212,7 +212,7 @@ maintainability/refactor · P3 scalability/performance · P4 docs/DX.
   restore RTO/RPO, and a service dependency diagram.
 - **Risk:** Low (docs).
 
-### P4.5 — CI gate hardening  — _Status: Pending_
+### P4.5 — CI gate hardening  — _Status: In Progress (concurrency group added 2026-06-30; coverage-gate decision + SAST triage pending)_
 - **Why:** Beyond branch protection (P0.4): the 85% coverage check is
   non-blocking, and there's no run-cancellation concurrency group. (Carried over
   from the archived Production Safety TODO §C/§D.)

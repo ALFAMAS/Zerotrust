@@ -52,6 +52,22 @@ recurring evidence for the **DR validated** criterion (see the
 
 ---
 
+## Production hardening checklist
+
+Endpoint exposure defaults are tuned for local dev; before an internet-facing
+deploy, confirm:
+
+- **`METRICS_AUTH_TOKEN` is set** — `/metrics` is **open by default**. Unauthenticated
+  it leaks internal route/label cardinality and traffic patterns, so it must be
+  token-gated (`Authorization: Bearer <token>`) or kept on a private scrape
+  network behind an auth proxy. Generate with `openssl rand -hex 32`.
+- **`CORS_ALLOWED_ORIGINS` is set** — an empty allowlist fails closed in
+  production (no cross-origin access), so set it to your app/admin origins.
+- **Backups are encrypted** — set `BACKUP_ENCRYPTION_KEY_HEX` and
+  `BACKUP_REQUIRE_ENCRYPTION=true` so a plaintext dump is never written.
+
+---
+
 ## Automated staging deploy
 
 `deploy-staging.yml` is a **manual** (`workflow_dispatch`) workflow that ships the
