@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { api } from "@/lib/api";
 import { getToken } from "@/lib/auth";
+import { apiGetBlob } from "@/lib/apiClient";
 
 const API = process.env.NEXT_PUBLIC_ZEROTRUST_URL ?? "http://localhost:3000";
 
@@ -20,15 +21,7 @@ export default function AccountPage() {
   async function handleExport() {
     setExportLoading(true);
     try {
-      // The GDPR routes are protected by Bearer-token authMiddleware, so we must
-      // send the access token. Export streams a file, so we fetch directly (the
-      // api client parses JSON) but attach the same Authorization header.
-      const token = getToken();
-      const res = await fetch(`${API}/gdpr/export`, {
-        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-      });
-      if (!res.ok) throw new Error("Export failed");
-      const blob = await res.blob();
+      const blob = await apiGetBlob("/gdpr/export");
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;

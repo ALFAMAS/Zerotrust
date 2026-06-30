@@ -1,0 +1,129 @@
+{
+  "$schema": "./scripts/boundaries.schema.json",
+  "version": 1,
+  "domains": {
+    "shared": {
+      "paths": [
+        "src/shared/",
+        "src/config/",
+        "src/logger/",
+        "src/models/",
+        "src/db/storageFallback.ts",
+        "src/db/schema.ts",
+        "src/audit/",
+        "src/services/siem.service.ts",
+        "src/middleware/cors.ts",
+        "src/middleware/inputSanitization.ts",
+        "src/middleware/rateLimiter/",
+        "src/middleware/apiKeyAuth.ts",
+        "src/middleware/requirePlan.ts",
+        "src/middleware/requireAdmin.ts"
+      ],
+      "can_import": []
+    },
+    "integrations": {
+      "paths": [
+        "src/oauth/",
+        "src/notifications/dispatcher.ts",
+        "src/notifications/formatters.ts",
+        "src/mfa/channels/",
+        "src/templates/",
+        "src/services/email.service.ts",
+        "src/services/emailQueue.ts",
+        "src/services/lifecycleEmail.service.ts",
+        "src/services/webPush.service.ts"
+      ],
+      "can_import": ["shared"]
+    },
+    "identity": {
+      "paths": [
+        "src/api/routes/auth.routes.ts",
+        "src/api/routes/session.routes.ts",
+        "src/api/routes/passkey.routes.ts",
+        "src/api/routes/mfa.routes.ts",
+        "src/api/routes/magic-link.routes.ts",
+        "src/api/routes/verification.routes.ts",
+        "src/api/routes/api-keys.routes.ts",
+        "src/services/token.service.ts",
+        "src/services/magicLink.service.ts",
+        "src/services/passwordBreach.service.ts",
+        "src/services/sessionCache.service.ts",
+        "src/services/trustedDevice.service.ts",
+        "src/services/fingerprint.service.ts",
+        "src/services/apiKeyRotation.service.ts",
+        "src/services/sessionPolicy.service.ts",
+        "src/services/authz.service.ts",
+        "src/crypto/",
+        "src/mfa/index.ts",
+        "src/mfa/fido-mds3.ts",
+        "src/mfa/resident-keys.ts",
+        "src/db/repositories/authSessions.repository.ts",
+        "src/middleware/auth.ts",
+        "src/middleware/deviceAttestation.ts",
+        "src/middleware/continuousEval.ts"
+      ],
+      "can_import": ["shared", "integrations"]
+    },
+    "tenancy": {
+      "paths": [
+        "src/api/routes/org.routes.ts",
+        "src/api/routes/tenant.routes.ts",
+        "src/jit/"
+      ],
+      "can_import": ["shared", "integrations", "identity"]
+    },
+    "billing": {
+      "paths": [
+        "src/api/routes/billing.routes.ts",
+        "src/api/routes/billing.webhooks.ts",
+        "src/api/routes/wallet.routes.ts",
+        "src/services/wallet.service.ts",
+        "src/services/points.service.ts",
+        "src/services/streak.service.ts",
+        "src/services/levelUp.service.ts",
+        "src/db/repositories/stripeEvents.repository.ts",
+        "src/db/repositories/processedWebhookEvents.repository.ts"
+      ],
+      "can_import": ["shared", "integrations", "identity", "tenancy"]
+    },
+    "compliance": {
+      "paths": [
+        "src/api/routes/compliance.routes.ts",
+        "src/api/routes/access-review.routes.ts",
+        "src/api/routes/unsubscribe.routes.ts",
+        "src/services/privacy.service.ts",
+        "src/services/dataRetention.ts",
+        "src/api/routes/notification.routes.ts",
+        "src/api/routes/region.routes.ts",
+        "src/api/routes/globalization.routes.ts"
+      ],
+      "can_import": ["shared", "integrations", "identity", "tenancy", "billing", "ops"]
+    },
+    "ops": {
+      "paths": [
+        "src/api/routes/admin.routes.ts",
+        "src/api/routes/admin-tools.routes.ts",
+        "src/api/routes/search.routes.ts",
+        "src/api/routes/feedback.routes.ts",
+        "src/api/routes/support.routes.ts",
+        "src/api/routes/anomaly.routes.ts",
+        "src/api/routes/email-events.routes.ts",
+        "src/services/search.service.ts",
+        "src/services/slo.service.ts",
+        "src/services/objectStorage.service.ts",
+        "src/services/dbBackup.service.ts",
+        "src/services/uploadSafety.ts",
+        "src/services/presignedUpload.service.ts",
+        "src/services/webhookDeliveryLog.service.ts",
+        "src/services/region.service.ts",
+        "src/services/globalization.service.ts",
+        "src/webhooks/",
+        "src/ssf/",
+        "src/metrics/",
+        "src/telemetry/",
+        "src/notifications/routes.ts"
+      ],
+      "can_import": ["shared", "integrations", "identity", "tenancy", "billing"]
+    }
+  }
+}

@@ -576,20 +576,24 @@ zerotrust tracks its state in the repository docs:
 | Doc                                              | What it covers                                              |
 | ------------------------------------------------ | ----------------------------------------------------------- |
 | [`tdone.md`](./tdone.md)                         | Everything that ships today, plus the latest codebase audit |
+| [`todo.md`](./todo.md)                           | Prioritized backlog (P0–P4) with acceptance criteria        |
 | [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) | System architecture audit + proposed upgrades               |
 | [`docs/AUDIT.md`](./docs/AUDIT.md)               | Standing production-readiness audit (findings + risk + order) |
-| [`todo.md`](./todo.md)                           | Prioritized backlog (P0–P4) with acceptance criteria        |
+| [`docs/reference-architecture.md`](./docs/reference-architecture.md) | Operational deployment blueprints (VM, containers, Kubernetes) |
+| [`docs/adr/`](./docs/adr/)                       | Architecture Decision Records (7 load-bearing decisions)    |
+| [`docs/maintenance-scorecard.md`](./docs/maintenance-scorecard.md) | Quarterly metrics (deps, CI, tests, backups, latency) |
 | [`docs/MAINTENANCE_FEATURE_AUDIT.md`](./docs/MAINTENANCE_FEATURE_AUDIT.md) | Feature-removal audit (what was slimmed out and why)        |
 | [`docs/PROJECT_HISTORY.md`](./docs/PROJECT_HISTORY.md) | Archived dated planning/audit/phase docs (consolidated)     |
 | [`docs/compliance`](./docs/compliance/README.md) | Compliance policies, procedures, and evidence templates     |
 | [`packages/client`](./packages/client/README.md) | Generated TypeScript SDK package and usage notes            |
 
-Latest audit note (2026-06-24): a clean `bun install` restores a fully working
-tree — `bun run lint:ci`, `bun run type-check`, the 677-test suite, and the UI
-build all pass. The earlier "broken workspace links" blocker is resolved, and the
-CI lint job (which previously crashed on Linux for a missing Biome binary) now
-runs. See the production-hardening audit snapshot at the bottom of
-[`tdone.md`](./tdone.md) for the full list of security fixes and findings.
+Latest audit note (2026-07-01): a clean `bun install` restores a fully working
+tree — `bun run lint:ci`, `bun run type-check`, `bun run boundaries:check`, the
+**749-test suite**, and the UI build all pass. P1.1 (transactional repositories)
+and P1.2 (dedicated worker with Redis-lock leader election) shipped; module
+boundaries enforced (0 violations); 7 ADRs, a maintenance scorecard, and 3
+deployment blueprints added. See the production-hardening audit snapshot at the
+bottom of [`tdone.md`](./tdone.md) for the full list.
 
 ---
 

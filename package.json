@@ -33,6 +33,7 @@
     "lint:fix": "biome check --write",
     "format": "biome format --write",
     "lint:ci": "biome ci",
+    "boundaries:check": "bun run scripts/check-boundaries.ts",
     "type-check": "node ./node_modules/typescript/lib/tsc.js --noEmit",
     "prepare": "bunx husky",
     "lint-staged": "biome check --write --staged --no-errors-on-unmatched",

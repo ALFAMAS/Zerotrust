@@ -16,6 +16,7 @@ import {
 import { isUnavailableStorageError } from "../db/storageFallback";
 import { getLogger } from "../logger";
 import { countRows } from "../shared/dbCount";
+import { topUpWallet as topUpWalletRepo, spendFromWallet as spendFromWalletRepo } from "../db/repositories/wallet.repository";
 
 const logger = getLogger("wallet-service");
 
@@ -168,48 +169,17 @@ export async function topUpWallet(
     metadata?: Record<string, unknown>;
   } = {}
 ): Promise<{ balance: number; transactionId: string }> {
-  if (amount <= 0) throw new Error("Top-up amount must be positive");
+  const result = await topUpWalletRepo(userId, amount, opts);
 
-  const db = getDb();
-  const [wallet] = await db
-    .select()
-    .from(walletsTable)
-    .where(eq(walletsTable.userId, userId))
-    .limit(1);
-
-  const currentBalance = wallet?.balance ?? 0;
-  const currentLifetime = wallet?.lifetimeBalance ?? 0;
-  const newBalance = currentBalance + amount;
-  const newLifetime = currentLifetime + amount;
-
-  if (!wallet) {
-    await db
-      .insert(walletsTable)
-      .values({ userId, balance: newBalance, lifetimeBalance: newLifetime });
-  } else {
-    await db
-      .update(walletsTable)
-      .set({ balance: newBalance, lifetimeBalance: newLifetime, updatedAt: new Date() })
-      .where(eq(walletsTable.userId, userId));
+  // Check tier upgrade after top-up (side-effect, outside tx — idempotent)
+  try {
+    const wallet = await getWallet(userId);
+    await evaluateTierUpgrade(userId, wallet?.lifetimeBalance ?? amount);
+  } catch (err) {
+    logger.warn("Tier evaluation failed after top-up", { userId, error: String(err) });
   }
 
-  const [tx] = await db
-    .insert(walletTransactionsTable)
-    .values({
-      userId,
-      amount,
-      balanceAfter: newBalance,
-      type: "top_up",
-      description: opts.description ?? "Wallet top-up",
-      stripePaymentIntentId: opts.stripePaymentIntentId ?? null,
-      metadata: opts.metadata ?? null,
-    })
-    .returning();
-
-  // Check tier upgrade after top-up
-  await evaluateTierUpgrade(userId, newLifetime);
-
-  return { balance: newBalance, transactionId: tx.id };
+  return result;
 }
 
 export async function spendFromWallet(
@@ -217,44 +187,7 @@ export async function spendFromWallet(
   amount: number,
   opts: { description?: string; metadata?: Record<string, unknown> } = {}
 ): Promise<{ balance: number; transactionId: string }> {
-  if (amount <= 0) throw new Error("Spend amount must be positive");
-
-  const db = getDb();
-  const [wallet] = await db
-    .select()
-    .from(walletsTable)
-    .where(eq(walletsTable.userId, userId))
-    .limit(1);
-  if (!wallet) throw new Error("Wallet not found");
-
-  // Atomic, conditional decrement: the `balance >= amount` guard lives inside
-  // the UPDATE so two concurrent spends can never both succeed off a stale read
-  // (TOCTOU double-spend). If no row matches, the balance was insufficient at
-  // the moment of write.
-  const debited = await db
-    .update(walletsTable)
-    .set({ balance: sql`${walletsTable.balance} - ${amount}`, updatedAt: new Date() })
-    .where(and(eq(walletsTable.userId, userId), gte(walletsTable.balance, amount)))
-    .returning({ balance: walletsTable.balance });
-
-  if (debited.length === 0) {
-    throw new Error(`Insufficient balance: ${wallet.balance} < ${amount}`);
-  }
-  const newBalance = debited[0].balance;
-
-  const [tx] = await db
-    .insert(walletTransactionsTable)
-    .values({
-      userId,
-      amount: -amount,
-      balanceAfter: newBalance,
-      type: "spend",
-      description: opts.description ?? "Wallet spend",
-      metadata: opts.metadata ?? null,
-    })
-    .returning();
-
-  return { balance: newBalance, transactionId: tx.id };
+  return spendFromWalletRepo(userId, amount, opts);
 }
 
 export async function getWalletTransactions(userId: string, limit = 30, offset = 0) {

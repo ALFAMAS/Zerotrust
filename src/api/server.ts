@@ -26,6 +26,7 @@ import { startNotificationEmailFallbackScheduler } from "../services/notificatio
 import { sloAlertingMiddleware, sloRouteHandler } from "../services/slo.service";
 import { initTelemetry, telemetryMiddleware } from "../telemetry";
 import webhookManagementRoutes from "../webhooks/routes";
+import { startJobScheduler } from "../jobs/scheduler";
 import accessReviewRoutes from "./routes/access-review.routes";
 import adminRoutes from "./routes/admin.routes";
 import adminToolsRoutes from "./routes/admin-tools.routes";
@@ -70,24 +71,26 @@ export async function createServer() {
   const app = new Hono<HonoEnv>();
   registerGlobalErrorHandler(app, logger);
 
-  // Start email queue worker when Redis is available
-  if (process.env.REDIS_URI) {
-    initEmailQueue(process.env.REDIS_URI).catch((err: Error) =>
-      initLogger.error("Email queue init failed", err)
-    );
-  }
+  // Background jobs: when a dedicated worker process is running, defer all
+    // schedulers and the email queue consumer to it (single-instance via Redis
+    // lock). In local dev / single-server deploys without WORKER_MODE, start
+    // them in-process as before.
+    const isWorkerMode = process.env.WORKER_MODE === "true";
 
-  // Start data retention scheduler (runs once every 24h)
-  startRetentionScheduler(24);
+    if (!isWorkerMode) {
+      // Start email queue worker when Redis is available
+      if (process.env.REDIS_URI) {
+        initEmailQueue(process.env.REDIS_URI).catch((err: Error) =>
+          initLogger.error("Email queue init failed", err)
+        );
+      }
 
-  // Send notification email fallbacks to inactive users (runs every 24h)
-  startNotificationEmailFallbackScheduler(24);
-
-  // Trial expiry, dunning (D3/D7/D14) and win-back (D7/D30/D90) emails
-  startBillingLifecycleScheduler(24);
-
-  // Daily pg_dump backup when BACKUP_ENABLED=true
-  startBackupScheduler(24);
+      // Start all interval jobs with leader election
+      startJobScheduler();
+      initLogger.info("Background jobs started in API process (WORKER_MODE not set)");
+    } else {
+      initLogger.info("Background jobs deferred to dedicated worker (WORKER_MODE=true)");
+    }
 
   app.use("*", cors(corsOptionsFromEnv()));
   app.use("*", secureHeaders());

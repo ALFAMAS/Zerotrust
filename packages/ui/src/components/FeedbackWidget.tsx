@@ -7,6 +7,8 @@ import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { brand } from "@/config/brand";
 
+import { apiPost } from "@/lib/apiClient";
+
 type FeedbackType = "nps" | "thumbs";
 
 interface Props {
@@ -20,27 +22,13 @@ interface Props {
 
 const DISMISS_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 
-function getToken() {
-  if (typeof window === "undefined") return null;
-  return localStorage.getItem("za_access_token");
-}
-
 async function submitFeedback(payload: {
   type: FeedbackType;
   score: number;
   comment?: string;
   context?: string;
 }) {
-  const token = getToken();
-  if (!token) return;
-  await fetch(`${brand.apiUrl}/feedback`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify(payload),
-  });
+  await apiPost("/feedback", payload);
 }
 
 export default function FeedbackWidget({

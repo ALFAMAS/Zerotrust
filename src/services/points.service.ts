@@ -2,6 +2,7 @@ import { desc, eq } from "drizzle-orm";
 import { getDb } from "../db";
 import { pointsLedgerTable } from "../db/schema";
 import { getLogger } from "../logger";
+import { awardPoints as awardPointsTransactional } from "../db/repositories/pointsLedger.repository";
 
 const logger = getLogger("points-service");
 
@@ -35,43 +36,30 @@ export interface AwardPointsInput {
 }
 
 /**
- * Award (or deduct) points for a user. Creates a new ledger entry with the
- * running balance. Returns the new ledger entry.
+ * Award (or deduct) points for a user via the transactional repository.
+ * The repo wraps the read-balance + insert-entry in a single transaction,
+ * preventing concurrent award operations from racing on the running balance.
  */
 export async function awardPoints(input: AwardPointsInput) {
-  const db = getDb();
-
-  // Get current balance (last ledger entry)
-  const [lastEntry] = await db
-    .select({ balance: pointsLedgerTable.balance })
-    .from(pointsLedgerTable)
-    .where(eq(pointsLedgerTable.userId, input.userId))
-    .orderBy(desc(pointsLedgerTable.createdAt))
-    .limit(1);
-
-  const currentBalance = lastEntry?.balance ?? 0;
-  const newBalance = currentBalance + input.amount;
-
-  const [entry] = await db
-    .insert(pointsLedgerTable)
-    .values({
+  try {
+    const entry = await awardPointsTransactional(input);
+    logger.info("Points awarded", {
       userId: input.userId,
       amount: input.amount,
-      balance: newBalance,
+      balance: entry.balance,
       reason: input.reason,
-      description: input.description ?? null,
-      metadata: input.metadata ?? null,
-    })
-    .returning();
-
-  logger.info("Points awarded", {
-    userId: input.userId,
-    amount: input.amount,
-    balance: newBalance,
-    reason: input.reason,
-  });
-
-  return entry;
+    });
+    return entry;
+  } catch (err) {
+    if (isMissingPointsStorageError(err)) {
+      logger.warn("Points storage is unavailable; points not recorded", {
+        userId: input.userId,
+        error: String(err),
+      });
+      return null;
+    }
+    throw err;
+  }
 }
 
 /**

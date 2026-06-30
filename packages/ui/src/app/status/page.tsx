@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
+import { apiGet } from "@/lib/apiClient";
 
 const API_URL = process.env.NEXT_PUBLIC_ZEROTRUST_URL || "http://localhost:3000";
 
@@ -39,9 +40,8 @@ export default function StatusPage() {
 
   const load = useCallback(async () => {
     try {
-      const res = await fetch(`${API_URL}/status`, { cache: "no-store" });
-      if (!res.ok) throw new Error();
-      setData(await res.json());
+      const data = await apiGet<StatusData>("/status", { skipAuth: true });
+      setData(data);
       setError(false);
     } catch {
       setError(true);

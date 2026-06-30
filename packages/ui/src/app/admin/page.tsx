@@ -9,6 +9,7 @@ import Badge from "@/components/Badge";
 import { brand } from "@/config/brand";
 import { api } from "@/lib/api";
 import { getToken } from "@/lib/auth";
+import { apiGetBlob } from "@/lib/apiClient";
 
 interface Stats {
   totalUsers: number;
@@ -67,12 +68,7 @@ export default function AdminOverviewPage() {
   async function exportUsers() {
     setExporting(true);
     try {
-      const token = getToken();
-      const res = await fetch(`${brand.apiUrl}/admin/users/export`, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
-      if (!res.ok) throw new Error(`Export failed (${res.status})`);
-      const blob = await res.blob();
+      const blob = await apiGetBlob("/admin/users/export");
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;

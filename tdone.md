@@ -66,6 +66,39 @@ loyalty, globalization, search, compliance, audit, and ops tooling.
 
 ---
 
+## Maintenance & hardening (2026-07-01)
+
+- ✅ **Repository layer expanded** — 4 repositories now wrapping hot-path writes
+  in `db.transaction`: `authSessions.repository.ts` (token rotation/revocation),
+  `stripeEvents.repository.ts` (webhook idempotency), `pointsLedger.repository.ts`
+  (atomic read-then-write points ledger), `wallet.repository.ts` (atomic wallet
+  top-up/spend with double-spend guard). `points.service.ts` and `wallet.service.ts`
+  now delegate to repos with storage-fallback wrappers.
+- ✅ **Centralized background jobs** — `src/jobs/registry.ts` defines 4 interval
+  jobs with Zod payload schemas; `src/jobs/scheduler.ts` provides Redis-lock
+  leader election (`SET NX PX`) per job tick for single-instance enforcement;
+  `src/worker.ts` runs email queue + all schedulers as a dedicated process;
+  `server.ts` gates with `WORKER_MODE` flag — backward compatible (local dev
+  still starts schedulers in-process).
+- ✅ **Module boundaries enforced** — `.boundaries.json` defines 7 domains
+  (shared, integrations, identity, tenancy, billing, compliance, ops) with
+  dependency direction; `scripts/check-boundaries.ts` scans imports and CI blocks
+  violations (0 at commit); `biome.json` excludes test files; `boundaries:check`
+  added to `package.json`.
+- ✅ **UI→API fetch normalization** — 5 raw `fetch()` calls in `packages/ui`
+  converted to canonical `apiClient` (`apiPost`, `apiGetBlob`, `apiGet`,
+  `apiPostFormData`): FeedbackWidget, status page, profile avatar upload, admin
+  CSV export, GDPR data export.
+- ✅ **ADRs for 7 load-bearing decisions** — `docs/adr/001-007/`: PASETO v4,
+  modular monolith, Drizzle ORM, Redis/BullMQ, generated SDK, token rotation,
+  module boundaries.
+- ✅ **Maintenance scorecard** — `docs/maintenance-scorecard.md` with 8 tracked
+  metric areas (deps, CI, tests, migrations, backup/restore, observability,
+  security, docs).
+- ✅ **Reference architecture** — `docs/reference-architecture.md` with 3
+  production blueprints (VM/PM2, containers, Kubernetes), worker topology,
+  RTO/RPO targets, deployment selection guide.
+
 ## Maintenance & hardening (2026-06-29)
 
 - ✅ **Global input sanitization (XSS / CWE-79)** — `inputSanitizationMiddleware()`

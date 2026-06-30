@@ -19,6 +19,7 @@ function fakeDb(queue: unknown[][]) {
   }
   builder.limit = () => Promise.resolve(queue[i++] ?? []);
   builder.returning = () => Promise.resolve(queue[i++] ?? []);
+  builder.transaction = async (fn: (tx: unknown) => unknown) => fn(builder);
   return builder;
 }
 

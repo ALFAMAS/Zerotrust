@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { brand } from "@/config/brand";
 import { api } from "../../../lib/api";
+import { apiPostFormData } from "../../../lib/apiClient";
 
 export default function ProfilePage() {
   const [user, setUser] = useState<any>(null);
@@ -69,22 +70,10 @@ export default function ProfilePage() {
     setUploading(true);
     setMsg("");
     try {
-      const token = typeof window !== "undefined" ? localStorage.getItem("za_access_token") : null;
       const fd = new FormData();
       fd.append("avatar", file);
 
-      const res = await fetch(`${brand.apiUrl}/auth/me/avatar`, {
-        method: "POST",
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-        body: fd,
-      });
-
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({ message: res.statusText }));
-        throw new Error(err.message || `Upload failed (${res.status})`);
-      }
-
-      const { avatarUrl } = await res.json();
+      const { avatarUrl } = await apiPostFormData("/auth/me/avatar", fd);
       setForm((f) => ({ ...f, avatarUrl }));
       setUser((u: any) => ({ ...u, avatarUrl }));
       setMsg("Avatar updated.");
