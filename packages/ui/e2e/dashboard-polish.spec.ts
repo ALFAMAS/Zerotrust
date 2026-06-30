@@ -18,7 +18,7 @@ test.describe("dashboard polish", () => {
     });
   });
 
-  test("shows setup, profile, and usage progress", async ({ page }) => {
+  test("shows the progress widget with profile completeness", async ({ page }) => {
     await page.route("http://localhost:1337/auth/me", (route) =>
       route.fulfill({ json: completeUser })
     );
@@ -32,26 +32,32 @@ test.describe("dashboard polish", () => {
 
     await page.goto("/dashboard");
 
-    await expect(page.getByText("Setup progress")).toBeVisible();
-    await expect(page.getByText("Profile strength")).toBeVisible();
-    await expect(page.getByText("Usage readiness")).toBeVisible();
-    await expect(page.getByText("4/4")).toBeVisible();
+    // ProgressBars renders the "Your Progress" widget with a profile-completeness bar.
+    await expect(page.getByText("Your Progress")).toBeVisible();
+    await expect(page.getByText("Profile completeness")).toBeVisible();
+    // completeUser satisfies all four profile fields → "4/4 fields".
+    await expect(page.getByText("4/4 fields")).toBeVisible();
   });
 
-  test("records onboarding completion once when setup reaches 100 percent", async ({ page }) => {
+  test("notifies onboarding-complete and shows the completion card at 100%", async ({ page }) => {
     await page.route("http://localhost:1337/auth/me", (route) =>
       route.fulfill({ json: completeUser })
     );
     await page.route("http://localhost:1337/sessions", (route) =>
       route.fulfill({ json: { sessions: [{ id: "session-1", isActive: true }] } })
     );
+    // SetupChecklist POSTs here once every setup step is done.
+    let onboardingCalls = 0;
+    await page.route("http://localhost:1337/auth/me/onboarding-complete", (route) => {
+      onboardingCalls++;
+      return route.fulfill({ json: { ok: true } });
+    });
 
     await page.goto("/dashboard");
 
-    await expect
-      .poll(() => page.evaluate(() => localStorage.getItem("za_onboarding_completed")))
-      .toBe("1");
+    // A fully set-up user sees the completion card and the API is notified.
     await expect(page.getByText("Onboarding complete")).toBeVisible();
+    await expect.poll(() => onboardingCalls).toBeGreaterThanOrEqual(1);
   });
 });
 
