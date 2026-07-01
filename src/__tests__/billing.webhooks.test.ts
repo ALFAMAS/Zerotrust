@@ -11,7 +11,19 @@ const h = vi.hoisted(() => {
   const whereMock = vi.fn();
   const setMock = vi.fn(() => ({ where: whereMock }));
   const updateMock = vi.fn(() => ({ set: setMock }));
-  return { constructEvent, subscriptionsRetrieve, claim, release, whereMock, setMock, updateMock };
+  // Defaults to false (no queue configured) so every existing test exercises
+  // the synchronous fallback path unchanged; individual tests can override.
+  const enqueue = vi.fn().mockResolvedValue(false);
+  return {
+    constructEvent,
+    subscriptionsRetrieve,
+    claim,
+    release,
+    whereMock,
+    setMock,
+    updateMock,
+    enqueue,
+  };
 });
 
 // Stripe: the handler builds `new Stripe()` and calls webhooks.constructEvent.
@@ -34,6 +46,12 @@ vi.mock("../db/repositories/stripeEvents.repository", () => ({
 // DB: a chainable update().set().where() that resolves (or rejects in the error test).
 vi.mock("../db", () => ({
   getDb: () => ({ update: h.updateMock, insert: vi.fn(), select: vi.fn() }),
+}));
+
+// Queue offload: defaults to unavailable (see h.enqueue above) so the route
+// falls back to synchronous processing unless a test opts into the queued path.
+vi.mock("../services/stripeWebhookQueue", () => ({
+  enqueueStripeWebhookEvent: (...args: unknown[]) => h.enqueue(...args),
 }));
 
 vi.mock("../logger", () => ({
@@ -74,6 +92,7 @@ describe("POST /billing/webhook — idempotency", () => {
     h.constructEvent.mockReturnValue(subscriptionUpdatedEvent());
     h.whereMock.mockResolvedValue(undefined);
     h.release.mockResolvedValue(undefined);
+    h.enqueue.mockResolvedValue(false);
     process.env.STRIPE_WEBHOOK_SECRET = "whsec_test";
     process.env.STRIPE_SECRET_KEY = "sk_test";
   });
@@ -117,5 +136,23 @@ describe("POST /billing/webhook — idempotency", () => {
     expect(res.status).toBe(400);
     expect(await res.json()).toEqual({ error: "MISSING_SIGNATURE" });
     expect(h.claim).not.toHaveBeenCalled();
+  });
+
+  it("offloads to the queue when available: acks fast without processing inline", async () => {
+    h.claim.mockResolvedValue(true);
+    h.enqueue.mockResolvedValue(true); // queue accepted the job
+
+    const res = await post();
+
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ received: true, queued: true });
+    expect(h.enqueue).toHaveBeenCalledWith({
+      eventId: "evt_1",
+      type: "customer.subscription.updated",
+      object: expect.objectContaining({ id: "sub_1" }),
+    });
+    // The mutation is the queue worker's job, not this request's.
+    expect(h.updateMock).not.toHaveBeenCalled();
+    expect(h.release).not.toHaveBeenCalled();
   });
 });

@@ -106,8 +106,8 @@ incident under load or attack) · **Medium** (correctness/maintainability debt) 
 | # | Finding | Risk | Status |
 | --- | --- | --- | --- |
 | P1 | In-process `setInterval` schedulers (C3) do not scale horizontally — duplicate work per replica. Needs a single-leader or queue-backed scheduler. | High | TODO P1 |
-| P2 | `checkout.session.completed` calls the Stripe API (`subscriptions.retrieve`) inside the request path; fine today, but webhook handlers should offload heavy work to the queue as volume grows. | Low | TODO P3 |
-| P3 | Read-replica routing exists (`getReadDb`) but is opt-in per call site; list/admin/analytics endpoints should default to the replica. | Low | TODO P3 |
+| P2 | `checkout.session.completed` calls the Stripe API (`subscriptions.retrieve`) inside the request path; fine today, but webhook handlers should offload heavy work to the queue as volume grows. | Low | **Fixed** (P3.3) — BullMQ offload with sync fallback |
+| P3 | Read-replica routing exists (`getReadDb`) but is opt-in per call site; list/admin/analytics endpoints should default to the replica. | Low | **In progress** (P3.2) — 4 read-only admin list endpoints switched |
 
 ### 4.5 Testing gaps
 
