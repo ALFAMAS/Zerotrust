@@ -68,6 +68,51 @@ deploy, confirm:
 
 ---
 
+## Release & migration safety
+
+The deploy path must survive a bad release without data loss. Three disciplines:
+
+### 1. Destructive migrations are one-way — use expand/contract
+
+Migrations `0020`–`0024` are `DROP TABLE … CASCADE` / `DROP COLUMN` (the
+2026-06-28 slim-down). **These cannot be rolled back by reverting code** — the
+data is gone. For any future destructive change:
+
+1. **Expand:** ship code that stops reading/writing the column or table first.
+2. **Contract:** drop it in a *later* release, once the expand deploy is stable.
+
+This keeps every single deploy independently reversible. Before applying a
+destructive migration in production:
+
+- Take and **verify** a backup: `bun run db:backup` (see the
+  [backup/restore runbook](./compliance/backup-restore-runbook.md)).
+- Apply on a staging replica first and confirm the app boots + the smoke suite
+  passes (`bun run ops:smoke`).
+- Consider a CI check that flags `DROP`/`ALTER … DROP` in new migrations for an
+  explicit human sign-off.
+
+### 2. Application rollback
+
+Code deploys (non-destructive) roll back by redeploying the previous release:
+
+- **PM2:** keep the previous release dir and `pm2 reload <app>` after switching
+  the `current` symlink back (or `pm2 reload` the prior fork). One command,
+  no data change.
+- **Containers:** redeploy the previous image tag.
+
+Pair a rollback with an incident entry — see the
+[incident-response runbook](./compliance/incident-response-runbook.md).
+
+### 3. Restore drills (RTO/RPO evidence)
+
+`dr-restore-drill.yml` runs on a schedule: backup → encrypt → restore into an
+isolated Postgres → verify. Treat a green drill as the recurring evidence that
+the **restore path actually works** (an untested backup is not a backup). Record
+the run duration as the measured RTO and the backup interval as the RPO in the
+[backup/restore runbook](./compliance/backup-restore-runbook.md).
+
+---
+
 ## Automated staging deploy
 
 `deploy-staging.yml` is a **manual** (`workflow_dispatch`) workflow that ships the

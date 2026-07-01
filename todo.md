@@ -98,7 +98,12 @@ _All P0 items completed. See tdone.md for the full ledger._
 ### P3.2 — Default read-heavy endpoints to the read replica  — _Status: Pending_
 ### P3.3 — Offload heavy webhook work to the queue  — _Status: Pending_
 ### P3.4 — Plugin/capability contract for optional-heavy integrations  — _Status: Pending_
-### P3.5 — Deploy & release safety (expand/contract, rollback, DR drills)  — _Status: Pending_
+### P3.5 — Deploy & release safety (expand/contract, rollback, DR drills)  — _Status: Done (2026-07-01)_
+- **Delivered:** `docs/deployment.md` "Release & migration safety" section —
+  expand/contract discipline for destructive migrations (`0020`–`0024` are
+  one-way), pre-migration verified backup + staging-first, one-command app
+  rollback (PM2/containers), and restore-drill RTO/RPO evidence via
+  `dr-restore-drill.yml`. Cross-links the backup/restore + incident runbooks.
 
 ---
 
