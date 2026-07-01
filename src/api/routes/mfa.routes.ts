@@ -9,7 +9,7 @@ import { authMiddleware } from "../../middleware/auth";
 import { getSettings } from "../../models/settings.model";
 import { sendOtpEmail } from "../../services/email.service";
 import { internalError } from "../../shared/httpErrors";
-import type { HonoEnv } from "../../shared/types";
+import type { HonoEnv, User } from "../../shared/types";
 
 const router = new Hono<HonoEnv>();
 const logger = getLogger("mfa-routes");
@@ -56,7 +56,7 @@ router.post("/totp/setup", async (c) => {
       .from(usersTable)
       .where(eq(usersTable.id, userId))
       .limit(1);
-    const currentMfa = (userRows[0]?.mfa as any) ?? {
+    const currentMfa = (userRows[0]?.mfa as User["mfa"] | null) ?? {
       totp: { enabled: false, backupCodes: [] },
       webauthn: { enabled: false },
     };
@@ -99,7 +99,7 @@ router.post("/totp/verify", async (c) => {
       .where(eq(usersTable.id, userId))
       .limit(1);
     const user = userRows[0];
-    const mfa = user?.mfa as any;
+    const mfa = user?.mfa as User["mfa"] | undefined;
 
     if (!user || !mfa?.totp?.secret) {
       return c.json(
@@ -180,7 +180,7 @@ router.delete("/totp", async (c) => {
       .from(usersTable)
       .where(eq(usersTable.id, userId))
       .limit(1);
-    const currentMfa = (userRows[0]?.mfa as any) ?? {
+    const currentMfa = (userRows[0]?.mfa as User["mfa"] | null) ?? {
       totp: { enabled: false, backupCodes: [] },
       webauthn: { enabled: false },
     };

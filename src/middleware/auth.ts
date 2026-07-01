@@ -1,5 +1,6 @@
 import { and, eq } from "drizzle-orm";
 import { createMiddleware } from "hono/factory";
+import type { ContentfulStatusCode } from "hono/utils/http-status";
 import { getConfig } from "../config";
 import { getDb } from "../db";
 import { sessionsTable, usersTable } from "../db/schema";
@@ -12,7 +13,15 @@ import {
 import { TokenService } from "../services/token.service";
 import { describePrincipal, principalFromToken } from "../shared/principal";
 import { isAdmin } from "../shared/roles";
-import type { HonoEnv, TokenPayload } from "../shared/types";
+import type {
+  DeviceFingerprint,
+  HonoEnv,
+  OAuthProvider,
+  Passkey,
+  Session,
+  TokenPayload,
+  User,
+} from "../shared/types";
 import { ErrorCodes, zerotrustError } from "../shared/types";
 import { revokeSession } from "./sessionControl";
 
@@ -225,7 +234,10 @@ export const authMiddleware = createMiddleware<HonoEnv>(async (c, next) => {
       );
     }
 
-    // Set typed context variables
+    // Set typed context variables. `userRow`/`session` come from a raw
+    // Drizzle select on untyped jsonb columns, so these casts translate the
+    // DB's storage shape into the canonical `User`/`Session` types everything
+    // downstream relies on (see shared/types.ts).
     c.set("user", {
       id: userRow.id,
       email: userRow.email,
@@ -235,19 +247,19 @@ export const authMiddleware = createMiddleware<HonoEnv>(async (c, next) => {
       displayName: userRow.displayName,
       avatarUrl: userRow.avatarUrl,
       roles: userRow.roles ?? [],
-      attributes: (userRow.attributes as any) ?? {},
-      mfa: (userRow.mfa as any) ?? {
+      attributes: (userRow.attributes as User["attributes"]) ?? {},
+      mfa: (userRow.mfa as User["mfa"]) ?? {
         totp: { enabled: false, backupCodes: [] },
         webauthn: { enabled: false },
       },
-      passkeys: (userRow.passkeys as any[]) ?? [],
-      oauthProviders: (userRow.oauthProviders as any[]) ?? [],
-      status: userRow.status as any,
+      passkeys: (userRow.passkeys as Passkey[]) ?? [],
+      oauthProviders: (userRow.oauthProviders as OAuthProvider[]) ?? [],
+      status: userRow.status as User["status"],
       parentUserId: userRow.parentUserId,
       subUserIds: userRow.subUserIds ?? [],
-      sessionConfig: (userRow.sessionConfig as any) ?? {},
+      sessionConfig: (userRow.sessionConfig as User["sessionConfig"]) ?? {},
       lastLoginAt: userRow.lastLoginAt,
-      metadata: userRow.metadata as any,
+      metadata: userRow.metadata as Record<string, unknown> | null,
       createdAt: userRow.createdAt,
       updatedAt: userRow.updatedAt,
     });
@@ -256,7 +268,7 @@ export const authMiddleware = createMiddleware<HonoEnv>(async (c, next) => {
       id: session.id,
       userId: session.userId,
       tokenId: session.tokenId,
-      deviceFingerprint: (session.deviceFingerprint as any) ?? {},
+      deviceFingerprint: (session.deviceFingerprint as DeviceFingerprint) ?? {},
       ipAddress: session.ipAddress,
       country: session.country,
       userAgent: session.userAgent,
@@ -266,8 +278,8 @@ export const authMiddleware = createMiddleware<HonoEnv>(async (c, next) => {
       revokedAt: session.revokedAt,
       revokedReason: session.revokedReason,
       proofOfPossessionKey: session.proofOfPossessionKey,
-      continuousEvalResult: session.continuousEvalResult as any,
-      anomalyFlags: session.anomalyFlags as any,
+      continuousEvalResult: session.continuousEvalResult as Session["continuousEvalResult"],
+      anomalyFlags: session.anomalyFlags as Session["anomalyFlags"],
       createdAt: session.createdAt,
       updatedAt: session.updatedAt,
     });
@@ -303,7 +315,10 @@ export const authMiddleware = createMiddleware<HonoEnv>(async (c, next) => {
     return next();
   } catch (error) {
     if (error instanceof zerotrustError) {
-      return c.json({ error: error.code, message: error.message }, error.statusCode as any);
+      return c.json(
+        { error: error.code, message: error.message },
+        error.statusCode as ContentfulStatusCode
+      );
     }
     logger.error("Auth middleware error", error as Error);
     return c.json({ error: "INTERNAL_ERROR", message: "Authentication failed" }, 500);
@@ -375,13 +390,16 @@ export const optionalAuthMiddleware = createMiddleware<HonoEnv>(async (c, next) 
               email: userRow.email,
               displayName: userRow.displayName,
               roles: userRow.roles ?? [],
-              attributes: (userRow.attributes as any) ?? {},
-              mfa: (userRow.mfa as any) ?? {},
-              passkeys: (userRow.passkeys as any[]) ?? [],
-              oauthProviders: (userRow.oauthProviders as any[]) ?? [],
-              status: userRow.status as any,
+              attributes: (userRow.attributes as User["attributes"]) ?? {},
+              mfa: (userRow.mfa as User["mfa"]) ?? {
+                totp: { enabled: false, backupCodes: [] },
+                webauthn: { enabled: false },
+              },
+              passkeys: (userRow.passkeys as Passkey[]) ?? [],
+              oauthProviders: (userRow.oauthProviders as OAuthProvider[]) ?? [],
+              status: userRow.status as User["status"],
               subUserIds: userRow.subUserIds ?? [],
-              sessionConfig: (userRow.sessionConfig as any) ?? {},
+              sessionConfig: (userRow.sessionConfig as User["sessionConfig"]) ?? {},
               lastLoginAt: userRow.lastLoginAt,
               createdAt: userRow.createdAt,
               updatedAt: userRow.updatedAt,
@@ -390,7 +408,7 @@ export const optionalAuthMiddleware = createMiddleware<HonoEnv>(async (c, next) 
               id: session.id,
               userId: session.userId,
               tokenId: session.tokenId,
-              deviceFingerprint: (session.deviceFingerprint as any) ?? {},
+              deviceFingerprint: (session.deviceFingerprint as DeviceFingerprint) ?? {},
               ipAddress: session.ipAddress,
               expiresAt: session.expiresAt,
               lastActivityAt: session.lastActivityAt,
