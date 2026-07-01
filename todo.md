@@ -17,16 +17,37 @@ Sorted easiest → hardest within each tier.
 
 ## Medium — Moderate effort, high maintainability payoff
 
-### M1 — Reduce `as any` casts (213 instances) — _Status: Pending_
+### M1 — Reduce `as any` casts (was 213, now 95) — _Status: In Progress (2026-07-01)_
 
 - **Source:** `docs/AUDIT.md` M2
-- **Why:** 213 `as any` casts in `src/`, concentrated in webhook/Stripe handling
-  and middleware. Each is a place the type system stops helping — a Stripe API
-  shape change fails silently at runtime rather than at compile time.
-- **Impact:** Type safety across the entire backend; catches API shape drift.
+- **Why:** `as any` casts in `src/` are a place the type system stops helping —
+  an API shape change fails silently at runtime rather than at compile time.
+- **Done so far (109 → 95):** `oauth/providers/google.ts` (userinfo response
+  typed); `services/dataRetention.ts` (**found and fixed a real bug** — all 4
+  purge functions read `.rowCount` on the postgres-js delete result, but the
+  driver actually exposes `.count`, so retention purge logs had silently
+  reported 0 rows purged for every run regardless of actual deletions; fixed
+  the property name + the test mock that shared the same wrong assumption);
+  `services/search.service.ts` (typed `db.execute<T>()` row shape);
+  `services/region.service.ts` (`residency` config field typed as an honest
+  optional extension — it doesn't exist in the schema and the check is
+  currently dead code; `setOrgBranding`'s cast now uses the column's real
+  `OrgBranding` type); `services/emailQueue.ts` (payload casts now use
+  `Parameters<typeof fn>[1]` so they track each target function's real
+  signature).
+- **Remaining:** 95 casts across ~35 files. **`middleware/auth.ts` (18) and
+  `api/routes/auth.routes.ts` (15) are the largest concentration (33 of 95)
+  and are deliberately deferred** — auth-critical code needs its own
+  dedicated PR with a `/security-review` pass, not a bundled mechanical sweep.
+  Next-largest: `middleware/deviceAttestation.ts` (5), `services/lifecycleEmail.service.ts` (4),
+  `api/routes/passkey.routes.ts` (6), `api/routes/verification.routes.ts` (4),
+  `api/routes/session.routes.ts` (4).
 - **Acceptance:** Replace `as any` with proper types; start with high-risk areas
-  (Stripe webhook body, OAuth provider payloads, SSF event data).
-- **Risk:** Low — mechanical changes; existing tests catch regressions.
+  (Stripe webhook body ✅, OAuth provider payloads ✅, SSF event data — none
+  found, already clean).
+- **Risk:** Low for the files done so far (mechanical, test-verified). The
+  deferred `auth.ts`/`auth.routes.ts` pass is higher risk — security-critical
+  code, needs its own review.
 
 ### M2 — Plugin/capability contract for optional-heavy integrations — _Status: Pending_
 

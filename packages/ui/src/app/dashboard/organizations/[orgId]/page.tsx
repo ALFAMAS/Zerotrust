@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { SkeletonCard, SkeletonTable } from "@/components/Skeleton";
 import {
   Select,
@@ -85,7 +85,7 @@ export default function OrgDetailPage() {
 
   const isAdminOrOwner = myRole === "admin" || myRole === "owner";
 
-  async function fetchAll() {
+  const fetchAll = useCallback(async () => {
     setLoading(true);
     try {
       const [orgRes, meRes, membersRes] = await Promise.all([
@@ -111,12 +111,11 @@ export default function OrgDetailPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [orgId]);
 
   useEffect(() => {
     fetchAll();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [orgId]);
+  }, [fetchAll]);
 
   async function handleInvite(e: React.FormEvent) {
     e.preventDefault();

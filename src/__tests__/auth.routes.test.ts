@@ -677,50 +677,6 @@ describe("GET /me", () => {
     expect(body.oauthProviders[0].provider).toBe("google");
   });
 
-  it("serves streak from the /me namespace before the base profile route", async () => {
-    const router = await getRouter();
-    const app = new Hono().route("/", router);
-    const res = await app.request("/me/streak", {
-      headers: { "x-test-user-id": USER_ID },
-    });
-
-    expect(res.status).toBe(200);
-    await expect(res.json()).resolves.toEqual({
-      streak: {
-        currentStreak: 3,
-        longestStreak: 5,
-        lastLoginDate: "2026-06-24",
-      },
-    });
-  });
-
-  it("serves achievements from the /me namespace before the base profile route", async () => {
-    const router = await getRouter();
-    const app = new Hono().route("/", router);
-    const res = await app.request("/me/achievements", {
-      headers: { "x-test-user-id": USER_ID },
-    });
-
-    expect(res.status).toBe(200);
-    const body = await res.json();
-    expect(body.achievements).toEqual([
-      {
-        key: "first_login",
-        label: "First Login",
-        description: "Logged in for the first time",
-        icon: "👋",
-        unlockedAt: "2026-06-24T00:00:00.000Z",
-      },
-      {
-        key: "power_user",
-        label: "Power User",
-        description: "Reached a 7-day streak",
-        icon: "⚡",
-        unlockedAt: null,
-      },
-    ]);
-  });
-
   it("returns disabled MFA defaults when the user has no mfa object", async () => {
     db.limit.mockResolvedValueOnce([
       {

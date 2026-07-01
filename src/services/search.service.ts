@@ -236,10 +236,10 @@ async function searchDatabase(
   const q = `%${query}%`;
 
   if (!type || type === "user") {
-    const rows = await db.execute(
+    const rows = await db.execute<{ id: string; title: string | null; email: string }>(
       sql`SELECT id, title, email FROM users WHERE email ILIKE ${q} OR display_name ILIKE ${q} LIMIT ${limit}`
     );
-    for (const r of rows as any[]) {
+    for (const r of rows) {
       hits.push({
         id: r.id,
         type: "user",
@@ -250,10 +250,10 @@ async function searchDatabase(
   }
 
   if (!type || type === "org") {
-    const rows = await db.execute(
+    const rows = await db.execute<{ id: string; name: string }>(
       sql`SELECT id, name FROM organizations WHERE name ILIKE ${q} LIMIT ${limit}`
     );
-    for (const r of rows as any[]) {
+    for (const r of rows) {
       hits.push({ id: r.id, type: "org", title: r.name, score: 1 });
     }
   }

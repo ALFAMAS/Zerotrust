@@ -64,24 +64,38 @@ export async function initEmailQueue(redisUri: string): Promise<void> {
       const { type, to, payload } = job.data;
       // Dynamic import avoids circular dependency
       const svc = await import("./email.service.js");
+      // The queue serializes payloads through JSON (BullMQ), erasing their
+      // original type — each case below casts to the target function's own
+      // parameter type (via `Parameters<>`, not `any`) so the cast stays
+      // correct if that function's signature changes, and every other
+      // argument on the call stays type-checked.
       switch (type) {
         case "welcome":
-          await svc.sendWelcomeEmail(to, payload as any);
+          await svc.sendWelcomeEmail(to, payload as Parameters<typeof svc.sendWelcomeEmail>[1]);
           break;
         case "magic-link":
-          await svc.sendMagicLinkEmail(to, payload as any);
+          await svc.sendMagicLinkEmail(to, payload as Parameters<typeof svc.sendMagicLinkEmail>[1]);
           break;
         case "otp":
-          await svc.sendOtpEmail(to, payload as any);
+          await svc.sendOtpEmail(to, payload as Parameters<typeof svc.sendOtpEmail>[1]);
           break;
         case "password-reset":
-          await svc.sendPasswordResetEmail(to, payload as any);
+          await svc.sendPasswordResetEmail(
+            to,
+            payload as Parameters<typeof svc.sendPasswordResetEmail>[1]
+          );
           break;
         case "security-alert":
-          await svc.sendSecurityAlertEmail(to, payload as any);
+          await svc.sendSecurityAlertEmail(
+            to,
+            payload as Parameters<typeof svc.sendSecurityAlertEmail>[1]
+          );
           break;
         case "notification":
-          await svc.sendNotificationEmail(to, payload as any);
+          await svc.sendNotificationEmail(
+            to,
+            payload as Parameters<typeof svc.sendNotificationEmail>[1]
+          );
           break;
         default:
           logger.warn("Unknown email job type", { type });

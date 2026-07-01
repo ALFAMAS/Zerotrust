@@ -274,7 +274,6 @@ async function issueAuthenticatedSession(
 
   await db.update(usersTable).set({ lastLoginAt: new Date() }).where(eq(usersTable.id, user.id));
 
-
   void notifyIfNewDevice({
     userId: user.id,
     email: user.email,
