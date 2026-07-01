@@ -178,9 +178,10 @@ Follow-up since the audit pass:
   - Unit tests: `email-events.routes.test.ts`, `ssf.receiver.test.ts`,
     `webhooks.delivery.test.ts`, and `processedWebhookEvents.repository.test.ts`.
 
-> **Pre-existing CI note:** the **SAST & Dependency Scans (Semgrep)** check is
-> also red on `main` (independent of this PR's diff). Triaged as out of scope for
-> this change; tracked separately rather than fixed here.
+> **Update (2026-07-01):** the SAST & Dependency Scans check noted as red above
+> has since gone green on `main` (all 6 CI jobs pass as of commit `20ec427`) —
+> resolved incidentally by later changes; no separate fix was needed. Confirmed
+> as part of the P4.5 CI-hardening pass.
 
 Verification as of 2026-06-30: type-check clean, `db:generate` reports no drift,
 `verify:generated` clean, and 746 Vitest tests passing. Targeted Biome on the

@@ -170,5 +170,23 @@ _All P0 items completed. See tdone.md for the full ledger._
   (3) Kubernetes; includes worker topology, migration ordering, rollback, RTO/RPO,
   service dependency diagram, and blueprint selection guide. ✅
 
-### P4.5 — CI gate hardening  — _Status: Pending (coverage gate decision + SAST triage pending)_
-- Concurrency group added 2026-06-30; remaining: coverage-gate decision, Semgrep triage.
+### P4.5 — CI gate hardening  — _Status: Done (2026-07-01)_
+- **Concurrency group** — added 2026-06-30 (see `ci.yml`).
+- **Coverage-gate decision:** the 85% threshold was permanently non-blocking
+  (`continue-on-error: true`) because actual coverage (~60-62%
+  lines/statements/functions, ~56% branches) is nowhere close, making the gate
+  meaningless. Decision: **ratchet, don't leave it open** — lowered
+  `vitest.config.ts`'s thresholds to a realistic floor a few points below the
+  measured baseline (lines 60 / functions 58 / branches 55 / statements 59)
+  and made the CI step **blocking** (dropped `continue-on-error`). This still
+  catches a real regression while not flaking on normal fluctuation; raise the
+  numbers as coverage improves toward the original 85% target (tracked via the
+  P4.2 maintenance scorecard).
+- **SAST triage:** re-checked the latest `main` CI run (commit `20ec427`) —
+  **all 6 jobs are green**, including SAST & Dependency Scans (Semgrep +
+  Trivy). The red state noted in the original audit (docs/AUDIT.md) resolved
+  itself along the way; no fix was needed. Updated the stale note in AUDIT.md.
+- **Files:** `vitest.config.ts`, `.github/workflows/ci.yml`, `docs/deployment.md`,
+  `docs/AUDIT.md`.
+- **Risk:** Low — verified locally that the new thresholds pass against actual
+  current coverage before flipping the gate to blocking.

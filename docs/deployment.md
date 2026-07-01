@@ -29,7 +29,7 @@ Reference for the **CI/CD & Documentation** deliverable.
 | Job | Gates | Notes |
 | --- | --- | --- |
 | **Lint & Type Check** | Biome + `bun audit --prod` + `tsc` | dependency audit is blocking (high+) |
-| **Tests** | Vitest suite; SDK-drift, API/UI matrix & shadcn report committed-checks | coverage runs **non-blocking** toward the 85% target (currently ~56%) |
+| **Tests** | Vitest suite; SDK-drift, API/UI matrix & shadcn report committed-checks | coverage is a **blocking ratchet gate** (~60% floor, raised as coverage improves toward the 85% target — see `vitest.config.ts`) |
 | **SAST & Dependency Scans** | Semgrep (`p/owasp-top-ten`) | Trivy step is currently **non-blocking** (its binary install is broken upstream); Semgrep + `bun audit` remain blocking |
 | **Build UI** | `next build` | |
 | **Playwright E2E & a11y** | full-stack smoke against a started API+UI | needs the app running with Postgres+Redis services |

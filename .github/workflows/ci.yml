@@ -75,12 +75,13 @@ jobs:
       - run: bun run test --reporter=verbose
       - name: UI component tests (happy-dom + Testing Library)
         run: bun run --cwd packages/ui test
-      # Coverage is tracked toward the 85% target but kept non-blocking: the
-      # codebase is currently ~56%, so gating at 85% deadlocks every PR. Flip
-      # back to a hard gate once coverage is ratcheted up to the threshold.
-      - name: Coverage report (target 85%, non-blocking)
+      # Blocking ratchet gate (todo.md P4.5): thresholds in vitest.config.ts sit
+      # a few points below the current measured baseline (~60% lines/statements,
+      # ~56% branches), not the aspirational 85% — that number deadlocked every
+      # PR and made the gate meaningless. This still fails on a real regression.
+      # Raise the thresholds in vitest.config.ts as coverage improves toward 85%.
+      - name: Coverage report (ratchet gate — see vitest.config.ts)
         run: bun run test:coverage -- --run
-        continue-on-error: true
       - name: API/UI integration drift audit
         run: bun run audit:integration
       - name: Verify integration matrix is committed
