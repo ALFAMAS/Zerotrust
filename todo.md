@@ -95,7 +95,13 @@ _All P0 items completed. See tdone.md for the full ledger._
 ## P3 — Scalability and performance
 
 ### P3.1 — UI component / integration tests  — _Status: Pending_
-### P3.2 — Default read-heavy endpoints to the read replica  — _Status: Pending_
+### P3.2 — Default read-heavy endpoints to the read replica  — _Status: In Progress (2026-07-01)_
+- **Done:** switched the verified read-only admin list endpoints (`GET /admin/users`,
+  `/admin/stats`, `/admin/audit-logs`, `/admin/feedback`) to `getReadDb()`.
+  `getReadDb()` falls back to the primary when no replica is configured, so
+  behavior is unchanged unless `DATABASE_URL_READ_REPLICA` is set. `/admin/sessions`
+  left on the primary (its handler also writes). Extend to other pure-read list
+  endpoints (org/session/search/notification lists) in follow-ups.
 ### P3.3 — Offload heavy webhook work to the queue  — _Status: Pending_
 ### P3.4 — Plugin/capability contract for optional-heavy integrations  — _Status: Pending_
 ### P3.5 — Deploy & release safety (expand/contract, rollback, DR drills)  — _Status: Done (2026-07-01)_
