@@ -73,7 +73,7 @@ export default function ProfilePage() {
       const fd = new FormData();
       fd.append("avatar", file);
 
-      const { avatarUrl } = await apiPostFormData("/auth/me/avatar", fd);
+      const { avatarUrl } = await apiPostFormData<{ avatarUrl: string }>("/auth/me/avatar", fd);
       setForm((f) => ({ ...f, avatarUrl }));
       setUser((u: any) => ({ ...u, avatarUrl }));
       setMsg("Avatar updated.");
