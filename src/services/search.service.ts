@@ -1,6 +1,6 @@
 import { sql } from "drizzle-orm";
 import { getConfig } from "../config";
-import { getDb } from "../db";
+import { getReadDb } from "../db";
 import { getLogger } from "../logger";
 import type { StorageRegion } from "./region.service";
 
@@ -231,7 +231,7 @@ async function searchDatabase(
   _region: StorageRegion | undefined,
   limit: number
 ): Promise<SearchResults> {
-  const db = getDb();
+  const db = getReadDb();
   const hits: SearchHit[] = [];
   const q = `%${query}%`;
 

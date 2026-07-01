@@ -1,6 +1,6 @@
 import { and, desc, eq } from "drizzle-orm";
 import { Hono } from "hono";
-import { getDb } from "../../db";
+import { getDb, getReadDb } from "../../db";
 import { sessionsTable } from "../../db/schema";
 import { getLogger } from "../../logger";
 import { authMiddleware } from "../../middleware/auth";
@@ -21,7 +21,7 @@ router.get("/", async (c) => {
     const userId = c.get("user").id;
     const currentSessionId = c.get("session")?.id;
     const { page, limit, offset } = parsePaginatedQuery(c.req.query());
-    const db = getDb();
+    const db = getReadDb();
     const where = eq(sessionsTable.userId, userId);
     const [sessions, total] = await Promise.all([
       db

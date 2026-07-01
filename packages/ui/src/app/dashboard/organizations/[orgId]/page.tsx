@@ -115,8 +115,8 @@ export default function OrgDetailPage() {
 
   useEffect(() => {
     fetchAll();
-    // biome-ignore lint/correctness/useExhaustiveDependencies: fetch on orgId change only
-  }, [fetchAll]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [orgId]);
 
   async function handleInvite(e: React.FormEvent) {
     e.preventDefault();

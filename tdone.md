@@ -68,6 +68,13 @@ loyalty, globalization, search, compliance, audit, and ops tooling.
 
 ## Maintenance & hardening (2026-07-01)
 
+- ✅ **Blog + changelog pages removed** — deleted `app/blog/`, `app/changelog/`,
+  `data/blog-posts.ts`, `data/changelog.ts` (~400 LOC); removed nav links from
+  `SiteHeader`, `SiteFooter`, and landing page. E1 complete.
+- ✅ **MFA channels consolidated (email-only)** — deleted
+  `src/mfa/channels/{sms,whatsapp,telegram}.ts`, removed the `twilio` dependency
+  from `package.json`, narrowed MFA schema types + config to email-only, updated
+  11 test files. TOTP + Email OTP remain functional. E2 complete.
 - ✅ **Repository layer expanded** — 4 repositories now wrapping hot-path writes
   in `db.transaction`: `authSessions.repository.ts` (token rotation/revocation),
   `stripeEvents.repository.ts` (webhook idempotency), `pointsLedger.repository.ts`

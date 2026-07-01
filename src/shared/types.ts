@@ -33,9 +33,6 @@ export interface zerotrustConfig {
     maxOTPAttempts: number;
     channels: {
       email: { enabled: boolean };
-      sms: { enabled: boolean; provider: string };
-      whatsapp: { enabled: boolean; provider: string };
-      telegram: { enabled: boolean; botToken: string };
     };
   };
   rateLimiting: {
@@ -323,7 +320,7 @@ export interface OTP {
   userId: string;
   code: string;
   type: "password_reset" | "email_verify" | "phone_verify" | "login";
-  channel: "email" | "sms" | "whatsapp" | "telegram";
+  channel: "email";
   target: string;
   expiresAt: Date;
   usedAt?: Date | null;
@@ -350,7 +347,7 @@ export interface OAuthTokenResponse {
 export interface MFAChallengeResponse {
   challengeId: string;
   expiresIn: number;
-  channels: ("email" | "sms" | "whatsapp" | "telegram")[];
+  channels: "email"[];
 }
 
 // ─── Hono Environment Type ────────────────────────────────────────────────

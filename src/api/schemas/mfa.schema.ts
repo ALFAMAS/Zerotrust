@@ -12,13 +12,13 @@ export const BackupCodeRedeemSchema = z.object({
 });
 
 export const MFASendOTPSchema = z.object({
-  channel: z.enum(["email", "sms", "whatsapp", "telegram"]),
+  channel: z.enum(["email"]),
   target: z.string().min(1, "Target (email/phone/chat ID) is required"),
 });
 
 export const MFAVerifyOTPSchema = z.object({
   code: z.string().min(4, "OTP code is required"),
-  channel: z.enum(["email", "sms", "whatsapp", "telegram"]),
+  channel: z.enum(["email"]),
 });
 
 export type TOTPVerifyInput = z.infer<typeof TOTPVerifySchema>;

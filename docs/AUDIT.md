@@ -98,7 +98,7 @@ incident under load or attack) · **Medium** (correctness/maintainability debt) 
 | # | Finding | Risk | Status |
 | --- | --- | --- | --- |
 | M1 | **No repository layer.** Routes/services call Drizzle inline. The codebase wants one (per TODO) so transactional invariants and authorization live in one testable place. | Medium | Seeded this PR (`src/db/repositories/`) |
-| M2 | **213 `as any` casts** in `src/`. Concentrated in webhook/Stripe handling and a few middleware. Each is a place the type system stops helping. | Medium | TODO P2 |
+| M2 | **213 `as any` casts** in `src/`. Concentrated in webhook/Stripe handling and a few middleware. Each is a place the type system stops helping. | Medium | → **todo.md M1** |
 | M3 | **No enforced module boundaries.** Any service can import any other; there is no `identity`/`billing`/`tenancy`/`ops` partition or import-linter, so coupling grows silently. | Medium | TODO P2 |
 
 ### 4.4 Scalability / performance

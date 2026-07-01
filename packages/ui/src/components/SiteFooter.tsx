@@ -40,14 +40,6 @@ export default function SiteFooter() {
                 </li>
                 <li>
                   <Link
-                    href="/changelog"
-                    className="text-muted-foreground transition-colors hover:text-foreground"
-                  >
-                    Changelog
-                  </Link>
-                </li>
-                <li>
-                  <Link
                     href="/status"
                     className="text-muted-foreground transition-colors hover:text-foreground"
                   >
@@ -66,14 +58,6 @@ export default function SiteFooter() {
                   >
                     Docs
                   </a>
-                </li>
-                <li>
-                  <Link
-                    href="/blog"
-                    className="text-muted-foreground transition-colors hover:text-foreground"
-                  >
-                    Blog
-                  </Link>
                 </li>
                 <li>
                   <Link

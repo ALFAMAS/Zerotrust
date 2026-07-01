@@ -25,7 +25,7 @@ export const RefreshTokenSchema = z.object({
 
 export const PasswordResetRequestSchema = z.object({
   email: z.string().email("Invalid email address"),
-  channel: z.enum(["email", "sms", "whatsapp", "telegram"]).default("email"),
+  channel: z.enum(["email"]).default("email"),
 });
 
 export const PasswordResetConfirmSchema = z.object({

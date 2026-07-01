@@ -1,7 +1,7 @@
 import { and, desc, eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { z } from "zod";
-import { getDb } from "../../db";
+import { getDb, getReadDb } from "../../db";
 import { notificationsTable, usersTable } from "../../db/schema";
 import { getLogger } from "../../logger";
 import { authMiddleware } from "../../middleware/auth";
@@ -104,7 +104,7 @@ router.get("/", async (c) => {
     }
     const { page, limit, offset } = parsePaginatedQuery(c.req.query(), { defaultLimit: 20 });
     const unreadOnly = c.req.query("unread") === "true";
-    const db = getDb();
+    const db = getReadDb();
     const conditions = [eq(notificationsTable.userId, user.id)];
     if (unreadOnly) conditions.push(eq(notificationsTable.read, false));
     const where = and(...conditions);
@@ -138,7 +138,7 @@ router.get("/unread-count", async (c) => {
     if (!user) {
       return c.json({ error: "UNAUTHORIZED", message: "Authentication required" }, 401);
     }
-    const db = getDb();
+    const db = getReadDb();
     const rows = await db
       .select()
       .from(notificationsTable)

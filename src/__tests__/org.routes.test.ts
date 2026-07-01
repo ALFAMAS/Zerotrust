@@ -6,7 +6,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 // leaving this RBAC surface (owner/admin/member tiers) untested. These tests
 // lock the authorization boundaries back down.
 
-vi.mock("../db", () => ({ getDb: vi.fn() }));
+vi.mock("../db", () => ({ getDb: vi.fn(), getReadDb: vi.fn() }));
 
 vi.mock("../logger", () => ({
   getLogger: () => ({ info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() }),
@@ -33,6 +33,8 @@ function makeDb() {
     from: vi.fn().mockReturnThis(),
     where: vi.fn().mockReturnThis(),
     innerJoin: vi.fn().mockReturnThis(),
+    orderBy: vi.fn().mockReturnThis(),
+    offset: vi.fn().mockReturnThis(),
     limit: vi.fn().mockResolvedValue([]), // getMembership lookups resolve here
     insert: vi.fn().mockReturnThis(),
     values: vi.fn().mockReturnThis(),
@@ -65,8 +67,9 @@ let db: ReturnType<typeof makeDb>;
 beforeEach(async () => {
   vi.resetModules();
   db = makeDb();
-  const { getDb } = await import("../db");
+  const { getDb, getReadDb } = await import("../db");
   vi.mocked(getDb).mockReturnValue(db as any);
+  vi.mocked(getReadDb).mockReturnValue(db as any);
 });
 
 afterEach(() => vi.clearAllMocks());
@@ -88,6 +91,20 @@ describe("org RBAC — member tier (read)", () => {
     const res = await req(app, `/${ORG}`, { uid: MEMBER });
     expect(res.status).toBe(403);
     expect((await res.json()).error).toBe("FORBIDDEN");
+  });
+
+  it("uses the read replica connection for the members list after membership check", async () => {
+    const readDb = makeDb();
+    db.limit.mockResolvedValueOnce(membership("member"));
+    readDb.limit.mockResolvedValueOnce([]);
+    const { getReadDb } = await import("../db");
+    vi.mocked(getReadDb).mockReturnValue(readDb as any);
+    const app = await getRouter();
+
+    const res = await req(app, `/${ORG}/members`, { uid: MEMBER });
+
+    expect(res.status).toBe(200);
+    expect(getReadDb).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -142,6 +159,20 @@ describe("org RBAC — admin tier", () => {
     });
     expect(res.status).toBe(400);
     expect((await res.json()).error).toBe("VALIDATION_ERROR");
+  });
+
+  it("uses the read replica connection for the invites list after admin check", async () => {
+    const readDb = makeDb();
+    db.limit.mockResolvedValueOnce(membership("admin"));
+    readDb.limit.mockResolvedValueOnce([]);
+    const { getReadDb } = await import("../db");
+    vi.mocked(getReadDb).mockReturnValue(readDb as any);
+    const app = await getRouter();
+
+    const res = await req(app, `/${ORG}/invites`, { uid: ADMIN });
+
+    expect(res.status).toBe(200);
+    expect(getReadDb).toHaveBeenCalledTimes(1);
   });
 });
 

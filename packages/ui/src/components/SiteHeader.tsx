@@ -26,12 +26,6 @@ export default function SiteHeader() {
           >
             Features
           </Link>
-          <Link
-            href="/changelog"
-            className="hidden rounded-md px-3 py-2 text-sm text-muted-foreground transition-colors hover:text-foreground sm:block"
-          >
-            Changelog
-          </Link>
           <a
             href={`${brand.apiUrl}/docs`}
             className="hidden rounded-md px-3 py-2 text-sm text-muted-foreground transition-colors hover:text-foreground sm:block"

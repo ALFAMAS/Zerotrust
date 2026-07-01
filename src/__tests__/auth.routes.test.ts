@@ -28,8 +28,6 @@ vi.mock("../config", () => ({
       maxOTPAttempts: 5,
       channels: {
         email: { enabled: true },
-        sms: { enabled: false, provider: "twilio" },
-        whatsapp: { enabled: false, provider: "twilio" },
         telegram: { enabled: false, botToken: "" },
       },
     },
@@ -1173,8 +1171,6 @@ describe("GET /oauth/:provider/authorize (configured)", () => {
           maxOTPAttempts: 5,
           channels: {
             email: { enabled: true },
-            sms: { enabled: false, provider: "twilio" },
-            whatsapp: { enabled: false, provider: "twilio" },
             telegram: { enabled: false, botToken: "" },
           },
         },
@@ -1313,8 +1309,6 @@ describe("Route-level rate limiting", () => {
           maxOTPAttempts: 5,
           channels: {
             email: { enabled: true },
-            sms: { enabled: false, provider: "twilio" },
-            whatsapp: { enabled: false, provider: "twilio" },
             telegram: { enabled: false, botToken: "" },
           },
         },

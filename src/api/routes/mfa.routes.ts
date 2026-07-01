@@ -213,28 +213,21 @@ router.post("/otp/send", async (c) => {
     const settings = await getSettings();
     const { channel } = await c.req.json();
 
-    if (!channel || !["email", "sms"].includes(channel)) {
+    if (channel !== "email") {
       return c.json(
         {
           error: "INVALID_REQUEST",
-          message: "channel must be 'email' or 'sms'",
+          message: "channel must be 'email'",
         },
         400
       );
     }
-    if (channel === "email" && !settings.emailOtpEnabled) {
+    if (!settings.emailOtpEnabled) {
       return c.json({ error: "FEATURE_DISABLED", message: "Email OTP is disabled" }, 403);
-    }
-    if (channel === "sms" && !settings.smsOtpEnabled) {
-      return c.json({ error: "FEATURE_DISABLED", message: "SMS OTP is disabled" }, 403);
     }
 
     const user = c.get("user");
-    const target = channel === "email" ? user.email : user.phone || "";
-
-    if (channel === "sms" && !target) {
-      return c.json({ error: "NO_PHONE", message: "No phone number on account" }, 400);
-    }
+    const target = user.email;
 
     const code = String(crypto.randomInt(100000, 999999));
     const db = getDb();
@@ -250,13 +243,11 @@ router.post("/otp/send", async (c) => {
 
     await sendOTP(channel, target, code);
 
-    if (channel === "email") {
-      void sendOtpEmail(target, {
-        name: user.displayName ?? user.email,
-        code,
-        expiresInMinutes: 10,
-      });
-    }
+    void sendOtpEmail(target, {
+      name: user.displayName ?? user.email,
+      code,
+      expiresInMinutes: 10,
+    });
 
     return c.json({ sent: true, channel });
   } catch (err) {

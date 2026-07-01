@@ -5,6 +5,7 @@ import { Hono } from "hono";
 
 vi.mock("../db", () => ({
   getDb: vi.fn(),
+  getReadDb: vi.fn(),
 }));
 
 vi.mock("../config", () => ({
@@ -28,8 +29,6 @@ vi.mock("../config", () => ({
       maxOTPAttempts: 5,
       channels: {
         email: { enabled: true },
-        sms: { enabled: false, provider: "twilio" },
-        whatsapp: { enabled: false, provider: "twilio" },
         telegram: { enabled: false, botToken: "" },
       },
     },
@@ -98,8 +97,9 @@ function makeNotification(overrides: Record<string, unknown> = {}) {
 async function getApp(db: ReturnType<typeof makeDbChain>) {
   vi.resetModules();
 
-  const { getDb } = await import("../db");
+  const { getDb, getReadDb } = await import("../db");
   vi.mocked(getDb).mockReturnValue(db as any);
+  vi.mocked(getReadDb).mockReturnValue(db as any);
 
   // Stub out authMiddleware so every request is treated as authenticated
   vi.doMock("../middleware/auth", () => ({
@@ -134,8 +134,9 @@ async function getUnauthApp() {
   }));
 
   const db = makeDbChain([]);
-  const { getDb } = await import("../db");
+  const { getDb, getReadDb } = await import("../db");
   vi.mocked(getDb).mockReturnValue(db as any);
+  vi.mocked(getReadDb).mockReturnValue(db as any);
 
   const { default: router } = await import("../api/routes/notification.routes");
   return new Hono().route("/", router);
@@ -182,6 +183,17 @@ describe("GET /notifications", () => {
     expect(body.data).toHaveLength(2);
   });
 
+  it("uses the read replica connection for the read-heavy notification list", async () => {
+    const db = makeDbChain([]);
+    const app = await getApp(db);
+    const { getReadDb } = await import("../db");
+
+    const res = await app.request("/");
+
+    expect(res.status).toBe(200);
+    expect(getReadDb).toHaveBeenCalledTimes(1);
+  });
+
   it("returns 401 for unauthenticated requests", async () => {
     const app = await getUnauthApp();
     const res = await app.request("/");
@@ -221,6 +233,18 @@ describe("GET /notifications/unread-count", () => {
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body).toEqual({ count: 2 });
+  });
+
+  it("uses the read replica connection for unread-count reads", async () => {
+    const db = makeDbChain([]);
+    db.where.mockResolvedValue([]);
+    const app = await getApp(db);
+    const { getReadDb } = await import("../db");
+
+    const res = await app.request("/unread-count");
+
+    expect(res.status).toBe(200);
+    expect(getReadDb).toHaveBeenCalledTimes(1);
   });
 
   it("returns 401 for unauthenticated requests", async () => {

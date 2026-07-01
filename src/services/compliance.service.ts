@@ -25,7 +25,7 @@ export async function seedSoc2Controls(): Promise<void> {
       title: "Logical access controls",
       description: "Multi-factor authentication, RBAC, API key scoping",
       implementation:
-        "MFA (TOTP, passkeys, SMS, WhatsApp, Telegram), RBAC+ABAC, per-key scopes enforced in apiKeyAuth middleware",
+        "MFA (TOTP, passkeys, email OTP), RBAC+ABAC, per-key scopes enforced in apiKeyAuth middleware",
       evidence: "src/middleware/auth.ts, src/middleware/apiKeyAuth.ts",
       status: "implemented",
     },

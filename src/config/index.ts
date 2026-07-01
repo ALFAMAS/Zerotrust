@@ -67,18 +67,6 @@ const DEFAULT_CONFIG: Partial<zerotrustConfig> = {
     maxOTPAttempts: parseInt(process.env.MAX_OTP_ATTEMPTS || "5", 10),
     channels: {
       email: { enabled: process.env.MFA_EMAIL_ENABLED !== "false" },
-      sms: {
-        enabled: process.env.MFA_SMS_ENABLED === "true",
-        provider: process.env.SMS_PROVIDER || "twilio",
-      },
-      whatsapp: {
-        enabled: process.env.MFA_WHATSAPP_ENABLED === "true",
-        provider: process.env.WHATSAPP_PROVIDER || "twilio",
-      },
-      telegram: {
-        enabled: process.env.MFA_TELEGRAM_ENABLED === "true",
-        botToken: process.env.TELEGRAM_BOT_TOKEN || "",
-      },
     },
   },
   rateLimiting: {
@@ -137,13 +125,9 @@ function validateConfig(config: zerotrustConfig): void {
     );
   }
 
-  const mfaChannelsEnabled = Object.values(config.mfa.channels).filter((c) => c.enabled).length;
+  const mfaChannelsEnabled = config.mfa.channels.email.enabled ? 1 : 0;
   if (mfaChannelsEnabled === 0) {
     errors.push("At least one MFA channel must be enabled");
-  }
-
-  if (config.mfa.channels.telegram.enabled && !config.mfa.channels.telegram.botToken) {
-    errors.push("TELEGRAM_BOT_TOKEN required when MFA_TELEGRAM_ENABLED=true");
   }
 
   if (errors.length > 0) {

@@ -2,7 +2,7 @@ import { randomBytes } from "node:crypto";
 import { and, desc, eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { z } from "zod";
-import { getDb } from "../../db";
+import { getDb, getReadDb } from "../../db";
 import {
   organizationInvitesTable,
   organizationMembersTable,
@@ -194,8 +194,9 @@ router.get("/:orgId/members", async (c) => {
   if (!(await requireMember(orgId, user.id))) return c.json({ error: "FORBIDDEN" }, 403);
   const { page, limit, offset } = parsePaginatedQuery(c.req.query());
   const where = eq(organizationMembersTable.orgId, orgId);
+  const db = getReadDb();
   const [members, total] = await Promise.all([
-    getDb()
+    db
       .select({
         member: organizationMembersTable,
         user: {
@@ -211,7 +212,7 @@ router.get("/:orgId/members", async (c) => {
       .orderBy(desc(organizationMembersTable.joinedAt))
       .offset(offset)
       .limit(limit),
-    countRows(getDb(), organizationMembersTable, where),
+    countRows(db, organizationMembersTable, where),
   ]);
   return c.json(paginated(members, { page, limit, total }));
 });
@@ -277,15 +278,16 @@ router.get("/:orgId/invites", async (c) => {
   if (!(await requireAdmin(orgId, user.id))) return c.json({ error: "FORBIDDEN" }, 403);
   const { page, limit, offset } = parsePaginatedQuery(c.req.query());
   const where = eq(organizationInvitesTable.orgId, orgId);
+  const db = getReadDb();
   const [invites, total] = await Promise.all([
-    getDb()
+    db
       .select()
       .from(organizationInvitesTable)
       .where(where)
       .orderBy(desc(organizationInvitesTable.createdAt))
       .offset(offset)
       .limit(limit),
-    countRows(getDb(), organizationInvitesTable, where),
+    countRows(db, organizationInvitesTable, where),
   ]);
   return c.json(paginated(invites, { page, limit, total }));
 });

@@ -42,8 +42,6 @@ vi.mock("../config", () => ({
       maxOTPAttempts: 5,
       channels: {
         email: { enabled: true },
-        sms: { enabled: false, provider: "twilio" },
-        whatsapp: { enabled: false, provider: "twilio" },
         telegram: { enabled: false, botToken: "" },
       },
     },
