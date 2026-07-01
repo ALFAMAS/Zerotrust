@@ -715,7 +715,6 @@ export const pushSubscriptionsTable = pgTable("push_subscriptions", {
   lastUsedAt: timestamp("last_used_at", { withTimezone: true }),
 });
 
-
 // ── Trusted devices per org ──────────────────────────────────────────────────
 
 export const trustedDevicesTable = pgTable(

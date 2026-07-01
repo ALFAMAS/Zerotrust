@@ -33,9 +33,7 @@ async function main() {
   try {
     for (const col of COLUMNS) {
       const def = col.default ? ` DEFAULT ${col.default}` : "";
-      console.log(
-        `Adding column organizations.${col.name} (${col.type}${def}) …`
-      );
+      console.log(`Adding column organizations.${col.name} (${col.type}${def}) …`);
       try {
         await sql.unsafe(
           `ALTER TABLE organizations ADD COLUMN IF NOT EXISTS "${col.name}" ${col.type}${def}`

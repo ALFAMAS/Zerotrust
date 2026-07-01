@@ -335,7 +335,7 @@ export async function seedRiskAssessment(year: number): Promise<void> {
       owner: "security-team",
       status: "mitigated",
     },
-  {
+    {
       year,
       riskId: "R-010",
       category: "availability",
