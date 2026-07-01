@@ -14,25 +14,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { api } from "@/lib/api";
-
-interface AuditEntry {
-  id: string;
-  timestamp?: string;
-  createdAt?: string;
-  user?: string;
-  userEmail?: string;
-  actorEmail?: string;
-  userId?: string;
-  action: string;
-  ip?: string;
-  ipAddress?: string;
-  status?: "success" | "failure" | "error" | string;
-  success?: boolean;
-  entryHash?: string | null;
-  metadata?: Record<string, unknown>;
-  details?: Record<string, unknown>;
-  resourceDetails?: Record<string, unknown>;
-}
+import { type AuditEntry, auditEntriesFromResponse } from "./auditData";
 
 interface VerifyResult {
   ok: boolean;
@@ -40,71 +22,10 @@ interface VerifyResult {
   brokenAt?: { seq: number; id: string; reason: string };
 }
 
-const MOCK_ENTRIES: AuditEntry[] = [
-  {
-    id: "1",
-    timestamp: new Date(Date.now() - 1000 * 60 * 2).toISOString(),
-    userEmail: "alice@acme.com",
-    action: "user.login",
-    ip: "192.168.1.10",
-    status: "success",
-  },
-  {
-    id: "2",
-    timestamp: new Date(Date.now() - 1000 * 60 * 5).toISOString(),
-    userEmail: "bob@acme.com",
-    action: "user.login",
-    ip: "10.0.0.5",
-    status: "failure",
-    metadata: { reason: "Invalid password" },
-  },
-  {
-    id: "3",
-    timestamp: new Date(Date.now() - 1000 * 60 * 10).toISOString(),
-    userEmail: "admin@acme.com",
-    action: "settings.update",
-    ip: "127.0.0.1",
-    status: "success",
-    metadata: { fields: ["emailPasswordEnabled", "sessionTTLSeconds"] },
-  },
-  {
-    id: "4",
-    timestamp: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
-    userEmail: "carol@acme.com",
-    action: "user.mfa.enabled",
-    ip: "203.0.113.42",
-    status: "success",
-  },
-  {
-    id: "5",
-    timestamp: new Date(Date.now() - 1000 * 60 * 60).toISOString(),
-    userEmail: "alice@acme.com",
-    action: "user.logout",
-    ip: "192.168.1.10",
-    status: "success",
-  },
-  {
-    id: "6",
-    timestamp: new Date(Date.now() - 1000 * 60 * 90).toISOString(),
-    userEmail: "dave@acme.com",
-    action: "user.register",
-    ip: "198.51.100.7",
-    status: "success",
-  },
-  {
-    id: "7",
-    timestamp: new Date(Date.now() - 1000 * 60 * 120).toISOString(),
-    userEmail: "admin@acme.com",
-    action: "user.delete",
-    ip: "127.0.0.1",
-    status: "success",
-    metadata: { targetUser: "old-user@acme.com" },
-  },
-];
-
 export default function AuditPage() {
   const [entries, setEntries] = useState<AuditEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [selected, setSelected] = useState<AuditEntry | null>(null);
   const [verify, setVerify] = useState<VerifyResult | null>(null);
   const [verifying, setVerifying] = useState(false);
@@ -115,11 +36,11 @@ export default function AuditPage() {
         const data = await api.get<{ data: AuditEntry[]; pagination: any } | AuditEntry[]>(
           "/admin/audit-logs"
         );
-        const logs = Array.isArray(data) ? data : (data.data ?? []);
-        setEntries(logs.length ? logs : MOCK_ENTRIES);
+        setEntries(auditEntriesFromResponse(data));
+        setLoadError(null);
       } catch {
-        // API unreachable — fall back to illustrative mock data
-        setEntries(MOCK_ENTRIES);
+        setEntries([]);
+        setLoadError("Failed to load audit entries.");
       } finally {
         setLoading(false);
       }
@@ -209,6 +130,12 @@ export default function AuditPage() {
               {verify.brokenAt?.reason ? ` (${verify.brokenAt.reason})` : ""}.
             </>
           )}
+        </div>
+      )}
+
+      {loadError && (
+        <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+          {loadError}
         </div>
       )}
 

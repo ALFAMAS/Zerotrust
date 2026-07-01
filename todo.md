@@ -27,3 +27,5 @@ highlights:
   short Redis user cache. Full suite: **832 tests, 97 files, all passing**.
 - **P1.2 shadcn batch** — top raw-control targets migrated to shared primitives;
   report now shows **44 raw controls across 22 files**.
+- **Admin audit logs empty-state fix** — removed sample/mock fallback rows so an
+  empty `/admin/audit-logs` response renders "No audit entries found."

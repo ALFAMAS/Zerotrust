@@ -278,6 +278,12 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
   pre-existing repo formatting/no-floating-promise diagnostics outside this
   change set; touched files passed targeted Biome checks.
 
+- **Admin audit logs empty-state fix:** Removed the admin audit page's
+  illustrative sample-data fallback (`alice@acme.com`, `bob@acme.com`, etc.).
+  Empty `/admin/audit-logs` responses now render the real empty state instead of
+  fake rows; API load failures render an explicit error banner plus the empty
+  table state. Added `auditEntriesFromResponse` regression coverage.
+
 - **M1 — `as any` reduction (213 → 3):** Four passes across all security-critical
   files. Three real bugs found and fixed along the way: `.rowCount`→`.count`
   mismatch in dataRetention/emailSuppression/sessionControl (silent zero-count
