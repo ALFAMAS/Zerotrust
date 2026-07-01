@@ -36,7 +36,7 @@ export async function purgeOldAuditLogs(retentionDays?: number): Promise<number>
         ? and(lt(auditLogsTable.timestamp, cutoff), notInArray(auditLogsTable.actorId, heldUserIds))
         : lt(auditLogsTable.timestamp, cutoff);
     const result = await db.delete(auditLogsTable).where(where);
-    const count = (result as any).rowCount ?? 0;
+    const count = (result as { count?: number }).count ?? 0;
     logger.info("Purged old audit logs", {
       count,
       cutoffDays: days,
@@ -57,7 +57,7 @@ export async function purgeExpiredSessions(retentionDays?: number): Promise<numb
     const result = await db
       .delete(sessionsTable)
       .where(and(eq(sessionsTable.isActive, false), lt(sessionsTable.updatedAt, cutoff)));
-    const count = (result as any).rowCount ?? 0;
+    const count = (result as { count?: number }).count ?? 0;
     logger.info("Purged expired sessions", { count, cutoffDays: days });
     return count;
   } catch (err) {
@@ -79,7 +79,7 @@ export async function purgeExpiredRefreshTokens(retentionDays?: number): Promise
           and(eq(refreshTokensTable.isRevoked, true), lt(refreshTokensTable.createdAt, cutoff))
         )
       );
-    const count = (result as any).rowCount ?? 0;
+    const count = (result as { count?: number }).count ?? 0;
     logger.info("Purged expired refresh tokens", { count });
     return count;
   } catch (err) {
@@ -94,7 +94,7 @@ export async function purgeExpiredOtps(retentionDays?: number): Promise<number> 
   try {
     const db = getDb();
     const result = await db.delete(otpsTable).where(lt(otpsTable.expiresAt, cutoff));
-    const count = (result as any).rowCount ?? 0;
+    const count = (result as { count?: number }).count ?? 0;
     logger.info("Purged expired OTPs", { count, cutoffDays: days });
     return count;
   } catch (err) {

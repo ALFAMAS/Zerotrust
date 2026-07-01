@@ -8,7 +8,10 @@ const { mockDb, setCount, setHeld, resetDb } = vi.hoisted(() => {
   const makeDeleteChain = (table: any): any => {
     const tag = table?.__t ?? "unknown";
     const c: any = {};
-    c.where = () => Promise.resolve(counts[tag] ?? { rowCount: 0 });
+    // The `postgres` driver's delete-without-.returning() result exposes the
+    // affected row count as `.count`, not `.rowCount` — matches the real
+    // runtime shape (see postgres package's ResultQueryMeta).
+    c.where = () => Promise.resolve(counts[tag] ?? { count: 0 });
     return c;
   };
   const makeSelectChain = (): any => {
@@ -22,8 +25,8 @@ const { mockDb, setCount, setHeld, resetDb } = vi.hoisted(() => {
       delete: (table: any) => makeDeleteChain(table),
       select: () => makeSelectChain(),
     },
-    setCount: (tag: string, rowCount: number) => {
-      counts[tag] = { rowCount };
+    setCount: (tag: string, count: number) => {
+      counts[tag] = { count };
     },
     setHeld: (ids: string[]) => {
       heldRows = ids.map((id) => ({ id }));

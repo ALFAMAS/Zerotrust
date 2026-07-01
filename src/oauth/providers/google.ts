@@ -20,6 +20,15 @@ export interface GoogleTokens {
   scope: string;
 }
 
+/** Minimal shape of Google's `/oauth2/v3/userinfo` response — only the fields we read. */
+interface GoogleUserinfoResponse {
+  sub: string;
+  email: string;
+  name: string;
+  picture?: string;
+  email_verified?: boolean;
+}
+
 export async function exchangeCode(
   code: string,
   clientId: string,
@@ -57,7 +66,7 @@ export async function exchangeCode(
     throw new Error(`Failed to fetch Google user profile: ${profileRes.status}`);
   }
 
-  const raw = (await profileRes.json()) as any;
+  const raw = (await profileRes.json()) as GoogleUserinfoResponse;
   const profile: GoogleProfile = {
     id: raw.sub,
     email: raw.email,

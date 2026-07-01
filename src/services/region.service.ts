@@ -1,7 +1,7 @@
 import { eq, sql } from "drizzle-orm";
 import { getConfig } from "../config";
 import { getDb } from "../db";
-import { organizationsTable } from "../db/schema";
+import { type OrgBranding, organizationsTable } from "../db/schema";
 
 // ── Region constants ─────────────────────────────────────────────────────────
 
@@ -201,9 +201,17 @@ export async function getOrgBranding(orgId: string): Promise<ResolvedBranding> {
   return branding;
 }
 
+// `residency.strictMode` is not part of the config schema today (no env var
+// wires it up) — this typed extension documents the extension point honestly
+// instead of hiding it behind `as any`. The check below is currently always
+// false (falls through to the EU/APAC rule) until a real config field lands.
+interface ResidencyConfigExtension {
+  residency?: { strictMode?: boolean };
+}
+
 export function canAccessRegion(requestRegion: StorageRegion, dataRegion: StorageRegion): boolean {
-  const cfg = getConfig();
-  if ((cfg as any).residency?.strictMode) {
+  const cfg = getConfig() as ReturnType<typeof getConfig> & ResidencyConfigExtension;
+  if (cfg.residency?.strictMode) {
     return requestRegion === dataRegion;
   }
   if (dataRegion === "eu" && requestRegion === "apac") return false;
@@ -242,10 +250,10 @@ export async function setOrgBranding(
     .from(organizationsTable)
     .where(eq(organizationsTable.id, orgId))
     .limit(1);
-  const merged = { ...(existing?.branding ?? {}), ...branding };
+  const merged: OrgBranding = { ...(existing?.branding ?? {}), ...branding };
   await db
     .update(organizationsTable)
-    .set({ branding: merged as any, updatedAt: new Date() })
+    .set({ branding: merged, updatedAt: new Date() })
     .where(eq(organizationsTable.id, orgId));
   orgCache.clear();
 }
