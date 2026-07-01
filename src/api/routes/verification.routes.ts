@@ -1,3 +1,7 @@
+import type {
+  AuthenticationResponseJSON,
+  AuthenticatorTransportFuture,
+} from "@simplewebauthn/server";
 import { and, eq, gt } from "drizzle-orm";
 import { Hono } from "hono";
 import { generateNumericCode } from "../../crypto/codes.js";
@@ -37,8 +41,7 @@ router.post("/challenge", async (c) => {
     const { type = "totp" } = (await c.req.json()) as { type?: string };
 
     if (type === "passkey") {
-      const passkeys =
-        (user.passkeys as unknown as Array<{ credentialId: string; transports?: string[] }>) ?? [];
+      const passkeys = user.passkeys ?? [];
       if (passkeys.length === 0) {
         return c.json({ error: "NO_PASSKEYS", message: "No passkeys registered" }, 400);
       }
@@ -49,7 +52,7 @@ router.post("/challenge", async (c) => {
       const allowCredentials = passkeys.map((pk) => ({
         id: pk.credentialId,
         type: "public-key" as const,
-        transports: (pk.transports ?? []) as any[],
+        transports: (pk.transports ?? []) as AuthenticatorTransportFuture[],
       }));
       const options = await generateAuthenticationOptions({
         rpID,
@@ -116,24 +119,19 @@ router.post("/respond", async (c) => {
       const appUrl = settings.appUrl || "http://localhost:3000";
       const rpID = new URL(appUrl).hostname;
 
-      const credentialId = (body.response as any)?.id ?? (body.response as any)?.rawId;
+      const responseIdentifier = body.response as { id?: string; rawId?: string } | undefined;
+      const credentialId = responseIdentifier?.id ?? responseIdentifier?.rawId;
       if (!credentialId)
         return c.json({ error: "INVALID_REQUEST", message: "credentialId required" }, 400);
 
-      const passkeys =
-        (user.passkeys as unknown as Array<{
-          credentialId: string;
-          publicKey: string;
-          counter: number;
-          transports?: string[];
-        }>) ?? [];
+      const passkeys = user.passkeys ?? [];
       const passkey = passkeys.find((p) => p.credentialId === credentialId);
       if (!passkey) return c.json({ error: "PASSKEY_NOT_FOUND" }, 401);
 
-      let verification: any;
+      let verification: Awaited<ReturnType<typeof verifyAuthenticationResponse>>;
       try {
         verification = await verifyAuthenticationResponse({
-          response: body.response as any,
+          response: body.response as AuthenticationResponseJSON,
           expectedChallenge,
           expectedOrigin: appUrl,
           expectedRPID: rpID,
@@ -141,7 +139,7 @@ router.post("/respond", async (c) => {
             id: passkey.credentialId,
             publicKey: new Uint8Array(Buffer.from(passkey.publicKey, "base64url")),
             counter: passkey.counter,
-            transports: passkey.transports as any,
+            transports: passkey.transports as AuthenticatorTransportFuture[],
           },
         });
       } catch {
@@ -190,7 +188,7 @@ router.post("/respond", async (c) => {
     // TOTP
     const { code } = body;
     if (!code) return c.json({ error: "INVALID_REQUEST", message: "code required" }, 400);
-    const mfa = user.mfa as unknown as { totp?: { enabled: boolean; secret?: string } };
+    const mfa = user.mfa;
     if (!mfa?.totp?.enabled || !mfa.totp.secret) {
       return c.json({ error: "TOTP_NOT_ENABLED" }, 400);
     }

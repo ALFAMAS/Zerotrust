@@ -17,7 +17,7 @@ Sorted easiest → hardest within each tier.
 
 ## Medium — Moderate effort, high maintainability payoff
 
-### M1 — Reduce `as any` casts (was 213, now 46) — _Status: In Progress (2026-07-01)_
+### M1 — Reduce `as any` casts (was 213, now 3, both documented exceptions) — _Status: Done (2026-07-01)_
 
 - **Source:** `docs/AUDIT.md` M2
 - **Why:** `as any` casts in `src/` are a place the type system stops helping —
@@ -73,28 +73,57 @@ Sorted easiest → hardest within each tier.
   touches auth-adjacent middleware: no findings — every change is
   compile-time-only (cast removed or narrowed; zero runtime/control-flow
   difference), confirmed by the full 773-test suite passing unchanged.
-- **Remaining:** 46 casts across 6 files, all deliberately deferred to a
-  dedicated `/security-review`-backed PR (not a mechanical sweep):
+  **Fourth pass (46 → 3)**: the final security-critical batch —
   `middleware/auth.ts` (18), `api/routes/auth.routes.ts` (15),
   `api/routes/passkey.routes.ts` (6, WebAuthn), `api/routes/verification.routes.ts`
-  (4, WebAuthn), `api/routes/mfa.routes.ts` (3) — these implement or directly
-  gate authentication/session/MFA/WebAuthn protocol logic, not just read
-  already-typed fields like the middleware batch above, so they need real
-  review of the underlying logic, not just a cast swap.
-  `services/stripeWebhookProcessor.ts` (2) is a documented exception: Stripe's
-  SDK only exposes its bundled API version as a type-level literal and
-  doesn't publicly export a type for "any valid version string," so pinning
-  an older version can't be expressed without a cast — left in place with a
-  comment, not counted against the "fix" list.
+  (4, WebAuthn), `api/routes/mfa.routes.ts` (3). `middleware/auth.ts` is where
+  the canonical typed `User`/`Session` objects that everything downstream
+  trusts are actually constructed from raw untyped-jsonb DB rows — every cast
+  there now targets the real `shared/types.ts` interfaces
+  (`User["attributes"|"mfa"|"status"|"sessionConfig"]`, `Passkey[]`,
+  `OAuthProvider[]`, `DeviceFingerprint`, `Session["anomalyFlags"|"continuousEvalResult"]`).
+  `passkey.routes.ts`/`verification.routes.ts` casts to `@simplewebauthn/server`'s
+  own exported types (`AuthenticatorTransportFuture`, `AuthenticationResponseJSON`,
+  `Awaited<ReturnType<typeof verify...Response>>`) instead of `any`, and reused
+  the canonical `Passkey`/`User["mfa"]` types for the several places reading raw
+  `usersTable.passkeys`/`usersTable.mfa` off a partial select. Along the way,
+  removed a duplicate local `getStripe()`-style redundancy: several `?? {}`
+  fallbacks for `mfa` (which would have failed to type-check once honestly
+  typed, since `{}` doesn't satisfy `User["mfa"]`) were widened to the same
+  `{ totp: { enabled: false, backupCodes: [] }, webauthn: { enabled: false } }`
+  default used elsewhere in the codebase — verified behaviorally identical to
+  the old `{}` fallback for every downstream check (`enabled === true`,
+  `!secret`), since `undefined` and the concrete default both fail closed the
+  same way. Ran `/security-review` via an independent sub-agent (not just
+  self-assessment, given the stakes) on the full 5-file diff before shipping:
+  no HIGH/MEDIUM findings — every changed line was traced to its call site and
+  confirmed behaviorally equivalent, including the fallback-shape changes above.
+  Full 773-test suite (including the 55KB `auth.routes.test.ts` integration
+  suite covering login/MFA/OAuth-linking/`/me`) passes unchanged.
+- **Remaining (documented exceptions, not real gaps):** `services/stripeWebhookProcessor.ts`
+  (2) — Stripe's SDK only exposes its bundled API version as a type-level
+  literal and doesn't publicly export a type for "any valid version string,"
+  so pinning an older version can't be expressed without a cast.
+  `services/region.service.ts` (1) — false positive, a code comment that
+  mentions the string "as any" in prose, not an actual cast.
 - **Acceptance:** Replace `as any` with proper types; start with high-risk areas
   (Stripe webhook body ✅, OAuth provider payloads ✅, SSF event data — none
-  found, already clean).
-- **Risk:** Low for the files done so far (mechanical, test-verified, three
-  real bugs found and fixed along the way; risk-decision middleware batch
-  passed `/security-review` with no findings). The remaining
-  auth.ts/auth.routes.ts/passkey/verification/mfa pass is higher risk —
-  security-critical code implementing auth logic itself, needs its own
-  dedicated review.
+  found, already clean). **Met — 213 → 3, both remaining are documented,
+  legitimate exceptions.**
+- **Risk:** None realized across all four passes — three real bugs found and
+  fixed (dataRetention.ts, emailSuppression.service.ts, sessionControl.ts
+  row-count reporting; lifecycleEmail.service.ts metadata-wipe), zero
+  regressions, every security-critical batch passed `/security-review`.
+- **Follow-up (not blocking, tracked separately):** `mfa.routes.ts`,
+  `verification.routes.ts`, and `passkey.routes.ts` have **zero existing test
+  coverage** (confirmed via search — no `mfa.routes.test.ts` /
+  `verification.routes.test.ts` / `passkey.routes.test.ts` exist). This PR's
+  confidence rests on type-check + manual trace + the existing
+  `auth.routes.test.ts` suite (which doesn't exercise these three files) +
+  independent `/security-review`, not on route-level tests for these specific
+  files. Writing WebAuthn ceremony mocks (register/authenticate options+verify)
+  correctly is a real effort in its own right and was deliberately not rushed
+  into this PR — worth a dedicated follow-up.
 
 ### M2 — Plugin/capability contract for optional-heavy integrations — _Status: Done (2026-07-01)_
 
@@ -162,8 +191,10 @@ Sorted easiest → hardest within each tier.
     polyfills needed for static assertions).
 - **Acceptance:** Auth flows covered (register, reset, forgot-password) ✅; org
   flows covered (invite, roles, leave) ✅; billing gates covered ✅; admin
-  tables covered ✅. MFA-specific UI flows are not yet covered — tracked
-  separately since MFA UI work should land alongside the deferred MFA/WebAuthn
-  backend `as any` pass (see M1) rather than as a standalone test-only PR.
+  tables covered ✅. MFA-specific UI flows (TOTP setup, WebAuthn browser
+  ceremonies) are not yet covered — same gap noted in M1's follow-up for the
+  backend routes (`mfa.routes.ts`/`passkey.routes.ts`/`verification.routes.ts`
+  have zero tests either); worth doing frontend+backend together in one
+  dedicated follow-up rather than splitting it further.
 - **Risk:** None realized — test infra in place, no production code changed;
   full UI suite (58 tests, 8 files) and backend suite (773 tests) both green.

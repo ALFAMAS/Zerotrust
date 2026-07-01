@@ -54,7 +54,7 @@ import { getClientIp } from "../../shared/clientIp";
 import { internalError } from "../../shared/httpErrors";
 import { localeFromAcceptLanguage, normalizeLocale, SUPPORTED_LOCALES } from "../../shared/locale";
 import { appRedirectUrl } from "../../shared/safeRedirect";
-import type { HonoEnv } from "../../shared/types";
+import type { HonoEnv, OAuthProvider, Passkey, User } from "../../shared/types";
 
 const router = new Hono<HonoEnv>();
 const logger = getLogger("auth-routes");
@@ -94,8 +94,8 @@ async function getAndVerifyOAuthState(state?: string): Promise<{
     oauthStateStore.delete(state);
     return { ok: false, codeChallenge: null, codeVerifier: null };
   }
-  const challenge = (entry as any).codeChallenge || null;
-  const verifier = (entry as any).codeVerifier || null;
+  const challenge = entry.codeChallenge || null;
+  const verifier = entry.codeVerifier || null;
   oauthStateStore.delete(state);
   return { ok: true, codeChallenge: challenge, codeVerifier: verifier };
 }
@@ -172,7 +172,7 @@ const MFA_CHALLENGE_TTL_SECS = 300;
 
 /** A user must clear a second factor at login once TOTP is verified+enabled. */
 function userRequiresMfa(user: { mfa?: unknown }): boolean {
-  return (user.mfa as any)?.totp?.enabled === true;
+  return (user.mfa as { totp?: { enabled?: boolean } } | undefined)?.totp?.enabled === true;
 }
 
 /** Mint the short-lived token that ties the pending login to the verified user. */
@@ -221,7 +221,7 @@ async function issueAuthenticatedSession(
   const db = getDb();
 
   const fpInput = FingerprintService.extractFromRequest({
-    headers: Object.fromEntries(c.req.raw.headers as any),
+    headers: Object.fromEntries(c.req.raw.headers),
     ip: getClientIp(c),
   });
   const fingerprint = FingerprintService.compute(fpInput);
@@ -681,7 +681,10 @@ router.post("/login/mfa", rateLimit({ points: 10, windowSecs: 60 }), async (c) =
       );
     }
 
-    const mfa = (user.mfa as any) ?? {};
+    const mfa = (user.mfa as User["mfa"] | null) ?? {
+      totp: { enabled: false, backupCodes: [] },
+      webauthn: { enabled: false },
+    };
     if (mfa?.totp?.enabled !== true || !mfa?.totp?.secret) {
       // The challenge was issued but TOTP was since removed — nothing to verify.
       return c.json(
@@ -848,8 +851,8 @@ router.post(
 
 // POST /oauth/state
 router.post("/oauth/state", rateLimit({ points: 20, windowSecs: 60 }), async (c) => {
-  const body = await c.req.json().catch(() => ({}));
-  const state = await generateOAuthState((body as any).codeChallenge);
+  const body = (await c.req.json().catch(() => ({}))) as { codeChallenge?: string };
+  const state = await generateOAuthState(body.codeChallenge);
   return c.json({ state, ttlSeconds: OAUTH_STATE_TTL_SECS });
 });
 
@@ -981,11 +984,11 @@ router.get("/oauth/:provider/callback", rateLimit({ points: 20, windowSecs: 60 }
           // Trust the IdP's verification assertion for the initial email.
           emailVerifiedAt: profile.emailVerified ? new Date() : null,
           status: "active",
-        } as any)
+        })
         .returning();
       user = created;
     } else {
-      const providers: any[] = (user.oauthProviders as any[]) || [];
+      const providers = (user.oauthProviders as OAuthProvider[] | null) || [];
       const has = providers.some((p) => p.provider === provider && p.providerId === providerId);
       if (!has) {
         // SECURITY (OAuth account-takeover defense): only merge a *new* social
@@ -1117,7 +1120,10 @@ router.get("/me", authMiddleware, async (c) => {
 
     // Sanitize sensitive auth material before returning to the client: never
     // expose the TOTP secret, backup-code hashes, or passkey public keys.
-    const rawMfa = (row.mfa as any) ?? {};
+    const rawMfa = (row.mfa as User["mfa"] | null) ?? {
+      totp: { enabled: false, backupCodes: [] },
+      webauthn: { enabled: false },
+    };
     const mfa = {
       totp: {
         enabled: rawMfa.totp?.enabled === true,
@@ -1128,7 +1134,7 @@ router.get("/me", authMiddleware, async (c) => {
       },
       webauthn: { enabled: rawMfa.webauthn?.enabled === true },
     };
-    const passkeys = ((row.passkeys as any[]) ?? []).map((pk) => ({
+    const passkeys = ((row.passkeys as Passkey[] | null) ?? []).map((pk) => ({
       credentialId: pk.credentialId,
       name: pk.name ?? "Passkey",
       deviceType: pk.deviceType,
@@ -1137,13 +1143,13 @@ router.get("/me", authMiddleware, async (c) => {
       createdAt: pk.createdAt,
       lastUsedAt: pk.lastUsedAt ?? null,
     }));
-    const oauthProviders = ((row.oauthProviders as any[]) ?? []).map((p) => ({
+    const oauthProviders = ((row.oauthProviders as OAuthProvider[] | null) ?? []).map((p) => ({
       provider: p.provider,
       email: p.email,
       connectedAt: p.connectedAt,
     }));
 
-    const { mfa: _m, passkeys: _p, oauthProviders: _o, ...rest } = row as any;
+    const { mfa: _m, passkeys: _p, oauthProviders: _o, ...rest } = row;
     return c.json({
       ...rest,
       emailVerified: row.emailVerifiedAt != null,
@@ -1219,7 +1225,8 @@ router.post("/me/onboarding-complete", authMiddleware, async (c) => {
       .limit(1);
 
     // Idempotent: already marked complete.
-    if ((row?.metadata as any)?.onboardingCompletedAt) {
+    const metadata = row?.metadata as { onboardingCompletedAt?: string } | null | undefined;
+    if (metadata?.onboardingCompletedAt) {
       return c.json({ success: true, alreadyCompleted: true });
     }
 
@@ -1306,7 +1313,7 @@ router.delete("/oauth/:provider", authMiddleware, async (c) => {
       .limit(1);
     if (!row) return c.json({ error: "USER_NOT_FOUND", message: "User not found" }, 404);
 
-    const providers: any[] = (row.oauthProviders as any[]) ?? [];
+    const providers = (row.oauthProviders as OAuthProvider[] | null) ?? [];
     const linked = providers.some((p) => p.provider === provider);
     if (!linked) {
       return c.json({ error: "NOT_LINKED", message: `No ${provider} account is linked` }, 404);
@@ -1446,8 +1453,8 @@ router.post("/me/link", authMiddleware, rateLimit({ points: 10, windowSecs: 60 }
       .where(eq(usersTable.id, user.id))
       .limit(1);
 
-    const providers: any[] = (currentUser?.oauthProviders as any) ?? [];
-    if (providers.some((p: any) => p.provider === provider && p.providerId === providerUserId)) {
+    const providers = (currentUser?.oauthProviders as OAuthProvider[] | null) ?? [];
+    if (providers.some((p) => p.provider === provider && p.providerId === providerUserId)) {
       return c.json({ linked: true, provider, alreadyLinked: true });
     }
 

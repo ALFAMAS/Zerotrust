@@ -1,4 +1,5 @@
 import crypto from "node:crypto";
+import type { AuthenticatorTransportFuture } from "@simplewebauthn/server";
 import { and, eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { getConfig } from "../../config";
@@ -20,7 +21,7 @@ import {
 import { TokenService } from "../../services/token.service";
 import { getClientIp } from "../../shared/clientIp";
 import { internalError } from "../../shared/httpErrors";
-import type { HonoEnv } from "../../shared/types";
+import type { HonoEnv, Passkey, User } from "../../shared/types";
 
 const router = new Hono<HonoEnv>();
 const logger = getLogger("passkey-routes");
@@ -109,7 +110,7 @@ router.post("/register/options", authMiddleware, async (c) => {
     const excludeCredentials = existingPasskeys.map((pk) => ({
       id: pk.credentialId,
       type: "public-key" as const,
-      transports: pk.transports as any[],
+      transports: pk.transports as AuthenticatorTransportFuture[],
     }));
 
     const options = await generateRegistrationOptions({
@@ -174,7 +175,7 @@ router.post("/register/verify", authMiddleware, async (c) => {
     const appUrl = settings.appUrl || "http://localhost:3000";
     const rpID = new URL(appUrl).hostname;
 
-    let verification: any;
+    let verification: Awaited<ReturnType<typeof verifyRegistrationResponse>>;
     try {
       verification = await verifyRegistrationResponse({
         response: body,
@@ -249,8 +250,8 @@ router.post("/register/verify", authMiddleware, async (c) => {
       .from(usersTable)
       .where(eq(usersTable.id, userId))
       .limit(1);
-    const existingPasskeysList = (userRows[0]?.passkeys as any[]) || [];
-    const currentMfa = (userRows[0]?.mfa as any) ?? {
+    const existingPasskeysList = (userRows[0]?.passkeys as Passkey[] | null) || [];
+    const currentMfa = (userRows[0]?.mfa as User["mfa"] | null) ?? {
       totp: { enabled: false, backupCodes: [] },
       webauthn: { enabled: false },
     };
@@ -292,7 +293,11 @@ router.post("/authenticate/options", async (c) => {
     const appUrl = settings.appUrl || "http://localhost:3000";
     const rpID = new URL(appUrl).hostname;
 
-    let allowCredentials: any[] = [];
+    let allowCredentials: {
+      id: string;
+      type: "public-key";
+      transports?: AuthenticatorTransportFuture[];
+    }[] = [];
     if (email) {
       const db = getDb();
       const userRows = await db
@@ -300,11 +305,11 @@ router.post("/authenticate/options", async (c) => {
         .from(usersTable)
         .where(eq(usersTable.email, email))
         .limit(1);
-      const passkeys = (userRows[0]?.passkeys as any[]) || [];
+      const passkeys = (userRows[0]?.passkeys as Passkey[] | null) || [];
       allowCredentials = passkeys.map((pk) => ({
         id: pk.credentialId,
         type: "public-key" as const,
-        transports: pk.transports,
+        transports: pk.transports as AuthenticatorTransportFuture[],
       }));
     }
 
@@ -366,11 +371,11 @@ router.post("/authenticate/verify", async (c) => {
     const db = getDb();
     const allUsers = await db.select().from(usersTable);
     let user: (typeof allUsers)[0] | null = null;
-    let passkey: any = null;
+    let passkey: Passkey | null = null;
 
     for (const u of allUsers) {
-      const pks = (u.passkeys as any[]) || [];
-      const pk = pks.find((p: any) => p.credentialId === credentialId);
+      const pks = (u.passkeys as Passkey[] | null) || [];
+      const pk = pks.find((p) => p.credentialId === credentialId);
       if (pk) {
         user = u;
         passkey = pk;
@@ -388,7 +393,7 @@ router.post("/authenticate/verify", async (c) => {
       );
     }
 
-    let verification: any;
+    let verification: Awaited<ReturnType<typeof verifyAuthenticationResponse>>;
     try {
       verification = await verifyAuthenticationResponse({
         response: body,
@@ -399,7 +404,7 @@ router.post("/authenticate/verify", async (c) => {
           id: passkey.credentialId,
           publicKey: new Uint8Array(Buffer.from(passkey.publicKey, "base64url")),
           counter: passkey.counter,
-          transports: passkey.transports,
+          transports: passkey.transports as AuthenticatorTransportFuture[],
         },
       });
     } catch (verifyErr) {
@@ -425,7 +430,7 @@ router.post("/authenticate/verify", async (c) => {
       );
     }
 
-    const updatedPasskeys = ((user.passkeys as any[]) || []).map((pk: any) =>
+    const updatedPasskeys = ((user.passkeys as Passkey[] | null) || []).map((pk) =>
       pk.credentialId === credentialId
         ? {
             ...pk,
