@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { z } from "zod";
 import { getLogger } from "../../logger";
 import { authMiddleware } from "../../middleware/auth";
+import { isValidRegion } from "../../services/region.service";
 import {
   deleteDocument,
   indexDocument,
@@ -26,7 +27,8 @@ router.use("*", authMiddleware);
 router.get("/", async (c) => {
   const { page, limit } = parsePaginatedQuery(c.req.query(), { defaultLimit: 20, maxLimit: 50 });
   const type = c.req.query("type") as SearchableType | undefined;
-  const region = c.req.query("region") as any;
+  const rawRegion = c.req.query("region");
+  const region = rawRegion && isValidRegion(rawRegion) ? rawRegion : undefined;
   const q = c.req.query("q");
   const orgId = c.req.query("orgId");
   if (!q || q.length < 1 || q.length > 200) {
@@ -62,7 +64,7 @@ router.get("/smart", async (c) => {
     const results = await smartSearch({
       query: parsed.data.q,
       orgId: parsed.data.orgId,
-      region: parsed.data.region as any,
+      region: parsed.data.region,
       limit: parsed.data.limit ?? 10,
     });
     return c.json(results);
@@ -96,7 +98,7 @@ router.post("/index", async (c) => {
     orgId: parsed.data.orgId,
     title: parsed.data.title,
     content: parsed.data.content ?? "",
-    region: (parsed.data.region ?? "us") as any,
+    region: parsed.data.region ?? "us",
     metadata: parsed.data.metadata,
   });
   return c.json({ success: ok });

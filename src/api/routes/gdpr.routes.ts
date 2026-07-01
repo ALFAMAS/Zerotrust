@@ -10,7 +10,7 @@ import {
 import { getLogger } from "../../logger";
 import { authMiddleware } from "../../middleware/auth";
 import { rateLimit } from "../../middleware/rateLimiting";
-import type { HonoEnv } from "../../shared/types";
+import type { HonoEnv, User } from "../../shared/types";
 
 const router = new Hono<HonoEnv>();
 const logger = getLogger("gdpr");
@@ -59,8 +59,8 @@ router.get("/export", rateLimit({ points: 3, windowSecs: 3600 }), authMiddleware
         lastLoginAt: profile.lastLoginAt,
         sessionConfig: profile.sessionConfig,
         mfa: {
-          totp: { enabled: (profile.mfa as any)?.totp?.enabled },
-          webauthn: { enabled: (profile.mfa as any)?.webauthn?.enabled },
+          totp: { enabled: (profile.mfa as User["mfa"] | null)?.totp?.enabled },
+          webauthn: { enabled: (profile.mfa as User["mfa"] | null)?.webauthn?.enabled },
         },
       },
       sessions: sessions.map((s) => ({
@@ -178,11 +178,7 @@ router.post(
         return c.json({ error: "NO_DELETION_PENDING" }, 400);
       }
 
-      const {
-        deletionRequestedAt: _a,
-        deletionScheduledFor: _b,
-        ...restMeta
-      } = existingMeta as any;
+      const { deletionRequestedAt: _a, deletionScheduledFor: _b, ...restMeta } = existingMeta;
 
       await db
         .update(usersTable)

@@ -1,22 +1,16 @@
 import { and, eq } from "drizzle-orm";
 import { Hono } from "hono";
-import Stripe from "stripe";
 import { getDb } from "../../db";
 import { feedbackTable, organizationMembersTable, subscriptionsTable } from "../../db/schema";
 import { auditLog, getLogger } from "../../logger";
 import { authMiddleware } from "../../middleware/auth";
+import { getStripe } from "../../services/stripeWebhookProcessor";
 import { getUsageSummary } from "../../services/usage.service";
 import { internalError } from "../../shared/httpErrors";
 import type { HonoEnv } from "../../shared/types";
 
 const router = new Hono<HonoEnv>();
 const logger = getLogger("billing-routes");
-
-function getStripe() {
-  const key = process.env.STRIPE_SECRET_KEY;
-  if (!key) throw new Error("STRIPE_SECRET_KEY not configured");
-  return new Stripe(key, { apiVersion: "2024-04-10" as any });
-}
 
 /** Trial length for new subscriptions; 0 disables trials. */
 function trialDays(): number {

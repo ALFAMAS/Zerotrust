@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import type { Context, Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
+import type { ContentfulStatusCode } from "hono/utils/http-status";
 import { getLogger } from "../logger";
 import { ErrorCodes, type HonoEnv, zerotrustError } from "../shared/types";
 
@@ -116,7 +117,11 @@ function logDataFor(
 }
 
 function jsonError(c: Context, body: ErrorBody, status: number): Response {
-  return c.json(body, status as any, { "x-request-id": body.requestId });
+  // `status` is derived at runtime from thrown errors (zerotrustError.statusCode,
+  // HTTPException.status), so it can't be proven to match Hono's literal status
+  // union at compile time — this cast names that specific target type instead
+  // of widening to `any`.
+  return c.json(body, status as ContentfulStatusCode, { "x-request-id": body.requestId });
 }
 
 export function internalErrorResponse(

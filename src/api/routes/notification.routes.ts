@@ -219,6 +219,8 @@ router.get("/sse", (c) => {
   }
   const userId = user.id;
 
+  let cleanupFn: (() => void) | undefined;
+
   const stream = new ReadableStream({
     start(controller) {
       const encoder = new TextEncoder();
@@ -264,13 +266,11 @@ router.get("/sse", (c) => {
         }
       };
 
-      // Store cleanup on controller for cancel signal
-      (controller as any)._cleanup = cleanup;
+      cleanupFn = cleanup;
     },
     cancel() {
       // Called when the client disconnects
-      const self = this as any;
-      if (self._cleanup) self._cleanup();
+      cleanupFn?.();
     },
   });
 
@@ -295,11 +295,13 @@ router.get("/preferences", async (c) => {
       .from(usersTable)
       .where(eq(usersTable.id, user.id))
       .limit(1);
+    const metadata = row?.metadata as {
+      notificationPreferences?: Partial<NotificationPreferences>;
+    } | null;
     const prefs: NotificationPreferences = {
       emailFallback: true,
       emailFallbackDays: 3,
-      ...(((row?.metadata as any)?.notificationPreferences as Partial<NotificationPreferences>) ??
-        {}),
+      ...(metadata?.notificationPreferences ?? {}),
     };
     return c.json(prefs);
   } catch (err) {

@@ -9,6 +9,7 @@
  */
 
 import type { Context } from "hono";
+import type { ContentfulStatusCode } from "hono/utils/http-status";
 import { internalErrorResponse } from "../api/errorHandler.js";
 import { getLogger } from "../logger/index.js";
 import type { HonoEnv } from "./types.js";
@@ -18,13 +19,13 @@ const logger = getLogger("shared-utils");
 // ─── Response Helpers ────────────────────────────────────────────────────────
 
 /** Standard success response. */
-export function ok<T>(c: Context, data: T, status = 200) {
-  return c.json(data, status as any);
+export function ok<T>(c: Context, data: T, status: ContentfulStatusCode = 200) {
+  return c.json(data, status);
 }
 
 /** Standard error response from a known error code/message. */
-export function fail(c: Context, status: number, code: string, message?: string) {
-  return c.json({ error: code, message: message ?? code }, status as any);
+export function fail(c: Context, status: ContentfulStatusCode, code: string, message?: string) {
+  return c.json({ error: code, message: message ?? code }, status);
 }
 
 /** Internal error response — logs the real error, returns a safe message. */

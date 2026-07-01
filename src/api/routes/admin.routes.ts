@@ -22,7 +22,7 @@ import {
 import { countRows } from "../../shared/dbCount";
 import { internalError } from "../../shared/httpErrors";
 import { paginated, parsePaginatedQuery } from "../../shared/pagination";
-import type { HonoEnv } from "../../shared/types";
+import type { HonoEnv, User } from "../../shared/types";
 
 const router = new Hono<HonoEnv>();
 const logger = getLogger("admin-routes");
@@ -121,7 +121,7 @@ router.get("/users/:id", async (c) => {
     }
 
     const u = rows[0];
-    const mfa = (u.mfa ?? {}) as any;
+    const mfa = (u.mfa as User["mfa"] | null) ?? undefined;
     const passkeys = Array.isArray(u.passkeys) ? u.passkeys : [];
     const oauthProviders = Array.isArray(u.oauthProviders) ? u.oauthProviders : [];
 
@@ -682,7 +682,7 @@ router.get("/users/segments", async (c) => {
     const segment = c.req.query("segment");
     const db = getDb();
 
-    if (segment && VALID_SEGMENTS.includes(segment as any)) {
+    if (segment && VALID_SEGMENTS.includes(segment as (typeof VALID_SEGMENTS)[number])) {
       const { page, limit, offset } = parsePaginatedQuery(c.req.query);
       const where = eq(usersTable.customerSegment, segment);
       const [rows, total] = await Promise.all([

@@ -64,9 +64,13 @@ export async function revokeAllSessionsForUser(userId: string, excludeSessionId?
   const result = await db
     .update(sessionsTable)
     .set({ isActive: false, revokedAt: new Date(), revokedReason: "ADMIN_REVOKE_ALL" })
-    .where(and(...(conditions as [any, ...any[]])));
+    .where(and(...conditions));
 
-  const count = (result as any)?.rowCount ?? 0;
+  // The `postgres` driver's update-without-.returning() result exposes the
+  // affected row count as `.count`, not `.rowCount` (see dataRetention.ts) —
+  // this was always reporting 0 revoked sessions to callers even though the
+  // revocation itself succeeded.
+  const count = (result as { count?: number }).count ?? 0;
   logger.info("Revoked all sessions for user", { userId, excluded: excludeSessionId, count });
   return count;
 }

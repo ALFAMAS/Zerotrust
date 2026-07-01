@@ -74,6 +74,13 @@ class Logger {
   }
 
   /**
+   * Merge additional key/value pairs into this logger's persistent context.
+   */
+  mergeContext(context: LogContext): void {
+    Object.assign(this.context, context);
+  }
+
+  /**
    * Log debug message
    */
   debug(message: string, data?: Record<string, unknown>): void {
@@ -190,6 +197,21 @@ class Logger {
   setElasticsearchClient(client: any): void {
     this.elasticsearchClient = client;
   }
+
+  /**
+   * Index a document directly into Elasticsearch under a custom index suffix
+   * (e.g. "audit" instead of the default "logs"). No-op when ES isn't configured.
+   */
+  async indexToElasticsearch(
+    indexSuffix: string,
+    document: Record<string, unknown>
+  ): Promise<void> {
+    if (!this.elasticsearchClient) return;
+    const indexName = `${this.config.elasticsearch.indexPrefix}-${indexSuffix}-${
+      new Date().toISOString().split("T")[0]
+    }`;
+    await this.elasticsearchClient.index({ index: indexName, document });
+  }
 }
 
 export type { Logger };
@@ -247,11 +269,7 @@ export function getLogger(module?: string): Logger {
  */
 export function createChildLogger(module: string, context?: LogContext): Logger {
   const logger = new Logger(getConfig(), module);
-  if (context) {
-    for (const [key, value] of Object.entries(context)) {
-      (logger as any).context[key] = value;
-    }
-  }
+  if (context) logger.mergeContext(context);
   return logger;
 }
 
@@ -301,19 +319,10 @@ export async function auditLog(
 
   // Stream to Elasticsearch
   if (getConfig().elasticsearch.enabled) {
-    const es = (logger as any).elasticsearchClient;
-    if (es) {
-      try {
-        const indexName = `${getConfig().elasticsearch.indexPrefix}-audit-${
-          new Date().toISOString().split("T")[0]
-        }`;
-        await es.index({
-          index: indexName,
-          document: auditEntry,
-        });
-      } catch (err) {
-        console.error("Failed to index audit log:", err);
-      }
+    try {
+      await logger.indexToElasticsearch("audit", auditEntry);
+    } catch (err) {
+      console.error("Failed to index audit log:", err);
     }
   }
 }

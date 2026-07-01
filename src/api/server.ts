@@ -328,6 +328,8 @@ export async function createServer() {
 
   // SSE stream for real-time status updates
   app.get("/status/stream", () => {
+    let cleanupFn: (() => void) | undefined;
+
     const stream = new ReadableStream({
       start(controller) {
         const encoder = new TextEncoder();
@@ -400,15 +402,13 @@ export async function createServer() {
           }
         }, 30_000);
 
-        // Cleanup stored on controller for cancel
-        (controller as any)._cleanup = () => {
+        cleanupFn = () => {
           clearInterval(interval);
           clearInterval(pingInterval);
         };
       },
       cancel() {
-        const s = this as any;
-        if (s._cleanup) s._cleanup();
+        cleanupFn?.();
       },
     });
     return new Response(stream, {
@@ -470,7 +470,7 @@ export async function createServer() {
     }
 
     const httpStatus = health.postgres === "ok" ? 200 : 503;
-    return c.json(health, httpStatus as any);
+    return c.json(health, httpStatus);
   });
 
   return app;
