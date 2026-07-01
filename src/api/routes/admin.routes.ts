@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import { and, desc, eq, gt, ilike, ne, or, sql } from "drizzle-orm";
 import { Hono } from "hono";
 import { verifyAuditChain } from "../../audit/chain";
-import { getDb } from "../../db";
+import { getDb, getReadDb } from "../../db";
 import {
   auditLogsTable,
   feedbackTable,
@@ -67,7 +67,7 @@ router.get("/users", async (c) => {
     const search = c.req.query("search") || "";
     const status = c.req.query("status") || "";
 
-    const db = getDb();
+    const db = getReadDb();
     const conditions = [ne(usersTable.status, "deleted")];
 
     if (search) {
@@ -321,7 +321,7 @@ router.get("/stats", async (c) => {
     const now = new Date();
     const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
     const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-    const db = getDb();
+    const db = getReadDb();
 
     const [totalUsers, activeSessions, activeUserRows, totalLogins24h] = await Promise.all([
       countRows(db, usersTable, ne(usersTable.status, "deleted")),
@@ -601,7 +601,7 @@ router.get("/audit-logs", async (c) => {
     const action = c.req.query("action");
     const actorId = c.req.query("actorId");
 
-    const db = getDb();
+    const db = getReadDb();
     const conditions: any[] = [];
     if (action) conditions.push(ilike(auditLogsTable.action, `%${action}%`));
     if (actorId) conditions.push(eq(auditLogsTable.actorId, actorId));
@@ -652,7 +652,7 @@ router.get("/feedback", async (c) => {
     });
     const type = c.req.query("type");
 
-    const db = getDb();
+    const db = getReadDb();
     const where = type ? eq(feedbackTable.type, type) : undefined;
     const [rows, total] = await Promise.all([
       db
