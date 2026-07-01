@@ -25,11 +25,8 @@ export function geoFencingMiddleware() {
 
       const user = c.get("user");
       const allowedGlobal = cfg.geofencing.allowedCountries.map((c) => c.trim().toUpperCase());
-      const allowedUser = (user as any)?.sessionConfig?.allowedCountries || [];
-      const allowed = new Set([
-        ...allowedGlobal,
-        ...allowedUser.map((c: string) => c.toUpperCase()),
-      ]);
+      const allowedUser = user?.sessionConfig?.allowedCountries || [];
+      const allowed = new Set([...allowedGlobal, ...allowedUser.map((c) => c.toUpperCase())]);
 
       if (allowed.size > 0 && !allowed.has(country.toUpperCase())) {
         logger.warn("Access denied by geofencing (country)", { ip: ipRaw, country });

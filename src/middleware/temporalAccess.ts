@@ -44,7 +44,7 @@ export function temporalAccessMiddleware() {
       const user = c.get("user");
       if (!user) return next();
 
-      const sched = (user.sessionConfig as any)?.scheduleRestriction;
+      const sched = user.sessionConfig?.scheduleRestriction;
       if (!sched?.enabled) return next();
 
       const { day, hour } = getLocalHourAndDay(sched.timezone);

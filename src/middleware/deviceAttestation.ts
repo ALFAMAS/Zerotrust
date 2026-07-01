@@ -1,5 +1,6 @@
 import { eq } from "drizzle-orm";
 import { createMiddleware } from "hono/factory";
+import type { ContentfulStatusCode } from "hono/utils/http-status";
 import { getDb } from "../db";
 import { sessionsTable } from "../db/schema";
 import { getLogger } from "../logger";
@@ -34,7 +35,7 @@ export const deviceAttestationMiddleware = createMiddleware<HonoEnv>(async (c, n
       });
 
       const anomalyFlags = {
-        ...((session.anomalyFlags as any) || {
+        ...(session.anomalyFlags || {
           deviceChangeDetected: false,
           locationChangeDetected: false,
           timeAnomalyDetected: false,
@@ -60,7 +61,10 @@ export const deviceAttestationMiddleware = createMiddleware<HonoEnv>(async (c, n
     return next();
   } catch (error) {
     if (error instanceof zerotrustError) {
-      return c.json({ error: error.code, message: error.message }, error.statusCode as any);
+      return c.json(
+        { error: error.code, message: error.message },
+        error.statusCode as ContentfulStatusCode
+      );
     }
     logger.error("Device attestation error", error as Error);
     return c.json({ error: "ATTESTATION_ERROR", message: "Device verification failed" }, 500);
@@ -69,7 +73,7 @@ export const deviceAttestationMiddleware = createMiddleware<HonoEnv>(async (c, n
 
 export const requireTrustedDevice = createMiddleware<HonoEnv>(async (c, next) => {
   const session = c.get("session");
-  if (!(session?.deviceFingerprint as any)?.isTrusted) {
+  if (!session?.deviceFingerprint?.isTrusted) {
     return c.json(
       {
         error: ErrorCodes.DEVICE_NOT_TRUSTED,
@@ -89,7 +93,7 @@ export const markDeviceAsTrusted = createMiddleware<HonoEnv>(async (c, next) => 
     }
 
     const db = getDb();
-    const currentFingerprint = (session.deviceFingerprint as any) || {};
+    const currentFingerprint = session.deviceFingerprint || {};
     await db
       .update(sessionsTable)
       .set({
@@ -109,7 +113,10 @@ export const markDeviceAsTrusted = createMiddleware<HonoEnv>(async (c, next) => 
     return next();
   } catch (error) {
     if (error instanceof zerotrustError) {
-      return c.json({ error: error.code, message: error.message }, error.statusCode as any);
+      return c.json(
+        { error: error.code, message: error.message },
+        error.statusCode as ContentfulStatusCode
+      );
     }
     logger.error("Error marking device as trusted", error as Error);
     return c.json(
