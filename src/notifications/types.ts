@@ -40,3 +40,15 @@ export interface NotificationChannel {
   events: NotificationEvent[];
   config: SlackConfig | TeamsConfig | PagerDutyConfig;
 }
+
+/**
+ * Capability contract every notification provider implements. `config` is
+ * `unknown` here because the registry is heterogeneous (see
+ * `adapters/index.ts`); each adapter casts to its own concrete config type,
+ * an invariant `NotificationChannel` guarantees by construction (`config`'s
+ * shape always matches its `type` discriminant).
+ */
+export interface NotificationAdapter {
+  readonly type: NotificationChannel["type"];
+  send(config: unknown, event: NotificationEvent, data: Record<string, unknown>): Promise<void>;
+}
