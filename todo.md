@@ -94,7 +94,28 @@ _All P0 items completed. See tdone.md for the full ledger._
 
 ## P3 — Scalability and performance
 
-### P3.1 — UI component / integration tests  — _Status: Pending_
+### P3.1 — UI component / integration tests  — _Status: In Progress (2026-07-01)_
+- **Why:** `packages/ui` had only `lib/*.test.ts` (plain logic); no component or
+  page-level tests, so auth/billing/admin regressions can land silently
+  (AUDIT T1).
+- **Files:** `packages/ui/vitest.config.ts` (new — happy-dom + Testing Library,
+  kept separate from the root `environment: "node"` config), `packages/ui/src/test/setup.ts`
+  (new — jest-dom matchers, `sonner` mock, per-test cleanup), `vitest.config.ts`
+  (root — narrowed the `packages/ui` include to `.ts` only so `.tsx` component
+  tests don't run under the wrong environment), `.github/workflows/ci.yml`
+  (new "UI component tests" step in the Tests job).
+- **Done:** harness stood up and enforced in CI; first tests written —
+  `components/SetupChecklist.test.tsx` (6 cases: empty state, progress count,
+  completion card + API notify, dismiss + localStorage persistence) and
+  `app/(auth)/login/page.test.tsx` (5 cases: render, login success + redirect,
+  MFA step transition, MFA verify completion, passkey-unsupported guard).
+  11 new tests, colocated with their components per the existing `lib/*.test.ts`
+  convention.
+- **Acceptance:** happy-dom/Testing-Library project ✅; login covered ✅.
+  Remaining from the original acceptance criteria — register/reset-password
+  states, org role/invite forms, billing/plan gates, admin tables — not yet
+  covered; extend incrementally following the same pattern.
+- **Risk:** Low (new test infra + colocated tests; no production code changed).
 ### P3.2 — Default read-heavy endpoints to the read replica  — _Status: In Progress (2026-07-01)_
 - **Done:** switched the verified read-only admin list endpoints (`GET /admin/users`,
   `/admin/stats`, `/admin/audit-logs`, `/admin/feedback`) to `getReadDb()`.

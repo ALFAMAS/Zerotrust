@@ -6,7 +6,11 @@ export default defineConfig({
     globals: true,
     environment: "node",
     setupFiles: ["src/__tests__/setup.ts"],
-    include: ["src/**/*.{test,spec}.ts", "packages/ui/src/**/*.{test,spec}.{ts,tsx}"],
+    // React component tests (.tsx) run under packages/ui/vitest.config.ts
+    // instead (happy-dom + Testing Library) — this config stays environment:
+    // "node" for the API suite and packages/ui's plain-logic .ts tests
+    // (lib/*.test.ts), so it can't run DOM-rendering tests correctly.
+    include: ["src/**/*.{test,spec}.ts", "packages/ui/src/**/*.{test,spec}.ts"],
     exclude: ["node_modules", "dist"],
     coverage: {
       provider: "v8",

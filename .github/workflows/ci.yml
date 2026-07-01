@@ -73,6 +73,8 @@ jobs:
       - name: Apply database schema
         run: bun run db:push
       - run: bun run test --reporter=verbose
+      - name: UI component tests (happy-dom + Testing Library)
+        run: bun run --cwd packages/ui test
       # Coverage is tracked toward the 85% target but kept non-blocking: the
       # codebase is currently ~56%, so gating at 85% deadlocks every PR. Flip
       # back to a hard gate once coverage is ratcheted up to the threshold.
