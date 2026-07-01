@@ -17,37 +17,68 @@ Sorted easiest → hardest within each tier.
 
 ## Medium — Moderate effort, high maintainability payoff
 
-### M1 — Reduce `as any` casts (was 213, now 95) — _Status: In Progress (2026-07-01)_
+### M1 — Reduce `as any` casts (was 213, now 61) — _Status: In Progress (2026-07-01)_
 
 - **Source:** `docs/AUDIT.md` M2
 - **Why:** `as any` casts in `src/` are a place the type system stops helping —
   an API shape change fails silently at runtime rather than at compile time.
-- **Done so far (109 → 95):** `oauth/providers/google.ts` (userinfo response
+- **Done so far (109 → 61):** `oauth/providers/google.ts` (userinfo response
   typed); `services/dataRetention.ts` (**found and fixed a real bug** — all 4
   purge functions read `.rowCount` on the postgres-js delete result, but the
   driver actually exposes `.count`, so retention purge logs had silently
-  reported 0 rows purged for every run regardless of actual deletions; fixed
-  the property name + the test mock that shared the same wrong assumption);
+  reported 0 rows purged for every run regardless of actual deletions);
   `services/search.service.ts` (typed `db.execute<T>()` row shape);
   `services/region.service.ts` (`residency` config field typed as an honest
-  optional extension — it doesn't exist in the schema and the check is
-  currently dead code; `setOrgBranding`'s cast now uses the column's real
-  `OrgBranding` type); `services/emailQueue.ts` (payload casts now use
-  `Parameters<typeof fn>[1]` so they track each target function's real
-  signature).
-- **Remaining:** 95 casts across ~35 files. **`middleware/auth.ts` (18) and
-  `api/routes/auth.routes.ts` (15) are the largest concentration (33 of 95)
-  and are deliberately deferred** — auth-critical code needs its own
-  dedicated PR with a `/security-review` pass, not a bundled mechanical sweep.
-  Next-largest: `middleware/deviceAttestation.ts` (5), `services/lifecycleEmail.service.ts` (4),
-  `api/routes/passkey.routes.ts` (6), `api/routes/verification.routes.ts` (4),
-  `api/routes/session.routes.ts` (4).
+  optional extension); `services/emailQueue.ts` (payload casts now use
+  `Parameters<typeof fn>[1]`).
+  **Second pass (95 → 61)** reused the canonical `User["mfa"]` /
+  `DeviceFingerprint` types from `shared/types.ts` for `gdpr.routes.ts`,
+  `admin.routes.ts`, `session.routes.ts`; validated `region` query params via
+  `isValidRegion()` instead of casting in `search.routes.ts`; replaced two
+  controller-monkey-patching SSE cleanup casts (`notification.routes.ts`,
+  `api/server.ts`) with a closure variable; added `Logger.mergeContext()` /
+  `Logger.indexToElasticsearch()` so `logger/index.ts` and callers no longer
+  reach into private fields via `as any`; typed `hono/utils/http-status`'s
+  `ContentfulStatusCode` for `apiHelpers.ts`'s `ok()`/`fail()` and
+  `errorHandler.ts`'s `jsonError()`; removed a duplicate `getStripe()` in
+  `billing.routes.ts` in favor of the one already exported from
+  `stripeWebhookProcessor.ts`. **Found and fixed two more instances of the
+  same `.rowCount`-vs-`.count` bug**: `emailSuppression.service.ts`'s
+  `unsuppressEmail()` (currently unused in production routes) and
+  `middleware/sessionControl.ts`'s `revokeAllSessionsForUser()` — the latter
+  is user-facing (`DELETE /sessions` and the admin "revoke all sessions"
+  action both always reported `revoked: 0` regardless of how many sessions
+  were actually revoked). Also found and fixed a real data-loss bug in
+  `services/lifecycleEmail.service.ts`: all four lifecycle-email queries
+  (D1/D3/D7/D14) selected only `id, email, displayName` — never `metadata` —
+  so `(user as any).metadata` was always `undefined`, meaning every lifecycle
+  email sent **overwrote the user's entire metadata column**, silently
+  wiping unrelated fields (pending account-deletion state, notification
+  preferences, customer segment, other lifecycle-sent flags). Fixed by
+  selecting `metadata` in all four queries and merging into it instead of
+  replacing it; added regression tests
+  (`__tests__/lifecycleEmail.service.test.ts`, `__tests__/sessionControl.test.ts`)
+  asserting existing fields survive the update.
+- **Remaining:** 61 casts across ~13 files, all deliberately deferred to a
+  dedicated `/security-review`-backed PR (not a mechanical sweep):
+  `middleware/auth.ts` (18), `api/routes/auth.routes.ts` (15),
+  `api/routes/passkey.routes.ts` (6, WebAuthn), `middleware/deviceAttestation.ts` (5),
+  `api/routes/verification.routes.ts` (4, WebAuthn), `api/routes/mfa.routes.ts` (3),
+  `middleware/continuousEval.ts` (2), `middleware/temporalAccess.ts` (1),
+  `middleware/rateLimiting.ts` (1), `middleware/proofOfPossession.ts` (1),
+  `middleware/geoFencing.ts` (1) — all auth/session/risk-decision middleware,
+  same rationale as `auth.ts`. `services/stripeWebhookProcessor.ts` (2) is a
+  documented exception: Stripe's SDK only exposes its bundled API version as a
+  type-level literal and doesn't publicly export a type for "any valid version
+  string," so pinning an older version can't be expressed without a cast —
+  left in place with a comment, not counted against the "fix" list.
 - **Acceptance:** Replace `as any` with proper types; start with high-risk areas
   (Stripe webhook body ✅, OAuth provider payloads ✅, SSF event data — none
   found, already clean).
-- **Risk:** Low for the files done so far (mechanical, test-verified). The
-  deferred `auth.ts`/`auth.routes.ts` pass is higher risk — security-critical
-  code, needs its own review.
+- **Risk:** Low for the files done so far (mechanical, test-verified, three
+  real bugs found and fixed along the way). The deferred auth/session/risk
+  middleware pass is higher risk — security-critical code, needs its own
+  review.
 
 ### M2 — Plugin/capability contract for optional-heavy integrations — _Status: Done (2026-07-01)_
 

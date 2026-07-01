@@ -17,13 +17,13 @@ function getTransporter() {
       auth: process.env.SMTP_USER
         ? { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS }
         : undefined,
-    } as any);
+    } as nodemailer.TransportOptions);
     logger.info("SMTP transporter configured");
     return transporter;
   }
 
   // Fallback to jsonTransport for development
-  transporter = nodemailer.createTransport({ jsonTransport: true } as any);
+  transporter = nodemailer.createTransport({ jsonTransport: true });
   logger.info("Using jsonTransport for email (development fallback)");
   return transporter;
 }
@@ -39,7 +39,7 @@ export async function sendEmailOTP(to: string, subject: string, body: string) {
     });
     logger.info("Email OTP sent", {
       to,
-      id: (info as any).messageId || "json",
+      id: info.messageId || "json",
     });
     return true;
   } catch (err) {

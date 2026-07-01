@@ -35,6 +35,7 @@ export async function sendLifecycleEmails() {
       email: usersTable.email,
       displayName: usersTable.displayName,
       locale: usersTable.locale,
+      metadata: usersTable.metadata,
     })
     .from(usersTable)
     .where(
@@ -60,7 +61,7 @@ export async function sendLifecycleEmails() {
         .update(usersTable)
         .set({
           metadata: {
-            ...((user as any).metadata ?? {}),
+            ...((user.metadata as Record<string, unknown>) ?? {}),
             lifecycleD1Sent: new Date().toISOString(),
           },
         })
@@ -86,6 +87,7 @@ export async function sendLifecycleEmails() {
       id: usersTable.id,
       email: usersTable.email,
       displayName: usersTable.displayName,
+      metadata: usersTable.metadata,
     })
     .from(usersTable)
     .where(
@@ -109,7 +111,7 @@ export async function sendLifecycleEmails() {
         .update(usersTable)
         .set({
           metadata: {
-            ...((user as any).metadata ?? {}),
+            ...((user.metadata as Record<string, unknown>) ?? {}),
             lifecycleD3Sent: new Date().toISOString(),
           },
         })
@@ -135,6 +137,7 @@ export async function sendLifecycleEmails() {
       id: usersTable.id,
       email: usersTable.email,
       displayName: usersTable.displayName,
+      metadata: usersTable.metadata,
     })
     .from(usersTable)
     .where(
@@ -158,7 +161,7 @@ export async function sendLifecycleEmails() {
         .update(usersTable)
         .set({
           metadata: {
-            ...((user as any).metadata ?? {}),
+            ...((user.metadata as Record<string, unknown>) ?? {}),
             lifecycleD7Sent: new Date().toISOString(),
           },
         })
@@ -185,6 +188,7 @@ export async function sendLifecycleEmails() {
       email: usersTable.email,
       displayName: usersTable.displayName,
       trialEnd: subscriptionsTable.trialEnd,
+      metadata: usersTable.metadata,
     })
     .from(usersTable)
     .innerJoin(subscriptionsTable, eq(usersTable.id, subscriptionsTable.userId))
@@ -210,7 +214,7 @@ export async function sendLifecycleEmails() {
         .update(usersTable)
         .set({
           metadata: {
-            ...((user as any).metadata ?? {}),
+            ...((user.metadata as Record<string, unknown>) ?? {}),
             lifecycleD14Sent: new Date().toISOString(),
           },
         })

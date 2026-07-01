@@ -72,11 +72,13 @@ describe("email suppression", () => {
   });
 
   it("unsuppressEmail reports whether a row was removed", async () => {
-    const chain: any = { delete: () => chain, where: () => Promise.resolve({ rowCount: 1 }) };
+    // The `postgres` driver's delete-without-.returning() result exposes the
+    // affected row count as `.count`, not `.rowCount`.
+    const chain: any = { delete: () => chain, where: () => Promise.resolve({ count: 1 }) };
     vi.mocked(getDb).mockReturnValue(chain as any);
     expect(await unsuppressEmail("x@test.com")).toBe(true);
 
-    const chain0: any = { delete: () => chain0, where: () => Promise.resolve({ rowCount: 0 }) };
+    const chain0: any = { delete: () => chain0, where: () => Promise.resolve({ count: 0 }) };
     vi.mocked(getDb).mockReturnValue(chain0 as any);
     expect(await unsuppressEmail("y@test.com")).toBe(false);
   });

@@ -41,6 +41,11 @@ interface StripeInvoicePayload {
 export function getStripe(): Stripe {
   const key = process.env.STRIPE_SECRET_KEY;
   if (!key) throw new Error("STRIPE_SECRET_KEY not configured");
+  // `apiVersion` deliberately pins an older, stable API version rather than
+  // the one bundled with the installed SDK. The SDK only exposes its own
+  // bundled version as a type-level literal (`LatestApiVersion`) and doesn't
+  // publicly export a type for "any valid API version string", so pinning an
+  // older version can't be expressed without a cast — this isn't a masked bug.
   return new Stripe(key, { apiVersion: "2024-04-10" as any });
 }
 

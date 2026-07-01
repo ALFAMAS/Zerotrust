@@ -79,7 +79,7 @@ async function buildEsClient() {
     async health(): Promise<{ status: string; available: boolean }> {
       try {
         const response = await fetchFixedUrl(`${baseUrl}/_cluster/health`, { timeoutMs: 3000 });
-        const data = (await response.json()) as any;
+        const data = (await response.json()) as { status?: string };
         return { status: data.status || "unknown", available: response.ok };
       } catch {
         return { status: "unreachable", available: false };

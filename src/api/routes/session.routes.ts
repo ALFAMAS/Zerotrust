@@ -8,7 +8,7 @@ import { revokeAllSessionsForUser, revokeSession } from "../../middleware/sessio
 import { countRows } from "../../shared/dbCount";
 import { internalError } from "../../shared/httpErrors";
 import { paginated, parsePaginatedQuery } from "../../shared/pagination";
-import type { HonoEnv } from "../../shared/types";
+import type { DeviceFingerprint, HonoEnv } from "../../shared/types";
 
 const router = new Hono<HonoEnv>();
 const logger = getLogger("session-routes");
@@ -34,25 +34,23 @@ router.get("/", async (c) => {
       countRows(db, sessionsTable, where),
     ]);
 
-    const sanitized = sessions.map((s) => ({
-      id: s.id,
-      ipAddress: s.ipAddress,
-      country: s.country,
-      userAgent: s.userAgent,
-      deviceFingerprint: s.deviceFingerprint
-        ? {
-            platform: (s.deviceFingerprint as any).platform,
-            browser: (s.deviceFingerprint as any).browser,
-            os: (s.deviceFingerprint as any).os,
-            isTrusted: (s.deviceFingerprint as any).isTrusted,
-          }
-        : null,
-      isActive: s.isActive,
-      expiresAt: s.expiresAt,
-      lastActivityAt: s.lastActivityAt,
-      createdAt: s.createdAt,
-      isCurrent: currentSessionId === s.id,
-    }));
+    const sanitized = sessions.map((s) => {
+      const fp = s.deviceFingerprint as DeviceFingerprint | null;
+      return {
+        id: s.id,
+        ipAddress: s.ipAddress,
+        country: s.country,
+        userAgent: s.userAgent,
+        deviceFingerprint: fp
+          ? { platform: fp.platform, browser: fp.browser, os: fp.os, isTrusted: fp.isTrusted }
+          : null,
+        isActive: s.isActive,
+        expiresAt: s.expiresAt,
+        lastActivityAt: s.lastActivityAt,
+        createdAt: s.createdAt,
+        isCurrent: currentSessionId === s.id,
+      };
+    });
 
     return c.json(paginated(sanitized, { page, limit, total }));
   } catch (err) {

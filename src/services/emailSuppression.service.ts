@@ -48,8 +48,10 @@ export async function suppressEmail(
 /** Remove an address from the suppression list (e.g. user re-confirms). */
 export async function unsuppressEmail(email: string): Promise<boolean> {
   const db = getDb();
+  // The `postgres` driver's delete-without-.returning() result exposes the
+  // affected row count as `.count`, not `.rowCount` (see dataRetention.ts).
   const result = await db
     .delete(emailSuppressionsTable)
     .where(eq(emailSuppressionsTable.email, email.toLowerCase()));
-  return ((result as any).rowCount ?? 0) > 0;
+  return ((result as { count?: number }).count ?? 0) > 0;
 }

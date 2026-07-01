@@ -37,7 +37,7 @@ function getTransport(): nodemailer.Transporter {
     } as nodemailer.TransportOptions);
   } else {
     // Dev / test — no-op transport that never actually sends
-    _transport = nodemailer.createTransport({ jsonTransport: true } as any);
+    _transport = nodemailer.createTransport({ jsonTransport: true });
   }
 
   return _transport;
