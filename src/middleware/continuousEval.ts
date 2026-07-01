@@ -1,5 +1,6 @@
 import { eq } from "drizzle-orm";
 import { createMiddleware } from "hono/factory";
+import type { ContentfulStatusCode } from "hono/utils/http-status";
 import { insertAuditLog } from "../audit/chain";
 import { getDb } from "../db";
 import { sessionsTable } from "../db/schema";
@@ -58,7 +59,7 @@ export function createContinuousEvalMiddleware(config?: Partial<ContinuousEvalCo
       };
 
       let riskScore = 0;
-      const anomalyFlags = session.anomalyFlags as any;
+      const anomalyFlags = session.anomalyFlags;
 
       if (anomalyFlags?.deviceChangeDetected) riskScore += 25;
       if (evalConfig.enableLocationAnomaly && anomalyFlags?.locationChangeDetected) riskScore += 30;
@@ -124,7 +125,7 @@ export function createContinuousEvalMiddleware(config?: Partial<ContinuousEvalCo
       if (error instanceof zerotrustError) {
         return c.json(
           { error: error.code, message: error.message, details: error.details },
-          error.statusCode as any
+          error.statusCode as ContentfulStatusCode
         );
       }
       logger.error("Continuous evaluation error", error as Error);

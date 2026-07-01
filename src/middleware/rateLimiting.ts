@@ -174,7 +174,7 @@ export function tenantRateLimit(opts: { windowMs: number; max: number; message?:
     const cfg = getConfig();
     if (!cfg.rateLimiting.enabled) return next();
 
-    const tenantId: string | undefined = (c as any).tenantId;
+    const tenantId = c.get("tenantId");
     let key: string;
     let points: number;
 

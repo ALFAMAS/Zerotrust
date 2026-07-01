@@ -19,7 +19,7 @@ setInterval(cleanupNonces, 60 * 1000).unref();
 export function requireProofOfPossession() {
   return createMiddleware<HonoEnv>(async (c, next) => {
     try {
-      const token = c.get("token") as any;
+      const token = c.get("token");
       if (!token?.pop_key) return next();
 
       const clientPop = c.req.header("x-pop-key") || "";

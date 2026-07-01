@@ -17,7 +17,7 @@ Sorted easiest → hardest within each tier.
 
 ## Medium — Moderate effort, high maintainability payoff
 
-### M1 — Reduce `as any` casts (was 213, now 61) — _Status: In Progress (2026-07-01)_
+### M1 — Reduce `as any` casts (was 213, now 46) — _Status: In Progress (2026-07-01)_
 
 - **Source:** `docs/AUDIT.md` M2
 - **Why:** `as any` casts in `src/` are a place the type system stops helping —
@@ -59,26 +59,42 @@ Sorted easiest → hardest within each tier.
   replacing it; added regression tests
   (`__tests__/lifecycleEmail.service.test.ts`, `__tests__/sessionControl.test.ts`)
   asserting existing fields survive the update.
-- **Remaining:** 61 casts across ~13 files, all deliberately deferred to a
+  **Third pass (61 → 46)**: the risk-decision middleware batch
+  (`temporalAccess.ts`, `rateLimiting.ts`, `proofOfPossession.ts`,
+  `geoFencing.ts`, `continuousEval.ts`, `deviceAttestation.ts`, 16 casts total)
+  turned out to be almost entirely redundant casts — `HonoEnv.Variables` and
+  `shared/types.ts`'s `User`/`Session`/`TokenPayload` interfaces already type
+  `sessionConfig.scheduleRestriction`, `sessionConfig.allowedCountries`,
+  `anomalyFlags`, `deviceFingerprint`, `token.pop_key`, and `tenantId`
+  correctly — the `as any` casts were bypassing types that were already
+  correct, not working around a real gap. Removed all of them (plus 3 more
+  `error.statusCode as any` → `as ContentfulStatusCode`, same pattern as the
+  second pass). Ran `/security-review` on the diff before shipping since it
+  touches auth-adjacent middleware: no findings — every change is
+  compile-time-only (cast removed or narrowed; zero runtime/control-flow
+  difference), confirmed by the full 773-test suite passing unchanged.
+- **Remaining:** 46 casts across 6 files, all deliberately deferred to a
   dedicated `/security-review`-backed PR (not a mechanical sweep):
   `middleware/auth.ts` (18), `api/routes/auth.routes.ts` (15),
-  `api/routes/passkey.routes.ts` (6, WebAuthn), `middleware/deviceAttestation.ts` (5),
-  `api/routes/verification.routes.ts` (4, WebAuthn), `api/routes/mfa.routes.ts` (3),
-  `middleware/continuousEval.ts` (2), `middleware/temporalAccess.ts` (1),
-  `middleware/rateLimiting.ts` (1), `middleware/proofOfPossession.ts` (1),
-  `middleware/geoFencing.ts` (1) — all auth/session/risk-decision middleware,
-  same rationale as `auth.ts`. `services/stripeWebhookProcessor.ts` (2) is a
-  documented exception: Stripe's SDK only exposes its bundled API version as a
-  type-level literal and doesn't publicly export a type for "any valid version
-  string," so pinning an older version can't be expressed without a cast —
-  left in place with a comment, not counted against the "fix" list.
+  `api/routes/passkey.routes.ts` (6, WebAuthn), `api/routes/verification.routes.ts`
+  (4, WebAuthn), `api/routes/mfa.routes.ts` (3) — these implement or directly
+  gate authentication/session/MFA/WebAuthn protocol logic, not just read
+  already-typed fields like the middleware batch above, so they need real
+  review of the underlying logic, not just a cast swap.
+  `services/stripeWebhookProcessor.ts` (2) is a documented exception: Stripe's
+  SDK only exposes its bundled API version as a type-level literal and
+  doesn't publicly export a type for "any valid version string," so pinning
+  an older version can't be expressed without a cast — left in place with a
+  comment, not counted against the "fix" list.
 - **Acceptance:** Replace `as any` with proper types; start with high-risk areas
   (Stripe webhook body ✅, OAuth provider payloads ✅, SSF event data — none
   found, already clean).
 - **Risk:** Low for the files done so far (mechanical, test-verified, three
-  real bugs found and fixed along the way). The deferred auth/session/risk
-  middleware pass is higher risk — security-critical code, needs its own
-  review.
+  real bugs found and fixed along the way; risk-decision middleware batch
+  passed `/security-review` with no findings). The remaining
+  auth.ts/auth.routes.ts/passkey/verification/mfa pass is higher risk —
+  security-critical code implementing auth logic itself, needs its own
+  dedicated review.
 
 ### M2 — Plugin/capability contract for optional-heavy integrations — _Status: Done (2026-07-01)_
 
