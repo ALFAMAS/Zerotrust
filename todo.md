@@ -44,23 +44,6 @@ Sorted easiest → hardest within each tier.
 
 ---
 
-### H2 — Remove Wallet/loyalty/points/referrals/streaks — _Status: Done (2026-07-01)_
-
-- **Source:** `docs/MAINTENANCE_FEATURE_AUDIT.md` #1 (Tier 1)
-- **Why:** Gamification/loyalty is product-specific growth tooling, not identity
-  infrastructure. It is the single largest service in the repo (1,500+ LOC) and
-  carries 5 of the 59 DB tables.
-- **Impact:** ~1,500 LOC removed, 5 DB tables dropped (, `tiers`,
-  `user_tiers`, `redemptions_catalog`, `streaks`), points ledger + referral
-  tables also candidates.
-- **Files to delete:** `points.service.ts`,
-  `streak.service.ts`,
-  `dashboard/points`, `dashboard/referrals` mount in `server.ts`;
-  nav entries; 5+ drop migrations; points tests.
-- **Acceptance:** All loyalty/referral/streak code + tables removed;
-  type-check + test suite pass; README updated.
-- **Risk:** Medium — self-contained with low coupling; safe to lift.
-
 ### H3 — UI component / integration tests — _Status: In Progress (2026-07-01)_
 
 - **Source:** `docs/AUDIT.md` T1, `todo.md` P3.1
