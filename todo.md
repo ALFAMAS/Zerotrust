@@ -49,19 +49,41 @@ Sorted easiest → hardest within each tier.
   deferred `auth.ts`/`auth.routes.ts` pass is higher risk — security-critical
   code, needs its own review.
 
-### M2 — Plugin/capability contract for optional-heavy integrations — _Status: Pending_
+### M2 — Plugin/capability contract for optional-heavy integrations — _Status: Done (2026-07-01)_
 
 - **Source:** `todo.md` P3.4 (original)
-- **Why:** Email, storage, SMS, and chat integrations are env-var-switchable but
-  have no formal interface contract — each integration implements its own ad-hoc
-  shape. A capability contract makes providers truly pluggable and testable in
-  isolation.
-- **Impact:** Cleaner integration surface, easier to swap providers, enforce
-  consistent fallback behavior.
-- **Acceptance:** Define a capability interface per integration domain (email,
-  storage, SMS, chat); refactor existing providers to implement it; add isolated
-  adapter tests.
-- **Risk:** Low — additive design; existing integrations keep working.
+- **Rescoped:** The original acceptance criteria named email, storage, SMS, and
+  chat as domains needing a capability interface. On inspection: SMS/Twilio has
+  already been fully removed from the codebase; `email.service.ts` is a single
+  generic `nodemailer` SMTP transport with no per-provider branching;
+  `objectStorage.service.ts` is already fully provider-agnostic via the
+  S3-compatible protocol (AWS/B2/R2/MinIO/Wasabi switch purely on env config,
+  no per-provider code paths). None of those three exhibit the "ad-hoc
+  per-provider shape" problem this item describes. The one genuine instance was
+  `src/notifications/dispatcher.ts`'s `sendToChannel`, which if/else-branched on
+  `channel.type` ("slack" | "teams" | "pagerduty") with three near-duplicate
+  private send methods baked into the dispatcher class.
+- **Done:** Added `NotificationAdapter` capability interface
+  (`src/notifications/types.ts`) — `{ type, send(config, event, data) }`.
+  Extracted each provider into its own adapter module under
+  `src/notifications/adapters/` (`slack.ts`, `teams.ts`, `pagerduty.ts`), each
+  owning its own formatting call + `fetchPublicUrl`/`fetchFixedUrl` (CWE-918
+  guard preserved verbatim per provider). `adapters/index.ts` exports a
+  `defaultAdapters` registry (`Map<type, NotificationAdapter>`).
+  `NotificationDispatcher` now takes an optional adapter map in its
+  constructor (defaults to `defaultAdapters`) and looks up `sendToChannel` by
+  `channel.type` instead of branching — unknown types are a no-op instead of a
+  silent branch fallthrough. Added isolated adapter tests
+  (`src/__tests__/notifications.adapters.test.ts` — payload shape, non-2xx
+  handling, SSRF-guard rejection per provider) and dispatcher registry tests
+  (`src/__tests__/notifications.dispatcher.test.ts` — routing, missing-adapter
+  no-op, one-channel-failure-doesn't-block-others, enabled/event filtering)
+  using fake injected adapters, no network mocking needed.
+- **Impact:** Adding a new chat/alerting provider (e.g. Discord, Opsgenie) is
+  now "write one adapter module + register it," with no dispatcher changes.
+  Adapters are unit-testable without the dispatcher or a live webhook.
+- **Risk:** None realized — additive/behavior-preserving; full test suite (768
+  tests) and type-check pass unchanged.
 
 ---
 

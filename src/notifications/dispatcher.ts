@@ -1,17 +1,17 @@
 import crypto from "node:crypto";
 import { getLogger } from "../logger";
-import { fetchFixedUrl, fetchPublicUrl } from "../shared/safeFetch";
-import { formatPagerDutyPayload, formatSlackMessage, formatTeamsMessage } from "./formatters";
-import type {
-  NotificationChannel,
-  NotificationEvent,
-  PagerDutyConfig,
-  SlackConfig,
-  TeamsConfig,
-} from "./types";
+import { defaultAdapters } from "./adapters";
+import type { NotificationAdapter, NotificationChannel, NotificationEvent } from "./types";
 
 export class NotificationDispatcher {
   private channels: Map<string, NotificationChannel> = new Map();
+  private adapters: ReadonlyMap<NotificationChannel["type"], NotificationAdapter>;
+
+  constructor(
+    adapters: ReadonlyMap<NotificationChannel["type"], NotificationAdapter> = defaultAdapters
+  ) {
+    this.adapters = adapters;
+  }
 
   addChannel(channel: Omit<NotificationChannel, "id"> & { id?: string }): NotificationChannel {
     const ch = {
@@ -54,18 +54,10 @@ export class NotificationDispatcher {
     event: NotificationEvent,
     data: Record<string, unknown>
   ): Promise<void> {
+    const adapter = this.adapters.get(channel.type);
+    if (!adapter) return;
     try {
-      if (channel.type === "slack") {
-        await this.sendToSlack(channel.config as SlackConfig, formatSlackMessage(event, data));
-      } else if (channel.type === "teams") {
-        await this.sendToTeams(channel.config as TeamsConfig, formatTeamsMessage(event, data));
-      } else if (channel.type === "pagerduty") {
-        const cfg = channel.config as PagerDutyConfig;
-        await this.sendToPagerDuty(
-          cfg,
-          formatPagerDutyPayload(event, data, cfg.integrationKey, cfg.severity)
-        );
-      }
+      await adapter.send(channel.config, event, data);
     } catch (err) {
       getLogger().warn("Notification delivery failed", {
         channel: channel.id,
@@ -73,43 +65,6 @@ export class NotificationDispatcher {
         error: (err as Error).message,
       });
     }
-  }
-
-  private async sendToSlack(config: SlackConfig, payload: object): Promise<void> {
-    const body = {
-      ...payload,
-      channel: config.channel,
-      username: config.username,
-      icon_emoji: config.iconEmoji,
-    };
-    // SECURITY (CWE-918): Slack webhooks can be configured via the admin API,
-    // so the host is user-influenced.
-    const res = await fetchPublicUrl(config.webhookUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
-    if (!res.ok) throw new Error(`Slack webhook returned ${res.status}`);
-  }
-
-  private async sendToTeams(config: TeamsConfig, payload: object): Promise<void> {
-    // SECURITY (CWE-918): Teams webhooks can be configured via the admin API,
-    // so the host is user-influenced.
-    const res = await fetchPublicUrl(config.webhookUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-    if (!res.ok) throw new Error(`Teams webhook returned ${res.status}`);
-  }
-
-  private async sendToPagerDuty(_config: PagerDutyConfig, payload: object): Promise<void> {
-    const res = await fetchFixedUrl("https://events.pagerduty.com/v2/enqueue", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-    if (!res.ok) throw new Error(`PagerDuty API returned ${res.status}`);
   }
 }
 
