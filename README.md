@@ -302,9 +302,12 @@ local disk. Set `BACKUP_ENCRYPTION_KEY` (or `BACKUP_ENCRYPTION_KEY_HEX`) to encr
 ## Testing & code quality
 
 ```bash
-bun run test            # run the Vitest suite
+bun run test            # run the Vitest suite (API + packages/ui plain-logic tests)
 bun run test:watch      # watch mode
 bun run test:coverage   # coverage report
+
+bun run --cwd packages/ui test        # UI component tests (happy-dom + Testing Library)
+bun run --cwd packages/ui test:watch  # watch mode
 
 bun run lint            # Biome lint (check only)
 bun run lint:fix        # Biome autofix (lint + format) — also runs on commit via Husky
@@ -312,10 +315,14 @@ bun run type-check      # tsc --noEmit
 bun run verify:generated # regenerate SDK + API docs + drift reports, fail on any diff
 ```
 
-Tests live in `src/__tests__/`. CI ([`.github/workflows/ci.yml`](./.github/workflows/ci.yml))
-runs lint, type-check, the test suite, generated-output drift checks (SDK, API
-reference, integration matrix, shadcn report), and the UI build on every push and
-PR to `main`. A scheduled
+Tests live in `src/__tests__/`. UI component tests are colocated next to the
+component/page they cover (`*.test.tsx`, e.g. `packages/ui/src/components/SetupChecklist.test.tsx`)
+and run under their own [`packages/ui/vitest.config.ts`](./packages/ui/vitest.config.ts)
+(happy-dom environment) — kept separate from the root config so backend tests
+stay on `environment: "node"`. CI ([`.github/workflows/ci.yml`](./.github/workflows/ci.yml))
+runs lint, type-check, the test suite, UI component tests, generated-output
+drift checks (SDK, API reference, integration matrix, shadcn report), and the
+UI build on every push and PR to `main`. A scheduled
 [dependency-update workflow](./.github/workflows/dependency-update.yml) opens a
 grouped PR each week after the same gates pass.
 

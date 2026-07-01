@@ -113,7 +113,7 @@ incident under load or attack) · **Medium** (correctness/maintainability debt) 
 
 | # | Finding | Risk | Status |
 | --- | --- | --- | --- |
-| T1 | **No UI component/integration tests.** `packages/ui` has only `lib/*.test.ts`; auth/billing/admin page flows are untested. | Medium | TODO P3 |
+| T1 | **No UI component/integration tests.** `packages/ui` has only `lib/*.test.ts`; auth/billing/admin page flows are untested. | Medium | **In progress** (P3.1) — happy-dom + Testing Library harness stood up + enforced in CI; login page + SetupChecklist covered (11 tests); register/reset/org/billing/admin flows remain |
 | T2 | No route-level test for billing-webhook idempotency end-to-end (the new repository is unit-tested; the handler path is not). | Low | **Fixed** (P1.3) |
 | T3 | 2 dashboard E2E tests had drifted from the shipped UI (asserted copy/behavior no component renders); they were red on `main`, masked by the login-500 crash (C4). | Medium | **Fixed this PR** — see §6 |
 
