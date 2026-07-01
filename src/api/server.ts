@@ -21,6 +21,10 @@ import notificationChannelRoutes from "../notifications/routes";
 import { alertingMiddleware } from "../services/alerting.service";
 import { initEmailQueue } from "../services/emailQueue";
 import { sloAlertingMiddleware, sloRouteHandler } from "../services/slo.service";
+import {
+  initStripeWebhookQueueConsumer,
+  initStripeWebhookQueueProducer,
+} from "../services/stripeWebhookQueue";
 import { initTelemetry, telemetryMiddleware } from "../telemetry";
 import webhookManagementRoutes from "../webhooks/routes";
 import accessReviewRoutes from "./routes/access-review.routes";
@@ -73,12 +77,21 @@ export async function createServer() {
   // them in-process as before.
   const isWorkerMode = process.env.WORKER_MODE === "true";
 
+  // Stripe webhooks always arrive at this (API) process, so the queue
+  // producer must be available here regardless of WORKER_MODE.
+  if (process.env.REDIS_URI) {
+    initStripeWebhookQueueProducer(process.env.REDIS_URI);
+  }
+
   if (!isWorkerMode) {
     // Start email queue worker when Redis is available
     if (process.env.REDIS_URI) {
       initEmailQueue(process.env.REDIS_URI).catch((err: Error) =>
         initLogger.error("Email queue init failed", err)
       );
+      // Single-process deployment: this process also consumes queued Stripe
+      // webhook jobs (the dedicated worker takes over when WORKER_MODE=true).
+      initStripeWebhookQueueConsumer(process.env.REDIS_URI);
     }
 
     // Start all interval jobs with leader election

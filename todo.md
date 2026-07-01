@@ -102,7 +102,21 @@ _All P0 items completed. See tdone.md for the full ledger._
   behavior is unchanged unless `DATABASE_URL_READ_REPLICA` is set. `/admin/sessions`
   left on the primary (its handler also writes). Extend to other pure-read list
   endpoints (org/session/search/notification lists) in follow-ups.
-### P3.3 — Offload heavy webhook work to the queue  — _Status: Pending_
+### P3.3 — Offload heavy webhook work to the queue  — _Status: Done (2026-07-01)_
+- **Delivered:** extracted the event-mutation logic from `billing.webhooks.ts`
+  into `src/services/stripeWebhookProcessor.ts` (shared by both paths), and
+  added `src/services/stripeWebhookQueue.ts` — a BullMQ queue that offloads the
+  Stripe `subscriptions.retrieve()` call + Postgres write off the request path
+  when `REDIS_URI` is configured. The route claims the idempotency key inline
+  (unchanged), enqueues, and acks fast (`{ received: true, queued: true }`).
+  The worker releases the claim only once BullMQ's retries are exhausted, so a
+  manual Stripe-dashboard replay can reprocess it. Falls back to the exact
+  prior synchronous claim→process→release-on-error flow when no queue is
+  configured, so behavior is unchanged without Redis. Wired: `server.ts`
+  always starts the producer (webhooks only arrive there); the consumer runs
+  in `server.ts` (single-process, `WORKER_MODE` unset) or `worker.ts`
+  (`WORKER_MODE=true`). Tests: `stripeWebhookQueue.test.ts` (7 cases) +
+  a new queued-path case in `billing.webhooks.test.ts`. 757 tests pass.
 ### P3.4 — Plugin/capability contract for optional-heavy integrations  — _Status: Pending_
 ### P3.5 — Deploy & release safety (expand/contract, rollback, DR drills)  — _Status: Done (2026-07-01)_
 - **Delivered:** `docs/deployment.md` "Release & migration safety" section —
