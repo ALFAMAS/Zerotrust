@@ -9,8 +9,8 @@
  * Exit code: 0 if clean, 1 if violations found.
  */
 
-import { readFileSync, readdirSync, statSync } from "node:fs";
-import { resolve, relative, dirname, basename } from "node:path";
+import { readdirSync, readFileSync, statSync } from "node:fs";
+import { basename, dirname, relative, resolve } from "node:path";
 
 // ── types ────────────────────────────────────────────────────────────────
 
@@ -105,8 +105,7 @@ function parseImports(filePath: string): Array<{ path: string; line: number }> {
   const imports: Array<{ path: string; line: number }> = [];
   const lines = content.split("\n");
 
-  const importRegex =
-    /^\s*(?:import|export)\s+(?:type\s+)?(?:[\s\S]*?\s+from\s+)?['"]([^'"]+)['"]/;
+  const importRegex = /^\s*(?:import|export)\s+(?:type\s+)?(?:[\s\S]*?\s+from\s+)?['"]([^'"]+)['"]/;
 
   for (let i = 0; i < lines.length; i++) {
     const match = lines[i].match(importRegex);
@@ -119,10 +118,7 @@ function parseImports(filePath: string): Array<{ path: string; line: number }> {
 
 // ── check ────────────────────────────────────────────────────────────────
 
-function resolveImport(
-  fromFile: string,
-  importPath: string
-): string | null {
+function resolveImport(fromFile: string, importPath: string): string | null {
   // Only track internal (relative) imports
   if (importPath.startsWith(".")) {
     const dir = dirname(fromFile);

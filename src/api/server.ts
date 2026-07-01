@@ -8,6 +8,7 @@ import { secureHeaders } from "hono/secure-headers";
 import { initializezerotrust } from "..";
 import { initSentry } from "../instrument";
 import jitRoutes from "../jit/routes";
+import { startJobScheduler } from "../jobs/scheduler";
 import { getLogger } from "../logger";
 import { metricsAuthMiddleware, metricsMiddleware, metricsRoute } from "../metrics";
 import { API_VERSIONS, apiVersioning, CURRENT_API_VERSION } from "../middleware/apiVersioning";
@@ -18,15 +19,10 @@ import { rateLimit } from "../middleware/rateLimiting";
 import { temporalAccessMiddleware } from "../middleware/temporalAccess";
 import notificationChannelRoutes from "../notifications/routes";
 import { alertingMiddleware } from "../services/alerting.service";
-import { startBillingLifecycleScheduler } from "../services/billingLifecycle.service";
-import { startRetentionScheduler } from "../services/dataRetention";
-import { startBackupScheduler } from "../services/dbBackup.service";
 import { initEmailQueue } from "../services/emailQueue";
-import { startNotificationEmailFallbackScheduler } from "../services/notificationEmailFallback";
 import { sloAlertingMiddleware, sloRouteHandler } from "../services/slo.service";
 import { initTelemetry, telemetryMiddleware } from "../telemetry";
 import webhookManagementRoutes from "../webhooks/routes";
-import { startJobScheduler } from "../jobs/scheduler";
 import accessReviewRoutes from "./routes/access-review.routes";
 import adminRoutes from "./routes/admin.routes";
 import adminToolsRoutes from "./routes/admin-tools.routes";
@@ -72,25 +68,25 @@ export async function createServer() {
   registerGlobalErrorHandler(app, logger);
 
   // Background jobs: when a dedicated worker process is running, defer all
-    // schedulers and the email queue consumer to it (single-instance via Redis
-    // lock). In local dev / single-server deploys without WORKER_MODE, start
-    // them in-process as before.
-    const isWorkerMode = process.env.WORKER_MODE === "true";
+  // schedulers and the email queue consumer to it (single-instance via Redis
+  // lock). In local dev / single-server deploys without WORKER_MODE, start
+  // them in-process as before.
+  const isWorkerMode = process.env.WORKER_MODE === "true";
 
-    if (!isWorkerMode) {
-      // Start email queue worker when Redis is available
-      if (process.env.REDIS_URI) {
-        initEmailQueue(process.env.REDIS_URI).catch((err: Error) =>
-          initLogger.error("Email queue init failed", err)
-        );
-      }
-
-      // Start all interval jobs with leader election
-      startJobScheduler();
-      initLogger.info("Background jobs started in API process (WORKER_MODE not set)");
-    } else {
-      initLogger.info("Background jobs deferred to dedicated worker (WORKER_MODE=true)");
+  if (!isWorkerMode) {
+    // Start email queue worker when Redis is available
+    if (process.env.REDIS_URI) {
+      initEmailQueue(process.env.REDIS_URI).catch((err: Error) =>
+        initLogger.error("Email queue init failed", err)
+      );
     }
+
+    // Start all interval jobs with leader election
+    startJobScheduler();
+    initLogger.info("Background jobs started in API process (WORKER_MODE not set)");
+  } else {
+    initLogger.info("Background jobs deferred to dedicated worker (WORKER_MODE=true)");
+  }
 
   app.use("*", cors(corsOptionsFromEnv()));
   app.use("*", secureHeaders());

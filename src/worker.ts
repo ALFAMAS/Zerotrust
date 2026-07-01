@@ -16,8 +16,8 @@
  */
 import "dotenv/config";
 import { startJobScheduler } from "./jobs/scheduler";
-import { initEmailQueue } from "./services/emailQueue";
 import { getLogger } from "./logger";
+import { initEmailQueue } from "./services/emailQueue";
 
 const logger = getLogger("worker");
 

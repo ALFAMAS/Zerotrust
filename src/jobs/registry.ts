@@ -34,7 +34,8 @@ export interface JobDef {
 export const JOB_REGISTRY: JobDef[] = [
   {
     name: "retention.purge",
-    description: "Purge data past retention window (GDPR soft-delete, expired tokens, old audit logs)",
+    description:
+      "Purge data past retention window (GDPR soft-delete, expired tokens, old audit logs)",
     intervalHours: 24,
     singleInstance: true,
     schema: z.object({}),

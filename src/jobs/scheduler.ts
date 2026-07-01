@@ -134,29 +134,29 @@ async function runJob(jobDef: JobDef) {
  * Only the scheduled jobs need entries here; on-demand jobs are dispatched
  * elsewhere.
  */
-async function dispatchJob(jobDef: JobDef, payload: unknown): Promise<boolean> {
+async function dispatchJob(jobDef: JobDef, _payload: unknown): Promise<boolean> {
   switch (jobDef.name) {
     case "retention.purge": {
-      const { startRetentionScheduler } = await import("../services/dataRetention");
+      const { startRetentionScheduler } = await import("../services/dataRetention.js");
       await startRetentionScheduler(jobDef.intervalHours!);
       return true;
     }
     case "notifications.emailFallback": {
       const { startNotificationEmailFallbackScheduler } = await import(
-        "../services/notificationEmailFallback"
+        "../services/notificationEmailFallback.js"
       );
       await startNotificationEmailFallbackScheduler(jobDef.intervalHours!);
       return true;
     }
     case "billing.lifecycle": {
       const { startBillingLifecycleScheduler } = await import(
-        "../services/billingLifecycle.service"
+        "../services/billingLifecycle.service.js"
       );
       await startBillingLifecycleScheduler(jobDef.intervalHours!);
       return true;
     }
     case "backup.daily": {
-      const { startBackupScheduler } = await import("../services/dbBackup.service");
+      const { startBackupScheduler } = await import("../services/dbBackup.service.js");
       await startBackupScheduler(jobDef.intervalHours!);
       return true;
     }

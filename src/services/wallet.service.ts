@@ -1,6 +1,10 @@
-import { and, desc, eq, gte, sql } from "drizzle-orm";
+import { and, desc, eq, sql } from "drizzle-orm";
 import { generateCodeFromAlphabet } from "../crypto/codes";
 import { getDb } from "../db";
+import {
+  spendFromWallet as spendFromWalletRepo,
+  topUpWallet as topUpWalletRepo,
+} from "../db/repositories/wallet.repository";
 import {
   pointsLedgerTable,
   redemptionsCatalogTable,
@@ -16,7 +20,6 @@ import {
 import { isUnavailableStorageError } from "../db/storageFallback";
 import { getLogger } from "../logger";
 import { countRows } from "../shared/dbCount";
-import { topUpWallet as topUpWalletRepo, spendFromWallet as spendFromWalletRepo } from "../db/repositories/wallet.repository";
 
 const logger = getLogger("wallet-service");
 
