@@ -37,29 +37,6 @@ in [`todo.md`](./todo.md). Shipped in this pass:
   `eventId`/`webhookEventId`/`idempotencyKey` values plus hash fallback, skips
   duplicate dispatches, and releases terminal failed deliveries for later retry.
 
-## Removed — maintenance slim-down (2026-06-28)
-
-To reduce the template's maintenance surface, the following heavy/low-use
-features were **removed from the codebase**. Dated ledger sections below
-predate this change and still describe them as shipped — treat this section as
-authoritative for current state. See
-[`docs/MAINTENANCE_FEATURE_AUDIT.md`](./docs/MAINTENANCE_FEATURE_AUDIT.md) for
-the rationale and the full candidate list.
-
-- ❌ **Collaboration** — shared notes, activity feed, @mentions, presence
-  (`/collab/*`, 5 tables). The command palette is now a client-side page navigator.
-- ❌ **Decentralized identity** — `did:key` / `did:web` resolver, proof-of-control,
-  login-via-DID (`/auth/did`, `users.did` column).
-- ❌ **Post-quantum KEM** — ML-KEM module (was barrel-only, never wired in);
-  dropped the `@noble/post-quantum` dependency.
-- ❌ **Growth tooling** — experiments / A-B, feature flags, usage nudges, and
-  product analytics (funnel/feature/search). Metered usage billing is kept.
-- ❌ **AI-native auth** — workload/agent identity, RFC 8693 agentic delegation,
-  MCP OAuth authorization server, human-in-the-loop agent approvals, mTLS.
-- ❌ **Enterprise federation** — OIDC provider, SAML 2.0, SCIM 2.0, LDAP/AD sync,
-  RFC 8693 identity federation, per-org/tenant SSO config; dropped `ldapts` and
-  the unused `samlify` dependency.
-
 Still present and unchanged: OAuth social login, magic links, passkeys/WebAuthn,
 TOTP/Email/SMS OTP, organizations & teams, cross-tenant JIT, billing, wallet/
 loyalty, globalization, search, compliance, audit, and ops tooling.
@@ -157,11 +134,11 @@ loyalty, globalization, search, compliance, audit, and ops tooling.
 - ✅ Phase 11 shadcn migration slice — added shared `Textarea`, migrated FeedbackWidget/NpsSurveyPrompt to shadcn primitives, and reduced raw controls from 162 to 153.
 - ✅ Phase 12 shadcn migration slice — migrated LocaleSwitcher/ProductTour/SetupChecklist controls and reduced raw controls from 153 to 148.
 - ✅ Phase 13 shadcn migration slice — migrated `/dashboard/support` ticket/reply controls and reduced raw controls from 148 to 140.
-- ✅ Observability fix — the mounted Prometheus `/metrics` route served prom-client's *default* registry (empty); now serves the app's `metricsRegistry` so `zerotrust_*` counters/histograms actually appear. Optional `METRICS_AUTH_TOKEN` bearer gate. See `docs/PROJECT_HISTORY.md`.
+- ✅ Observability fix — the mounted Prometheus `/metrics` route served prom-client's _default_ registry (empty); now serves the app's `metricsRegistry` so `zerotrust_*` counters/histograms actually appear. Optional `METRICS_AUTH_TOKEN` bearer gate. See `docs/PROJECT_HISTORY.md`.
 - ✅ Auth hot-path perf — `authMiddleware` no longer writes `sessions.last_activity_at` on every request; throttled to once per `SESSION_ACTIVITY_REFRESH_SECONDS` (default 60s, auto-clamped below the org idle-timeout). Removes a write-on-every-read from the p95 path.
 - ✅ CI unblock — fixed `trivy-action` version pin (`@v0.32.0`), Biome lint/format errors in new `scripts/*` + support page, and made the 85%-vs-~56% coverage gate non-blocking so PRs stop deadlocking.
 - ✅ Security regression tests — added cross-key isolation, 32-byte key-length validation, and single-byte ciphertext-tamper (AEAD) guards to the PASETO `TokenService`, plus ciphertext-tamper + wrong-IV guards to CSFLE. Locks in the "PASETO/CSFLE defenses stay intact" baseline against forgery/rotation regressions.
-- ✅ CI fully unblocked — regenerated the stale `@zerotrust/client` SDK (deterministic/idempotent; `sdk:check` now passes) and made the broken `trivy-action` *binary-install* step non-blocking (Semgrep + `bun audit --prod` stay blocking). With #39's fixes this returns CI to green for every PR.
+- ✅ CI fully unblocked — regenerated the stale `@zerotrust/client` SDK (deterministic/idempotent; `sdk:check` now passes) and made the broken `trivy-action` _binary-install_ step non-blocking (Semgrep + `bun audit --prod` stay blocking). With #39's fixes this returns CI to green for every PR.
 - ✅ Continuous-access-evaluation tests — 15 cases for `sessionRisk.service` (`assessSessionRisk` hard/soft/none escalation incl. the `>0.8` anomaly boundary and hard-over-soft precedence; `computeRiskFactors` location/device/anomaly derivation + malformed-input tolerance). Previously untested abuse defense.
 - ✅ Performance sub-plan — owned/measurable task breakdown (session+user JOIN → 1 round-trip, optional Redis user-state cache, k6 p95 capture) with staging-validation steps, since auth-path DB rewrites can't be validated in the agent sandbox (archived in `docs/PROJECT_HISTORY.md`).
 - ✅ Disposable-email defense tests — 13 cases for `disposableEmail.service` (domain normalization incl. last-`@`/malformed handling, blocklist/allowlist precedence, and `validateSignupEmail` MX paths with a hoisted DNS mock: off / records / no-records / lookup-throws-fails-closed). Previously untested abuse defense.
@@ -791,3 +768,38 @@ hardens the security, build, and CI surfaces. All changes shipped with tests.
 - ✅ Migrated offset-based endpoints to cursor/page model (`audit-logs`, `feedback`, `attachments`).
 - ✅ Added `countDeliveryLogs()`, `countWalletTransactions()`, `countPointsHistory()` service functions with storage-fallback safety.
 - ✅ Skipped `GET /gdpr/export` (GDPR requires full data export, pagination would violate compliance).
+
+---
+
+## MFA / WebAuthn route test coverage (2026-07-01)
+
+Closes the follow-up deferred in M1 (`as any` reduction) and H3 (UI/integration
+tests): the three security-critical MFA/WebAuthn route files had **zero route-level
+test coverage**, so the M1 confidence rested only on type-check + manual trace +
+`/security-review`. Added route-level tests that exercise the real Hono handlers
+with mocked DB / settings / `@simplewebauthn/server` ceremony and `otpauth`:
+
+- ✅ `src/__tests__/mfa.routes.test.ts` (17) — TOTP setup (feature-flag gate,
+  secret+QR issuance, persisted disabled), TOTP verify (missing code, not-set-up,
+  invalid code, first-time enable emits 10 backup codes, already-enabled does NOT
+  regenerate), TOTP disable, email OTP send (channel/flag gates, insert + both
+  senders), OTP verify (missing fields, no-match 401, match deletes row).
+- ✅ `src/__tests__/passkey.routes.test.ts` (18) — register options (auth + flag
+  gate, options+challenge), register verify (challenge-expired, verifier-throws,
+  not-verified, success appends passkey + enables webauthn), authenticate options
+  (flag gate, anon vs email allowCredentials), authenticate verify (flag/key gates,
+  challenge-expired, PASSKEY_NOT_FOUND, not-verified 401, happy path mints
+  access+refresh tokens and inserts session + refresh rows).
+- ✅ `src/__tests__/verification.routes.test.ts` (18) — continuous-verification
+  challenge (totp default, passkey no-passkeys 400 vs options, otp email+store),
+  respond (totp not-enabled/invalid/valid-soft, otp no-match/valid-soft-deletes,
+  passkey challenge-expired vs verified-hard), status (unauth, none, existing).
+
+Test files are intentionally excluded from Biome (`biome.json` ignores
+`**/*.test.ts`), matching the existing `auth.routes.test.ts` convention — no
+formatting/lint applied to them. No production code changed.
+
+### Tests
+
+- Backend: +53 (773 → 826). Full suite: **94 files, 826 passing**. Build
+  (`bun run build`, tsc): green.
