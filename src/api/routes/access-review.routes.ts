@@ -5,6 +5,7 @@ import { getDb } from "../../db";
 import { accessReviewItemsTable, accessReviewsTable, usersTable } from "../../db/schema";
 import { getLogger } from "../../logger";
 import { authMiddleware, requireAdmin } from "../../middleware/auth";
+import { invalidateUserCache } from "../../services/userStateCache.service";
 import { countRows } from "../../shared/dbCount";
 import { internalError } from "../../shared/httpErrors";
 import { paginated, parsePaginatedQuery } from "../../shared/pagination";
@@ -194,6 +195,7 @@ router.patch("/:id/items/:itemId", async (c) => {
         .update(usersTable)
         .set({ roles: ["user"], updatedAt: new Date() })
         .where(eq(usersTable.id, item.userId));
+      await invalidateUserCache(item.userId);
       rolesRevoked = true;
       await insertAuditLog({
         action: "ACCESS_REVIEW_ROLES_REVOKED",

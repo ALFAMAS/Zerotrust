@@ -33,6 +33,65 @@ export interface Session {
   deviceFingerprint?: { platform?: string; browser?: string; os?: string };
 }
 
+export type GenericObject = Record<string, unknown>;
+
+export interface SuccessResponse {
+  success?: boolean;
+}
+
+export interface PaginatedMeta {
+  page?: number;
+  limit?: number;
+  total?: number;
+  totalPages?: number;
+}
+
+export interface MoneyAmount {
+  amount?: number;
+  currency?: string;
+  formatted?: string;
+}
+
+export interface BillingSubscription {
+  plan?: string;
+  status?: string;
+  currentPeriodEnd?: string | null;
+  cancelAtPeriodEnd?: boolean;
+  trialEnd?: string | null;
+}
+
+export interface Wallet {
+  balance?: number;
+  currency?: string;
+  credits?: number;
+}
+
+export interface ApiKey {
+  id?: string;
+  name?: string;
+  prefix?: string;
+  scopes?: string[];
+  createdAt?: string;
+  lastUsedAt?: string | null;
+}
+
+export interface Notification {
+  id?: string;
+  type?: string;
+  title?: string;
+  body?: string;
+  readAt?: string | null;
+  createdAt?: string;
+}
+
+export interface SupportTicket {
+  id?: string;
+  subject?: string;
+  status?: string;
+  priority?: string;
+  createdAt?: string;
+}
+
 // ── Runtime ──
 /**
  * Options for constructing a {@link zerotrustClient}.
@@ -228,7 +287,7 @@ export class zerotrustClient {
    *
    * @route POST /auth/password-reset/request
    */
-  postAuthPasswordResetRequest(body: { email: string; channel?: "email" | "sms" | "whatsapp" | "telegram" }): Promise<{ success?: boolean; message?: string }> {
+  postAuthPasswordResetRequest(body: { email: string; channel?: "email" }): Promise<{ success?: boolean; message?: string }> {
     return this.request("POST", `/auth/password-reset/request`, { body });
   }
 
@@ -333,11 +392,11 @@ export class zerotrustClient {
   }
 
   /**
-   * Send OTP via email, SMS, WhatsApp, or Telegram
+   * Send Email OTP
    *
    * @route POST /auth/mfa/otp/send
    */
-  postAuthMfaOtpSend(body: { channel: "email" | "sms" | "whatsapp" | "telegram"; target: string }): Promise<{ success?: boolean; expiresIn?: number }> {
+  postAuthMfaOtpSend(body: { channel: "email"; target: string }): Promise<{ success?: boolean; expiresIn?: number }> {
     return this.request("POST", `/auth/mfa/otp/send`, { body });
   }
 
@@ -346,7 +405,7 @@ export class zerotrustClient {
    *
    * @route POST /auth/mfa/otp/verify
    */
-  postAuthMfaOtpVerify(body: { code: string; channel: "email" | "sms" | "whatsapp" | "telegram" }): Promise<unknown> {
+  postAuthMfaOtpVerify(body: { code: string; channel: "email" }): Promise<unknown> {
     return this.request("POST", `/auth/mfa/otp/verify`, { body });
   }
 
@@ -680,5 +739,544 @@ export class zerotrustClient {
    */
   putOrgsByOrgIdSecurityPolicy(orgId: string, body: Record<string, unknown>): Promise<unknown> {
     return this.request("PUT", `/orgs/${encodeURIComponent(orgId)}/security/policy`, { body });
+  }
+
+  /**
+   * Get current subscription
+   *
+   * @route GET /billing/subscription
+   */
+  getBillingSubscription(): Promise<BillingSubscription> {
+    return this.request("GET", `/billing/subscription`);
+  }
+
+  /**
+   * Get current billing usage
+   *
+   * @route GET /billing/usage
+   */
+  getBillingUsage(): Promise<GenericObject> {
+    return this.request("GET", `/billing/usage`);
+  }
+
+  /**
+   * Create Stripe checkout session
+   *
+   * @route POST /billing/checkout
+   */
+  postBillingCheckout(body: { priceId?: string; plan?: string }): Promise<{ url?: string }> {
+    return this.request("POST", `/billing/checkout`, { body });
+  }
+
+  /**
+   * Change subscription plan
+   *
+   * @route POST /billing/change-plan
+   */
+  postBillingChangePlan(body: { plan: string; priceId?: string }): Promise<GenericObject> {
+    return this.request("POST", `/billing/change-plan`, { body });
+  }
+
+  /**
+   * Cancel or pause subscription
+   *
+   * @route POST /billing/cancel
+   */
+  postBillingCancel(body: { action?: "cancel" | "pause"; reason?: string; comment?: string }): Promise<GenericObject> {
+    return this.request("POST", `/billing/cancel`, { body });
+  }
+
+  /**
+   * Reactivate subscription
+   *
+   * @route POST /billing/reactivate
+   */
+  postBillingReactivate(body: Record<string, unknown>): Promise<GenericObject> {
+    return this.request("POST", `/billing/reactivate`, { body });
+  }
+
+  /**
+   * Create Stripe billing portal session
+   *
+   * @route POST /billing/portal
+   */
+  postBillingPortal(body: Record<string, unknown>): Promise<{ url?: string }> {
+    return this.request("POST", `/billing/portal`, { body });
+  }
+
+  /**
+   * List supported billing currencies
+   *
+   * @route GET /billing/currencies
+   */
+  getBillingCurrencies(): Promise<{ currencies?: GenericObject[] }> {
+    return this.request("GET", `/billing/currencies`);
+  }
+
+  /**
+   * Get localized plan pricing
+   *
+   * @route GET /billing/pricing
+   */
+  getBillingPricing(query?: { currency?: string; locale?: string }): Promise<{ plans?: GenericObject[] }> {
+    return this.request("GET", `/billing/pricing`, { query });
+  }
+
+  /**
+   * Quote sales tax / VAT
+   *
+   * @route POST /billing/tax/quote
+   */
+  postBillingTaxQuote(body: GenericObject): Promise<GenericObject> {
+    return this.request("POST", `/billing/tax/quote`, { body });
+  }
+
+  /**
+   * Validate VAT number
+   *
+   * @route GET /billing/vat/validate
+   */
+  getBillingVatValidate(query: { vatNumber: string; country?: string }): Promise<GenericObject> {
+    return this.request("GET", `/billing/vat/validate`, { query });
+  }
+
+  /**
+   * List tax exemptions
+   *
+   * @route GET /billing/tax-exemptions
+   */
+  getBillingTaxExemptions(): Promise<GenericObject> {
+    return this.request("GET", `/billing/tax-exemptions`);
+  }
+
+  /**
+   * Create tax exemption request
+   *
+   * @route POST /billing/tax-exemptions
+   */
+  postBillingTaxExemptions(body: GenericObject): Promise<GenericObject> {
+    return this.request("POST", `/billing/tax-exemptions`, { body });
+  }
+
+  /**
+   * Update tax exemption status
+   *
+   * @route POST /billing/tax-exemptions/{id}/status
+   * @param id path parameter
+   */
+  postBillingTaxExemptionsByIdStatus(id: string, body: { status?: string }): Promise<GenericObject> {
+    return this.request("POST", `/billing/tax-exemptions/${encodeURIComponent(id)}/status`, { body });
+  }
+
+  /**
+   * Get wallet balance
+   *
+   * @route GET /wallet
+   */
+  getWallet(): Promise<Wallet> {
+    return this.request("GET", `/wallet`);
+  }
+
+  /**
+   * List wallet transactions
+   *
+   * @route GET /wallet/transactions
+   */
+  getWalletTransactions(query?: { page?: number; limit?: number }): Promise<{ transactions?: GenericObject[]; meta?: PaginatedMeta }> {
+    return this.request("GET", `/wallet/transactions`, { query });
+  }
+
+  /**
+   * Top up wallet
+   *
+   * @route POST /wallet/top-up
+   */
+  postWalletTopUp(body: { amount?: number; currency?: string }): Promise<GenericObject> {
+    return this.request("POST", `/wallet/top-up`, { body });
+  }
+
+  /**
+   * Spend wallet balance
+   *
+   * @route POST /wallet/spend
+   */
+  postWalletSpend(body: { amount?: number; reason?: string; metadata?: GenericObject }): Promise<GenericObject> {
+    return this.request("POST", `/wallet/spend`, { body });
+  }
+
+  /**
+   * Search indexed resources
+   *
+   * @route GET /search
+   */
+  getSearch(query?: { q?: string; type?: string; page?: number; limit?: number }): Promise<GenericObject> {
+    return this.request("GET", `/search`, { query });
+  }
+
+  /**
+   * Smart / semantic search
+   *
+   * @route GET /search/smart
+   */
+  getSearchSmart(query?: { q?: string; type?: string }): Promise<GenericObject> {
+    return this.request("GET", `/search/smart`, { query });
+  }
+
+  /**
+   * Index a searchable document
+   *
+   * @route POST /search/index
+   */
+  postSearchIndex(body: GenericObject): Promise<SuccessResponse> {
+    return this.request("POST", `/search/index`, { body });
+  }
+
+  /**
+   * Remove an indexed document
+   *
+   * @route DELETE /search/index/{type}/{id}
+   * @param type path parameter
+   * @param id path parameter
+   */
+  deleteSearchIndexByTypeById(type: string, id: string): Promise<SuccessResponse> {
+    return this.request("DELETE", `/search/index/${encodeURIComponent(type)}/${encodeURIComponent(id)}`);
+  }
+
+  /**
+   * Get search provider status
+   *
+   * @route GET /search/provider
+   */
+  getSearchProvider(): Promise<GenericObject> {
+    return this.request("GET", `/search/provider`);
+  }
+
+  /**
+   * Get SOC 2 readiness summary
+   *
+   * @route GET /compliance/soc2/readiness
+   */
+  getComplianceSoc2Readiness(): Promise<GenericObject> {
+    return this.request("GET", `/compliance/soc2/readiness`);
+  }
+
+  /**
+   * List SOC 2 controls
+   *
+   * @route GET /compliance/soc2/controls
+   */
+  getComplianceSoc2Controls(): Promise<GenericObject> {
+    return this.request("GET", `/compliance/soc2/controls`);
+  }
+
+  /**
+   * Update SOC 2 control status
+   *
+   * @route PUT /compliance/soc2/controls/{controlId}
+   * @param controlId path parameter
+   */
+  putComplianceSoc2ControlsByControlId(controlId: string, body: GenericObject): Promise<GenericObject> {
+    return this.request("PUT", `/compliance/soc2/controls/${encodeURIComponent(controlId)}`, { body });
+  }
+
+  /**
+   * Get annual risk assessment
+   *
+   * @route GET /compliance/risk-assessment/{year}
+   * @param year path parameter
+   */
+  getComplianceRiskAssessmentByYear(year: string): Promise<GenericObject> {
+    return this.request("GET", `/compliance/risk-assessment/${encodeURIComponent(year)}`);
+  }
+
+  /**
+   * Create risk assessment item
+   *
+   * @route POST /compliance/risk-assessment/{year}
+   * @param year path parameter
+   */
+  postComplianceRiskAssessmentByYear(year: string, body: GenericObject): Promise<GenericObject> {
+    return this.request("POST", `/compliance/risk-assessment/${encodeURIComponent(year)}`, { body });
+  }
+
+  /**
+   * Update risk assessment item
+   *
+   * @route PUT /compliance/risk-assessment/{year}/{riskId}
+   * @param year path parameter
+   * @param riskId path parameter
+   */
+  putComplianceRiskAssessmentByYearByRiskId(year: string, riskId: string, body: GenericObject): Promise<GenericObject> {
+    return this.request("PUT", `/compliance/risk-assessment/${encodeURIComponent(year)}/${encodeURIComponent(riskId)}`, { body });
+  }
+
+  /**
+   * List support tickets
+   *
+   * @route GET /support
+   */
+  getSupport(): Promise<{ tickets?: SupportTicket[] }> {
+    return this.request("GET", `/support`);
+  }
+
+  /**
+   * Create support ticket
+   *
+   * @route POST /support
+   */
+  postSupport(body: { subject: string; message: string; priority?: string }): Promise<SupportTicket> {
+    return this.request("POST", `/support`, { body });
+  }
+
+  /**
+   * Get support ticket
+   *
+   * @route GET /support/{id}
+   * @param id path parameter
+   */
+  getSupportById(id: string): Promise<SupportTicket> {
+    return this.request("GET", `/support/${encodeURIComponent(id)}`);
+  }
+
+  /**
+   * Update support ticket
+   *
+   * @route PATCH /support/{id}
+   * @param id path parameter
+   */
+  patchSupportById(id: string, body: GenericObject): Promise<SupportTicket> {
+    return this.request("PATCH", `/support/${encodeURIComponent(id)}`, { body });
+  }
+
+  /**
+   * Add support ticket message
+   *
+   * @route POST /support/{id}/messages
+   * @param id path parameter
+   */
+  postSupportByIdMessages(id: string, body: { message: string }): Promise<GenericObject> {
+    return this.request("POST", `/support/${encodeURIComponent(id)}/messages`, { body });
+  }
+
+  /**
+   * Submit product feedback
+   *
+   * @route POST /feedback
+   */
+  postFeedback(body: { type: "nps" | "csat" | "thumbs"; score: number; comment?: string; context?: string; orgId?: string; metadata?: GenericObject }): Promise<GenericObject> {
+    return this.request("POST", `/feedback`, { body });
+  }
+
+  /**
+   * Export authenticated user data
+   *
+   * @route GET /gdpr/export
+   */
+  getGdprExport(): Promise<GenericObject> {
+    return this.request("GET", `/gdpr/export`);
+  }
+
+  /**
+   * Request account deletion
+   *
+   * @route DELETE /gdpr/account
+   */
+  deleteGdprAccount(body?: { password?: string; reason?: string }): Promise<GenericObject> {
+    return this.request("DELETE", `/gdpr/account`, { body });
+  }
+
+  /**
+   * Cancel pending account deletion
+   *
+   * @route POST /gdpr/account/deletion/cancel
+   */
+  postGdprAccountDeletionCancel(body: Record<string, unknown>): Promise<SuccessResponse> {
+    return this.request("POST", `/gdpr/account/deletion/cancel`, { body });
+  }
+
+  /**
+   * List notifications
+   *
+   * @route GET /notifications
+   */
+  getNotifications(query?: { page?: number; limit?: number }): Promise<{ notifications?: Notification[] }> {
+    return this.request("GET", `/notifications`, { query });
+  }
+
+  /**
+   * Get unread notification count
+   *
+   * @route GET /notifications/unread-count
+   */
+  getNotificationsUnreadCount(): Promise<{ count?: number }> {
+    return this.request("GET", `/notifications/unread-count`);
+  }
+
+  /**
+   * Mark notification as read
+   *
+   * @route POST /notifications/{id}/read
+   * @param id path parameter
+   */
+  postNotificationsByIdRead(id: string, body: Record<string, unknown>): Promise<SuccessResponse> {
+    return this.request("POST", `/notifications/${encodeURIComponent(id)}/read`, { body });
+  }
+
+  /**
+   * Mark all notifications as read
+   *
+   * @route POST /notifications/read-all
+   */
+  postNotificationsReadAll(body: Record<string, unknown>): Promise<SuccessResponse> {
+    return this.request("POST", `/notifications/read-all`, { body });
+  }
+
+  /**
+   * Open notification SSE stream
+   *
+   * @route GET /notifications/sse
+   */
+  getNotificationsSse(): Promise<unknown> {
+    return this.request("GET", `/notifications/sse`);
+  }
+
+  /**
+   * Get notification preferences
+   *
+   * @route GET /notifications/preferences
+   */
+  getNotificationsPreferences(): Promise<GenericObject> {
+    return this.request("GET", `/notifications/preferences`);
+  }
+
+  /**
+   * Update notification preferences
+   *
+   * @route PUT /notifications/preferences
+   */
+  putNotificationsPreferences(body: GenericObject): Promise<GenericObject> {
+    return this.request("PUT", `/notifications/preferences`, { body });
+  }
+
+  /**
+   * Get web-push public key
+   *
+   * @route GET /notifications/push/public-key
+   */
+  getNotificationsPushPublicKey(): Promise<{ publicKey?: string }> {
+    return this.request("GET", `/notifications/push/public-key`);
+  }
+
+  /**
+   * Subscribe to web-push notifications
+   *
+   * @route POST /notifications/push/subscribe
+   */
+  postNotificationsPushSubscribe(body: GenericObject): Promise<SuccessResponse> {
+    return this.request("POST", `/notifications/push/subscribe`, { body });
+  }
+
+  /**
+   * Unsubscribe from web-push notifications
+   *
+   * @route POST /notifications/push/unsubscribe
+   */
+  postNotificationsPushUnsubscribe(body: GenericObject): Promise<SuccessResponse> {
+    return this.request("POST", `/notifications/push/unsubscribe`, { body });
+  }
+
+  /**
+   * Resolve organization by custom domain
+   *
+   * @route GET /regions/resolve
+   */
+  getRegionsResolve(query?: { domain?: string }): Promise<GenericObject> {
+    return this.request("GET", `/regions/resolve`, { query });
+  }
+
+  /**
+   * Get region health
+   *
+   * @route GET /regions/health
+   */
+  getRegionsHealth(): Promise<GenericObject> {
+    return this.request("GET", `/regions/health`);
+  }
+
+  /**
+   * Resolve storage region for country
+   *
+   * @route GET /regions/for-country
+   */
+  getRegionsForCountry(query?: { country?: string }): Promise<{ country?: string | null; region?: string }> {
+    return this.request("GET", `/regions/for-country`, { query });
+  }
+
+  /**
+   * Get organization branding
+   *
+   * @route GET /regions/orgs/{orgId}/branding
+   * @param orgId path parameter
+   */
+  getRegionsOrgsByOrgIdBranding(orgId: string): Promise<GenericObject> {
+    return this.request("GET", `/regions/orgs/${encodeURIComponent(orgId)}/branding`);
+  }
+
+  /**
+   * Update organization branding
+   *
+   * @route PUT /regions/orgs/{orgId}/branding
+   * @param orgId path parameter
+   */
+  putRegionsOrgsByOrgIdBranding(orgId: string, body: GenericObject): Promise<SuccessResponse> {
+    return this.request("PUT", `/regions/orgs/${encodeURIComponent(orgId)}/branding`, { body });
+  }
+
+  /**
+   * Set organization custom domain
+   *
+   * @route PUT /regions/orgs/{orgId}/domain
+   * @param orgId path parameter
+   */
+  putRegionsOrgsByOrgIdDomain(orgId: string, body: { domain?: string | null }): Promise<SuccessResponse> {
+    return this.request("PUT", `/regions/orgs/${encodeURIComponent(orgId)}/domain`, { body });
+  }
+
+  /**
+   * Set organization data residency region
+   *
+   * @route PUT /regions/orgs/{orgId}/region
+   * @param orgId path parameter
+   */
+  putRegionsOrgsByOrgIdRegion(orgId: string, body: { region: "us" | "eu" | "apac" }): Promise<{ success?: boolean; region?: string }> {
+    return this.request("PUT", `/regions/orgs/${encodeURIComponent(orgId)}/region`, { body });
+  }
+
+  /**
+   * List API keys
+   *
+   * @route GET /api-keys
+   */
+  getApiKeys(): Promise<{ apiKeys?: ApiKey[] }> {
+    return this.request("GET", `/api-keys`);
+  }
+
+  /**
+   * Create API key
+   *
+   * @route POST /api-keys
+   */
+  postApiKeys(body: { name: string; scopes?: string[]; expiresAt?: string }): Promise<{ apiKey?: ApiKey; secret?: string }> {
+    return this.request("POST", `/api-keys`, { body });
+  }
+
+  /**
+   * Revoke API key
+   *
+   * @route DELETE /api-keys/{id}
+   * @param id path parameter
+   */
+  deleteApiKeysById(id: string): Promise<SuccessResponse> {
+    return this.request("DELETE", `/api-keys/${encodeURIComponent(id)}`);
   }
 }

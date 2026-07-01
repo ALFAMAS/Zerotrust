@@ -50,6 +50,7 @@ import {
   verifyPowSolution,
 } from "../../services/proofOfWork.service";
 import { TokenService } from "../../services/token.service";
+import { invalidateUserCache } from "../../services/userStateCache.service";
 import { getClientIp } from "../../shared/clientIp";
 import { internalError } from "../../shared/httpErrors";
 import { localeFromAcceptLanguage, normalizeLocale, SUPPORTED_LOCALES } from "../../shared/locale";
@@ -1204,6 +1205,7 @@ router.patch("/me", authMiddleware, async (c) => {
         updatedAt: usersTable.updatedAt,
       });
     if (!updated) return c.json({ error: "USER_NOT_FOUND" }, 404);
+    await invalidateUserCache(user.id);
     return c.json(updated);
   } catch (err) {
     return internalError(c, logger, "Patch current user error", err);
@@ -1528,6 +1530,7 @@ router.post("/me/email", authMiddleware, rateLimit({ points: 5, windowSecs: 60 }
       .update(usersTable)
       .set({ email: normalized, updatedAt: new Date() })
       .where(eq(usersTable.id, user.id));
+    await invalidateUserCache(user.id);
 
     // Account takeover detection: email change shortly after a password
     // reset (or other sensitive change) revokes other sessions and alerts
@@ -1631,6 +1634,7 @@ router.post("/me/avatar", authMiddleware, async (c) => {
       .update(usersTable)
       .set({ avatarUrl, updatedAt: new Date() })
       .where(eq(usersTable.id, user.id));
+    await invalidateUserCache(user.id);
 
     return c.json({ avatarUrl });
   } catch (err) {

@@ -2,6 +2,9 @@
 
 import { Clock, Loader2, ShieldQuestion } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { api } from "@/lib/api";
 import { useToast } from "@/lib/toast";
 
@@ -49,7 +52,7 @@ export default function JITRequestPage() {
   }, []);
 
   useEffect(() => {
-    load();
+    void load();
   }, [load]);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -65,7 +68,7 @@ export default function JITRequestPage() {
       });
       toast({ message: "Access request submitted for approval", type: "success" });
       setForm({ targetTenantId: "", targetResource: "", justification: "", ttlMinutes: 60 });
-      load();
+      void load();
     } catch (err: unknown) {
       toast({
         message: err instanceof Error ? err.message : "Failed to submit request",
@@ -97,7 +100,7 @@ export default function JITRequestPage() {
             <label htmlFor="page-f0" className="text-sm font-medium text-foreground">
               Target tenant ID
             </label>
-            <input
+            <Input
               id="page-f0"
               value={form.targetTenantId}
               onChange={(e) => setForm({ ...form, targetTenantId: e.target.value })}
@@ -110,7 +113,7 @@ export default function JITRequestPage() {
             <label htmlFor="page-f1" className="text-sm font-medium text-foreground">
               Resource
             </label>
-            <input
+            <Input
               id="page-f1"
               value={form.targetResource}
               onChange={(e) => setForm({ ...form, targetResource: e.target.value })}
@@ -125,7 +128,7 @@ export default function JITRequestPage() {
           <label htmlFor="page-f2" className="text-sm font-medium text-foreground">
             Justification
           </label>
-          <textarea
+          <Textarea
             id="page-f2"
             value={form.justification}
             onChange={(e) => setForm({ ...form, justification: e.target.value })}
@@ -141,7 +144,7 @@ export default function JITRequestPage() {
             <label htmlFor="page-f3" className="text-sm font-medium text-foreground">
               Duration (minutes)
             </label>
-            <input
+            <Input
               id="page-f3"
               type="number"
               min={5}
@@ -156,7 +159,7 @@ export default function JITRequestPage() {
               className="w-28 rounded-lg border border-border bg-muted px-3 py-2 text-right text-sm text-foreground focus:border-ring focus:outline-none"
             />
           </div>
-          <button
+          <Button
             type="submit"
             disabled={submitting}
             className="flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
@@ -167,7 +170,7 @@ export default function JITRequestPage() {
               <ShieldQuestion className="h-4 w-4" />
             )}
             Request access
-          </button>
+          </Button>
         </div>
       </form>
 

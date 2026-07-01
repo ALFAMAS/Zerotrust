@@ -11,6 +11,7 @@ import {
   getEffectiveSessionPolicy,
 } from "../services/sessionPolicy.service";
 import { TokenService } from "../services/token.service";
+import { cacheUserState, getUserCached } from "../services/userStateCache.service";
 import { describePrincipal, principalFromToken } from "../shared/principal";
 import { isAdmin } from "../shared/roles";
 import type {
@@ -119,19 +120,58 @@ export const authMiddleware = createMiddleware<HonoEnv>(async (c, next) => {
 
     const db = getDb();
 
-    let sessionRows: (typeof sessionsTable.$inferSelect)[];
+    const cachedUser = await getUserCached(payload.sub);
+    let session: typeof sessionsTable.$inferSelect;
+    let userRow: typeof usersTable.$inferSelect;
     try {
-      sessionRows = await db
-        .select()
-        .from(sessionsTable)
-        .where(
-          and(
-            eq(sessionsTable.tokenId, payload.jti),
-            eq(sessionsTable.userId, payload.sub),
-            eq(sessionsTable.isActive, true)
+      if (cachedUser) {
+        const sessionRows = await db
+          .select({ session: sessionsTable })
+          .from(sessionsTable)
+          .where(
+            and(
+              eq(sessionsTable.tokenId, payload.jti),
+              eq(sessionsTable.userId, payload.sub),
+              eq(sessionsTable.isActive, true)
+            )
           )
-        )
-        .limit(1);
+          .limit(1);
+        if (sessionRows.length === 0) {
+          return c.json(
+            {
+              error: ErrorCodes.SESSION_NOT_FOUND,
+              message: "Session not found or revoked",
+            },
+            401
+          );
+        }
+        session = sessionRows[0].session;
+        userRow = cachedUser;
+      } else {
+        const authRows = await db
+          .select({ session: sessionsTable, user: usersTable })
+          .from(sessionsTable)
+          .innerJoin(usersTable, eq(sessionsTable.userId, usersTable.id))
+          .where(
+            and(
+              eq(sessionsTable.tokenId, payload.jti),
+              eq(sessionsTable.userId, payload.sub),
+              eq(sessionsTable.isActive, true)
+            )
+          )
+          .limit(1);
+        if (authRows.length === 0) {
+          return c.json(
+            {
+              error: ErrorCodes.SESSION_NOT_FOUND,
+              message: "Session not found or revoked",
+            },
+            401
+          );
+        }
+        ({ session, user: userRow } = authRows[0]);
+        void cacheUserState(userRow);
+      }
     } catch (dbErr) {
       logger.error("Auth middleware DB error", dbErr as Error);
       return c.json(
@@ -139,18 +179,6 @@ export const authMiddleware = createMiddleware<HonoEnv>(async (c, next) => {
         503
       );
     }
-
-    if (sessionRows.length === 0) {
-      return c.json(
-        {
-          error: ErrorCodes.SESSION_NOT_FOUND,
-          message: "Session not found or revoked",
-        },
-        401
-      );
-    }
-
-    const session = sessionRows[0];
 
     if (session.expiresAt < new Date()) {
       await db
@@ -201,18 +229,6 @@ export const authMiddleware = createMiddleware<HonoEnv>(async (c, next) => {
         );
       }
     }
-
-    const userRows = await db
-      .select()
-      .from(usersTable)
-      .where(eq(usersTable.id, payload.sub))
-      .limit(1);
-
-    if (userRows.length === 0) {
-      return c.json({ error: ErrorCodes.USER_NOT_FOUND, message: "User not found" }, 401);
-    }
-
-    const userRow = userRows[0];
 
     if (userRow.status === "deleted") {
       return c.json(

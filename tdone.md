@@ -19,7 +19,7 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
 | Migrations | 27 (latest: `0026_processed_webhook_events`) |
 | Route mounts in `server.ts` | 30 |
 | UI pages | 47 |
-| Tests | 826 (94 files) |
+| Tests | 832 (97 files) |
 | ADRs | 7 |
 | Stack | Hono 4 · TypeScript 6 · Bun · Next.js 16 · Drizzle ORM · PostgreSQL · Redis |
 
@@ -36,6 +36,7 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
 - ✅ PASETO v4 access tokens (AES-256-GCM, 1-hour TTL, no JWT footguns)
 - ✅ Refresh tokens — SHA-256 hashed, rotated on use, long-lived
 - ✅ Session management — list, revoke, device fingerprinting, concurrent-session caps
+- ✅ Auth hot path — session+user loaded via one JOIN on cache miss; optional 5 s Redis user-state cache on cache hit
 - ✅ Silent token refresh — UI replays 401 via `POST /auth/token/refresh`
 - ✅ Account merge / linking — `POST /auth/me/link` adds OAuth providers to existing account
 - ✅ HIBP (HaveIBeenPwned) breach check on register / password change (fails open)
@@ -168,6 +169,7 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
 - ✅ OpenTelemetry tracing — `NodeSDK` with OTLP exporter, `withSpan()` helper
 - ✅ Sentry — server + browser error capture
 - ✅ Structured logging — `getLogger()` with levels + correlation IDs
+- ✅ Trace correlation test — login flow asserts `X-Trace-Id` response propagation and structured request log correlation
 - ✅ Audit log fan-out — Elasticsearch + SIEM (Datadog/Splunk/S3)
 - ✅ Health status page — public `/status` with per-component state
 - ✅ Alerting — Slack / Teams / PagerDuty on error spike or latency breach
@@ -242,7 +244,7 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
 
 ## Platform & Infrastructure
 
-- ✅ Generated TypeScript SDK — `@zerotrust/client` from `openapi.json` (57 operations)
+- ✅ Generated TypeScript SDK — `@zerotrust/client` from `openapi.json` (115 operations)
 - ✅ S3-compatible storage — provider-agnostic (AWS S3, B2, R2, MinIO, Wasabi)
 - ✅ DB backups — `pg_dump` with local + S3 retention, AES-256-GCM encryption
 - ✅ DB restore + PITR — `bun run db:restore`, Neon PITR runbook
@@ -262,6 +264,19 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
 ---
 
 ## Recent work (2026-07-01)
+
+- **D6 — Backlog sweep from `todo.md`:** Expanded `openapi.json` and generated
+  docs/SDK from 57 to **115 operations** across 20 tag groups; added SDK README
+  usage examples; migrated the top shadcn/raw-control targets (audit now **44
+  raw controls across 22 files**); added login-path trace correlation coverage;
+  optimized `authMiddleware` with a one-query session+user JOIN on cache miss;
+  added a 5 s Redis user-state cache with explicit invalidation on profile,
+  email/avatar, admin user, and role changes; added k6 scripts for login storm
+  and auth-cache p95 thresholds. Verification: `bun run test` → **832 tests / 97
+  files passing**; `bun run build`, `bun run sdk:build`, `bun run docs:api`, and
+  `bun run ui:audit` all pass. Local `bun run lint` is still blocked by broad
+  pre-existing repo formatting/no-floating-promise diagnostics outside this
+  change set; touched files passed targeted Biome checks.
 
 - **M1 — `as any` reduction (213 → 3):** Four passes across all security-critical
   files. Three real bugs found and fixed along the way: `.rowCount`→`.count`

@@ -33,6 +33,8 @@
     "lint:fix": "biome check --write",
     "format": "biome format --write",
     "lint:ci": "biome ci",
+    "load:auth-cache": "k6 run tests/load/auth-cache.k6.js",
+    "load:login": "k6 run tests/load/login.k6.js",
     "boundaries:check": "bun run scripts/check-boundaries.ts",
     "type-check": "node ./node_modules/typescript/lib/tsc.js --noEmit",
     "prepare": "bunx husky",

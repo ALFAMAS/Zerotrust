@@ -1,6 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { api } from "@/lib/api";
 
 interface GeneralSettings {
@@ -42,7 +44,7 @@ export default function GeneralSettingsPage() {
         setLoading(false);
       }
     }
-    load();
+    void load();
   }, []);
 
   function set<K extends keyof GeneralSettings>(key: K, value: string) {
@@ -91,7 +93,7 @@ export default function GeneralSettingsPage() {
           <label htmlFor="page-f0" className="block text-sm font-medium text-foreground mb-1">
             App Name
           </label>
-          <input
+          <Input
             id="page-f0"
             type="text"
             value={settings.appName}
@@ -107,7 +109,7 @@ export default function GeneralSettingsPage() {
           <label htmlFor="page-f1" className="block text-sm font-medium text-foreground mb-1">
             App URL
           </label>
-          <input
+          <Input
             id="page-f1"
             type="url"
             value={settings.appUrl}
@@ -125,7 +127,7 @@ export default function GeneralSettingsPage() {
           <label htmlFor="page-f2" className="block text-sm font-medium text-foreground mb-1">
             Support Email
           </label>
-          <input
+          <Input
             id="page-f2"
             type="email"
             value={settings.supportEmail}
@@ -143,7 +145,7 @@ export default function GeneralSettingsPage() {
           <label htmlFor="page-f3" className="block text-sm font-medium text-foreground mb-1">
             Logo URL
           </label>
-          <input
+          <Input
             id="page-f3"
             type="text"
             value={settings.logoUrl}
@@ -176,7 +178,7 @@ export default function GeneralSettingsPage() {
 
         {/* Save */}
         <div className="pt-2 flex justify-end">
-          <button
+          <Button
             type="submit"
             disabled={saving}
             className="flex items-center gap-2 rounded-lg bg-primary px-6 py-2.5 text-sm font-medium text-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors min-w-[140px] justify-center"
@@ -208,7 +210,7 @@ export default function GeneralSettingsPage() {
             ) : (
               "Save Settings"
             )}
-          </button>
+          </Button>
         </div>
       </form>
     </div>

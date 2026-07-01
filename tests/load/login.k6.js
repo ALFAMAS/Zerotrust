@@ -7,7 +7,7 @@ const loginDuration = new Trend("login_duration", true);
 
 export const options = {
   scenarios: {
-    concurrent_logins: {
+    login_storm: {
       executor: "ramping-vus",
       startVUs: 0,
       stages: [
@@ -28,6 +28,7 @@ export const options = {
   },
   thresholds: {
     http_req_duration: ["p(95)<500", "p(99)<1000"],
+    login_duration: ["p(95)<100"],
     error_rate: ["rate<0.01"],
   },
 };

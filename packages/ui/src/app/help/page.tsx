@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { brand } from "@/config/brand";
 import { FAQ_ITEMS } from "../../data/faq";
 
@@ -41,7 +43,7 @@ export default function HelpPage() {
           <p className="mt-3 text-lg text-muted-foreground">Find answers to common questions.</p>
           <div className="relative mt-8">
             <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <input
+            <Input
               type="search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
@@ -53,7 +55,7 @@ export default function HelpPage() {
 
         {!query && (
           <div className="mb-8 flex flex-wrap justify-center gap-2">
-            <button
+            <Button
               type="button"
               onClick={() => setActiveCategory(null)}
               className={`rounded-full px-3 py-1.5 text-sm transition-colors ${
@@ -63,9 +65,9 @@ export default function HelpPage() {
               }`}
             >
               All
-            </button>
+            </Button>
             {CATEGORIES.map((cat) => (
-              <button
+              <Button
                 type="button"
                 key={cat}
                 onClick={() => setActiveCategory(cat === activeCategory ? null : cat)}
@@ -76,7 +78,7 @@ export default function HelpPage() {
                 }`}
               >
                 {cat}
-              </button>
+              </Button>
             ))}
           </div>
         )}
@@ -84,7 +86,7 @@ export default function HelpPage() {
         {filtered.length === 0 ? (
           <div className="py-16 text-center">
             <p className="text-sm text-muted-foreground">No results for &ldquo;{query}&rdquo;.</p>
-            <button
+            <Button
               type="button"
               onClick={() => {
                 setQuery("");
@@ -93,7 +95,7 @@ export default function HelpPage() {
               className="mt-3 text-sm text-primary hover:underline"
             >
               Clear search
-            </button>
+            </Button>
           </div>
         ) : (
           <div className="space-y-2">
@@ -104,7 +106,7 @@ export default function HelpPage() {
                   key={item.id}
                   className="overflow-hidden rounded-xl border border-border bg-card"
                 >
-                  <button
+                  <Button
                     type="button"
                     onClick={() => setOpenId(isOpen ? null : item.id)}
                     className="flex w-full items-center justify-between gap-4 px-6 py-4 text-left transition-colors hover:bg-accent/50"
@@ -116,7 +118,7 @@ export default function HelpPage() {
                     <span className="flex-shrink-0 text-muted-foreground">
                       {isOpen ? <Minus className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
                     </span>
-                  </button>
+                  </Button>
                   {isOpen && (
                     <div className="px-6 pb-5">
                       <p className="text-sm leading-relaxed text-muted-foreground">{item.answer}</p>

@@ -4,6 +4,8 @@ import { Check } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import Modal from "../../../components/Modal";
+import { Button } from "../../../components/ui/button";
+import { Input } from "../../../components/ui/input";
 import {
   Select,
   SelectContent,
@@ -11,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../../components/ui/select";
+import { Textarea } from "../../../components/ui/textarea";
 import { api } from "../../../lib/api";
 import { navigateToSafeExternal } from "../../../lib/safeRedirect";
 
@@ -224,30 +227,30 @@ function BillingContent() {
             </div>
             <div className="flex items-center gap-2">
               {sub.cancelAtPeriodEnd ? (
-                <button
+                <Button
                   type="button"
                   onClick={handleReactivate}
                   className="px-4 py-2 bg-green-700 hover:bg-green-600 text-foreground text-sm rounded-lg transition-colors"
                 >
                   Reactivate
-                </button>
+                </Button>
               ) : (
-                <button
+                <Button
                   type="button"
                   onClick={() => setCancelOpen(true)}
                   className="px-4 py-2 bg-muted hover:bg-accent text-foreground/80 text-sm rounded-lg transition-colors"
                 >
                   Cancel plan
-                </button>
+                </Button>
               )}
-              <button
+              <Button
                 type="button"
                 onClick={handlePortal}
                 disabled={portalLoading}
                 className="px-4 py-2 bg-secondary hover:bg-secondary/80 disabled:opacity-50 text-foreground text-sm rounded-lg transition-colors"
               >
                 {portalLoading ? "Loading…" : "Manage billing"}
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -261,8 +264,13 @@ function BillingContent() {
             </p>
             <div className="space-y-2">
               {CANCEL_REASONS.map((r) => (
-                <label key={r} className="flex items-center gap-2 text-sm text-foreground/80">
-                  <input
+                <label
+                  key={r}
+                  htmlFor={`cancel-reason-${r}`}
+                  className="flex items-center gap-2 text-sm text-foreground/80"
+                >
+                  <Input
+                    id={`cancel-reason-${r}`}
                     type="radio"
                     name="cancel-reason"
                     checked={cancelReason === r}
@@ -273,7 +281,7 @@ function BillingContent() {
                 </label>
               ))}
             </div>
-            <textarea
+            <Textarea
               value={cancelComment}
               onChange={(e) => setCancelComment(e.target.value)}
               placeholder="Anything else you'd like us to know? (optional)"
@@ -287,22 +295,22 @@ function BillingContent() {
               </p>
             </div>
             <div className="flex gap-2">
-              <button
+              <Button
                 type="button"
                 onClick={() => handleCancel("pause")}
                 disabled={cancelBusy}
                 className="flex-1 py-2 bg-primary hover:bg-primary/90 disabled:opacity-50 text-foreground text-sm font-medium rounded-lg transition-colors"
               >
                 Pause instead
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
                 onClick={() => handleCancel("cancel")}
                 disabled={cancelBusy || !cancelReason}
                 className="flex-1 py-2 bg-red-900/60 hover:bg-red-900 disabled:opacity-50 text-red-200 text-sm font-medium rounded-lg transition-colors"
               >
                 {cancelBusy ? "Working…" : "Cancel at period end"}
-              </button>
+              </Button>
             </div>
           </div>
         </Modal>
@@ -367,13 +375,13 @@ function BillingContent() {
                 ))}
               </ul>
               {isCurrent ? (
-                <button
+                <Button
                   type="button"
                   disabled
                   className="py-2 rounded-lg text-sm font-medium bg-secondary text-muted-foreground cursor-default"
                 >
                   Current plan
-                </button>
+                </Button>
               ) : plan.cta ? (
                 <a
                   href="mailto:hello@example.com"
@@ -382,7 +390,7 @@ function BillingContent() {
                   {plan.cta}
                 </a>
               ) : plan.priceId ? (
-                <button
+                <Button
                   type="button"
                   onClick={() => handleCheckout(plan.priceId!)}
                   disabled={checkoutLoading === plan.priceId}
@@ -393,15 +401,15 @@ function BillingContent() {
                   }`}
                 >
                   {checkoutLoading === plan.priceId ? "Loading…" : `Upgrade to ${plan.name}`}
-                </button>
+                </Button>
               ) : (
-                <button
+                <Button
                   type="button"
                   disabled
                   className="py-2 rounded-lg text-sm font-medium bg-secondary text-muted-foreground cursor-default"
                 >
                   Free forever
-                </button>
+                </Button>
               )}
             </div>
           );

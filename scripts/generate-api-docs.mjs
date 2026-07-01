@@ -17,6 +17,11 @@ const spec = JSON.parse(readFileSync(path.join(root, "src/api/openapi.json"), "u
 
 const METHOD_ORDER = ["get", "post", "put", "patch", "delete", "options", "head"];
 const rootSecured = Array.isArray(spec.security) && spec.security.length > 0;
+const tagDescriptions = new Map(
+  (Array.isArray(spec.tags) ? spec.tags : [])
+    .filter((tag) => typeof tag?.name === "string")
+    .map((tag) => [tag.name, typeof tag.description === "string" ? tag.description.trim() : ""])
+);
 
 /** Collect operations grouped by their first tag. */
 const groups = new Map();
@@ -51,12 +56,11 @@ lines.push(`**${opCount} operations** across ${tags.length} groups.`);
 lines.push("");
 lines.push(
   "> **Coverage note:** this lists the operations currently described in " +
-    "`openapi.json` (auth/admin/MFA/sessions/OAuth + organizations). Several " +
-    "mounted route modules — billing, wallet, search, collaboration, compliance, " +
-    "etc. — are not yet in the spec; see the [README API overview](../README.md#api-overview) " +
-    "and `src/api/server.ts` for the full mounted surface. Expanding `openapi.json` " +
-    "to the whole API (so the SDK + this reference cover it) is tracked as an " +
-    "Integration-Completion (D5) follow-up."
+    "`openapi.json`. Coverage includes auth/admin/MFA/sessions/OAuth, organizations, " +
+    "billing, wallet, search, compliance, support, feedback, notifications, GDPR, " +
+    "regions, and API keys. Some lower-traffic admin/tools, webhook, tenant, and " +
+    "email-event routes may still require schema-level expansion; see " +
+    "`src/api/server.ts` for the full mounted surface."
 );
 lines.push("");
 lines.push("## Contents");
@@ -70,6 +74,11 @@ lines.push("");
 for (const tag of tags) {
   lines.push(`## ${tag}`);
   lines.push("");
+  const description = tagDescriptions.get(tag);
+  if (description) {
+    lines.push(description);
+    lines.push("");
+  }
   lines.push("| Method | Path | Summary | Auth |");
   lines.push("| --- | --- | --- | --- |");
   const rows = groups

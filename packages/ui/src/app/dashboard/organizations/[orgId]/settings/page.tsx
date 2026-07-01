@@ -2,6 +2,8 @@
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { SkeletonCard } from "@/components/Skeleton";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -119,7 +121,7 @@ export default function OrgSettingsPage() {
         setLoading(false);
       }
     }
-    fetchAll();
+    void fetchAll();
   }, [orgId]);
 
   async function handleSavePolicy(e: React.FormEvent) {
@@ -249,7 +251,7 @@ export default function OrgSettingsPage() {
           <label htmlFor="page-f0" className="text-xs text-muted-foreground">
             Organization name
           </label>
-          <input
+          <Input
             id="page-f0"
             value={editName}
             onChange={(e) => setEditName(e.target.value)}
@@ -260,7 +262,7 @@ export default function OrgSettingsPage() {
           <label htmlFor="page-f1" className="text-xs text-muted-foreground">
             Billing email
           </label>
-          <input
+          <Input
             id="page-f1"
             type="email"
             value={editBillingEmail}
@@ -273,7 +275,7 @@ export default function OrgSettingsPage() {
           <label htmlFor="page-f2" className="text-xs text-muted-foreground">
             Logo URL
           </label>
-          <input
+          <Input
             id="page-f2"
             type="url"
             value={editLogoUrl}
@@ -282,13 +284,13 @@ export default function OrgSettingsPage() {
             className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-ring"
           />
         </div>
-        <button
+        <Button
           type="submit"
           disabled={saving}
           className="bg-primary hover:bg-primary/90 disabled:opacity-50 text-primary-foreground text-sm px-4 py-2 rounded-lg transition-colors"
         >
           {saving ? "Saving…" : "Save changes"}
-        </button>
+        </Button>
       </form>
 
       {/* Passkey security policy — admin+ */}
@@ -305,8 +307,12 @@ export default function OrgSettingsPage() {
             </p>
           </div>
 
-          <label className="flex items-start gap-3 cursor-pointer">
-            <input
+          <label
+            htmlFor="require-passkey-attestation"
+            className="flex items-start gap-3 cursor-pointer"
+          >
+            <Input
+              id="require-passkey-attestation"
               type="checkbox"
               checked={policy.requirePasskeyAttestation}
               onChange={(e) =>
@@ -323,8 +329,12 @@ export default function OrgSettingsPage() {
             </span>
           </label>
 
-          <label className="flex items-start gap-3 cursor-pointer">
-            <input
+          <label
+            htmlFor="require-hardware-passkey"
+            className="flex items-start gap-3 cursor-pointer"
+          >
+            <Input
+              id="require-hardware-passkey"
               type="checkbox"
               checked={policy.requireHardwarePasskey}
               onChange={(e) => setPolicy({ ...policy, requireHardwarePasskey: e.target.checked })}
@@ -342,7 +352,7 @@ export default function OrgSettingsPage() {
             <label htmlFor="page-f3" className="text-xs text-muted-foreground">
               Allowed AAGUIDs (comma or space separated — leave blank to allow all)
             </label>
-            <input
+            <Input
               id="page-f3"
               value={allowedAaguids}
               onChange={(e) => setAllowedAaguids(e.target.value)}
@@ -355,7 +365,7 @@ export default function OrgSettingsPage() {
             <label htmlFor="page-f4" className="text-xs text-muted-foreground">
               Denied AAGUIDs
             </label>
-            <input
+            <Input
               id="page-f4"
               value={deniedAaguids}
               onChange={(e) => setDeniedAaguids(e.target.value)}
@@ -368,7 +378,7 @@ export default function OrgSettingsPage() {
             <label htmlFor="page-f5" className="text-xs text-muted-foreground">
               IP allowlist (IPv4 CIDRs, comma or space separated — leave blank to allow all)
             </label>
-            <input
+            <Input
               id="page-f5"
               value={ipAllowlist}
               onChange={(e) => setIpAllowlist(e.target.value)}
@@ -391,7 +401,7 @@ export default function OrgSettingsPage() {
                 <label htmlFor="page-f6" className="text-xs text-muted-foreground">
                   Max session age (minutes)
                 </label>
-                <input
+                <Input
                   id="page-f6"
                   type="number"
                   min={0}
@@ -409,7 +419,7 @@ export default function OrgSettingsPage() {
                 <label htmlFor="page-f7" className="text-xs text-muted-foreground">
                   Idle timeout (minutes)
                 </label>
-                <input
+                <Input
                   id="page-f7"
                   type="number"
                   min={0}
@@ -427,7 +437,7 @@ export default function OrgSettingsPage() {
                 <label htmlFor="page-f8" className="text-xs text-muted-foreground">
                   Max concurrent sessions
                 </label>
-                <input
+                <Input
                   id="page-f8"
                   type="number"
                   min={0}
@@ -447,7 +457,7 @@ export default function OrgSettingsPage() {
                 Allowed countries (ISO 3166-1 alpha-2, comma or space separated — leave blank to
                 allow all)
               </label>
-              <input
+              <Input
                 id="page-f9"
                 value={allowedCountries}
                 onChange={(e) => setAllowedCountries(e.target.value)}
@@ -457,13 +467,13 @@ export default function OrgSettingsPage() {
             </div>
           </div>
 
-          <button
+          <Button
             type="submit"
             disabled={savingPolicy}
             className="bg-primary hover:bg-primary/90 disabled:opacity-50 text-primary-foreground text-sm px-4 py-2 rounded-lg transition-colors"
           >
             {savingPolicy ? "Saving…" : "Save security policy"}
-          </button>
+          </Button>
         </form>
       )}
 
@@ -492,13 +502,13 @@ export default function OrgSettingsPage() {
               </SelectContent>
             </Select>
           </div>
-          <button
+          <Button
             type="submit"
             disabled={!transferTo || transferring}
             className="bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-foreground text-sm px-4 py-2 rounded-lg transition-colors"
           >
             {transferring ? "Transferring…" : "Transfer ownership"}
-          </button>
+          </Button>
         </form>
       )}
 
@@ -517,7 +527,7 @@ export default function OrgSettingsPage() {
             <label htmlFor="page-f12" className="text-xs text-muted-foreground">
               Type <span className="font-mono text-foreground">{org.name}</span> to confirm
             </label>
-            <input
+            <Input
               id="page-f12"
               value={deleteConfirm}
               onChange={(e) => setDeleteConfirm(e.target.value)}
@@ -525,13 +535,13 @@ export default function OrgSettingsPage() {
               className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-red-500"
             />
           </div>
-          <button
+          <Button
             type="submit"
             disabled={deleteConfirm !== org.name || deleting}
             className="bg-red-700 hover:bg-red-600 disabled:opacity-50 text-foreground text-sm px-4 py-2 rounded-lg transition-colors"
           >
             {deleting ? "Deleting…" : "Delete organization"}
-          </button>
+          </Button>
         </form>
       )}
     </div>

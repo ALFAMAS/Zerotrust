@@ -2,6 +2,8 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { SkeletonCard } from "@/components/Skeleton";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useToast } from "@/context/ToastContext";
 import { api } from "../../../lib/api";
 
@@ -102,13 +104,13 @@ export default function OrganizationsPage() {
         <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
           Organizations
         </h1>
-        <button
+        <Button
           type="button"
           onClick={() => setShowCreateForm((v) => !v)}
           className="text-sm bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-lg transition-colors"
         >
           {showCreateForm ? "Cancel" : "Create organization"}
-        </button>
+        </Button>
       </div>
 
       {showCreateForm && (
@@ -121,7 +123,7 @@ export default function OrganizationsPage() {
             <label htmlFor="page-f0" className="text-xs text-muted-foreground">
               Name
             </label>
-            <input
+            <Input
               id="page-f0"
               value={orgName}
               onChange={(e) => handleNameChange(e.target.value)}
@@ -134,7 +136,7 @@ export default function OrganizationsPage() {
             <label htmlFor="page-f1" className="text-xs text-muted-foreground">
               Slug (optional — auto-generated from name)
             </label>
-            <input
+            <Input
               id="page-f1"
               value={orgSlug}
               onChange={(e) => {
@@ -151,13 +153,13 @@ export default function OrganizationsPage() {
               </p>
             )}
           </div>
-          <button
+          <Button
             type="submit"
             disabled={creating || !orgName.trim()}
             className="bg-primary hover:bg-primary/90 disabled:opacity-50 text-primary-foreground text-sm px-4 py-2 rounded-lg transition-colors"
           >
             {creating ? "Creating…" : "Create"}
-          </button>
+          </Button>
         </form>
       )}
 
@@ -170,13 +172,13 @@ export default function OrganizationsPage() {
       ) : orgs.length === 0 ? (
         <div className="text-center py-16 text-muted-foreground">
           <p className="mb-3">You don&apos;t belong to any organizations yet.</p>
-          <button
+          <Button
             type="button"
             onClick={() => setShowCreateForm(true)}
             className="text-sm text-primary hover:text-primary/80 underline"
           >
             Create your first organization
-          </button>
+          </Button>
         </div>
       ) : (
         <div className="space-y-3">

@@ -19,6 +19,7 @@ import {
   ALLOWED_UPLOAD_CONTENT_TYPES,
   safeExtensionForContentType,
 } from "../../services/uploadSafety";
+import { invalidateUserCache } from "../../services/userStateCache.service";
 import { countRows } from "../../shared/dbCount";
 import { internalError } from "../../shared/httpErrors";
 import { paginated, parsePaginatedQuery } from "../../shared/pagination";
@@ -194,6 +195,7 @@ router.patch("/users/:id", async (c) => {
     if (rows.length === 0) {
       return c.json({ error: "USER_NOT_FOUND", message: "User not found" }, 404);
     }
+    await invalidateUserCache(c.req.param("id"));
     return c.json(rows[0]);
   } catch (err) {
     return internalError(c, logger, "Admin update user error", err, "Failed to update user");
@@ -215,6 +217,7 @@ router.delete("/users/:id", async (c) => {
       return c.json({ error: "USER_NOT_FOUND", message: "User not found" }, 404);
     }
 
+    await invalidateUserCache(id);
     await revokeAllSessionsForUser(id);
     return c.json({ deleted: true, userId: id });
   } catch (err) {
@@ -444,6 +447,7 @@ router.post("/users/:id/roles", async (c) => {
         .update(usersTable)
         .set({ roles: updatedRoles, updatedAt: new Date() })
         .where(eq(usersTable.id, userId));
+      await invalidateUserCache(userId);
       return c.json({ success: true, roles: updatedRoles });
     }
 
@@ -475,6 +479,7 @@ router.delete("/users/:id/roles/:roleName", async (c) => {
       .update(usersTable)
       .set({ roles: updatedRoles, updatedAt: new Date() })
       .where(eq(usersTable.id, userId));
+    await invalidateUserCache(userId);
     return c.json({ success: true, roles: updatedRoles });
   } catch (err) {
     return internalError(c, logger, "Admin revoke role error", err, "Failed to remove role");
