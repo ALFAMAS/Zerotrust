@@ -103,34 +103,6 @@ vi.mock("../services/accountTakeover.service", () => ({
     .mockResolvedValue({ flagged: false, recentEvents: [] }),
 }));
 
-vi.mock("../services/streak.service", () => ({
-  getStreak: vi.fn().mockResolvedValue({
-    currentStreak: 3,
-    longestStreak: 5,
-    lastLoginDate: "2026-06-24",
-  }),
-}));
-
-vi.mock("../services/achievement.service", () => ({
-  ACHIEVEMENT_DEFS: {
-    firstLogin: {
-      key: "first_login",
-      label: "First Login",
-      description: "Logged in for the first time",
-      icon: "👋",
-    },
-    powerUser: {
-      key: "power_user",
-      label: "Power User",
-      description: "Reached a 7-day streak",
-      icon: "⚡",
-    },
-  },
-  getUserAchievements: vi.fn().mockResolvedValue([
-    { key: "first_login", unlockedAt: new Date("2026-06-24T00:00:00Z") },
-  ]),
-}));
-
 // ── Helpers ────────────────────────────────────────────────────────────────
 
 const USER_ID = "00000000-0000-0000-0000-000000000001";

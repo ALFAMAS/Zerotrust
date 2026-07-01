@@ -222,7 +222,7 @@ export async function createServer() {
   app.route("/search", searchRoutes);
 
   // ─── Wallet, Loyalty, Referral, Gamification ──────────────────────────────
-  // Wallet, points, tiers, redemptions, referrals.
+  // Wallet.
   app.route("/wallet", walletRoutes);
 
   // ─── Compliance ────────────────────────────────────────────────────────────

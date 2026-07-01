@@ -1,6 +1,5 @@
 "use client";
 import {
-  Award,
   Bell,
   Building2,
   CreditCard,
@@ -10,7 +9,6 @@ import {
   Monitor,
   Plug,
   Search,
-  Share2,
   ShieldCheck,
   ShieldQuestion,
   User,
@@ -44,9 +42,7 @@ const navItems: NavItem[] = [
   { href: "/dashboard/api-keys", label: "API Keys", icon: KeyRound },
   { href: "/dashboard/webhooks", label: "Webhooks", icon: Webhook },
   { href: "/dashboard/billing", label: "Billing", icon: CreditCard },
-  { href: "/dashboard/points", label: "Points & Rewards", icon: Award },
   { href: "/dashboard/wallet", label: "Wallet", icon: Wallet },
-  { href: "/dashboard/referrals", label: "Referrals", icon: Share2 },
   { href: "/dashboard/jit", label: "Cross-tenant", icon: ShieldQuestion },
   { href: "/dashboard/settings", label: "Connected Apps", icon: Plug },
   { href: "/dashboard/support", label: "Support", icon: LifeBuoy },

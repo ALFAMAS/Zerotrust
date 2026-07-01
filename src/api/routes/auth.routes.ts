@@ -274,39 +274,7 @@ async function issueAuthenticatedSession(
 
   await db.update(usersTable).set({ lastLoginAt: new Date() }).where(eq(usersTable.id, user.id));
 
-  // Streak tracking + achievement checks — fire and forget, never blocks login.
-  void (async () => {
-    try {
-      const { recordLogin } = await import("../../services/streak.service.js");
-      const { unlockAchievement } = await import("../../services/achievement.service.js");
-      const { awardPoints } = await import("../../services/points.service.js");
 
-      const streak = await recordLogin(user.id);
-
-      // First Login achievement
-      await unlockAchievement(user.id, "first_login");
-
-      // Power User achievement (7-day streak)
-      if (streak.currentStreak >= 7) {
-        await unlockAchievement(user.id, "power_user");
-      }
-
-      // Award daily login points
-      await awardPoints({
-        userId: user.id,
-        amount: 10,
-        reason: "daily_login",
-        description: `Day ${streak.currentStreak} login streak`,
-      });
-    } catch (err) {
-      logger.warn("Post-login streak/achievement error", {
-        userId: user.id,
-        error: String(err),
-      });
-    }
-  })();
-
-  // New-device alert email — fire and forget, never blocks the response
   void notifyIfNewDevice({
     userId: user.id,
     email: user.email,
@@ -1118,42 +1086,6 @@ router.post("/oauth/exchange", rateLimit({ points: 10, windowSecs: 60 }), async 
   }
 });
 
-// ── GET /auth/me/streak ───────────────────────────────────────────────────────
-router.get("/me/streak", authMiddleware, async (c) => {
-  try {
-    const user = c.get("user");
-    const { getStreak } = await import("../../services/streak.service.js");
-    const streak = await getStreak(user.id);
-    return c.json({ streak });
-  } catch (err) {
-    return internalError(c, logger, "Get streak error", err);
-  }
-});
-
-// ── GET /auth/me/achievements ─────────────────────────────────────────────────
-router.get("/me/achievements", authMiddleware, async (c) => {
-  try {
-    const user = c.get("user");
-    const { getUserAchievements, ACHIEVEMENT_DEFS } = await import(
-      "../../services/achievement.service.js"
-    );
-    const unlocked = await getUserAchievements(user.id);
-    const achievements = Object.values(ACHIEVEMENT_DEFS).map((def) => {
-      const found = unlocked.find((u: any) => u.key === def.key);
-      return {
-        key: def.key,
-        label: def.label,
-        description: def.description,
-        icon: def.icon,
-        unlockedAt: found?.unlockedAt ?? null,
-      };
-    });
-    return c.json({ achievements });
-  } catch (err) {
-    return internalError(c, logger, "Get achievements error", err);
-  }
-});
-
 // ── GET /auth/me ──────────────────────────────────────────────────────────────
 
 router.get("/me", authMiddleware, async (c) => {
@@ -1321,19 +1253,6 @@ router.post("/me/onboarding-complete", authMiddleware, async (c) => {
       },
       500
     );
-  }
-});
-
-// ── GET /auth/me/points ───────────────────────────────────────────────────────
-router.get("/me/points", authMiddleware, async (c) => {
-  try {
-    const user = c.get("user");
-    const { getPointsBalance, getPointsHistory } = await import("../../services/points.service.js");
-    const balance = await getPointsBalance(user.id);
-    const { entries, total } = await getPointsHistory(user.id);
-    return c.json({ balance, history: entries, total });
-  } catch (err) {
-    return internalError(c, logger, "Get points error", err);
   }
 });
 

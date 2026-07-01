@@ -75,6 +75,13 @@ loyalty, globalization, search, compliance, audit, and ops tooling.
   `src/mfa/channels/{sms,whatsapp,telegram}.ts`, removed the `twilio` dependency
   from `package.json`, narrowed MFA schema types + config to email-only, updated
   11 test files. TOTP + Email OTP remain functional. E2 complete.
+- ✅ **Gamification removed (points/streaks/tiers/redemptions/referrals/achievements)** —
+  removed `points.service.ts`, `streak.service.ts`, `achievement.service.ts`,
+  `levelUp.service.ts`, `pointsLedger.repository.ts`; stripped points/tier/referral
+  routes from `wallet.routes.ts`; removed game tables from schema
+  (streaks, points_ledger, achievements, tiers, user_tiers, redemptions_catalog,
+  redemptions, referrals, referral_tracking); cleaned auth login handler and
+  test files. **Wallet** (balance, top-up, spend, transactions) preserved. H2 complete.
 - ✅ **Repository layer expanded** — 4 repositories now wrapping hot-path writes
   in `db.transaction`: `authSessions.repository.ts` (token rotation/revocation),
   `stripeEvents.repository.ts` (webhook idempotency), `pointsLedger.repository.ts`

@@ -335,21 +335,7 @@ export async function seedRiskAssessment(year: number): Promise<void> {
       owner: "security-team",
       status: "mitigated",
     },
-    {
-      year,
-      riskId: "R-009",
-      category: "security",
-      title: "Referral fraud",
-      description: "Self-referrals, same-IP abuse",
-      likelihood: 3,
-      impact: 2,
-      riskScore: 6,
-      treatment: "mitigate",
-      mitigation: "Same-IP detection, referredBy validation, fraud detection service",
-      owner: "growth-team",
-      status: "open",
-    },
-    {
+  {
       year,
       riskId: "R-010",
       category: "availability",

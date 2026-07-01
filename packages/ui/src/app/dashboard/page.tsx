@@ -1,19 +1,15 @@
 "use client";
-import { Award, KeyRound, Monitor, ShieldCheck, User } from "lucide-react";
+import { KeyRound, Monitor, ShieldCheck, User, Wallet } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { AchievementBadges } from "@/components/AchievementBadges";
 import { ProgressBars } from "@/components/ProgressBars";
 import SetupChecklist from "@/components/SetupChecklist";
 import { SkeletonCard, SkeletonText } from "@/components/Skeleton";
-import { StreakDisplay } from "@/components/StreakDisplay";
 import { api } from "../../lib/api";
 
 export default function DashboardPage() {
   const [user, setUser] = useState<any>(null);
   const [sessions, setSessions] = useState<any[]>([]);
-  const [streak, setStreak] = useState<any>(null);
-  const [achievements, setAchievements] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -25,14 +21,6 @@ export default function DashboardPage() {
       api
         .get<any>("/sessions")
         .then((d) => setSessions(d.data || d.sessions || d || []))
-        .catch(() => {}),
-      api
-        .get<any>("/auth/me/streak")
-        .then((d) => setStreak(d.streak))
-        .catch(() => {}),
-      api
-        .get<any>("/auth/me/achievements")
-        .then((d) => setAchievements(d.achievements || []))
         .catch(() => {}),
     ]).finally(() => setLoading(false));
   }, []);
@@ -63,8 +51,6 @@ export default function DashboardPage() {
     { label: "MFA", value: user?.mfa?.totp?.enabled ? "Enabled" : "Off", icon: ShieldCheck },
     { label: "Passkeys", value: user?.passkeys?.length ?? 0, icon: KeyRound },
   ];
-
-  const unlockedAchievements = achievements.filter((a) => a.unlockedAt);
 
   const quickLinks = [
     {
@@ -102,12 +88,6 @@ export default function DashboardPage() {
       {/* Progress bars */}
       <ProgressBars user={user} />
 
-      {/* Streak display */}
-      {streak && <StreakDisplay streak={streak} />}
-
-      {/* Achievement badges */}
-      {unlockedAchievements.length > 0 && <AchievementBadges achievements={unlockedAchievements} />}
-
       <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-3">
         {stats.map((stat) => (
           <div
@@ -142,14 +122,14 @@ export default function DashboardPage() {
             </Link>
           ))}
           <Link
-            href="/dashboard/points"
+            href="/dashboard/wallet"
             className="flex items-start gap-3 rounded-xl border border-border bg-background p-4 transition-colors hover:border-primary/50"
           >
-            <Award className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+            <Wallet className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
             <div>
-              <span className="block text-sm font-medium text-foreground">Points & Rewards</span>
+              <span className="block text-sm font-medium text-foreground">Wallet</span>
               <span className="mt-0.5 block text-xs text-muted-foreground">
-                View your points history and achievements
+                Manage your balance and transactions
               </span>
             </div>
           </Link>

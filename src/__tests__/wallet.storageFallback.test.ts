@@ -12,9 +12,6 @@ vi.mock("../logger", () => ({
 
 import { getDb } from "../db";
 import {
-  getCurrentTier,
-  getPointsBalance,
-  getPointsHistory,
   getWallet,
   getWalletTransactions,
 } from "../services/wallet.service";
@@ -53,7 +50,6 @@ describe("wallet storage fallbacks", () => {
       lifetimeBalance: 0,
       currency: "usd",
       autoTopUp: false,
-      tier: null,
     });
   });
 
@@ -63,26 +59,5 @@ describe("wallet storage fallbacks", () => {
     );
 
     await expect(getWalletTransactions("user-1")).resolves.toEqual([]);
-  });
-
-  it("returns zero points when wallet storage is unavailable", async () => {
-    vi.mocked(getDb).mockReturnValue(selectChain("limit", missingStorage("wallets")) as any);
-
-    await expect(getPointsBalance("user-1")).resolves.toEqual({
-      balance: 0,
-      lifetimeBalance: 0,
-    });
-  });
-
-  it("returns empty points history when the points ledger is unavailable", async () => {
-    vi.mocked(getDb).mockReturnValue(selectChain("offset", missingStorage("points_ledger")) as any);
-
-    await expect(getPointsHistory("user-1")).resolves.toEqual([]);
-  });
-
-  it("returns no tier when tier storage is unavailable", async () => {
-    vi.mocked(getDb).mockReturnValue(selectChain("limit", missingStorage("user_tiers")) as any);
-
-    await expect(getCurrentTier("user-1")).resolves.toBeNull();
   });
 });

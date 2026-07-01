@@ -14,31 +14,6 @@ Sorted easiest → hardest within each tier.
 
 ---
 
-## Easy — Low effort, meaningful impact
-
-### E1 — Remove Blog + changelog marketing pages — _Status: Done (2026-07-01)_
-
-- **Source:** `docs/MAINTENANCE_FEATURE_AUDIT.md` #6 (Tier 2)
-- **Why:** Pure marketing UI — `app/blog` (+ `[slug]`), `app/changelog` (~400 LOC
-  - MDX data). Most teams replace these with their own marketing stack. Zero
-    backend coupling.
-- **Impact:** ~400 LOC removed, 0 deps dropped, 0 DB tables affected.
-- **Acceptance:** Delete UI files + nav entries + MDX data; update README.
-- **Risk:** None — no backend or DB dependency.
-
-### E2 — Consolidate MFA channels — drop SMS/WhatsApp/Telegram OTP — _Status: Done (2026-07-01)_
-
-- **Source:** `docs/MAINTENANCE_FEATURE_AUDIT.md` #8 (Tier 3)
-- **Why:** TOTP + Email OTP cover the vast majority of MFA needs. The `twilio`
-  dependency exists **only** for SMS/WhatsApp OTP (~250 LOC across
-  `src/mfa/channels/sms.ts`, `whatsapp.ts`, `telegram.ts`). Dropping these three
-  channels removes `twilio` and keeps MFA fully functional.
-- **Impact:** ~250 LOC removed, 1 npm dep dropped (`twilio`), 0 DB tables affected.
-- **Acceptance:** Delete SMS/WhatsApp/Telegram channel files + `twilio` from
-  `package.json`; verify TOTP + Email OTP still work.
-- **Risk:** Low — channel registry is pluggable, removal is localized.
-
----
 
 ## Medium — Moderate effort, high maintainability payoff
 
@@ -69,7 +44,7 @@ Sorted easiest → hardest within each tier.
 
 ---
 
-### H2 — Remove loyalty/points/referrals/streaks — _Status: Pending_
+### H2 — Remove Wallet/loyalty/points/referrals/streaks — _Status: Done (2026-07-01)_
 
 - **Source:** `docs/MAINTENANCE_FEATURE_AUDIT.md` #1 (Tier 1)
 - **Why:** Gamification/loyalty is product-specific growth tooling, not identity

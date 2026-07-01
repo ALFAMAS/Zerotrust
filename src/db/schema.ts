@@ -715,66 +715,6 @@ export const pushSubscriptionsTable = pgTable("push_subscriptions", {
   lastUsedAt: timestamp("last_used_at", { withTimezone: true }),
 });
 
-// ── Login streaks ──────────────────────────────────────────────────────────────
-// Tracks daily login streak per user with a 1-day grace period.
-
-export const streaksTable = pgTable("streaks", {
-  userId: uuid("user_id")
-    .primaryKey()
-    .references(() => usersTable.id, { onDelete: "cascade" }),
-  currentStreak: integer("current_streak").notNull().default(0),
-  longestStreak: integer("longest_streak").notNull().default(0),
-  lastLoginDate: text("last_login_date"), // ISO date string YYYY-MM-DD
-  lastLoginAt: timestamp("last_login_at", { withTimezone: true }),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().default(sql`now()`),
-});
-
-// ── Points ledger ──────────────────────────────────────────────────────────────
-// Append-only log of every points change for a user. The running balance is
-// computed by summing rows — this design gives us a full audit trail and makes
-// it trivial to build a points history page.
-
-export const pointsLedgerTable = pgTable(
-  "points_ledger",
-  {
-    id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
-    userId: uuid("user_id")
-      .notNull()
-      .references(() => usersTable.id, { onDelete: "cascade" }),
-    amount: integer("amount").notNull(), // positive = earned, negative = spent
-    balance: integer("balance").notNull(), // running balance after this entry
-    reason: text("reason").notNull(), // "daily_login" | "referral" | "achievement" | "redemption" | …
-    description: text("description"),
-    metadata: jsonb("metadata"),
-    createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
-  },
-  (t) => ({
-    pointsLedgerUserIdCreatedIdx: index("points_ledger_user_id_created_idx").on(
-      t.userId,
-      t.createdAt
-    ),
-  })
-);
-
-// ── Achievements ──────────────────────────────────────────────────────────────
-// Tracks which achievements a user has unlocked and when.
-
-export const achievementsTable = pgTable(
-  "achievements",
-  {
-    id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
-    userId: uuid("user_id")
-      .notNull()
-      .references(() => usersTable.id, { onDelete: "cascade" }),
-    key: text("key").notNull(), // "first_login" | "power_user" | "early_adopter" | …
-    unlockedAt: timestamp("unlocked_at", { withTimezone: true }).notNull().default(sql`now()`),
-  },
-  (t) => ({
-    achievementsUserKeyUnq: unique().on(t.userId, t.key),
-    achievementsUserIdIdx: index("achievements_user_id_idx").on(t.userId),
-  })
-);
 
 // ── Trusted devices per org ──────────────────────────────────────────────────
 
@@ -935,7 +875,7 @@ export const walletTransactionsTable = pgTable(
       .references(() => usersTable.id, { onDelete: "cascade" }),
     amount: integer("amount").notNull(), // positive = top-up, negative = spend
     balanceAfter: integer("balance_after").notNull(),
-    type: text("type").notNull(), // "top_up" | "spend" | "refund" | "referral_credit" | "tier_bonus"
+    type: text("type").notNull(), // "top_up" | "spend" | "refund"
     description: text("description"),
     stripePaymentIntentId: text("stripe_payment_intent_id"),
     metadata: jsonb("metadata"),
@@ -946,125 +886,6 @@ export const walletTransactionsTable = pgTable(
       t.userId,
       t.createdAt
     ),
-  })
-);
-
-// ── Tier system ───────────────────────────────────────────────────────────────
-// Bronze / Silver / Gold / Platinum tiers with perks.
-
-export const tiersTable = pgTable("tiers", {
-  key: text("key").primaryKey(), // "bronze" | "silver" | "gold" | "platinum"
-  name: text("name").notNull(),
-  description: text("description"),
-  minPoints: integer("min_points").notNull(), // points required to reach this tier
-  multiplier: integer("multiplier").notNull().default(100), // points earning multiplier (100 = 1x)
-  perks: jsonb("perks").$type<string[]>().notNull().default(sql`'[]'::jsonb`),
-  color: text("color"), // hex color for badge display
-  icon: text("icon"), // lucide icon name
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
-});
-
-export const userTiersTable = pgTable("user_tiers", {
-  userId: uuid("user_id")
-    .primaryKey()
-    .references(() => usersTable.id, { onDelete: "cascade" }),
-  tierKey: text("tier_key")
-    .notNull()
-    .references(() => tiersTable.key, { onDelete: "restrict" }),
-  achievedAt: timestamp("achieved_at", { withTimezone: true }).notNull().default(sql`now()`),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
-});
-
-// ── Redemption catalog ────────────────────────────────────────────────────────
-// Items users can redeem with points.
-
-export const redemptionsCatalogTable = pgTable("redemptions_catalog", {
-  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
-  key: text("key").notNull().unique(), // "account_credit_5" | "feature_unlock" | "extended_trial" | "swag_code"
-  name: text("name").notNull(),
-  description: text("description"),
-  cost: integer("cost").notNull(), // points required
-  type: text("type").notNull(), // "account_credit" | "feature_unlock" | "extended_trial" | "swag"
-  value: jsonb("value").$type<{
-    cents?: number;
-    days?: number;
-    feature?: string;
-    code?: string;
-  }>(),
-  active: boolean("active").notNull().default(true),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
-});
-
-export const redemptionsTable = pgTable(
-  "redemptions",
-  {
-    id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
-    userId: uuid("user_id")
-      .notNull()
-      .references(() => usersTable.id, { onDelete: "cascade" }),
-    catalogId: uuid("catalog_id")
-      .notNull()
-      .references(() => redemptionsCatalogTable.id, { onDelete: "restrict" }),
-    pointsSpent: integer("points_spent").notNull(),
-    status: text("status").notNull().default("completed"), // "completed" | "pending" | "failed"
-    fulfilledAt: timestamp("fulfilled_at", { withTimezone: true }),
-    metadata: jsonb("metadata"),
-    createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
-  },
-  (t) => ({
-    redemptionsUserIdCreatedIdx: index("redemptions_user_id_created_idx").on(t.userId, t.createdAt),
-  })
-);
-
-// ── Referrals ─────────────────────────────────────────────────────────────────
-// Unique referral links, tracking, and reward attribution.
-
-export const referralsTable = pgTable(
-  "referrals",
-  {
-    id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
-    referrerUserId: uuid("referrer_user_id")
-      .notNull()
-      .references(() => usersTable.id, { onDelete: "cascade" }),
-    code: text("code").notNull().unique(), // short signed link code
-    slug: text("slug").notNull().unique(), // URL-friendly slug
-    clicks: integer("clicks").notNull().default(0),
-    signups: integer("signups").notNull().default(0),
-    conversions: integer("conversions").notNull().default(0), // signed up + paid
-    rewardsEarned: integer("rewards_earned").notNull().default(0), // points earned from this link
-    active: boolean("active").notNull().default(true),
-    createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
-  },
-  (t) => ({
-    referralsReferrerIdx: index("referrals_referrer_idx").on(t.referrerUserId),
-    referralsCodeIdx: index("referrals_code_idx").on(t.code),
-  })
-);
-
-export const referralTrackingTable = pgTable(
-  "referral_tracking",
-  {
-    id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
-    referralId: uuid("referral_id")
-      .notNull()
-      .references(() => referralsTable.id, { onDelete: "cascade" }),
-    referredUserId: uuid("referred_user_id").references(() => usersTable.id, {
-      onDelete: "set null",
-    }),
-    ipAddress: text("ip_address"),
-    userAgent: text("user_agent"),
-    utmSource: text("utm_source"),
-    utmMedium: text("utm_medium"),
-    utmCampaign: text("utm_campaign"),
-    status: text("status").notNull().default("clicked"), // "clicked" | "signed_up" | "converted" | "rewarded"
-    clickedAt: timestamp("clicked_at", { withTimezone: true }).notNull().default(sql`now()`),
-    signedUpAt: timestamp("signed_up_at", { withTimezone: true }),
-    convertedAt: timestamp("converted_at", { withTimezone: true }),
-    createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
-  },
-  (t) => ({
-    referralTrackingReferralIdx: index("referral_tracking_referral_idx").on(t.referralId),
-    referralTrackingReferredIdx: index("referral_tracking_referred_idx").on(t.referredUserId),
   })
 );
 

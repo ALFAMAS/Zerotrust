@@ -12,25 +12,14 @@ vi.mock("../middleware/auth", () => ({
 }));
 
 vi.mock("../services/wallet.service", () => ({
-  getWallet: vi.fn().mockResolvedValue({ balance: 100, tier: null }),
+  getWallet: vi.fn().mockResolvedValue({ balance: 100, lifetimeBalance: 200, currency: "usd", autoTopUp: false }),
   getWalletTransactions: vi.fn().mockResolvedValue([]),
-  topUpWallet: vi.fn(),
-  spendFromWallet: vi.fn(),
-  getPointsBalance: vi.fn(),
-  getPointsHistory: vi.fn(),
-  getCurrentTier: vi.fn().mockResolvedValue(null),
-  getRedemptionCatalog: vi.fn(),
-  redeemItem: vi.fn(),
-  createReferralLink: vi.fn().mockResolvedValue({ code: "ABCD1234", slug: "my-link" }),
-  getReferralDashboard: vi
-    .fn()
-    .mockResolvedValue({ totals: { clicks: 3, signups: 1, conversions: 1, rewards: 500 }, links: [] }),
-  getReferralBySlug: vi.fn(),
-  trackReferralClick: vi.fn(),
+  topUpWallet: vi.fn().mockResolvedValue({ balance: 150, transactionId: "tx-1" }),
+  spendFromWallet: vi.fn().mockResolvedValue({ balance: 50, transactionId: "tx-2" }),
+  countWalletTransactions: vi.fn().mockResolvedValue(0),
 }));
 
 import walletRoutes from "../api/routes/wallet.routes";
-import { createReferralLink, getReferralDashboard } from "../services/wallet.service";
 
 function app() {
   const a = new Hono();
@@ -40,39 +29,50 @@ function app() {
 
 beforeEach(() => vi.clearAllMocks());
 
-describe("wallet referral routes — correct paths", () => {
-  it("GET /wallet/referrals/dashboard returns the dashboard (documented path)", async () => {
-    const res = await app().request("/wallet/referrals/dashboard", {
+describe("wallet routes", () => {
+  it("GET /wallet returns wallet balance", async () => {
+    const res = await app().request("/wallet", {
       headers: { "x-test-user-id": "user-1" },
     });
     expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body.totals.clicks).toBe(3);
-    expect(getReferralDashboard).toHaveBeenCalledWith("user-1");
+    expect(body.balance).toBe(100);
   });
 
-  it("POST /wallet/referrals creates a referral link (documented path)", async () => {
-    const res = await app().request("/wallet/referrals", {
-      method: "POST",
-      headers: { "x-test-user-id": "user-1", "content-type": "application/json" },
-      body: JSON.stringify({ slug: "my-link" }),
-    });
-    expect(res.status).toBe(201);
-    expect(createReferralLink).toHaveBeenCalledWith("user-1", "my-link");
-  });
-
-  it("the old mis-registered paths no longer resolve to referral handlers", async () => {
-    // GET /wallet/dashboard used to be the dashboard; it must now 404 so the
-    // route surface matches the README / generated SDK.
-    const stale = await app().request("/wallet/dashboard", {
+  it("GET /wallet/transactions returns paginated transactions", async () => {
+    const res = await app().request("/wallet/transactions", {
       headers: { "x-test-user-id": "user-1" },
     });
-    expect(stale.status).toBe(404);
-    expect(getReferralDashboard).not.toHaveBeenCalled();
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.data).toEqual([]);
+    expect(body.pagination.total).toBe(0);
   });
 
-  it("still requires authentication", async () => {
-    const res = await app().request("/wallet/referrals/dashboard");
+  it("POST /wallet/top-up adds funds", async () => {
+    const res = await app().request("/wallet/top-up", {
+      method: "POST",
+      headers: { "x-test-user-id": "user-1", "content-type": "application/json" },
+      body: JSON.stringify({ amount: 50 }),
+    });
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.balance).toBe(150);
+  });
+
+  it("POST /wallet/spend deducts funds", async () => {
+    const res = await app().request("/wallet/spend", {
+      method: "POST",
+      headers: { "x-test-user-id": "user-1", "content-type": "application/json" },
+      body: JSON.stringify({ amount: 50, description: "test spend" }),
+    });
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.balance).toBe(50);
+  });
+
+  it("requires authentication", async () => {
+    const res = await app().request("/wallet");
     expect(res.status).toBe(401);
   });
 });

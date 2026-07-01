@@ -36,7 +36,7 @@ import-reference counts excluding tests.
 | #   | Feature                                                                  |  Est. LOC | Dedicated deps dropped           | Coupling             | Verdict          |
 | --- | ------------------------------------------------------------------------ | --------: | -------------------------------- | -------------------- | ---------------- |
 | 0   | **Unused deps** (`samlify`, `@noble/post-quantum`)                       |   ~0 prod | `samlify`, `@noble/post-quantum` | none / barrel-only   | **Done**         |
-| 1   | **loyalty / points / referrals / streaks**                               |    ~1,500 | —                                | low (self-contained) | → **todo.md H2** |
+| 1   | **loyalty / points / referrals / streaks**                               |    ~1,500 | —                                | low (self-contained) | **Done** (wallet kept, gamification removed) |
 | 2   | **Collaboration** (notes, presence, mentions, activity feed)             |    ~1,100 | —                                | low                  | **Done**         |
 | 3   | **Decentralized identity** (`did:key` / `did:web`)                       |      ~700 | —                                | low                  | **Done**         |
 | 4   | **Globalization** (multi-currency, PPP, VAT/tax quotes)                  |    ~1,400 | —                                | medium (billing)     | → **todo.md H1** |
@@ -74,7 +74,7 @@ the `@noble/post-quantum` dependency.
 
 ## Tier 1 — Remove (heavy, niche, low coupling)
 
-### 1. loyalty / points / referrals / streaks — → **todo.md H2**
+### 1. loyalty / points / referrals / streaks — **Done** (wallet kept, gamification removed)
 
 - **What:** `points.service.ts` (133) +
   `streak.service.ts` (130) UI pages
