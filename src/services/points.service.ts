@@ -1,8 +1,8 @@
 import { desc, eq } from "drizzle-orm";
 import { getDb } from "../db";
+import { awardPoints as awardPointsTransactional } from "../db/repositories/pointsLedger.repository";
 import { pointsLedgerTable } from "../db/schema";
 import { getLogger } from "../logger";
-import { awardPoints as awardPointsTransactional } from "../db/repositories/pointsLedger.repository";
 
 const logger = getLogger("points-service");
 
