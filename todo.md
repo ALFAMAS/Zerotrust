@@ -118,17 +118,36 @@ Sorted easiest → hardest within each tier.
 
 ---
 
-### H3 — UI component / integration tests — _Status: In Progress (2026-07-01)_
+### H3 — UI component / integration tests — _Status: Done (2026-07-01)_
 
 - **Source:** `docs/AUDIT.md` T1, `todo.md` P3.1
 - **Why:** `packages/ui` had only `lib/*.test.ts` (plain logic); no component or
   page-level tests, so auth/billing/admin regressions can land silently.
-- **Done so far:** happy-dom + Testing Library harness stood up and enforced in
-  CI; 11 tests written — `SetupChecklist.test.tsx` (6 cases) and
-  `app/(auth)/login/page.test.tsx` (5 cases).
-- **Remaining:** Register/reset-password states, org role/invite forms,
-  billing/plan gates, admin tables — extend incrementally following the same
-  colocated test pattern.
-- **Acceptance:** Auth flows covered (register, reset, MFA); org flows covered
-  (invite, roles); billing gates covered; admin tables covered.
-- **Risk:** Low — test infra in place; no production code changed.
+- **Done:** happy-dom + Testing Library harness stood up and enforced in CI;
+  grew from 11 to 58 tests across 8 files, all colocated `*.test.tsx` next to
+  their component:
+  - `SetupChecklist.test.tsx` (6), `app/(auth)/login/page.test.tsx` (5) — prior work
+  - `app/(auth)/register/page.test.tsx` (5) — password-mismatch guard, register→login→token
+    flow, proof-of-work payload fields, error toast
+  - `app/(auth)/reset-password/page.test.tsx` (5) — token read from the URL via
+    `useSearchParams`, mismatch guard, success/error states
+  - `app/(auth)/forgot-password/page.test.tsx` (3) — request flow, and the
+    always-show-confirmation behavior that avoids account-enumeration even on API failure
+  - `app/dashboard/organizations/[orgId]/page.test.tsx` (6) — member list, invite
+    form gated to admin/owner, invite submission, leave-org with redirect
+  - `app/dashboard/billing/page.test.tsx` (9) — plan tiers, current-plan card only
+    on paid plans, cancel-reason-required gate, checkout redirect (env-gated Stripe
+    price via `vi.stubEnv` + dynamic re-import), success-banner query param
+  - `app/admin/users/page.test.tsx` (8) — table render/empty/error states,
+    search-triggers-refetch, suspend/activate toggle, delete-with-confirm, invite modal
+  - Established a `next/navigation` mock pattern (`useSearchParams`/`useParams`/`useRouter`)
+    for pages that weren't previously exercised under the happy-dom harness; confirmed
+    Radix `Select`/`Dialog` render fine without interaction (no portal/pointer-capture
+    polyfills needed for static assertions).
+- **Acceptance:** Auth flows covered (register, reset, forgot-password) ✅; org
+  flows covered (invite, roles, leave) ✅; billing gates covered ✅; admin
+  tables covered ✅. MFA-specific UI flows are not yet covered — tracked
+  separately since MFA UI work should land alongside the deferred MFA/WebAuthn
+  backend `as any` pass (see M1) rather than as a standalone test-only PR.
+- **Risk:** None realized — test infra in place, no production code changed;
+  full UI suite (58 tests, 8 files) and backend suite (773 tests) both green.
