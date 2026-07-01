@@ -64,7 +64,7 @@ Live, interactive docs: **Swagger UI at `/docs`** (dev). Full request/response t
 | --- | --- | --- | --- |
 | POST | `/auth/mfa/backup-codes/redeem` | Redeem a backup code for authentication |  |
 | POST | `/auth/mfa/backup-codes/regenerate` | Regenerate backup codes (invalidates existing ones) | 🔒 |
-| POST | `/auth/mfa/otp/send` | Send OTP via email, SMS, WhatsApp, or Telegram | 🔒 |
+| POST | `/auth/mfa/otp/send` | Send Email OTP | 🔒 |
 | POST | `/auth/mfa/otp/verify` | Verify channel OTP | 🔒 |
 | POST | `/auth/mfa/totp/disable` | Disable TOTP (requires valid TOTP code) | 🔒 |
 | POST | `/auth/mfa/totp/setup` | Initialize TOTP setup — returns secret and QR code | 🔒 |

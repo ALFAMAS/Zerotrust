@@ -1,7 +1,6 @@
 # Architecture
 
-Audited 2026-06-28, after the maintenance slim-down
-([`MAINTENANCE_FEATURE_AUDIT.md`](./MAINTENANCE_FEATURE_AUDIT.md)). Describes
+Audited 2026-06-28. Describes
 the system as it is today, then proposes upgrades. Forward-looking operational
 fixes that overlap with CI/deploy safety live in the backlog
 ([`../todo.md`](../todo.md)); the standing audit is [`AUDIT.md`](./AUDIT.md).
@@ -17,7 +16,7 @@ zerotrust is a **Bun monorepo** with three deployables:
 | `packages/client/` | Generated, dependency-free TypeScript SDK (from `src/api/openapi.json`) | — |
 
 It is a **modular monolith**: one API process exposes ~27 route modules backed
-by ~48 services and ~20 middleware, persisting to PostgreSQL (49 tables) with
+by ~45 services and ~21 middleware, persisting to PostgreSQL (41 tables) with
 Redis for sessions/rate-limiting/queue. There are no internal network hops
 between domains — modules call each other in-process.
 
@@ -31,8 +30,8 @@ between domains — modules call each other in-process.
                   ┌──────────────────────┬──────────────┼───────────────┬─────────────────┐
                   ▼                      ▼              ▼               ▼                 ▼
             PostgreSQL (5432)      Redis (6379)    Elasticsearch    S3-compatible    SMTP / Stripe /
-            Drizzle ORM            sessions·rate   (9200, optional) (backups·uploads) Twilio / web-push
-            49 tables              limit·BullMQ    audit·search                       (external)
+            Drizzle ORM            sessions·rate   (9200, optional) (backups·uploads) SMTP / web-push
+            41 tables              limit·BullMQ    audit·search                       (external)
 ```
 
 ## 2. Request lifecycle
@@ -58,11 +57,11 @@ read it via `c.get("user")`.
 | Area | Dir(s) | Responsibility |
 | --- | --- | --- |
 | HTTP | `api/` | Hono app, route mounting, OpenAPI spec |
-| Domain logic | `services/` (~48) | token, session, email/queue, MFA, OAuth, billing, wallet, globalization, search, compliance, backup, SLO, alerting… |
+| Domain logic | `services/` (~45) | token, session, email/queue, MFA, OAuth, billing, wallet, globalization, search, compliance, backup, SLO, alerting… |
 | Middleware | `middleware/` (~20) | auth, rate limiting, CSRF/headers, plan gating, abuse defense, API versioning |
-| Data | `db/` | Drizzle schema (49 tables) + connection; `models/` thin table re-exports |
+| Data | `db/` | Drizzle schema (41 tables) + connection; `models/` thin table re-exports |
 | Crypto | `crypto/` | `paseto-v4` (v4.local), `csfle` (field encryption), `hardware-key-store`, `codes` |
-| MFA | `mfa/` | TOTP, Email/SMS/WhatsApp/Telegram OTP channels, FIDO MDS3 |
+| MFA | `mfa/` | TOTP, Email OTP channel, FIDO MDS3 |
 | OAuth | `oauth/` | provider factory + adapters (Google/GitHub/Apple/Facebook) |
 | Access | `jit/` | cross-tenant just-in-time elevation |
 | Platform | `audit/` `metrics/` `telemetry/` `webhooks/` `notifications/` `ssf/` | hash-chained audit log, Prometheus, OTel, outbound webhooks, SSF receiver |
@@ -70,7 +69,7 @@ read it via `c.get("user")`.
 
 ## 4. State & data
 
-- **PostgreSQL** (Drizzle ORM, `postgres` driver) — system of record, 49 tables,
+- **PostgreSQL** (Drizzle ORM, `postgres` driver) — system of record, 41 tables,
   27 versioned migrations in `drizzle/`. Sensitive columns use **CSFLE**
   (client-side field encryption) with key-version rotation.
 - **Redis** (ioredis) — session validation cache (`session:{tokenId}` with
@@ -162,7 +161,7 @@ interim fix: guard each scheduler behind a Redis lock or
 
 ### P2 — Migration safety
 
-49 tables / 27 migrations, several recent ones `DROP … CASCADE`. Add a
+41 tables / 27 migrations, several recent ones `DROP … CASCADE`. Add a
 "deploy code that stops using the column → ship → drop in a later release"
 (expand/contract) discipline and a pre-migration verified backup step (see
 [`../todo.md`](../todo.md) P3.5). Consider a CI check that flags `DROP`/`ALTER …

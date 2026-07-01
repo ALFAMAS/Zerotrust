@@ -68,7 +68,7 @@ rebuilding login for the hundredth time.
 - OAuth — Google, GitHub, Apple, Facebook (admin-toggleable per provider)
 - Magic links (passwordless, 15-minute TTL)
 - Passkeys / WebAuthn (FIDO2, resident keys, MDS3 attestation policy)
-- TOTP, Email OTP, SMS & WhatsApp OTP (Twilio), Telegram OTP
+- TOTP (Google Authenticator / Authy) + Email OTP
 - PASETO v4 access tokens + rotating, hashed refresh tokens
 - Session management — list, revoke, device fingerprinting, concurrent-session caps
 
@@ -91,7 +91,7 @@ rebuilding login for the hundredth time.
 - Plan feature gates (`requirePlan()`), 14-day trials, dunning, win-back, cancellation flow
 - API key management — named keys, SHA-256 hashed, scopes, revoke
 - Multi-currency pricing, PPP discounts, tax quotes, VAT validation, and tax exemptions
-- Wallet, loyalty tiers, points ledger, redemption catalog, and referral tracking
+- Wallet (balance, top-up, spend, transaction history)
 
 ### Frontend (Next.js)
 
@@ -138,7 +138,7 @@ rebuilding login for the hundredth time.
 
 zerotrust is a Bun monorepo: a standalone API server and a Next.js app that talks
 to it. It is a **modular monolith** — one Hono API process exposes ~27 route
-modules backed by ~48 services and ~20 middleware, persisting to PostgreSQL (49
+modules backed by ~45 services and ~21 middleware, persisting to PostgreSQL (41
 tables) with Redis for sessions, rate limiting, and the email queue. Domains call
 each other in-process; there are no internal network hops.
 
@@ -169,24 +169,13 @@ each other in-process; there are no internal network hops.
 | PostgreSQL          | localhost:5432             | or a managed provider (e.g. Neon)      |
 | Redis               | localhost:6379             | optional — in-memory fallback if unset |
 
-### Request lifecycle
-
-Global middleware runs in order — `cors` → `secureHeaders` → `compress` →
-metrics → OpenTelemetry → API versioning → alerting/SLO — then each route module
-applies its own guards (`authMiddleware` / `apiKeyAuth`, then rate limiting,
-`requirePlan`, `requireAdmin`, geo-fencing, temporal access, continuous
-verification, as needed). Access tokens are **PASETO v4.local** (XChaCha20 +
-BLAKE2b, 1-hour TTL); refresh tokens are opaque, SHA-256-hashed, and rotated on
-use. Sessions are Redis-cached with a Postgres fallback.
-
 ### Background work
 
-A BullMQ email-queue consumer plus 24h schedulers (data retention, notification
-fallback, billing lifecycle, `pg_dump` backup) start with the API process.
-> **Note:** these are not yet instance-guarded, so running the API in PM2
-> **cluster** mode duplicates them — see proposal **P1** in
-> [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) and run a single worker
-> instance until that lands.
+A BullMQ email-queue consumer plus scheduled jobs (data retention, notification
+fallback, billing lifecycle, `pg_dump` backup) run as a dedicated worker process
+(`src/worker.ts`) with Redis-lock leader election (`SET NX PX`) for single-instance
+enforcement. In local dev the API process still starts schedulers in-process when
+`WORKER_MODE` is unset.
 
 ---
 
@@ -474,8 +463,8 @@ POST   /billing/checkout|portal · POST /billing/webhook (Stripe)
 GET    /billing/pricing · POST /billing/tax/quote
 
 # Search, wallet, compliance
-GET    /search · /search/smart · /search/provider
-GET    /wallet · /wallet/tier · /wallet/referrals/dashboard
+GET    /search
+GET    /wallet · GET /wallet/transactions
 GET    /compliance/soc2/readiness · /compliance/risk-assessment/:year
 
 # Ops
@@ -506,7 +495,7 @@ GET    /health · /healthz · /metrics (Prometheus)
 │   └── ui/                         # Next.js 16 app (port 3000)
 │       ├── messages/               # i18n JSON (en, es, fr, ar)
 │       └── src/
-│           ├── app/                # App Router: (auth)/, dashboard/, admin/, blog/, …
+│           ├── app/                # App Router: (auth)/, dashboard/, admin/  │
 │           ├── components/         # shared UI components
 │           └── lib/                # API client, auth tokens, helpers
 ├── drizzle/                        # SQL migrations + journal
@@ -589,18 +578,16 @@ zerotrust tracks its state in the repository docs:
 | [`docs/reference-architecture.md`](./docs/reference-architecture.md) | Operational deployment blueprints (VM, containers, Kubernetes) |
 | [`docs/adr/`](./docs/adr/)                       | Architecture Decision Records (7 load-bearing decisions)    |
 | [`docs/maintenance-scorecard.md`](./docs/maintenance-scorecard.md) | Quarterly metrics (deps, CI, tests, backups, latency) |
-| [`docs/MAINTENANCE_FEATURE_AUDIT.md`](./docs/MAINTENANCE_FEATURE_AUDIT.md) | Feature-removal audit (what was slimmed out and why)        |
 | [`docs/PROJECT_HISTORY.md`](./docs/PROJECT_HISTORY.md) | Archived dated planning/audit/phase docs (consolidated)     |
 | [`docs/compliance`](./docs/compliance/README.md) | Compliance policies, procedures, and evidence templates     |
 | [`packages/client`](./packages/client/README.md) | Generated TypeScript SDK package and usage notes            |
 
 Latest audit note (2026-07-01): a clean `bun install` restores a fully working
 tree — `bun run lint:ci`, `bun run type-check`, `bun run boundaries:check`, the
-**749-test suite**, and the UI build all pass. P1.1 (transactional repositories)
-and P1.2 (dedicated worker with Redis-lock leader election) shipped; module
-boundaries enforced (0 violations); 7 ADRs, a maintenance scorecard, and 3
-deployment blueprints added. See the production-hardening audit snapshot at the
-bottom of [`tdone.md`](./tdone.md) for the full list.
+**826-test suite** (94 files), and the UI build all pass. Transactional
+repositories, dedicated worker with Redis-lock leader election, and module
+boundaries are all shipped. See [`tdone.md`](./tdone.md) for the full feature
+catalog.
 
 ---
 

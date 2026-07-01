@@ -13,7 +13,7 @@ git history at the path noted.
 | Standing production-readiness audit | [`AUDIT.md`](./AUDIT.md) |
 | Prioritized backlog (P0–P4) | [`../todo.md`](../todo.md) |
 | Current architecture + proposals | [`ARCHITECTURE.md`](./ARCHITECTURE.md) |
-| Feature-removal record (2026-06-28 slim-down) | [`MAINTENANCE_FEATURE_AUDIT.md`](./MAINTENANCE_FEATURE_AUDIT.md) |
+| Feature-removal record (2026-06-28 slim-down) | _Removed_ — see migrations `0020`–`0024` and `tdone.md` |
 | Shipped-feature ledger | [`../tdone.md`](../tdone.md) |
 
 ---
@@ -44,8 +44,8 @@ _Was: `docs/audit/2026-06-25-production-readiness-audit.md` and its near-duplica
 The first full audit (security, correctness, coverage, FE↔BE surface). Both copies
 were **self-marked historical** — their scope figures ("31 route modules, 70+
 services") predate the 2026-06-28 slim-down and no longer hold. **Superseded by**
-[`AUDIT.md`](./AUDIT.md) (current standing audit) and
-[`MAINTENANCE_FEATURE_AUDIT.md`](./MAINTENANCE_FEATURE_AUDIT.md).
+[`AUDIT.md`](./AUDIT.md) (current standing audit). The feature-removal audit
+doc was itself removed; see migrations `0020`–`0024` for what was slimmed out.
 
 ## 2026-06-25 — Performance sub-plan (auth/org hot path → p95 < 100 ms)
 _Was: `docs/audit/D3-performance-subplan.md`_

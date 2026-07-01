@@ -406,7 +406,7 @@ spec:
     └───────────┘     └──────────┘
 
 External providers (optional):
-  SMTP · Stripe · Twilio · Elasticsearch · Sentry
+  SMTP · Stripe · Elasticsearch · Sentry
   OAuth (Google/GitHub/Apple/Facebook) · Telegram Bot
 ```
 

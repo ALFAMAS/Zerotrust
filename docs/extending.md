@@ -88,13 +88,13 @@ Unset ⇒ backups stay local and avatar uploads fall back to local disk. Use
 
 ---
 
-## SMS / OTP and other notification channels
+## MFA / OTP channels
 
-SMS/WhatsApp OTP uses Twilio via env (`TWILIO_*`); Telegram OTP via its bot
-token. These are delivery channels for the OTP/MFA services — provide the
-credentials and the channel turns on. To add a brand-new channel, implement a
-sender with the same `(recipient, message) => Promise<void>` shape the OTP
-service calls and wire it where the existing channels are selected.
+MFA currently supports TOTP and Email OTP. Email OTP uses the same Nodemailer
+SMTP transport as transactional email (see above). To add a new MFA channel
+(e.g. SMS via Twilio, push-based), implement a sender with the same
+`(recipient, message) => Promise<void>` shape the OTP dispatcher calls and wire
+it in `src/mfa/`. Register the channel name in the settings model and UI.
 
 ---
 

@@ -34,7 +34,7 @@ breakage.
 | Flaky tests (failing ≥2 of last 10 runs) | _TBD_ | 0 | — |
 | `verify:generated` drift failures | _TBD_ | 0 | — |
 
-**Jobs:** `lint:ci` (Biome) · `type-check` (tsc) · `test` (Vitest, 746+ tests) ·
+**Jobs:** `lint:ci` (Biome) · `type-check` (tsc) · `test` (Vitest, 826+ tests) ·
 `verify:generated` (SDK+docs drift) · UI build · SAST (Semgrep) · Trivy filesystem
 
 ---

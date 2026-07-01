@@ -1,6 +1,21 @@
 # Changelog
 
-All notable changes to zerotrust are documented here.
-This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and [Conventional Commits](https://www.conventionalcommits.org/).
+All notable changes to zerotrust are documented in this file.
+This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
+and [Conventional Commits](https://www.conventionalcommits.org/).
 
-This file is regenerated automatically by [semantic-release](https://github.com/semantic-release/semantic-release) on every release. For the current feature status (shipped vs. pending), see [`implemented.md`](./implemented.md) and [`not-implemented.md`](./not-implemented.md).
+Releases are automated via [semantic-release](https://github.com/semantic-release/semantic-release);
+each release populates this file with generated entries. For the current feature
+status (shipped vs. pending), see [`tdone.md`](./tdone.md) and [`todo.md`](./todo.md).
+
+## Recent work (2026-07-01)
+
+- **M1** — `as any` casts reduced 213 → 3 (documented exceptions); 3 real bugs
+  found and fixed along the way (`.rowCount`/`.count` mismatch in data retention,
+  email suppression, and session revocation; lifecycle-email metadata-wipe).
+- **M2** — Notification dispatcher refactored to a plugin/capability
+  (`NotificationAdapter`) pattern with isolated adapters per provider.
+- **H3** — UI test harness (happy-dom + Testing Library) grown 11 → 58 tests.
+- **MFA/WebAuthn route tests** — 53 new route-level tests for the three
+  previously-untested security-critical route files. Full suite: **826 tests
+  (94 files)**. Build green.

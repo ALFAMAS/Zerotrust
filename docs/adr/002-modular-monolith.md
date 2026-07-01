@@ -19,7 +19,7 @@ a generated TypeScript SDK. The codebase needs to be:
 ## Decision
 
 Ship as a **modular monolith** — one Hono API process that exposes ~27 route
-modules backed by ~48 services and ~20 middleware, persisting to PostgreSQL.
+modules backed by ~45 services and ~21 middleware, persisting to PostgreSQL.
 Domains call each other in-process. There are no internal network hops.
 
 The monolith is "modular" in that:
