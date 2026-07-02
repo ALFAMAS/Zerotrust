@@ -22,13 +22,13 @@ import { geoFencingMiddleware } from "../middleware/geoFencing";
 import { rateLimit } from "../middleware/rateLimiting";
 import { temporalAccessMiddleware } from "../middleware/temporalAccess";
 import notificationChannelRoutes from "../notifications/routes";
-import { alertingMiddleware } from "../services/ops/alerting.service";
-import { initEmailQueue } from "../services/notifications/emailQueue";
-import { sloAlertingMiddleware, sloRouteHandler } from "../services/ops/slo.service";
 import {
   initStripeWebhookQueueConsumer,
   initStripeWebhookQueueProducer,
 } from "../services/billing/stripeWebhookQueue";
+import { initEmailQueue } from "../services/notifications/emailQueue";
+import { alertingMiddleware } from "../services/ops/alerting.service";
+import { sloAlertingMiddleware, sloRouteHandler } from "../services/ops/slo.service";
 import { initTelemetry, telemetryMiddleware } from "../telemetry";
 import webhookManagementRoutes from "../webhooks/routes";
 import accessReviewRoutes from "./routes/access-review.routes";

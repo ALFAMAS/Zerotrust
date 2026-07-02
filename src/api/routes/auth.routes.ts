@@ -38,15 +38,8 @@ import {
 import { getProviderAdapter } from "../../oauth/provider.factory";
 import { recordAndRespond } from "../../services/auth/accountTakeover.service";
 import { validateSignupEmail } from "../../services/auth/disposableEmail.service";
-import { sendVerificationEmail, sendWelcomeEmail } from "../../services/notifications/email.service";
 import { FingerprintService } from "../../services/auth/fingerprint.service";
 import { notifyIfNewDevice } from "../../services/auth/loginNotification.service";
-import {
-  deleteObject,
-  isS3BackupEnabled,
-  parseObjectKeyFromPublicUrl,
-  uploadBuffer,
-} from "../../services/ops/objectStorage.service";
 import { rejectIfBreached } from "../../services/auth/passwordBreach.service";
 import {
   createPowChallenge,
@@ -55,6 +48,16 @@ import {
 } from "../../services/auth/proofOfWork.service";
 import { TokenService } from "../../services/auth/token.service";
 import { invalidateUserCache } from "../../services/auth/userStateCache.service";
+import {
+  sendVerificationEmail,
+  sendWelcomeEmail,
+} from "../../services/notifications/email.service";
+import {
+  deleteObject,
+  isS3BackupEnabled,
+  parseObjectKeyFromPublicUrl,
+  uploadBuffer,
+} from "../../services/ops/objectStorage.service";
 import { getClientIp } from "../../shared/clientIp";
 import { internalError } from "../../shared/httpErrors";
 import { localeFromAcceptLanguage, normalizeLocale, SUPPORTED_LOCALES } from "../../shared/locale";
