@@ -2,12 +2,13 @@
 
 import { Download, KeyRound, LogIn, Monitor, UserCheck, UserPlus, Users } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import MetricCard from "@/components/admin/MetricCard";
 import RadialGauge from "@/components/admin/RadialGauge";
 import Badge from "@/components/Badge";
-import { api } from "@/lib/api";
+import { Button } from "@/components/ui/button";
 import { apiGetBlob } from "@/lib/apiClient";
+import { useApi } from "@/lib/hooks/useApi";
 
 interface Stats {
   totalUsers: number;
@@ -37,29 +38,17 @@ const quickActions = [
 ];
 
 export default function AdminOverviewPage() {
-  const [stats, setStats] = useState<Stats | null>(null);
-  const [recentUsers, setRecentUsers] = useState<User[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: stats, loading: statsLoading } = useApi<Stats>("/admin/stats");
+  const { data: usersData, loading: usersLoading } = useApi<User[] | { users: User[] } | null>(
+    "/admin/users?limit=5"
+  );
 
-  useEffect(() => {
-    async function load() {
-      try {
-        const [statsData, usersData] = await Promise.allSettled([
-          api.get<Stats>("/admin/stats"),
-          api.get<{ users: User[] } | User[]>("/admin/users?limit=5"),
-        ]);
-
-        if (statsData.status === "fulfilled") setStats(statsData.value);
-        if (usersData.status === "fulfilled") {
-          const v = usersData.value;
-          setRecentUsers(Array.isArray(v) ? v : (v.users ?? []));
-        }
-      } finally {
-        setLoading(false);
-      }
-    }
-    void load();
-  }, []);
+  const loading = statsLoading || usersLoading;
+  const recentUsers = usersData
+    ? Array.isArray(usersData)
+      ? usersData
+      : (usersData.users ?? [])
+    : [];
 
   const [exporting, setExporting] = useState(false);
 
@@ -177,8 +166,7 @@ export default function AdminOverviewPage() {
               <span className="text-xs text-muted-foreground">{a.desc}</span>
             </Link>
           ))}
-          <button
-            type="button"
+          <Button
             onClick={exportUsers}
             disabled={exporting}
             className="flex flex-col items-start gap-2 rounded-lg border border-border bg-background p-4 text-left transition-colors hover:border-primary/50 disabled:opacity-50"
@@ -188,7 +176,7 @@ export default function AdminOverviewPage() {
             <span className="text-xs text-muted-foreground">
               {exporting ? "Preparing…" : "Download CSV"}
             </span>
-          </button>
+          </Button>
         </div>
       </div>
     </div>

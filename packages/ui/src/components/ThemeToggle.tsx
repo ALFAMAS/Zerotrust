@@ -3,9 +3,9 @@
 import { Monitor, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
 
-const btnClass =
-  "inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-foreground";
+const btnClass = "h-8 w-8";
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
@@ -18,9 +18,9 @@ export function ThemeToggle() {
 
   if (!mounted) {
     return (
-      <button type="button" className={btnClass} aria-label="Toggle theme">
+      <Button variant="ghost" size="icon" aria-label="Toggle theme" className={btnClass}>
         <span className="h-4 w-4" />
-      </button>
+      </Button>
     );
   }
 
@@ -38,8 +38,9 @@ export function ThemeToggle() {
         : "Switch to dark mode";
 
   return (
-    <button
-      type="button"
+    <Button
+      variant="ghost"
+      size="icon"
       onClick={cycleTheme}
       aria-label={label}
       title={label}
@@ -52,6 +53,6 @@ export function ThemeToggle() {
       ) : (
         <Monitor className="h-4 w-4" />
       )}
-    </button>
+    </Button>
   );
 }

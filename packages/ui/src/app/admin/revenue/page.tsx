@@ -13,6 +13,7 @@ import { useEffect, useState } from "react";
 import DonutChart from "@/components/admin/DonutChart";
 import MetricCard from "@/components/admin/MetricCard";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -20,6 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { api } from "@/lib/api";
 
 interface RevenueData {
@@ -102,13 +104,13 @@ export default function RevenuePage() {
       {broadcastOpen && (
         <div className="space-y-4 rounded-xl border border-border bg-card p-6">
           <h2 className="font-medium text-foreground">Send announcement</h2>
-          <input
+          <Input
             value={broadcast.title}
             onChange={(e) => setBroadcast({ ...broadcast, title: e.target.value })}
             placeholder="Title"
             className={inputClasses}
           />
-          <textarea
+          <Textarea
             value={broadcast.message}
             onChange={(e) => setBroadcast({ ...broadcast, message: e.target.value })}
             placeholder="Message"

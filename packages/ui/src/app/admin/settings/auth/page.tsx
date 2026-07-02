@@ -4,7 +4,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Toggle from "@/components/Toggle";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { api } from "@/lib/api";
 
 interface AuthSettings {
   // Auth Methods
@@ -119,7 +118,7 @@ export default function AuthSettingsPage() {
   useEffect(() => {
     async function load() {
       try {
-        const data = await api.get<Partial<AuthSettings>>("/admin/settings");
+        const data = await (await fetch("/api/admin/settings")).json();
         setSettings({ ...DEFAULTS, ...data });
       } catch {
         // Use defaults if API not available
@@ -137,7 +136,11 @@ export default function AuthSettingsPage() {
   async function handleSave() {
     setSaving(true);
     try {
-      await api.put("/admin/settings", settings);
+      await fetch("/api/admin/settings", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(settings),
+      });
       showToast("Settings saved successfully");
     } catch {
       showToast("Failed to save settings");
@@ -239,13 +242,13 @@ export default function AuthSettingsPage() {
               <label htmlFor="page-f1" className="block text-sm font-medium text-foreground mb-1">
                 Allowed Email Domains
               </label>
-              <input
+              <Input
                 id="page-f1"
                 type="text"
                 placeholder="acme.com, corp.com (leave blank for all)"
                 value={settings.allowedEmailDomains}
                 onChange={(e) => set("allowedEmailDomains", e.target.value)}
-                className="w-full rounded-lg bg-muted border border-border px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none"
+                className="w-full"
               />
               <p className="mt-1 text-xs text-muted-foreground">
                 Comma-separated. Leave blank to allow all domains.
@@ -338,11 +341,10 @@ export default function AuthSettingsPage() {
 
       {/* Save Button */}
       <div className="flex justify-end pt-2">
-        <button
-          type="button"
+        <Button
           onClick={handleSave}
           disabled={saving}
-          className="flex items-center gap-2 rounded-lg bg-primary px-6 py-2.5 text-sm font-medium text-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors min-w-[140px] justify-center"
+          className="gap-2 px-6 py-2.5 text-sm font-medium min-w-[140px]"
         >
           {saving ? (
             <>
@@ -371,7 +373,7 @@ export default function AuthSettingsPage() {
           ) : (
             "Save Settings"
           )}
-        </button>
+        </Button>
       </div>
     </div>
   );

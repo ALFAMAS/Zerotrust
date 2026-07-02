@@ -3,6 +3,7 @@
 import { ArrowRight, File, Search, Settings, User } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { Button } from "@/components/ui/button";
 import { safeRelativeRedirect } from "@/lib/safeRedirect";
 import { cn } from "@/lib/utils";
 
@@ -165,8 +166,7 @@ export function CommandPalette() {
   return (
     <div className="fixed inset-0 z-[100] flex items-start justify-center pt-[15vh]">
       {/* Backdrop */}
-      <button
-        type="button"
+      <Button
         aria-label="Close command palette"
         className="fixed inset-0 bg-background/80 backdrop-blur-sm"
         onClick={() => {
@@ -210,13 +210,13 @@ export function CommandPalette() {
           {results.length > 0 && (
             <div role="listbox">
               {results.map((result, i) => (
-                <button
-                  type="button"
+                <Button
                   key={`${result.type}-${result.href}-${i}`}
                   role="option"
                   aria-selected={i === selectedIndex}
                   onClick={() => navigateTo(result)}
                   onMouseEnter={() => setSelectedIndex(i)}
+                  variant="ghost"
                   className={cn(
                     "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors",
                     i === selectedIndex
@@ -245,7 +245,7 @@ export function CommandPalette() {
                   <span className="shrink-0 rounded bg-muted px-1.5 py-0.5 text-[10px] font-medium uppercase text-muted-foreground">
                     {result.type}
                   </span>
-                </button>
+                </Button>
               ))}
             </div>
           )}

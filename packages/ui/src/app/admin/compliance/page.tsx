@@ -232,9 +232,9 @@ export default function CompliancePage() {
                           {c.evidence ?? "—"}
                         </TableCell>
                         <TableCell>
-                          <button type="button" onClick={() => cycleControlStatus(c)}>
+                          <Button variant="ghost" size="sm" onClick={() => cycleControlStatus(c)}>
                             <Badge variant={CONTROL_STATUS_VARIANT[c.status]}>{c.status}</Badge>
-                          </button>
+                          </Button>
                         </TableCell>
                       </TableRow>
                     ))}

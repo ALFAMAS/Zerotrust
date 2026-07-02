@@ -19,13 +19,13 @@ maintainability/refactor · P3 scalability/performance · P4 docs/DX.
 
 ### P2 — product completeness / template polish
 
-- **C4/C5/C7 — partially done; see AUDIT-REPORT** — OAuth linked accounts
-  connect/disconnect, per-category notification preferences, and customer segment
-  tagging are now surfaced in the UI. Remaining polish: `useApi` migration (E2).
+|- **E3 — shadcn cleanup (in progress)** — migrated 35 controls (from 44) to shadcn/ui. Remaining: 9 raw controls across 9 files.
+
 - **E2 — `useApi` adoption** — migrate repetitive dashboard/admin
   `useEffect + api.get + loading` boilerplate to `useApi` / `usePaginatedApi` in
   focused batches.
-- **E3 — shadcn cleanup** — continue reducing the 44 raw controls reported in
+
+- **E3 — shadcn cleanup** — continue reducing the remaining raw controls in
   `docs/shadcn-adoption-report.md`.
 
 ### P4 — docs / claims hygiene

@@ -309,6 +309,21 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
   notification preference toggles (5 categories × 3 channels) with backend
   schema extension; confirmed `/auth/me/nps` and `/auth/me/onboarding-complete`
   routes exist; added customer segment selector to admin user detail page.
+- **E3 shadcn migration (batch 1):** Migrated 30 raw HTML controls (from 44) to shadcn/ui
+  `<Button>`, `<Input>`, `<Textarea>` across 10 files:
+  `packages/ui/src/app/admin/users/[id]/page.tsx`,
+  `packages/ui/src/app/dashboard/account/page.tsx`,
+  `packages/ui/src/app/dashboard/organizations/[orgId]/page.tsx`,
+  `packages/ui/src/components/NotificationBell.tsx`,
+  `packages/ui/src/components/app-shell/AppTopbar.tsx`,
+  `packages/ui/src/app/admin/settings/auth/page.tsx`,
+  `packages/ui/src/components/CommandPalette.tsx`,
+  `packages/ui/src/app/admin/jit/page.tsx`,
+  `packages/ui/src/app/admin/revenue/page.tsx`,
+  `packages/ui/src/app/(auth)/magic-link/page.tsx`,
+  `packages/ui/src/app/admin/compliance/page.tsx`.
+  Remaining 14 raw controls across 12 files documented in
+  `docs/shadcn-adoption-report.md`.
 
 - **Verification:** `bun run test -- --run` → **838 tests / 99 files passing**;
   `bun run build`, `bun run lint`, `bun run --cwd packages/ui build`,

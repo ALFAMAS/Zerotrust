@@ -173,19 +173,15 @@ export default function SessionsPage() {
       {/* Tabs */}
       <div className="flex gap-1 border-b border-border">
         {tabs.map((t) => (
-          <button
+          <Button
             type="button"
             key={t.key}
+            variant={tab === t.key ? "default" : "ghost"}
             onClick={() => setTab(t.key)}
-            className={[
-              "px-4 py-2.5 text-sm font-medium transition-colors -mb-px border-b-2",
-              tab === t.key
-                ? "border-primary text-primary"
-                : "border-transparent text-muted-foreground hover:text-foreground",
-            ].join(" ")}
+            className="px-4 py-2.5 text-sm font-medium -mb-px border-b-2 border-primary"
           >
             {t.label}
-          </button>
+          </Button>
         ))}
       </div>
 

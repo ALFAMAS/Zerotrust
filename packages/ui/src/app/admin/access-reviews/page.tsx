@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -14,6 +14,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { api } from "@/lib/api";
+import { useApi } from "@/lib/hooks/useApi";
 
 interface Review {
   id: string;
@@ -29,8 +30,6 @@ interface Review {
 const fmt = (d?: string | null) => (d ? new Date(d).toLocaleString() : "—");
 
 export default function AccessReviewsPage() {
-  const [reviews, setReviews] = useState<Review[]>([]);
-  const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
 
@@ -42,21 +41,11 @@ export default function AccessReviewsPage() {
     toastTimer.current = setTimeout(() => setToast(null), 3000);
   }, []);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    try {
-      const data = await api.get<{ reviews: Review[] }>("/admin/access-reviews");
-      setReviews(data.reviews ?? []);
-    } catch {
-      showToast("Failed to load access reviews");
-    } finally {
-      setLoading(false);
-    }
-  }, [showToast]);
-
-  useEffect(() => {
-    void load();
-  }, [load]);
+  const { data, loading, refetch } = useApi<{ reviews: Review[] }>("/admin/access-reviews", {
+    onError: () => showToast("Failed to load access reviews"),
+  });
+  const reviews = data?.reviews ?? [];
+  const load = refetch;
 
   async function startReview() {
     setCreating(true);

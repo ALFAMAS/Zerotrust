@@ -52,11 +52,7 @@ export default function AppTopbar({
           </kbd>
         </Button>
         {actions}
-        <Button
-          variant="ghost"
-          onClick={onSignOut}
-          className="flex items-center gap-1.5"
-        >
+        <Button variant="ghost" onClick={onSignOut} className="flex items-center gap-1.5">
           <LogOut className="h-4 w-4" />
           <span className="hidden sm:inline">Sign out</span>
         </Button>

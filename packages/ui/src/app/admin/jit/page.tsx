@@ -2,6 +2,7 @@
 
 import { Check, Clock, Loader2, ShieldQuestion, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { Button } from "@/components/ui/button";
 import { api } from "@/lib/api";
 
 interface JITRequest {
@@ -125,8 +126,7 @@ export default function AdminJITPage() {
                         </p>
                       </div>
                       <div className="flex shrink-0 gap-2">
-                        <button
-                          type="button"
+                        <Button
                           onClick={() => act(r.id, "approve")}
                           disabled={acting === r.id}
                           className="flex items-center gap-1.5 rounded-lg bg-green-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-green-500 disabled:opacity-50"
@@ -137,16 +137,15 @@ export default function AdminJITPage() {
                             <Check className="h-3.5 w-3.5" />
                           )}
                           Approve
-                        </button>
-                        <button
-                          type="button"
+                        </Button>
+                        <Button
                           onClick={() => act(r.id, "deny")}
                           disabled={acting === r.id}
                           className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:border-red-700 hover:text-red-400 disabled:opacity-50"
                         >
                           <X className="h-3.5 w-3.5" />
                           Deny
-                        </button>
+                        </Button>
                       </div>
                     </div>
                   </li>

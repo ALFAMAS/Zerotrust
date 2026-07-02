@@ -1,7 +1,7 @@
 "use client";
 
 import { Bell, Plus, Send, Trash2 } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
 import { SkeletonCard } from "@/components/Skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -18,6 +18,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/context/ToastContext";
 import { api } from "@/lib/api";
+import { useApi } from "@/lib/hooks/useApi";
 
 type ChannelType = "slack" | "teams" | "pagerduty";
 
@@ -49,7 +50,6 @@ const TYPE_LABELS: Record<ChannelType, string> = {
 export default function AdminAlertsPage() {
   const { toast } = useToast();
   const [channels, setChannels] = useState<NotificationChannel[]>([]);
-  const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
 
   // Add-channel form
@@ -57,22 +57,17 @@ export default function AdminAlertsPage() {
   const [name, setName] = useState("");
   const [secret, setSecret] = useState("");
 
-  const load = useCallback(async () => {
-    try {
-      const res = await api.get<{ channels: NotificationChannel[] }>(
-        "/admin/notifications/channels"
-      );
-      setChannels(res.channels ?? []);
-    } catch {
-      toast({ message: "Could not load alert channels", type: "error" });
-    } finally {
-      setLoading(false);
+  const { loading, refetch } = useApi<{ channels: NotificationChannel[] }>(
+    "/admin/notifications/channels",
+    {
+      onSuccess: (data) => {
+        setChannels(data.channels ?? []);
+      },
+      onError: () => {
+        toast({ message: "Could not load alert channels", type: "error" });
+      },
     }
-  }, [toast]);
-
-  useEffect(() => {
-    void load();
-  }, [load]);
+  );
 
   const secretLabel = type === "pagerduty" ? "Integration key" : "Webhook URL";
 
@@ -93,7 +88,7 @@ export default function AdminAlertsPage() {
       setName("");
       setSecret("");
       toast({ message: `${TYPE_LABELS[type]} channel added`, type: "success" });
-      await load();
+      await refetch();
     } catch (err) {
       toast({ message: (err as Error).message || "Could not add channel", type: "error" });
     } finally {

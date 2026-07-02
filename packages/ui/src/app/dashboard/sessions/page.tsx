@@ -1,6 +1,7 @@
 "use client";
 import { CalendarClock, Clock, Globe, Laptop, MapPin, ShieldCheck } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
 import { SkeletonCard } from "@/components/Skeleton";
 import { api } from "../../../lib/api";
 
@@ -48,8 +49,8 @@ export default function SessionsPage() {
         <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
           Active Sessions
         </h1>
-        <button
-          type="button"
+        <Button
+          variant="outline"
           onClick={() => {
             if (confirm("Revoke all other sessions?"))
               api
@@ -63,7 +64,7 @@ export default function SessionsPage() {
           className="text-sm text-red-400 hover:text-red-300 border border-red-800 px-3 py-1.5 rounded-lg hover:bg-red-950 transition-colors"
         >
           Revoke All
-        </button>
+        </Button>
       </div>
 
       {loading ? (
@@ -143,13 +144,13 @@ export default function SessionsPage() {
                   </div>
                 </div>
                 {session.isActive && !session.isCurrent && (
-                  <button
-                    type="button"
+                  <Button
+                    variant="outline"
                     onClick={() => revoke(session.id)}
                     className="shrink-0 text-xs text-red-400 hover:text-red-300 border border-red-800 px-2.5 py-1 rounded-lg hover:bg-red-950 transition-colors"
                   >
                     Revoke
-                  </button>
+                  </Button>
                 )}
               </div>
             );
