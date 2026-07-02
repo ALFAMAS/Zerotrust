@@ -19,14 +19,10 @@ maintainability/refactor · P3 scalability/performance · P4 docs/DX.
 
 ### P2 — product completeness / template polish
 
-|- **E3 — shadcn cleanup (in progress)** — migrated 35 controls (from 44) to shadcn/ui. Remaining: 9 raw controls across 9 files.
+|- **E3 — shadcn cleanup (in progress)** — 44 → **8 raw controls** across 8 files.
+- **E3 secondary:** Remaining: dashboard/profile, dashboard/search, dashboard/settings, dashboard/webhooks, admin/sessions, components/AppSidebar, CommandPalette, ErrorBoundary.
 
-- **E2 — `useApi` adoption** — migrate repetitive dashboard/admin
-  `useEffect + api.get + loading` boilerplate to `useApi` / `usePaginatedApi` in
-  focused batches.
-
-- **E3 — shadcn cleanup** — continue reducing the remaining raw controls in
-  `docs/shadcn-adoption-report.md`.
+- **E2 — `useApi` adoption** — Partially complete: migrated access-reviews, alerts, admin overview. ~15 more pages with repetitive useEffect+api.get patterns remain.
 
 ### P4 — docs / claims hygiene
 

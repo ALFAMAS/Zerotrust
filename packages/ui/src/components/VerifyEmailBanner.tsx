@@ -71,14 +71,16 @@ export default function VerifyEmailBanner() {
           <Button size="sm" asChild className="bg-amber-500 text-amber-950 hover:bg-amber-400">
             <Link href="/verify-email">Enter code</Link>
           </Button>
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="icon"
             onClick={dismiss}
             aria-label="Dismiss"
-            className="rounded-md p-1 text-amber-300 transition-colors hover:bg-amber-500/20 hover:text-amber-100"
+            className="text-amber-300 hover:bg-amber-500/20 hover:text-amber-100"
           >
             <X className="h-4 w-4" />
-          </button>
+          </Button>
         </div>
       </div>
     </div>

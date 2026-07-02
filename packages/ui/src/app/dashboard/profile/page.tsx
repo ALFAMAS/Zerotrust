@@ -138,7 +138,7 @@ export default function ProfilePage() {
               <p className="mb-3 text-sm text-muted-foreground">
                 Upload a JPEG, PNG, GIF, or WebP image (max 5 MB).
               </p>
-              <input
+              <Input
                 ref={fileRef}
                 type="file"
                 accept="image/jpeg,image/png,image/gif,image/webp"

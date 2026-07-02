@@ -309,8 +309,8 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
   notification preference toggles (5 categories × 3 channels) with backend
   schema extension; confirmed `/auth/me/nps` and `/auth/me/onboarding-complete`
   routes exist; added customer segment selector to admin user detail page.
-- **E3 shadcn migration (batch 1):** Migrated 30 raw HTML controls (from 44) to shadcn/ui
-  `<Button>`, `<Input>`, `<Textarea>` across 10 files:
+- **E3 shadcn migration (batch 1):** Migrated 36 raw HTML controls (from 44) to shadcn/ui
+  `<Button>`, `<Input>`, `<Textarea>` across 12 files:
   `packages/ui/src/app/admin/users/[id]/page.tsx`,
   `packages/ui/src/app/dashboard/account/page.tsx`,
   `packages/ui/src/app/dashboard/organizations/[orgId]/page.tsx`,
@@ -321,9 +321,19 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
   `packages/ui/src/app/admin/jit/page.tsx`,
   `packages/ui/src/app/admin/revenue/page.tsx`,
   `packages/ui/src/app/(auth)/magic-link/page.tsx`,
-  `packages/ui/src/app/admin/compliance/page.tsx`.
-  Remaining 14 raw controls across 12 files documented in
+  `packages/ui/src/app/admin/compliance/page.tsx`,
+  `packages/ui/src/components/ThemeToggle.tsx`,
+  `packages/ui/src/app/admin/page.tsx`,
+  `packages/ui/src/app/admin/sessions/page.tsx`,
+  `packages/ui/src/app/dashboard/search/page.tsx`.
+  Remaining 8 raw controls across 8 files documented in
   `docs/shadcn-adoption-report.md`.
+
+- **E2 — useApi migration (batch 1):** Migrated 3 admin pages to `useApi` hook:
+  `packages/ui/src/app/admin/access-reviews/page.tsx`,
+  `packages/ui/src/app/admin/alerts/page.tsx`,
+  `packages/ui/src/app/admin/page.tsx`.
+  Reduced manual `useEffect + api.get + loading` boilerplate. Verification passed.
 
 - **Verification:** `bun run test -- --run` → **838 tests / 99 files passing**;
   `bun run build`, `bun run lint`, `bun run --cwd packages/ui build`,

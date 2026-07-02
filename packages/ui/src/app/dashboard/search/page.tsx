@@ -2,6 +2,7 @@
 
 import { Building2, FileText, LifeBuoy, Search as SearchIcon, User } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -96,18 +97,16 @@ export default function SearchPage() {
 
       <div className="mb-6 flex flex-wrap gap-2">
         {FILTERS.map((f) => (
-          <button
+          <Button
             key={f.value || "all"}
             type="button"
+            size="sm"
+            variant={type === f.value ? "default" : "secondary"}
             onClick={() => setType(f.value)}
-            className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-              type === f.value
-                ? "bg-primary text-primary-foreground"
-                : "bg-muted text-muted-foreground hover:text-foreground"
-            }`}
+            className="h-auto rounded-full px-3 py-1 text-xs font-medium"
           >
             {f.label}
-          </button>
+          </Button>
         ))}
       </div>
 

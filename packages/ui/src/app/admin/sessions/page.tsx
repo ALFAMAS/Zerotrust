@@ -176,9 +176,13 @@ export default function SessionsPage() {
           <Button
             type="button"
             key={t.key}
-            variant={tab === t.key ? "default" : "ghost"}
+            variant="ghost"
             onClick={() => setTab(t.key)}
-            className="px-4 py-2.5 text-sm font-medium -mb-px border-b-2 border-primary"
+            className={`px-4 py-2.5 text-sm font-medium -mb-px border-b-2 transition-colors ${
+              tab === t.key
+                ? "border-primary text-primary"
+                : "border-transparent text-muted-foreground hover:text-foreground"
+            }`}
           >
             {t.label}
           </Button>
