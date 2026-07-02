@@ -1,8 +1,10 @@
 "use client";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { ServerStateStatus } from "@/components/ServerStateStatus";
 import { SkeletonCard } from "@/components/Skeleton";
 import { Button } from "@/components/ui/button";
+import { ErrorState } from "@/components/ui/States";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -12,49 +14,17 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/context/ToastContext";
-import { api } from "../../../../../lib/api";
-
-interface OrgDetails {
-  id: string;
-  name: string;
-  slug: string;
-  logoUrl: string | null;
-  billingEmail: string | null;
-  ownerId: string | null;
-  createdAt: string;
-  updatedAt: string;
-}
-
-interface MemberRow {
-  member: {
-    id: string;
-    userId: string;
-    role: string;
-  };
-  user: {
-    id: string;
-    email: string;
-    displayName: string;
-  };
-}
-
-interface CurrentUser {
-  id: string;
-  email: string;
-}
-
-interface SecurityPolicy {
-  orgId: string;
-  requirePasskeyAttestation: boolean;
-  requireHardwarePasskey: boolean;
-  allowedPasskeyAaguids: string[];
-  deniedPasskeyAaguids: string[];
-  ipAllowlist: string[];
-  maxSessionAgeSeconds: number;
-  idleTimeoutSeconds: number;
-  maxConcurrentSessions: number;
-  allowedCountries: string[];
-}
+import { useAuthMeQuery } from "@/lib/server-state/auth";
+import {
+  useDeleteOrganizationMutation,
+  useOrganizationDetailQuery,
+  useOrganizationMembersQuery,
+  useOrganizationSecurityPolicyQuery,
+  useSaveOrgSecurityPolicyMutation,
+  useTransferOrganizationMutation,
+  useUpdateOrganizationMutation,
+} from "@/lib/server-state/organizations";
+import type { OrgSecurityPolicy } from "@/lib/server-state/types";
 
 export default function OrgSettingsPage() {
   const params = useParams();
@@ -62,152 +32,73 @@ export default function OrgSettingsPage() {
   const { toast } = useToast();
   const orgId = params.orgId as string;
 
-  const [org, setOrg] = useState<OrgDetails | null>(null);
-  const [members, setMembers] = useState<MemberRow[]>([]);
-  const [myRole, setMyRole] = useState<string>("");
-  const [loading, setLoading] = useState(true);
+  const meQuery = useAuthMeQuery();
+  const detailQuery = useOrganizationDetailQuery(orgId);
+  const membersQuery = useOrganizationMembersQuery(orgId);
+  const policyQuery = useOrganizationSecurityPolicyQuery(orgId);
 
-  // Edit form state
+  const updateMutation = useUpdateOrganizationMutation(orgId);
+  const savePolicyMutation = useSaveOrgSecurityPolicyMutation(orgId);
+  const transferMutation = useTransferOrganizationMutation(orgId);
+  const deleteMutation = useDeleteOrganizationMutation(orgId);
+
+  const org = detailQuery.data?.org ?? null;
+  const members = membersQuery.data?.data ?? [];
+  const myRole = useMemo(() => {
+    const me = members.find((r) => r.user.id === meQuery.data?.id);
+    return me?.member.role ?? "";
+  }, [members, meQuery.data?.id]);
+
   const [editName, setEditName] = useState("");
   const [editBillingEmail, setEditBillingEmail] = useState("");
   const [editLogoUrl, setEditLogoUrl] = useState("");
-  const [saving, setSaving] = useState(false);
-
-  // Transfer form state
   const [transferTo, setTransferTo] = useState("");
-  const [transferring, setTransferring] = useState(false);
-
-  // Delete form state
   const [deleteConfirm, setDeleteConfirm] = useState("");
-  const [deleting, setDeleting] = useState(false);
-
-  // Passkey security policy state
-  const [policy, setPolicy] = useState<SecurityPolicy | null>(null);
+  const [policy, setPolicy] = useState<OrgSecurityPolicy | null>(null);
   const [allowedAaguids, setAllowedAaguids] = useState("");
   const [deniedAaguids, setDeniedAaguids] = useState("");
   const [ipAllowlist, setIpAllowlist] = useState("");
   const [allowedCountries, setAllowedCountries] = useState("");
-  const [savingPolicy, setSavingPolicy] = useState(false);
 
   useEffect(() => {
-    async function fetchAll() {
-      try {
-        const [orgRes, meRes, membersRes, policyRes] = await Promise.all([
-          api.get<{ org: OrgDetails; memberCount: number }>(`/orgs/${orgId}`),
-          api.get<CurrentUser>("/auth/me"),
-          api.get<{ data: MemberRow[]; pagination: any }>(`/orgs/${orgId}/members`),
-          api.get<{ policy: SecurityPolicy }>(`/orgs/${orgId}/security/policy`).catch(() => null),
-        ]);
+    if (org) {
+      setEditName(org.name);
+      setEditBillingEmail(org.billingEmail ?? "");
+      setEditLogoUrl(org.logoUrl ?? "");
+    }
+  }, [org]);
 
-        setOrg(orgRes.org);
-        setEditName(orgRes.org.name);
-        setEditBillingEmail(orgRes.org.billingEmail ?? "");
-        setEditLogoUrl(orgRes.org.logoUrl ?? "");
-        setMembers(membersRes.data ?? []);
+  useEffect(() => {
+    if (policyQuery.data?.policy) {
+      const p = policyQuery.data.policy;
+      setPolicy(p);
+      setAllowedAaguids((p.allowedPasskeyAaguids ?? []).join(", "));
+      setDeniedAaguids((p.deniedPasskeyAaguids ?? []).join(", "));
+      setIpAllowlist((p.ipAllowlist ?? []).join(", "));
+      setAllowedCountries((p.allowedCountries ?? []).join(", "));
+    }
+  }, [policyQuery.data]);
 
-        if (policyRes?.policy) {
-          setPolicy(policyRes.policy);
-          setAllowedAaguids((policyRes.policy.allowedPasskeyAaguids ?? []).join(", "));
-          setDeniedAaguids((policyRes.policy.deniedPasskeyAaguids ?? []).join(", "));
-          setIpAllowlist((policyRes.policy.ipAllowlist ?? []).join(", "));
-          setAllowedCountries((policyRes.policy.allowedCountries ?? []).join(", "));
+  const loading =
+    detailQuery.isPending || membersQuery.isPending || meQuery.isPending;
+
+  if (
+    (detailQuery.error && !detailQuery.data) ||
+    (membersQuery.error && !membersQuery.data)
+  ) {
+    return (
+      <ErrorState
+        message={
+          detailQuery.error?.message ||
+          membersQuery.error?.message ||
+          "Failed to load organization settings"
         }
-
-        const me = (membersRes.data ?? []).find((r) => r.user.id === meRes.id);
-        setMyRole(me?.member.role ?? "");
-      } catch {
-        // handled
-      } finally {
-        setLoading(false);
-      }
-    }
-    void fetchAll();
-  }, [orgId]);
-
-  async function handleSavePolicy(e: React.FormEvent) {
-    e.preventDefault();
-    if (!policy) return;
-    setSavingPolicy(true);
-    try {
-      const parseList = (s: string) =>
-        s
-          .split(/[\s,]+/)
-          .map((x) => x.trim().toLowerCase())
-          .filter(Boolean);
-      const parseCountries = (s: string) =>
-        s
-          .split(/[\s,]+/)
-          .map((x) => x.trim().toUpperCase())
-          .filter(Boolean);
-      const res = await api.put<{ policy: SecurityPolicy }>(`/orgs/${orgId}/security/policy`, {
-        requirePasskeyAttestation: policy.requirePasskeyAttestation,
-        requireHardwarePasskey: policy.requireHardwarePasskey,
-        allowedPasskeyAaguids: parseList(allowedAaguids),
-        deniedPasskeyAaguids: parseList(deniedAaguids),
-        ipAllowlist: parseList(ipAllowlist),
-        maxSessionAgeSeconds: policy.maxSessionAgeSeconds || 0,
-        idleTimeoutSeconds: policy.idleTimeoutSeconds || 0,
-        maxConcurrentSessions: policy.maxConcurrentSessions || 0,
-        allowedCountries: parseCountries(allowedCountries),
-      });
-      setPolicy(res.policy);
-      setIpAllowlist((res.policy.ipAllowlist ?? []).join(", "));
-      setAllowedCountries((res.policy.allowedCountries ?? []).join(", "));
-      toast({ message: "Security policy saved", type: "success" });
-    } catch (err: any) {
-      toast({ message: err.message || "Failed to save passkey policy", type: "error" });
-    } finally {
-      setSavingPolicy(false);
-    }
-  }
-
-  async function handleSave(e: React.FormEvent) {
-    e.preventDefault();
-    setSaving(true);
-    try {
-      const res = await api.put<{ org: OrgDetails }>(`/orgs/${orgId}`, {
-        name: editName || undefined,
-        billingEmail: editBillingEmail || undefined,
-        logoUrl: editLogoUrl || undefined,
-      });
-      setOrg(res.org);
-      toast({ message: "Settings saved", type: "success" });
-    } catch (err: any) {
-      toast({ message: err.message || "Failed to save settings", type: "error" });
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  async function handleTransfer(e: React.FormEvent) {
-    e.preventDefault();
-    if (!transferTo) return;
-    if (!confirm("Transfer ownership? You will become an admin.")) return;
-    setTransferring(true);
-    try {
-      await api.post(`/orgs/${orgId}/transfer`, { newOwnerId: transferTo });
-      toast({ message: "Ownership transferred", type: "success" });
-      router.push(`/dashboard/organizations/${orgId}`);
-    } catch (err: any) {
-      toast({ message: err.message || "Failed to transfer ownership", type: "error" });
-    } finally {
-      setTransferring(false);
-    }
-  }
-
-  async function handleDelete(e: React.FormEvent) {
-    e.preventDefault();
-    if (!org || deleteConfirm !== org.name) return;
-    setDeleting(true);
-    try {
-      await api.delete(`/orgs/${orgId}`);
-      toast({ message: "Organization deleted", type: "success" });
-      router.push("/dashboard/organizations");
-    } catch (err: any) {
-      toast({ message: err.message || "Failed to delete organization", type: "error" });
-    } finally {
-      setDeleting(false);
-    }
+        retry={() => {
+          void detailQuery.refetch();
+          void membersQuery.refetch();
+        }}
+      />
+    );
   }
 
   if (loading) {
@@ -235,8 +126,102 @@ export default function OrgSettingsPage() {
 
   const nonOwnerMembers = members.filter((m) => m.member.role !== "owner");
 
+  async function handleSavePolicy(e: React.FormEvent) {
+    e.preventDefault();
+    if (!policy) return;
+    const parseList = (s: string) =>
+      s
+        .split(/[\s,]+/)
+        .map((x) => x.trim().toLowerCase())
+        .filter(Boolean);
+    const parseCountries = (s: string) =>
+      s
+        .split(/[\s,]+/)
+        .map((x) => x.trim().toUpperCase())
+        .filter(Boolean);
+    try {
+      const res = await savePolicyMutation.mutateAsync({
+        requirePasskeyAttestation: policy.requirePasskeyAttestation,
+        requireHardwarePasskey: policy.requireHardwarePasskey,
+        allowedPasskeyAaguids: parseList(allowedAaguids),
+        deniedPasskeyAaguids: parseList(deniedAaguids),
+        ipAllowlist: parseList(ipAllowlist),
+        maxSessionAgeSeconds: policy.maxSessionAgeSeconds || 0,
+        idleTimeoutSeconds: policy.idleTimeoutSeconds || 0,
+        maxConcurrentSessions: policy.maxConcurrentSessions || 0,
+        allowedCountries: parseCountries(allowedCountries),
+      });
+      setPolicy(res.policy);
+      setIpAllowlist((res.policy.ipAllowlist ?? []).join(", "));
+      setAllowedCountries((res.policy.allowedCountries ?? []).join(", "));
+      toast({ message: "Security policy saved", type: "success" });
+    } catch (err: unknown) {
+      toast({
+        message: err instanceof Error ? err.message : "Failed to save passkey policy",
+        type: "error",
+      });
+    }
+  }
+
+  async function handleSave(e: React.FormEvent) {
+    e.preventDefault();
+    try {
+      const res = await updateMutation.mutateAsync({
+        name: editName || undefined,
+        billingEmail: editBillingEmail || undefined,
+        logoUrl: editLogoUrl || undefined,
+      });
+      toast({ message: "Settings saved", type: "success" });
+      setEditName(res.org.name);
+      setEditBillingEmail(res.org.billingEmail ?? "");
+      setEditLogoUrl(res.org.logoUrl ?? "");
+    } catch (err: unknown) {
+      toast({
+        message: err instanceof Error ? err.message : "Failed to save settings",
+        type: "error",
+      });
+    }
+  }
+
+  async function handleTransfer(e: React.FormEvent) {
+    e.preventDefault();
+    if (!transferTo) return;
+    if (!confirm("Transfer ownership? You will become an admin.")) return;
+    try {
+      await transferMutation.mutateAsync({ newOwnerId: transferTo });
+      toast({ message: "Ownership transferred", type: "success" });
+      router.push(`/dashboard/organizations/${orgId}`);
+    } catch (err: unknown) {
+      toast({
+        message: err instanceof Error ? err.message : "Failed to transfer ownership",
+        type: "error",
+      });
+    }
+  }
+
+  async function handleDelete(e: React.FormEvent) {
+    e.preventDefault();
+    if (!org || deleteConfirm !== org.name) return;
+    try {
+      await deleteMutation.mutateAsync();
+      toast({ message: "Organization deleted", type: "success" });
+      router.push("/dashboard/organizations");
+    } catch (err: unknown) {
+      toast({
+        message: err instanceof Error ? err.message : "Failed to delete organization",
+        type: "error",
+      });
+    }
+  }
+
   return (
     <div className="space-y-8 max-w-xl">
+      <ServerStateStatus
+        isFetching={detailQuery.isFetching || policyQuery.isFetching}
+        isStale={detailQuery.isStale || policyQuery.isStale}
+        dataUpdatedAt={Math.max(detailQuery.dataUpdatedAt, policyQuery.dataUpdatedAt)}
+      />
+
       <div>
         <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
           {org.name} — Settings
@@ -244,7 +229,6 @@ export default function OrgSettingsPage() {
         <p className="text-sm text-muted-foreground mt-0.5 font-mono">{org.slug}</p>
       </div>
 
-      {/* General settings */}
       <form onSubmit={handleSave} className="bg-card border border-border rounded-xl p-5 space-y-4">
         <h2 className="font-semibold text-foreground">General</h2>
         <div className="space-y-1">
@@ -284,16 +268,11 @@ export default function OrgSettingsPage() {
             className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-ring"
           />
         </div>
-        <Button
-          type="submit"
-          disabled={saving}
-          className="bg-primary hover:bg-primary/90 disabled:opacity-50 text-primary-foreground text-sm px-4 py-2 rounded-lg transition-colors"
-        >
-          {saving ? "Saving…" : "Save changes"}
+        <Button type="submit" disabled={updateMutation.isPending} className="bg-primary hover:bg-primary/90 disabled:opacity-50 text-primary-foreground text-sm px-4 py-2 rounded-lg transition-colors">
+          {updateMutation.isPending ? "Saving…" : "Save changes"}
         </Button>
       </form>
 
-      {/* Passkey security policy — admin+ */}
       {policy && (
         <form
           onSubmit={handleSavePolicy}
@@ -307,10 +286,7 @@ export default function OrgSettingsPage() {
             </p>
           </div>
 
-          <label
-            htmlFor="require-passkey-attestation"
-            className="flex items-start gap-3 cursor-pointer"
-          >
+          <label htmlFor="require-passkey-attestation" className="flex items-start gap-3 cursor-pointer">
             <Input
               id="require-passkey-attestation"
               type="checkbox"
@@ -329,10 +305,7 @@ export default function OrgSettingsPage() {
             </span>
           </label>
 
-          <label
-            htmlFor="require-hardware-passkey"
-            className="flex items-start gap-3 cursor-pointer"
-          >
+          <label htmlFor="require-hardware-passkey" className="flex items-start gap-3 cursor-pointer">
             <Input
               id="require-hardware-passkey"
               type="checkbox"
@@ -469,15 +442,14 @@ export default function OrgSettingsPage() {
 
           <Button
             type="submit"
-            disabled={savingPolicy}
+            disabled={savePolicyMutation.isPending}
             className="bg-primary hover:bg-primary/90 disabled:opacity-50 text-primary-foreground text-sm px-4 py-2 rounded-lg transition-colors"
           >
-            {savingPolicy ? "Saving…" : "Save security policy"}
+            {savePolicyMutation.isPending ? "Saving…" : "Save security policy"}
           </Button>
         </form>
       )}
 
-      {/* Transfer ownership — owner only */}
       {myRole === "owner" && nonOwnerMembers.length > 0 && (
         <form
           onSubmit={handleTransfer}
@@ -504,15 +476,14 @@ export default function OrgSettingsPage() {
           </div>
           <Button
             type="submit"
-            disabled={!transferTo || transferring}
+            disabled={!transferTo || transferMutation.isPending}
             className="bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-foreground text-sm px-4 py-2 rounded-lg transition-colors"
           >
-            {transferring ? "Transferring…" : "Transfer ownership"}
+            {transferMutation.isPending ? "Transferring…" : "Transfer ownership"}
           </Button>
         </form>
       )}
 
-      {/* Delete organization — owner only */}
       {myRole === "owner" && (
         <form
           onSubmit={handleDelete}
@@ -537,10 +508,10 @@ export default function OrgSettingsPage() {
           </div>
           <Button
             type="submit"
-            disabled={deleteConfirm !== org.name || deleting}
+            disabled={deleteConfirm !== org.name || deleteMutation.isPending}
             className="bg-red-700 hover:bg-red-600 disabled:opacity-50 text-foreground text-sm px-4 py-2 rounded-lg transition-colors"
           >
-            {deleting ? "Deleting…" : "Delete organization"}
+            {deleteMutation.isPending ? "Deleting…" : "Delete organization"}
           </Button>
         </form>
       )}

@@ -5,25 +5,22 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { api } from "../../../lib/api";
+import { useSendMagicLinkMutation } from "@/lib/server-state/authForms";
 
 export default function MagicLinkPage() {
   const [email, setEmail] = useState("");
-  const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState("");
+  const sendMutation = useSendMagicLinkMutation();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    setLoading(true);
     try {
-      await api.post("/auth/magic-link/send", { email, redirectUrl: "/dashboard" }, true);
+      await sendMutation.mutateAsync({ email, redirectUrl: "/dashboard" });
       setSent(true);
-    } catch (err: any) {
-      setError(err.message || "Something went wrong");
-    } finally {
-      setLoading(false);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Something went wrong");
     }
   };
 
@@ -36,7 +33,7 @@ export default function MagicLinkPage() {
           We sent a sign-in link to <strong className="text-foreground">{email}</strong>. The link
           expires in 15 minutes.
         </p>
-        <Button variant="link" onClick={(): any => setSent(false)} className="text-sm">
+        <Button variant="link" onClick={(): void => setSent(false)} className="text-sm">
           Use a different email
         </Button>
       </div>
@@ -71,8 +68,8 @@ export default function MagicLinkPage() {
             placeholder="you@example.com"
           />
         </div>
-        <Button type="submit" disabled={loading} className="w-full">
-          {loading ? "Sending…" : "Send Magic Link"}
+        <Button type="submit" disabled={sendMutation.isPending} className="w-full">
+          {sendMutation.isPending ? "Sending…" : "Send Magic Link"}
         </Button>
       </form>
 

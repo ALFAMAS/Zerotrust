@@ -6,9 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PasswordInput } from "@/components/ui/password-input";
 import { brand } from "@/config/brand";
+import { useRegisterAndLoginMutation } from "@/lib/server-state/authForms";
 import { useToast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
-import { api } from "../../../lib/api";
 import { setToken } from "../../../lib/auth";
 import { solveSignupPow } from "../../../lib/pow";
 
@@ -32,7 +32,7 @@ function passwordStrength(p: string): { score: number; label: string; color: str
 
 export default function RegisterPage() {
   const [form, setForm] = useState({ displayName: "", email: "", password: "", confirm: "" });
-  const [loading, setLoading] = useState(false);
+  const registerMutation = useRegisterAndLoginMutation();
   const { toast } = useToast();
   const strength = passwordStrength(form.password);
 
@@ -42,32 +42,22 @@ export default function RegisterPage() {
       toast({ message: "Passwords do not match", type: "error" });
       return;
     }
-    setLoading(true);
     try {
-      // Solve the anti-bot proof-of-work if the server requires one (no-op otherwise).
       const pow = await solveSignupPow();
-      await api.post(
-        "/auth/register",
-        {
-          email: form.email,
-          password: form.password,
-          displayName: form.displayName,
-          ...pow,
-        },
-        true
-      );
-      const data = await api.post<any>(
-        "/auth/login",
-        { email: form.email, password: form.password },
-        true
-      );
+      const data = await registerMutation.mutateAsync({
+        email: form.email,
+        password: form.password,
+        displayName: form.displayName,
+        ...pow,
+      });
       setToken(data.accessToken, data.refreshToken);
       toast({ message: "Account created! Check your email to verify.", type: "success" });
       window.location.href = "/dashboard";
-    } catch (err: any) {
-      toast({ message: err.message || "Registration failed", type: "error" });
-    } finally {
-      setLoading(false);
+    } catch (err: unknown) {
+      toast({
+        message: err instanceof Error ? err.message : "Registration failed",
+        type: "error",
+      });
     }
   };
 
@@ -145,8 +135,8 @@ export default function RegisterPage() {
           />
         </div>
 
-        <Button type="submit" disabled={loading} className="mt-2 w-full">
-          {loading ? "Creating account…" : "Create account"}
+        <Button type="submit" disabled={registerMutation.isPending} className="mt-2 w-full">
+          {registerMutation.isPending ? "Creating account…" : "Create account"}
         </Button>
       </form>
 

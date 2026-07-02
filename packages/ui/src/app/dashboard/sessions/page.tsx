@@ -1,47 +1,42 @@
 "use client";
 import { CalendarClock, Clock, Globe, Laptop, MapPin, ShieldCheck } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { ServerStateStatus } from "@/components/ServerStateStatus";
 import { SkeletonCard } from "@/components/Skeleton";
 import { Button } from "@/components/ui/button";
-import { api } from "../../../lib/api";
-
-interface Session {
-  id: string;
-  ipAddress: string;
-  country?: string;
-  userAgent?: string;
-  deviceFingerprint?: { platform?: string; browser?: string; os?: string; isTrusted?: boolean };
-  isActive: boolean;
-  isCurrent?: boolean;
-  expiresAt?: string;
-  lastActivityAt: string;
-  createdAt?: string;
-}
+import { ErrorState } from "@/components/ui/States";
+import {
+  useRevokeAllUserSessionsMutation,
+  useRevokeUserSessionMutation,
+  useUserSessionsListQuery,
+} from "@/lib/server-state/sessions";
 
 const fmt = (d?: string) => (d ? new Date(d).toLocaleString() : "—");
 
 export default function SessionsPage() {
-  const [sessions, setSessions] = useState<Session[]>([]);
-  const [loading, setLoading] = useState(true);
+  const sessionsQuery = useUserSessionsListQuery();
+  const revokeMutation = useRevokeUserSessionMutation();
+  const revokeAllMutation = useRevokeAllUserSessionsMutation();
 
-  const fetchSessions = useCallback(() => {
-    setLoading(true);
-    api
-      .get<any>("/sessions")
-      .then((d) => setSessions(d.data || d.sessions || []))
-      .catch(() => setSessions([]))
-      .finally(() => setLoading(false));
-  }, []);
-
-  useEffect(() => {
-    fetchSessions();
-  }, [fetchSessions]);
+  const sessions = sessionsQuery.data ?? [];
+  const loading = sessionsQuery.isPending;
 
   const revoke = async (id: string) => {
     if (!confirm("Revoke this session?")) return;
-    await api.delete(`/sessions/${id}`).catch(() => {});
-    fetchSessions();
+    try {
+      await revokeMutation.mutateAsync(id);
+    } catch {
+      // ignore
+    }
   };
+
+  if (sessionsQuery.error && !sessionsQuery.data) {
+    return (
+      <ErrorState
+        message={sessionsQuery.error.message || "Failed to load sessions"}
+        retry={() => void sessionsQuery.refetch()}
+      />
+    );
+  }
 
   return (
     <div>
@@ -52,20 +47,28 @@ export default function SessionsPage() {
         <Button
           variant="outline"
           onClick={() => {
-            if (confirm("Revoke all other sessions?"))
-              api
-                .delete("/sessions")
+            if (confirm("Revoke all other sessions?")) {
+              revokeAllMutation
+                .mutateAsync()
                 .then(() => {
-                  fetchSessions();
                   window.location.href = "/login";
                 })
                 .catch(() => {});
+            }
           }}
+          disabled={revokeAllMutation.isPending}
           className="text-sm text-red-400 hover:text-red-300 border border-red-800 px-3 py-1.5 rounded-lg hover:bg-red-950 transition-colors"
         >
           Revoke All
         </Button>
       </div>
+
+      <ServerStateStatus
+        isFetching={sessionsQuery.isFetching}
+        isStale={sessionsQuery.isStale}
+        dataUpdatedAt={sessionsQuery.dataUpdatedAt}
+        className="mb-4"
+      />
 
       {loading ? (
         <div className="space-y-3">
@@ -147,6 +150,7 @@ export default function SessionsPage() {
                   <Button
                     variant="outline"
                     onClick={() => revoke(session.id)}
+                    disabled={revokeMutation.isPending}
                     className="shrink-0 text-xs text-red-400 hover:text-red-300 border border-red-800 px-2.5 py-1 rounded-lg hover:bg-red-950 transition-colors"
                   >
                     Revoke

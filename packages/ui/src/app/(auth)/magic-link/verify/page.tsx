@@ -4,16 +4,15 @@ import { CheckCircle2, XCircle } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useRef, useState } from "react";
+import { useVerifyMagicLinkMutation } from "@/lib/server-state/authForms";
 import { setToken } from "@/lib/auth";
 import { navigateToSafeRelative, safeRelativeRedirect } from "@/lib/safeRedirect";
-import { api } from "../../../../lib/api";
 
 type Status = "verifying" | "success" | "error";
 
-type Tokens = { accessToken: string; refreshToken?: string };
-
 function VerifyMagicLinkInner() {
   const params = useSearchParams();
+  const verifyMutation = useVerifyMagicLinkMutation();
   const [status, setStatus] = useState<Status>("verifying");
   const [error, setError] = useState("");
   const tried = useRef(false);
@@ -32,25 +31,22 @@ function VerifyMagicLinkInner() {
       return;
     }
 
-    async function verify() {
-      try {
-        // skipAuth: this is a sign-in flow, there's no session yet.
-        const tokens = await api.post<Tokens>("/auth/magic-link/verify", { email, token }, true);
+    verifyMutation
+      .mutateAsync({ email, token })
+      .then((tokens) => {
         setToken(tokens.accessToken, tokens.refreshToken);
         setStatus("success");
         navigateToSafeRelative(redirect, "/dashboard");
-      } catch (err: any) {
+      })
+      .catch((err: unknown) => {
         setStatus("error");
-        setError(err?.message || "This magic link is invalid or has expired. Request a new one.");
-      }
-    }
-
-    // handle promise explicitly to avoid floating-promise lint errors
-    verify().catch((err: any) => {
-      setStatus("error");
-      setError(err?.message || "This magic link is invalid or has expired. Request a new one.");
-    });
-  }, [params]);
+        setError(
+          err instanceof Error
+            ? err.message
+            : "This magic link is invalid or has expired. Request a new one."
+        );
+      });
+  }, [params, verifyMutation]);
 
   if (status === "error") {
     return (

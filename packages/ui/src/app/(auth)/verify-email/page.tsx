@@ -7,8 +7,8 @@ import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useVerifyEmailMutation } from "@/lib/server-state/authForms";
 import { useToast } from "@/lib/toast";
-import { api } from "../../../lib/api";
 import { isAuthenticated } from "../../../lib/auth";
 
 type Status = "idle" | "verifying" | "success" | "error";
@@ -16,6 +16,7 @@ type Status = "idle" | "verifying" | "success" | "error";
 function VerifyEmailInner() {
   const params = useSearchParams();
   const { toast } = useToast();
+  const verifyMutation = useVerifyEmailMutation();
   const [status, setStatus] = useState<Status>("idle");
   const [code, setCode] = useState("");
   const autoTried = useRef(false);
@@ -24,17 +25,16 @@ function VerifyEmailInner() {
     async (codeValue: string) => {
       setStatus("verifying");
       try {
-        // The endpoint is authenticated — it reads the email from the session, so
-        // we only send the code (auth token is attached automatically).
-        await api.post("/auth/verify-email", { code: codeValue });
+        await verifyMutation.mutateAsync({ code: codeValue });
         setStatus("success");
         toast({ message: "Email verified — you're all set!", type: "success" });
         setTimeout(() => {
           window.location.href = "/dashboard";
         }, 1500);
-      } catch (err: any) {
+      } catch (err: unknown) {
         setStatus("error");
-        if (err.status === 401) {
+        const apiErr = err as { status?: number; message?: string };
+        if (apiErr.status === 401) {
           toast({
             message: "Please sign in to verify your email.",
             type: "error",
@@ -42,15 +42,14 @@ function VerifyEmailInner() {
           return;
         }
         toast({
-          message: err.message || "Invalid or expired code. Request a new one.",
+          message: apiErr.message || "Invalid or expired code. Request a new one.",
           type: "error",
         });
       }
     },
-    [toast]
+    [toast, verifyMutation]
   );
 
-  // Auto-verify when arriving from the email magic link (?code=)
   useEffect(() => {
     if (autoTried.current) return;
     const qCode = params.get("code");
@@ -74,6 +73,8 @@ function VerifyEmailInner() {
       </div>
     );
   }
+
+  const verifying = status === "verifying" || verifyMutation.isPending;
 
   return (
     <>
@@ -108,8 +109,8 @@ function VerifyEmailInner() {
           />
         </div>
 
-        <Button type="submit" disabled={status === "verifying"} className="w-full">
-          {status === "verifying" ? "Verifying…" : "Verify email"}
+        <Button type="submit" disabled={verifying} className="w-full">
+          {verifying ? "Verifying…" : "Verify email"}
         </Button>
       </form>
 

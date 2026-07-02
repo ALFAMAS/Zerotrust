@@ -2,55 +2,16 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Toggle from "@/components/Toggle";
+import { ServerStateStatus } from "@/components/ServerStateStatus";
 import { Button } from "@/components/ui/button";
+import { ErrorState } from "@/components/ui/States";
 import { Input } from "@/components/ui/input";
-
-interface AuthSettings {
-  // Auth Methods
-  emailPasswordEnabled: boolean;
-  googleOAuthEnabled: boolean;
-  githubOAuthEnabled: boolean;
-  magicLinkEnabled: boolean;
-  passkeyEnabled: boolean;
-
-  // MFA
-  totpEnabled: boolean;
-  emailOtpEnabled: boolean;
-  smsOtpEnabled: boolean;
-  requireMfaForAll: boolean;
-
-  // Security
-  sessionTTLSeconds: number;
-  maxConcurrentSessions: number;
-  accountLockoutEnabled: boolean;
-  accountLockoutThreshold: number;
-  accountLockoutDurationMinutes: number;
-
-  // Registration
-  registrationEnabled: boolean;
-  requireEmailVerification: boolean;
-  allowedEmailDomains: string;
-}
-
-const DEFAULTS: AuthSettings = {
-  emailPasswordEnabled: true,
-  googleOAuthEnabled: false,
-  githubOAuthEnabled: false,
-  magicLinkEnabled: false,
-  passkeyEnabled: false,
-  totpEnabled: false,
-  emailOtpEnabled: false,
-  smsOtpEnabled: false,
-  requireMfaForAll: false,
-  sessionTTLSeconds: 3600,
-  maxConcurrentSessions: 5,
-  accountLockoutEnabled: true,
-  accountLockoutThreshold: 5,
-  accountLockoutDurationMinutes: 15,
-  registrationEnabled: true,
-  requireEmailVerification: true,
-  allowedEmailDomains: "",
-};
+import {
+  AUTH_SETTINGS_DEFAULTS,
+  useAdminAuthSettingsQuery,
+  useSaveAdminAuthSettingsMutation,
+} from "@/lib/server-state/settings";
+import type { AuthSettings } from "@/lib/server-state/types";
 
 interface ToggleRowProps {
   label: string;
@@ -102,12 +63,17 @@ function NumberInput({ label, value, onChange, min, max }: NumberInputProps) {
 }
 
 export default function AuthSettingsPage() {
-  const [settings, setSettings] = useState<AuthSettings>(DEFAULTS);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const settingsQuery = useAdminAuthSettingsQuery();
+  const saveMutation = useSaveAdminAuthSettingsMutation();
+  const [settings, setSettings] = useState<AuthSettings>(AUTH_SETTINGS_DEFAULTS);
   const [toast, setToast] = useState<string | null>(null);
-
   const toastTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+
+  useEffect(() => {
+    if (settingsQuery.data) {
+      setSettings(settingsQuery.data);
+    }
+  }, [settingsQuery.data]);
 
   const showToast = useCallback((msg: string) => {
     setToast(msg);
@@ -115,41 +81,20 @@ export default function AuthSettingsPage() {
     toastTimer.current = setTimeout(() => setToast(null), 3000);
   }, []);
 
-  useEffect(() => {
-    async function load() {
-      try {
-        const data = await (await fetch("/api/admin/settings")).json();
-        setSettings({ ...DEFAULTS, ...data });
-      } catch {
-        // Use defaults if API not available
-      } finally {
-        setLoading(false);
-      }
-    }
-    void load();
-  }, []);
-
   function set<K extends keyof AuthSettings>(key: K, value: AuthSettings[K]) {
     setSettings((prev) => ({ ...prev, [key]: value }));
   }
 
   async function handleSave() {
-    setSaving(true);
     try {
-      await fetch("/api/admin/settings", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(settings),
-      });
+      await saveMutation.mutateAsync(settings);
       showToast("Settings saved successfully");
     } catch {
       showToast("Failed to save settings");
-    } finally {
-      setSaving(false);
     }
   }
 
-  if (loading) {
+  if (settingsQuery.isPending) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-muted-foreground">Loading…</div>
@@ -157,9 +102,17 @@ export default function AuthSettingsPage() {
     );
   }
 
+  if (settingsQuery.error && !settingsQuery.data) {
+    return (
+      <ErrorState
+        message={settingsQuery.error.message || "Failed to load auth settings"}
+        retry={() => void settingsQuery.refetch()}
+      />
+    );
+  }
+
   return (
     <div className="space-y-6 max-w-4xl">
-      {/* Toast */}
       {toast && (
         <div className="fixed top-4 right-4 z-50 rounded-lg bg-primary px-4 py-3 text-sm text-foreground shadow-lg">
           {toast}
@@ -175,10 +128,14 @@ export default function AuthSettingsPage() {
         </p>
       </div>
 
+      <ServerStateStatus
+        isFetching={settingsQuery.isFetching}
+        isStale={settingsQuery.isStale}
+        dataUpdatedAt={settingsQuery.dataUpdatedAt}
+      />
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Column 1 */}
         <div className="space-y-6">
-          {/* Card 1: Authentication Methods */}
           <div className="rounded-xl bg-card border border-border p-5">
             <h2 className="font-semibold text-foreground mb-1">Authentication Methods</h2>
             <p className="text-xs text-muted-foreground mb-4">
@@ -218,7 +175,6 @@ export default function AuthSettingsPage() {
             </div>
           </div>
 
-          {/* Card 4: Registration */}
           <div className="rounded-xl bg-card border border-border p-5">
             <h2 className="font-semibold text-foreground mb-1">Registration</h2>
             <p className="text-xs text-muted-foreground mb-4">
@@ -257,9 +213,7 @@ export default function AuthSettingsPage() {
           </div>
         </div>
 
-        {/* Column 2 */}
         <div className="space-y-6">
-          {/* Card 2: MFA */}
           <div className="rounded-xl bg-card border border-border p-5">
             <h2 className="font-semibold text-foreground mb-1">Multi-Factor Authentication</h2>
             <p className="text-xs text-muted-foreground mb-4">
@@ -293,7 +247,6 @@ export default function AuthSettingsPage() {
             </div>
           </div>
 
-          {/* Card 3: Security */}
           <div className="rounded-xl bg-card border border-border p-5">
             <h2 className="font-semibold text-foreground mb-1">Security Settings</h2>
             <p className="text-xs text-muted-foreground mb-4">
@@ -339,40 +292,13 @@ export default function AuthSettingsPage() {
         </div>
       </div>
 
-      {/* Save Button */}
       <div className="flex justify-end pt-2">
         <Button
           onClick={handleSave}
-          disabled={saving}
+          disabled={saveMutation.isPending}
           className="gap-2 px-6 py-2.5 text-sm font-medium min-w-[140px]"
         >
-          {saving ? (
-            <>
-              <svg
-                aria-hidden="true"
-                className="h-4 w-4 animate-spin"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                />
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                />
-              </svg>
-              Saving…
-            </>
-          ) : (
-            "Save Settings"
-          )}
+          {saveMutation.isPending ? "Saving…" : "Save Settings"}
         </Button>
       </div>
     </div>

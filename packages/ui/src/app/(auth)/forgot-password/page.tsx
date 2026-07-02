@@ -4,19 +4,17 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { api } from "../../../lib/api";
+import { usePasswordResetRequestMutation } from "@/lib/server-state/authForms";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
-  const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
+  const resetMutation = usePasswordResetRequestMutation();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    await api.post("/auth/password-reset/request", { email }, true).catch(() => {});
+    await resetMutation.mutateAsync({ email });
     setSent(true);
-    setLoading(false);
   };
 
   if (sent) {
@@ -52,8 +50,8 @@ export default function ForgotPasswordPage() {
             placeholder="you@example.com"
           />
         </div>
-        <Button type="submit" disabled={loading} className="w-full">
-          {loading ? "Sending…" : "Send Reset Link"}
+        <Button type="submit" disabled={resetMutation.isPending} className="w-full">
+          {resetMutation.isPending ? "Sending…" : "Send Reset Link"}
         </Button>
       </form>
       <p className="mt-6 text-center text-sm text-muted-foreground">

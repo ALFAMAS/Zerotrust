@@ -1,18 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
-import { apiGet } from "@/lib/apiClient";
-
-const API_URL = process.env.NEXT_PUBLIC_ZEROTRUST_URL || "http://localhost:3000";
-
-interface StatusData {
-  status: "operational" | "degraded" | "down";
-  components: Record<string, "operational" | "degraded" | "down" | "not set">;
-  uptimeSeconds: number;
-  timestamp: string;
-}
+import { ServerStateStatus } from "@/components/ServerStateStatus";
+import { ErrorState } from "@/components/ui/States";
+import { useStatusQuery, useStatusStream } from "@/lib/server-state/status";
 
 const STATUS_STYLES: Record<string, { dot: string; label: string; text: string }> = {
   operational: {
@@ -34,50 +26,44 @@ const COMPONENT_LABELS: Record<string, string> = {
 };
 
 export default function StatusPage() {
-  const [data, setData] = useState<StatusData | null>(null);
-  const [error, setError] = useState(false);
-  const [lastChecked, setLastChecked] = useState<Date | null>(null);
+  const statusQuery = useStatusQuery();
+  useStatusStream(!statusQuery.isError);
 
-  const load = useCallback(async () => {
-    try {
-      const data = await apiGet<StatusData>("/status", { skipAuth: true });
-      setData(data);
-      setError(false);
-    } catch {
-      setError(true);
-      setData(null);
-    } finally {
-      setLastChecked(new Date());
-    }
-  }, []);
-
-  // Initial load
-  useEffect(() => {
-    void load();
-  }, [load]);
-
-  // SSE for real-time status updates (replaces 30s polling)
-  useEffect(() => {
-    const es = new EventSource(`${API_URL}/status/stream`);
-    es.onmessage = (e) => {
-      try {
-        const statusData = JSON.parse(e.data);
-        setData(statusData);
-        setError(false);
-        setLastChecked(new Date());
-      } catch {
-        // ignore parse errors
-      }
-    };
-    es.onerror = () => {
-      setError(true);
-      // EventSource will auto-reconnect
-    };
-    return () => es.close();
-  }, []);
+  const data = statusQuery.data ?? null;
+  const error = Boolean(statusQuery.error && !statusQuery.data);
+  const lastChecked = statusQuery.dataUpdatedAt
+    ? new Date(statusQuery.dataUpdatedAt)
+    : null;
 
   const overall = error ? "down" : (data?.status ?? "operational");
   const style = STATUS_STYLES[overall];
+
+  if (statusQuery.isPending) {
+    return (
+      <div className="flex min-h-screen flex-col bg-background text-foreground">
+        <SiteHeader />
+        <main className="mx-auto w-full max-w-2xl flex-1 px-6 py-16">
+          <p className="text-sm text-muted-foreground">Loading system status…</p>
+        </main>
+        <SiteFooter />
+      </div>
+    );
+  }
+
+  if (error && !data) {
+    return (
+      <div className="flex min-h-screen flex-col bg-background text-foreground">
+        <SiteHeader />
+        <main className="mx-auto w-full max-w-2xl flex-1 px-6 py-16">
+          <ErrorState
+            message={statusQuery.error?.message || "API unreachable"}
+            retry={() => void statusQuery.refetch()}
+          />
+        </main>
+        <SiteFooter />
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
@@ -87,6 +73,13 @@ export default function StatusPage() {
         <p className="mt-2 text-sm text-muted-foreground">
           Live status of all platform components. Updates in real-time.
         </p>
+
+        <ServerStateStatus
+          isFetching={statusQuery.isFetching}
+          isStale={statusQuery.isStale}
+          dataUpdatedAt={statusQuery.dataUpdatedAt}
+          className="mt-4"
+        />
 
         <div
           className={`mb-8 mt-10 flex items-center gap-4 rounded-xl border p-6 ${

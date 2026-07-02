@@ -18,6 +18,19 @@ Tracks the frontend server-state migration from ad-hoc `useEffect` + local loadi
 - `[~]` Partial / started.
 - `[ ]` Not migrated yet.
 
+## Summary (audited 2026-07-03)
+
+| Metric | Count |
+| --- | --- |
+| App `page.tsx` files | 47 |
+| Migrated to TanStack Query | 28 |
+| Remaining (`lib/api` relative imports) | 11 |
+| Remaining (other legacy: `useApi`, raw `fetch`, `useEffect`+`apiGet`) | 3 |
+| Static / no server state | 5 |
+| **Data-fetching completion** | **~67%** (28/42) |
+
+`@/lib/api` alias imports: **0** under `packages/ui/src`.
+
 ## Foundation
 
 - [x] Install `@tanstack/react-query` in `packages/ui`.
@@ -94,7 +107,15 @@ New modules: `organizations.ts`, `apiKeys.ts`. Extended: `auth.ts` (avatar, TOTP
 | Dashboard | `dashboard/organizations/[orgId]/settings/page.tsx` | extend `organizations.ts` |
 | Other | `invite/[token]/page.tsx` | new or extend `organizations.ts` |
 
-**Next batch targets:** `dashboard/sessions`, org detail + settings, auth form pages (login/register/forgot/reset/verify/magic-link), `invite/[token]`.
+### Other legacy patterns (not `lib/api`) — 3 files
+
+| Area | File | Pattern |
+| --- | --- | --- |
+| Admin | `admin/page.tsx` | `useApi` + `apiGetBlob` |
+| Admin | `admin/settings/auth/page.tsx` | raw `fetch("/api/admin/settings")` |
+| Public | `status/page.tsx` | `useEffect` + `apiGet` + SSE |
+
+**Next batch targets:** `dashboard/sessions` → org detail + settings → `invite/[token]` → auth forms (7) → `admin/page` → `admin/settings/auth` → `status`.
 
 
 Prioritize pages with real server data, manual `loading/error` state, and repeated `api.get` calls.

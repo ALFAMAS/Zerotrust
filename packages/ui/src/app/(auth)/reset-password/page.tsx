@@ -7,22 +7,19 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PasswordInput } from "@/components/ui/password-input";
-import { api } from "../../../lib/api";
+import { usePasswordResetConfirmMutation } from "@/lib/server-state/authForms";
 
 function ResetForm() {
   const searchParams = useSearchParams();
-  // The password-reset email link carries the email and 6-digit code as query
-  // params (see password-reset.routes.ts). Pre-fill them when present; the
-  // user can also type the code manually.
   const email = searchParams.get("email") || "";
   const code = searchParams.get("code") || "";
   const [enteredCode, setEnteredCode] = useState(code);
   const [enteredEmail, setEnteredEmail] = useState(email);
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [done, setDone] = useState(false);
+  const resetMutation = usePasswordResetConfirmMutation();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,19 +31,16 @@ function ResetForm() {
       setError("Email and reset code are required");
       return;
     }
-    setLoading(true);
     setError("");
     try {
-      await api.post(
-        "/auth/password-reset/confirm",
-        { email: enteredEmail, code: enteredCode, newPassword: password },
-        true
-      );
+      await resetMutation.mutateAsync({
+        email: enteredEmail,
+        code: enteredCode,
+        newPassword: password,
+      });
       setDone(true);
-    } catch (err: any) {
-      setError(err.message || "Reset failed");
-    } finally {
-      setLoading(false);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Reset failed");
     }
   };
 
@@ -123,8 +117,8 @@ function ResetForm() {
             placeholder="Repeat password"
           />
         </div>
-        <Button type="submit" disabled={loading} className="w-full">
-          {loading ? "Updating…" : "Update Password"}
+        <Button type="submit" disabled={resetMutation.isPending} className="w-full">
+          {resetMutation.isPending ? "Updating…" : "Update Password"}
         </Button>
       </form>
     </>

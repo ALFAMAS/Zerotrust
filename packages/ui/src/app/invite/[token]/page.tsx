@@ -1,52 +1,31 @@
 "use client";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef } from "react";
 import { SkeletonCard } from "@/components/Skeleton";
-import { api } from "../../../lib/api";
+import { ErrorState } from "@/components/ui/States";
+import { useAcceptInviteMutation } from "@/lib/server-state/organizations";
 import { getToken } from "../../../lib/auth";
-
-interface AcceptResult {
-  org: {
-    id: string;
-    name: string;
-    slug: string;
-  } | null;
-  member: {
-    role: string;
-  };
-}
 
 export default function InviteAcceptPage() {
   const params = useParams();
   const router = useRouter();
   const token = params.token as string;
-
-  const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
-  const [result, setResult] = useState<AcceptResult | null>(null);
-  const [errorMessage, setErrorMessage] = useState("");
+  const acceptMutation = useAcceptInviteMutation();
+  const started = useRef(false);
 
   useEffect(() => {
-    // If not logged in, redirect to login page preserving the invite URL
     const authToken = getToken();
     if (!authToken) {
       router.replace(`/login?next=/invite/${encodeURIComponent(token)}`);
       return;
     }
+    if (started.current) return;
+    started.current = true;
+    acceptMutation.mutate({ token });
+  }, [token, router, acceptMutation]);
 
-    api
-      .post<AcceptResult>("/orgs/invites/accept", { token })
-      .then((res) => {
-        setResult(res);
-        setStatus("success");
-      })
-      .catch((err: any) => {
-        setErrorMessage(err.message || "Failed to accept invite");
-        setStatus("error");
-      });
-  }, [token, router]);
-
-  if (status === "loading") {
+  if (acceptMutation.isPending) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center px-4">
         <div className="w-full max-w-sm">
@@ -57,7 +36,7 @@ export default function InviteAcceptPage() {
     );
   }
 
-  if (status === "error") {
+  if (acceptMutation.isError) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center px-4">
         <div className="w-full max-w-sm bg-card border border-red-900 rounded-xl p-6 text-center space-y-4">
@@ -65,7 +44,9 @@ export default function InviteAcceptPage() {
             !
           </div>
           <h1 className="text-lg font-semibold text-foreground">Invite error</h1>
-          <p className="text-sm text-muted-foreground">{errorMessage}</p>
+          <p className="text-sm text-muted-foreground">
+            {acceptMutation.error?.message || "Failed to accept invite"}
+          </p>
           <Link
             href="/dashboard/organizations"
             className="inline-block text-sm text-primary hover:text-primary/80 underline"
@@ -76,6 +57,8 @@ export default function InviteAcceptPage() {
       </div>
     );
   }
+
+  const result = acceptMutation.data;
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4">

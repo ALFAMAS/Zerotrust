@@ -1,26 +1,47 @@
 "use client";
 import { Fingerprint } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PasswordInput } from "@/components/ui/password-input";
 import { brand } from "@/config/brand";
+import { useOAuthAuthorizeMutation } from "@/lib/server-state/auth";
+import {
+  useLoginMfaMutation,
+  useLoginMutation,
+  useOAuthExchangeMutation,
+  usePasskeyAuthOptionsMutation,
+  usePasskeyAuthVerifyMutation,
+} from "@/lib/server-state/authForms";
 import { useToast } from "@/lib/toast";
-import { api } from "../../../lib/api";
 import { setToken } from "../../../lib/auth";
 import { navigateToSafeExternal, navigateToSafeRelative } from "../../../lib/safeRedirect";
 import { isWebAuthnAvailable, startAuthentication } from "../../../lib/webauthn";
 
 export default function LoginPage() {
   const [form, setForm] = useState({ email: "", password: "" });
-  const [loading, setLoading] = useState(false);
   const [mfaToken, setMfaToken] = useState<string | null>(null);
   const [mfaCode, setMfaCode] = useState("");
   const { toast } = useToast();
 
-  const apiBase = process.env.NEXT_PUBLIC_ZEROAUTH_URL || "http://localhost:1337";
+  const loginMutation = useLoginMutation();
+  const loginMfaMutation = useLoginMfaMutation();
+  const passkeyOptionsMutation = usePasskeyAuthOptionsMutation();
+  const passkeyVerifyMutation = usePasskeyAuthVerifyMutation();
+  const oauthExchangeMutation = useOAuthExchangeMutation();
+  const oauthAuthorizeMutation = useOAuthAuthorizeMutation();
+
+  const loading =
+    loginMutation.isPending ||
+    loginMfaMutation.isPending ||
+    passkeyOptionsMutation.isPending ||
+    passkeyVerifyMutation.isPending ||
+    oauthExchangeMutation.isPending ||
+    oauthAuthorizeMutation.isPending;
+
+  const oauthTried = useRef(false);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -36,31 +57,24 @@ export default function LoginPage() {
       return;
     }
 
-    if (oauthCode) {
-      // Redeem the exchange code for tokens via the API
-      fetch(`${apiBase}/auth/oauth/exchange`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code: oauthCode }),
+    if (!oauthCode || oauthTried.current) return;
+    oauthTried.current = true;
+
+    oauthExchangeMutation
+      .mutateAsync({ code: oauthCode })
+      .then((data) => {
+        setToken(data.accessToken, data.refreshToken);
+        toast({ message: "Welcome!", type: "success" });
+        window.location.replace("/dashboard");
       })
-        .then((res) => {
-          if (!res.ok) throw new Error("Token exchange failed");
-          return res.json();
-        })
-        .then((data) => {
-          setToken(data.accessToken, data.refreshToken);
-          toast({ message: "Welcome!", type: "success" });
-          window.location.replace("/dashboard");
-        })
-        .catch(() => {
-          toast({
-            message: "OAuth sign-in failed. Please try again.",
-            type: "error",
-          });
-          window.history.replaceState({}, "", "/login");
+      .catch(() => {
+        toast({
+          message: "OAuth sign-in failed. Please try again.",
+          type: "error",
         });
-    }
-  }, [toast, apiBase]);
+        window.history.replaceState({}, "", "/login");
+      });
+  }, [toast, oauthExchangeMutation]);
 
   const finishLogin = (data: { accessToken: string; refreshToken: string }) => {
     setToken(data.accessToken, data.refreshToken);
@@ -71,11 +85,10 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     try {
-      const data = await api.post<any>("/auth/login", form, true);
+      const data = await loginMutation.mutateAsync(form);
       if (data.mfaRequired) {
-        setMfaToken(data.mfaToken);
+        setMfaToken(data.mfaToken ?? null);
         toast({
           message: "Enter your authenticator code to continue.",
           type: "info",
@@ -83,13 +96,11 @@ export default function LoginPage() {
         return;
       }
       finishLogin(data);
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast({
-        message: err.message || "Login failed. Please check your credentials.",
+        message: err instanceof Error ? err.message : "Login failed. Please check your credentials.",
         type: "error",
       });
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -101,73 +112,54 @@ export default function LoginPage() {
       });
       return;
     }
-    setLoading(true);
     try {
-      const options = await api.post<any>(
-        "/auth/passkey/authenticate/options",
-        { email: form.email || undefined },
-        true
-      );
+      const options = await passkeyOptionsMutation.mutateAsync({
+        email: form.email || undefined,
+      });
       const assertion = await startAuthentication(options);
-      const data = await api.post<any>(
-        "/auth/passkey/authenticate/verify",
-        {
-          ...assertion,
-          challengeKey: options._challengeKey,
-          email: form.email || undefined,
-        },
-        true
-      );
+      const data = await passkeyVerifyMutation.mutateAsync({
+        ...assertion,
+        challengeKey: options._challengeKey as string | undefined,
+        email: form.email || undefined,
+      });
       finishLogin(data);
-    } catch (err: any) {
-      if (err?.name === "NotAllowedError") {
+    } catch (err: unknown) {
+      if (err instanceof DOMException && err.name === "NotAllowedError") {
         toast({ message: "Passkey sign-in was cancelled.", type: "error" });
       } else {
         toast({
-          message: err?.message || "Passkey sign-in failed.",
+          message: err instanceof Error ? err.message : "Passkey sign-in failed.",
           type: "error",
         });
       }
-    } finally {
-      setLoading(false);
     }
   };
 
   const handleMfaSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    if (!mfaToken) return;
     try {
-      const data = await api.post<any>("/auth/login/mfa", { mfaToken, code: mfaCode.trim() }, true);
+      const data = await loginMfaMutation.mutateAsync({
+        mfaToken,
+        code: mfaCode.trim(),
+      });
       finishLogin(data);
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast({
-        message: err.message || "Invalid code. Please try again.",
+        message: err instanceof Error ? err.message : "Invalid code. Please try again.",
         type: "error",
       });
-    } finally {
-      setLoading(false);
     }
   };
 
   const handleOAuthLogin = async (provider: string) => {
     try {
-      // PKCE is handled entirely server-side (the API generates the verifier and
-      // keeps it with the state record), so the client only needs to ask for the
-      // provider's authorization URL and navigate to it.
-      const res = await fetch(`${apiBase}/auth/oauth/${provider}/authorize`);
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        toast({
-          message: (err as { message?: string }).message || `Failed to initiate ${provider} login`,
-          type: "error",
-        });
-        return;
-      }
-      const { authorizeUrl } = await res.json();
+      const { authorizeUrl } = await oauthAuthorizeMutation.mutateAsync(provider);
       navigateToSafeExternal(authorizeUrl, "/login");
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast({
-        message: err.message || `Failed to initiate ${provider} login`,
+        message:
+          err instanceof Error ? err.message : `Failed to initiate ${provider} login`,
         type: "error",
       });
     }

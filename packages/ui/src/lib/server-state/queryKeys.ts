@@ -6,6 +6,7 @@ export const queryKeys = {
   },
   admin: {
     all: ["admin"] as const,
+    stats: () => [...queryKeys.admin.all, "stats"] as const,
     users: {
       all: () => [...queryKeys.admin.all, "users"] as const,
       list: (filters: Record<string, string | number | undefined> = {}) =>
@@ -63,6 +64,9 @@ export const queryKeys = {
     detail: (orgId: string) => [...queryKeys.organizations.all, "detail", orgId] as const,
     members: (orgId: string, filters: Record<string, string | number | undefined> = {}) =>
       [...queryKeys.organizations.detail(orgId), "members", filters] as const,
+    invites: (orgId: string) => [...queryKeys.organizations.detail(orgId), "invites"] as const,
+    securityPolicy: (orgId: string) =>
+      [...queryKeys.organizations.detail(orgId), "securityPolicy"] as const,
   },
   support: {
     all: ["support"] as const,
@@ -102,6 +106,11 @@ export const queryKeys = {
   settings: {
     all: ["settings"] as const,
     general: () => [...queryKeys.settings.all, "general"] as const,
+    auth: () => [...queryKeys.settings.all, "auth"] as const,
+  },
+  status: {
+    all: ["status"] as const,
+    current: () => [...queryKeys.status.all, "current"] as const,
   },
   notifications: {
     all: ["notifications"] as const,

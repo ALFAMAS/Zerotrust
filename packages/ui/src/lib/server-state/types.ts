@@ -651,3 +651,179 @@ export interface TotpSetupResponse {
 export interface TotpVerifyResponse {
   backupCodes?: string[];
 }
+
+export interface LoginTokens {
+  accessToken: string;
+  refreshToken: string;
+}
+
+export interface LoginResponse extends LoginTokens {
+  mfaRequired?: boolean;
+  mfaToken?: string;
+}
+
+export interface RegisterInput {
+  email: string;
+  password: string;
+  displayName: string;
+  powChallenge?: string;
+  powSolution?: string;
+}
+
+export interface PasswordResetRequestInput {
+  email: string;
+}
+
+export interface PasswordResetConfirmInput {
+  email: string;
+  code: string;
+  newPassword: string;
+}
+
+export interface VerifyEmailInput {
+  code: string;
+}
+
+export interface SendMagicLinkInput {
+  email: string;
+  redirectUrl?: string;
+}
+
+export interface VerifyMagicLinkInput {
+  email: string;
+  token: string;
+}
+
+export interface PasskeyAuthOptionsInput {
+  email?: string;
+}
+
+export interface PasskeyAuthVerifyInput extends Record<string, unknown> {
+  challengeKey?: string;
+  email?: string;
+}
+
+export interface OAuthExchangeInput {
+  code: string;
+}
+
+export interface OrgDetailResponse {
+  org: Organization;
+  memberCount: number;
+}
+
+export interface OrgMemberUser {
+  id: string;
+  email: string;
+  displayName: string;
+  avatarUrl?: string | null;
+}
+
+export interface OrgMemberRow {
+  member: OrganizationMember;
+  user: OrgMemberUser;
+}
+
+export interface OrgInvite {
+  id: string;
+  orgId: string;
+  email: string;
+  role: string;
+  token: string;
+  expiresAt: string;
+  createdAt: string;
+}
+
+export interface CreateOrgInviteInput {
+  email: string;
+  role: string;
+}
+
+export interface UpdateOrganizationInput {
+  name?: string;
+  billingEmail?: string;
+  logoUrl?: string;
+}
+
+export interface OrgSecurityPolicy {
+  orgId: string;
+  requirePasskeyAttestation: boolean;
+  requireHardwarePasskey: boolean;
+  allowedPasskeyAaguids: string[];
+  deniedPasskeyAaguids: string[];
+  ipAllowlist: string[];
+  maxSessionAgeSeconds: number;
+  idleTimeoutSeconds: number;
+  maxConcurrentSessions: number;
+  allowedCountries: string[];
+}
+
+export interface SaveOrgSecurityPolicyInput {
+  requirePasskeyAttestation: boolean;
+  requireHardwarePasskey: boolean;
+  allowedPasskeyAaguids: string[];
+  deniedPasskeyAaguids: string[];
+  ipAllowlist: string[];
+  maxSessionAgeSeconds: number;
+  idleTimeoutSeconds: number;
+  maxConcurrentSessions: number;
+  allowedCountries: string[];
+}
+
+export interface TransferOrganizationInput {
+  newOwnerId: string;
+}
+
+export interface AcceptInviteInput {
+  token: string;
+}
+
+export interface AcceptInviteResponse {
+  org: Pick<Organization, "id" | "name" | "slug"> | null;
+  member: { role: string };
+}
+
+export interface AdminStats {
+  totalUsers: number;
+  activeUsers: number;
+  activeSessions: number;
+  totalLogins24h: number;
+}
+
+export interface AdminRecentUser {
+  id: string;
+  name?: string;
+  email: string;
+  status: string;
+  createdAt: string;
+  lastLoginAt?: string;
+}
+
+export interface AuthSettings {
+  emailPasswordEnabled: boolean;
+  googleOAuthEnabled: boolean;
+  githubOAuthEnabled: boolean;
+  magicLinkEnabled: boolean;
+  passkeyEnabled: boolean;
+  totpEnabled: boolean;
+  emailOtpEnabled: boolean;
+  smsOtpEnabled: boolean;
+  requireMfaForAll: boolean;
+  sessionTTLSeconds: number;
+  maxConcurrentSessions: number;
+  accountLockoutEnabled: boolean;
+  accountLockoutThreshold: number;
+  accountLockoutDurationMinutes: number;
+  registrationEnabled: boolean;
+  requireEmailVerification: boolean;
+  allowedEmailDomains: string;
+}
+
+export type StatusComponentState = "operational" | "degraded" | "down" | "not set";
+
+export interface StatusData {
+  status: "operational" | "degraded" | "down";
+  components: Record<string, StatusComponentState>;
+  uptimeSeconds: number;
+  timestamp: string;
+}

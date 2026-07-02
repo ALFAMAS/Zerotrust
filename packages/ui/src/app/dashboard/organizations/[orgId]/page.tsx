@@ -1,9 +1,11 @@
 "use client";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useMemo, useState } from "react";
+import { ServerStateStatus } from "@/components/ServerStateStatus";
 import { SkeletonCard, SkeletonTable } from "@/components/Skeleton";
 import { Button } from "@/components/ui/button";
+import { ErrorState } from "@/components/ui/States";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -13,51 +15,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/context/ToastContext";
-import { api } from "../../../../lib/api";
-
-interface OrgDetails {
-  id: string;
-  name: string;
-  slug: string;
-  logoUrl: string | null;
-  billingEmail: string | null;
-  ownerId: string | null;
-  createdAt: string;
-  updatedAt: string;
-}
-
-interface MemberRow {
-  member: {
-    id: string;
-    orgId: string;
-    userId: string;
-    role: string;
-    joinedAt: string | null;
-    createdAt: string;
-  };
-  user: {
-    id: string;
-    email: string;
-    displayName: string;
-    avatarUrl: string | null;
-  };
-}
-
-interface Invite {
-  id: string;
-  orgId: string;
-  email: string;
-  role: string;
-  token: string;
-  expiresAt: string;
-  createdAt: string;
-}
-
-interface CurrentUser {
-  id: string;
-  email: string;
-  displayName: string;
-}
+import { useAuthMeQuery } from "@/lib/server-state/auth";
+import {
+  useCreateOrgInviteMutation,
+  useLeaveOrganizationMutation,
+  useOrganizationDetailQuery,
+  useOrganizationInvitesQuery,
+  useOrganizationMembersQuery,
+  useRevokeOrgInviteMutation,
+} from "@/lib/server-state/organizations";
 
 const ROLE_COLORS: Record<string, string> = {
   owner: "bg-indigo-900 text-indigo-200 border border-indigo-700",
@@ -72,90 +38,95 @@ export default function OrgDetailPage() {
   const { toast } = useToast();
   const orgId = params.orgId as string;
 
-  const [org, setOrg] = useState<OrgDetails | null>(null);
-  const [memberCount, setMemberCount] = useState(0);
-  const [members, setMembers] = useState<MemberRow[]>([]);
-  const [invites, setInvites] = useState<Invite[]>([]);
-  const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
-  const [myRole, setMyRole] = useState<string>("");
-  const [loading, setLoading] = useState(true);
+  const meQuery = useAuthMeQuery();
+  const detailQuery = useOrganizationDetailQuery(orgId);
+  const membersQuery = useOrganizationMembersQuery(orgId);
 
-  // Invite form
-  const [inviteEmail, setInviteEmail] = useState("");
-  const [inviteRole, setInviteRole] = useState("member");
-  const [inviting, setInviting] = useState(false);
+  const members = membersQuery.data?.data ?? [];
+  const myRole = useMemo(() => {
+    const me = members.find((m) => m.member.userId === meQuery.data?.id);
+    return me?.member.role ?? "";
+  }, [members, meQuery.data?.id]);
 
   const isAdminOrOwner = myRole === "admin" || myRole === "owner";
+  const invitesQuery = useOrganizationInvitesQuery(orgId, isAdminOrOwner);
+  const createInviteMutation = useCreateOrgInviteMutation(orgId);
+  const revokeInviteMutation = useRevokeOrgInviteMutation(orgId);
+  const leaveMutation = useLeaveOrganizationMutation(orgId);
 
-  const fetchAll = useCallback(async () => {
-    setLoading(true);
-    try {
-      const [orgRes, meRes, membersRes] = await Promise.all([
-        api.get<{ org: OrgDetails; memberCount: number }>(`/orgs/${orgId}`),
-        api.get<CurrentUser>("/auth/me"),
-        api.get<{ data: MemberRow[]; pagination: any }>(`/orgs/${orgId}/members`),
-      ]);
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteRole, setInviteRole] = useState("member");
 
-      setOrg(orgRes.org);
-      setMemberCount(orgRes.memberCount);
-      setCurrentUser(meRes);
-      setMembers(membersRes.data ?? []);
+  const org = detailQuery.data?.org ?? null;
+  const memberCount = detailQuery.data?.memberCount ?? 0;
+  const invites = invitesQuery.data?.data ?? [];
 
-      const me = (membersRes.data ?? []).find((m) => m.member.userId === meRes.id);
-      setMyRole(me?.member.role ?? "");
-
-      if (me && (me.member.role === "admin" || me.member.role === "owner")) {
-        const invRes = await api.get<{ data: Invite[]; pagination: any }>(`/orgs/${orgId}/invites`);
-        setInvites(invRes.data ?? []);
-      }
-    } catch {
-      // handled below
-    } finally {
-      setLoading(false);
-    }
-  }, [orgId]);
-
-  useEffect(() => {
-    void fetchAll();
-  }, [fetchAll]);
+  const loading =
+    detailQuery.isPending || membersQuery.isPending || meQuery.isPending;
+  const queryError =
+    (detailQuery.error && !detailQuery.data) ||
+    (membersQuery.error && !membersQuery.data);
 
   async function handleInvite(e: React.FormEvent) {
     e.preventDefault();
     if (!inviteEmail.trim()) return;
-    setInviting(true);
     try {
-      await api.post(`/orgs/${orgId}/invites`, { email: inviteEmail.trim(), role: inviteRole });
+      await createInviteMutation.mutateAsync({
+        email: inviteEmail.trim(),
+        role: inviteRole,
+      });
       toast({ message: "Invite sent!", type: "success" });
       setInviteEmail("");
-      await fetchAll();
-    } catch (err: any) {
-      toast({ message: err.message || "Failed to send invite", type: "error" });
-    } finally {
-      setInviting(false);
+    } catch (err: unknown) {
+      toast({
+        message: err instanceof Error ? err.message : "Failed to send invite",
+        type: "error",
+      });
     }
   }
 
   async function handleRevokeInvite(inviteId: string) {
     if (!confirm("Revoke this invite?")) return;
     try {
-      await api.delete(`/orgs/${orgId}/invites/${inviteId}`);
+      await revokeInviteMutation.mutateAsync(inviteId);
       toast({ message: "Invite revoked", type: "success" });
-      await fetchAll();
-    } catch (err: any) {
-      toast({ message: err.message || "Failed to revoke invite", type: "error" });
+    } catch (err: unknown) {
+      toast({
+        message: err instanceof Error ? err.message : "Failed to revoke invite",
+        type: "error",
+      });
     }
   }
 
   async function handleLeave() {
-    if (!currentUser) return;
+    if (!meQuery.data) return;
     if (!confirm("Leave this organization?")) return;
     try {
-      await api.delete(`/orgs/${orgId}/members/${currentUser.id}`);
+      await leaveMutation.mutateAsync(meQuery.data.id);
       toast({ message: "You left the organization", type: "success" });
       router.push("/dashboard/organizations");
-    } catch (err: any) {
-      toast({ message: err.message || "Failed to leave", type: "error" });
+    } catch (err: unknown) {
+      toast({
+        message: err instanceof Error ? err.message : "Failed to leave",
+        type: "error",
+      });
     }
+  }
+
+  if (queryError) {
+    const message =
+      detailQuery.error?.message ||
+      membersQuery.error?.message ||
+      "Failed to load organization";
+    return (
+      <ErrorState
+        message={message}
+        retry={() => {
+          void detailQuery.refetch();
+          void membersQuery.refetch();
+        }}
+      />
+    );
   }
 
   if (loading) {
@@ -177,7 +148,12 @@ export default function OrgDetailPage() {
 
   return (
     <div className="space-y-8">
-      {/* Header */}
+      <ServerStateStatus
+        isFetching={detailQuery.isFetching || membersQuery.isFetching}
+        isStale={detailQuery.isStale || membersQuery.isStale}
+        dataUpdatedAt={Math.max(detailQuery.dataUpdatedAt, membersQuery.dataUpdatedAt)}
+      />
+
       <div className="flex items-start justify-between">
         <div>
           <div className="flex items-center gap-2">
@@ -207,14 +183,18 @@ export default function OrgDetailPage() {
             </Link>
           )}
           {myRole !== "owner" && (
-            <Button type="button" variant="destructive" onClick={handleLeave}>
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={handleLeave}
+              disabled={leaveMutation.isPending}
+            >
               Leave
             </Button>
           )}
         </div>
       </div>
 
-      {/* Members table */}
       <div>
         <h2 className="text-base font-semibold text-foreground mb-3">Members</h2>
         <div className="bg-card border border-border rounded-xl overflow-hidden">
@@ -232,7 +212,6 @@ export default function OrgDetailPage() {
                 key={member.id}
                 className="grid grid-cols-[auto_1fr_auto_auto] gap-4 px-4 py-3 items-center border-b border-border last:border-b-0"
               >
-                {/* Avatar placeholder */}
                 <div className="w-8 h-8 rounded-full bg-primary/15 flex items-center justify-center text-xs text-primary font-medium flex-shrink-0">
                   {(user.displayName || user.email)[0]?.toUpperCase()}
                 </div>
@@ -256,7 +235,6 @@ export default function OrgDetailPage() {
         </div>
       </div>
 
-      {/* Invite section — admin/owner only */}
       {isAdminOrOwner && (
         <div>
           <h2 className="text-base font-semibold text-foreground mb-3">Invite member</h2>
@@ -291,14 +269,13 @@ export default function OrgDetailPage() {
                 </SelectContent>
               </Select>
             </div>
-            <Button type="submit" disabled={inviting}>
-              {inviting ? "Sending…" : "Send invite"}
+            <Button type="submit" disabled={createInviteMutation.isPending}>
+              {createInviteMutation.isPending ? "Sending…" : "Send invite"}
             </Button>
           </form>
         </div>
       )}
 
-      {/* Pending invites table — admin/owner only */}
       {isAdminOrOwner && invites.length > 0 && (
         <div>
           <h2 className="text-base font-semibold text-foreground mb-3">Pending invites</h2>
@@ -330,6 +307,7 @@ export default function OrgDetailPage() {
                   variant="destructive"
                   className="text-xs px-2 py-0.5 h-auto whitespace-nowrap"
                   onClick={() => handleRevokeInvite(invite.id)}
+                  disabled={revokeInviteMutation.isPending}
                 >
                   Revoke
                 </Button>

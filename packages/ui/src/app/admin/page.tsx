@@ -2,29 +2,17 @@
 
 import { Download, KeyRound, LogIn, Monitor, UserCheck, UserPlus, Users } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
 import MetricCard from "@/components/admin/MetricCard";
 import RadialGauge from "@/components/admin/RadialGauge";
 import Badge from "@/components/Badge";
+import { ServerStateStatus } from "@/components/ServerStateStatus";
 import { Button } from "@/components/ui/button";
-import { apiGetBlob } from "@/lib/apiClient";
-import { useApi } from "@/lib/hooks/useApi";
-
-interface Stats {
-  totalUsers: number;
-  activeUsers: number;
-  activeSessions: number;
-  totalLogins24h: number;
-}
-
-interface User {
-  id: string;
-  name?: string;
-  email: string;
-  status: string;
-  createdAt: string;
-  lastLoginAt?: string;
-}
+import { ErrorState } from "@/components/ui/States";
+import {
+  useAdminRecentUsersQuery,
+  useAdminStatsQuery,
+  useExportUsersMutation,
+} from "@/lib/server-state/adminDashboard";
 
 const quickActions = [
   { href: "/admin/users", icon: UserPlus, title: "Add user", desc: "Invite a new member" },
@@ -38,24 +26,17 @@ const quickActions = [
 ];
 
 export default function AdminOverviewPage() {
-  const { data: stats, loading: statsLoading } = useApi<Stats>("/admin/stats");
-  const { data: usersData, loading: usersLoading } = useApi<User[] | { users: User[] } | null>(
-    "/admin/users?limit=5"
-  );
+  const statsQuery = useAdminStatsQuery();
+  const usersQuery = useAdminRecentUsersQuery(5);
+  const exportMutation = useExportUsersMutation();
 
-  const loading = statsLoading || usersLoading;
-  const recentUsers = usersData
-    ? Array.isArray(usersData)
-      ? usersData
-      : (usersData.users ?? [])
-    : [];
-
-  const [exporting, setExporting] = useState(false);
+  const loading = statsQuery.isPending || usersQuery.isPending;
+  const stats = statsQuery.data;
+  const recentUsers = usersQuery.data ?? [];
 
   async function exportUsers() {
-    setExporting(true);
     try {
-      const blob = await apiGetBlob("/admin/users/export");
+      const blob = await exportMutation.mutateAsync();
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -66,13 +47,30 @@ export default function AdminOverviewPage() {
       URL.revokeObjectURL(url);
     } catch {
       alert("Export failed. Please try again.");
-    } finally {
-      setExporting(false);
     }
   }
 
   const activePct =
     stats && stats.totalUsers > 0 ? Math.round((stats.activeUsers / stats.totalUsers) * 100) : 0;
+
+  if (
+    (statsQuery.error && !statsQuery.data) ||
+    (usersQuery.error && !usersQuery.data)
+  ) {
+    return (
+      <ErrorState
+        message={
+          statsQuery.error?.message ||
+          usersQuery.error?.message ||
+          "Failed to load admin dashboard"
+        }
+        retry={() => {
+          void statsQuery.refetch();
+          void usersQuery.refetch();
+        }}
+      />
+    );
+  }
 
   return (
     <div className="space-y-8">
@@ -85,7 +83,12 @@ export default function AdminOverviewPage() {
         </p>
       </div>
 
-      {/* Metric tiles */}
+      <ServerStateStatus
+        isFetching={statsQuery.isFetching || usersQuery.isFetching}
+        isStale={statsQuery.isStale || usersQuery.isStale}
+        dataUpdatedAt={Math.max(statsQuery.dataUpdatedAt, usersQuery.dataUpdatedAt)}
+      />
+
       {loading ? (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {[...Array(4)].map((_, i) => (
@@ -106,7 +109,6 @@ export default function AdminOverviewPage() {
       )}
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        {/* Activity gauge (real active/total ratio) */}
         <div className="rounded-xl border border-border bg-card p-5">
           <h2 className="font-medium text-foreground">User activity</h2>
           <p className="text-xs text-muted-foreground">Active in the last 30 days</p>
@@ -119,7 +121,6 @@ export default function AdminOverviewPage() {
           </div>
         </div>
 
-        {/* Recent users */}
         <div className="overflow-hidden rounded-xl border border-border bg-card lg:col-span-2">
           <div className="flex items-center justify-between border-b border-border px-5 py-4">
             <h2 className="font-medium text-foreground">Recent users</h2>
@@ -149,7 +150,6 @@ export default function AdminOverviewPage() {
         </div>
       </div>
 
-      {/* Quick actions */}
       <div className="overflow-hidden rounded-xl border border-border bg-card">
         <div className="border-b border-border px-5 py-4">
           <h2 className="font-medium text-foreground">Quick actions</h2>
@@ -168,13 +168,13 @@ export default function AdminOverviewPage() {
           ))}
           <Button
             onClick={exportUsers}
-            disabled={exporting}
+            disabled={exportMutation.isPending}
             className="flex flex-col items-start gap-2 rounded-lg border border-border bg-background p-4 text-left transition-colors hover:border-primary/50 disabled:opacity-50"
           >
             <Download className="h-5 w-5 text-primary" />
             <span className="text-sm font-medium text-foreground">Export users</span>
             <span className="text-xs text-muted-foreground">
-              {exporting ? "Preparing…" : "Download CSV"}
+              {exportMutation.isPending ? "Preparing…" : "Download CSV"}
             </span>
           </Button>
         </div>
