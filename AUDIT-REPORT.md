@@ -9,26 +9,26 @@
 
 ## TL;DR
 
-| Check                                          | Result                                                                                                                                 |
-| ---------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| `bun run test` (vitest)                        | ✅ **838 tests / 99 files passing**                                                                                                    |
-| `bun run build` (tsc API)                      | ✅ clean                                                                                                                               |
-| `bun run type-check`                           | ✅ clean                                                                                                                               |
-| `bun run verify:generated` (SDK + docs drift)  | ⚠ regenerates cleanly; expected tracked docs diffs are included for the improved API↔UI scanner                                        |
-| `bun run boundaries:check`                     | ✅ clean                                                                                                                               |
+| Check                                          | Result                                                                                                                                                              |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `bun run test` (vitest)                        | ✅ **838 tests / 99 files passing**                                                                                                                                 |
+| `bun run build` (tsc API)                      | ✅ clean                                                                                                                                                            |
+| `bun run type-check`                           | ✅ clean                                                                                                                                                            |
+| `bun run verify:generated` (SDK + docs drift)  | ⚠ regenerates cleanly; expected tracked docs diffs are included for the improved API↔UI scanner                                                                     |
+| `bun run boundaries:check`                     | ✅ clean                                                                                                                                                            |
 | `bun run audit:integration` (API↔UI map)       | ✅ passes, scans typed/template `api.*`, `apiClient`, and `useApi` calls; documents 25 API/SDK-only product-surface decisions outside the actionable unmatched list |
-| `bun run ui:audit` (shadcn adoption)           | ✅ **0 raw HTML controls** — migration complete                                                                                        |
-| `bun run lint` (biome)                         | ✅ exits 0; only pre-existing script warnings remain                                                                                   |
-| `bun run --cwd packages/ui build` (next build) | ✅ production build passes; only existing Next/SWC version warning remains                                                             |
+| `bun run ui:audit` (shadcn adoption)           | ✅ **0 raw HTML controls** — migration complete                                                                                                                     |
+| `bun run lint` (biome)                         | ✅ exits 0; only pre-existing script warnings remain                                                                                                                |
+| `bun run --cwd packages/ui build` (next build) | ✅ production build passes; only existing Next/SWC version warning remains                                                                                          |
 
 **Verdict:** Strong, production-shaped SaaS template (27 route modules, 41 DB tables, 838 root tests, full Stripe/SSO/MFA/WebAuthn/observability). All fork-blocking, should-fix, and P2 maintainability items are resolved — details consolidated in [`tdone.md`](./tdone.md).
 
 ### Open follow-ups (still in [`todo.md`](./todo.md))
 
-| ID     | Status     | Summary                                                                                                                                       |
-| ------ | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| **E5** | 🟡 Info    | In-process `setInterval` schedulers — leader lock mitigates but not horizontally scalable                                                     |
-| **E6** | 🟡 Info    | Repository layer ~10% complete (4 repos); hot-path writes still mostly inline Drizzle                                                         |
+| ID     | Status  | Summary                                                                                   |
+| ------ | ------- | ----------------------------------------------------------------------------------------- |
+| **E5** | 🟡 Info | In-process `setInterval` schedulers — leader lock mitigates but not horizontally scalable |
+| **E6** | 🟡 Info | Repository layer ~10% complete (4 repos); hot-path writes still mostly inline Drizzle     |
 
 ---
 
@@ -39,14 +39,6 @@
 ---
 
 ## E. Architecture / maintainability debt
-
-### E2. ✅ TanStack Query server-state adoption — **resolved**
-
-`@tanstack/react-query` is installed and mounted through the UI root, with domain query keys/functions/hooks under `packages/ui/src/lib/server-state/*`. All 42 data-fetching pages are migrated, the old `packages/ui/src/lib/api.ts` facade is removed, and grep confirms no `@/lib/api` imports under `packages/ui/src`.
-
-### E4. ✅ Product-surface gaps — **resolved for P2**
-
-`docs/api-ui-integration-matrix.md` now documents 25 deliberate API/SDK-only product-surface decisions (admin feedback/roles/JIT grants, billing ops endpoints, admin attachments/lifecycle-email tooling, search index management, regional metadata, email unsubscribe, and wallet spend) and excludes them from the actionable unmatched backend-route list.
 
 ### E5. 🟡 Background scheduler is in-process (documented)
 
