@@ -2,12 +2,12 @@ import { desc, eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { z } from "zod";
 import { getDb, getReadDb } from "../../db";
-import { supportTicketMessagesTable, supportTicketsTable } from "../../db/schema";
 import {
   createSupportTicketWithMessage,
   replyToSupportTicket,
   updateSupportTicketStatus,
 } from "../../db/repositories/supportTickets.repository";
+import { supportTicketMessagesTable, supportTicketsTable } from "../../db/schema";
 import { getLogger } from "../../logger";
 import { authMiddleware } from "../../middleware/auth";
 import { rateLimit } from "../../middleware/rateLimiting";

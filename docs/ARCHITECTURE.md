@@ -136,12 +136,12 @@ Prioritized; **P1 is a correctness bug**, the rest are improvements.
 
 | # | Change | Why | Effort |
 | --- | --- | --- | --- |
-| **P1** | Split HTTP and worker/scheduler processes (or instance-guard the schedulers) | **Correctness** — duplicate jobs under cluster mode | M |
-| P2 | Adopt expand/contract migrations; gate destructive DDL | Safe rollbacks; the `0020`–`0024` drops are irreversible | S–M |
-| P3 | Make Elasticsearch fully optional / default to Postgres FTS | Drop an operational dependency post-slim-down | M | **Shipped** (2026-07-03) |
-| P4 | Move hot dashboard reads to Server Components / route handlers | TTFB, fewer client waterfalls | M |
-| P5 | Containerize (Dockerfile + compose) and split health/readiness | Reproducible deploys, orchestrator-friendly | M |
-| P6 | Fail-fast typed config validation at boot | Catch missing prod secrets before serving traffic | S |
+| **P1** | Split HTTP and worker/scheduler processes (or instance-guard the schedulers) | **Correctness** — duplicate jobs under cluster mode | **Shipped** (P1.2, P1.5) |
+| P2 | Adopt expand/contract migrations; gate destructive DDL | Safe rollbacks; the `0020`–`0024` drops are irreversible | **Shipped** (P3.5) — CI destructive-migration gate |
+| P3 | Make Elasticsearch fully optional / default to Postgres FTS | Drop an operational dependency post-slim-down | **Shipped** (2026-07-03) |
+| P4 | Move hot dashboard reads to Server Components / route handlers | TTFB, fewer client waterfalls | **Partial** (P3.4 pilot — `/dashboard`, `/admin` prefetch) |
+| P5 | Containerize (Dockerfile + compose) and split health/readiness | Reproducible deploys, orchestrator-friendly | **Shipped** — Dockerfile + `docker-compose.yml` + readiness |
+| P6 | Fail-fast typed config validation at boot | Catch missing prod secrets before serving traffic | **Shipped** (P4.3) |
 | P7 | Group `services/` by domain | **Shipped 2026-07-03** — files live under `auth/`, `billing/`, `notifications/`, `compliance/`, `ops/`, and `shared/` | Done |
 
 ### P1 — Separate the worker from the API process (correctness) — **Shipped** (P1.2, P1.5)
@@ -155,13 +155,12 @@ and [`docs/reference-architecture.md`](./reference-architecture.md).
 Extracted `src/worker.ts` owns BullMQ consumers and cron schedulers; API scales
 horizontally and defers background work when `WORKER_MODE=true`.
 
-### P2 — Migration safety
+### P2 — Migration safety — **Shipped** (P3.5)
 
-41 tables / 27 migrations, several recent ones `DROP … CASCADE`. Add a
-"deploy code that stops using the column → ship → drop in a later release"
-(expand/contract) discipline and a pre-migration verified backup step (see
-[`../todo.md`](../todo.md) P3.5). Consider a CI check that flags `DROP`/`ALTER …
-DROP` in new migrations for explicit human sign-off.
+41 tables / 28 migrations, several recent ones `DROP … CASCADE`. CI now flags
+`DROP`/`ALTER … DROP` in new migrations via `scripts/check-destructive-migrations.ts`
+and `.destructive-migrations.json` (`migrations:check` job + pre-commit).
+Expand/contract discipline remains the operator runbook for irreversible DDL.
 
 ### P3 — Reconsider Elasticsearch — shipped 2026-07-03
 
@@ -171,27 +170,25 @@ deployments a Postgres `tsvector` + GIN index covers this without running ES.
 ES is opt-in for large tenants (`ELASTICSEARCH_ENABLED=true`); default off to
 shed an operational dependency — consistent with the slim-down's goal.
 
-### P4 — Server-side data fetching on the dashboard
+### P4 — Server-side data fetching on the dashboard — **Partial** (P3.4)
 
-Several dashboard/admin pages do `api.get(...)` inside `useEffect`, creating
-client-side request waterfalls and slower TTFB. Next 16 RSC + route handlers (or
-a server action layer) can fetch on the server with the session cookie, cutting
-round-trips and shipping less client JS.
+Several dashboard/admin pages still client-fetch on mount. The P3.4 pilot
+prefetches `/dashboard` and `/admin` via `serverApiClient` + TanStack Query
+`HydrationBoundary` (see [`ui-http-client.md`](./ui-http-client.md)). Remaining
+high-traffic pages are tracked in [`../todo.md`](../todo.md) P3.6.
 
-### P5 — Containerized, orchestrator-friendly deploys
+### P5 — Containerized, orchestrator-friendly deploys — **Shipped**
 
-The reference deploy is bare-metal PM2 + nginx. A `Dockerfile` (API + worker
-targets) and `docker-compose.yml` (API, worker, Postgres, Redis) would make
-deploys reproducible and pair naturally with P1's process split. Distinguish
-`/health` (liveness) from a true readiness probe that checks DB/Redis before
-accepting traffic.
+The repo ships a multi-stage `Dockerfile` (API + worker targets) and
+`docker-compose.yml` (API, worker, Postgres, Redis). Reference architecture
+covers PM2, containers, and Kubernetes with `/health` liveness and readiness
+probes that check DB/Redis.
 
-### P6 — Fail-fast config
+### P6 — Fail-fast config — **Shipped** (P4.3)
 
-`src/config` is typed but a boot-time `zod` validation that **refuses to start**
-in `NODE_ENV=production` when required secrets (`TOKEN_SECRET_HEX`,
-`CSFLE_MASTER_KEY_HEX`, `DATABASE_URL`, backup encryption) are missing or weak
-would turn silent misconfiguration into a loud, early failure.
+`validateConfig()` in `src/config/index.ts` refuses boot in
+`NODE_ENV=production` when required secrets (`METRICS_AUTH_TOKEN`,
+`CORS_ALLOWED_ORIGINS`, `REDIS_URI`, backup encryption keys) are missing or weak.
 
 ### P7 — Domain-oriented service layout — shipped 2026-07-03
 

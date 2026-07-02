@@ -8,10 +8,7 @@ import {
   completePasskeyAuthentication,
   registerPasskey,
 } from "../../db/repositories/passkeys.repository";
-import {
-  organizationMembersTable,
-  usersTable,
-} from "../../db/schema";
+import { organizationMembersTable, usersTable } from "../../db/schema";
 import { getLogger } from "../../logger";
 import { KNOWN_HARDWARE_KEY_AAGUIDS, verifyAttestation } from "../../mfa/attestation";
 import { authMiddleware } from "../../middleware/auth";

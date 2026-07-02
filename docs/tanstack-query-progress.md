@@ -100,9 +100,9 @@ Relative `lib/api` imports in app `page.tsx`: **0**.
 | `/admin/feedback` | [x] | Admin feedback inbox via `adminFeedback.ts`. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/adminFeedback.test.tsx` |
 | `/admin/roles` | [x] | System role list + create via `adminRoles.ts`. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/adminRoles.test.tsx` |
 | `/admin/jit-grants` | [x] | JIT grant approve/deny inbox via `adminJitGrants.ts` (distinct from `/admin/jit` cross-tenant). | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/adminJitGrants.test.tsx` |
-| `/admin/content` | [x] | Attachment list/upload + lifecycle email trigger via `adminContent.ts`. | — |
+| `/admin/content` | [x] | Attachment list/upload + lifecycle email trigger via `adminContent.ts`. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/adminContent.test.tsx` |
 | `/admin/search` | [x] | Search index management + provider via `adminSearch.ts`. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/adminSearch.test.tsx` |
-| `/admin/webhooks` | [x] | Admin-wide webhook delivery log lookup via `adminWebhooks.ts`. | — |
+| `/admin/webhooks` | [x] | Admin-wide webhook delivery log lookup via `adminWebhooks.ts`. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/adminWebhooks.test.tsx` |
 | `/dashboard/billing` (extended) | [x] | Usage, VAT validate, tax exemptions, change-plan added to existing `billing.ts` surface. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/billing.test.tsx` |
 | `/admin/regions` (extended) | [x] | Org branding + custom domain forms added to `regions.ts`. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/regions.test.tsx` |
 

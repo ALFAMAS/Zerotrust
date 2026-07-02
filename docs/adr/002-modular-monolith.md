@@ -50,12 +50,12 @@ The monolith is "modular" in that:
 - **Negative:** Background schedulers duplicate work when cluster deploys omit
   `WORKER_MODE=true`. Production topology enforcement (P1.2) defers schedulers
   to the dedicated worker and warns on misconfiguration.
-- **Negative:** Module boundaries are not enforced — any service can import any
-  other. An import-linter or boundary check is needed (TODO P2.2).
+- **Negative:** Module boundaries are enforced via `.boundaries.json` +
+  `scripts/check-boundaries.ts` (P2.2, ADR 007).
 
 ## References
 
 - Architecture doc: `docs/ARCHITECTURE.md`
 - Worker split: `src/worker.ts`, `src/jobs/topology.ts` (P1.2 shipped)
-- TODO: `todo.md` P2.2 (module boundaries)
+- Module boundaries: `.boundaries.json`, ADR 007 (P2.2 shipped)
 - `src/api/server.ts` — route mounting and global middleware chain

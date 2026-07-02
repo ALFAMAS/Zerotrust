@@ -19,8 +19,8 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
 | Migrations | 28 (latest: `0027_webhook_endpoints`) |
 | Route mounts in `server.ts` | 30 |
 | UI pages | 53 |
-| Tests | 1065 (870 API + 195 UI, 152 files) |
-| ADRs | 7 |
+| Tests | 1082 (870 API + 212 UI, 154 files) |
+| ADRs | 8 |
 | Stack | Hono 4 · TypeScript 6 · Bun · Next.js 16 · Drizzle ORM · PostgreSQL · Redis |
 
 ---
@@ -264,7 +264,7 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
 - ✅ CI/CD — GitHub Actions (lint, type-check, test, SDK drift, UI build, SAST, E2E, load)
 - ✅ Docker Compose — Postgres + Redis dev stack; Elasticsearch/Kibana behind `--profile elasticsearch`
 - ✅ Dockerfile — multi-stage production image (Bun + Node)
-- ✅ 7 ADRs — PASETO v4, modular monolith, Drizzle, Redis/BullMQ, generated SDK, token rotation, module boundaries
+- ✅ 8 ADRs — PASETO v4, modular monolith, Drizzle, Redis/BullMQ, generated SDK, token rotation, module boundaries, token storage revisit
 - ✅ Deployment blueprints — VM/PM2, containers, Kubernetes (`docs/reference-architecture.md`)
 
 ---
@@ -432,8 +432,7 @@ follow-ups (**E2**, E4–E6 info debt) remain in [`todo.md`](./todo.md).
 
 - **E2 — useApi migration (partial, 7 pages):** Migrated `admin/page`,
   `admin/access-reviews`, `admin/alerts`, `admin/sessions`, `admin/users`,
-  `dashboard/billing`, and `dashboard/settings` to `useApi`/`usePaginatedApi`. ~17 pages remain —
-  tracked in `todo.md` P2.
+  `dashboard/billing`, and `dashboard/settings` to `useApi`/`usePaginatedApi`. ~17 pages remain — superseded by TanStack Query Phase 4 (shipped in `tdone.md` P2).
 
 - **Bun runtime bump:** `.bun-version` now pins Bun 1.3.14; `server.ts` mounts
   Hono `compress()` directly after verifying `CompressionStream` exists in the
@@ -587,16 +586,33 @@ follow-ups (**E2**, E4–E6 info debt) remain in [`todo.md`](./todo.md).
     (server-rendered HTML from email links), `POST /wallet/spend` (programmatic
     debit for integrations)
   - New server-state tests: `adminFeedback`, `adminRoles`, `adminJitGrants`,
-    `adminSearch`
-  - `docs/api-ui-integration-matrix.md` regenerated — **44** frontend API calls
-    (was 31)
+    `adminSearch`, `adminContent`, `adminWebhooks`
+  - `docs/api-ui-integration-matrix.md` regenerated — **127** frontend API calls
+    via `build*Path` / `*_PATH` scanner (was 44 literal-only)
+
+- **P2.4 — API↔UI integration scanner accuracy:** `scripts/audit-api-ui-map.mjs`
+  resolves `build*Path()` prefixes and `*_PATH` constants from server-state modules,
+  infers HTTP methods per call site, and trims `PRODUCT_SURFACE_DISPOSITIONS` to
+  SDK-only routes (`GET /auth/unsubscribe`, `POST /wallet/spend`).
+
+- **P2.5 — Reconcile stale audit / status docs:** `docs/AUDIT.md`, `README.md`,
+  and `docs/ARCHITECTURE.md` updated to match shipped work (1065+ tests, 8 ADRs,
+  module boundaries, metrics gate, read replicas, ADRs).
+
+- **P2.6 — Server-state tests for P2.3 modules:** `adminContent.test.tsx` and
+  `adminWebhooks.test.tsx` with loading/error/mutation coverage; tracker rows in
+  `docs/tanstack-query-progress.md`.
+
+- **P2.7 — `serverApiClient` / RSC prefetch tests:** `serverApiClient.test.ts`
+  (cookie Bearer auth, `skipAuth`, error mapping) and `prefetch.test.ts`
+  (prefetch options factories).
 
 - **Verification (2026-07-03):**
   - `bun run boundaries:check` — pass
   - `bun run type-check` — pass
   - `bun run build` — pass
-  - `bun run test` — **864 passed** (106 files)
-  - `NODE_ENV=test bun run --cwd packages/ui test` — **176 passed** (39 files)
+  - `bun run test` — **875+ passed** (106+ files)
+  - `NODE_ENV=test bun run --cwd packages/ui test` — **195+ passed** (39+ files)
   - `bun run --cwd packages/ui build` — pass (52 app routes)
   - `bun run lint` — pass (warnings only in scripts)
   - `bun run verify:generated` — regenerates SDK + API docs + integration matrix

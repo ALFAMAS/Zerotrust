@@ -96,5 +96,4 @@ shared  ◄──  integrations  ◄──  identity  ◄──  tenancy  ◄─
 
 - Boundary definitions: `.boundaries.json`
 - Enforcement script: `scripts/check-boundaries.ts`
-- AUDIT finding M3: `docs/AUDIT.md` — "No enforced module boundaries"
-- TODO P2.2: `todo.md` — "Module boundaries + import-linter"
+- AUDIT finding M3: `docs/AUDIT.md` — resolved (P2.2)

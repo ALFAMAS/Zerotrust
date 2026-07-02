@@ -3,8 +3,8 @@
 **Date:** 2026-06-29
 **Scope:** Full repository — `src/` (Hono API), `packages/ui/` (Next.js), `packages/client/`
 (generated SDK), build/CI config, migrations, and docs.
-**Baseline at audit time:** type-check clean, `biome ci` clean, **826 tests passing**
-(94 files), `verify:generated` clean.
+**Baseline at audit time:** type-check clean, `biome ci` clean, **1065 tests passing**
+(152 files), `verify:generated` clean.
 
 This document is the standing audit. It complements [`docs/ARCHITECTURE.md`](./ARCHITECTURE.md)
 (current-state architecture) and supersedes the earlier dated audit/recommendation
@@ -62,7 +62,7 @@ biggest maintainability asset in the repo.
   not reflected (`src/middleware/cors.ts`).
 - **Rate limiting is applied per-route** on every auth-sensitive endpoint
   (login, register, MFA, password reset, magic link) with tuned points/windows.
-- **Strong test coverage** for a template — 826 tests including dedicated CWE
+- **Strong test coverage** for a template — 1065 tests including dedicated CWE
   regression tests (`dbBackup.cwe78.test.ts`, redaction tests, safe-redirect/safe-fetch).
 - **Reproducibility tooling** — pinned formatters/codegen, a single
   `verify:generated` drift gate, scheduled dependency-update workflow.
@@ -82,7 +82,7 @@ incident under load or attack) · **Medium** (correctness/maintainability debt) 
 | --- | --- | --- | --- |
 | S1 | **Stripe webhook had no idempotency.** `POST /billing/webhook` verified the signature but processed every delivery, so a Stripe retry or a replayed (still-valid) event reprocessed subscription mutations — a money-path correctness hole (checklist #94). | Critical | **Fixed this PR** — see §6 |
 | S2 | Other webhook/event consumers (email events `/webhooks/email`, SSF `/ssf/events`, user-defined webhook deliveries) did not persist a processed-event id, so a valid replay could be reprocessed. Lower blast radius than billing but the same class. | High | **Fixed** (P0.3) — email events, SSF, and user webhook deliveries now share `processed_webhook_events` |
-| S3 | `/metrics` is open by default (only gated when `METRICS_AUTH_TOKEN` is set). Acceptable for a private scrape network, but a public deployment leaks internal cardinality/labels. Documented but easy to miss. | Medium | TODO P4 (doc/deploy default) |
+| S3 | `/metrics` is open by default (only gated when `METRICS_AUTH_TOKEN` is set). Acceptable for a private scrape network, but a public deployment leaks internal cardinality/labels. Documented but easy to miss. | Medium | **Fixed** (P4.2) — production boot requires `METRICS_AUTH_TOKEN`; reference architecture documents token-gated scrape |
 
 ### 4.2 Stability / correctness
 
@@ -98,8 +98,8 @@ incident under load or attack) · **Medium** (correctness/maintainability debt) 
 | # | Finding | Risk | Status |
 | --- | --- | --- | --- |
 | M1 | **No repository layer.** Routes/services call Drizzle inline. The codebase wants one so transactional invariants and authorization live in one testable place. | Medium | **Fixed** (P1.1, P1.4) — `src/db/repositories/` with nine hot-path repos |
-| M2 | **213 `as any` casts** in `src/`. Concentrated in webhook/Stripe handling and a few middleware. Each is a place the type system stops helping. | Medium | → **todo.md M1** |
-| M3 | **No enforced module boundaries.** Any service can import any other; there is no `identity`/`billing`/`tenancy`/`ops` partition or import-linter, so coupling grows silently. | Medium | TODO P2 |
+| M2 | **213 `as any` casts** in `src/`. Concentrated in webhook/Stripe handling and a few middleware. Each is a place the type system stops helping. | Medium | **Fixed** (M1, 2026-07-01) — 213 → 3 documented exceptions |
+| M3 | **No enforced module boundaries.** Any service can import any other; there is no `identity`/`billing`/`tenancy`/`ops` partition or import-linter, so coupling grows silently. | Medium | **Fixed** (P2.2) — `.boundaries.json` + `scripts/check-boundaries.ts`, CI-enforced |
 
 ### 4.4 Scalability / performance
 
@@ -107,13 +107,13 @@ incident under load or attack) · **Medium** (correctness/maintainability debt) 
 | --- | --- | --- | --- |
 | P1 | In-process `setInterval` schedulers (C3) do not scale horizontally — duplicate work per replica. Needs a single-leader or queue-backed scheduler. | High | **Mitigated** (P1.2, P1.5) — dedicated worker + `WORKER_MODE`; deploy defaults; leader election in `jobs/scheduler.ts` |
 | P2 | `checkout.session.completed` calls the Stripe API (`subscriptions.retrieve`) inside the request path; fine today, but webhook handlers should offload heavy work to the queue as volume grows. | Low | **Fixed** (P3.3) — BullMQ offload with sync fallback |
-| P3 | Read-replica routing exists (`getReadDb`) but is opt-in per call site; list/admin/analytics endpoints should default to the replica. | Low | **In progress** (P3.2) — 4 read-only admin list endpoints switched |
+| P3 | Read-replica routing exists (`getReadDb`) but is opt-in per call site; list/admin/analytics endpoints should default to the replica. | Low | **Fixed** (P3.2) — read-heavy admin/analytics/org/notification/session/support handlers route through `getReadDb()` |
 
 ### 4.5 Testing gaps
 
 | # | Finding | Risk | Status |
 | --- | --- | --- | --- |
-| T1 | **No UI component/integration tests.** `packages/ui` has only `lib/*.test.ts`; auth/billing/admin page flows are untested. | Medium | **In progress** (P3.1) — happy-dom + Testing Library harness stood up + enforced in CI; login page + SetupChecklist covered (11 tests); register/reset/org/billing/admin flows remain |
+| T1 | **No UI component/integration tests.** `packages/ui` has only `lib/*.test.ts`; auth/billing/admin page flows are untested. | Medium | **In progress** (P3.1, P3.7) — happy-dom harness + 15 page tests + 30 server-state modules; UI ratchet at ~42% lines |
 | T2 | No route-level test for billing-webhook idempotency end-to-end (the new repository is unit-tested; the handler path is not). | Low | **Fixed** (P1.3) |
 | T3 | 2 dashboard E2E tests had drifted from the shipped UI (asserted copy/behavior no component renders); they were red on `main`, masked by the login-500 crash (C4). | Medium | **Fixed this PR** — see §6 |
 
@@ -122,7 +122,7 @@ incident under load or attack) · **Medium** (correctness/maintainability debt) 
 | # | Finding | Risk | Status |
 | --- | --- | --- | --- |
 | D1 | Many phase docs (`PHASE_*`) describe completed migrations; there was **no single standing audit + prioritized TODO** with acceptance criteria. | Low | Fixed this PR (`docs/AUDIT.md`, `todo.md`) |
-| D2 | No ADRs for the load-bearing decisions (PASETO vs JWT, monolith vs split, Drizzle as source of truth, queue choice, token storage). | Low | TODO P4 |
+| D2 | No ADRs for the load-bearing decisions (PASETO vs JWT, monolith vs split, Drizzle as source of truth, queue choice, token storage). | Low | **Fixed** (P4.5) — 8 ADRs including token-storage revisit (ADR 008) |
 
 ## 5. Recommended upgrades (suggested implementation order)
 
@@ -131,8 +131,9 @@ incident under load or attack) · **Medium** (correctness/maintainability debt) 
    (P1.1, 2026-07-03).
 2. **Centralized jobs module** with Zod payloads, retry/backoff, dead-letter,
    idempotency keys, and single-leader scheduling (C3, P1).
-3. **Module boundaries + import-linter** and an ADR for dependency direction (M3).
-4. **Typed event payloads**, chip away at `as any` (M2).
+3. ~~**Module boundaries + import-linter** and an ADR for dependency direction (M3).~~ **Done**
+   (P2.2, 2026-07-03).
+4. ~~**Typed event payloads**, chip away at `as any` (M2).~~ **Done** (M1, 2026-07-01).
 5. **UI component/integration tests** for auth/billing/admin flows (T1).
 6. **ADRs + maintenance scorecard** (D2).
 

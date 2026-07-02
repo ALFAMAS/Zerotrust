@@ -579,15 +579,15 @@ zerotrust tracks its state in the repository docs:
 | [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) | System architecture audit + proposed upgrades               |
 | [`docs/AUDIT.md`](./docs/AUDIT.md)               | Standing production-readiness audit (findings + risk + order) |
 | [`docs/reference-architecture.md`](./docs/reference-architecture.md) | Operational deployment blueprints (VM, containers, Kubernetes) |
-| [`docs/adr/`](./docs/adr/)                       | Architecture Decision Records (7 load-bearing decisions)    |
+| [`docs/adr/`](./docs/adr/)                       | Architecture Decision Records (8 load-bearing decisions)    |
 | [`docs/maintenance-scorecard.md`](./docs/maintenance-scorecard.md) | Quarterly metrics (deps, CI, tests, backups, latency) |
 | [`docs/PROJECT_HISTORY.md`](./docs/PROJECT_HISTORY.md) | Archived dated planning/audit/phase docs (consolidated)     |
 | [`docs/compliance`](./docs/compliance/README.md) | Compliance policies, procedures, and evidence templates     |
 | [`packages/client`](./packages/client/README.md) | Generated TypeScript SDK package and usage notes            |
 
-Latest audit note (2026-07-01): a clean `bun install` restores a fully working
+Latest audit note (2026-07-03): a clean `bun install` restores a fully working
 tree — `bun run lint:ci`, `bun run type-check`, `bun run boundaries:check`, the
-**826-test suite** (94 files), and the UI build all pass. Transactional
+**1065-test suite** (152 files), and the UI build all pass. Transactional
 repositories, dedicated worker with Redis-lock leader election, and module
 boundaries are all shipped. See [`tdone.md`](./tdone.md) for the full feature
 catalog.

@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
+import type { Passkey, User } from "../../shared/types";
 import { getDb } from "..";
 import { refreshTokensTable, sessionsTable, usersTable } from "../schema";
-import type { Passkey, User } from "../../shared/types";
 
 const DEFAULT_MFA: User["mfa"] = {
   totp: { enabled: false, backupCodes: [] },
@@ -9,10 +9,7 @@ const DEFAULT_MFA: User["mfa"] = {
 };
 
 export type PasskeySessionInsert = typeof sessionsTable.$inferInsert;
-export type PasskeyRefreshTokenInsert = Omit<
-  typeof refreshTokensTable.$inferInsert,
-  "sessionId"
->;
+export type PasskeyRefreshTokenInsert = Omit<typeof refreshTokensTable.$inferInsert, "sessionId">;
 
 /**
  * Append a verified passkey credential and enable WebAuthn MFA atomically.

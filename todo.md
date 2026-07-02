@@ -8,47 +8,8 @@ _Synthesized from `docs/AUDIT.md`, `AUDIT-REPORT.md`, `docs/maintenance-scorecar
 `docs/compliance/`, and a full-repo scan. Does not duplicate shipped work in
 [`tdone.md`](./tdone.md)._
 
-_Verified 2026-07-03: **19 open items** (P1.3 removed — duplicate of shipped P3.2
+_Verified 2026-07-03: **15 open items** (P2 shipped 2026-07-03; P1.3 removed — duplicate of shipped P3.2
 in `tdone.md`; P1.4–P1.5 shipped 2026-07-03)._
-
-### P2 — Maintainability and refactoring
-
-- **P2.4 — Fix API↔UI integration scanner accuracy**
-  - **Where:** `scripts/audit-api-ui-map.mjs`, `docs/api-ui-integration-matrix.md`.
-  - **Why:** Scanner reports **44** frontend calls but many paths use
-    `build*Path()` helpers (`adminFeedback.ts`, `adminJitGrants.ts`,
-    `adminContent.ts`, `adminWebhooks.ts`, `regions.ts`) and exported `*_PATH`
-    constants — not detected. `PRODUCT_SURFACE_DISPOSITIONS` still marks routes
-    as "API-only" that now have dashboard pages (P2.3).
-  - **Acceptance:** Scanner follows `build*Path` return prefixes + `*_PATH`
-    constants; dispositions trimmed to truly SDK-only routes (`/auth/unsubscribe`,
-    `POST /wallet/spend`); matrix regen shows ≥55 frontend calls; CI
-    `git diff --exit-code docs/api-ui-integration-matrix.md` passes.
-
-- **P2.5 — Reconcile stale audit / status docs**
-  - **Where:** `docs/AUDIT.md` (M3/P2/P4 statuses), `AUDIT-REPORT.md` (E5/E6),
-    `README.md` (still cites **826** tests / 7 ADRs), `docs/ARCHITECTURE.md`
-    (P1–P6 proposals partially shipped).
-  - **Why:** Docs contradict `tdone.md` and mislead fork consumers.
-  - **Acceptance:** Standing audit table statuses match shipped work; README stats
-    match scorecard (1065 tests, 8 ADRs); ARCHITECTURE "Proposed upgrades" marks
-    shipped items.
-
-- **P2.6 — Server-state tests for untested P2.3 modules**
-  - **Where:** `packages/ui/src/lib/server-state/adminContent.ts`,
-    `adminWebhooks.ts` (tanstack tracker shows "—" verification).
-  - **Why:** P2.3 pages shipped without focused server-state tests unlike
-    `adminFeedback`, `adminRoles`, `adminSearch`.
-  - **Acceptance:** `adminContent.test.tsx` + `adminWebhooks.test.tsx` with
-    loading/error/mutation cases; added to `tanstack-query-progress.md`.
-
-- **P2.7 — `serverApiClient` / RSC prefetch tests**
-  - **Where:** `packages/ui/src/lib/serverApiClient.ts`,
-    `packages/ui/src/lib/server-state/prefetch.ts`.
-  - **Why:** P3.4 pilot shipped with **zero** tests; `docs/ui-http-client.md`
-    recommends mocking `serverApiGet` but none exist.
-  - **Acceptance:** Unit tests for cookie auth header, error mapping, and at
-    least one prefetch options factory.
 
 ### P3 — Scalability and performance
 

@@ -11,121 +11,6 @@ const OUT = join(ROOT, "docs/api-ui-integration-matrix.md");
 const PRODUCT_SURFACE_DISPOSITIONS = [
   [
     "GET",
-    "/admin/feedback",
-    "Operator API-only: feedback can be exported/triaged through the admin API without a dashboard inbox.",
-  ],
-  [
-    "GET",
-    "/admin/roles",
-    "Operator API-only: system role inventory and seed validation remain privileged admin API workflows.",
-  ],
-  [
-    "POST",
-    "/admin/roles",
-    "Operator API-only: system role CRUD remains a privileged admin API workflow.",
-  ],
-  [
-    "GET",
-    "/admin/jit-grants",
-    "Operator API-only: emergency JIT grant moderation is scriptable for approval runbooks.",
-  ],
-  [
-    "DELETE",
-    "/admin/jit-grants/{id}",
-    "Operator API-only: emergency JIT grant moderation is scriptable for approval runbooks.",
-  ],
-  [
-    "POST",
-    "/admin/jit-grants/{id}/approve",
-    "Operator API-only: emergency JIT grant moderation is scriptable for approval runbooks.",
-  ],
-  [
-    "POST",
-    "/admin/jit-grants/{id}/deny",
-    "Operator API-only: emergency JIT grant moderation is scriptable for approval runbooks.",
-  ],
-  [
-    "GET",
-    "/billing/tax-exemptions",
-    "Billing ops API-only: tax exemption review is a back-office/SDK workflow.",
-  ],
-  [
-    "POST",
-    "/billing/tax-exemptions",
-    "Billing ops API-only: tax exemption review is a back-office/SDK workflow.",
-  ],
-  [
-    "POST",
-    "/billing/tax-exemptions/{id}/status",
-    "Billing ops API-only: tax exemption review is a back-office/SDK workflow.",
-  ],
-  [
-    "GET",
-    "/billing/vat/validate",
-    "Billing ops API-only: VAT validation is for checkout/SDK integrations.",
-  ],
-  [
-    "GET",
-    "/billing/usage",
-    "Billing ops API-only: usage is consumed by billing integrations; dashboard billing surfaces subscription status.",
-  ],
-  [
-    "POST",
-    "/billing/change-plan",
-    "Billing ops API-only: plan changes remain server/API initiated to avoid duplicate checkout surfaces.",
-  ],
-  [
-    "GET",
-    "/admin/attachments",
-    "Operator API-only: admin attachment listing supports support/export tooling.",
-  ],
-  [
-    "POST",
-    "/admin/attachments/upload",
-    "Operator API-only: admin attachment upload supports support/export tooling.",
-  ],
-  [
-    "POST",
-    "/admin/lifecycle-emails",
-    "Operator API-only: lifecycle email sends are runbook-controlled content operations.",
-  ],
-  [
-    "GET",
-    "/admin/webhooks/{webhookId}/deliveries",
-    "Operator API-only: admin-wide delivery-log inspection complements the user webhook page.",
-  ],
-  [
-    "POST",
-    "/search/index",
-    "Operator API-only: search index management is a maintenance/runbook action.",
-  ],
-  [
-    "DELETE",
-    "/search/index/{type}/{id}",
-    "Operator API-only: search index management is a maintenance/runbook action.",
-  ],
-  [
-    "GET",
-    "/search/provider",
-    "Operator API-only: search provider introspection is for health/debug tooling.",
-  ],
-  [
-    "GET",
-    "/regions/orgs/{orgId}/branding",
-    "Admin API-only: regional branding metadata is available to tenant tooling; regions UI covers health and pinning.",
-  ],
-  [
-    "PUT",
-    "/regions/orgs/{orgId}/branding",
-    "Admin API-only: regional branding metadata is available to tenant tooling; regions UI covers health and pinning.",
-  ],
-  [
-    "PUT",
-    "/regions/orgs/{orgId}/domain",
-    "Admin API-only: regional domain metadata is available to tenant tooling; regions UI covers health and pinning.",
-  ],
-  [
-    "GET",
     "/auth/unsubscribe",
     "Public API-only landing endpoint reached from email links, not dashboard navigation.",
   ],
@@ -240,6 +125,130 @@ function parseBackendRoutes() {
   return dedupe(routes);
 }
 
+function extractPathLiterals(fragment) {
+  const paths = new Set();
+  for (const match of fragment.matchAll(/["'`](\/[^"'`${}]+)["'`]/g)) {
+    paths.add(normalizePath(match[1].split("?")[0]));
+  }
+  for (const match of fragment.matchAll(/`(\/[^`$]+)/g)) {
+    paths.add(normalizePath(match[1].split("?")[0]));
+  }
+  return paths;
+}
+
+const API_CLIENT_METHODS = {
+  apiGet: "GET",
+  apiGetBlob: "GET",
+  apiPost: "POST",
+  apiPostFormData: "POST",
+  apiPostRaw: "POST",
+  apiPut: "PUT",
+  apiPatch: "PATCH",
+  apiDelete: "DELETE",
+  serverApiGet: "GET",
+};
+
+function inferMethodsForIdentifier(source, identifier) {
+  const escaped = identifier.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const methods = new Set();
+  let idx = 0;
+  while (true) {
+    const at = source.indexOf(identifier, idx);
+    if (at === -1) break;
+    const callWindow = source.slice(Math.max(0, at - 160), at + identifier.length + 80);
+    for (const [fn, method] of Object.entries(API_CLIENT_METHODS)) {
+      const re = new RegExp(`\\b${fn}\\b[^(]*\\([\\s\\S]*?\\b${escaped}\\b`);
+      if (re.test(callWindow)) methods.add(method);
+    }
+    idx = at + identifier.length;
+  }
+  return methods.size > 0 ? [...methods] : ["GET"];
+}
+
+function inferMethodForPath(source, pathOrRef) {
+  const escaped = pathOrRef.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  for (const [fn, method] of Object.entries(API_CLIENT_METHODS)) {
+    const re = new RegExp(`\\b${fn}\\b[^(]*\\([^;\\n]*["'\`]${escaped}`);
+    if (re.test(source)) return method;
+  }
+  return inferMethodsForIdentifier(source, pathOrRef)[0];
+}
+
+function parseServerStatePaths() {
+  const serverStateDir = join(ROOT, "packages/ui/src/lib/server-state");
+  if (!statExists(serverStateDir)) return [];
+
+  const calls = [];
+  const files = walk(serverStateDir).filter((file) => !/[\\/.](test|spec)\.(ts|tsx)$/.test(file));
+
+  for (const file of files) {
+    const source = stripComments(readFileSync(file, "utf8"));
+    const relFile = relativePath(file);
+    const pathConsts = new Map();
+    const buildFns = new Map();
+
+    for (const match of source.matchAll(/export const (\w+_PATH)\s*=\s*["'`]([^"'`?]+)/g)) {
+      pathConsts.set(match[1], normalizePath(match[2]));
+    }
+
+    for (const match of source.matchAll(
+      /export function (build\w+Path)\s*\([^)]*\)[^{]*\{([\s\S]*?)\n\}/g
+    )) {
+      buildFns.set(match[1], extractPathLiterals(match[2]));
+    }
+
+    const seen = new Set();
+    const record = (method, path) => {
+      const key = `${method} ${path}`;
+      if (seen.has(key)) return;
+      seen.add(key);
+      calls.push({ method, path, file: relFile });
+    };
+
+    for (const [name, path] of pathConsts) {
+      for (const method of inferMethodsForIdentifier(source, name)) {
+        record(method, path);
+      }
+    }
+
+    for (const [fnName, paths] of buildFns) {
+      for (const path of paths) {
+        for (const method of inferMethodsForIdentifier(source, fnName)) {
+          record(method, path);
+        }
+      }
+    }
+
+    for (const match of source.matchAll(
+      /\b(apiGetBlob|apiGet|apiPostFormData|apiPost|apiPut|apiPatch|apiDelete|serverApiGet)(?:<[^>]*>)?\(\s*([`"'])([^`"']+)\2/g
+    )) {
+      const routePath = routeFromRawPath(match[3]);
+      if (!routePath) continue;
+      record(API_CLIENT_METHODS[match[1]], routePath);
+    }
+
+    for (const match of source.matchAll(
+      /\b(apiGetBlob|apiGet|apiPostFormData|apiPost|apiPut|apiPatch|apiDelete|serverApiGet)(?:<[^>]*>)?\(\s*(\w+_PATH)\b/g
+    )) {
+      const path = pathConsts.get(match[2]);
+      if (!path) continue;
+      record(API_CLIENT_METHODS[match[1]], path);
+    }
+
+    for (const match of source.matchAll(
+      /\b(apiGetBlob|apiGet|apiPostFormData|apiPost|apiPut|apiPatch|apiDelete)\b[^(]*\(\s*(build\w+Path)\s*\(/g
+    )) {
+      const paths = buildFns.get(match[2]);
+      if (!paths) continue;
+      for (const path of paths) {
+        record(API_CLIENT_METHODS[match[1]], path);
+      }
+    }
+  }
+
+  return calls;
+}
+
 function parseFrontendCalls() {
   const calls = [];
   const files = walk(join(ROOT, "packages/ui/src")).filter(
@@ -284,6 +293,7 @@ function parseFrontendCalls() {
       calls.push({ method: "FETCH", path: normalizePath(match[1]), file: relativePath(file) });
     }
   }
+  calls.push(...parseServerStatePaths());
   return dedupe(calls);
 }
 
