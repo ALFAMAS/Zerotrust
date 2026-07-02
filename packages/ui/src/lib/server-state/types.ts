@@ -268,3 +268,37 @@ export interface ScoreLoginInput {
   deviceHash: string;
   loginHour: number;
 }
+
+export interface GeneralSettings {
+  appName: string;
+  appUrl: string;
+  supportEmail: string;
+  logoUrl: string;
+}
+
+export type AdminUserStatus = "active" | "suspended" | "deleted" | string;
+export type CustomerSegment = "champion" | "at_risk" | "expansion" | "new";
+
+export interface AdminUserDetail {
+  id: string;
+  displayName?: string;
+  username?: string | null;
+  phone?: string | null;
+  email: string;
+  status: AdminUserStatus;
+  roles?: string[];
+  locale?: string;
+  emailVerifiedAt?: string | null;
+  createdAt: string;
+  updatedAt?: string;
+  lastLoginAt?: string;
+  mfa?: {
+    totpEnabled?: boolean;
+    webauthnEnabled?: boolean;
+  };
+  passkeyCount?: number;
+  oauthProviders?: string[];
+  activeSessions?: number;
+  sessionsCount?: number;
+  customerSegment?: CustomerSegment | string | null;
+}

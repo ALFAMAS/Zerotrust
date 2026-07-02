@@ -1,131 +1,101 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import Badge from "@/components/Badge";
+import { ServerStateStatus } from "@/components/ServerStateStatus";
 import { Button } from "@/components/ui/button";
-import { api } from "@/lib/api";
-
-interface UserDetail {
-  id: string;
-  displayName?: string;
-  username?: string | null;
-  phone?: string | null;
-  email: string;
-  status: "active" | "suspended" | "deleted" | string;
-  roles?: string[];
-  locale?: string;
-  emailVerifiedAt?: string | null;
-  createdAt: string;
-  updatedAt?: string;
-  lastLoginAt?: string;
-  mfa?: {
-    totpEnabled?: boolean;
-    webauthnEnabled?: boolean;
-  };
-  passkeyCount?: number;
-  oauthProviders?: string[];
-  activeSessions?: number;
-  sessionsCount?: number;
-  customerSegment?: string | null;
-}
-
-const SEGMENTS = ["champion", "at_risk", "expansion", "new"] as const;
+import { ErrorState } from "@/components/ui/States";
+import {
+  CUSTOMER_SEGMENTS,
+  useAdminUserDetailQuery,
+  useDeleteAdminUserMutation,
+  useForceLogoutAdminUserMutation,
+  useSetAdminUserSegmentMutation,
+  useUpdateAdminUserStatusMutation,
+} from "@/lib/server-state/adminUsers";
+import type { CustomerSegment } from "@/lib/server-state/types";
 
 const fmt = (d?: string | null) => (d ? new Date(d).toLocaleString() : "—");
 
 export default function UserDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
-  const [user, setUser] = useState<UserDetail | null>(null);
-  const [loading, setLoading] = useState(true);
+  const userQuery = useAdminUserDetailQuery(id);
+  const updateStatusMutation = useUpdateAdminUserStatusMutation(id);
+  const segmentMutation = useSetAdminUserSegmentMutation(id);
+  const forceLogoutMutation = useForceLogoutAdminUserMutation(id);
+  const deleteMutation = useDeleteAdminUserMutation(id);
   const [toast, setToast] = useState<string | null>(null);
-  const [actionLoading, setActionLoading] = useState(false);
+
+  const user = userQuery.data;
+  const hasUser = user !== undefined;
+
+  const actionPending =
+    updateStatusMutation.isPending ||
+    segmentMutation.isPending ||
+    forceLogoutMutation.isPending ||
+    deleteMutation.isPending;
 
   const showToast = useCallback((msg: string) => {
     setToast(msg);
     setTimeout(() => setToast(null), 3000);
   }, []);
 
-  useEffect(() => {
-    async function load() {
-      try {
-        const data = await api.get<UserDetail>(`/admin/users/${id}`);
-        setUser(data);
-      } catch {
-        showToast("Failed to load user");
-      } finally {
-        setLoading(false);
-      }
-    }
-    void load();
-  }, [id, showToast]);
-
   async function handleForceLogout() {
     if (!confirm("Force logout all sessions for this user?")) return;
-    setActionLoading(true);
     try {
-      await api.post(`/admin/users/${id}/force-logout`);
-      setUser((u) => (u ? { ...u, activeSessions: 0, sessionsCount: 0 } : u));
+      await forceLogoutMutation.mutateAsync();
       showToast("All sessions revoked");
     } catch {
       showToast("Action failed");
-    } finally {
-      setActionLoading(false);
     }
   }
 
   async function handleToggleStatus() {
     if (!user) return;
     const newStatus = user.status === "active" ? "suspended" : "active";
-    setActionLoading(true);
     try {
-      await api.patch(`/admin/users/${id}`, { status: newStatus });
-      setUser((u) => (u ? { ...u, status: newStatus } : u));
+      await updateStatusMutation.mutateAsync(newStatus);
       showToast(`User ${newStatus}`);
     } catch {
       showToast("Action failed");
-    } finally {
-      setActionLoading(false);
     }
   }
 
   async function handleDelete() {
     if (!user) return;
     if (!confirm(`Permanently delete ${user.email}? This cannot be undone.`)) return;
-    setActionLoading(true);
     try {
-      await api.delete(`/admin/users/${id}`);
+      await deleteMutation.mutateAsync();
       showToast("User deleted");
       setTimeout(() => router.push("/admin/users"), 800);
     } catch {
       showToast("Delete failed");
-    } finally {
-      setActionLoading(false);
     }
   }
 
-  async function handleSegmentChange(segment: string | null) {
+  async function handleSegmentChange(segment: CustomerSegment) {
     if (!user) return;
-    setActionLoading(true);
     try {
-      if (segment) {
-        await api.put(`/admin/users/${id}/segment`, { segment });
-        setUser((u) => (u ? { ...u, customerSegment: segment } : u));
-        showToast(`Segment set to ${segment}`);
-      }
+      await segmentMutation.mutateAsync(segment);
+      showToast(`Segment set to ${segment}`);
     } catch {
       showToast("Failed to update segment");
-    } finally {
-      setActionLoading(false);
     }
   }
 
-  if (loading) {
+  if (userQuery.isPending) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-muted-foreground">Loading…</div>
       </div>
+    );
+  }
+
+  if (userQuery.error && !hasUser) {
+    return (
+      <ErrorState message={userQuery.error.message} retry={() => void userQuery.refetch()} />
     );
   }
 
@@ -137,7 +107,6 @@ export default function UserDetailPage() {
 
   return (
     <div className="space-y-6 max-w-3xl">
-      {/* Toast */}
       {toast && (
         <div className="fixed top-4 right-4 z-50 rounded-lg bg-primary px-4 py-3 text-sm text-foreground shadow-lg">
           {toast}
@@ -156,6 +125,14 @@ export default function UserDetailPage() {
           User Detail
         </h1>
       </div>
+
+      <ServerStateStatus
+        isFetching={userQuery.isFetching}
+        isStale={userQuery.isStale}
+        hasData={hasUser}
+        label="user"
+        onRefresh={() => void userQuery.refetch()}
+      />
 
       {/* Profile Card */}
       <div className="rounded-xl bg-card border border-border p-6">
@@ -285,7 +262,7 @@ export default function UserDetailPage() {
           <Button
             variant="outline"
             onClick={handleForceLogout}
-            disabled={actionLoading || sessionCount === 0}
+            disabled={actionPending || sessionCount === 0}
             className="border-orange-500/30 bg-orange-900/40 text-orange-400 hover:bg-orange-900/60 disabled:opacity-40"
           >
             Force logout all
@@ -300,14 +277,14 @@ export default function UserDetailPage() {
           Tag this account for CS/success workflows.
         </p>
         <div className="flex flex-wrap gap-2">
-          {SEGMENTS.map((seg) => {
+          {CUSTOMER_SEGMENTS.map((seg) => {
             const active = user.customerSegment === seg;
             return (
               <Button
                 key={seg}
                 variant="outline"
                 onClick={() => handleSegmentChange(seg)}
-                disabled={actionLoading}
+                disabled={actionPending}
                 className={`px-3 py-1.5 ${
                   active
                     ? "border-primary bg-primary/15 text-primary"
@@ -328,7 +305,7 @@ export default function UserDetailPage() {
           <Button
             variant="outline"
             onClick={handleToggleStatus}
-            disabled={actionLoading}
+            disabled={actionPending}
             className="border-orange-500/30 bg-orange-900/30 text-orange-400 hover:bg-orange-900/50 disabled:opacity-50"
           >
             {user.status === "active" ? "Suspend User" : "Activate User"}
@@ -336,7 +313,7 @@ export default function UserDetailPage() {
           <Button
             variant="destructive"
             onClick={handleDelete}
-            disabled={actionLoading}
+            disabled={actionPending}
             className="border-red-500/30 bg-red-900/30 text-red-400 hover:bg-red-900/50 disabled:opacity-50"
           >
             Delete User

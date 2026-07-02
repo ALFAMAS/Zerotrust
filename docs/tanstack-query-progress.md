@@ -38,6 +38,9 @@ Tracks the frontend server-state migration from ad-hoc `useEffect` + local loadi
 | `/admin/tenants` | [x] | Tenant list moved to TanStack Query. Create/plan/status/delete use mutations with optimistic list updates, rollback, and targeted invalidation. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/tenants.test.tsx` |
 | `/admin/jit` | [x] | Incoming cross-tenant JIT request list moved to TanStack Query. Approve/deny mutations invalidate the incoming list. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/jit.test.tsx` |
 | `/admin/compliance` | [x] | SOC2 readiness/controls and annual risk assessment moved to TanStack Query. Control status cycling uses optimistic mutation with readiness invalidation. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/compliance.test.tsx` |
+| `/admin/anomaly` | [x] | Behavior baselines list and reset/score actions moved to TanStack Query. Reset uses optimistic list removal with rollback and targeted invalidation. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/anomaly.test.tsx` |
+| `/admin/settings/general` | [x] | General app settings load/save moved to TanStack Query. Save mutation updates settings cache and invalidates the settings domain. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/settings.test.tsx` |
+| `/admin/users/[id]` | [x] | Admin user detail moved to TanStack Query. Status/segment mutations use optimistic detail cache updates with rollback; force-logout and delete invalidate targeted keys. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/adminUsers.test.tsx` |
 
 ## Migration backlog
 
@@ -45,10 +48,18 @@ Prioritize pages with real server data, manual `loading/error` state, and repeat
 
 | Area | Status | Next action |
 | --- | --- | --- |
-| `/admin/anomaly` | [ ] | Add anomaly keys/hooks, migrate baseline list and status actions. |
-| `/admin/settings/general` | [ ] | Add settings keys/hooks, migrate app settings load/save. |
-| `/admin/users/[id]` | [ ] | Add admin user detail key/hook, optimistic status/segment updates. |
-| shared components using legacy `api.get` | [ ] | Migrate high-impact reusable server-data components after page migrations. |
+| shared components using legacy `api.get` | [ ] | Migrate high-impact reusable server-data components (see list below). |
+
+### Shared components still on legacy `api`
+
+| Component | API call(s) | Priority |
+| --- | --- | --- |
+| `NotificationBell.tsx` | notifications | High — visible on every page |
+| `LiveChatWidget.tsx` | `GET /auth/me` | Medium |
+| `LocaleSwitcher.tsx` | `PATCH /auth/me` | Medium |
+| `VerifyEmailBanner.tsx` | `POST /auth/verify-email/resend` | Medium |
+| `NpsSurveyPrompt.tsx` | `POST /auth/me/nps` | Low |
+| `SetupChecklist.tsx` | `POST /auth/me/onboarding-complete` | Low |
 
 ## Per-page checklist
 

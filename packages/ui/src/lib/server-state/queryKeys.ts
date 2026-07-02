@@ -82,4 +82,8 @@ export const queryKeys = {
     baselines: (filters: Record<string, string | number | undefined> = {}) =>
       [...queryKeys.anomaly.all, "baselines", filters] as const,
   },
+  settings: {
+    all: ["settings"] as const,
+    general: () => [...queryKeys.settings.all, "general"] as const,
+  },
 };

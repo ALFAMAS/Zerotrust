@@ -1,7 +1,8 @@
 "use client";
 
-import { Activity, RotateCcw } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { Activity, Loader2, RotateCcw } from "lucide-react";
+import { useCallback, useState } from "react";
+import { ServerStateStatus } from "@/components/ServerStateStatus";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,45 +16,24 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { ErrorState } from "@/components/ui/States";
 import { riskBand } from "@/lib/anomaly";
-import { api } from "@/lib/api";
+import {
+  useAnomalyBaselinesQuery,
+  useResetBaselineMutation,
+  useScoreLoginMutation,
+} from "@/lib/server-state/anomaly";
 
-interface RollingStats {
-  mean: number;
-  variance: number;
-  count: number;
-}
-
-interface Baseline {
-  id: string;
-  userId: string;
-  loginHourStats?: RollingStats;
-  sessionDurationStats?: RollingStats;
-  knownIps?: string[];
-  knownCountries?: string[];
-  knownDevices?: string[];
-  totalLogins?: number;
-  lastUpdatedAt?: string;
-  createdAt?: string;
-}
-
-interface AnomalySignals {
-  unknownIp: boolean;
-  unknownCountry: boolean;
-  unknownDevice: boolean;
-  unusualHour: boolean;
-  overallScore: number;
-  flags: string[];
-}
+const LIST_PARAMS = { limit: 100 } as const;
 
 const fmt = (d?: string | null) => (d ? new Date(d).toLocaleString() : "—");
 
 export default function AnomalyPage() {
-  const [baselines, setBaselines] = useState<Baseline[]>([]);
-  const [loading, setLoading] = useState(true);
+  const baselinesQuery = useAnomalyBaselinesQuery(LIST_PARAMS);
+  const resetMutation = useResetBaselineMutation(LIST_PARAMS);
+  const scoreMutation = useScoreLoginMutation();
   const [toast, setToast] = useState<string | null>(null);
 
-  // Risk-scoring panel state
   const [form, setForm] = useState({
     userId: "",
     ip: "",
@@ -61,37 +41,19 @@ export default function AnomalyPage() {
     deviceHash: "",
     loginHour: String(new Date().getHours()),
   });
-  const [scoring, setScoring] = useState(false);
-  const [signals, setSignals] = useState<AnomalySignals | null>(null);
-  const [scoreError, setScoreError] = useState<string | null>(null);
+
+  const baselines = baselinesQuery.data?.data ?? [];
+  const hasBaselines = baselines.length > 0;
+  const signals = scoreMutation.data ?? null;
 
   const showToast = useCallback((msg: string) => {
     setToast(msg);
     setTimeout(() => setToast(null), 3000);
   }, []);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    try {
-      const data = await api.get<{ data: Baseline[]; pagination: any }>(
-        "/admin/anomaly/baselines?limit=100"
-      );
-      setBaselines(data.data ?? []);
-    } catch {
-      showToast("Failed to load behavior baselines");
-    } finally {
-      setLoading(false);
-    }
-  }, [showToast]);
-
-  useEffect(() => {
-    void load();
-  }, [load]);
-
   async function handleReset(userId: string) {
     try {
-      await api.delete(`/admin/anomaly/baseline/${userId}`);
-      setBaselines((prev) => prev.filter((b) => b.userId !== userId));
+      await resetMutation.mutateAsync(userId);
       showToast("Baseline reset");
     } catch {
       showToast("Failed to reset baseline");
@@ -100,22 +62,17 @@ export default function AnomalyPage() {
 
   async function handleScore(e: React.FormEvent) {
     e.preventDefault();
-    setScoreError(null);
-    setSignals(null);
-    setScoring(true);
+    scoreMutation.reset();
     try {
-      const result = await api.post<AnomalySignals>("/admin/anomaly/score", {
+      await scoreMutation.mutateAsync({
         userId: form.userId.trim(),
         ip: form.ip.trim(),
         country: form.country.trim() || null,
         deviceHash: form.deviceHash.trim(),
         loginHour: Number(form.loginHour),
       });
-      setSignals(result);
-    } catch (err) {
-      setScoreError(err instanceof Error ? err.message : "Scoring failed");
-    } finally {
-      setScoring(false);
+    } catch {
+      // Error surfaced via scoreMutation.error below
     }
   }
 
@@ -202,13 +159,15 @@ export default function AnomalyPage() {
               />
             </div>
             <div className="flex items-end">
-              <Button type="submit" disabled={scoring} className="w-full">
-                {scoring ? "Scoring…" : "Score login"}
+              <Button type="submit" disabled={scoreMutation.isPending} className="w-full">
+                {scoreMutation.isPending ? "Scoring…" : "Score login"}
               </Button>
             </div>
           </form>
 
-          {scoreError && <p className="mt-3 text-sm text-destructive">{scoreError}</p>}
+          {scoreMutation.error && (
+            <p className="mt-3 text-sm text-destructive">{scoreMutation.error.message}</p>
+          )}
 
           {signals && (
             <div className="mt-4 rounded-lg border border-border bg-muted/30 p-4">
@@ -247,69 +206,94 @@ export default function AnomalyPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>User</TableHead>
-                  <TableHead className="text-right">Logins</TableHead>
-                  <TableHead className="text-right">Known IPs</TableHead>
-                  <TableHead>Countries</TableHead>
-                  <TableHead className="text-right">Devices</TableHead>
-                  <TableHead className="text-right">Avg hour</TableHead>
-                  <TableHead>Last updated</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {loading && (
+          <ServerStateStatus
+            isFetching={baselinesQuery.isFetching && !baselinesQuery.isPending}
+            isStale={baselinesQuery.isStale}
+            hasData={hasBaselines}
+            label="baselines"
+            onRefresh={() => void baselinesQuery.refetch()}
+          />
+
+          {baselinesQuery.error && !hasBaselines ? (
+            <ErrorState
+              message={baselinesQuery.error.message}
+              retry={() => void baselinesQuery.refetch()}
+            />
+          ) : (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
                   <TableRow>
-                    <TableCell colSpan={8} className="py-8 text-center text-muted-foreground">
-                      Loading…
-                    </TableCell>
+                    <TableHead>User</TableHead>
+                    <TableHead className="text-right">Logins</TableHead>
+                    <TableHead className="text-right">Known IPs</TableHead>
+                    <TableHead>Countries</TableHead>
+                    <TableHead className="text-right">Devices</TableHead>
+                    <TableHead className="text-right">Avg hour</TableHead>
+                    <TableHead>Last updated</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
-                )}
-                {!loading && baselines.length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={8} className="py-8 text-center text-muted-foreground">
-                      No baselines yet. They form automatically as users sign in.
-                    </TableCell>
-                  </TableRow>
-                )}
-                {!loading &&
-                  baselines.map((b) => (
-                    <TableRow key={b.id}>
-                      <TableCell className="font-mono text-xs">{b.userId}</TableCell>
-                      <TableCell className="text-right">{b.totalLogins ?? 0}</TableCell>
-                      <TableCell className="text-right">{b.knownIps?.length ?? 0}</TableCell>
-                      <TableCell>
-                        {b.knownCountries && b.knownCountries.length > 0
-                          ? b.knownCountries.slice(0, 4).join(", ")
-                          : "—"}
-                      </TableCell>
-                      <TableCell className="text-right">{b.knownDevices?.length ?? 0}</TableCell>
-                      <TableCell className="text-right">
-                        {b.loginHourStats ? b.loginHourStats.mean.toFixed(0) : "—"}
-                      </TableCell>
-                      <TableCell className="text-xs text-muted-foreground">
-                        {fmt(b.lastUpdatedAt)}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleReset(b.userId)}
-                        >
-                          <RotateCcw className="h-3.5 w-3.5" />
-                          Reset
-                        </Button>
+                </TableHeader>
+                <TableBody>
+                  {baselinesQuery.isPending && (
+                    <TableRow>
+                      <TableCell colSpan={8} className="py-8 text-center text-muted-foreground">
+                        <span className="inline-flex items-center gap-2">
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          Loading…
+                        </span>
                       </TableCell>
                     </TableRow>
-                  ))}
-              </TableBody>
-            </Table>
-          </div>
+                  )}
+                  {!baselinesQuery.isPending && baselines.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={8} className="py-8 text-center text-muted-foreground">
+                        No baselines yet. They form automatically as users sign in.
+                      </TableCell>
+                    </TableRow>
+                  )}
+                  {!baselinesQuery.isPending &&
+                    baselines.map((b) => (
+                      <TableRow key={b.id}>
+                        <TableCell className="font-mono text-xs">{b.userId}</TableCell>
+                        <TableCell className="text-right">{b.totalLogins ?? 0}</TableCell>
+                        <TableCell className="text-right">{b.knownIps?.length ?? 0}</TableCell>
+                        <TableCell>
+                          {b.knownCountries && b.knownCountries.length > 0
+                            ? b.knownCountries.slice(0, 4).join(", ")
+                            : "—"}
+                        </TableCell>
+                        <TableCell className="text-right">{b.knownDevices?.length ?? 0}</TableCell>
+                        <TableCell className="text-right">
+                          {b.loginHourStats ? b.loginHourStats.mean.toFixed(0) : "—"}
+                        </TableCell>
+                        <TableCell className="text-xs text-muted-foreground">
+                          {fmt(b.lastUpdatedAt)}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            disabled={
+                              resetMutation.isPending && resetMutation.variables === b.userId
+                            }
+                            onClick={() => void handleReset(b.userId)}
+                          >
+                            {resetMutation.isPending && resetMutation.variables === b.userId ? (
+                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                            ) : (
+                              <RotateCcw className="h-3.5 w-3.5" />
+                            )}
+                            Reset
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
