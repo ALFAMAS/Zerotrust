@@ -1,6 +1,6 @@
 "use client";
 import { CalendarClock, Clock, Globe, Laptop, MapPin, ShieldCheck } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { SkeletonCard } from "@/components/Skeleton";
 import { api } from "../../../lib/api";
 
@@ -23,18 +23,17 @@ export default function SessionsPage() {
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchSessions = () => {
+  const fetchSessions = useCallback(() => {
     setLoading(true);
     api
       .get<any>("/sessions")
       .then((d) => setSessions(d.data || d.sessions || []))
       .catch(() => setSessions([]))
       .finally(() => setLoading(false));
-  };
+  }, []);
 
   useEffect(() => {
     fetchSessions();
-    // biome-ignore lint/correctness/useExhaustiveDependencies: loads on mount / when the route key changes; closes over stable setters
   }, [fetchSessions]);
 
   const revoke = async (id: string) => {
@@ -54,7 +53,7 @@ export default function SessionsPage() {
           onClick={() => {
             if (confirm("Revoke all other sessions?"))
               api
-                .post("/auth/logout/all")
+                .delete("/sessions")
                 .then(() => {
                   fetchSessions();
                   window.location.href = "/login";

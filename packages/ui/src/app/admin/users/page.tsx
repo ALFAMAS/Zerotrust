@@ -5,16 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -71,9 +62,6 @@ export default function UsersPage() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState<string | null>(null);
-  const [showInviteModal, setShowInviteModal] = useState(false);
-  const [inviteEmail, setInviteEmail] = useState("");
-  const [inviting, setInviting] = useState(false);
 
   const toastTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
@@ -136,23 +124,6 @@ export default function UsersPage() {
     }
   }
 
-  async function handleInvite() {
-    if (!inviteEmail.trim()) return;
-    setInviting(true);
-    try {
-      await api.post("/admin/users/invite", { email: inviteEmail });
-      showToast(`Invite sent to ${inviteEmail}`);
-      setInviteEmail("");
-      setShowInviteModal(false);
-    } catch {
-      showToast(`Invite sent to ${inviteEmail} (mock)`);
-      setInviteEmail("");
-      setShowInviteModal(false);
-    } finally {
-      setInviting(false);
-    }
-  }
-
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   return (
@@ -170,9 +141,6 @@ export default function UsersPage() {
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">{total} total users</p>
         </div>
-        <Button type="button" onClick={() => setShowInviteModal(true)}>
-          Invite user
-        </Button>
       </div>
 
       {/* Filters */}
@@ -343,35 +311,6 @@ export default function UsersPage() {
           </Button>
         </div>
       </div>
-
-      {/* Invite Modal */}
-      <Dialog open={showInviteModal} onOpenChange={setShowInviteModal}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Invite user</DialogTitle>
-            <DialogDescription>Send an invitation email to a new user.</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-1.5">
-            <Label htmlFor="invite-email">Email address</Label>
-            <Input
-              id="invite-email"
-              type="email"
-              placeholder="user@example.com"
-              value={inviteEmail}
-              onChange={(e) => setInviteEmail(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleInvite()}
-            />
-          </div>
-          <DialogFooter>
-            <Button type="button" variant="ghost" onClick={() => setShowInviteModal(false)}>
-              Cancel
-            </Button>
-            <Button type="button" onClick={handleInvite} disabled={inviting || !inviteEmail.trim()}>
-              {inviting ? "Sending…" : "Send invite"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

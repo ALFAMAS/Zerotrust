@@ -52,7 +52,7 @@ export default function AdminJITPage() {
   }, []);
 
   useEffect(() => {
-    load();
+    void load();
   }, [load]);
 
   async function act(id: string, decision: "approve" | "deny") {
@@ -60,7 +60,7 @@ export default function AdminJITPage() {
     try {
       await api.post(`/jit/cross-tenant/${id}/${decision}`);
       showToast(decision === "approve" ? "Request approved" : "Request denied");
-      load();
+      void load();
     } catch (err: unknown) {
       showToast(err instanceof Error ? err.message : "Action failed");
     } finally {

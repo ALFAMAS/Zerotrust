@@ -2,7 +2,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-let searchParams = new URLSearchParams("token=reset-tok-1");
+let searchParams = new URLSearchParams("email=alice%40example.com&code=123456");
 vi.mock("next/navigation", () => ({
   useSearchParams: () => searchParams,
 }));
@@ -17,15 +17,16 @@ import ResetPasswordPage from "./page";
 describe("ResetPasswordPage", () => {
   beforeEach(() => {
     mockPost.mockReset();
-    searchParams = new URLSearchParams("token=reset-tok-1");
+    searchParams = new URLSearchParams("email=alice%40example.com&code=123456");
   });
 
-  it("renders the new-password form", () => {
+  it("renders the new-password form with email and code fields pre-filled from the link", () => {
     render(<ResetPasswordPage />);
-
     expect(screen.getByText("New password")).toBeInTheDocument();
     expect(screen.getByLabelText("New Password")).toBeInTheDocument();
     expect(screen.getByLabelText("Confirm Password")).toBeInTheDocument();
+    expect(screen.getByLabelText("Email")).toHaveValue("alice@example.com");
+    expect(screen.getByLabelText("Reset code")).toHaveValue("123456");
   });
 
   it("rejects submission when passwords don't match, without calling the API", async () => {
@@ -40,7 +41,7 @@ describe("ResetPasswordPage", () => {
     expect(mockPost).not.toHaveBeenCalled();
   });
 
-  it("submits the token from the URL along with the new password", async () => {
+  it("submits email + code + newPassword to the /confirm endpoint", async () => {
     const user = userEvent.setup();
     mockPost.mockResolvedValue(undefined);
 
@@ -51,8 +52,12 @@ describe("ResetPasswordPage", () => {
 
     await waitFor(() => {
       expect(mockPost).toHaveBeenCalledWith(
-        "/auth/password-reset/reset",
-        { token: "reset-tok-1", newPassword: "newpassword1" },
+        "/auth/password-reset/confirm",
+        {
+          email: "alice@example.com",
+          code: "123456",
+          newPassword: "newpassword1",
+        },
         true
       );
     });
@@ -69,24 +74,5 @@ describe("ResetPasswordPage", () => {
     await user.click(screen.getByRole("button", { name: "Update Password" }));
 
     expect(await screen.findByText("Token expired")).toBeInTheDocument();
-  });
-
-  it("submits an empty token when none is present in the URL", async () => {
-    searchParams = new URLSearchParams();
-    const user = userEvent.setup();
-    mockPost.mockResolvedValue(undefined);
-
-    render(<ResetPasswordPage />);
-    await user.type(screen.getByLabelText("New Password"), "newpassword1");
-    await user.type(screen.getByLabelText("Confirm Password"), "newpassword1");
-    await user.click(screen.getByRole("button", { name: "Update Password" }));
-
-    await waitFor(() => {
-      expect(mockPost).toHaveBeenCalledWith(
-        "/auth/password-reset/reset",
-        { token: "", newPassword: "newpassword1" },
-        true
-      );
-    });
   });
 });

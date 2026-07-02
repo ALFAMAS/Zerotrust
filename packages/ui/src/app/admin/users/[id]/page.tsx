@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Badge from "@/components/Badge";
 import { api } from "@/lib/api";
 
@@ -38,10 +38,10 @@ export default function UserDetailPage() {
   const [toast, setToast] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
 
-  function showToast(msg: string) {
+  const showToast = useCallback((msg: string) => {
     setToast(msg);
     setTimeout(() => setToast(null), 3000);
-  }
+  }, []);
 
   useEffect(() => {
     async function load() {
@@ -55,14 +55,13 @@ export default function UserDetailPage() {
       }
     }
     load();
-    // biome-ignore lint/correctness/useExhaustiveDependencies: loads on mount / when the route key changes; closes over stable setters
   }, [id, showToast]);
 
   async function handleForceLogout() {
     if (!confirm("Force logout all sessions for this user?")) return;
     setActionLoading(true);
     try {
-      await api.post(`/admin/users/${id}/logout`);
+      await api.post(`/admin/users/${id}/force-logout`);
       setUser((u) => (u ? { ...u, activeSessions: 0, sessionsCount: 0 } : u));
       showToast("All sessions revoked");
     } catch {

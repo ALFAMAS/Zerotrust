@@ -109,7 +109,7 @@ export default function CompliancePage() {
   }, [year, toast]);
 
   useEffect(() => {
-    load();
+    void load();
   }, [load]);
 
   async function cycleControlStatus(control: Soc2Control) {

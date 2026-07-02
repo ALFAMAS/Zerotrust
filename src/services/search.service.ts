@@ -47,7 +47,10 @@ function getEsClient(): any {
       node: `http://${cfg.elasticsearch.host}:${cfg.elasticsearch.port}`,
     });
   } catch {
-    logger.warn("@elastic/elasticsearch not installed; falling back to DB search");
+    logger.warn(
+      "@elastic/elasticsearch not installed — search will use the database fallback. " +
+        "To enable Elasticsearch: run `bun add @elastic/elasticsearch` and set ELASTICSEARCH_ENABLED=true"
+    );
   }
   return esClient;
 }

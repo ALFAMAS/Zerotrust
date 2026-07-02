@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { SkeletonCard } from "@/components/Skeleton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -45,18 +45,17 @@ export default function OrganizationsPage() {
   const [orgSlug, setOrgSlug] = useState("");
   const [slugManual, setSlugManual] = useState(false);
 
-  const fetchOrgs = () => {
+  const fetchOrgs = useCallback(() => {
     setLoading(true);
     api
       .get<{ orgs: OrgMember[] }>("/orgs")
       .then((d) => setOrgs(d.orgs || []))
       .catch(() => setOrgs([]))
       .finally(() => setLoading(false));
-  };
+  }, []);
 
   useEffect(() => {
     fetchOrgs();
-    // biome-ignore lint/correctness/useExhaustiveDependencies: loads on mount / when the route key changes; closes over stable setters
   }, [fetchOrgs]);
 
   function autoSlug(name: string): string {

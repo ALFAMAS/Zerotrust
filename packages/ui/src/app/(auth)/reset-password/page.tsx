@@ -4,13 +4,20 @@ import { useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PasswordInput } from "@/components/ui/password-input";
 import { api } from "../../../lib/api";
 
 function ResetForm() {
   const searchParams = useSearchParams();
-  const token = searchParams.get("token") || "";
+  // The password-reset email link carries the email and 6-digit code as query
+  // params (see password-reset.routes.ts). Pre-fill them when present; the
+  // user can also type the code manually.
+  const email = searchParams.get("email") || "";
+  const code = searchParams.get("code") || "";
+  const [enteredCode, setEnteredCode] = useState(code);
+  const [enteredEmail, setEnteredEmail] = useState(email);
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [loading, setLoading] = useState(false);
@@ -23,9 +30,18 @@ function ResetForm() {
       setError("Passwords do not match");
       return;
     }
+    if (!enteredEmail || !enteredCode) {
+      setError("Email and reset code are required");
+      return;
+    }
     setLoading(true);
+    setError("");
     try {
-      await api.post("/auth/password-reset/reset", { token, newPassword: password }, true);
+      await api.post(
+        "/auth/password-reset/confirm",
+        { email: enteredEmail, code: enteredCode, newPassword: password },
+        true
+      );
       setDone(true);
     } catch (err: any) {
       setError(err.message || "Reset failed");
@@ -53,7 +69,7 @@ function ResetForm() {
     <>
       <h1 className="mb-1 text-2xl font-bold text-foreground">New password</h1>
       <p className="mb-6 text-sm text-muted-foreground">
-        Choose a strong password for your account.
+        Enter the 6-digit reset code from your email and choose a new password.
       </p>
       {error && (
         <Alert variant="destructive" className="mb-4">
@@ -61,6 +77,31 @@ function ResetForm() {
         </Alert>
       )}
       <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="space-y-1.5">
+          <Label htmlFor="email">Email</Label>
+          <Input
+            id="email"
+            type="email"
+            required
+            value={enteredEmail}
+            onChange={(e) => setEnteredEmail(e.target.value)}
+            placeholder="you@example.com"
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="code">Reset code</Label>
+          <Input
+            id="code"
+            inputMode="numeric"
+            pattern="[0-9]*"
+            maxLength={6}
+            required
+            value={enteredCode}
+            onChange={(e) => setEnteredCode(e.target.value.replace(/\D/g, ""))}
+            placeholder="123456"
+            className="font-mono tracking-[0.3em]"
+          />
+        </div>
         <div className="space-y-1.5">
           <Label htmlFor="password">New Password</Label>
           <PasswordInput

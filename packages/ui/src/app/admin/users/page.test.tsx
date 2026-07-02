@@ -5,13 +5,11 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const mockGet = vi.fn();
 const mockPatch = vi.fn();
 const mockDelete = vi.fn();
-const mockPost = vi.fn();
 vi.mock("@/lib/api", () => ({
   api: {
     get: (...args: unknown[]) => mockGet(...args),
     patch: (...args: unknown[]) => mockPatch(...args),
     delete: (...args: unknown[]) => mockDelete(...args),
-    post: (...args: unknown[]) => mockPost(...args),
   },
 }));
 
@@ -49,7 +47,6 @@ describe("Admin UsersPage", () => {
     mockGet.mockReset();
     mockPatch.mockReset();
     mockDelete.mockReset();
-    mockPost.mockReset();
     window.confirm = vi.fn(() => true);
   });
 
@@ -123,23 +120,6 @@ describe("Admin UsersPage", () => {
     });
     expect(await screen.findByText("User deleted")).toBeInTheDocument();
     expect(screen.queryByText("Ada Lovelace")).not.toBeInTheDocument();
-  });
-
-  it("sends an invite via the invite modal", async () => {
-    mockUsersResponse(users);
-    mockPost.mockResolvedValue({});
-    const user = userEvent.setup();
-    render(<UsersPage />);
-    await screen.findByText("Ada Lovelace");
-
-    await user.click(screen.getByRole("button", { name: "Invite user" }));
-    await user.type(screen.getByLabelText("Email address"), "new@example.com");
-    await user.click(screen.getByRole("button", { name: "Send invite" }));
-
-    await waitFor(() => {
-      expect(mockPost).toHaveBeenCalledWith("/admin/users/invite", { email: "new@example.com" });
-    });
-    expect(await screen.findByText("Invite sent to new@example.com")).toBeInTheDocument();
   });
 
   it("disables Previous on the first page", async () => {

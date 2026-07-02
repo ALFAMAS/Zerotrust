@@ -3,7 +3,7 @@
 import { CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { Suspense, useEffect, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,32 +20,35 @@ function VerifyEmailInner() {
   const [code, setCode] = useState("");
   const autoTried = useRef(false);
 
-  async function verify(codeValue: string) {
-    setStatus("verifying");
-    try {
-      // The endpoint is authenticated — it reads the email from the session, so
-      // we only send the code (auth token is attached automatically).
-      await api.post("/auth/verify-email", { code: codeValue });
-      setStatus("success");
-      toast({ message: "Email verified — you're all set!", type: "success" });
-      setTimeout(() => {
-        window.location.href = "/dashboard";
-      }, 1500);
-    } catch (err: any) {
-      setStatus("error");
-      if (err.status === 401) {
+  const verify = useCallback(
+    async (codeValue: string) => {
+      setStatus("verifying");
+      try {
+        // The endpoint is authenticated — it reads the email from the session, so
+        // we only send the code (auth token is attached automatically).
+        await api.post("/auth/verify-email", { code: codeValue });
+        setStatus("success");
+        toast({ message: "Email verified — you're all set!", type: "success" });
+        setTimeout(() => {
+          window.location.href = "/dashboard";
+        }, 1500);
+      } catch (err: any) {
+        setStatus("error");
+        if (err.status === 401) {
+          toast({
+            message: "Please sign in to verify your email.",
+            type: "error",
+          });
+          return;
+        }
         toast({
-          message: "Please sign in to verify your email.",
+          message: err.message || "Invalid or expired code. Request a new one.",
           type: "error",
         });
-        return;
       }
-      toast({
-        message: err.message || "Invalid or expired code. Request a new one.",
-        type: "error",
-      });
-    }
-  }
+    },
+    [toast]
+  );
 
   // Auto-verify when arriving from the email magic link (?code=)
   useEffect(() => {
@@ -56,7 +59,6 @@ function VerifyEmailInner() {
       autoTried.current = true;
       void verify(qCode);
     }
-    // biome-ignore lint/correctness/useExhaustiveDependencies: loads on mount / when the route key changes; closes over stable setters
   }, [params, verify]);
 
   if (status === "success") {

@@ -125,7 +125,7 @@ export default function AuthSettingsPage() {
         setLoading(false);
       }
     }
-    load();
+    void load();
   }, []);
 
   function set<K extends keyof AuthSettings>(key: K, value: AuthSettings[K]) {

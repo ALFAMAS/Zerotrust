@@ -19,6 +19,7 @@ import {
 import { auditLog, getLogger } from "../../logger";
 import { authMiddleware, requireAdmin } from "../../middleware/auth";
 import { sendNotificationEmail } from "../../services/email.service";
+import { enqueueEmail } from "../../services/emailQueue";
 import { setLegalHold } from "../../services/legalHold.service";
 import { TokenService } from "../../services/token.service";
 import { getClientIp } from "../../shared/clientIp";
@@ -287,14 +288,19 @@ router.post("/broadcast", async (c) => {
       );
     }
 
-    // Optional email fan-out — sequential to stay friendly to SMTP limits
+    // Optional email fan-out. Route through the BullMQ email queue when it's
+    // available so SMTP sends are paced, retried, and don't saturate the
+    // connection pool for large segments. Each enqueue is independent and
+    // fire-and-forget; the queue owns backpressure and retries. Falls back to
+    // a direct (still non-blocking) send when Redis/the queue is not running.
     if (sendEmail) {
       for (const r of recipients) {
-        void sendNotificationEmail(r.email, {
-          name: r.displayName ?? r.email,
-          title,
-          body: message,
-          link,
+        const payload = { name: r.displayName ?? r.email, title, body: message, link };
+        void enqueueEmail("notification", r.email, payload).then((queued) => {
+          if (!queued) {
+            // Queue unavailable — deliver directly but still without blocking.
+            void sendNotificationEmail(r.email, payload);
+          }
         });
       }
     }
