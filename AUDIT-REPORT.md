@@ -9,130 +9,28 @@
 
 ## TL;DR
 
-| Check                                          | Result                                                                                                                 |
-| ---------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `bun run test` (vitest)                        | ✅ **835 tests / 99 files passing**                                                                                    |
-| `bun run build` (tsc API)                      | ✅ clean                                                                                                               |
-| `bun run type-check`                           | ✅ clean                                                                                                               |
-| `bun run verify:generated` (SDK + docs drift)  | ⚠ regenerates cleanly; expected tracked docs diffs are included for the improved API↔UI scanner                        |
-| `bun run boundaries:check`                     | ✅ clean                                                                                                               |
-| `bun run audit:integration` (API↔UI map)       | ✅ passes, scans typed/template `api.*`, `apiClient`, and `useApi` calls; flags 48 backend routes with no UI caller (mostly by design)      |
-| `bun run ui:audit` (shadcn adoption)           | ✅ **0 raw HTML controls** — migration complete                                                                          |
-| `bun run lint` (biome)                         | ✅ exits 0; only pre-existing script warnings remain                                                                    |
-| `bun run --cwd packages/ui build` (next build) | ✅ production build passes; only existing Next/SWC version warning remains                                             |
+| Check                                          | Result                                                                                                                                 |
+| ---------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `bun run test` (vitest)                        | ✅ **835 tests / 99 files passing**                                                                                                    |
+| `bun run build` (tsc API)                      | ✅ clean                                                                                                                               |
+| `bun run type-check`                           | ✅ clean                                                                                                                               |
+| `bun run verify:generated` (SDK + docs drift)  | ⚠ regenerates cleanly; expected tracked docs diffs are included for the improved API↔UI scanner                                        |
+| `bun run boundaries:check`                     | ✅ clean                                                                                                                               |
+| `bun run audit:integration` (API↔UI map)       | ✅ passes, scans typed/template `api.*`, `apiClient`, and `useApi` calls; flags 48 backend routes with no UI caller (mostly by design) |
+| `bun run ui:audit` (shadcn adoption)           | ✅ **0 raw HTML controls** — migration complete                                                                                        |
+| `bun run lint` (biome)                         | ✅ exits 0; only pre-existing script warnings remain                                                                                   |
+| `bun run --cwd packages/ui build` (next build) | ✅ production build passes; only existing Next/SWC version warning remains                                                             |
 
 **Verdict:** Strong, production-shaped SaaS template (27 route modules, 41 DB tables, 835 root tests, full Stripe/SSO/MFA/WebAuthn/observability). All fork-blocking and should-fix items are resolved — details consolidated in [`tdone.md`](./tdone.md).
 
 ### Open follow-ups (still in [`todo.md`](./todo.md))
 
-| ID | Status | Summary |
-| --- | --- | --- |
+| ID     | Status     | Summary                                                                                                 |
+| ------ | ---------- | ------------------------------------------------------------------------------------------------------- |
 | **E2** | 🟠 Partial | `useApi`/`usePaginatedApi` on 6 pages; ~18 dashboard/admin pages still use legacy `useEffect`+`api.get` |
-| **E4** | 🟡 Info | 48 backend routes have no UI caller (many by design; some shipped features lack UI) |
-| **E5** | 🟡 Info | In-process `setInterval` schedulers — leader lock mitigates but not horizontally scalable |
-| **E6** | 🟡 Info | Repository layer ~10% complete (4 repos); hot-path writes still mostly inline Drizzle |
-
----
-
-## A. Build blockers (fix before forking)
-
-### A1. ✅ UI production build passes — `next-themes` issue resolved
-
-**File:** `packages/ui/src/app/layout.tsx:83`
-
-```tsx
-<ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-  {" "}
-  // ← error ...
-</ThemeProvider>
-```
-
-**Error (from `next build`):**
-
-```
-Property 'children' does not exist on type 'IntrinsicAttributes & ThemeProviderProps'.
-```
-
-**Root cause:** `next-themes` `^0.4.6` was installed. In v0.4 the `ThemeProvider` no longer takes `children`/`attribute` props the same way — it's now a wrapper that uses a `nonce`/context pattern and you wrap with `<NextThemesProvider>`, or pass props via a client wrapper. Either downgrade to `next-themes@0.3.x` or migrate the wrapper.
-**Status:** Fixed and verified with `bun run --cwd packages/ui build`. The build now completes; the only remaining output is the existing `@next/swc` version warning.
-
-### A2. ✅ `bun run lint` exits 0
-
-Two classes:
-
-1. **CRLF line endings** across ~30+ files (every diff shows `␍` removals). The repo was authored on Windows and `.gitattributes` isn't forcing LF. This is cosmetic but makes `bun run lint` / `lint:ci` permanently red and will trip up CI on the fork.
-2. **Real `lint/nursery/noFloatingPromises` bugs** (4 sites) — these are genuine unhandled promise rejections, not formatting noise:
-   - `packages/ui/src/app/admin/compliance/page.tsx:112` — `load()` in `useEffect`
-   - `packages/ui/src/app/admin/jit/page.tsx:55` — `load()` in `useEffect`
-   - `packages/ui/src/app/admin/jit/page.tsx:63` — `load()` after `await` (should be `await load()` or `void load()`)
-   - `packages/ui/src/app/admin/settings/auth/page.tsx:128` — `load()` in `useEffect`
-
-**Status:** Fixed and verified. LF normalization is enforced by `.gitattributes`; no-floating-promise hazards in the audited UI paths are fixed; `bun run lint` exits 0 with only pre-existing script warnings.
-
----
-
-### B9. ✅ Admin sessions UI now passes `page`/`limit`
-
-**Fix applied:** `packages/ui/src/app/admin/sessions/page.tsx` now requests `/admin/sessions?page=...&limit=20`, renders total/page counts, and exposes Previous/Next controls. `packages/ui/src/app/admin/sessions/page.test.tsx` covers the first-page request and next-page navigation.
-
----
-
-## C. Incomplete / stubbed features (call out before forking)
-
-### C1. ✅ Smart search is ranked full-text, not a semantic stub
-
-**File:** `src/services/search.service.ts`
-
-```ts
-return smartSearchDatabase(query, orgId, region, limit);
-```
-
-**Fix applied:** the placeholder embedding branch was removed. `/search/smart` now
-uses one bounded PostgreSQL `websearch_to_tsquery` ranked query across users,
-organizations, and support tickets when Elasticsearch is unavailable; if
-Elasticsearch is configured it uses the ES scorer. OpenAPI/generated docs now call
-this **ranked smart search** rather than semantic/vector search, and
-`search.service.test.ts` covers the old `EMBEDDING_PROVIDER=openai` downgrade path.
-
-### C2. ✅ Elasticsearch dependency is explicit
-
-**File:** `src/services/search.service.ts:45`
-
-```ts
-const { Client } = require("@elastic/elasticsearch");
-```
-
-**Fix applied:** `@elastic/elasticsearch` is now listed in root `dependencies` and locked in `bun.lock`, so enabling the Elasticsearch provider no longer depends on a hidden manual install.
-
-### C3. ✅ Hardware key-store claims softened to match reality
-
-**File:** `src/crypto/hardware-key-store.ts:197-378`
-
-All three hardware providers throw `NotImplementedError` on every operation. The code explicitly fails fast at startup if `KEY_PROVIDER=tpm|secure-enclave|pkcs11` is set (good). Only the `software` provider works.
-
-**Fix applied:** README directory-tree comment changed from "hardware key store" to "software key store (hardware providers are stubs)" so the README no longer overstates what ships. The hardware provider stubs remain in-tree as documented extension points with fail-fast guards.
-
-### C4. ✅ OAuth "Account merge / linking" — UI now surfaces connect/disconnect
-
-`POST /auth/me/link` and `DELETE /auth/oauth/:provider` are implemented and tested. The dashboard security page now renders a "Connect" button for unlinked providers (initiating the OAuth authorize flow) alongside the existing "Disconnect" button for linked providers.
-
-### C5. ✅ Notification preferences UI exposes per-category controls
-
-`/notifications/preferences` supports per-category × per-channel toggles (security, billing, account, social, system × email, push, inApp). The backend schema was extended and the dashboard notifications page now renders the full grid.
-
-### C6. ✅ `/auth/me/nps` and `/auth/me/onboarding-complete` confirmed in route file
-
-Both routes exist in `auth.routes.ts` (lines 1218 and 1283). The audit scanner missed them because it only catches `router.get/post(...)` with literal strings; these use inline handlers that the scanner pattern didn't match.
-
-### C7. ✅ Customer segments — admin UI now exposes segment tagging
-
-`PUT /admin/users/:id/segment` is called from the admin user detail page, which now renders a segment selector (champion, at_risk, expansion, new).
-
-### C8. ✅ Webhook management is **in-memory**, not DB-backed — fixed
-
-**Fix applied:** `src/webhooks/store.ts` is DB-backed via Drizzle and the new
-`webhook_endpoints` table. Migration `drizzle/0027_webhook_endpoints.sql` and
-`src/__tests__/webhookStore.persistence.test.ts` cover endpoint persistence.
+| **E4** | 🟡 Info    | 48 backend routes have no UI caller (many by design; some shipped features lack UI)                     |
+| **E5** | 🟡 Info    | In-process `setInterval` schedulers — leader lock mitigates but not horizontally scalable               |
+| **E6** | 🟡 Info    | Repository layer ~10% complete (4 repos); hot-path writes still mostly inline Drizzle                   |
 
 ---
 
@@ -158,28 +56,9 @@ The repo's own `CLAUDE.md` documents the 2026-06-26 CWE sweep. Spot-checks confi
 
 ## E. Architecture / maintainability debt
 
-### E1. ✅ UI HTTP client boundary is documented and extended
-
-Two UI HTTP entry points still exist, but their roles are now explicit:
-
-- `packages/ui/src/lib/apiClient.ts` — canonical boundary for new UI→API calls.
-  It now exposes JSON helpers for GET/POST/PATCH/PUT/DELETE, FormData uploads,
-  blob downloads, timeout, refresh replay, and transient 5xx/network retry.
-- `packages/ui/src/lib/api.ts` — legacy compatibility facade used by older
-  dashboard/admin pages while they are migrated in focused batches.
-
-**Fix applied:** `CLAUDE.md` and new `docs/ui-http-client.md` document the split,
-`apiClient.ts` gained `apiPatch()` / `apiPut()` and retry coverage, and
-`useApi()` now consumes `apiClient.ts` internally. Remaining older page migration
-is tracked under E2.
-
 ### E2. 🟠 `useApi` hook exists but is barely used — **open**
 
 `packages/ui/src/lib/hooks/useApi.ts` (with `usePaginatedApi`) is documented in `CLAUDE.md` as the replacement for `useEffect+api.get+loading` boilerplate. **6 of ~40 app pages use it** (`admin/page`, `admin/access-reviews`, `admin/alerts`, `admin/sessions`, `admin/users`, `dashboard/settings`). ~18 dashboard/admin pages still import `@/lib/api` and hand-roll fetch/loading/error (webhooks, billing, wallet, admin audit/revenue/tenants/regions, etc.). Tracked in `todo.md` P2.
-
-### E3. ✅ Raw HTML controls fully migrated to shadcn/ui
-
-Per `docs/shadcn-adoption-report.md`: all 44 raw `<button>`, `<input>`, and `<textarea>` controls outside `components/ui` have been migrated to shadcn primitives (`Button`, `Input`, `Textarea`, `Checkbox`). `bun run ui:audit` reports **0 raw controls**.
 
 ### E4. 🟡 48 backend routes have no UI caller
 

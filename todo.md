@@ -25,9 +25,3 @@ maintainability/refactor · P3 scalability/performance · P4 docs/DX.
   dashboard/admin pages still import legacy `@/lib/api` and hand-roll
   `useEffect` + `api.get` + loading/error state (e.g. webhooks, billing,
   wallet, admin audit/revenue/tenants/regions).
-
-### P4 — docs / claims hygiene
-
-- No active P4 audit items.
-
----
