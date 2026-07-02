@@ -33,7 +33,8 @@ strategy, migration ordering, and rollback procedure.
 
 | Component | Process | Replicas | Notes |
 |---|---|---|---|
-| API | `pm2 start dist/api/server.js -i max` | N (CPU count) | Cluster mode; 1 worker needed separately (P1.2) |
+| API | `WORKER_MODE=true pm2 start dist/api/server.js -i max` | N (CPU count) | Cluster mode; schedulers/consumers deferred to worker |
+| Worker | `pm2 start dist/worker.js -i 1 --name zerotrust-worker` | 1 | Owns BullMQ consumers + scheduled jobs |
 | UI | `pm2 start npm --name zerotrust-ui -- start` | 1 (fork) | Next.js production server |
 | nginx | systemd | 1 | TLS termination, static asset caching |
 
@@ -52,8 +53,8 @@ strategy, migration ordering, and rollback procedure.
   Blueprint 2 or 3.
 - **UI:** single process; Next.js ISR/revalidation handles cache freshness.
   Static assets (/_next/static) served by nginx.
-- **Workers:** when P1.2 lands, run 1 dedicated worker process via `pm2 start
-  dist/worker.js -i 1`.
+- **Workers:** production API replicas set `WORKER_MODE=true`; run exactly 1
+  dedicated worker process via `pm2 start dist/worker.js -i 1`.
 
 ### Backup strategy
 
@@ -126,7 +127,7 @@ FROM oven/bun:1-slim AS api
 COPY --from=builder /app/dist ./dist
 CMD ["bun", "dist/api/server.js"]
 
-# Worker target (when P1.2 lands)
+# Worker target
 FROM oven/bun:1-slim AS worker
 COPY --from=builder /app/dist ./dist
 CMD ["bun", "dist/worker.js"]
@@ -145,6 +146,8 @@ services:
     build: { target: api }
     ports: ["1337:1337"]
     env_file: .env
+    environment:
+      WORKER_MODE: "true"
     depends_on: [postgres, redis]
     deploy: { replicas: 2 }
 
@@ -246,6 +249,9 @@ spec:
         image: registry.example.com/zerotrust-api:latest
         ports:
         - containerPort: 1337
+        env:
+        - name: WORKER_MODE
+          value: "true"
         envFrom:
         - secretRef:
             name: zerotrust-env

@@ -61,7 +61,7 @@ vi.mock("../config", () => ({
 describe("Rate Limiting Middleware", () => {
   it("allows requests within the configured limit", async () => {
     const { consumeInMemory, clearInMemoryBuckets } =
-      await import("../services/ops/rateLimiter/inmemory");
+      await import("../services/shared/rateLimiter/inmemory");
     clearInMemoryBuckets();
     const key = `mw-test-${Date.now()}`;
     const r = consumeInMemory(key, 1, 10, 60);
@@ -71,7 +71,7 @@ describe("Rate Limiting Middleware", () => {
 
   it("blocks after exhausting the bucket", async () => {
     const { consumeInMemory, clearInMemoryBuckets } =
-      await import("../services/ops/rateLimiter/inmemory");
+      await import("../services/shared/rateLimiter/inmemory");
     clearInMemoryBuckets();
     const key = `mw-block-${Date.now()}`;
     for (let i = 0; i < 3; i++) consumeInMemory(key, 1, 3, 60);
@@ -82,7 +82,7 @@ describe("Rate Limiting Middleware", () => {
 
   it("bans IP after repeated violations", async () => {
     const { consumeInMemory, isIpBanned, clearInMemoryBuckets } =
-      await import("../services/ops/rateLimiter/inmemory");
+      await import("../services/shared/rateLimiter/inmemory");
     clearInMemoryBuckets();
     const key = `ban-test-${Date.now()}`;
     for (let i = 0; i < 10; i++) consumeInMemory(key, 1, 1, 60);
@@ -93,7 +93,7 @@ describe("Rate Limiting Middleware", () => {
 
   it("reports remaining tokens accurately", async () => {
     const { consumeInMemory, clearInMemoryBuckets } =
-      await import("../services/ops/rateLimiter/inmemory");
+      await import("../services/shared/rateLimiter/inmemory");
     clearInMemoryBuckets();
     const key = `remaining-${Date.now()}`;
     const r1 = consumeInMemory(key, 1, 5, 60);

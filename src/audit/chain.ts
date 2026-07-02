@@ -17,7 +17,7 @@
 
 import { createHash } from "node:crypto";
 import { desc, isNotNull, sql } from "drizzle-orm";
-import { getDb } from "../db";
+import { getDb, getReadDb } from "../db";
 import { auditLogsTable } from "../db/schema";
 import { getLogger } from "../logger";
 
@@ -131,7 +131,7 @@ export interface ChainVerifyResult {
  * (recomputed hash mismatch) and deletions/reordering (broken prev→entry link).
  */
 export async function verifyAuditChain(limit = 1000): Promise<ChainVerifyResult> {
-  const db = getDb();
+  const db = getReadDb();
   const rows = await db
     .select()
     .from(auditLogsTable)

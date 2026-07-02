@@ -312,7 +312,7 @@ router.get("/sse", (c) => {
 router.get("/preferences", async (c) => {
   const user = c.get("user");
   try {
-    const db = getDb();
+    const db = getReadDb();
     const [row] = await db
       .select({ metadata: usersTable.metadata })
       .from(usersTable)

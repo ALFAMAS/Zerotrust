@@ -1266,7 +1266,7 @@ describe("Route-level rate limiting", () => {
     // Exhaust the limit of 10 (register route uses points: 10)
     // We use the in-memory bucket logic from rateLimiting middleware directly
     const { consumeInMemory, clearInMemoryBuckets } =
-      await import("../services/ops/rateLimiter/inmemory");
+      await import("../services/shared/rateLimiter/inmemory");
     clearInMemoryBuckets();
 
     const key = `rl-route-test-${Date.now()}`;

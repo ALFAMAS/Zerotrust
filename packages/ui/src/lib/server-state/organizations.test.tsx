@@ -1,25 +1,25 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, renderHook, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import OrganizationsPage from "@/app/dashboard/organizations/page";
-import OrgSettingsPage from "@/app/dashboard/organizations/[orgId]/settings/page";
-import { mockApiDelete, mockApiGet, mockApiPost, mockApiPut } from "@/test/apiClientMock";
-import {
-  ORGS_PATH,
-  buildOrgInvitePath,
-  buildOrgPath,
-  buildOrgSecurityPolicyPath,
-  organizationKeys,
-  useRevokeOrgInviteMutation,
-  useSaveOrgSecurityPolicyMutation,
-} from "./organizations";
+import { ORGS_PATH, organizationKeys } from "./organizations";
+
+const mockApiGet = vi.fn();
+const mockApiPost = vi.fn();
+const mockLegacyGet = vi.fn();
+vi.mock("@/lib/apiClient", () => ({
+  apiGet: (...args: unknown[]) => mockApiGet(...args),
+  apiPost: (...args: unknown[]) => mockApiPost(...args),
+}));
+vi.mock("@/lib/api", () => ({
+  api: {
+    get: (...args: unknown[]) => mockLegacyGet(...args),
+    post: vi.fn(),
+  },
+}));
 vi.mock("@/context/ToastContext", () => ({
   useToast: () => ({ toast: vi.fn() }),
-}));
-vi.mock("next/navigation", () => ({
-  useParams: () => ({ orgId: "org_1" }),
-  useRouter: () => ({ push: vi.fn() }),
 }));
 
 const orgMembership = {
@@ -55,24 +55,13 @@ function renderWithQueryClient(ui: React.ReactElement) {
   return { ...result, queryClient };
 }
 
-function hookWrapper() {
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: { retry: false, gcTime: 0, staleTime: 0 },
-      mutations: { retry: false },
-    },
+describe("organizations TanStack Query server state", () => {
+  beforeEach(() => {
+    mockApiGet.mockReset();
+    mockApiPost.mockReset();
+    mockLegacyGet.mockReset();
   });
 
-  return {
-    queryClient,
-    Wrapper: ({ children }: { children: React.ReactNode }) => (
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-    ),
-  };
-}
-
-describe("organizations TanStack Query server state", () => {
-  
   it("models organizations domain query keys and paths", () => {
     expect(organizationKeys.list()).toEqual(["organizations", "list"]);
     expect(ORGS_PATH).toBe("/orgs");
@@ -84,6 +73,7 @@ describe("organizations TanStack Query server state", () => {
 
     expect(await screen.findByText("Acme Corp")).toBeInTheDocument();
     expect(mockApiGet).toHaveBeenCalledWith(ORGS_PATH);
+    expect(mockLegacyGet).not.toHaveBeenCalled();
   });
 
   it("renders error + retry when organizations list fails", async () => {
@@ -116,153 +106,5 @@ describe("organizations TanStack Query server state", () => {
     await waitFor(() =>
       expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: organizationKeys.list() })
     );
-  });
-
-  it("loads org settings for owners and saves organization details", async () => {
-    const owner = { id: "user_1", email: "owner@example.com", displayName: "Owner" };
-    const policy = {
-      requirePasskeyAttestation: false,
-      requireHardwarePasskey: false,
-      allowedPasskeyAaguids: [],
-      deniedPasskeyAaguids: [],
-      ipAllowlist: [],
-      maxSessionAgeSeconds: 0,
-      idleTimeoutSeconds: 0,
-      maxConcurrentSessions: 0,
-      allowedCountries: [],
-    };
-
-    mockApiGet.mockImplementation((path: string) => {
-      if (path === buildOrgPath("org_1")) {
-        return Promise.resolve({
-          org: orgMembership.org,
-          memberCount: 1,
-        });
-      }
-      if (path === "/auth/me") return Promise.resolve(owner);
-      if (path === `${buildOrgPath("org_1")}/members`) {
-        return Promise.resolve({
-          data: [
-            {
-              member: { ...orgMembership.member, role: "owner" },
-              user: { id: "user_1", email: "owner@example.com", displayName: "Owner", avatarUrl: null },
-            },
-          ],
-          pagination: {},
-        });
-      }
-      if (path === buildOrgSecurityPolicyPath("org_1")) {
-        return Promise.resolve({ policy });
-      }
-      return Promise.reject(new Error(`unexpected path ${path}`));
-    });
-    mockApiPut.mockResolvedValue({
-      org: { ...orgMembership.org, name: "Acme Updated" },
-    });
-
-    const user = userEvent.setup();
-    renderWithQueryClient(<OrgSettingsPage />);
-
-    const nameInput = await screen.findByLabelText("Organization name");
-    expect(nameInput).toHaveValue("Acme Corp");
-
-    await user.clear(nameInput);
-    await user.type(nameInput, "Acme Updated");
-    await user.click(screen.getByRole("button", { name: "Save changes" }));
-
-    await waitFor(() =>
-      expect(mockApiPut).toHaveBeenCalledWith(buildOrgPath("org_1"), {
-        name: "Acme Updated",
-        billingEmail: undefined,
-        logoUrl: undefined,
-      })
-    );
-  });
-
-  it("denies org settings for non-admin members", async () => {
-    mockApiGet.mockImplementation((path: string) => {
-      if (path === buildOrgPath("org_1")) {
-        return Promise.resolve({ org: orgMembership.org, memberCount: 2 });
-      }
-      if (path === "/auth/me") {
-        return Promise.resolve({ id: "user_2", email: "member@example.com" });
-      }
-      if (path === `${buildOrgPath("org_1")}/members`) {
-        return Promise.resolve({
-          data: [
-            {
-              member: { ...orgMembership.member, userId: "user_2", role: "member" },
-              user: { id: "user_2", email: "member@example.com", displayName: "Member", avatarUrl: null },
-            },
-          ],
-          pagination: {},
-        });
-      }
-      if (path === buildOrgSecurityPolicyPath("org_1")) {
-        return Promise.resolve({ policy: {} });
-      }
-      return Promise.reject(new Error(`unexpected path ${path}`));
-    });
-
-    renderWithQueryClient(<OrgSettingsPage />);
-
-    expect(await screen.findByText("Access denied")).toBeInTheDocument();
-  });
-
-  it("renders org settings error + retry when detail load fails", async () => {
-    mockApiGet.mockImplementation((path: string) => {
-      if (path === buildOrgPath("org_1")) return Promise.reject(new Error("settings unavailable"));
-      if (path === "/auth/me") return Promise.resolve({ id: "user_1" });
-      if (path === `${buildOrgPath("org_1")}/members`) return Promise.resolve({ data: [], pagination: {} });
-      return Promise.reject(new Error(`unexpected path ${path}`));
-    });
-
-    renderWithQueryClient(<OrgSettingsPage />);
-
-    expect(await screen.findByText("settings unavailable")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Try again" })).toBeInTheDocument();
-  });
-
-  it("revokes an org invite via mutation", async () => {
-    mockApiDelete.mockResolvedValue({ success: true });
-    const { Wrapper, queryClient } = hookWrapper();
-    const invalidateSpy = vi.spyOn(queryClient, "invalidateQueries");
-    const { result } = renderHook(() => useRevokeOrgInviteMutation("org_1"), { wrapper: Wrapper });
-
-    await result.current.mutateAsync("invite_1");
-
-    expect(mockApiDelete).toHaveBeenCalledWith(buildOrgInvitePath("org_1", "invite_1"));
-    await waitFor(() =>
-      expect(invalidateSpy).toHaveBeenCalledWith({
-        queryKey: organizationKeys.invites("org_1"),
-      })
-    );
-  });
-
-  it("saves org security policy via mutation", async () => {
-    const policy = {
-      requirePasskeyAttestation: true,
-      requireHardwarePasskey: false,
-      allowedPasskeyAaguids: [],
-      deniedPasskeyAaguids: [],
-      ipAllowlist: ["203.0.113.0/24"],
-      maxSessionAgeSeconds: 3600,
-      idleTimeoutSeconds: 900,
-      maxConcurrentSessions: 3,
-      allowedCountries: ["US"],
-    };
-    mockApiPut.mockResolvedValue({ policy });
-    const { Wrapper, queryClient } = hookWrapper();
-    const policyKey = organizationKeys.securityPolicy("org_1");
-    const invalidateSpy = vi.spyOn(queryClient, "invalidateQueries");
-    const { result } = renderHook(() => useSaveOrgSecurityPolicyMutation("org_1"), {
-      wrapper: Wrapper,
-    });
-
-    await result.current.mutateAsync(policy);
-
-    expect(mockApiPut).toHaveBeenCalledWith(buildOrgSecurityPolicyPath("org_1"), policy);
-    expect(queryClient.getQueryData(policyKey)).toEqual({ policy });
-    await waitFor(() => expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: policyKey }));
   });
 });

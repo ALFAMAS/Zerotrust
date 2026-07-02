@@ -100,7 +100,7 @@ router.use("*", authMiddleware);
 
 router.get("/", async (c) => {
   const user = c.get("user");
-  const db = getDb();
+  const db = getReadDb();
   const orgs = await db
     .select({ member: organizationMembersTable, org: organizationsTable })
     .from(organizationMembersTable)
@@ -135,7 +135,7 @@ router.get("/:orgId", async (c) => {
   if (!(await requireMember(orgId, user.id))) {
     return c.json({ error: "FORBIDDEN", message: "Not a member of this organization" }, 403);
   }
-  const db = getDb();
+  const db = getReadDb();
   const [org] = await db
     .select()
     .from(organizationsTable)
@@ -303,7 +303,7 @@ router.get("/:orgId/security/policy", async (c) => {
   const user = c.get("user");
   const orgId = c.req.param("orgId");
   if (!(await requireAdmin(orgId, user.id))) return c.json({ error: "FORBIDDEN" }, 403);
-  const db = getDb();
+  const db = getReadDb();
   const [policy] = await db
     .select()
     .from(orgSecurityPoliciesTable)

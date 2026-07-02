@@ -1,6 +1,6 @@
 import { eq, sql } from "drizzle-orm";
 import { getConfig } from "../../config/index";
-import { getDb } from "../../db/index";
+import { getDb, getReadDb } from "../../db/index";
 import { type OrgBranding, organizationsTable } from "../../db/schema";
 
 // ── Region constants ─────────────────────────────────────────────────────────
@@ -124,7 +124,7 @@ export async function resolveOrgByDomain(hostname: string): Promise<ResolvedOrg 
   const cached = cacheGet(hostname);
   if (cached) return cached;
 
-  const db = getDb();
+  const db = getReadDb();
   const baseDomain = process.env.APP_BASE_DOMAIN?.toLowerCase();
   const normalizedHost = hostname.toLowerCase().split(":")[0] ?? hostname.toLowerCase();
 
@@ -175,7 +175,7 @@ export async function getOrgBranding(orgId: string): Promise<ResolvedBranding> {
   const cached = cacheGet(cacheKey);
   if (cached) return cached.branding;
 
-  const db = getDb();
+  const db = getReadDb();
   const [org] = await db
     .select({ branding: organizationsTable.branding })
     .from(organizationsTable)

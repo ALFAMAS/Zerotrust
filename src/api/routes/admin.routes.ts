@@ -114,7 +114,7 @@ router.get("/users", async (c) => {
 router.get("/users/:id", async (c) => {
   try {
     const id = c.req.param("id");
-    const db = getDb();
+    const db = getReadDb();
     const rows = await db.select().from(usersTable).where(eq(usersTable.id, id)).limit(1);
 
     if (rows.length === 0) {
@@ -253,7 +253,7 @@ router.get("/sessions", async (c) => {
     const page = Math.max(1, parseInt(c.req.query("page") || "1", 10));
     const limit = Math.min(100, Math.max(1, parseInt(c.req.query("limit") || "20", 10)));
 
-    const db = getDb();
+    const db = getReadDb();
     const conditions: any[] = [];
     if (c.req.query("userId")) conditions.push(eq(sessionsTable.userId, c.req.query("userId")!));
     if (c.req.query("active") !== undefined) {
@@ -352,7 +352,7 @@ router.get("/stats", async (c) => {
 // GET /roles
 router.get("/roles", async (c) => {
   try {
-    const db = getDb();
+    const db = getReadDb();
     const roles = await db.select().from(rolesTable).orderBy(rolesTable.name);
     return c.json({ roles });
   } catch (err) {
@@ -492,7 +492,7 @@ router.delete("/users/:id/roles/:roleName", async (c) => {
 router.get("/jit-grants", async (c) => {
   try {
     const status = c.req.query("status");
-    const db = getDb();
+    const db = getReadDb();
 
     const conditions: any[] = [];
     if (status) conditions.push(eq(jitAccessTable.status, status));
@@ -685,7 +685,7 @@ const VALID_SEGMENTS = ["champion", "at_risk", "expansion", "new"] as const;
 router.get("/users/segments", async (c) => {
   try {
     const segment = c.req.query("segment");
-    const db = getDb();
+    const db = getReadDb();
 
     if (segment && VALID_SEGMENTS.includes(segment as (typeof VALID_SEGMENTS)[number])) {
       const { page, limit, offset } = parsePaginatedQuery(c.req.query);
@@ -829,7 +829,7 @@ router.get("/attachments", async (c) => {
       maxLimit: 200,
     });
     const feature = c.req.query("feature");
-    const db = getDb();
+    const db = getReadDb();
     const conditions = feature ? eq(fileAttachmentsTable.feature, feature) : undefined;
     const [rows, total] = await Promise.all([
       db

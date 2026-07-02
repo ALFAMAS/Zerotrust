@@ -1,10 +1,7 @@
-import { screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import OrgDetailPage from "./page";
-import { renderWithQueryClient } from "@/test/queryClient";
 
-import { mockApiGet, mockApiPost, mockApiDelete } from "@/test/apiClientMock";
 vi.mock("next/navigation", () => ({
   useParams: () => ({ orgId: "org-1" }),
   useRouter: () => ({ push: mockPush }),
@@ -16,6 +13,18 @@ vi.mock("@/context/ToastContext", () => ({
   useToast: () => ({ toast: mockToast }),
 }));
 
+const mockGet = vi.fn();
+const mockPost = vi.fn();
+const mockDelete = vi.fn();
+vi.mock("../../../../lib/api", () => ({
+  api: {
+    get: (...args: unknown[]) => mockGet(...args),
+    post: (...args: unknown[]) => mockPost(...args),
+    delete: (...args: unknown[]) => mockDelete(...args),
+  },
+}));
+
+import OrgDetailPage from "./page";
 
 const org = {
   id: "org-1",
@@ -62,13 +71,16 @@ function membersResponse(role: string) {
 
 describe("OrgDetailPage", () => {
   beforeEach(() => {
+    mockGet.mockReset();
+    mockPost.mockReset();
+    mockDelete.mockReset();
     mockToast.mockReset();
     mockPush.mockReset();
     window.confirm = vi.fn(() => true);
   });
 
   function mockAsAdmin() {
-    mockApiGet.mockImplementation((path: string) => {
+    mockGet.mockImplementation((path: string) => {
       if (path === "/orgs/org-1") return Promise.resolve({ org, memberCount: 2 });
       if (path === "/auth/me") return Promise.resolve(me);
       if (path === "/orgs/org-1/members") return Promise.resolve(membersResponse("owner"));
@@ -78,7 +90,7 @@ describe("OrgDetailPage", () => {
   }
 
   function mockAsMember() {
-    mockApiGet.mockImplementation((path: string) => {
+    mockGet.mockImplementation((path: string) => {
       if (path === "/orgs/org-1") return Promise.resolve({ org, memberCount: 2 });
       if (path === "/auth/me") return Promise.resolve(me);
       if (path === "/orgs/org-1/members") return Promise.resolve(membersResponse("member"));
@@ -88,7 +100,7 @@ describe("OrgDetailPage", () => {
 
   it("renders the member list once loaded", async () => {
     mockAsAdmin();
-    renderWithQueryClient(<OrgDetailPage />);
+    render(<OrgDetailPage />);
 
     expect(await screen.findByText("Acme Inc")).toBeInTheDocument();
     expect(screen.getByText("Other User")).toBeInTheDocument();
@@ -97,7 +109,7 @@ describe("OrgDetailPage", () => {
 
   it("shows the invite form and pending invites for an admin/owner", async () => {
     mockAsAdmin();
-    renderWithQueryClient(<OrgDetailPage />);
+    render(<OrgDetailPage />);
 
     expect(await screen.findByText("Invite member")).toBeInTheDocument();
     expect(screen.getByPlaceholderText("colleague@example.com")).toBeInTheDocument();
@@ -105,7 +117,7 @@ describe("OrgDetailPage", () => {
 
   it("hides the invite form for a non-admin member", async () => {
     mockAsMember();
-    renderWithQueryClient(<OrgDetailPage />);
+    render(<OrgDetailPage />);
 
     await screen.findByText("Acme Inc");
     expect(screen.queryByText("Invite member")).not.toBeInTheDocument();
@@ -113,17 +125,17 @@ describe("OrgDetailPage", () => {
 
   it("sends an invite with the default role", async () => {
     mockAsAdmin();
-    mockApiPost.mockResolvedValue({});
+    mockPost.mockResolvedValue({});
     const user = userEvent.setup();
 
-    renderWithQueryClient(<OrgDetailPage />);
+    render(<OrgDetailPage />);
     await screen.findByText("Invite member");
 
     await user.type(screen.getByPlaceholderText("colleague@example.com"), "new@example.com");
     await user.click(screen.getByRole("button", { name: "Send invite" }));
 
     await waitFor(() => {
-      expect(mockApiPost).toHaveBeenCalledWith("/orgs/org-1/invites", {
+      expect(mockPost).toHaveBeenCalledWith("/orgs/org-1/invites", {
         email: "new@example.com",
         role: "member",
       });
@@ -133,23 +145,23 @@ describe("OrgDetailPage", () => {
 
   it("leaves the organization after confirming", async () => {
     mockAsMember();
-    mockApiDelete.mockResolvedValue({});
+    mockDelete.mockResolvedValue({});
     const user = userEvent.setup();
 
-    renderWithQueryClient(<OrgDetailPage />);
+    render(<OrgDetailPage />);
     await screen.findByText("Acme Inc");
 
     await user.click(screen.getByRole("button", { name: "Leave" }));
 
     await waitFor(() => {
-      expect(mockApiDelete).toHaveBeenCalledWith("/orgs/org-1/members/user-1");
+      expect(mockDelete).toHaveBeenCalledWith("/orgs/org-1/members/user-1");
     });
     expect(mockPush).toHaveBeenCalledWith("/dashboard/organizations");
   });
 
   it("does not show a Leave button for the owner", async () => {
     mockAsAdmin();
-    renderWithQueryClient(<OrgDetailPage />);
+    render(<OrgDetailPage />);
 
     await screen.findByText("Acme Inc");
     expect(screen.queryByRole("button", { name: "Leave" })).not.toBeInTheDocument();

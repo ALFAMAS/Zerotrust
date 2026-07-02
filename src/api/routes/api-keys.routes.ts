@@ -2,7 +2,7 @@ import { createHash, randomBytes } from "node:crypto";
 import { and, eq, isNull } from "drizzle-orm";
 import { Hono } from "hono";
 import { z } from "zod";
-import { getDb } from "../../db";
+import { getDb, getReadDb } from "../../db";
 import { apiKeysTable, organizationMembersTable } from "../../db/schema";
 import { getLogger } from "../../logger";
 import { authMiddleware } from "../../middleware/auth";
@@ -26,7 +26,7 @@ const createSchema = z.object({
 // GET /api-keys
 router.get("/", authMiddleware, async (c) => {
   const user = c.get("user");
-  const db = getDb();
+  const db = getReadDb();
 
   const keys = await db
     .select({

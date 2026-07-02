@@ -1,6 +1,6 @@
 import { and, eq } from "drizzle-orm";
 import { Hono } from "hono";
-import { getDb } from "../../db";
+import { getDb, getReadDb } from "../../db";
 import {
   reactivateSubscription,
   scheduleSubscriptionCancellation,
@@ -24,7 +24,7 @@ function trialDays(): number {
 
 /** Org-scoped requests require the caller to be an org owner or admin. */
 async function canManageOrgBilling(orgId: string, userId: string): Promise<boolean> {
-  const db = getDb();
+  const db = getReadDb();
   const [member] = await db
     .select({ role: organizationMembersTable.role })
     .from(organizationMembersTable)
@@ -36,7 +36,7 @@ async function canManageOrgBilling(orgId: string, userId: string): Promise<boole
 }
 
 async function findSubscription(opts: { userId?: string; orgId?: string }) {
-  const db = getDb();
+  const db = getReadDb();
   const where = opts.orgId
     ? eq(subscriptionsTable.orgId, opts.orgId)
     : eq(subscriptionsTable.userId, opts.userId!);

@@ -1,7 +1,7 @@
 import { and, desc, eq, ne, sql } from "drizzle-orm";
 import { Hono } from "hono";
 import { insertAuditLog } from "../../audit/chain";
-import { getDb } from "../../db";
+import { getDb, getReadDb } from "../../db";
 import { accessReviewItemsTable, accessReviewsTable, usersTable } from "../../db/schema";
 import { getLogger } from "../../logger";
 import { authMiddleware, requireAdmin } from "../../middleware/auth";
@@ -89,7 +89,7 @@ router.post("/", async (c) => {
 router.get("/", async (c) => {
   try {
     const { page, limit, offset } = parsePaginatedQuery(c.req.query());
-    const db = getDb();
+    const db = getReadDb();
     const where = undefined; // could add status filter later
     const [reviews, total, counts] = await Promise.all([
       db
@@ -134,7 +134,7 @@ router.get("/:id", async (c) => {
   try {
     const id = c.req.param("id");
     const { page, limit, offset } = parsePaginatedQuery(c.req.query());
-    const db = getDb();
+    const db = getReadDb();
     const [review] = await db
       .select()
       .from(accessReviewsTable)

@@ -8,7 +8,7 @@ import * as nodeCrypto from "node:crypto";
 import { desc, eq, inArray, lt, ne } from "drizzle-orm";
 import { Hono } from "hono";
 import { getConfig } from "../../config";
-import { getDb } from "../../db";
+import { getDb, getReadDb } from "../../db";
 import {
   auditLogsTable,
   notificationsTable,
@@ -167,7 +167,7 @@ router.put("/users/:id/plan", async (c) => {
 // MRR / ARR / churn / past-due summary from the subscriptions table.
 router.get("/revenue", async (c) => {
   try {
-    const db = getDb();
+    const db = getReadDb();
     const subs = await db.select().from(subscriptionsTable);
 
     const billable = subs.filter((s) => ["active", "trialing", "past_due"].includes(s.status));
@@ -335,7 +335,7 @@ function toCsv(rows: Record<string, unknown>[]): string {
 // GET /admin/users/export — CSV of all users
 router.get("/users/export", async (c) => {
   try {
-    const db = getDb();
+    const db = getReadDb();
     const users = await db
       .select({
         id: usersTable.id,
@@ -370,7 +370,7 @@ router.get("/users/export", async (c) => {
 router.get("/audit/export", async (c) => {
   try {
     const limit = Math.min(50_000, parseInt(c.req.query("limit") || "10000", 10));
-    const db = getDb();
+    const db = getReadDb();
     const rows = await db
       .select()
       .from(auditLogsTable)

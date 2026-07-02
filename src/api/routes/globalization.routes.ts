@@ -6,7 +6,7 @@
 import { and, eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { z } from "zod";
-import { getDb } from "../../db";
+import { getReadDb } from "../../db";
 import { organizationMembersTable } from "../../db/schema";
 import { getLogger } from "../../logger";
 import { authMiddleware } from "../../middleware/auth";
@@ -37,7 +37,7 @@ const logger = getLogger("globalization-routes");
 // with billingRoutes, so a router-wide `use("*")` would leak onto its routes).
 
 async function isOrgMember(orgId: string, userId: string): Promise<boolean> {
-  const db = getDb();
+  const db = getReadDb();
   const [m] = await db
     .select({ id: organizationMembersTable.id })
     .from(organizationMembersTable)
@@ -49,7 +49,7 @@ async function isOrgMember(orgId: string, userId: string): Promise<boolean> {
 }
 
 async function canManageOrg(orgId: string, userId: string): Promise<boolean> {
-  const db = getDb();
+  const db = getReadDb();
   const [m] = await db
     .select({ role: organizationMembersTable.role })
     .from(organizationMembersTable)

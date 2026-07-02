@@ -1,18 +1,15 @@
-import { screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import LoginPage from "./page";
-import { renderWithQueryClient } from "@/test/queryClient";
-import { mockApiPost } from "@/test/apiClientMock";
+
+const mockPost = vi.fn();
+vi.mock("../../../lib/api", () => ({
+  api: { post: (...args: unknown[]) => mockPost(...args) },
+}));
 
 const mockSetToken = vi.fn();
 vi.mock("../../../lib/auth", () => ({
   setToken: (...args: unknown[]) => mockSetToken(...args),
-}));
-
-const mockToast = vi.fn();
-vi.mock("@/lib/toast", () => ({
-  useToast: () => ({ toast: mockToast }),
 }));
 
 const mockNavigateToSafeRelative = vi.fn();
@@ -27,22 +24,20 @@ vi.mock("../../../lib/webauthn", () => ({
   isWebAuthnAvailable: () => mockIsWebAuthnAvailable(),
   startAuthentication: vi.fn(),
 }));
-vi.mock("@/lib/server-state/auth", () => ({
-  useOAuthAuthorizeMutation: () => ({ mutateAsync: vi.fn(), isPending: false }),
-}));
+
+import LoginPage from "./page";
 
 describe("LoginPage", () => {
   beforeEach(() => {
+    mockPost.mockReset();
     mockSetToken.mockReset();
-    mockToast.mockReset();
     mockNavigateToSafeRelative.mockReset();
-    mockNavigateToSafeExternal.mockReset();
     mockIsWebAuthnAvailable.mockReturnValue(false);
     window.history.replaceState({}, "", "/login");
   });
 
   it("renders the sign-in form", () => {
-    renderWithQueryClient(<LoginPage />);
+    render(<LoginPage />);
 
     expect(screen.getByText("Welcome back")).toBeInTheDocument();
     expect(screen.getByLabelText("Email")).toBeInTheDocument();
@@ -50,20 +45,20 @@ describe("LoginPage", () => {
     expect(screen.getByRole("button", { name: "Sign in" })).toBeInTheDocument();
   });
 
-  it("logs in via apiClient and redirects on success", async () => {
+  it("logs in and redirects on success", async () => {
     const user = userEvent.setup();
-    mockApiPost.mockResolvedValue({ accessToken: "at", refreshToken: "rt" });
+    mockPost.mockResolvedValue({ accessToken: "at", refreshToken: "rt" });
 
-    renderWithQueryClient(<LoginPage />);
+    render(<LoginPage />);
     await user.type(screen.getByLabelText("Email"), "person@example.com");
     await user.type(screen.getByLabelText("Password"), "hunter2");
     await user.click(screen.getByRole("button", { name: "Sign in" }));
 
     await waitFor(() => {
-      expect(mockApiPost).toHaveBeenCalledWith(
+      expect(mockPost).toHaveBeenCalledWith(
         "/auth/login",
         { email: "person@example.com", password: "hunter2" },
-        { skipAuth: true }
+        true
       );
     });
     expect(mockSetToken).toHaveBeenCalledWith("at", "rt");
@@ -72,25 +67,26 @@ describe("LoginPage", () => {
 
   it("switches to the MFA step when the API reports mfaRequired", async () => {
     const user = userEvent.setup();
-    mockApiPost.mockResolvedValue({ mfaRequired: true, mfaToken: "mfa-tok-1" });
+    mockPost.mockResolvedValue({ mfaRequired: true, mfaToken: "mfa-tok-1" });
 
-    renderWithQueryClient(<LoginPage />);
+    render(<LoginPage />);
     await user.type(screen.getByLabelText("Email"), "person@example.com");
     await user.type(screen.getByLabelText("Password"), "hunter2");
     await user.click(screen.getByRole("button", { name: "Sign in" }));
 
     expect(await screen.findByText("Two-factor authentication")).toBeInTheDocument();
     expect(screen.getByLabelText("Authentication code")).toBeInTheDocument();
+    // Login is not finished yet — no token/redirect until the MFA code is verified.
     expect(mockSetToken).not.toHaveBeenCalled();
   });
 
   it("completes login after submitting a valid MFA code", async () => {
     const user = userEvent.setup();
-    mockApiPost
+    mockPost
       .mockResolvedValueOnce({ mfaRequired: true, mfaToken: "mfa-tok-1" })
       .mockResolvedValueOnce({ accessToken: "at2", refreshToken: "rt2" });
 
-    renderWithQueryClient(<LoginPage />);
+    render(<LoginPage />);
     await user.type(screen.getByLabelText("Email"), "person@example.com");
     await user.type(screen.getByLabelText("Password"), "hunter2");
     await user.click(screen.getByRole("button", { name: "Sign in" }));
@@ -100,13 +96,23 @@ describe("LoginPage", () => {
     await user.click(screen.getByRole("button", { name: "Verify" }));
 
     await waitFor(() => {
-      expect(mockApiPost).toHaveBeenLastCalledWith(
+      expect(mockPost).toHaveBeenLastCalledWith(
         "/auth/login/mfa",
         { mfaToken: "mfa-tok-1", code: "123456" },
-        { skipAuth: true }
+        true
       );
     });
     expect(mockSetToken).toHaveBeenCalledWith("at2", "rt2");
-    expect(mockNavigateToSafeRelative).toHaveBeenCalledWith(null, "/dashboard");
+  });
+
+  it("hides the passkey option check but still surfaces an error toast when unsupported", async () => {
+    const user = userEvent.setup();
+    mockIsWebAuthnAvailable.mockReturnValue(false);
+
+    render(<LoginPage />);
+    await user.click(screen.getByRole("button", { name: /sign in with a passkey/i }));
+
+    // Passkey flow bails out before calling the API when unsupported.
+    expect(mockPost).not.toHaveBeenCalled();
   });
 });

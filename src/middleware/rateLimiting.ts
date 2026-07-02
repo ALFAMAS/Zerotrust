@@ -1,7 +1,7 @@
 import { createMiddleware } from "hono/factory";
 import { getConfig } from "../config";
 import { getLogger } from "../logger";
-import { clearInMemoryBuckets } from "../services/ops/rateLimiter/inmemory";
+import { clearInMemoryBuckets } from "../services/shared/rateLimiter/inmemory";
 import type { HonoEnv } from "../shared/types";
 import { ErrorCodes } from "../shared/types";
 
@@ -29,7 +29,7 @@ export async function initRateLimiter(): Promise<void> {
   if (cfg.rateLimiting.redisUri) {
     try {
       const { initRedisRateLimiter, consumePoint } = await import(
-        "../services/ops/rateLimiter/redis.js"
+        "../services/shared/rateLimiter/redis.js"
       );
       await initRedisRateLimiter(cfg.rateLimiting.redisUri!);
       redisConsume = consumePoint;

@@ -77,7 +77,7 @@ async function getAndVerifyOAuthState(state?: string): Promise<{
   if (!state) return { ok: false, codeChallenge: null, codeVerifier: null };
   // Try Redis first
   try {
-    const { getRedis } = await import("../../services/ops/rateLimiter/redis.js");
+    const { getRedis } = await import("../../services/shared/rateLimiter/redis.js");
     const redis = getRedis();
     if (redis) {
       const raw = await redis.get(`oauth:state:${state}`);
@@ -136,7 +136,7 @@ async function generateOAuthState(codeChallenge?: string, codeVerifier?: string)
   });
   // Store in Redis if available (multi-instance safe), else fall back to memory
   try {
-    const { getRedis } = await import("../../services/ops/rateLimiter/redis.js");
+    const { getRedis } = await import("../../services/shared/rateLimiter/redis.js");
     const redis = getRedis();
     if (redis) {
       await redis.setex(`oauth:state:${state}`, OAUTH_STATE_TTL_SECS, store);

@@ -4,7 +4,7 @@
  */
 
 import { and, eq, isNull, sql } from "drizzle-orm";
-import { getDb } from "../../db/index";
+import { getDb, getReadDb } from "../../db/index";
 import { organizationMembersTable, subscriptionsTable, usageCountersTable } from "../../db/schema";
 import { getLogger } from "../../logger/index";
 import { type Plan, planLimit } from "../../shared/plans";
@@ -65,7 +65,7 @@ export async function incrementUsage(
 
 /** Read a single usage counter for the current period. */
 export async function getUsage(metric: UsageMetric, scope: UsageScope): Promise<number> {
-  const db = getDb();
+  const db = getReadDb();
   const period = currentPeriod();
   const conditions = [eq(usageCountersTable.period, period), eq(usageCountersTable.metric, metric)];
   conditions.push(
@@ -90,7 +90,7 @@ export interface UsageSummary {
 
 /** Usage summary for the dashboard: every metric with its plan limit. */
 export async function getUsageSummary(scope: UsageScope): Promise<UsageSummary> {
-  const db = getDb();
+  const db = getReadDb();
 
   // Resolve the plan for limits
   let plan: Plan = "free";

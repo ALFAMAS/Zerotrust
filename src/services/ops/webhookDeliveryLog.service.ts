@@ -1,5 +1,5 @@
 import { desc, eq } from "drizzle-orm";
-import { getDb } from "../../db/index";
+import { getDb, getReadDb } from "../../db/index";
 import { webhookDeliveryLogsTable } from "../../db/schema";
 import { countRows } from "../../shared/dbCount";
 
@@ -51,7 +51,7 @@ export async function getDeliveryLogs(
   limit = 50,
   offset = 0
 ): Promise<DeliveryLogEntry[]> {
-  const db = getDb();
+  const db = getReadDb();
   const rows = await db
     .select()
     .from(webhookDeliveryLogsTable)
@@ -64,14 +64,14 @@ export async function getDeliveryLogs(
 
 export async function countDeliveryLogs(webhookId: string): Promise<number> {
   return countRows(
-    getDb(),
+    getReadDb(),
     webhookDeliveryLogsTable,
     eq(webhookDeliveryLogsTable.webhookId, webhookId)
   );
 }
 
 export async function getDeliveryLogById(logId: string): Promise<DeliveryLogEntry | null> {
-  const db = getDb();
+  const db = getReadDb();
   const [row] = await db
     .select()
     .from(webhookDeliveryLogsTable)

@@ -57,7 +57,7 @@ read it via `c.get("user")`.
 | Area | Dir(s) | Responsibility |
 | --- | --- | --- |
 | HTTP | `api/` | Hono app, route mounting, OpenAPI spec |
-| Domain logic | `services/` (~45) | token, session, email/queue, MFA, OAuth, billing, wallet, globalization, search, compliance, backup, SLO, alerting… |
+| Domain logic | `services/{auth,billing,notifications,compliance,ops,shared}/` (48 files) | token, session, email/queue, billing, wallet, globalization, search, compliance, backup, SLO, alerting… |
 | Middleware | `middleware/` (~20) | auth, rate limiting, CSRF/headers, plan gating, abuse defense, API versioning |
 | Data | `db/` | Drizzle schema (41 tables) + connection; `models/` thin table re-exports |
 | Crypto | `crypto/` | `paseto-v4` (v4.local), `csfle` (field encryption), `hardware-key-store`, `codes` |
@@ -141,7 +141,7 @@ Prioritized; **P1 is a correctness bug**, the rest are improvements.
 | P4 | Move hot dashboard reads to Server Components / route handlers | TTFB, fewer client waterfalls | M |
 | P5 | Containerize (Dockerfile + compose) and split health/readiness | Reproducible deploys, orchestrator-friendly | M |
 | P6 | Fail-fast typed config validation at boot | Catch missing prod secrets before serving traffic | S |
-| P7 | Group `services/` by domain | Navigability now that the surface is smaller | S |
+| P7 | Group `services/` by domain | **Shipped 2026-07-03** — files live under `auth/`, `billing/`, `notifications/`, `compliance/`, `ops/`, and `shared/` | Done |
 
 ### P1 — Separate the worker from the API process (correctness)
 
@@ -197,13 +197,14 @@ in `NODE_ENV=production` when required secrets (`TOKEN_SECRET_HEX`,
 `CSFLE_MASTER_KEY_HEX`, `DATABASE_URL`, backup encryption) are missing or weak
 would turn silent misconfiguration into a loud, early failure.
 
-### P7 — Domain-oriented service layout
+### P7 — Domain-oriented service layout — shipped 2026-07-03
 
-`services/` is a flat directory of ~48 files. Grouping by domain (`auth/`,
-`billing/`, `notifications/`, `compliance/`, `ops/`) improves discoverability now
-that the feature set is smaller and more focused.
+`src/services/` is grouped by domain (`auth/`, `billing/`, `notifications/`,
+`compliance/`, `ops/`, `shared/`) with no flat root service files remaining.
+The grouped layout keeps 48 service files navigable without changing runtime
+module boundaries.
 
 ---
 
-These proposals are advisory. P1 and P2 are the highest-leverage and map to open
-items in the backlog ([`../todo.md`](../todo.md)).
+These proposals are advisory. Open items that map to the active backlog live in
+[`../todo.md`](../todo.md).

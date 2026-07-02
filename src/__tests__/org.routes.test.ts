@@ -8,6 +8,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("../db", () => ({ getDb: vi.fn(), getReadDb: vi.fn() }));
 
+vi.mock("../db/repositories/orgs.repository", () => ({
+  createOrganizationWithOwner: vi.fn(),
+  transferOrganizationOwnership: vi.fn(),
+}));
+
 vi.mock("../logger", () => ({
   getLogger: () => ({ info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() }),
 }));
@@ -85,6 +90,35 @@ describe("org RBAC — authentication", () => {
 });
 
 describe("org RBAC — member tier (read)", () => {
+  it("uses the read replica connection for the org list", async () => {
+    const readDb = makeDb();
+    readDb.where.mockResolvedValueOnce([]);
+    const { getReadDb } = await import("../db");
+    vi.mocked(getReadDb).mockReturnValue(readDb as any);
+    const app = await getRouter();
+
+    const res = await req(app, "", { uid: MEMBER });
+
+    expect(res.status).toBe(200);
+    expect(getReadDb).toHaveBeenCalledTimes(1);
+  });
+
+  it("uses the read replica connection for org detail after membership check", async () => {
+    const readDb = makeDb();
+    db.limit.mockResolvedValueOnce(membership("member"));
+    readDb.limit.mockResolvedValueOnce([
+      { id: ORG, name: "Acme", slug: "acme", logoUrl: null, billingEmail: null },
+    ]);
+    const { getReadDb } = await import("../db");
+    vi.mocked(getReadDb).mockReturnValue(readDb as any);
+    const app = await getRouter();
+
+    const res = await req(app, `/${ORG}`, { uid: MEMBER });
+
+    expect(res.status).toBe(200);
+    expect(getReadDb).toHaveBeenCalledTimes(1);
+  });
+
   it("403s a non-member from reading an org", async () => {
     db.limit.mockResolvedValueOnce([]); // getMembership → none
     const app = await getRouter();
@@ -235,7 +269,13 @@ describe("org create", () => {
   });
 
   it("creates an org and returns 201", async () => {
-    db.transaction.mockResolvedValueOnce([{ id: ORG, name: "Acme", slug: "acme", ownerId: OWNER }]);
+    const { createOrganizationWithOwner } = await import("../db/repositories/orgs.repository");
+    vi.mocked(createOrganizationWithOwner).mockResolvedValueOnce({
+      id: ORG,
+      name: "Acme",
+      slug: "acme",
+      ownerId: OWNER,
+    } as any);
     const app = await getRouter();
     const res = await req(app, "", { method: "POST", uid: OWNER, body: { name: "Acme" } });
     expect(res.status).toBe(201);

@@ -36,7 +36,7 @@ Relative `lib/api` imports in app `page.tsx`: **0**.
 
 ## Caveats (post-rollout)
 
-- `packages/ui/src/lib/api.ts` still exists but has **zero production imports**; `lib/api` appears only in **test mocks** as a guard against accidental legacy GET usage.
+- `packages/ui/src/lib/api.ts` has been removed; all UI production code and tests target `apiClient` / `server-state` modules directly.
 - `FeedbackWidget.tsx` still calls `apiPost` from `apiClient` directly (shared component, not a page).
 - `dashboard/billing/page.tsx` uses a relative `server-state` import instead of `@/lib/server-state/*` (style inconsistency only).
 

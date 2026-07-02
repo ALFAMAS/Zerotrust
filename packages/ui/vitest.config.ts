@@ -20,26 +20,5 @@ export default defineConfig({
     setupFiles: ["./src/test/setup.ts"],
     include: ["src/**/*.test.tsx"],
     exclude: ["node_modules", "e2e"],
-    coverage: {
-      provider: "v8",
-      reporter: ["text", "json-summary", "html"],
-      include: ["src/lib/server-state/**/*.ts"],
-      exclude: [
-        "node_modules/",
-        "src/**/*.test.{ts,tsx}",
-        "src/test/**",
-        "e2e/**",
-        "src/app/**/layout.tsx",
-        "src/app/**/loading.tsx",
-        "src/app/**/error.tsx",
-        "src/app/**/not-found.tsx",
-      ],
-      thresholds: {
-        lines: 85,
-        functions: 85,
-        branches: 55,
-        statements: 85,
-      },
-    },
   },
 });

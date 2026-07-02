@@ -276,7 +276,7 @@ export async function createServer() {
     }
 
     try {
-      const { pingRedis } = await import("../services/ops/rateLimiter/redis.js");
+      const { pingRedis } = await import("../services/shared/rateLimiter/redis.js");
       components.cache = (await pingRedis()) ? "operational" : "degraded";
     } catch {
       components.cache = "degraded";
@@ -344,7 +344,7 @@ export async function createServer() {
               components.database = "down";
             }
             try {
-              const { pingRedis } = await import("../services/ops/rateLimiter/redis.js");
+              const { pingRedis } = await import("../services/shared/rateLimiter/redis.js");
               components.cache = (await pingRedis()) ? "operational" : "degraded";
             } catch {
               components.cache = "degraded";
@@ -426,7 +426,7 @@ export async function createServer() {
     };
 
     try {
-      const { pingRedis } = await import("../services/ops/rateLimiter/redis.js");
+      const { pingRedis } = await import("../services/shared/rateLimiter/redis.js");
       health.redis = (await pingRedis()) ? "ok" : "down";
     } catch {
       health.redis = "unconfigured";

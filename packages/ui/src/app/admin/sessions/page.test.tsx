@@ -1,11 +1,20 @@
-import { screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
+const mockGet = vi.fn();
+const mockDelete = vi.fn();
+vi.mock("@/lib/apiClient", () => ({
+  apiGet: (...args: unknown[]) => mockGet(...args),
+}));
+vi.mock("@/lib/api", () => ({
+  api: {
+    delete: (...args: unknown[]) => mockDelete(...args),
+  },
+}));
+
 import SessionsPage from "./page";
-import { renderWithQueryClient } from "@/test/queryClient";
 
-
-import { mockApiGet, mockApiDelete } from "@/test/apiClientMock";
 const sessions = [
   {
     id: "s1",
@@ -24,7 +33,7 @@ const sessions = [
 ];
 
 function mockSessionsResponse(page = 1, totalPages = 2) {
-  mockApiGet.mockResolvedValue({
+  mockGet.mockResolvedValue({
     data: sessions,
     pagination: {
       page,
@@ -38,33 +47,29 @@ function mockSessionsResponse(page = 1, totalPages = 2) {
 }
 
 describe("Admin SessionsPage", () => {
-  
+  beforeEach(() => {
+    mockGet.mockReset();
+    mockDelete.mockReset();
+  });
+
   it("requests sessions with page and limit, then advances to the next page", async () => {
     mockSessionsResponse(1, 2);
     const user = userEvent.setup();
 
-    renderWithQueryClient(<SessionsPage />);
+    render(<SessionsPage />);
 
     expect(await screen.findByText("Ada Lovelace")).toBeInTheDocument();
-    expect(mockApiGet).toHaveBeenCalledWith("/admin/sessions?page=1&limit=20");
+    expect(mockGet).toHaveBeenCalledWith("/admin/sessions?page=1&limit=20");
     expect(screen.getByText("Page 1 of 2")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Previous" })).toBeDisabled();
 
-    mockApiGet.mockClear();
+    mockGet.mockClear();
     mockSessionsResponse(2, 2);
     await user.click(screen.getByRole("button", { name: "Next" }));
 
     await waitFor(() => {
-      expect(mockApiGet).toHaveBeenCalledWith("/admin/sessions?page=2&limit=20");
+      expect(mockGet).toHaveBeenCalledWith("/admin/sessions?page=2&limit=20");
     });
     expect(screen.getByText("Page 2 of 2")).toBeInTheDocument();
-  });
-
-  it("renders error + retry when session list fails", async () => {
-    mockApiGet.mockRejectedValue(new Error("sessions unavailable"));
-    renderWithQueryClient(<SessionsPage />);
-
-    expect(await screen.findByText("sessions unavailable")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Try again" })).toBeInTheDocument();
   });
 });

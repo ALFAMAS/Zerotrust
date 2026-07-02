@@ -1,7 +1,7 @@
 import { desc, eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { z } from "zod";
-import { getDb } from "../../db";
+import { getDb, getReadDb } from "../../db";
 import { supportTicketMessagesTable, supportTicketsTable } from "../../db/schema";
 import { getLogger } from "../../logger";
 import { authMiddleware } from "../../middleware/auth";
@@ -74,7 +74,7 @@ router.get("/", async (c) => {
   const user = c.get("user");
   const all = c.req.query("all") === "true";
   try {
-    const db = getDb();
+    const db = getReadDb();
     const showAll = all && isAgent(user);
     const tickets = await db
       .select()
@@ -92,7 +92,7 @@ router.get("/:id", async (c) => {
   const user = c.get("user");
   const id = c.req.param("id");
   try {
-    const db = getDb();
+    const db = getReadDb();
     const [ticket] = await db
       .select()
       .from(supportTicketsTable)

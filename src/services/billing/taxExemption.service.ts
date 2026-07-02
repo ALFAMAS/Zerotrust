@@ -5,7 +5,7 @@
  */
 
 import { and, desc, eq } from "drizzle-orm";
-import { getDb } from "../../db/index";
+import { getDb, getReadDb } from "../../db/index";
 import { taxExemptionsTable } from "../../db/schema";
 import { getLogger } from "../../logger/index";
 import { isEuCountry, validateVatFormat } from "./globalization.service";
@@ -71,7 +71,7 @@ export async function submitTaxExemption(input: SubmitExemptionInput) {
 }
 
 export async function listTaxExemptions(orgId: string) {
-  const db = getDb();
+  const db = getReadDb();
   return db
     .select()
     .from(taxExemptionsTable)

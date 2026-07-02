@@ -3,13 +3,16 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import AccountPage from "@/app/dashboard/account/page";
-import { mockApiDelete, mockApiGetBlob, mockApiPost } from "@/test/apiClientMock";
 import {
   GDPR_ACCOUNT_PATH,
   GDPR_CANCEL_DELETION_PATH,
   GDPR_EXPORT_PATH,
   accountKeys,
 } from "./account";
+
+const mockApiGetBlob = vi.fn();
+const mockApiDelete = vi.fn();
+const mockApiPost = vi.fn();
 
 function renderWithQueryClient(ui: React.ReactElement) {
   const queryClient = new QueryClient({
@@ -25,6 +28,9 @@ function renderWithQueryClient(ui: React.ReactElement) {
 
 describe("account TanStack Query server state", () => {
   beforeEach(() => {
+    mockApiGetBlob.mockReset();
+    mockApiDelete.mockReset();
+    mockApiPost.mockReset();
     vi.spyOn(URL, "createObjectURL").mockReturnValue("blob:mock");
     vi.spyOn(URL, "revokeObjectURL").mockImplementation(() => {});
   });

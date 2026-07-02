@@ -65,6 +65,80 @@ deploy, confirm:
   production (no cross-origin access), so set it to your app/admin origins.
 - **Backups are encrypted** — set `BACKUP_ENCRYPTION_KEY_HEX` and
   `BACKUP_REQUIRE_ENCRYPTION=true` so a plaintext dump is never written.
+- **Background jobs have a single owner** — production API replicas should set
+  `WORKER_MODE=true` so schedulers and queue consumers are deferred; run exactly
+  one dedicated worker with `bun run src/worker.ts`. If a production API process
+  starts schedulers without `WORKER_MODE=true`, startup emits a warning because
+  every API replica would otherwise run the same intervals.
+
+### Production background-worker topology
+
+Use one of these two topologies deliberately:
+
+1. **Recommended clustered production:** API replicas set `WORKER_MODE=true` and
+   only initialize request/producer paths. One separate worker process runs
+   `bun run src/worker.ts` and owns BullMQ consumers plus scheduled jobs. Keep
+   the worker replica count at **1**; Redis leader locks are a guardrail, not a
+   substitute for intentional topology.
+2. **Single-process development / small deploy:** omit `WORKER_MODE=true`; the
+   API process starts schedulers in-process. This is fine for local dev and one
+   API replica, but production startup logs a warning so clustered deploys do
+   not accidentally duplicate background work.
+
+Example production process split:
+
+```bash
+# API replicas (N instances behind the load balancer)
+WORKER_MODE=true bun run src/api/server.ts
+
+# Dedicated background worker (exactly one instance)
+bun run src/worker.ts
+```
+
+---
+
+## Read replica routing
+
+When `DATABASE_URL_READ_REPLICA` is set, read-heavy API handlers call
+`getReadDb()` instead of the primary connection. Mutations, auth/session
+validation, idempotent webhook claims, and any read that must reflect a write
+from the same request stay on `getDb()`.
+
+### What is routed to the replica
+
+- Admin list/detail/analytics: users, sessions, roles, JIT grants, audit logs,
+  feedback, segments, attachments, revenue dashboard, CSV exports
+- User/org dashboard reads: org lists, members, invites, support tickets, API
+  keys, notifications, billing subscription/usage summaries, wallet transaction
+  history, search (Postgres FTS fallback)
+- Compliance/analytics reads: access-review lists, anomaly baselines, audit
+  chain verification, webhook delivery logs
+
+### Replica lag expectations
+
+Managed Postgres replicas (Neon, RDS, Cloud SQL, etc.) typically lag **under
+1 second** under normal load. Plan for these bounds when choosing replica-backed
+endpoints:
+
+| Scenario | Expected lag | User-visible effect |
+| --- | --- | --- |
+| Steady state | 0–500 ms | Admin dashboards and lists may omit rows written in the last sub-second |
+| Write burst / bulk import | 1–5 s | New users, tickets, or notifications can appear briefly stale in list views |
+| Replica catch-up / failover | up to 30 s | Treat replica health `degraded`/`unhealthy` in `/health` as a signal to fall back operationally |
+
+**Acceptable stale reads:** paginated admin lists, analytics counters, CSV
+exports, org member lists, notification feeds, and billing usage summaries.
+
+**Stay on primary:** login/session validation, token refresh, password/MFA
+changes, webhook idempotency claims, wallet auto-create on first read, and SOC 2
+control seeding (write-on-first-read).
+
+When no replica URL is configured, `getReadDb()` transparently returns the
+primary connection — local dev and single-node deploys require no code changes.
+
+Optional: set `DB_READ_REPLICA_STRICT=true` so the postgres driver opens replica
+connections in `default_transaction_read_only` mode (writes fail fast at the
+driver layer).
 
 ---
 

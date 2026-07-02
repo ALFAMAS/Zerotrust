@@ -1,5 +1,5 @@
 import { desc, eq } from "drizzle-orm";
-import { getDb } from "../../db/index";
+import { getDb, getReadDb } from "../../db/index";
 import {
   spendFromWallet as spendFromWalletRepo,
   topUpWallet as topUpWalletRepo,
@@ -115,7 +115,7 @@ export async function spendFromWallet(
 }
 
 export async function getWalletTransactions(userId: string, limit = 30, offset = 0) {
-  const db = getDb();
+  const db = getReadDb();
   try {
     return await db
       .select()
@@ -134,7 +134,7 @@ export async function getWalletTransactions(userId: string, limit = 30, offset =
 }
 
 export async function countWalletTransactions(userId: string): Promise<number> {
-  const db = getDb();
+  const db = getReadDb();
   try {
     return await countRows(db, walletTransactionsTable, eq(walletTransactionsTable.userId, userId));
   } catch (err) {

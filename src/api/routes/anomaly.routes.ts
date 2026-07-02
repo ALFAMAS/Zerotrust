@@ -1,7 +1,7 @@
 import { desc } from "drizzle-orm";
 import type { Context } from "hono";
 import { Hono } from "hono";
-import { getDb } from "../../db/index.js";
+import { getReadDb } from "../../db/index.js";
 import { userBehaviorBaselinesTable } from "../../db/schema.js";
 import { getLogger } from "../../logger/index.js";
 import { authMiddleware } from "../../middleware/auth.js";
@@ -29,7 +29,7 @@ router.get("/baselines", async (c) => {
   if (!isAdmin(c)) return c.json({ error: "FORBIDDEN" }, 403);
   try {
     const { page, limit, offset } = parsePaginatedQuery(c.req.query());
-    const db = getDb();
+    const db = getReadDb();
     const [rows, total] = await Promise.all([
       db
         .select()

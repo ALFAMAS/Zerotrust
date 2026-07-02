@@ -1,6 +1,6 @@
 import crypto from "node:crypto";
 import { eq } from "drizzle-orm";
-import { getDb } from "../../db/index.js";
+import { getDb, getReadDb } from "../../db/index.js";
 import { userBehaviorBaselinesTable, usersTable } from "../../db/schema.js";
 import { getLogger } from "../../logger/index.js";
 
@@ -47,7 +47,7 @@ export interface BehaviorObservation {
 }
 
 export async function getBaseline(userId: string) {
-  const db = getDb();
+  const db = getReadDb();
   const rows = await db
     .select()
     .from(userBehaviorBaselinesTable)

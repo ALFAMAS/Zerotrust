@@ -5,7 +5,7 @@
  */
 
 import { eq } from "drizzle-orm";
-import { getDb } from "../db/index.js";
+import { getDb, getReadDb } from "../db/index.js";
 import { tenantsTable } from "../db/schema.js";
 
 export interface TenantSettings {
@@ -91,12 +91,12 @@ function rowToTenant(row: typeof tenantsTable.$inferSelect): Tenant {
 export async function getTenant(id: string): Promise<Tenant | undefined> {
   // Guard: querying a uuid column with a non-uuid string errors in Postgres.
   if (!UUID_RE.test(id)) return undefined;
-  const rows = await getDb().select().from(tenantsTable).where(eq(tenantsTable.id, id)).limit(1);
+  const rows = await getReadDb().select().from(tenantsTable).where(eq(tenantsTable.id, id)).limit(1);
   return rows[0] ? rowToTenant(rows[0]) : undefined;
 }
 
 export async function getTenantBySlug(slug: string): Promise<Tenant | undefined> {
-  const rows = await getDb()
+  const rows = await getReadDb()
     .select()
     .from(tenantsTable)
     .where(eq(tenantsTable.slug, slug))
@@ -105,7 +105,7 @@ export async function getTenantBySlug(slug: string): Promise<Tenant | undefined>
 }
 
 export async function getAllTenants(): Promise<Tenant[]> {
-  const rows = await getDb().select().from(tenantsTable);
+  const rows = await getReadDb().select().from(tenantsTable);
   return rows.map(rowToTenant);
 }
 
@@ -130,8 +130,14 @@ export async function updateTenant(
   id: string,
   data: UpdateTenantData
 ): Promise<Tenant | undefined> {
-  const existing = await getTenant(id);
-  if (!existing) return undefined;
+  if (!UUID_RE.test(id)) return undefined;
+  const [existingRow] = await getDb()
+    .select()
+    .from(tenantsTable)
+    .where(eq(tenantsTable.id, id))
+    .limit(1);
+  if (!existingRow) return undefined;
+  const existing = rowToTenant(existingRow);
 
   const patch: Partial<typeof tenantsTable.$inferInsert> = { updatedAt: new Date() };
   if (data.name !== undefined) patch.name = data.name;

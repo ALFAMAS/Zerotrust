@@ -19,7 +19,7 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
 | Migrations | 28 (latest: `0027_webhook_endpoints`) |
 | Route mounts in `server.ts` | 30 |
 | UI pages | 47 |
-| Tests | 850+ (100+ files; 196 UI component/integration) |
+| Tests | 850 (102 files) |
 | ADRs | 7 |
 | Stack | Hono 4 · TypeScript 6 · Bun · Next.js 16 · Drizzle ORM · PostgreSQL · Redis |
 
@@ -431,18 +431,6 @@ follow-ups (**E2**, E4–E6 info debt) remain in [`todo.md`](./todo.md).
   `passkey.routes.test.ts` 18, `verification.routes.test.ts` 18). Exercises real
   Hono handlers with mocked DB / settings / `@simplewebauthn/server` / `otpauth`.
   Full suite: **826 tests (94 files)**. Build green.
-
-- **P3.1 — UI component/integration test coverage toward 85%:** Expanded
-  `packages/ui` page and server-state tests for high-traffic flows (dashboard
-  home, profile, security/MFA, org settings, admin users/sessions/audit/alerts,
-  compliance, regions, billing, wallet, notifications). Centralized
-  `apiClient` mocks in `packages/ui/src/test/apiClientMock.ts` (wired from
-  `setup.ts`). Coverage gate in `packages/ui/vitest.config.ts` enforces ≥85%
-  lines/functions/statements on `src/lib/server-state/**` (branches ratchet 55%).
-  Root `vitest.config.ts` API ratchet bumped +1 pt (61/59/55/60). Verification:
-  `bun run --cwd packages/ui test` → **196 tests / 35 files**;
-  `bun run --cwd packages/ui test:coverage` → **89.7% lines**, 88.7% functions,
-  88.2% statements (gate green). `docs/maintenance-scorecard.md` §3 updated.
 
 - **Pagination standardization:** Shared `parsePaginatedQuery()` + `paginated()`
   envelope across 15+ list endpoints.

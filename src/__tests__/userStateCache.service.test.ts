@@ -12,7 +12,7 @@ vi.mock("../logger", () => ({
   getLogger: () => ({ debug: vi.fn(), error: vi.fn(), info: vi.fn(), warn: vi.fn() }),
 }));
 
-vi.mock("../services/ops/rateLimiter/redis", () => ({
+vi.mock("../services/shared/rateLimiter/redis", () => ({
   getRedis: () => redisMock.client,
 }));
 
