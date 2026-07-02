@@ -42,6 +42,9 @@ Tracks the frontend server-state migration from ad-hoc `useEffect` + local loadi
 | `/admin/settings/general` | [x] | General app settings load/save moved to TanStack Query. Save mutation updates settings cache and invalidates the settings domain. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/settings.test.tsx` |
 | `/admin/users/[id]` | [x] | Admin user detail moved to TanStack Query. Status/segment mutations use optimistic detail cache updates with rollback; force-logout and delete invalidate targeted keys. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/adminUsers.test.tsx` |
 | `NotificationBell` (shared) | [x] | Unread count + preview list moved to TanStack Query. Mark-read/mark-all-read use optimistic cache updates with rollback; SSE bumps unread-count cache. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/notifications.test.tsx` |
+| `LiveChatWidget` (shared) | [x] | Third-party identity preload uses `useAuthMeQuery`; native fallback uses support ticket mutations. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/auth.test.tsx` |
+| `VerifyEmailBanner` (shared) | [x] | Current-user check + resend verification moved to `auth.ts` TanStack Query hooks. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/auth.test.tsx` |
+| `SetupChecklist` (shared) | [x] | Onboarding-complete mutation moved to `auth.ts`; user prop unchanged (parent still supplies `/auth/me`). | `NODE_ENV=test bun run --cwd packages/ui test -- src/components/SetupChecklist.test.tsx` |
 
 ## Migration backlog
 
@@ -56,11 +59,11 @@ Prioritize pages with real server data, manual `loading/error` state, and repeat
 | Component | API call(s) | Priority |
 | --- | --- | --- |
 | `NotificationBell.tsx` | notifications | High — visible on every page | [x] |
-| `LiveChatWidget.tsx` | `GET /auth/me` | Medium |
+| `LiveChatWidget.tsx` | `GET /auth/me` + support tickets | Medium | [x] |
 | `LocaleSwitcher.tsx` | `PATCH /auth/me` | Medium |
-| `VerifyEmailBanner.tsx` | `POST /auth/verify-email/resend` | Medium |
+| `VerifyEmailBanner.tsx` | `GET /auth/me` + resend | Medium | [x] |
 | `NpsSurveyPrompt.tsx` | `POST /auth/me/nps` | Low |
-| `SetupChecklist.tsx` | `POST /auth/me/onboarding-complete` | Low |
+| `SetupChecklist.tsx` | onboarding-complete mutation | Low | [x] |
 
 ## Per-page checklist
 

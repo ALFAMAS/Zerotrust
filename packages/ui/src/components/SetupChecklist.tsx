@@ -2,16 +2,17 @@
 
 import { Check, Trophy } from "lucide-react";
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { api } from "@/lib/api";
+import { useOnboardingCompleteMutation } from "@/lib/server-state/auth";
+import type { AuthMe } from "@/lib/server-state/types";
 
 interface ChecklistItem {
   id: string;
   label: string;
   href: string;
-  check: (user: any) => boolean;
+  check: (user: AuthMe) => boolean;
 }
 
 const ITEMS: ChecklistItem[] = [
@@ -43,20 +44,13 @@ const ITEMS: ChecklistItem[] = [
 
 const DISMISS_KEY = "za_setup_checklist_dismissed";
 
-export default function SetupChecklist({ user }: { user: any }) {
+export default function SetupChecklist({ user }: { user: AuthMe | null }) {
   const [dismissed, setDismissed] = useState(false);
   const [celebrated, setCelebrated] = useState(false);
+  const { mutate: markOnboardingComplete } = useOnboardingCompleteMutation();
 
   useEffect(() => {
     if (localStorage.getItem(DISMISS_KEY) === "1") setDismissed(true);
-  }, []);
-
-  const fireOnboardingComplete = useCallback(async () => {
-    try {
-      await api.post("/auth/me/onboarding-complete", {});
-    } catch {
-      // non-fatal
-    }
   }, []);
 
   const completed = user ? ITEMS.filter((i) => i.check(user)) : [];
@@ -68,9 +62,9 @@ export default function SetupChecklist({ user }: { user: any }) {
   useEffect(() => {
     if (allDone && !celebrated) {
       setCelebrated(true);
-      void fireOnboardingComplete();
+      markOnboardingComplete();
     }
-  }, [allDone, celebrated, fireOnboardingComplete]);
+  }, [allDone, celebrated, markOnboardingComplete]);
 
   if (!user || dismissed) return null;
 

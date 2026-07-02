@@ -292,6 +292,54 @@ export interface NotificationsUnreadCount {
   count: number;
 }
 
+export interface AuthMeMfa {
+  totp?: {
+    enabled?: boolean;
+    verifiedAt?: string | null;
+    backupCodesRemaining?: number;
+  };
+  webauthn?: { enabled?: boolean };
+}
+
+export interface AuthMePasskey {
+  credentialId: string;
+  name: string;
+  deviceType?: string;
+  aaguid?: string;
+  backedUp?: boolean;
+  createdAt?: string;
+  lastUsedAt?: string | null;
+}
+
+export interface AuthMe {
+  id: string;
+  email: string;
+  username?: string | null;
+  displayName?: string;
+  avatarUrl?: string | null;
+  roles?: string[];
+  status?: string;
+  phone?: string | null;
+  createdAt?: string;
+  lastLoginAt?: string | null;
+  emailVerified: boolean;
+  emailVerifiedAt?: string | null;
+  locale?: string;
+  metadata?: Record<string, unknown>;
+  attributes?: { emailVerified?: boolean };
+  mfa?: AuthMeMfa;
+  passkeys?: AuthMePasskey[];
+  oauthProviders?: Array<{ provider: string; email?: string; connectedAt?: string }>;
+}
+
+export interface PatchAuthMeInput {
+  displayName?: string;
+  avatarUrl?: string | null;
+  phone?: string | null;
+  username?: string | null;
+  locale?: string;
+}
+
 export type AdminUserStatus = "active" | "suspended" | "deleted" | string;
 export type CustomerSegment = "champion" | "at_risk" | "expansion" | "new";
 

@@ -6,8 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { brand } from "@/config/brand";
-import { api } from "@/lib/api";
 import { getToken } from "@/lib/auth";
+import { useAuthMeQuery } from "@/lib/server-state/auth";
+import {
+  useCreateSupportTicketMutation,
+  useReplySupportTicketMutation,
+} from "@/lib/server-state/support";
 
 /**
  * Native live chat fallback — rendered when no third-party provider is configured.
@@ -28,81 +32,63 @@ export default function LiveChatWidget() {
 /** Third-party widget loader (existing behavior) */
 function ThirdPartyChatWidget() {
   const { chatProvider, chatId } = brand;
+  const hasToken = typeof window !== "undefined" && !!getToken();
+  const { data: me, isError, isFetched } = useAuthMeQuery(hasToken);
+  const identityReady = !hasToken || isFetched || isError;
+  const identity = me ? { name: me.displayName, email: me.email } : {};
 
   useEffect(() => {
-    if (chatProvider === "none" || !chatId) return;
+    if (chatProvider === "none" || !chatId || !identityReady) return;
     if (typeof document === "undefined") return;
     if (document.getElementById("zerotrust-livechat")) return;
 
-    let cancelled = false;
+    const w = window as any;
 
-    async function getIdentity(): Promise<{ name?: string; email?: string }> {
-      if (!getToken()) return {};
-      try {
-        const me = await api.get<{ displayName?: string; email?: string }>("/auth/me");
-        return { name: me.displayName, email: me.email };
-      } catch {
-        return {};
-      }
-    }
-
-    function inject(identity: { name?: string; email?: string }) {
-      if (cancelled) return;
-      const w = window as any;
-
-      if (chatProvider === "crisp") {
-        w.$crisp = w.$crisp || [];
-        w.CRISP_WEBSITE_ID = chatId;
-        if (identity.email) w.$crisp.push(["set", "user:email", [identity.email]]);
-        if (identity.name) w.$crisp.push(["set", "user:nickname", [identity.name]]);
-        const s = document.createElement("script");
-        s.id = "zerotrust-livechat";
-        s.src = "https://client.crisp.chat/l.js";
-        s.async = true;
-        document.head.appendChild(s);
-      } else if (chatProvider === "intercom") {
-        w.intercomSettings = {
-          app_id: chatId,
-          name: identity.name,
-          email: identity.email,
-        };
-        const s = document.createElement("script");
-        s.id = "zerotrust-livechat";
-        s.async = true;
-        s.src = `https://widget.intercom.io/widget/${chatId}`;
-        s.onload = () => {
-          try {
-            w.Intercom?.("boot", w.intercomSettings);
-          } catch {
-            /* ignore */
-          }
-        };
-        document.head.appendChild(s);
-      } else if (chatProvider === "tawk") {
-        const [propertyId, widgetId] = chatId.split("/");
-        if (!propertyId || !widgetId) return;
-        w.Tawk_API = w.Tawk_API || {};
-        if (identity.name || identity.email) {
-          w.Tawk_API.visitor = { name: identity.name, email: identity.email };
+    if (chatProvider === "crisp") {
+      w.$crisp = w.$crisp || [];
+      w.CRISP_WEBSITE_ID = chatId;
+      if (identity.email) w.$crisp.push(["set", "user:email", [identity.email]]);
+      if (identity.name) w.$crisp.push(["set", "user:nickname", [identity.name]]);
+      const s = document.createElement("script");
+      s.id = "zerotrust-livechat";
+      s.src = "https://client.crisp.chat/l.js";
+      s.async = true;
+      document.head.appendChild(s);
+    } else if (chatProvider === "intercom") {
+      w.intercomSettings = {
+        app_id: chatId,
+        name: identity.name,
+        email: identity.email,
+      };
+      const s = document.createElement("script");
+      s.id = "zerotrust-livechat";
+      s.async = true;
+      s.src = `https://widget.intercom.io/widget/${chatId}`;
+      s.onload = () => {
+        try {
+          w.Intercom?.("boot", w.intercomSettings);
+        } catch {
+          /* ignore */
         }
-        w.Tawk_LoadStart = new Date();
-        const s = document.createElement("script");
-        s.id = "zerotrust-livechat";
-        s.async = true;
-        s.src = `https://embed.tawk.to/${propertyId}/${widgetId}`;
-        s.charset = "UTF-8";
-        s.setAttribute("crossorigin", "*");
-        document.head.appendChild(s);
+      };
+      document.head.appendChild(s);
+    } else if (chatProvider === "tawk") {
+      const [propertyId, widgetId] = chatId.split("/");
+      if (!propertyId || !widgetId) return;
+      w.Tawk_API = w.Tawk_API || {};
+      if (identity.name || identity.email) {
+        w.Tawk_API.visitor = { name: identity.name, email: identity.email };
       }
+      w.Tawk_LoadStart = new Date();
+      const s = document.createElement("script");
+      s.id = "zerotrust-livechat";
+      s.async = true;
+      s.src = `https://embed.tawk.to/${propertyId}/${widgetId}`;
+      s.charset = "UTF-8";
+      s.setAttribute("crossorigin", "*");
+      document.head.appendChild(s);
     }
-
-    void getIdentity()
-      .then(inject)
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  }, [identity.email, identity.name, identityReady]);
 
   return null;
 }
@@ -112,8 +98,10 @@ function NativeChatWidget() {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Array<{ role: "user" | "system"; text: string }>>([]);
   const [input, setInput] = useState("");
-  const [sending, setSending] = useState(false);
   const [ticketId, setTicketId] = useState<string | null>(null);
+  const createTicket = useCreateSupportTicketMutation();
+  const replyTicket = useReplySupportTicketMutation();
+  const sending = createTicket.isPending || replyTicket.isPending;
   const bottomRef = useRef<HTMLDivElement>(null);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: data loader intentionally runs on mount / when the route key changes; it closes over stable state setters
@@ -127,12 +115,10 @@ function NativeChatWidget() {
     const text = input.trim();
     setInput("");
     setMessages((prev) => [...prev, { role: "user", text }]);
-    setSending(true);
 
     try {
       if (!ticketId) {
-        // Create a new support ticket
-        const res = await api.post<{ ticket: { id: string } }>("/support", {
+        const res = await createTicket.mutateAsync({
           subject: text.slice(0, 80),
           message: text,
         });
@@ -145,8 +131,7 @@ function NativeChatWidget() {
           },
         ]);
       } else {
-        // Add message to existing ticket
-        await api.post(`/support/${ticketId}/messages`, { body: text });
+        await replyTicket.mutateAsync({ id: ticketId, body: text });
         setMessages((prev) => [
           ...prev,
           { role: "system", text: "Message sent. An agent will respond soon." },
@@ -157,8 +142,6 @@ function NativeChatWidget() {
         ...prev,
         { role: "system", text: "Failed to send. Please try again." },
       ]);
-    } finally {
-      setSending(false);
     }
   }
 
