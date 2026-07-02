@@ -12,7 +12,7 @@ vi.mock("../logger", () => ({
   getLogger: () => ({ debug: vi.fn(), error: vi.fn(), info: vi.fn(), warn: vi.fn() }),
 }));
 
-vi.mock("../services/rateLimiter/redis", () => ({
+vi.mock("../services/ops/rateLimiter/redis", () => ({
   getRedis: () => redisMock.client,
 }));
 
@@ -54,7 +54,7 @@ describe("user state cache", () => {
 
   it("stores user state in Redis with a 5 second TTL", async () => {
     const { USER_STATE_CACHE_TTL_SECONDS, cacheUserState } = await import(
-      "../services/userStateCache.service"
+      "../services/auth/userStateCache.service"
     );
     const user = makeUser();
 
@@ -72,7 +72,7 @@ describe("user state cache", () => {
   it("reads cached user state and hydrates date fields", async () => {
     const user = makeUser();
     redisMock.client.get.mockResolvedValueOnce(JSON.stringify(user));
-    const { getUserCached } = await import("../services/userStateCache.service");
+    const { getUserCached } = await import("../services/auth/userStateCache.service");
 
     const cached = await getUserCached(user.id);
 
@@ -83,7 +83,7 @@ describe("user state cache", () => {
   });
 
   it("invalidates cached user state explicitly", async () => {
-    const { invalidateUserCache } = await import("../services/userStateCache.service");
+    const { invalidateUserCache } = await import("../services/auth/userStateCache.service");
     const userId = "00000000-0000-0000-0000-000000000001";
 
     await invalidateUserCache(userId);

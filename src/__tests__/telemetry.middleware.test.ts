@@ -56,19 +56,19 @@ vi.mock("../oauth/provider.factory", () => ({
   getProviderAdapter: vi.fn(),
 }));
 
-vi.mock("../services/passwordBreach.service", () => ({
+vi.mock("../services/auth/passwordBreach.service", () => ({
   isBreachCheckEnabled: () => false,
   checkPasswordBreached: vi.fn().mockResolvedValue({ breached: false, count: 0 }),
   rejectIfBreached: vi.fn().mockResolvedValue(null),
 }));
 
-vi.mock("../services/accountTakeover.service", () => ({
+vi.mock("../services/auth/accountTakeover.service", () => ({
   recordAndRespond: vi.fn().mockResolvedValue(false),
   recordSensitiveChange: vi.fn().mockResolvedValue(undefined),
   assessTakeoverRisk: vi.fn().mockResolvedValue({ flagged: false, recentEvents: [] }),
 }));
 
-vi.mock("../services/loginNotification.service", () => ({
+vi.mock("../services/auth/loginNotification.service", () => ({
   notifyIfNewDevice: vi.fn().mockResolvedValue(undefined),
 }));
 

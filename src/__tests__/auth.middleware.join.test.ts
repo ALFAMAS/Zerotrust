@@ -33,7 +33,7 @@ vi.mock("../logger", () => ({
   getLogger: () => ({ debug: vi.fn(), error: vi.fn(), info: vi.fn(), warn: vi.fn() }),
 }));
 
-vi.mock("../services/token.service", () => ({
+vi.mock("../services/auth/token.service", () => ({
   TokenService: vi.fn().mockImplementation(function TokenService() {
     return {
       init: vi.fn().mockResolvedValue(undefined),
@@ -42,7 +42,7 @@ vi.mock("../services/token.service", () => ({
   }),
 }));
 
-vi.mock("../services/sessionPolicy.service", () => ({
+vi.mock("../services/auth/sessionPolicy.service", () => ({
   getEffectiveSessionPolicy: vi.fn().mockResolvedValue({
     idleTimeoutSeconds: 3600,
     maxConcurrentSessions: 0,
@@ -55,7 +55,7 @@ vi.mock("../middleware/sessionControl", () => ({
   revokeSession: vi.fn().mockResolvedValue(undefined),
 }));
 
-vi.mock("../services/userStateCache.service", () => ({
+vi.mock("../services/auth/userStateCache.service", () => ({
   cacheUserState: cacheMock.cacheUserState,
   getUserCached: cacheMock.getUserCached,
 }));

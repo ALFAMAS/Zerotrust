@@ -9,7 +9,7 @@ import {
   getSoc2Readiness,
   updateRiskStatus,
   updateSoc2Control,
-} from "../../services/compliance.service";
+} from "../../services/compliance/compliance.service";
 import { internalError } from "../../shared/httpErrors";
 import { paginated, parsePaginatedQuery } from "../../shared/pagination";
 import type { HonoEnv } from "../../shared/types";

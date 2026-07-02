@@ -1,9 +1,10 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { NotificationBell } from "@/components/NotificationBell";
 import NotificationSettingsPage from "@/app/dashboard/notifications/page";
+import { mockApiGet, mockApiPost, mockApiPut } from "@/test/apiClientMock";
 import {
   NOTIFICATIONS_PATH,
   NOTIFICATIONS_PREFERENCES_PATH,
@@ -13,21 +14,6 @@ import {
   notificationKeys,
 } from "./notifications";
 
-const mockApiGet = vi.fn();
-const mockApiPost = vi.fn();
-const mockApiPut = vi.fn();
-const mockLegacyGet = vi.fn();
-vi.mock("@/lib/apiClient", () => ({
-  apiGet: (...args: unknown[]) => mockApiGet(...args),
-  apiPost: (...args: unknown[]) => mockApiPost(...args),
-  apiPut: (...args: unknown[]) => mockApiPut(...args),
-}));
-vi.mock("@/lib/api", () => ({
-  api: {
-    get: (...args: unknown[]) => mockLegacyGet(...args),
-    post: vi.fn(),
-  },
-}));
 vi.mock("@/lib/format", () => ({
   useFormat: () => ({
     relativeTime: () => "just now",
@@ -79,10 +65,6 @@ function mockNotificationsSuccess(unreadCount = 1) {
 
 describe("notifications TanStack Query server state", () => {
   beforeEach(() => {
-    mockApiGet.mockReset();
-    mockApiPost.mockReset();
-    mockApiPut.mockReset();
-    mockLegacyGet.mockReset();
     vi.stubGlobal("EventSource", class {
       addEventListener() {}
       close() {}
@@ -104,7 +86,6 @@ describe("notifications TanStack Query server state", () => {
 
     expect(await screen.findByText("2")).toBeInTheDocument();
     expect(mockApiGet).toHaveBeenCalledWith(NOTIFICATIONS_UNREAD_COUNT_PATH);
-    expect(mockLegacyGet).not.toHaveBeenCalled();
   });
 
   it("loads notification list when dropdown opens", async () => {
@@ -139,6 +120,23 @@ describe("notifications TanStack Query server state", () => {
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: notificationKeys.all });
   });
 
+  it("marks a single notification read when a preview item is clicked", async () => {
+    mockNotificationsSuccess();
+    mockApiPost.mockResolvedValue({ success: true });
+
+    const user = userEvent.setup();
+    renderWithQueryClient(<NotificationBell />);
+
+    await screen.findByText("1");
+    await user.click(screen.getByRole("button", { name: "Notifications" }));
+    await screen.findByText("Welcome");
+    await user.click(screen.getByText("Welcome"));
+
+    await waitFor(() =>
+      expect(mockApiPost).toHaveBeenCalledWith(buildNotificationReadPath("notif_1"))
+    );
+  });
+
   it("renders notification preferences through apiClient/TanStack Query, not legacy api.get", async () => {
     mockApiGet.mockImplementation((path: string) => {
       if (path === NOTIFICATIONS_PREFERENCES_PATH) {
@@ -152,7 +150,6 @@ describe("notifications TanStack Query server state", () => {
     expect(screen.getByText("Loading preferences…")).toBeInTheDocument();
     expect(await screen.findByText("Email fallback")).toBeInTheDocument();
     expect(mockApiGet).toHaveBeenCalledWith(NOTIFICATIONS_PREFERENCES_PATH);
-    expect(mockLegacyGet).not.toHaveBeenCalled();
   });
 
   it("updates notification preferences via mutation and invalidates preferences cache", async () => {
@@ -168,9 +165,9 @@ describe("notifications TanStack Query server state", () => {
     const { queryClient } = renderWithQueryClient(<NotificationSettingsPage />);
     const invalidateSpy = vi.spyOn(queryClient, "invalidateQueries");
 
-    await screen.findByText("Email fallback");
-    const toggles = screen.getAllByRole("checkbox");
-    await user.click(toggles[1]);
+    await screen.findByText("Email me when I'm away");
+    const emailRow = screen.getByText("Email me when I'm away").closest(".flex")!;
+    await user.click(within(emailRow).getByRole("switch"));
 
     await waitFor(() =>
       expect(mockApiPut).toHaveBeenCalledWith(NOTIFICATIONS_PREFERENCES_PATH, {

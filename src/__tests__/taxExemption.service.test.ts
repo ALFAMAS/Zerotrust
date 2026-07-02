@@ -12,7 +12,7 @@ import {
   listTaxExemptions,
   setExemptionStatus,
   submitTaxExemption,
-} from "../services/taxExemption.service";
+} from "../services/billing/taxExemption.service";
 
 const getDbMock = getDb as unknown as ReturnType<typeof vi.fn>;
 beforeEach(() => getDbMock.mockReset());

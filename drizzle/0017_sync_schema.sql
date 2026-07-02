@@ -178,16 +178,7 @@ CREATE TABLE "passkeys" (
 	CONSTRAINT "passkeys_credential_id_unique" UNIQUE("credential_id")
 );
 --> statement-breakpoint
-CREATE TABLE "points_ledger" (
-	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"user_id" uuid NOT NULL,
-	"amount" integer NOT NULL,
-	"balance" integer NOT NULL,
-	"reason" text NOT NULL,
-	"description" text,
-	"metadata" jsonb,
-	"created_at" timestamp with time zone DEFAULT now() NOT NULL
-);
+
 --> statement-breakpoint
 CREATE TABLE "presence" (
 	"user_id" uuid PRIMARY KEY NOT NULL,
@@ -221,48 +212,6 @@ CREATE TABLE "redemptions_catalog" (
 	"active" boolean DEFAULT true NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	CONSTRAINT "redemptions_catalog_key_unique" UNIQUE("key")
-);
---> statement-breakpoint
-CREATE TABLE "redemptions" (
-	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"user_id" uuid NOT NULL,
-	"catalog_id" uuid NOT NULL,
-	"points_spent" integer NOT NULL,
-	"status" text DEFAULT 'completed' NOT NULL,
-	"fulfilled_at" timestamp with time zone,
-	"metadata" jsonb,
-	"created_at" timestamp with time zone DEFAULT now() NOT NULL
-);
---> statement-breakpoint
-CREATE TABLE "referral_tracking" (
-	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"referral_id" uuid NOT NULL,
-	"referred_user_id" uuid,
-	"ip_address" text,
-	"user_agent" text,
-	"utm_source" text,
-	"utm_medium" text,
-	"utm_campaign" text,
-	"status" text DEFAULT 'clicked' NOT NULL,
-	"clicked_at" timestamp with time zone DEFAULT now() NOT NULL,
-	"signed_up_at" timestamp with time zone,
-	"converted_at" timestamp with time zone,
-	"created_at" timestamp with time zone DEFAULT now() NOT NULL
-);
---> statement-breakpoint
-CREATE TABLE "referrals" (
-	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"referrer_user_id" uuid NOT NULL,
-	"code" text NOT NULL,
-	"slug" text NOT NULL,
-	"clicks" integer DEFAULT 0 NOT NULL,
-	"signups" integer DEFAULT 0 NOT NULL,
-	"conversions" integer DEFAULT 0 NOT NULL,
-	"rewards_earned" integer DEFAULT 0 NOT NULL,
-	"active" boolean DEFAULT true NOT NULL,
-	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
-	CONSTRAINT "referrals_code_unique" UNIQUE("code"),
-	CONSTRAINT "referrals_slug_unique" UNIQUE("slug")
 );
 --> statement-breakpoint
 CREATE TABLE "risk_assessments" (
@@ -388,18 +337,6 @@ CREATE TABLE "tenants" (
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
 	CONSTRAINT "tenants_slug_unique" UNIQUE("slug")
-);
---> statement-breakpoint
-CREATE TABLE "tiers" (
-	"key" text PRIMARY KEY NOT NULL,
-	"name" text NOT NULL,
-	"description" text,
-	"min_points" integer NOT NULL,
-	"multiplier" integer DEFAULT 100 NOT NULL,
-	"perks" jsonb DEFAULT ARRAY[]::text[] NOT NULL,
-	"color" text,
-	"icon" text,
-	"created_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "trusted_devices" (

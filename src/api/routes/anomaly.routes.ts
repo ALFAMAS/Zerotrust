@@ -9,7 +9,7 @@ import {
   getBaseline,
   resetBaseline,
   scoreAnomaly,
-} from "../../services/anomalyDetection.service.js";
+} from "../../services/auth/anomalyDetection.service.js";
 import { countRows } from "../../shared/dbCount.js";
 import { paginated, parsePaginatedQuery } from "../../shared/pagination.js";
 import { hasRole } from "../../shared/roles.js";

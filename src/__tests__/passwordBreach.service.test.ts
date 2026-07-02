@@ -10,7 +10,7 @@ vi.mock("../logger", () => ({
   }),
 }));
 
-import { checkPasswordBreached, rejectIfBreached } from "../services/passwordBreach.service";
+import { checkPasswordBreached, rejectIfBreached } from "../services/auth/passwordBreach.service";
 
 function hibpResponseFor(password: string, count: number): string {
   const sha1 = crypto.createHash("sha1").update(password).digest("hex").toUpperCase();

@@ -24,7 +24,7 @@ vi.mock("../mfa", () => ({
 }));
 
 const sendOtpEmail = vi.fn().mockResolvedValue(undefined);
-vi.mock("../services/email.service", () => ({
+vi.mock("../services/notifications/email.service", () => ({
   sendOtpEmail: (...a: unknown[]) => sendOtpEmail(...a),
 }));
 

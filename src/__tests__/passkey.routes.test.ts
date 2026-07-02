@@ -31,7 +31,7 @@ vi.mock("../models/settings.model", () => ({
 
 const getOrgSecurityPolicy = vi.fn();
 const toAttestationPolicy = vi.fn((p: unknown) => p);
-vi.mock("../services/orgSecurityPolicy.service", () => ({
+vi.mock("../services/auth/orgSecurityPolicy.service", () => ({
   getOrgSecurityPolicy: (...a: unknown[]) => getOrgSecurityPolicy(...a),
   toAttestationPolicy: (...a: unknown[]) => toAttestationPolicy(...a),
 }));
@@ -52,7 +52,7 @@ const verifyAccessToken = vi
   .fn()
   .mockResolvedValue({ jti: "jti-1", exp: Math.floor(Date.now() / 1000) + 3600 });
 const signRefreshToken = vi.fn().mockResolvedValue("refresh-token-abc");
-vi.mock("../services/token.service", () => ({
+vi.mock("../services/auth/token.service", () => ({
   TokenService: class {
     init = vi.fn().mockResolvedValue(undefined);
     signAccessToken = signAccessToken;

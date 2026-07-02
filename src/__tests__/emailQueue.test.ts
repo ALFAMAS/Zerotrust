@@ -56,12 +56,12 @@ describe("Email Queue", () => {
   });
 
   it("returns null queue before initialization", async () => {
-    const { getEmailQueue } = await import("../services/emailQueue");
+    const { getEmailQueue } = await import("../services/notifications/emailQueue");
     expect(getEmailQueue()).toBeNull();
   });
 
   it("enqueueEmail returns false when queue is not initialized", async () => {
-    const { enqueueEmail } = await import("../services/emailQueue");
+    const { enqueueEmail } = await import("../services/notifications/emailQueue");
     const result = await enqueueEmail("welcome", "test@example.com", {
       name: "Test",
     });
@@ -70,7 +70,7 @@ describe("Email Queue", () => {
 
   it("initializes queue with valid redis URI", async () => {
     const { initEmailQueue, getEmailQueue, shutdownEmailQueue } =
-      await import("../services/emailQueue");
+      await import("../services/notifications/emailQueue");
     await initEmailQueue("redis://:pass@localhost:6379");
     expect(getEmailQueue()).not.toBeNull();
     await shutdownEmailQueue();
@@ -78,7 +78,7 @@ describe("Email Queue", () => {
 
   it("enqueueEmail returns true after initialization", async () => {
     const { initEmailQueue, enqueueEmail, shutdownEmailQueue } =
-      await import("../services/emailQueue");
+      await import("../services/notifications/emailQueue");
     await initEmailQueue("redis://:pass@localhost:6379");
     const result = await enqueueEmail("welcome", "user@example.com", {
       name: "User",
@@ -89,14 +89,14 @@ describe("Email Queue", () => {
 
   it("gracefully skips init for invalid redis URI", async () => {
     const { initEmailQueue, getEmailQueue } =
-      await import("../services/emailQueue");
+      await import("../services/notifications/emailQueue");
     await initEmailQueue("not-a-valid-uri");
     expect(getEmailQueue()).toBeNull();
   });
 
   it("shutdownEmailQueue resets queue to null", async () => {
     const { initEmailQueue, shutdownEmailQueue, getEmailQueue } =
-      await import("../services/emailQueue");
+      await import("../services/notifications/emailQueue");
     await initEmailQueue("redis://:pass@localhost:6379");
     expect(getEmailQueue()).not.toBeNull();
     await shutdownEmailQueue();

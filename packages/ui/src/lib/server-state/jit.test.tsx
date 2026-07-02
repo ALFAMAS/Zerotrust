@@ -6,19 +6,7 @@ import AdminJITPage from "@/app/admin/jit/page";
 import DashboardJITPage from "@/app/dashboard/jit/page";
 import { INCOMING_JIT_REQUESTS_PATH, MY_JIT_REQUESTS_PATH, jitKeys } from "./jit";
 
-const mockApiGet = vi.fn();
-const mockApiPost = vi.fn();
-const mockLegacyGet = vi.fn();
-vi.mock("@/lib/apiClient", () => ({
-  apiGet: (...args: unknown[]) => mockApiGet(...args),
-  apiPost: (...args: unknown[]) => mockApiPost(...args),
-}));
-vi.mock("@/lib/api", () => ({
-  api: {
-    get: (...args: unknown[]) => mockLegacyGet(...args),
-    post: vi.fn(),
-  },
-}));
+import { mockApiGet, mockApiPost } from "@/test/apiClientMock";
 vi.mock("@/lib/toast", () => ({
   useToast: () => ({ toast: vi.fn() }),
 }));
@@ -57,12 +45,7 @@ function mockIncomingSuccess(requests = [pendingRequest]) {
 }
 
 describe("jit TanStack Query server state", () => {
-  beforeEach(() => {
-    mockApiGet.mockReset();
-    mockApiPost.mockReset();
-    mockLegacyGet.mockReset();
-  });
-
+  
   it("models JIT domain query keys", () => {
     expect(jitKeys.incoming()).toEqual(["jit", "incoming"]);
     expect(jitKeys.myRequests()).toEqual(["jit", "myRequests"]);
@@ -75,7 +58,6 @@ describe("jit TanStack Query server state", () => {
     expect(screen.getByText("Loading…")).toBeInTheDocument();
     expect(await screen.findByText("admin:users:read")).toBeInTheDocument();
     expect(mockApiGet).toHaveBeenCalledWith(INCOMING_JIT_REQUESTS_PATH);
-    expect(mockLegacyGet).not.toHaveBeenCalled();
   });
 
   it("renders error + retry when the incoming list fails", async () => {
@@ -131,7 +113,6 @@ describe("jit TanStack Query server state", () => {
     expect(screen.getByText("Loading…")).toBeInTheDocument();
     expect(await screen.findByText("admin:users:read")).toBeInTheDocument();
     expect(mockApiGet).toHaveBeenCalledWith(MY_JIT_REQUESTS_PATH);
-    expect(mockLegacyGet).not.toHaveBeenCalled();
   });
 
   it("submits JIT request and invalidates my-requests list", async () => {

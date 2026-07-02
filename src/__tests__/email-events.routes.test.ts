@@ -12,7 +12,7 @@ vi.mock("../db/repositories/processedWebhookEvents.repository", () => ({
   releaseProcessedWebhookEvent: h.release,
 }));
 
-vi.mock("../services/emailSuppression.service", () => ({
+vi.mock("../services/notifications/emailSuppression.service", () => ({
   suppressEmail: h.suppressEmail,
 }));
 

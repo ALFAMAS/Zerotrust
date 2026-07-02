@@ -5,21 +5,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { NpsSurveyPrompt } from "@/components/NpsSurveyPrompt";
 import { NPS_SHOULD_PROMPT_PATH, NPS_SUBMIT_PATH, npsKeys } from "./nps";
 
-const mockApiGet = vi.fn();
-const mockApiPost = vi.fn();
-const mockLegacyGet = vi.fn();
-const mockLegacyPost = vi.fn();
-vi.mock("@/lib/apiClient", () => ({
-  apiGet: (...args: unknown[]) => mockApiGet(...args),
-  apiPost: (...args: unknown[]) => mockApiPost(...args),
-}));
-vi.mock("@/lib/api", () => ({
-  api: {
-    get: (...args: unknown[]) => mockLegacyGet(...args),
-    post: (...args: unknown[]) => mockLegacyPost(...args),
-  },
-}));
 
+import { mockApiGet, mockApiPost } from "@/test/apiClientMock";
 function renderWithQueryClient(ui: React.ReactElement) {
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -34,10 +21,6 @@ function renderWithQueryClient(ui: React.ReactElement) {
 
 describe("nps TanStack Query server state", () => {
   beforeEach(() => {
-    mockApiGet.mockReset();
-    mockApiPost.mockReset();
-    mockLegacyGet.mockReset();
-    mockLegacyPost.mockReset();
     vi.useFakeTimers({ shouldAdvanceTime: true });
   });
 
@@ -55,7 +38,6 @@ describe("nps TanStack Query server state", () => {
       await screen.findByText(/How likely are you to recommend zerotrust/)
     ).toBeInTheDocument();
     expect(mockApiGet).toHaveBeenCalledWith(NPS_SHOULD_PROMPT_PATH);
-    expect(mockLegacyGet).not.toHaveBeenCalled();
   });
 
   it("hides NPS prompt when should-prompt returns false", async () => {
@@ -80,6 +62,5 @@ describe("nps TanStack Query server state", () => {
     await waitFor(() =>
       expect(mockApiPost).toHaveBeenCalledWith(NPS_SUBMIT_PATH, { score: 9 })
     );
-    expect(mockLegacyPost).not.toHaveBeenCalled();
   });
 });

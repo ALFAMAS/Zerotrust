@@ -4,7 +4,7 @@ import type { ContentfulStatusCode } from "hono/utils/http-status";
 import { getDb } from "../db";
 import { sessionsTable } from "../db/schema";
 import { getLogger } from "../logger";
-import { FingerprintService } from "../services/fingerprint.service";
+import { FingerprintService } from "../services/auth/fingerprint.service";
 import type { HonoEnv } from "../shared/types";
 import { ErrorCodes, zerotrustError } from "../shared/types";
 

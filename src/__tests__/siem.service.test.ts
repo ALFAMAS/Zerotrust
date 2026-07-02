@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { isSiemEnabled, streamToSiem } from "../services/siem.service";
+import { isSiemEnabled, streamToSiem } from "../services/shared/siem.service";
 
 const ENV = { ...process.env };
 

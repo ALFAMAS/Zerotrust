@@ -112,7 +112,7 @@ describe("sendMagicLink", () => {
     const { getDb } = await import("../db");
     vi.mocked(getDb).mockReturnValue(makeDbWithUser() as any);
 
-    const { sendMagicLink } = await import("../services/magicLink.service");
+    const { sendMagicLink } = await import("../services/auth/magicLink.service");
     const result = await sendMagicLink("alice@example.com");
     expect(result.sent).toBe(true);
   });
@@ -121,7 +121,7 @@ describe("sendMagicLink", () => {
     const { getDb } = await import("../db");
     vi.mocked(getDb).mockReturnValue(makeDbWithNoUser() as any);
 
-    const { sendMagicLink } = await import("../services/magicLink.service");
+    const { sendMagicLink } = await import("../services/auth/magicLink.service");
     const result = await sendMagicLink("nobody@example.com");
     expect(result.sent).toBe(true);
   });
@@ -131,7 +131,7 @@ describe("sendMagicLink", () => {
     const { getDb } = await import("../db");
     vi.mocked(getDb).mockReturnValue(db as any);
 
-    const { sendMagicLink } = await import("../services/magicLink.service");
+    const { sendMagicLink } = await import("../services/auth/magicLink.service");
     await sendMagicLink("alice@example.com");
 
     // insert should have been called once (for the OTP)
@@ -151,7 +151,7 @@ describe("sendMagicLink", () => {
     });
     db.returning.mockResolvedValue([{ id: "otp-1" }]);
 
-    const { sendMagicLink } = await import("../services/magicLink.service");
+    const { sendMagicLink } = await import("../services/auth/magicLink.service");
     await sendMagicLink("alice@example.com");
 
     expect(capturedValues.length).toBeGreaterThan(0);
@@ -175,7 +175,7 @@ describe("sendMagicLink", () => {
     db.returning.mockResolvedValue([{ id: "otp-1" }]);
 
     const before = Date.now();
-    const { sendMagicLink } = await import("../services/magicLink.service");
+    const { sendMagicLink } = await import("../services/auth/magicLink.service");
     await sendMagicLink("alice@example.com");
     const after = Date.now();
 
@@ -193,7 +193,7 @@ describe("sendMagicLink", () => {
     const { getDb } = await import("../db");
     vi.mocked(getDb).mockReturnValue(db as any);
 
-    const { sendMagicLink } = await import("../services/magicLink.service");
+    const { sendMagicLink } = await import("../services/auth/magicLink.service");
     const result = await sendMagicLink("alice@example.com");
     expect(result.sent).toBe(true);
   });
@@ -210,7 +210,7 @@ describe("verifyMagicLink", () => {
     const { getDb } = await import("../db");
     vi.mocked(getDb).mockReturnValue(db as any);
 
-    const { verifyMagicLink } = await import("../services/magicLink.service");
+    const { verifyMagicLink } = await import("../services/auth/magicLink.service");
     const result = await verifyMagicLink(
       "alice@example.com",
       "nonexistent-token",
@@ -250,7 +250,7 @@ describe("verifyMagicLink", () => {
     const { getDb } = await import("../db");
     vi.mocked(getDb).mockReturnValue(db as any);
 
-    const { verifyMagicLink } = await import("../services/magicLink.service");
+    const { verifyMagicLink } = await import("../services/auth/magicLink.service");
     const result = await verifyMagicLink("alice@example.com", rawToken);
     expect(result).not.toBeNull();
     expect(result?.userId).toBe(USER_ID);
@@ -290,7 +290,7 @@ describe("verifyMagicLink", () => {
     const { getDb } = await import("../db");
     vi.mocked(getDb).mockReturnValue(db as any);
 
-    const { verifyMagicLink } = await import("../services/magicLink.service");
+    const { verifyMagicLink } = await import("../services/auth/magicLink.service");
     await verifyMagicLink("alice@example.com", rawToken);
 
     // delete must have been called with the OTPs table
@@ -334,7 +334,7 @@ describe("verifyMagicLink", () => {
     const { getDb } = await import("../db");
     vi.mocked(getDb).mockReturnValue(db as any);
 
-    const { verifyMagicLink } = await import("../services/magicLink.service");
+    const { verifyMagicLink } = await import("../services/auth/magicLink.service");
 
     const firstResult = await verifyMagicLink("alice@example.com", rawToken);
     expect(firstResult).not.toBeNull();
@@ -358,7 +358,7 @@ describe("verifyMagicLink", () => {
     const { getDb } = await import("../db");
     vi.mocked(getDb).mockReturnValue(db as any);
 
-    const { verifyMagicLink } = await import("../services/magicLink.service");
+    const { verifyMagicLink } = await import("../services/auth/magicLink.service");
     const result = await verifyMagicLink("alice@example.com", "expired-token");
     expect(result).toBeNull();
   });
@@ -396,7 +396,7 @@ describe("verifyMagicLink", () => {
     const { getDb } = await import("../db");
     vi.mocked(getDb).mockReturnValue(db as any);
 
-    const { verifyMagicLink } = await import("../services/magicLink.service");
+    const { verifyMagicLink } = await import("../services/auth/magicLink.service");
     const result = await verifyMagicLink("alice@example.com", rawToken);
     expect(result).toBeNull();
   });
@@ -413,7 +413,7 @@ describe("verifyMagicLink", () => {
     const { getDb } = await import("../db");
     vi.mocked(getDb).mockReturnValue(db as any);
 
-    const { verifyMagicLink } = await import("../services/magicLink.service");
+    const { verifyMagicLink } = await import("../services/auth/magicLink.service");
     const result = await verifyMagicLink("alice@example.com", "any-token");
     expect(result).toBeNull();
   });
@@ -445,7 +445,7 @@ describe("Magic link token uniqueness", () => {
     const { getDb } = await import("../db");
     vi.mocked(getDb).mockReturnValue(db as any);
 
-    const { sendMagicLink } = await import("../services/magicLink.service");
+    const { sendMagicLink } = await import("../services/auth/magicLink.service");
     await sendMagicLink("alice@example.com");
     await sendMagicLink("alice@example.com");
 

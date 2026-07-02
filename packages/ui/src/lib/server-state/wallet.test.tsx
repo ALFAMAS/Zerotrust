@@ -4,18 +4,13 @@ import userEvent from "@testing-library/user-event";
 import { act } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import WalletPage from "@/app/dashboard/wallet/page";
+import { mockApiGet, mockApiPost } from "@/test/apiClientMock";
 import {
   buildWalletTransactionPath,
   optimisticTopUpTransaction,
   walletKeys,
 } from "./wallet";
 
-const mockApiGet = vi.fn();
-const mockApiPost = vi.fn();
-vi.mock("@/lib/apiClient", () => ({
-  apiGet: (...args: unknown[]) => mockApiGet(...args),
-  apiPost: (...args: unknown[]) => mockApiPost(...args),
-}));
 
 const wallet = {
   balance: 2500,
@@ -60,11 +55,7 @@ function mockWalletSuccess(overrides?: { txs?: typeof transactions; delayed?: bo
 }
 
 describe("wallet TanStack Query server state", () => {
-  beforeEach(() => {
-    mockApiGet.mockReset();
-    mockApiPost.mockReset();
-  });
-
+  
   it("models wallet domain query keys and colocated query paths", () => {
     expect(walletKeys.detail()).toEqual(["wallet", "detail"]);
     expect(walletKeys.transactions({ limit: 30 })).toEqual([

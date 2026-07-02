@@ -3,7 +3,7 @@ import {
   ALLOWED_UPLOAD_CONTENT_TYPES,
   isAllowedUploadContentType,
   safeExtensionForContentType,
-} from "../services/uploadSafety";
+} from "../services/ops/uploadSafety";
 
 describe("uploadSafety", () => {
   it("maps each allowed content type to a single safe extension", () => {

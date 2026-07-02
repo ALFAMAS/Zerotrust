@@ -595,6 +595,29 @@ export const subscriptionsTable = pgTable(
   })
 );
 
+// ── Points ledger (gamification balance history) ─────────────────────────────
+
+export const pointsLedgerTable = pgTable(
+  "points_ledger",
+  {
+    id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => usersTable.id, { onDelete: "cascade" }),
+    points: integer("points").notNull(),
+    balanceAfter: integer("balance_after").notNull(),
+    reason: text("reason").notNull(),
+    metadata: jsonb("metadata"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
+  },
+  (t) => ({
+    pointsLedgerUserCreatedIdx: index("points_ledger_user_created_idx").on(
+      t.userId,
+      t.createdAt
+    ),
+  })
+);
+
 // ── Processed Stripe events (webhook idempotency) ─────────────────────────────
 // Records every Stripe event id we have already applied so a redelivered or
 // replayed webhook is a no-op (CWE-/ checklist #94: idempotency on money paths).

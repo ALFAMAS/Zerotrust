@@ -11,7 +11,7 @@ vi.mock("../middleware/auth", () => ({
   },
 }));
 
-vi.mock("../services/wallet.service", () => ({
+vi.mock("../services/billing/wallet.service", () => ({
   getWallet: vi.fn().mockResolvedValue({ balance: 100, lifetimeBalance: 200, currency: "usd", autoTopUp: false }),
   getWalletTransactions: vi.fn().mockResolvedValue([]),
   topUpWallet: vi.fn().mockResolvedValue({ balance: 150, transactionId: "tx-1" }),

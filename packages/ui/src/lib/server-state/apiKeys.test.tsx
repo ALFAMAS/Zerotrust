@@ -5,23 +5,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import ApiKeysPage from "@/app/dashboard/api-keys/page";
 import { API_KEYS_PATH, apiKeyKeys, buildApiKeyPath } from "./apiKeys";
 
-const mockApiGet = vi.fn();
-const mockApiPost = vi.fn();
-const mockApiDelete = vi.fn();
-const mockLegacyGet = vi.fn();
-vi.mock("@/lib/apiClient", () => ({
-  apiGet: (...args: unknown[]) => mockApiGet(...args),
-  apiPost: (...args: unknown[]) => mockApiPost(...args),
-  apiDelete: (...args: unknown[]) => mockApiDelete(...args),
-}));
-vi.mock("@/lib/api", () => ({
-  api: {
-    get: (...args: unknown[]) => mockLegacyGet(...args),
-    post: vi.fn(),
-    delete: vi.fn(),
-  },
-}));
 
+import { mockApiGet, mockApiPost, mockApiDelete } from "@/test/apiClientMock";
 const apiKey = {
   id: "key_1",
   name: "CI pipeline",
@@ -47,10 +32,6 @@ function renderWithQueryClient(ui: React.ReactElement) {
 
 describe("apiKeys TanStack Query server state", () => {
   beforeEach(() => {
-    mockApiGet.mockReset();
-    mockApiPost.mockReset();
-    mockApiDelete.mockReset();
-    mockLegacyGet.mockReset();
     vi.stubGlobal("confirm", () => true);
   });
 
@@ -66,7 +47,6 @@ describe("apiKeys TanStack Query server state", () => {
 
     expect(await screen.findByText("CI pipeline")).toBeInTheDocument();
     expect(mockApiGet).toHaveBeenCalledWith(API_KEYS_PATH);
-    expect(mockLegacyGet).not.toHaveBeenCalled();
   });
 
   it("renders error + retry when API keys list fails", async () => {

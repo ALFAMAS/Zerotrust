@@ -1,6 +1,6 @@
 import { createMiddleware } from "hono/factory";
 import { getLogger } from "../logger/index.js";
-import { assessSessionRisk, computeRiskFactors } from "../services/sessionRisk.service.js";
+import { assessSessionRisk, computeRiskFactors } from "../services/auth/sessionRisk.service.js";
 import type { HonoEnv } from "../shared/types.js";
 
 const logger = getLogger("continuous-verification");

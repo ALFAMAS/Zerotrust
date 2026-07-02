@@ -30,7 +30,7 @@ describe("search database fallback", () => {
     const { getDb, getReadDb } = await import("../db");
     vi.mocked(getDb).mockReturnValue(db as any);
     vi.mocked(getReadDb).mockReturnValue(db as any);
-    const { search } = await import("../services/search.service");
+    const { search } = await import("../services/ops/search.service");
 
     const results = await search({ query: "alice", type: "user" });
 
@@ -57,7 +57,7 @@ describe("smart search", () => {
     const { getDb, getReadDb } = await import("../db");
     vi.mocked(getDb).mockReturnValue(db as any);
     vi.mocked(getReadDb).mockReturnValue(db as any);
-    const { smartSearch } = await import("../services/search.service");
+    const { smartSearch } = await import("../services/ops/search.service");
 
     const results = await smartSearch({ query: "magic link", limit: 5 });
 

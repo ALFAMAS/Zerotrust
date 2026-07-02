@@ -17,7 +17,7 @@ vi.mock("../logger", () => ({
 }));
 
 const mockSendSecurityAlertEmail = vi.fn().mockResolvedValue(undefined);
-vi.mock("../services/email.service", () => ({
+vi.mock("../services/notifications/email.service", () => ({
   sendSecurityAlertEmail: (...args: unknown[]) => mockSendSecurityAlertEmail(...args),
 }));
 
@@ -26,7 +26,7 @@ import {
   recordSensitiveChange,
   assessTakeoverRisk,
   recordAndRespond,
-} from "../services/accountTakeover.service";
+} from "../services/auth/accountTakeover.service";
 
 const USER_ID = "00000000-0000-0000-0000-000000000001";
 

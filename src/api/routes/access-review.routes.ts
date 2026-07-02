@@ -5,7 +5,7 @@ import { getDb } from "../../db";
 import { accessReviewItemsTable, accessReviewsTable, usersTable } from "../../db/schema";
 import { getLogger } from "../../logger";
 import { authMiddleware, requireAdmin } from "../../middleware/auth";
-import { invalidateUserCache } from "../../services/userStateCache.service";
+import { invalidateUserCache } from "../../services/auth/userStateCache.service";
 import { countRows } from "../../shared/dbCount";
 import { internalError } from "../../shared/httpErrors";
 import { paginated, parsePaginatedQuery } from "../../shared/pagination";

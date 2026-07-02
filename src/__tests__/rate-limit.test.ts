@@ -49,13 +49,13 @@ vi.mock("../logger", () => ({
 describe("In-Memory Rate Limiter — consumeInMemory", () => {
   beforeEach(async () => {
     const { clearInMemoryBuckets } =
-      await import("../services/rateLimiter/inmemory");
+      await import("../services/ops/rateLimiter/inmemory");
     clearInMemoryBuckets();
   });
 
   it("allows the first request within an empty bucket", async () => {
     const { consumeInMemory } =
-      await import("../services/rateLimiter/inmemory");
+      await import("../services/ops/rateLimiter/inmemory");
     const key = `imrl-first-${Date.now()}`;
     const result = consumeInMemory(key, 1, 5, 60);
     expect(result.allowed).toBe(true);
@@ -64,7 +64,7 @@ describe("In-Memory Rate Limiter — consumeInMemory", () => {
 
   it("allows N requests up to capacity", async () => {
     const { consumeInMemory } =
-      await import("../services/rateLimiter/inmemory");
+      await import("../services/ops/rateLimiter/inmemory");
     const key = `imrl-capacity-${Date.now()}`;
     const capacity = 5;
     let last;
@@ -77,7 +77,7 @@ describe("In-Memory Rate Limiter — consumeInMemory", () => {
 
   it("blocks the N+1th request when capacity is exhausted", async () => {
     const { consumeInMemory } =
-      await import("../services/rateLimiter/inmemory");
+      await import("../services/ops/rateLimiter/inmemory");
     const key = `imrl-block-${Date.now()}`;
     const capacity = 3;
     for (let i = 0; i < capacity; i++) consumeInMemory(key, 1, capacity, 60);
@@ -88,7 +88,7 @@ describe("In-Memory Rate Limiter — consumeInMemory", () => {
 
   it("decrements remaining tokens accurately with each consume", async () => {
     const { consumeInMemory } =
-      await import("../services/rateLimiter/inmemory");
+      await import("../services/ops/rateLimiter/inmemory");
     const key = `imrl-decrement-${Date.now()}`;
     const capacity = 10;
     const r1 = consumeInMemory(key, 1, capacity, 60);
@@ -101,7 +101,7 @@ describe("In-Memory Rate Limiter — consumeInMemory", () => {
 
   it("consumes multiple points in a single call", async () => {
     const { consumeInMemory } =
-      await import("../services/rateLimiter/inmemory");
+      await import("../services/ops/rateLimiter/inmemory");
     const key = `imrl-multipoint-${Date.now()}`;
     const capacity = 10;
     const result = consumeInMemory(key, 3, capacity, 60);
@@ -111,7 +111,7 @@ describe("In-Memory Rate Limiter — consumeInMemory", () => {
 
   it("blocks when requested points exceed remaining tokens", async () => {
     const { consumeInMemory } =
-      await import("../services/rateLimiter/inmemory");
+      await import("../services/ops/rateLimiter/inmemory");
     const key = `imrl-big-cost-${Date.now()}`;
     consumeInMemory(key, 8, 10, 60);
     const blocked = consumeInMemory(key, 5, 10, 60);
@@ -120,7 +120,7 @@ describe("In-Memory Rate Limiter — consumeInMemory", () => {
 
   it("isolates buckets by key — different keys do not share limits", async () => {
     const { consumeInMemory } =
-      await import("../services/rateLimiter/inmemory");
+      await import("../services/ops/rateLimiter/inmemory");
     const key1 = `imrl-iso-a-${Date.now()}`;
     const key2 = `imrl-iso-b-${Date.now()}`;
     const capacity = 2;
@@ -134,7 +134,7 @@ describe("In-Memory Rate Limiter — consumeInMemory", () => {
 
   it("clearInMemoryBuckets resets all buckets", async () => {
     const { consumeInMemory, clearInMemoryBuckets } =
-      await import("../services/rateLimiter/inmemory");
+      await import("../services/ops/rateLimiter/inmemory");
     const key = `imrl-clear-${Date.now()}`;
     const capacity = 1;
     consumeInMemory(key, 1, capacity, 60);
@@ -152,12 +152,12 @@ describe("In-Memory Rate Limiter — consumeInMemory", () => {
 describe("In-Memory Rate Limiter — IP banning", () => {
   beforeEach(async () => {
     const { clearInMemoryBuckets } =
-      await import("../services/rateLimiter/inmemory");
+      await import("../services/ops/rateLimiter/inmemory");
     clearInMemoryBuckets();
   });
 
   it("reports IP as not banned initially", async () => {
-    const { isIpBanned } = await import("../services/rateLimiter/inmemory");
+    const { isIpBanned } = await import("../services/ops/rateLimiter/inmemory");
     const key = `ban-init-${Date.now()}`;
     const result = isIpBanned(key);
     expect(result.banned).toBe(false);
@@ -165,7 +165,7 @@ describe("In-Memory Rate Limiter — IP banning", () => {
 
   it("bans IP after repeated violations exceed the threshold (5 violations)", async () => {
     const { consumeInMemory, isIpBanned } =
-      await import("../services/rateLimiter/inmemory");
+      await import("../services/ops/rateLimiter/inmemory");
     const key = `ban-trigger-${Date.now()}`;
     // Drive violations: capacity=1, so every call after the first is a violation
     for (let i = 0; i < 10; i++) consumeInMemory(key, 1, 1, 60);
@@ -176,7 +176,7 @@ describe("In-Memory Rate Limiter — IP banning", () => {
 
   it("returns banSeconds > 0 when banned", async () => {
     const { consumeInMemory, isIpBanned } =
-      await import("../services/rateLimiter/inmemory");
+      await import("../services/ops/rateLimiter/inmemory");
     const key = `ban-seconds-${Date.now()}`;
     for (let i = 0; i < 10; i++) consumeInMemory(key, 1, 1, 60);
     const ban = isIpBanned(key);
@@ -185,7 +185,7 @@ describe("In-Memory Rate Limiter — IP banning", () => {
 
   it("allows request from a key that has not been banned", async () => {
     const { consumeInMemory, isIpBanned } =
-      await import("../services/rateLimiter/inmemory");
+      await import("../services/ops/rateLimiter/inmemory");
     const key = `no-ban-${Date.now()}`;
     // Only 2 violations — under the ban threshold of 5
     consumeInMemory(key, 1, 1, 60);
@@ -196,7 +196,7 @@ describe("In-Memory Rate Limiter — IP banning", () => {
 
   it("clearInMemoryBuckets removes ban entries", async () => {
     const { consumeInMemory, isIpBanned, clearInMemoryBuckets } =
-      await import("../services/rateLimiter/inmemory");
+      await import("../services/ops/rateLimiter/inmemory");
     const key = `ban-clear-${Date.now()}`;
     for (let i = 0; i < 10; i++) consumeInMemory(key, 1, 1, 60);
     expect(isIpBanned(key).banned).toBe(true);
@@ -234,7 +234,7 @@ describe("Redis Rate Limiter — consumePoint", () => {
 
   afterEach(async () => {
     const { shutdownRedisRateLimiter } =
-      await import("../services/rateLimiter/redis");
+      await import("../services/ops/rateLimiter/redis");
     await shutdownRedisRateLimiter();
     vi.clearAllMocks();
     vi.doUnmock("ioredis");
@@ -243,7 +243,7 @@ describe("Redis Rate Limiter — consumePoint", () => {
   it("allows the first request (incr returns 1)", async () => {
     redisMock.incr.mockResolvedValue(1);
     const { initRedisRateLimiter, consumePoint } =
-      await import("../services/rateLimiter/redis");
+      await import("../services/ops/rateLimiter/redis");
     await initRedisRateLimiter("redis://localhost:6379");
     const result = await consumePoint("test-ip", 10, 60);
     expect(result.allowed).toBe(true);
@@ -253,7 +253,7 @@ describe("Redis Rate Limiter — consumePoint", () => {
   it("sets expiry on the key when it is first created (incr === 1)", async () => {
     redisMock.incr.mockResolvedValue(1);
     const { initRedisRateLimiter, consumePoint } =
-      await import("../services/rateLimiter/redis");
+      await import("../services/ops/rateLimiter/redis");
     await initRedisRateLimiter("redis://localhost:6379");
     await consumePoint("new-key", 10, 60);
     expect(redisMock.expire).toHaveBeenCalledWith("rate:60:new-key", 60);
@@ -262,7 +262,7 @@ describe("Redis Rate Limiter — consumePoint", () => {
   it("does not set expiry when key already exists (incr > 1)", async () => {
     redisMock.incr.mockResolvedValue(2);
     const { initRedisRateLimiter, consumePoint } =
-      await import("../services/rateLimiter/redis");
+      await import("../services/ops/rateLimiter/redis");
     await initRedisRateLimiter("redis://localhost:6379");
     await consumePoint("existing-key", 10, 60);
     expect(redisMock.expire).not.toHaveBeenCalled();
@@ -271,7 +271,7 @@ describe("Redis Rate Limiter — consumePoint", () => {
   it("allows N requests (incr at capacity)", async () => {
     redisMock.incr.mockResolvedValue(10);
     const { initRedisRateLimiter, consumePoint } =
-      await import("../services/rateLimiter/redis");
+      await import("../services/ops/rateLimiter/redis");
     await initRedisRateLimiter("redis://localhost:6379");
     const result = await consumePoint("at-limit", 10, 60);
     expect(result.allowed).toBe(true);
@@ -281,7 +281,7 @@ describe("Redis Rate Limiter — consumePoint", () => {
   it("blocks the N+1th request (incr exceeds limit)", async () => {
     redisMock.incr.mockResolvedValue(11);
     const { initRedisRateLimiter, consumePoint } =
-      await import("../services/rateLimiter/redis");
+      await import("../services/ops/rateLimiter/redis");
     await initRedisRateLimiter("redis://localhost:6379");
     const result = await consumePoint("over-limit", 10, 60);
     expect(result.allowed).toBe(false);
@@ -291,7 +291,7 @@ describe("Redis Rate Limiter — consumePoint", () => {
   it("calculates remaining correctly as max(0, points - current)", async () => {
     redisMock.incr.mockResolvedValue(7);
     const { initRedisRateLimiter, consumePoint } =
-      await import("../services/rateLimiter/redis");
+      await import("../services/ops/rateLimiter/redis");
     await initRedisRateLimiter("redis://localhost:6379");
     const result = await consumePoint("mid-usage", 10, 60);
     expect(result.remaining).toBe(3);
@@ -299,7 +299,7 @@ describe("Redis Rate Limiter — consumePoint", () => {
   });
 
   it("throws when Redis client is not initialized", async () => {
-    const { consumePoint } = await import("../services/rateLimiter/redis");
+    const { consumePoint } = await import("../services/ops/rateLimiter/redis");
     await expect(consumePoint("uninit-key", 10, 60)).rejects.toThrow(
       "Redis client not initialized",
     );
@@ -308,14 +308,14 @@ describe("Redis Rate Limiter — consumePoint", () => {
   it("uses the correct Redis key format rate:<windowSecs>:<key>", async () => {
     redisMock.incr.mockResolvedValue(1);
     const { initRedisRateLimiter, consumePoint } =
-      await import("../services/rateLimiter/redis");
+      await import("../services/ops/rateLimiter/redis");
     await initRedisRateLimiter("redis://localhost:6379");
     await consumePoint("my-ip", 5, 120);
     expect(redisMock.incr).toHaveBeenCalledWith("rate:120:my-ip");
   });
 
   it("pingRedis returns false when client is not initialized", async () => {
-    const { pingRedis } = await import("../services/rateLimiter/redis");
+    const { pingRedis } = await import("../services/ops/rateLimiter/redis");
     const alive = await pingRedis();
     expect(alive).toBe(false);
   });
@@ -324,7 +324,7 @@ describe("Redis Rate Limiter — consumePoint", () => {
     redisMock.incr.mockResolvedValue(1);
     (redisMock as any).ping = vi.fn().mockResolvedValue("PONG");
     const { initRedisRateLimiter, pingRedis } =
-      await import("../services/rateLimiter/redis");
+      await import("../services/ops/rateLimiter/redis");
     await initRedisRateLimiter("redis://localhost:6379");
     const alive = await pingRedis();
     expect(alive).toBe(true);
@@ -336,7 +336,7 @@ describe("Redis Rate Limiter — consumePoint", () => {
       .fn()
       .mockRejectedValue(new Error("ECONNREFUSED"));
     const { initRedisRateLimiter, pingRedis } =
-      await import("../services/rateLimiter/redis");
+      await import("../services/ops/rateLimiter/redis");
     await initRedisRateLimiter("redis://localhost:6379");
     const alive = await pingRedis();
     expect(alive).toBe(false);

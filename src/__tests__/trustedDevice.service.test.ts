@@ -12,7 +12,7 @@ import {
   removeTrustedDevice,
   isDeviceTrusted,
   updateLastUsed,
-} from "../services/trustedDevice.service";
+} from "../services/auth/trustedDevice.service";
 
 const getDbMock = getDb as unknown as ReturnType<typeof vi.fn>;
 

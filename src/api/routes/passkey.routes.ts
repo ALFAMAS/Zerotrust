@@ -17,8 +17,8 @@ import { getSettings } from "../../models/settings.model";
 import {
   getOrgSecurityPolicy,
   toAttestationPolicy,
-} from "../../services/orgSecurityPolicy.service";
-import { TokenService } from "../../services/token.service";
+} from "../../services/auth/orgSecurityPolicy.service";
+import { TokenService } from "../../services/auth/token.service";
 import { getClientIp } from "../../shared/clientIp";
 import { internalError } from "../../shared/httpErrors";
 import type { HonoEnv, Passkey, User } from "../../shared/types";

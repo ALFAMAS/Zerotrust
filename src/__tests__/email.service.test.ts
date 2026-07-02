@@ -30,7 +30,7 @@ describe("email.service", () => {
   });
 
   it("sendWelcomeEmail: calls sendMail with correct to/subject and html contains the name", async () => {
-    const { sendWelcomeEmail } = await import("../services/email.service");
+    const { sendWelcomeEmail } = await import("../services/notifications/email.service");
     await sendWelcomeEmail("alice@example.com", {
       name: "Alice",
       loginUrl: "http://localhost:3000/login",
@@ -44,7 +44,7 @@ describe("email.service", () => {
   });
 
   it("sendMagicLinkEmail: html contains the magic link URL", async () => {
-    const { sendMagicLinkEmail } = await import("../services/email.service");
+    const { sendMagicLinkEmail } = await import("../services/notifications/email.service");
     const magicLinkUrl = "http://localhost:3000/auth/magic-link/verify?token=abc123";
     await sendMagicLinkEmail("bob@example.com", {
       name: "Bob",
@@ -59,7 +59,7 @@ describe("email.service", () => {
   });
 
   it("sendOtpEmail: html contains the OTP code", async () => {
-    const { sendOtpEmail } = await import("../services/email.service");
+    const { sendOtpEmail } = await import("../services/notifications/email.service");
     await sendOtpEmail("carol@example.com", {
       name: "Carol",
       code: "987654",
@@ -73,7 +73,7 @@ describe("email.service", () => {
   });
 
   it("sendPasswordResetEmail: html contains the reset URL", async () => {
-    const { sendPasswordResetEmail } = await import("../services/email.service");
+    const { sendPasswordResetEmail } = await import("../services/notifications/email.service");
     const resetUrl = "http://localhost:3000/reset-password?token=xyz";
     await sendPasswordResetEmail("dave@example.com", {
       name: "Dave",
@@ -88,7 +88,7 @@ describe("email.service", () => {
   });
 
   it("sendSecurityAlertEmail: html contains the action string", async () => {
-    const { sendSecurityAlertEmail } = await import("../services/email.service");
+    const { sendSecurityAlertEmail } = await import("../services/notifications/email.service");
     const action = "New sign-in from unknown device";
     await sendSecurityAlertEmail("eve@example.com", {
       name: "Eve",
@@ -107,7 +107,7 @@ describe("email.service", () => {
   it("sendEmail failure (sendMail throws) does NOT throw from the send function", async () => {
     mockSendMail.mockRejectedValueOnce(new Error("SMTP connection refused"));
 
-    const { sendWelcomeEmail } = await import("../services/email.service");
+    const { sendWelcomeEmail } = await import("../services/notifications/email.service");
 
     // Should not throw
     await expect(

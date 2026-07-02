@@ -19,7 +19,7 @@ import {
   taxRateForLocation,
   validateVatFormat,
   validateVatNumber,
-} from "../services/globalization.service";
+} from "../services/billing/globalization.service";
 
 const ENV_KEYS = ["EXCHANGE_RATES_JSON", "EXCHANGE_RATES_API_URL", "VIES_CHECK_ENABLED"];
 let saved: Record<string, string | undefined>;

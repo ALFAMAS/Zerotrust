@@ -16,7 +16,7 @@ vi.mock("../logger", () => ({
 }));
 
 const mockSendBillingEventEmail = vi.fn().mockResolvedValue(undefined);
-vi.mock("../services/email.service", () => ({
+vi.mock("../services/notifications/email.service", () => ({
   sendBillingEventEmail: (...args: unknown[]) => mockSendBillingEventEmail(...args),
 }));
 
@@ -27,7 +27,7 @@ import {
   processWinback,
   DUNNING_DAYS,
   WINBACK_DAYS,
-} from "../services/billingLifecycle.service";
+} from "../services/billing/billingLifecycle.service";
 
 const USER_ID = "00000000-0000-0000-0000-000000000001";
 const DAY_MS = 86400_000;

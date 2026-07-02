@@ -9,7 +9,7 @@ import {
   isDisposableEmailDomain,
   normalizeEmailDomain,
   validateSignupEmail,
-} from "../services/disposableEmail.service";
+} from "../services/auth/disposableEmail.service";
 
 const ENV_KEYS = [
   "DISPOSABLE_EMAIL_ALLOWLIST",

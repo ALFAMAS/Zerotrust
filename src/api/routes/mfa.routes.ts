@@ -7,7 +7,7 @@ import { getLogger } from "../../logger";
 import { sendOTP } from "../../mfa";
 import { authMiddleware } from "../../middleware/auth";
 import { getSettings } from "../../models/settings.model";
-import { sendOtpEmail } from "../../services/email.service";
+import { sendOtpEmail } from "../../services/notifications/email.service";
 import { internalError } from "../../shared/httpErrors";
 import type { HonoEnv, User } from "../../shared/types";
 

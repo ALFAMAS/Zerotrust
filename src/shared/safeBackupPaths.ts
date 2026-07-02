@@ -1,7 +1,7 @@
 /**
  * CWE-78 / CWE-22 guards for the database backup service.
  *
- * These helpers are intentionally extracted from `src/services/dbBackup.service.ts`
+ * These helpers are intentionally extracted from `src/services/ops/dbBackup.service.ts`
  * so they can be:
  *   - unit-tested without dragging in the AWS SDK transitive graph;
  *   - reused by `scripts/db-backup.js` and `scripts/db-restore.js` so every

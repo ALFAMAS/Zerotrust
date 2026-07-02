@@ -3,28 +3,13 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { mockApiGet, mockApiPost } from "@/test/apiClientMock";
 let searchParams = new URLSearchParams();
 vi.mock("next/navigation", () => ({
   useSearchParams: () => searchParams,
 }));
 
-const mockApiGet = vi.fn();
-const mockApiPost = vi.fn();
-vi.mock("../../../lib/apiClient", () => ({
-  apiGet: (...args: unknown[]) => mockApiGet(...args),
-  apiPost: (...args: unknown[]) => mockApiPost(...args),
-}));
 
-vi.mock("../../../lib/api", () => ({
-  api: {
-    get: () => {
-      throw new Error("Billing requests must use server-state/apiClient");
-    },
-    post: () => {
-      throw new Error("Billing requests must use server-state/apiClient");
-    },
-  },
-}));
 
 const mockNavigateToSafeExternal = vi.fn();
 vi.mock("../../../lib/safeRedirect", () => ({
@@ -68,8 +53,6 @@ function renderBillingPage(BillingPage: React.ComponentType) {
 
 describe("BillingPage", () => {
   beforeEach(() => {
-    mockApiGet.mockReset();
-    mockApiPost.mockReset();
     mockNavigateToSafeExternal.mockReset();
     searchParams = new URLSearchParams();
     vi.resetModules();

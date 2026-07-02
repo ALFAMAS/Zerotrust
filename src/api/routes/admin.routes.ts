@@ -18,8 +18,8 @@ import { getSettings, updateSettings } from "../../models/settings.model";
 import {
   ALLOWED_UPLOAD_CONTENT_TYPES,
   safeExtensionForContentType,
-} from "../../services/uploadSafety";
-import { invalidateUserCache } from "../../services/userStateCache.service";
+} from "../../services/ops/uploadSafety";
+import { invalidateUserCache } from "../../services/auth/userStateCache.service";
 import { countRows } from "../../shared/dbCount";
 import { internalError } from "../../shared/httpErrors";
 import { paginated, parsePaginatedQuery } from "../../shared/pagination";
@@ -761,7 +761,7 @@ router.put("/users/:id/segment", async (c) => {
 // POST /admin/lifecycle-emails — trigger lifecycle email batch (admin only)
 router.post("/lifecycle-emails", async (c) => {
   try {
-    const { sendLifecycleEmails } = await import("../../services/lifecycleEmail.service.js");
+    const { sendLifecycleEmails } = await import("../../services/notifications/lifecycleEmail.service.js");
     const results = await sendLifecycleEmails();
     return c.json({ success: true, results });
   } catch (err) {
@@ -782,7 +782,7 @@ router.get("/webhooks/:webhookId/deliveries", async (c) => {
       maxLimit: 200,
     });
     const { getDeliveryLogs, countDeliveryLogs } = await import(
-      "../../services/webhookDeliveryLog.service.js"
+      "../../services/ops/webhookDeliveryLog.service.js"
     );
     const [logs, total] = await Promise.all([
       getDeliveryLogs(webhookId, limit, offset),
@@ -807,7 +807,7 @@ router.post("/uploads/presigned", async (c) => {
       );
     }
     const { generatePresignedUploadUrl } = await import(
-      "../../services/presignedUpload.service.js"
+      "../../services/ops/presignedUpload.service.js"
     );
     const result = await generatePresignedUploadUrl({ contentType, fileName, maxSize });
     return c.json(result);
@@ -883,7 +883,7 @@ router.post("/attachments/upload", authMiddleware, async (c) => {
     // Upload to S3 (stamped with a long-lived Cache-Control so an edge/CDN can
     // cache it) or fall back to local disk.
     const { uploadBuffer, isS3BackupEnabled, getUploadCacheControl } = await import(
-      "../../services/objectStorage.service.js"
+      "../../services/ops/objectStorage.service.js"
     );
     const cacheControl = getUploadCacheControl();
     const storageKey = `attachments/${Date.now()}-${randomUUID()}.${safeExt}`;

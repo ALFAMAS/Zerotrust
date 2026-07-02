@@ -1,4 +1,4 @@
-import { api } from "./api";
+import { apiGet } from "./apiClient";
 
 /**
  * Client side of the signup proof-of-work. Fetches a challenge; if PoW is
@@ -43,7 +43,7 @@ async function sha256Bytes(input: string): Promise<Uint8Array> {
 export async function solveSignupPow(): Promise<{ powChallenge?: string; powSolution?: string }> {
   let res: ChallengeResponse;
   try {
-    res = await api.get<ChallengeResponse>("/auth/pow/challenge");
+    res = await apiGet<ChallengeResponse>("/auth/pow/challenge");
   } catch {
     // If the challenge can't be fetched, don't block signup on the client.
     return {};

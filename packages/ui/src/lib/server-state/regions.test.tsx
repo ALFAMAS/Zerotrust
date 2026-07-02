@@ -5,21 +5,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import RegionsPage from "@/app/admin/regions/page";
 import { REGION_HEALTH_PATH, buildOrgRegionPath, regionKeys } from "./regions";
 
-const mockApiGet = vi.fn();
-const mockApiPut = vi.fn();
-const mockLegacyGet = vi.fn();
-const mockLegacyPut = vi.fn();
-vi.mock("@/lib/apiClient", () => ({
-  apiGet: (...args: unknown[]) => mockApiGet(...args),
-  apiPut: (...args: unknown[]) => mockApiPut(...args),
-}));
-vi.mock("@/lib/api", () => ({
-  api: {
-    get: (...args: unknown[]) => mockLegacyGet(...args),
-    put: (...args: unknown[]) => mockLegacyPut(...args),
-  },
-}));
 
+import { mockApiGet, mockApiPut } from "@/test/apiClientMock";
 const health = { status: "ok", regions: ["us", "eu", "apac"] };
 
 function renderWithQueryClient(ui: React.ReactElement) {
@@ -35,13 +22,7 @@ function renderWithQueryClient(ui: React.ReactElement) {
 }
 
 describe("regions TanStack Query server state", () => {
-  beforeEach(() => {
-    mockApiGet.mockReset();
-    mockApiPut.mockReset();
-    mockLegacyGet.mockReset();
-    mockLegacyPut.mockReset();
-  });
-
+  
   it("models regions domain query keys and paths", () => {
     expect(regionKeys.health()).toEqual(["regions", "health"]);
     expect(REGION_HEALTH_PATH).toBe("/regions/health");
@@ -55,7 +36,6 @@ describe("regions TanStack Query server state", () => {
 
     expect(await screen.findByText("ok")).toBeInTheDocument();
     expect(mockApiGet).toHaveBeenCalledWith(REGION_HEALTH_PATH);
-    expect(mockLegacyGet).not.toHaveBeenCalled();
   });
 
   it("renders error + retry when region health fetch fails", async () => {
@@ -80,6 +60,5 @@ describe("regions TanStack Query server state", () => {
     await waitFor(() =>
       expect(mockApiPut).toHaveBeenCalledWith(buildOrgRegionPath("org_1"), { region: "us" })
     );
-    expect(mockLegacyPut).not.toHaveBeenCalled();
   });
 });

@@ -10,6 +10,10 @@ import { getConfig } from "../../config";
 import { generateNumericCode } from "../../crypto/codes";
 import { getDb } from "../../db";
 import {
+  revokeRefreshTokenFamily,
+  rotateRefreshToken,
+} from "../../db/repositories/authSessions.repository";
+import {
   oauthExchangeCodesTable,
   otpsTable,
   refreshTokensTable,
@@ -32,25 +36,25 @@ import {
   PROVIDER_META,
 } from "../../oauth/authorize-url";
 import { getProviderAdapter } from "../../oauth/provider.factory";
-import { recordAndRespond } from "../../services/accountTakeover.service";
-import { validateSignupEmail } from "../../services/disposableEmail.service";
-import { sendVerificationEmail, sendWelcomeEmail } from "../../services/email.service";
-import { FingerprintService } from "../../services/fingerprint.service";
-import { notifyIfNewDevice } from "../../services/loginNotification.service";
+import { recordAndRespond } from "../../services/auth/accountTakeover.service";
+import { validateSignupEmail } from "../../services/auth/disposableEmail.service";
+import { sendVerificationEmail, sendWelcomeEmail } from "../../services/notifications/email.service";
+import { FingerprintService } from "../../services/auth/fingerprint.service";
+import { notifyIfNewDevice } from "../../services/auth/loginNotification.service";
 import {
   deleteObject,
   isS3BackupEnabled,
   parseObjectKeyFromPublicUrl,
   uploadBuffer,
-} from "../../services/objectStorage.service";
-import { rejectIfBreached } from "../../services/passwordBreach.service";
+} from "../../services/ops/objectStorage.service";
+import { rejectIfBreached } from "../../services/auth/passwordBreach.service";
 import {
   createPowChallenge,
   isSignupPowEnabled,
   verifyPowSolution,
-} from "../../services/proofOfWork.service";
-import { TokenService } from "../../services/token.service";
-import { invalidateUserCache } from "../../services/userStateCache.service";
+} from "../../services/auth/proofOfWork.service";
+import { TokenService } from "../../services/auth/token.service";
+import { invalidateUserCache } from "../../services/auth/userStateCache.service";
 import { getClientIp } from "../../shared/clientIp";
 import { internalError } from "../../shared/httpErrors";
 import { localeFromAcceptLanguage, normalizeLocale, SUPPORTED_LOCALES } from "../../shared/locale";
@@ -70,7 +74,7 @@ async function getAndVerifyOAuthState(state?: string): Promise<{
   if (!state) return { ok: false, codeChallenge: null, codeVerifier: null };
   // Try Redis first
   try {
-    const { getRedis } = await import("../../services/rateLimiter/redis.js");
+    const { getRedis } = await import("../../services/ops/rateLimiter/redis.js");
     const redis = getRedis();
     if (redis) {
       const raw = await redis.get(`oauth:state:${state}`);
@@ -129,7 +133,7 @@ async function generateOAuthState(codeChallenge?: string, codeVerifier?: string)
   });
   // Store in Redis if available (multi-instance safe), else fall back to memory
   try {
-    const { getRedis } = await import("../../services/rateLimiter/redis.js");
+    const { getRedis } = await import("../../services/ops/rateLimiter/redis.js");
     const redis = getRedis();
     if (redis) {
       await redis.setex(`oauth:state:${state}`, OAUTH_STATE_TTL_SECS, store);
@@ -762,18 +766,7 @@ router.post(
         logger.warn("Refresh token reuse detected — revoking session family", {
           userId: rt.userId,
         });
-        await db
-          .update(refreshTokensTable)
-          .set({ isRevoked: true })
-          .where(eq(refreshTokensTable.userId, rt.userId));
-        await db
-          .update(sessionsTable)
-          .set({
-            isActive: false,
-            revokedAt: new Date(),
-            revokedReason: "refresh_token_reuse",
-          })
-          .where(eq(sessionsTable.userId, rt.userId));
+        await revokeRefreshTokenFamily(rt.userId, "refresh_token_reuse");
         return c.json(
           {
             error: "TOKEN_REUSE_DETECTED",
@@ -782,11 +775,6 @@ router.post(
           401
         );
       }
-
-      await db
-        .update(refreshTokensTable)
-        .set({ isRevoked: true, usedAt: new Date() })
-        .where(eq(refreshTokensTable.id, rt.id));
 
       const cfg = getConfig();
       const tokenSvc = await getTokenService();
@@ -813,10 +801,12 @@ router.post(
         pop_key: popKey,
       });
       const payload = await tokenSvc.verifyAccessToken(accessToken);
+      const newRefreshPlain = await tokenSvc.signRefreshToken();
+      const newRefreshHash = hashToken(newRefreshPlain);
 
-      const [session] = await db
-        .insert(sessionsTable)
-        .values({
+      await rotateRefreshToken({
+        oldRefreshTokenId: rt.id,
+        session: {
           id: newSessionId,
           userId: user.id,
           tokenId: payload.jti,
@@ -826,16 +816,12 @@ router.post(
           expiresAt: new Date(payload.exp * 1000),
           lastActivityAt: new Date(),
           isActive: true,
-        })
-        .returning();
-
-      const newRefreshPlain = await tokenSvc.signRefreshToken();
-      const newRefreshHash = hashToken(newRefreshPlain);
-      await db.insert(refreshTokensTable).values({
-        userId: user.id,
-        sessionId: session.id,
-        tokenHash: newRefreshHash,
-        expiresAt: new Date(Date.now() + cfg.session.refreshTokenTTL * 1000),
+        },
+        refreshToken: {
+          userId: user.id,
+          tokenHash: newRefreshHash,
+          expiresAt: new Date(Date.now() + cfg.session.refreshTokenTTL * 1000),
+        },
       });
 
       return c.json({
@@ -1270,7 +1256,7 @@ router.post("/me/onboarding-complete", authMiddleware, async (c) => {
 router.get("/me/nps/should-prompt", authMiddleware, async (c) => {
   try {
     const user = c.get("user");
-    const { shouldPromptNps } = await import("../../services/nps.service.js");
+    const { shouldPromptNps } = await import("../../services/ops/nps.service.js");
     const should = await shouldPromptNps(user.id);
     return c.json({ shouldPrompt: should });
   } catch (err) {
@@ -1287,7 +1273,7 @@ router.post("/me/nps", authMiddleware, async (c) => {
     if (typeof score !== "number" || score < 0 || score > 10) {
       return c.json({ error: "INVALID_REQUEST", message: "score must be 0-10" }, 400);
     }
-    const { recordNpsFeedback } = await import("../../services/nps.service.js");
+    const { recordNpsFeedback } = await import("../../services/ops/nps.service.js");
     await recordNpsFeedback(user.id, score, comment, context);
     return c.json({ success: true });
   } catch (err) {

@@ -1,7 +1,7 @@
 # Quarterly Maintenance Scorecard
 
 **Quarter:** Q3 2026 (Jul – Sep)
-**Last updated:** 2026-07-01
+**Last updated:** 2026-07-03
 **Owner:** Platform team
 
 Tracked trend: dependency freshness, CI health, test health, migration health,
@@ -43,9 +43,11 @@ breakage.
 
 | Metric | Current | Target | Trend |
 |---|---|---|---|
-| Total test count | _TBD_ | Growing | — |
-| Unit test coverage (lines) | _TBD_ | ≥85% | — |
-| Unit test coverage (branches) | _TBD_ | ≥85% | — |
+| Total test count | 196 UI + ~564 API (packages/ui `.tsx` + root `.ts`) | Growing | ✅ |
+| UI server-state coverage (lines) | 89.7% (`packages/ui` gate) | ≥85% | ✅ |
+| UI server-state coverage (branches) | 58.5% (`packages/ui` gate) | ≥55% ratchet | ✅ |
+| API unit test coverage (lines) | ~61% (root `vitest.config.ts` ratchet) | ≥85% long-term | 🔶 |
+| API unit test coverage (branches) | ~56% | ≥85% long-term | 🔶 |
 | E2E smoke passing | _TBD_ | 100% | — |
 | Playwright E2E passing | _TBD_ | 100% | — |
 | k6 load test thresholds met | _TBD_ | p95 <100ms, p99 <300ms | — |

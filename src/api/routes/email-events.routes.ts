@@ -5,7 +5,7 @@ import {
   releaseProcessedWebhookEvent,
 } from "../../db/repositories/processedWebhookEvents.repository";
 import { getLogger } from "../../logger";
-import { suppressEmail } from "../../services/emailSuppression.service";
+import { suppressEmail } from "../../services/notifications/emailSuppression.service";
 import { sha256Hex } from "../../shared/cryptoHash";
 import { internalError } from "../../shared/httpErrors";
 import type { HonoEnv } from "../../shared/types";

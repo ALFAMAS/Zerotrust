@@ -8,41 +8,21 @@ import VerifyEmailBanner from "@/components/VerifyEmailBanner";
 import SettingsPage from "@/app/dashboard/settings/page";
 import ProfilePage from "@/app/dashboard/profile/page";
 import DashboardPage from "@/app/dashboard/page";
+import SecurityPage from "@/app/dashboard/security/page";
+import { mockApiGet, mockApiPost, mockApiPatch, mockApiPostFormData, mockApiDelete } from "@/test/apiClientMock";
 import {
   AUTH_ME_PATH,
   AUTH_ME_AVATAR_PATH,
   ONBOARDING_COMPLETE_PATH,
   OAUTH_PROVIDERS_PATH,
   TOTP_PATH,
+  TOTP_SETUP_PATH,
+  TOTP_VERIFY_PATH,
   VERIFY_EMAIL_RESEND_PATH,
   authKeys,
 } from "./auth";
 import { USER_SESSIONS_PATH, userSessionKeys } from "./sessions";
 
-const mockApiGet = vi.fn();
-const mockApiPost = vi.fn();
-const mockApiPatch = vi.fn();
-const mockApiDelete = vi.fn();
-const mockApiPostFormData = vi.fn();
-const mockLegacyGet = vi.fn();
-const mockLegacyPost = vi.fn();
-const mockLegacyPatch = vi.fn();
-const mockLegacyDelete = vi.fn();
-vi.mock("@/lib/apiClient", () => ({
-  apiGet: (...args: unknown[]) => mockApiGet(...args),
-  apiPost: (...args: unknown[]) => mockApiPost(...args),
-  apiPatch: (...args: unknown[]) => mockApiPatch(...args),
-  apiDelete: (...args: unknown[]) => mockApiDelete(...args),
-  apiPostFormData: (...args: unknown[]) => mockApiPostFormData(...args),
-}));
-vi.mock("@/lib/api", () => ({
-  api: {
-    get: (...args: unknown[]) => mockLegacyGet(...args),
-    post: (...args: unknown[]) => mockLegacyPost(...args),
-    patch: (...args: unknown[]) => mockLegacyPatch(...args),
-    delete: (...args: unknown[]) => mockLegacyDelete(...args),
-  },
-}));
 vi.mock("@/lib/toast", () => ({
   useToast: () => ({ toast: vi.fn() }),
 }));
@@ -61,6 +41,16 @@ const completeUser = {
   mfa: { totp: { enabled: true } },
 };
 
+const userWithoutMfa = {
+  email: "user@example.com",
+  displayName: "Complete User",
+  emailVerified: true,
+  avatarUrl: null,
+  mfa: { totp: { enabled: false } },
+  passkeys: [],
+  oauth: { google: false, github: false },
+};
+
 function renderWithQueryClient(ui: React.ReactElement) {
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -75,15 +65,6 @@ function renderWithQueryClient(ui: React.ReactElement) {
 
 describe("auth TanStack Query server state", () => {
   beforeEach(() => {
-    mockApiGet.mockReset();
-    mockApiPost.mockReset();
-    mockApiPatch.mockReset();
-    mockApiDelete.mockReset();
-    mockApiPostFormData.mockReset();
-    mockLegacyGet.mockReset();
-    mockLegacyPost.mockReset();
-    mockLegacyPatch.mockReset();
-    mockLegacyDelete.mockReset();
     sessionStorage.clear();
     localStorage.clear();
   });
@@ -101,7 +82,6 @@ describe("auth TanStack Query server state", () => {
 
     expect(await screen.findByText(/Please verify your email/)).toBeInTheDocument();
     expect(mockApiGet).toHaveBeenCalledWith(AUTH_ME_PATH);
-    expect(mockLegacyGet).not.toHaveBeenCalled();
   });
 
   it("resends verification email via mutation, not legacy api.post", async () => {
@@ -115,7 +95,6 @@ describe("auth TanStack Query server state", () => {
     await user.click(screen.getByRole("button", { name: "Resend email" }));
 
     await waitFor(() => expect(mockApiPost).toHaveBeenCalledWith(VERIFY_EMAIL_RESEND_PATH));
-    expect(mockLegacyPost).not.toHaveBeenCalled();
   });
 
   it("marks onboarding complete via mutation in SetupChecklist", async () => {
@@ -124,7 +103,6 @@ describe("auth TanStack Query server state", () => {
 
     expect(await screen.findByText(/Onboarding complete!/)).toBeInTheDocument();
     await waitFor(() => expect(mockApiPost).toHaveBeenCalledWith(ONBOARDING_COMPLETE_PATH));
-    expect(mockLegacyPost).not.toHaveBeenCalled();
   });
 
   it("persists locale via patch mutation in LocaleSwitcher when signed in", async () => {
@@ -145,7 +123,6 @@ describe("auth TanStack Query server state", () => {
     await waitFor(() =>
       expect(mockApiPatch).toHaveBeenCalledWith(AUTH_ME_PATH, { locale: "es" })
     );
-    expect(mockLegacyPatch).not.toHaveBeenCalled();
     expect(reload).toHaveBeenCalled();
   });
 
@@ -155,7 +132,6 @@ describe("auth TanStack Query server state", () => {
 
     expect(await screen.findByText("Connected")).toBeInTheDocument();
     expect(mockApiGet).toHaveBeenCalledWith(OAUTH_PROVIDERS_PATH);
-    expect(mockLegacyGet).not.toHaveBeenCalled();
   });
 
   it("disconnects OAuth provider via apiDelete mutation, not legacy api.delete", async () => {
@@ -170,7 +146,6 @@ describe("auth TanStack Query server state", () => {
     await user.click(screen.getByRole("button", { name: "Disconnect" }));
 
     await waitFor(() => expect(mockApiDelete).toHaveBeenCalledWith("/auth/oauth/google"));
-    expect(mockLegacyDelete).not.toHaveBeenCalled();
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: authKeys.oauthProviders() });
   });
 
@@ -180,7 +155,6 @@ describe("auth TanStack Query server state", () => {
 
     expect(await screen.findByDisplayValue("Complete User")).toBeInTheDocument();
     expect(mockApiGet).toHaveBeenCalledWith(AUTH_ME_PATH);
-    expect(mockLegacyGet).not.toHaveBeenCalled();
   });
 
   it("patches profile via mutation on profile page, not legacy api.patch", async () => {
@@ -203,7 +177,6 @@ describe("auth TanStack Query server state", () => {
         username: null,
       })
     );
-    expect(mockLegacyPatch).not.toHaveBeenCalled();
   });
 
   it("disables TOTP via apiDelete mutation on profile page", async () => {
@@ -234,7 +207,71 @@ describe("auth TanStack Query server state", () => {
     expect(await screen.findByText(/Welcome back, Complete User/)).toBeInTheDocument();
     expect(mockApiGet).toHaveBeenCalledWith(AUTH_ME_PATH);
     expect(mockApiGet).toHaveBeenCalledWith(USER_SESSIONS_PATH);
-    expect(mockLegacyGet).not.toHaveBeenCalled();
     expect(userSessionKeys.list()).toEqual(["sessions", "list"]);
+  });
+
+  it("renders dashboard error + retry when auth/me fails", async () => {
+    mockApiGet.mockImplementation((path: string) => {
+      if (path === AUTH_ME_PATH) return Promise.reject(new Error("dashboard unavailable"));
+      if (path === USER_SESSIONS_PATH) return Promise.resolve({ data: [] });
+      return Promise.reject(new Error(`unexpected path ${path}`));
+    });
+
+    renderWithQueryClient(<DashboardPage />);
+
+    expect(await screen.findByText("dashboard unavailable")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Try again" })).toBeInTheDocument();
+  });
+
+  it("loads security settings through useAuthMeQuery", async () => {
+    mockApiGet.mockResolvedValue(userWithoutMfa);
+    renderWithQueryClient(<SecurityPage />);
+
+    expect(await screen.findByText("Security Settings")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Set Up TOTP" })).toBeInTheDocument();
+    expect(mockApiGet).toHaveBeenCalledWith(AUTH_ME_PATH);
+  });
+
+  it("starts TOTP setup via mutation on security page", async () => {
+    mockApiGet.mockResolvedValue(userWithoutMfa);
+    mockApiPost.mockResolvedValue({ qrCodeUrl: "data:image/png;base64,abc" });
+
+    const user = userEvent.setup();
+    renderWithQueryClient(<SecurityPage />);
+    await screen.findByRole("button", { name: "Set Up TOTP" });
+
+    await user.click(screen.getByRole("button", { name: "Set Up TOTP" }));
+
+    await waitFor(() => expect(mockApiPost).toHaveBeenCalledWith(TOTP_SETUP_PATH));
+    expect(await screen.findByAltText("TOTP QR Code")).toBeInTheDocument();
+  });
+
+  it("verifies TOTP code on security page", async () => {
+    mockApiGet.mockResolvedValue(userWithoutMfa);
+    mockApiPost
+      .mockResolvedValueOnce({ qrCodeUrl: "data:image/png;base64,abc" })
+      .mockResolvedValueOnce({ backupCodes: ["code-1", "code-2"] });
+
+    const user = userEvent.setup();
+    renderWithQueryClient(<SecurityPage />);
+    await screen.findByRole("button", { name: "Set Up TOTP" });
+    await user.click(screen.getByRole("button", { name: "Set Up TOTP" }));
+    await screen.findByAltText("TOTP QR Code");
+
+    await user.type(screen.getByPlaceholderText("Enter 6-digit code"), "123456");
+    await user.click(screen.getByRole("button", { name: "Verify" }));
+
+    await waitFor(() =>
+      expect(mockApiPost).toHaveBeenCalledWith(TOTP_VERIFY_PATH, { code: "123456" })
+    );
+    expect(await screen.findByText("Save your backup codes")).toBeInTheDocument();
+  });
+
+  it("renders security error + retry when user load fails", async () => {
+    mockApiGet.mockRejectedValue(new Error("security unavailable"));
+    renderWithQueryClient(<SecurityPage />);
+
+    expect(await screen.findByText("security unavailable")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Try again" })).toBeInTheDocument();
   });
 });

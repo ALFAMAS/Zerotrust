@@ -5,23 +5,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import AnomalyPage from "@/app/admin/anomaly/page";
 import { anomalyKeys, buildAnomalyBaselinesPath } from "./anomaly";
 
-const mockApiGet = vi.fn();
-const mockApiPost = vi.fn();
-const mockApiDelete = vi.fn();
-const mockLegacyGet = vi.fn();
-vi.mock("@/lib/apiClient", () => ({
-  apiGet: (...args: unknown[]) => mockApiGet(...args),
-  apiPost: (...args: unknown[]) => mockApiPost(...args),
-  apiDelete: (...args: unknown[]) => mockApiDelete(...args),
-}));
-vi.mock("@/lib/api", () => ({
-  api: {
-    get: (...args: unknown[]) => mockLegacyGet(...args),
-    post: vi.fn(),
-    delete: vi.fn(),
-  },
-}));
 
+import { mockApiGet, mockApiPost, mockApiDelete } from "@/test/apiClientMock";
 const baseline = {
   id: "bl_1",
   userId: "user_abc",
@@ -55,13 +40,7 @@ function mockBaselinesSuccess(list = [baseline]) {
 }
 
 describe("anomaly TanStack Query server state", () => {
-  beforeEach(() => {
-    mockApiGet.mockReset();
-    mockApiPost.mockReset();
-    mockApiDelete.mockReset();
-    mockLegacyGet.mockReset();
-  });
-
+  
   it("models anomaly domain query keys and list paths", () => {
     expect(anomalyKeys.baselines({ limit: 100 })).toEqual(["anomaly", "baselines", { limit: 100 }]);
     expect(buildAnomalyBaselinesPath({ limit: 100 })).toBe(
@@ -76,7 +55,6 @@ describe("anomaly TanStack Query server state", () => {
     expect(screen.getByText("Loading…")).toBeInTheDocument();
     expect(await screen.findByText("user_abc")).toBeInTheDocument();
     expect(mockApiGet).toHaveBeenCalledWith("/admin/anomaly/baselines?limit=100");
-    expect(mockLegacyGet).not.toHaveBeenCalled();
   });
 
   it("renders error + retry when the baselines list fails", async () => {

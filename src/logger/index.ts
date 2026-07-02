@@ -4,7 +4,7 @@
  */
 
 import { getConfig } from "../config";
-import { streamToSiem } from "../services/siem.service";
+import { streamToSiem } from "../services/shared/siem.service";
 import { type AuditPrincipal, principalAuditFields } from "../shared/principal";
 import { fetchFixedUrl } from "../shared/safeFetch";
 import type { zerotrustConfig } from "../shared/types";

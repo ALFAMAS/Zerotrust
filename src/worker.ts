@@ -21,8 +21,8 @@
 import "dotenv/config";
 import { startJobScheduler } from "./jobs/scheduler";
 import { getLogger } from "./logger";
-import { initEmailQueue } from "./services/emailQueue";
-import { initStripeWebhookQueueConsumer } from "./services/stripeWebhookQueue";
+import { initEmailQueue } from "./services/notifications/emailQueue";
+import { initStripeWebhookQueueConsumer } from "./services/billing/stripeWebhookQueue";
 
 const logger = getLogger("worker");
 

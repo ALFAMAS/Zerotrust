@@ -4,6 +4,10 @@ import { Hono } from "hono";
 import { z } from "zod";
 import { getDb, getReadDb } from "../../db";
 import {
+  createOrganizationWithOwner,
+  transferOrganizationOwnership,
+} from "../../db/repositories/orgs.repository";
+import {
   organizationInvitesTable,
   organizationMembersTable,
   organizationsTable,
@@ -111,30 +115,12 @@ router.post("/", async (c) => {
   if (!parsed.success) {
     return c.json({ error: "VALIDATION_ERROR", message: parsed.error.issues[0]?.message }, 400);
   }
-
-  const db = getDb();
   try {
     const slug = slugify(parsed.data.slug ?? parsed.data.name);
-    const [org] = await db.transaction(async (tx) => {
-      const [createdOrg] = await tx
-        .insert(organizationsTable)
-        .values({ name: parsed.data.name, slug, ownerId: user.id })
-        .returning({
-          id: organizationsTable.id,
-          name: organizationsTable.name,
-          slug: organizationsTable.slug,
-          ownerId: organizationsTable.ownerId,
-          createdAt: organizationsTable.createdAt,
-          updatedAt: organizationsTable.updatedAt,
-        });
-      if (!createdOrg) throw new Error("Failed to create organization");
-      await tx.insert(organizationMembersTable).values({
-        orgId: createdOrg.id,
-        userId: user.id,
-        role: "owner",
-        joinedAt: new Date(),
-      });
-      return [createdOrg];
+    const org = await createOrganizationWithOwner({
+      name: parsed.data.name,
+      slug,
+      ownerId: user.id,
     });
     return c.json({ org }, 201);
   } catch (error) {
@@ -245,29 +231,12 @@ router.post("/:orgId/transfer", async (c) => {
   const parsed = transferSchema.safeParse(await c.req.json().catch(() => ({})));
   if (!parsed.success)
     return c.json({ error: "VALIDATION_ERROR", message: parsed.error.issues[0]?.message }, 400);
-  const db = getDb();
   const newOwner = await getMembership(orgId, parsed.data.newOwnerId);
   if (!newOwner) return c.json({ error: "NOT_FOUND", message: "New owner must be a member" }, 404);
-  await db.transaction(async (tx) => {
-    await tx
-      .update(organizationsTable)
-      .set({ ownerId: parsed.data.newOwnerId, updatedAt: new Date() })
-      .where(eq(organizationsTable.id, orgId));
-    await tx
-      .update(organizationMembersTable)
-      .set({ role: "admin" })
-      .where(
-        and(eq(organizationMembersTable.orgId, orgId), eq(organizationMembersTable.userId, user.id))
-      );
-    await tx
-      .update(organizationMembersTable)
-      .set({ role: "owner" })
-      .where(
-        and(
-          eq(organizationMembersTable.orgId, orgId),
-          eq(organizationMembersTable.userId, parsed.data.newOwnerId)
-        )
-      );
+  await transferOrganizationOwnership({
+    orgId,
+    currentOwnerId: user.id,
+    newOwnerId: parsed.data.newOwnerId,
   });
   return c.json({ ok: true });
 });

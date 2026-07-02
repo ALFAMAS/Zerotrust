@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll } from "vitest";
-import { TokenService } from "../services/token.service";
+import { TokenService } from "../services/auth/token.service";
 import { encrypt } from "../crypto/paseto-v4";
 
 const SECRET_HEX = "a".repeat(64);

@@ -18,14 +18,14 @@ import {
   pppForCountry,
   SUPPORTED_CURRENCIES,
   validateVatNumber,
-} from "../../services/globalization.service";
+} from "../../services/billing/globalization.service";
 import {
   hasVerifiedExemption,
   isReverseCharge,
   listTaxExemptions,
   setExemptionStatus,
   submitTaxExemption,
-} from "../../services/taxExemption.service";
+} from "../../services/billing/taxExemption.service";
 import { internalError } from "../../shared/httpErrors";
 import { isAdmin } from "../../shared/roles";
 import type { HonoEnv } from "../../shared/types";

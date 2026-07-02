@@ -10,7 +10,7 @@ import {
   setOrgBranding,
   setOrgCustomDomain,
   setOrgStorageRegion,
-} from "../../services/region.service";
+} from "../../services/ops/region.service";
 import type { HonoEnv } from "../../shared/types";
 
 const router = new Hono<HonoEnv>();

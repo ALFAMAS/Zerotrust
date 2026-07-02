@@ -1,6 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { mockApiGet, mockApiPost } from "@/test/apiClientMock";
 import {
   billingKeys,
   buildBillingPricingPath,
@@ -10,12 +11,6 @@ import {
   useBillingSubscriptionQuery,
 } from "./billing";
 
-const mockApiGet = vi.fn();
-const mockApiPost = vi.fn();
-vi.mock("@/lib/apiClient", () => ({
-  apiGet: (...args: unknown[]) => mockApiGet(...args),
-  apiPost: (...args: unknown[]) => mockApiPost(...args),
-}));
 
 function wrapper() {
   const queryClient = new QueryClient({
@@ -34,11 +29,7 @@ function wrapper() {
 }
 
 describe("billing TanStack Query server state", () => {
-  beforeEach(() => {
-    mockApiGet.mockReset();
-    mockApiPost.mockReset();
-  });
-
+  
   it("models billing query keys and encoded pricing paths", () => {
     expect(billingKeys.subscription()).toEqual(["billing", "subscription"]);
     expect(billingKeys.currencies()).toEqual(["billing", "currencies"]);

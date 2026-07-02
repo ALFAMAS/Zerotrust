@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 vi.mock("../db", () => ({ getDb: vi.fn() }));
 
 import { getDb } from "../db";
-import { spendFromWallet } from "../services/wallet.service";
+import { spendFromWallet } from "../services/billing/wallet.service";
 
 const getDbMock = getDb as unknown as ReturnType<typeof vi.fn>;
 

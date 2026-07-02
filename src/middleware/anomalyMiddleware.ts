@@ -5,7 +5,7 @@ import {
   computeDeviceHash,
   scoreAnomaly,
   updateBaseline,
-} from "../services/anomalyDetection.service.js";
+} from "../services/auth/anomalyDetection.service.js";
 import type { HonoEnv } from "../shared/types.js";
 
 const logger = getLogger("anomaly-middleware");

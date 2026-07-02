@@ -33,6 +33,6 @@ describe("SLO service metrics registration", () => {
 
     await import("../metrics/middleware");
 
-    await expect(import("../services/slo.service")).resolves.toBeDefined();
+    await expect(import("../services/ops/slo.service")).resolves.toBeDefined();
   });
 });

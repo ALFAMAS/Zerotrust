@@ -5,13 +5,13 @@ import { getDb, getReadDb } from "../../db";
 import { notificationsTable, usersTable } from "../../db/schema";
 import { getLogger } from "../../logger";
 import { authMiddleware } from "../../middleware/auth";
-import { sendNotificationEmail } from "../../services/email.service";
+import { sendNotificationEmail } from "../../services/notifications/email.service";
 import {
   getVapidPublicKey,
   removeSubscription,
   saveSubscription,
   sendWebPush,
-} from "../../services/webPush.service";
+} from "../../services/notifications/webPush.service";
 import { countRows } from "../../shared/dbCount";
 import { internalError } from "../../shared/httpErrors";
 import { paginated, parsePaginatedQuery } from "../../shared/pagination";

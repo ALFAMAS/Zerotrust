@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { generateUnsubscribeToken, verifyUnsubscribeToken } from "../services/unsubscribe";
+import { generateUnsubscribeToken, verifyUnsubscribeToken } from "../services/compliance/unsubscribe";
 
 describe("Unsubscribe token service", () => {
   beforeEach(() => {

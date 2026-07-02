@@ -18,7 +18,7 @@ import {
   recordServerError,
   recordSlowRequest,
   resetAlertingState,
-} from "../services/alerting.service";
+} from "../services/ops/alerting.service";
 
 describe("alerting.service", () => {
   beforeEach(() => {

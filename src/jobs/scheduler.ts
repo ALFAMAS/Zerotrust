@@ -137,26 +137,26 @@ async function runJob(jobDef: JobDef) {
 async function dispatchJob(jobDef: JobDef, _payload: unknown): Promise<boolean> {
   switch (jobDef.name) {
     case "retention.purge": {
-      const { startRetentionScheduler } = await import("../services/dataRetention.js");
+      const { startRetentionScheduler } = await import("../services/compliance/dataRetention.js");
       await startRetentionScheduler(jobDef.intervalHours!);
       return true;
     }
     case "notifications.emailFallback": {
       const { startNotificationEmailFallbackScheduler } = await import(
-        "../services/notificationEmailFallback.js"
+        "../services/notifications/notificationEmailFallback.js"
       );
       await startNotificationEmailFallbackScheduler(jobDef.intervalHours!);
       return true;
     }
     case "billing.lifecycle": {
       const { startBillingLifecycleScheduler } = await import(
-        "../services/billingLifecycle.service.js"
+        "../services/billing/billingLifecycle.service.js"
       );
       await startBillingLifecycleScheduler(jobDef.intervalHours!);
       return true;
     }
     case "backup.daily": {
-      const { startBackupScheduler } = await import("../services/dbBackup.service.js");
+      const { startBackupScheduler } = await import("../services/ops/dbBackup.service.js");
       await startBackupScheduler(jobDef.intervalHours!);
       return true;
     }

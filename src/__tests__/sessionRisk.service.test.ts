@@ -3,7 +3,7 @@ import {
   assessSessionRisk,
   computeRiskFactors,
   type RiskFactors,
-} from "../services/sessionRisk.service";
+} from "../services/auth/sessionRisk.service";
 
 const base: RiskFactors = {
   timeSinceLastActivity: 0,

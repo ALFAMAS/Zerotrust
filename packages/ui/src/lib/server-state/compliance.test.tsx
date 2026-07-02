@@ -3,6 +3,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import CompliancePage from "@/app/admin/compliance/page";
+import { mockApiGet, mockApiPut } from "@/test/apiClientMock";
 import {
   SOC2_CONTROLS_PATH,
   SOC2_READINESS_PATH,
@@ -11,19 +12,6 @@ import {
   nextControlStatus,
 } from "./compliance";
 
-const mockApiGet = vi.fn();
-const mockApiPut = vi.fn();
-const mockLegacyGet = vi.fn();
-vi.mock("@/lib/apiClient", () => ({
-  apiGet: (...args: unknown[]) => mockApiGet(...args),
-  apiPut: (...args: unknown[]) => mockApiPut(...args),
-}));
-vi.mock("@/lib/api", () => ({
-  api: {
-    get: (...args: unknown[]) => mockLegacyGet(...args),
-    put: vi.fn(),
-  },
-}));
 vi.mock("@/context/ToastContext", () => ({
   useToast: () => ({ toast: vi.fn() }),
 }));
@@ -96,12 +84,7 @@ function mockComplianceSuccess() {
 }
 
 describe("compliance TanStack Query server state", () => {
-  beforeEach(() => {
-    mockApiGet.mockReset();
-    mockApiPut.mockReset();
-    mockLegacyGet.mockReset();
-  });
-
+  
   it("models compliance domain query keys and helpers", () => {
     expect(complianceKeys.soc2Readiness()).toEqual(["compliance", "soc2Readiness"]);
     expect(complianceKeys.soc2Controls()).toEqual(["compliance", "soc2Controls"]);
@@ -122,7 +105,6 @@ describe("compliance TanStack Query server state", () => {
     expect(mockApiGet).toHaveBeenCalledWith(SOC2_READINESS_PATH);
     expect(mockApiGet).toHaveBeenCalledWith(SOC2_CONTROLS_PATH);
     expect(mockApiGet).toHaveBeenCalledWith(buildRiskAssessmentPath(currentYear));
-    expect(mockLegacyGet).not.toHaveBeenCalled();
   });
 
   it("renders error + retry when SOC2 data fails", async () => {

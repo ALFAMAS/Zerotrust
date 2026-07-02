@@ -3,29 +3,13 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import AccountPage from "@/app/dashboard/account/page";
+import { mockApiDelete, mockApiGetBlob, mockApiPost } from "@/test/apiClientMock";
 import {
   GDPR_ACCOUNT_PATH,
   GDPR_CANCEL_DELETION_PATH,
   GDPR_EXPORT_PATH,
   accountKeys,
 } from "./account";
-
-const mockApiGetBlob = vi.fn();
-const mockApiDelete = vi.fn();
-const mockApiPost = vi.fn();
-const mockLegacyDelete = vi.fn();
-const mockLegacyPost = vi.fn();
-vi.mock("@/lib/apiClient", () => ({
-  apiGetBlob: (...args: unknown[]) => mockApiGetBlob(...args),
-  apiDelete: (...args: unknown[]) => mockApiDelete(...args),
-  apiPost: (...args: unknown[]) => mockApiPost(...args),
-}));
-vi.mock("@/lib/api", () => ({
-  api: {
-    delete: (...args: unknown[]) => mockLegacyDelete(...args),
-    post: (...args: unknown[]) => mockLegacyPost(...args),
-  },
-}));
 
 function renderWithQueryClient(ui: React.ReactElement) {
   const queryClient = new QueryClient({
@@ -41,11 +25,6 @@ function renderWithQueryClient(ui: React.ReactElement) {
 
 describe("account TanStack Query server state", () => {
   beforeEach(() => {
-    mockApiGetBlob.mockReset();
-    mockApiDelete.mockReset();
-    mockApiPost.mockReset();
-    mockLegacyDelete.mockReset();
-    mockLegacyPost.mockReset();
     vi.spyOn(URL, "createObjectURL").mockReturnValue("blob:mock");
     vi.spyOn(URL, "revokeObjectURL").mockImplementation(() => {});
   });
@@ -75,7 +54,6 @@ describe("account TanStack Query server state", () => {
     await user.click(screen.getByRole("button", { name: "Download my data" }));
 
     await waitFor(() => expect(mockApiGetBlob).toHaveBeenCalledWith(GDPR_EXPORT_PATH));
-    expect(mockLegacyDelete).not.toHaveBeenCalled();
     expect(click).toHaveBeenCalled();
   });
 
@@ -92,7 +70,6 @@ describe("account TanStack Query server state", () => {
     await user.click(screen.getByRole("button", { name: "Delete my account" }));
 
     await waitFor(() => expect(mockApiDelete).toHaveBeenCalledWith(GDPR_ACCOUNT_PATH));
-    expect(mockLegacyDelete).not.toHaveBeenCalled();
     expect(await screen.findByText("Account deletion scheduled")).toBeInTheDocument();
   });
 
@@ -113,7 +90,6 @@ describe("account TanStack Query server state", () => {
     await user.click(screen.getByRole("button", { name: "Cancel deletion request" }));
 
     await waitFor(() => expect(mockApiPost).toHaveBeenCalledWith(GDPR_CANCEL_DELETION_PATH));
-    expect(mockLegacyPost).not.toHaveBeenCalled();
     expect(screen.getByRole("button", { name: "Delete my account" })).toBeInTheDocument();
   });
 });

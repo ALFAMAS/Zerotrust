@@ -6,20 +6,8 @@ import GeneralSettingsPage from "@/app/admin/settings/general/page";
 import AuthSettingsPage from "@/app/admin/settings/auth/page";
 import { ADMIN_SETTINGS_PATH, settingsKeys } from "./settings";
 
-const mockApiGet = vi.fn();
-const mockApiPut = vi.fn();
-const mockLegacyGet = vi.fn();
-vi.mock("@/lib/apiClient", () => ({
-  apiGet: (...args: unknown[]) => mockApiGet(...args),
-  apiPut: (...args: unknown[]) => mockApiPut(...args),
-}));
-vi.mock("@/lib/api", () => ({
-  api: {
-    get: (...args: unknown[]) => mockLegacyGet(...args),
-    put: vi.fn(),
-  },
-}));
 
+import { mockApiGet, mockApiPut } from "@/test/apiClientMock";
 const settings = {
   appName: "Acme Corp",
   appUrl: "https://app.acme.com",
@@ -47,12 +35,7 @@ function mockSettingsSuccess(data = settings) {
 }
 
 describe("settings TanStack Query server state", () => {
-  beforeEach(() => {
-    mockApiGet.mockReset();
-    mockApiPut.mockReset();
-    mockLegacyGet.mockReset();
-  });
-
+  
   it("models settings domain query keys and paths", () => {
     expect(settingsKeys.general()).toEqual(["settings", "general"]);
     expect(ADMIN_SETTINGS_PATH).toBe("/admin/settings");
@@ -66,7 +49,6 @@ describe("settings TanStack Query server state", () => {
     expect(await screen.findByDisplayValue("Acme Corp")).toBeInTheDocument();
     expect(screen.getByDisplayValue("https://app.acme.com")).toBeInTheDocument();
     expect(mockApiGet).toHaveBeenCalledWith(ADMIN_SETTINGS_PATH);
-    expect(mockLegacyGet).not.toHaveBeenCalled();
   });
 
   it("renders error + retry when settings load fails", async () => {

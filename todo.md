@@ -16,11 +16,11 @@ maintainability/refactor · P3 scalability/performance · P4 docs/DX · P5 compl
 - **Source:** [`docs/AUDIT.md`](./docs/AUDIT.md) C1/M1; [`AUDIT-REPORT.md`](./AUDIT-REPORT.md) E6; ADR 006
 - **Why:** Four transactional repositories exist (`authSessions`, `stripeEvents`,
   `wallet`, `processedWebhookEvents`). Billing mutations, org role transitions,
-  session lifecycle side effects, and points-ledger writes still run as
+  session lifecycle side effects, writes still run as
   sequential inline Drizzle — a crash mid-sequence can leave partial state.
 - **Acceptance:** Add repository methods (each owning `db.transaction` +
   invariants) for: refresh-token rotation (extend `authSessions`), billing
-  subscription/plan mutations, org role transitions, and points ledger;
+  subscription/plan mutations, org role transitions;
   route/services delegate to repos; regression tests for each hot path.
 - **Status:** In Progress (~25% — wallet + auth session rotation seeded).
 
@@ -92,19 +92,6 @@ run boundaries:check` and full test suite stay green.
 ---
 
 ## P3 — Scalability and performance
-
-### P3.1 — UI component / integration test coverage toward 85% — _In Progress_
-
-- **Source:** [`docs/AUDIT.md`](./docs/AUDIT.md) T1; [`docs/maintenance-scorecard.md`](./docs/maintenance-scorecard.md) §3
-- **Why:** Server-state module tests grew significantly during the TanStack Query
-  rollout, but page-level component/integration coverage is still below the 85%
-  target. Auth, billing, org, and admin flows need broader regression nets.
-- **Acceptance:** Expand `packages/ui` page/component tests for remaining
-  high-traffic flows (dashboard home, profile, security/MFA, org settings,
-  admin overview, compliance, regions); raise `vitest.config.ts` coverage
-  ratchet thresholds incrementally; maintenance scorecard §3 shows ≥85% lines.
-- **Status:** In Progress — harness + server-state tests in place; page coverage
-  incomplete.
 
 ### P3.2 — Default read-heavy endpoints to the read replica — _In Progress_
 

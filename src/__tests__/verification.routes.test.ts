@@ -22,7 +22,7 @@ vi.mock("../crypto/codes.js", () => ({
   generateNumericCode: () => "654321",
 }));
 
-vi.mock("../services/email.service.js", () => ({
+vi.mock("../services/notifications/email.service.js", () => ({
   sendOtpEmail: vi.fn().mockResolvedValue(undefined),
 }));
 

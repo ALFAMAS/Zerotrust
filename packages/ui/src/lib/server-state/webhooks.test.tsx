@@ -5,26 +5,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import WebhooksPage from "@/app/dashboard/webhooks/page";
 import { buildWebhookDeliveriesPath, webhookKeys } from "./webhooks";
 
-const mockApiGet = vi.fn();
-const mockApiPost = vi.fn();
-const mockApiPatch = vi.fn();
-const mockApiDelete = vi.fn();
-const mockLegacyGet = vi.fn();
-vi.mock("@/lib/apiClient", () => ({
-  apiGet: (...args: unknown[]) => mockApiGet(...args),
-  apiPost: (...args: unknown[]) => mockApiPost(...args),
-  apiPatch: (...args: unknown[]) => mockApiPatch(...args),
-  apiDelete: (...args: unknown[]) => mockApiDelete(...args),
-}));
-vi.mock("@/lib/api", () => ({
-  api: {
-    get: (...args: unknown[]) => mockLegacyGet(...args),
-    post: vi.fn(),
-    patch: vi.fn(),
-    delete: vi.fn(),
-  },
-}));
 
+import { mockApiGet, mockApiPost, mockApiPatch, mockApiDelete } from "@/test/apiClientMock";
 const endpoints = [
   {
     id: "wh_1",
@@ -69,11 +51,6 @@ function mockWebhookSuccess(list = endpoints) {
 
 describe("webhooks TanStack Query server state", () => {
   beforeEach(() => {
-    mockApiGet.mockReset();
-    mockApiPost.mockReset();
-    mockApiPatch.mockReset();
-    mockApiDelete.mockReset();
-    mockLegacyGet.mockReset();
     window.confirm = vi.fn(() => true);
     window.alert = vi.fn();
   });
@@ -99,7 +76,6 @@ describe("webhooks TanStack Query server state", () => {
     expect(screen.getByText("Loading webhooks…")).toBeInTheDocument();
     expect(await screen.findByText("https://example.com/webhooks/zerotrust")).toBeInTheDocument();
     expect(mockApiGet).toHaveBeenCalledWith("/webhooks");
-    expect(mockLegacyGet).not.toHaveBeenCalled();
   });
 
   it("renders error + retry and empty states", async () => {

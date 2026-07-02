@@ -4,6 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import AccessReviewsPage from "@/app/admin/access-reviews/page";
 import AccessReviewDetailPage from "@/app/admin/access-reviews/[id]/page";
+import { mockApiGet, mockApiPost, mockApiPatch } from "@/test/apiClientMock";
 import {
   ACCESS_REVIEWS_PATH,
   accessReviewKeys,
@@ -12,24 +13,6 @@ import {
   buildAccessReviewItemPath,
 } from "./accessReviews";
 
-const mockApiGet = vi.fn();
-const mockApiPost = vi.fn();
-const mockApiPatch = vi.fn();
-const mockLegacyGet = vi.fn();
-const mockLegacyPost = vi.fn();
-const mockLegacyPatch = vi.fn();
-vi.mock("@/lib/apiClient", () => ({
-  apiGet: (...args: unknown[]) => mockApiGet(...args),
-  apiPost: (...args: unknown[]) => mockApiPost(...args),
-  apiPatch: (...args: unknown[]) => mockApiPatch(...args),
-}));
-vi.mock("@/lib/api", () => ({
-  api: {
-    get: (...args: unknown[]) => mockLegacyGet(...args),
-    post: (...args: unknown[]) => mockLegacyPost(...args),
-    patch: (...args: unknown[]) => mockLegacyPatch(...args),
-  },
-}));
 vi.mock("next/navigation", () => ({
   useParams: () => ({ id: "rev_1" }),
   useRouter: () => ({ back: vi.fn(), push: vi.fn(), replace: vi.fn() }),
@@ -66,15 +49,7 @@ function renderWithQueryClient(ui: React.ReactElement) {
 }
 
 describe("accessReviews TanStack Query server state", () => {
-  beforeEach(() => {
-    mockApiGet.mockReset();
-    mockApiPost.mockReset();
-    mockApiPatch.mockReset();
-    mockLegacyGet.mockReset();
-    mockLegacyPost.mockReset();
-    mockLegacyPatch.mockReset();
-  });
-
+  
   it("models access review domain query keys and paths", () => {
     expect(accessReviewKeys.list()).toEqual(["admin", "accessReviews", "list"]);
     expect(accessReviewKeys.detail("rev_1")).toEqual(["admin", "accessReviews", "detail", "rev_1"]);
@@ -93,7 +68,6 @@ describe("accessReviews TanStack Query server state", () => {
     expect(screen.getByText("Loading…")).toBeInTheDocument();
     expect(await screen.findByText("Q3 2026 Review")).toBeInTheDocument();
     expect(mockApiGet).toHaveBeenCalledWith(ACCESS_REVIEWS_PATH);
-    expect(mockLegacyGet).not.toHaveBeenCalled();
   });
 
   it("starts a review via mutation and invalidates the list", async () => {
@@ -110,7 +84,6 @@ describe("accessReviews TanStack Query server state", () => {
     await waitFor(() =>
       expect(mockApiPost).toHaveBeenCalledWith(ACCESS_REVIEWS_PATH, {})
     );
-    expect(mockLegacyPost).not.toHaveBeenCalled();
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: accessReviewKeys.list() });
   });
 
@@ -131,6 +104,5 @@ describe("accessReviews TanStack Query server state", () => {
         decision: "approved",
       })
     );
-    expect(mockLegacyPatch).not.toHaveBeenCalled();
   });
 });

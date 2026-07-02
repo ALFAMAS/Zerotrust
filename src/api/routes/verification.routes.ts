@@ -10,7 +10,7 @@ import { otpsTable, usersTable } from "../../db/schema.js";
 import { getLogger } from "../../logger/index.js";
 import { authMiddleware } from "../../middleware/auth.js";
 import { getVerification, recordVerification } from "../../middleware/continuousVerification.js";
-import { sendOtpEmail } from "../../services/email.service.js";
+import { sendOtpEmail } from "../../services/notifications/email.service.js";
 import type { HonoEnv } from "../../shared/types.js";
 
 const router = new Hono<HonoEnv>();

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { FingerprintService } from "../services/fingerprint.service";
+import { FingerprintService } from "../services/auth/fingerprint.service";
 
 describe("FingerprintService", () => {
   it("computes stable hash for same input", () => {

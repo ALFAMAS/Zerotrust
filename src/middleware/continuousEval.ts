@@ -5,7 +5,7 @@ import { insertAuditLog } from "../audit/chain";
 import { getDb } from "../db";
 import { sessionsTable } from "../db/schema";
 import { getLogger } from "../logger";
-import { AuthorizationEngine } from "../services/authz.service";
+import { AuthorizationEngine } from "../services/auth/authz.service";
 import type { AuthzContext, HonoEnv } from "../shared/types";
 import { ErrorCodes, zerotrustError } from "../shared/types";
 

@@ -56,7 +56,7 @@ import {
   cdnURLForKey,
   getUploadCacheControl,
   uploadCdnBaseUrl,
-} from "../services/objectStorage.service";
+} from "../services/ops/objectStorage.service";
 
 // ── Env helpers ─────────────────────────────────────────────────────────────
 

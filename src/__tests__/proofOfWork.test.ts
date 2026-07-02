@@ -5,7 +5,7 @@ vi.mock("../config", () => ({
   getConfig: () => ({ security: { tokenSecretHex: "a".repeat(64) } }),
 }));
 
-import { createPowChallenge, verifyPowSolution } from "../services/proofOfWork.service";
+import { createPowChallenge, verifyPowSolution } from "../services/auth/proofOfWork.service";
 
 /** Brute-force a solution with the same rule the server verifies. */
 function solve(challenge: string, difficulty: number): string {

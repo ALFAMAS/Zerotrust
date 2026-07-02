@@ -5,26 +5,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import TenantsPage from "@/app/admin/tenants/page";
 import { buildTenantsListPath, tenantKeys } from "./tenants";
 
-const mockApiGet = vi.fn();
-const mockApiPost = vi.fn();
-const mockApiPut = vi.fn();
-const mockApiDelete = vi.fn();
-const mockLegacyGet = vi.fn();
-vi.mock("@/lib/apiClient", () => ({
-  apiGet: (...args: unknown[]) => mockApiGet(...args),
-  apiPost: (...args: unknown[]) => mockApiPost(...args),
-  apiPut: (...args: unknown[]) => mockApiPut(...args),
-  apiDelete: (...args: unknown[]) => mockApiDelete(...args),
-}));
-vi.mock("@/lib/api", () => ({
-  api: {
-    get: (...args: unknown[]) => mockLegacyGet(...args),
-    post: vi.fn(),
-    put: vi.fn(),
-    delete: vi.fn(),
-  },
-}));
 
+import { mockApiGet, mockApiPost, mockApiPut, mockApiDelete } from "@/test/apiClientMock";
 const tenants = [
   {
     id: "ten_1",
@@ -59,14 +41,7 @@ function mockTenantsSuccess(list = tenants) {
 }
 
 describe("tenants TanStack Query server state", () => {
-  beforeEach(() => {
-    mockApiGet.mockReset();
-    mockApiPost.mockReset();
-    mockApiPut.mockReset();
-    mockApiDelete.mockReset();
-    mockLegacyGet.mockReset();
-  });
-
+  
   it("models tenant domain query keys and list paths", () => {
     expect(tenantKeys.list({ limit: 100 })).toEqual(["tenants", "list", { limit: 100 }]);
     expect(buildTenantsListPath({ limit: 100 })).toBe("/admin/tenants?limit=100");
@@ -79,7 +54,6 @@ describe("tenants TanStack Query server state", () => {
     expect(screen.getByText("Loading tenants…")).toBeInTheDocument();
     expect(await screen.findByText("acme-inc")).toBeInTheDocument();
     expect(mockApiGet).toHaveBeenCalledWith("/admin/tenants?limit=100");
-    expect(mockLegacyGet).not.toHaveBeenCalled();
   });
 
   it("renders error + retry when the tenant list fails", async () => {

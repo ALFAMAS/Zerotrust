@@ -63,11 +63,11 @@ vi.mock("drizzle-orm", () => ({
   lte: vi.fn(),
   sql: Object.assign(vi.fn(), { raw: vi.fn() }),
 }));
-vi.mock("../services/email.service", () => ({
+vi.mock("../services/notifications/email.service", () => ({
   sendNotificationEmail: vi.fn().mockResolvedValue(undefined),
 }));
 
-import { sendLifecycleEmails } from "../services/lifecycleEmail.service";
+import { sendLifecycleEmails } from "../services/notifications/lifecycleEmail.service";
 
 describe("lifecycleEmail.service — metadata preservation", () => {
   beforeEach(() => {

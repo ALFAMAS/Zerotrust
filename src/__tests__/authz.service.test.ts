@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { AuthorizationEngine } from "../services/authz.service";
+import { AuthorizationEngine } from "../services/auth/authz.service";
 import type { AuthzContext, User, Session } from "../shared/types";
 
 const { mockDb, enqueueDb, resetDb } = vi.hoisted(() => {

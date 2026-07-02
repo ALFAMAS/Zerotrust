@@ -18,10 +18,10 @@ import {
 } from "../../db/schema";
 import { auditLog, getLogger } from "../../logger";
 import { authMiddleware, requireAdmin } from "../../middleware/auth";
-import { sendNotificationEmail } from "../../services/email.service";
-import { enqueueEmail } from "../../services/emailQueue";
-import { setLegalHold } from "../../services/legalHold.service";
-import { TokenService } from "../../services/token.service";
+import { sendNotificationEmail } from "../../services/notifications/email.service";
+import { enqueueEmail } from "../../services/notifications/emailQueue";
+import { setLegalHold } from "../../services/compliance/legalHold.service";
+import { TokenService } from "../../services/auth/token.service";
 import { getClientIp } from "../../shared/clientIp";
 import { internalError } from "../../shared/httpErrors";
 import { PLAN_CONFIGS, PLANS, type Plan } from "../../shared/plans";

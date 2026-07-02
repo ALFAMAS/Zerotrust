@@ -4,6 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import SessionsPage from "@/app/admin/sessions/page";
 import UserSessionsPage from "@/app/dashboard/sessions/page";
+import { mockApiGet, mockApiDelete } from "@/test/apiClientMock";
 import {
   USER_SESSIONS_PATH,
   buildAdminSessionRevokePath,
@@ -12,14 +13,6 @@ import {
   userSessionKeys,
 } from "./sessions";
 
-const mockApiGet = vi.fn();
-const mockApiDelete = vi.fn();
-const mockLegacyGet = vi.fn();
-const mockLegacyDelete = vi.fn();
-vi.mock("@/lib/apiClient", () => ({
-  apiGet: (...args: unknown[]) => mockApiGet(...args),
-  apiDelete: (...args: unknown[]) => mockApiDelete(...args),
-}));
 
 const session = {
   id: "sess_1",
@@ -43,13 +36,7 @@ function renderWithQueryClient(ui: React.ReactElement) {
 }
 
 describe("sessions TanStack Query server state", () => {
-  beforeEach(() => {
-    mockApiGet.mockReset();
-    mockApiDelete.mockReset();
-    mockLegacyGet.mockReset();
-    mockLegacyDelete.mockReset();
-  });
-
+  
   it("models sessions domain query keys and paths", () => {
     expect(sessionKeys.list({ page: 1, limit: 20 })).toEqual([
       "admin",
@@ -74,7 +61,6 @@ describe("sessions TanStack Query server state", () => {
     expect(screen.getByText("Loading…")).toBeInTheDocument();
     expect(await screen.findByText("user@example.com")).toBeInTheDocument();
     expect(mockApiGet).toHaveBeenCalledWith("/admin/sessions?page=1&limit=20");
-    expect(mockLegacyGet).not.toHaveBeenCalled();
   });
 
   it("renders error + retry when the sessions list fails", async () => {
@@ -102,7 +88,6 @@ describe("sessions TanStack Query server state", () => {
     await waitFor(() =>
       expect(mockApiDelete).toHaveBeenCalledWith("/admin/sessions/sess_1")
     );
-    expect(mockLegacyDelete).not.toHaveBeenCalled();
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: sessionKeys.list() });
   });
 
@@ -122,5 +107,49 @@ describe("sessions TanStack Query server state", () => {
     expect(await screen.findByText("Active Sessions")).toBeInTheDocument();
     expect(mockApiGet).toHaveBeenCalledWith(USER_SESSIONS_PATH);
     expect(userSessionKeys.list()).toEqual(["sessions", "list"]);
+  });
+
+  it("revokes a user session from the dashboard page", async () => {
+    vi.stubGlobal("confirm", () => true);
+    mockApiGet.mockResolvedValue([
+      {
+        id: "sess_user_1",
+        ipAddress: "203.0.113.1",
+        isActive: true,
+        isCurrent: false,
+        lastActivityAt: "2026-07-03T00:00:00Z",
+      },
+    ]);
+    mockApiDelete.mockResolvedValue({ success: true });
+
+    const user = userEvent.setup();
+    renderWithQueryClient(<UserSessionsPage />);
+    const revokeButton = await screen.findByRole("button", { name: "Revoke" });
+    await user.click(revokeButton);
+
+    await waitFor(() =>
+      expect(mockApiDelete).toHaveBeenCalledWith("/sessions/sess_user_1")
+    );
+  });
+
+  it("revokes all other user sessions from the dashboard page", async () => {
+    vi.stubGlobal("confirm", () => true);
+    mockApiGet.mockResolvedValue([
+      {
+        id: "sess_user_1",
+        ipAddress: "203.0.113.1",
+        isActive: true,
+        isCurrent: true,
+        lastActivityAt: "2026-07-03T00:00:00Z",
+      },
+    ]);
+    mockApiDelete.mockResolvedValue({ success: true });
+
+    const user = userEvent.setup();
+    renderWithQueryClient(<UserSessionsPage />);
+    await screen.findByText("Active Sessions");
+    await user.click(screen.getByRole("button", { name: "Revoke All" }));
+
+    await waitFor(() => expect(mockApiDelete).toHaveBeenCalledWith(USER_SESSIONS_PATH));
   });
 });

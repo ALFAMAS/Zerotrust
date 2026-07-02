@@ -5,24 +5,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import SupportPage from "@/app/dashboard/support/page";
 import { supportKeys } from "./support";
 
-const mockApiGet = vi.fn();
-const mockApiPost = vi.fn();
-const mockApiPatch = vi.fn();
-const mockLegacyGet = vi.fn();
-vi.mock("@/lib/apiClient", () => ({
-  apiGet: (...args: unknown[]) => mockApiGet(...args),
-  apiPost: (...args: unknown[]) => mockApiPost(...args),
-  apiPatch: (...args: unknown[]) => mockApiPatch(...args),
-}));
-vi.mock("@/lib/api", () => ({
-  api: {
-    get: (...args: unknown[]) => mockLegacyGet(...args),
-    post: vi.fn(),
-    patch: vi.fn(),
-    delete: vi.fn(),
-  },
-}));
 
+import { mockApiGet, mockApiPost, mockApiPatch } from "@/test/apiClientMock";
 const tickets = [
   {
     id: "t1",
@@ -67,13 +51,7 @@ function mockSupportSuccess(list = tickets) {
 }
 
 describe("support TanStack Query server state", () => {
-  beforeEach(() => {
-    mockApiGet.mockReset();
-    mockApiPost.mockReset();
-    mockApiPatch.mockReset();
-    mockLegacyGet.mockReset();
-  });
-
+  
   it("models support domain query keys", () => {
     expect(supportKeys.list()).toEqual(["support", "list", {}]);
     expect(supportKeys.detail("t1")).toEqual(["support", "detail", "t1"]);
@@ -85,7 +63,6 @@ describe("support TanStack Query server state", () => {
 
     expect(await screen.findByText("Cannot log in")).toBeInTheDocument();
     expect(mockApiGet).toHaveBeenCalledWith("/support");
-    expect(mockLegacyGet).not.toHaveBeenCalled();
   });
 
   it("renders an error state with retry when the list fails", async () => {

@@ -197,28 +197,28 @@ export { getProviderAdapter } from "./oauth/provider.factory";
 export type {
   AnomalySignals,
   BehaviorObservation,
-} from "./services/anomalyDetection.service";
+} from "./services/auth/anomalyDetection.service";
 export {
   computeDeviceHash,
   getBaseline,
   resetBaseline,
   scoreAnomaly,
   updateBaseline,
-} from "./services/anomalyDetection.service";
-export { AuthorizationEngine } from "./services/authz.service";
-export { FingerprintService } from "./services/fingerprint.service";
+} from "./services/auth/anomalyDetection.service";
+export { AuthorizationEngine } from "./services/auth/authz.service";
+export { FingerprintService } from "./services/auth/fingerprint.service";
 // ─── Magic Links ─────────────────────────────────────────────────────────────
-export { sendMagicLink, verifyMagicLink } from "./services/magicLink.service";
+export { sendMagicLink, verifyMagicLink } from "./services/auth/magicLink.service";
 export type {
   RiskAssessment,
   RiskFactors,
-} from "./services/sessionRisk.service";
+} from "./services/auth/sessionRisk.service";
 export {
   assessSessionRisk,
   computeRiskFactors,
-} from "./services/sessionRisk.service";
+} from "./services/auth/sessionRisk.service";
 // ─── Services ───────────────────────────────────────────────────────────────
-export { TokenService } from "./services/token.service";
+export { TokenService } from "./services/auth/token.service";
 // ─── Shared Types ───────────────────────────────────────────────────────────
 export type {
   ABACCondition,

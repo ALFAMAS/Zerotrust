@@ -1,5 +1,5 @@
 /**
- * CWE-78 hardening tests for src/services/dbBackup.service.ts.
+ * CWE-78 hardening tests for src/services/ops/dbBackup.service.ts.
  *
  * The production `run()` helper uses `shell: false` with a literal argv array,
  * which already prevents shell metachar interpretation. These tests pin that
@@ -64,7 +64,7 @@ describe("dbBackup — CWE-78 run() guard", () => {
     process.env.DATABASE_URL = "postgres://user:pass@host:5432/db";
     process.env.BACKUP_DIR = "./backups-test";
 
-    const { runBackup } = await import("../services/dbBackup.service");
+    const { runBackup } = await import("../services/ops/dbBackup.service");
     const res = await runBackup();
     expect(res.ok).toBe(true);
 
@@ -84,7 +84,7 @@ describe("dbBackup — CWE-78 run() guard", () => {
   });
 
   it("rejects a BACKUP_DIR that contains shell metacharacters", async () => {
-    const { assertSafeBackupDir } = await import("../services/dbBackup.service");
+    const { assertSafeBackupDir } = await import("../services/ops/dbBackup.service");
     expect(() => assertSafeBackupDir("/tmp/innocent;rm -rf /")).toThrowError(
       /metachar|reject|invalid/i
     );
@@ -92,14 +92,14 @@ describe("dbBackup — CWE-78 run() guard", () => {
 
   it("rejects a BACKUP_DIR that contains path-traversal segments", async () => {
     process.env.BACKUP_DIR = "/tmp/legit/../../etc";
-    const { assertSafeBackupDir } = await import("../services/dbBackup.service");
+    const { assertSafeBackupDir } = await import("../services/ops/dbBackup.service");
     expect(() => assertSafeBackupDir("/tmp/legit/../../etc")).toThrowError(
       /traversal|invalid|\.\./
     );
   });
 
   it("accepts an absolute BACKUP_DIR with no metachars", async () => {
-    const { assertSafeBackupDir } = await import("../services/dbBackup.service");
+    const { assertSafeBackupDir } = await import("../services/ops/dbBackup.service");
     expect(() => assertSafeBackupDir("/var/lib/zerotrust/backups")).not.toThrow();
     expect(() => assertSafeBackupDir("./backups")).not.toThrow();
   });
@@ -118,7 +118,7 @@ describe("dbBackup — DATABASE_URL credential safety (CWE-532)", () => {
       stderr: { on: (_e: string, cb: (b: Buffer) => void) => cb(Buffer.from("boom")) },
     } as never);
 
-    const { runBackup } = await import("../services/dbBackup.service");
+    const { runBackup } = await import("../services/ops/dbBackup.service");
     const res = await runBackup();
 
     expect(res.ok).toBe(false);
@@ -130,7 +130,7 @@ describe("dbBackup — DATABASE_URL credential safety (CWE-532)", () => {
 
 describe("dbBackup — closed command allowlist", () => {
   it("refuses to spawn anything outside the allowlist", async () => {
-    const { assertSafeCommand } = await import("../services/dbBackup.service");
+    const { assertSafeCommand } = await import("../services/ops/dbBackup.service");
     expect(() => assertSafeCommand("pg_dump")).not.toThrow();
     expect(() => assertSafeCommand("pg_restore")).not.toThrow();
     expect(() => assertSafeCommand("psql")).not.toThrow();
@@ -144,7 +144,7 @@ describe("dbBackup — closed command allowlist", () => {
 describe("dbBackup — dump file path shape", () => {
   it("resolves to <dir>/zerotrust-<stamp>.dump(.enc)?(.meta)?", async () => {
     process.env.BACKUP_DIR = "./backups-test";
-    const { assertSafeBackupPath } = await import("../services/dbBackup.service");
+    const { assertSafeBackupPath } = await import("../services/ops/dbBackup.service");
     expect(() => assertSafeBackupPath("./backups-test/zerotrust-2025-01-01T00-00-00.dump")).not.toThrow();
     expect(() =>
       assertSafeBackupPath("./backups-test/zerotrust-2025-01-01T00-00-00.dump.enc")
@@ -155,7 +155,7 @@ describe("dbBackup — dump file path shape", () => {
   });
 
   it("rejects paths outside BACKUP_DIR or with the wrong prefix", async () => {
-    const { assertSafeBackupPath } = await import("../services/dbBackup.service");
+    const { assertSafeBackupPath } = await import("../services/ops/dbBackup.service");
     expect(() => assertSafeBackupPath("/etc/passwd")).toThrowError(/artifact|invalid/i);
     expect(() => assertSafeBackupPath("./backups-test/random.dump")).toThrowError(
       /artifact|invalid/i

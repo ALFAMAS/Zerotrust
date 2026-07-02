@@ -9,6 +9,10 @@ import { initializezerotrust } from "..";
 import { initSentry } from "../instrument";
 import jitRoutes from "../jit/routes";
 import { startJobScheduler } from "../jobs/scheduler";
+import {
+  resolveBackgroundJobTopology,
+  warnIfApiRunsSchedulersInProduction,
+} from "../jobs/topology";
 import { getLogger } from "../logger";
 import { metricsAuthMiddleware, metricsMiddleware, metricsRoute } from "../metrics";
 import { API_VERSIONS, apiVersioning, CURRENT_API_VERSION } from "../middleware/apiVersioning";
@@ -18,13 +22,13 @@ import { geoFencingMiddleware } from "../middleware/geoFencing";
 import { rateLimit } from "../middleware/rateLimiting";
 import { temporalAccessMiddleware } from "../middleware/temporalAccess";
 import notificationChannelRoutes from "../notifications/routes";
-import { alertingMiddleware } from "../services/alerting.service";
-import { initEmailQueue } from "../services/emailQueue";
-import { sloAlertingMiddleware, sloRouteHandler } from "../services/slo.service";
+import { alertingMiddleware } from "../services/ops/alerting.service";
+import { initEmailQueue } from "../services/notifications/emailQueue";
+import { sloAlertingMiddleware, sloRouteHandler } from "../services/ops/slo.service";
 import {
   initStripeWebhookQueueConsumer,
   initStripeWebhookQueueProducer,
-} from "../services/stripeWebhookQueue";
+} from "../services/billing/stripeWebhookQueue";
 import { initTelemetry, telemetryMiddleware } from "../telemetry";
 import webhookManagementRoutes from "../webhooks/routes";
 import accessReviewRoutes from "./routes/access-review.routes";
@@ -75,7 +79,8 @@ export async function createServer() {
   // schedulers and the email queue consumer to it (single-instance via Redis
   // lock). In local dev / single-server deploys without WORKER_MODE, start
   // them in-process as before.
-  const isWorkerMode = process.env.WORKER_MODE === "true";
+  const jobTopology = resolveBackgroundJobTopology(process.env);
+  warnIfApiRunsSchedulersInProduction(initLogger, jobTopology);
 
   // Stripe webhooks always arrive at this (API) process, so the queue
   // producer must be available here regardless of WORKER_MODE.
@@ -83,7 +88,7 @@ export async function createServer() {
     initStripeWebhookQueueProducer(process.env.REDIS_URI);
   }
 
-  if (!isWorkerMode) {
+  if (jobTopology.startInApiProcess) {
     // Start email queue worker when Redis is available
     if (process.env.REDIS_URI) {
       initEmailQueue(process.env.REDIS_URI).catch((err: Error) =>
@@ -271,7 +276,7 @@ export async function createServer() {
     }
 
     try {
-      const { pingRedis } = await import("../services/rateLimiter/redis.js");
+      const { pingRedis } = await import("../services/ops/rateLimiter/redis.js");
       components.cache = (await pingRedis()) ? "operational" : "degraded";
     } catch {
       components.cache = "degraded";
@@ -287,7 +292,7 @@ export async function createServer() {
     let s3Enabled = false;
     try {
       const { isS3BackupEnabled, pingS3WithTimeout } = await import(
-        "../services/objectStorage.service.js"
+        "../services/ops/objectStorage.service.js"
       );
       s3Enabled = isS3BackupEnabled();
       if (s3Enabled) {
@@ -339,7 +344,7 @@ export async function createServer() {
               components.database = "down";
             }
             try {
-              const { pingRedis } = await import("../services/rateLimiter/redis.js");
+              const { pingRedis } = await import("../services/ops/rateLimiter/redis.js");
               components.cache = (await pingRedis()) ? "operational" : "degraded";
             } catch {
               components.cache = "degraded";
@@ -347,7 +352,7 @@ export async function createServer() {
             let s3Enabled = false;
             try {
               const { isS3BackupEnabled, pingS3WithTimeout } = await import(
-                "../services/objectStorage.service.js"
+                "../services/ops/objectStorage.service.js"
               );
               s3Enabled = isS3BackupEnabled();
               if (s3Enabled) {
@@ -421,7 +426,7 @@ export async function createServer() {
     };
 
     try {
-      const { pingRedis } = await import("../services/rateLimiter/redis.js");
+      const { pingRedis } = await import("../services/ops/rateLimiter/redis.js");
       health.redis = (await pingRedis()) ? "ok" : "down";
     } catch {
       health.redis = "unconfigured";
@@ -449,7 +454,7 @@ export async function createServer() {
     let s3Enabled = false;
     try {
       const { isS3BackupEnabled, pingS3WithTimeout } = await import(
-        "../services/objectStorage.service.js"
+        "../services/ops/objectStorage.service.js"
       );
       s3Enabled = isS3BackupEnabled();
       if (s3Enabled) {

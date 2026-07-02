@@ -7,7 +7,7 @@ vi.mock("../logger", () => ({
   getLogger: () => ({ info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() }),
 }));
 
-import { setLegalHold, getHeldUserIds } from "../services/legalHold.service";
+import { setLegalHold, getHeldUserIds } from "../services/compliance/legalHold.service";
 import { getDb } from "../db";
 
 describe("legal hold service", () => {

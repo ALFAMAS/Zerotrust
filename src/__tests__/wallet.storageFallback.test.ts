@@ -14,7 +14,7 @@ import { getDb } from "../db";
 import {
   getWallet,
   getWalletTransactions,
-} from "../services/wallet.service";
+} from "../services/billing/wallet.service";
 
 function missingStorage(table: string) {
   return Object.assign(new Error(`relation "${table}" does not exist`), { code: "42P01" });

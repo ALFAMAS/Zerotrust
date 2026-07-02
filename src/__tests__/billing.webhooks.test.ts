@@ -50,7 +50,7 @@ vi.mock("../db", () => ({
 
 // Queue offload: defaults to unavailable (see h.enqueue above) so the route
 // falls back to synchronous processing unless a test opts into the queued path.
-vi.mock("../services/stripeWebhookQueue", () => ({
+vi.mock("../services/billing/stripeWebhookQueue", () => ({
   enqueueStripeWebhookEvent: (...args: unknown[]) => h.enqueue(...args),
 }));
 

@@ -14,8 +14,8 @@ import {
 import { getLogger } from "../../logger";
 import { rateLimit } from "../../middleware/rateLimiting";
 import { getSettings } from "../../models/settings.model";
-import { sendMagicLink, verifyMagicLink } from "../../services/magicLink.service";
-import { TokenService } from "../../services/token.service";
+import { sendMagicLink, verifyMagicLink } from "../../services/auth/magicLink.service";
+import { TokenService } from "../../services/auth/token.service";
 import { getClientIp } from "../../shared/clientIp";
 import { internalError } from "../../shared/httpErrors";
 import { appRedirectUrl, safeRelativeRedirect } from "../../shared/safeRedirect";

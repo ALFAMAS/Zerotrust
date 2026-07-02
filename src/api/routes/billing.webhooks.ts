@@ -4,8 +4,8 @@ import {
   releaseStripeEvent,
 } from "../../db/repositories/stripeEvents.repository";
 import { getLogger } from "../../logger";
-import { getStripe, processStripeEvent } from "../../services/stripeWebhookProcessor";
-import { enqueueStripeWebhookEvent } from "../../services/stripeWebhookQueue";
+import { getStripe, processStripeEvent } from "../../services/billing/stripeWebhookProcessor";
+import { enqueueStripeWebhookEvent } from "../../services/billing/stripeWebhookQueue";
 import { internalError } from "../../shared/httpErrors";
 import type { HonoEnv } from "../../shared/types";
 

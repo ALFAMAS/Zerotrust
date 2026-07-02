@@ -4,9 +4,11 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import UserDetailPage from "@/app/admin/users/[id]/page";
 import UsersPage from "@/app/admin/users/page";
+import { mockApiGet, mockApiPost, mockApiPatch, mockApiPut, mockApiDelete } from "@/test/apiClientMock";
 import {
   adminUserKeys,
   buildAdminUserDetailPath,
+  buildAdminUserForceLogoutPath,
   buildAdminUserSegmentPath,
   buildAdminUsersListPath,
 } from "./adminUsers";
@@ -17,28 +19,6 @@ vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: mockPush, back: vi.fn() }),
 }));
 
-const mockApiGet = vi.fn();
-const mockApiPatch = vi.fn();
-const mockApiPut = vi.fn();
-const mockApiPost = vi.fn();
-const mockApiDelete = vi.fn();
-const mockLegacyGet = vi.fn();
-vi.mock("@/lib/apiClient", () => ({
-  apiGet: (...args: unknown[]) => mockApiGet(...args),
-  apiPatch: (...args: unknown[]) => mockApiPatch(...args),
-  apiPut: (...args: unknown[]) => mockApiPut(...args),
-  apiPost: (...args: unknown[]) => mockApiPost(...args),
-  apiDelete: (...args: unknown[]) => mockApiDelete(...args),
-}));
-vi.mock("@/lib/api", () => ({
-  api: {
-    get: (...args: unknown[]) => mockLegacyGet(...args),
-    patch: vi.fn(),
-    put: vi.fn(),
-    post: vi.fn(),
-    delete: vi.fn(),
-  },
-}));
 
 const user = {
   id: "user_abc",
@@ -83,12 +63,7 @@ function mockUserDetailSuccess(data = user) {
 
 describe("adminUsers TanStack Query server state", () => {
   beforeEach(() => {
-    mockApiGet.mockReset();
-    mockApiPatch.mockReset();
-    mockApiPut.mockReset();
-    mockApiPost.mockReset();
-    mockApiDelete.mockReset();
-    mockLegacyGet.mockReset();
+    vi.stubGlobal("confirm", () => true);
   });
 
   it("models admin user domain query keys and paths", () => {
@@ -101,6 +76,7 @@ describe("adminUsers TanStack Query server state", () => {
     ]);
     expect(buildAdminUserDetailPath("user_abc")).toBe("/admin/users/user_abc");
     expect(buildAdminUserSegmentPath("user_abc")).toBe("/admin/users/user_abc/segment");
+    expect(buildAdminUserForceLogoutPath("user_abc")).toBe("/admin/users/user_abc/force-logout");
     expect(buildAdminUsersListPath({ page: 1, limit: 20 })).toBe("/admin/users?page=1&limit=20");
   });
 
@@ -111,7 +87,6 @@ describe("adminUsers TanStack Query server state", () => {
     expect(screen.getByText("Loading…")).toBeInTheDocument();
     expect(await screen.findByText("Alice")).toBeInTheDocument();
     expect(mockApiGet).toHaveBeenCalledWith("/admin/users/user_abc");
-    expect(mockLegacyGet).not.toHaveBeenCalled();
   });
 
   it("renders error + retry when user detail load fails", async () => {
@@ -159,7 +134,6 @@ describe("adminUsers TanStack Query server state", () => {
     expect(screen.getByText("Loading…")).toBeInTheDocument();
     expect(await screen.findByText("Alice")).toBeInTheDocument();
     expect(mockApiGet).toHaveBeenCalledWith("/admin/users?page=1&limit=20");
-    expect(mockLegacyGet).not.toHaveBeenCalled();
   });
 
   it("uses list status mutation with optimistic update and invalidates user caches", async () => {
@@ -189,5 +163,76 @@ describe("adminUsers TanStack Query server state", () => {
       queryKey: adminUserKeys.detail("user_abc"),
     });
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: adminUserKeys.list() });
+  });
+
+  it("sets customer segment via mutation and invalidates detail cache", async () => {
+    mockUserDetailSuccess();
+    mockApiPut.mockResolvedValue({ ...user, customerSegment: "champion" });
+
+    const userEvt = userEvent.setup();
+    const { queryClient } = renderWithQueryClient(<UserDetailPage />);
+    await screen.findByText("Alice");
+
+    const invalidateSpy = vi.spyOn(queryClient, "invalidateQueries");
+    await userEvt.click(screen.getByRole("button", { name: "champion" }));
+
+    await waitFor(() =>
+      expect(mockApiPut).toHaveBeenCalledWith(buildAdminUserSegmentPath("user_abc"), {
+        segment: "champion",
+      })
+    );
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: adminUserKeys.detail("user_abc"),
+    });
+  });
+
+  it("force-logs out all sessions for a user", async () => {
+    mockUserDetailSuccess();
+    mockApiPost.mockResolvedValue({ success: true });
+
+    const userEvt = userEvent.setup();
+    renderWithQueryClient(<UserDetailPage />);
+    await screen.findByText("Alice");
+    await userEvt.click(screen.getByRole("button", { name: "Force logout all" }));
+
+    await waitFor(() =>
+      expect(mockApiPost).toHaveBeenCalledWith(buildAdminUserForceLogoutPath("user_abc"))
+    );
+  });
+
+  it("deletes a user from the detail page", async () => {
+    mockUserDetailSuccess();
+    mockApiDelete.mockResolvedValue({ success: true });
+
+    const userEvt = userEvent.setup();
+    renderWithQueryClient(<UserDetailPage />);
+    await screen.findByText("Alice");
+    await userEvt.click(screen.getByRole("button", { name: "Delete User" }));
+
+    await waitFor(() =>
+      expect(mockApiDelete).toHaveBeenCalledWith(buildAdminUserDetailPath("user_abc"))
+    );
+  });
+
+  it("deletes a user from the list page", async () => {
+    mockApiGet.mockImplementation((path: string) => {
+      if (path.startsWith("/admin/users?")) {
+        return Promise.resolve({
+          data: [listUser],
+          pagination: { total: 1, totalPages: 1, hasNext: false, hasPrev: false },
+        });
+      }
+      return Promise.reject(new Error(`unexpected apiGet path ${path}`));
+    });
+    mockApiDelete.mockResolvedValue({ success: true });
+
+    const userEvt = userEvent.setup();
+    renderWithQueryClient(<UsersPage />);
+    await screen.findByText("Alice");
+    await userEvt.click(screen.getByRole("button", { name: "Delete" }));
+
+    await waitFor(() =>
+      expect(mockApiDelete).toHaveBeenCalledWith(buildAdminUserDetailPath("user_abc"))
+    );
   });
 });

@@ -5,7 +5,7 @@
  * service worker registration → persist the subscription server-side. The
  * service worker's `push` handler renders incoming notifications.
  */
-import { api } from "./api";
+import { apiGet, apiPost } from "./apiClient";
 
 function urlBase64ToUint8Array(base64String: string): Uint8Array {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
@@ -50,8 +50,9 @@ export async function subscribeToPush(): Promise<boolean> {
   const permission = await Notification.requestPermission();
   if (permission !== "granted") return false;
 
-  const { publicKey } = await api
-    .get<{ publicKey: string | null }>("/notifications/push/public-key")
+  const { publicKey } = await apiGet<{ publicKey: string | null }>(
+    "/notifications/push/public-key"
+  )
     .catch(() => ({ publicKey: null }));
   if (!publicKey) return false;
 
@@ -67,7 +68,7 @@ export async function subscribeToPush(): Promise<boolean> {
   const json = sub.toJSON() as { endpoint?: string; keys?: { p256dh: string; auth: string } };
   if (!json.endpoint || !json.keys) return false;
 
-  await api.post("/notifications/push/subscribe", {
+  await apiPost("/notifications/push/subscribe", {
     endpoint: json.endpoint,
     keys: json.keys,
   });
@@ -81,5 +82,5 @@ export async function unsubscribeFromPush(): Promise<void> {
   if (!sub) return;
   const endpoint = sub.endpoint;
   await sub.unsubscribe().catch(() => {});
-  await api.post("/notifications/push/unsubscribe", { endpoint }).catch(() => {});
+  await apiPost("/notifications/push/unsubscribe", { endpoint }).catch(() => {});
 }

@@ -7,7 +7,7 @@
  * CWE-327 ban on `crypto.createHash("sha1")` for app crypto stays enforceable.
  *
  * HIBP's k-anonymity protocol still legitimately needs SHA-1 (see
- * `src/services/passwordBreach.service.ts`); that one site is intentionally
+ * `src/services/auth/passwordBreach.service.ts`); that one site is intentionally
  * isolated behind `hibpSha1Hex()` and is NOT re-exported here.
  */
 

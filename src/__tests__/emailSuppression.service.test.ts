@@ -11,7 +11,7 @@ import {
   isEmailSuppressed,
   suppressEmail,
   unsuppressEmail,
-} from "../services/emailSuppression.service";
+} from "../services/notifications/emailSuppression.service";
 import { getDb } from "../db";
 
 describe("email suppression", () => {

@@ -8,7 +8,7 @@ import {
   getWalletTransactions,
   spendFromWallet,
   topUpWallet,
-} from "../../services/wallet.service";
+} from "../../services/billing/wallet.service";
 import { internalError } from "../../shared/httpErrors";
 import { paginated, parsePaginatedQuery } from "../../shared/pagination";
 import type { HonoEnv } from "../../shared/types";

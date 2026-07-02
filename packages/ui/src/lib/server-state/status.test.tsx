@@ -4,10 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import StatusPage from "@/app/status/page";
 import { STATUS_PATH, statusKeys } from "@/lib/server-state/status";
 
-const mockApiGet = vi.fn();
-vi.mock("@/lib/apiClient", () => ({
-  apiGet: (...args: unknown[]) => mockApiGet(...args),
-}));
+import { mockApiGet } from "@/test/apiClientMock";
 vi.mock("@/components/SiteHeader", () => ({ default: () => <div>header</div> }));
 vi.mock("@/components/SiteFooter", () => ({ default: () => <div>footer</div> }));
 
@@ -33,7 +30,6 @@ function renderWithQueryClient(ui: React.ReactElement) {
 
 describe("status TanStack Query server state", () => {
   beforeEach(() => {
-    mockApiGet.mockReset();
     class MockEventSource {
       close = vi.fn();
       onmessage: ((event: MessageEvent) => void) | null = null;

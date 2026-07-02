@@ -5,21 +5,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import RevenuePage from "@/app/admin/revenue/page";
 import { BROADCAST_PATH, REVENUE_PATH, revenueKeys } from "./revenue";
 
-const mockApiGet = vi.fn();
-const mockApiPost = vi.fn();
-const mockLegacyGet = vi.fn();
-const mockLegacyPost = vi.fn();
-vi.mock("@/lib/apiClient", () => ({
-  apiGet: (...args: unknown[]) => mockApiGet(...args),
-  apiPost: (...args: unknown[]) => mockApiPost(...args),
-}));
-vi.mock("@/lib/api", () => ({
-  api: {
-    get: (...args: unknown[]) => mockLegacyGet(...args),
-    post: (...args: unknown[]) => mockLegacyPost(...args),
-  },
-}));
 
+import { mockApiGet, mockApiPost } from "@/test/apiClientMock";
 const revenue = {
   mrr: 1200,
   arr: 14400,
@@ -45,13 +32,7 @@ function renderWithQueryClient(ui: React.ReactElement) {
 }
 
 describe("revenue TanStack Query server state", () => {
-  beforeEach(() => {
-    mockApiGet.mockReset();
-    mockApiPost.mockReset();
-    mockLegacyGet.mockReset();
-    mockLegacyPost.mockReset();
-  });
-
+  
   it("models revenue domain query keys and paths", () => {
     expect(revenueKeys.summary()).toEqual(["admin", "revenue", "summary"]);
     expect(REVENUE_PATH).toBe("/admin/revenue");
@@ -65,7 +46,6 @@ describe("revenue TanStack Query server state", () => {
 
     expect(await screen.findByText("MRR")).toBeInTheDocument();
     expect(mockApiGet).toHaveBeenCalledWith(REVENUE_PATH);
-    expect(mockLegacyGet).not.toHaveBeenCalled();
   });
 
   it("renders error + retry when revenue fetch fails", async () => {
@@ -97,6 +77,5 @@ describe("revenue TanStack Query server state", () => {
         sendEmail: false,
       })
     );
-    expect(mockLegacyPost).not.toHaveBeenCalled();
   });
 });

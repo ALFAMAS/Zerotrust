@@ -2,19 +2,13 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import AdminOverviewPage from "@/app/admin/page";
+import { mockApiGet, mockApiGetBlob } from "@/test/apiClientMock";
 import {
   ADMIN_STATS_PATH,
   ADMIN_USERS_EXPORT_PATH,
   adminDashboardKeys,
 } from "@/lib/server-state/adminDashboard";
 
-const mockApiGet = vi.fn();
-const mockApiGetBlob = vi.fn();
-const mockLegacyGet = vi.fn();
-vi.mock("@/lib/apiClient", () => ({
-  apiGet: (...args: unknown[]) => mockApiGet(...args),
-  apiGetBlob: (...args: unknown[]) => mockApiGetBlob(...args),
-}));
 vi.mock("@/lib/hooks/useApi", () => ({
   useApi: () => {
     throw new Error("legacy useApi should not be called");
@@ -47,12 +41,7 @@ function renderWithQueryClient(ui: React.ReactElement) {
 }
 
 describe("adminDashboard TanStack Query server state", () => {
-  beforeEach(() => {
-    mockApiGet.mockReset();
-    mockApiGetBlob.mockReset();
-    mockLegacyGet.mockReset();
-  });
-
+  
   it("models admin dashboard query keys and paths", () => {
     expect(adminDashboardKeys.stats()).toEqual(["admin", "stats"]);
     expect(ADMIN_STATS_PATH).toBe("/admin/stats");
@@ -71,7 +60,6 @@ describe("adminDashboard TanStack Query server state", () => {
     expect(await screen.findByText("100")).toBeInTheDocument();
     expect(screen.getByText("Alice")).toBeInTheDocument();
     expect(mockApiGet).toHaveBeenCalledWith(ADMIN_STATS_PATH);
-    expect(mockLegacyGet).not.toHaveBeenCalled();
   });
 
   it("renders error + retry when admin stats fail", async () => {

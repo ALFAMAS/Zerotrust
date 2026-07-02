@@ -3,12 +3,8 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ONBOARDING_COMPLETE_PATH } from "@/lib/server-state/auth";
+import { mockApiPost } from "@/test/apiClientMock";
 import SetupChecklist from "./SetupChecklist";
-
-const mockApiPost = vi.fn().mockResolvedValue(undefined);
-vi.mock("@/lib/apiClient", () => ({
-  apiPost: (...args: unknown[]) => mockApiPost(...args),
-}));
 
 function renderWithQueryClient(ui: React.ReactElement) {
   const queryClient = new QueryClient({

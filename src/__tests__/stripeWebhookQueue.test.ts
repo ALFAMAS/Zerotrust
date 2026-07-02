@@ -26,7 +26,7 @@ vi.mock("bullmq", () => ({
 }));
 
 const mockProcessStripeEvent = vi.fn().mockResolvedValue(undefined);
-vi.mock("../services/stripeWebhookProcessor", () => ({
+vi.mock("../services/billing/stripeWebhookProcessor", () => ({
   processStripeEvent: (...args: unknown[]) => mockProcessStripeEvent(...args),
 }));
 
@@ -49,12 +49,12 @@ describe("Stripe webhook queue", () => {
 
   describe("producer", () => {
     it("returns null before initialization", async () => {
-      const { getStripeWebhookQueue } = await import("../services/stripeWebhookQueue");
+      const { getStripeWebhookQueue } = await import("../services/billing/stripeWebhookQueue");
       expect(getStripeWebhookQueue()).toBeNull();
     });
 
     it("enqueueStripeWebhookEvent returns false when producer is not initialized", async () => {
-      const { enqueueStripeWebhookEvent } = await import("../services/stripeWebhookQueue");
+      const { enqueueStripeWebhookEvent } = await import("../services/billing/stripeWebhookQueue");
       const result = await enqueueStripeWebhookEvent({
         eventId: "evt_1",
         type: "customer.subscription.updated",
@@ -65,7 +65,7 @@ describe("Stripe webhook queue", () => {
 
     it("initializes and enqueues after producer init", async () => {
       const { initStripeWebhookQueueProducer, enqueueStripeWebhookEvent, getStripeWebhookQueue } =
-        await import("../services/stripeWebhookQueue");
+        await import("../services/billing/stripeWebhookQueue");
 
       initStripeWebhookQueueProducer("redis://localhost:6379");
       expect(getStripeWebhookQueue()).not.toBeNull();
@@ -80,7 +80,7 @@ describe("Stripe webhook queue", () => {
 
     it("gracefully skips producer init for an invalid redis URI", async () => {
       const { initStripeWebhookQueueProducer, getStripeWebhookQueue } = await import(
-        "../services/stripeWebhookQueue"
+        "../services/billing/stripeWebhookQueue"
       );
       initStripeWebhookQueueProducer("not-a-valid-uri");
       expect(getStripeWebhookQueue()).toBeNull();
@@ -89,7 +89,7 @@ describe("Stripe webhook queue", () => {
 
   describe("consumer", () => {
     it("processes a job by delegating to processStripeEvent", async () => {
-      const { initStripeWebhookQueueConsumer } = await import("../services/stripeWebhookQueue");
+      const { initStripeWebhookQueueConsumer } = await import("../services/billing/stripeWebhookQueue");
       initStripeWebhookQueueConsumer("redis://localhost:6379");
       expect(capturedProcessor).not.toBeNull();
 
@@ -103,7 +103,7 @@ describe("Stripe webhook queue", () => {
     });
 
     it("does not release the idempotency claim while retries remain", async () => {
-      const { initStripeWebhookQueueConsumer } = await import("../services/stripeWebhookQueue");
+      const { initStripeWebhookQueueConsumer } = await import("../services/billing/stripeWebhookQueue");
       initStripeWebhookQueueConsumer("redis://localhost:6379");
       const failedHandler = capturedHandlers.failed;
       expect(failedHandler).toBeDefined();
@@ -118,7 +118,7 @@ describe("Stripe webhook queue", () => {
     });
 
     it("releases the idempotency claim once retries are exhausted", async () => {
-      const { initStripeWebhookQueueConsumer } = await import("../services/stripeWebhookQueue");
+      const { initStripeWebhookQueueConsumer } = await import("../services/billing/stripeWebhookQueue");
       initStripeWebhookQueueConsumer("redis://localhost:6379");
       const failedHandler = capturedHandlers.failed;
 

@@ -96,7 +96,7 @@ describe("Data Retention Service", () => {
 
   it("purgeOldAuditLogs returns row count", async () => {
     setCount("audit", 5);
-    const { purgeOldAuditLogs } = await import("../services/dataRetention");
+    const { purgeOldAuditLogs } = await import("../services/compliance/dataRetention");
     const count = await purgeOldAuditLogs(90);
     expect(count).toBe(5);
   });
@@ -104,7 +104,7 @@ describe("Data Retention Service", () => {
   it("purgeOldAuditLogs still purges (excluding held users) when legal holds exist", async () => {
     setHeld(["user-under-hold"]);
     setCount("audit", 4);
-    const { purgeOldAuditLogs } = await import("../services/dataRetention");
+    const { purgeOldAuditLogs } = await import("../services/compliance/dataRetention");
     const count = await purgeOldAuditLogs(90);
     // Purge still runs; held users' logs are excluded via notInArray (mocked).
     expect(count).toBe(4);
@@ -114,7 +114,7 @@ describe("Data Retention Service", () => {
 
   it("purgeExpiredSessions returns row count", async () => {
     setCount("sessions", 3);
-    const { purgeExpiredSessions } = await import("../services/dataRetention");
+    const { purgeExpiredSessions } = await import("../services/compliance/dataRetention");
     const count = await purgeExpiredSessions(30);
     expect(count).toBe(3);
   });
@@ -122,14 +122,14 @@ describe("Data Retention Service", () => {
   it("purgeExpiredRefreshTokens returns row count", async () => {
     setCount("refresh", 7);
     const { purgeExpiredRefreshTokens } =
-      await import("../services/dataRetention");
+      await import("../services/compliance/dataRetention");
     const count = await purgeExpiredRefreshTokens(30);
     expect(count).toBe(7);
   });
 
   it("purgeExpiredOtps returns row count", async () => {
     setCount("otps", 2);
-    const { purgeExpiredOtps } = await import("../services/dataRetention");
+    const { purgeExpiredOtps } = await import("../services/compliance/dataRetention");
     const count = await purgeExpiredOtps(7);
     expect(count).toBe(2);
   });
@@ -140,7 +140,7 @@ describe("Data Retention Service", () => {
     setCount("refresh", 6);
     setCount("otps", 1);
 
-    const { runRetentionPolicies } = await import("../services/dataRetention");
+    const { runRetentionPolicies } = await import("../services/compliance/dataRetention");
     const result = await runRetentionPolicies();
     expect(result.auditLogs).toBe(10);
     expect(result.sessions).toBe(4);
@@ -150,7 +150,7 @@ describe("Data Retention Service", () => {
 
   it("scheduler starts and stops without errors", async () => {
     const { startRetentionScheduler, stopRetentionScheduler } =
-      await import("../services/dataRetention");
+      await import("../services/compliance/dataRetention");
     startRetentionScheduler(24);
     stopRetentionScheduler();
   });

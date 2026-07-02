@@ -103,7 +103,7 @@ describe("Integration: Auth flow (mocked DB)", () => {
     SessionModel = models.SessionModel;
     RefreshTokenModel = models.RefreshTokenModel;
 
-    const ts = await import("../services/token.service");
+    const ts = await import("../services/auth/token.service");
     TokenService = ts.TokenService;
   });
 
@@ -155,7 +155,7 @@ describe("Integration: Auth flow (mocked DB)", () => {
 describe("Integration: Rate limiter", () => {
   it("in-memory limiter allows requests within limit", async () => {
     const { consumeInMemory, clearInMemoryBuckets } =
-      await import("../services/rateLimiter/inmemory");
+      await import("../services/ops/rateLimiter/inmemory");
     clearInMemoryBuckets();
     const key = "test-ip-int-" + Date.now();
     const r1 = consumeInMemory(key, 1, 10, 60);
@@ -164,7 +164,7 @@ describe("Integration: Rate limiter", () => {
 
   it("in-memory limiter blocks requests over limit", async () => {
     const { consumeInMemory, clearInMemoryBuckets } =
-      await import("../services/rateLimiter/inmemory");
+      await import("../services/ops/rateLimiter/inmemory");
     clearInMemoryBuckets();
     const key = "test-ip-block-" + Date.now();
     for (let i = 0; i < 3; i++) consumeInMemory(key, 1, 3, 60);

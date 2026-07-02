@@ -1,11 +1,16 @@
 import { and, eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { getDb } from "../../db";
+import {
+  reactivateSubscription,
+  scheduleSubscriptionCancellation,
+  setSubscriptionPaused,
+} from "../../db/repositories/billingSubscriptions.repository";
 import { feedbackTable, organizationMembersTable, subscriptionsTable } from "../../db/schema";
 import { auditLog, getLogger } from "../../logger";
 import { authMiddleware } from "../../middleware/auth";
-import { getStripe } from "../../services/stripeWebhookProcessor";
-import { getUsageSummary } from "../../services/usage.service";
+import { getStripe } from "../../services/billing/stripeWebhookProcessor";
+import { getUsageSummary } from "../../services/billing/usage.service";
 import { internalError } from "../../shared/httpErrors";
 import type { HonoEnv } from "../../shared/types";
 
@@ -196,10 +201,7 @@ router.post("/cancel", authMiddleware, async (c) => {
       await stripe.subscriptions.update(sub.stripeSubscriptionId, {
         pause_collection: { behavior: "mark_uncollectible" },
       });
-      await db
-        .update(subscriptionsTable)
-        .set({ status: "paused", updatedAt: new Date() })
-        .where(eq(subscriptionsTable.id, sub.id));
+      await setSubscriptionPaused({ subscriptionId: sub.id, userId: user.id, reason: body.reason });
       await auditLog("billing.paused", user.id, sub.id, true, { reason: body.reason });
       return c.json({ success: true, action: "paused" });
     }
@@ -207,10 +209,11 @@ router.post("/cancel", authMiddleware, async (c) => {
     await stripe.subscriptions.update(sub.stripeSubscriptionId, {
       cancel_at_period_end: true,
     });
-    await db
-      .update(subscriptionsTable)
-      .set({ cancelAtPeriodEnd: true, updatedAt: new Date() })
-      .where(eq(subscriptionsTable.id, sub.id));
+    await scheduleSubscriptionCancellation({
+      subscriptionId: sub.id,
+      userId: user.id,
+      reason: body.reason,
+    });
     await auditLog("billing.cancel_scheduled", user.id, sub.id, true, { reason: body.reason });
 
     // Retention offer the UI can present after scheduling the cancel
@@ -237,7 +240,6 @@ router.post("/reactivate", authMiddleware, async (c) => {
   }
 
   try {
-    const db = getDb();
     const sub = await findSubscription({ userId: user.id, orgId });
     if (!sub?.stripeSubscriptionId) {
       return c.json({ error: "NO_SUBSCRIPTION" }, 404);
@@ -248,10 +250,7 @@ router.post("/reactivate", authMiddleware, async (c) => {
       cancel_at_period_end: false,
       pause_collection: null,
     });
-    await db
-      .update(subscriptionsTable)
-      .set({ cancelAtPeriodEnd: false, status: "active", updatedAt: new Date() })
-      .where(eq(subscriptionsTable.id, sub.id));
+    await reactivateSubscription({ subscriptionId: sub.id });
     await auditLog("billing.reactivated", user.id, sub.id, true);
 
     return c.json({ success: true });

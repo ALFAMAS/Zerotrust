@@ -5,17 +5,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import SearchPage from "@/app/dashboard/search/page";
 import { buildSearchPath, searchKeys } from "./search";
 
-const mockApiGet = vi.fn();
-const mockLegacyGet = vi.fn();
-vi.mock("@/lib/apiClient", () => ({
-  apiGet: (...args: unknown[]) => mockApiGet(...args),
-}));
-vi.mock("@/lib/api", () => ({
-  api: {
-    get: (...args: unknown[]) => mockLegacyGet(...args),
-  },
-}));
 
+import { mockApiGet } from "@/test/apiClientMock";
 const results = {
   total: 1,
   provider: "database" as const,
@@ -43,8 +34,6 @@ function renderWithQueryClient(ui: React.ReactElement) {
 
 describe("search TanStack Query server state", () => {
   beforeEach(() => {
-    mockApiGet.mockReset();
-    mockLegacyGet.mockReset();
     vi.useFakeTimers({ shouldAdvanceTime: true });
   });
 
@@ -72,7 +61,6 @@ describe("search TanStack Query server state", () => {
 
     await vi.advanceTimersByTimeAsync(350);
     expect(mockApiGet).not.toHaveBeenCalled();
-    expect(mockLegacyGet).not.toHaveBeenCalled();
   });
 
   it("searches through apiClient/TanStack Query after debounce, not legacy api", async () => {
@@ -86,7 +74,6 @@ describe("search TanStack Query server state", () => {
 
     expect(await screen.findByText("user@example.com")).toBeInTheDocument();
     expect(mockApiGet).toHaveBeenCalledWith("/search?q=user&limit=25");
-    expect(mockLegacyGet).not.toHaveBeenCalled();
   });
 
   it("shows empty state when search returns no hits", async () => {

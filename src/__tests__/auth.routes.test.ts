@@ -85,7 +85,7 @@ vi.mock("../oauth/provider.factory", () => ({
 // network errors. Mock it so these route tests are deterministic and do not
 // depend on network access or on whether the test password happens to appear in
 // a real breach corpus.
-vi.mock("../services/passwordBreach.service", () => ({
+vi.mock("../services/auth/passwordBreach.service", () => ({
   isBreachCheckEnabled: () => false,
   checkPasswordBreached: vi
     .fn()
@@ -95,7 +95,7 @@ vi.mock("../services/passwordBreach.service", () => ({
 
 // Account-takeover detection fires (fire-and-forget) on sensitive changes such
 // as unlinking an OAuth provider; stub it so route tests don't hit its DB/email.
-vi.mock("../services/accountTakeover.service", () => ({
+vi.mock("../services/auth/accountTakeover.service", () => ({
   recordAndRespond: vi.fn().mockResolvedValue(false),
   recordSensitiveChange: vi.fn().mockResolvedValue(undefined),
   assessTakeoverRisk: vi
@@ -585,7 +585,7 @@ describe("POST /login with MFA enabled + POST /login/mfa", () => {
     const router = await getRouter();
     const app = new Hono().route("/", router);
     // A plausible-looking but non-challenge token: just sign a normal access token.
-    const { TokenService } = await import("../services/token.service");
+    const { TokenService } = await import("../services/auth/token.service");
     const svc = new TokenService("a".repeat(64), {
       defaultTTL: 3600,
       refreshTokenTTL: 604800,
@@ -1266,7 +1266,7 @@ describe("Route-level rate limiting", () => {
     // Exhaust the limit of 10 (register route uses points: 10)
     // We use the in-memory bucket logic from rateLimiting middleware directly
     const { consumeInMemory, clearInMemoryBuckets } =
-      await import("../services/rateLimiter/inmemory");
+      await import("../services/ops/rateLimiter/inmemory");
     clearInMemoryBuckets();
 
     const key = `rl-route-test-${Date.now()}`;

@@ -9,9 +9,9 @@ import {
   enforceConcurrentSessionCap,
   evaluateSessionPolicy,
   getEffectiveSessionPolicy,
-} from "../services/sessionPolicy.service";
-import { TokenService } from "../services/token.service";
-import { cacheUserState, getUserCached } from "../services/userStateCache.service";
+} from "../services/auth/sessionPolicy.service";
+import { TokenService } from "../services/auth/token.service";
+import { cacheUserState, getUserCached } from "../services/auth/userStateCache.service";
 import { describePrincipal, principalFromToken } from "../shared/principal";
 import { isAdmin } from "../shared/roles";
 import type {

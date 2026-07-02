@@ -10,7 +10,7 @@ vi.mock("../db", () => ({
 import {
   getVapidPublicKey,
   isWebPushConfigured,
-} from "../services/webPush.service";
+} from "../services/notifications/webPush.service";
 
 describe("webPush.service configuration", () => {
   const original = { ...process.env };
