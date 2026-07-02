@@ -32,6 +32,14 @@ Tracks the frontend server-state migration from ad-hoc `useEffect` + local loadi
 `@/lib/api` alias imports: **0** under `packages/ui/src`.
 Relative `lib/api` imports in app `page.tsx`: **0**.
 
+**Static pages (no migration needed):** `/` (marketing), `/privacy`, `/terms`, `/security`, `/help`.
+
+## Caveats (post-rollout)
+
+- `packages/ui/src/lib/api.ts` still exists but has **zero production imports**; `lib/api` appears only in **test mocks** as a guard against accidental legacy GET usage.
+- `FeedbackWidget.tsx` still calls `apiPost` from `apiClient` directly (shared component, not a page).
+- `dashboard/billing/page.tsx` uses a relative `server-state` import instead of `@/lib/server-state/*` (style inconsistency only).
+
 ## Foundation
 
 - [x] Install `@tanstack/react-query` in `packages/ui`.
