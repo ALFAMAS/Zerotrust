@@ -41,6 +41,7 @@ Tracks the frontend server-state migration from ad-hoc `useEffect` + local loadi
 | `/admin/anomaly` | [x] | Behavior baselines list and reset/score actions moved to TanStack Query. Reset uses optimistic list removal with rollback and targeted invalidation. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/anomaly.test.tsx` |
 | `/admin/settings/general` | [x] | General app settings load/save moved to TanStack Query. Save mutation updates settings cache and invalidates the settings domain. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/settings.test.tsx` |
 | `/admin/users/[id]` | [x] | Admin user detail moved to TanStack Query. Status/segment mutations use optimistic detail cache updates with rollback; force-logout and delete invalidate targeted keys. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/adminUsers.test.tsx` |
+| `NotificationBell` (shared) | [x] | Unread count + preview list moved to TanStack Query. Mark-read/mark-all-read use optimistic cache updates with rollback; SSE bumps unread-count cache. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/notifications.test.tsx` |
 
 ## Migration backlog
 
@@ -54,7 +55,7 @@ Prioritize pages with real server data, manual `loading/error` state, and repeat
 
 | Component | API call(s) | Priority |
 | --- | --- | --- |
-| `NotificationBell.tsx` | notifications | High — visible on every page |
+| `NotificationBell.tsx` | notifications | High — visible on every page | [x] |
 | `LiveChatWidget.tsx` | `GET /auth/me` | Medium |
 | `LocaleSwitcher.tsx` | `PATCH /auth/me` | Medium |
 | `VerifyEmailBanner.tsx` | `POST /auth/verify-email/resend` | Medium |

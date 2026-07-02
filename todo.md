@@ -13,10 +13,6 @@ maintainability/refactor · P3 scalability/performance · P4 docs/DX.
 
 ## Current backlog
 
-### P1 — correctness / fork-readiness
-
-- No active P1 audit items.
-
 ### P2 — product completeness / template polish
 
 - **E2 — server-state adoption** — Partial: TanStack Query is installed and

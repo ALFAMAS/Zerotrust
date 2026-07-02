@@ -276,6 +276,22 @@ export interface GeneralSettings {
   logoUrl: string;
 }
 
+export type NotificationType = "info" | "success" | "warning" | "error" | "security";
+
+export interface Notification {
+  id: string;
+  type: NotificationType;
+  title: string;
+  body: string;
+  link?: string;
+  read: boolean;
+  createdAt: string;
+}
+
+export interface NotificationsUnreadCount {
+  count: number;
+}
+
 export type AdminUserStatus = "active" | "suspended" | "deleted" | string;
 export type CustomerSegment = "champion" | "at_risk" | "expansion" | "new";
 

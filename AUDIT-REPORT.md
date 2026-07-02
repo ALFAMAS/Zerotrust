@@ -25,30 +25,16 @@
 
 ### Open follow-ups (still in [`todo.md`](./todo.md))
 
-| ID     | Status     | Summary                                                                                                 |
-| ------ | ---------- | ------------------------------------------------------------------------------------------------------- |
+| ID     | Status     | Summary                                                                                                                                       |
+| ------ | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
 | **E2** | 🟠 Partial | TanStack Query on 5 pages (wallet, webhooks, billing, support, admin/audit); ~12 dashboard/admin pages still use legacy `useEffect`+`api.get` |
-| **E4** | 🟡 Info    | 46 backend routes have no UI caller (many by design; some shipped features lack UI)                     |
-| **E5** | 🟡 Info    | In-process `setInterval` schedulers — leader lock mitigates but not horizontally scalable               |
-| **E6** | 🟡 Info    | Repository layer ~10% complete (4 repos); hot-path writes still mostly inline Drizzle                   |
+| **E4** | 🟡 Info    | 46 backend routes have no UI caller (many by design; some shipped features lack UI)                                                           |
+| **E5** | 🟡 Info    | In-process `setInterval` schedulers — leader lock mitigates but not horizontally scalable                                                     |
+| **E6** | 🟡 Info    | Repository layer ~10% complete (4 repos); hot-path writes still mostly inline Drizzle                                                         |
 
 ---
 
 ## D. Security review (mandatory CWE table — all mitigated)
-
-The repo's own `CLAUDE.md` documents the 2026-06-26 CWE sweep. Spot-checks confirm every class is genuinely mitigated, not aspirational:
-
-| CWE                       | Status | Evidence                                                                                                                  |
-| ------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------- |
-| 601 Open redirect         | ✅     | `safeRelativeRedirect` used in client + server; OAuth uses exchange-code pattern                                          |
-| 918 SSRF                  | ✅     | `assertSafeFetchUrl` / `fetchPublicUrl` enforced on webhook URL registration (`webhooks/routes.ts:47`)                    |
-| 78 Command injection      | ✅     | `safeSpawnOptions({shell:false})` + `assertSafeCommand` allowlist in `dbBackup.service.ts`                                |
-| 22 Path traversal         | ✅     | Upload extensions server-derived via `safeExtensionForContentType`                                                        |
-| 532 Secrets in logs       | ✅     | Global error handler redacts `password=`/`Bearer` (verified by `apiHelpers.test.ts`)                                      |
-| 1333 ReDoS                | ✅     | No `new RegExp(userInput)` found in static scan                                                                           |
-| 327 Weak crypto           | ✅     | Only SHA-1 is in `passwordBreach.service.ts` (HIBP protocol, isolated `hibpSha1Hex` helper)                               |
-| 1427 Identifier injection | ✅     | All DB queries go through Drizzle parameterized `sql` tag                                                                 |
-| 79 XSS                    | ✅     | Global `inputSanitizationMiddleware` mounted; search highlight renderer uses React escaping, no `dangerouslySetInnerHTML` |
 
 **One token-handling note:** access/refresh tokens are stored in `localStorage` (`packages/ui/src/lib/auth.ts`), not httpOnly cookies. This is a deliberate tradeoff for the SPA architecture (the API is on port 1337, UI on 3000 — different origins), but it means **the tokens are readable by any injected JS**. For a fork where stronger XSS-resistance is required, consider moving to httpOnly cookies + BFF pattern. Not a regression — just a design decision to revisit.
 
@@ -90,51 +76,6 @@ These represent backend features that are **implemented but not surfaced** in th
   is available in the pinned runtime.
 - **`.gitattributes`** added — LF normalization is now documented/enforced for
   source/text files.
-
----
-
-## G. Recommended pre-fork checklist (priority order)
-
-### Must fix (blocks the fork)
-
-1. ✅ **A1** — UI production build passes.
-2. ✅ **A2** — `.gitattributes` is present; no-floating-promise fixes applied;
-   `bun run lint` exits 0.
-3. ✅ **B1** — Reset-password page uses the OTP `/confirm` flow.
-4. ✅ **B2** — Removed stale `/admin/users/invite` UI caller.
-5. ✅ **B4** — Revoke-all sessions uses `DELETE /sessions`.
-6. ✅ **B5** — Admin force logout uses `/force-logout`.
-7. ✅ **B3 / B6** — Hook dependency hazards wrapped in `useCallback`.
-
-### Should fix (correctness)
-
-8. ✅ **B8** — Admin broadcast email fan-out routes through BullMQ.
-9. ✅ **B7** — `inputSanitizationMiddleware` placement verified before routes.
-10. ✅ **C2** — `@elastic/elasticsearch` is now an explicit dependency.
-11. ✅ **C8** — Webhook store is DB-backed with migration `0027`.
-12. ✅ **E1** — `apiClient.ts` is documented as canonical for new UI calls; `api.ts` is legacy compatibility.
-13. ✅ **B9** — Admin sessions UI passes `page`/`limit` and exposes pagination controls.
-
-### Nice to have (polish for a clean template)
-
-14. ✅ **C1** — `/search/smart` is ranked full-text search; semantic/vector claims removed from generated docs.
-15. ✅ **E3** — Finish shadcn migration (0 raw controls remaining).
-16. **E2** — Migrate remaining server-data pages to TanStack Query domain hooks
-17. ✅ **C4 / C5 / C6 / C7** — OAuth linked accounts UI, per-category notification preferences, route scan confirmed, customer segment admin UI.
-18. ✅ **C3** — README now says "software key store (hardware providers are stubs)" instead of advertising hardware-backed crypto.
-19. ✅ Refresh `todo.md` to reflect this audit
-
----
-
-## H. What's genuinely good (keep these)
-
-- **Security posture is real**, not theater. Every CWE class has a canonical shared module that's actually wired in, with regression tests (`dbBackup.cwe78`, redaction, safe-redirect, safe-fetch). This is rare.
-- **Test suite is broad and meaningful** — 838 tests including CWE regressions, OAuth account-linking safety, wallet double-spend, audit-chain integrity.
-- **Generated SDK + OpenAPI + drift gate** (`verify:generated`) — the API surface stays in sync with docs and client by construction. Excellent template DX.
-- **Centralized shared modules** (pagination, httpErrors, safeFetch, cryptoHash, apiClient, errorHandler) are documented in `CLAUDE.md` and actually enforced.
-- **Observability is complete**: Prometheus `/metrics`, OTel traces, Sentry, SLO burn-rate alerting, per-component `/status`.
-- **Modular monolith** with module-boundary CI enforcement (`boundaries:check`) — prevents the typical "everything imports everything" rot.
-- **Provider-agnostic integrations**: S3 storage (AWS/B2/R2/MinIO/Wasabi), notification adapters (Slack/Teams/PagerDuty), multi-currency billing + Stripe Tax + EU VAT. Good defaults for a SaaS.
 
 ---
 

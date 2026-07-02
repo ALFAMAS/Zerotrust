@@ -1,22 +1,21 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import { Bell } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { api } from "@/lib/api";
 import { useFormat } from "@/lib/format";
 import { navigateToSafeRelative } from "@/lib/safeRedirect";
+import {
+  bumpNotificationsUnreadCountCache,
+  setNotificationsUnreadCountCache,
+  useMarkAllNotificationsReadMutation,
+  useMarkNotificationReadMutation,
+  useNotificationsListQuery,
+  useNotificationsUnreadCountQuery,
+} from "@/lib/server-state/notifications";
+import type { Notification } from "@/lib/server-state/types";
 import { cn } from "@/lib/utils";
-
-interface Notification {
-  id: string;
-  type: "info" | "success" | "warning" | "error" | "security";
-  title: string;
-  body: string;
-  link?: string;
-  read: boolean;
-  createdAt: string;
-}
 
 function typeIcon(type: Notification["type"]): string {
   switch (type) {
@@ -35,20 +34,16 @@ function typeIcon(type: Notification["type"]): string {
 
 export function NotificationBell() {
   const fmt = useFormat();
-  const [unreadCount, setUnreadCount] = useState(0);
+  const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [loadingList, setLoadingList] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const esRef = useRef<EventSource | null>(null);
 
-  // Fetch unread count on mount
-  useEffect(() => {
-    api
-      .get<{ count: number }>("/notifications/unread-count")
-      .then((d) => setUnreadCount(d.count))
-      .catch(() => {});
-  }, []);
+  const { data: unreadData } = useNotificationsUnreadCountQuery();
+  const unreadCount = unreadData?.count ?? 0;
+  const { data: notifications = [], isLoading: loadingList } = useNotificationsListQuery(open);
+  const markReadMutation = useMarkNotificationReadMutation();
+  const markAllReadMutation = useMarkAllNotificationsReadMutation();
 
   // SSE for real-time unread count updates (replaces 30s polling)
   useEffect(() => {
@@ -65,18 +60,16 @@ export function NotificationBell() {
       esRef.current = es;
 
       es.addEventListener("notification", () => {
-        // New notification arrived — bump unread count
-        setUnreadCount((c) => c + 1);
+        bumpNotificationsUnreadCountCache(queryClient);
       });
 
       es.addEventListener("unread_count", ((e: MessageEvent) => {
         const data = JSON.parse(e.data);
-        setUnreadCount(data.count);
+        setNotificationsUnreadCountCache(queryClient, data.count);
       }) as EventListener);
 
       es.onerror = () => {
         es.close();
-        // Reconnect after 5s
         setTimeout(connect, 5000);
       };
     };
@@ -86,7 +79,7 @@ export function NotificationBell() {
     return () => {
       esRef.current?.close();
     };
-  }, []);
+  }, [queryClient]);
 
   // Close dropdown on click-outside or Escape
   useEffect(() => {
@@ -107,31 +100,16 @@ export function NotificationBell() {
     };
   }, [open]);
 
-  // Fetch notifications when dropdown opens
-  useEffect(() => {
-    if (!open) return;
-    setLoadingList(true);
-    api
-      .get<Notification[]>("/notifications")
-      .then((rows) => setNotifications(rows.slice(0, 5)))
-      .catch(() => setNotifications([]))
-      .finally(() => setLoadingList(false));
-  }, [open]);
+  function markRead(id: string) {
+    markReadMutation.mutate(id);
+  }
 
-  const markRead = useCallback(async (id: string) => {
-    await api.post(`/notifications/${id}/read`).catch(() => {});
-    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
-    setUnreadCount((c) => Math.max(0, c - 1));
-  }, []);
-
-  const markAllRead = useCallback(async () => {
-    await api.post("/notifications/read-all").catch(() => {});
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-    setUnreadCount(0);
-  }, []);
+  function markAllRead() {
+    markAllReadMutation.mutate();
+  }
 
   function handleNotificationClick(n: Notification) {
-    if (!n.read) void markRead(n.id);
+    if (!n.read) markRead(n.id);
     setOpen(false);
     if (n.link) navigateToSafeRelative(n.link, "/dashboard");
   }
