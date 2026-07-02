@@ -5,9 +5,11 @@ import { Hono } from "hono";
 import { getConfig } from "../../config";
 import { getDb } from "../../db";
 import {
+  completePasskeyAuthentication,
+  registerPasskey,
+} from "../../db/repositories/passkeys.repository";
+import {
   organizationMembersTable,
-  refreshTokensTable,
-  sessionsTable,
   usersTable,
 } from "../../db/schema";
 import { getLogger } from "../../logger";
@@ -20,8 +22,9 @@ import {
 } from "../../services/auth/orgSecurityPolicy.service";
 import { TokenService } from "../../services/auth/token.service";
 import { getClientIp } from "../../shared/clientIp";
+import { hashTokenSha256 } from "../../shared/cryptoHash";
 import { internalError } from "../../shared/httpErrors";
-import type { HonoEnv, Passkey, User } from "../../shared/types";
+import type { HonoEnv, Passkey } from "../../shared/types";
 
 const router = new Hono<HonoEnv>();
 const logger = getLogger("passkey-routes");
@@ -36,7 +39,7 @@ async function getTokenService(): Promise<TokenService> {
 }
 
 function hashToken(token: string): string {
-  return crypto.createHash("sha256").update(token).digest("hex");
+  return hashTokenSha256(token);
 }
 
 const challengeStore = new Map<string, { challenge: string; expiresAt: number }>();
@@ -244,26 +247,7 @@ router.post("/register/verify", authMiddleware, async (c) => {
       createdAt: new Date(),
     };
 
-    const db = getDb();
-    const userRows = await db
-      .select({ passkeys: usersTable.passkeys, mfa: usersTable.mfa })
-      .from(usersTable)
-      .where(eq(usersTable.id, userId))
-      .limit(1);
-    const existingPasskeysList = (userRows[0]?.passkeys as Passkey[] | null) || [];
-    const currentMfa = (userRows[0]?.mfa as User["mfa"] | null) ?? {
-      totp: { enabled: false, backupCodes: [] },
-      webauthn: { enabled: false },
-    };
-
-    await db
-      .update(usersTable)
-      .set({
-        passkeys: [...existingPasskeysList, newPasskey],
-        mfa: { ...currentMfa, webauthn: { enabled: true } },
-        updatedAt: new Date(),
-      })
-      .where(eq(usersTable.id, userId));
+    await registerPasskey(userId, newPasskey);
 
     return c.json({ verified: true });
   } catch (err) {
@@ -439,10 +423,6 @@ router.post("/authenticate/verify", async (c) => {
           }
         : pk
     );
-    await db
-      .update(usersTable)
-      .set({ passkeys: updatedPasskeys, updatedAt: new Date() })
-      .where(eq(usersTable.id, user.id));
 
     const cfg = getConfig();
     const tokenSvc = await getTokenService();
@@ -456,10 +436,12 @@ router.post("/authenticate/verify", async (c) => {
       scope: ["openid"],
     });
     const payload = await tokenSvc.verifyAccessToken(accessToken);
+    const refreshTokenPlain = await tokenSvc.signRefreshToken();
 
-    const [session] = await db
-      .insert(sessionsTable)
-      .values({
+    await completePasskeyAuthentication({
+      userId: user.id,
+      updatedPasskeys,
+      session: {
         id: sessionId,
         userId: user.id,
         tokenId: payload.jti,
@@ -469,15 +451,12 @@ router.post("/authenticate/verify", async (c) => {
         expiresAt: new Date(payload.exp * 1000),
         lastActivityAt: new Date(),
         isActive: true,
-      })
-      .returning();
-
-    const refreshTokenPlain = await tokenSvc.signRefreshToken();
-    await db.insert(refreshTokensTable).values({
-      userId: user.id,
-      sessionId: session.id,
-      tokenHash: hashToken(refreshTokenPlain),
-      expiresAt: new Date(Date.now() + cfg.session.refreshTokenTTL * 1000),
+      },
+      refreshToken: {
+        userId: user.id,
+        tokenHash: hashToken(refreshTokenPlain),
+        expiresAt: new Date(Date.now() + cfg.session.refreshTokenTTL * 1000),
+      },
     });
 
     return c.json({

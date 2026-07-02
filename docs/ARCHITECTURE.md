@@ -144,21 +144,16 @@ Prioritized; **P1 is a correctness bug**, the rest are improvements.
 | P6 | Fail-fast typed config validation at boot | Catch missing prod secrets before serving traffic | S |
 | P7 | Group `services/` by domain | **Shipped 2026-07-03** — files live under `auth/`, `billing/`, `notifications/`, `compliance/`, `ops/`, and `shared/` | Done |
 
-### P1 — Separate the worker from the API process (correctness)
+### P1 — Separate the worker from the API process (correctness) — **Shipped** (P1.2, P1.5)
 
-`startServer()` unconditionally calls `startRetentionScheduler`,
-`startNotificationEmailFallbackScheduler`, `startBillingLifecycleScheduler`,
-`startBackupScheduler`, and `initEmailQueue`. The production guide runs the API
-under **PM2 cluster mode** (`pm2 start … -i max`), so **every** worker process
-starts its own copy of each scheduler and a BullMQ consumer. Effects: N nightly
-`pg_dump` backups, duplicate dunning/win-back emails per user, and racing
-retention purges.
+Production deploy blueprints default API replicas to `WORKER_MODE=true` and run
+exactly one dedicated worker (`bun run src/worker.ts` / `dist/worker.js`). See
+[`docs/deployment.md`](./deployment.md) §Production background-worker topology
+and [`docs/reference-architecture.md`](./reference-architecture.md).
 
-**Recommended:** extract a dedicated `src/worker.ts` entrypoint that owns the
-BullMQ consumers and the cron schedulers; run it as a **single** PM2 fork
-(`-i 1`) while the HTTP API scales horizontally and stays stateless. Cheaper
-interim fix: guard each scheduler behind a Redis lock or
-`process.env.NODE_APP_INSTANCE === "0"`.
+~~`startServer()` unconditionally calls schedulers in every PM2 cluster worker.~~
+Extracted `src/worker.ts` owns BullMQ consumers and cron schedulers; API scales
+horizontally and defers background work when `WORKER_MODE=true`.
 
 ### P2 — Migration safety
 

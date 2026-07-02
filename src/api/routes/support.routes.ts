@@ -3,6 +3,11 @@ import { Hono } from "hono";
 import { z } from "zod";
 import { getDb, getReadDb } from "../../db";
 import { supportTicketMessagesTable, supportTicketsTable } from "../../db/schema";
+import {
+  createSupportTicketWithMessage,
+  replyToSupportTicket,
+  updateSupportTicketStatus,
+} from "../../db/repositories/supportTickets.repository";
 import { getLogger } from "../../logger";
 import { authMiddleware } from "../../middleware/auth";
 import { rateLimit } from "../../middleware/rateLimiting";
@@ -40,27 +45,13 @@ router.post("/", rateLimit({ points: 20, windowSecs: 3600 }), async (c) => {
     return c.json({ error: "INVALID_REQUEST", issues: parsed.error.issues }, 400);
 
   try {
-    const db = getDb();
-    const [ticket] = await db
-      .insert(supportTicketsTable)
-      .values({
-        userId: user.id,
-        orgId: parsed.data.orgId ?? null,
-        subject: parsed.data.subject,
-        priority: parsed.data.priority ?? "normal",
-        status: "open",
-      })
-      .returning();
-
-    const [message] = await db
-      .insert(supportTicketMessagesTable)
-      .values({
-        ticketId: ticket.id,
-        authorId: user.id,
-        authorRole: "user",
-        body: parsed.data.message,
-      })
-      .returning();
+    const { ticket, message } = await createSupportTicketWithMessage({
+      userId: user.id,
+      orgId: parsed.data.orgId,
+      subject: parsed.data.subject,
+      priority: parsed.data.priority,
+      messageBody: parsed.data.message,
+    });
 
     logger.info("Support ticket opened", { ticketId: ticket.id, userId: user.id });
     return c.json({ ticket, messages: [message] }, 201);
@@ -141,21 +132,13 @@ router.post("/:id/messages", rateLimit({ points: 60, windowSecs: 3600 }), async 
       return c.json({ error: "TICKET_CLOSED", message: "Reopen the ticket before replying" }, 409);
     }
 
-    const [message] = await db
-      .insert(supportTicketMessagesTable)
-      .values({
-        ticketId: id,
-        authorId: user.id,
-        authorRole: agent ? "agent" : "user",
-        body: parsed.data.body,
-      })
-      .returning();
-
-    // An agent reply awaits the user (pending); a user reply reopens for the agent.
-    await db
-      .update(supportTicketsTable)
-      .set({ status: agent ? "pending" : "open", updatedAt: new Date() })
-      .where(eq(supportTicketsTable.id, id));
+    const message = await replyToSupportTicket({
+      ticketId: id,
+      authorId: user.id,
+      authorRole: agent ? "agent" : "user",
+      body: parsed.data.body,
+      nextStatus: agent ? "pending" : "open",
+    });
 
     return c.json({ message }, 201);
   } catch (err) {
@@ -190,11 +173,10 @@ router.patch("/:id", async (c) => {
       return c.json({ error: "FORBIDDEN", message: "Only agents can set pending" }, 403);
     }
 
-    const [updated] = await db
-      .update(supportTicketsTable)
-      .set({ status: parsed.data.status, updatedAt: new Date() })
-      .where(eq(supportTicketsTable.id, id))
-      .returning();
+    const updated = await updateSupportTicketStatus({
+      ticketId: id,
+      status: parsed.data.status,
+    });
 
     return c.json({ ticket: updated });
   } catch (err) {

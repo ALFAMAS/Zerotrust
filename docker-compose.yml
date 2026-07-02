@@ -143,6 +143,8 @@ services:
       LOG_FORMAT: json
       NODE_ENV: development
       PORT: 3000
+      # Production-style topology: API defers schedulers to the worker service.
+      WORKER_MODE: "true"
 
     depends_on:
       postgres:
@@ -156,6 +158,31 @@ services:
       timeout: 5s
       retries: 5
 
+    networks:
+      - zerotrust
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # zerotrust background worker (schedulers + BullMQ consumers)
+  # ─────────────────────────────────────────────────────────────────────────
+  zerotrust-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: zerotrust-worker
+    command: ["bun", "dist/worker.js"]
+    environment:
+      DATABASE_URL: postgresql://zerotrust:password@postgres:5432/zerotrust
+      TOKEN_SECRET_HEX: 0000000000000000000000000000000000000000000000000000000000000000
+      CSFLE_MASTER_KEY_HEX: 0000000000000000000000000000000000000000000000000000000000000000
+      REDIS_URI: redis://:redispass@redis:6379
+      NODE_ENV: development
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      LOG_FORMAT: json
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     networks:
       - zerotrust
 

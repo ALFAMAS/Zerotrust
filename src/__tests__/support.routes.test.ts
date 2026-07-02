@@ -26,6 +26,7 @@ function makeDbChain(ret: any = []) {
     update: vi.fn().mockReturnThis(),
     set: vi.fn().mockReturnThis(),
   };
+  chain.transaction = vi.fn(async (callback: (tx: typeof chain) => unknown) => callback(chain));
   return chain;
 }
 

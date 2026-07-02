@@ -365,8 +365,11 @@ bun run build          # compile the API to dist/
 ### 3. Run with PM2
 
 ```bash
-# API (port 1337) — cluster mode
-pm2 start dist/api/server.js --name zerotrust-api -i max
+# API replicas (port 1337) — cluster mode; defer schedulers to the worker below
+WORKER_MODE=true pm2 start dist/api/server.js --name zerotrust-api -i max
+
+# Dedicated background worker (exactly one instance)
+pm2 start dist/worker.js --name zerotrust-worker -i 1
 
 # UI (Next.js, port 3000)
 cd packages/ui

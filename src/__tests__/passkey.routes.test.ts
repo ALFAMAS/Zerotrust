@@ -121,6 +121,7 @@ function makeDbChain() {
   };
   chain.where.mockImplementation(() => chain);
   chain.values.mockImplementation(() => chain);
+  chain.transaction = vi.fn(async (callback: (tx: typeof chain) => unknown) => callback(chain));
   return chain;
 }
 

@@ -538,6 +538,23 @@ follow-ups (**E2**, E4–E6 info debt) remain in [`todo.md`](./todo.md).
   (PM2 + K8s blueprints). Test: `workerTopology.test.ts`. Verification: same
   suite as P1.1.
 
+- **P1.4 — Extend repository layer (support + passkey hot paths):** Added
+  `supportTickets.repository.ts` (`createSupportTicketWithMessage`,
+  `replyToSupportTicket`, `updateSupportTicketStatus`) and `passkeys.repository.ts`
+  (`registerPasskey`, `completePasskeyAuthentication`). Routes delegate:
+  `support.routes.ts` (create/reply/status), `passkey.routes.ts`
+  (register/authenticate). Five new transactional tests in
+  `p1.repositories.test.ts`; route tests updated for `db.transaction` mocks.
+  Nine repositories total under `src/db/repositories/`.
+
+- **P1.5 — Production worker topology deploy defaults:** README PM2 section now
+  sets `WORKER_MODE=true` on API replicas and documents exactly one
+  `zerotrust-worker` process; `docker-compose.yml` adds `WORKER_MODE=true` on the
+  API service plus a dedicated `zerotrust-worker` service. Reference architecture
+  and deployment docs already matched — no code change beyond compose/README.
+
+- **Verification (2026-07-03):** `bun run test` — **875 passed** (106 files).
+
 ---
 
 ## P2 — Maintainability and refactoring (2026-07-03)

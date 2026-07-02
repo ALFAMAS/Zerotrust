@@ -1,21 +1,6 @@
 # zerotrust — TODO
 
-Consolidated, prioritized backlog of work that is **not yet shipped**. Shipped
-features live in [`tdone.md`](./tdone.md); the standing audit is
-[`docs/AUDIT.md`](./docs/AUDIT.md). The focused fork-readiness audit is
-[`AUDIT-REPORT.md`](./AUDIT-REPORT.md).
-
-**Priorities:** P0 critical/security · P1 stability/correctness · P2
-maintainability/refactor · P3 scalability/performance · P4 docs/DX · P5 compliance.
-**Status:** Pending · In Progress.
-
----
-
-_P3 scalability & performance (P3.1–P3.5) shipped 2026-07-03 — see
-[`tdone.md`](./tdone.md) §P3 scalability & performance._
-
----
-
+\
 ## Audit backlog — 2026-07-03
 
 _Synthesized from `docs/AUDIT.md`, `AUDIT-REPORT.md`, `docs/maintenance-scorecard.md`,
@@ -23,29 +8,8 @@ _Synthesized from `docs/AUDIT.md`, `AUDIT-REPORT.md`, `docs/maintenance-scorecar
 `docs/compliance/`, and a full-repo scan. Does not duplicate shipped work in
 [`tdone.md`](./tdone.md)._
 
-_Verified 2026-07-03: **21 open items** (P1.3 removed — duplicate of shipped P3.2
-in `tdone.md`; admin/org/support/session list GETs already use `getReadDb()`)._
-
-### P1 — Stability and correctness
-
-- **P1.4 — Extend repository layer beyond the current seven repos** _(partial — 7 repos shipped; hot paths still inline)_
-  - **Where:** `src/db/repositories/` (7 today); inline Drizzle remains in
-    `passkey.routes.ts`, `mfa.routes.ts`, `support.routes.ts`, parts of
-    `admin.routes.ts`.
-  - **Why:** AUDIT C1/M1 — multi-statement mutations without a single transaction
-    boundary are correctness risk under retry/concurrency.
-  - **Acceptance:** At least support-ticket create/reply/close and passkey
-    register/authenticate flows delegate to repository methods with tests;
-    `AUDIT-REPORT.md` E6 note updated (no longer "~10% / 4 repos").
-
-- **P1.5 — Production worker topology enforcement (operational)** _(partial — P1.2 code shipped; deploy enforcement open)_
-  - **Where:** `src/jobs/topology.ts`, `src/worker.ts`, `docs/deployment.md`,
-    `docs/reference-architecture.md`.
-  - **Why:** P1.2 shipped `WORKER_MODE` gating, startup warnings, and
-    `workerTopology.test.ts`; schedulers still run in-process on API replicas
-    unless operators set `WORKER_MODE=true` in production deploys.
-  - **Acceptance:** Deploy blueprints default API to `WORKER_MODE=true`; exactly
-    one worker process documented.
+_Verified 2026-07-03: **19 open items** (P1.3 removed — duplicate of shipped P3.2
+in `tdone.md`; P1.4–P1.5 shipped 2026-07-03)._
 
 ### P2 — Maintainability and refactoring
 

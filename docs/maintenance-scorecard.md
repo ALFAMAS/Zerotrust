@@ -130,7 +130,7 @@ ungated `/metrics` exceptions to zero.
 | Standing audit freshness | 2026-07-03 | <quarter old | ✅ |
 | `verify:generated` (API reference drift) | 0 diff | 0 diff | ✅ |
 | Unaddressed TODO P0 items | 0 (P0.1–P0.3 done) | 0 | ✅ |
-| Unaddressed TODO P1 items | 0 (P1.1–P1.2 done) | 0 | ✅ |
+| Unaddressed TODO P1 items | 0 (P1.1–P1.5 done) | 0 | ✅ |
 | Unaddressed TODO P4 items | 0 (P4.1–P4.5 done) | 0 | ✅ |
 
 ---

@@ -7,28 +7,11 @@
 
 ---
 
-## TL;DR
-
-| Check                                          | Result                                                                                                                                                              |
-| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `bun run test` (vitest)                        | ✅ **838 tests / 99 files passing**                                                                                                                                 |
-| `bun run build` (tsc API)                      | ✅ clean                                                                                                                                                            |
-| `bun run type-check`                           | ✅ clean                                                                                                                                                            |
-| `bun run verify:generated` (SDK + docs drift)  | ⚠ regenerates cleanly; expected tracked docs diffs are included for the improved API↔UI scanner                                                                     |
-| `bun run boundaries:check`                     | ✅ clean                                                                                                                                                            |
-| `bun run audit:integration` (API↔UI map)       | ✅ passes, scans typed/template `api.*`, `apiClient`, and `useApi` calls; documents 25 API/SDK-only product-surface decisions outside the actionable unmatched list |
-| `bun run ui:audit` (shadcn adoption)           | ✅ **0 raw HTML controls** — migration complete                                                                                                                     |
-| `bun run lint` (biome)                         | ✅ exits 0; only pre-existing script warnings remain                                                                                                                |
-| `bun run --cwd packages/ui build` (next build) | ✅ production build passes; only existing Next/SWC version warning remains                                                                                          |
-
-**Verdict:** Strong, production-shaped SaaS template (27 route modules, 41 DB tables, 838 root tests, full Stripe/SSO/MFA/WebAuthn/observability). All fork-blocking, should-fix, and P2 maintainability items are resolved — details consolidated in [`tdone.md`](./tdone.md).
-
 ### Open follow-ups (still in [`todo.md`](./todo.md))
 
 | ID     | Status  | Summary                                                                                   |
 | ------ | ------- | ----------------------------------------------------------------------------------------- |
-| **E5** | 🟡 Info | In-process `setInterval` schedulers — leader lock mitigates but not horizontally scalable |
-| **E6** | 🟡 Info | Repository layer ~10% complete (4 repos); hot-path writes still mostly inline Drizzle     |
+| **E5** | 🟡 Info | In-process `setInterval` schedulers — mitigated by `WORKER_MODE` + dedicated worker; Redis leader lock remains guardrail |
 
 ---
 
@@ -40,29 +23,12 @@
 
 ## E. Architecture / maintainability debt
 
-### E5. 🟡 Background scheduler is in-process (documented)
+### E5. 🟡 Background scheduler is in-process (documented, mitigated)
 
-`docs/AUDIT.md` C3/P1 already flags this: `setInterval`-based schedulers in `src/jobs/scheduler.ts` run in every API replica unless `WORKER_MODE=true`. The leader-election lock mitigates duplication, but it's still a single-process pattern. Fine for a starter, but not horizontally scalable as-shipped.
+`docs/AUDIT.md` C3/P1 flags this: `setInterval`-based schedulers in `src/jobs/scheduler.ts` run in every API replica unless `WORKER_MODE=true`. Production deploy blueprints (README PM2, `docker-compose.yml`, `docs/reference-architecture.md`) default API replicas to `WORKER_MODE=true` with exactly one dedicated worker (`src/worker.ts`). The leader-election lock remains a guardrail. Fine for a starter template; queue-backed scheduling is a future scale-out path.
 
-### E6. 🟡 Repository layer is only ~10% complete
+### E6. ✅ Repository layer expanded (P1.1 + P1.4)
 
-`docs/AUDIT.md` C1/M1 flags: only 4 transactional repositories exist (authSessions, stripeEvents, wallet, pointsLedger). Refresh-token rotation, session lifecycle, billing mutations, org role transitions still run as sequential non-transactional statements. The architecture is sound but the migration is incomplete.
-
----
-
-## F. Documentation / DX notes
-
-- **`todo.md`** — P2 maintainability/refactor backlog is cleared; active backlog now starts at P3/P4 follow-ups.
-  All P1 fork-blocking items are cleared.
-- **`tdone.md`** — completed audit items (A1–A2, B1–B9, C1–C8, E1, E3) consolidated
-  under "Fork-readiness audit" (2026-07-02). Latest verification: **835 tests / 99 files**;
-  build, lint, type-check, UI build, and boundary checks pass.
-- **Bun runtime bump** is complete: `.bun-version` pins Bun 1.3.14 and
-  `server.ts` mounts `compress()` directly after verifying `CompressionStream`
-  is available in the pinned runtime.
-- **`.gitattributes`** added — LF normalization is now documented/enforced for
-  source/text files.
+`docs/AUDIT.md` C1/M1: nine transactional repositories under `src/db/repositories/` now cover auth sessions, billing, orgs, wallet, Stripe/webhook idempotency, points ledger, support tickets, and passkeys. Hot-path routes delegate multi-statement mutations; remaining inline Drizzle is mostly reads and single-row updates (MFA, admin list filters).
 
 ---
-
-_Generated 2026-07-03. Re-run `bun run verify:generated` + `bun run --cwd packages/ui build` after applying fixes to confirm._

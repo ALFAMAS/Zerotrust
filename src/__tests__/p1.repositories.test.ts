@@ -13,6 +13,15 @@ import {
 } from "../db/repositories/billingSubscriptions.repository";
 import { createOrganizationWithOwner, transferOrganizationOwnership } from "../db/repositories/orgs.repository";
 import { awardPoints } from "../db/repositories/pointsLedger.repository";
+import {
+  completePasskeyAuthentication,
+  registerPasskey,
+} from "../db/repositories/passkeys.repository";
+import {
+  createSupportTicketWithMessage,
+  replyToSupportTicket,
+  updateSupportTicketStatus,
+} from "../db/repositories/supportTickets.repository";
 
 const mockGetDb = vi.mocked(getDb);
 
@@ -154,5 +163,111 @@ describe("P1 transactional repositories", () => {
       metadata: null,
     });
     expect(entry).toEqual({ id: "ledger-1", balanceAfter: 35 });
+  });
+
+  it("creates a support ticket and first message inside one transaction", async () => {
+    const tx = makeBuilder([
+      [{ id: "ticket-1", subject: "Help", status: "open" }],
+      [{ id: "msg-1", body: "Need assistance" }],
+    ]);
+    const db = makeTxDb(tx);
+    mockGetDb.mockReturnValue(db as never);
+
+    const result = await createSupportTicketWithMessage({
+      userId: "user-1",
+      subject: "Help",
+      messageBody: "Need assistance",
+    });
+
+    expect(db.transaction).toHaveBeenCalledTimes(1);
+    expect(tx.insert).toHaveBeenCalledTimes(2);
+    expect(result.ticket.id).toBe("ticket-1");
+    expect(result.message.id).toBe("msg-1");
+  });
+
+  it("replies to a support ticket and updates status inside one transaction", async () => {
+    const tx = makeBuilder([[{ id: "msg-2", body: "Agent reply" }]]);
+    const db = makeTxDb(tx);
+    mockGetDb.mockReturnValue(db as never);
+
+    const message = await replyToSupportTicket({
+      ticketId: "ticket-1",
+      authorId: "agent-1",
+      authorRole: "agent",
+      body: "Agent reply",
+      nextStatus: "pending",
+    });
+
+    expect(db.transaction).toHaveBeenCalledTimes(1);
+    expect(tx.insert).toHaveBeenCalledTimes(1);
+    expect(tx.update).toHaveBeenCalledTimes(1);
+    expect(tx.set).toHaveBeenCalledWith({ status: "pending", updatedAt: expect.any(Date) });
+    expect(message.id).toBe("msg-2");
+  });
+
+  it("updates support ticket status through the repository", async () => {
+    const db = makeBuilder([[{ id: "ticket-1", status: "closed" }]]);
+    mockGetDb.mockReturnValue(db as never);
+
+    const ticket = await updateSupportTicketStatus({ ticketId: "ticket-1", status: "closed" });
+
+    expect(ticket.status).toBe("closed");
+    expect(db.update).toHaveBeenCalledTimes(1);
+  });
+
+  it("registers a passkey and enables webauthn MFA inside one transaction", async () => {
+    const tx = makeBuilder([
+      [{ passkeys: [], mfa: { totp: { enabled: false, backupCodes: [] }, webauthn: { enabled: false } } }],
+    ]);
+    const db = makeTxDb(tx);
+    mockGetDb.mockReturnValue(db as never);
+
+    await registerPasskey("user-1", {
+      credentialId: "cred-1",
+      publicKey: "pk",
+      counter: 0,
+      backedUp: false,
+      transports: [],
+      createdAt: new Date("2026-07-03T00:00:00.000Z"),
+    });
+
+    expect(db.transaction).toHaveBeenCalledTimes(1);
+    expect(tx.select).toHaveBeenCalledTimes(1);
+    expect(tx.update).toHaveBeenCalledTimes(1);
+    expect(tx.set).toHaveBeenCalledWith(
+      expect.objectContaining({
+        mfa: expect.objectContaining({ webauthn: { enabled: true } }),
+      })
+    );
+  });
+
+  it("completes passkey authentication with session and refresh token in one transaction", async () => {
+    const tx = makeBuilder([[{ id: "session-1", userId: "user-1" }]]);
+    const db = makeTxDb(tx);
+    mockGetDb.mockReturnValue(db as never);
+
+    const session = await completePasskeyAuthentication({
+      userId: "user-1",
+      updatedPasskeys: [],
+      session: {
+        id: "session-1",
+        userId: "user-1",
+        tokenId: "jti-1",
+        deviceFingerprint: {},
+        ipAddress: "127.0.0.1",
+        expiresAt: new Date("2026-08-01T00:00:00.000Z"),
+        isActive: true,
+      },
+      refreshToken: {
+        userId: "user-1",
+        tokenHash: "hash",
+        expiresAt: new Date("2026-08-01T00:00:00.000Z"),
+      },
+    });
+
+    expect(db.transaction).toHaveBeenCalledTimes(1);
+    expect(tx.update).toHaveBeenCalledTimes(1);
+    expect(tx.insert).toHaveBeenCalledTimes(2);
+    expect(session.id).toBe("session-1");
   });
 });
