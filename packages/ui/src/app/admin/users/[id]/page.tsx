@@ -3,6 +3,7 @@
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import Badge from "@/components/Badge";
+import { Button } from "@/components/ui/button";
 import { api } from "@/lib/api";
 
 interface UserDetail {
@@ -26,7 +27,10 @@ interface UserDetail {
   oauthProviders?: string[];
   activeSessions?: number;
   sessionsCount?: number;
+  customerSegment?: string | null;
 }
+
+const SEGMENTS = ["champion", "at_risk", "expansion", "new"] as const;
 
 const fmt = (d?: string | null) => (d ? new Date(d).toLocaleString() : "—");
 
@@ -101,6 +105,22 @@ export default function UserDetailPage() {
     }
   }
 
+  async function handleSegmentChange(segment: string | null) {
+    if (!user) return;
+    setActionLoading(true);
+    try {
+      if (segment) {
+        await api.put(`/admin/users/${id}/segment`, { segment });
+        setUser((u) => (u ? { ...u, customerSegment: segment } : u));
+        showToast(`Segment set to ${segment}`);
+      }
+    } catch {
+      showToast("Failed to update segment");
+    } finally {
+      setActionLoading(false);
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -125,13 +145,13 @@ export default function UserDetailPage() {
       )}
 
       <div className="flex items-center gap-3">
-        <button
-          type="button"
+        <Button
+          variant="ghost"
           onClick={() => router.back()}
-          className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+          className="text-sm text-muted-foreground hover:text-foreground"
         >
           ← Back
-        </button>
+        </Button>
         <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
           User Detail
         </h1>
@@ -262,14 +282,42 @@ export default function UserDetailPage() {
               {sessionCount} session{sessionCount !== 1 ? "s" : ""} active
             </p>
           </div>
-          <button
-            type="button"
+          <Button
+            variant="outline"
             onClick={handleForceLogout}
             disabled={actionLoading || sessionCount === 0}
-            className="rounded-lg bg-orange-900/40 border border-orange-500/30 px-4 py-2 text-sm text-orange-400 hover:bg-orange-900/60 disabled:opacity-40 transition-colors"
+            className="border-orange-500/30 bg-orange-900/40 text-orange-400 hover:bg-orange-900/60 disabled:opacity-40"
           >
             Force logout all
-          </button>
+          </Button>
+        </div>
+      </div>
+
+      {/* Customer Segment */}
+      <div className="rounded-xl bg-card border border-border p-6">
+        <h3 className="font-semibold text-foreground">Customer Segment</h3>
+        <p className="text-sm text-muted-foreground mt-0.5 mb-3">
+          Tag this account for CS/success workflows.
+        </p>
+        <div className="flex flex-wrap gap-2">
+          {SEGMENTS.map((seg) => {
+            const active = user.customerSegment === seg;
+            return (
+              <Button
+                key={seg}
+                variant="outline"
+                onClick={() => handleSegmentChange(seg)}
+                disabled={actionLoading}
+                className={`px-3 py-1.5 ${
+                  active
+                    ? "border-primary bg-primary/15 text-primary"
+                    : "border-border text-muted-foreground hover:text-foreground hover:border-primary/40"
+                }`}
+              >
+                {seg.replace("_", " ")}
+              </Button>
+            );
+          })}
         </div>
       </div>
 
@@ -277,22 +325,22 @@ export default function UserDetailPage() {
       <div className="rounded-xl bg-card border border-red-900/40 p-6 space-y-4">
         <h3 className="font-semibold text-red-400">Danger Zone</h3>
         <div className="flex flex-wrap gap-3">
-          <button
-            type="button"
+          <Button
+            variant="outline"
             onClick={handleToggleStatus}
             disabled={actionLoading}
-            className="rounded-lg bg-orange-900/30 border border-orange-500/30 px-4 py-2 text-sm font-medium text-orange-400 hover:bg-orange-900/50 disabled:opacity-50 transition-colors"
+            className="border-orange-500/30 bg-orange-900/30 text-orange-400 hover:bg-orange-900/50 disabled:opacity-50"
           >
             {user.status === "active" ? "Suspend User" : "Activate User"}
-          </button>
-          <button
-            type="button"
+          </Button>
+          <Button
+            variant="destructive"
             onClick={handleDelete}
             disabled={actionLoading}
-            className="rounded-lg bg-red-900/30 border border-red-500/30 px-4 py-2 text-sm font-medium text-red-400 hover:bg-red-900/50 disabled:opacity-50 transition-colors"
+            className="border-red-500/30 bg-red-900/30 text-red-400 hover:bg-red-900/50 disabled:opacity-50"
           >
             Delete User
-          </button>
+          </Button>
         </div>
       </div>
     </div>

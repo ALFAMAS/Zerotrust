@@ -257,6 +257,7 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
 - ✅ Background jobs — registry with Zod schemas, Redis-lock leader election, dedicated worker (`src/worker.ts`)
 - ✅ Module boundaries — `.boundaries.json` + `scripts/check-boundaries.ts`, CI-enforced
 - ✅ Shared canonical modules — pagination, safeFetch, safeRedirect, cryptoHash, httpErrors, apiClient
+- ✅ UI HTTP client boundary — canonical `apiClient` helpers for JSON, FormData, blob, retry, refresh replay; legacy `api` facade documented
 - ✅ CI/CD — GitHub Actions (lint, type-check, test, SDK drift, UI build, SAST, E2E, load)
 - ✅ Docker Compose — full dev stack + observability overlay
 - ✅ Dockerfile — multi-stage production image (Bun + Node)
@@ -286,7 +287,30 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
   package, and added page/limit controls plus regression coverage for the admin
   all-sessions browser.
 
-- **Verification:** `bun run test -- --run` → **835 tests / 99 files passing**;
+- **Audit follow-up E1:** Resolved the dual UI HTTP-client ambiguity by making
+  `apiClient.ts` the documented boundary for new UI→API calls, adding PATCH/PUT
+  helpers plus transient retry coverage, wiring `useApi` through `apiClient`, and
+  adding `docs/ui-http-client.md` for the migration rule. `api.ts` remains a
+  legacy compatibility facade while older pages are migrated in E2 batches.
+
+- **Audit follow-up C1:** Removed the semantic-search stub/claim from
+  `/search/smart`. Smart search now runs a single ranked PostgreSQL
+  `websearch_to_tsquery` query across users, organizations, and support tickets
+  when Elasticsearch is unavailable; OpenAPI/generated docs label it ranked
+  smart search instead of semantic/vector search.
+
+- **Audit follow-up C3:** Softened the README directory-tree comment from
+  "hardware key store" to "software key store (hardware providers are stubs)"
+  so the README accurately reflects that only the software key provider is
+  functional; TPM/Secure Enclave/PKCS#11 stubs remain as fail-fast extension points.
+
+- **Audit follow-up C4/C5/C6/C7:** Surfaced backend-only features in the UI:
+  added OAuth "Connect" button to the security page; added per-category
+  notification preference toggles (5 categories × 3 channels) with backend
+  schema extension; confirmed `/auth/me/nps` and `/auth/me/onboarding-complete`
+  routes exist; added customer segment selector to admin user detail page.
+
+- **Verification:** `bun run test -- --run` → **838 tests / 99 files passing**;
   `bun run build`, `bun run lint`, `bun run --cwd packages/ui build`,
   `bun run boundaries:check`, and `bun run type-check` all pass. UI vitest passes
   **46 tests / 9 files**. Generated SDK/docs regenerate deterministically; this

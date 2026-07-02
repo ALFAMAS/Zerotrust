@@ -8,11 +8,11 @@
  *     bearer-token omission, inconsistent 4xx handling, JSON parse crashes
  *     on non-JSON responses).
  *   - This module is the single secure HTTP boundary for the Next.js client.
- *     Callers say what they want (`apiGet`, `apiPost`, `apiPostFormData`,
- *     `apiGetBlob`, `apiDelete`); the helpers attach the auth header, set
- *     Content-Type appropriately, never let the browser leak tokens to a
- *     cross-origin host (same-origin BASE_URL enforced), and surface a
- *     consistent `{ message, code, status }` error shape.
+ *     Callers say what they want (`apiGet`, `apiPost`, `apiPatch`, `apiPut`,
+ *     `apiPostFormData`, `apiGetBlob`, `apiDelete`); the helpers attach the
+ *     auth header, set Content-Type appropriately, never let the browser leak
+ *     tokens to a cross-origin host (same-origin BASE_URL enforced), and
+ *     surface a consistent `{ message, code, status }` error shape.
  *
  * Same-origin requirement (CWE-601/CWE-918 hygiene):
  *   - BASE_URL comes from `NEXT_PUBLIC_ZEROTRUST_URL`. All callers therefore
@@ -28,6 +28,12 @@ const BASE_URL = process.env.NEXT_PUBLIC_ZEROTRUST_URL || "http://localhost:1337
 
 /** Request timeout in milliseconds before we abort and may retry. */
 const FETCH_TIMEOUT_MS = 15_000;
+
+/** Maximum number of retry attempts for transient failures (network error or 5xx). */
+const MAX_RETRIES = 2;
+
+/** Base delay for exponential backoff (ms). Actual delay = BASE_RETRY_DELAY * 2^attempt. */
+const BASE_RETRY_DELAY_MS = 500;
 
 export interface ApiError extends Error {
   code?: string;
@@ -48,6 +54,10 @@ function buildAuthHeaders(skipAuth: boolean): Record<string, string> {
   const token = getToken();
   if (!skipAuth && token) headers.Authorization = `Bearer ${token}`;
   return headers;
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 async function fetchWithTimeout(
@@ -93,11 +103,34 @@ async function dispatch<T>(
     ...(options.extraHeaders ?? {}),
   };
 
-  const res = await fetchWithTimeout(
-    url,
-    { ...init, method, headers },
-    options.timeoutMs ?? FETCH_TIMEOUT_MS
-  );
+  let res: Response | null = null;
+  let lastErr: unknown;
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    if (attempt > 0) {
+      await sleep(BASE_RETRY_DELAY_MS * 2 ** (attempt - 1));
+    }
+
+    try {
+      res = await fetchWithTimeout(
+        url,
+        { ...init, method, headers },
+        options.timeoutMs ?? FETCH_TIMEOUT_MS
+      );
+    } catch (err) {
+      lastErr = err;
+      if (attempt < MAX_RETRIES) continue;
+      throw err;
+    }
+
+    if (res.status >= 500 && attempt < MAX_RETRIES) {
+      lastErr = new Error(`HTTP ${res.status}`);
+      continue;
+    }
+
+    break;
+  }
+
+  if (!res) throw lastErr;
 
   if (res.status === 401 && !options.skipAuth && !isRetry && getRefreshToken()) {
     const refreshed = await tryRefresh();
@@ -144,6 +177,36 @@ export function apiPost<T>(
 ): Promise<T> {
   return dispatch<T>(
     "POST",
+    path,
+    {
+      headers: { "Content-Type": "application/json" },
+      body: body === undefined ? undefined : JSON.stringify(body),
+    },
+    options
+  );
+}
+
+/** PATCH a JSON body. */
+export function apiPatch<T>(
+  path: string,
+  body: unknown,
+  options: ApiClientOptions = {}
+): Promise<T> {
+  return dispatch<T>(
+    "PATCH",
+    path,
+    {
+      headers: { "Content-Type": "application/json" },
+      body: body === undefined ? undefined : JSON.stringify(body),
+    },
+    options
+  );
+}
+
+/** PUT a JSON body. */
+export function apiPut<T>(path: string, body: unknown, options: ApiClientOptions = {}): Promise<T> {
+  return dispatch<T>(
+    "PUT",
     path,
     {
       headers: { "Content-Type": "application/json" },

@@ -264,7 +264,7 @@ async function searchDatabase(
   return { total: hits.length, hits, provider: "database" };
 }
 
-// ── Smart search (semantic placeholder) ─────────────────────────────────────
+// ── Smart search (ranked full-text) ──────────────────────────────────────────
 
 export interface SemanticSearchRequest {
   query: string;
@@ -273,41 +273,131 @@ export interface SemanticSearchRequest {
   limit?: number;
 }
 
+interface RankedSearchRow {
+  [key: string]: unknown;
+  id: string;
+  type: SearchableType;
+  title: string;
+  highlight?: string | null;
+  score: number | string;
+}
+
 /**
- * Smart search — uses BM25 + term boosting from the primary search as a
- * fallback. When an embedding provider is configured (EMBEDDING_PROVIDER),
- * this will dispatch to a vector search. The provider-agnostic interface
- * means the rest of the app doesn't care which backend serves the results.
+ * Smart search — ranked full-text search across the database fallback corpus.
+ * This is deliberately not advertised as semantic/vector search: no embedding
+ * provider is invoked, and provider env vars cannot silently downgrade into a
+ * fake "semantic" result. Elasticsearch deployments still use the ES scorer;
+ * otherwise PostgreSQL `websearch_to_tsquery` ranking covers users, orgs, and
+ * support tickets in one bounded query.
  */
 export async function smartSearch(params: SemanticSearchRequest): Promise<SearchResults> {
   const { query, orgId, region, limit = 10 } = params;
+  const client = getEsClient();
 
-  // Check if an embedding provider is configured
-  const provider = process.env.EMBEDDING_PROVIDER;
-  if (provider === "openai" && process.env.OPENAI_API_KEY) {
-    return embeddingSearch(query, orgId, region, limit, "openai");
-  }
-  if (provider === "anthropic" && process.env.ANTHROPIC_API_KEY) {
-    return embeddingSearch(query, orgId, region, limit, "anthropic");
+  if (client) {
+    return searchElasticsearch(query, orgId, undefined, region, limit);
   }
 
-  // Fallback: enhanced keyword search with fuzzy matching
-  return search({ query, orgId, region, limit });
+  return smartSearchDatabase(query, orgId, region, limit);
 }
 
-async function embeddingSearch(
+async function smartSearchDatabase(
   query: string,
   orgId: string | undefined,
   region: StorageRegion | undefined,
-  limit: number,
-  provider: string
+  limit: number
 ): Promise<SearchResults> {
-  // Placeholder: in production this would call the embedding API,
-  // embed the query, and run a kNN search against an ES dense_vector field.
-  // For now, fall back to keyword search with a note about the provider.
-  logger.info(`Embedding search requested (provider=${provider}), falling back to keyword`);
-  const results = await search({ query, orgId, region, limit });
-  return { ...results, provider: "database" };
+  const db = getReadDb();
+  const orgFilter = orgId ?? null;
+  const regionFilter = region ?? null;
+  const rows = await db.execute<RankedSearchRow>(sql`
+    WITH search_query AS (
+      SELECT
+        websearch_to_tsquery('simple', ${query}) AS tsq,
+        ${query}::text AS raw_query
+    )
+    SELECT id, type, title, highlight, score
+    FROM (
+      SELECT
+        u.id::text AS id,
+        'user'::text AS type,
+        COALESCE(NULLIF(u.display_name, ''), u.email) AS title,
+        u.email AS highlight,
+        ts_rank_cd(
+          setweight(to_tsvector('simple', COALESCE(u.display_name, '')), 'A') ||
+          setweight(to_tsvector('simple', COALESCE(u.email, '')), 'B'),
+          sq.tsq
+        ) AS score
+      FROM users u
+      CROSS JOIN search_query sq
+      WHERE
+        (sq.tsq @@ (
+          setweight(to_tsvector('simple', COALESCE(u.display_name, '')), 'A') ||
+          setweight(to_tsvector('simple', COALESCE(u.email, '')), 'B')
+        ) OR u.display_name ILIKE ('%' || sq.raw_query || '%') OR u.email ILIKE ('%' || sq.raw_query || '%'))
+        AND (${orgFilter}::uuid IS NULL OR EXISTS (
+          SELECT 1 FROM organization_members om WHERE om.user_id = u.id AND om.org_id = ${orgFilter}::uuid
+        ))
+
+      UNION ALL
+
+      SELECT
+        o.id::text AS id,
+        'org'::text AS type,
+        o.name AS title,
+        o.slug AS highlight,
+        ts_rank_cd(
+          setweight(to_tsvector('simple', COALESCE(o.name, '')), 'A') ||
+          setweight(to_tsvector('simple', COALESCE(o.slug, '')), 'B'),
+          sq.tsq
+        ) AS score
+      FROM organizations o
+      CROSS JOIN search_query sq
+      WHERE
+        (sq.tsq @@ (
+          setweight(to_tsvector('simple', COALESCE(o.name, '')), 'A') ||
+          setweight(to_tsvector('simple', COALESCE(o.slug, '')), 'B')
+        ) OR o.name ILIKE ('%' || sq.raw_query || '%') OR o.slug ILIKE ('%' || sq.raw_query || '%'))
+        AND (${orgFilter}::uuid IS NULL OR o.id = ${orgFilter}::uuid)
+        AND (${regionFilter}::text IS NULL OR o.storage_region = ${regionFilter}::text)
+
+      UNION ALL
+
+      SELECT
+        t.id::text AS id,
+        'ticket'::text AS type,
+        t.subject AS title,
+        COALESCE(
+          (SELECT m.body FROM support_ticket_messages m WHERE m.ticket_id = t.id ORDER BY m.created_at DESC LIMIT 1),
+          t.status
+        ) AS highlight,
+        ts_rank_cd(
+          setweight(to_tsvector('simple', COALESCE(t.subject, '')), 'A') ||
+          setweight(to_tsvector('simple', COALESCE(t.status, '')), 'C'),
+          sq.tsq
+        ) AS score
+      FROM support_tickets t
+      CROSS JOIN search_query sq
+      WHERE
+        (sq.tsq @@ (
+          setweight(to_tsvector('simple', COALESCE(t.subject, '')), 'A') ||
+          setweight(to_tsvector('simple', COALESCE(t.status, '')), 'C')
+        ) OR t.subject ILIKE ('%' || sq.raw_query || '%'))
+        AND (${orgFilter}::uuid IS NULL OR t.org_id = ${orgFilter}::uuid)
+    ) ranked
+    ORDER BY score DESC, title ASC
+    LIMIT ${limit}
+  `);
+
+  const hits: SearchHit[] = rows.map((row) => ({
+    id: row.id,
+    type: row.type,
+    title: row.title,
+    highlight: row.highlight ?? undefined,
+    score: Number(row.score),
+  }));
+
+  return { total: hits.length, hits, provider: "database" };
 }
 
 export function isElasticsearchEnabled(): boolean {

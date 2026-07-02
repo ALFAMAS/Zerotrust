@@ -17,10 +17,33 @@ import { internalError } from "../../shared/httpErrors";
 import { paginated, parsePaginatedQuery } from "../../shared/pagination";
 import type { HonoEnv } from "../../shared/types";
 
+export type NotificationCategory = "security" | "billing" | "account" | "social" | "system";
+
+export type NotificationChannel = "email" | "push" | "inApp";
+
+/** All categories enabled on all channels by default. */
+export interface CategoryPreference {
+  email: boolean;
+  push: boolean;
+  inApp: boolean;
+}
+
 export interface NotificationPreferences {
   emailFallback: boolean;
   emailFallbackDays: number;
+  /** Per-category channel controls. Missing = all channels enabled. */
+  categories?: Partial<Record<NotificationCategory, Partial<CategoryPreference>>>;
 }
+
+export const NOTIFICATION_CATEGORIES: NotificationCategory[] = [
+  "security",
+  "billing",
+  "account",
+  "social",
+  "system",
+];
+
+export const NOTIFICATION_CHANNELS: NotificationChannel[] = ["email", "push", "inApp"];
 
 const router = new Hono<HonoEnv>();
 const logger = getLogger("notification-routes");
@@ -311,9 +334,18 @@ router.get("/preferences", async (c) => {
 
 // ── PUT /notifications/preferences ───────────────────────────────────────────
 
+const categorySchema = z.object({
+  email: z.boolean().optional(),
+  push: z.boolean().optional(),
+  inApp: z.boolean().optional(),
+});
+
 const prefsSchema = z.object({
   emailFallback: z.boolean().optional(),
   emailFallbackDays: z.number().int().min(1).max(30).optional(),
+  categories: z
+    .record(z.enum(["security", "billing", "account", "social", "system"]), categorySchema)
+    .optional(),
 });
 
 router.put("/preferences", async (c) => {

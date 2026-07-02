@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { api } from "../api";
+import { apiGet } from "../apiClient";
 
 interface UseApiState<T> {
   data: T | null;
@@ -53,7 +53,7 @@ export function useApi<T = any>(
     }
     setState((s) => ({ ...s, loading: true, error: null }));
     try {
-      const data = await api.get<T>(path);
+      const data = await apiGet<T>(path);
       if (!mountedRef.current) return;
       setState({ data, loading: false, error: null });
       opts.onSuccess?.(data);

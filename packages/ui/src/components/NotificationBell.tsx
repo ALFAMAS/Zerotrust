@@ -2,6 +2,7 @@
 
 import { Bell } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { Button } from "@/components/ui/button";
 import { api } from "@/lib/api";
 import { useFormat } from "@/lib/format";
 import { navigateToSafeRelative } from "@/lib/safeRedirect";
@@ -137,13 +138,14 @@ export function NotificationBell() {
 
   return (
     <div ref={containerRef} className="relative">
-      <button
-        type="button"
+      <Button
+        variant="ghost"
+        size="icon"
         aria-label="Notifications"
         aria-haspopup="dialog"
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
-        className="relative flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+        className="relative h-8 w-8"
       >
         <Bell className="h-5 w-5" />
         {unreadCount > 0 && (
@@ -151,7 +153,7 @@ export function NotificationBell() {
             {unreadCount > 99 ? "99+" : unreadCount}
           </span>
         )}
-      </button>
+      </Button>
 
       {open && (
         <div
@@ -163,13 +165,13 @@ export function NotificationBell() {
           <div className="flex items-center justify-between border-b border-border px-4 py-3">
             <span className="text-sm font-semibold text-foreground">Notifications</span>
             {unreadCount > 0 && (
-              <button
-                type="button"
+              <Button
+                variant="ghost"
                 onClick={markAllRead}
-                className="text-xs text-primary transition-colors hover:text-primary/80"
+                className="text-xs text-primary"
               >
                 Mark all read
-              </button>
+              </Button>
             )}
           </div>
 
@@ -182,12 +184,12 @@ export function NotificationBell() {
               </div>
             ) : (
               notifications.map((n) => (
-                <button
-                  type="button"
+                <Button
+                  variant="ghost"
                   key={n.id}
                   onClick={() => handleNotificationClick(n)}
                   className={cn(
-                    "flex w-full items-start gap-3 border-b border-border px-4 py-3 text-left transition-colors last:border-b-0 hover:bg-accent",
+                    "flex w-full items-start gap-3 border-b border-border px-4 py-3 text-left last:border-b-0",
                     n.read && "opacity-60"
                   )}
                 >
@@ -204,20 +206,20 @@ export function NotificationBell() {
                   {!n.read && (
                     <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-primary" />
                   )}
-                </button>
+                </Button>
               ))
             )}
           </div>
 
           {notifications.length > 0 && (
             <div className="border-t border-border px-4 py-2">
-              <button
-                type="button"
+              <Button
+                variant="ghost"
                 onClick={markAllRead}
-                className="w-full py-1 text-center text-xs text-primary transition-colors hover:text-primary/80"
+                className="w-full py-1 text-center text-xs text-primary"
               >
                 Mark all as read
-              </button>
+              </Button>
             </div>
           )}
         </div>

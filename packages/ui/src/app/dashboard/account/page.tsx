@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { api } from "@/lib/api";
 import { apiGetBlob } from "@/lib/apiClient";
 
@@ -80,14 +82,14 @@ export default function AccountPage() {
           Download a copy of all data associated with your account, including your profile,
           sessions, and activity logs.
         </p>
-        <button
-          type="button"
+        <Button
+          variant="default"
           onClick={handleExport}
           disabled={exportLoading}
           className="px-4 py-2 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-medium disabled:opacity-50 transition-colors"
         >
           {exportLoading ? "Preparing export…" : "Download my data"}
-        </button>
+        </Button>
       </section>
 
       {/* Account Deletion */}
@@ -110,13 +112,13 @@ export default function AccountPage() {
                 .
               </p>
             </div>
-            <button
-              type="button"
+            <Button
+              variant="outline"
               onClick={handleCancelDeletion}
               className="px-4 py-2 rounded-lg border border-border hover:border-border text-foreground/80 text-sm transition-colors"
             >
               Cancel deletion request
-            </button>
+            </Button>
           </div>
         ) : (
           <>
@@ -135,7 +137,7 @@ export default function AccountPage() {
               <label htmlFor="page-f0" className="block text-sm text-muted-foreground">
                 Type <span className="font-mono font-bold text-red-400">DELETE</span> to confirm
               </label>
-              <input
+              <Input
                 id="page-f0"
                 type="text"
                 value={deleteConfirm}
@@ -143,14 +145,14 @@ export default function AccountPage() {
                 placeholder="DELETE"
                 className="w-full px-3 py-2 rounded-lg bg-muted border border-border text-foreground text-sm placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-red-500"
               />
-              <button
-                type="button"
+              <Button
+                variant="destructive"
                 onClick={handleDelete}
                 disabled={deleteConfirm !== "DELETE" || deleteLoading}
                 className="px-4 py-2 rounded-lg bg-red-700 hover:bg-red-600 text-foreground text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
               >
                 {deleteLoading ? "Processing…" : "Delete my account"}
-              </button>
+              </Button>
             </div>
           </>
         )}

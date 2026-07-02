@@ -45,7 +45,7 @@ router.get("/", async (c) => {
   }
 });
 
-// ── Smart search (semantic) ──────────────────────────────────────────────────
+// ── Smart search (ranked full-text) ──────────────────────────────────────────
 
 const smartSearchSchema = z.object({
   q: z.string().min(1).max(500),

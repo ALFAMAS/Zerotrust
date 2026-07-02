@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Toggle from "@/components/Toggle";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { api } from "@/lib/api";
 
 interface AuthSettings {
@@ -84,7 +86,7 @@ function NumberInput({ label, value, onChange, min, max }: NumberInputProps) {
       <label htmlFor="page-f0" className="text-sm font-medium text-foreground">
         {label}
       </label>
-      <input
+      <Input
         id="page-f0"
         type="number"
         min={min}
@@ -94,7 +96,7 @@ function NumberInput({ label, value, onChange, min, max }: NumberInputProps) {
           const n = Number(e.target.value);
           if (!Number.isNaN(n)) onChange(Math.min(max, Math.max(min, n)));
         }}
-        className="w-28 rounded-lg bg-muted border border-border px-3 py-1.5 text-sm text-foreground text-right focus:border-ring focus:outline-none"
+        className="w-28 text-right"
       />
     </div>
   );

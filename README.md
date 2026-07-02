@@ -488,7 +488,7 @@ GET    /health · /healthz · /metrics (Prometheus)
 │   ├── shared/                     # reusable helpers: pagination, dbCount, httpErrors, roles, safeFetch/safeRedirect…
 │   ├── jit/                        # cross-tenant just-in-time access
 │   ├── audit/ · metrics/ · webhooks/                               # ops + platform modules
-│   ├── crypto/                     # PASETO, CSFLE, hardware key store
+│   ├── crypto/                     # PASETO, CSFLE, software key store (hardware providers are stubs)
 │   └── __tests__/                  # Vitest unit + integration tests
 ├── packages/
 │   ├── client/                     # generated dependency-free TypeScript SDK

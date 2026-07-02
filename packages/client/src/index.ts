@@ -914,7 +914,7 @@ export class zerotrustClient {
   }
 
   /**
-   * Smart / semantic search
+   * Ranked smart search
    *
    * @route GET /search/smart
    */

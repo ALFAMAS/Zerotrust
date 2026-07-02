@@ -24,6 +24,8 @@ import {
   apiPostFormData,
   apiDelete,
   apiGetBlob,
+  apiPatch,
+  apiPut,
   apiPostRaw,
 } from "./apiClient";
 
@@ -107,6 +109,15 @@ describe("apiClient — POST / FormData / Blob", () => {
 });
 
 describe("apiClient — error surface", () => {
+  it("retries transient 5xx responses before resolving", async () => {
+    fetchMock
+      .mockResolvedValueOnce(jsonResponse(503, { message: "temporarily unavailable" }))
+      .mockResolvedValueOnce(jsonResponse(200, { ok: true }));
+
+    await expect(apiGet<{ ok: boolean }>("/status")).resolves.toEqual({ ok: true });
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
   it("throws a structured error with message + code + status on 4xx", async () => {
     fetchMock.mockResolvedValueOnce(
       jsonResponse(400, { message: "Bad input", code: "INVALID_REQUEST" })
@@ -124,5 +135,23 @@ describe("apiClient — error surface", () => {
     const [, init] = fetchMock.mock.calls[0];
     expect(init.method).toBe("DELETE");
     expect(init.body).toBeUndefined();
+  });
+
+  it("exposes PATCH and PUT helpers so new JSON mutations do not need the legacy api facade", async () => {
+    fetchMock
+      .mockResolvedValueOnce(jsonResponse(200, { patched: true }))
+      .mockResolvedValueOnce(jsonResponse(200, { put: true }));
+
+    await apiPatch("/admin/users/u1", { status: "active" });
+    await apiPut("/admin/settings", { appName: "ZeroAuth" });
+
+    expect(fetchMock.mock.calls[0][1]).toMatchObject({
+      method: "PATCH",
+      body: JSON.stringify({ status: "active" }),
+    });
+    expect(fetchMock.mock.calls[1][1]).toMatchObject({
+      method: "PUT",
+      body: JSON.stringify({ appName: "ZeroAuth" }),
+    });
   });
 });

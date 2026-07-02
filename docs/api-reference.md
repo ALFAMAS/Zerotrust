@@ -235,7 +235,7 @@ Custom domain resolution, region health, geo-routing, branding, domains, and dat
 
 ## Search
 
-Full-text and smart search plus indexing operations.
+Full-text and ranked smart search plus indexing operations.
 
 | Method | Path | Summary | Auth |
 | --- | --- | --- | --- |
@@ -243,7 +243,7 @@ Full-text and smart search plus indexing operations.
 | POST | `/search/index` | Index a searchable document | 🔒 |
 | DELETE | `/search/index/{type}/{id}` | Remove an indexed document | 🔒 |
 | GET | `/search/provider` | Get search provider status | 🔒 |
-| GET | `/search/smart` | Smart / semantic search | 🔒 |
+| GET | `/search/smart` | Ranked smart search | 🔒 |
 
 ## Sessions
 

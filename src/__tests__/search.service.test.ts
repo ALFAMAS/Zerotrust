@@ -20,6 +20,8 @@ vi.mock("../logger", () => ({
 beforeEach(() => {
   vi.resetModules();
   vi.clearAllMocks();
+  delete process.env.EMBEDDING_PROVIDER;
+  delete process.env.OPENAI_API_KEY;
 });
 
 describe("search database fallback", () => {
@@ -34,5 +36,44 @@ describe("search database fallback", () => {
 
     expect(results).toEqual({ total: 0, hits: [], provider: "database" });
     expect(getReadDb).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("smart search", () => {
+  it("uses a single ranked database query instead of the old embedding placeholder fallback", async () => {
+    process.env.EMBEDDING_PROVIDER = "openai";
+    process.env.OPENAI_API_KEY = "test-key";
+    const db = {
+      execute: vi.fn().mockResolvedValue([
+        {
+          id: "ticket-1",
+          type: "ticket",
+          title: "Cannot receive magic links",
+          highlight: "Magic link delivery fails for one domain",
+          score: "1.25",
+        },
+      ]),
+    };
+    const { getDb, getReadDb } = await import("../db");
+    vi.mocked(getDb).mockReturnValue(db as any);
+    vi.mocked(getReadDb).mockReturnValue(db as any);
+    const { smartSearch } = await import("../services/search.service");
+
+    const results = await smartSearch({ query: "magic link", limit: 5 });
+
+    expect(db.execute).toHaveBeenCalledTimes(1);
+    expect(results).toEqual({
+      total: 1,
+      provider: "database",
+      hits: [
+        {
+          id: "ticket-1",
+          type: "ticket",
+          title: "Cannot receive magic links",
+          highlight: "Magic link delivery fails for one domain",
+          score: 1.25,
+        },
+      ],
+    });
   });
 });

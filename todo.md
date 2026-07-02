@@ -15,17 +15,13 @@ maintainability/refactor · P3 scalability/performance · P4 docs/DX.
 
 ### P1 — correctness / fork-readiness
 
-- **E1 — UI HTTP client consolidation** — decide whether `packages/ui/src/lib/api.ts`
-  or `packages/ui/src/lib/apiClient.ts` is canonical, then migrate/document the
-  split so new UI code has one clear API-call pattern.
+- No active P1 audit items.
 
 ### P2 — product completeness / template polish
 
-- **C1 — Smart search claim** — either implement real semantic search for
-  `/search/smart` or remove the semantic-search claim/endpoint until it is real.
-- **C4/C5/C7 — Surface backend-only features in UI** — linked OAuth account
-  management, granular notification preferences, and customer segment controls
-  exist backend-side but need dashboard/admin exposure or docs marking them API-only.
+- **C4/C5/C7 — partially done; see AUDIT-REPORT** — OAuth linked accounts
+  connect/disconnect, per-category notification preferences, and customer segment
+  tagging are now surfaced in the UI. Remaining polish: `useApi` migration (E2).
 - **E2 — `useApi` adoption** — migrate repetitive dashboard/admin
   `useEffect + api.get + loading` boilerplate to `useApi` / `usePaginatedApi` in
   focused batches.
@@ -34,9 +30,6 @@ maintainability/refactor · P3 scalability/performance · P4 docs/DX.
 
 ### P4 — docs / claims hygiene
 
-- **C3 — Hardware key-store claims** — either productize TPM/Secure Enclave/PKCS#11
-  providers or soften post-quantum/hardware-backed crypto claims to reflect that
-  only the software provider is functional.
 - **Bun runtime bump review** — `.bun-version` pins Bun 1.2.23; consider bumping
   after confirming the `CompressionStream` guard is no longer needed.
 
@@ -50,9 +43,24 @@ highlights:
 - **Audit-report must-fix sweep** — UI build/lint blockers fixed, B1-B6
   frontend/backend contract drift resolved, B7/B8 verified, C2 made explicit with
   `@elastic/elasticsearch`, B9 admin session pagination added, and webhook
-  endpoints moved to DB persistence. Verification: **835 tests / 99 files
+  endpoints moved to DB persistence. Verification: **838 tests / 99 files
   passing**, plus build, lint, type-check, UI build, generated docs, and boundary
   checks.
+- **E1 UI HTTP client boundary** — `apiClient.ts` is documented as canonical for
+  new UI→API calls, now exposes PATCH/PUT helpers and transient retry coverage,
+  and `useApi` uses it internally. `api.ts` remains legacy compatibility while
+  older pages are migrated under E2.
+- **C1 smart search claim fix** — `/search/smart` now uses ranked PostgreSQL
+  full-text search across users, orgs, and support tickets when Elasticsearch is
+  unavailable; semantic/vector claims were removed from OpenAPI/generated docs.
+- **C3 hardware key-store claims** — README directory-tree comment softened from
+  "hardware key store" to "software key store (hardware providers are stubs)".
+- **C4/C5/C6/C7 backend-feature UI exposure** — Added OAuth "Connect" button to
+  the security page for unlinked providers; added per-category × per-channel
+  notification preference toggles (5 categories × 3 channels) to the
+  notifications page; confirmed `/auth/me/nps` and `/auth/me/onboarding-complete`
+  routes exist in `auth.routes.ts`; added customer segment selector to the admin
+  user detail page calling `PUT /admin/users/:id/segment`.
 - **Backlog sweep D6** — OpenAPI/SDK docs expanded to 115 operations; SDK README
   examples added; trace correlation tested; auth hot path optimized with JOIN +
   short Redis user cache.

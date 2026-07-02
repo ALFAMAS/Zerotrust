@@ -70,20 +70,20 @@ Two classes:
 
 ## C. Incomplete / stubbed features (call out before forking)
 
-### C1. 🟠 Semantic / "smart" search is a stub
+### C1. ✅ Smart search is ranked full-text, not a semantic stub
 
-**File:** `src/services/search.service.ts:295-308`
+**File:** `src/services/search.service.ts`
 
 ```ts
-async function embeddingSearch(...) {
-  // Placeholder: in production this would call the embedding API,
-  // embed the query, and run a kNN search against an ES dense_vector field.
-  logger.info(`Embedding search requested (provider=${provider}), falling back to keyword`);
-  return search(...);
-}
+return smartSearchDatabase(query, orgId, region, limit);
 ```
 
-The `/search/smart` endpoint exists and is wired, but always falls back to keyword search even when `EMBEDDING_PROVIDER=openai` is set. Not a bug, but the README claims "smart/semantic search" — it isn't.
+**Fix applied:** the placeholder embedding branch was removed. `/search/smart` now
+uses one bounded PostgreSQL `websearch_to_tsquery` ranked query across users,
+organizations, and support tickets when Elasticsearch is unavailable; if
+Elasticsearch is configured it uses the ES scorer. OpenAPI/generated docs now call
+this **ranked smart search** rather than semantic/vector search, and
+`search.service.test.ts` covers the old `EMBEDDING_PROVIDER=openai` downgrade path.
 
 ### C2. ✅ Elasticsearch dependency is explicit
 
@@ -95,26 +95,29 @@ const { Client } = require("@elastic/elasticsearch");
 
 **Fix applied:** `@elastic/elasticsearch` is now listed in root `dependencies` and locked in `bun.lock`, so enabling the Elasticsearch provider no longer depends on a hidden manual install.
 
-### C3. 🟠 Hardware key store (TPM / Secure Enclave / PKCS#11) is a documented stub
+### C3. ✅ Hardware key-store claims softened to match reality
 
 **File:** `src/crypto/hardware-key-store.ts:197-378`
-All three hardware providers throw `NotImplementedError` on every operation. The code explicitly fails fast at startup if `KEY_PROVIDER=tpm|secure-enclave|pkcs11` is set (good), but the README's "post-quantum / CSFLE hardware key store" is aspirational. Only the `software` provider works. Fine for a template, just don't advertise hardware-backed crypto.
 
-### C4. 🟡 OAuth "Account merge / linking" — backend exists, **no UI**
+All three hardware providers throw `NotImplementedError` on every operation. The code explicitly fails fast at startup if `KEY_PROVIDER=tpm|secure-enclave|pkcs11` is set (good). Only the `software` provider works.
 
-`POST /auth/me/link` is implemented and tested (`auth.routes.test.ts`), but there is no settings page where a user can see linked providers or unlink one (`DELETE /auth/oauth/:provider` also has no UI caller). The user has no way to manage linked accounts from the dashboard.
+**Fix applied:** README directory-tree comment changed from "hardware key store" to "software key store (hardware providers are stubs)" so the README no longer overstates what ships. The hardware provider stubs remain in-tree as documented extension points with fail-fast guards.
 
-### C5. 🟡 Notification preferences UI only exposes `emailFallback`
+### C4. ✅ OAuth "Account merge / linking" — UI now surfaces connect/disconnect
 
-`/notifications/preferences` supports `emailFallback` + `emailFallbackDays`. The tdone.md claims "Granular per-channel per-category preferences" — the backend stores them in `users.metadata.notificationPreferences`, but the UI (`dashboard/notifications/page.tsx`) only renders the single email-fallback toggle. Per-category preference controls are missing.
+`POST /auth/me/link` and `DELETE /auth/oauth/:provider` are implemented and tested. The dashboard security page now renders a "Connect" button for unlinked providers (initiating the OAuth authorize flow) alongside the existing "Disconnect" button for linked providers.
 
-### C6. 🟡 `/auth/me/nps` and `/auth/me/onboarding-complete` are not in the audit's "mounted routes" list
+### C5. ✅ Notification preferences UI exposes per-category controls
 
-Both are called from UI components (`NpsSurveyPrompt.tsx`, `SetupChecklist.tsx`). They aren't in the static route file scan — confirm they're defined in `auth.routes.ts` (the audit scanner only catches `router.get/post(...)` with a literal string; if they're defined with a template literal they'd be missed). Quick grep needed.
+`/notifications/preferences` supports per-category × per-channel toggles (security, billing, account, social, system × email, push, inApp). The backend schema was extended and the dashboard notifications page now renders the full grid.
 
-### C7. 🟡 "Customer segments" — backend has `PUT /admin/users/:id/segment`, no UI
+### C6. ✅ `/auth/me/nps` and `/auth/me/onboarding-complete` confirmed in route file
 
-`admin.routes.ts:727` sets a customer segment. There's no admin page that calls it; segments can only be set via API.
+Both routes exist in `auth.routes.ts` (lines 1218 and 1283). The audit scanner missed them because it only catches `router.get/post(...)` with literal strings; these use inline handlers that the scanner pattern didn't match.
+
+### C7. ✅ Customer segments — admin UI now exposes segment tagging
+
+`PUT /admin/users/:id/segment` is called from the admin user detail page, which now renders a segment selector (champion, at_risk, expansion, new).
 
 ### C8. ✅ Webhook management is **in-memory**, not DB-backed — fixed
 
@@ -146,14 +149,20 @@ The repo's own `CLAUDE.md` documents the 2026-06-26 CWE sweep. Spot-checks confi
 
 ## E. Architecture / maintainability debt
 
-### E1. 🟠 Dual HTTP client modules on the UI side
+### E1. ✅ UI HTTP client boundary is documented and extended
 
-Two parallel clients exist:
+Two UI HTTP entry points still exist, but their roles are now explicit:
 
-- `packages/ui/src/lib/api.ts` — full-featured (cache, dedup, offline-queue, retry). Used by **~49 files**.
-- `packages/ui/src/lib/apiClient.ts` — simpler (timeout, refresh, no cache). Used by **6 files** (`status`, `account`, `profile`, `admin/page`, `FeedbackWidget`, `billing`).
+- `packages/ui/src/lib/apiClient.ts` — canonical boundary for new UI→API calls.
+  It now exposes JSON helpers for GET/POST/PATCH/PUT/DELETE, FormData uploads,
+  blob downloads, timeout, refresh replay, and transient 5xx/network retry.
+- `packages/ui/src/lib/api.ts` — legacy compatibility facade used by older
+  dashboard/admin pages while they are migrated in focused batches.
 
-The `CLAUDE.md` says `apiClient.ts` is canonical ("never raw `fetch`"), but the majority of the app uses `api.ts`. Pick one, migrate the other, or document when to use which. As-is, a new contributor will be confused.
+**Fix applied:** `CLAUDE.md` and new `docs/ui-http-client.md` document the split,
+`apiClient.ts` gained `apiPatch()` / `apiPut()` and retry coverage, and
+`useApi()` now consumes `apiClient.ts` internally. Remaining older page migration
+is tracked under E2.
 
 ### E2. 🟠 `useApi` hook exists but is barely used
 
@@ -183,9 +192,9 @@ These represent backend features that are **implemented but not surfaced** in th
 
 ## F. Documentation / DX notes
 
-- **`todo.md`** refreshed — fixed/verified B1-B9, C2, and C8 moved out of the active
+- **`todo.md`** refreshed — fixed/verified B1-B9, C2, C8, and E1 moved out of the active
   backlog; remaining audit follow-ups are tracked as P1/P2/P4 items.
-- **`tdone.md`** refreshed — latest verification is **835 tests / 99 files** with
+- **`tdone.md`** refreshed — latest verification is **838 tests / 99 files** with
   build, lint, type-check, UI build, and boundary checks passing. Generated SDK/docs
   regenerate deterministically; the API↔UI and shadcn reports have expected tracked
   diffs from this audit batch.
@@ -214,16 +223,16 @@ These represent backend features that are **implemented but not surfaced** in th
 9. ✅ **B7** — `inputSanitizationMiddleware` placement verified before routes.
 10. ✅ **C2** — `@elastic/elasticsearch` is now an explicit dependency.
 11. ✅ **C8** — Webhook store is DB-backed with migration `0027`.
-12. **E1** — Decide on one HTTP client (`api.ts` vs `apiClient.ts`)
+12. ✅ **E1** — `apiClient.ts` is documented as canonical for new UI calls; `api.ts` is legacy compatibility.
 13. ✅ **B9** — Admin sessions UI passes `page`/`limit` and exposes pagination controls.
 
 ### Nice to have (polish for a clean template)
 
-14. **E3** — Finish shadcn migration (44 raw controls)
-15. **E2** — Migrate pages to `useApi`/`usePaginatedApi`
-16. **C1** — Either implement semantic search or remove the `/search/smart` endpoint + "smart search" claim from README
-17. **C4 / C5 / C7** — Surface the backend-only features in the UI (linked accounts, notification preferences, segments)
-18. **C3** — Either implement or remove the hardware key-store stubs + "post-quantum" claims
+14. ✅ **C1** — `/search/smart` is ranked full-text search; semantic/vector claims removed from generated docs.
+15. **E3** — Finish shadcn migration (44 raw controls)
+16. **E2** — Migrate pages to `useApi`/`usePaginatedApi`
+17. ✅ **C4 / C5 / C6 / C7** — OAuth linked accounts UI, per-category notification preferences, route scan confirmed, customer segment admin UI.
+18. ✅ **C3** — README now says "software key store (hardware providers are stubs)" instead of advertising hardware-backed crypto.
 19. ✅ Refresh `todo.md` to reflect this audit
 
 ---
@@ -231,7 +240,7 @@ These represent backend features that are **implemented but not surfaced** in th
 ## H. What's genuinely good (keep these)
 
 - **Security posture is real**, not theater. Every CWE class has a canonical shared module that's actually wired in, with regression tests (`dbBackup.cwe78`, redaction, safe-redirect, safe-fetch). This is rare.
-- **Test suite is broad and meaningful** — 835 tests including CWE regressions, OAuth account-linking safety, wallet double-spend, audit-chain integrity.
+- **Test suite is broad and meaningful** — 838 tests including CWE regressions, OAuth account-linking safety, wallet double-spend, audit-chain integrity.
 - **Generated SDK + OpenAPI + drift gate** (`verify:generated`) — the API surface stays in sync with docs and client by construction. Excellent template DX.
 - **Centralized shared modules** (pagination, httpErrors, safeFetch, cryptoHash, apiClient, errorHandler) are documented in `CLAUDE.md` and actually enforced.
 - **Observability is complete**: Prometheus `/metrics`, OTel traces, Sentry, SLO burn-rate alerting, per-component `/status`.

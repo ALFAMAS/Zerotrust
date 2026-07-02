@@ -77,7 +77,7 @@
     },
     {
       "name": "Search",
-      "description": "Full-text and smart search plus indexing operations."
+      "description": "Full-text and ranked smart search plus indexing operations."
     },
     {
       "name": "Sessions",
@@ -3836,7 +3836,7 @@
         "tags": [
           "Search"
         ],
-        "summary": "Smart / semantic search",
+        "summary": "Ranked smart search",
         "responses": {
           "200": {
             "description": "Smart search results",

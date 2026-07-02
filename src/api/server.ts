@@ -201,7 +201,7 @@ export async function createServer() {
   app.route("/regions", regionRoutes);
 
   // ─── Search routes ─────────────────────────────────────────────────────────
-  // Full-text search (Elasticsearch) + smart/semantic search.
+  // Full-text search (Elasticsearch) + ranked smart search.
   app.route("/search", searchRoutes);
 
   // ─── Wallet, Loyalty, Referral, Gamification ──────────────────────────────

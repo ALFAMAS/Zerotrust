@@ -86,6 +86,19 @@ export default function SecurityPage() {
     }
   };
 
+  const connectOAuth = async (provider: string) => {
+    try {
+      const data = await api.get<any>(`/auth/oauth/${provider}/authorize`);
+      if (data?.authorizeUrl) {
+        window.location.href = data.authorizeUrl;
+      } else {
+        setMsg(`Failed to start ${provider} connection flow.`);
+      }
+    } catch (err: any) {
+      setMsg(err.message || `Failed to connect ${provider}`);
+    }
+  };
+
   const disableTOTP = async () => {
     if (
       !confirm(
@@ -272,6 +285,11 @@ export default function SecurityPage() {
                     {linked && (
                       <Button variant="outline" size="sm" onClick={() => disconnectOAuth(provider)}>
                         Disconnect
+                      </Button>
+                    )}
+                    {!linked && (
+                      <Button size="sm" onClick={() => connectOAuth(provider)}>
+                        Connect
                       </Button>
                     )}
                   </div>

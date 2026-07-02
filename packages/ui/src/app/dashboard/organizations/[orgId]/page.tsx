@@ -3,6 +3,8 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { SkeletonCard, SkeletonTable } from "@/components/Skeleton";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -205,13 +207,9 @@ export default function OrgDetailPage() {
             </Link>
           )}
           {myRole !== "owner" && (
-            <button
-              type="button"
-              onClick={handleLeave}
-              className="text-sm text-red-400 hover:text-red-300 border border-red-800 px-3 py-1.5 rounded-lg hover:bg-red-950 transition-colors"
-            >
+            <Button type="button" variant="destructive" onClick={handleLeave}>
               Leave
-            </button>
+            </Button>
           )}
         </div>
       </div>
@@ -270,7 +268,7 @@ export default function OrgDetailPage() {
               <label htmlFor="page-f0" className="text-xs text-muted-foreground">
                 Email
               </label>
-              <input
+              <Input
                 id="page-f0"
                 type="email"
                 value={inviteEmail}
@@ -293,13 +291,9 @@ export default function OrgDetailPage() {
                 </SelectContent>
               </Select>
             </div>
-            <button
-              type="submit"
-              disabled={inviting}
-              className="bg-primary hover:bg-primary/90 disabled:opacity-50 text-primary-foreground text-sm px-4 py-2 rounded-lg transition-colors"
-            >
+            <Button type="submit" disabled={inviting}>
               {inviting ? "Sending…" : "Send invite"}
-            </button>
+            </Button>
           </form>
         </div>
       )}
@@ -331,13 +325,14 @@ export default function OrgDetailPage() {
                 <span className="text-xs text-muted-foreground whitespace-nowrap">
                   {new Date(invite.expiresAt).toLocaleDateString()}
                 </span>
-                <button
+                <Button
                   type="button"
+                  variant="destructive"
+                  className="text-xs px-2 py-0.5 h-auto whitespace-nowrap"
                   onClick={() => handleRevokeInvite(invite.id)}
-                  className="text-xs text-red-400 hover:text-red-300 border border-red-800 px-2 py-0.5 rounded hover:bg-red-950 transition-colors whitespace-nowrap"
                 >
                   Revoke
-                </button>
+                </Button>
               </div>
             ))}
           </div>
