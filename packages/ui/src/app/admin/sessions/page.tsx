@@ -1,7 +1,7 @@
 "use client";
 
 import { AlertTriangle, ShieldCheck } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,6 +14,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { api } from "@/lib/api";
+import { usePaginatedApi } from "@/lib/hooks/useApi";
 
 interface Session {
   id: string;
@@ -40,22 +41,6 @@ interface Session {
 
 type TabFilter = "all" | "active" | "expired";
 
-interface SessionsResponse {
-  data?: Session[];
-  sessions?: Session[];
-  total?: number;
-  pagination?: {
-    page?: number;
-    limit?: number;
-    total?: number;
-    totalPages?: number;
-    hasNext?: boolean;
-    hasPrev?: boolean;
-  };
-}
-
-const PAGE_SIZE = 20;
-
 const fmt = (d?: string | null) => (d ? new Date(d).toLocaleString() : "—");
 
 function anomalyCount(flags: unknown): number {
@@ -66,11 +51,6 @@ function anomalyCount(flags: unknown): number {
 }
 
 export default function SessionsPage() {
-  const [sessions, setSessions] = useState<Session[]>([]);
-  const [total, setTotal] = useState(0);
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<TabFilter>("all");
   const [toast, setToast] = useState<string | null>(null);
 
@@ -79,52 +59,24 @@ export default function SessionsPage() {
     setTimeout(() => setToast(null), 3000);
   }, []);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    try {
-      const params = new URLSearchParams({ page: String(page), limit: String(PAGE_SIZE) });
-      const data = await api.get<Session[] | SessionsResponse>(`/admin/sessions?${params}`);
-      if (Array.isArray(data)) {
-        setSessions(data);
-        setTotal(data.length);
-        setTotalPages(1);
-      } else {
-        const rows = data.data ?? data.sessions ?? [];
-        const nextTotal = data.pagination?.total ?? data.total ?? rows.length;
-        const nextTotalPages =
-          data.pagination?.totalPages ?? Math.max(1, Math.ceil(nextTotal / PAGE_SIZE));
-        setSessions(rows);
-        setTotal(nextTotal);
-        setTotalPages(nextTotalPages);
-      }
-    } catch {
-      showToast("Failed to load sessions");
-    } finally {
-      setLoading(false);
-    }
-  }, [page, showToast]);
-
-  useEffect(() => {
-    void load();
-  }, [load]);
+  const {
+    items: sessions,
+    loading,
+    pagination,
+    page,
+    setPage,
+    refetch,
+  } = usePaginatedApi<Session>("/admin/sessions", {
+    onError: () => showToast("Failed to load sessions"),
+  });
+  const total = pagination?.total ?? 0;
+  const totalPages = pagination?.totalPages ?? 1;
 
   async function handleRevoke(session: Session) {
     try {
       await api.delete(`/admin/sessions/${session.id}`);
-      setSessions((prev) =>
-        prev.map((s) =>
-          s.id === session.id
-            ? {
-                ...s,
-                isActive: false,
-                revokedAt: new Date().toISOString(),
-                revokedReason: "ADMIN_REVOKED",
-              }
-            : s
-        )
-      );
-      setTotal((prev) => Math.max(0, prev - 1));
       showToast("Session revoked");
+      await refetch();
     } catch {
       showToast("Failed to revoke session");
     }

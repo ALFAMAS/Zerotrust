@@ -4,9 +4,11 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mockGet = vi.fn();
 const mockDelete = vi.fn();
+vi.mock("@/lib/apiClient", () => ({
+  apiGet: (...args: unknown[]) => mockGet(...args),
+}));
 vi.mock("@/lib/api", () => ({
   api: {
-    get: (...args: unknown[]) => mockGet(...args),
     delete: (...args: unknown[]) => mockDelete(...args),
   },
 }));
