@@ -311,6 +311,11 @@ follow-ups (**E2**, E4–E6 info debt) remain in [`todo.md`](./todo.md).
   pinned runtime (`bun -e`). The old P4 Bun bump follow-up was removed from
   `todo.md` / `AUDIT-REPORT.md`.
 
+- **API↔UI integration scanner:** `scripts/audit-api-ui-map.mjs` now recognizes
+  canonical `apiClient` helpers plus `useApi`/`usePaginatedApi`, ignores UI test
+  fixtures, and keeps `docs/api-ui-integration-matrix.md` in sync with the E2
+  migrations.
+
 - **Webhook endpoint persistence:** Replaced the user-facing webhook endpoint
   in-memory store with Drizzle persistence via `webhook_endpoints`, added
   migration `0027_webhook_endpoints`, and added persistence regression coverage.

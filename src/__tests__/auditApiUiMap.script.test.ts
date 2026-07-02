@@ -16,5 +16,7 @@ describe("audit-api-ui-map generator", () => {
     expect(matrix).not.toContain("src\\");
     expect(matrix).not.toContain("packages\\");
     expect(matrix).toContain("| GET | /admin/sessions | packages/ui/src/app/admin/sessions/page.tsx |");
+    expect(matrix).toContain("| GET | /admin/users | packages/ui/src/app/admin/users/page.tsx |");
+    expect(matrix).toContain("| GET | /admin/users/export | packages/ui/src/app/admin/page.tsx |");
   });
 });

@@ -32,6 +32,17 @@ function relativePath(path) {
   return relative(ROOT, path).replaceAll("\\", "/");
 }
 
+function routeFromRawPath(rawPath) {
+  const staticPrefix = rawPath.split("${")[0];
+  const queryIndex = staticPrefix.indexOf("?");
+  const routePath = queryIndex === -1 ? staticPrefix : staticPrefix.slice(0, queryIndex);
+  return routePath.startsWith("/") ? normalizePath(routePath) : null;
+}
+
+function stripComments(source) {
+  return source.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
+}
+
 function joinRoute(prefix, routePath) {
   const full = `${prefix === "/" ? "" : prefix}${routePath === "/" ? "" : routePath}`;
   return normalizePath(full || "/");
@@ -98,21 +109,43 @@ function parseBackendRoutes() {
 
 function parseFrontendCalls() {
   const calls = [];
-  const files = walk(join(ROOT, "packages/ui/src"));
+  const files = walk(join(ROOT, "packages/ui/src")).filter(
+    (file) => !/[\\/.](test|spec)\.(ts|tsx)$/.test(file)
+  );
   const apiRe = /api\.(get|post|put|patch|delete)(?:<[^>]*>)?\(\s*([`"'])([^`"']+)\2/g;
+  const apiClientRe =
+    /\b(apiGetBlob|apiGet|apiPostFormData|apiPost|apiPut|apiPatch|apiDelete)(?:<[^>]*>)?\(\s*([`"'])([^`"']+)\2/g;
+  const hookRe = /\buse(Paginated)?Api(?:<[^>]*>)?\(\s*([`"'])([\s\S]*?)\2/g;
+  const apiClientMethods = {
+    apiGet: "GET",
+    apiGetBlob: "GET",
+    apiPost: "POST",
+    apiPostFormData: "POST",
+    apiPut: "PUT",
+    apiPatch: "PATCH",
+    apiDelete: "DELETE",
+  };
   const fetchRe = /fetch\(\s*`?\$?\{?BASE_URL\}?([^`"'$]+)[`"']/g;
   for (const file of files) {
-    const source = readFileSync(file, "utf8");
+    const source = stripComments(readFileSync(file, "utf8"));
     for (const match of source.matchAll(apiRe)) {
-      const rawPath = match[3];
-      const queryIndex = rawPath.indexOf("?");
-      const routePath = queryIndex === -1 ? rawPath : rawPath.slice(0, queryIndex);
-      if (routePath.includes("$")) continue;
+      const routePath = routeFromRawPath(match[3]);
+      if (!routePath) continue;
       calls.push({
         method: match[1].toUpperCase(),
-        path: normalizePath(rawPath),
+        path: routePath,
         file: relativePath(file),
       });
+    }
+    for (const match of source.matchAll(apiClientRe)) {
+      const routePath = routeFromRawPath(match[3]);
+      if (!routePath) continue;
+      calls.push({ method: apiClientMethods[match[1]], path: routePath, file: relativePath(file) });
+    }
+    for (const match of source.matchAll(hookRe)) {
+      const routePath = routeFromRawPath(match[3]);
+      if (!routePath) continue;
+      calls.push({ method: "GET", path: routePath, file: relativePath(file) });
     }
     for (const match of source.matchAll(fetchRe)) {
       calls.push({ method: "FETCH", path: normalizePath(match[1]), file: relativePath(file) });
@@ -135,6 +168,8 @@ function dedupe(items) {
 
 function prefixMatch(frontendPath, backendPath) {
   if (frontendPath === backendPath) return true;
+  const backendStaticPrefix = backendPath.replace(/\/\{[^/]+\}.*/, "");
+  if (backendStaticPrefix && frontendPath === backendStaticPrefix) return true;
   const frontendRoot = frontendPath.split("/").slice(0, 3).join("/");
   const backendRoot = backendPath.split("/").slice(0, 3).join("/");
   return frontendRoot && frontendRoot === backendRoot;

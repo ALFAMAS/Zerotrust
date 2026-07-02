@@ -16,7 +16,7 @@
 | `bun run type-check`                           | ✅ clean                                                                                                               |
 | `bun run verify:generated` (SDK + docs drift)  | ⚠ regenerates cleanly; expected tracked docs diffs are included for the improved API↔UI scanner                        |
 | `bun run boundaries:check`                     | ✅ clean                                                                                                               |
-| `bun run audit:integration` (API↔UI map)       | ✅ passes, now scans typed/template `api.*` calls and flags 87 backend routes with no UI caller (mostly by design)      |
+| `bun run audit:integration` (API↔UI map)       | ✅ passes, scans typed/template `api.*`, `apiClient`, and `useApi` calls; flags 48 backend routes with no UI caller (mostly by design)      |
 | `bun run ui:audit` (shadcn adoption)           | ✅ **0 raw HTML controls** — migration complete                                                                          |
 | `bun run lint` (biome)                         | ✅ exits 0; only pre-existing script warnings remain                                                                    |
 | `bun run --cwd packages/ui build` (next build) | ✅ production build passes; only existing Next/SWC version warning remains                                             |
@@ -28,7 +28,7 @@
 | ID | Status | Summary |
 | --- | --- | --- |
 | **E2** | 🟠 Partial | `useApi`/`usePaginatedApi` on 6 pages; ~18 dashboard/admin pages still use legacy `useEffect`+`api.get` |
-| **E4** | 🟡 Info | 87 backend routes have no UI caller (many by design; some shipped features lack UI) |
+| **E4** | 🟡 Info | 48 backend routes have no UI caller (many by design; some shipped features lack UI) |
 | **E5** | 🟡 Info | In-process `setInterval` schedulers — leader lock mitigates but not horizontally scalable |
 | **E6** | 🟡 Info | Repository layer ~10% complete (4 repos); hot-path writes still mostly inline Drizzle |
 
@@ -181,11 +181,11 @@ is tracked under E2.
 
 Per `docs/shadcn-adoption-report.md`: all 44 raw `<button>`, `<input>`, and `<textarea>` controls outside `components/ui` have been migrated to shadcn primitives (`Button`, `Input`, `Textarea`, `Checkbox`). `bun run ui:audit` reports **0 raw controls**.
 
-### E4. 🟡 87 backend routes have no UI caller
+### E4. 🟡 48 backend routes have no UI caller
 
-Per `docs/api-ui-integration-matrix.md` after improving the scanner to catch typed and template-literal `api.*` calls. Most are legitimately admin/infra/SDK-only (exports, OAuth callbacks, webhooks, search index management, GDPR export). But a meaningful subset are **shipped features with no UI exposure**:
+Per `docs/api-ui-integration-matrix.md` after improving the scanner to catch typed/template `api.*`, canonical `apiClient`, and `useApi`/`usePaginatedApi` calls. Most are legitimately admin/infra/SDK-only (OAuth callbacks, webhooks, search index management, machine endpoints). But a meaningful subset are **shipped features with no UI exposure**:
 
-- `/admin/feedback`, `/admin/roles` (CRUD), `/admin/jit-grants/*`, `/billing/currencies`, `/billing/pricing`, `/billing/tax-exemptions/*`, `/billing/vat/validate`, `/orgs/:orgId/security/policy` (has UI), `/regions/*`, `/compliance/risk-assessment/*`, `/auth/oauth/:provider` (delete link)
+- `/admin/feedback`, `/admin/roles` (CRUD), `/admin/jit-grants/*`, `/billing/currencies`, `/billing/pricing`, `/billing/tax-exemptions/*`, `/billing/vat/validate`, selected `/regions/*` metadata endpoints
 
 These represent backend features that are **implemented but not surfaced** in the dashboard. For a template fork, decide which to expose and which to drop.
 
