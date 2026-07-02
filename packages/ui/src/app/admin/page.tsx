@@ -58,7 +58,7 @@ export default function AdminOverviewPage() {
         setLoading(false);
       }
     }
-    load();
+    void load();
   }, []);
 
   const [exporting, setExporting] = useState(false);

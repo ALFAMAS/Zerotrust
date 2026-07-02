@@ -190,6 +190,13 @@
       "when": 1782860400000,
       "tag": "0026_processed_webhook_events",
       "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "7",
+      "when": 1782946800000,
+      "tag": "0027_webhook_endpoints",
+      "breakpoints": true
     }
   ]
 }

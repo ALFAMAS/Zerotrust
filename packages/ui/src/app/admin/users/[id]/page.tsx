@@ -54,7 +54,7 @@ export default function UserDetailPage() {
         setLoading(false);
       }
     }
-    load();
+    void load();
   }, [id, showToast]);
 
   async function handleForceLogout() {

@@ -71,7 +71,7 @@ export function useApi<T = any>(
       setState((s) => ({ ...s, loading: false }));
       return;
     }
-    fetch();
+    void fetch();
     return () => {
       mountedRef.current = false;
     };

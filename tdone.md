@@ -13,13 +13,13 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
 | Metric | Count |
 |--------|------:|
 | Route modules | 27 |
-| Service files | 45 |
+| Service files | 46 |
 | DB tables | 41 |
 | Middleware | 21 |
-| Migrations | 27 (latest: `0026_processed_webhook_events`) |
+| Migrations | 28 (latest: `0027_webhook_endpoints`) |
 | Route mounts in `server.ts` | 30 |
 | UI pages | 47 |
-| Tests | 832 (97 files) |
+| Tests | 835 (99 files) |
 | ADRs | 7 |
 | Stack | Hono 4 · TypeScript 6 · Bun · Next.js 16 · Drizzle ORM · PostgreSQL · Redis |
 
@@ -139,6 +139,7 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
 ## Webhooks (user-facing)
 
 - ✅ Endpoint management — `/dashboard/webhooks` UI + REST CRUD
+- ✅ Endpoint persistence — `webhook_endpoints` table + Drizzle-backed store
 - ✅ Event catalog — typed `WebhookEventType`
 - ✅ Signed payloads — HMAC-SHA256 `X-zerotrust-Signature`
 - ✅ Test delivery — ping button sends a signed test event
@@ -211,7 +212,7 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
 
 - ✅ Stats dashboard — user count, active sessions, recent registrations
 - ✅ User management — list, search, view detail, edit roles, force logout, delete, impersonate
-- ✅ Session browser — view all active sessions, revoke any
+- ✅ Session browser — paginated all-session browser with total counts and revoke-any controls
 - ✅ Audit log viewer — searchable immutable event trail with integrity verification
 - ✅ Auth settings — toggle every auth method on/off live
 - ✅ General settings — app name, URL, branding
@@ -245,6 +246,7 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
 ## Platform & Infrastructure
 
 - ✅ Generated TypeScript SDK — `@zerotrust/client` from `openapi.json` (115 operations)
+- ✅ Elasticsearch provider dependency — `@elastic/elasticsearch` is explicit in root deps for search-provider enablement
 - ✅ S3-compatible storage — provider-agnostic (AWS S3, B2, R2, MinIO, Wasabi)
 - ✅ DB backups — `pg_dump` with local + S3 retention, AES-256-GCM encryption
 - ✅ DB restore + PITR — `bun run db:restore`, Neon PITR runbook
@@ -262,6 +264,35 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
 - ✅ Deployment blueprints — VM/PM2, containers, Kubernetes (`docs/reference-architecture.md`)
 
 ---
+
+## Recent work (2026-07-02)
+
+- **Audit-report must-fix sweep:** Resolved/verified the fork-blocking items in
+  `AUDIT-REPORT.md`: UI production build passes; LF normalization is enforced by
+  `.gitattributes`; no-floating-promise hazards are fixed in touched UI code;
+  reset-password uses the OTP `/auth/password-reset/confirm` flow; stale
+  `/admin/users/invite`, `/auth/logout/all`, and `/admin/users/:id/logout` route
+  drift is gone; `verify`, `fetchOrgs`, `fetchSessions`, and `showToast` are
+  stable hook dependencies; input sanitization is mounted before routes; admin
+  broadcast email fan-out routes through BullMQ.
+
+- **Webhook endpoint persistence:** Replaced the user-facing webhook endpoint
+  in-memory store with Drizzle persistence via `webhook_endpoints`, added
+  migration `0027_webhook_endpoints`, and added persistence regression coverage.
+  Delivery and management routes now await the async store.
+
+- **Audit follow-up C2/B9:** Added `@elastic/elasticsearch` as an explicit root
+  dependency so the Elasticsearch provider no longer silently lacks its runtime
+  package, and added page/limit controls plus regression coverage for the admin
+  all-sessions browser.
+
+- **Verification:** `bun run test -- --run` → **835 tests / 99 files passing**;
+  `bun run build`, `bun run lint`, `bun run --cwd packages/ui build`,
+  `bun run boundaries:check`, and `bun run type-check` all pass. UI vitest passes
+  **46 tests / 9 files**. Generated SDK/docs regenerate deterministically; this
+  batch intentionally updates the API↔UI integration matrix and shadcn adoption
+  report. UI build reports only the existing Next/SWC version warning
+  (`@next/swc` 16.2.9 vs Next 16.2.7).
 
 ## Recent work (2026-07-01)
 

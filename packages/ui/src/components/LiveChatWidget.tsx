@@ -96,7 +96,9 @@ function ThirdPartyChatWidget() {
       }
     }
 
-    getIdentity().then(inject);
+    void getIdentity()
+      .then(inject)
+      .catch(() => {});
     return () => {
       cancelled = true;
     };

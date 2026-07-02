@@ -99,14 +99,18 @@ function parseBackendRoutes() {
 function parseFrontendCalls() {
   const calls = [];
   const files = walk(join(ROOT, "packages/ui/src"));
-  const apiRe = /api\.(get|post|put|patch|delete)<[^>]*>?\(\s*[`"']([^`"'$]+)[`"']/g;
+  const apiRe = /api\.(get|post|put|patch|delete)(?:<[^>]*>)?\(\s*([`"'])([^`"']+)\2/g;
   const fetchRe = /fetch\(\s*`?\$?\{?BASE_URL\}?([^`"'$]+)[`"']/g;
   for (const file of files) {
     const source = readFileSync(file, "utf8");
     for (const match of source.matchAll(apiRe)) {
+      const rawPath = match[3];
+      const queryIndex = rawPath.indexOf("?");
+      const routePath = queryIndex === -1 ? rawPath : rawPath.slice(0, queryIndex);
+      if (routePath.includes("$")) continue;
       calls.push({
         method: match[1].toUpperCase(),
-        path: normalizePath(match[2]),
+        path: normalizePath(rawPath),
         file: relativePath(file),
       });
     }

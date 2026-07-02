@@ -130,7 +130,7 @@ export function NotificationBell() {
   }, []);
 
   function handleNotificationClick(n: Notification) {
-    if (!n.read) markRead(n.id);
+    if (!n.read) void markRead(n.id);
     setOpen(false);
     if (n.link) navigateToSafeRelative(n.link, "/dashboard");
   }

@@ -15,5 +15,6 @@ describe("audit-api-ui-map generator", () => {
     const matrix = readFileSync(join(root, "docs", "api-ui-integration-matrix.md"), "utf8");
     expect(matrix).not.toContain("src\\");
     expect(matrix).not.toContain("packages\\");
+    expect(matrix).toContain("| GET | /admin/sessions | packages/ui/src/app/admin/sessions/page.tsx |");
   });
 });

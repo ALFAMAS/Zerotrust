@@ -40,6 +40,22 @@ interface Session {
 
 type TabFilter = "all" | "active" | "expired";
 
+interface SessionsResponse {
+  data?: Session[];
+  sessions?: Session[];
+  total?: number;
+  pagination?: {
+    page?: number;
+    limit?: number;
+    total?: number;
+    totalPages?: number;
+    hasNext?: boolean;
+    hasPrev?: boolean;
+  };
+}
+
+const PAGE_SIZE = 20;
+
 const fmt = (d?: string | null) => (d ? new Date(d).toLocaleString() : "—");
 
 function anomalyCount(flags: unknown): number {
@@ -51,6 +67,9 @@ function anomalyCount(flags: unknown): number {
 
 export default function SessionsPage() {
   const [sessions, setSessions] = useState<Session[]>([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<TabFilter>("all");
   const [toast, setToast] = useState<string | null>(null);
@@ -63,16 +82,27 @@ export default function SessionsPage() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await api.get<Session[] | { data: Session[]; pagination: any }>(
-        "/admin/sessions"
-      );
-      setSessions(Array.isArray(data) ? data : (data.data ?? []));
+      const params = new URLSearchParams({ page: String(page), limit: String(PAGE_SIZE) });
+      const data = await api.get<Session[] | SessionsResponse>(`/admin/sessions?${params}`);
+      if (Array.isArray(data)) {
+        setSessions(data);
+        setTotal(data.length);
+        setTotalPages(1);
+      } else {
+        const rows = data.data ?? data.sessions ?? [];
+        const nextTotal = data.pagination?.total ?? data.total ?? rows.length;
+        const nextTotalPages =
+          data.pagination?.totalPages ?? Math.max(1, Math.ceil(nextTotal / PAGE_SIZE));
+        setSessions(rows);
+        setTotal(nextTotal);
+        setTotalPages(nextTotalPages);
+      }
     } catch {
       showToast("Failed to load sessions");
     } finally {
       setLoading(false);
     }
-  }, [showToast]);
+  }, [page, showToast]);
 
   useEffect(() => {
     void load();
@@ -93,6 +123,7 @@ export default function SessionsPage() {
             : s
         )
       );
+      setTotal((prev) => Math.max(0, prev - 1));
       showToast("Session revoked");
     } catch {
       showToast("Failed to revoke session");
@@ -136,7 +167,7 @@ export default function SessionsPage() {
         <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
           Sessions
         </h1>
-        <p className="mt-1 text-sm text-muted-foreground">{sessions.length} total sessions</p>
+        <p className="mt-1 text-sm text-muted-foreground">{total} total sessions</p>
       </div>
 
       {/* Tabs */}
@@ -287,6 +318,32 @@ export default function SessionsPage() {
           </div>
         </CardContent>
       </Card>
+
+      <div className="flex items-center justify-between text-sm text-muted-foreground">
+        <span>
+          Page {page} of {totalPages}
+        </span>
+        <div className="flex gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={page <= 1 || loading}
+          >
+            Previous
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            disabled={page >= totalPages || loading}
+          >
+            Next
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }

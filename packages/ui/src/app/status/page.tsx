@@ -53,7 +53,7 @@ export default function StatusPage() {
 
   // Initial load
   useEffect(() => {
-    load();
+    void load();
   }, [load]);
 
   // SSE for real-time status updates (replaces 30s polling)

@@ -68,7 +68,7 @@ export default function SetupChecklist({ user }: { user: any }) {
   useEffect(() => {
     if (allDone && !celebrated) {
       setCelebrated(true);
-      fireOnboardingComplete();
+      void fireOnboardingComplete();
     }
   }, [allDone, celebrated, fireOnboardingComplete]);
 

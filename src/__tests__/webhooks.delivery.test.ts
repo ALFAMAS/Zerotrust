@@ -4,6 +4,8 @@ const h = vi.hoisted(() => ({
   fetchPublicUrl: vi.fn(),
   claim: vi.fn(),
   release: vi.fn(),
+  endpoints: [] as any[],
+  nextId: 1,
 }));
 
 vi.mock("../shared/safeFetch", () => ({
@@ -15,14 +17,38 @@ vi.mock("../db/repositories/processedWebhookEvents.repository", () => ({
   releaseProcessedWebhookEvent: h.release,
 }));
 
+vi.mock("../webhooks/store", () => ({
+  webhookStore: {
+    registerEndpoint: vi.fn(async (input: any) => {
+      const endpoint = { id: `ep-${h.nextId++}`, createdAt: new Date(), ...input };
+      h.endpoints.push(endpoint);
+      return endpoint;
+    }),
+    deleteEndpoint: vi.fn(async (id: string) => {
+      const idx = h.endpoints.findIndex((ep) => ep.id === id);
+      if (idx === -1) return false;
+      h.endpoints.splice(idx, 1);
+      return true;
+    }),
+    getEndpointsForEvent: vi.fn(async (event: string, tenantId?: string) =>
+      h.endpoints.filter(
+        (ep) =>
+          ep.active &&
+          ep.events.includes(event) &&
+          (tenantId === undefined || ep.tenantId === undefined || ep.tenantId === tenantId)
+      )
+    ),
+  },
+}));
+
 import { dispatchEvent } from "../webhooks/delivery";
 import { webhookStore } from "../webhooks/store";
 import type { WebhookEndpoint, WebhookEventType } from "../webhooks/types";
 
 const endpoints: WebhookEndpoint[] = [];
 
-function registerEndpoint(events: WebhookEventType[] = ["user.created"]) {
-  const endpoint = webhookStore.registerEndpoint({
+async function registerEndpoint(events: WebhookEventType[] = ["user.created"]) {
+  const endpoint = await webhookStore.registerEndpoint({
     url: "https://hooks.example.test/zerotrust",
     secret: "webhook-secret",
     events,
@@ -36,20 +62,23 @@ function registerEndpoint(events: WebhookEventType[] = ["user.created"]) {
 describe("dispatchEvent - webhook delivery idempotency", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    h.endpoints.length = 0;
+    h.nextId = 1;
+    endpoints.length = 0;
     h.claim.mockResolvedValue(true);
     h.release.mockResolvedValue(undefined);
     h.fetchPublicUrl.mockResolvedValue(new Response("ok", { status: 200 }));
   });
 
-  afterEach(() => {
+  afterEach(async () => {
     while (endpoints.length > 0) {
       const endpoint = endpoints.pop();
-      if (endpoint) webhookStore.deleteEndpoint(endpoint.id);
+      if (endpoint) await webhookStore.deleteEndpoint(endpoint.id);
     }
   });
 
   it("claims an event id for each subscribed endpoint before delivery", async () => {
-    const endpoint = registerEndpoint();
+    const endpoint = await registerEndpoint();
 
     await dispatchEvent("user.created", { eventId: "evt_user_created_1", userId: "user-1" });
 
@@ -62,7 +91,7 @@ describe("dispatchEvent - webhook delivery idempotency", () => {
   });
 
   it("skips duplicate deliveries without posting to the endpoint again", async () => {
-    registerEndpoint();
+    await registerEndpoint();
     h.claim.mockResolvedValue(false);
 
     await dispatchEvent("user.created", { eventId: "evt_duplicate", userId: "user-1" });
@@ -72,7 +101,7 @@ describe("dispatchEvent - webhook delivery idempotency", () => {
   });
 
   it("falls back to a content hash when the payload has no event id", async () => {
-    registerEndpoint(["user.updated"]);
+    await registerEndpoint(["user.updated"]);
 
     await dispatchEvent("user.updated", { userId: "user-1", changed: ["name"] });
 
@@ -84,7 +113,7 @@ describe("dispatchEvent - webhook delivery idempotency", () => {
   });
 
   it("releases the claim when first delivery fails", async () => {
-    const endpoint = registerEndpoint();
+    const endpoint = await registerEndpoint();
     h.fetchPublicUrl.mockResolvedValueOnce(new Response("bad gateway", { status: 502 }));
 
     await dispatchEvent("user.created", { eventId: "evt_retry", userId: "user-1" });

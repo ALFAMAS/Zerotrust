@@ -144,7 +144,7 @@ export async function dispatchEvent(
   payload: Record<string, unknown>,
   tenantId?: string
 ): Promise<void> {
-  const endpoints = webhookStore.getEndpointsForEvent(event, tenantId);
+  const endpoints = await webhookStore.getEndpointsForEvent(event, tenantId);
 
   await Promise.allSettled(
     endpoints.map(async (endpoint) => {

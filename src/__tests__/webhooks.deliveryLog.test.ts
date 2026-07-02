@@ -1,11 +1,33 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Hono } from "hono";
+
+const h = vi.hoisted(() => ({
+  endpoints: [] as any[],
+  nextId: 1,
+}));
 
 // Stub auth so the webhook admin routes are reachable without a real token.
 vi.mock("../middleware/auth", () => ({
   authMiddleware: async (c: any, next: any) => {
     c.set("user", { id: "user-1", email: "admin@example.com", roles: ["admin"] });
     return next();
+  },
+}));
+
+vi.mock("../webhooks/store", () => ({
+  webhookStore: {
+    registerEndpoint: vi.fn(async (input: any) => {
+      const endpoint = { id: `ep-${h.nextId++}`, createdAt: new Date(), ...input };
+      h.endpoints.push(endpoint);
+      return endpoint;
+    }),
+    deleteEndpoint: vi.fn(async (id: string) => {
+      const idx = h.endpoints.findIndex((ep) => ep.id === id);
+      if (idx === -1) return false;
+      h.endpoints.splice(idx, 1);
+      return true;
+    }),
+    getEndpoint: vi.fn(async (id: string) => h.endpoints.find((ep) => ep.id === id) ?? null),
   },
 }));
 
@@ -69,6 +91,8 @@ describe("WebhookDeliveryLog", () => {
 describe("GET /webhooks/:id/deliveries", () => {
   beforeEach(() => {
     webhookDeliveryLog.reset();
+    h.endpoints.length = 0;
+    h.nextId = 1;
   });
 
   function getApp() {
@@ -82,7 +106,7 @@ describe("GET /webhooks/:id/deliveries", () => {
   });
 
   it("returns recorded deliveries for a registered endpoint", async () => {
-    const ep = webhookStore.registerEndpoint({
+    const ep = await webhookStore.registerEndpoint({
       url: "https://example.test/hook",
       secret: "s3cret",
       events: ["user.created"],
@@ -110,6 +134,6 @@ describe("GET /webhooks/:id/deliveries", () => {
     // The signing secret must never leak into the delivery log response.
     expect(JSON.stringify(body)).not.toContain("s3cret");
 
-    webhookStore.deleteEndpoint(ep.id);
+    await webhookStore.deleteEndpoint(ep.id);
   });
 });

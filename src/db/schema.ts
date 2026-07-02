@@ -741,7 +741,30 @@ export const trustedDevicesTable = pgTable(
   })
 );
 
-// ── Webhook delivery logs (durable) ───────────────────────────────────────────
+// ── Webhook endpoints and delivery logs (durable) ─────────────────────────────
+
+export const webhookEndpointsTable = pgTable(
+  "webhook_endpoints",
+  {
+    id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+    tenantId: text("tenant_id"),
+    url: text("url").notNull(),
+    secret: text("secret").notNull(),
+    events: jsonb("events").notNull().default(sql`'[]'::jsonb`),
+    active: boolean("active").notNull().default(true),
+    headers: jsonb("headers").notNull().default(sql`'{}'::jsonb`),
+    retryPolicy: jsonb("retry_policy")
+      .notNull()
+      .default(sql`'{"maxRetries":3,"backoffMs":1000}'::jsonb`),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().default(sql`now()`),
+  },
+  (t) => ({
+    webhookEndpointsTenantIdx: index("webhook_endpoints_tenant_idx").on(t.tenantId),
+    webhookEndpointsActiveIdx: index("webhook_endpoints_active_idx").on(t.active),
+    webhookEndpointsCreatedIdx: index("webhook_endpoints_created_idx").on(t.createdAt),
+  })
+);
 
 export const webhookDeliveryLogsTable = pgTable(
   "webhook_delivery_logs",

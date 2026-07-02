@@ -13,7 +13,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Promise.all([
+    void Promise.all([
       api
         .get<any>("/auth/me")
         .then(setUser)

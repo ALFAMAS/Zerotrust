@@ -13,9 +13,9 @@ const app = new Hono<HonoEnv>();
 app.use("*", authMiddleware);
 
 // GET / — list endpoints
-app.get("/", (c) => {
+app.get("/", async (c) => {
   const tenantId = c.req.query("tenantId");
-  const endpoints = webhookStore.listEndpoints(tenantId);
+  const endpoints = await webhookStore.listEndpoints(tenantId);
   return c.json(endpoints);
 });
 
@@ -56,7 +56,7 @@ app.post("/", async (c) => {
     );
   }
 
-  const endpoint = webhookStore.registerEndpoint({
+  const endpoint = await webhookStore.registerEndpoint({
     url,
     secret,
     events,
@@ -70,10 +70,9 @@ app.post("/", async (c) => {
 });
 
 // GET /:id — get endpoint
-app.get("/:id", (c) => {
+app.get("/:id", async (c) => {
   const id = c.req.param("id");
-  const endpoints = webhookStore.listEndpoints();
-  const endpoint = endpoints.find((ep) => ep.id === id);
+  const endpoint = await webhookStore.getEndpoint(id);
 
   if (!endpoint) {
     return c.json(
@@ -107,7 +106,7 @@ app.patch("/:id", async (c) => {
       );
     }
   }
-  const updated = webhookStore.updateEndpoint(id, body);
+  const updated = await webhookStore.updateEndpoint(id, body);
 
   if (!updated) {
     return c.json(
@@ -124,9 +123,9 @@ app.patch("/:id", async (c) => {
 });
 
 // DELETE /:id — delete endpoint
-app.delete("/:id", (c) => {
+app.delete("/:id", async (c) => {
   const id = c.req.param("id");
-  const deleted = webhookStore.deleteEndpoint(id);
+  const deleted = await webhookStore.deleteEndpoint(id);
 
   if (!deleted) {
     return c.json(
@@ -144,9 +143,9 @@ app.delete("/:id", (c) => {
 });
 
 // GET /:id/deliveries — per-attempt delivery history (most recent first)
-app.get("/:id/deliveries", (c) => {
+app.get("/:id/deliveries", async (c) => {
   const id = c.req.param("id");
-  const endpoint = webhookStore.listEndpoints().find((ep) => ep.id === id);
+  const endpoint = await webhookStore.getEndpoint(id);
   if (!endpoint) {
     return c.json(
       {
@@ -178,8 +177,7 @@ app.get("/:id/deliveries", (c) => {
 // POST /:id/ping — send test ping
 app.post("/:id/ping", async (c) => {
   const id = c.req.param("id");
-  const endpoints = webhookStore.listEndpoints();
-  const endpoint = endpoints.find((ep) => ep.id === id);
+  const endpoint = await webhookStore.getEndpoint(id);
 
   if (!endpoint) {
     return c.json(

@@ -114,7 +114,7 @@ export default function OrgDetailPage() {
   }, [orgId]);
 
   useEffect(() => {
-    fetchAll();
+    void fetchAll();
   }, [fetchAll]);
 
   async function handleInvite(e: React.FormEvent) {
@@ -125,7 +125,7 @@ export default function OrgDetailPage() {
       await api.post(`/orgs/${orgId}/invites`, { email: inviteEmail.trim(), role: inviteRole });
       toast({ message: "Invite sent!", type: "success" });
       setInviteEmail("");
-      fetchAll();
+      await fetchAll();
     } catch (err: any) {
       toast({ message: err.message || "Failed to send invite", type: "error" });
     } finally {
@@ -138,7 +138,7 @@ export default function OrgDetailPage() {
     try {
       await api.delete(`/orgs/${orgId}/invites/${inviteId}`);
       toast({ message: "Invite revoked", type: "success" });
-      fetchAll();
+      await fetchAll();
     } catch (err: any) {
       toast({ message: err.message || "Failed to revoke invite", type: "error" });
     }
