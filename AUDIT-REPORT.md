@@ -56,9 +56,9 @@ The repo's own `CLAUDE.md` documents the 2026-06-26 CWE sweep. Spot-checks confi
 
 ## E. Architecture / maintainability debt
 
-### E2. 🟠 `useApi` hook exists but is barely used — **open**
+### E2. 🟠 TanStack Query server-state adoption is partial — **open**
 
-`packages/ui/src/lib/hooks/useApi.ts` (with `usePaginatedApi`) is documented in `CLAUDE.md` as the replacement for `useEffect+api.get+loading` boilerplate. **7 of ~40 app pages use it** (`admin/page`, `admin/access-reviews`, `admin/alerts`, `admin/sessions`, `admin/users`, `dashboard/billing`, `dashboard/settings`). ~17 dashboard/admin pages still import `@/lib/api` and hand-roll fetch/loading/error (webhooks, wallet, admin audit/revenue/tenants/regions, etc.). Tracked in `todo.md` P2.
+`@tanstack/react-query` is installed and mounted through the UI root, with domain query keys/functions/hooks under `packages/ui/src/lib/server-state/*`. `dashboard/wallet`, `dashboard/webhooks`, and `dashboard/billing` now use the server-state layer for their GET flows and mutations. Several dashboard/admin pages still import legacy `@/lib/api` and hand-roll `useEffect` + server data state (`support`, `admin audit/revenue/tenants/regions`, etc.). Tracked in `todo.md` P2 and `docs/tanstack-query-progress.md`.
 
 ### E4. 🟡 46 backend routes have no UI caller
 
@@ -80,7 +80,7 @@ These represent backend features that are **implemented but not surfaced** in th
 
 ## F. Documentation / DX notes
 
-- **`todo.md`** — active backlog is **E2** (useApi migration).
+- **`todo.md`** — active backlog is **E2** (TanStack Query server-state migration).
   All P1 fork-blocking items are cleared.
 - **`tdone.md`** — completed audit items (A1–A2, B1–B9, C1–C8, E1, E3) consolidated
   under "Fork-readiness audit" (2026-07-02). Latest verification: **835 tests / 99 files**;
@@ -119,7 +119,7 @@ These represent backend features that are **implemented but not surfaced** in th
 
 14. ✅ **C1** — `/search/smart` is ranked full-text search; semantic/vector claims removed from generated docs.
 15. ✅ **E3** — Finish shadcn migration (0 raw controls remaining).
-16. **E2** — Migrate pages to `useApi`/`usePaginatedApi` (~17 pages remain; 7 done)
+16. **E2** — Migrate remaining server-data pages to TanStack Query domain hooks
 17. ✅ **C4 / C5 / C6 / C7** — OAuth linked accounts UI, per-category notification preferences, route scan confirmed, customer segment admin UI.
 18. ✅ **C3** — README now says "software key store (hardware providers are stubs)" instead of advertising hardware-backed crypto.
 19. ✅ Refresh `todo.md` to reflect this audit

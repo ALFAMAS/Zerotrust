@@ -243,8 +243,8 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
 - ✅ Sitemap.xml + robots.txt — generated at build time
 - ✅ Protected routes — client guards on `/dashboard` + `/admin`
 - ✅ TanStack Query server-state layer — app-level `QueryClientProvider`, domain
-  query keys/functions, colocated wallet hooks, optimistic top-up mutation, and
-  stale/background-refetch UI states
+  query keys/functions, colocated wallet/webhook/billing hooks, optimistic
+  mutations where safe, and stale/background-refetch UI states
 
 ## Platform & Infrastructure
 
@@ -287,12 +287,20 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
   state to TanStack Query queries/mutations. The webhook list and delivery-log
   fetches use domain keys; toggle/delete apply optimistic list updates with
   rollback; create, ping, toggle, and delete use targeted webhook invalidation.
+- Migrated `/dashboard/billing` from `useApi`/legacy mutation calls to TanStack
+  Query queries/mutations. Subscription, currency, and pricing fetches now live
+  in `server-state/billing.ts`; cancel/reactivate invalidate subscription data;
+  checkout/portal keep safe external redirects in the page component.
 - Covered loading, error + retry, empty, stale cached data, and background
   refetch states in UI and tests.
 - Verification: `NODE_ENV=test bun run --cwd packages/ui test --
   src/lib/server-state/wallet.test.tsx` → **5 tests passing**;
   `NODE_ENV=test bun run --cwd packages/ui test --
-  src/lib/server-state/webhooks.test.tsx` → **5 tests passing**; `bun run
+  src/lib/server-state/webhooks.test.tsx` → **5 tests passing**;
+  `NODE_ENV=test bun run --cwd packages/ui test --
+  src/lib/server-state/billing.test.tsx` → **3 tests passing**;
+  `NODE_ENV=test bun run --cwd packages/ui test --
+  src/app/dashboard/billing/page.test.tsx` → **9 tests passing**; `bun run
   build` passes; `bun run --cwd packages/ui build` passes; `bun run lint` exits
   0 with existing script warnings only.
 

@@ -32,6 +32,7 @@ Tracks the frontend server-state migration from ad-hoc `useEffect` + local loadi
 | --- | --- | --- | --- |
 | `/dashboard/wallet` | [x] | Wallet detail + transactions moved to TanStack Query. Top-up uses optimistic balance/transaction update, rollback, and targeted invalidation. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/wallet.test.tsx` |
 | `/dashboard/webhooks` | [x] | Endpoint list + delivery logs moved to TanStack Query. Toggle/delete use optimistic list updates with rollback; create, ping, toggle, and delete target webhook list/detail/delivery invalidation. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/webhooks.test.tsx` |
+| `/dashboard/billing` | [x] | Subscription, currencies, and localized pricing moved to TanStack Query. Cancel/reactivate mutations invalidate subscription state; checkout/portal mutations keep safe external redirects at the page boundary. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/billing.test.tsx && NODE_ENV=test bun run --cwd packages/ui test -- src/app/dashboard/billing/page.test.tsx` |
 
 ## Migration backlog
 

@@ -61,3 +61,35 @@ export interface CreateWebhookEndpointInput {
   secret: string;
   events: string[];
 }
+
+export interface SupportTicket {
+  id: string;
+  subject: string;
+  status: "open" | "pending" | "closed";
+  priority: "low" | "normal" | "high";
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SupportMessage {
+  id: string;
+  authorRole: "user" | "agent";
+  body: string;
+  createdAt: string;
+}
+
+export interface SupportTicketsResponse {
+  tickets: SupportTicket[];
+  scope?: "mine" | "all";
+}
+
+export interface SupportThreadResponse {
+  ticket: SupportTicket;
+  messages: SupportMessage[];
+}
+
+export interface CreateSupportTicketInput {
+  subject: string;
+  message: string;
+  priority?: "low" | "normal" | "high";
+}

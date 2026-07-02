@@ -1,35 +1,27 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import EmptyState from "../../../components/EmptyState";
-import Modal from "../../../components/Modal";
-import { Button } from "../../../components/ui/button";
-import { Input } from "../../../components/ui/input";
+import { useState } from "react";
+import EmptyState from "@/components/EmptyState";
+import Modal from "@/components/Modal";
+import { ServerStateStatus } from "@/components/ServerStateStatus";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { ErrorState } from "@/components/ui/States";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../../../components/ui/select";
-import { Textarea } from "../../../components/ui/textarea";
-import { api } from "../../../lib/api";
-
-interface Ticket {
-  id: string;
-  subject: string;
-  status: "open" | "pending" | "closed";
-  priority: "low" | "normal" | "high";
-  createdAt: string;
-  updatedAt: string;
-}
-
-interface Message {
-  id: string;
-  authorRole: "user" | "agent";
-  body: string;
-  createdAt: string;
-}
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  useCreateSupportTicketMutation,
+  useReplySupportTicketMutation,
+  useSupportThreadQuery,
+  useSupportTicketsQuery,
+  useUpdateTicketStatusMutation,
+} from "@/lib/server-state/support";
 
 const STATUS_STYLES: Record<string, string> = {
   open: "bg-emerald-900/40 text-emerald-400",
@@ -38,26 +30,19 @@ const STATUS_STYLES: Record<string, string> = {
 };
 
 export default function SupportPage() {
-  const [tickets, setTickets] = useState<Ticket[]>([]);
-  const [loading, setLoading] = useState(true);
+  const ticketsQuery = useSupportTicketsQuery();
+  const createMutation = useCreateSupportTicketMutation();
+  const replyMutation = useReplySupportTicketMutation();
+  const statusMutation = useUpdateTicketStatusMutation();
   const [createOpen, setCreateOpen] = useState(false);
   const [form, setForm] = useState({ subject: "", message: "", priority: "normal" });
   const [error, setError] = useState<string | null>(null);
-
   const [activeId, setActiveId] = useState<string | null>(null);
-  const [thread, setThread] = useState<{ ticket: Ticket; messages: Message[] } | null>(null);
   const [reply, setReply] = useState("");
-  const [sending, setSending] = useState(false);
 
-  const load = useCallback(() => {
-    api
-      .get<{ tickets: Ticket[] }>("/support")
-      .then((r) => setTickets(r.tickets))
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, []);
-
-  useEffect(load, [load]);
+  const threadQuery = useSupportThreadQuery(activeId);
+  const tickets = ticketsQuery.data?.tickets ?? [];
+  const thread = threadQuery.data ?? null;
 
   async function createTicket() {
     if (!form.subject.trim() || !form.message.trim()) {
@@ -66,51 +51,35 @@ export default function SupportPage() {
     }
     setError(null);
     try {
-      await api.post("/support", {
+      await createMutation.mutateAsync({
         subject: form.subject.trim(),
         message: form.message.trim(),
-        priority: form.priority,
+        priority: form.priority as "low" | "normal" | "high",
       });
       setCreateOpen(false);
       setForm({ subject: "", message: "", priority: "normal" });
-      setLoading(true);
-      load();
     } catch (e) {
       setError((e as Error).message);
     }
   }
 
-  async function openThread(id: string) {
-    setActiveId(id);
-    setThread(null);
-    try {
-      const data = await api.get<{ ticket: Ticket; messages: Message[] }>(`/support/${id}`);
-      setThread(data);
-    } catch {
-      setThread(null);
-    }
-  }
-
   async function sendReply() {
     if (!activeId || !reply.trim()) return;
-    setSending(true);
     try {
-      await api.post(`/support/${activeId}/messages`, { body: reply.trim() });
+      await replyMutation.mutateAsync({ id: activeId, body: reply.trim() });
       setReply("");
-      await openThread(activeId);
-      load();
     } catch {
       /* surfaced by refetch */
-    } finally {
-      setSending(false);
     }
   }
 
   async function closeTicket() {
     if (!activeId) return;
-    await api.patch(`/support/${activeId}`, { status: "closed" }).catch(() => {});
-    await openThread(activeId);
-    load();
+    try {
+      await statusMutation.mutateAsync({ id: activeId, status: "closed" });
+    } catch {
+      /* surfaced by refetch */
+    }
   }
 
   return (
@@ -129,11 +98,25 @@ export default function SupportPage() {
         </Button>
       </div>
 
-      {loading ? (
+      <ServerStateStatus
+        isFetching={ticketsQuery.isFetching && !ticketsQuery.isPending}
+        isStale={ticketsQuery.isStale}
+        hasData={tickets.length > 0}
+        label="tickets"
+        onRefresh={() => void ticketsQuery.refetch()}
+      />
+
+      {ticketsQuery.error && tickets.length === 0 ? (
+        <ErrorState
+          message={ticketsQuery.error.message}
+          retry={() => void ticketsQuery.refetch()}
+        />
+      ) : ticketsQuery.isPending ? (
         <div className="space-y-3">
           {[...Array(3)].map((_, i) => (
             <div key={i} className="h-16 animate-pulse rounded-xl bg-card" />
           ))}
+          <p className="sr-only">Loading support tickets…</p>
         </div>
       ) : tickets.length === 0 ? (
         <div className="rounded-xl border border-border bg-card">
@@ -151,7 +134,7 @@ export default function SupportPage() {
             <li key={t.id}>
               <Button
                 type="button"
-                onClick={() => openThread(t.id)}
+                onClick={() => setActiveId(t.id)}
                 variant="outline"
                 className="h-auto w-full justify-between gap-4 rounded-xl border-border bg-card p-4 text-left hover:border-primary/50"
               >
@@ -228,10 +211,10 @@ export default function SupportPage() {
             <Button
               type="button"
               onClick={createTicket}
-              disabled={!form.subject.trim() || !form.message.trim()}
+              disabled={!form.subject.trim() || !form.message.trim() || createMutation.isPending}
               className="w-full"
             >
-              Submit ticket
+              {createMutation.isPending ? "Submitting…" : "Submit ticket"}
             </Button>
           </div>
         </Modal>
@@ -243,13 +226,17 @@ export default function SupportPage() {
           title={thread?.ticket.subject ?? "Ticket"}
           onClose={() => {
             setActiveId(null);
-            setThread(null);
             setReply("");
           }}
         >
-          {!thread ? (
+          {threadQuery.isPending ? (
             <p className="text-sm text-muted-foreground">Loading…</p>
-          ) : (
+          ) : threadQuery.error ? (
+            <ErrorState
+              message={threadQuery.error.message}
+              retry={() => void threadQuery.refetch()}
+            />
+          ) : !thread ? null : (
             <div className="space-y-4">
               <div className="max-h-72 space-y-3 overflow-y-auto">
                 {thread.messages.map((m) => (
@@ -290,11 +277,16 @@ export default function SupportPage() {
                       variant="ghost"
                       size="sm"
                       className="text-xs text-muted-foreground"
+                      disabled={statusMutation.isPending}
                     >
                       Close ticket
                     </Button>
-                    <Button type="button" onClick={sendReply} disabled={!reply.trim() || sending}>
-                      {sending ? "Sending…" : "Send reply"}
+                    <Button
+                      type="button"
+                      onClick={sendReply}
+                      disabled={!reply.trim() || replyMutation.isPending}
+                    >
+                      {replyMutation.isPending ? "Sending…" : "Send reply"}
                     </Button>
                   </div>
                 </div>

@@ -21,9 +21,10 @@ maintainability/refactor · P3 scalability/performance · P4 docs/DX.
 
 - **E2 — server-state adoption** — Partial: TanStack Query is installed and
   wired through the UI root, with domain query keys/query functions under
-  `packages/ui/src/lib/server-state/*`. `dashboard/wallet` and
-  `dashboard/webhooks` have migrated to query/mutation hooks with optimistic
-  updates, background-refetch, stale-data, loading, error, and empty states.
+  `packages/ui/src/lib/server-state/*`. `dashboard/wallet`,
+  `dashboard/webhooks`, and `dashboard/billing` have migrated to
+  query/mutation hooks with optimistic updates where safe, background-refetch,
+  stale-data, loading, error, and empty states.
   Track page-by-page progress in `docs/tanstack-query-progress.md`. Continue
   migrating the remaining dashboard/admin pages that still import legacy
   `@/lib/api` and hand-roll `useEffect` + server data state (e.g. support,

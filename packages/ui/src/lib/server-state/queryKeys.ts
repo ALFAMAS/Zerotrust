@@ -48,4 +48,10 @@ export const queryKeys = {
     members: (orgId: string, filters: Record<string, string | number | undefined> = {}) =>
       [...queryKeys.organizations.detail(orgId), "members", filters] as const,
   },
+  support: {
+    all: ["support"] as const,
+    list: (filters: Record<string, string | number | undefined> = {}) =>
+      [...queryKeys.support.all, "list", filters] as const,
+    detail: (id: string) => [...queryKeys.support.all, "detail", id] as const,
+  },
 };
