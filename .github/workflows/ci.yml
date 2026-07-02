@@ -73,6 +73,8 @@ jobs:
       - name: Apply database schema
         run: bun run db:push
       - run: bun run test --reporter=verbose
+      - name: Destructive migration DDL gate (P3.5)
+        run: bun run migrations:check
       - name: UI component tests (happy-dom + Testing Library)
         run: bun run --cwd packages/ui test
       # Blocking ratchet gate (todo.md P4.5): thresholds in vitest.config.ts sit

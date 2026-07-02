@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import AdminOverviewPage from "@/app/admin/page";
+import AdminOverviewClient from "@/app/admin/AdminOverviewClient";
 import { mockApiGet, mockApiGetBlob } from "@/test/apiClientMock";
 import {
   ADMIN_STATS_PATH,
@@ -55,7 +55,7 @@ describe("adminDashboard TanStack Query server state", () => {
       return Promise.reject(new Error("unexpected"));
     });
 
-    renderWithQueryClient(<AdminOverviewPage />);
+    renderWithQueryClient(<AdminOverviewClient />);
 
     expect(await screen.findByText("100")).toBeInTheDocument();
     expect(screen.getByText("Alice")).toBeInTheDocument();
@@ -64,7 +64,7 @@ describe("adminDashboard TanStack Query server state", () => {
 
   it("renders error + retry when admin stats fail", async () => {
     mockApiGet.mockRejectedValue(new Error("stats unavailable"));
-    renderWithQueryClient(<AdminOverviewPage />);
+    renderWithQueryClient(<AdminOverviewClient />);
 
     expect(await screen.findByText("stats unavailable")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Try again" })).toBeInTheDocument();
@@ -79,7 +79,7 @@ describe("adminDashboard TanStack Query server state", () => {
     mockApiGetBlob.mockResolvedValue(new Blob(["csv"]));
 
     const createElementSpy = vi.spyOn(document, "createElement");
-    renderWithQueryClient(<AdminOverviewPage />);
+    renderWithQueryClient(<AdminOverviewClient />);
     await screen.findByText("Alice");
 
     screen.getByRole("button", { name: /Export users/i }).click();

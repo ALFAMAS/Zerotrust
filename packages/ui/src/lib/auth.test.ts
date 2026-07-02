@@ -5,13 +5,22 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 // environment.
 function installBrowser() {
   const store = new Map<string, string>();
+  let cookie = "";
   const localStorage = {
     getItem: (k: string) => (store.has(k) ? store.get(k)! : null),
     setItem: (k: string, v: string) => void store.set(k, String(v)),
     removeItem: (k: string) => void store.delete(k),
     clear: () => store.clear(),
   };
-  (globalThis as any).window = { localStorage };
+  (globalThis as any).document = {
+    get cookie() {
+      return cookie;
+    },
+    set cookie(value: string) {
+      cookie = value;
+    },
+  };
+  (globalThis as any).window = { localStorage, document: (globalThis as any).document };
   (globalThis as any).localStorage = localStorage;
   return store;
 }
@@ -19,6 +28,7 @@ function installBrowser() {
 function uninstallBrowser() {
   (globalThis as any).window = undefined;
   (globalThis as any).localStorage = undefined;
+  (globalThis as any).document = undefined;
 }
 
 describe("auth token helpers", () => {
@@ -33,6 +43,7 @@ describe("auth token helpers", () => {
     setToken("access-1", "refresh-1");
     expect(getToken()).toBe("access-1");
     expect(getRefreshToken()).toBe("refresh-1");
+    expect((globalThis as any).document.cookie).toContain("za_access_token=access-1");
   });
 
   it("setToken without a refresh token leaves the access token only", async () => {

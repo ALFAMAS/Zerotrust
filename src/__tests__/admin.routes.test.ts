@@ -143,4 +143,49 @@ describe("admin read routes — read replica", () => {
     expect(res.status).toBe(200);
     expect(getReadDb).toHaveBeenCalled();
   });
+
+  it("GET /admin/audit-logs uses getReadDb", async () => {
+    const readDb = makeDb();
+    const app = await getApp(readDb);
+    const { getReadDb } = await import("../db");
+
+    const res = await app.request("/admin/audit-logs");
+
+    expect(res.status).toBe(200);
+    expect(getReadDb).toHaveBeenCalled();
+  });
+
+  it("GET /admin/feedback uses getReadDb", async () => {
+    const readDb = makeDb();
+    const app = await getApp(readDb);
+    const { getReadDb } = await import("../db");
+
+    const res = await app.request("/admin/feedback");
+
+    expect(res.status).toBe(200);
+    expect(getReadDb).toHaveBeenCalled();
+  });
+
+  it("GET /admin/jit-grants uses getReadDb", async () => {
+    const readDb = makeDb();
+    readDb.orderBy.mockResolvedValue([]);
+    const app = await getApp(readDb);
+    const { getReadDb } = await import("../db");
+
+    const res = await app.request("/admin/jit-grants");
+
+    expect(res.status).toBe(200);
+    expect(getReadDb).toHaveBeenCalled();
+  });
+
+  it("GET /admin/attachments uses getReadDb", async () => {
+    const readDb = makeDb();
+    const app = await getApp(readDb);
+    const { getReadDb } = await import("../db");
+
+    const res = await app.request("/admin/attachments");
+
+    expect(res.status).toBe(200);
+    expect(getReadDb).toHaveBeenCalled();
+  });
 });

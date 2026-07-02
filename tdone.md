@@ -19,7 +19,7 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
 | Migrations | 28 (latest: `0027_webhook_endpoints`) |
 | Route mounts in `server.ts` | 30 |
 | UI pages | 53 |
-| Tests | 1040 (864 API + 176 UI, 145 files) |
+| Tests | 1065 (870 API + 195 UI, 152 files) |
 | ADRs | 7 |
 | Stack | Hono 4 · TypeScript 6 · Bun · Next.js 16 · Drizzle ORM · PostgreSQL · Redis |
 
@@ -584,5 +584,40 @@ follow-ups (**E2**, E4–E6 info debt) remain in [`todo.md`](./todo.md).
   - `bun run lint` — pass (warnings only in scripts)
   - `bun run verify:generated` — regenerates SDK + API docs + integration matrix
     (diff vs committed baseline expected until regenerated artifacts are committed)
+
+---
+
+## P3 scalability & performance (2026-07-03)
+
+Shipped all five P3 backlog items from [`todo.md`](./todo.md):
+
+### P3.1 — UI test coverage toward 85%
+- Added page/component tests: dashboard home, profile, security/MFA, org settings,
+  admin overview, compliance, regions (15 total under `packages/ui/src/app/`).
+- API coverage ratchet raised to 63% lines / 57% branches; UI package ratchet added
+  at ~42% lines on app/components/lib.
+- [`docs/maintenance-scorecard.md`](./docs/maintenance-scorecard.md) §3 updated.
+
+### P3.2 — Read replica defaults
+- Read-heavy admin/analytics/org/notification/session/support handlers route through
+  `getReadDb()`; route tests assert replica usage on admin list endpoints.
+- Replica lag expectations in [`docs/deployment.md`](./docs/deployment.md) §Read replica routing.
+
+### P3.3 — Elasticsearch optional
+- `elasticsearch.enabled` defaults to `false`; Postgres FTS + hash-chain audit work without ES.
+- Config + search service tests prove database provider when ES is disabled.
+- README and deployment docs describe ES as opt-in for large tenants.
+
+### P3.4 — RSC server prefetch pilot
+- `/dashboard` and `/admin` prefetch TanStack Query data server-side with
+  `HydrationBoundary`; client components handle mutations.
+- Pattern in [`docs/ui-http-client.md`](./docs/ui-http-client.md).
+
+### P3.5 — Destructive migration CI gate
+- `scripts/check-destructive-migrations.ts` + `.destructive-migrations.json` in
+  CI (`migrations:check`) and pre-commit; tests in `destructiveMigrations.script.test.ts`.
+
+**Verification (2026-07-03):** 870 API + 195 UI tests passing; API line coverage 64.2%;
+`boundaries:check` · `type-check` · `build` · `lint` · UI build green.
 
 ---

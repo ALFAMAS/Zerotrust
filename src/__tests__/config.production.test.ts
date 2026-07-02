@@ -98,3 +98,29 @@ describe("P4.3 — Production fail-fast config validation", () => {
     expect(() => loadConfig()).not.toThrow();
   });
 });
+
+describe("P3.3 — Elasticsearch optional by default", () => {
+  const originalEnv = { ...process.env };
+
+  afterEach(() => {
+    process.env = { ...originalEnv };
+  });
+
+  it("defaults elasticsearch.enabled to false when ELASTICSEARCH_ENABLED is unset", async () => {
+    process.env.NODE_ENV = "development";
+    setBaseEnv();
+    delete process.env.ELASTICSEARCH_ENABLED;
+    const loadConfig = await loadFreshConfig();
+    const config = loadConfig() as { elasticsearch: { enabled: boolean } };
+    expect(config.elasticsearch.enabled).toBe(false);
+  });
+
+  it("enables elasticsearch only when ELASTICSEARCH_ENABLED=true", async () => {
+    process.env.NODE_ENV = "development";
+    setBaseEnv();
+    process.env.ELASTICSEARCH_ENABLED = "true";
+    const loadConfig = await loadFreshConfig();
+    const config = loadConfig() as { elasticsearch: { enabled: boolean } };
+    expect(config.elasticsearch.enabled).toBe(true);
+  });
+});

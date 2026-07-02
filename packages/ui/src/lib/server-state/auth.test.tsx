@@ -7,7 +7,7 @@ import SetupChecklist from "@/components/SetupChecklist";
 import VerifyEmailBanner from "@/components/VerifyEmailBanner";
 import SettingsPage from "@/app/dashboard/settings/page";
 import ProfilePage from "@/app/dashboard/profile/page";
-import DashboardPage from "@/app/dashboard/page";
+import DashboardClient from "@/app/dashboard/DashboardClient";
 import {
   AUTH_ME_PATH,
   AUTH_ME_AVATAR_PATH,
@@ -200,7 +200,7 @@ describe("auth TanStack Query server state", () => {
       return Promise.reject(new Error(`unexpected path ${path}`));
     });
 
-    renderWithQueryClient(<DashboardPage />);
+    renderWithQueryClient(<DashboardClient />);
 
     expect(await screen.findByText(/Welcome back, Complete User/)).toBeInTheDocument();
     expect(mockApiGet).toHaveBeenCalledWith(AUTH_ME_PATH);

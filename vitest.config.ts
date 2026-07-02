@@ -16,19 +16,15 @@ export default defineConfig({
       provider: "v8",
       reporter: ["text", "json", "html", "json-summary"],
       exclude: ["node_modules/", "src/__tests__/setup.ts", "src/**/*.test.ts", "src/**/*.spec.ts"],
-      // Ratchet thresholds (todo.md P4.1): actual coverage as of 2026-07-03 is
-      // ~61-63% lines/statements/functions, ~56% branches — nowhere near the
-      // aspirational 85% (which made the gate permanently non-blocking and
-      // therefore meaningless — see ci.yml). These floors sit a few points
-      // below the measured baseline so normal fluctuation doesn't flake CI,
-      // but a real regression still fails the build. Raise them as coverage
-      // improves; 85% remains the long-term target (see docs/AUDIT.md /
-      // the quarterly maintenance scorecard).
+      // Ratchet thresholds (todo.md P3.1): measured coverage as of 2026-07-03 is
+      // ~63-64% lines/statements/functions, ~56% branches. Floors sit a few points
+      // below baseline so normal fluctuation doesn't flake CI; raise incrementally
+      // toward the 85% long-term target (see docs/maintenance-scorecard.md §3).
       thresholds: {
-        lines: 62,
-        functions: 60,
+        lines: 63,
+        functions: 61,
         branches: 56,
-        statements: 61,
+        statements: 62,
       },
     },
     testTimeout: 10000,

@@ -20,5 +20,19 @@ export default defineConfig({
     setupFiles: ["./src/test/setup.ts"],
     include: ["src/**/*.test.tsx"],
     exclude: ["node_modules", "e2e"],
+    coverage: {
+      provider: "v8",
+      reporter: ["text", "json-summary"],
+      include: ["src/app/**/*.{tsx,ts}", "src/components/**/*.{tsx,ts}", "src/lib/**/*.{tsx,ts}"],
+      exclude: ["**/*.test.tsx", "**/*.test.ts", "src/test/**"],
+      // UI page/component ratchet (P3.1): measured ~45-50% lines on app/ pages;
+      // floors below baseline — raise toward 85% as page tests expand.
+      thresholds: {
+        lines: 42,
+        functions: 38,
+        branches: 35,
+        statements: 41,
+      },
+    },
   },
 });

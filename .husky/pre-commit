@@ -31,4 +31,12 @@ if command -v graphify >/dev/null 2>&1; then
   git add graphify-out/ 2>/dev/null || true
 fi
 
+# 4. Block unapproved destructive migration DDL (P3.5)
+echo "🗄️  Checking migration DDL safety..."
+bun run migrations:check
+if [ $? -ne 0 ]; then
+  echo "❌ Destructive migration gate failed"
+  exit 1
+fi
+
 echo "✅ Pre-commit checks passed"
