@@ -18,18 +18,19 @@ Tracks the frontend server-state migration from ad-hoc `useEffect` + local loadi
 - `[~]` Partial / started.
 - `[ ]` Not migrated yet.
 
-## Summary (audited 2026-07-03)
+## Summary (audited 2026-07-03 — Phase 4 complete)
 
 | Metric | Count |
 | --- | --- |
 | App `page.tsx` files | 47 |
-| Migrated to TanStack Query | 28 |
-| Remaining (`lib/api` relative imports) | 11 |
-| Remaining (other legacy: `useApi`, raw `fetch`, `useEffect`+`apiGet`) | 3 |
+| Migrated to TanStack Query | 42 |
+| Remaining (`lib/api` relative imports) | 0 |
+| Remaining (other legacy: `useApi`, raw `fetch`, `useEffect`+`apiGet`) | 0 |
 | Static / no server state | 5 |
-| **Data-fetching completion** | **~67%** (28/42) |
+| **Data-fetching completion** | **100%** (42/42) |
 
 `@/lib/api` alias imports: **0** under `packages/ui/src`.
+Relative `lib/api` imports in app `page.tsx`: **0**.
 
 ## Foundation
 
@@ -74,83 +75,56 @@ Tracks the frontend server-state migration from ad-hoc `useEffect` + local loadi
 | `/dashboard/organizations` | [x] | Org list + create moved to `organizations.ts`. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/organizations.test.tsx` |
 | `/dashboard/security` | [x] | TOTP, passkeys, OAuth connect/disconnect via extended `auth.ts`. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/auth.test.tsx` |
 | `/dashboard/api-keys` | [x] | API key list/create/revoke moved to `apiKeys.ts`. Optimistic revoke with rollback. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/apiKeys.test.tsx` |
+| `/dashboard/sessions` | [x] | User session list + revoke/revoke-all wired to `sessions.ts`. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/sessions.test.tsx` |
+| `/dashboard/organizations/[orgId]` | [x] | Org detail, members, invites, leave via extended `organizations.ts` + `useAuthMeQuery`. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/organizations.test.tsx` |
+| `/dashboard/organizations/[orgId]/settings` | [x] | Org update, security policy, transfer, delete via `organizations.ts`. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/organizations.test.tsx` |
+| `/invite/[token]` | [x] | Accept invite mutation via `organizations.ts`. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/organizations.test.tsx` |
+| `(auth)/login` | [x] | Login, MFA, passkey, OAuth exchange/authorize via `authForms.ts` + `auth.ts`. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/authForms.test.tsx` |
+| `(auth)/register` | [x] | Register + auto-login via `authForms.ts`. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/authForms.test.tsx` |
+| `(auth)/forgot-password` | [x] | Password reset request via `authForms.ts`. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/authForms.test.tsx` |
+| `(auth)/reset-password` | [x] | Password reset confirm via `authForms.ts`. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/authForms.test.tsx` |
+| `(auth)/verify-email` | [x] | Email verification via `authForms.ts`. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/authForms.test.tsx` |
+| `(auth)/magic-link` | [x] | Send magic link via `authForms.ts`. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/authForms.test.tsx` |
+| `(auth)/magic-link/verify` | [x] | Verify magic link via `authForms.ts`. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/authForms.test.tsx` |
+| `/admin` (overview) | [x] | Stats + recent users queries + CSV export mutation via `adminDashboard.ts`. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/adminDashboard.test.tsx` |
+| `/admin/settings/auth` | [x] | Auth settings load/save via extended `settings.ts` (`useAdminAuthSettingsQuery`). | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/settings.test.tsx` |
+| `/status` | [x] | Status query + SSE cache updates via `status.ts`. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/status.test.tsx` |
 
-## Phase 4 — relative `lib/api` imports (`packages/ui/src/app`)
+## Phase 4 — relative `lib/api` imports (`packages/ui/src/app`) — **COMPLETE**
 
-Tracks migration of app routes still importing legacy `api` via relative paths (`../../lib/api`), after the `@/lib/api` alias backlog was cleared.
-
-### Migrated this batch (2026-07-03)
+All 14 remaining pages migrated in the final batch (2026-07-03).
 
 | Page | Server-state module(s) |
 | --- | --- |
-| `/dashboard` (home) | `auth.ts`, `sessions.ts` (user sessions) |
-| `/dashboard/profile` | `auth.ts` |
-| `/dashboard/organizations` | `organizations.ts` |
-| `/dashboard/security` | `auth.ts` |
-| `/dashboard/api-keys` | `apiKeys.ts` |
+| `/dashboard/sessions` | `sessions.ts` (user sessions) |
+| `/dashboard/organizations/[orgId]` | `organizations.ts`, `auth.ts` |
+| `/dashboard/organizations/[orgId]/settings` | `organizations.ts`, `auth.ts` |
+| `/invite/[token]` | `organizations.ts` |
+| `(auth)/login` | `authForms.ts`, `auth.ts` |
+| `(auth)/register` | `authForms.ts` |
+| `(auth)/forgot-password` | `authForms.ts` |
+| `(auth)/reset-password` | `authForms.ts` |
+| `(auth)/verify-email` | `authForms.ts` |
+| `(auth)/magic-link` | `authForms.ts` |
+| `(auth)/magic-link/verify` | `authForms.ts` |
+| `/admin` (overview) | `adminDashboard.ts` |
+| `/admin/settings/auth` | `settings.ts` |
+| `/status` | `status.ts` |
 
-New modules: `organizations.ts`, `apiKeys.ts`. Extended: `auth.ts` (avatar, TOTP, passkey, OAuth authorize), `sessions.ts` (user `/sessions` list/revoke).
+New server-state modules: `authForms.ts`, `adminDashboard.ts`, `status.ts`.
 
-### Remaining relative `lib/api` imports (11 files)
+Extended: `organizations.ts` (detail, members, invites, policy, transfer, delete, accept), `settings.ts` (auth settings), `queryKeys.ts`, `types.ts`.
 
-| Area | File | Notes |
-| --- | --- | --- |
-| Auth | `(auth)/login/page.tsx` | mutations |
-| Auth | `(auth)/register/page.tsx` | mutations |
-| Auth | `(auth)/forgot-password/page.tsx` | mutations |
-| Auth | `(auth)/reset-password/page.tsx` | mutations |
-| Auth | `(auth)/verify-email/page.tsx` | mutations |
-| Auth | `(auth)/magic-link/page.tsx` | mutations |
-| Auth | `(auth)/magic-link/verify/page.tsx` | mutations |
-| Dashboard | `dashboard/sessions/page.tsx` | hooks exist in `sessions.ts` — page not wired yet |
-| Dashboard | `dashboard/organizations/[orgId]/page.tsx` | extend `organizations.ts` |
-| Dashboard | `dashboard/organizations/[orgId]/settings/page.tsx` | extend `organizations.ts` |
-| Other | `invite/[token]/page.tsx` | new or extend `organizations.ts` |
+**Verification grep (2026-07-03):** 0 `lib/api` in app `page.tsx`; 0 `useApi(` in app pages; 0 raw `fetch("/api/` in app pages.
 
-### Other legacy patterns (not `lib/api`) — 3 files
-
-| Area | File | Pattern |
-| --- | --- | --- |
-| Admin | `admin/page.tsx` | `useApi` + `apiGetBlob` |
-| Admin | `admin/settings/auth/page.tsx` | raw `fetch("/api/admin/settings")` |
-| Public | `status/page.tsx` | `useEffect` + `apiGet` + SSE |
-
-**Next batch targets:** `dashboard/sessions` → org detail + settings → `invite/[token]` → auth forms (7) → `admin/page` → `admin/settings/auth` → `status`.
-
-
-Prioritize pages with real server data, manual `loading/error` state, and repeated `api.get` calls.
+## Shared components / layouts
 
 | Area | Status | Next action |
 | --- | --- | --- |
 | shared components using legacy `api.get` | [x] | **Complete** — all listed shared components migrated. |
-| pages/layouts using legacy `api` (`@/lib/api` alias) | [x] | **Complete** — zero `from "@/lib/api"` under `packages/ui/src` (2026-07-03). |
-
-### Shared components still on legacy `api`
-
-| Component | API call(s) | Priority |
-| --- | --- | --- |
-| `NotificationBell.tsx` | notifications | High — visible on every page | [x] |
-| `LiveChatWidget.tsx` | `GET /auth/me` + support tickets | Medium | [x] |
-| `LocaleSwitcher.tsx` | `PATCH /auth/me` | Medium | [x] |
-| `VerifyEmailBanner.tsx` | `GET /auth/me` + resend | Medium | [x] |
-| `NpsSurveyPrompt.tsx` | `GET /auth/me/nps/should-prompt` + `POST /auth/me/nps` | Low | [x] |
-| `SetupChecklist.tsx` | onboarding-complete mutation | Low | [x] |
-
-### Remaining legacy `api` surfaces (pages/layouts only)
-
-Grep of `from "@/lib/api"` under `packages/ui/src` after page phase batch 3 (2026-07-03):
-
-**Zero** `@/lib/api` alias imports remain under `packages/ui/src`. The six targeted app pages/layouts are migrated.
-
-Note: some app routes still import legacy `api` via relative paths (`../../lib/api`) — auth flows, profile, orgs, api-keys, etc. Those are a follow-up wave; this batch cleared the `@/lib/api` backlog.
-
-**Migrated this batch:** `admin/layout`, `admin/access-reviews` (list + detail), `admin/revenue`, `admin/regions`, `dashboard/search`.
-
-New server-state modules: `accessReviews.ts`, `revenue.ts`, `regions.ts`, `search.ts`.
-
-Previously listed but already migrated before this batch: `admin/sessions`, `admin/alerts`, `dashboard/settings`, `dashboard/account`.
-
-`FeedbackWidget.tsx` uses `apiPost` from `apiClient` directly (not legacy `api`).
+| pages/layouts using legacy `api` (`@/lib/api` alias) | [x] | **Complete** — zero `from "@/lib/api"` under `packages/ui/src`. |
+| pages using relative `lib/api` | [x] | **Complete** — zero relative `lib/api` imports in app `page.tsx` files. |
+| pages using `useApi` / raw `fetch("/api/` | [x] | **Complete** — all data-fetching pages on TanStack Query. |
 
 ## Per-page checklist
 

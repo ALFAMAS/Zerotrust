@@ -3,10 +3,13 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import SessionsPage from "@/app/admin/sessions/page";
+import UserSessionsPage from "@/app/dashboard/sessions/page";
 import {
+  USER_SESSIONS_PATH,
   buildAdminSessionRevokePath,
   buildAdminSessionsListPath,
   sessionKeys,
+  userSessionKeys,
 } from "./sessions";
 
 const mockApiGet = vi.fn();
@@ -101,5 +104,23 @@ describe("sessions TanStack Query server state", () => {
     );
     expect(mockLegacyDelete).not.toHaveBeenCalled();
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: sessionKeys.list() });
+  });
+
+  it("renders user dashboard sessions through apiClient/TanStack Query", async () => {
+    mockApiGet.mockResolvedValue([
+      {
+        id: "sess_user_1",
+        ipAddress: "203.0.113.1",
+        isActive: true,
+        isCurrent: true,
+        lastActivityAt: "2026-07-03T00:00:00Z",
+      },
+    ]);
+
+    renderWithQueryClient(<UserSessionsPage />);
+
+    expect(await screen.findByText("Active Sessions")).toBeInTheDocument();
+    expect(mockApiGet).toHaveBeenCalledWith(USER_SESSIONS_PATH);
+    expect(userSessionKeys.list()).toEqual(["sessions", "list"]);
   });
 });

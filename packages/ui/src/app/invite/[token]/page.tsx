@@ -3,7 +3,6 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useRef } from "react";
 import { SkeletonCard } from "@/components/Skeleton";
-import { ErrorState } from "@/components/ui/States";
 import { useAcceptInviteMutation } from "@/lib/server-state/organizations";
 import { getToken } from "../../../lib/auth";
 

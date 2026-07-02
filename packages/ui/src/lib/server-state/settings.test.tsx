@@ -3,6 +3,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import GeneralSettingsPage from "@/app/admin/settings/general/page";
+import AuthSettingsPage from "@/app/admin/settings/auth/page";
 import { ADMIN_SETTINGS_PATH, settingsKeys } from "./settings";
 
 const mockApiGet = vi.fn();
@@ -103,5 +104,17 @@ describe("settings TanStack Query server state", () => {
       })
     );
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: settingsKeys.all });
+  });
+
+  it("loads auth settings via apiClient, not raw fetch", async () => {
+    mockApiGet.mockResolvedValue({
+      emailPasswordEnabled: true,
+      googleOAuthEnabled: true,
+      allowedEmailDomains: ["acme.com"],
+    });
+    renderWithQueryClient(<AuthSettingsPage />);
+
+    expect(await screen.findByText("Auth Settings")).toBeInTheDocument();
+    expect(mockApiGet).toHaveBeenCalledWith(ADMIN_SETTINGS_PATH);
   });
 });
