@@ -19,12 +19,12 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import AppShell from "@/components/app-shell/AppShell";
 import type { NavItem } from "@/components/app-shell/AppSidebar";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { api } from "@/lib/api";
 import { clearToken, isAuthenticated } from "@/lib/auth";
+import { useAuthMeQuery } from "@/lib/server-state/auth";
 
 const navItems: NavItem[] = [
   { href: "/admin", icon: LayoutDashboard, label: "Dashboard", exact: true },
@@ -45,36 +45,31 @@ const navItems: NavItem[] = [
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  // null = still checking, false = not an admin, true = authorized
-  const [authorized, setAuthorized] = useState<boolean | null>(null);
+  const authed = isAuthenticated();
+  const { data: me, isPending, isError } = useAuthMeQuery(authed);
 
   useEffect(() => {
-    if (!isAuthenticated()) {
+    if (!authed) {
       router.replace("/login");
       return;
     }
-    let active = true;
-    api
-      .get<{ roles?: string[] }>("/auth/me")
-      .then((me) => {
-        if (!active) return;
-        if (me?.roles?.includes("admin")) {
-          setAuthorized(true);
-        } else {
-          // Authenticated but not an admin — keep them out of the admin area.
-          setAuthorized(false);
-          router.replace("/dashboard");
-        }
-      })
-      .catch(() => {
-        if (!active) return;
-        setAuthorized(false);
-        router.replace("/login");
-      });
-    return () => {
-      active = false;
-    };
-  }, [router]);
+    if (isPending) return;
+    if (isError || !me) {
+      router.replace("/login");
+      return;
+    }
+    if (!me.roles?.includes("admin")) {
+      router.replace("/dashboard");
+    }
+  }, [authed, router, me, isPending, isError]);
+
+  // null = still checking, false = not an admin, true = authorized
+  let authorized: boolean | null = null;
+  if (!authed) authorized = false;
+  else if (isPending) authorized = null;
+  else if (isError || !me) authorized = false;
+  else if (!me.roles?.includes("admin")) authorized = false;
+  else authorized = true;
 
   function handleSignOut() {
     clearToken();

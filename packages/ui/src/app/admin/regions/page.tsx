@@ -1,10 +1,12 @@
 "use client";
 
 import { Globe2 } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
+import { ServerStateStatus } from "@/components/ServerStateStatus";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ErrorState } from "@/components/ui/States";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -14,12 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { api } from "@/lib/api";
-
-interface RegionHealth {
-  status: string;
-  regions: string[];
-}
+import { useRegionHealthQuery, useSetOrgRegionMutation } from "@/lib/server-state/regions";
 
 const REGION_LABEL: Record<string, string> = {
   us: "United States",
@@ -28,49 +25,34 @@ const REGION_LABEL: Record<string, string> = {
 };
 
 export default function RegionsPage() {
-  const [health, setHealth] = useState<RegionHealth | null>(null);
-  const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState<string | null>(null);
-
   const [orgId, setOrgId] = useState("");
   const [region, setRegion] = useState("us");
-  const [saving, setSaving] = useState(false);
+
+  const healthQuery = useRegionHealthQuery();
+  const setRegionMutation = useSetOrgRegionMutation();
 
   const showToast = useCallback((msg: string) => {
     setToast(msg);
     setTimeout(() => setToast(null), 3000);
   }, []);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    try {
-      setHealth(await api.get<RegionHealth>("/regions/health"));
-    } catch {
-      showToast("Failed to load region health");
-    } finally {
-      setLoading(false);
-    }
-  }, [showToast]);
-
-  useEffect(() => {
-    void load();
-  }, [load]);
+  const health = healthQuery.data ?? null;
+  const loading = healthQuery.isLoading;
+  const error = healthQuery.error;
+  const regions = health?.regions ?? ["us", "eu", "apac"];
 
   async function setOrgRegion(e: React.FormEvent) {
     e.preventDefault();
-    setSaving(true);
+    const trimmedOrgId = orgId.trim();
     try {
-      await api.put(`/regions/orgs/${orgId.trim()}/region`, { region });
-      showToast(`Org ${orgId} pinned to ${region.toUpperCase()}`);
+      await setRegionMutation.mutateAsync({ orgId: trimmedOrgId, input: { region } });
+      showToast(`Org ${trimmedOrgId} pinned to ${region.toUpperCase()}`);
       setOrgId("");
     } catch (err) {
       showToast(err instanceof Error ? err.message : "Failed to set region");
-    } finally {
-      setSaving(false);
     }
   }
-
-  const regions = health?.regions ?? ["us", "eu", "apac"];
 
   return (
     <div className="space-y-6">
@@ -93,12 +75,20 @@ export default function RegionsPage() {
       </div>
 
       <Card>
-        <CardHeader>
-          <CardTitle>Region health</CardTitle>
-          <CardDescription>Active storage regions and overall status.</CardDescription>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0">
+          <div>
+            <CardTitle>Region health</CardTitle>
+            <CardDescription>Active storage regions and overall status.</CardDescription>
+          </div>
+          <ServerStateStatus query={healthQuery} />
         </CardHeader>
         <CardContent>
-          {loading ? (
+          {error ? (
+            <ErrorState
+              message={error.message || "Failed to load region health"}
+              retry={() => healthQuery.refetch()}
+            />
+          ) : loading ? (
             <p className="text-sm text-muted-foreground">Loading…</p>
           ) : (
             <div className="flex flex-wrap items-center gap-3">
@@ -151,8 +141,8 @@ export default function RegionsPage() {
               </Select>
             </div>
             <div className="flex items-end">
-              <Button type="submit" disabled={saving} className="w-full">
-                {saving ? "Saving…" : "Set region"}
+              <Button type="submit" disabled={setRegionMutation.isPending} className="w-full">
+                {setRegionMutation.isPending ? "Saving…" : "Set region"}
               </Button>
             </div>
           </form>

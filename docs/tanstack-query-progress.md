@@ -51,6 +51,11 @@ Tracks the frontend server-state migration from ad-hoc `useEffect` + local loadi
 | `/admin/alerts` | [x] | Alert channel list + create/toggle/test/delete moved to `alertChannels.ts`. Toggle/delete use optimistic cache updates with rollback. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/alertChannels.test.tsx` |
 | `/dashboard/settings` | [x] | OAuth provider list + disconnect moved to `auth.ts` (`useOAuthProvidersQuery`, `useDisconnectOAuthProviderMutation`). | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/auth.test.tsx` |
 | `/dashboard/account` | [x] | GDPR export/delete/cancel moved to `account.ts` mutation hooks (`apiGetBlob` + `apiDelete` + `apiPost`). | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/account.test.tsx` |
+| `admin/layout.tsx` (admin shell) | [x] | Admin role gate uses `useAuthMeQuery` from `auth.ts`; no child admin API calls until authorized. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/auth.test.tsx` |
+| `/admin/access-reviews` | [x] | List + detail + start/decide/complete moved to `accessReviews.ts`. Optimistic item decision with rollback. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/accessReviews.test.tsx` |
+| `/admin/revenue` | [x] | Revenue summary + broadcast mutation moved to `revenue.ts`. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/revenue.test.tsx` |
+| `/admin/regions` | [x] | Region health query + org region pin mutation moved to `regions.ts`. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/regions.test.tsx` |
+| `/dashboard/search` | [x] | Debounced full-text search moved to `search.ts` (`enabled` when query ≥ 2 chars). | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/search.test.tsx` |
 
 ## Migration backlog
 
@@ -59,6 +64,7 @@ Prioritize pages with real server data, manual `loading/error` state, and repeat
 | Area | Status | Next action |
 | --- | --- | --- |
 | shared components using legacy `api.get` | [x] | **Complete** — all listed shared components migrated. |
+| pages/layouts using legacy `api` (`@/lib/api` alias) | [x] | **Complete** — zero `from "@/lib/api"` under `packages/ui/src` (2026-07-03). |
 
 ### Shared components still on legacy `api`
 
@@ -73,20 +79,17 @@ Prioritize pages with real server data, manual `loading/error` state, and repeat
 
 ### Remaining legacy `api` surfaces (pages/layouts only)
 
-Grep of `from "@/lib/api"` under `packages/ui/src` after page phase batch 2 (2026-07-03):
+Grep of `from "@/lib/api"` under `packages/ui/src` after page phase batch 3 (2026-07-03):
 
-| File | Notes |
-| --- | --- |
-| `app/admin/layout.tsx` | Admin shell auth/bootstrap |
-| `app/admin/access-reviews/page.tsx` | Access review list |
-| `app/admin/access-reviews/[id]/page.tsx` | Access review detail |
-| `app/admin/revenue/page.tsx` | Revenue + broadcast |
-| `app/admin/regions/page.tsx` | Region admin |
-| `app/dashboard/search/page.tsx` | Search |
+**Zero** `@/lib/api` alias imports remain under `packages/ui/src`. The six targeted app pages/layouts are migrated.
 
-**Migrated this batch:** `admin/sessions`, `admin/alerts`, `dashboard/settings`, `dashboard/account`.
+Note: some app routes still import legacy `api` via relative paths (`../../lib/api`) — auth flows, profile, orgs, api-keys, etc. Those are a follow-up wave; this batch cleared the `@/lib/api` backlog.
 
-Previously listed but already migrated before this batch: `admin/users/page.tsx`, `dashboard/notifications/page.tsx`, `dashboard/jit/page.tsx`.
+**Migrated this batch:** `admin/layout`, `admin/access-reviews` (list + detail), `admin/revenue`, `admin/regions`, `dashboard/search`.
+
+New server-state modules: `accessReviews.ts`, `revenue.ts`, `regions.ts`, `search.ts`.
+
+Previously listed but already migrated before this batch: `admin/sessions`, `admin/alerts`, `dashboard/settings`, `dashboard/account`.
 
 `FeedbackWidget.tsx` uses `apiPost` from `apiClient` directly (not legacy `api`).
 

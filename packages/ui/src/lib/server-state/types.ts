@@ -476,3 +476,96 @@ export interface CreateAlertChannelInput {
   events: string[];
   config: { webhookUrl?: string; integrationKey?: string };
 }
+
+export interface AccessReview {
+  id: string;
+  title: string;
+  status: "open" | "completed" | string;
+  createdByEmail?: string | null;
+  createdAt: string;
+  completedAt?: string | null;
+  note?: string | null;
+  itemCount?: number;
+  pendingCount?: number;
+}
+
+export interface AccessReviewItem {
+  id: string;
+  userId: string;
+  userEmail?: string | null;
+  userDisplayName?: string | null;
+  rolesSnapshot: string[];
+  decision: "pending" | "approved" | "revoked" | "flagged" | string;
+  decidedByEmail?: string | null;
+  decidedAt?: string | null;
+  note?: string | null;
+}
+
+export interface AccessReviewsListResponse {
+  reviews: AccessReview[];
+}
+
+export interface AccessReviewDetailResponse {
+  review: AccessReview;
+  items: AccessReviewItem[];
+}
+
+export type AccessReviewDecision = "approved" | "revoked" | "flagged";
+
+export interface StartAccessReviewResponse {
+  itemCount: number;
+}
+
+export interface RevenueData {
+  mrr: number;
+  arr: number;
+  currency: string;
+  activeSubscriptions: number;
+  byPlan: Record<string, number>;
+  trialing: number;
+  pastDue: number;
+  canceledLast30Days: number;
+  churnRatePercent: number;
+}
+
+export interface BroadcastInput {
+  title: string;
+  message: string;
+  segment: string;
+  sendEmail?: boolean;
+}
+
+export interface BroadcastResponse {
+  recipients: number;
+}
+
+export interface RegionHealth {
+  status: string;
+  regions: string[];
+}
+
+export interface SetOrgRegionInput {
+  region: string;
+}
+
+export type SearchHitType = "user" | "org" | "note" | "ticket";
+
+export interface SearchHit {
+  id: string;
+  type: SearchHitType;
+  title: string;
+  highlight?: string;
+  score: number;
+}
+
+export interface SearchResults {
+  total: number;
+  hits: SearchHit[];
+  provider: "elasticsearch" | "database";
+}
+
+export interface SearchParams {
+  q: string;
+  type?: string;
+  limit?: number;
+}

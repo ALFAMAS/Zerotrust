@@ -1,10 +1,12 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
+import { ServerStateStatus } from "@/components/ServerStateStatus";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { ErrorState } from "@/components/ui/States";
 import {
   Table,
   TableBody,
@@ -13,29 +15,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { api } from "@/lib/api";
-
-interface ReviewItem {
-  id: string;
-  userId: string;
-  userEmail?: string | null;
-  userDisplayName?: string | null;
-  rolesSnapshot: string[];
-  decision: "pending" | "approved" | "revoked" | "flagged" | string;
-  decidedByEmail?: string | null;
-  decidedAt?: string | null;
-  note?: string | null;
-}
-
-interface Review {
-  id: string;
-  title: string;
-  status: "open" | "completed" | string;
-  createdByEmail?: string | null;
-  createdAt: string;
-  completedAt?: string | null;
-  note?: string | null;
-}
+import {
+  useAccessReviewDetailQuery,
+  useCompleteAccessReviewMutation,
+  useDecideAccessReviewItemMutation,
+} from "@/lib/server-state/accessReviews";
+import type { AccessReviewDecision, AccessReviewItem } from "@/lib/server-state/types";
 
 const fmt = (d?: string | null) => (d ? new Date(d).toLocaleString() : "—");
 
@@ -49,13 +34,12 @@ const DECISION_VARIANT: Record<string, "success" | "destructive" | "warning" | "
 export default function AccessReviewDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
-  const [review, setReview] = useState<Review | null>(null);
-  const [items, setItems] = useState<ReviewItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [busy, setBusy] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
-
   const toastTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+
+  const detailQuery = useAccessReviewDetailQuery(id);
+  const decideMutation = useDecideAccessReviewItemMutation();
+  const completeMutation = useCompleteAccessReviewMutation();
 
   const showToast = useCallback((msg: string) => {
     setToast(msg);
@@ -63,67 +47,59 @@ export default function AccessReviewDetailPage() {
     toastTimer.current = setTimeout(() => setToast(null), 3000);
   }, []);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    try {
-      const data = await api.get<{ review: Review; items: ReviewItem[] }>(
-        `/admin/access-reviews/${id}`
-      );
-      setReview(data.review);
-      setItems(data.items ?? []);
-    } catch {
-      showToast("Failed to load review");
-    } finally {
-      setLoading(false);
-    }
-  }, [id, showToast]);
+  const review = detailQuery.data?.review ?? null;
+  const items = detailQuery.data?.items ?? [];
+  const loading = detailQuery.isLoading;
+  const error = detailQuery.error;
+  const busyId = decideMutation.isPending
+    ? decideMutation.variables?.itemId ?? null
+    : completeMutation.isPending
+      ? "complete"
+      : null;
 
-  useEffect(() => {
-    void load();
-  }, [load]);
-
-  async function decide(item: ReviewItem, decision: "approved" | "revoked" | "flagged") {
+  async function decide(item: AccessReviewItem, decision: AccessReviewDecision) {
     if (
       decision === "revoked" &&
       !confirm(`Revoke elevated roles for ${item.userEmail}? This sets their roles to just "user".`)
     ) {
       return;
     }
-    setBusy(item.id);
     try {
-      await api.patch(`/admin/access-reviews/${id}/items/${item.id}`, { decision });
-      setItems((prev) =>
-        prev.map((i) =>
-          i.id === item.id ? { ...i, decision, decidedAt: new Date().toISOString() } : i
-        )
-      );
+      await decideMutation.mutateAsync({ reviewId: id, itemId: item.id, decision });
       showToast(`Marked ${decision}`);
     } catch {
       showToast("Failed to record decision");
-    } finally {
-      setBusy(null);
     }
   }
 
   async function complete() {
-    setBusy("complete");
     try {
-      await api.post(`/admin/access-reviews/${id}/complete`, {});
+      await completeMutation.mutateAsync(id);
       showToast("Review completed");
-      await load();
-    } catch (err: any) {
-      showToast(err?.message || "Cannot complete — items still pending");
-    } finally {
-      setBusy(null);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Cannot complete — items still pending";
+      showToast(message);
     }
   }
 
-  if (loading)
+  if (loading) {
     return (
       <div className="flex h-64 items-center justify-center text-muted-foreground">Loading…</div>
     );
-  if (!review)
+  }
+
+  if (error) {
+    return (
+      <ErrorState
+        message={error.message || "Failed to load review"}
+        retry={() => detailQuery.refetch()}
+      />
+    );
+  }
+
+  if (!review) {
     return <div className="py-16 text-center text-muted-foreground">Review not found.</div>;
+  }
 
   const pending = items.filter((i) => i.decision === "pending").length;
   const isOpen = review.status !== "completed";
@@ -157,16 +133,19 @@ export default function AccessReviewDetailPage() {
             {review.completedAt && ` · completed ${fmt(review.completedAt)}`}
           </p>
         </div>
-        {isOpen && (
-          <Button
-            type="button"
-            onClick={complete}
-            disabled={busy === "complete" || pending > 0}
-            title={pending > 0 ? `${pending} item(s) still pending` : "Mark review complete"}
-          >
-            {busy === "complete" ? "Completing…" : "Complete review"}
-          </Button>
-        )}
+        <div className="flex items-center gap-3">
+          <ServerStateStatus query={detailQuery} />
+          {isOpen && (
+            <Button
+              type="button"
+              onClick={complete}
+              disabled={busyId === "complete" || pending > 0}
+              title={pending > 0 ? `${pending} item(s) still pending` : "Mark review complete"}
+            >
+              {busyId === "complete" ? "Completing…" : "Complete review"}
+            </Button>
+          )}
+        </div>
       </div>
 
       <Card>
@@ -233,7 +212,7 @@ export default function AccessReviewDetailPage() {
                             size="sm"
                             className="text-emerald-600 hover:text-emerald-600"
                             onClick={() => decide(item, "approved")}
-                            disabled={busy === item.id}
+                            disabled={busyId === item.id}
                           >
                             Approve
                           </Button>
@@ -243,7 +222,7 @@ export default function AccessReviewDetailPage() {
                             size="sm"
                             className="text-amber-600 hover:text-amber-600"
                             onClick={() => decide(item, "flagged")}
-                            disabled={busy === item.id}
+                            disabled={busyId === item.id}
                           >
                             Flag
                           </Button>
@@ -253,7 +232,7 @@ export default function AccessReviewDetailPage() {
                             size="sm"
                             className="text-destructive hover:text-destructive"
                             onClick={() => decide(item, "revoked")}
-                            disabled={busy === item.id}
+                            disabled={busyId === item.id}
                           >
                             Revoke
                           </Button>

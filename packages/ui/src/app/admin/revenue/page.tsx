@@ -9,10 +9,12 @@ import {
   TrendingDown,
   TrendingUp,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import DonutChart from "@/components/admin/DonutChart";
 import MetricCard from "@/components/admin/MetricCard";
+import { ServerStateStatus } from "@/components/ServerStateStatus";
 import { Button } from "@/components/ui/button";
+import { ErrorState } from "@/components/ui/States";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -22,25 +24,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { api } from "@/lib/api";
-
-interface RevenueData {
-  mrr: number;
-  arr: number;
-  currency: string;
-  activeSubscriptions: number;
-  byPlan: Record<string, number>;
-  trialing: number;
-  pastDue: number;
-  canceledLast30Days: number;
-  churnRatePercent: number;
-}
+import { useRevenueQuery, useSendBroadcastMutation } from "@/lib/server-state/revenue";
 
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
 export default function RevenuePage() {
-  const [data, setData] = useState<RevenueData | null>(null);
-  const [loading, setLoading] = useState(true);
   const [broadcastOpen, setBroadcastOpen] = useState(false);
   const [broadcast, setBroadcast] = useState({
     title: "",
@@ -49,17 +37,15 @@ export default function RevenuePage() {
   });
   const [broadcastResult, setBroadcastResult] = useState<string | null>(null);
 
-  useEffect(() => {
-    api
-      .get<RevenueData>("/admin/revenue")
-      .then(setData)
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, []);
+  const revenueQuery = useRevenueQuery();
+  const broadcastMutation = useSendBroadcastMutation();
+  const data = revenueQuery.data ?? null;
+  const loading = revenueQuery.isLoading;
+  const error = revenueQuery.error;
 
   async function sendBroadcast() {
     try {
-      const res = await api.post<{ recipients: number }>("/admin/broadcast", {
+      const res = await broadcastMutation.mutateAsync({
         ...broadcast,
         sendEmail: false,
       });
@@ -87,7 +73,8 @@ export default function RevenuePage() {
             MRR, churn and subscription health at a glance
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex items-center gap-2">
+          <ServerStateStatus query={revenueQuery} />
           <Button asChild variant="outline" size="sm">
             <a href={`${oauthBase}/admin/users/export`}>
               <Download />
@@ -135,7 +122,7 @@ export default function RevenuePage() {
             </Select>
             <Button
               onClick={sendBroadcast}
-              disabled={!broadcast.title || !broadcast.message}
+              disabled={!broadcast.title || !broadcast.message || broadcastMutation.isPending}
               size="sm"
             >
               <Send />
@@ -148,7 +135,12 @@ export default function RevenuePage() {
         </div>
       )}
 
-      {loading ? (
+      {error ? (
+        <ErrorState
+          message={error.message || "Failed to load revenue data"}
+          retry={() => revenueQuery.refetch()}
+        />
+      ) : loading ? (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {[...Array(4)].map((_, i) => (
             <div key={i} className="h-32 animate-pulse rounded-xl border border-border bg-card" />

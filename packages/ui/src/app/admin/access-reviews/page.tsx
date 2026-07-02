@@ -2,9 +2,11 @@
 
 import Link from "next/link";
 import { useCallback, useRef, useState } from "react";
+import { ServerStateStatus } from "@/components/ServerStateStatus";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { ErrorState } from "@/components/ui/States";
 import {
   Table,
   TableBody,
@@ -13,27 +15,19 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { api } from "@/lib/api";
-import { useApi } from "@/lib/hooks/useApi";
-
-interface Review {
-  id: string;
-  title: string;
-  status: "open" | "completed" | string;
-  createdByEmail?: string | null;
-  createdAt: string;
-  completedAt?: string | null;
-  itemCount: number;
-  pendingCount: number;
-}
+import {
+  useAccessReviewsListQuery,
+  useStartAccessReviewMutation,
+} from "@/lib/server-state/accessReviews";
 
 const fmt = (d?: string | null) => (d ? new Date(d).toLocaleString() : "—");
 
 export default function AccessReviewsPage() {
-  const [creating, setCreating] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
-
   const toastTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+
+  const reviewsQuery = useAccessReviewsListQuery();
+  const startMutation = useStartAccessReviewMutation();
 
   const showToast = useCallback((msg: string) => {
     setToast(msg);
@@ -41,22 +35,16 @@ export default function AccessReviewsPage() {
     toastTimer.current = setTimeout(() => setToast(null), 3000);
   }, []);
 
-  const { data, loading, refetch } = useApi<{ reviews: Review[] }>("/admin/access-reviews", {
-    onError: () => showToast("Failed to load access reviews"),
-  });
-  const reviews = data?.reviews ?? [];
-  const load = refetch;
+  const reviews = reviewsQuery.data?.reviews ?? [];
+  const loading = reviewsQuery.isLoading;
+  const error = reviewsQuery.error;
 
   async function startReview() {
-    setCreating(true);
     try {
-      const res = await api.post<{ itemCount: number }>("/admin/access-reviews", {});
+      const res = await startMutation.mutateAsync();
       showToast(`Review started — ${res.itemCount} privileged user(s) to review`);
-      await load();
     } catch {
       showToast("Failed to start review");
-    } finally {
-      setCreating(false);
     }
   }
 
@@ -77,78 +65,94 @@ export default function AccessReviewsPage() {
             Periodic review of privileged (non-default) role grants — SOC 2 CC6 evidence.
           </p>
         </div>
-        <Button type="button" onClick={startReview} disabled={creating}>
-          {creating ? "Starting…" : "Start new review"}
-        </Button>
+        <div className="flex items-center gap-3">
+          <ServerStateStatus query={reviewsQuery} />
+          <Button
+            type="button"
+            onClick={startReview}
+            disabled={startMutation.isPending}
+          >
+            {startMutation.isPending ? "Starting…" : "Start new review"}
+          </Button>
+        </div>
       </div>
 
-      <Card>
-        <CardContent className="pt-6">
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Review</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Progress</TableHead>
-                  <TableHead>Started by</TableHead>
-                  <TableHead>Created</TableHead>
-                  <TableHead>Completed</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {loading && (
+      {error ? (
+        <ErrorState
+          message={error.message || "Failed to load access reviews"}
+          retry={() => reviewsQuery.refetch()}
+        />
+      ) : (
+        <Card>
+          <CardContent className="pt-6">
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
                   <TableRow>
-                    <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
-                      Loading…
-                    </TableCell>
+                    <TableHead>Review</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Progress</TableHead>
+                    <TableHead>Started by</TableHead>
+                    <TableHead>Created</TableHead>
+                    <TableHead>Completed</TableHead>
                   </TableRow>
-                )}
-                {!loading && reviews.length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
-                      No access reviews yet. Start one to snapshot current privileged grants.
-                    </TableCell>
-                  </TableRow>
-                )}
-                {!loading &&
-                  reviews.map((r) => (
-                    <TableRow key={r.id}>
-                      <TableCell>
-                        <Link
-                          href={`/admin/access-reviews/${r.id}`}
-                          className="font-medium text-primary hover:underline"
-                        >
-                          {r.title}
-                        </Link>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={r.status === "completed" ? "success" : "warning"}>
-                          {r.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-xs text-muted-foreground">
-                        {r.itemCount - r.pendingCount}/{r.itemCount} decided
-                        {r.pendingCount > 0 && (
-                          <span className="ml-1 text-amber-500">({r.pendingCount} pending)</span>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-xs text-muted-foreground">
-                        {r.createdByEmail ?? "—"}
-                      </TableCell>
-                      <TableCell className="text-xs text-muted-foreground">
-                        {fmt(r.createdAt)}
-                      </TableCell>
-                      <TableCell className="text-xs text-muted-foreground">
-                        {fmt(r.completedAt)}
+                </TableHeader>
+                <TableBody>
+                  {loading && (
+                    <TableRow>
+                      <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
+                        Loading…
                       </TableCell>
                     </TableRow>
-                  ))}
-              </TableBody>
-            </Table>
-          </div>
-        </CardContent>
-      </Card>
+                  )}
+                  {!loading && reviews.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
+                        No access reviews yet. Start one to snapshot current privileged grants.
+                      </TableCell>
+                    </TableRow>
+                  )}
+                  {!loading &&
+                    reviews.map((r) => (
+                      <TableRow key={r.id}>
+                        <TableCell>
+                          <Link
+                            href={`/admin/access-reviews/${r.id}`}
+                            className="font-medium text-primary hover:underline"
+                          >
+                            {r.title}
+                          </Link>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={r.status === "completed" ? "success" : "warning"}>
+                            {r.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-xs text-muted-foreground">
+                          {(r.itemCount ?? 0) - (r.pendingCount ?? 0)}/{r.itemCount ?? 0} decided
+                          {(r.pendingCount ?? 0) > 0 && (
+                            <span className="ml-1 text-amber-500">
+                              ({r.pendingCount} pending)
+                            </span>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-xs text-muted-foreground">
+                          {r.createdByEmail ?? "—"}
+                        </TableCell>
+                        <TableCell className="text-xs text-muted-foreground">
+                          {fmt(r.createdAt)}
+                        </TableCell>
+                        <TableCell className="text-xs text-muted-foreground">
+                          {fmt(r.completedAt)}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

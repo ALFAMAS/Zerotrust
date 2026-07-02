@@ -21,6 +21,15 @@ export const queryKeys = {
       all: () => [...queryKeys.admin.all, "alertChannels"] as const,
       list: () => [...queryKeys.admin.alertChannels.all(), "list"] as const,
     },
+    accessReviews: {
+      all: () => [...queryKeys.admin.all, "accessReviews"] as const,
+      list: () => [...queryKeys.admin.accessReviews.all(), "list"] as const,
+      detail: (id: string) => [...queryKeys.admin.accessReviews.all(), "detail", id] as const,
+    },
+    revenue: {
+      all: () => [...queryKeys.admin.all, "revenue"] as const,
+      summary: () => [...queryKeys.admin.revenue.all(), "summary"] as const,
+    },
   },
   account: {
     all: ["account"] as const,
@@ -103,5 +112,14 @@ export const queryKeys = {
   nps: {
     all: ["nps"] as const,
     shouldPrompt: () => [...queryKeys.nps.all, "shouldPrompt"] as const,
+  },
+  regions: {
+    all: ["regions"] as const,
+    health: () => [...queryKeys.regions.all, "health"] as const,
+  },
+  search: {
+    all: ["search"] as const,
+    results: (params: Record<string, string | number | undefined> = {}) =>
+      [...queryKeys.search.all, "results", params] as const,
   },
 };

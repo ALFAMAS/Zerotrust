@@ -2,36 +2,22 @@
 
 import { Building2, FileText, LifeBuoy, Search as SearchIcon, User } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { ServerStateStatus } from "@/components/ServerStateStatus";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { api } from "@/lib/api";
+import { useSearchQuery } from "@/lib/server-state/search";
+import type { SearchHitType } from "@/lib/server-state/types";
 
-type HitType = "user" | "org" | "note" | "ticket";
-
-interface SearchHit {
-  id: string;
-  type: HitType;
-  title: string;
-  highlight?: string;
-  score: number;
-}
-
-interface SearchResults {
-  total: number;
-  hits: SearchHit[];
-  provider: "elasticsearch" | "database";
-}
-
-const TYPE_META: Record<HitType, { label: string; icon: typeof User }> = {
+const TYPE_META: Record<SearchHitType, { label: string; icon: typeof User }> = {
   user: { label: "User", icon: User },
   org: { label: "Org", icon: Building2 },
   note: { label: "Note", icon: FileText },
   ticket: { label: "Ticket", icon: LifeBuoy },
 };
 
-const FILTERS: { value: "" | HitType; label: string }[] = [
+const FILTERS: { value: "" | SearchHitType; label: string }[] = [
   { value: "", label: "All" },
   { value: "user", label: "Users" },
   { value: "org", label: "Orgs" },
@@ -41,36 +27,25 @@ const FILTERS: { value: "" | HitType; label: string }[] = [
 
 export default function SearchPage() {
   const [q, setQ] = useState("");
-  const [type, setType] = useState<"" | HitType>("");
-  const [results, setResults] = useState<SearchResults | null>(null);
-  const [searching, setSearching] = useState(false);
+  const [type, setType] = useState<"" | SearchHitType>("");
+  const [debouncedQ, setDebouncedQ] = useState("");
   const debounce = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   useEffect(() => {
-    const query = q.trim();
     if (debounce.current) clearTimeout(debounce.current);
-    if (query.length < 2) {
-      setResults(null);
-      setSearching(false);
-      return;
-    }
-    setSearching(true);
-    debounce.current = setTimeout(async () => {
-      try {
-        const params = new URLSearchParams({ q: query, limit: "25" });
-        if (type) params.set("type", type);
-        const res = await api.get<SearchResults>(`/search?${params.toString()}`);
-        setResults(res);
-      } catch {
-        setResults({ total: 0, hits: [], provider: "database" });
-      } finally {
-        setSearching(false);
-      }
-    }, 300);
+    debounce.current = setTimeout(() => setDebouncedQ(q.trim()), 300);
     return () => {
       if (debounce.current) clearTimeout(debounce.current);
     };
-  }, [q, type]);
+  }, [q]);
+
+  const searchQuery = useSearchQuery({
+    q: debouncedQ,
+    type: type || undefined,
+    limit: 25,
+  });
+  const results = searchQuery.data ?? null;
+  const searching = searchQuery.isFetching && debouncedQ.length >= 2;
 
   return (
     <div className="max-w-2xl">
@@ -110,14 +85,23 @@ export default function SearchPage() {
         ))}
       </div>
 
-      {q.trim().length >= 2 && results && (
+      {debouncedQ.length >= 2 && (
         <div className="mb-3 flex items-center justify-between text-xs text-muted-foreground">
           <span>
-            {searching ? "Searching…" : `${results.total} result${results.total === 1 ? "" : "s"}`}
+            {searching
+              ? "Searching…"
+              : results
+                ? `${results.total} result${results.total === 1 ? "" : "s"}`
+                : "—"}
           </span>
-          <Badge variant="outline" className="font-normal">
-            {results.provider === "elasticsearch" ? "Elasticsearch" : "Database"}
-          </Badge>
+          <div className="flex items-center gap-2">
+            <ServerStateStatus query={searchQuery} />
+            {results && (
+              <Badge variant="outline" className="font-normal">
+                {results.provider === "elasticsearch" ? "Elasticsearch" : "Database"}
+              </Badge>
+            )}
+          </div>
         </div>
       )}
 
@@ -149,14 +133,15 @@ export default function SearchPage() {
           })}
         </ul>
       ) : (
-        q.trim().length >= 2 &&
-        !searching && (
+        debouncedQ.length >= 2 &&
+        !searching &&
+        results && (
           <div className="py-12 text-center">
             <SearchIcon
               className="mx-auto mb-3 h-9 w-9 text-muted-foreground/40"
               aria-hidden="true"
             />
-            <p className="text-sm text-muted-foreground">No results for “{q.trim()}”.</p>
+            <p className="text-sm text-muted-foreground">No results for “{debouncedQ}”.</p>
           </div>
         )
       )}
