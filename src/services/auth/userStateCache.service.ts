@@ -1,6 +1,6 @@
 import type { usersTable } from "../../db/schema";
 import { getLogger } from "../../logger/index";
-import { getRedis } from "../ops/rateLimiter/redis";
+import { getRedis } from "../shared/rateLimiter/redis";
 
 const logger = getLogger("user-state-cache");
 const USER_STATE_CACHE_TTL_SECONDS = 5;

@@ -52,7 +52,7 @@ startActivityFlusher();
 
 async function getRedis(): Promise<any> {
   try {
-    const { getRedis } = await import("../ops/rateLimiter/redis.js");
+    const { getRedis } = await import("../shared/rateLimiter/redis.js");
     return getRedis();
   } catch {
     return null;

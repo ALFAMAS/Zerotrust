@@ -17,7 +17,7 @@ import { and, eq, isNotNull } from "drizzle-orm";
 import { getDb } from "../../db/index";
 import { subscriptionsTable, usersTable } from "../../db/schema";
 import { getLogger } from "../../logger/index";
-import { sendBillingEventEmail } from "./email.service";
+import { sendBillingEventEmail } from "../notifications/email.service";
 
 const logger = getLogger("billing-lifecycle");
 

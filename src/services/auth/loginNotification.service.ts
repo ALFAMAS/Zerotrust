@@ -9,7 +9,7 @@ import { and, eq, ne } from "drizzle-orm";
 import { getDb } from "../../db/index";
 import { sessionsTable } from "../../db/schema";
 import { getLogger } from "../../logger/index";
-import { sendSecurityAlertEmail } from "./email.service";
+import { sendSecurityAlertEmail } from "../notifications/email.service";
 
 const logger = getLogger("login-notification");
 

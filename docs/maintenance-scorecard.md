@@ -43,9 +43,9 @@ breakage.
 
 | Metric | Current | Target | Trend |
 |---|---|---|---|
-| Total test count | _TBD_ | Growing | — |
-| Unit test coverage (lines) | _TBD_ | ≥85% | — |
-| Unit test coverage (branches) | _TBD_ | ≥85% | — |
+| Total test count | 827 root tests observed in latest coverage run; UI count tracked separately | Growing | ✅ |
+| API unit test coverage (lines) | ≥62% ratchet (root `vitest.config.ts`) | ≥85% long-term | 🔶 ↑ |
+| API unit test coverage (branches) | ≥56% ratchet (root `vitest.config.ts`) | ≥85% long-term | 🔶 ↑ |
 | E2E smoke passing | _TBD_ | 100% | — |
 | Playwright E2E passing | _TBD_ | 100% | — |
 | k6 load test thresholds met | _TBD_ | p95 <100ms, p99 <300ms | — |

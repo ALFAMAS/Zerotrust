@@ -40,54 +40,7 @@ maintainability/refactor · P3 scalability/performance · P4 docs/DX · P5 compl
 
 ## P2 — Maintainability and refactoring
 
-### P2.1 — Remove legacy `packages/ui/src/lib/api.ts` — _Pending_
-
-- **Source:** [`docs/tanstack-query-progress.md`](./docs/tanstack-query-progress.md) post-rollout caveats
-- **Why:** TanStack Query migration is complete (42/42 data-fetching pages). The
-  legacy facade has zero production imports but remains as dead code; tests still
-  mock it as a guard.
-- **Acceptance:** Delete `lib/api.ts` (or reduce to a thin deprecated stub with a
-  single migration note); update test mocks to target `apiClient` / server-state
-  modules; `grep` confirms no `lib/api` imports under `packages/ui/src`.
-- **Status:** Pending.
-
-### P2.2 — Domain-oriented `services/` layout — _Pending_
-
-- **Source:** [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) P7
-- **Why:** `src/services/` is a flat directory of ~48 files; grouping by domain
-  (`auth/`, `billing/`, `notifications/`, `compliance/`, `ops/`) improves
-  navigability as the template grows.
-- **Acceptance:** Move services into domain subdirectories; update imports; `bun
-run boundaries:check` and full test suite stay green.
-- **Status:** Pending.
-
-### P2.3 — Backend features without UI exposure (product surface gaps) — _Pending_
-
-- **Source:** [`docs/api-ui-integration-matrix.md`](./docs/api-ui-integration-matrix.md)
-  (81 backend routes with no UI scan match); [`AUDIT-REPORT.md`](./AUDIT-REPORT.md) E4
-- **Why:** Many unmatched routes are infra/SDK-only by design, but a meaningful
-  subset are shipped backend features with no dashboard surface. Forks must
-  either expose or consciously drop them.
-- **Acceptance:** For each gap below, either add a UI page/component wired
-  through `server-state/*` + `apiClient`, or document "API/SDK-only" in
-  `openapi.json` tag descriptions and drop from the matrix unmatched list.
-- **Gaps to decide (highest value first):**
-  - `/admin/feedback` — admin feedback inbox
-  - `/admin/roles` — system role CRUD
-  - `/admin/jit-grants/*` — admin JIT grant approve/deny (distinct from
-    `/jit/cross-tenant/*` user flows)
-  - `/billing/tax-exemptions/*`, `/billing/vat/validate`, `/billing/usage`,
-    `/billing/change-plan` — billing ops not on the billing page today
-  - `/admin/attachments`, `/admin/lifecycle-emails` — admin content tools
-  - `/admin/webhooks/{webhookId}/deliveries` — admin-wide delivery log (user
-    webhooks page covers per-endpoint deliveries only)
-  - `/search/index`, `/search/index/{type}/{id}`, `/search/provider` — search
-    index management (admin)
-  - `/regions/orgs/{orgId}/branding`, `/regions/orgs/{orgId}/domain` — org
-    region/branding metadata (regions page covers health + pin only)
-  - `/auth/unsubscribe` — email unsubscribe landing
-  - `/wallet/spend` — programmatic spend (may stay API-only; document if so)
-- **Status:** Pending.
+_All P2 items shipped — see [`tdone.md`](./tdone.md)._
 
 ---
 
@@ -116,17 +69,6 @@ run boundaries:check` and full test suite stay green.
   replica usage; document replica lag expectations in [`docs/deployment.md`](./docs/deployment.md).
 - **Status:** In Progress — sessions, notifications, org lists, and four admin
   list endpoints switched; remaining admin/analytics routes pending.
-
-### P3.3 — Make Elasticsearch optional; default to Postgres FTS — _Pending_
-
-- **Source:** [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) P3
-- **Why:** After the slim-down, searchable surface is users/orgs/tickets and the
-  service already has a Postgres fallback. Running ES is an operational burden
-  most template forks do not need.
-- **Acceptance:** `elasticsearch.enabled` defaults to `false`; search, audit,
-  and logging paths use Postgres FTS / file fallback without requiring ES;
-  README and deployment docs reflect ES as opt-in for large tenants.
-- **Status:** Pending.
 
 ### P3.4 — Server-side data fetching (RSC / route handlers) — _Pending_
 

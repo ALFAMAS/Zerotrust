@@ -100,7 +100,7 @@
         "src/telemetry/",
         "src/notifications/routes.ts"
       ],
-      "can_import": ["shared", "integrations", "identity", "tenancy", "billing"]
+      "can_import": ["shared", "integrations", "identity", "tenancy", "billing", "compliance"]
     }
   }
 }

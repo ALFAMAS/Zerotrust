@@ -172,6 +172,7 @@ export async function initAuditPipeline(flushIntervalMs = 5000): Promise<void> {
 }
 
 export function queueAuditDoc(doc: AuditLog): void {
+  if (!getConfig().elasticsearch.enabled) return;
   pendingDocs.push(doc);
 }
 

@@ -15,7 +15,7 @@
  * src/api/server.ts and src/worker.ts.
  */
 import { Queue, Worker } from "bullmq";
-import { releaseStripeEvent } from "../db/repositories/stripeEvents.repository";
+import { releaseStripeEvent } from "../../db/repositories/stripeEvents.repository";
 import { getLogger } from "../../logger/index";
 import { processStripeEvent } from "./stripeWebhookProcessor";
 
@@ -112,7 +112,7 @@ export function initStripeWebhookQueueConsumer(redisUri: string): void {
       // replay from the Stripe dashboard (or an operator-triggered retry) can
       // reprocess it, instead of the event being stuck "processed" forever
       // with no subscription mutation ever applied.
-      releaseStripeEvent(job.data.eventId).catch((releaseErr) =>
+      releaseStripeEvent(job.data.eventId).catch((releaseErr: unknown) =>
         logger.error(
           "Failed to release Stripe event claim after exhausted retries",
           releaseErr as Error

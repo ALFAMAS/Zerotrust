@@ -44,9 +44,12 @@ services:
       - zerotrust
 
   # ─────────────────────────────────────────────────────────────────────────
-  # Elasticsearch: Audit logs, event streaming, analytics
+  # Elasticsearch (opt-in): audit/log mirror + ES-backed search for large tenants.
+  # Start with: docker compose --profile elasticsearch up
   # ─────────────────────────────────────────────────────────────────────────
   elasticsearch:
+    profiles:
+      - elasticsearch
     image: docker.elastic.co/elasticsearch/elasticsearch:8.10.0
     container_name: zerotrust-elasticsearch
     environment:
@@ -71,6 +74,8 @@ services:
   # Kibana: Elasticsearch UI for monitoring and dashboards
   # ─────────────────────────────────────────────────────────────────────────
   kibana:
+    profiles:
+      - elasticsearch
     image: docker.elastic.co/kibana/kibana:8.10.0
     container_name: zerotrust-kibana
     environment:
@@ -128,8 +133,8 @@ services:
       RATE_LIMITING_ENABLED: true
       REDIS_URI: redis://:redispass@redis:6379
 
-      # Elasticsearch
-      ELASTICSEARCH_ENABLED: true
+      # Elasticsearch (opt-in — set true and start the elasticsearch profile)
+      ELASTICSEARCH_ENABLED: false
       ELASTICSEARCH_HOST: elasticsearch
       ELASTICSEARCH_PORT: 9200
 
@@ -143,8 +148,6 @@ services:
       postgres:
         condition: service_healthy
       redis:
-        condition: service_healthy
-      elasticsearch:
         condition: service_healthy
 
     healthcheck:

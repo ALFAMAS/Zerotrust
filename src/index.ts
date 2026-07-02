@@ -294,7 +294,7 @@ export async function initializezerotrust() {
     });
   }
 
-  // Initialize Elasticsearch audit pipeline
+  // Optional Elasticsearch audit mirror (Postgres hash-chain is the source of truth)
   try {
     const { initAuditPipeline } = await import("./audit/index.js");
     await initAuditPipeline();

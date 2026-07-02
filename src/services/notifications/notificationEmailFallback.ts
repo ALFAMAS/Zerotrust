@@ -3,7 +3,7 @@ import { getDb } from "../../db/index";
 import { notificationsTable, usersTable } from "../../db/schema";
 import { getLogger } from "../../logger/index";
 import { sendNotificationEmail } from "./email.service";
-import { generateUnsubscribeToken } from "../compliance/unsubscribe";
+import { generateUnsubscribeToken } from "../../shared/unsubscribeToken";
 
 const logger = getLogger("notification-fallback");
 

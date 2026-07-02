@@ -2,7 +2,7 @@ import { and, eq, gte, isNull, lte } from "drizzle-orm";
 import { getDb } from "../../db/index";
 import { apiKeysTable, usersTable } from "../../db/schema";
 import { getLogger } from "../../logger/index";
-import { sendNotificationEmail } from "./email.service";
+import { sendNotificationEmail } from "../notifications/email.service";
 
 const logger = getLogger("api-key-rotation");
 

@@ -44,7 +44,7 @@ import {
   assertSafeBackupPath,
   assertSafeCommand,
   safeSpawnOptions,
-} from "../shared/safeBackupPaths";
+} from "../../shared/safeBackupPaths";
 import {
   isS3BackupEnabled,
   pruneOldBackups as pruneOldS3Backups,

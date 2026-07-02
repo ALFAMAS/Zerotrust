@@ -97,6 +97,40 @@ bun run src/worker.ts
 
 ---
 
+## Elasticsearch (optional)
+
+Elasticsearch is **not required** for production. By default
+(`ELASTICSEARCH_ENABLED=false`, the unset default):
+
+- **Search** — `/search` and `/search/smart` use Postgres full-text search
+  (`websearch_to_tsquery` ranking across users, orgs, and support tickets).
+- **Audit** — tamper-evident SHA-256 hash-chained rows in Postgres are the
+  source of truth; the ES audit pipeline is a no-op.
+- **Logging** — structured JSON logs go to stdout; ES log streaming is skipped.
+
+Enable ES only when you need Elasticsearch-backed search at scale or Kibana/SIEM
+mirroring for large tenants:
+
+```bash
+ELASTICSEARCH_ENABLED=true
+ELASTICSEARCH_HOST=your-es-host
+ELASTICSEARCH_PORT=9200
+ELASTICSEARCH_INDEX_PREFIX=zerotrust
+```
+
+With Docker Compose, start the optional stack profile:
+
+```bash
+docker compose --profile elasticsearch up
+```
+
+When ES is enabled, search prefers the `@elastic/elasticsearch` client (with
+Postgres FTS fallback on failure), the audit pipeline bulk-indexes masked events,
+and info/warn/error logs stream to daily indices. Kibana dashboards under
+`kibana/` require this opt-in path.
+
+---
+
 ## Read replica routing
 
 When `DATABASE_URL_READ_REPLICA` is set, read-heavy API handlers call

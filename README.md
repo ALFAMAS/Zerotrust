@@ -106,7 +106,7 @@ rebuilding login for the hundredth time.
 
 ### Compliance & operations
 
-- Tamper-evident audit log (SHA-256 hash-chain) + Elasticsearch + SIEM fan-out
+- Tamper-evident audit log (SHA-256 hash-chain) in Postgres + optional Elasticsearch/SIEM fan-out
 - Replay-safe email bounce/complaint, SSF, and user-defined webhook event handling
 - Access reviews tooling, data-retention auto-purge
 - SOC 2 readiness controls, risk register, privacy records, and compliance runbooks
@@ -155,9 +155,9 @@ each other in-process; there are no internal network hops.
                                                   │
                           ┌───────────────────────┼───────────────────────┐
                           ▼                        ▼                        ▼
-                   PostgreSQL (5432)        Redis (6379)         Elasticsearch (9200, opt.)
-                   Drizzle ORM              sessions/rate-limit  audit log (optional)
-                                            /BullMQ queue
+                   PostgreSQL (5432)        Redis (6379)         Elasticsearch (9200, opt-in)
+                   Drizzle ORM              sessions/rate-limit  search mirror + audit fan-out
+                                            /BullMQ queue        (large tenants only)
 ```
 
 | Service             | Local URL                  | Notes                                  |
@@ -264,7 +264,7 @@ important ones:
 | `MAIL_HOST` / `MAIL_*`  |          | —                        | SMTP — required for magic links & email OTP        |
 | `OAUTH_<PROVIDER>_*`    |          | —                        | OAuth client id/secret/redirect (per provider)     |
 | `STRIPE_SECRET_KEY`     |          | —                        | Enables billing endpoints when set                 |
-| `ELASTICSEARCH_*`       |          | disabled                 | Audit-log storage (off by default)                 |
+| `ELASTICSEARCH_*`       |          | disabled                 | Opt-in search mirror + audit/log streaming (Postgres FTS is the default) |
 | `BACKUP_S3_*`           |          | —                        | S3-compatible backups & uploads (see below)        |
 | `BACKUP_ENCRYPTION_KEY` |          | —                        | AES-256-GCM encryption key/passphrase for DB dumps |
 
@@ -553,8 +553,8 @@ locale in `src/i18n/request.ts` and the `LocaleSwitcher` component.
 - **Input sanitization** — a global middleware strips dangerous HTML and neutralizes
   `javascript:`/event-handler payloads in request bodies, query, path, and form
   fields (XSS / CWE-79), skipping sensitive fields and signed/SSF payloads.
-- **Audit** — tamper-evident SHA-256 hash-chained audit log, optional Elasticsearch +
-  SIEM streaming.
+- **Audit** — tamper-evident SHA-256 hash-chained audit log in Postgres; optional Elasticsearch +
+  SIEM streaming for large deployments.
 - **Disclosure** — `/.well-known/security.txt` (RFC 9116); set `SECURITY_CONTACT`.
   Report vulnerabilities per [`SECURITY.md`](./SECURITY.md) — please do not open public
   issues for security reports.

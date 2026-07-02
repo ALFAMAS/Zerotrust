@@ -3,9 +3,9 @@ import { and, eq, gt } from "drizzle-orm";
 import { getDb } from "../../db/index";
 import { otpsTable, usersTable } from "../../db/schema";
 import { getLogger } from "../../logger/index";
-import { getSettings } from "../models/settings.model";
+import { getSettings } from "../../models/settings.model";
 import { hashTokenSha256 } from "../../shared/cryptoHash";
-import { sendMagicLinkEmail } from "./email.service";
+import { sendMagicLinkEmail } from "../notifications/email.service";
 
 const logger = getLogger("magic-link");
 

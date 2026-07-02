@@ -37,6 +37,15 @@ describe("search database fallback", () => {
     expect(results).toEqual({ total: 0, hits: [], provider: "database" });
     expect(getReadDb).toHaveBeenCalledTimes(1);
   });
+
+  it("reports database as the active search provider when ES is disabled", async () => {
+    const { isElasticsearchEnabled, searchProvider } = await import(
+      "../services/ops/search.service"
+    );
+
+    expect(isElasticsearchEnabled()).toBe(false);
+    expect(searchProvider()).toBe("database");
+  });
 });
 
 describe("smart search", () => {

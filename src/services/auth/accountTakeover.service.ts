@@ -15,7 +15,7 @@ import { and, eq, gt } from "drizzle-orm";
 import { getDb } from "../../db/index";
 import { securityEventsTable, sessionsTable } from "../../db/schema";
 import { auditLog, getLogger } from "../../logger/index";
-import { sendSecurityAlertEmail } from "./email.service";
+import { sendSecurityAlertEmail } from "../notifications/email.service";
 
 const logger = getLogger("account-takeover");
 

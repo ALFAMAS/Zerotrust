@@ -3,7 +3,7 @@ import { and, eq, isNull } from "drizzle-orm";
 import { createMiddleware } from "hono/factory";
 import { getDb } from "../db";
 import { apiKeysTable, usersTable } from "../db/schema";
-import { apiKeyUsageMetric, getUsage, incrementUsage } from "../services/billing/usage.service";
+import { apiKeyUsageMetric, getUsage, incrementUsage } from "../shared/usageMetering";
 import type { HonoEnv, User } from "../shared/types";
 import { consumeRateLimit } from "./rateLimiting";
 

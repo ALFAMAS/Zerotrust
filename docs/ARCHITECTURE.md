@@ -76,8 +76,9 @@ read it via `c.get("user")`.
   debounced `lastActivityAt` writes and **DB fallback when Redis is down**),
   sliding-window rate limiting (`rateLimiter/redis.ts`, with `inmemory.ts`
   fallback), and the **BullMQ** email queue.
-- **Elasticsearch** (optional) — audit-log mirror + full-text search; the search
-  service falls back to Postgres `ILIKE` when ES is unset.
+- **Elasticsearch** (optional, off by default) — full-text search mirror + audit/log
+  streaming for large tenants. Search and audit work without ES via Postgres FTS and
+  the tamper-evident hash-chain; set `ELASTICSEARCH_ENABLED=true` to opt in.
 - **S3-compatible storage** (AWS S3 / B2 / R2 / MinIO / Wasabi) — one adapter for
   `pg_dump` backups (`backups/`) and user uploads (`uploads/`), with local-disk
   fallback.
@@ -137,7 +138,7 @@ Prioritized; **P1 is a correctness bug**, the rest are improvements.
 | --- | --- | --- | --- |
 | **P1** | Split HTTP and worker/scheduler processes (or instance-guard the schedulers) | **Correctness** — duplicate jobs under cluster mode | M |
 | P2 | Adopt expand/contract migrations; gate destructive DDL | Safe rollbacks; the `0020`–`0024` drops are irreversible | S–M |
-| P3 | Make Elasticsearch fully optional / default to Postgres FTS | Drop an operational dependency post-slim-down | M |
+| P3 | Make Elasticsearch fully optional / default to Postgres FTS | Drop an operational dependency post-slim-down | M | **Shipped** (2026-07-03) |
 | P4 | Move hot dashboard reads to Server Components / route handlers | TTFB, fewer client waterfalls | M |
 | P5 | Containerize (Dockerfile + compose) and split health/readiness | Reproducible deploys, orchestrator-friendly | M |
 | P6 | Fail-fast typed config validation at boot | Catch missing prod secrets before serving traffic | S |
@@ -167,13 +168,13 @@ interim fix: guard each scheduler behind a Redis lock or
 [`../todo.md`](../todo.md) P3.5). Consider a CI check that flags `DROP`/`ALTER …
 DROP` in new migrations for explicit human sign-off.
 
-### P3 — Reconsider Elasticsearch
+### P3 — Reconsider Elasticsearch — shipped 2026-07-03
 
 After removing collaboration/notes, the searchable surface is just
 user/org/ticket and the service already has a Postgres fallback. For most
 deployments a Postgres `tsvector` + GIN index covers this without running ES.
-Keep ES as an opt-in for large tenants; default off to shed an operational
-dependency — consistent with the slim-down's goal.
+ES is opt-in for large tenants (`ELASTICSEARCH_ENABLED=true`); default off to
+shed an operational dependency — consistent with the slim-down's goal.
 
 ### P4 — Server-side data fetching on the dashboard
 

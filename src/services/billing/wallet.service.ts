@@ -3,7 +3,7 @@ import { getDb, getReadDb } from "../../db/index";
 import {
   spendFromWallet as spendFromWalletRepo,
   topUpWallet as topUpWalletRepo,
-} from "../db/repositories/wallet.repository";
+} from "../../db/repositories/wallet.repository";
 import { walletsTable, walletTransactionsTable } from "../../db/schema";
 import { isUnavailableStorageError } from "../../db/storageFallback";
 import { getLogger } from "../../logger/index";

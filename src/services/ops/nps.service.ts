@@ -1,7 +1,7 @@
 import { and, eq, gt } from "drizzle-orm";
-import { getDb } from "../db";
-import { feedbackTable, usersTable } from "../db/schema";
-import { getLogger } from "../logger";
+import { getDb } from "../../db/index";
+import { feedbackTable, usersTable } from "../../db/schema";
+import { getLogger } from "../../logger/index";
 
 const logger = getLogger("nps-service");
 

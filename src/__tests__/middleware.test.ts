@@ -244,6 +244,21 @@ describe("Audit Pipeline", () => {
     await expect(flushAuditPipeline()).resolves.toBeUndefined();
   });
 
+  it("does not queue audit docs when Elasticsearch is disabled", async () => {
+    const audit = await import("../audit");
+    await audit.initAuditPipeline(100);
+    audit.queueAuditDoc({
+      action: "test.noop",
+      success: true,
+      timestamp: new Date(),
+    } as any);
+    await expect(audit.flushAuditPipeline()).resolves.toBeUndefined();
+    await expect(audit.getElasticsearchHealth()).resolves.toEqual({
+      status: "disabled",
+      available: false,
+    });
+  });
+
   it("maskSensitiveFields redacts token and code fields", async () => {
     const { indexAuditLogToES } = await import("../audit");
     await expect(

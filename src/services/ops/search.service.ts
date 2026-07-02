@@ -193,7 +193,7 @@ async function searchElasticsearch(
 
   const indices = type
     ? [indexName(type)]
-    : ["zerotrust-user", "zerotrust-org", "zerotrust-ticket"];
+    : (["user", "org", "ticket"] as SearchableType[]).map(indexName);
 
   try {
     const result = await client.search({
