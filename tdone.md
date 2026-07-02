@@ -271,7 +271,7 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
 ### Fork-readiness audit (`AUDIT-REPORT.md`) — completed items
 
 All fork-blocking (must-fix) and should-fix audit items are resolved. Open
-follow-ups (**E2**, Bun bump, E4–E6 info debt) remain in [`todo.md`](./todo.md).
+follow-ups (**E2**, E4–E6 info debt) remain in [`todo.md`](./todo.md).
 
 | ID | Item | Resolution |
 | --- | --- | --- |
@@ -295,14 +295,21 @@ follow-ups (**E2**, Bun bump, E4–E6 info debt) remain in [`todo.md`](./todo.md
 | C8 | Webhook endpoint persistence | Drizzle `webhook_endpoints` + migration `0027` |
 | E1 | UI HTTP client boundary | `apiClient.ts` canonical; `docs/ui-http-client.md` |
 | E3 | shadcn migration | **0 raw controls** (`bun run ui:audit`) |
+| P4 | Bun runtime bump | `.bun-version` pinned to 1.3.14; `compress()` guard removed after `CompressionStream` verification |
 
 - **E3 shadcn migration (complete)** — All raw HTML controls migrated to
   shadcn/ui primitives (`Button`, `Input`, `Textarea`, `Checkbox`). Added
   `components/ui/checkbox.tsx`. `bun run ui:audit` → **0 raw controls**.
 
-- **E2 — useApi migration (partial, 4 pages):** Migrated `admin/page`,
-  `admin/access-reviews`, `admin/alerts`, and `dashboard/settings` to
-  `useApi`/`usePaginatedApi`. ~20 pages remain — tracked in `todo.md` P2.
+- **E2 — useApi migration (partial, 6 pages):** Migrated `admin/page`,
+  `admin/access-reviews`, `admin/alerts`, `admin/sessions`, `admin/users`,
+  and `dashboard/settings` to `useApi`/`usePaginatedApi`. ~18 pages remain —
+  tracked in `todo.md` P2.
+
+- **Bun runtime bump:** `.bun-version` now pins Bun 1.3.14; `server.ts` mounts
+  Hono `compress()` directly after verifying `CompressionStream` exists in the
+  pinned runtime (`bun -e`). The old P4 Bun bump follow-up was removed from
+  `todo.md` / `AUDIT-REPORT.md`.
 
 - **Webhook endpoint persistence:** Replaced the user-facing webhook endpoint
   in-memory store with Drizzle persistence via `webhook_endpoints`, added

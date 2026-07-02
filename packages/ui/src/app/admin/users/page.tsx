@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -22,6 +22,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { api } from "@/lib/api";
+import { usePaginatedApi } from "@/lib/hooks/useApi";
 
 interface User {
   id: string;
@@ -42,25 +43,9 @@ const STATUS_VARIANT: Record<string, "success" | "secondary" | "destructive"> = 
   deleted: "destructive",
 };
 
-interface UsersResponse {
-  users?: User[];
-  total?: number;
-  page?: number;
-  limit?: number;
-  // Paginated envelope shape (`paginated()` on the API side).
-  data?: User[];
-  pagination?: { total?: number; totalPages?: number; hasNext?: boolean; hasPrev?: boolean };
-}
-
-const PAGE_SIZE = 20;
-
 export default function UsersPage() {
-  const [users, setUsers] = useState<User[]>([]);
-  const [total, setTotal] = useState(0);
-  const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState<string | null>(null);
 
   const toastTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
@@ -71,43 +56,30 @@ export default function UsersPage() {
     toastTimer.current = setTimeout(() => setToast(null), 3000);
   }, []);
 
-  const loadUsers = useCallback(async () => {
-    setLoading(true);
-    try {
-      const params = new URLSearchParams({
-        page: String(page),
-        limit: String(PAGE_SIZE),
-        ...(search && { search }),
-        ...(statusFilter !== "all" && { status: statusFilter }),
-      });
-      const data = await api.get<UsersResponse | User[]>(`/admin/users?${params}`);
-      if (Array.isArray(data)) {
-        setUsers(data);
-        setTotal(data.length);
-      } else if (data.data) {
-        setUsers(data.data);
-        setTotal(data.pagination?.total ?? data.data.length);
-      } else {
-        setUsers(data.users ?? []);
-        setTotal(data.total ?? data.users?.length ?? 0);
-      }
-    } catch {
-      showToast("Failed to load users");
-    } finally {
-      setLoading(false);
-    }
-  }, [page, search, statusFilter, showToast]);
+  const filterParams = new URLSearchParams({
+    ...(search && { search }),
+    ...(statusFilter !== "all" && { status: statusFilter }),
+  }).toString();
 
-  useEffect(() => {
-    void loadUsers();
-  }, [loadUsers]);
+  const {
+    items: users,
+    loading,
+    pagination,
+    page,
+    setPage,
+    refetch,
+  } = usePaginatedApi<User>(`/admin/users${filterParams ? `?${filterParams}` : ""}`, {
+    onError: () => showToast("Failed to load users"),
+  });
+  const total = pagination?.total ?? 0;
+  const totalPages = pagination?.totalPages ?? 1;
 
   async function handleToggleStatus(user: User) {
     const newStatus = user.status === "active" ? "suspended" : "active";
     try {
       await api.patch(`/admin/users/${user.id}`, { status: newStatus });
-      setUsers((prev) => prev.map((u) => (u.id === user.id ? { ...u, status: newStatus } : u)));
       showToast(`User ${newStatus}`);
+      await refetch();
     } catch {
       showToast("Action failed");
     }
@@ -117,14 +89,12 @@ export default function UsersPage() {
     if (!confirm(`Delete user ${user.email}? This cannot be undone.`)) return;
     try {
       await api.delete(`/admin/users/${user.id}`);
-      setUsers((prev) => prev.filter((u) => u.id !== user.id));
       showToast("User deleted");
+      await refetch();
     } catch {
       showToast("Delete failed");
     }
   }
-
-  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   return (
     <div className="space-y-6">

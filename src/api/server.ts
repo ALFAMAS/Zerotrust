@@ -105,15 +105,8 @@ export async function createServer() {
   app.use("*", secureHeaders());
   app.use("*", inputSanitizationMiddleware());
   // Compress JSON, HTML, and text responses to reduce transfer time for dashboard/API reads.
-  // Hono's compress() relies on the global `CompressionStream`, which is absent in
-  // some runtimes (notably Bun < 1.3, the version pinned in .bun-version for CI/dev).
-  // Mounting it there makes every compressible response throw
-  // `ReferenceError: CompressionStream is not defined` → HTTP 500. Guard the mount
-  // so compression is simply skipped when the runtime lacks it; Node 18+ and
-  // Bun ≥ 1.3 still compress normally.
-  if ("CompressionStream" in globalThis) {
-    app.use("*", compress());
-  }
+  // Bun is pinned to >= 1.3, where `CompressionStream` is available.
+  app.use("*", compress());
   app.use("*", metricsMiddleware());
   app.use("*", telemetryMiddleware());
 

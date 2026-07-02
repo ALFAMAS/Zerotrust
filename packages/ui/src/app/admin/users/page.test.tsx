@@ -5,9 +5,11 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const mockGet = vi.fn();
 const mockPatch = vi.fn();
 const mockDelete = vi.fn();
+vi.mock("@/lib/apiClient", () => ({
+  apiGet: (...args: unknown[]) => mockGet(...args),
+}));
 vi.mock("@/lib/api", () => ({
   api: {
-    get: (...args: unknown[]) => mockGet(...args),
     patch: (...args: unknown[]) => mockPatch(...args),
     delete: (...args: unknown[]) => mockDelete(...args),
   },
@@ -113,13 +115,16 @@ describe("Admin UsersPage", () => {
     await screen.findByText("Ada Lovelace");
 
     const row = screen.getByText("Ada Lovelace").closest("tr")!;
+    mockUsersResponse(users.filter((u) => u.id !== "u1"));
     await user.click(within(row).getByRole("button", { name: "Delete" }));
 
     await waitFor(() => {
       expect(mockDelete).toHaveBeenCalledWith("/admin/users/u1");
     });
     expect(await screen.findByText("User deleted")).toBeInTheDocument();
-    expect(screen.queryByText("Ada Lovelace")).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.queryByText("Ada Lovelace")).not.toBeInTheDocument();
+    });
   });
 
   it("disables Previous on the first page", async () => {

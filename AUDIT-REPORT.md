@@ -27,8 +27,7 @@
 
 | ID | Status | Summary |
 | --- | --- | --- |
-| **E2** | 🟠 Partial | `useApi`/`usePaginatedApi` on 4 pages; ~20 dashboard/admin pages still use legacy `useEffect`+`api.get` |
-| **Bun bump** | ⏳ Pending | `.bun-version` = 1.2.23; `CompressionStream` guard in `server.ts` — bump after verification |
+| **E2** | 🟠 Partial | `useApi`/`usePaginatedApi` on 6 pages; ~18 dashboard/admin pages still use legacy `useEffect`+`api.get` |
 | **E4** | 🟡 Info | 87 backend routes have no UI caller (many by design; some shipped features lack UI) |
 | **E5** | 🟡 Info | In-process `setInterval` schedulers — leader lock mitigates but not horizontally scalable |
 | **E6** | 🟡 Info | Repository layer ~10% complete (4 repos); hot-path writes still mostly inline Drizzle |
@@ -176,7 +175,7 @@ is tracked under E2.
 
 ### E2. 🟠 `useApi` hook exists but is barely used — **open**
 
-`packages/ui/src/lib/hooks/useApi.ts` (with `usePaginatedApi`) is documented in `CLAUDE.md` as the replacement for `useEffect+api.get+loading` boilerplate. **4 of ~40 app pages use it** (`admin/page`, `admin/access-reviews`, `admin/alerts`, `dashboard/settings`). ~20 dashboard/admin pages still import `@/lib/api` and hand-roll fetch/loading/error (webhooks, sessions, billing, wallet, admin users/sessions/audit, etc.). Tracked in `todo.md` P2.
+`packages/ui/src/lib/hooks/useApi.ts` (with `usePaginatedApi`) is documented in `CLAUDE.md` as the replacement for `useEffect+api.get+loading` boilerplate. **6 of ~40 app pages use it** (`admin/page`, `admin/access-reviews`, `admin/alerts`, `admin/sessions`, `admin/users`, `dashboard/settings`). ~18 dashboard/admin pages still import `@/lib/api` and hand-roll fetch/loading/error (webhooks, billing, wallet, admin audit/revenue/tenants/regions, etc.). Tracked in `todo.md` P2.
 
 ### E3. ✅ Raw HTML controls fully migrated to shadcn/ui
 
@@ -202,13 +201,14 @@ These represent backend features that are **implemented but not surfaced** in th
 
 ## F. Documentation / DX notes
 
-- **`todo.md`** — active backlog is **E2** (useApi migration) and **Bun runtime bump** (P4).
+- **`todo.md`** — active backlog is **E2** (useApi migration).
   All P1 fork-blocking items are cleared.
 - **`tdone.md`** — completed audit items (A1–A2, B1–B9, C1–C8, E1, E3) consolidated
   under "Fork-readiness audit" (2026-07-02). Latest verification: **835 tests / 99 files**;
   build, lint, type-check, UI build, and boundary checks pass.
-- **`.bun-version`** pins Bun 1.2.23; the `compress()` guard in `server.ts` exists
-  because this version lacks `CompressionStream`. Bump tracked in `todo.md` P4.
+- **Bun runtime bump** is complete: `.bun-version` pins Bun 1.3.14 and
+  `server.ts` mounts `compress()` directly after verifying `CompressionStream`
+  is available in the pinned runtime.
 - **`.gitattributes`** added — LF normalization is now documented/enforced for
   source/text files.
 
@@ -240,7 +240,7 @@ These represent backend features that are **implemented but not surfaced** in th
 
 14. ✅ **C1** — `/search/smart` is ranked full-text search; semantic/vector claims removed from generated docs.
 15. ✅ **E3** — Finish shadcn migration (0 raw controls remaining).
-16. **E2** — Migrate pages to `useApi`/`usePaginatedApi` (~20 pages remain; 4 done)
+16. **E2** — Migrate pages to `useApi`/`usePaginatedApi` (~18 pages remain; 6 done)
 17. ✅ **C4 / C5 / C6 / C7** — OAuth linked accounts UI, per-category notification preferences, route scan confirmed, customer segment admin UI.
 18. ✅ **C3** — README now says "software key store (hardware providers are stubs)" instead of advertising hardware-backed crypto.
 19. ✅ Refresh `todo.md` to reflect this audit

@@ -19,16 +19,15 @@ maintainability/refactor · P3 scalability/performance · P4 docs/DX.
 
 ### P2 — product completeness / template polish
 
-- **E2 — `useApi` adoption** — Partial (~4/40 app pages): `admin/page`,
-  `admin/access-reviews`, `admin/alerts`, and `dashboard/settings` use
-  `useApi`/`usePaginatedApi`. ~20 dashboard/admin pages still import legacy
-  `@/lib/api` and hand-roll `useEffect` + `api.get` + loading/error state
-  (e.g. webhooks, sessions, billing, wallet, admin users/sessions/audit).
+- **E2 — `useApi` adoption** — Partial (~6/40 app pages): `admin/page`,
+  `admin/access-reviews`, `admin/alerts`, `admin/sessions`, `admin/users`,
+  and `dashboard/settings` use `useApi`/`usePaginatedApi`. ~18
+  dashboard/admin pages still import legacy `@/lib/api` and hand-roll
+  `useEffect` + `api.get` + loading/error state (e.g. webhooks, billing,
+  wallet, admin audit/revenue/tenants/regions).
 
 ### P4 — docs / claims hygiene
 
-- **Bun runtime bump review** — `.bun-version` pins Bun 1.2.23; `server.ts`
-  guards `compress()` on missing `CompressionStream`. Bump Bun (≥ 1.3) and
-  re-verify compression + CI after confirming the guard can be removed.
+- No active P4 audit items.
 
 ---
