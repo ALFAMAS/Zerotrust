@@ -44,10 +44,7 @@ export default class ErrorBoundary extends React.Component<Props, State> {
             {this.state.eventId && (
               <p className="text-xs text-gray-600 mb-4 font-mono">Ref: {this.state.eventId}</p>
             )}
-            <Button
-              type="button"
-              onClick={() => this.setState({ hasError: false, eventId: null })}
-            >
+            <Button type="button" onClick={() => this.setState({ hasError: false, eventId: null })}>
               Try again
             </Button>
           </div>

@@ -17,11 +17,21 @@
 | `bun run verify:generated` (SDK + docs drift)  | ⚠ regenerates cleanly; expected tracked docs diffs are included for the improved API↔UI scanner                        |
 | `bun run boundaries:check`                     | ✅ clean                                                                                                               |
 | `bun run audit:integration` (API↔UI map)       | ✅ passes, now scans typed/template `api.*` calls and flags 87 backend routes with no UI caller (mostly by design)      |
-| `bun run ui:audit` (shadcn adoption)           | ⚠ **44 raw HTML controls across 22 files** not migrated to shadcn                                                      |
+| `bun run ui:audit` (shadcn adoption)           | ✅ **0 raw HTML controls** — migration complete                                                                          |
 | `bun run lint` (biome)                         | ✅ exits 0; only pre-existing script warnings remain                                                                    |
 | `bun run --cwd packages/ui build` (next build) | ✅ production build passes; only existing Next/SWC version warning remains                                             |
 
-**Verdict:** Strong, production-shaped SaaS template (27 route modules, 41 DB tables, 835 root tests, full Stripe/SSO/MFA/WebAuthn/observability). The original fork-blocking build/lint issues are fixed; remaining items are correctness/product-polish follow-ups tracked in `todo.md`.
+**Verdict:** Strong, production-shaped SaaS template (27 route modules, 41 DB tables, 835 root tests, full Stripe/SSO/MFA/WebAuthn/observability). All fork-blocking and should-fix items are resolved — details consolidated in [`tdone.md`](./tdone.md).
+
+### Open follow-ups (still in [`todo.md`](./todo.md))
+
+| ID | Status | Summary |
+| --- | --- | --- |
+| **E2** | 🟠 Partial | `useApi`/`usePaginatedApi` on 4 pages; ~20 dashboard/admin pages still use legacy `useEffect`+`api.get` |
+| **Bun bump** | ⏳ Pending | `.bun-version` = 1.2.23; `CompressionStream` guard in `server.ts` — bump after verification |
+| **E4** | 🟡 Info | 87 backend routes have no UI caller (many by design; some shipped features lack UI) |
+| **E5** | 🟡 Info | In-process `setInterval` schedulers — leader lock mitigates but not horizontally scalable |
+| **E6** | 🟡 Info | Repository layer ~10% complete (4 repos); hot-path writes still mostly inline Drizzle |
 
 ---
 
@@ -164,13 +174,13 @@ Two UI HTTP entry points still exist, but their roles are now explicit:
 `useApi()` now consumes `apiClient.ts` internally. Remaining older page migration
 is tracked under E2.
 
-### E2. 🟠 `useApi` hook exists but is barely used
+### E2. 🟠 `useApi` hook exists but is barely used — **open**
 
-`packages/ui/src/lib/hooks/useApi.ts` (with `usePaginatedApi`) is documented in `CLAUDE.md` as the replacement for `useEffect+api.get+loading` boilerplate, yet **only ~2 pages use it** — almost every dashboard/admin page hand-rolls `useState(loading)` + `useEffect` + `api.get().then().catch().finally()`. Lots of duplicated boilerplate to clean up.
+`packages/ui/src/lib/hooks/useApi.ts` (with `usePaginatedApi`) is documented in `CLAUDE.md` as the replacement for `useEffect+api.get+loading` boilerplate. **4 of ~40 app pages use it** (`admin/page`, `admin/access-reviews`, `admin/alerts`, `dashboard/settings`). ~20 dashboard/admin pages still import `@/lib/api` and hand-roll fetch/loading/error (webhooks, sessions, billing, wallet, admin users/sessions/audit, etc.). Tracked in `todo.md` P2.
 
-### E3. 🟡 44 raw HTML controls not migrated to shadcn/ui
+### E3. ✅ Raw HTML controls fully migrated to shadcn/ui
 
-Per `docs/shadcn-adoption-report.md`: 35 raw `<button>`, 8 `<input>`, 1 `<textarea>` across 22 files. Top offenders: `admin/users/[id]`, `dashboard/account`, `dashboard/organizations/[orgId]`, `NotificationBell`, `admin/settings/auth`, `CommandPalette`. The design system is only ~half-rolled-out.
+Per `docs/shadcn-adoption-report.md`: all 44 raw `<button>`, `<input>`, and `<textarea>` controls outside `components/ui` have been migrated to shadcn primitives (`Button`, `Input`, `Textarea`, `Checkbox`). `bun run ui:audit` reports **0 raw controls**.
 
 ### E4. 🟡 87 backend routes have no UI caller
 
@@ -192,13 +202,13 @@ These represent backend features that are **implemented but not surfaced** in th
 
 ## F. Documentation / DX notes
 
-- **`todo.md`** refreshed — fixed/verified B1-B9, C2, C8, and E1 moved out of the active
-  backlog; remaining audit follow-ups are tracked as P1/P2/P4 items.
-- **`tdone.md`** refreshed — latest verification is **838 tests / 99 files** with
-  build, lint, type-check, UI build, and boundary checks passing. Generated SDK/docs
-  regenerate deterministically; the API↔UI and shadcn reports have expected tracked
-  diffs from this audit batch.
-- **`.bun-version`** pins Bun 1.2.23; the `compress()` guard in `server.ts` exists specifically because this version lacks `CompressionStream`. Consider bumping.
+- **`todo.md`** — active backlog is **E2** (useApi migration) and **Bun runtime bump** (P4).
+  All P1 fork-blocking items are cleared.
+- **`tdone.md`** — completed audit items (A1–A2, B1–B9, C1–C8, E1, E3) consolidated
+  under "Fork-readiness audit" (2026-07-02). Latest verification: **835 tests / 99 files**;
+  build, lint, type-check, UI build, and boundary checks pass.
+- **`.bun-version`** pins Bun 1.2.23; the `compress()` guard in `server.ts` exists
+  because this version lacks `CompressionStream`. Bump tracked in `todo.md` P4.
 - **`.gitattributes`** added — LF normalization is now documented/enforced for
   source/text files.
 
@@ -229,8 +239,8 @@ These represent backend features that are **implemented but not surfaced** in th
 ### Nice to have (polish for a clean template)
 
 14. ✅ **C1** — `/search/smart` is ranked full-text search; semantic/vector claims removed from generated docs.
-15. **E3** — Finish shadcn migration (44 raw controls)
-16. **E2** — Migrate pages to `useApi`/`usePaginatedApi`
+15. ✅ **E3** — Finish shadcn migration (0 raw controls remaining).
+16. **E2** — Migrate pages to `useApi`/`usePaginatedApi` (~20 pages remain; 4 done)
 17. ✅ **C4 / C5 / C6 / C7** — OAuth linked accounts UI, per-category notification preferences, route scan confirmed, customer segment admin UI.
 18. ✅ **C3** — README now says "software key store (hardware providers are stubs)" instead of advertising hardware-backed crypto.
 19. ✅ Refresh `todo.md` to reflect this audit

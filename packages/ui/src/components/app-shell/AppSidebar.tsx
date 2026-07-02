@@ -3,6 +3,7 @@
 import type { LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Button } from "@/components/ui/button";
 import { brand } from "@/config/brand";
 import { cn } from "@/lib/utils";
 
@@ -110,11 +111,12 @@ export default function AppSidebar({ items, open, onClose, brandSuffix, footer }
         )}
         aria-hidden={!open}
       >
-        <button
+        <Button
           type="button"
+          variant="ghost"
           aria-label="Close menu"
           className={cn(
-            "absolute inset-0 bg-black/60 transition-opacity",
+            "absolute inset-0 h-auto w-auto rounded-none bg-black/60 p-0 transition-opacity hover:bg-black/60",
             open ? "opacity-100" : "opacity-0"
           )}
           onClick={onClose}

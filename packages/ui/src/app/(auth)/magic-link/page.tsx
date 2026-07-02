@@ -36,11 +36,7 @@ export default function MagicLinkPage() {
           We sent a sign-in link to <strong className="text-foreground">{email}</strong>. The link
           expires in 15 minutes.
         </p>
-        <Button
-          variant="link"
-          onClick={(): any => setSent(false)}
-          className="text-sm"
-        >
+        <Button variant="link" onClick={(): any => setSent(false)} className="text-sm">
           Use a different email
         </Button>
       </div>

@@ -1,8 +1,8 @@
 "use client";
 import { CalendarClock, Clock, Globe, Laptop, MapPin, ShieldCheck } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
 import { SkeletonCard } from "@/components/Skeleton";
+import { Button } from "@/components/ui/button";
 import { api } from "../../../lib/api";
 
 interface Session {

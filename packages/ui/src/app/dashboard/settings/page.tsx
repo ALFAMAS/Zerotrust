@@ -1,7 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import { api } from "@/lib/api";
+import { useApi } from "@/lib/hooks/useApi";
 
 interface ConnectedProviders {
   google?: boolean;
@@ -11,25 +13,17 @@ interface ConnectedProviders {
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000";
 
 export default function SettingsPage() {
-  const [providers, setProviders] = useState<ConnectedProviders>({});
-  const [loading, setLoading] = useState(true);
+  const { data, loading, refetch } = useApi<ConnectedProviders>("/auth/oauth/providers");
+  const providers = data ?? {};
   const [error, setError] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
-
-  useEffect(() => {
-    api
-      .get<ConnectedProviders>("/auth/oauth/providers")
-      .then(setProviders)
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, []);
 
   const handleDisconnect = async (provider: "google" | "github") => {
     setError(null);
     setActionLoading(provider);
     try {
       await api.delete(`/auth/oauth/${provider}`);
-      setProviders((prev) => ({ ...prev, [provider]: false }));
+      await refetch();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : `Failed to disconnect ${provider}`);
     } finally {
@@ -115,21 +109,20 @@ export default function SettingsPage() {
                 </div>
                 <div>
                   {isConnected ? (
-                    <button
+                    <Button
                       type="button"
+                      variant="outline"
+                      size="sm"
                       onClick={() => handleDisconnect(provider.id)}
                       disabled={actionLoading === provider.id}
-                      className="border border-border hover:border-red-700 text-muted-foreground hover:text-red-400 px-3 py-1.5 rounded-lg text-xs transition-colors disabled:opacity-50"
+                      className="text-xs hover:border-red-700 hover:text-red-400"
                     >
                       {actionLoading === provider.id ? "Disconnecting…" : "Disconnect"}
-                    </button>
+                    </Button>
                   ) : (
-                    <a
-                      href={provider.connectUrl}
-                      className="border border-primary hover:bg-primary/10 text-primary hover:text-primary/80 px-3 py-1.5 rounded-lg text-xs transition-colors"
-                    >
-                      Connect
-                    </a>
+                    <Button asChild size="sm" variant="outline" className="text-xs">
+                      <a href={provider.connectUrl}>Connect</a>
+                    </Button>
                   )}
                 </div>
               </div>

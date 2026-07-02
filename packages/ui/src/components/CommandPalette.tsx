@@ -4,6 +4,7 @@ import { ArrowRight, File, Search, Settings, User } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { safeRelativeRedirect } from "@/lib/safeRedirect";
 import { cn } from "@/lib/utils";
 
@@ -185,13 +186,13 @@ export function CommandPalette() {
         {/* Search input */}
         <div className="flex items-center gap-3 border-b border-border px-4 py-3">
           <Search className="h-5 w-5 shrink-0 text-muted-foreground" />
-          <input
+          <Input
             ref={inputRef}
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search pages, notes, people..."
-            className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
+            className="flex-1 border-0 bg-transparent shadow-none focus-visible:ring-0"
             aria-label="Search"
           />
           <kbd className="hidden shrink-0 rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground sm:inline">

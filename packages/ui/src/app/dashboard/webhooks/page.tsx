@@ -5,6 +5,7 @@ import EmptyState from "../../../components/EmptyState";
 import { Badge } from "../../../components/ui/badge";
 import { Button } from "../../../components/ui/button";
 import { Card } from "../../../components/ui/card";
+import { Checkbox } from "../../../components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -260,15 +261,19 @@ export default function WebhooksPage() {
               <span className="mb-1.5 block text-sm text-foreground/80">Events</span>
               <div className="grid grid-cols-2 gap-2">
                 {EVENT_OPTIONS.map((ev) => (
-                  <label key={ev} className="flex items-center gap-2 text-xs text-foreground/80">
-                    <input
-                      type="checkbox"
+                  <div key={ev} className="flex items-center gap-2 text-xs text-foreground/80">
+                    <Checkbox
+                      id={`wh-event-${ev}`}
                       checked={form.events.includes(ev)}
-                      onChange={() => toggleEvent(ev)}
-                      className="rounded border-border bg-muted"
+                      onCheckedChange={() => toggleEvent(ev)}
                     />
-                    {ev}
-                  </label>
+                    <Label
+                      htmlFor={`wh-event-${ev}`}
+                      className="cursor-pointer text-xs font-normal"
+                    >
+                      {ev}
+                    </Label>
+                  </div>
                 ))}
               </div>
             </div>

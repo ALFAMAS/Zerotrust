@@ -268,80 +268,58 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
 
 ## Recent work (2026-07-02)
 
-- **Audit-report must-fix sweep:** Resolved/verified the fork-blocking items in
-  `AUDIT-REPORT.md`: UI production build passes; LF normalization is enforced by
-  `.gitattributes`; no-floating-promise hazards are fixed in touched UI code;
-  reset-password uses the OTP `/auth/password-reset/confirm` flow; stale
-  `/admin/users/invite`, `/auth/logout/all`, and `/admin/users/:id/logout` route
-  drift is gone; `verify`, `fetchOrgs`, `fetchSessions`, and `showToast` are
-  stable hook dependencies; input sanitization is mounted before routes; admin
-  broadcast email fan-out routes through BullMQ.
+### Fork-readiness audit (`AUDIT-REPORT.md`) — completed items
+
+All fork-blocking (must-fix) and should-fix audit items are resolved. Open
+follow-ups (**E2**, Bun bump, E4–E6 info debt) remain in [`todo.md`](./todo.md).
+
+| ID | Item | Resolution |
+| --- | --- | --- |
+| A1 | UI production build | `next-themes` wrapper fixed; `bun run --cwd packages/ui build` passes |
+| A2 | Lint / CRLF / floating promises | `.gitattributes` enforces LF; no-floating-promise fixes; `bun run lint` exits 0 |
+| B1 | Reset-password flow | Uses OTP `/auth/password-reset/confirm` |
+| B2 | Stale `/admin/users/invite` | Removed |
+| B3/B6 | Hook dependency hazards | `verify`, `fetchOrgs`, `fetchSessions`, `showToast` stabilized |
+| B4 | Revoke-all sessions | Uses `DELETE /sessions` |
+| B5 | Admin force logout | Uses `/force-logout` |
+| B7 | Input sanitization placement | Mounted before routes |
+| B8 | Admin broadcast email | Fan-out routes through BullMQ |
+| B9 | Admin sessions pagination | `page`/`limit` + Previous/Next controls |
+| C1 | Smart search stub | Ranked PostgreSQL `websearch_to_tsquery`; semantic claims removed |
+| C2 | Elasticsearch dependency | `@elastic/elasticsearch` explicit in root deps |
+| C3 | Hardware key-store claims | README says software store; hardware providers are stubs |
+| C4 | OAuth account linking UI | Connect/disconnect on security page |
+| C5 | Notification preferences UI | Per-category × per-channel grid |
+| C6 | NPS / onboarding routes | Confirmed in `auth.routes.ts` |
+| C7 | Customer segments UI | Segment selector on admin user detail |
+| C8 | Webhook endpoint persistence | Drizzle `webhook_endpoints` + migration `0027` |
+| E1 | UI HTTP client boundary | `apiClient.ts` canonical; `docs/ui-http-client.md` |
+| E3 | shadcn migration | **0 raw controls** (`bun run ui:audit`) |
+
+- **E3 shadcn migration (complete)** — All raw HTML controls migrated to
+  shadcn/ui primitives (`Button`, `Input`, `Textarea`, `Checkbox`). Added
+  `components/ui/checkbox.tsx`. `bun run ui:audit` → **0 raw controls**.
+
+- **E2 — useApi migration (partial, 4 pages):** Migrated `admin/page`,
+  `admin/access-reviews`, `admin/alerts`, and `dashboard/settings` to
+  `useApi`/`usePaginatedApi`. ~20 pages remain — tracked in `todo.md` P2.
 
 - **Webhook endpoint persistence:** Replaced the user-facing webhook endpoint
   in-memory store with Drizzle persistence via `webhook_endpoints`, added
   migration `0027_webhook_endpoints`, and added persistence regression coverage.
-  Delivery and management routes now await the async store.
 
 - **Audit follow-up C2/B9:** Added `@elastic/elasticsearch` as an explicit root
-  dependency so the Elasticsearch provider no longer silently lacks its runtime
-  package, and added page/limit controls plus regression coverage for the admin
-  all-sessions browser.
+  dependency; admin sessions browser now passes `page`/`limit` with pagination controls.
 
-- **Audit follow-up E1:** Resolved the dual UI HTTP-client ambiguity by making
-  `apiClient.ts` the documented boundary for new UI→API calls, adding PATCH/PUT
-  helpers plus transient retry coverage, wiring `useApi` through `apiClient`, and
-  adding `docs/ui-http-client.md` for the migration rule. `api.ts` remains a
-  legacy compatibility facade while older pages are migrated in E2 batches.
+- **Audit follow-up E1:** `apiClient.ts` is the documented boundary; `useApi`
+  consumes it internally; `docs/ui-http-client.md` documents the migration rule.
 
-- **Audit follow-up C1:** Removed the semantic-search stub/claim from
-  `/search/smart`. Smart search now runs a single ranked PostgreSQL
-  `websearch_to_tsquery` query across users, organizations, and support tickets
-  when Elasticsearch is unavailable; OpenAPI/generated docs label it ranked
-  smart search instead of semantic/vector search.
+- **Audit follow-up C1/C3/C4/C5/C6/C7:** Smart search, README key-store
+  wording, OAuth connect UI, notification preferences grid, route confirmation,
+  customer segment selector.
 
-- **Audit follow-up C3:** Softened the README directory-tree comment from
-  "hardware key store" to "software key store (hardware providers are stubs)"
-  so the README accurately reflects that only the software key provider is
-  functional; TPM/Secure Enclave/PKCS#11 stubs remain as fail-fast extension points.
-
-- **Audit follow-up C4/C5/C6/C7:** Surfaced backend-only features in the UI:
-  added OAuth "Connect" button to the security page; added per-category
-  notification preference toggles (5 categories × 3 channels) with backend
-  schema extension; confirmed `/auth/me/nps` and `/auth/me/onboarding-complete`
-  routes exist; added customer segment selector to admin user detail page.
-- **E3 shadcn migration (batch 1):** Migrated 36 raw HTML controls (from 44) to shadcn/ui
-  `<Button>`, `<Input>`, `<Textarea>` across 12 files:
-  `packages/ui/src/app/admin/users/[id]/page.tsx`,
-  `packages/ui/src/app/dashboard/account/page.tsx`,
-  `packages/ui/src/app/dashboard/organizations/[orgId]/page.tsx`,
-  `packages/ui/src/components/NotificationBell.tsx`,
-  `packages/ui/src/components/app-shell/AppTopbar.tsx`,
-  `packages/ui/src/app/admin/settings/auth/page.tsx`,
-  `packages/ui/src/components/CommandPalette.tsx`,
-  `packages/ui/src/app/admin/jit/page.tsx`,
-  `packages/ui/src/app/admin/revenue/page.tsx`,
-  `packages/ui/src/app/(auth)/magic-link/page.tsx`,
-  `packages/ui/src/app/admin/compliance/page.tsx`,
-  `packages/ui/src/components/ThemeToggle.tsx`,
-  `packages/ui/src/app/admin/page.tsx`,
-  `packages/ui/src/app/admin/sessions/page.tsx`,
-  `packages/ui/src/app/dashboard/search/page.tsx`.
-  Remaining 8 raw controls across 8 files documented in
-  `docs/shadcn-adoption-report.md`.
-
-- **E2 — useApi migration (batch 1):** Migrated 3 admin pages to `useApi` hook:
-  `packages/ui/src/app/admin/access-reviews/page.tsx`,
-  `packages/ui/src/app/admin/alerts/page.tsx`,
-  `packages/ui/src/app/admin/page.tsx`.
-  Reduced manual `useEffect + api.get + loading` boilerplate. Verification passed.
-
-- **Verification:** `bun run test -- --run` → **838 tests / 99 files passing**;
-  `bun run build`, `bun run lint`, `bun run --cwd packages/ui build`,
-  `bun run boundaries:check`, and `bun run type-check` all pass. UI vitest passes
-  **46 tests / 9 files**. Generated SDK/docs regenerate deterministically; this
-  batch intentionally updates the API↔UI integration matrix and shadcn adoption
-  report. UI build reports only the existing Next/SWC version warning
-  (`@next/swc` 16.2.9 vs Next 16.2.7).
+- **Verification:** `bun run --cwd packages/ui build` passes. Targeted Biome
+  checks pass on touched files. Root `bun run test` → **835 tests / 99 files**.
 
 ## Recent work (2026-07-01)
 
