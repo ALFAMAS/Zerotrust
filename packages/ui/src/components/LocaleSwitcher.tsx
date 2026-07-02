@@ -3,8 +3,8 @@
 import { ChevronDown } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { api } from "@/lib/api";
 import { getToken } from "@/lib/auth";
+import { usePatchAuthMeMutation } from "@/lib/server-state/auth";
 import { cn } from "@/lib/utils";
 
 const LOCALES = [
@@ -24,6 +24,7 @@ export default function LocaleSwitcher() {
   const [open, setOpen] = useState(false);
   const [current, setCurrent] = useState("en");
   const ref = useRef<HTMLDivElement>(null);
+  const patchAuthMe = usePatchAuthMeMutation();
 
   useEffect(() => {
     setCurrent(getCurrentLocale());
@@ -46,7 +47,7 @@ export default function LocaleSwitcher() {
     // Persist to the account when signed in so transactional emails follow the
     // chosen language too. Best-effort — never block the UI switch on it.
     if (getToken()) {
-      void api.patch("/auth/me", { locale: code }).catch(() => {});
+      patchAuthMe.mutate({ locale: code }, { onError: () => {} });
     }
     window.location.reload();
   }

@@ -45,6 +45,8 @@ Tracks the frontend server-state migration from ad-hoc `useEffect` + local loadi
 | `LiveChatWidget` (shared) | [x] | Third-party identity preload uses `useAuthMeQuery`; native fallback uses support ticket mutations. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/auth.test.tsx` |
 | `VerifyEmailBanner` (shared) | [x] | Current-user check + resend verification moved to `auth.ts` TanStack Query hooks. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/auth.test.tsx` |
 | `SetupChecklist` (shared) | [x] | Onboarding-complete mutation moved to `auth.ts`; user prop unchanged (parent still supplies `/auth/me`). | `NODE_ENV=test bun run --cwd packages/ui test -- src/components/SetupChecklist.test.tsx` |
+| `LocaleSwitcher` (shared) | [x] | Locale persistence uses `usePatchAuthMeMutation` from `auth.ts`; cookie + reload unchanged. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/auth.test.tsx` |
+| `NpsSurveyPrompt` (shared) | [x] | Should-prompt query + submit mutation moved to `nps.ts` TanStack Query hooks. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/nps.test.tsx` |
 
 ## Migration backlog
 
@@ -52,7 +54,7 @@ Prioritize pages with real server data, manual `loading/error` state, and repeat
 
 | Area | Status | Next action |
 | --- | --- | --- |
-| shared components using legacy `api.get` | [ ] | Migrate high-impact reusable server-data components (see list below). |
+| shared components using legacy `api.get` | [x] | **Complete** — all listed shared components migrated. |
 
 ### Shared components still on legacy `api`
 
@@ -60,10 +62,32 @@ Prioritize pages with real server data, manual `loading/error` state, and repeat
 | --- | --- | --- |
 | `NotificationBell.tsx` | notifications | High — visible on every page | [x] |
 | `LiveChatWidget.tsx` | `GET /auth/me` + support tickets | Medium | [x] |
-| `LocaleSwitcher.tsx` | `PATCH /auth/me` | Medium |
+| `LocaleSwitcher.tsx` | `PATCH /auth/me` | Medium | [x] |
 | `VerifyEmailBanner.tsx` | `GET /auth/me` + resend | Medium | [x] |
-| `NpsSurveyPrompt.tsx` | `POST /auth/me/nps` | Low |
+| `NpsSurveyPrompt.tsx` | `GET /auth/me/nps/should-prompt` + `POST /auth/me/nps` | Low | [x] |
 | `SetupChecklist.tsx` | onboarding-complete mutation | Low | [x] |
+
+### Remaining legacy `api` surfaces (pages/layouts only)
+
+Grep of `from "@/lib/api"` under `packages/ui/src` after shared-component phase (2026-07-03):
+
+| File | Notes |
+| --- | --- |
+| `app/admin/layout.tsx` | Admin shell auth/bootstrap |
+| `app/admin/users/page.tsx` | Admin user list mutations |
+| `app/admin/sessions/page.tsx` | Session management |
+| `app/admin/alerts/page.tsx` | Notification channels |
+| `app/admin/access-reviews/page.tsx` | Access review list |
+| `app/admin/access-reviews/[id]/page.tsx` | Access review detail |
+| `app/admin/revenue/page.tsx` | Revenue + broadcast |
+| `app/admin/regions/page.tsx` | Region admin |
+| `app/dashboard/account/page.tsx` | Account page |
+| `app/dashboard/notifications/page.tsx` | Full notifications list |
+| `app/dashboard/search/page.tsx` | Search |
+| `app/dashboard/settings/page.tsx` | OAuth unlink |
+| `app/dashboard/jit/page.tsx` | JIT requests |
+
+`FeedbackWidget.tsx` uses `apiPost` from `apiClient` directly (not legacy `api`).
 
 ## Per-page checklist
 

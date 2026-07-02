@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import LocaleSwitcher from "@/components/LocaleSwitcher";
 import SetupChecklist from "@/components/SetupChecklist";
 import VerifyEmailBanner from "@/components/VerifyEmailBanner";
 import {
@@ -13,17 +14,20 @@ import {
 
 const mockApiGet = vi.fn();
 const mockApiPost = vi.fn();
+const mockApiPatch = vi.fn();
 const mockLegacyGet = vi.fn();
 const mockLegacyPost = vi.fn();
+const mockLegacyPatch = vi.fn();
 vi.mock("@/lib/apiClient", () => ({
   apiGet: (...args: unknown[]) => mockApiGet(...args),
   apiPost: (...args: unknown[]) => mockApiPost(...args),
-  apiPatch: vi.fn(),
+  apiPatch: (...args: unknown[]) => mockApiPatch(...args),
 }));
 vi.mock("@/lib/api", () => ({
   api: {
     get: (...args: unknown[]) => mockLegacyGet(...args),
     post: (...args: unknown[]) => mockLegacyPost(...args),
+    patch: (...args: unknown[]) => mockLegacyPatch(...args),
   },
 }));
 vi.mock("@/lib/toast", () => ({
@@ -60,8 +64,10 @@ describe("auth TanStack Query server state", () => {
   beforeEach(() => {
     mockApiGet.mockReset();
     mockApiPost.mockReset();
+    mockApiPatch.mockReset();
     mockLegacyGet.mockReset();
     mockLegacyPost.mockReset();
+    mockLegacyPatch.mockReset();
     sessionStorage.clear();
     localStorage.clear();
   });
@@ -103,5 +109,27 @@ describe("auth TanStack Query server state", () => {
     expect(await screen.findByText(/Onboarding complete!/)).toBeInTheDocument();
     await waitFor(() => expect(mockApiPost).toHaveBeenCalledWith(ONBOARDING_COMPLETE_PATH));
     expect(mockLegacyPost).not.toHaveBeenCalled();
+  });
+
+  it("persists locale via patch mutation in LocaleSwitcher when signed in", async () => {
+    localStorage.setItem("za_access_token", "token_1");
+    mockApiPatch.mockResolvedValue({ locale: "es" });
+    const reload = vi.fn();
+    Object.defineProperty(window, "location", {
+      configurable: true,
+      value: { ...window.location, reload },
+    });
+
+    const user = userEvent.setup();
+    renderWithQueryClient(<LocaleSwitcher />);
+
+    await user.click(screen.getByRole("button", { name: "Switch language" }));
+    await user.click(screen.getByRole("option", { name: /Español/ }));
+
+    await waitFor(() =>
+      expect(mockApiPatch).toHaveBeenCalledWith(AUTH_ME_PATH, { locale: "es" })
+    );
+    expect(mockLegacyPatch).not.toHaveBeenCalled();
+    expect(reload).toHaveBeenCalled();
   });
 });

@@ -340,6 +340,15 @@ export interface PatchAuthMeInput {
   locale?: string;
 }
 
+export interface NpsShouldPrompt {
+  shouldPrompt: boolean;
+}
+
+export interface SubmitNpsInput {
+  score: number;
+  comment?: string;
+}
+
 export type AdminUserStatus = "active" | "suspended" | "deleted" | string;
 export type CustomerSegment = "champion" | "at_risk" | "expansion" | "new";
 

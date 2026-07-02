@@ -91,4 +91,8 @@ export const queryKeys = {
     list: () => [...queryKeys.notifications.all, "list"] as const,
     unreadCount: () => [...queryKeys.notifications.all, "unreadCount"] as const,
   },
+  nps: {
+    all: ["nps"] as const,
+    shouldPrompt: () => [...queryKeys.nps.all, "shouldPrompt"] as const,
+  },
 };

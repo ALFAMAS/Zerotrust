@@ -1,37 +1,32 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { api } from "@/lib/api";
+import { useNpsShouldPromptQuery, useSubmitNpsMutation } from "@/lib/server-state/nps";
 
 /**
  * NPS Survey prompt — shows after 30 days, then quarterly.
  * Checks on mount and displays a non-intrusive banner.
  */
 export function NpsSurveyPrompt() {
-  const [visible, setVisible] = useState(false);
   const [score, setScore] = useState<number | null>(null);
   const [comment, setComment] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [dismissed, setDismissed] = useState(false);
 
-  useEffect(() => {
-    api
-      .get<{ shouldPrompt: boolean }>("/auth/me/nps/should-prompt")
-      .then((res) => {
-        if (res.shouldPrompt) setVisible(true);
-      })
-      .catch(() => {});
-  }, []);
+  const { data } = useNpsShouldPromptQuery(!dismissed && !submitted);
+  const submitMutation = useSubmitNpsMutation();
+
+  const visible = data?.shouldPrompt === true;
 
   async function handleSubmit() {
     if (score === null) return;
     try {
-      await api.post("/auth/me/nps", { score, comment: comment || undefined });
+      await submitMutation.mutateAsync({ score, comment: comment || undefined });
       setSubmitted(true);
-      setTimeout(() => setVisible(false), 3000);
+      setTimeout(() => setDismissed(true), 3000);
     } catch {
       // non-fatal
     }
@@ -89,8 +84,13 @@ export function NpsSurveyPrompt() {
                   rows={2}
                   className="mb-3 bg-muted"
                 />
-                <Button type="button" onClick={handleSubmit} className="w-full">
-                  Submit feedback
+                <Button
+                  type="button"
+                  onClick={handleSubmit}
+                  disabled={submitMutation.isPending}
+                  className="w-full"
+                >
+                  {submitMutation.isPending ? "Submitting…" : "Submit feedback"}
                 </Button>
               </>
             )}
