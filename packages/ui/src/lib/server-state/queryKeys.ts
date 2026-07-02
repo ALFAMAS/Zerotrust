@@ -17,6 +17,13 @@ export const queryKeys = {
       list: (filters: Record<string, string | number | undefined> = {}) =>
         [...queryKeys.admin.sessions.all(), "list", filters] as const,
     },
+    alertChannels: {
+      all: () => [...queryKeys.admin.all, "alertChannels"] as const,
+      list: () => [...queryKeys.admin.alertChannels.all(), "list"] as const,
+    },
+  },
+  account: {
+    all: ["account"] as const,
   },
   wallet: {
     all: ["wallet"] as const,

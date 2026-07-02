@@ -1,33 +1,31 @@
 "use client";
 
 import { useState } from "react";
+import { ServerStateStatus } from "@/components/ServerStateStatus";
 import { Button } from "@/components/ui/button";
-import { api } from "@/lib/api";
-import { useApi } from "@/lib/hooks/useApi";
-
-interface ConnectedProviders {
-  google?: boolean;
-  github?: boolean;
-}
+import { ErrorState } from "@/components/ui/States";
+import {
+  useDisconnectOAuthProviderMutation,
+  useOAuthProvidersQuery,
+} from "@/lib/server-state/auth";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000";
 
 export default function SettingsPage() {
-  const { data, loading, refetch } = useApi<ConnectedProviders>("/auth/oauth/providers");
-  const providers = data ?? {};
+  const providersQuery = useOAuthProvidersQuery();
+  const disconnectMutation = useDisconnectOAuthProviderMutation();
   const [error, setError] = useState<string | null>(null);
-  const [actionLoading, setActionLoading] = useState<string | null>(null);
+
+  const providers = providersQuery.data ?? {};
+  const loading = providersQuery.isLoading;
+  const queryError = providersQuery.error;
 
   const handleDisconnect = async (provider: "google" | "github") => {
     setError(null);
-    setActionLoading(provider);
     try {
-      await api.delete(`/auth/oauth/${provider}`);
-      await refetch();
+      await disconnectMutation.mutateAsync(provider);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : `Failed to disconnect ${provider}`);
-    } finally {
-      setActionLoading(null);
     }
   };
 
@@ -69,6 +67,15 @@ export default function SettingsPage() {
     },
   ];
 
+  if (queryError && !providersQuery.data) {
+    return (
+      <ErrorState
+        message={queryError.message || "Failed to load connected apps"}
+        retry={() => void providersQuery.refetch()}
+      />
+    );
+  }
+
   return (
     <div className="max-w-2xl space-y-6">
       <div>
@@ -79,6 +86,14 @@ export default function SettingsPage() {
           Manage OAuth providers linked to your account.
         </p>
       </div>
+
+      <ServerStateStatus
+        isFetching={providersQuery.isFetching}
+        isStale={providersQuery.isStale}
+        hasData={providersQuery.data !== undefined}
+        label="connected apps"
+        onRefresh={() => void providersQuery.refetch()}
+      />
 
       {error && (
         <div className="bg-red-500/10 border border-red-500/30 text-red-400 text-sm px-4 py-3 rounded-lg">
@@ -94,6 +109,8 @@ export default function SettingsPage() {
         ) : (
           oauthProviders.map((provider) => {
             const isConnected = !!providers[provider.id];
+            const isDisconnecting =
+              disconnectMutation.isPending && disconnectMutation.variables === provider.id;
             return (
               <div key={provider.id} className="flex items-center justify-between px-6 py-4">
                 <div className="flex items-center gap-3">
@@ -113,11 +130,11 @@ export default function SettingsPage() {
                       type="button"
                       variant="outline"
                       size="sm"
-                      onClick={() => handleDisconnect(provider.id)}
-                      disabled={actionLoading === provider.id}
+                      onClick={() => void handleDisconnect(provider.id)}
+                      disabled={isDisconnecting}
                       className="text-xs hover:border-red-700 hover:text-red-400"
                     >
-                      {actionLoading === provider.id ? "Disconnecting…" : "Disconnect"}
+                      {isDisconnecting ? "Disconnecting…" : "Disconnect"}
                     </Button>
                   ) : (
                     <Button asChild size="sm" variant="outline" className="text-xs">

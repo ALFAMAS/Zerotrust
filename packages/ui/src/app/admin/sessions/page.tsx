@@ -2,9 +2,11 @@
 
 import { AlertTriangle, ShieldCheck } from "lucide-react";
 import { useCallback, useState } from "react";
+import { ServerStateStatus } from "@/components/ServerStateStatus";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ErrorState } from "@/components/ui/States";
 import {
   Table,
   TableBody,
@@ -13,31 +15,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { api } from "@/lib/api";
-import { usePaginatedApi } from "@/lib/hooks/useApi";
-
-interface Session {
-  id: string;
-  userId?: string;
-  userEmail?: string | null;
-  userDisplayName?: string | null;
-  deviceFingerprint?: {
-    platform?: string;
-    browser?: string;
-    os?: string;
-    isTrusted?: boolean;
-  } | null;
-  userAgent?: string | null;
-  ipAddress?: string | null;
-  country?: string | null;
-  isActive?: boolean;
-  revokedAt?: string | null;
-  revokedReason?: string | null;
-  anomalyFlags?: unknown;
-  createdAt: string;
-  lastActivityAt?: string | null;
-  expiresAt?: string | null;
-}
+import {
+  useAdminSessionsListQuery,
+  useRevokeAdminSessionMutation,
+} from "@/lib/server-state/sessions";
+import type { AdminSession } from "@/lib/server-state/types";
 
 type TabFilter = "all" | "active" | "expired";
 
@@ -52,45 +34,40 @@ function anomalyCount(flags: unknown): number {
 
 export default function SessionsPage() {
   const [tab, setTab] = useState<TabFilter>("all");
+  const [page, setPage] = useState(1);
   const [toast, setToast] = useState<string | null>(null);
+
+  const sessionsQuery = useAdminSessionsListQuery({ page, limit: 20 });
+  const revokeMutation = useRevokeAdminSessionMutation({ page, limit: 20 });
 
   const showToast = useCallback((msg: string) => {
     setToast(msg);
     setTimeout(() => setToast(null), 3000);
   }, []);
 
-  const {
-    items: sessions,
-    loading,
-    pagination,
-    page,
-    setPage,
-    refetch,
-  } = usePaginatedApi<Session>("/admin/sessions", {
-    onError: () => showToast("Failed to load sessions"),
-  });
+  const sessions = sessionsQuery.data?.data ?? [];
+  const pagination = sessionsQuery.data?.pagination;
   const total = pagination?.total ?? 0;
   const totalPages = pagination?.totalPages ?? 1;
+  const loading = sessionsQuery.isLoading;
+  const error = sessionsQuery.error;
 
-  async function handleRevoke(session: Session) {
+  async function handleRevoke(session: AdminSession) {
     try {
-      await api.delete(`/admin/sessions/${session.id}`);
+      await revokeMutation.mutateAsync(session.id);
       showToast("Session revoked");
-      await refetch();
     } catch {
       showToast("Failed to revoke session");
     }
   }
 
-  // "expired" here is the filter bucket for anything not currently active
-  // (truly expired, manually revoked, or marked inactive).
-  function isActiveSession(s: Session): boolean {
+  function isActiveSession(s: AdminSession): boolean {
     if (s.isActive === false || s.revokedAt) return false;
     if (s.expiresAt && new Date(s.expiresAt) < new Date()) return false;
     return true;
   }
 
-  function statusLabel(s: Session): string {
+  function statusLabel(s: AdminSession): string {
     if (s.revokedAt) return "revoked";
     if (!isActiveSession(s)) return "expired";
     return "active";
@@ -107,6 +84,15 @@ export default function SessionsPage() {
     { key: "expired", label: "Expired" },
   ];
 
+  if (error && !sessionsQuery.data) {
+    return (
+      <ErrorState
+        message={error.message || "Failed to load sessions"}
+        retry={() => void sessionsQuery.refetch()}
+      />
+    );
+  }
+
   return (
     <div className="space-y-6">
       {toast && (
@@ -121,6 +107,14 @@ export default function SessionsPage() {
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">{total} total sessions</p>
       </div>
+
+      <ServerStateStatus
+        isFetching={sessionsQuery.isFetching}
+        isStale={sessionsQuery.isStale}
+        hasData={sessions.length > 0}
+        label="sessions"
+        onRefresh={() => void sessionsQuery.refetch()}
+      />
 
       {/* Tabs */}
       <div className="flex gap-1 border-b border-border">
@@ -256,6 +250,7 @@ export default function SessionsPage() {
                               variant="ghost"
                               size="sm"
                               onClick={() => handleRevoke(s)}
+                              disabled={revokeMutation.isPending && revokeMutation.variables === s.id}
                               className="text-destructive hover:text-destructive"
                             >
                               Revoke

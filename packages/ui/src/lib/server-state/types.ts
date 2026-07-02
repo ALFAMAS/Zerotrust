@@ -413,3 +413,66 @@ export interface AdminUserDetail {
   sessionsCount?: number;
   customerSegment?: CustomerSegment | string | null;
 }
+
+export interface AdminSession {
+  id: string;
+  userId?: string;
+  userEmail?: string | null;
+  userDisplayName?: string | null;
+  deviceFingerprint?: {
+    platform?: string;
+    browser?: string;
+    os?: string;
+    isTrusted?: boolean;
+  } | null;
+  userAgent?: string | null;
+  ipAddress?: string | null;
+  country?: string | null;
+  isActive?: boolean;
+  revokedAt?: string | null;
+  revokedReason?: string | null;
+  anomalyFlags?: unknown;
+  createdAt: string;
+  lastActivityAt?: string | null;
+  expiresAt?: string | null;
+}
+
+export interface AdminSessionsListParams {
+  page?: number;
+  limit?: number;
+}
+
+export type OAuthProvider = "google" | "github";
+
+export interface ConnectedProviders {
+  google?: boolean;
+  github?: boolean;
+}
+
+export interface GdprDeletionResponse {
+  scheduledFor?: string;
+  message?: string;
+}
+
+export type AlertChannelType = "slack" | "teams" | "pagerduty";
+
+export interface AlertChannel {
+  id: string;
+  type: AlertChannelType;
+  name: string;
+  enabled: boolean;
+  events: string[];
+  config: { webhookUrl?: string; integrationKey?: string };
+}
+
+export interface AlertChannelsResponse {
+  channels: AlertChannel[];
+}
+
+export interface CreateAlertChannelInput {
+  type: AlertChannelType;
+  name: string;
+  enabled: boolean;
+  events: string[];
+  config: { webhookUrl?: string; integrationKey?: string };
+}

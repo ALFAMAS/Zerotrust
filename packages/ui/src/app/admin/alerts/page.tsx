@@ -2,10 +2,12 @@
 
 import { Bell, Plus, Send, Trash2 } from "lucide-react";
 import { useState } from "react";
+import { ServerStateStatus } from "@/components/ServerStateStatus";
 import { SkeletonCard } from "@/components/Skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ErrorState } from "@/components/ui/States";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -17,21 +19,15 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/context/ToastContext";
-import { api } from "@/lib/api";
-import { useApi } from "@/lib/hooks/useApi";
+import {
+  useAlertChannelsQuery,
+  useCreateAlertChannelMutation,
+  useDeleteAlertChannelMutation,
+  useTestAlertChannelMutation,
+  useToggleAlertChannelMutation,
+} from "@/lib/server-state/alertChannels";
+import type { AlertChannel, AlertChannelType } from "@/lib/server-state/types";
 
-type ChannelType = "slack" | "teams" | "pagerduty";
-
-interface NotificationChannel {
-  id: string;
-  type: ChannelType;
-  name: string;
-  enabled: boolean;
-  events: string[];
-  config: { webhookUrl?: string; integrationKey?: string };
-}
-
-// The most useful security/ops alerts to start with (the backend supports more).
 const DEFAULT_EVENTS = [
   "anomaly.detected",
   "auth.brute_force",
@@ -41,7 +37,7 @@ const DEFAULT_EVENTS = [
   "slo.burn",
 ];
 
-const TYPE_LABELS: Record<ChannelType, string> = {
+const TYPE_LABELS: Record<AlertChannelType, string> = {
   slack: "Slack",
   teams: "Microsoft Teams",
   pagerduty: "PagerDuty",
@@ -49,36 +45,29 @@ const TYPE_LABELS: Record<ChannelType, string> = {
 
 export default function AdminAlertsPage() {
   const { toast } = useToast();
-  const [channels, setChannels] = useState<NotificationChannel[]>([]);
-  const [busy, setBusy] = useState(false);
+  const channelsQuery = useAlertChannelsQuery();
+  const createMutation = useCreateAlertChannelMutation();
+  const toggleMutation = useToggleAlertChannelMutation();
+  const testMutation = useTestAlertChannelMutation();
+  const deleteMutation = useDeleteAlertChannelMutation();
 
-  // Add-channel form
-  const [type, setType] = useState<ChannelType>("slack");
+  const [type, setType] = useState<AlertChannelType>("slack");
   const [name, setName] = useState("");
   const [secret, setSecret] = useState("");
 
-  const { loading, refetch } = useApi<{ channels: NotificationChannel[] }>(
-    "/admin/notifications/channels",
-    {
-      onSuccess: (data) => {
-        setChannels(data.channels ?? []);
-      },
-      onError: () => {
-        toast({ message: "Could not load alert channels", type: "error" });
-      },
-    }
-  );
+  const channels = channelsQuery.data?.channels ?? [];
+  const loading = channelsQuery.isLoading;
+  const error = channelsQuery.error;
 
   const secretLabel = type === "pagerduty" ? "Integration key" : "Webhook URL";
 
   async function addChannel(e: React.FormEvent) {
     e.preventDefault();
     if (!name.trim() || !secret.trim()) return;
-    setBusy(true);
     try {
       const config =
         type === "pagerduty" ? { integrationKey: secret.trim() } : { webhookUrl: secret.trim() };
-      await api.post("/admin/notifications/channels", {
+      await createMutation.mutateAsync({
         type,
         name: name.trim(),
         enabled: true,
@@ -88,41 +77,45 @@ export default function AdminAlertsPage() {
       setName("");
       setSecret("");
       toast({ message: `${TYPE_LABELS[type]} channel added`, type: "success" });
-      await refetch();
     } catch (err) {
       toast({ message: (err as Error).message || "Could not add channel", type: "error" });
-    } finally {
-      setBusy(false);
     }
   }
 
-  async function toggleEnabled(ch: NotificationChannel) {
+  async function toggleEnabled(ch: AlertChannel) {
     try {
-      await api.patch(`/admin/notifications/channels/${ch.id}`, { enabled: !ch.enabled });
-      setChannels((cs) => cs.map((c) => (c.id === ch.id ? { ...c, enabled: !c.enabled } : c)));
+      await toggleMutation.mutateAsync({ id: ch.id, enabled: !ch.enabled });
     } catch (err) {
       toast({ message: (err as Error).message || "Update failed", type: "error" });
     }
   }
 
-  async function testChannel(ch: NotificationChannel) {
+  async function testChannel(ch: AlertChannel) {
     try {
-      await api.post(`/admin/notifications/channels/${ch.id}/test`, {});
+      await testMutation.mutateAsync(ch.id);
       toast({ message: `Test alert sent to ${ch.name}`, type: "success" });
     } catch (err) {
       toast({ message: (err as Error).message || "Test failed", type: "error" });
     }
   }
 
-  async function removeChannel(ch: NotificationChannel) {
+  async function removeChannel(ch: AlertChannel) {
     if (!confirm(`Delete the "${ch.name}" alert channel?`)) return;
     try {
-      await api.delete(`/admin/notifications/channels/${ch.id}`);
-      setChannels((cs) => cs.filter((c) => c.id !== ch.id));
+      await deleteMutation.mutateAsync(ch.id);
       toast({ message: "Channel deleted", type: "success" });
     } catch (err) {
       toast({ message: (err as Error).message || "Delete failed", type: "error" });
     }
+  }
+
+  if (error && !channelsQuery.data) {
+    return (
+      <ErrorState
+        message={error.message || "Could not load alert channels"}
+        retry={() => void channelsQuery.refetch()}
+      />
+    );
   }
 
   return (
@@ -135,16 +128,24 @@ export default function AdminAlertsPage() {
         Microsoft Teams, or PagerDuty.
       </p>
 
+      <ServerStateStatus
+        isFetching={channelsQuery.isFetching}
+        isStale={channelsQuery.isStale}
+        hasData={channels.length > 0}
+        label="alert channels"
+        onRefresh={() => void channelsQuery.refetch()}
+      />
+
       {/* Add channel */}
       <Card className="mb-8">
         <CardHeader>
           <CardTitle className="text-base">Add a channel</CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={addChannel} className="grid gap-4 sm:grid-cols-2">
+          <form onSubmit={(e) => void addChannel(e)} className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
               <Label htmlFor="ch-type">Destination</Label>
-              <Select value={type} onValueChange={(v) => setType(v as ChannelType)}>
+              <Select value={type} onValueChange={(v) => setType(v as AlertChannelType)}>
                 <SelectTrigger id="ch-type">
                   <SelectValue />
                 </SelectTrigger>
@@ -178,8 +179,11 @@ export default function AdminAlertsPage() {
               />
             </div>
             <div className="sm:col-span-2">
-              <Button type="submit" disabled={busy || !name.trim() || !secret.trim()}>
-                <Plus className="h-4 w-4" /> {busy ? "Adding…" : "Add channel"}
+              <Button
+                type="submit"
+                disabled={createMutation.isPending || !name.trim() || !secret.trim()}
+              >
+                <Plus className="h-4 w-4" /> {createMutation.isPending ? "Adding…" : "Add channel"}
               </Button>
             </div>
           </form>
@@ -220,7 +224,8 @@ export default function AdminAlertsPage() {
                       <Switch
                         id={`enabled-${ch.id}`}
                         checked={ch.enabled}
-                        onCheckedChange={() => toggleEnabled(ch)}
+                        onCheckedChange={() => void toggleEnabled(ch)}
+                        disabled={toggleMutation.isPending && toggleMutation.variables?.id === ch.id}
                       />
                       <Label htmlFor={`enabled-${ch.id}`} className="text-xs text-muted-foreground">
                         Enabled
@@ -230,7 +235,8 @@ export default function AdminAlertsPage() {
                       type="button"
                       variant="outline"
                       size="sm"
-                      onClick={() => testChannel(ch)}
+                      onClick={() => void testChannel(ch)}
+                      disabled={testMutation.isPending && testMutation.variables === ch.id}
                     >
                       <Send className="h-4 w-4" /> Test
                     </Button>
@@ -239,7 +245,8 @@ export default function AdminAlertsPage() {
                       variant="ghost"
                       size="icon"
                       aria-label={`Delete ${ch.name}`}
-                      onClick={() => removeChannel(ch)}
+                      onClick={() => void removeChannel(ch)}
+                      disabled={deleteMutation.isPending && deleteMutation.variables === ch.id}
                     >
                       <Trash2 className="h-4 w-4 text-destructive" />
                     </Button>

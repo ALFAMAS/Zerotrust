@@ -47,6 +47,10 @@ Tracks the frontend server-state migration from ad-hoc `useEffect` + local loadi
 | `SetupChecklist` (shared) | [x] | Onboarding-complete mutation moved to `auth.ts`; user prop unchanged (parent still supplies `/auth/me`). | `NODE_ENV=test bun run --cwd packages/ui test -- src/components/SetupChecklist.test.tsx` |
 | `LocaleSwitcher` (shared) | [x] | Locale persistence uses `usePatchAuthMeMutation` from `auth.ts`; cookie + reload unchanged. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/auth.test.tsx` |
 | `NpsSurveyPrompt` (shared) | [x] | Should-prompt query + submit mutation moved to `nps.ts` TanStack Query hooks. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/nps.test.tsx` |
+| `/admin/sessions` | [x] | Paginated session list + revoke mutation moved to `sessions.ts`. Optimistic revoke with rollback and list invalidation. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/sessions.test.tsx` |
+| `/admin/alerts` | [x] | Alert channel list + create/toggle/test/delete moved to `alertChannels.ts`. Toggle/delete use optimistic cache updates with rollback. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/alertChannels.test.tsx` |
+| `/dashboard/settings` | [x] | OAuth provider list + disconnect moved to `auth.ts` (`useOAuthProvidersQuery`, `useDisconnectOAuthProviderMutation`). | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/auth.test.tsx` |
+| `/dashboard/account` | [x] | GDPR export/delete/cancel moved to `account.ts` mutation hooks (`apiGetBlob` + `apiDelete` + `apiPost`). | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/account.test.tsx` |
 
 ## Migration backlog
 
@@ -69,23 +73,20 @@ Prioritize pages with real server data, manual `loading/error` state, and repeat
 
 ### Remaining legacy `api` surfaces (pages/layouts only)
 
-Grep of `from "@/lib/api"` under `packages/ui/src` after shared-component phase (2026-07-03):
+Grep of `from "@/lib/api"` under `packages/ui/src` after page phase batch 2 (2026-07-03):
 
 | File | Notes |
 | --- | --- |
 | `app/admin/layout.tsx` | Admin shell auth/bootstrap |
-| `app/admin/users/page.tsx` | Admin user list mutations |
-| `app/admin/sessions/page.tsx` | Session management |
-| `app/admin/alerts/page.tsx` | Notification channels |
 | `app/admin/access-reviews/page.tsx` | Access review list |
 | `app/admin/access-reviews/[id]/page.tsx` | Access review detail |
 | `app/admin/revenue/page.tsx` | Revenue + broadcast |
 | `app/admin/regions/page.tsx` | Region admin |
-| `app/dashboard/account/page.tsx` | Account page |
-| `app/dashboard/notifications/page.tsx` | Full notifications list |
 | `app/dashboard/search/page.tsx` | Search |
-| `app/dashboard/settings/page.tsx` | OAuth unlink |
-| `app/dashboard/jit/page.tsx` | JIT requests |
+
+**Migrated this batch:** `admin/sessions`, `admin/alerts`, `dashboard/settings`, `dashboard/account`.
+
+Previously listed but already migrated before this batch: `admin/users/page.tsx`, `dashboard/notifications/page.tsx`, `dashboard/jit/page.tsx`.
 
 `FeedbackWidget.tsx` uses `apiPost` from `apiClient` directly (not legacy `api`).
 

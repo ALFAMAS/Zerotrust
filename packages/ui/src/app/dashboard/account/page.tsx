@@ -3,13 +3,18 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { api } from "@/lib/api";
-import { apiGetBlob } from "@/lib/apiClient";
+import {
+  useCancelAccountDeletionMutation,
+  useGdprExportMutation,
+  useScheduleAccountDeletionMutation,
+} from "@/lib/server-state/account";
 
 export default function AccountPage() {
-  const [exportLoading, setExportLoading] = useState(false);
+  const exportMutation = useGdprExportMutation();
+  const deleteMutation = useScheduleAccountDeletionMutation();
+  const cancelDeletionMutation = useCancelAccountDeletionMutation();
+
   const [deleteConfirm, setDeleteConfirm] = useState("");
-  const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteStatus, setDeleteStatus] = useState<{
     scheduled?: boolean;
     scheduledFor?: string;
@@ -18,9 +23,8 @@ export default function AccountPage() {
   } | null>(null);
 
   async function handleExport() {
-    setExportLoading(true);
     try {
-      const blob = await apiGetBlob("/gdpr/export");
+      const blob = await exportMutation.mutateAsync();
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -29,19 +33,13 @@ export default function AccountPage() {
       URL.revokeObjectURL(url);
     } catch {
       alert("Export failed. Please try again.");
-    } finally {
-      setExportLoading(false);
     }
   }
 
   async function handleDelete() {
     if (deleteConfirm !== "DELETE") return;
-    setDeleteLoading(true);
     try {
-      const data = await api.delete<{
-        scheduledFor?: string;
-        message?: string;
-      }>("/gdpr/account");
+      const data = await deleteMutation.mutateAsync();
       setDeleteStatus({
         scheduled: true,
         scheduledFor: data.scheduledFor,
@@ -51,14 +49,12 @@ export default function AccountPage() {
       setDeleteStatus({
         error: err instanceof Error ? err.message : "Request failed",
       });
-    } finally {
-      setDeleteLoading(false);
     }
   }
 
   async function handleCancelDeletion() {
     try {
-      await api.post("/gdpr/account/deletion/cancel");
+      await cancelDeletionMutation.mutateAsync();
       setDeleteStatus(null);
       setDeleteConfirm("");
     } catch {
@@ -84,11 +80,11 @@ export default function AccountPage() {
         </p>
         <Button
           variant="default"
-          onClick={handleExport}
-          disabled={exportLoading}
+          onClick={() => void handleExport()}
+          disabled={exportMutation.isPending}
           className="px-4 py-2 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-medium disabled:opacity-50 transition-colors"
         >
-          {exportLoading ? "Preparing export…" : "Download my data"}
+          {exportMutation.isPending ? "Preparing export…" : "Download my data"}
         </Button>
       </section>
 
@@ -114,10 +110,11 @@ export default function AccountPage() {
             </div>
             <Button
               variant="outline"
-              onClick={handleCancelDeletion}
+              onClick={() => void handleCancelDeletion()}
+              disabled={cancelDeletionMutation.isPending}
               className="px-4 py-2 rounded-lg border border-border hover:border-border text-foreground/80 text-sm transition-colors"
             >
-              Cancel deletion request
+              {cancelDeletionMutation.isPending ? "Cancelling…" : "Cancel deletion request"}
             </Button>
           </div>
         ) : (
@@ -147,11 +144,11 @@ export default function AccountPage() {
               />
               <Button
                 variant="destructive"
-                onClick={handleDelete}
-                disabled={deleteConfirm !== "DELETE" || deleteLoading}
+                onClick={() => void handleDelete()}
+                disabled={deleteConfirm !== "DELETE" || deleteMutation.isPending}
                 className="px-4 py-2 rounded-lg bg-red-700 hover:bg-red-600 text-foreground text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
               >
-                {deleteLoading ? "Processing…" : "Delete my account"}
+                {deleteMutation.isPending ? "Processing…" : "Delete my account"}
               </Button>
             </div>
           </>

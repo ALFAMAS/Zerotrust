@@ -5,9 +5,11 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import LocaleSwitcher from "@/components/LocaleSwitcher";
 import SetupChecklist from "@/components/SetupChecklist";
 import VerifyEmailBanner from "@/components/VerifyEmailBanner";
+import SettingsPage from "@/app/dashboard/settings/page";
 import {
   AUTH_ME_PATH,
   ONBOARDING_COMPLETE_PATH,
+  OAUTH_PROVIDERS_PATH,
   VERIFY_EMAIL_RESEND_PATH,
   authKeys,
 } from "./auth";
@@ -15,19 +17,23 @@ import {
 const mockApiGet = vi.fn();
 const mockApiPost = vi.fn();
 const mockApiPatch = vi.fn();
+const mockApiDelete = vi.fn();
 const mockLegacyGet = vi.fn();
 const mockLegacyPost = vi.fn();
 const mockLegacyPatch = vi.fn();
+const mockLegacyDelete = vi.fn();
 vi.mock("@/lib/apiClient", () => ({
   apiGet: (...args: unknown[]) => mockApiGet(...args),
   apiPost: (...args: unknown[]) => mockApiPost(...args),
   apiPatch: (...args: unknown[]) => mockApiPatch(...args),
+  apiDelete: (...args: unknown[]) => mockApiDelete(...args),
 }));
 vi.mock("@/lib/api", () => ({
   api: {
     get: (...args: unknown[]) => mockLegacyGet(...args),
     post: (...args: unknown[]) => mockLegacyPost(...args),
     patch: (...args: unknown[]) => mockLegacyPatch(...args),
+    delete: (...args: unknown[]) => mockLegacyDelete(...args),
   },
 }));
 vi.mock("@/lib/toast", () => ({
@@ -65,9 +71,11 @@ describe("auth TanStack Query server state", () => {
     mockApiGet.mockReset();
     mockApiPost.mockReset();
     mockApiPatch.mockReset();
+    mockApiDelete.mockReset();
     mockLegacyGet.mockReset();
     mockLegacyPost.mockReset();
     mockLegacyPatch.mockReset();
+    mockLegacyDelete.mockReset();
     sessionStorage.clear();
     localStorage.clear();
   });
@@ -131,5 +139,30 @@ describe("auth TanStack Query server state", () => {
     );
     expect(mockLegacyPatch).not.toHaveBeenCalled();
     expect(reload).toHaveBeenCalled();
+  });
+
+  it("loads OAuth providers through apiClient/TanStack Query for settings page", async () => {
+    mockApiGet.mockResolvedValue({ google: true, github: false });
+    renderWithQueryClient(<SettingsPage />);
+
+    expect(await screen.findByText("Connected")).toBeInTheDocument();
+    expect(mockApiGet).toHaveBeenCalledWith(OAUTH_PROVIDERS_PATH);
+    expect(mockLegacyGet).not.toHaveBeenCalled();
+  });
+
+  it("disconnects OAuth provider via apiDelete mutation, not legacy api.delete", async () => {
+    mockApiGet.mockResolvedValue({ google: true, github: false });
+    mockApiDelete.mockResolvedValue({ success: true });
+
+    const user = userEvent.setup();
+    const { queryClient } = renderWithQueryClient(<SettingsPage />);
+    await screen.findByText("Connected");
+
+    const invalidateSpy = vi.spyOn(queryClient, "invalidateQueries");
+    await user.click(screen.getByRole("button", { name: "Disconnect" }));
+
+    await waitFor(() => expect(mockApiDelete).toHaveBeenCalledWith("/auth/oauth/google"));
+    expect(mockLegacyDelete).not.toHaveBeenCalled();
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: authKeys.oauthProviders() });
   });
 });
