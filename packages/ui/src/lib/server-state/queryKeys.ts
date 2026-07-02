@@ -122,4 +122,12 @@ export const queryKeys = {
     results: (params: Record<string, string | number | undefined> = {}) =>
       [...queryKeys.search.all, "results", params] as const,
   },
+  sessions: {
+    all: ["sessions"] as const,
+    list: () => [...queryKeys.sessions.all, "list"] as const,
+  },
+  apiKeys: {
+    all: ["apiKeys"] as const,
+    list: () => [...queryKeys.apiKeys.all, "list"] as const,
+  },
 };

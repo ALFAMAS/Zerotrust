@@ -569,3 +569,85 @@ export interface SearchParams {
   type?: string;
   limit?: number;
 }
+
+export interface UserSession {
+  id: string;
+  ipAddress?: string;
+  country?: string;
+  userAgent?: string;
+  deviceFingerprint?: {
+    platform?: string;
+    browser?: string;
+    os?: string;
+    isTrusted?: boolean;
+  };
+  isActive: boolean;
+  isCurrent?: boolean;
+  expiresAt?: string;
+  lastActivityAt?: string;
+  createdAt?: string;
+}
+
+export interface Organization {
+  id: string;
+  name: string;
+  slug: string;
+  logoUrl?: string | null;
+  billingEmail?: string | null;
+  ownerId?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface OrganizationMember {
+  id: string;
+  orgId: string;
+  userId: string;
+  role: string;
+  joinedAt?: string | null;
+  createdAt?: string;
+}
+
+export interface OrgMembership {
+  member: OrganizationMember;
+  org: Organization;
+}
+
+export interface OrganizationsListResponse {
+  orgs: OrgMembership[];
+}
+
+export interface CreateOrganizationInput {
+  name: string;
+  slug?: string;
+}
+
+export interface ApiKey {
+  id: string;
+  name: string;
+  environment?: "live" | "test";
+  keyPrefix: string;
+  scopes?: string[];
+  expiresAt?: string | null;
+  lastUsedAt?: string | null;
+  createdAt?: string;
+}
+
+export interface CreateApiKeyInput {
+  name: string;
+  environment?: string;
+  expiresInDays?: number;
+}
+
+export interface CreateApiKeyResponse {
+  key: string;
+}
+
+export interface TotpSetupResponse {
+  qrCodeUrl: string;
+  secret?: string;
+}
+
+export interface TotpVerifyResponse {
+  backupCodes?: string[];
+}

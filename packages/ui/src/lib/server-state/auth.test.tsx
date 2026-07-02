@@ -6,18 +6,24 @@ import LocaleSwitcher from "@/components/LocaleSwitcher";
 import SetupChecklist from "@/components/SetupChecklist";
 import VerifyEmailBanner from "@/components/VerifyEmailBanner";
 import SettingsPage from "@/app/dashboard/settings/page";
+import ProfilePage from "@/app/dashboard/profile/page";
+import DashboardPage from "@/app/dashboard/page";
 import {
   AUTH_ME_PATH,
+  AUTH_ME_AVATAR_PATH,
   ONBOARDING_COMPLETE_PATH,
   OAUTH_PROVIDERS_PATH,
+  TOTP_PATH,
   VERIFY_EMAIL_RESEND_PATH,
   authKeys,
 } from "./auth";
+import { USER_SESSIONS_PATH, userSessionKeys } from "./sessions";
 
 const mockApiGet = vi.fn();
 const mockApiPost = vi.fn();
 const mockApiPatch = vi.fn();
 const mockApiDelete = vi.fn();
+const mockApiPostFormData = vi.fn();
 const mockLegacyGet = vi.fn();
 const mockLegacyPost = vi.fn();
 const mockLegacyPatch = vi.fn();
@@ -27,6 +33,7 @@ vi.mock("@/lib/apiClient", () => ({
   apiPost: (...args: unknown[]) => mockApiPost(...args),
   apiPatch: (...args: unknown[]) => mockApiPatch(...args),
   apiDelete: (...args: unknown[]) => mockApiDelete(...args),
+  apiPostFormData: (...args: unknown[]) => mockApiPostFormData(...args),
 }));
 vi.mock("@/lib/api", () => ({
   api: {
@@ -72,6 +79,7 @@ describe("auth TanStack Query server state", () => {
     mockApiPost.mockReset();
     mockApiPatch.mockReset();
     mockApiDelete.mockReset();
+    mockApiPostFormData.mockReset();
     mockLegacyGet.mockReset();
     mockLegacyPost.mockReset();
     mockLegacyPatch.mockReset();
@@ -164,5 +172,69 @@ describe("auth TanStack Query server state", () => {
     await waitFor(() => expect(mockApiDelete).toHaveBeenCalledWith("/auth/oauth/google"));
     expect(mockLegacyDelete).not.toHaveBeenCalled();
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: authKeys.oauthProviders() });
+  });
+
+  it("loads profile through useAuthMeQuery on profile page, not legacy api.get", async () => {
+    mockApiGet.mockResolvedValue(completeUser);
+    renderWithQueryClient(<ProfilePage />);
+
+    expect(await screen.findByDisplayValue("Complete User")).toBeInTheDocument();
+    expect(mockApiGet).toHaveBeenCalledWith(AUTH_ME_PATH);
+    expect(mockLegacyGet).not.toHaveBeenCalled();
+  });
+
+  it("patches profile via mutation on profile page, not legacy api.patch", async () => {
+    mockApiGet.mockResolvedValue(completeUser);
+    mockApiPatch.mockResolvedValue({ displayName: "Updated User" });
+
+    const user = userEvent.setup();
+    renderWithQueryClient(<ProfilePage />);
+    await screen.findByDisplayValue("Complete User");
+
+    await user.clear(screen.getByLabelText("Display Name"));
+    await user.type(screen.getByLabelText("Display Name"), "Updated User");
+    await user.click(screen.getByRole("button", { name: "Save Changes" }));
+
+    await waitFor(() =>
+      expect(mockApiPatch).toHaveBeenCalledWith(AUTH_ME_PATH, {
+        displayName: "Updated User",
+        avatarUrl: "https://example.com/a.png",
+        phone: null,
+        username: null,
+      })
+    );
+    expect(mockLegacyPatch).not.toHaveBeenCalled();
+  });
+
+  it("disables TOTP via apiDelete mutation on profile page", async () => {
+    mockApiGet.mockResolvedValue(completeUser);
+    mockApiDelete.mockResolvedValue({ success: true });
+    vi.stubGlobal("confirm", () => true);
+
+    const user = userEvent.setup();
+    const { queryClient } = renderWithQueryClient(<ProfilePage />);
+    await screen.findByText("Disable two-factor authentication");
+
+    const invalidateSpy = vi.spyOn(queryClient, "invalidateQueries");
+    await user.click(screen.getByRole("button", { name: "Disable two-factor authentication" }));
+
+    await waitFor(() => expect(mockApiDelete).toHaveBeenCalledWith(TOTP_PATH));
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: authKeys.me() });
+  });
+
+  it("loads dashboard home via auth + user sessions queries, not legacy api", async () => {
+    mockApiGet.mockImplementation((path: string) => {
+      if (path === AUTH_ME_PATH) return Promise.resolve(completeUser);
+      if (path === USER_SESSIONS_PATH) return Promise.resolve({ data: [{ id: "s1", isActive: true }] });
+      return Promise.reject(new Error(`unexpected path ${path}`));
+    });
+
+    renderWithQueryClient(<DashboardPage />);
+
+    expect(await screen.findByText(/Welcome back, Complete User/)).toBeInTheDocument();
+    expect(mockApiGet).toHaveBeenCalledWith(AUTH_ME_PATH);
+    expect(mockApiGet).toHaveBeenCalledWith(USER_SESSIONS_PATH);
+    expect(mockLegacyGet).not.toHaveBeenCalled();
+    expect(userSessionKeys.list()).toEqual(["sessions", "list"]);
   });
 });

@@ -56,8 +56,46 @@ Tracks the frontend server-state migration from ad-hoc `useEffect` + local loadi
 | `/admin/revenue` | [x] | Revenue summary + broadcast mutation moved to `revenue.ts`. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/revenue.test.tsx` |
 | `/admin/regions` | [x] | Region health query + org region pin mutation moved to `regions.ts`. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/regions.test.tsx` |
 | `/dashboard/search` | [x] | Debounced full-text search moved to `search.ts` (`enabled` when query ≥ 2 chars). | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/search.test.tsx` |
+| `/dashboard` (home) | [x] | User profile + active sessions via `auth.ts` + `sessions.ts` (`useAuthMeQuery`, `useUserSessionsListQuery`). | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/auth.test.tsx` |
+| `/dashboard/profile` | [x] | Profile load/save, avatar upload, TOTP disable via extended `auth.ts`. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/auth.test.tsx` |
+| `/dashboard/organizations` | [x] | Org list + create moved to `organizations.ts`. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/organizations.test.tsx` |
+| `/dashboard/security` | [x] | TOTP, passkeys, OAuth connect/disconnect via extended `auth.ts`. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/auth.test.tsx` |
+| `/dashboard/api-keys` | [x] | API key list/create/revoke moved to `apiKeys.ts`. Optimistic revoke with rollback. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/apiKeys.test.tsx` |
 
-## Migration backlog
+## Phase 4 — relative `lib/api` imports (`packages/ui/src/app`)
+
+Tracks migration of app routes still importing legacy `api` via relative paths (`../../lib/api`), after the `@/lib/api` alias backlog was cleared.
+
+### Migrated this batch (2026-07-03)
+
+| Page | Server-state module(s) |
+| --- | --- |
+| `/dashboard` (home) | `auth.ts`, `sessions.ts` (user sessions) |
+| `/dashboard/profile` | `auth.ts` |
+| `/dashboard/organizations` | `organizations.ts` |
+| `/dashboard/security` | `auth.ts` |
+| `/dashboard/api-keys` | `apiKeys.ts` |
+
+New modules: `organizations.ts`, `apiKeys.ts`. Extended: `auth.ts` (avatar, TOTP, passkey, OAuth authorize), `sessions.ts` (user `/sessions` list/revoke).
+
+### Remaining relative `lib/api` imports (11 files)
+
+| Area | File | Notes |
+| --- | --- | --- |
+| Auth | `(auth)/login/page.tsx` | mutations |
+| Auth | `(auth)/register/page.tsx` | mutations |
+| Auth | `(auth)/forgot-password/page.tsx` | mutations |
+| Auth | `(auth)/reset-password/page.tsx` | mutations |
+| Auth | `(auth)/verify-email/page.tsx` | mutations |
+| Auth | `(auth)/magic-link/page.tsx` | mutations |
+| Auth | `(auth)/magic-link/verify/page.tsx` | mutations |
+| Dashboard | `dashboard/sessions/page.tsx` | hooks exist in `sessions.ts` — page not wired yet |
+| Dashboard | `dashboard/organizations/[orgId]/page.tsx` | extend `organizations.ts` |
+| Dashboard | `dashboard/organizations/[orgId]/settings/page.tsx` | extend `organizations.ts` |
+| Other | `invite/[token]/page.tsx` | new or extend `organizations.ts` |
+
+**Next batch targets:** `dashboard/sessions`, org detail + settings, auth form pages (login/register/forgot/reset/verify/magic-link), `invite/[token]`.
+
 
 Prioritize pages with real server data, manual `loading/error` state, and repeated `api.get` calls.
 

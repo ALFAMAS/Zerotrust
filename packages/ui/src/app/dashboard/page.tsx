@@ -1,29 +1,29 @@
 "use client";
 import { KeyRound, Monitor, ShieldCheck, User, Wallet } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import { ProgressBars } from "@/components/ProgressBars";
 import SetupChecklist from "@/components/SetupChecklist";
 import { SkeletonCard, SkeletonText } from "@/components/Skeleton";
-import { api } from "../../lib/api";
+import { ErrorState } from "@/components/ui/States";
+import { useAuthMeQuery } from "@/lib/server-state/auth";
+import { useUserSessionsListQuery } from "@/lib/server-state/sessions";
 
 export default function DashboardPage() {
-  const [user, setUser] = useState<any>(null);
-  const [sessions, setSessions] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const userQuery = useAuthMeQuery();
+  const sessionsQuery = useUserSessionsListQuery();
 
-  useEffect(() => {
-    void Promise.all([
-      api
-        .get<any>("/auth/me")
-        .then(setUser)
-        .catch(() => {}),
-      api
-        .get<any>("/sessions")
-        .then((d) => setSessions(d.data || d.sessions || d || []))
-        .catch(() => {}),
-    ]).finally(() => setLoading(false));
-  }, []);
+  const user = userQuery.data;
+  const sessions = sessionsQuery.data ?? [];
+  const loading = userQuery.isLoading || sessionsQuery.isLoading;
+
+  if (userQuery.error && !user) {
+    return (
+      <ErrorState
+        message={userQuery.error.message || "Failed to load dashboard"}
+        retry={() => void userQuery.refetch()}
+      />
+    );
+  }
 
   if (loading) {
     return (
@@ -45,7 +45,7 @@ export default function DashboardPage() {
   const stats = [
     {
       label: "Active sessions",
-      value: sessions.filter((s: any) => s.isActive).length,
+      value: sessions.filter((s) => s.isActive).length,
       icon: Monitor,
     },
     { label: "MFA", value: user?.mfa?.totp?.enabled ? "Enabled" : "Off", icon: ShieldCheck },
@@ -85,7 +85,6 @@ export default function DashboardPage() {
 
       <SetupChecklist user={user} />
 
-      {/* Progress bars */}
       <ProgressBars user={user} />
 
       <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-3">

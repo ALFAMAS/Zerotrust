@@ -1,32 +1,16 @@
 "use client";
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
+import { ServerStateStatus } from "@/components/ServerStateStatus";
 import { SkeletonCard } from "@/components/Skeleton";
 import { Button } from "@/components/ui/button";
+import { ErrorState } from "@/components/ui/States";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/context/ToastContext";
-import { api } from "../../../lib/api";
-
-interface OrgMember {
-  member: {
-    id: string;
-    orgId: string;
-    userId: string;
-    role: string;
-    joinedAt: string | null;
-    createdAt: string;
-  };
-  org: {
-    id: string;
-    name: string;
-    slug: string;
-    logoUrl: string | null;
-    billingEmail: string | null;
-    ownerId: string | null;
-    createdAt: string;
-    updatedAt: string;
-  };
-}
+import {
+  useCreateOrganizationMutation,
+  useOrganizationsListQuery,
+} from "@/lib/server-state/organizations";
 
 const ROLE_COLORS: Record<string, string> = {
   owner: "bg-indigo-900 text-indigo-200 border border-indigo-700",
@@ -37,26 +21,14 @@ const ROLE_COLORS: Record<string, string> = {
 
 export default function OrganizationsPage() {
   const { toast } = useToast();
-  const [orgs, setOrgs] = useState<OrgMember[]>([]);
-  const [loading, setLoading] = useState(true);
+  const orgsQuery = useOrganizationsListQuery();
+  const createMutation = useCreateOrganizationMutation();
+
+  const orgs = orgsQuery.data?.orgs ?? [];
   const [showCreateForm, setShowCreateForm] = useState(false);
-  const [creating, setCreating] = useState(false);
   const [orgName, setOrgName] = useState("");
   const [orgSlug, setOrgSlug] = useState("");
   const [slugManual, setSlugManual] = useState(false);
-
-  const fetchOrgs = useCallback(() => {
-    setLoading(true);
-    api
-      .get<{ orgs: OrgMember[] }>("/orgs")
-      .then((d) => setOrgs(d.orgs || []))
-      .catch(() => setOrgs([]))
-      .finally(() => setLoading(false));
-  }, []);
-
-  useEffect(() => {
-    fetchOrgs();
-  }, [fetchOrgs]);
 
   function autoSlug(name: string): string {
     return name
@@ -78,9 +50,8 @@ export default function OrganizationsPage() {
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
     if (!orgName.trim()) return;
-    setCreating(true);
     try {
-      await api.post("/orgs", {
+      await createMutation.mutateAsync({
         name: orgName.trim(),
         slug: orgSlug || undefined,
       });
@@ -89,12 +60,21 @@ export default function OrganizationsPage() {
       setSlugManual(false);
       setShowCreateForm(false);
       toast({ message: "Organization created!", type: "success" });
-      fetchOrgs();
-    } catch (err: any) {
-      toast({ message: err.message || "Failed to create organization", type: "error" });
-    } finally {
-      setCreating(false);
+    } catch (err: unknown) {
+      toast({
+        message: err instanceof Error ? err.message : "Failed to create organization",
+        type: "error",
+      });
     }
+  }
+
+  if (orgsQuery.error && !orgsQuery.data) {
+    return (
+      <ErrorState
+        message={orgsQuery.error.message || "Failed to load organizations"}
+        retry={() => void orgsQuery.refetch()}
+      />
+    );
   }
 
   return (
@@ -111,6 +91,14 @@ export default function OrganizationsPage() {
           {showCreateForm ? "Cancel" : "Create organization"}
         </Button>
       </div>
+
+      <ServerStateStatus
+        isFetching={orgsQuery.isFetching}
+        isStale={orgsQuery.isStale}
+        hasData={orgs.length > 0}
+        label="organizations"
+        onRefresh={() => void orgsQuery.refetch()}
+      />
 
       {showCreateForm && (
         <form
@@ -154,15 +142,15 @@ export default function OrganizationsPage() {
           </div>
           <Button
             type="submit"
-            disabled={creating || !orgName.trim()}
+            disabled={createMutation.isPending || !orgName.trim()}
             className="bg-primary hover:bg-primary/90 disabled:opacity-50 text-primary-foreground text-sm px-4 py-2 rounded-lg transition-colors"
           >
-            {creating ? "Creating…" : "Create"}
+            {createMutation.isPending ? "Creating…" : "Create"}
           </Button>
         </form>
       )}
 
-      {loading ? (
+      {orgsQuery.isLoading ? (
         <div className="space-y-3">
           <SkeletonCard />
           <SkeletonCard />

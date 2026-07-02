@@ -1,50 +1,62 @@
 "use client";
 import { KeyRound } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { ServerStateStatus } from "@/components/ServerStateStatus";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ErrorState } from "@/components/ui/States";
 import { Input } from "@/components/ui/input";
-import { api } from "../../../lib/api";
-import { isWebAuthnAvailable, startRegistration } from "../../../lib/webauthn";
+import {
+  useAuthMeQuery,
+  useDisableTotpMutation,
+  useDisconnectOAuthProviderMutation,
+  useOAuthAuthorizeMutation,
+  usePasskeyRegisterOptionsMutation,
+  usePasskeyRegisterVerifyMutation,
+  useSetupTotpMutation,
+  useVerifyTotpMutation,
+} from "@/lib/server-state/auth";
+import { isWebAuthnAvailable, startRegistration } from "@/lib/webauthn";
 
 export default function SecurityPage() {
-  const [user, setUser] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [totpSetup, setTotpSetup] = useState<any>(null);
+  const userQuery = useAuthMeQuery();
+  const setupTotpMutation = useSetupTotpMutation();
+  const verifyTotpMutation = useVerifyTotpMutation();
+  const disableTotpMutation = useDisableTotpMutation();
+  const passkeyOptionsMutation = usePasskeyRegisterOptionsMutation();
+  const passkeyVerifyMutation = usePasskeyRegisterVerifyMutation();
+  const disconnectOAuthMutation = useDisconnectOAuthProviderMutation();
+  const oauthAuthorizeMutation = useOAuthAuthorizeMutation();
+
+  const user = userQuery.data;
+  const [totpSetup, setTotpSetup] = useState<{ qrCodeUrl: string } | null>(null);
   const [totpCode, setTotpCode] = useState("");
   const [backupCodes, setBackupCodes] = useState<string[] | null>(null);
   const [msg, setMsg] = useState("");
-
-  useEffect(() => {
-    api
-      .get<any>("/auth/me")
-      .then(setUser)
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, []);
+  const [addingPasskey, setAddingPasskey] = useState(false);
 
   const startTOTP = async () => {
-    const data = await api.post<any>("/auth/mfa/totp/setup").catch(() => null);
-    if (data) setTotpSetup(data);
+    try {
+      const data = await setupTotpMutation.mutateAsync();
+      setTotpSetup(data);
+    } catch {
+      setMsg("Failed to start TOTP setup");
+    }
   };
 
   const verifyTOTP = async () => {
     try {
-      const res = await api.post<any>("/auth/mfa/totp/verify", { code: totpCode });
+      const res = await verifyTotpMutation.mutateAsync({ code: totpCode });
       setMsg("TOTP enabled successfully! Two-factor authentication is now required at login.");
       setTotpSetup(null);
       setTotpCode("");
       if (Array.isArray(res?.backupCodes)) setBackupCodes(res.backupCodes);
-      const u = await api.get<any>("/auth/me");
-      setUser(u);
-    } catch (err: any) {
-      setMsg(err.message || "TOTP verification failed");
+    } catch (err: unknown) {
+      setMsg(err instanceof Error ? err.message : "TOTP verification failed");
     }
   };
-
-  const [addingPasskey, setAddingPasskey] = useState(false);
 
   const addPasskey = async () => {
     if (!isWebAuthnAvailable()) {
@@ -57,17 +69,16 @@ export default function SecurityPage() {
       const name =
         (typeof window !== "undefined" && window.prompt("Name this passkey", "My device")) ||
         "Passkey";
-      const options = await api.post<any>("/auth/passkey/register/options");
+      const options = await passkeyOptionsMutation.mutateAsync();
       const attestation = await startRegistration(options);
-      await api.post("/auth/passkey/register/verify", { ...attestation, name });
+      await passkeyVerifyMutation.mutateAsync({ ...attestation, name });
       setMsg("Passkey registered successfully.");
-      const u = await api.get<any>("/auth/me");
-      setUser(u);
-    } catch (err: any) {
-      if (err?.name === "NotAllowedError") {
+    } catch (err: unknown) {
+      const error = err as { name?: string; message?: string };
+      if (error?.name === "NotAllowedError") {
         setMsg("Passkey registration was cancelled.");
       } else {
-        setMsg(err?.message || "Failed to register passkey.");
+        setMsg(error?.message || "Failed to register passkey.");
       }
     } finally {
       setAddingPasskey(false);
@@ -77,25 +88,23 @@ export default function SecurityPage() {
   const disconnectOAuth = async (provider: string) => {
     if (!confirm(`Disconnect your ${provider} account?`)) return;
     try {
-      await api.delete(`/auth/oauth/${provider}`);
+      await disconnectOAuthMutation.mutateAsync(provider);
       setMsg(`Disconnected ${provider}. Other active sessions may have been signed out.`);
-      const u = await api.get<any>("/auth/me");
-      setUser(u);
-    } catch (err: any) {
-      setMsg(err.message || `Failed to disconnect ${provider}`);
+    } catch (err: unknown) {
+      setMsg(err instanceof Error ? err.message : `Failed to disconnect ${provider}`);
     }
   };
 
   const connectOAuth = async (provider: string) => {
     try {
-      const data = await api.get<any>(`/auth/oauth/${provider}/authorize`);
+      const data = await oauthAuthorizeMutation.mutateAsync(provider);
       if (data?.authorizeUrl) {
         window.location.href = data.authorizeUrl;
       } else {
         setMsg(`Failed to start ${provider} connection flow.`);
       }
-    } catch (err: any) {
-      setMsg(err.message || `Failed to connect ${provider}`);
+    } catch (err: unknown) {
+      setMsg(err instanceof Error ? err.message : `Failed to connect ${provider}`);
     }
   };
 
@@ -107,17 +116,24 @@ export default function SecurityPage() {
     )
       return;
     try {
-      await api.delete("/auth/mfa/totp");
+      await disableTotpMutation.mutateAsync();
       setMsg("TOTP disabled. Two-factor authentication is no longer required at login.");
       setBackupCodes(null);
-      const u = await api.get<any>("/auth/me");
-      setUser(u);
-    } catch (err: any) {
-      setMsg(err.message || "Failed to disable TOTP");
+    } catch (err: unknown) {
+      setMsg(err instanceof Error ? err.message : "Failed to disable TOTP");
     }
   };
 
-  if (loading) return <p className="text-muted-foreground">Loading…</p>;
+  if (userQuery.error && !user) {
+    return (
+      <ErrorState
+        message={userQuery.error.message || "Failed to load security settings"}
+        retry={() => void userQuery.refetch()}
+      />
+    );
+  }
+
+  if (userQuery.isLoading) return <p className="text-muted-foreground">Loading…</p>;
 
   return (
     <div className="max-w-2xl space-y-6">
@@ -125,13 +141,20 @@ export default function SecurityPage() {
         Security Settings
       </h1>
 
+      <ServerStateStatus
+        isFetching={userQuery.isFetching}
+        isStale={userQuery.isStale}
+        hasData={Boolean(user)}
+        label="security settings"
+        onRefresh={() => void userQuery.refetch()}
+      />
+
       {msg && (
         <Alert>
           <AlertDescription>{msg}</AlertDescription>
         </Alert>
       )}
 
-      {/* TOTP */}
       <Card>
         <CardHeader>
           <div className="flex items-start justify-between">
@@ -148,7 +171,9 @@ export default function SecurityPage() {
         </CardHeader>
         <CardContent>
           {!user?.mfa?.totp?.enabled && !totpSetup && (
-            <Button onClick={startTOTP}>Set Up TOTP</Button>
+            <Button onClick={startTOTP} disabled={setupTotpMutation.isPending}>
+              Set Up TOTP
+            </Button>
           )}
 
           {user?.mfa?.totp?.enabled && (
@@ -159,7 +184,11 @@ export default function SecurityPage() {
                   <> {user.mfa.totp.backupCodesRemaining} backup code(s) remaining.</>
                 )}
               </p>
-              <Button variant="destructive" onClick={disableTOTP}>
+              <Button
+                variant="destructive"
+                onClick={disableTOTP}
+                disabled={disableTotpMutation.isPending}
+              >
                 Disable
               </Button>
             </div>
@@ -212,7 +241,11 @@ export default function SecurityPage() {
                   placeholder="Enter 6-digit code"
                   maxLength={6}
                 />
-                <Button onClick={verifyTOTP} className="bg-emerald-600 hover:bg-emerald-500">
+                <Button
+                  onClick={verifyTOTP}
+                  disabled={verifyTotpMutation.isPending}
+                  className="bg-emerald-600 hover:bg-emerald-500"
+                >
                   Verify
                 </Button>
               </div>
@@ -221,7 +254,6 @@ export default function SecurityPage() {
         </CardContent>
       </Card>
 
-      {/* Passkeys */}
       <Card>
         <CardHeader>
           <CardTitle>Passkeys &amp; Security Keys</CardTitle>
@@ -230,9 +262,9 @@ export default function SecurityPage() {
           </p>
         </CardHeader>
         <CardContent>
-          {user?.passkeys?.length > 0 ? (
+          {user?.passkeys && user.passkeys.length > 0 ? (
             <div className="mb-4 space-y-2">
-              {user.passkeys.map((pk: any) => (
+              {user.passkeys.map((pk) => (
                 <div
                   key={pk.credentialId}
                   className="flex items-center justify-between rounded-lg bg-muted p-3"
@@ -242,7 +274,7 @@ export default function SecurityPage() {
                       {pk.name || "Security Key"}
                     </div>
                     <div className="text-xs text-muted-foreground">
-                      Added {new Date(pk.createdAt).toLocaleString()}
+                      Added {pk.createdAt ? new Date(pk.createdAt).toLocaleString() : "—"}
                     </div>
                   </div>
                   <KeyRound className="h-4 w-4 text-muted-foreground" />
@@ -260,7 +292,6 @@ export default function SecurityPage() {
         </CardContent>
       </Card>
 
-      {/* OAuth */}
       <Card>
         <CardHeader>
           <CardTitle>Connected Accounts</CardTitle>
@@ -271,7 +302,7 @@ export default function SecurityPage() {
         <CardContent>
           <div className="space-y-2">
             {["google", "github", "facebook", "apple"].map((provider) => {
-              const linked = user?.oauthProviders?.some((p: any) => p.provider === provider);
+              const linked = user?.oauthProviders?.some((p) => p.provider === provider);
               return (
                 <div
                   key={provider}
@@ -283,12 +314,21 @@ export default function SecurityPage() {
                       {linked ? "Connected" : "Not connected"}
                     </Badge>
                     {linked && (
-                      <Button variant="outline" size="sm" onClick={() => disconnectOAuth(provider)}>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => disconnectOAuth(provider)}
+                        disabled={disconnectOAuthMutation.isPending}
+                      >
                         Disconnect
                       </Button>
                     )}
                     {!linked && (
-                      <Button size="sm" onClick={() => connectOAuth(provider)}>
+                      <Button
+                        size="sm"
+                        onClick={() => connectOAuth(provider)}
+                        disabled={oauthAuthorizeMutation.isPending}
+                      >
                         Connect
                       </Button>
                     )}

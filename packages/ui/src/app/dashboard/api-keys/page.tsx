@@ -1,74 +1,61 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { Badge } from "../../../components/ui/badge";
-import { Button } from "../../../components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "../../../components/ui/card";
-import { Input } from "../../../components/ui/input";
+import { useState } from "react";
+import { ServerStateStatus } from "@/components/ServerStateStatus";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ErrorState } from "@/components/ui/States";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../../../components/ui/select";
-import { api } from "../../../lib/api";
-
-interface ApiKey {
-  id: string;
-  name: string;
-  environment?: "live" | "test";
-  keyPrefix: string;
-  scopes: string[];
-  expiresAt: string | null;
-  lastUsedAt: string | null;
-  createdAt: string;
-}
+} from "@/components/ui/select";
+import {
+  useApiKeysListQuery,
+  useCreateApiKeyMutation,
+  useRevokeApiKeyMutation,
+} from "@/lib/server-state/apiKeys";
 
 export default function ApiKeysPage() {
-  const [keys, setKeys] = useState<ApiKey[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [creating, setCreating] = useState(false);
+  const keysQuery = useApiKeysListQuery();
+  const createMutation = useCreateApiKeyMutation();
+  const revokeMutation = useRevokeApiKeyMutation();
+
+  const keys = keysQuery.data ?? [];
   const [newKey, setNewKey] = useState<string | null>(null);
   const [form, setForm] = useState({ name: "", expiresInDays: "", environment: "live" });
   const [error, setError] = useState("");
   const [copied, setCopied] = useState(false);
 
-  const load = useCallback(() => {
-    api
-      .get<ApiKey[]>("/api-keys")
-      .then(setKeys)
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, []);
-
-  useEffect(() => {
-    load();
-  }, [load]);
-
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
     if (!form.name.trim()) return setError("Name is required");
     setError("");
-    setCreating(true);
     try {
-      const body: any = { name: form.name.trim(), environment: form.environment };
+      const body: { name: string; environment: string; expiresInDays?: number } = {
+        name: form.name.trim(),
+        environment: form.environment,
+      };
       if (form.expiresInDays) body.expiresInDays = parseInt(form.expiresInDays, 10);
-      const res = await api.post<any>("/api-keys", body);
+      const res = await createMutation.mutateAsync(body);
       setNewKey(res.key);
       setForm({ name: "", expiresInDays: "", environment: form.environment });
-      load();
     } catch {
       setError("Failed to create API key");
-    } finally {
-      setCreating(false);
     }
   }
 
   async function handleRevoke(id: string) {
     if (!confirm("Revoke this API key? This cannot be undone.")) return;
-    await api.delete(`/api-keys/${id}`).catch(() => {});
-    setKeys((prev) => prev.filter((k) => k.id !== id));
+    try {
+      await revokeMutation.mutateAsync(id);
+    } catch {
+      setError("Failed to revoke API key");
+    }
   }
 
   function copy(text: string) {
@@ -76,6 +63,15 @@ export default function ApiKeysPage() {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     });
+  }
+
+  if (keysQuery.error && !keysQuery.data) {
+    return (
+      <ErrorState
+        message={keysQuery.error.message || "Failed to load API keys"}
+        retry={() => void keysQuery.refetch()}
+      />
+    );
   }
 
   return (
@@ -86,6 +82,14 @@ export default function ApiKeysPage() {
       <p className="mb-8 text-sm text-muted-foreground">
         Use API keys to authenticate programmatic access to your account.
       </p>
+
+      <ServerStateStatus
+        isFetching={keysQuery.isFetching}
+        isStale={keysQuery.isStale}
+        hasData={keys.length > 0}
+        label="API keys"
+        onRefresh={() => void keysQuery.refetch()}
+      />
 
       {newKey && (
         <div className="mb-6 rounded-xl border border-emerald-700 bg-emerald-900/30 p-4">
@@ -158,8 +162,8 @@ export default function ApiKeysPage() {
               sandbox/non-production use.
             </p>
             {error && <p className="text-xs text-destructive">{error}</p>}
-            <Button type="submit" disabled={creating} className="self-start">
-              {creating ? "Creating…" : "Create key"}
+            <Button type="submit" disabled={createMutation.isPending} className="self-start">
+              {createMutation.isPending ? "Creating…" : "Create key"}
             </Button>
           </form>
         </CardContent>
@@ -170,7 +174,7 @@ export default function ApiKeysPage() {
           <CardTitle className="text-base">Active keys</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
-          {loading ? (
+          {keysQuery.isLoading ? (
             <div className="p-6 text-sm text-muted-foreground">Loading…</div>
           ) : keys.length === 0 ? (
             <div className="p-6 text-sm text-muted-foreground">
@@ -207,6 +211,7 @@ export default function ApiKeysPage() {
                     size="sm"
                     className="text-destructive hover:text-destructive"
                     onClick={() => handleRevoke(key.id)}
+                    disabled={revokeMutation.isPending}
                   >
                     Revoke
                   </Button>

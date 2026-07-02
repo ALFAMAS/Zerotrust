@@ -1,64 +1,64 @@
 "use client";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { ServerStateStatus } from "@/components/ServerStateStatus";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ErrorState } from "@/components/ui/States";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { api } from "../../../lib/api";
-import { apiPostFormData } from "../../../lib/apiClient";
+import {
+  useAuthMeQuery,
+  useDisableTotpMutation,
+  usePatchAuthMeMutation,
+  useUploadAvatarMutation,
+} from "@/lib/server-state/auth";
 
 export default function ProfilePage() {
-  const [user, setUser] = useState<any>(null);
+  const userQuery = useAuthMeQuery();
+  const patchMutation = usePatchAuthMeMutation();
+  const uploadMutation = useUploadAvatarMutation();
+  const disableTotpMutation = useDisableTotpMutation();
+
+  const user = userQuery.data;
   const [form, setForm] = useState({
     displayName: "",
     avatarUrl: "",
     phone: "",
     username: "",
   });
-  const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState("");
   const [msgType, setMsgType] = useState<"success" | "error">("success");
-  const [uploading, setUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    api
-      .get<any>("/auth/me")
-      .then((u) => {
-        setUser(u);
-        setForm({
-          displayName: u.displayName || "",
-          avatarUrl: u.avatarUrl || "",
-          phone: u.phone || "",
-          username: u.username || "",
-        });
-      })
-      .catch(() => {});
-  }, []);
+    if (!user) return;
+    setForm({
+      displayName: user.displayName || "",
+      avatarUrl: user.avatarUrl || "",
+      phone: user.phone || "",
+      username: user.username || "",
+    });
+  }, [user]);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSaving(true);
     setMsg("");
     try {
-      const updated = await api.patch<any>("/auth/me", {
+      await patchMutation.mutateAsync({
         displayName: form.displayName || undefined,
         avatarUrl: form.avatarUrl || null,
         phone: form.phone || null,
         username: form.username || null,
       });
-      setUser({ ...user, ...updated });
       setMsg("Profile updated successfully.");
       setMsgType("success");
-    } catch (err: any) {
-      setMsg(err.message || "Update failed");
+    } catch (err: unknown) {
+      setMsg(err instanceof Error ? err.message : "Update failed");
       setMsgType("error");
-    } finally {
-      setSaving(false);
     }
   };
 
@@ -66,22 +66,18 @@ export default function ProfilePage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    setUploading(true);
     setMsg("");
     try {
       const fd = new FormData();
       fd.append("avatar", file);
-
-      const { avatarUrl } = await apiPostFormData<{ avatarUrl: string }>("/auth/me/avatar", fd);
+      const { avatarUrl } = await uploadMutation.mutateAsync(fd);
       setForm((f) => ({ ...f, avatarUrl }));
-      setUser((u: any) => ({ ...u, avatarUrl }));
       setMsg("Avatar updated.");
       setMsgType("success");
-    } catch (err: any) {
-      setMsg(err.message || "Upload failed");
+    } catch (err: unknown) {
+      setMsg(err instanceof Error ? err.message : "Upload failed");
       setMsgType("error");
     } finally {
-      setUploading(false);
       if (fileRef.current) fileRef.current.value = "";
     }
   };
@@ -95,16 +91,23 @@ export default function ProfilePage() {
       return;
     setMsg("");
     try {
-      await api.delete("/auth/mfa/totp");
-      const u = await api.get<any>("/auth/me");
-      setUser(u);
+      await disableTotpMutation.mutateAsync();
       setMsg("Two-factor authentication disabled.");
       setMsgType("success");
-    } catch (err: any) {
-      setMsg(err.message || "Failed to disable two-factor authentication");
+    } catch (err: unknown) {
+      setMsg(err instanceof Error ? err.message : "Failed to disable two-factor authentication");
       setMsgType("error");
     }
   };
+
+  if (userQuery.error && !user) {
+    return (
+      <ErrorState
+        message={userQuery.error.message || "Failed to load profile"}
+        retry={() => void userQuery.refetch()}
+      />
+    );
+  }
 
   const initials = user?.displayName
     ? user.displayName
@@ -121,7 +124,14 @@ export default function ProfilePage() {
         Profile Settings
       </h1>
 
-      {/* Avatar */}
+      <ServerStateStatus
+        isFetching={userQuery.isFetching}
+        isStale={userQuery.isStale}
+        hasData={Boolean(user)}
+        label="profile"
+        onRefresh={() => void userQuery.refetch()}
+      />
+
       <Card className="mb-6">
         <CardHeader>
           <CardTitle>Avatar</CardTitle>
@@ -148,17 +158,16 @@ export default function ProfilePage() {
               <Button
                 type="button"
                 variant="outline"
-                disabled={uploading}
+                disabled={uploadMutation.isPending}
                 onClick={() => fileRef.current?.click()}
               >
-                {uploading ? "Uploading…" : "Choose file"}
+                {uploadMutation.isPending ? "Uploading…" : "Choose file"}
               </Button>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Personal info */}
       <Card className="mb-6">
         <CardHeader>
           <CardTitle>Personal Info</CardTitle>
@@ -200,14 +209,13 @@ export default function ProfilePage() {
                 placeholder="+1 555 000 0000"
               />
             </div>
-            <Button type="submit" disabled={saving}>
-              {saving ? "Saving…" : "Save Changes"}
+            <Button type="submit" disabled={patchMutation.isPending}>
+              {patchMutation.isPending ? "Saving…" : "Save Changes"}
             </Button>
           </form>
         </CardContent>
       </Card>
 
-      {/* Two-factor authentication */}
       <Card className="mb-6">
         <CardHeader>
           <div className="flex items-start justify-between">
@@ -226,7 +234,11 @@ export default function ProfilePage() {
                   <> {user.mfa.totp.backupCodesRemaining} backup code(s) remaining.</>
                 )}
               </p>
-              <Button variant="destructive" onClick={disableTOTP}>
+              <Button
+                variant="destructive"
+                onClick={disableTOTP}
+                disabled={disableTotpMutation.isPending}
+              >
                 Disable two-factor authentication
               </Button>
             </div>

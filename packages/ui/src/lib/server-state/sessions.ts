@@ -3,7 +3,7 @@
 import { queryOptions, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiDelete, apiGet } from "@/lib/apiClient";
 import { queryKeys } from "./queryKeys";
-import type { AdminSession, AdminSessionsListParams, PaginatedResponse } from "./types";
+import type { AdminSession, AdminSessionsListParams, PaginatedResponse, UserSession } from "./types";
 
 export const sessionKeys = queryKeys.admin.sessions;
 
@@ -85,6 +85,80 @@ export function useRevokeAdminSessionMutation(params: AdminSessionsListParams = 
     },
     onSettled: () => {
       void queryClient.invalidateQueries({ queryKey: sessionKeys.list() });
+    },
+  });
+}
+
+export const userSessionKeys = queryKeys.sessions;
+
+export const USER_SESSIONS_PATH = "/sessions";
+
+export function buildUserSessionPath(id: string): string {
+  return `${USER_SESSIONS_PATH}/${id}`;
+}
+
+function normalizeUserSessionsList(data: unknown): UserSession[] {
+  if (Array.isArray(data)) return data;
+  const record = data as { data?: UserSession[]; sessions?: UserSession[] };
+  return record.data ?? record.sessions ?? [];
+}
+
+export function fetchUserSessionsList(): Promise<UserSession[]> {
+  return apiGet<unknown>(USER_SESSIONS_PATH).then(normalizeUserSessionsList);
+}
+
+export function userSessionsListQueryOptions() {
+  return queryOptions({
+    queryKey: userSessionKeys.list(),
+    queryFn: fetchUserSessionsList,
+  });
+}
+
+export function useUserSessionsListQuery() {
+  return useQuery(userSessionsListQueryOptions());
+}
+
+interface RevokeUserSessionMutationContext {
+  previous?: UserSession[];
+  listKey: ReturnType<typeof userSessionKeys.list>;
+}
+
+export function useRevokeUserSessionMutation() {
+  const queryClient = useQueryClient();
+  const listKey = userSessionKeys.list();
+
+  return useMutation<unknown, Error, string, RevokeUserSessionMutationContext>({
+    mutationFn: (id) => apiDelete(buildUserSessionPath(id)),
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: listKey });
+      const previous = queryClient.getQueryData<UserSession[]>(listKey);
+      queryClient.setQueryData<UserSession[]>(listKey, (current) =>
+        current
+          ? current.map((session) =>
+              session.id === id ? { ...session, isActive: false } : session
+            )
+          : current
+      );
+      return { previous, listKey };
+    },
+    onError: (_error, _id, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(context.listKey, context.previous);
+      }
+    },
+    onSettled: () => {
+      void queryClient.invalidateQueries({ queryKey: userSessionKeys.list() });
+    },
+  });
+}
+
+export function useRevokeAllUserSessionsMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation<unknown, Error, void>({
+    mutationFn: () => apiDelete(USER_SESSIONS_PATH),
+    onSettled: () => {
+      void queryClient.invalidateQueries({ queryKey: userSessionKeys.list() });
     },
   });
 }
