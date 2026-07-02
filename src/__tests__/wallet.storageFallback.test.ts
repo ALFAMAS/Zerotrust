@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("../db", () => ({ getDb: vi.fn() }));
+vi.mock("../db", () => ({ getDb: vi.fn(), getReadDb: vi.fn() }));
 vi.mock("../logger", () => ({
   getLogger: () => ({
     info: vi.fn(),
@@ -10,7 +10,7 @@ vi.mock("../logger", () => ({
   }),
 }));
 
-import { getDb } from "../db";
+import { getDb, getReadDb } from "../db";
 import {
   getWallet,
   getWalletTransactions,
@@ -54,7 +54,7 @@ describe("wallet storage fallbacks", () => {
   });
 
   it("returns empty wallet transactions when transaction storage is unavailable", async () => {
-    vi.mocked(getDb).mockReturnValue(
+    vi.mocked(getReadDb).mockReturnValue(
       selectChain("offset", missingStorage("wallet_transactions")) as any
     );
 

@@ -52,7 +52,7 @@ export default function AccessReviewDetailPage() {
   const loading = detailQuery.isLoading;
   const error = detailQuery.error;
   const busyId = decideMutation.isPending
-    ? decideMutation.variables?.itemId ?? null
+    ? (decideMutation.variables?.itemId ?? null)
     : completeMutation.isPending
       ? "complete"
       : null;

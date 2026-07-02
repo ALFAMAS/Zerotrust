@@ -250,7 +250,9 @@ export default function SessionsPage() {
                               variant="ghost"
                               size="sm"
                               onClick={() => handleRevoke(s)}
-                              disabled={revokeMutation.isPending && revokeMutation.variables === s.id}
+                              disabled={
+                                revokeMutation.isPending && revokeMutation.variables === s.id
+                              }
                               className="text-destructive hover:text-destructive"
                             >
                               Revoke

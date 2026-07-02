@@ -4,20 +4,8 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import OrganizationsPage from "@/app/dashboard/organizations/page";
 import { ORGS_PATH, organizationKeys } from "./organizations";
+import { mockApiGet, mockApiPost } from "@/test/apiClientMock";
 
-const mockApiGet = vi.fn();
-const mockApiPost = vi.fn();
-const mockLegacyGet = vi.fn();
-vi.mock("@/lib/apiClient", () => ({
-  apiGet: (...args: unknown[]) => mockApiGet(...args),
-  apiPost: (...args: unknown[]) => mockApiPost(...args),
-}));
-vi.mock("@/lib/api", () => ({
-  api: {
-    get: (...args: unknown[]) => mockLegacyGet(...args),
-    post: vi.fn(),
-  },
-}));
 vi.mock("@/context/ToastContext", () => ({
   useToast: () => ({ toast: vi.fn() }),
 }));
@@ -59,7 +47,6 @@ describe("organizations TanStack Query server state", () => {
   beforeEach(() => {
     mockApiGet.mockReset();
     mockApiPost.mockReset();
-    mockLegacyGet.mockReset();
   });
 
   it("models organizations domain query keys and paths", () => {
@@ -73,7 +60,6 @@ describe("organizations TanStack Query server state", () => {
 
     expect(await screen.findByText("Acme Corp")).toBeInTheDocument();
     expect(mockApiGet).toHaveBeenCalledWith(ORGS_PATH);
-    expect(mockLegacyGet).not.toHaveBeenCalled();
   });
 
   it("renders error + retry when organizations list fails", async () => {

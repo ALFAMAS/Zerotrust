@@ -98,7 +98,8 @@ export default function LoginPage() {
       finishLogin(data);
     } catch (err: unknown) {
       toast({
-        message: err instanceof Error ? err.message : "Login failed. Please check your credentials.",
+        message:
+          err instanceof Error ? err.message : "Login failed. Please check your credentials.",
         type: "error",
       });
     }
@@ -158,8 +159,7 @@ export default function LoginPage() {
       navigateToSafeExternal(authorizeUrl, "/login");
     } catch (err: unknown) {
       toast({
-        message:
-          err instanceof Error ? err.message : `Failed to initiate ${provider} login`,
+        message: err instanceof Error ? err.message : `Failed to initiate ${provider} login`,
         type: "error",
       });
     }

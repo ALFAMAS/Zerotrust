@@ -4,7 +4,7 @@ _Generated from `src/api/openapi.json` (zerotrust API v1.0.0) — run `bun run d
 
 Live, interactive docs: **Swagger UI at `/docs`** (dev). Full request/response types: the generated **`@zerotrust/client`** SDK (`packages/client`). 🔒 = requires authentication.
 
-**115 operations** across 20 groups.
+**116 operations** across 21 groups.
 
 > **Coverage note:** this lists the operations currently described in `openapi.json`. Coverage includes auth/admin/MFA/sessions/OAuth, organizations, billing, wallet, search, compliance, support, feedback, notifications, GDPR, regions, and API keys. Some lower-traffic admin/tools, webhook, tenant, and email-event routes may still require schema-level expansion; see `src/api/server.ts` for the full mounted surface.
 
@@ -29,6 +29,7 @@ Live, interactive docs: **Swagger UI at `/docs`** (dev). Full request/response t
 - [Sessions](#sessions) (3)
 - [Shared Signals](#shared-signals) (1)
 - [Support](#support) (5)
+- [Unsubscribe](#unsubscribe) (1)
 - [Wallet](#wallet) (4)
 
 ## Admin
@@ -275,14 +276,22 @@ Support ticket and message workflows.
 | PATCH | `/support/{id}` | Update support ticket | 🔒 |
 | POST | `/support/{id}/messages` | Add support ticket message | 🔒 |
 
+## Unsubscribe
+
+Email unsubscribe landing (API/SDK-only). GET /auth/unsubscribe serves server-rendered HTML for one-click email opt-out links — no Next.js UI page.
+
+| Method | Path | Summary | Auth |
+| --- | --- | --- | --- |
+| GET | `/auth/unsubscribe` | Email unsubscribe landing (API-only HTML) |  |
+
 ## Wallet
 
-Wallet balance, transactions, top-up, and spend operations.
+Wallet balance, transactions, and top-up. POST /wallet/spend is API/SDK-only (programmatic debit for integrations — no dashboard UI).
 
 | Method | Path | Summary | Auth |
 | --- | --- | --- | --- |
 | GET | `/wallet` | Get wallet balance | 🔒 |
-| POST | `/wallet/spend` | Spend wallet balance | 🔒 |
+| POST | `/wallet/spend` | Spend wallet balance (API/SDK-only) | 🔒 |
 | POST | `/wallet/top-up` | Top up wallet | 🔒 |
 | GET | `/wallet/transactions` | List wallet transactions | 🔒 |
 

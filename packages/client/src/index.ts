@@ -301,6 +301,17 @@ export class zerotrustClient {
   }
 
   /**
+   * Email unsubscribe landing (API-only HTML)
+   *
+   * API/SDK-only. Verifies a signed token from email links and returns an HTML confirmation page (not JSON). No dashboard UI — email templates link directly to this API route.
+   *
+   * @route GET /auth/unsubscribe
+   */
+  getAuthUnsubscribe(query: { token: string }): Promise<unknown> {
+    return this.request("GET", `/auth/unsubscribe`, { query });
+  }
+
+  /**
    * Get WebAuthn registration options
    *
    * @route POST /auth/passkey/register/options
@@ -896,7 +907,9 @@ export class zerotrustClient {
   }
 
   /**
-   * Spend wallet balance
+   * Spend wallet balance (API/SDK-only)
+   *
+   * Programmatic wallet debit for integrations and background jobs. Not exposed in the dashboard UI — use the API or generated SDK from server-side code with a user or service token.
    *
    * @route POST /wallet/spend
    */

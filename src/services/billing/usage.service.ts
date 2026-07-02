@@ -13,20 +13,20 @@ import { getReadDb } from "../../db/index";
 import { organizationMembersTable, subscriptionsTable } from "../../db/schema";
 import { type Plan, planLimit } from "../../shared/plans";
 import {
-  type UsageMetric,
   apiKeyUsageMetric,
   currentPeriod,
   getUsage,
   incrementUsage,
+  type UsageMetric,
   type UsageScope,
 } from "../../shared/usageMetering";
 
 export {
-  type UsageMetric,
   apiKeyUsageMetric,
   currentPeriod,
   getUsage,
   incrementUsage,
+  type UsageMetric,
   type UsageScope,
 };
 

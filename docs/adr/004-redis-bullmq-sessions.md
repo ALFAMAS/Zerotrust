@@ -27,7 +27,9 @@ Use **Redis** (via ioredis) for session caching and rate limiting, and
 - Rate limiting uses a sliding-window algorithm with in-memory fallback when
   Redis is unavailable.
 - BullMQ workers process email jobs with retry/backoff; the consumer starts
-  with the API process (pending extract to a dedicated worker — TODO P1.2).
+  with the API process when `WORKER_MODE` is unset (local dev / single-server);
+  production API replicas set `WORKER_MODE=true` and defer to `src/worker.ts`
+  (P1.2).
 
 Redis is **optional** — when `REDIS_URI` is unset, sessions go straight to
 PostgreSQL, rate limiting falls back to in-memory, and emails are sent
@@ -54,13 +56,14 @@ synchronously.
 - **Negative:** Redis adds an operational dependency — it's one more service to
   monitor, backup, and scale. The `optional` flag means some deployments may
   skip it and accept the performance trade-off.
-- **Negative:** The BullMQ consumer currently starts in-process alongside HTTP
-  (no instance guard), so PM2 cluster mode duplicates workers. Extracting to a
-  dedicated worker process is P1.2.
+- **Negative:** The BullMQ consumer and interval schedulers must not run in
+  every API replica. Production deploys set `WORKER_MODE=true` on API processes
+  and run exactly one `bun run src/worker.ts` instance (see `docs/deployment.md`;
+  P1.2). Redis leader locks in `jobs/scheduler.ts` remain a guardrail.
 
 ## References
 
 - Session caching: `src/services/session.service.ts`
 - Rate limiting: `src/middleware/rateLimiter/redis.ts`, `inmemory.ts`
 - Email queue: `src/services/emailQueue.ts`
-- TODO: `todo.md` P1.2 (dedicated worker)
+- Worker topology: `src/jobs/topology.ts`, `src/worker.ts`, `docs/deployment.md`

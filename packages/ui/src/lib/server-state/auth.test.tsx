@@ -18,31 +18,14 @@ import {
   authKeys,
 } from "./auth";
 import { USER_SESSIONS_PATH, userSessionKeys } from "./sessions";
+import {
+  mockApiDelete,
+  mockApiGet,
+  mockApiPatch,
+  mockApiPost,
+  mockApiPostFormData,
+} from "@/test/apiClientMock";
 
-const mockApiGet = vi.fn();
-const mockApiPost = vi.fn();
-const mockApiPatch = vi.fn();
-const mockApiDelete = vi.fn();
-const mockApiPostFormData = vi.fn();
-const mockLegacyGet = vi.fn();
-const mockLegacyPost = vi.fn();
-const mockLegacyPatch = vi.fn();
-const mockLegacyDelete = vi.fn();
-vi.mock("@/lib/apiClient", () => ({
-  apiGet: (...args: unknown[]) => mockApiGet(...args),
-  apiPost: (...args: unknown[]) => mockApiPost(...args),
-  apiPatch: (...args: unknown[]) => mockApiPatch(...args),
-  apiDelete: (...args: unknown[]) => mockApiDelete(...args),
-  apiPostFormData: (...args: unknown[]) => mockApiPostFormData(...args),
-}));
-vi.mock("@/lib/api", () => ({
-  api: {
-    get: (...args: unknown[]) => mockLegacyGet(...args),
-    post: (...args: unknown[]) => mockLegacyPost(...args),
-    patch: (...args: unknown[]) => mockLegacyPatch(...args),
-    delete: (...args: unknown[]) => mockLegacyDelete(...args),
-  },
-}));
 vi.mock("@/lib/toast", () => ({
   useToast: () => ({ toast: vi.fn() }),
 }));
@@ -80,10 +63,6 @@ describe("auth TanStack Query server state", () => {
     mockApiPatch.mockReset();
     mockApiDelete.mockReset();
     mockApiPostFormData.mockReset();
-    mockLegacyGet.mockReset();
-    mockLegacyPost.mockReset();
-    mockLegacyPatch.mockReset();
-    mockLegacyDelete.mockReset();
     sessionStorage.clear();
     localStorage.clear();
   });
@@ -101,7 +80,6 @@ describe("auth TanStack Query server state", () => {
 
     expect(await screen.findByText(/Please verify your email/)).toBeInTheDocument();
     expect(mockApiGet).toHaveBeenCalledWith(AUTH_ME_PATH);
-    expect(mockLegacyGet).not.toHaveBeenCalled();
   });
 
   it("resends verification email via mutation, not legacy api.post", async () => {
@@ -114,8 +92,7 @@ describe("auth TanStack Query server state", () => {
     await screen.findByText(/Please verify your email/);
     await user.click(screen.getByRole("button", { name: "Resend email" }));
 
-    await waitFor(() => expect(mockApiPost).toHaveBeenCalledWith(VERIFY_EMAIL_RESEND_PATH));
-    expect(mockLegacyPost).not.toHaveBeenCalled();
+    await waitFor(() => expect(mockApiPost).toHaveBeenCalledWith(VERIFY_EMAIL_RESEND_PATH, {}));
   });
 
   it("marks onboarding complete via mutation in SetupChecklist", async () => {
@@ -123,8 +100,7 @@ describe("auth TanStack Query server state", () => {
     renderWithQueryClient(<SetupChecklist user={completeUser} />);
 
     expect(await screen.findByText(/Onboarding complete!/)).toBeInTheDocument();
-    await waitFor(() => expect(mockApiPost).toHaveBeenCalledWith(ONBOARDING_COMPLETE_PATH));
-    expect(mockLegacyPost).not.toHaveBeenCalled();
+    await waitFor(() => expect(mockApiPost).toHaveBeenCalledWith(ONBOARDING_COMPLETE_PATH, {}));
   });
 
   it("persists locale via patch mutation in LocaleSwitcher when signed in", async () => {
@@ -145,7 +121,6 @@ describe("auth TanStack Query server state", () => {
     await waitFor(() =>
       expect(mockApiPatch).toHaveBeenCalledWith(AUTH_ME_PATH, { locale: "es" })
     );
-    expect(mockLegacyPatch).not.toHaveBeenCalled();
     expect(reload).toHaveBeenCalled();
   });
 
@@ -155,7 +130,6 @@ describe("auth TanStack Query server state", () => {
 
     expect(await screen.findByText("Connected")).toBeInTheDocument();
     expect(mockApiGet).toHaveBeenCalledWith(OAUTH_PROVIDERS_PATH);
-    expect(mockLegacyGet).not.toHaveBeenCalled();
   });
 
   it("disconnects OAuth provider via apiDelete mutation, not legacy api.delete", async () => {
@@ -170,7 +144,6 @@ describe("auth TanStack Query server state", () => {
     await user.click(screen.getByRole("button", { name: "Disconnect" }));
 
     await waitFor(() => expect(mockApiDelete).toHaveBeenCalledWith("/auth/oauth/google"));
-    expect(mockLegacyDelete).not.toHaveBeenCalled();
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: authKeys.oauthProviders() });
   });
 
@@ -180,7 +153,6 @@ describe("auth TanStack Query server state", () => {
 
     expect(await screen.findByDisplayValue("Complete User")).toBeInTheDocument();
     expect(mockApiGet).toHaveBeenCalledWith(AUTH_ME_PATH);
-    expect(mockLegacyGet).not.toHaveBeenCalled();
   });
 
   it("patches profile via mutation on profile page, not legacy api.patch", async () => {
@@ -203,7 +175,6 @@ describe("auth TanStack Query server state", () => {
         username: null,
       })
     );
-    expect(mockLegacyPatch).not.toHaveBeenCalled();
   });
 
   it("disables TOTP via apiDelete mutation on profile page", async () => {
@@ -234,7 +205,6 @@ describe("auth TanStack Query server state", () => {
     expect(await screen.findByText(/Welcome back, Complete User/)).toBeInTheDocument();
     expect(mockApiGet).toHaveBeenCalledWith(AUTH_ME_PATH);
     expect(mockApiGet).toHaveBeenCalledWith(USER_SESSIONS_PATH);
-    expect(mockLegacyGet).not.toHaveBeenCalled();
     expect(userSessionKeys.list()).toEqual(["sessions", "list"]);
   });
 });

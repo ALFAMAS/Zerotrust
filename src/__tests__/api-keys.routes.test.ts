@@ -7,7 +7,7 @@ const mockDb = {
   update: vi.fn(),
 };
 
-vi.mock("../db", () => ({ getDb: () => mockDb }));
+vi.mock("../db", () => ({ getDb: () => mockDb, getReadDb: () => mockDb }));
 vi.mock("../middleware/auth", () => ({
   authMiddleware: vi.fn(async (c: any, next: any) => {
     c.set("user", { id: "user-uuid-1", email: "test@example.com" });

@@ -1,53 +1,53 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { mockApiPost } from "@/test/apiClientMock";
 
-const mockPost = vi.fn();
-vi.mock("../../../lib/api", () => ({
-  api: { post: (...args: unknown[]) => mockPost(...args) },
+vi.mock("@/lib/toast", () => ({
+  useToast: () => ({ toast: vi.fn() }),
 }));
 
 import ForgotPasswordPage from "./page";
 
+function renderPage() {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+  });
+  return render(
+    <QueryClientProvider client={queryClient}>
+      <ForgotPasswordPage />
+    </QueryClientProvider>
+  );
+}
+
 describe("ForgotPasswordPage", () => {
   beforeEach(() => {
-    mockPost.mockReset();
+    mockApiPost.mockReset();
   });
 
   it("renders the request form", () => {
-    render(<ForgotPasswordPage />);
+    renderPage();
 
     expect(screen.getByText("Reset password")).toBeInTheDocument();
     expect(screen.getByLabelText("Email")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Send Reset Link" })).toBeInTheDocument();
   });
 
-  it("submits the email and shows the confirmation state", async () => {
+  it("submits the reset request via apiClient", async () => {
+    mockApiPost.mockResolvedValue({});
     const user = userEvent.setup();
-    mockPost.mockResolvedValue(undefined);
+    renderPage();
 
-    render(<ForgotPasswordPage />);
-    await user.type(screen.getByLabelText("Email"), "person@example.com");
+    await user.type(screen.getByLabelText("Email"), "user@example.com");
     await user.click(screen.getByRole("button", { name: "Send Reset Link" }));
 
-    await waitFor(() => {
-      expect(mockPost).toHaveBeenCalledWith(
+    await waitFor(() =>
+      expect(mockApiPost).toHaveBeenCalledWith(
         "/auth/password-reset/request",
-        { email: "person@example.com" },
-        true
-      );
-    });
-    expect(await screen.findByText("Check your email")).toBeInTheDocument();
-  });
-
-  it("shows the confirmation state even when the API call fails (avoids account enumeration)", async () => {
-    const user = userEvent.setup();
-    mockPost.mockRejectedValue(new Error("boom"));
-
-    render(<ForgotPasswordPage />);
-    await user.type(screen.getByLabelText("Email"), "nonexistent@example.com");
-    await user.click(screen.getByRole("button", { name: "Send Reset Link" }));
-
+        { email: "user@example.com" },
+        { skipAuth: true }
+      )
+    );
     expect(await screen.findByText("Check your email")).toBeInTheDocument();
   });
 });

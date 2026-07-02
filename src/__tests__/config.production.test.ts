@@ -1,0 +1,100 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+// We test validateConfig indirectly via loadConfig(), which calls it.
+// loadConfig reads process.env at call time, so we manipulate env before each
+// reset+re-import to get a fresh configInstance.
+
+async function loadFreshConfig(): Promise<() => unknown> {
+  vi.resetModules();
+  const mod = await import("../config");
+  return mod.loadConfig;
+}
+
+function setBaseEnv(): void {
+  process.env.DATABASE_URL = "postgresql://test:test@localhost/test";
+  process.env.TOKEN_SECRET_HEX = "a".repeat(64);
+  process.env.CSFLE_MASTER_KEY_HEX = "b".repeat(64);
+}
+
+describe("P4.3 — Production fail-fast config validation", () => {
+  const originalEnv = { ...process.env };
+
+  beforeEach(() => {
+    // Clean slate for tested vars
+    delete process.env.NODE_ENV;
+    delete process.env.METRICS_AUTH_TOKEN;
+    delete process.env.CORS_ALLOWED_ORIGINS;
+    delete process.env.REDIS_URI;
+    delete process.env.BACKUP_ENCRYPTION_KEY_HEX;
+    delete process.env.BACKUP_REQUIRE_ENCRYPTION;
+    delete process.env.BACKUP_ENABLED;
+  });
+
+  afterEach(() => {
+    process.env = { ...originalEnv };
+  });
+
+  it("boots fine in development without prod-only env vars", async () => {
+    process.env.NODE_ENV = "development";
+    setBaseEnv();
+    const loadConfig = await loadFreshConfig();
+    expect(() => loadConfig()).not.toThrow();
+  });
+
+  it("refuses to boot in production without METRICS_AUTH_TOKEN", async () => {
+    process.env.NODE_ENV = "production";
+    setBaseEnv();
+    const loadConfig = await loadFreshConfig();
+    expect(() => loadConfig()).toThrow(/METRICS_AUTH_TOKEN/);
+  });
+
+  it("refuses to boot in production without CORS_ALLOWED_ORIGINS", async () => {
+    process.env.NODE_ENV = "production";
+    setBaseEnv();
+    process.env.METRICS_AUTH_TOKEN = "secret-token";
+    const loadConfig = await loadFreshConfig();
+    expect(() => loadConfig()).toThrow(/CORS_ALLOWED_ORIGINS/);
+  });
+
+  it("refuses to boot in production without REDIS_URI", async () => {
+    process.env.NODE_ENV = "production";
+    setBaseEnv();
+    process.env.METRICS_AUTH_TOKEN = "secret-token";
+    process.env.CORS_ALLOWED_ORIGINS = "https://app.example.com";
+    const loadConfig = await loadFreshConfig();
+    expect(() => loadConfig()).toThrow(/REDIS_URI/);
+  });
+
+  it("refuses to boot in production without backup encryption keys", async () => {
+    process.env.NODE_ENV = "production";
+    setBaseEnv();
+    process.env.METRICS_AUTH_TOKEN = "secret-token";
+    process.env.CORS_ALLOWED_ORIGINS = "https://app.example.com";
+    process.env.REDIS_URI = "redis://localhost:6379";
+    const loadConfig = await loadFreshConfig();
+    expect(() => loadConfig()).toThrow(/BACKUP_ENCRYPTION_KEY_HEX/);
+  });
+
+  it("allows production boot when all prod-only env vars are set", async () => {
+    process.env.NODE_ENV = "production";
+    setBaseEnv();
+    process.env.METRICS_AUTH_TOKEN = "secret-token";
+    process.env.CORS_ALLOWED_ORIGINS = "https://app.example.com";
+    process.env.REDIS_URI = "redis://localhost:6379";
+    process.env.BACKUP_ENCRYPTION_KEY_HEX = "c".repeat(64);
+    process.env.BACKUP_REQUIRE_ENCRYPTION = "true";
+    const loadConfig = await loadFreshConfig();
+    expect(() => loadConfig()).not.toThrow();
+  });
+
+  it("allows production boot with backups explicitly disabled", async () => {
+    process.env.NODE_ENV = "production";
+    setBaseEnv();
+    process.env.METRICS_AUTH_TOKEN = "secret-token";
+    process.env.CORS_ALLOWED_ORIGINS = "https://app.example.com";
+    process.env.REDIS_URI = "redis://localhost:6379";
+    process.env.BACKUP_ENABLED = "false";
+    const loadConfig = await loadFreshConfig();
+    expect(() => loadConfig()).not.toThrow();
+  });
+});

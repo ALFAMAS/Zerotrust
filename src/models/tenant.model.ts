@@ -91,7 +91,11 @@ function rowToTenant(row: typeof tenantsTable.$inferSelect): Tenant {
 export async function getTenant(id: string): Promise<Tenant | undefined> {
   // Guard: querying a uuid column with a non-uuid string errors in Postgres.
   if (!UUID_RE.test(id)) return undefined;
-  const rows = await getReadDb().select().from(tenantsTable).where(eq(tenantsTable.id, id)).limit(1);
+  const rows = await getReadDb()
+    .select()
+    .from(tenantsTable)
+    .where(eq(tenantsTable.id, id))
+    .limit(1);
   return rows[0] ? rowToTenant(rows[0]) : undefined;
 }
 

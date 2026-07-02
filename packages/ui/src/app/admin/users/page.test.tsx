@@ -1,19 +1,8 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-
-const mockGet = vi.fn();
-const mockPatch = vi.fn();
-const mockDelete = vi.fn();
-vi.mock("@/lib/apiClient", () => ({
-  apiGet: (...args: unknown[]) => mockGet(...args),
-}));
-vi.mock("@/lib/api", () => ({
-  api: {
-    patch: (...args: unknown[]) => mockPatch(...args),
-    delete: (...args: unknown[]) => mockDelete(...args),
-  },
-}));
+import { mockApiDelete, mockApiGet, mockApiPatch } from "@/test/apiClientMock";
 
 import UsersPage from "./page";
 
@@ -41,20 +30,31 @@ const users = [
 ];
 
 function mockUsersResponse(list: typeof users, total = list.length) {
-  mockGet.mockResolvedValue({ data: list, pagination: { total } });
+  mockApiGet.mockResolvedValue({ data: list, pagination: { total } });
+}
+
+function renderUsers() {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+  });
+  return render(
+    <QueryClientProvider client={queryClient}>
+      <UsersPage />
+    </QueryClientProvider>
+  );
 }
 
 describe("Admin UsersPage", () => {
   beforeEach(() => {
-    mockGet.mockReset();
-    mockPatch.mockReset();
-    mockDelete.mockReset();
+    mockApiGet.mockReset();
+    mockApiPatch.mockReset();
+    mockApiDelete.mockReset();
     window.confirm = vi.fn(() => true);
   });
 
   it("renders the user table once loaded", async () => {
     mockUsersResponse(users);
-    render(<UsersPage />);
+    renderUsers();
 
     expect(await screen.findByText("Ada Lovelace")).toBeInTheDocument();
     expect(screen.getByText("Grace Hopper")).toBeInTheDocument();
@@ -63,55 +63,55 @@ describe("Admin UsersPage", () => {
 
   it("shows an empty state when there are no users", async () => {
     mockUsersResponse([], 0);
-    render(<UsersPage />);
+    renderUsers();
 
     expect(await screen.findByText("No users found.")).toBeInTheDocument();
   });
 
   it("shows a toast when loading fails", async () => {
-    mockGet.mockRejectedValue(new Error("network error"));
-    render(<UsersPage />);
+    mockApiGet.mockRejectedValue(new Error("network error"));
+    renderUsers();
 
-    expect(await screen.findByText("Failed to load users")).toBeInTheDocument();
+    expect(await screen.findByText("network error")).toBeInTheDocument();
   });
 
   it("re-fetches with the search query when typing in the search box", async () => {
     mockUsersResponse(users);
     const user = userEvent.setup();
-    render(<UsersPage />);
+    renderUsers();
     await screen.findByText("Ada Lovelace");
 
-    mockGet.mockClear();
+    mockApiGet.mockClear();
     mockUsersResponse(users);
     await user.type(screen.getByPlaceholderText("Search by email or name…"), "ada");
 
     await waitFor(() => {
-      const calledWithSearch = mockGet.mock.calls.some((c) => String(c[0]).includes("search=ada"));
+      const calledWithSearch = mockApiGet.mock.calls.some((c) => String(c[0]).includes("search=ada"));
       expect(calledWithSearch).toBe(true);
     });
   });
 
   it("toggles a user's status between active and suspended", async () => {
     mockUsersResponse(users);
-    mockPatch.mockResolvedValue({});
+    mockApiPatch.mockResolvedValue({});
     const user = userEvent.setup();
-    render(<UsersPage />);
+    renderUsers();
     await screen.findByText("Ada Lovelace");
 
     const row = screen.getByText("Ada Lovelace").closest("tr")!;
     await user.click(within(row).getByRole("button", { name: "Suspend" }));
 
     await waitFor(() => {
-      expect(mockPatch).toHaveBeenCalledWith("/admin/users/u1", { status: "suspended" });
+      expect(mockApiPatch).toHaveBeenCalledWith("/admin/users/u1", { status: "suspended" });
     });
     expect(await screen.findByText("User suspended")).toBeInTheDocument();
   });
 
   it("deletes a user after confirming", async () => {
     mockUsersResponse(users);
-    mockDelete.mockResolvedValue({});
+    mockApiDelete.mockResolvedValue({});
     const user = userEvent.setup();
-    render(<UsersPage />);
+    renderUsers();
     await screen.findByText("Ada Lovelace");
 
     const row = screen.getByText("Ada Lovelace").closest("tr")!;
@@ -119,7 +119,7 @@ describe("Admin UsersPage", () => {
     await user.click(within(row).getByRole("button", { name: "Delete" }));
 
     await waitFor(() => {
-      expect(mockDelete).toHaveBeenCalledWith("/admin/users/u1");
+      expect(mockApiDelete).toHaveBeenCalledWith("/admin/users/u1");
     });
     expect(await screen.findByText("User deleted")).toBeInTheDocument();
     await waitFor(() => {
@@ -129,7 +129,7 @@ describe("Admin UsersPage", () => {
 
   it("disables Previous on the first page", async () => {
     mockUsersResponse(users, 2);
-    render(<UsersPage />);
+    renderUsers();
     await screen.findByText("Ada Lovelace");
 
     expect(screen.getByRole("button", { name: "Previous" })).toBeDisabled();

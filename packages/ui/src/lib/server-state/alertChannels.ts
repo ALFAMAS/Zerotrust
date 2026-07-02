@@ -92,7 +92,7 @@ export function useToggleAlertChannelMutation() {
 
 export function useTestAlertChannelMutation() {
   return useMutation<unknown, Error, string>({
-    mutationFn: (id) => apiPost(buildAlertChannelTestPath(id)),
+    mutationFn: (id) => apiPost(buildAlertChannelTestPath(id), {}),
   });
 }
 

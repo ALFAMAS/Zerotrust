@@ -2,11 +2,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { auditKeys, useAuditEntriesQuery, useAuditVerifyQuery } from "./audit";
-
-const mockApiGet = vi.fn();
-vi.mock("@/lib/apiClient", () => ({
-  apiGet: (...args: unknown[]) => mockApiGet(...args),
-}));
+import { mockApiGet } from "@/test/apiClientMock";
 
 function wrapper() {
   const queryClient = new QueryClient({

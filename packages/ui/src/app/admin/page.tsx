@@ -53,16 +53,11 @@ export default function AdminOverviewPage() {
   const activePct =
     stats && stats.totalUsers > 0 ? Math.round((stats.activeUsers / stats.totalUsers) * 100) : 0;
 
-  if (
-    (statsQuery.error && !statsQuery.data) ||
-    (usersQuery.error && !usersQuery.data)
-  ) {
+  if ((statsQuery.error && !statsQuery.data) || (usersQuery.error && !usersQuery.data)) {
     return (
       <ErrorState
         message={
-          statsQuery.error?.message ||
-          usersQuery.error?.message ||
-          "Failed to load admin dashboard"
+          statsQuery.error?.message || usersQuery.error?.message || "Failed to load admin dashboard"
         }
         retry={() => {
           void statsQuery.refetch();
@@ -86,7 +81,7 @@ export default function AdminOverviewPage() {
       <ServerStateStatus
         isFetching={statsQuery.isFetching || usersQuery.isFetching}
         isStale={statsQuery.isStale || usersQuery.isStale}
-        dataUpdatedAt={Math.max(statsQuery.dataUpdatedAt, usersQuery.dataUpdatedAt)}
+        hasData={Boolean(statsQuery.data || usersQuery.data)}
       />
 
       {loading ? (

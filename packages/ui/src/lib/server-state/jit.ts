@@ -48,7 +48,7 @@ export function useApproveJitRequestMutation() {
   const queryClient = useQueryClient();
 
   return useMutation<JitRequest, Error, string>({
-    mutationFn: (id) => apiPost<JitRequest>(`/jit/cross-tenant/${id}/approve`),
+    mutationFn: (id) => apiPost<JitRequest>(`/jit/cross-tenant/${id}/approve`, {}),
     onSettled: () => {
       void queryClient.invalidateQueries({ queryKey: jitKeys.incoming() });
     },
@@ -59,7 +59,7 @@ export function useDenyJitRequestMutation() {
   const queryClient = useQueryClient();
 
   return useMutation<JitRequest, Error, string>({
-    mutationFn: (id) => apiPost<JitRequest>(`/jit/cross-tenant/${id}/deny`),
+    mutationFn: (id) => apiPost<JitRequest>(`/jit/cross-tenant/${id}/deny`, {}),
     onSettled: () => {
       void queryClient.invalidateQueries({ queryKey: jitKeys.incoming() });
     },

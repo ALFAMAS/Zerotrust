@@ -9,7 +9,12 @@ import {
 } from "@tanstack/react-query";
 import { apiGet, apiPost, apiPut } from "@/lib/apiClient";
 import { queryKeys } from "./queryKeys";
-import type { Notification, NotificationsUnreadCount, NotificationPreferences, UpdateNotificationPreferencesInput } from "./types";
+import type {
+  Notification,
+  NotificationPreferences,
+  NotificationsUnreadCount,
+  UpdateNotificationPreferencesInput,
+} from "./types";
 
 export const notificationKeys = queryKeys.notifications;
 
@@ -138,7 +143,7 @@ export function useMarkNotificationReadMutation() {
   const listKey = notificationKeys.list();
 
   return useMutation<unknown, Error, string, NotificationListMutationContext>({
-    mutationFn: (id) => apiPost(buildNotificationReadPath(id)),
+    mutationFn: (id) => apiPost(buildNotificationReadPath(id), {}),
     onMutate: async (id) => {
       await queryClient.cancelQueries({ queryKey: listKey });
       await queryClient.cancelQueries({ queryKey: unreadKey });
@@ -176,7 +181,7 @@ export function useMarkAllNotificationsReadMutation() {
   const listKey = notificationKeys.list();
 
   return useMutation<unknown, Error, void, NotificationListMutationContext>({
-    mutationFn: () => apiPost(NOTIFICATIONS_READ_ALL_PATH),
+    mutationFn: () => apiPost(NOTIFICATIONS_READ_ALL_PATH, {}),
     onMutate: async () => {
       await queryClient.cancelQueries({ queryKey: listKey });
       await queryClient.cancelQueries({ queryKey: unreadKey });

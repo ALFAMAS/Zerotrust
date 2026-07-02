@@ -12,22 +12,8 @@ import {
   buildNotificationReadPath,
   notificationKeys,
 } from "./notifications";
+import { mockApiGet, mockApiPost, mockApiPut } from "@/test/apiClientMock";
 
-const mockApiGet = vi.fn();
-const mockApiPost = vi.fn();
-const mockApiPut = vi.fn();
-const mockLegacyGet = vi.fn();
-vi.mock("@/lib/apiClient", () => ({
-  apiGet: (...args: unknown[]) => mockApiGet(...args),
-  apiPost: (...args: unknown[]) => mockApiPost(...args),
-  apiPut: (...args: unknown[]) => mockApiPut(...args),
-}));
-vi.mock("@/lib/api", () => ({
-  api: {
-    get: (...args: unknown[]) => mockLegacyGet(...args),
-    post: vi.fn(),
-  },
-}));
 vi.mock("@/lib/format", () => ({
   useFormat: () => ({
     relativeTime: () => "just now",
@@ -82,7 +68,6 @@ describe("notifications TanStack Query server state", () => {
     mockApiGet.mockReset();
     mockApiPost.mockReset();
     mockApiPut.mockReset();
-    mockLegacyGet.mockReset();
     vi.stubGlobal("EventSource", class {
       addEventListener() {}
       close() {}
@@ -104,7 +89,6 @@ describe("notifications TanStack Query server state", () => {
 
     expect(await screen.findByText("2")).toBeInTheDocument();
     expect(mockApiGet).toHaveBeenCalledWith(NOTIFICATIONS_UNREAD_COUNT_PATH);
-    expect(mockLegacyGet).not.toHaveBeenCalled();
   });
 
   it("loads notification list when dropdown opens", async () => {
@@ -134,7 +118,7 @@ describe("notifications TanStack Query server state", () => {
     await user.click(screen.getByRole("button", { name: "Mark all read" }));
 
     await waitFor(() =>
-      expect(mockApiPost).toHaveBeenCalledWith(NOTIFICATIONS_READ_ALL_PATH)
+      expect(mockApiPost).toHaveBeenCalledWith(NOTIFICATIONS_READ_ALL_PATH, {})
     );
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: notificationKeys.all });
   });
@@ -152,7 +136,6 @@ describe("notifications TanStack Query server state", () => {
     expect(screen.getByText("Loading preferences…")).toBeInTheDocument();
     expect(await screen.findByText("Email fallback")).toBeInTheDocument();
     expect(mockApiGet).toHaveBeenCalledWith(NOTIFICATIONS_PREFERENCES_PATH);
-    expect(mockLegacyGet).not.toHaveBeenCalled();
   });
 
   it("updates notification preferences via mutation and invalidates preferences cache", async () => {
@@ -169,8 +152,8 @@ describe("notifications TanStack Query server state", () => {
     const invalidateSpy = vi.spyOn(queryClient, "invalidateQueries");
 
     await screen.findByText("Email fallback");
-    const toggles = screen.getAllByRole("checkbox");
-    await user.click(toggles[1]);
+    const [emailFallbackSwitch] = screen.getAllByRole("switch");
+    await user.click(emailFallbackSwitch);
 
     await waitFor(() =>
       expect(mockApiPut).toHaveBeenCalledWith(NOTIFICATIONS_PREFERENCES_PATH, {

@@ -1,7 +1,13 @@
 import { and, eq, gt } from "drizzle-orm";
 import { getDb } from "../../db/index";
 import { jitAccessTable, rolesTable } from "../../db/schema";
-import type { ABACCondition, AuthzContext, AuthzResult, Permission, User } from "../../shared/types";
+import type {
+  ABACCondition,
+  AuthzContext,
+  AuthzResult,
+  Permission,
+  User,
+} from "../../shared/types";
 
 export class AuthorizationEngine {
   async evaluate(ctx: AuthzContext): Promise<AuthzResult> {

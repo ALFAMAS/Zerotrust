@@ -52,8 +52,7 @@ export async function subscribeToPush(): Promise<boolean> {
 
   const { publicKey } = await apiGet<{ publicKey: string | null }>(
     "/notifications/push/public-key"
-  )
-    .catch(() => ({ publicKey: null }));
+  ).catch(() => ({ publicKey: null }));
   if (!publicKey) return false;
 
   const reg = await navigator.serviceWorker.ready;

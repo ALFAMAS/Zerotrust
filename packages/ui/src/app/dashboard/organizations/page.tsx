@@ -4,8 +4,8 @@ import { useState } from "react";
 import { ServerStateStatus } from "@/components/ServerStateStatus";
 import { SkeletonCard } from "@/components/Skeleton";
 import { Button } from "@/components/ui/button";
-import { ErrorState } from "@/components/ui/States";
 import { Input } from "@/components/ui/input";
+import { ErrorState } from "@/components/ui/States";
 import { useToast } from "@/context/ToastContext";
 import {
   useCreateOrganizationMutation,

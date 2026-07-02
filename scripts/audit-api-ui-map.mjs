@@ -9,31 +9,131 @@ const OUT = join(ROOT, "docs/api-ui-integration-matrix.md");
 // Product-surface decisions for routes that intentionally remain API/SDK-only.
 // Excluding them keeps the unmatched list actionable for future dashboard gaps.
 const PRODUCT_SURFACE_DISPOSITIONS = [
-  ["GET", "/admin/feedback", "Operator API-only: feedback can be exported/triaged through the admin API without a dashboard inbox."],
-  ["GET", "/admin/roles", "Operator API-only: system role inventory and seed validation remain privileged admin API workflows."],
-  ["POST", "/admin/roles", "Operator API-only: system role CRUD remains a privileged admin API workflow."],
-  ["GET", "/admin/jit-grants", "Operator API-only: emergency JIT grant moderation is scriptable for approval runbooks."],
-  ["DELETE", "/admin/jit-grants/{id}", "Operator API-only: emergency JIT grant moderation is scriptable for approval runbooks."],
-  ["POST", "/admin/jit-grants/{id}/approve", "Operator API-only: emergency JIT grant moderation is scriptable for approval runbooks."],
-  ["POST", "/admin/jit-grants/{id}/deny", "Operator API-only: emergency JIT grant moderation is scriptable for approval runbooks."],
-  ["GET", "/billing/tax-exemptions", "Billing ops API-only: tax exemption review is a back-office/SDK workflow."],
-  ["POST", "/billing/tax-exemptions", "Billing ops API-only: tax exemption review is a back-office/SDK workflow."],
-  ["POST", "/billing/tax-exemptions/{id}/status", "Billing ops API-only: tax exemption review is a back-office/SDK workflow."],
-  ["GET", "/billing/vat/validate", "Billing ops API-only: VAT validation is for checkout/SDK integrations."],
-  ["GET", "/billing/usage", "Billing ops API-only: usage is consumed by billing integrations; dashboard billing surfaces subscription status."],
-  ["POST", "/billing/change-plan", "Billing ops API-only: plan changes remain server/API initiated to avoid duplicate checkout surfaces."],
-  ["GET", "/admin/attachments", "Operator API-only: admin attachment listing supports support/export tooling."],
-  ["POST", "/admin/attachments/upload", "Operator API-only: admin attachment upload supports support/export tooling."],
-  ["POST", "/admin/lifecycle-emails", "Operator API-only: lifecycle email sends are runbook-controlled content operations."],
-  ["GET", "/admin/webhooks/{webhookId}/deliveries", "Operator API-only: admin-wide delivery-log inspection complements the user webhook page."],
-  ["POST", "/search/index", "Operator API-only: search index management is a maintenance/runbook action."],
-  ["DELETE", "/search/index/{type}/{id}", "Operator API-only: search index management is a maintenance/runbook action."],
-  ["GET", "/search/provider", "Operator API-only: search provider introspection is for health/debug tooling."],
-  ["GET", "/regions/orgs/{orgId}/branding", "Admin API-only: regional branding metadata is available to tenant tooling; regions UI covers health and pinning."],
-  ["PUT", "/regions/orgs/{orgId}/branding", "Admin API-only: regional branding metadata is available to tenant tooling; regions UI covers health and pinning."],
-  ["PUT", "/regions/orgs/{orgId}/domain", "Admin API-only: regional domain metadata is available to tenant tooling; regions UI covers health and pinning."],
-  ["GET", "/auth/unsubscribe", "Public API-only landing endpoint reached from email links, not dashboard navigation."],
-  ["POST", "/wallet/spend", "SDK-only: programmatic spend is for metered product integrations, not dashboard clicks."],
+  [
+    "GET",
+    "/admin/feedback",
+    "Operator API-only: feedback can be exported/triaged through the admin API without a dashboard inbox.",
+  ],
+  [
+    "GET",
+    "/admin/roles",
+    "Operator API-only: system role inventory and seed validation remain privileged admin API workflows.",
+  ],
+  [
+    "POST",
+    "/admin/roles",
+    "Operator API-only: system role CRUD remains a privileged admin API workflow.",
+  ],
+  [
+    "GET",
+    "/admin/jit-grants",
+    "Operator API-only: emergency JIT grant moderation is scriptable for approval runbooks.",
+  ],
+  [
+    "DELETE",
+    "/admin/jit-grants/{id}",
+    "Operator API-only: emergency JIT grant moderation is scriptable for approval runbooks.",
+  ],
+  [
+    "POST",
+    "/admin/jit-grants/{id}/approve",
+    "Operator API-only: emergency JIT grant moderation is scriptable for approval runbooks.",
+  ],
+  [
+    "POST",
+    "/admin/jit-grants/{id}/deny",
+    "Operator API-only: emergency JIT grant moderation is scriptable for approval runbooks.",
+  ],
+  [
+    "GET",
+    "/billing/tax-exemptions",
+    "Billing ops API-only: tax exemption review is a back-office/SDK workflow.",
+  ],
+  [
+    "POST",
+    "/billing/tax-exemptions",
+    "Billing ops API-only: tax exemption review is a back-office/SDK workflow.",
+  ],
+  [
+    "POST",
+    "/billing/tax-exemptions/{id}/status",
+    "Billing ops API-only: tax exemption review is a back-office/SDK workflow.",
+  ],
+  [
+    "GET",
+    "/billing/vat/validate",
+    "Billing ops API-only: VAT validation is for checkout/SDK integrations.",
+  ],
+  [
+    "GET",
+    "/billing/usage",
+    "Billing ops API-only: usage is consumed by billing integrations; dashboard billing surfaces subscription status.",
+  ],
+  [
+    "POST",
+    "/billing/change-plan",
+    "Billing ops API-only: plan changes remain server/API initiated to avoid duplicate checkout surfaces.",
+  ],
+  [
+    "GET",
+    "/admin/attachments",
+    "Operator API-only: admin attachment listing supports support/export tooling.",
+  ],
+  [
+    "POST",
+    "/admin/attachments/upload",
+    "Operator API-only: admin attachment upload supports support/export tooling.",
+  ],
+  [
+    "POST",
+    "/admin/lifecycle-emails",
+    "Operator API-only: lifecycle email sends are runbook-controlled content operations.",
+  ],
+  [
+    "GET",
+    "/admin/webhooks/{webhookId}/deliveries",
+    "Operator API-only: admin-wide delivery-log inspection complements the user webhook page.",
+  ],
+  [
+    "POST",
+    "/search/index",
+    "Operator API-only: search index management is a maintenance/runbook action.",
+  ],
+  [
+    "DELETE",
+    "/search/index/{type}/{id}",
+    "Operator API-only: search index management is a maintenance/runbook action.",
+  ],
+  [
+    "GET",
+    "/search/provider",
+    "Operator API-only: search provider introspection is for health/debug tooling.",
+  ],
+  [
+    "GET",
+    "/regions/orgs/{orgId}/branding",
+    "Admin API-only: regional branding metadata is available to tenant tooling; regions UI covers health and pinning.",
+  ],
+  [
+    "PUT",
+    "/regions/orgs/{orgId}/branding",
+    "Admin API-only: regional branding metadata is available to tenant tooling; regions UI covers health and pinning.",
+  ],
+  [
+    "PUT",
+    "/regions/orgs/{orgId}/domain",
+    "Admin API-only: regional domain metadata is available to tenant tooling; regions UI covers health and pinning.",
+  ],
+  [
+    "GET",
+    "/auth/unsubscribe",
+    "Public API-only landing endpoint reached from email links, not dashboard navigation.",
+  ],
+  [
+    "POST",
+    "/wallet/spend",
+    "SDK-only: programmatic spend is for metered product integrations, not dashboard clicks.",
+  ],
 ].map(([method, path, decision]) => ({ method, path, decision }));
 const PRODUCT_SURFACE_DISPOSITION_KEYS = new Set(
   PRODUCT_SURFACE_DISPOSITIONS.map((route) => `${route.method} ${route.path}`)

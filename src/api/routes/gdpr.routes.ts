@@ -1,6 +1,6 @@
 import { and, desc, eq } from "drizzle-orm";
 import { Hono } from "hono";
-import { getDb } from "../../db";
+import { getDb, getReadDb } from "../../db";
 import {
   auditLogsTable,
   organizationMembersTable,
@@ -19,7 +19,7 @@ const logger = getLogger("gdpr");
 
 router.get("/export", rateLimit({ points: 3, windowSecs: 3600 }), authMiddleware, async (c) => {
   const user = c.get("user");
-  const db = getDb();
+  const db = getReadDb();
 
   try {
     const [profile] = await db.select().from(usersTable).where(eq(usersTable.id, user.id)).limit(1);

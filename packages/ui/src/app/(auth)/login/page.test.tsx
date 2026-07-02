@@ -1,11 +1,8 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-
-const mockPost = vi.fn();
-vi.mock("../../../lib/api", () => ({
-  api: { post: (...args: unknown[]) => mockPost(...args) },
-}));
+import { mockApiPost } from "@/test/apiClientMock";
 
 const mockSetToken = vi.fn();
 vi.mock("../../../lib/auth", () => ({
@@ -25,11 +22,30 @@ vi.mock("../../../lib/webauthn", () => ({
   startAuthentication: vi.fn(),
 }));
 
+vi.mock("@/lib/toast", () => ({
+  useToast: () => ({ toast: vi.fn() }),
+}));
+
+vi.mock("@/lib/server-state/auth", () => ({
+  useOAuthAuthorizeMutation: () => ({ mutateAsync: vi.fn(), isPending: false }),
+}));
+
 import LoginPage from "./page";
+
+function renderLogin() {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+  });
+  return render(
+    <QueryClientProvider client={queryClient}>
+      <LoginPage />
+    </QueryClientProvider>
+  );
+}
 
 describe("LoginPage", () => {
   beforeEach(() => {
-    mockPost.mockReset();
+    mockApiPost.mockReset();
     mockSetToken.mockReset();
     mockNavigateToSafeRelative.mockReset();
     mockIsWebAuthnAvailable.mockReturnValue(false);
@@ -37,7 +53,7 @@ describe("LoginPage", () => {
   });
 
   it("renders the sign-in form", () => {
-    render(<LoginPage />);
+    renderLogin();
 
     expect(screen.getByText("Welcome back")).toBeInTheDocument();
     expect(screen.getByLabelText("Email")).toBeInTheDocument();
@@ -47,18 +63,18 @@ describe("LoginPage", () => {
 
   it("logs in and redirects on success", async () => {
     const user = userEvent.setup();
-    mockPost.mockResolvedValue({ accessToken: "at", refreshToken: "rt" });
+    mockApiPost.mockResolvedValue({ accessToken: "at", refreshToken: "rt" });
 
-    render(<LoginPage />);
+    renderLogin();
     await user.type(screen.getByLabelText("Email"), "person@example.com");
     await user.type(screen.getByLabelText("Password"), "hunter2");
     await user.click(screen.getByRole("button", { name: "Sign in" }));
 
     await waitFor(() => {
-      expect(mockPost).toHaveBeenCalledWith(
+      expect(mockApiPost).toHaveBeenCalledWith(
         "/auth/login",
         { email: "person@example.com", password: "hunter2" },
-        true
+        { skipAuth: true }
       );
     });
     expect(mockSetToken).toHaveBeenCalledWith("at", "rt");
@@ -67,26 +83,25 @@ describe("LoginPage", () => {
 
   it("switches to the MFA step when the API reports mfaRequired", async () => {
     const user = userEvent.setup();
-    mockPost.mockResolvedValue({ mfaRequired: true, mfaToken: "mfa-tok-1" });
+    mockApiPost.mockResolvedValue({ mfaRequired: true, mfaToken: "mfa-tok-1" });
 
-    render(<LoginPage />);
+    renderLogin();
     await user.type(screen.getByLabelText("Email"), "person@example.com");
     await user.type(screen.getByLabelText("Password"), "hunter2");
     await user.click(screen.getByRole("button", { name: "Sign in" }));
 
     expect(await screen.findByText("Two-factor authentication")).toBeInTheDocument();
     expect(screen.getByLabelText("Authentication code")).toBeInTheDocument();
-    // Login is not finished yet — no token/redirect until the MFA code is verified.
     expect(mockSetToken).not.toHaveBeenCalled();
   });
 
   it("completes login after submitting a valid MFA code", async () => {
     const user = userEvent.setup();
-    mockPost
+    mockApiPost
       .mockResolvedValueOnce({ mfaRequired: true, mfaToken: "mfa-tok-1" })
       .mockResolvedValueOnce({ accessToken: "at2", refreshToken: "rt2" });
 
-    render(<LoginPage />);
+    renderLogin();
     await user.type(screen.getByLabelText("Email"), "person@example.com");
     await user.type(screen.getByLabelText("Password"), "hunter2");
     await user.click(screen.getByRole("button", { name: "Sign in" }));
@@ -96,10 +111,10 @@ describe("LoginPage", () => {
     await user.click(screen.getByRole("button", { name: "Verify" }));
 
     await waitFor(() => {
-      expect(mockPost).toHaveBeenLastCalledWith(
+      expect(mockApiPost).toHaveBeenLastCalledWith(
         "/auth/login/mfa",
         { mfaToken: "mfa-tok-1", code: "123456" },
-        true
+        { skipAuth: true }
       );
     });
     expect(mockSetToken).toHaveBeenCalledWith("at2", "rt2");
@@ -109,10 +124,9 @@ describe("LoginPage", () => {
     const user = userEvent.setup();
     mockIsWebAuthnAvailable.mockReturnValue(false);
 
-    render(<LoginPage />);
+    renderLogin();
     await user.click(screen.getByRole("button", { name: /sign in with a passkey/i }));
 
-    // Passkey flow bails out before calling the API when unsupported.
-    expect(mockPost).not.toHaveBeenCalled();
+    expect(mockApiPost).not.toHaveBeenCalled();
   });
 });

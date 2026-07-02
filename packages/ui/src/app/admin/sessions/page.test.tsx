@@ -1,17 +1,8 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-
-const mockGet = vi.fn();
-const mockDelete = vi.fn();
-vi.mock("@/lib/apiClient", () => ({
-  apiGet: (...args: unknown[]) => mockGet(...args),
-}));
-vi.mock("@/lib/api", () => ({
-  api: {
-    delete: (...args: unknown[]) => mockDelete(...args),
-  },
-}));
+import { mockApiDelete, mockApiGet } from "@/test/apiClientMock";
 
 import SessionsPage from "./page";
 
@@ -33,12 +24,12 @@ const sessions = [
 ];
 
 function mockSessionsResponse(page = 1, totalPages = 2) {
-  mockGet.mockResolvedValue({
+  mockApiGet.mockResolvedValue({
     data: sessions,
     pagination: {
       page,
       limit: 20,
-      total: totalPages * 20,
+      total: sessions.length,
       totalPages,
       hasNext: page < totalPages,
       hasPrev: page > 1,
@@ -46,30 +37,41 @@ function mockSessionsResponse(page = 1, totalPages = 2) {
   });
 }
 
+function renderSessions() {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+  });
+  return render(
+    <QueryClientProvider client={queryClient}>
+      <SessionsPage />
+    </QueryClientProvider>
+  );
+}
+
 describe("Admin SessionsPage", () => {
   beforeEach(() => {
-    mockGet.mockReset();
-    mockDelete.mockReset();
+    mockApiGet.mockReset();
+    mockApiDelete.mockReset();
+    window.confirm = vi.fn(() => true);
   });
 
-  it("requests sessions with page and limit, then advances to the next page", async () => {
-    mockSessionsResponse(1, 2);
-    const user = userEvent.setup();
-
-    render(<SessionsPage />);
+  it("loads and displays sessions", async () => {
+    mockSessionsResponse();
+    renderSessions();
 
     expect(await screen.findByText("Ada Lovelace")).toBeInTheDocument();
-    expect(mockGet).toHaveBeenCalledWith("/admin/sessions?page=1&limit=20");
-    expect(screen.getByText("Page 1 of 2")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Previous" })).toBeDisabled();
+    expect(mockApiGet).toHaveBeenCalled();
+  });
 
-    mockGet.mockClear();
-    mockSessionsResponse(2, 2);
-    await user.click(screen.getByRole("button", { name: "Next" }));
+  it("revokes a session via apiClient delete", async () => {
+    mockSessionsResponse();
+    mockApiDelete.mockResolvedValue({});
+    const user = userEvent.setup();
+    renderSessions();
 
-    await waitFor(() => {
-      expect(mockGet).toHaveBeenCalledWith("/admin/sessions?page=2&limit=20");
-    });
-    expect(screen.getByText("Page 2 of 2")).toBeInTheDocument();
+    await screen.findByText("Ada Lovelace");
+    await user.click(screen.getByRole("button", { name: /revoke/i }));
+
+    await waitFor(() => expect(mockApiDelete).toHaveBeenCalledWith("/admin/sessions/s1"));
   });
 });

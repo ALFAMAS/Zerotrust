@@ -92,8 +92,12 @@
       "description": "Support ticket and message workflows."
     },
     {
+      "name": "Unsubscribe",
+      "description": "Email unsubscribe landing (API/SDK-only). GET /auth/unsubscribe serves server-rendered HTML for one-click email opt-out links — no Next.js UI page."
+    },
+    {
       "name": "Wallet",
-      "description": "Wallet balance, transactions, top-up, and spend operations."
+      "description": "Wallet balance, transactions, and top-up. POST /wallet/spend is API/SDK-only (programmatic debit for integrations — no dashboard UI)."
     }
   ],
   "components": {
@@ -972,6 +976,34 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/auth/unsubscribe": {
+      "get": {
+        "tags": [
+          "Unsubscribe"
+        ],
+        "summary": "Email unsubscribe landing (API-only HTML)",
+        "description": "API/SDK-only. Verifies a signed token from email links and returns an HTML confirmation page (not JSON). No dashboard UI — email templates link directly to this API route.",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Signed unsubscribe token from the email link"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "HTML unsubscribe confirmation page"
+          },
+          "400": {
+            "description": "Invalid or missing token (HTML error page)"
           }
         }
       }
@@ -3731,7 +3763,8 @@
         "tags": [
           "Wallet"
         ],
-        "summary": "Spend wallet balance",
+        "summary": "Spend wallet balance (API/SDK-only)",
+        "description": "Programmatic wallet debit for integrations and background jobs. Not exposed in the dashboard UI — use the API or generated SDK from server-side code with a user or service token.",
         "responses": {
           "200": {
             "description": "Spend result",

@@ -130,6 +130,49 @@ function validateConfig(config: zerotrustConfig): void {
     errors.push("At least one MFA channel must be enabled");
   }
 
+  // ── Production-only fail-fast gates (P4.3) ─────────────────────────────
+  // When NODE_ENV=production, refuse to boot unless critical operational
+  // secrets are set. These are warnings/silent in dev but hard errors in prod.
+  if (process.env.NODE_ENV === "production") {
+    // /metrics must be token-gated in production
+    if (!process.env.METRICS_AUTH_TOKEN) {
+      errors.push(
+        "METRICS_AUTH_TOKEN is required in production — /metrics is open without it. Generate with: openssl rand -hex 32"
+      );
+    }
+
+    // CORS must be explicitly configured in production
+    if (!process.env.CORS_ALLOWED_ORIGINS) {
+      errors.push(
+        "CORS_ALLOWED_ORIGINS is required in production — set it to your app/admin origins"
+      );
+    }
+
+    // Redis is required for rate limiting, sessions, and BullMQ in production
+    if (!process.env.REDIS_URI) {
+      errors.push(
+        "REDIS_URI is required in production — rate limiting, BullMQ queues, and session caching depend on it"
+      );
+    }
+
+    // Backup encryption must be enabled when backups are in use
+    if (process.env.BACKUP_ENABLED !== "false") {
+      if (
+        !process.env.BACKUP_ENCRYPTION_KEY_HEX ||
+        process.env.BACKUP_ENCRYPTION_KEY_HEX.length < 64
+      ) {
+        errors.push(
+          "BACKUP_ENCRYPTION_KEY_HEX must be at least 32 bytes (64 hex chars) in production, or set BACKUP_ENABLED=false to explicitly opt out. Generate with: openssl rand -hex 32"
+        );
+      }
+      if (process.env.BACKUP_REQUIRE_ENCRYPTION !== "true") {
+        errors.push(
+          "BACKUP_REQUIRE_ENCRYPTION must be set to 'true' in production (or set BACKUP_ENABLED=false to opt out of backups)"
+        );
+      }
+    }
+  }
+
   if (errors.length > 0) {
     throw new Error(`Configuration validation failed:\n${errors.join("\n")}`);
   }

@@ -9,39 +9,6 @@ features live in [`tdone.md`](./tdone.md); the standing audit is
 maintainability/refactor · P3 scalability/performance · P4 docs/DX · P5 compliance.
 **Status:** Pending · In Progress.
 
-## P1 — Stability and correctness
-
-### P1.1 — Expand repository + transaction layer for hot-path writes — _In Progress_
-
-- **Source:** [`docs/AUDIT.md`](./docs/AUDIT.md) C1/M1; [`AUDIT-REPORT.md`](./AUDIT-REPORT.md) E6; ADR 006
-- **Why:** Four transactional repositories exist (`authSessions`, `stripeEvents`,
-  `wallet`, `processedWebhookEvents`). Billing mutations, org role transitions,
-  session lifecycle side effects, and points-ledger writes still run as
-  sequential inline Drizzle — a crash mid-sequence can leave partial state.
-- **Acceptance:** Add repository methods (each owning `db.transaction` +
-  invariants) for: refresh-token rotation (extend `authSessions`), billing
-  subscription/plan mutations, org role transitions, and points ledger;
-  route/services delegate to repos; regression tests for each hot path.
-- **Status:** In Progress (~25% — wallet + auth session rotation seeded).
-
-### P1.2 — Production worker topology enforcement — _Pending (ops)_
-
-- **Source:** [`docs/AUDIT.md`](./docs/AUDIT.md) C3/P1; [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) P1; ADR 004
-- **Why:** `src/worker.ts` and Redis leader locks exist, but cluster deploys
-  without `WORKER_MODE=true` still start schedulers in every API replica.
-- **Acceptance:** Document and enforce the split in [`docs/deployment.md`](./docs/deployment.md)
-  and [`docs/reference-architecture.md`](./docs/reference-architecture.md): API
-  replicas run with `WORKER_MODE=true` (schedulers deferred); exactly one worker
-  process runs `bun run src/worker.ts`. Add a startup warning when schedulers run
-  inside the API process in production.
-- **Status:** Pending — code shipped; deploy discipline not enforced.
-
----
-
-## P2 — Maintainability and refactoring
-
-_All P2 items shipped — see [`tdone.md`](./tdone.md)._
-
 ---
 
 ## P3 — Scalability and performance
@@ -70,6 +37,17 @@ _All P2 items shipped — see [`tdone.md`](./tdone.md)._
 - **Status:** In Progress — sessions, notifications, org lists, and four admin
   list endpoints switched; remaining admin/analytics routes pending.
 
+### P3.3 — Make Elasticsearch optional; default to Postgres FTS — _Pending_
+
+- **Source:** [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) P3
+- **Why:** After the slim-down, searchable surface is users/orgs/tickets and the
+  service already has a Postgres fallback. Running ES is an operational burden
+  most template forks do not need.
+- **Acceptance:** `elasticsearch.enabled` defaults to `false`; search, audit,
+  and logging paths use Postgres FTS / file fallback without requiring ES;
+  README and deployment docs reflect ES as opt-in for large tenants.
+- **Status:** Pending.
+
 ### P3.4 — Server-side data fetching (RSC / route handlers) — _Pending_
 
 - **Source:** [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) P4
@@ -92,47 +70,3 @@ _All P2 items shipped — see [`tdone.md`](./tdone.md)._
 - **Status:** Pending — docs done; automation not wired.
 
 ---
-
-## P4 — Documentation and developer experience
-
-### P4.2 — `/metrics` production default-closed — _Pending (ops)_
-
-- **Source:** [`docs/AUDIT.md`](./docs/AUDIT.md) S3; [`docs/maintenance-scorecard.md`](./docs/maintenance-scorecard.md) §7
-- **Why:** `/metrics` is open unless `METRICS_AUTH_TOKEN` is set. Guidance was
-  added (P4.3 shipped); production deploys still need explicit token configuration.
-- **Acceptance:** Deployment checklist requires `METRICS_AUTH_TOKEN` in
-  production; reference architecture shows token-gated scrape config; scorecard §7
-  tracks open exceptions to zero.
-- **Status:** Pending — guidance done; per-deploy enforcement not verified.
-
-### P4.3 — Strengthen fail-fast production config validation — _Pending_
-
-- **Source:** [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) P6
-- **Why:** `validateConfig()` checks core secrets but does not refuse to start in
-  `NODE_ENV=production` when backup encryption, Redis, or other prod-critical
-  vars are missing/weak.
-- **Acceptance:** Zod (or extended `validateConfig`) gates production boot on
-  required secrets (`BACKUP_ENCRYPTION_KEY_HEX` when backups enabled,
-  `BACKUP_REQUIRE_ENCRYPTION`, `REDIS_URI`, etc.); integration test asserts
-  refuse-to-start behavior.
-- **Status:** Pending — basic validation exists; production-specific hardening
-  incomplete.
-
-### P4.4 — Quarterly maintenance scorecard — first baseline fill — _Pending_
-
-- **Source:** [`docs/maintenance-scorecard.md`](./docs/maintenance-scorecard.md)
-- **Why:** Scorecard template exists (P4.2 shipped 2026-07-01) but all metric
-  cells are `_TBD_`.
-- **Acceptance:** Populate Q3 2026 baseline (deps, CI duration, test count,
-  migration health, backup drill dates, p95 latency); set next review date.
-- **Status:** Pending.
-
-### P4.5 — Token storage design revisit (optional hardening) — _Pending (fork decision)_
-
-- **Source:** [`AUDIT-REPORT.md`](./AUDIT-REPORT.md) §D
-- **Why:** Access/refresh tokens live in `localStorage` (SPA cross-origin
-  architecture). Any injected JS can read them. Not a regression, but forks
-  needing stronger XSS resistance may want httpOnly cookies + BFF.
-- **Acceptance:** ADR or doc section comparing current SPA tokens vs BFF/cookie
-  pattern with migration steps; no change required for the default template.
-- **Status:** Pending — design decision for fork consumers.

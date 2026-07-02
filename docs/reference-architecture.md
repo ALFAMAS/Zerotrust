@@ -354,7 +354,17 @@ spec:
     kind: ClusterIssuer
 ```
 
-### Prometheus ServiceMonitor
+### Prometheus ServiceMonitor (token-gated — production default-closed)
+
+`/metrics` is **open by default** unless `METRICS_AUTH_TOKEN` is set. Production
+deploys MUST set this env var (see deployment checklist). The scrape config below
+sends the required bearer token via a Kubernetes secret.
+
+```bash
+# Create the metrics auth secret once per cluster
+kubectl create secret generic zerotrust-metrics-auth \
+  --from-literal=token="$(openssl rand -hex 32)"
+```
 
 ```yaml
 apiVersion: monitoring.coreos.com/v1
@@ -371,6 +381,20 @@ spec:
     bearerTokenSecret:
       name: zerotrust-metrics-auth
       key: token
+```
+
+For VM/PM2 deploys without a ServiceMonitor, set `METRICS_AUTH_TOKEN` in the
+environment and configure `prometheus.yml`:
+
+```yaml
+scrape_configs:
+  - job_name: zerotrust-api
+    static_configs:
+      - targets: ["localhost:1337"]
+    metrics_path: /metrics
+    authorization:
+      type: Bearer
+      credentials_file: /etc/zerotrust/metrics-token
 ```
 
 ### RTO / RPO

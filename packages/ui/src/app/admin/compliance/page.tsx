@@ -194,7 +194,9 @@ export default function CompliancePage() {
                             </TableCell>
                             <TableCell>
                               <div className="font-medium text-foreground">{c.title}</div>
-                              <div className="text-xs text-muted-foreground">{c.implementation}</div>
+                              <div className="text-xs text-muted-foreground">
+                                {c.implementation}
+                              </div>
                             </TableCell>
                             <TableCell className="hidden max-w-xs truncate font-mono text-xs text-muted-foreground lg:table-cell">
                               {c.evidence ?? "—"}
@@ -312,7 +314,9 @@ export default function CompliancePage() {
                       ) : (
                         (risk?.risks ?? []).map((r) => (
                           <TableRow key={r.riskId}>
-                            <TableCell className="font-mono text-xs font-medium">{r.riskId}</TableCell>
+                            <TableCell className="font-mono text-xs font-medium">
+                              {r.riskId}
+                            </TableCell>
                             <TableCell>
                               <div className="font-medium text-foreground">{r.title}</div>
                               <div className="text-xs text-muted-foreground">{r.mitigation}</div>

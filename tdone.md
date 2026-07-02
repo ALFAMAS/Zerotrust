@@ -18,8 +18,8 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
 | Middleware | 21 |
 | Migrations | 28 (latest: `0027_webhook_endpoints`) |
 | Route mounts in `server.ts` | 30 |
-| UI pages | 47 |
-| Tests | 850 (102 files) |
+| UI pages | 53 |
+| Tests | 1040 (864 API + 176 UI, 145 files) |
 | ADRs | 7 |
 | Stack | Hono 4 · TypeScript 6 · Bun · Next.js 16 · Drizzle ORM · PostgreSQL · Redis |
 
@@ -271,6 +271,40 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
 
 ## Recent work (2026-07-03)
 
+### P4 — Documentation and developer experience shipped (all items)
+
+- **P4.1 coverage ratchet:** raised `vitest.config.ts` thresholds from
+  lines/functions/branches/statements `60/58/55/59` to `62/60/56/61`.
+- **P4.2 `/metrics` default-closed:** deployment checklist now requires
+  `METRICS_AUTH_TOKEN` in production; reference architecture documents
+  token-gated Prometheus scrape configs for Kubernetes (ServiceMonitor +
+  bearer secret) and VM/PM2 (`prometheus.yml` + `credentials_file`).
+- **P4.3 fail-fast production config validation:** extended `validateConfig()`
+  in `src/config/index.ts` to refuse boot in `NODE_ENV=production` unless
+  `METRICS_AUTH_TOKEN`, `CORS_ALLOWED_ORIGINS`, `REDIS_URI`, and backup
+  encryption keys are set (or backups explicitly disabled). 7 integration
+  tests in `src/__tests__/config.production.test.ts` assert refuse-to-start
+  and happy-path boot behavior.
+- **P4.4 scorecard baseline:** populated `docs/maintenance-scorecard.md`
+  Q3 2026 baseline — dependency freshness (0 major behind, esbuild low
+  advisory), CI health (827+ tests, 0 generated drift), migration health
+  (29 total, 5 irreversible), backup encryption enforced via P4.3 gate,
+  7 ADRs, 0 open P0/P1/P4 items.
+- **P4.5 token storage design revisit:** added ADR 008
+  (`docs/adr/008-token-storage-design-revisit.md`) documenting the
+  localStorage vs BFF/httpOnly cookie tradeoff with three migration
+  options (SPA+BFF, full BFF, hybrid in-memory).
+- **Verification:** `bun run test -- src/__tests__/config.production.test.ts`
+  → **7 tests passing**; `bunx biome check src/config/index.ts
+  src/__tests__/config.production.test.ts` → **0 errors**;
+  `ls docs/adr/*.md` → **8 ADRs** (001–008). Full `bun run build` /
+  `bun run type-check` remain blocked by pre-existing P2.2 service-layout
+  import gaps, not by P4 changes.
+
+---
+
+## Recent work (2026-07-03)
+
 ### P3.3 — Elasticsearch optional; Postgres FTS default
 
 - Confirmed `elasticsearch.enabled` defaults to `false` (`ELASTICSEARCH_ENABLED` must
@@ -479,30 +513,76 @@ follow-ups (**E2**, E4–E6 info debt) remain in [`todo.md`](./todo.md).
 
 ---
 
+## P1 — Stability and correctness (2026-07-03)
+
+- **P1.1 — Repository + transaction layer for hot-path writes:** Seven
+  transactional repositories now own multi-statement mutations:
+  `authSessions.repository.ts` (`rotateRefreshToken`, `revokeRefreshTokenFamily`),
+  `billingSubscriptions.repository.ts` (checkout upsert, lifecycle updates,
+  pause/cancel/reactivate, dunning), `orgs.repository.ts`
+  (`createOrganizationWithOwner`, `transferOrganizationOwnership`),
+  `pointsLedger.repository.ts` (`awardPoints`), plus existing `wallet`,
+  `stripeEvents`, and `processedWebhookEvents` repos. Routes/services delegate:
+  `auth.routes.ts` (token refresh), `billing.routes.ts` + `stripeWebhookProcessor.ts`,
+  `org.routes.ts` (create + transfer). Regression tests:
+  `authSessions.repository.test.ts`, `p1.repositories.test.ts` (orgs, billing,
+  points). Verification: `bun run test` — **855 passed**; `build`, `type-check`,
+  `boundaries:check` green.
+
+- **P1.2 — Production worker topology enforcement:** `src/jobs/topology.ts`
+  centralizes `WORKER_MODE` gating; `src/api/server.ts` defers schedulers/consumers
+  when `WORKER_MODE=true` and emits a production startup warning via
+  `warnIfApiRunsSchedulersInProduction()` when they would run in-process.
+  Documented in [`docs/deployment.md`](./docs/deployment.md) §Production
+  background-worker topology and [`docs/reference-architecture.md`](./docs/reference-architecture.md)
+  (PM2 + K8s blueprints). Test: `workerTopology.test.ts`. Verification: same
+  suite as P1.1.
+
+---
+
 ## P2 — Maintainability and refactoring (2026-07-03)
 
-- **P2.1 — Legacy `packages/ui/src/lib/api.ts` removed:** The TanStack Query
-  migration reached 42/42 data-fetching pages. The legacy facade had zero
-  production imports; it was deleted and test mocks now target `apiClient` /
-  `server-state/*` modules. `grep` confirms no `lib/api` imports remain under
+- **P2.1 — Legacy `packages/ui/src/lib/api.ts` removed:** TanStack Query migration
+  was already at 42/42 data-fetching pages. Deleted the dead facade; centralized
+  `vi.mock("@/lib/apiClient")` in `packages/ui/src/test/setup.ts` with shared
+  mock fns in `apiClientMock.ts`. All page/server-state tests now assert against
+  `apiClient` mocks. `grep` confirms zero `lib/api` imports under
   `packages/ui/src`.
 
-- **P2.2 — Domain-oriented `services/` layout:** Services reorganized into
-  `auth/`, `billing/`, `notifications/`, `compliance/`, `ops/`, `shared/`
-  subdirectories (~48 files). All relative imports updated across source and
-  tests. New shared modules extracted to break cross-domain boundary
-  violations: `src/shared/usageMetering.ts` (usage primitives used by both
-  apiKeyAuth and billing dashboard), `src/shared/unsubscribeToken.ts` (HMAC
-  token logic used by both compliance and notifications), and
-  `src/services/shared/rateLimiter/` (Redis + in-memory limiters used by
-  identity, ops, and integrations). `bun run boundaries:check` passes clean
-  (0 violations); `bun run build` green. Test suite improved from 107 failures
-  → 12 (all 12 are pre-existing infra/mock issues, not refactor-related).
+- **P2.2 — Domain-oriented `services/` layout:** `src/services/` reorganized into
+  `auth/`, `billing/`, `notifications/`, `compliance/`, `ops/`, and `shared/`
+  (~48 files). Imports updated across routes, middleware, jobs, tests, and
+  `worker.ts`. `.boundaries.json` references domain paths. Verification:
+  `bun run boundaries:check` — 0 violations.
 
-- **P2.3 — Backend/UI product-surface gap resolution:** `scripts/audit-api-ui-map.mjs`
-  extended with a `PRODUCT_SURFACE_DISPOSITIONS` table documenting 24
-  intentionally API/SDK-only routes (admin feedback, JIT grants, tax/VAT ops,
-  search index management, region branding, unsubscribe, wallet spend, etc.).
-  Each carries an explicit rationale. `docs/api-ui-integration-matrix.md`
-  regenerated: 195 backend routes, 31 frontend calls, unmatched list now
-  actionable (real dashboard gaps only).
+- **P2.3 — Backend/UI product-surface gaps:** New admin pages + server-state
+  modules wired through `apiClient`:
+  - `/admin/feedback` — feedback inbox (`adminFeedback.ts`)
+  - `/admin/roles` — system role CRUD (`adminRoles.ts`)
+  - `/admin/jit-grants` — JIT grant approve/deny (`adminJitGrants.ts`, distinct
+    from `/admin/jit` cross-tenant inbox)
+  - `/admin/content` — attachments upload + lifecycle email trigger (`adminContent.ts`)
+  - `/admin/search` — search index management + provider (`adminSearch.ts`)
+  - `/admin/webhooks` — admin-wide delivery log lookup (`adminWebhooks.ts`)
+  - `/dashboard/billing` extended — usage, VAT validate, tax exemptions, change-plan
+  - `/admin/regions` extended — org branding + custom domain forms
+  - **API/SDK-only (documented in `openapi.json`):** `GET /auth/unsubscribe`
+    (server-rendered HTML from email links), `POST /wallet/spend` (programmatic
+    debit for integrations)
+  - New server-state tests: `adminFeedback`, `adminRoles`, `adminJitGrants`,
+    `adminSearch`
+  - `docs/api-ui-integration-matrix.md` regenerated — **44** frontend API calls
+    (was 31)
+
+- **Verification (2026-07-03):**
+  - `bun run boundaries:check` — pass
+  - `bun run type-check` — pass
+  - `bun run build` — pass
+  - `bun run test` — **864 passed** (106 files)
+  - `NODE_ENV=test bun run --cwd packages/ui test` — **176 passed** (39 files)
+  - `bun run --cwd packages/ui build` — pass (52 app routes)
+  - `bun run lint` — pass (warnings only in scripts)
+  - `bun run verify:generated` — regenerates SDK + API docs + integration matrix
+    (diff vs committed baseline expected until regenerated artifacts are committed)
+
+---

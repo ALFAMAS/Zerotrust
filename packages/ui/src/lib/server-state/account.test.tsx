@@ -9,10 +9,7 @@ import {
   GDPR_EXPORT_PATH,
   accountKeys,
 } from "./account";
-
-const mockApiGetBlob = vi.fn();
-const mockApiDelete = vi.fn();
-const mockApiPost = vi.fn();
+import { mockApiDelete, mockApiGetBlob, mockApiPost } from "@/test/apiClientMock";
 
 function renderWithQueryClient(ui: React.ReactElement) {
   const queryClient = new QueryClient({
@@ -95,7 +92,9 @@ describe("account TanStack Query server state", () => {
 
     await user.click(screen.getByRole("button", { name: "Cancel deletion request" }));
 
-    await waitFor(() => expect(mockApiPost).toHaveBeenCalledWith(GDPR_CANCEL_DELETION_PATH));
+    await waitFor(() =>
+      expect(mockApiPost).toHaveBeenCalledWith(GDPR_CANCEL_DELETION_PATH, {})
+    );
     expect(screen.getByRole("button", { name: "Delete my account" })).toBeInTheDocument();
   });
 });

@@ -103,6 +103,11 @@ vi.mock("../services/auth/accountTakeover.service", () => ({
     .mockResolvedValue({ flagged: false, recentEvents: [] }),
 }));
 
+vi.mock("../db/repositories/authSessions.repository", () => ({
+  revokeRefreshTokenFamily: vi.fn().mockResolvedValue(undefined),
+  rotateRefreshToken: vi.fn().mockResolvedValue({ id: "00000000-0000-0000-0000-000000000002" }),
+}));
+
 // ── Helpers ────────────────────────────────────────────────────────────────
 
 const USER_ID = "00000000-0000-0000-0000-000000000001";
@@ -837,6 +842,7 @@ describe("POST /token/refresh", () => {
   });
 
   it("detects reuse of a revoked refresh token and revokes the whole family", async () => {
+    const { revokeRefreshTokenFamily } = await import("../db/repositories/authSessions.repository");
     db.limit.mockResolvedValueOnce([
       {
         id: "rt-1",
@@ -857,13 +863,7 @@ describe("POST /token/refresh", () => {
     expect(res.status).toBe(401);
     const body = await res.json();
     expect(body.error).toBe("TOKEN_REUSE_DETECTED");
-    // The whole account's sessions are force-revoked on reuse.
-    const setArgs = db.set.mock.calls.map((c) => c[0]);
-    expect(setArgs).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ revokedReason: "refresh_token_reuse", isActive: false }),
-      ])
-    );
+    expect(revokeRefreshTokenFamily).toHaveBeenCalledWith(USER_ID, "refresh_token_reuse");
   });
 
   it("returns 401 when refresh token is expired", async () => {
@@ -888,6 +888,7 @@ describe("POST /token/refresh", () => {
   });
 
   it("returns 200 with new token pair on valid refresh", async () => {
+    const { rotateRefreshToken } = await import("../db/repositories/authSessions.repository");
     // 1) refresh token lookup
     db.limit.mockResolvedValueOnce([
       {
@@ -899,14 +900,8 @@ describe("POST /token/refresh", () => {
         expiresAt: new Date(Date.now() + 3_600_000),
       },
     ]);
-    // 2) update (revoke old RT) — no return needed
-    db.returning.mockResolvedValueOnce([{ id: "rt-1" }]);
-    // 3) user lookup
+    // 2) user lookup
     db.limit.mockResolvedValueOnce([makeActiveUser()]);
-    // 4) insert new session
-    db.returning.mockResolvedValueOnce([makeSession()]);
-    // 5) insert new refresh token
-    db.returning.mockResolvedValueOnce([{ id: "rt-2" }]);
 
     const router = await getRouter();
     const app = new Hono().route("/", router);
@@ -920,6 +915,13 @@ describe("POST /token/refresh", () => {
     expect(body.accessToken).toBeTruthy();
     expect(body.refreshToken).toBeTruthy();
     expect(body.tokenType).toBe("Bearer");
+    expect(rotateRefreshToken).toHaveBeenCalledWith(
+      expect.objectContaining({
+        oldRefreshTokenId: "rt-1",
+        session: expect.objectContaining({ userId: USER_ID, isActive: true }),
+        refreshToken: expect.objectContaining({ userId: USER_ID }),
+      })
+    );
   });
 });
 

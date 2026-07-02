@@ -15,11 +15,11 @@ import { getLogger } from "../../logger";
 import { authMiddleware, requireAdmin } from "../../middleware/auth";
 import { revokeAllSessionsForUser, revokeSession } from "../../middleware/sessionControl";
 import { getSettings, updateSettings } from "../../models/settings.model";
+import { invalidateUserCache } from "../../services/auth/userStateCache.service";
 import {
   ALLOWED_UPLOAD_CONTENT_TYPES,
   safeExtensionForContentType,
 } from "../../services/ops/uploadSafety";
-import { invalidateUserCache } from "../../services/auth/userStateCache.service";
 import { countRows } from "../../shared/dbCount";
 import { internalError } from "../../shared/httpErrors";
 import { paginated, parsePaginatedQuery } from "../../shared/pagination";
@@ -761,7 +761,9 @@ router.put("/users/:id/segment", async (c) => {
 // POST /admin/lifecycle-emails — trigger lifecycle email batch (admin only)
 router.post("/lifecycle-emails", async (c) => {
   try {
-    const { sendLifecycleEmails } = await import("../../services/notifications/lifecycleEmail.service.js");
+    const { sendLifecycleEmails } = await import(
+      "../../services/notifications/lifecycleEmail.service.js"
+    );
     const results = await sendLifecycleEmails();
     return c.json({ success: true, results });
   } catch (err) {

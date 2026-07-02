@@ -30,7 +30,7 @@ const { mockDb, enqueueDb, resetDb } = vi.hoisted(() => {
   };
 });
 
-vi.mock("../db", () => ({ getDb: () => mockDb }));
+vi.mock("../db", () => ({ getDb: () => mockDb, getReadDb: () => mockDb }));
 vi.mock("../db/schema", () => ({
   usersTable: {},
   sessionsTable: {},

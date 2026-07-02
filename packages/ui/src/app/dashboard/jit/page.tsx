@@ -4,13 +4,10 @@ import { Clock, Loader2, ShieldQuestion } from "lucide-react";
 import { useState } from "react";
 import { ServerStateStatus } from "@/components/ServerStateStatus";
 import { Button } from "@/components/ui/button";
-import { ErrorState } from "@/components/ui/States";
 import { Input } from "@/components/ui/input";
+import { ErrorState } from "@/components/ui/States";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  useMyJitRequestsQuery,
-  useSubmitJitRequestMutation,
-} from "@/lib/server-state/jit";
+import { useMyJitRequestsQuery, useSubmitJitRequestMutation } from "@/lib/server-state/jit";
 import type { JitRequestStatus } from "@/lib/server-state/types";
 import { useToast } from "@/lib/toast";
 

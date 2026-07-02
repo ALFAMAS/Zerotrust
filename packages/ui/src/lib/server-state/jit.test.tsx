@@ -45,7 +45,11 @@ function mockIncomingSuccess(requests = [pendingRequest]) {
 }
 
 describe("jit TanStack Query server state", () => {
-  
+  beforeEach(() => {
+    mockApiGet.mockReset();
+    mockApiPost.mockReset();
+  });
+
   it("models JIT domain query keys", () => {
     expect(jitKeys.incoming()).toEqual(["jit", "incoming"]);
     expect(jitKeys.myRequests()).toEqual(["jit", "myRequests"]);
@@ -88,7 +92,7 @@ describe("jit TanStack Query server state", () => {
 
     await user.click(screen.getByRole("button", { name: "Approve" }));
     await waitFor(() =>
-      expect(mockApiPost).toHaveBeenCalledWith("/jit/cross-tenant/jit_1/approve")
+      expect(mockApiPost).toHaveBeenCalledWith("/jit/cross-tenant/jit_1/approve", {})
     );
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: jitKeys.incoming() });
 
@@ -96,7 +100,9 @@ describe("jit TanStack Query server state", () => {
     mockIncomingSuccess([{ ...pendingRequest, status: "pending" }]);
 
     await user.click(screen.getByRole("button", { name: "Deny" }));
-    await waitFor(() => expect(mockApiPost).toHaveBeenCalledWith("/jit/cross-tenant/jit_1/deny"));
+    await waitFor(() =>
+      expect(mockApiPost).toHaveBeenCalledWith("/jit/cross-tenant/jit_1/deny", {})
+    );
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: jitKeys.incoming() });
   });
 

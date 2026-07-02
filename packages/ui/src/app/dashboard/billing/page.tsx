@@ -17,12 +17,16 @@ import { Textarea } from "../../../components/ui/textarea";
 import { navigateToSafeExternal } from "../../../lib/safeRedirect";
 import {
   useBillingCancelMutation,
+  useBillingChangePlanMutation,
   useBillingCheckoutMutation,
   useBillingCurrenciesQuery,
   useBillingPortalMutation,
   useBillingPricingQuery,
   useBillingReactivateMutation,
   useBillingSubscriptionQuery,
+  useBillingUsageQuery,
+  useSubmitTaxExemptionMutation,
+  useVatValidateQuery,
 } from "../../../lib/server-state/billing";
 
 const CANCEL_REASONS = [
@@ -84,6 +88,18 @@ function BillingContent() {
   const reactivateMutation = useBillingReactivateMutation();
   const checkoutMutation = useBillingCheckoutMutation();
   const portalMutation = useBillingPortalMutation();
+  const usageQuery = useBillingUsageQuery();
+  const changePlanMutation = useBillingChangePlanMutation();
+  const submitExemptionMutation = useSubmitTaxExemptionMutation();
+  const [vatInput, setVatInput] = useState("");
+  const [submittedVat, setSubmittedVat] = useState("");
+  const vatQuery = useVatValidateQuery(submittedVat);
+  const [exemptionForm, setExemptionForm] = useState({
+    orgId: "",
+    kind: "vat",
+    taxId: "",
+    country: "DE",
+  });
 
   // Multi-currency / PPP pricing (backend: /billing/currencies + /billing/pricing).
   const currenciesQuery = useBillingCurrenciesQuery();
@@ -100,6 +116,26 @@ function BillingContent() {
     return map;
   }, [pricingQuery.data]);
   const checkoutLoading = checkoutMutation.isPending ? checkoutMutation.variables : null;
+  const usage = usageQuery.data ?? null;
+
+  async function handleChangePlan(priceId: string) {
+    try {
+      await changePlanMutation.mutateAsync({ priceId, when: "now" });
+      alert("Plan change submitted.");
+    } catch {
+      alert("Failed to change plan.");
+    }
+  }
+
+  async function handleSubmitExemption(e: React.FormEvent) {
+    e.preventDefault();
+    try {
+      await submitExemptionMutation.mutateAsync(exemptionForm);
+      alert("Tax exemption submitted for review.");
+    } catch {
+      alert("Failed to submit exemption.");
+    }
+  }
 
   async function handleCancel(action: "cancel" | "pause") {
     try {
@@ -170,6 +206,88 @@ function BillingContent() {
           your mind.
         </div>
       )}
+
+      {usage && (
+        <div className="mb-8 bg-card border border-border rounded-xl p-6">
+          <h2 className="font-display text-lg font-semibold text-foreground mb-4">Usage</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+            <div>
+              <p className="text-muted-foreground">API calls</p>
+              <p className="text-foreground font-medium">
+                {usage.apiCalls.used} / {usage.apiCalls.limit}
+              </p>
+            </div>
+            <div>
+              <p className="text-muted-foreground">Seats</p>
+              <p className="text-foreground font-medium">
+                {usage.seats.used} / {usage.seats.limit}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="mb-8 bg-card border border-border rounded-xl p-6 space-y-6">
+        <h2 className="font-display text-lg font-semibold text-foreground">Tax &amp; VAT</h2>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            setSubmittedVat(vatInput.trim());
+          }}
+          className="flex flex-wrap items-end gap-3"
+        >
+          <div className="space-y-1.5 flex-1 min-w-[200px]">
+            <label htmlFor="vat" className="text-sm text-muted-foreground">
+              Validate EU VAT number
+            </label>
+            <Input
+              id="vat"
+              value={vatInput}
+              onChange={(e) => setVatInput(e.target.value)}
+              placeholder="DE123456789"
+            />
+          </div>
+          <Button type="submit">Validate</Button>
+        </form>
+        {submittedVat && vatQuery.data && (
+          <p className="text-sm text-muted-foreground">
+            {vatQuery.data.valid ? "Valid" : "Invalid"} — format{" "}
+            {vatQuery.data.formatValid ? "ok" : "bad"}
+            {vatQuery.data.name ? ` · ${vatQuery.data.name}` : ""}
+          </p>
+        )}
+        <form onSubmit={handleSubmitExemption} className="grid gap-3 sm:grid-cols-2">
+          <div className="space-y-1.5 sm:col-span-2">
+            <label htmlFor="exOrgId" className="text-sm text-muted-foreground">
+              Submit tax exemption (org owner/admin)
+            </label>
+            <Input
+              id="exOrgId"
+              value={exemptionForm.orgId}
+              onChange={(e) => setExemptionForm((f) => ({ ...f, orgId: e.target.value }))}
+              placeholder="Organization ID"
+              required
+            />
+          </div>
+          <Input
+            value={exemptionForm.taxId}
+            onChange={(e) => setExemptionForm((f) => ({ ...f, taxId: e.target.value }))}
+            placeholder="Tax / VAT ID"
+            required
+          />
+          <Input
+            value={exemptionForm.country}
+            onChange={(e) => setExemptionForm((f) => ({ ...f, country: e.target.value }))}
+            placeholder="Country (ISO)"
+            required
+          />
+          <div className="sm:col-span-2">
+            <Button type="submit" disabled={submitExemptionMutation.isPending}>
+              Submit exemption
+            </Button>
+          </div>
+        </form>
+      </div>
 
       {!loading && sub && sub.plan !== "free" && (
         <div className="mb-8 bg-card border border-border rounded-xl p-6">
@@ -359,8 +477,14 @@ function BillingContent() {
               ) : plan.priceId ? (
                 <Button
                   type="button"
-                  onClick={() => handleCheckout(plan.priceId!)}
-                  disabled={checkoutLoading === plan.priceId}
+                  onClick={() => {
+                    if (sub && sub.plan !== "free" && sub.status !== "canceled") {
+                      void handleChangePlan(plan.priceId!);
+                    } else {
+                      void handleCheckout(plan.priceId!);
+                    }
+                  }}
+                  disabled={checkoutLoading === plan.priceId || changePlanMutation.isPending}
                   className={`py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 ${
                     plan.highlighted
                       ? "bg-primary hover:bg-primary/90 text-foreground"

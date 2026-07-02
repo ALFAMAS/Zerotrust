@@ -8,9 +8,7 @@ const h = vi.hoisted(() => {
   const subscriptionsRetrieve = vi.fn();
   const claim = vi.fn();
   const release = vi.fn();
-  const whereMock = vi.fn();
-  const setMock = vi.fn(() => ({ where: whereMock }));
-  const updateMock = vi.fn(() => ({ set: setMock }));
+  const applySubscriptionLifecycleUpdate = vi.fn();
   // Defaults to false (no queue configured) so every existing test exercises
   // the synchronous fallback path unchanged; individual tests can override.
   const enqueue = vi.fn().mockResolvedValue(false);
@@ -19,9 +17,7 @@ const h = vi.hoisted(() => {
     subscriptionsRetrieve,
     claim,
     release,
-    whereMock,
-    setMock,
-    updateMock,
+    applySubscriptionLifecycleUpdate,
     enqueue,
   };
 });
@@ -43,9 +39,17 @@ vi.mock("../db/repositories/stripeEvents.repository", () => ({
   releaseStripeEvent: h.release,
 }));
 
-// DB: a chainable update().set().where() that resolves (or rejects in the error test).
+vi.mock("../db/repositories/billingSubscriptions.repository", () => ({
+  applySubscriptionLifecycleUpdate: (...args: unknown[]) =>
+    h.applySubscriptionLifecycleUpdate(...args),
+  upsertCheckoutSubscription: vi.fn().mockResolvedValue(undefined),
+  clearSubscriptionDunning: vi.fn().mockResolvedValue(undefined),
+  recordInvoicePaymentFailure: vi.fn().mockResolvedValue(undefined),
+}));
+
+// DB reads for invoice handlers (unused by subscription.updated tests).
 vi.mock("../db", () => ({
-  getDb: () => ({ update: h.updateMock, insert: vi.fn(), select: vi.fn() }),
+  getDb: () => ({ select: vi.fn() }),
 }));
 
 // Queue offload: defaults to unavailable (see h.enqueue above) so the route
@@ -90,7 +94,7 @@ describe("POST /billing/webhook — idempotency", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     h.constructEvent.mockReturnValue(subscriptionUpdatedEvent());
-    h.whereMock.mockResolvedValue(undefined);
+    h.applySubscriptionLifecycleUpdate.mockResolvedValue(undefined);
     h.release.mockResolvedValue(undefined);
     h.enqueue.mockResolvedValue(false);
     process.env.STRIPE_WEBHOOK_SECRET = "whsec_test";
@@ -105,7 +109,7 @@ describe("POST /billing/webhook — idempotency", () => {
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual({ received: true });
     expect(h.claim).toHaveBeenCalledWith("evt_1", "customer.subscription.updated");
-    expect(h.updateMock).toHaveBeenCalledTimes(1); // the subscription mutation ran
+    expect(h.applySubscriptionLifecycleUpdate).toHaveBeenCalledTimes(1);
     expect(h.release).not.toHaveBeenCalled();
   });
 
@@ -116,13 +120,13 @@ describe("POST /billing/webhook — idempotency", () => {
 
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual({ received: true, duplicate: true });
-    expect(h.updateMock).not.toHaveBeenCalled(); // no second apply
+    expect(h.applySubscriptionLifecycleUpdate).not.toHaveBeenCalled();
     expect(h.release).not.toHaveBeenCalled();
   });
 
   it("releases the claim when processing throws so Stripe can retry", async () => {
     h.claim.mockResolvedValue(true);
-    h.whereMock.mockRejectedValueOnce(new Error("db down"));
+    h.applySubscriptionLifecycleUpdate.mockRejectedValueOnce(new Error("db down"));
 
     const res = await post();
 
@@ -152,7 +156,7 @@ describe("POST /billing/webhook — idempotency", () => {
       object: expect.objectContaining({ id: "sub_1" }),
     });
     // The mutation is the queue worker's job, not this request's.
-    expect(h.updateMock).not.toHaveBeenCalled();
+    expect(h.applySubscriptionLifecycleUpdate).not.toHaveBeenCalled();
     expect(h.release).not.toHaveBeenCalled();
   });
 });

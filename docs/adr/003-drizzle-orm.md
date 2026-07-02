@@ -26,7 +26,7 @@ Use **Drizzle ORM** with the `postgres` driver as the canonical database layer.
   safe to hand-edit when needed (e.g. adding `CONCURRENTLY` to index creation).
 - `db.transaction` (via Drizzle's `tx`) is used for multi-statement atomicity;
   the repository layer (`src/db/repositories/`) wraps hot-path multi-statement
-  writes in transactions (TODO P1.1).
+  Hot-path writes use repository methods that own `db.transaction` (P1.1).
 - Read-replica routing (`getReadDb()`) is opt-in per call site, with
   `READ_REPLICA_URL` as an optional env var.
 

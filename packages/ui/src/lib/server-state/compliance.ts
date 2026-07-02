@@ -80,12 +80,7 @@ export function useCycleControlStatusMutation() {
   const queryClient = useQueryClient();
   const controlsKey = complianceKeys.soc2Controls();
 
-  return useMutation<
-    { success: boolean },
-    Error,
-    Soc2Control,
-    CycleControlStatusContext
-  >({
+  return useMutation<{ success: boolean }, Error, Soc2Control, CycleControlStatusContext>({
     mutationFn: (control) => {
       const next = nextControlStatus(control.status);
       return apiPut<{ success: boolean }>(`/compliance/soc2/controls/${control.controlId}`, {

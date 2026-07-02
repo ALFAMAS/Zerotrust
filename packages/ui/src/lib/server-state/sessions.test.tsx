@@ -11,13 +11,7 @@ import {
   sessionKeys,
   userSessionKeys,
 } from "./sessions";
-
-const mockApiGet = vi.fn();
-const mockApiDelete = vi.fn();
-vi.mock("@/lib/apiClient", () => ({
-  apiGet: (...args: unknown[]) => mockApiGet(...args),
-  apiDelete: (...args: unknown[]) => mockApiDelete(...args),
-}));
+import { mockApiDelete, mockApiGet } from "@/test/apiClientMock";
 
 const session = {
   id: "sess_1",

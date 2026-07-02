@@ -5,8 +5,8 @@ import { useMemo, useState } from "react";
 import { ServerStateStatus } from "@/components/ServerStateStatus";
 import { SkeletonCard, SkeletonTable } from "@/components/Skeleton";
 import { Button } from "@/components/ui/button";
-import { ErrorState } from "@/components/ui/States";
 import { Input } from "@/components/ui/input";
+import { ErrorState } from "@/components/ui/States";
 import {
   Select,
   SelectContent,
@@ -61,11 +61,9 @@ export default function OrgDetailPage() {
   const memberCount = detailQuery.data?.memberCount ?? 0;
   const invites = invitesQuery.data?.data ?? [];
 
-  const loading =
-    detailQuery.isPending || membersQuery.isPending || meQuery.isPending;
+  const loading = detailQuery.isPending || membersQuery.isPending || meQuery.isPending;
   const queryError =
-    (detailQuery.error && !detailQuery.data) ||
-    (membersQuery.error && !membersQuery.data);
+    (detailQuery.error && !detailQuery.data) || (membersQuery.error && !membersQuery.data);
 
   async function handleInvite(e: React.FormEvent) {
     e.preventDefault();
@@ -115,9 +113,7 @@ export default function OrgDetailPage() {
 
   if (queryError) {
     const message =
-      detailQuery.error?.message ||
-      membersQuery.error?.message ||
-      "Failed to load organization";
+      detailQuery.error?.message || membersQuery.error?.message || "Failed to load organization";
     return (
       <ErrorState
         message={message}
@@ -151,7 +147,7 @@ export default function OrgDetailPage() {
       <ServerStateStatus
         isFetching={detailQuery.isFetching || membersQuery.isFetching}
         isStale={detailQuery.isStale || membersQuery.isStale}
-        dataUpdatedAt={Math.max(detailQuery.dataUpdatedAt, membersQuery.dataUpdatedAt)}
+        hasData={Boolean(detailQuery.data || membersQuery.data)}
       />
 
       <div className="flex items-start justify-between">

@@ -13,7 +13,7 @@ const MIN_QUERY_LENGTH = 2;
 export function normalizeSearchParams(
   params: SearchParams
 ): Required<Pick<SearchParams, "q" | "limit">> & SearchParams {
-  return { q: params.q.trim(), limit: params.limit ?? DEFAULT_SEARCH_LIMIT, ...params };
+  return { ...params, q: params.q.trim(), limit: params.limit ?? DEFAULT_SEARCH_LIMIT };
 }
 
 export function buildSearchPath(params: SearchParams): string {

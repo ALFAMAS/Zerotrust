@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { Hono } from "hono";
 
-vi.mock("../db", () => ({ getDb: vi.fn() }));
+vi.mock("../db", () => ({ getDb: vi.fn(), getReadDb: vi.fn() }));
 vi.mock("../middleware/rateLimiting", () => ({
   rateLimit: () => async (_c: any, next: any) => next(),
 }));
@@ -45,8 +45,9 @@ function makeTicket(o: Record<string, unknown> = {}) {
 
 async function getApp(db: any, userId = USER_ID, roles: string[] = ["user"]) {
   vi.resetModules();
-  const { getDb } = await import("../db");
+  const { getDb, getReadDb } = await import("../db");
   vi.mocked(getDb).mockReturnValue(db);
+  vi.mocked(getReadDb).mockReturnValue(db);
   vi.doMock("../middleware/auth", () => ({
     authMiddleware: async (c: any, next: any) => {
       c.set("user", { id: userId, email: "u@test.com", roles });

@@ -25,6 +25,6 @@ export function useScheduleAccountDeletionMutation() {
 
 export function useCancelAccountDeletionMutation() {
   return useMutation<unknown, Error, void>({
-    mutationFn: () => apiPost(GDPR_CANCEL_DELETION_PATH),
+    mutationFn: () => apiPost(GDPR_CANCEL_DELETION_PATH, {}),
   });
 }

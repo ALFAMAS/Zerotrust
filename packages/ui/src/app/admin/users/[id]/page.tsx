@@ -94,9 +94,7 @@ export default function UserDetailPage() {
   }
 
   if (userQuery.error && !hasUser) {
-    return (
-      <ErrorState message={userQuery.error.message} retry={() => void userQuery.refetch()} />
-    );
+    return <ErrorState message={userQuery.error.message} retry={() => void userQuery.refetch()} />;
   }
 
   if (!user) {

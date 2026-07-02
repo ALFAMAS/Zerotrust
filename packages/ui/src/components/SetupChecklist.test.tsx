@@ -3,9 +3,8 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ONBOARDING_COMPLETE_PATH } from "@/lib/server-state/auth";
+import { mockApiPost } from "@/test/apiClientMock";
 import SetupChecklist from "./SetupChecklist";
-
-const mockApiPost = vi.fn().mockResolvedValue(undefined);
 
 function renderWithQueryClient(ui: React.ReactElement) {
   const queryClient = new QueryClient({
@@ -36,7 +35,7 @@ const completeUser = {
 describe("SetupChecklist", () => {
   beforeEach(() => {
     localStorage.clear();
-    mockApiPost.mockClear();
+    mockApiPost.mockReset().mockResolvedValue(undefined);
   });
 
   it("renders nothing when there is no user", () => {
@@ -67,7 +66,7 @@ describe("SetupChecklist", () => {
 
     expect(await screen.findByText(/Onboarding complete!/)).toBeInTheDocument();
     expect(screen.queryByText("Get started")).not.toBeInTheDocument();
-    await waitFor(() => expect(mockApiPost).toHaveBeenCalledWith(ONBOARDING_COMPLETE_PATH));
+    await waitFor(() => expect(mockApiPost).toHaveBeenCalledWith(ONBOARDING_COMPLETE_PATH, {}));
   });
 
   it("dismisses the checklist and persists the choice in localStorage", async () => {

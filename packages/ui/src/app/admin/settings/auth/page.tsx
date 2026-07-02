@@ -1,11 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import Toggle from "@/components/Toggle";
 import { ServerStateStatus } from "@/components/ServerStateStatus";
+import Toggle from "@/components/Toggle";
 import { Button } from "@/components/ui/button";
-import { ErrorState } from "@/components/ui/States";
 import { Input } from "@/components/ui/input";
+import { ErrorState } from "@/components/ui/States";
 import {
   AUTH_SETTINGS_DEFAULTS,
   useAdminAuthSettingsQuery,
@@ -131,7 +131,7 @@ export default function AuthSettingsPage() {
       <ServerStateStatus
         isFetching={settingsQuery.isFetching}
         isStale={settingsQuery.isStale}
-        dataUpdatedAt={settingsQuery.dataUpdatedAt}
+        hasData={Boolean(settingsQuery.data)}
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

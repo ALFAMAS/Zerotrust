@@ -4,9 +4,9 @@ import { CheckCircle2, XCircle } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useRef, useState } from "react";
-import { useVerifyMagicLinkMutation } from "@/lib/server-state/authForms";
 import { setToken } from "@/lib/auth";
 import { navigateToSafeRelative, safeRelativeRedirect } from "@/lib/safeRedirect";
+import { useVerifyMagicLinkMutation } from "@/lib/server-state/authForms";
 
 type Status = "verifying" | "success" | "error";
 

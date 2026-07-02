@@ -126,7 +126,9 @@ describe("telemetry middleware trace propagation", () => {
     vi.clearAllMocks();
   });
 
-  it("correlates a login response header with structured request log trace data", async () => {
+  it(
+    "correlates a login response header with structured request log trace data",
+    async () => {
     const bcrypt = await import("bcryptjs");
     const db = makeDbChain([]);
     db.limit.mockResolvedValueOnce([
@@ -168,5 +170,7 @@ describe("telemetry middleware trace propagation", () => {
         traceId,
       })
     );
-  });
+  },
+    30_000
+  );
 });

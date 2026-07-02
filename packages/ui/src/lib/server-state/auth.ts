@@ -64,13 +64,13 @@ export function usePatchAuthMeMutation() {
 
 export function useResendVerificationEmailMutation() {
   return useMutation<unknown, Error, void>({
-    mutationFn: () => apiPost(VERIFY_EMAIL_RESEND_PATH),
+    mutationFn: () => apiPost(VERIFY_EMAIL_RESEND_PATH, {}),
   });
 }
 
 export function useOnboardingCompleteMutation() {
   return useMutation<unknown, Error, void>({
-    mutationFn: () => apiPost(ONBOARDING_COMPLETE_PATH),
+    mutationFn: () => apiPost(ONBOARDING_COMPLETE_PATH, {}),
   });
 }
 
@@ -131,7 +131,7 @@ export function useDisableTotpMutation() {
 
 export function useSetupTotpMutation() {
   return useMutation<TotpSetupResponse, Error, void>({
-    mutationFn: () => apiPost<TotpSetupResponse>(TOTP_SETUP_PATH),
+    mutationFn: () => apiPost<TotpSetupResponse>(TOTP_SETUP_PATH, {}),
   });
 }
 
@@ -148,7 +148,7 @@ export function useVerifyTotpMutation() {
 
 export function usePasskeyRegisterOptionsMutation() {
   return useMutation<Record<string, unknown>, Error, void>({
-    mutationFn: () => apiPost<Record<string, unknown>>(PASSKEY_REGISTER_OPTIONS_PATH),
+    mutationFn: () => apiPost<Record<string, unknown>>(PASSKEY_REGISTER_OPTIONS_PATH, {}),
   });
 }
 

@@ -22,7 +22,11 @@ function renderWithQueryClient(ui: React.ReactElement) {
 }
 
 describe("regions TanStack Query server state", () => {
-  
+  beforeEach(() => {
+    mockApiGet.mockReset();
+    mockApiPut.mockReset();
+  });
+
   it("models regions domain query keys and paths", () => {
     expect(regionKeys.health()).toEqual(["regions", "health"]);
     expect(REGION_HEALTH_PATH).toBe("/regions/health");
@@ -54,7 +58,7 @@ describe("regions TanStack Query server state", () => {
     renderWithQueryClient(<RegionsPage />);
     await screen.findByText("ok");
 
-    await user.type(screen.getByLabelText("Organization ID"), "org_1");
+    await user.type(screen.getByLabelText("Organization ID", { selector: "#orgId" }), "org_1");
     await user.click(screen.getByRole("button", { name: "Set region" }));
 
     await waitFor(() =>

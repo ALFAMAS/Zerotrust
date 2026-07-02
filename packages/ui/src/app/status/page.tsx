@@ -1,8 +1,8 @@
 "use client";
 
+import { ServerStateStatus } from "@/components/ServerStateStatus";
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
-import { ServerStateStatus } from "@/components/ServerStateStatus";
 import { ErrorState } from "@/components/ui/States";
 import { useStatusQuery, useStatusStream } from "@/lib/server-state/status";
 
@@ -31,9 +31,7 @@ export default function StatusPage() {
 
   const data = statusQuery.data ?? null;
   const error = Boolean(statusQuery.error && !statusQuery.data);
-  const lastChecked = statusQuery.dataUpdatedAt
-    ? new Date(statusQuery.dataUpdatedAt)
-    : null;
+  const lastChecked = statusQuery.dataUpdatedAt ? new Date(statusQuery.dataUpdatedAt) : null;
 
   const overall = error ? "down" : (data?.status ?? "operational");
   const style = STATUS_STYLES[overall];
@@ -77,8 +75,7 @@ export default function StatusPage() {
         <ServerStateStatus
           isFetching={statusQuery.isFetching}
           isStale={statusQuery.isStale}
-          dataUpdatedAt={statusQuery.dataUpdatedAt}
-          className="mt-4"
+          hasData={Boolean(statusQuery.data)}
         />
 
         <div

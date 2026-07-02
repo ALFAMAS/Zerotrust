@@ -7,9 +7,9 @@ import { SkeletonCard } from "@/components/Skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ErrorState } from "@/components/ui/States";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ErrorState } from "@/components/ui/States";
 import {
   Select,
   SelectContent,
@@ -225,7 +225,9 @@ export default function AdminAlertsPage() {
                         id={`enabled-${ch.id}`}
                         checked={ch.enabled}
                         onCheckedChange={() => void toggleEnabled(ch)}
-                        disabled={toggleMutation.isPending && toggleMutation.variables?.id === ch.id}
+                        disabled={
+                          toggleMutation.isPending && toggleMutation.variables?.id === ch.id
+                        }
                       />
                       <Label htmlFor={`enabled-${ch.id}`} className="text-xs text-muted-foreground">
                         Enabled

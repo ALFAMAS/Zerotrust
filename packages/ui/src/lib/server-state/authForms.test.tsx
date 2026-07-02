@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -9,18 +10,8 @@ import {
   AUTH_PASSWORD_RESET_REQUEST_PATH,
   useLoginMutation,
 } from "@/lib/server-state/authForms";
+import { mockApiPost } from "@/test/apiClientMock";
 
-const mockApiPost = vi.fn();
-const mockLegacyPost = vi.fn();
-vi.mock("@/lib/apiClient", () => ({
-  apiGet: vi.fn(),
-  apiPost: (...args: unknown[]) => mockApiPost(...args),
-}));
-vi.mock("@/lib/api", () => ({
-  api: {
-    post: (...args: unknown[]) => mockLegacyPost(...args),
-  },
-}));
 vi.mock("@/lib/toast", () => ({
   useToast: () => ({ toast: vi.fn() }),
 }));
@@ -49,7 +40,6 @@ function renderWithQueryClient(ui: React.ReactElement) {
 describe("authForms TanStack Query server state", () => {
   beforeEach(() => {
     mockApiPost.mockReset();
-    mockLegacyPost.mockReset();
   });
 
   it("models auth form domain paths", () => {
@@ -77,7 +67,6 @@ describe("authForms TanStack Query server state", () => {
         { skipAuth: true }
       )
     );
-    expect(mockLegacyPost).not.toHaveBeenCalled();
   });
 
   it("submits password reset request via skipAuth mutation", async () => {
@@ -105,9 +94,9 @@ describe("authForms TanStack Query server state", () => {
     function Probe() {
       const mutation = useLoginMutation();
       return (
-        <button type="button" onClick={() => mutation.mutate({ email: "a@b.com", password: "x" })}>
+        <Button type="button" onClick={() => mutation.mutate({ email: "a@b.com", password: "x" })}>
           login
-        </button>
+        </Button>
       );
     }
 

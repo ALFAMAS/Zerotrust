@@ -67,11 +67,7 @@ export default function AccessReviewsPage() {
         </div>
         <div className="flex items-center gap-3">
           <ServerStateStatus query={reviewsQuery} />
-          <Button
-            type="button"
-            onClick={startReview}
-            disabled={startMutation.isPending}
-          >
+          <Button type="button" onClick={startReview} disabled={startMutation.isPending}>
             {startMutation.isPending ? "Starting…" : "Start new review"}
           </Button>
         </div>
@@ -131,9 +127,7 @@ export default function AccessReviewsPage() {
                         <TableCell className="text-xs text-muted-foreground">
                           {(r.itemCount ?? 0) - (r.pendingCount ?? 0)}/{r.itemCount ?? 0} decided
                           {(r.pendingCount ?? 0) > 0 && (
-                            <span className="ml-1 text-amber-500">
-                              ({r.pendingCount} pending)
-                            </span>
+                            <span className="ml-1 text-amber-500">({r.pendingCount} pending)</span>
                           )}
                         </TableCell>
                         <TableCell className="text-xs text-muted-foreground">

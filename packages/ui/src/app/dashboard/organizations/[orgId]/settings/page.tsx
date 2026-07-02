@@ -4,8 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import { ServerStateStatus } from "@/components/ServerStateStatus";
 import { SkeletonCard } from "@/components/Skeleton";
 import { Button } from "@/components/ui/button";
-import { ErrorState } from "@/components/ui/States";
 import { Input } from "@/components/ui/input";
+import { ErrorState } from "@/components/ui/States";
 import {
   Select,
   SelectContent,
@@ -79,13 +79,9 @@ export default function OrgSettingsPage() {
     }
   }, [policyQuery.data]);
 
-  const loading =
-    detailQuery.isPending || membersQuery.isPending || meQuery.isPending;
+  const loading = detailQuery.isPending || membersQuery.isPending || meQuery.isPending;
 
-  if (
-    (detailQuery.error && !detailQuery.data) ||
-    (membersQuery.error && !membersQuery.data)
-  ) {
+  if ((detailQuery.error && !detailQuery.data) || (membersQuery.error && !membersQuery.data)) {
     return (
       <ErrorState
         message={
@@ -219,7 +215,7 @@ export default function OrgSettingsPage() {
       <ServerStateStatus
         isFetching={detailQuery.isFetching || policyQuery.isFetching}
         isStale={detailQuery.isStale || policyQuery.isStale}
-        dataUpdatedAt={Math.max(detailQuery.dataUpdatedAt, policyQuery.dataUpdatedAt)}
+        hasData={Boolean(detailQuery.data || policyQuery.data)}
       />
 
       <div>
@@ -268,7 +264,11 @@ export default function OrgSettingsPage() {
             className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-ring"
           />
         </div>
-        <Button type="submit" disabled={updateMutation.isPending} className="bg-primary hover:bg-primary/90 disabled:opacity-50 text-primary-foreground text-sm px-4 py-2 rounded-lg transition-colors">
+        <Button
+          type="submit"
+          disabled={updateMutation.isPending}
+          className="bg-primary hover:bg-primary/90 disabled:opacity-50 text-primary-foreground text-sm px-4 py-2 rounded-lg transition-colors"
+        >
           {updateMutation.isPending ? "Saving…" : "Save changes"}
         </Button>
       </form>
@@ -286,7 +286,10 @@ export default function OrgSettingsPage() {
             </p>
           </div>
 
-          <label htmlFor="require-passkey-attestation" className="flex items-start gap-3 cursor-pointer">
+          <label
+            htmlFor="require-passkey-attestation"
+            className="flex items-start gap-3 cursor-pointer"
+          >
             <Input
               id="require-passkey-attestation"
               type="checkbox"
@@ -305,7 +308,10 @@ export default function OrgSettingsPage() {
             </span>
           </label>
 
-          <label htmlFor="require-hardware-passkey" className="flex items-start gap-3 cursor-pointer">
+          <label
+            htmlFor="require-hardware-passkey"
+            className="flex items-start gap-3 cursor-pointer"
+          >
             <Input
               id="require-hardware-passkey"
               type="checkbox"

@@ -7,10 +7,7 @@ vi.mock("@/lib/toast", () => ({
   useToast: () => ({ toast: mockToast }),
 }));
 
-const mockPost = vi.fn();
-vi.mock("../../../lib/api", () => ({
-  api: { post: (...args: unknown[]) => mockPost(...args) },
-}));
+import { mockApiPost } from "@/test/apiClientMock";
 
 const mockSetToken = vi.fn();
 vi.mock("../../../lib/auth", () => ({
@@ -23,17 +20,29 @@ vi.mock("../../../lib/pow", () => ({
 }));
 
 import RegisterPage from "./page";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+function renderRegister() {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+  });
+  return render(
+    <QueryClientProvider client={queryClient}>
+      <RegisterPage />
+    </QueryClientProvider>
+  );
+}
 
 describe("RegisterPage", () => {
   beforeEach(() => {
     mockToast.mockReset();
-    mockPost.mockReset();
+    mockApiPost.mockReset();
     mockSetToken.mockReset();
     mockSolveSignupPow.mockReset().mockResolvedValue({});
   });
 
   it("renders the sign-up form", () => {
-    render(<RegisterPage />);
+    renderRegister();
 
     expect(screen.getByText("Create your account")).toBeInTheDocument();
     expect(screen.getByLabelText("Display Name")).toBeInTheDocument();
@@ -45,7 +54,7 @@ describe("RegisterPage", () => {
 
   it("rejects submission when passwords don't match, without calling the API", async () => {
     const user = userEvent.setup();
-    render(<RegisterPage />);
+    renderRegister();
 
     await user.type(screen.getByLabelText("Display Name"), "Jane Doe");
     await user.type(screen.getByLabelText("Email"), "jane@example.com");
@@ -54,16 +63,16 @@ describe("RegisterPage", () => {
     await user.click(screen.getByRole("button", { name: "Create account" }));
 
     expect(mockToast).toHaveBeenCalledWith({ message: "Passwords do not match", type: "error" });
-    expect(mockPost).not.toHaveBeenCalled();
+    expect(mockApiPost).not.toHaveBeenCalled();
   });
 
   it("registers, logs in, and stores tokens on success", async () => {
     const user = userEvent.setup();
-    mockPost
+    mockApiPost
       .mockResolvedValueOnce(undefined) // POST /auth/register
       .mockResolvedValueOnce({ accessToken: "at", refreshToken: "rt" }); // POST /auth/login
 
-    render(<RegisterPage />);
+    renderRegister();
     await user.type(screen.getByLabelText("Display Name"), "Jane Doe");
     await user.type(screen.getByLabelText("Email"), "jane@example.com");
     await user.type(screen.getByLabelText("Password"), "hunter22222");
@@ -71,14 +80,14 @@ describe("RegisterPage", () => {
     await user.click(screen.getByRole("button", { name: "Create account" }));
 
     await waitFor(() => {
-      expect(mockPost).toHaveBeenCalledWith(
+      expect(mockApiPost).toHaveBeenCalledWith(
         "/auth/register",
         {
           email: "jane@example.com",
           password: "hunter22222",
           displayName: "Jane Doe",
         },
-        true
+        { skipAuth: true }
       );
     });
     await waitFor(() => {
@@ -93,11 +102,11 @@ describe("RegisterPage", () => {
   it("includes the proof-of-work fields in the register payload when required", async () => {
     const user = userEvent.setup();
     mockSolveSignupPow.mockResolvedValue({ powChallenge: "chal-1", powSolution: "42" });
-    mockPost
+    mockApiPost
       .mockResolvedValueOnce(undefined)
       .mockResolvedValueOnce({ accessToken: "at", refreshToken: "rt" });
 
-    render(<RegisterPage />);
+    renderRegister();
     await user.type(screen.getByLabelText("Display Name"), "Jane Doe");
     await user.type(screen.getByLabelText("Email"), "jane@example.com");
     await user.type(screen.getByLabelText("Password"), "hunter22222");
@@ -105,19 +114,19 @@ describe("RegisterPage", () => {
     await user.click(screen.getByRole("button", { name: "Create account" }));
 
     await waitFor(() => {
-      expect(mockPost).toHaveBeenCalledWith(
+      expect(mockApiPost).toHaveBeenCalledWith(
         "/auth/register",
         expect.objectContaining({ powChallenge: "chal-1", powSolution: "42" }),
-        true
+        { skipAuth: true }
       );
     });
   });
 
   it("shows an error toast when registration fails", async () => {
     const user = userEvent.setup();
-    mockPost.mockRejectedValueOnce(new Error("Email already registered"));
+    mockApiPost.mockRejectedValueOnce(new Error("Email already registered"));
 
-    render(<RegisterPage />);
+    renderRegister();
     await user.type(screen.getByLabelText("Display Name"), "Jane Doe");
     await user.type(screen.getByLabelText("Email"), "jane@example.com");
     await user.type(screen.getByLabelText("Password"), "hunter22222");

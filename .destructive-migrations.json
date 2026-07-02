@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema",
+  "approved": [
+    {
+      "file": "drizzle/0020_drop_collaboration.sql",
+      "pattern": "DROP TABLE",
+      "reason": "Pre-existing destructive migration (pre-P3.5 baseline)"
+    },
+    {
+      "file": "drizzle/0021_drop_did_column.sql",
+      "pattern": "DROP CONSTRAINT",
+      "reason": "Pre-existing destructive migration (pre-P3.5 baseline)"
+    },
+    {
+      "file": "drizzle/0021_drop_did_column.sql",
+      "pattern": "DROP COLUMN",
+      "reason": "Pre-existing destructive migration (pre-P3.5 baseline)"
+    },
+    {
+      "file": "drizzle/0022_drop_growth_tooling.sql",
+      "pattern": "DROP TABLE",
+      "reason": "Pre-existing destructive migration (pre-P3.5 baseline)"
+    },
+    {
+      "file": "drizzle/0023_drop_workload_credentials.sql",
+      "pattern": "DROP TABLE",
+      "reason": "Pre-existing destructive migration (pre-P3.5 baseline)"
+    },
+    {
+      "file": "drizzle/0024_drop_enterprise_federation.sql",
+      "pattern": "DROP TABLE",
+      "reason": "Pre-existing destructive migration (pre-P3.5 baseline)"
+    },
+    {
+      "file": "drizzle/0024_drop_enterprise_federation.sql",
+      "pattern": "DROP COLUMN",
+      "reason": "Pre-existing destructive migration (pre-P3.5 baseline)"
+    }
+  ]
+}

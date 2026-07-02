@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-vi.mock("../db", () => ({ getDb: vi.fn() }));
+vi.mock("../db", () => ({ getDb: vi.fn(), getReadDb: vi.fn() }));
 vi.mock("../logger", () => ({
   getLogger: () => ({ info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() }),
 }));
 
-import { getDb } from "../db";
+import { getDb, getReadDb } from "../db";
 import {
   hasVerifiedExemption,
   isReverseCharge,
@@ -15,7 +15,11 @@ import {
 } from "../services/billing/taxExemption.service";
 
 const getDbMock = getDb as unknown as ReturnType<typeof vi.fn>;
-beforeEach(() => getDbMock.mockReset());
+const getReadDbMock = getReadDb as unknown as ReturnType<typeof vi.fn>;
+beforeEach(() => {
+  getDbMock.mockReset();
+  getReadDbMock.mockReset();
+});
 
 const insertReturning = (row: unknown) => ({
   insert: () => ({ values: () => ({ onConflictDoUpdate: () => ({ returning: () => Promise.resolve([row]) }) }) }),
@@ -107,7 +111,7 @@ describe("isReverseCharge", () => {
 describe("listTaxExemptions", () => {
   it("returns the org's exemptions", async () => {
     const rows = [{ id: "e1" }, { id: "e2" }];
-    getDbMock.mockReturnValue(selectOrderBy(rows));
+    getReadDbMock.mockReturnValue(selectOrderBy(rows));
     expect(await listTaxExemptions("o1")).toEqual(rows);
   });
 });

@@ -611,10 +611,7 @@ export const pointsLedgerTable = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
   },
   (t) => ({
-    pointsLedgerUserCreatedIdx: index("points_ledger_user_created_idx").on(
-      t.userId,
-      t.createdAt
-    ),
+    pointsLedgerUserCreatedIdx: index("points_ledger_user_created_idx").on(t.userId, t.createdAt),
   })
 );
 

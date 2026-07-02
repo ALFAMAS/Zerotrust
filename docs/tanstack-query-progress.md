@@ -22,12 +22,12 @@ Tracks the frontend server-state migration from ad-hoc `useEffect` + local loadi
 
 | Metric | Count |
 | --- | --- |
-| App `page.tsx` files | 47 |
-| Migrated to TanStack Query | 42 |
+| App `page.tsx` files | 53 |
+| Migrated to TanStack Query | 48 |
 | Remaining (`lib/api` relative imports) | 0 |
 | Remaining (other legacy: `useApi`, raw `fetch`, `useEffect`+`apiGet`) | 0 |
 | Static / no server state | 5 |
-| **Data-fetching completion** | **100%** (42/42) |
+| **Data-fetching completion** | **100%** (48/48) |
 
 `@/lib/api` alias imports: **0** under `packages/ui/src`.
 Relative `lib/api` imports in app `page.tsx`: **0**.
@@ -97,6 +97,21 @@ Relative `lib/api` imports in app `page.tsx`: **0**.
 | `/admin` (overview) | [x] | Stats + recent users queries + CSV export mutation via `adminDashboard.ts`. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/adminDashboard.test.tsx` |
 | `/admin/settings/auth` | [x] | Auth settings load/save via extended `settings.ts` (`useAdminAuthSettingsQuery`). | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/settings.test.tsx` |
 | `/status` | [x] | Status query + SSE cache updates via `status.ts`. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/status.test.tsx` |
+| `/admin/feedback` | [x] | Admin feedback inbox via `adminFeedback.ts`. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/adminFeedback.test.tsx` |
+| `/admin/roles` | [x] | System role list + create via `adminRoles.ts`. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/adminRoles.test.tsx` |
+| `/admin/jit-grants` | [x] | JIT grant approve/deny inbox via `adminJitGrants.ts` (distinct from `/admin/jit` cross-tenant). | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/adminJitGrants.test.tsx` |
+| `/admin/content` | [x] | Attachment list/upload + lifecycle email trigger via `adminContent.ts`. | — |
+| `/admin/search` | [x] | Search index management + provider via `adminSearch.ts`. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/adminSearch.test.tsx` |
+| `/admin/webhooks` | [x] | Admin-wide webhook delivery log lookup via `adminWebhooks.ts`. | — |
+| `/dashboard/billing` (extended) | [x] | Usage, VAT validate, tax exemptions, change-plan added to existing `billing.ts` surface. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/billing.test.tsx` |
+| `/admin/regions` (extended) | [x] | Org branding + custom domain forms added to `regions.ts`. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/regions.test.tsx` |
+
+## P2 product-surface pages (2026-07-03)
+
+Six new admin pages plus billing/regions extensions. New server-state modules:
+`adminFeedback.ts`, `adminRoles.ts`, `adminJitGrants.ts`, `adminContent.ts`,
+`adminSearch.ts`, `adminWebhooks.ts`. API/SDK-only routes documented in
+`openapi.json`: `GET /auth/unsubscribe`, `POST /wallet/spend`.
 
 ## Phase 4 — relative `lib/api` imports (`packages/ui/src/app`) — **COMPLETE**
 

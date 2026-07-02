@@ -45,6 +45,6 @@ export function useStatusStream(enabled = true) {
         // ignore parse errors
       }
     };
-  return () => es.close();
+    return () => es.close();
   }, [enabled, queryClient, statusKey]);
 }

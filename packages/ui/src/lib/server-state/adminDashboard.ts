@@ -39,9 +39,9 @@ function normalizeRecentUsers(
 }
 
 export function fetchAdminRecentUsers(limit = 5): Promise<AdminRecentUser[]> {
-  return apiGet<PaginatedResponse<AdminRecentUser> | AdminRecentUser[] | { users: AdminRecentUser[] }>(
-    buildAdminRecentUsersPath(limit)
-  ).then(normalizeRecentUsers);
+  return apiGet<
+    PaginatedResponse<AdminRecentUser> | AdminRecentUser[] | { users: AdminRecentUser[] }
+  >(buildAdminRecentUsersPath(limit)).then(normalizeRecentUsers);
 }
 
 export function adminRecentUsersQueryOptions(limit = 5) {

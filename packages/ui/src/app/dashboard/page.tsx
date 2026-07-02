@@ -83,9 +83,9 @@ export default function DashboardPage() {
         <p className="mt-1 text-muted-foreground">{user?.email}</p>
       </div>
 
-      <SetupChecklist user={user} />
+      <SetupChecklist user={user ?? null} />
 
-      <ProgressBars user={user} />
+      <ProgressBars user={user ?? null} />
 
       <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-3">
         {stats.map((stat) => (

@@ -116,3 +116,127 @@ export function useBillingPortalMutation() {
     mutationFn: () => apiPost("/billing/portal", {}),
   });
 }
+
+export interface BillingUsageSummary {
+  apiCalls: { used: number; limit: number };
+  seats: { used: number; limit: number };
+  plan: string;
+}
+
+export interface TaxExemption {
+  id: string;
+  orgId: string;
+  kind: string;
+  taxId: string;
+  country: string;
+  status: string;
+  businessName: string | null;
+  createdAt: string;
+}
+
+export interface VatValidationResult {
+  valid: boolean;
+  country: string;
+  vatNumber: string;
+  name?: string;
+  address?: string;
+  formatValid: boolean;
+  viesChecked: boolean;
+}
+
+export function fetchBillingUsage(orgId?: string): Promise<BillingUsageSummary> {
+  const path = orgId ? `/billing/usage?orgId=${encodeURIComponent(orgId)}` : "/billing/usage";
+  return apiGet<BillingUsageSummary>(path);
+}
+
+export function billingUsageQueryOptions(orgId?: string) {
+  return queryOptions({
+    queryKey: billingKeys.usage(orgId),
+    queryFn: () => fetchBillingUsage(orgId),
+  });
+}
+
+export function useBillingUsageQuery(orgId?: string) {
+  return useQuery(billingUsageQueryOptions(orgId));
+}
+
+export function fetchTaxExemptions(orgId: string): Promise<{ exemptions: TaxExemption[] }> {
+  return apiGet<{ exemptions: TaxExemption[] }>(
+    `/billing/tax-exemptions?orgId=${encodeURIComponent(orgId)}`
+  );
+}
+
+export function taxExemptionsQueryOptions(orgId: string) {
+  return queryOptions({
+    queryKey: billingKeys.taxExemptions(orgId),
+    queryFn: () => fetchTaxExemptions(orgId),
+    enabled: Boolean(orgId),
+  });
+}
+
+export function useTaxExemptionsQuery(orgId: string) {
+  return useQuery(taxExemptionsQueryOptions(orgId));
+}
+
+export function useSubmitTaxExemptionMutation() {
+  const queryClient = useQueryClient();
+  return useMutation<
+    unknown,
+    Error,
+    { orgId: string; kind: string; taxId: string; country: string; businessName?: string }
+  >({
+    mutationFn: (input) => apiPost("/billing/tax-exemptions", input),
+    onSettled: (_data, _error, variables) => {
+      void queryClient.invalidateQueries({
+        queryKey: billingKeys.taxExemptions(variables.orgId),
+      });
+    },
+  });
+}
+
+export function useSetTaxExemptionStatusMutation() {
+  const queryClient = useQueryClient();
+  return useMutation<
+    unknown,
+    Error,
+    { id: string; status: "verified" | "rejected" | "pending"; orgId: string }
+  >({
+    mutationFn: ({ id, status }) => apiPost(`/billing/tax-exemptions/${id}/status`, { status }),
+    onSettled: (_data, _error, variables) => {
+      void queryClient.invalidateQueries({
+        queryKey: billingKeys.taxExemptions(variables.orgId),
+      });
+    },
+  });
+}
+
+export function fetchVatValidation(vat: string): Promise<VatValidationResult> {
+  return apiGet<VatValidationResult>(`/billing/vat/validate?vat=${encodeURIComponent(vat)}`);
+}
+
+export function vatValidateQueryOptions(vat: string) {
+  return queryOptions({
+    queryKey: billingKeys.vatValidate(vat),
+    queryFn: () => fetchVatValidation(vat),
+    enabled: vat.length >= 4,
+  });
+}
+
+export function useVatValidateQuery(vat: string) {
+  return useQuery(vatValidateQueryOptions(vat));
+}
+
+export function useBillingChangePlanMutation() {
+  const queryClient = useQueryClient();
+  return useMutation<
+    unknown,
+    Error,
+    { priceId: string; orgId?: string; when?: "now" | "period_end" }
+  >({
+    mutationFn: (input) => apiPost("/billing/change-plan", input),
+    onSettled: () => {
+      void queryClient.invalidateQueries({ queryKey: billingKeys.subscription() });
+      void queryClient.invalidateQueries({ queryKey: billingKeys.usage() });
+    },
+  });
+}

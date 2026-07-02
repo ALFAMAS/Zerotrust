@@ -3,7 +3,12 @@
 import { queryOptions, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiDelete, apiGet } from "@/lib/apiClient";
 import { queryKeys } from "./queryKeys";
-import type { AdminSession, AdminSessionsListParams, PaginatedResponse, UserSession } from "./types";
+import type {
+  AdminSession,
+  AdminSessionsListParams,
+  PaginatedResponse,
+  UserSession,
+} from "./types";
 
 export const sessionKeys = queryKeys.admin.sessions;
 

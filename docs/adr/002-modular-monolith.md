@@ -27,8 +27,8 @@ The monolith is "modular" in that:
 - Routes are independently mounted in `src/api/server.ts` and each applies its
   own guards (`authMiddleware`, `rateLimiting`, `requirePlan`, etc.).
 - Services are pure TypeScript modules with explicit dependencies.
-- The worker process (P1.2 target) will share the same service and repository
-  code — no duplication.
+- The worker process (`src/worker.ts`) shares the same service and repository
+  code — no duplication (P1.2).
 
 ## Alternatives considered
 
@@ -47,15 +47,15 @@ The monolith is "modular" in that:
   route and service without packaging or publishing.
 - **Positive:** Splitting paths later (worker process, read-replica routing) is
   a refactor of `startServer()`, not a migration of IPC protocols.
-- **Negative:** Background schedulers (retention, billing lifecycle, backups)
-  currently run in the HTTP process with no instance guard — under PM2 cluster
-  mode (`-i max`) every replica runs them, producing duplicate work (addressed
-  by TODO P1.2).
+- **Negative:** Background schedulers duplicate work when cluster deploys omit
+  `WORKER_MODE=true`. Production topology enforcement (P1.2) defers schedulers
+  to the dedicated worker and warns on misconfiguration.
 - **Negative:** Module boundaries are not enforced — any service can import any
   other. An import-linter or boundary check is needed (TODO P2.2).
 
 ## References
 
 - Architecture doc: `docs/ARCHITECTURE.md`
-- TODO: `todo.md` P1.2 (worker split), P2.2 (module boundaries)
+- Worker split: `src/worker.ts`, `src/jobs/topology.ts` (P1.2 shipped)
+- TODO: `todo.md` P2.2 (module boundaries)
 - `src/api/server.ts` — route mounting and global middleware chain

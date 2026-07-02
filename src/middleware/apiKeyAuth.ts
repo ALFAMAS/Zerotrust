@@ -3,8 +3,8 @@ import { and, eq, isNull } from "drizzle-orm";
 import { createMiddleware } from "hono/factory";
 import { getDb } from "../db";
 import { apiKeysTable, usersTable } from "../db/schema";
-import { apiKeyUsageMetric, getUsage, incrementUsage } from "../shared/usageMetering";
 import type { HonoEnv, User } from "../shared/types";
+import { apiKeyUsageMetric, getUsage, incrementUsage } from "../shared/usageMetering";
 import { consumeRateLimit } from "./rateLimiting";
 
 export function requireApiKeyScopes(required: string | string[], mode: "all" | "any" = "all") {

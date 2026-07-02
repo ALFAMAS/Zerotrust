@@ -5,15 +5,15 @@ import { useEffect, useState } from "react";
 import { ServerStateStatus } from "@/components/ServerStateStatus";
 import Toggle from "@/components/Toggle";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ErrorState } from "@/components/ui/States";
 import { Label } from "@/components/ui/label";
+import { ErrorState } from "@/components/ui/States";
 import { useToast } from "@/context/ToastContext";
+import { isPushSupported, isSubscribed, subscribeToPush, unsubscribeFromPush } from "@/lib/push";
 import {
   useNotificationPreferencesQuery,
   useUpdateNotificationPreferencesMutation,
 } from "@/lib/server-state/notifications";
 import type { NotificationPreferences } from "@/lib/server-state/types";
-import { isPushSupported, isSubscribed, subscribeToPush, unsubscribeFromPush } from "@/lib/push";
 
 const NOTIF_CATEGORIES: { key: string; label: string; desc: string }[] = [
   { key: "security", label: "Security", desc: "Logins, MFA, passkeys, suspicious activity" },
@@ -125,10 +125,7 @@ export default function NotificationSettingsPage() {
       />
 
       {prefsQuery.error && !hasPrefs ? (
-        <ErrorState
-          message={prefsQuery.error.message}
-          retry={() => void prefsQuery.refetch()}
-        />
+        <ErrorState message={prefsQuery.error.message} retry={() => void prefsQuery.refetch()} />
       ) : loading ? (
         <div className="flex items-center gap-2 rounded-xl border border-border bg-card p-6 text-sm text-muted-foreground">
           <Loader2 className="h-4 w-4 animate-spin" /> Loading preferences…
@@ -161,8 +158,8 @@ export default function NotificationSettingsPage() {
                 </div>
               ) : (
                 <p className="text-sm text-muted-foreground">
-                  This browser doesn't support web push notifications. Install zerotrust as an app or
-                  use a supported browser to enable them.
+                  This browser doesn't support web push notifications. Install zerotrust as an app
+                  or use a supported browser to enable them.
                 </p>
               )}
             </CardContent>
@@ -176,7 +173,9 @@ export default function NotificationSettingsPage() {
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between gap-4">
                 <div>
-                  <Label className="text-sm font-medium text-foreground">Email me when I'm away</Label>
+                  <Label className="text-sm font-medium text-foreground">
+                    Email me when I'm away
+                  </Label>
                   <p className="mt-0.5 text-xs text-muted-foreground">
                     If you haven't seen an important notification in-app, send it to your email too.
                   </p>

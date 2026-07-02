@@ -66,8 +66,7 @@ export default function SessionsPage() {
       <ServerStateStatus
         isFetching={sessionsQuery.isFetching}
         isStale={sessionsQuery.isStale}
-        dataUpdatedAt={sessionsQuery.dataUpdatedAt}
-        className="mb-4"
+        hasData={Boolean(sessionsQuery.data)}
       />
 
       {loading ? (

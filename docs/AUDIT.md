@@ -88,16 +88,16 @@ incident under load or attack) · **Medium** (correctness/maintainability debt) 
 
 | # | Finding | Risk | Status |
 | --- | --- | --- | --- |
-| C1 | **Hot-path writes are not transactional.** Only 2 files use `db.transaction` (`audit/chain.ts`, `org.routes.ts`). Refresh-token rotation, session lifecycle, billing mutations, wallet ledger, and org role transitions run as sequential statements — a crash between them leaves partial state. | High | TODO P1 |
+| C1 | **Hot-path writes are not transactional.** Refresh-token rotation, billing mutations, org role transitions, and points-ledger writes ran as sequential inline Drizzle. | High | **Fixed** (P1.1) — seven transactional repositories; routes/services delegate |
 | C2 | The Stripe webhook body is typed `any` end-to-end (`event: any`, `event.data.object as any`). A shape change from Stripe fails silently at runtime rather than at compile time. | Medium | **Fixed** (P2.1) — `Stripe.Event` + explicit per-case payload interfaces |
-| C3 | Background schedulers (retention, billing lifecycle, backups, notification fallback) are fire-and-forget `setInterval`s started in-process with no shared job registry, retry/backoff, dead-letter, or idempotency keys. A second API replica runs every scheduler twice. | High | TODO P1 |
+| C3 | Background schedulers (retention, billing lifecycle, backups, notification fallback) are fire-and-forget `setInterval`s started in-process with no shared job registry, retry/backoff, dead-letter, or idempotency keys. A second API replica runs every scheduler twice. | High | **Mitigated** (P1.2) — `WORKER_MODE=true` defers schedulers to `src/worker.ts`; production API startup warns when misconfigured; Redis leader locks remain as guardrail |
 | C4 | **`compress()` middleware crashed the API under the old pinned runtime.** Hono's `compress()` needs the global `CompressionStream`, absent in Bun < 1.3. The repo now pins Bun 1.3.14 and mounts compression directly after verifying the global exists. | High | **Fixed** — see §6 |
 
 ### 4.3 Maintainability
 
 | # | Finding | Risk | Status |
 | --- | --- | --- | --- |
-| M1 | **No repository layer.** Routes/services call Drizzle inline. The codebase wants one (per TODO) so transactional invariants and authorization live in one testable place. | Medium | Seeded this PR (`src/db/repositories/`) |
+| M1 | **No repository layer.** Routes/services call Drizzle inline. The codebase wants one so transactional invariants and authorization live in one testable place. | Medium | **Fixed** (P1.1) — `src/db/repositories/` with seven hot-path repos |
 | M2 | **213 `as any` casts** in `src/`. Concentrated in webhook/Stripe handling and a few middleware. Each is a place the type system stops helping. | Medium | → **todo.md M1** |
 | M3 | **No enforced module boundaries.** Any service can import any other; there is no `identity`/`billing`/`tenancy`/`ops` partition or import-linter, so coupling grows silently. | Medium | TODO P2 |
 
@@ -105,7 +105,7 @@ incident under load or attack) · **Medium** (correctness/maintainability debt) 
 
 | # | Finding | Risk | Status |
 | --- | --- | --- | --- |
-| P1 | In-process `setInterval` schedulers (C3) do not scale horizontally — duplicate work per replica. Needs a single-leader or queue-backed scheduler. | High | TODO P1 |
+| P1 | In-process `setInterval` schedulers (C3) do not scale horizontally — duplicate work per replica. Needs a single-leader or queue-backed scheduler. | High | **Mitigated** (P1.2) — dedicated worker + `WORKER_MODE`; leader election in `jobs/scheduler.ts` |
 | P2 | `checkout.session.completed` calls the Stripe API (`subscriptions.retrieve`) inside the request path; fine today, but webhook handlers should offload heavy work to the queue as volume grows. | Low | **Fixed** (P3.3) — BullMQ offload with sync fallback |
 | P3 | Read-replica routing exists (`getReadDb`) but is opt-in per call site; list/admin/analytics endpoints should default to the replica. | Low | **In progress** (P3.2) — 4 read-only admin list endpoints switched |
 
@@ -126,8 +126,9 @@ incident under load or attack) · **Medium** (correctness/maintainability debt) 
 
 ## 5. Recommended upgrades (suggested implementation order)
 
-1. **Repository + transaction layer** for refresh-token rotation, session
-   lifecycle, billing, wallet ledger, org role transitions (C1, M1).
+1. ~~**Repository + transaction layer** for refresh-token rotation, session
+   lifecycle, billing, wallet ledger, org role transitions (C1, M1).~~ **Done**
+   (P1.1, 2026-07-03).
 2. **Centralized jobs module** with Zod payloads, retry/backoff, dead-letter,
    idempotency keys, and single-leader scheduling (C3, P1).
 3. **Module boundaries + import-linter** and an ADR for dependency direction (M3).

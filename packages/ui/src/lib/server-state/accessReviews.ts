@@ -95,9 +95,7 @@ export function useDecideAccessReviewItemMutation() {
         return {
           ...current,
           items: current.items.map((item) =>
-            item.id === itemId
-              ? { ...item, decision, decidedAt: new Date().toISOString() }
-              : item
+            item.id === itemId ? { ...item, decision, decidedAt: new Date().toISOString() } : item
           ),
         };
       });

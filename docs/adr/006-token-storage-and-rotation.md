@@ -50,12 +50,12 @@ access. Their lifecycle — how they are stored, transmitted, rotated, and revok
   apps, CLI tools). The API key system (`src/api/routes/api-keys.routes.ts`)
   addresses this with SHA-256-hashed bearer tokens.
 - **Negative:** Refresh-token rotation is a multi-statement write (invalidate
-  old + insert new) that must be transactional. Until the repository layer (P1.1)
-  wraps this, a crash between statements leaves partial state.
+  old + insert new) that must be transactional. `authSessions.repository.ts`
+  wraps rotation and family-revocation in `db.transaction` (P1.1).
 
 ## References
 
 - Token service: `src/services/token.service.ts`
 - PASETO implementation: `src/crypto/paseto-v4.ts`
 - API keys: `src/api/routes/api-keys.routes.ts`
-- TODO: `todo.md` P1.1 (transactional token rotation)
+- Token rotation repository: `src/db/repositories/authSessions.repository.ts`

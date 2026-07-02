@@ -6,13 +6,13 @@ import { queryKeys } from "./queryKeys";
 import type {
   AcceptInviteInput,
   AcceptInviteResponse,
-  CreateOrgInviteInput,
   CreateOrganizationInput,
+  CreateOrgInviteInput,
+  OrganizationsListResponse,
   OrgDetailResponse,
   OrgInvite,
   OrgMemberRow,
   OrgSecurityPolicy,
-  OrganizationsListResponse,
   PaginatedResponse,
   SaveOrgSecurityPolicyInput,
   TransferOrganizationInput,
@@ -183,8 +183,10 @@ export function useUpdateOrganizationMutation(orgId: string) {
   return useMutation<{ org: OrgDetailResponse["org"] }, Error, UpdateOrganizationInput>({
     mutationFn: (input) => apiPut<{ org: OrgDetailResponse["org"] }>(buildOrgPath(orgId), input),
     onSuccess: (result) => {
-      queryClient.setQueryData(organizationKeys.detail(orgId), (current: OrgDetailResponse | undefined) =>
-        current ? { ...current, org: result.org } : current
+      queryClient.setQueryData(
+        organizationKeys.detail(orgId),
+        (current: OrgDetailResponse | undefined) =>
+          current ? { ...current, org: result.org } : current
       );
     },
     onSettled: () => {

@@ -36,13 +36,13 @@ export const AUTH_SETTINGS_DEFAULTS: AuthSettings = {
   allowedEmailDomains: "",
 };
 
-export function normalizeGeneralSettings(
-  partial: Partial<GeneralSettings> = {}
-): GeneralSettings {
+export function normalizeGeneralSettings(partial: Partial<GeneralSettings> = {}): GeneralSettings {
   return { ...GENERAL_SETTINGS_DEFAULTS, ...partial };
 }
 
-export function normalizeAuthSettings(partial: Partial<AuthSettings> & { allowedEmailDomains?: string | string[] } = {}): AuthSettings {
+export function normalizeAuthSettings(
+  partial: Partial<AuthSettings> & { allowedEmailDomains?: string | string[] } = {}
+): AuthSettings {
   const domains = partial.allowedEmailDomains;
   const allowedEmailDomains = Array.isArray(domains)
     ? domains.join(", ")

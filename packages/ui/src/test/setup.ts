@@ -1,6 +1,25 @@
 import "@testing-library/jest-dom/vitest";
 import { cleanup } from "@testing-library/react";
 import { afterEach, vi } from "vitest";
+import {
+  mockApiDelete,
+  mockApiGet,
+  mockApiGetBlob,
+  mockApiPatch,
+  mockApiPost,
+  mockApiPostFormData,
+  mockApiPut,
+} from "./apiClientMock";
+
+vi.mock("@/lib/apiClient", () => ({
+  apiGet: (...args: unknown[]) => mockApiGet(...args),
+  apiPost: (...args: unknown[]) => mockApiPost(...args),
+  apiPatch: (...args: unknown[]) => mockApiPatch(...args),
+  apiPut: (...args: unknown[]) => mockApiPut(...args),
+  apiDelete: (...args: unknown[]) => mockApiDelete(...args),
+  apiPostFormData: (...args: unknown[]) => mockApiPostFormData(...args),
+  apiGetBlob: (...args: unknown[]) => mockApiGetBlob(...args),
+}));
 
 // Unmount rendered components between tests so state/DOM doesn't leak across cases.
 afterEach(() => {

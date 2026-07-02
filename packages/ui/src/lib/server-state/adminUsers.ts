@@ -6,8 +6,8 @@ import { queryKeys } from "./queryKeys";
 import type {
   AdminUserDetail,
   AdminUserListItem,
-  AdminUsersListParams,
   AdminUserStatus,
+  AdminUsersListParams,
   CustomerSegment,
   PaginatedResponse,
   UpdateAdminUserListStatusInput,
@@ -17,12 +17,7 @@ export const adminUserKeys = queryKeys.admin.users;
 
 const DEFAULT_LIST_LIMIT = 20;
 
-export const CUSTOMER_SEGMENTS: CustomerSegment[] = [
-  "champion",
-  "at_risk",
-  "expansion",
-  "new",
-];
+export const CUSTOMER_SEGMENTS: CustomerSegment[] = ["champion", "at_risk", "expansion", "new"];
 
 export function buildAdminUserDetailPath(id: string): string {
   return `/admin/users/${id}`;
@@ -44,6 +39,12 @@ export function normalizeAdminUsersListParams(
   return { page: params.page ?? 1, limit: params.limit ?? DEFAULT_LIST_LIMIT, ...params };
 }
 
+function adminUsersListKey(params: AdminUsersListParams = {}) {
+  return adminUserKeys.list(
+    normalizeAdminUsersListParams(params) as unknown as Record<string, string | number | undefined>
+  );
+}
+
 export function fetchAdminUsersList(
   params: AdminUsersListParams = {}
 ): Promise<PaginatedResponse<AdminUserListItem>> {
@@ -54,7 +55,7 @@ export function fetchAdminUsersList(
 export function adminUsersListQueryOptions(params: AdminUsersListParams = {}) {
   const normalized = normalizeAdminUsersListParams(params);
   return queryOptions({
-    queryKey: adminUserKeys.list(normalized),
+    queryKey: adminUsersListKey(params),
     queryFn: () => fetchAdminUsersList(normalized),
   });
 }
@@ -123,8 +124,7 @@ export function useUpdateAdminUserStatusMutation(userId: string) {
   const detailKey = adminUserKeys.detail(userId);
 
   return useMutation<AdminUserDetail, Error, AdminUserStatus, DetailMutationContext>({
-    mutationFn: (status) =>
-      apiPatch<AdminUserDetail>(buildAdminUserDetailPath(userId), { status }),
+    mutationFn: (status) => apiPatch<AdminUserDetail>(buildAdminUserDetailPath(userId), { status }),
     onMutate: async (status) => {
       await queryClient.cancelQueries({ queryKey: detailKey });
       const previous = queryClient.getQueryData<AdminUserDetail>(detailKey);
@@ -175,7 +175,7 @@ export function useForceLogoutAdminUserMutation(userId: string) {
   const detailKey = adminUserKeys.detail(userId);
 
   return useMutation<{ success: boolean }, Error, void, DetailMutationContext>({
-    mutationFn: () => apiPost<{ success: boolean }>(buildAdminUserForceLogoutPath(userId)),
+    mutationFn: () => apiPost<{ success: boolean }>(buildAdminUserForceLogoutPath(userId), {}),
     onMutate: async () => {
       await queryClient.cancelQueries({ queryKey: detailKey });
       const previous = queryClient.getQueryData<AdminUserDetail>(detailKey);
@@ -211,7 +211,7 @@ export function useDeleteAdminUserMutation(userId: string) {
 
 export function useAdminUserListStatusMutation(params: AdminUsersListParams = {}) {
   const queryClient = useQueryClient();
-  const listKey = adminUserKeys.list(normalizeAdminUsersListParams(params));
+  const listKey = adminUsersListKey(params);
 
   return useMutation<
     AdminUserDetail,
@@ -243,7 +243,7 @@ export function useAdminUserListStatusMutation(params: AdminUsersListParams = {}
 
 export function useAdminUserListDeleteMutation(params: AdminUsersListParams = {}) {
   const queryClient = useQueryClient();
-  const listKey = adminUserKeys.list(normalizeAdminUsersListParams(params));
+  const listKey = adminUsersListKey(params);
 
   return useMutation<unknown, Error, string, AdminUsersListMutationContext>({
     mutationFn: (id) => apiDelete(buildAdminUserDetailPath(id)),
