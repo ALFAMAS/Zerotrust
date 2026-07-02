@@ -53,8 +53,8 @@ _Was: `docs/audit/D3-performance-subplan.md`_
 Companion task breakdown to the audit above: eliminate write-on-every-read in
 `authMiddleware` (shipped, #39), session+user single round-trip, optional Redis
 user-state cache, k6 p95 capture. **Outcome:** the write-on-read fix shipped;
-remaining latency work is tracked under [`../todo.md`](../todo.md) P3
-(read-replica routing, queue offload).
+remaining latency work shipped in [`../tdone.md`](../tdone.md) P3
+(read-replica routing, RSC prefetch, k6 baselines).
 
 ## 2026-06-28 — Production Safety TODO (failsafe CI/CD & hardening)
 _Was: `docs/PRODUCTION_SAFETY_TODO.md`_

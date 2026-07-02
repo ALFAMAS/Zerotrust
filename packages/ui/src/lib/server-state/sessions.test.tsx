@@ -2,7 +2,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import SessionsPage from "@/app/admin/sessions/page";
+import SessionsClient from "@/app/admin/sessions/SessionsClient";
 import UserSessionsPage from "@/app/dashboard/sessions/page";
 import {
   USER_SESSIONS_PATH,
@@ -59,7 +59,7 @@ describe("sessions TanStack Query server state", () => {
       pagination: { total: 1, totalPages: 1, hasNext: false, hasPrev: false },
     });
 
-    renderWithQueryClient(<SessionsPage />);
+    renderWithQueryClient(<SessionsClient />);
 
     expect(screen.getByText("Loading…")).toBeInTheDocument();
     expect(await screen.findByText("user@example.com")).toBeInTheDocument();
@@ -68,7 +68,7 @@ describe("sessions TanStack Query server state", () => {
 
   it("renders error + retry when the sessions list fails", async () => {
     mockApiGet.mockRejectedValueOnce(new Error("sessions unavailable"));
-    renderWithQueryClient(<SessionsPage />);
+    renderWithQueryClient(<SessionsClient />);
 
     expect(await screen.findByText("sessions unavailable")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Try again" })).toBeInTheDocument();
@@ -82,7 +82,7 @@ describe("sessions TanStack Query server state", () => {
     mockApiDelete.mockResolvedValue({ success: true });
 
     const user = userEvent.setup();
-    const { queryClient } = renderWithQueryClient(<SessionsPage />);
+    const { queryClient } = renderWithQueryClient(<SessionsClient />);
     await screen.findByText("user@example.com");
 
     const invalidateSpy = vi.spyOn(queryClient, "invalidateQueries");

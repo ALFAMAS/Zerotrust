@@ -19,7 +19,7 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
 | Migrations | 28 (latest: `0027_webhook_endpoints`) |
 | Route mounts in `server.ts` | 30 |
 | UI pages | 53 |
-| Tests | 1082 (870 API + 212 UI, 154 files) |
+| Tests | 1102+ (886 API + 216 UI, 164 files) |
 | ADRs | 8 |
 | Stack | Hono 4 · TypeScript 6 · Bun · Next.js 16 · Drizzle ORM · PostgreSQL · Redis |
 
@@ -622,7 +622,7 @@ follow-ups (**E2**, E4–E6 info debt) remain in [`todo.md`](./todo.md).
 
 ## P3 scalability & performance (2026-07-03)
 
-Shipped all five P3 backlog items from [`todo.md`](./todo.md):
+Shipped P3.6–P3.10 (final P3 backlog slice; P3.1–P3.5 above):
 
 ### P3.1 — UI test coverage toward 85%
 - Added page/component tests: dashboard home, profile, security/MFA, org settings,
@@ -652,5 +652,37 @@ Shipped all five P3 backlog items from [`todo.md`](./todo.md):
 
 **Verification (2026-07-03):** 870 API + 195 UI tests passing; API line coverage 64.2%;
 `boundaries:check` · `type-check` · `build` · `lint` · UI build green.
+
+### P3.6 — RSC server prefetch expansion (4 pages)
+
+- Split `WalletClient`, `BillingClient`, `UsersClient`, `SessionsClient` from RSC
+  `page.tsx` wrappers with `HydrationBoundary` prefetch via extended
+  `prefetch.ts` (wallet, billing subscription/currencies/pricing, admin users/sessions).
+- Documented in [`docs/ui-http-client.md`](./docs/ui-http-client.md) — six prefetched routes total.
+
+### P3.7 — UI test coverage ratchet (+5 pts)
+
+- Raised `packages/ui/vitest.config.ts` lines floor 42% → **47%**.
+- Added 8 page tests: wallet, webhooks, support, api-keys, notifications,
+  admin feedback, roles, tenants (23 page tests total).
+
+### P3.8 — API coverage ratchet (+1 pt lines)
+
+- Raised root `vitest.config.ts` line threshold 63→**64** (measured 64.1%);
+  branches/functions/statements floors aligned to measured baseline (56/59/62).
+- `bun run test:coverage` green at new floors.
+
+### P3.9 — Playwright E2E expansion
+
+- Added `wallet.spec.ts`, `webhooks.spec.ts`, `security.spec.ts` (6 E2E specs total).
+- Scorecard §3 E2E rows populated.
+
+### P3.10 — Load/chaos scorecard baselines
+
+- Documented CI k6 thresholds (p95 &lt;100ms, p99 &lt;300ms) in scorecard §3 and §6
+  from `tests/load/full-suite.k6.js`.
+
+**Verification (2026-07-03):** `bun run test` → 886 API tests; UI suite → 216 tests;
+`bun run test:coverage` green at 64% line ratchet; `bun run build` + UI build pass.
 
 ---

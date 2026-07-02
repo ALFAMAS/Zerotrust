@@ -4,7 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { mockApiDelete, mockApiGet } from "@/test/apiClientMock";
 
-import SessionsPage from "./page";
+import SessionsClient from "./SessionsClient";
 
 const sessions = [
   {
@@ -43,7 +43,7 @@ function renderSessions() {
   });
   return render(
     <QueryClientProvider client={queryClient}>
-      <SessionsPage />
+      <SessionsClient />
     </QueryClientProvider>
   );
 }

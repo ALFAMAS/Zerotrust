@@ -32,7 +32,7 @@ function mockSubscription(sub: Record<string, unknown> | null) {
 // env var and re-import the module fresh (vi.resetModules), rather than rely
 // on the top-level static import.
 async function loadBillingPage() {
-  const mod = await import("./page");
+  const mod = await import("./BillingClient");
   return mod.default;
 }
 

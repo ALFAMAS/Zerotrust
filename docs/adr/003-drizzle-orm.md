@@ -50,7 +50,8 @@ Use **Drizzle ORM** with the `postgres` driver as the canonical database layer.
   compatibility and supports the full PostgreSQL protocol surface (prepared
   statements, `LISTEN/NOTIFY`, replication).
 - **Negative:** Drizzle Kit occasionally produces `DROP … CASCADE` migrations
-  that are irreversible without expand/contract discipline (TODO P3.5).
+  that are irreversible without expand/contract discipline (mitigated — see
+  `tdone.md` P3.5 destructive-migration CI gate).
 - **Negative:** `drizzle-kit` version is pinned to `0.31.10` — a breakage in
   the upstream release process (observed mid-2026) means upgrades must be
   tested carefully.
@@ -60,4 +61,4 @@ Use **Drizzle ORM** with the `postgres` driver as the canonical database layer.
 - Schema: `src/db/schema.ts`
 - Migrations: `drizzle/*.sql`
 - Repositories: `src/db/repositories/`
-- TODO: `todo.md` P3.5 (expand/contract migrations)
+- Shipped: `tdone.md` P3.5 (expand/contract migrations + destructive DDL CI gate)

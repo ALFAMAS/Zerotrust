@@ -3,7 +3,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import UserDetailPage from "@/app/admin/users/[id]/page";
-import UsersPage from "@/app/admin/users/page";
+import UsersClient from "@/app/admin/users/UsersClient";
 import { mockApiGet, mockApiPost, mockApiPatch, mockApiPut, mockApiDelete } from "@/test/apiClientMock";
 import {
   adminUserKeys,
@@ -124,7 +124,7 @@ describe("adminUsers TanStack Query server state", () => {
       return Promise.reject(new Error(`unexpected apiGet path ${path}`));
     });
 
-    renderWithQueryClient(<UsersPage />);
+    renderWithQueryClient(<UsersClient />);
 
     expect(screen.getByText("Loading…")).toBeInTheDocument();
     expect(await screen.findByText("Alice")).toBeInTheDocument();
@@ -144,7 +144,7 @@ describe("adminUsers TanStack Query server state", () => {
     mockApiPatch.mockResolvedValue({ ...listUser, status: "suspended" });
 
     const userEvt = userEvent.setup();
-    const { queryClient } = renderWithQueryClient(<UsersPage />);
+    const { queryClient } = renderWithQueryClient(<UsersClient />);
     await screen.findByText("Alice");
 
     const invalidateSpy = vi.spyOn(queryClient, "invalidateQueries");

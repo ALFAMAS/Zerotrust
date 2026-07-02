@@ -4,7 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { mockApiDelete, mockApiGet, mockApiPatch } from "@/test/apiClientMock";
 
-import UsersPage from "./page";
+import UsersClient from "./UsersClient";
 
 const users = [
   {
@@ -39,7 +39,7 @@ function renderUsers() {
   });
   return render(
     <QueryClientProvider client={queryClient}>
-      <UsersPage />
+      <UsersClient />
     </QueryClientProvider>
   );
 }

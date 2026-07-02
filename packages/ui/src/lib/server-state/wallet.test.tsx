@@ -3,7 +3,7 @@ import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { act } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import WalletPage from "@/app/dashboard/wallet/page";
+import WalletClient from "@/app/dashboard/wallet/WalletClient";
 import { mockApiGet, mockApiPost } from "@/test/apiClientMock";
 import {
   buildWalletTransactionPath,
@@ -68,7 +68,7 @@ describe("wallet TanStack Query server state", () => {
 
   it("renders loading, fetched data, and an empty transaction state", async () => {
     mockWalletSuccess({ txs: [] });
-    renderWithQueryClient(<WalletPage />);
+    renderWithQueryClient(<WalletClient />);
 
     expect(screen.getByText("Loading wallet…")).toBeInTheDocument();
     expect(await screen.findByText((text) => text.includes("25.00"))).toBeInTheDocument();
@@ -77,7 +77,7 @@ describe("wallet TanStack Query server state", () => {
 
   it("renders an explicit error state with retry when the wallet query fails", async () => {
     mockApiGet.mockRejectedValue(new Error("wallet offline"));
-    renderWithQueryClient(<WalletPage />);
+    renderWithQueryClient(<WalletClient />);
 
     expect(await screen.findByText("wallet offline")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Try again" })).toBeInTheDocument();
@@ -85,7 +85,7 @@ describe("wallet TanStack Query server state", () => {
 
   it("marks stale cached data while a background refetch is in progress", async () => {
     mockWalletSuccess();
-    const { queryClient } = renderWithQueryClient(<WalletPage />);
+    const { queryClient } = renderWithQueryClient(<WalletClient />);
     expect(await screen.findByText("Initial top-up")).toBeInTheDocument();
 
     mockWalletSuccess({ delayed: true });
@@ -101,7 +101,7 @@ describe("wallet TanStack Query server state", () => {
     mockWalletSuccess({ delayed: true });
     let resolveTopUp: (value: unknown) => void = () => {};
     mockApiPost.mockReturnValue(new Promise((resolve) => (resolveTopUp = resolve)));
-    const { queryClient } = renderWithQueryClient(<WalletPage />);
+    const { queryClient } = renderWithQueryClient(<WalletClient />);
     const invalidateSpy = vi.spyOn(queryClient, "invalidateQueries");
 
     await waitFor(() => {

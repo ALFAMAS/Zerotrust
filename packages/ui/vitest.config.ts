@@ -28,10 +28,10 @@ export default defineConfig({
       // UI page/component ratchet (P3.1): measured ~45-50% lines on app/ pages;
       // floors below baseline — raise toward 85% as page tests expand.
       thresholds: {
-        lines: 42,
-        functions: 38,
-        branches: 35,
-        statements: 41,
+        lines: 47,
+        functions: 43,
+        branches: 40,
+        statements: 46,
       },
     },
   },

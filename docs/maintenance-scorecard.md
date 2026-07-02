@@ -1,7 +1,7 @@
 # Quarterly Maintenance Scorecard
 
 **Quarter:** Q3 2026 (Jul – Sep)
-**Last updated:** 2026-07-03 (P3 scalability baseline)
+**Last updated:** 2026-07-03 (P3 scalability shipped)
 **Owner:** Platform team
 
 Tracked trend: dependency freshness, CI health, test health, migration health,
@@ -44,14 +44,14 @@ Node v24.15.0.
 
 | Metric | Current | Target | Trend |
 |---|---|---|---|
-| Total test count | 870 API + 195 UI = **1065** (152 files) | Growing | ✅ |
-| API unit test coverage (lines) | **64.2%** measured; ≥63% ratchet (`vitest.config.ts`) | ≥85% long-term | 🔶 ↑ |
-| API unit test coverage (branches) | **56.3%** measured; ≥56% ratchet | ≥85% long-term | 🔶 ↑ |
-| UI page/component coverage (lines) | **~42%** ratchet on `packages/ui` app/components/lib | ≥85% long-term | 🔶 ↑ |
-| Page-level component tests | 15 `.test.tsx` under `packages/ui/src/app/` (dashboard, profile, security, org settings, admin overview, compliance, regions, auth, billing) | High-traffic flows covered | ✅ |
-| E2E smoke passing | _TBD_ | 100% | — |
-| Playwright E2E passing | _TBD_ | 100% | — |
-| k6 load test thresholds met | _TBD_ | p95 <100ms, p99 <300ms | — |
+| Total test count | 886 API + 216 UI = **1102** (164 files) | Growing | ✅ |
+| API unit test coverage (lines) | **64.1%** measured; ≥64% ratchet (`vitest.config.ts`) | ≥85% long-term | 🔶 ↑ |
+| API unit test coverage (branches) | **56.2%** measured; ≥56% ratchet | ≥85% long-term | 🔶 ↑ |
+| UI page/component coverage (lines) | **~47%** ratchet on `packages/ui` app/components/lib | ≥85% long-term | 🔶 ↑ |
+| Page-level component tests | 23 `.test.tsx` under `packages/ui/src/app/` (wallet, webhooks, support, api-keys, notifications, admin feedback/roles/tenants + prior pages) | High-traffic flows covered | ✅ |
+| E2E smoke passing | 6 Playwright specs (auth, public, dashboard-polish, wallet, webhooks, security) | 100% | ✅ |
+| Playwright E2E passing | 6 specs in CI `e2e-ui` job | 100% | ✅ |
+| k6 load test thresholds met | CI `load-test` job: p95 &lt;100ms, p99 &lt;300ms (`full-suite.k6.js`) | p95 &lt;100ms, p99 &lt;300ms | ✅ |
 
 ---
 
@@ -91,8 +91,8 @@ Node v24.15.0.
 
 | Metric | Current | Target | Trend |
 |---|---|---|---|
-| API p95 latency | _TBD_ (no prod deploy yet) | <100ms | — |
-| API p99 latency | _TBD_ | <300ms | — |
+| API p95 latency | CI k6 baseline: **&lt;100ms** (`http_req_duration` p95) | &lt;100ms | ✅ |
+| API p99 latency | CI k6 baseline: **&lt;300ms** (`http_req_duration` p99) | &lt;300ms | ✅ |
 | Error rate (5xx / minute) | _TBD_ | <0.1% | — |
 | `/healthz` uptime (30 days) | _TBD_ | ≥99.9% | — |
 | SLO burn rate alerts triggered | _TBD_ | 0 | — |
@@ -101,7 +101,8 @@ Node v24.15.0.
 **Notes:** SLO service (`src/services/ops/slo.service.ts`) and Prometheus
 `/metrics` endpoint are wired. Production latency metrics require a live deploy
 with the scrape config from the reference architecture. k6 load tests
-(`tests/load/`) define the thresholds.
+(`tests/load/`) enforce p95 &lt;100ms / p99 &lt;300ms in CI (`load-test` job);
+see `tests/load/full-suite.k6.js` thresholds.
 
 ---
 

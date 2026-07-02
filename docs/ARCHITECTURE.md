@@ -139,7 +139,7 @@ Prioritized; **P1 is a correctness bug**, the rest are improvements.
 | **P1** | Split HTTP and worker/scheduler processes (or instance-guard the schedulers) | **Correctness** — duplicate jobs under cluster mode | **Shipped** (P1.2, P1.5) |
 | P2 | Adopt expand/contract migrations; gate destructive DDL | Safe rollbacks; the `0020`–`0024` drops are irreversible | **Shipped** (P3.5) — CI destructive-migration gate |
 | P3 | Make Elasticsearch fully optional / default to Postgres FTS | Drop an operational dependency post-slim-down | **Shipped** (2026-07-03) |
-| P4 | Move hot dashboard reads to Server Components / route handlers | TTFB, fewer client waterfalls | **Partial** (P3.4 pilot — `/dashboard`, `/admin` prefetch) |
+| P4 | Move hot dashboard reads to Server Components / route handlers | TTFB, fewer client waterfalls | **Shipped** (P3.4 pilot + P3.6 — six prefetched routes) |
 | P5 | Containerize (Dockerfile + compose) and split health/readiness | Reproducible deploys, orchestrator-friendly | **Shipped** — Dockerfile + `docker-compose.yml` + readiness |
 | P6 | Fail-fast typed config validation at boot | Catch missing prod secrets before serving traffic | **Shipped** (P4.3) |
 | P7 | Group `services/` by domain | **Shipped 2026-07-03** — files live under `auth/`, `billing/`, `notifications/`, `compliance/`, `ops/`, and `shared/` | Done |
@@ -170,12 +170,14 @@ deployments a Postgres `tsvector` + GIN index covers this without running ES.
 ES is opt-in for large tenants (`ELASTICSEARCH_ENABLED=true`); default off to
 shed an operational dependency — consistent with the slim-down's goal.
 
-### P4 — Server-side data fetching on the dashboard — **Partial** (P3.4)
+### P4 — Server-side data fetching on the dashboard — **Shipped** (P3.4 + P3.6)
 
-Several dashboard/admin pages still client-fetch on mount. The P3.4 pilot
-prefetches `/dashboard` and `/admin` via `serverApiClient` + TanStack Query
-`HydrationBoundary` (see [`ui-http-client.md`](./ui-http-client.md)). Remaining
-high-traffic pages are tracked in [`../todo.md`](../todo.md) P3.6.
+Six high-traffic dashboard/admin pages prefetch authenticated reads server-side
+via `serverApiClient` + TanStack Query `HydrationBoundary` (see
+[`ui-http-client.md`](./ui-http-client.md)): `/dashboard`, `/admin`,
+`/dashboard/wallet`, `/dashboard/billing`, `/admin/users`, `/admin/sessions`.
+Client components (`*Client.tsx`) share query keys with prefetch — no duplicate
+fetch on hydration.
 
 ### P5 — Containerized, orchestrator-friendly deploys — **Shipped**
 

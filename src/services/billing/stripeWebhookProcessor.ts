@@ -3,7 +3,7 @@
  * each event type. Extracted from the webhook route (billing.webhooks.ts) so
  * the exact same logic runs whether the event is processed synchronously in
  * the request path (no queue configured) or inside the BullMQ worker
- * (stripeWebhookQueue.ts) when Redis is available. See todo.md P3.3.
+ * (stripeWebhookQueue.ts) when Redis is available. See tdone.md P3.3.
  */
 import { eq } from "drizzle-orm";
 import Stripe from "stripe";

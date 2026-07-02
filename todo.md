@@ -8,48 +8,8 @@ _Synthesized from `docs/AUDIT.md`, `AUDIT-REPORT.md`, `docs/maintenance-scorecar
 `docs/compliance/`, and a full-repo scan. Does not duplicate shipped work in
 [`tdone.md`](./tdone.md)._
 
-_Verified 2026-07-03: **15 open items** (P2 shipped 2026-07-03; P1.3 removed — duplicate of shipped P3.2
+_Verified 2026-07-03: **10 open items** (P2 shipped 2026-07-03; P3 shipped 2026-07-03; P1.3 removed — duplicate of shipped P3.2
 in `tdone.md`; P1.4–P1.5 shipped 2026-07-03)._
-
-### P3 — Scalability and performance
-
-- **P3.6 — Expand RSC server prefetch beyond pilot (2 pages)**
-  - **Where:** `packages/ui/src/app/dashboard/page.tsx`, `admin/page.tsx` (done);
-    candidates: `dashboard/wallet`, `dashboard/billing`, `admin/users`,
-    `admin/sessions` per `docs/ui-http-client.md` pattern.
-  - **Why:** P3.4 proved HydrationBoundary pattern; most pages still client-fetch
-    on mount (waterfall TTFB).
-  - **Acceptance:** ≥4 additional high-traffic pages prefetch; shared
-    `FooClient.tsx` split documented; no duplicate fetch on hydration.
-
-- **P3.7 — UI test coverage ratchet toward 85%**
-  - **Where:** `packages/ui/vitest.config.ts` (42% lines floor), 15/54 `page.test.tsx`
-    files today.
-  - **Why:** Scorecard §3 target is 85%; gaps on wallet, webhooks, support,
-    api-keys, notifications, admin feedback/roles/jit-grants/content/webhooks,
-    revenue, alerts, tenants, access-reviews detail, etc.
-  - **Acceptance:** Raise UI ratchet +5 pts; add page tests for top 8 untested
-    traffic pages; scorecard §3 updated.
-
-- **P3.8 — API coverage ratchet toward 85%** _(partial — floors at 63%/56%; ~64% measured)_
-  - **Where:** `vitest.config.ts` (63% lines / 56% branches); measured 64.2% / 56.3%.
-  - **Why:** P4.1 raised floors once; long-term gate is 85% not yet reached.
-  - **Acceptance:** Increment thresholds +2 pts with green `bun run test:coverage`;
-    scorecard trend row updated.
-
-- **P3.9 — Playwright E2E expansion**
-  - **Where:** `packages/ui/e2e/` (3 specs: auth, public, dashboard-polish); CI
-    `e2e-ui` job exists but scorecard E2E = _TBD_.
-  - **Why:** Only smoke coverage for billing, admin users, org flows — no E2E for
-    webhooks, wallet, MFA security page, admin product-surface pages.
-  - **Acceptance:** ≥3 new specs for critical flows; scorecard §3 E2E row populated.
-
-- **P3.10 — Load/chaos scorecard baselines** _(partial — 6 k6 scripts + CI job exist; baselines _TBD_)_
-  - **Where:** `tests/load/`, CI `load-test` job (`continue-on-error: true`),
-    `docs/maintenance-scorecard.md` §3/§6.
-  - **Why:** k6 runs in CI but scorecard p95/p99 rows and prod metrics are _TBD_.
-  - **Acceptance:** Document p95/p99 baselines from CI load job; optional badge in
-    scorecard.
 
 ### P4 — Documentation and developer experience
 
