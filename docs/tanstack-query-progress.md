@@ -32,7 +32,12 @@ Tracks the frontend server-state migration from ad-hoc `useEffect` + local loadi
 | --- | --- | --- | --- |
 | `/dashboard/wallet` | [x] | Wallet detail + transactions moved to TanStack Query. Top-up uses optimistic balance/transaction update, rollback, and targeted invalidation. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/wallet.test.tsx` |
 | `/dashboard/webhooks` | [x] | Endpoint list + delivery logs moved to TanStack Query. Toggle/delete use optimistic list updates with rollback; create, ping, toggle, and delete target webhook list/detail/delivery invalidation. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/webhooks.test.tsx` |
-| `/dashboard/billing` | [x] | Subscription, currencies, and localized pricing moved to TanStack Query. Cancel/reactivate mutations invalidate subscription state; checkout/portal mutations keep safe external redirects at the page boundary. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/billing.test.tsx && NODE_ENV=test bun run --cwd packages/ui test -- src/app/dashboard/billing/page.test.tsx` |
+| `/dashboard/billing` | [x] | Subscription, currencies, and localized pricing moved to TanStack Query. Cancel/reactivate mutations invalidate subscription state; checkout/portal mutations keep safe external redirects at the page boundary. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/billing.test.tsx` |
+| `/dashboard/support` | [x] | Ticket list + thread detail moved to TanStack Query. Create/reply/close mutations optimistically update list and thread caches with targeted invalidation. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/support.test.tsx` |
+| `/admin/audit` | [x] | Audit log entries and hash-chain integrity verify moved to TanStack Query. Verify is a manual refetch (enabled:false), entries auto-fetch with loading/error states. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/audit.test.tsx` |
+| `/admin/tenants` | [x] | Tenant list moved to TanStack Query. Create/plan/status/delete use mutations with optimistic list updates, rollback, and targeted invalidation. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/tenants.test.tsx` |
+| `/admin/jit` | [x] | Incoming cross-tenant JIT request list moved to TanStack Query. Approve/deny mutations invalidate the incoming list. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/jit.test.tsx` |
+| `/admin/compliance` | [x] | SOC2 readiness/controls and annual risk assessment moved to TanStack Query. Control status cycling uses optimistic mutation with readiness invalidation. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/compliance.test.tsx` |
 
 ## Migration backlog
 
@@ -40,11 +45,6 @@ Prioritize pages with real server data, manual `loading/error` state, and repeat
 
 | Area | Status | Next action |
 | --- | --- | --- |
-| `/dashboard/support` | [ ] | Add support tickets/messages keys/hooks, migrate ticket list/detail, optimistic message append where safe. |
-| `/admin/audit` | [ ] | Add admin audit keys/hooks, migrate log list + integrity verification fetch with clear empty/error states. |
-| `/admin/tenants` | [ ] | Add admin tenants keys/hooks, migrate tenant list and region updates. |
-| `/admin/jit` | [ ] | Add JIT keys/hooks, migrate incoming request list and approval/deny invalidation. |
-| `/admin/compliance` | [ ] | Add compliance keys/hooks, migrate SOC2/risk data fan-out. |
 | `/admin/anomaly` | [ ] | Add anomaly keys/hooks, migrate baseline list and status actions. |
 | `/admin/settings/general` | [ ] | Add settings keys/hooks, migrate app settings load/save. |
 | `/admin/users/[id]` | [ ] | Add admin user detail key/hook, optimistic status/segment updates. |

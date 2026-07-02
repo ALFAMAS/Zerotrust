@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -13,56 +13,23 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { api } from "@/lib/api";
-import { type AuditEntry, auditEntriesFromResponse } from "./auditData";
-
-interface VerifyResult {
-  ok: boolean;
-  checked: number;
-  brokenAt?: { seq: number; id: string; reason: string };
-}
+import { useAuditEntriesQuery, useAuditVerifyQuery } from "@/lib/server-state/audit";
+import type { AuditEntry } from "@/lib/server-state/types";
+import { auditEntriesFromResponse } from "./auditData";
 
 export default function AuditPage() {
-  const [entries, setEntries] = useState<AuditEntry[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [loadError, setLoadError] = useState<string | null>(null);
+  const entriesQuery = useAuditEntriesQuery();
+  const verifyQuery = useAuditVerifyQuery();
   const [selected, setSelected] = useState<AuditEntry | null>(null);
-  const [verify, setVerify] = useState<VerifyResult | null>(null);
-  const [verifying, setVerifying] = useState(false);
 
-  useEffect(() => {
-    async function load() {
-      try {
-        const data = await api.get<{ data: AuditEntry[]; pagination: any } | AuditEntry[]>(
-          "/admin/audit-logs"
-        );
-        setEntries(auditEntriesFromResponse(data));
-        setLoadError(null);
-      } catch {
-        setEntries([]);
-        setLoadError("Failed to load audit entries.");
-      } finally {
-        setLoading(false);
-      }
-    }
-    void load();
-  }, []);
+  const entries = entriesQuery.data ? auditEntriesFromResponse(entriesQuery.data) : [];
+  const verify = verifyQuery.data ?? null;
+  const loading = entriesQuery.isPending;
+  const verifying = verifyQuery.isFetching;
+  const loadError = entriesQuery.error ? "Failed to load audit entries." : null;
 
   async function runVerify() {
-    setVerifying(true);
-    setVerify(null);
-    try {
-      const res = await api.get<VerifyResult>("/admin/audit-logs/verify");
-      setVerify(res);
-    } catch {
-      setVerify({
-        ok: false,
-        checked: 0,
-        brokenAt: { seq: 0, id: "", reason: "verify request failed" },
-      });
-    } finally {
-      setVerifying(false);
-    }
+    await verifyQuery.refetch();
   }
 
   function getStatus(entry: AuditEntry): string {

@@ -93,3 +93,178 @@ export interface CreateSupportTicketInput {
   message: string;
   priority?: "low" | "normal" | "high";
 }
+
+export type TenantPlan = "free" | "starter" | "pro" | "enterprise";
+export type TenantStatus = "active" | "trial" | "suspended" | "deleted";
+
+export interface Tenant {
+  id: string;
+  slug: string;
+  name: string;
+  displayName?: string;
+  status: TenantStatus;
+  plan: TenantPlan;
+  createdAt?: string;
+}
+
+export interface TenantsResponse {
+  tenants: Tenant[];
+  total?: number;
+  page?: number;
+  limit?: number;
+}
+
+export interface TenantsListParams {
+  limit?: number;
+  page?: number;
+  status?: string;
+  plan?: string;
+}
+
+export interface CreateTenantInput {
+  slug: string;
+  name: string;
+  plan?: TenantPlan;
+}
+
+export interface UpdateTenantStatusInput {
+  id: string;
+  status: TenantStatus;
+}
+
+export interface ChangeTenantPlanInput {
+  id: string;
+  plan: TenantPlan;
+}
+
+export interface AuditEntry {
+  id: string;
+  action: string;
+  success?: boolean;
+  status?: string;
+  actorEmail?: string;
+  userEmail?: string;
+  user?: string;
+  userId?: string;
+  ip?: string;
+  ipAddress?: string;
+  timestamp?: string;
+  createdAt?: string;
+  metadata?: Record<string, unknown>;
+  details?: Record<string, unknown>;
+  resourceDetails?: Record<string, unknown>;
+}
+
+export interface AuditVerifyResult {
+  ok: boolean;
+  checked: number;
+  brokenAt?: { seq: number; id: string; reason: string };
+}
+
+export type JitRequestStatus = "pending" | "approved" | "denied" | "expired";
+
+export interface JitRequest {
+  id: string;
+  requestorUserId: string;
+  requestorTenantId: string;
+  targetTenantId: string;
+  targetResource: string;
+  justification: string;
+  ttlSeconds: number;
+  status: JitRequestStatus;
+  approvedBy?: string;
+  approvedAt?: string;
+  expiresAt?: string;
+  createdAt: string;
+}
+
+export type Soc2ControlStatus = "implemented" | "partial" | "planned";
+
+export interface Soc2Control {
+  controlId: string;
+  category: string;
+  title: string;
+  description?: string;
+  implementation: string;
+  evidence?: string;
+  status: Soc2ControlStatus;
+  lastReviewedAt?: string;
+  reviewedBy?: string;
+}
+
+export interface Soc2Readiness {
+  total: number;
+  implemented: number;
+  partial: number;
+  planned: number;
+  readinessPercent: number;
+}
+
+export type RiskItemStatus = "open" | "mitigated" | "closed";
+export type RiskTreatment = "mitigate" | "accept" | "transfer" | "avoid";
+
+export interface RiskItem {
+  year: number;
+  riskId: string;
+  category: string;
+  title: string;
+  description: string;
+  likelihood: number;
+  impact: number;
+  riskScore: number;
+  treatment: RiskTreatment;
+  mitigation: string;
+  owner: string;
+  status: RiskItemStatus;
+}
+
+export interface RiskAssessment {
+  year: number;
+  totalRisks: number;
+  openRisks: number;
+  mitigatedRisks: number;
+  closedRisks: number;
+  avgRiskScore: number;
+  risks: RiskItem[];
+}
+
+export interface RollingStats {
+  mean: number;
+  variance: number;
+  count: number;
+}
+
+export interface AnomalyBaseline {
+  id: string;
+  userId: string;
+  loginHourStats?: RollingStats;
+  sessionDurationStats?: RollingStats;
+  knownIps?: string[];
+  knownCountries?: string[];
+  knownDevices?: string[];
+  totalLogins?: number;
+  lastUpdatedAt?: string;
+  createdAt?: string;
+}
+
+export interface AnomalySignals {
+  unknownIp: boolean;
+  unknownCountry: boolean;
+  unknownDevice: boolean;
+  unusualHour: boolean;
+  overallScore: number;
+  flags: string[];
+}
+
+export interface AnomalyBaselinesListParams {
+  limit?: number;
+  page?: number;
+}
+
+export interface ScoreLoginInput {
+  userId: string;
+  ip: string;
+  country?: string | null;
+  deviceHash: string;
+  loginHour: number;
+}

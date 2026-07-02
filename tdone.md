@@ -19,7 +19,7 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
 | Migrations | 28 (latest: `0027_webhook_endpoints`) |
 | Route mounts in `server.ts` | 30 |
 | UI pages | 47 |
-| Tests | 845 (101 files) |
+| Tests | 850 (102 files) |
 | ADRs | 7 |
 | Stack | Hono 4 · TypeScript 6 · Bun · Next.js 16 · Drizzle ORM · PostgreSQL · Redis |
 
@@ -287,10 +287,23 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
   state to TanStack Query queries/mutations. The webhook list and delivery-log
   fetches use domain keys; toggle/delete apply optimistic list updates with
   rollback; create, ping, toggle, and delete use targeted webhook invalidation.
+- Migrated `/dashboard/support` from ad-hoc `useEffect` + legacy `api.get`
+  state to TanStack Query queries/mutations. Ticket list and thread detail use
+  domain keys; create optimistically prepends the new ticket and seeds thread
+  cache; reply appends to thread cache; close-status updates both list and
+  detail caches; all mutations invalidate list/detail keys.
 - Migrated `/dashboard/billing` from `useApi`/legacy mutation calls to TanStack
   Query queries/mutations. Subscription, currency, and pricing fetches now live
   in `server-state/billing.ts`; cancel/reactivate invalidate subscription data;
   checkout/portal keep safe external redirects in the page component.
+- Migrated `/admin/audit` from ad-hoc `useEffect` + legacy `api.get` state to
+  TanStack Query queries. Audit entries auto-fetch with loading/error states;
+  hash-chain integrity verify is a manual refetch (`enabled: false`). Domain
+  keys/hooks live in `server-state/audit.ts`.
+- Migrated `/admin/tenants` from ad-hoc `useEffect` + legacy `api` calls to
+  TanStack Query queries/mutations. Tenant list auto-fetches with loading/error
+  states; create/plan/status/delete use optimistic list updates with rollback
+  and targeted invalidation. Domain keys/hooks live in `server-state/tenants.ts`.
 - Covered loading, error + retry, empty, stale cached data, and background
   refetch states in UI and tests.
 - Verification: `NODE_ENV=test bun run --cwd packages/ui test --
@@ -300,7 +313,14 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
   `NODE_ENV=test bun run --cwd packages/ui test --
   src/lib/server-state/billing.test.tsx` → **3 tests passing**;
   `NODE_ENV=test bun run --cwd packages/ui test --
-  src/app/dashboard/billing/page.test.tsx` → **9 tests passing**; `bun run
+  src/lib/server-state/support.test.tsx` → **5 tests passing**;
+  `NODE_ENV=test bun run --cwd packages/ui test --
+  src/lib/server-state/audit.test.tsx` → **3 tests passing**;
+  `NODE_ENV=test bun run --cwd packages/ui test --
+  src/lib/server-state/tenants.test.tsx` → **4 tests passing**;
+  `NODE_ENV=test bun run --cwd packages/ui test --
+  src/app/dashboard/billing/page.test.tsx` → **9 tests passing**;
+  root `bun run test` → **838 tests / 99 files passing**; `bun run
   build` passes; `bun run --cwd packages/ui build` passes; `bun run lint` exits
   0 with existing script warnings only.
 

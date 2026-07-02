@@ -54,4 +54,32 @@ export const queryKeys = {
       [...queryKeys.support.all, "list", filters] as const,
     detail: (id: string) => [...queryKeys.support.all, "detail", id] as const,
   },
+  audit: {
+    all: ["audit"] as const,
+    entries: (filters: Record<string, string | number | undefined> = {}) =>
+      [...queryKeys.audit.all, "entries", filters] as const,
+    verify: () => [...queryKeys.audit.all, "verify"] as const,
+  },
+  tenants: {
+    all: ["tenants"] as const,
+    list: (filters: Record<string, string | number | undefined> = {}) =>
+      [...queryKeys.tenants.all, "list", filters] as const,
+    detail: (id: string) => [...queryKeys.tenants.all, "detail", id] as const,
+  },
+  jit: {
+    all: ["jit"] as const,
+    incoming: () => [...queryKeys.jit.all, "incoming"] as const,
+  },
+  compliance: {
+    all: ["compliance"] as const,
+    soc2Readiness: () => [...queryKeys.compliance.all, "soc2Readiness"] as const,
+    soc2Controls: () => [...queryKeys.compliance.all, "soc2Controls"] as const,
+    riskAssessment: (year: number) =>
+      [...queryKeys.compliance.all, "riskAssessment", year] as const,
+  },
+  anomaly: {
+    all: ["anomaly"] as const,
+    baselines: (filters: Record<string, string | number | undefined> = {}) =>
+      [...queryKeys.anomaly.all, "baselines", filters] as const,
+  },
 };

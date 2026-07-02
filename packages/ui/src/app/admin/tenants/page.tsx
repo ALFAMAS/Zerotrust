@@ -1,7 +1,8 @@
 "use client";
 
 import { Building2, Trash2 } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
+import { ServerStateStatus } from "@/components/ServerStateStatus";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,6 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ErrorState } from "@/components/ui/States";
 import {
   Table,
   TableBody,
@@ -22,22 +24,17 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { api } from "@/lib/api";
+import {
+  useChangeTenantPlanMutation,
+  useCreateTenantMutation,
+  useDeleteTenantMutation,
+  useTenantsQuery,
+  useUpdateTenantStatusMutation,
+} from "@/lib/server-state/tenants";
+import type { Tenant, TenantPlan, TenantStatus } from "@/lib/server-state/types";
 
-type Plan = "free" | "starter" | "pro" | "enterprise";
-type Status = "active" | "trial" | "suspended" | "deleted";
-
-interface Tenant {
-  id: string;
-  slug: string;
-  name: string;
-  displayName?: string;
-  status: Status;
-  plan: Plan;
-  createdAt?: string;
-}
-
-const PLANS: Plan[] = ["free", "starter", "pro", "enterprise"];
+const LIST_PARAMS = { limit: 100 } as const;
+const PLANS: TenantPlan[] = ["free", "starter", "pro", "enterprise"];
 const STATUS_VARIANT: Record<string, "success" | "warning" | "secondary" | "destructive"> = {
   active: "success",
   trial: "warning",
@@ -46,60 +43,44 @@ const STATUS_VARIANT: Record<string, "success" | "warning" | "secondary" | "dest
 };
 
 export default function TenantsPage() {
-  const [tenants, setTenants] = useState<Tenant[]>([]);
-  const [loading, setLoading] = useState(true);
+  const tenantsQuery = useTenantsQuery(LIST_PARAMS);
+  const createMutation = useCreateTenantMutation(LIST_PARAMS);
+  const changePlanMutation = useChangeTenantPlanMutation(LIST_PARAMS);
+  const updateStatusMutation = useUpdateTenantStatusMutation(LIST_PARAMS);
+  const deleteMutation = useDeleteTenantMutation(LIST_PARAMS);
   const [toast, setToast] = useState<string | null>(null);
-  const [form, setForm] = useState<{ slug: string; name: string; plan: Plan }>({
+  const [form, setForm] = useState<{ slug: string; name: string; plan: TenantPlan }>({
     slug: "",
     name: "",
     plan: "free",
   });
-  const [creating, setCreating] = useState(false);
+
+  const tenants = tenantsQuery.data?.tenants ?? [];
+  const hasTenants = tenants.length > 0;
 
   const showToast = useCallback((msg: string) => {
     setToast(msg);
     setTimeout(() => setToast(null), 3000);
   }, []);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    try {
-      const data = await api.get<{ tenants: Tenant[] }>("/admin/tenants?limit=100");
-      setTenants(data.tenants ?? []);
-    } catch {
-      showToast("Failed to load tenants");
-    } finally {
-      setLoading(false);
-    }
-  }, [showToast]);
-
-  useEffect(() => {
-    void load();
-  }, [load]);
-
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
-    setCreating(true);
     try {
-      await api.post("/admin/tenants", {
+      await createMutation.mutateAsync({
         slug: form.slug.trim(),
         name: form.name.trim(),
         plan: form.plan,
       });
       setForm({ slug: "", name: "", plan: "free" });
       showToast("Tenant created");
-      await load();
     } catch (err) {
       showToast(err instanceof Error ? err.message : "Failed to create tenant");
-    } finally {
-      setCreating(false);
     }
   }
 
-  async function changePlan(t: Tenant, plan: Plan) {
+  async function changePlan(t: Tenant, plan: TenantPlan) {
     try {
-      await api.post(`/admin/tenants/${t.id}/plan`, { plan });
-      setTenants((prev) => prev.map((x) => (x.id === t.id ? { ...x, plan } : x)));
+      await changePlanMutation.mutateAsync({ id: t.id, plan });
       showToast(`${t.slug} → ${plan}`);
     } catch {
       showToast("Failed to change plan");
@@ -107,10 +88,9 @@ export default function TenantsPage() {
   }
 
   async function toggleSuspend(t: Tenant) {
-    const status: Status = t.status === "suspended" ? "active" : "suspended";
+    const status: TenantStatus = t.status === "suspended" ? "active" : "suspended";
     try {
-      await api.put(`/admin/tenants/${t.id}`, { status });
-      setTenants((prev) => prev.map((x) => (x.id === t.id ? { ...x, status } : x)));
+      await updateStatusMutation.mutateAsync({ id: t.id, status });
       showToast(`${t.slug} ${status}`);
     } catch {
       showToast("Failed to update status");
@@ -119,8 +99,7 @@ export default function TenantsPage() {
 
   async function remove(t: Tenant) {
     try {
-      await api.delete(`/admin/tenants/${t.id}`);
-      setTenants((prev) => prev.filter((x) => x.id !== t.id));
+      await deleteMutation.mutateAsync(t.id);
       showToast("Tenant deleted");
     } catch {
       showToast("Failed to delete tenant");
@@ -178,7 +157,7 @@ export default function TenantsPage() {
               <Label htmlFor="plan">Plan</Label>
               <Select
                 value={form.plan}
-                onValueChange={(v) => setForm((f) => ({ ...f, plan: v as Plan }))}
+                onValueChange={(v) => setForm((f) => ({ ...f, plan: v as TenantPlan }))}
               >
                 <SelectTrigger id="plan">
                   <SelectValue />
@@ -193,13 +172,21 @@ export default function TenantsPage() {
               </Select>
             </div>
             <div className="flex items-end">
-              <Button type="submit" disabled={creating} className="w-full">
-                {creating ? "Creating…" : "Create tenant"}
+              <Button type="submit" disabled={createMutation.isPending} className="w-full">
+                {createMutation.isPending ? "Creating…" : "Create tenant"}
               </Button>
             </div>
           </form>
         </CardContent>
       </Card>
+
+      <ServerStateStatus
+        isFetching={tenantsQuery.isFetching && !tenantsQuery.isPending}
+        isStale={tenantsQuery.isStale}
+        hasData={hasTenants}
+        label="tenants"
+        onRefresh={() => void tenantsQuery.refetch()}
+      />
 
       <Card>
         <CardHeader>
@@ -207,84 +194,99 @@ export default function TenantsPage() {
           <CardDescription>{tenants.length} tenant(s).</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Tenant</TableHead>
-                  <TableHead>Slug</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Plan</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {loading && (
+          {tenantsQuery.error && !hasTenants ? (
+            <ErrorState
+              message={tenantsQuery.error.message}
+              retry={() => void tenantsQuery.refetch()}
+            />
+          ) : (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
                   <TableRow>
-                    <TableCell colSpan={5} className="py-8 text-center text-muted-foreground">
-                      Loading…
-                    </TableCell>
+                    <TableHead>Tenant</TableHead>
+                    <TableHead>Slug</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Plan</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
-                )}
-                {!loading && tenants.length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={5} className="py-8 text-center text-muted-foreground">
-                      No tenants yet.
-                    </TableCell>
-                  </TableRow>
-                )}
-                {!loading &&
-                  tenants.map((t) => (
-                    <TableRow key={t.id}>
-                      <TableCell className="font-medium text-foreground">
-                        {t.displayName || t.name}
-                      </TableCell>
-                      <TableCell className="font-mono text-xs text-muted-foreground">
-                        {t.slug}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={STATUS_VARIANT[t.status] ?? "secondary"}>{t.status}</Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Select value={t.plan} onValueChange={(v) => changePlan(t, v as Plan)}>
-                          <SelectTrigger className="h-8 w-32">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {PLANS.map((p) => (
-                              <SelectItem key={p} value={p}>
-                                {p}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-1">
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => toggleSuspend(t)}
-                          >
-                            {t.status === "suspended" ? "Activate" : "Suspend"}
-                          </Button>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            className="text-destructive hover:text-destructive"
-                            onClick={() => remove(t)}
-                          >
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </Button>
-                        </div>
+                </TableHeader>
+                <TableBody>
+                  {tenantsQuery.isPending && (
+                    <TableRow>
+                      <TableCell colSpan={5} className="py-8 text-center text-muted-foreground">
+                        Loading tenants…
                       </TableCell>
                     </TableRow>
-                  ))}
-              </TableBody>
-            </Table>
-          </div>
+                  )}
+                  {!tenantsQuery.isPending && tenants.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={5} className="py-8 text-center text-muted-foreground">
+                        No tenants yet.
+                      </TableCell>
+                    </TableRow>
+                  )}
+                  {!tenantsQuery.isPending &&
+                    tenants.map((t) => (
+                      <TableRow key={t.id}>
+                        <TableCell className="font-medium text-foreground">
+                          {t.displayName || t.name}
+                        </TableCell>
+                        <TableCell className="font-mono text-xs text-muted-foreground">
+                          {t.slug}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={STATUS_VARIANT[t.status] ?? "secondary"}>
+                            {t.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Select
+                            value={t.plan}
+                            onValueChange={(v) => changePlan(t, v as TenantPlan)}
+                            disabled={changePlanMutation.isPending}
+                          >
+                            <SelectTrigger className="h-8 w-32">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {PLANS.map((p) => (
+                                <SelectItem key={p} value={p}>
+                                  {p}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-1">
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => toggleSuspend(t)}
+                              disabled={updateStatusMutation.isPending}
+                            >
+                              {t.status === "suspended" ? "Activate" : "Suspend"}
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className="text-destructive hover:text-destructive"
+                              onClick={() => remove(t)}
+                              disabled={deleteMutation.isPending}
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

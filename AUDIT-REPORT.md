@@ -27,7 +27,7 @@
 
 | ID     | Status     | Summary                                                                                                 |
 | ------ | ---------- | ------------------------------------------------------------------------------------------------------- |
-| **E2** | 🟠 Partial | `useApi`/`usePaginatedApi` on 7 pages; ~17 dashboard/admin pages still use legacy `useEffect`+`api.get` |
+| **E2** | 🟠 Partial | TanStack Query on 5 pages (wallet, webhooks, billing, support, admin/audit); ~12 dashboard/admin pages still use legacy `useEffect`+`api.get` |
 | **E4** | 🟡 Info    | 46 backend routes have no UI caller (many by design; some shipped features lack UI)                     |
 | **E5** | 🟡 Info    | In-process `setInterval` schedulers — leader lock mitigates but not horizontally scalable               |
 | **E6** | 🟡 Info    | Repository layer ~10% complete (4 repos); hot-path writes still mostly inline Drizzle                   |
@@ -58,7 +58,7 @@ The repo's own `CLAUDE.md` documents the 2026-06-26 CWE sweep. Spot-checks confi
 
 ### E2. 🟠 TanStack Query server-state adoption is partial — **open**
 
-`@tanstack/react-query` is installed and mounted through the UI root, with domain query keys/functions/hooks under `packages/ui/src/lib/server-state/*`. `dashboard/wallet`, `dashboard/webhooks`, and `dashboard/billing` now use the server-state layer for their GET flows and mutations. Several dashboard/admin pages still import legacy `@/lib/api` and hand-roll `useEffect` + server data state (`support`, `admin audit/revenue/tenants/regions`, etc.). Tracked in `todo.md` P2 and `docs/tanstack-query-progress.md`.
+`@tanstack/react-query` is installed and mounted through the UI root, with domain query keys/functions/hooks under `packages/ui/src/lib/server-state/*`. 5 pages now use the server-state layer: `dashboard/wallet`, `dashboard/webhooks`, `dashboard/billing`, `dashboard/support`, and `admin/audit`. Several dashboard/admin pages still import legacy `@/lib/api` and hand-roll `useEffect` + server data state (`admin revenue/tenants/regions/compliance`, etc.). Tracked in `todo.md` P2 and `docs/tanstack-query-progress.md`.
 
 ### E4. 🟡 46 backend routes have no UI caller
 

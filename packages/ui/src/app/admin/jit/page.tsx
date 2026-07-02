@@ -1,26 +1,18 @@
 "use client";
 
 import { Check, Clock, Loader2, ShieldQuestion, X } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
+import { ServerStateStatus } from "@/components/ServerStateStatus";
 import { Button } from "@/components/ui/button";
-import { api } from "@/lib/api";
+import { ErrorState } from "@/components/ui/States";
+import {
+  useApproveJitRequestMutation,
+  useDenyJitRequestMutation,
+  useIncomingJitRequestsQuery,
+} from "@/lib/server-state/jit";
+import type { JitRequestStatus } from "@/lib/server-state/types";
 
-interface JITRequest {
-  id: string;
-  requestorUserId: string;
-  requestorTenantId: string;
-  targetTenantId: string;
-  targetResource: string;
-  justification: string;
-  ttlSeconds: number;
-  status: "pending" | "approved" | "denied" | "expired";
-  approvedBy?: string;
-  approvedAt?: string;
-  expiresAt?: string;
-  createdAt: string;
-}
-
-const STATUS_STYLES: Record<JITRequest["status"], string> = {
+const STATUS_STYLES: Record<JitRequestStatus, string> = {
   pending: "border-amber-500/30 bg-amber-500/10 text-amber-400",
   approved: "border-green-500/30 bg-green-500/10 text-green-400",
   denied: "border-red-500/30 bg-red-500/10 text-red-400",
@@ -28,12 +20,17 @@ const STATUS_STYLES: Record<JITRequest["status"], string> = {
 };
 
 export default function AdminJITPage() {
-  const [requests, setRequests] = useState<JITRequest[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [acting, setActing] = useState<string | null>(null);
+  const incomingQuery = useIncomingJitRequestsQuery();
+  const approveMutation = useApproveJitRequestMutation();
+  const denyMutation = useDenyJitRequestMutation();
   const [toast, setToast] = useState<string | null>(null);
 
   const toastTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+
+  const requests = incomingQuery.data ?? [];
+  const hasRequests = requests.length > 0;
+  const pending = requests.filter((r) => r.status === "pending");
+  const resolved = requests.filter((r) => r.status !== "pending");
 
   const showToast = useCallback((msg: string) => {
     setToast(msg);
@@ -41,36 +38,30 @@ export default function AdminJITPage() {
     toastTimer.current = setTimeout(() => setToast(null), 3000);
   }, []);
 
-  const load = useCallback(async () => {
-    try {
-      const data = await api.get<JITRequest[]>("/jit/cross-tenant/incoming");
-      setRequests(Array.isArray(data) ? data : []);
-    } catch {
-      setRequests([]);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  function isActing(id: string) {
+    return (
+      (approveMutation.isPending && approveMutation.variables === id) ||
+      (denyMutation.isPending && denyMutation.variables === id)
+    );
+  }
 
-  useEffect(() => {
-    void load();
-  }, [load]);
-
-  async function act(id: string, decision: "approve" | "deny") {
-    setActing(id);
+  async function approve(id: string) {
     try {
-      await api.post(`/jit/cross-tenant/${id}/${decision}`);
-      showToast(decision === "approve" ? "Request approved" : "Request denied");
-      void load();
+      await approveMutation.mutateAsync(id);
+      showToast("Request approved");
     } catch (err: unknown) {
       showToast(err instanceof Error ? err.message : "Action failed");
-    } finally {
-      setActing(null);
     }
   }
 
-  const pending = requests.filter((r) => r.status === "pending");
-  const resolved = requests.filter((r) => r.status !== "pending");
+  async function deny(id: string) {
+    try {
+      await denyMutation.mutateAsync(id);
+      showToast("Request denied");
+    } catch (err: unknown) {
+      showToast(err instanceof Error ? err.message : "Action failed");
+    }
+  }
 
   return (
     <div className="max-w-4xl space-y-6">
@@ -90,7 +81,20 @@ export default function AdminJITPage() {
         </p>
       </div>
 
-      {loading ? (
+      <ServerStateStatus
+        isFetching={incomingQuery.isFetching && !incomingQuery.isPending}
+        isStale={incomingQuery.isStale}
+        hasData={hasRequests}
+        label="JIT requests"
+        onRefresh={() => void incomingQuery.refetch()}
+      />
+
+      {incomingQuery.error && !hasRequests ? (
+        <ErrorState
+          message={incomingQuery.error.message}
+          retry={() => void incomingQuery.refetch()}
+        />
+      ) : incomingQuery.isPending ? (
         <div className="flex items-center gap-2 rounded-xl border border-border bg-card p-6 text-sm text-muted-foreground">
           <Loader2 className="h-4 w-4 animate-spin" /> Loading…
         </div>
@@ -127,11 +131,11 @@ export default function AdminJITPage() {
                       </div>
                       <div className="flex shrink-0 gap-2">
                         <Button
-                          onClick={() => act(r.id, "approve")}
-                          disabled={acting === r.id}
+                          onClick={() => void approve(r.id)}
+                          disabled={isActing(r.id)}
                           className="flex items-center gap-1.5 rounded-lg bg-green-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-green-500 disabled:opacity-50"
                         >
-                          {acting === r.id ? (
+                          {isActing(r.id) ? (
                             <Loader2 className="h-3.5 w-3.5 animate-spin" />
                           ) : (
                             <Check className="h-3.5 w-3.5" />
@@ -139,8 +143,8 @@ export default function AdminJITPage() {
                           Approve
                         </Button>
                         <Button
-                          onClick={() => act(r.id, "deny")}
-                          disabled={acting === r.id}
+                          onClick={() => void deny(r.id)}
+                          disabled={isActing(r.id)}
                           className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:border-red-700 hover:text-red-400 disabled:opacity-50"
                         >
                           <X className="h-3.5 w-3.5" />
