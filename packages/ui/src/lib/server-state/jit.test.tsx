@@ -3,7 +3,8 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import AdminJITPage from "@/app/admin/jit/page";
-import { INCOMING_JIT_REQUESTS_PATH, jitKeys } from "./jit";
+import DashboardJITPage from "@/app/dashboard/jit/page";
+import { INCOMING_JIT_REQUESTS_PATH, MY_JIT_REQUESTS_PATH, jitKeys } from "./jit";
 
 const mockApiGet = vi.fn();
 const mockApiPost = vi.fn();
@@ -17,6 +18,9 @@ vi.mock("@/lib/api", () => ({
     get: (...args: unknown[]) => mockLegacyGet(...args),
     post: vi.fn(),
   },
+}));
+vi.mock("@/lib/toast", () => ({
+  useToast: () => ({ toast: vi.fn() }),
 }));
 
 const pendingRequest = {
@@ -61,6 +65,7 @@ describe("jit TanStack Query server state", () => {
 
   it("models JIT domain query keys", () => {
     expect(jitKeys.incoming()).toEqual(["jit", "incoming"]);
+    expect(jitKeys.myRequests()).toEqual(["jit", "myRequests"]);
   });
 
   it("renders incoming requests through apiClient/TanStack Query, not legacy api.get", async () => {
@@ -111,5 +116,50 @@ describe("jit TanStack Query server state", () => {
     await user.click(screen.getByRole("button", { name: "Deny" }));
     await waitFor(() => expect(mockApiPost).toHaveBeenCalledWith("/jit/cross-tenant/jit_1/deny"));
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: jitKeys.incoming() });
+  });
+
+  it("renders dashboard my-requests through apiClient/TanStack Query, not legacy api.get", async () => {
+    mockApiGet.mockImplementation((path: string) => {
+      if (path === MY_JIT_REQUESTS_PATH) {
+        return Promise.resolve([pendingRequest]);
+      }
+      return Promise.reject(new Error(`unexpected apiGet path ${path}`));
+    });
+
+    renderWithQueryClient(<DashboardJITPage />);
+
+    expect(screen.getByText("Loading…")).toBeInTheDocument();
+    expect(await screen.findByText("admin:users:read")).toBeInTheDocument();
+    expect(mockApiGet).toHaveBeenCalledWith(MY_JIT_REQUESTS_PATH);
+    expect(mockLegacyGet).not.toHaveBeenCalled();
+  });
+
+  it("submits JIT request and invalidates my-requests list", async () => {
+    mockApiGet.mockImplementation((path: string) => {
+      if (path === MY_JIT_REQUESTS_PATH) return Promise.resolve([]);
+      return Promise.reject(new Error(`unexpected apiGet path ${path}`));
+    });
+    mockApiPost.mockResolvedValue(pendingRequest);
+
+    const user = userEvent.setup();
+    const { queryClient } = renderWithQueryClient(<DashboardJITPage />);
+    await screen.findByText("You haven't requested any cross-tenant access yet.");
+
+    const invalidateSpy = vi.spyOn(queryClient, "invalidateQueries");
+
+    await user.type(screen.getByLabelText("Target tenant ID"), "acme-corp");
+    await user.type(screen.getByLabelText("Resource"), "admin:users:read");
+    await user.type(screen.getByLabelText("Justification"), "Need access for audit");
+    await user.click(screen.getByRole("button", { name: "Request access" }));
+
+    await waitFor(() =>
+      expect(mockApiPost).toHaveBeenCalledWith(MY_JIT_REQUESTS_PATH, {
+        targetTenantId: "acme-corp",
+        targetResource: "admin:users:read",
+        justification: "Need access for audit",
+        ttlSeconds: 3600,
+      })
+    );
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: jitKeys.myRequests() });
   });
 });

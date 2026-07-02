@@ -7,15 +7,16 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { apiGet, apiPost } from "@/lib/apiClient";
+import { apiGet, apiPost, apiPut } from "@/lib/apiClient";
 import { queryKeys } from "./queryKeys";
-import type { Notification, NotificationsUnreadCount } from "./types";
+import type { Notification, NotificationsUnreadCount, NotificationPreferences, UpdateNotificationPreferencesInput } from "./types";
 
 export const notificationKeys = queryKeys.notifications;
 
 export const NOTIFICATIONS_PATH = "/notifications";
 export const NOTIFICATIONS_UNREAD_COUNT_PATH = "/notifications/unread-count";
 export const NOTIFICATIONS_READ_ALL_PATH = "/notifications/read-all";
+export const NOTIFICATIONS_PREFERENCES_PATH = "/notifications/preferences";
 export const NOTIFICATIONS_LIST_PREVIEW_LIMIT = 5;
 
 export function buildNotificationReadPath(id: string): string {
@@ -52,6 +53,59 @@ export function useNotificationsUnreadCountQuery() {
 
 export function useNotificationsListQuery(enabled: boolean) {
   return useQuery(notificationsListQueryOptions(enabled));
+}
+
+export function fetchNotificationPreferences(): Promise<NotificationPreferences> {
+  return apiGet<NotificationPreferences>(NOTIFICATIONS_PREFERENCES_PATH);
+}
+
+export function notificationPreferencesQueryOptions() {
+  return queryOptions({
+    queryKey: notificationKeys.preferences(),
+    queryFn: fetchNotificationPreferences,
+  });
+}
+
+export function useNotificationPreferencesQuery() {
+  return useQuery(notificationPreferencesQueryOptions());
+}
+
+interface PreferencesMutationContext {
+  previous?: NotificationPreferences;
+}
+
+export function useUpdateNotificationPreferencesMutation() {
+  const queryClient = useQueryClient();
+  const preferencesKey = notificationKeys.preferences();
+
+  return useMutation<
+    NotificationPreferences,
+    Error,
+    UpdateNotificationPreferencesInput,
+    PreferencesMutationContext
+  >({
+    mutationFn: (input) => apiPut<NotificationPreferences>(NOTIFICATIONS_PREFERENCES_PATH, input),
+    onMutate: async (input) => {
+      await queryClient.cancelQueries({ queryKey: preferencesKey });
+      const previous = queryClient.getQueryData<NotificationPreferences>(preferencesKey);
+      queryClient.setQueryData<NotificationPreferences>(preferencesKey, (current) => ({
+        emailFallback: true,
+        emailFallbackDays: 3,
+        ...current,
+        ...input,
+        categories: input.categories ?? current?.categories,
+      }));
+      return { previous };
+    },
+    onError: (_error, _input, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(preferencesKey, context.previous);
+      }
+    },
+    onSettled: () => {
+      void queryClient.invalidateQueries({ queryKey: preferencesKey });
+    },
+  });
 }
 
 export function setNotificationsUnreadCountCache(queryClient: QueryClient, count: number) {

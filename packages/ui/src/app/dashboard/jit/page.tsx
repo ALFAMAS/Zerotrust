@@ -1,27 +1,20 @@
 "use client";
 
 import { Clock, Loader2, ShieldQuestion } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
+import { ServerStateStatus } from "@/components/ServerStateStatus";
 import { Button } from "@/components/ui/button";
+import { ErrorState } from "@/components/ui/States";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { api } from "@/lib/api";
+import {
+  useMyJitRequestsQuery,
+  useSubmitJitRequestMutation,
+} from "@/lib/server-state/jit";
+import type { JitRequestStatus } from "@/lib/server-state/types";
 import { useToast } from "@/lib/toast";
 
-interface JITRequest {
-  id: string;
-  targetTenantId: string;
-  targetResource: string;
-  justification: string;
-  ttlSeconds: number;
-  status: "pending" | "approved" | "denied" | "expired";
-  approvedBy?: string;
-  approvedAt?: string;
-  expiresAt?: string;
-  createdAt: string;
-}
-
-const STATUS_STYLES: Record<JITRequest["status"], string> = {
+const STATUS_STYLES: Record<JitRequestStatus, string> = {
   pending: "border-amber-500/30 bg-amber-500/10 text-amber-400",
   approved: "border-green-500/30 bg-green-500/10 text-green-400",
   denied: "border-red-500/30 bg-red-500/10 text-red-400",
@@ -30,9 +23,8 @@ const STATUS_STYLES: Record<JITRequest["status"], string> = {
 
 export default function JITRequestPage() {
   const { toast } = useToast();
-  const [requests, setRequests] = useState<JITRequest[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
+  const requestsQuery = useMyJitRequestsQuery();
+  const submitMutation = useSubmitJitRequestMutation();
   const [form, setForm] = useState({
     targetTenantId: "",
     targetResource: "",
@@ -40,27 +32,14 @@ export default function JITRequestPage() {
     ttlMinutes: 60,
   });
 
-  const load = useCallback(async () => {
-    try {
-      const data = await api.get<JITRequest[]>("/jit/cross-tenant");
-      setRequests(Array.isArray(data) ? data : []);
-    } catch {
-      // leave list empty
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    void load();
-  }, [load]);
+  const requests = requestsQuery.data ?? [];
+  const hasRequests = requests.length > 0;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!form.targetTenantId || !form.targetResource || !form.justification) return;
-    setSubmitting(true);
     try {
-      await api.post("/jit/cross-tenant", {
+      await submitMutation.mutateAsync({
         targetTenantId: form.targetTenantId.trim(),
         targetResource: form.targetResource.trim(),
         justification: form.justification.trim(),
@@ -68,14 +47,11 @@ export default function JITRequestPage() {
       });
       toast({ message: "Access request submitted for approval", type: "success" });
       setForm({ targetTenantId: "", targetResource: "", justification: "", ttlMinutes: 60 });
-      void load();
     } catch (err: unknown) {
       toast({
         message: err instanceof Error ? err.message : "Failed to submit request",
         type: "error",
       });
-    } finally {
-      setSubmitting(false);
     }
   }
 
@@ -161,10 +137,10 @@ export default function JITRequestPage() {
           </div>
           <Button
             type="submit"
-            disabled={submitting}
+            disabled={submitMutation.isPending}
             className="flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
           >
-            {submitting ? (
+            {submitMutation.isPending ? (
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
               <ShieldQuestion className="h-4 w-4" />
@@ -176,7 +152,21 @@ export default function JITRequestPage() {
 
       <div>
         <h2 className="mb-3 font-medium text-foreground">My requests</h2>
-        {loading ? (
+
+        <ServerStateStatus
+          isFetching={requestsQuery.isFetching && !requestsQuery.isPending}
+          isStale={requestsQuery.isStale}
+          hasData={hasRequests}
+          label="JIT requests"
+          onRefresh={() => void requestsQuery.refetch()}
+        />
+
+        {requestsQuery.error && !hasRequests ? (
+          <ErrorState
+            message={requestsQuery.error.message}
+            retry={() => void requestsQuery.refetch()}
+          />
+        ) : requestsQuery.isPending ? (
           <div className="flex items-center gap-2 rounded-xl border border-border bg-card p-6 text-sm text-muted-foreground">
             <Loader2 className="h-4 w-4 animate-spin" /> Loading…
           </div>

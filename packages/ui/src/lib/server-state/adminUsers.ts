@@ -3,9 +3,19 @@
 import { queryOptions, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiDelete, apiGet, apiPatch, apiPost, apiPut } from "@/lib/apiClient";
 import { queryKeys } from "./queryKeys";
-import type { AdminUserDetail, AdminUserStatus, CustomerSegment } from "./types";
+import type {
+  AdminUserDetail,
+  AdminUserListItem,
+  AdminUsersListParams,
+  AdminUserStatus,
+  CustomerSegment,
+  PaginatedResponse,
+  UpdateAdminUserListStatusInput,
+} from "./types";
 
 export const adminUserKeys = queryKeys.admin.users;
+
+const DEFAULT_LIST_LIMIT = 20;
 
 export const CUSTOMER_SEGMENTS: CustomerSegment[] = [
   "champion",
@@ -16,6 +26,57 @@ export const CUSTOMER_SEGMENTS: CustomerSegment[] = [
 
 export function buildAdminUserDetailPath(id: string): string {
   return `/admin/users/${id}`;
+}
+
+export function buildAdminUsersListPath(params: AdminUsersListParams = {}): string {
+  const search = new URLSearchParams();
+  if (params.page !== undefined) search.set("page", String(params.page));
+  if (params.limit !== undefined) search.set("limit", String(params.limit));
+  if (params.search) search.set("search", params.search);
+  if (params.status && params.status !== "all") search.set("status", params.status);
+  const qs = search.toString();
+  return qs ? `/admin/users?${qs}` : "/admin/users";
+}
+
+export function normalizeAdminUsersListParams(
+  params: AdminUsersListParams = {}
+): Required<Pick<AdminUsersListParams, "page" | "limit">> & AdminUsersListParams {
+  return { page: params.page ?? 1, limit: params.limit ?? DEFAULT_LIST_LIMIT, ...params };
+}
+
+export function fetchAdminUsersList(
+  params: AdminUsersListParams = {}
+): Promise<PaginatedResponse<AdminUserListItem>> {
+  const normalized = normalizeAdminUsersListParams(params);
+  return apiGet<PaginatedResponse<AdminUserListItem>>(buildAdminUsersListPath(normalized));
+}
+
+export function adminUsersListQueryOptions(params: AdminUsersListParams = {}) {
+  const normalized = normalizeAdminUsersListParams(params);
+  return queryOptions({
+    queryKey: adminUserKeys.list(normalized),
+    queryFn: () => fetchAdminUsersList(normalized),
+  });
+}
+
+export function useAdminUsersListQuery(params: AdminUsersListParams = {}) {
+  return useQuery(adminUsersListQueryOptions(params));
+}
+
+function updateAdminUsersListCache(
+  queryClient: ReturnType<typeof useQueryClient>,
+  listKey: ReturnType<typeof adminUserKeys.list>,
+  updater: (users: AdminUserListItem[]) => AdminUserListItem[]
+) {
+  queryClient.setQueryData<PaginatedResponse<AdminUserListItem>>(listKey, (current) => {
+    if (!current) return current;
+    return { ...current, data: updater(current.data) };
+  });
+}
+
+interface AdminUsersListMutationContext {
+  previous?: PaginatedResponse<AdminUserListItem>;
+  listKey: ReturnType<typeof adminUserKeys.list>;
 }
 
 export function buildAdminUserForceLogoutPath(id: string): string {
@@ -144,6 +205,64 @@ export function useDeleteAdminUserMutation(userId: string) {
     onSettled: () => {
       void queryClient.invalidateQueries({ queryKey: adminUserKeys.list() });
       void queryClient.removeQueries({ queryKey: adminUserKeys.detail(userId) });
+    },
+  });
+}
+
+export function useAdminUserListStatusMutation(params: AdminUsersListParams = {}) {
+  const queryClient = useQueryClient();
+  const listKey = adminUserKeys.list(normalizeAdminUsersListParams(params));
+
+  return useMutation<
+    AdminUserDetail,
+    Error,
+    UpdateAdminUserListStatusInput,
+    AdminUsersListMutationContext
+  >({
+    mutationFn: ({ id, status }) =>
+      apiPatch<AdminUserDetail>(buildAdminUserDetailPath(id), { status }),
+    onMutate: async ({ id, status }) => {
+      await queryClient.cancelQueries({ queryKey: listKey });
+      const previous = queryClient.getQueryData<PaginatedResponse<AdminUserListItem>>(listKey);
+      updateAdminUsersListCache(queryClient, listKey, (users) =>
+        users.map((user) => (user.id === id ? { ...user, status } : user))
+      );
+      return { previous, listKey };
+    },
+    onError: (_error, _variables, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(context.listKey, context.previous);
+      }
+    },
+    onSettled: (_data, _error, { id }) => {
+      void queryClient.invalidateQueries({ queryKey: adminUserKeys.list() });
+      void queryClient.invalidateQueries({ queryKey: adminUserKeys.detail(id) });
+    },
+  });
+}
+
+export function useAdminUserListDeleteMutation(params: AdminUsersListParams = {}) {
+  const queryClient = useQueryClient();
+  const listKey = adminUserKeys.list(normalizeAdminUsersListParams(params));
+
+  return useMutation<unknown, Error, string, AdminUsersListMutationContext>({
+    mutationFn: (id) => apiDelete(buildAdminUserDetailPath(id)),
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: listKey });
+      const previous = queryClient.getQueryData<PaginatedResponse<AdminUserListItem>>(listKey);
+      updateAdminUsersListCache(queryClient, listKey, (users) =>
+        users.filter((user) => user.id !== id)
+      );
+      return { previous, listKey };
+    },
+    onError: (_error, _id, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(context.listKey, context.previous);
+      }
+    },
+    onSettled: (_data, _error, id) => {
+      void queryClient.invalidateQueries({ queryKey: adminUserKeys.list() });
+      void queryClient.removeQueries({ queryKey: adminUserKeys.detail(id) });
     },
   });
 }

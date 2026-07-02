@@ -178,6 +178,21 @@ export interface JitRequest {
   createdAt: string;
 }
 
+export interface CreateJitRequestInput {
+  targetTenantId: string;
+  targetResource: string;
+  justification: string;
+  ttlSeconds: number;
+}
+
+export interface NotificationPreferences {
+  emailFallback: boolean;
+  emailFallbackDays: number;
+  categories?: Record<string, { email?: boolean; push?: boolean; inApp?: boolean }>;
+}
+
+export type UpdateNotificationPreferencesInput = Partial<NotificationPreferences>;
+
 export type Soc2ControlStatus = "implemented" | "partial" | "planned";
 
 export interface Soc2Control {
@@ -351,6 +366,29 @@ export interface SubmitNpsInput {
 
 export type AdminUserStatus = "active" | "suspended" | "deleted" | string;
 export type CustomerSegment = "champion" | "at_risk" | "expansion" | "new";
+
+export interface AdminUserListItem {
+  id: string;
+  displayName?: string;
+  email: string;
+  status: AdminUserStatus;
+  roles?: string[];
+  emailVerifiedAt?: string | null;
+  createdAt: string;
+  lastLoginAt?: string;
+}
+
+export interface AdminUsersListParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+  status?: string;
+}
+
+export interface UpdateAdminUserListStatusInput {
+  id: string;
+  status: AdminUserStatus;
+}
 
 export interface AdminUserDetail {
   id: string;

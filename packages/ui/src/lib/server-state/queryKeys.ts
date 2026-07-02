@@ -69,6 +69,7 @@ export const queryKeys = {
   jit: {
     all: ["jit"] as const,
     incoming: () => [...queryKeys.jit.all, "incoming"] as const,
+    myRequests: () => [...queryKeys.jit.all, "myRequests"] as const,
   },
   compliance: {
     all: ["compliance"] as const,
@@ -90,6 +91,7 @@ export const queryKeys = {
     all: ["notifications"] as const,
     list: () => [...queryKeys.notifications.all, "list"] as const,
     unreadCount: () => [...queryKeys.notifications.all, "unreadCount"] as const,
+    preferences: () => [...queryKeys.notifications.all, "preferences"] as const,
   },
   nps: {
     all: ["nps"] as const,
