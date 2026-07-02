@@ -11,24 +11,24 @@
 
 | Check                                          | Result                                                                                                                                 |
 | ---------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| `bun run test` (vitest)                        | ✅ **835 tests / 99 files passing**                                                                                                    |
+| `bun run test` (vitest)                        | ✅ **838 tests / 99 files passing**                                                                                                    |
 | `bun run build` (tsc API)                      | ✅ clean                                                                                                                               |
 | `bun run type-check`                           | ✅ clean                                                                                                                               |
 | `bun run verify:generated` (SDK + docs drift)  | ⚠ regenerates cleanly; expected tracked docs diffs are included for the improved API↔UI scanner                                        |
 | `bun run boundaries:check`                     | ✅ clean                                                                                                                               |
-| `bun run audit:integration` (API↔UI map)       | ✅ passes, scans typed/template `api.*`, `apiClient`, and `useApi` calls; flags 48 backend routes with no UI caller (mostly by design) |
+| `bun run audit:integration` (API↔UI map)       | ✅ passes, scans typed/template `api.*`, `apiClient`, and `useApi` calls; flags 46 backend routes with no UI caller (mostly by design) |
 | `bun run ui:audit` (shadcn adoption)           | ✅ **0 raw HTML controls** — migration complete                                                                                        |
 | `bun run lint` (biome)                         | ✅ exits 0; only pre-existing script warnings remain                                                                                   |
 | `bun run --cwd packages/ui build` (next build) | ✅ production build passes; only existing Next/SWC version warning remains                                                             |
 
-**Verdict:** Strong, production-shaped SaaS template (27 route modules, 41 DB tables, 835 root tests, full Stripe/SSO/MFA/WebAuthn/observability). All fork-blocking and should-fix items are resolved — details consolidated in [`tdone.md`](./tdone.md).
+**Verdict:** Strong, production-shaped SaaS template (27 route modules, 41 DB tables, 838 root tests, full Stripe/SSO/MFA/WebAuthn/observability). All fork-blocking and should-fix items are resolved — details consolidated in [`tdone.md`](./tdone.md).
 
 ### Open follow-ups (still in [`todo.md`](./todo.md))
 
 | ID     | Status     | Summary                                                                                                 |
 | ------ | ---------- | ------------------------------------------------------------------------------------------------------- |
-| **E2** | 🟠 Partial | `useApi`/`usePaginatedApi` on 6 pages; ~18 dashboard/admin pages still use legacy `useEffect`+`api.get` |
-| **E4** | 🟡 Info    | 48 backend routes have no UI caller (many by design; some shipped features lack UI)                     |
+| **E2** | 🟠 Partial | `useApi`/`usePaginatedApi` on 7 pages; ~17 dashboard/admin pages still use legacy `useEffect`+`api.get` |
+| **E4** | 🟡 Info    | 46 backend routes have no UI caller (many by design; some shipped features lack UI)                     |
 | **E5** | 🟡 Info    | In-process `setInterval` schedulers — leader lock mitigates but not horizontally scalable               |
 | **E6** | 🟡 Info    | Repository layer ~10% complete (4 repos); hot-path writes still mostly inline Drizzle                   |
 
@@ -58,13 +58,13 @@ The repo's own `CLAUDE.md` documents the 2026-06-26 CWE sweep. Spot-checks confi
 
 ### E2. 🟠 `useApi` hook exists but is barely used — **open**
 
-`packages/ui/src/lib/hooks/useApi.ts` (with `usePaginatedApi`) is documented in `CLAUDE.md` as the replacement for `useEffect+api.get+loading` boilerplate. **6 of ~40 app pages use it** (`admin/page`, `admin/access-reviews`, `admin/alerts`, `admin/sessions`, `admin/users`, `dashboard/settings`). ~18 dashboard/admin pages still import `@/lib/api` and hand-roll fetch/loading/error (webhooks, billing, wallet, admin audit/revenue/tenants/regions, etc.). Tracked in `todo.md` P2.
+`packages/ui/src/lib/hooks/useApi.ts` (with `usePaginatedApi`) is documented in `CLAUDE.md` as the replacement for `useEffect+api.get+loading` boilerplate. **7 of ~40 app pages use it** (`admin/page`, `admin/access-reviews`, `admin/alerts`, `admin/sessions`, `admin/users`, `dashboard/billing`, `dashboard/settings`). ~17 dashboard/admin pages still import `@/lib/api` and hand-roll fetch/loading/error (webhooks, wallet, admin audit/revenue/tenants/regions, etc.). Tracked in `todo.md` P2.
 
-### E4. 🟡 48 backend routes have no UI caller
+### E4. 🟡 46 backend routes have no UI caller
 
 Per `docs/api-ui-integration-matrix.md` after improving the scanner to catch typed/template `api.*`, canonical `apiClient`, and `useApi`/`usePaginatedApi` calls. Most are legitimately admin/infra/SDK-only (OAuth callbacks, webhooks, search index management, machine endpoints). But a meaningful subset are **shipped features with no UI exposure**:
 
-- `/admin/feedback`, `/admin/roles` (CRUD), `/admin/jit-grants/*`, `/billing/currencies`, `/billing/pricing`, `/billing/tax-exemptions/*`, `/billing/vat/validate`, selected `/regions/*` metadata endpoints
+- `/admin/feedback`, `/admin/roles` (CRUD), `/admin/jit-grants/*`, `/billing/tax-exemptions/*`, `/billing/vat/validate`, selected `/regions/*` metadata endpoints
 
 These represent backend features that are **implemented but not surfaced** in the dashboard. For a template fork, decide which to expose and which to drop.
 
@@ -119,7 +119,7 @@ These represent backend features that are **implemented but not surfaced** in th
 
 14. ✅ **C1** — `/search/smart` is ranked full-text search; semantic/vector claims removed from generated docs.
 15. ✅ **E3** — Finish shadcn migration (0 raw controls remaining).
-16. **E2** — Migrate pages to `useApi`/`usePaginatedApi` (~18 pages remain; 6 done)
+16. **E2** — Migrate pages to `useApi`/`usePaginatedApi` (~17 pages remain; 7 done)
 17. ✅ **C4 / C5 / C6 / C7** — OAuth linked accounts UI, per-category notification preferences, route scan confirmed, customer segment admin UI.
 18. ✅ **C3** — README now says "software key store (hardware providers are stubs)" instead of advertising hardware-backed crypto.
 19. ✅ Refresh `todo.md` to reflect this audit

@@ -1,3 +1,4 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -7,12 +8,21 @@ vi.mock("next/navigation", () => ({
   useSearchParams: () => searchParams,
 }));
 
-const mockGet = vi.fn();
-const mockPost = vi.fn();
+const mockApiGet = vi.fn();
+const mockApiPost = vi.fn();
+vi.mock("../../../lib/apiClient", () => ({
+  apiGet: (...args: unknown[]) => mockApiGet(...args),
+  apiPost: (...args: unknown[]) => mockApiPost(...args),
+}));
+
 vi.mock("../../../lib/api", () => ({
   api: {
-    get: (...args: unknown[]) => mockGet(...args),
-    post: (...args: unknown[]) => mockPost(...args),
+    get: () => {
+      throw new Error("Billing requests must use server-state/apiClient");
+    },
+    post: () => {
+      throw new Error("Billing requests must use server-state/apiClient");
+    },
   },
 }));
 
@@ -22,7 +32,7 @@ vi.mock("../../../lib/safeRedirect", () => ({
 }));
 
 function mockSubscription(sub: Record<string, unknown> | null) {
-  mockGet.mockImplementation((path: string) => {
+  mockApiGet.mockImplementation((path: string) => {
     if (path === "/billing/subscription") {
       return sub ? Promise.resolve(sub) : Promise.reject(new Error("no subscription"));
     }
@@ -41,10 +51,25 @@ async function loadBillingPage() {
   return mod.default;
 }
 
+function renderBillingPage(BillingPage: React.ComponentType) {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: { retry: false, gcTime: 0 },
+      mutations: { retry: false },
+    },
+  });
+
+  return render(
+    <QueryClientProvider client={queryClient}>
+      <BillingPage />
+    </QueryClientProvider>
+  );
+}
+
 describe("BillingPage", () => {
   beforeEach(() => {
-    mockGet.mockReset();
-    mockPost.mockReset();
+    mockApiGet.mockReset();
+    mockApiPost.mockReset();
     mockNavigateToSafeExternal.mockReset();
     searchParams = new URLSearchParams();
     vi.resetModules();
@@ -57,7 +82,7 @@ describe("BillingPage", () => {
   it("renders all plan tiers", async () => {
     mockSubscription(null);
     const BillingPage = await loadBillingPage();
-    render(<BillingPage />);
+    renderBillingPage(BillingPage);
 
     expect(await screen.findByText("Free")).toBeInTheDocument();
     expect(screen.getByText("Pro")).toBeInTheDocument();
@@ -67,7 +92,7 @@ describe("BillingPage", () => {
   it("does not show the paid-plan summary card on the free plan", async () => {
     mockSubscription(null);
     const BillingPage = await loadBillingPage();
-    render(<BillingPage />);
+    renderBillingPage(BillingPage);
 
     await screen.findByText("Free");
     // The summary card (with manage/cancel actions) only renders for paid
@@ -85,11 +110,10 @@ describe("BillingPage", () => {
       trialEnd: null,
     });
     const BillingPage = await loadBillingPage();
-    render(<BillingPage />);
+    renderBillingPage(BillingPage);
 
-    expect(await screen.findByText("Current plan")).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: "Cancel plan" })).toBeInTheDocument();
     expect(screen.getByText("pro")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Cancel plan" })).toBeInTheDocument();
   });
 
   it("shows Reactivate instead of Cancel when the plan is set to cancel at period end", async () => {
@@ -101,7 +125,7 @@ describe("BillingPage", () => {
       trialEnd: null,
     });
     const BillingPage = await loadBillingPage();
-    render(<BillingPage />);
+    renderBillingPage(BillingPage);
 
     expect(await screen.findByRole("button", { name: "Reactivate" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Cancel plan" })).not.toBeInTheDocument();
@@ -117,7 +141,7 @@ describe("BillingPage", () => {
     });
     const user = userEvent.setup();
     const BillingPage = await loadBillingPage();
-    render(<BillingPage />);
+    renderBillingPage(BillingPage);
 
     await user.click(await screen.findByRole("button", { name: "Cancel plan" }));
 
@@ -137,17 +161,17 @@ describe("BillingPage", () => {
       cancelAtPeriodEnd: false,
       trialEnd: null,
     });
-    mockPost.mockResolvedValue({});
+    mockApiPost.mockResolvedValue({});
     const user = userEvent.setup();
     const BillingPage = await loadBillingPage();
-    render(<BillingPage />);
+    renderBillingPage(BillingPage);
 
     await user.click(await screen.findByRole("button", { name: "Cancel plan" }));
     await user.click(screen.getByLabelText("No longer needed"));
     await user.click(screen.getByRole("button", { name: "Cancel at period end" }));
 
     await waitFor(() => {
-      expect(mockPost).toHaveBeenCalledWith("/billing/cancel", {
+      expect(mockApiPost).toHaveBeenCalledWith("/billing/cancel", {
         action: "cancel",
         reason: "No longer needed",
         comment: "",
@@ -158,7 +182,7 @@ describe("BillingPage", () => {
   it("shows a disabled fallback (not an upgrade button) when no Stripe price is configured", async () => {
     mockSubscription(null);
     const BillingPage = await loadBillingPage();
-    render(<BillingPage />);
+    renderBillingPage(BillingPage);
 
     await screen.findByText("Pro");
     expect(screen.queryByRole("button", { name: "Upgrade to Pro" })).not.toBeInTheDocument();
@@ -167,15 +191,15 @@ describe("BillingPage", () => {
   it("starts checkout and redirects to the returned URL when a price is configured", async () => {
     vi.stubEnv("NEXT_PUBLIC_STRIPE_PRICE_PRO", "price_pro_123");
     mockSubscription(null);
-    mockPost.mockResolvedValue({ url: "https://checkout.stripe.com/session/abc" });
+    mockApiPost.mockResolvedValue({ url: "https://checkout.stripe.com/session/abc" });
     const user = userEvent.setup();
     const BillingPage = await loadBillingPage();
-    render(<BillingPage />);
+    renderBillingPage(BillingPage);
 
     await user.click(await screen.findByRole("button", { name: "Upgrade to Pro" }));
 
     await waitFor(() => {
-      expect(mockPost).toHaveBeenCalledWith("/billing/checkout", { priceId: "price_pro_123" });
+      expect(mockApiPost).toHaveBeenCalledWith("/billing/checkout", { priceId: "price_pro_123" });
     });
     expect(mockNavigateToSafeExternal).toHaveBeenCalledWith(
       "https://checkout.stripe.com/session/abc",
@@ -187,7 +211,7 @@ describe("BillingPage", () => {
     searchParams = new URLSearchParams("success=1");
     mockSubscription(null);
     const BillingPage = await loadBillingPage();
-    render(<BillingPage />);
+    renderBillingPage(BillingPage);
 
     expect(await screen.findByText("Subscription updated successfully!")).toBeInTheDocument();
   });

@@ -1,20 +1,22 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import EmptyState from "../../../components/EmptyState";
-import { Badge } from "../../../components/ui/badge";
-import { Button } from "../../../components/ui/button";
-import { Card } from "../../../components/ui/card";
-import { Checkbox } from "../../../components/ui/checkbox";
+import { useState } from "react";
+import EmptyState from "@/components/EmptyState";
+import { ServerStateStatus } from "@/components/ServerStateStatus";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "../../../components/ui/dialog";
-import { Input } from "../../../components/ui/input";
-import { Label } from "../../../components/ui/label";
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { ErrorState } from "@/components/ui/States";
 import {
   Table,
   TableBody,
@@ -22,26 +24,16 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "../../../components/ui/table";
-import { api } from "../../../lib/api";
-
-interface WebhookEndpoint {
-  id: string;
-  url: string;
-  events: string[];
-  active: boolean;
-  createdAt?: string;
-}
-
-interface WebhookDelivery {
-  id: string;
-  event: string;
-  status: "pending" | "delivered" | "failed" | "retrying";
-  attempt: number;
-  responseStatus: number | null;
-  error: string | null;
-  recordedAt: string;
-}
+} from "@/components/ui/table";
+import type { WebhookEndpoint } from "@/lib/server-state/types";
+import {
+  useCreateWebhookEndpointMutation,
+  useDeleteWebhookEndpointMutation,
+  usePingWebhookEndpointMutation,
+  useToggleWebhookEndpointMutation,
+  useWebhookDeliveriesQuery,
+  useWebhookEndpointsQuery,
+} from "@/lib/server-state/webhooks";
 
 const EVENT_OPTIONS = [
   "auth.login.success",
@@ -55,8 +47,11 @@ const EVENT_OPTIONS = [
 ];
 
 export default function WebhooksPage() {
-  const [endpoints, setEndpoints] = useState<WebhookEndpoint[]>([]);
-  const [loading, setLoading] = useState(true);
+  const endpointsQuery = useWebhookEndpointsQuery();
+  const createMutation = useCreateWebhookEndpointMutation();
+  const deleteMutation = useDeleteWebhookEndpointMutation();
+  const pingMutation = usePingWebhookEndpointMutation();
+  const toggleMutation = useToggleWebhookEndpointMutation();
   const [createOpen, setCreateOpen] = useState(false);
   const [form, setForm] = useState({
     url: "",
@@ -66,25 +61,18 @@ export default function WebhooksPage() {
   const [error, setError] = useState<string | null>(null);
   const [pingResult, setPingResult] = useState<Record<string, string>>({});
   const [deliveriesFor, setDeliveriesFor] = useState<string | null>(null);
-  const [deliveries, setDeliveries] = useState<WebhookDelivery[] | null>(null);
+  const deliveriesQuery = useWebhookDeliveriesQuery(deliveriesFor, { limit: 50 });
 
-  const load = useCallback(() => {
-    api
-      .get<WebhookEndpoint[]>("/webhooks")
-      .then(setEndpoints)
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, []);
-
-  useEffect(load, [load]);
+  const endpoints = endpointsQuery.data ?? [];
+  const hasEndpoints = endpoints.length > 0;
+  const deliveries = deliveriesQuery.data?.deliveries ?? [];
 
   async function createEndpoint() {
     setError(null);
     try {
-      await api.post("/webhooks", form);
+      await createMutation.mutateAsync(form);
       setCreateOpen(false);
       setForm({ url: "", secret: "", events: [] });
-      load();
     } catch (e) {
       setError((e as Error).message);
     }
@@ -93,8 +81,7 @@ export default function WebhooksPage() {
   async function deleteEndpoint(id: string) {
     if (!confirm("Delete this webhook endpoint?")) return;
     try {
-      await api.delete(`/webhooks/${id}`);
-      load();
+      await deleteMutation.mutateAsync(id);
     } catch {
       alert("Failed to delete endpoint");
     }
@@ -103,28 +90,20 @@ export default function WebhooksPage() {
   async function pingEndpoint(id: string) {
     setPingResult((r) => ({ ...r, [id]: "…" }));
     try {
-      await api.post(`/webhooks/${id}/ping`, {});
+      await pingMutation.mutateAsync(id);
       setPingResult((r) => ({ ...r, [id]: "✓ delivered" }));
     } catch {
       setPingResult((r) => ({ ...r, [id]: "✗ failed" }));
     }
   }
 
-  async function openDeliveries(id: string) {
+  function openDeliveries(id: string) {
     setDeliveriesFor(id);
-    setDeliveries(null);
-    try {
-      const res = await api.get<{ deliveries: WebhookDelivery[] }>(`/webhooks/${id}/deliveries`);
-      setDeliveries(res.deliveries);
-    } catch {
-      setDeliveries([]);
-    }
   }
 
   async function toggleActive(ep: WebhookEndpoint) {
     try {
-      await api.patch(`/webhooks/${ep.id}`, { active: !ep.active });
-      load();
+      await toggleMutation.mutateAsync({ id: ep.id, active: !ep.active });
     } catch {
       alert("Failed to update endpoint");
     }
@@ -155,11 +134,25 @@ export default function WebhooksPage() {
         </Button>
       </div>
 
-      {loading ? (
+      <ServerStateStatus
+        isFetching={endpointsQuery.isFetching && !endpointsQuery.isPending}
+        isStale={endpointsQuery.isStale}
+        hasData={hasEndpoints}
+        label="webhooks"
+        onRefresh={() => void endpointsQuery.refetch()}
+      />
+
+      {endpointsQuery.error && !hasEndpoints ? (
+        <ErrorState
+          message={endpointsQuery.error.message}
+          retry={() => void endpointsQuery.refetch()}
+        />
+      ) : endpointsQuery.isPending ? (
         <div className="space-y-3">
           {[...Array(2)].map((_, i) => (
             <div key={i} className="h-20 animate-pulse rounded-xl bg-card" />
           ))}
+          <p className="sr-only">Loading webhooks…</p>
         </div>
       ) : endpoints.length === 0 ? (
         <Card>
@@ -193,6 +186,7 @@ export default function WebhooksPage() {
                   variant="secondary"
                   size="sm"
                   onClick={() => pingEndpoint(ep.id)}
+                  disabled={pingMutation.isPending}
                 >
                   Test
                 </Button>
@@ -209,6 +203,7 @@ export default function WebhooksPage() {
                   variant="secondary"
                   size="sm"
                   onClick={() => toggleActive(ep)}
+                  disabled={toggleMutation.isPending}
                 >
                   {ep.active ? "Disable" : "Enable"}
                 </Button>
@@ -218,6 +213,7 @@ export default function WebhooksPage() {
                   size="sm"
                   className="text-destructive hover:text-destructive"
                   onClick={() => deleteEndpoint(ep.id)}
+                  disabled={deleteMutation.isPending}
                 >
                   Delete
                 </Button>
@@ -282,9 +278,11 @@ export default function WebhooksPage() {
               type="button"
               className="w-full"
               onClick={createEndpoint}
-              disabled={!form.url || !form.secret || form.events.length === 0}
+              disabled={
+                !form.url || !form.secret || form.events.length === 0 || createMutation.isPending
+              }
             >
-              Create endpoint
+              {createMutation.isPending ? "Creating…" : "Create endpoint"}
             </Button>
           </div>
         </DialogContent>
@@ -293,18 +291,23 @@ export default function WebhooksPage() {
       <Dialog
         open={deliveriesFor !== null}
         onOpenChange={(open) => {
-          if (!open) {
-            setDeliveriesFor(null);
-            setDeliveries(null);
-          }
+          if (!open) setDeliveriesFor(null);
         }}
       >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Recent deliveries</DialogTitle>
+            <DialogDescription>
+              Recent delivery attempts for this webhook endpoint.
+            </DialogDescription>
           </DialogHeader>
-          {deliveries === null ? (
-            <p className="text-sm text-muted-foreground">Loading…</p>
+          {deliveriesQuery.isPending || deliveriesQuery.isFetching ? (
+            <p className="text-sm text-muted-foreground">Loading deliveries…</p>
+          ) : deliveriesQuery.error ? (
+            <ErrorState
+              message={deliveriesQuery.error.message}
+              retry={() => void deliveriesQuery.refetch()}
+            />
           ) : deliveries.length === 0 ? (
             <p className="text-sm text-muted-foreground">
               No deliveries recorded yet. Send a test ping or trigger an event.

@@ -2,7 +2,7 @@
 
 import { Check } from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useMemo, useState } from "react";
 import Modal from "../../../components/Modal";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
@@ -14,16 +14,16 @@ import {
   SelectValue,
 } from "../../../components/ui/select";
 import { Textarea } from "../../../components/ui/textarea";
-import { api } from "../../../lib/api";
 import { navigateToSafeExternal } from "../../../lib/safeRedirect";
-
-interface Subscription {
-  plan: string;
-  status: string;
-  currentPeriodEnd: string | null;
-  cancelAtPeriodEnd: boolean;
-  trialEnd: string | null;
-}
+import {
+  useBillingCancelMutation,
+  useBillingCheckoutMutation,
+  useBillingCurrenciesQuery,
+  useBillingPortalMutation,
+  useBillingPricingQuery,
+  useBillingReactivateMutation,
+  useBillingSubscriptionQuery,
+} from "../../../lib/server-state/billing";
 
 const CANCEL_REASONS = [
   "Too expensive",
@@ -72,105 +72,72 @@ const PLANS = [
 
 function BillingContent() {
   const params = useSearchParams();
-  const [sub, setSub] = useState<Subscription | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [portalLoading, setPortalLoading] = useState(false);
-  const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
   const [cancelOpen, setCancelOpen] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
   const [cancelComment, setCancelComment] = useState("");
-  const [cancelBusy, setCancelBusy] = useState(false);
   const [retentionOffer, setRetentionOffer] = useState<string | null>(null);
 
-  // Multi-currency / PPP pricing (backend: /billing/currencies + /billing/pricing).
   const [currency, setCurrency] = useState("USD");
-  const [currencies, setCurrencies] = useState<{ code: string; symbol: string; name: string }[]>(
-    []
-  );
-  const [prices, setPrices] = useState<
-    Record<string, { formatted: string; pppDiscountPercent: number }>
-  >({});
+  const locale = typeof navigator !== "undefined" ? navigator.language : "en-US";
+  const subscriptionQuery = useBillingSubscriptionQuery();
+  const cancelMutation = useBillingCancelMutation();
+  const reactivateMutation = useBillingReactivateMutation();
+  const checkoutMutation = useBillingCheckoutMutation();
+  const portalMutation = useBillingPortalMutation();
 
-  useEffect(() => {
-    api
-      .get<{ currencies: { code: string; symbol: string; name: string }[] }>("/billing/currencies")
-      .then((r) => setCurrencies(r.currencies ?? []))
-      .catch(() => {});
-  }, []);
+  // Multi-currency / PPP pricing (backend: /billing/currencies + /billing/pricing).
+  const currenciesQuery = useBillingCurrenciesQuery();
+  const pricingQuery = useBillingPricingQuery(currency, locale);
 
-  useEffect(() => {
-    const locale = typeof navigator !== "undefined" ? navigator.language : "en-US";
-    api
-      .get<{ plans: { plan: string; formatted: string; pppDiscountPercent: number }[] }>(
-        `/billing/pricing?currency=${currency}&locale=${encodeURIComponent(locale)}`
-      )
-      .then((r) => {
-        const map: Record<string, { formatted: string; pppDiscountPercent: number }> = {};
-        for (const p of r.plans ?? [])
-          map[p.plan] = { formatted: p.formatted, pppDiscountPercent: p.pppDiscountPercent };
-        setPrices(map);
-      })
-      .catch(() => {});
-  }, [currency]);
-
-  function loadSubscription() {
-    api
-      .get<Subscription>("/billing/subscription")
-      .then(setSub)
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }
-
-  useEffect(loadSubscription, []);
+  const sub = subscriptionQuery.data ?? null;
+  const loading = subscriptionQuery.isPending;
+  const currencies = currenciesQuery.data?.currencies ?? [];
+  const prices = useMemo(() => {
+    const map: Record<string, { formatted: string; pppDiscountPercent: number }> = {};
+    for (const p of pricingQuery.data?.plans ?? []) {
+      map[p.plan] = { formatted: p.formatted, pppDiscountPercent: p.pppDiscountPercent };
+    }
+    return map;
+  }, [pricingQuery.data]);
+  const checkoutLoading = checkoutMutation.isPending ? checkoutMutation.variables : null;
 
   async function handleCancel(action: "cancel" | "pause") {
-    setCancelBusy(true);
     try {
-      const res = await api.post<{ offer?: { code: string } }>("/billing/cancel", {
+      const res = await cancelMutation.mutateAsync({
         action,
         reason: cancelReason,
         comment: cancelComment,
       });
       if (res.offer?.code) setRetentionOffer(res.offer.code);
       setCancelOpen(false);
-      loadSubscription();
     } catch {
       alert("Failed to update subscription. Please try again.");
-    } finally {
-      setCancelBusy(false);
     }
   }
 
   async function handleReactivate() {
     try {
-      await api.post("/billing/reactivate", {});
-      loadSubscription();
+      await reactivateMutation.mutateAsync();
     } catch {
       alert("Failed to reactivate subscription.");
     }
   }
 
   async function handleCheckout(priceId: string) {
-    setCheckoutLoading(priceId);
     try {
-      const { url } = await api.post<{ url: string }>("/billing/checkout", { priceId });
+      const { url } = await checkoutMutation.mutateAsync(priceId);
       navigateToSafeExternal(url, "/dashboard/billing");
     } catch {
       alert("Failed to start checkout. Please try again.");
-    } finally {
-      setCheckoutLoading(null);
     }
   }
 
   async function handlePortal() {
-    setPortalLoading(true);
     try {
-      const { url } = await api.post<{ url: string }>("/billing/portal", {});
+      const { url } = await portalMutation.mutateAsync();
       navigateToSafeExternal(url, "/dashboard/billing");
     } catch {
       alert("Failed to open billing portal.");
-    } finally {
-      setPortalLoading(false);
     }
   }
 
@@ -246,10 +213,10 @@ function BillingContent() {
               <Button
                 type="button"
                 onClick={handlePortal}
-                disabled={portalLoading}
+                disabled={portalMutation.isPending}
                 className="px-4 py-2 bg-secondary hover:bg-secondary/80 disabled:opacity-50 text-foreground text-sm rounded-lg transition-colors"
               >
-                {portalLoading ? "Loading…" : "Manage billing"}
+                {portalMutation.isPending ? "Loading…" : "Manage billing"}
               </Button>
             </div>
           </div>
@@ -298,7 +265,7 @@ function BillingContent() {
               <Button
                 type="button"
                 onClick={() => handleCancel("pause")}
-                disabled={cancelBusy}
+                disabled={cancelMutation.isPending}
                 className="flex-1 py-2 bg-primary hover:bg-primary/90 disabled:opacity-50 text-foreground text-sm font-medium rounded-lg transition-colors"
               >
                 Pause instead
@@ -306,10 +273,10 @@ function BillingContent() {
               <Button
                 type="button"
                 onClick={() => handleCancel("cancel")}
-                disabled={cancelBusy || !cancelReason}
+                disabled={cancelMutation.isPending || !cancelReason}
                 className="flex-1 py-2 bg-red-900/60 hover:bg-red-900 disabled:opacity-50 text-red-200 text-sm font-medium rounded-lg transition-colors"
               >
-                {cancelBusy ? "Working…" : "Cancel at period end"}
+                {cancelMutation.isPending ? "Working…" : "Cancel at period end"}
               </Button>
             </div>
           </div>

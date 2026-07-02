@@ -1,12 +1,14 @@
 "use client";
 
 import { Wallet as WalletIcon } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
+import { ServerStateStatus } from "@/components/ServerStateStatus";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { EmptyState, ErrorState } from "@/components/ui/States";
 import {
   Table,
   TableBody,
@@ -15,60 +17,42 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { api } from "@/lib/api";
-
-interface Wallet {
-  balance: number;
-  lifetimeBalance: number;
-  currency: string;
-  autoTopUp: boolean;
-}
-
-interface WalletTx {
-  id: string;
-  amount: number;
-  balanceAfter: number;
-  type: string;
-  description?: string | null;
-  createdAt?: string;
-}
+import {
+  useTopUpWalletMutation,
+  useWalletQuery,
+  useWalletTransactionsQuery,
+} from "@/lib/server-state/wallet";
 
 const fmt = (d?: string | null) => (d ? new Date(d).toLocaleString() : "—");
 const money = (cents: number, currency = "USD") =>
   new Intl.NumberFormat(undefined, { style: "currency", currency }).format((cents ?? 0) / 100);
 
 export default function WalletPage() {
-  const [wallet, setWallet] = useState<Wallet | null>(null);
-  const [txs, setTxs] = useState<WalletTx[]>([]);
-  const [loading, setLoading] = useState(true);
+  const walletQuery = useWalletQuery();
+  const transactionsQuery = useWalletTransactionsQuery({ limit: 30 });
+  const topUpMutation = useTopUpWalletMutation();
   const [toast, setToast] = useState<string | null>(null);
   const [amount, setAmount] = useState("10");
-  const [topping, setTopping] = useState(false);
 
-  const showToast = useCallback((msg: string) => {
+  const wallet = walletQuery.data ?? null;
+  const txs = transactionsQuery.data?.data ?? [];
+  const currency = wallet?.currency ?? "USD";
+  const isInitialLoading = walletQuery.isPending || transactionsQuery.isPending;
+  const error = walletQuery.error ?? transactionsQuery.error;
+  const isRefetching =
+    (walletQuery.isFetching && !walletQuery.isPending) ||
+    (transactionsQuery.isFetching && !transactionsQuery.isPending);
+  const isStale = walletQuery.isStale || transactionsQuery.isStale;
+
+  function showToast(msg: string) {
     setToast(msg);
     setTimeout(() => setToast(null), 3000);
-  }, []);
+  }
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    try {
-      const [w, t] = await Promise.all([
-        api.get<Wallet>("/wallet"),
-        api.get<{ data: WalletTx[]; pagination: any }>("/wallet/transactions?limit=30"),
-      ]);
-      setWallet(w);
-      setTxs(t.data ?? []);
-    } catch {
-      showToast("Failed to load wallet");
-    } finally {
-      setLoading(false);
-    }
-  }, [showToast]);
-
-  useEffect(() => {
-    void load();
-  }, [load]);
+  function refreshWallet() {
+    void walletQuery.refetch();
+    void transactionsQuery.refetch();
+  }
 
   async function handleTopUp(e: React.FormEvent) {
     e.preventDefault();
@@ -77,20 +61,24 @@ export default function WalletPage() {
       showToast("Enter a positive amount");
       return;
     }
-    setTopping(true);
+
+    const amountCents = Math.round(dollars * 100);
     try {
-      // Wallet amounts are integer cents.
-      await api.post("/wallet/top-up", { amount: Math.round(dollars * 100) });
-      showToast(`Added ${money(Math.round(dollars * 100), wallet?.currency)}`);
-      await load();
+      await topUpMutation.mutateAsync(amountCents);
+      showToast(`Added ${money(amountCents, currency)}`);
     } catch (err) {
       showToast(err instanceof Error ? err.message : "Top-up failed");
-    } finally {
-      setTopping(false);
     }
   }
 
-  const currency = wallet?.currency ?? "USD";
+  if (error && !wallet && txs.length === 0) {
+    return (
+      <div className="space-y-6">
+        <WalletHeader />
+        <ErrorState message={error.message} retry={refreshWallet} />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -100,24 +88,22 @@ export default function WalletPage() {
         </div>
       )}
 
-      <div className="flex items-center gap-3">
-        <WalletIcon className="h-6 w-6 text-primary" />
-        <div>
-          <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
-            Wallet
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Your account credit balance and transaction history.
-          </p>
-        </div>
-      </div>
+      <WalletHeader />
+
+      <ServerStateStatus
+        isFetching={isRefetching}
+        isStale={isStale}
+        hasData={Boolean(wallet)}
+        label="wallet data"
+        onRefresh={refreshWallet}
+      />
 
       <div className="grid gap-4 sm:grid-cols-2">
         <Card>
           <CardHeader>
             <CardDescription>Current balance</CardDescription>
             <CardTitle className="text-3xl">
-              {loading ? "…" : money(wallet?.balance ?? 0, currency)}
+              {isInitialLoading ? "…" : money(wallet?.balance ?? 0, currency)}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -150,8 +136,8 @@ export default function WalletPage() {
                   onChange={(e) => setAmount(e.target.value)}
                 />
               </div>
-              <Button type="submit" disabled={topping}>
-                {topping ? "Adding…" : "Top up"}
+              <Button type="submit" disabled={topUpMutation.isPending || !wallet}>
+                {topUpMutation.isPending ? "Adding…" : "Top up"}
               </Button>
             </form>
           </CardContent>
@@ -176,28 +162,33 @@ export default function WalletPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {loading && (
+                {isInitialLoading && (
                   <TableRow>
                     <TableCell colSpan={5} className="py-8 text-center text-muted-foreground">
-                      Loading…
+                      Loading wallet…
                     </TableCell>
                   </TableRow>
                 )}
-                {!loading && txs.length === 0 && (
+                {!isInitialLoading && txs.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={5} className="py-8 text-center text-muted-foreground">
-                      No transactions yet.
+                    <TableCell colSpan={5}>
+                      <EmptyState
+                        title="No transactions yet."
+                        description="Top up your wallet to see account-credit activity here."
+                      />
                     </TableCell>
                   </TableRow>
                 )}
-                {!loading &&
+                {!isInitialLoading &&
                   txs.map((tx) => (
-                    <TableRow key={tx.id}>
+                    <TableRow key={tx.id} className={tx.optimistic ? "opacity-75" : undefined}>
                       <TableCell className="text-xs text-muted-foreground">
                         {fmt(tx.createdAt)}
                       </TableCell>
                       <TableCell>
-                        <Badge variant="outline">{tx.type.replace(/_/g, " ")}</Badge>
+                        <Badge variant={tx.optimistic ? "secondary" : "outline"}>
+                          {tx.type.replace(/_/g, " ")}
+                        </Badge>
                       </TableCell>
                       <TableCell className="text-muted-foreground">
                         {tx.description ?? "—"}
@@ -218,6 +209,22 @@ export default function WalletPage() {
           </div>
         </CardContent>
       </Card>
+    </div>
+  );
+}
+
+function WalletHeader() {
+  return (
+    <div className="flex items-center gap-3">
+      <WalletIcon className="h-6 w-6 text-primary" />
+      <div>
+        <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
+          Wallet
+        </h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Your account credit balance and transaction history.
+        </p>
+      </div>
     </div>
   );
 }

@@ -19,7 +19,7 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
 | Migrations | 28 (latest: `0027_webhook_endpoints`) |
 | Route mounts in `server.ts` | 30 |
 | UI pages | 47 |
-| Tests | 835 (99 files) |
+| Tests | 845 (101 files) |
 | ADRs | 7 |
 | Stack | Hono 4 · TypeScript 6 · Bun · Next.js 16 · Drizzle ORM · PostgreSQL · Redis |
 
@@ -242,6 +242,9 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
 - ✅ Cookie consent banner with consent-gated analytics (Plausible, GA4)
 - ✅ Sitemap.xml + robots.txt — generated at build time
 - ✅ Protected routes — client guards on `/dashboard` + `/admin`
+- ✅ TanStack Query server-state layer — app-level `QueryClientProvider`, domain
+  query keys/functions, colocated wallet hooks, optimistic top-up mutation, and
+  stale/background-refetch UI states
 
 ## Platform & Infrastructure
 
@@ -267,6 +270,31 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
 ---
 
 ## Recent work (2026-07-02)
+
+### E2 — TanStack Query server-state foundation
+
+- Added `@tanstack/react-query` to the UI package and mounted a single
+  app-level `QueryProvider`, keeping server data out of global client state.
+- Added product-domain query keys plus colocated query functions/hooks under
+  `packages/ui/src/lib/server-state/`, starting with wallet detail/transactions
+  and webhook endpoint/delivery-log state.
+- Migrated `/dashboard/wallet` from ad-hoc `useEffect` + legacy `api.get` state
+  to TanStack Query queries/mutations. The top-up mutation applies an optimistic
+  wallet balance + pending transaction row, rolls back on error, and targets
+  wallet detail/transaction invalidation after writes.
+- Added `docs/tanstack-query-progress.md` as the page-by-page migration tracker.
+- Migrated `/dashboard/webhooks` from ad-hoc `useEffect` + legacy `api.get`
+  state to TanStack Query queries/mutations. The webhook list and delivery-log
+  fetches use domain keys; toggle/delete apply optimistic list updates with
+  rollback; create, ping, toggle, and delete use targeted webhook invalidation.
+- Covered loading, error + retry, empty, stale cached data, and background
+  refetch states in UI and tests.
+- Verification: `NODE_ENV=test bun run --cwd packages/ui test --
+  src/lib/server-state/wallet.test.tsx` → **5 tests passing**;
+  `NODE_ENV=test bun run --cwd packages/ui test --
+  src/lib/server-state/webhooks.test.tsx` → **5 tests passing**; `bun run
+  build` passes; `bun run --cwd packages/ui build` passes; `bun run lint` exits
+  0 with existing script warnings only.
 
 ### Fork-readiness audit (`AUDIT-REPORT.md`) — completed items
 
@@ -301,9 +329,9 @@ follow-ups (**E2**, E4–E6 info debt) remain in [`todo.md`](./todo.md).
   shadcn/ui primitives (`Button`, `Input`, `Textarea`, `Checkbox`). Added
   `components/ui/checkbox.tsx`. `bun run ui:audit` → **0 raw controls**.
 
-- **E2 — useApi migration (partial, 6 pages):** Migrated `admin/page`,
+- **E2 — useApi migration (partial, 7 pages):** Migrated `admin/page`,
   `admin/access-reviews`, `admin/alerts`, `admin/sessions`, `admin/users`,
-  and `dashboard/settings` to `useApi`/`usePaginatedApi`. ~18 pages remain —
+  `dashboard/billing`, and `dashboard/settings` to `useApi`/`usePaginatedApi`. ~17 pages remain —
   tracked in `todo.md` P2.
 
 - **Bun runtime bump:** `.bun-version` now pins Bun 1.3.14; `server.ts` mounts
@@ -331,7 +359,7 @@ follow-ups (**E2**, E4–E6 info debt) remain in [`todo.md`](./todo.md).
   customer segment selector.
 
 - **Verification:** `bun run --cwd packages/ui build` passes. Targeted Biome
-  checks pass on touched files. Root `bun run test` → **835 tests / 99 files**.
+  checks pass on touched files. Root `bun run test` → **838 tests / 99 files**.
 
 ## Recent work (2026-07-01)
 

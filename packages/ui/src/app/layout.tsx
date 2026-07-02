@@ -5,6 +5,7 @@ import { getLocale, getMessages } from "next-intl/server";
 import AnalyticsScript from "@/components/AnalyticsScript";
 import CookieBanner from "@/components/CookieBanner";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import { QueryProvider } from "@/components/QueryProvider";
 import ServiceWorkerRegistrar from "@/components/ServiceWorkerRegistrar";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { brand } from "@/config/brand";
@@ -82,12 +83,14 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <NextIntlClientProvider messages={messages}>
           <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
             <ErrorBoundary>
-              <ToastProvider>
-                {children}
-                <CookieBanner />
-                <AnalyticsScript />
-                <ServiceWorkerRegistrar />
-              </ToastProvider>
+              <QueryProvider>
+                <ToastProvider>
+                  {children}
+                  <CookieBanner />
+                  <AnalyticsScript />
+                  <ServiceWorkerRegistrar />
+                </ToastProvider>
+              </QueryProvider>
             </ErrorBoundary>
           </ThemeProvider>
         </NextIntlClientProvider>

@@ -19,9 +19,12 @@ maintainability/refactor · P3 scalability/performance · P4 docs/DX.
 
 ### P2 — product completeness / template polish
 
-- **E2 — `useApi` adoption** — Partial (~6/40 app pages): `admin/page`,
-  `admin/access-reviews`, `admin/alerts`, `admin/sessions`, `admin/users`,
-  and `dashboard/settings` use `useApi`/`usePaginatedApi`. ~18
-  dashboard/admin pages still import legacy `@/lib/api` and hand-roll
-  `useEffect` + `api.get` + loading/error state (e.g. webhooks, billing,
-  wallet, admin audit/revenue/tenants/regions).
+- **E2 — server-state adoption** — Partial: TanStack Query is installed and
+  wired through the UI root, with domain query keys/query functions under
+  `packages/ui/src/lib/server-state/*`. `dashboard/wallet` and
+  `dashboard/webhooks` have migrated to query/mutation hooks with optimistic
+  updates, background-refetch, stale-data, loading, error, and empty states.
+  Track page-by-page progress in `docs/tanstack-query-progress.md`. Continue
+  migrating the remaining dashboard/admin pages that still import legacy
+  `@/lib/api` and hand-roll `useEffect` + server data state (e.g. support,
+  admin audit/revenue/tenants/regions).
