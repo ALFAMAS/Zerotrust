@@ -68,6 +68,12 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
 - ✅ Session & device policy per org — max session age, idle timeout, concurrent session cap, allowed countries
 - ✅ Trusted-device list per org — `trustedDevicesTable` + enforcement middleware
 - ✅ Cross-tenant JIT access — request + admin approval inbox + auto-expiring grants
+- ✅ Invite acceptance + invitee visibility (ALFA-3) — `POST /orgs/invites/accept` validates the
+  token/email/expiry and creates membership inside one transaction
+  (`acceptOrgInvite` in `src/db/repositories/orgs.repository.ts`); invited users see their pending
+  invites with accept/decline actions on `/dashboard/organizations` via `GET /orgs/invites/mine`;
+  creating an invite fires an in-app notification (existing accounts) and a branded invite email
+  (`sendOrgInviteEmail`, new or existing accounts)
 
 ## Billing & Subscriptions
 

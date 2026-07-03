@@ -4,7 +4,7 @@ _Generated from `src/api/openapi.json` (zerotrust API v1.0.0) — run `bun run d
 
 Live, interactive docs: **Swagger UI at `/docs`** (dev). Full request/response types: the generated **`@zerotrust/client`** SDK (`packages/client`). 🔒 = requires authentication.
 
-**116 operations** across 21 groups.
+**119 operations** across 21 groups.
 
 > **Coverage note:** this lists the operations currently described in `openapi.json`. Coverage includes auth/admin/MFA/sessions/OAuth, organizations, billing, wallet, search, compliance, support, feedback, notifications, GDPR, regions, and API keys. Some lower-traffic admin/tools, webhook, tenant, and email-event routes may still require schema-level expansion; see `src/api/server.ts` for the full mounted surface.
 
@@ -21,7 +21,7 @@ Live, interactive docs: **Swagger UI at `/docs`** (dev). Full request/response t
 - [MFA](#mfa) (7)
 - [Notifications](#notifications) (10)
 - [OAuth](#oauth) (4)
-- [Organizations](#organizations) (13)
+- [Organizations](#organizations) (16)
 - [Passkeys](#passkeys) (5)
 - [Password Reset](#password-reset) (2)
 - [Regions](#regions) (7)
@@ -170,7 +170,7 @@ In-app notifications, unread counts, preferences, SSE, and web-push subscription
 
 ## OAuth
 
-Social sign-in and provider callback flows for Google, GitHub, Apple, and Facebook.
+Social sign-in and provider callback flows for Google, GitHub, and Facebook.
 
 | Method | Path | Summary | Auth |
 | --- | --- | --- | --- |
@@ -198,6 +198,9 @@ Workspace, team, invitation, membership, and organization role-management endpoi
 | GET | `/orgs/{orgId}/security/policy` | Get the org security policy (session/device/geo limits) | 🔒 |
 | PUT | `/orgs/{orgId}/security/policy` | Update the org security policy | 🔒 |
 | POST | `/orgs/{orgId}/transfer` | Transfer organization ownership | 🔒 |
+| DELETE | `/orgs/invites/{inviteId}` | Decline (delete) one of the caller's own pending invites | 🔒 |
+| POST | `/orgs/invites/accept` | Accept a pending org invite by token | 🔒 |
+| GET | `/orgs/invites/mine` | List the authenticated user's pending org invites | 🔒 |
 
 ## Passkeys
 

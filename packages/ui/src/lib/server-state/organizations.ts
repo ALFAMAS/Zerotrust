@@ -8,6 +8,7 @@ import type {
   AcceptInviteResponse,
   CreateOrganizationInput,
   CreateOrgInviteInput,
+  MyOrgInvite,
   OrganizationsListResponse,
   OrgDetailResponse,
   OrgInvite,
@@ -23,6 +24,11 @@ export const organizationKeys = queryKeys.organizations;
 
 export const ORGS_PATH = "/orgs";
 export const ORG_INVITES_ACCEPT_PATH = "/orgs/invites/accept";
+export const ORG_INVITES_MINE_PATH = "/orgs/invites/mine";
+
+export function buildDeclineOrgInvitePath(inviteId: string): string {
+  return `/orgs/invites/${inviteId}`;
+}
 
 export function buildOrgPath(orgId: string): string {
   return `${ORGS_PATH}/${orgId}`;
@@ -242,6 +248,32 @@ export function useAcceptInviteMutation() {
     mutationFn: (input) => apiPost<AcceptInviteResponse>(ORG_INVITES_ACCEPT_PATH, input),
     onSettled: () => {
       void queryClient.invalidateQueries({ queryKey: organizationKeys.all });
+    },
+  });
+}
+
+export function fetchMyOrgInvites(): Promise<PaginatedResponse<MyOrgInvite>> {
+  return apiGet<PaginatedResponse<MyOrgInvite>>(ORG_INVITES_MINE_PATH);
+}
+
+export function myOrgInvitesQueryOptions() {
+  return queryOptions({
+    queryKey: organizationKeys.myInvites(),
+    queryFn: fetchMyOrgInvites,
+  });
+}
+
+export function useMyOrgInvitesQuery() {
+  return useQuery(myOrgInvitesQueryOptions());
+}
+
+export function useDeclineOrgInviteMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation<unknown, Error, string>({
+    mutationFn: (inviteId) => apiDelete(buildDeclineOrgInvitePath(inviteId)),
+    onSettled: () => {
+      void queryClient.invalidateQueries({ queryKey: organizationKeys.myInvites() });
     },
   });
 }

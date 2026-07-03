@@ -722,6 +722,34 @@ export class zerotrustClient {
   }
 
   /**
+   * List the authenticated user's pending org invites
+   *
+   * @route GET /orgs/invites/mine
+   */
+  getOrgsInvitesMine(): Promise<unknown> {
+    return this.request("GET", `/orgs/invites/mine`);
+  }
+
+  /**
+   * Accept a pending org invite by token
+   *
+   * @route POST /orgs/invites/accept
+   */
+  postOrgsInvitesAccept(body: { token: string }): Promise<unknown> {
+    return this.request("POST", `/orgs/invites/accept`, { body });
+  }
+
+  /**
+   * Decline (delete) one of the caller's own pending invites
+   *
+   * @route DELETE /orgs/invites/{inviteId}
+   * @param inviteId path parameter
+   */
+  deleteOrgsInvitesByInviteId(inviteId: string): Promise<unknown> {
+    return this.request("DELETE", `/orgs/invites/${encodeURIComponent(inviteId)}`);
+  }
+
+  /**
    * Revoke a pending invite
    *
    * @route DELETE /orgs/{orgId}/invites/{inviteId}

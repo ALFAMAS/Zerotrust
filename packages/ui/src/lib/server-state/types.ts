@@ -734,6 +734,11 @@ export interface OrgInvite {
   createdAt: string;
 }
 
+export interface MyOrgInvite {
+  invite: OrgInvite;
+  org: Pick<Organization, "id" | "name" | "slug">;
+}
+
 export interface CreateOrgInviteInput {
   email: string;
   role: string;

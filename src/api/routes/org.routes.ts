@@ -1,13 +1,15 @@
 import { randomBytes } from "node:crypto";
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, gt, isNull } from "drizzle-orm";
 import { Hono } from "hono";
 import { z } from "zod";
 import { getDb, getReadDb } from "../../db";
 import {
+  acceptOrgInvite,
   createOrganizationWithOwner,
   transferOrganizationOwnership,
 } from "../../db/repositories/orgs.repository";
 import {
+  notificationsTable,
   organizationInvitesTable,
   organizationMembersTable,
   organizationsTable,
@@ -17,6 +19,7 @@ import {
 import { getLogger } from "../../logger";
 import { authMiddleware } from "../../middleware/auth";
 import { sensitiveReverification } from "../../middleware/continuousVerification";
+import { sendOrgInviteEmail } from "../../services/notifications/email.service";
 import { countRows } from "../../shared/dbCount";
 import { paginated, parsePaginatedQuery } from "../../shared/pagination";
 import type { HonoEnv } from "../../shared/types";
@@ -37,6 +40,9 @@ const inviteSchema = z.object({
   email: z.string().email(),
   role: z.enum(["admin", "member", "viewer"]).default("member"),
 });
+const acceptInviteSchema = z.object({ token: z.string().min(1) });
+const INVITE_TTL_DAYS = 7;
+const APP_URL = process.env.APP_URL ?? "http://localhost:3000";
 const transferSchema = z.object({ newOwnerId: z.string().uuid() });
 const securityPolicySchema = z.object({
   requirePasskeyAttestation: z.boolean().default(false),
@@ -269,20 +275,137 @@ router.post("/:orgId/invites", async (c) => {
   const parsed = inviteSchema.safeParse(await c.req.json().catch(() => ({})));
   if (!parsed.success)
     return c.json({ error: "VALIDATION_ERROR", message: parsed.error.issues[0]?.message }, 400);
+  const email = parsed.data.email.toLowerCase();
   const token = randomBytes(24).toString("hex");
-  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-  const [invite] = await getDb()
+  const expiresAt = new Date(Date.now() + INVITE_TTL_DAYS * 24 * 60 * 60 * 1000);
+  const db = getDb();
+  const [invite] = await db
     .insert(organizationInvitesTable)
     .values({
       orgId,
-      email: parsed.data.email.toLowerCase(),
+      email,
       role: parsed.data.role,
       token,
       invitedBy: user.id,
       expiresAt,
     })
     .returning();
+
+  // Notify + email the invitee. Non-blocking: the invite row is the source of
+  // truth, so a slow/failed notification or email must never fail the request.
+  void (async () => {
+    try {
+      const [org] = await db
+        .select({ name: organizationsTable.name })
+        .from(organizationsTable)
+        .where(eq(organizationsTable.id, orgId))
+        .limit(1);
+      const orgName = org?.name ?? "an organization";
+      const acceptUrl = `${APP_URL}/invite/${token}`;
+
+      const [invitedUser] = await db
+        .select({ id: usersTable.id, displayName: usersTable.displayName })
+        .from(usersTable)
+        .where(eq(usersTable.email, email))
+        .limit(1);
+
+      if (invitedUser) {
+        await db.insert(notificationsTable).values({
+          userId: invitedUser.id,
+          type: "info",
+          title: `You've been invited to join ${orgName}`,
+          body: `${user.displayName ?? user.email} invited you to join ${orgName} as ${parsed.data.role}.`,
+          link: "/dashboard/organizations",
+        });
+      }
+
+      await sendOrgInviteEmail(email, {
+        inviterName: user.displayName ?? user.email,
+        orgName,
+        role: parsed.data.role,
+        acceptUrl,
+        expiresInDays: INVITE_TTL_DAYS,
+      });
+    } catch (err) {
+      logger.error("Failed to notify/email org invite", err as Error);
+    }
+  })();
+
   return c.json({ invite }, 201);
+});
+
+router.get("/invites/mine", async (c) => {
+  const user = c.get("user");
+  const { page, limit, offset } = parsePaginatedQuery(c.req.query());
+  const where = and(
+    eq(organizationInvitesTable.email, user.email.toLowerCase()),
+    isNull(organizationInvitesTable.usedAt),
+    gt(organizationInvitesTable.expiresAt, new Date())
+  );
+  const db = getReadDb();
+  const [invites, total] = await Promise.all([
+    db
+      .select({
+        invite: organizationInvitesTable,
+        org: {
+          id: organizationsTable.id,
+          name: organizationsTable.name,
+          slug: organizationsTable.slug,
+        },
+      })
+      .from(organizationInvitesTable)
+      .innerJoin(organizationsTable, eq(organizationInvitesTable.orgId, organizationsTable.id))
+      .where(where)
+      .orderBy(desc(organizationInvitesTable.createdAt))
+      .offset(offset)
+      .limit(limit),
+    countRows(db, organizationInvitesTable, where),
+  ]);
+  return c.json(paginated(invites, { page, limit, total }));
+});
+
+router.post("/invites/accept", async (c) => {
+  const user = c.get("user");
+  const parsed = acceptInviteSchema.safeParse(await c.req.json().catch(() => ({})));
+  if (!parsed.success)
+    return c.json({ error: "VALIDATION_ERROR", message: parsed.error.issues[0]?.message }, 400);
+
+  const result = await acceptOrgInvite({
+    token: parsed.data.token,
+    userId: user.id,
+    userEmail: user.email,
+  });
+
+  if (!result.ok) {
+    if (result.reason === "not_found") {
+      return c.json({ error: "NOT_FOUND", message: "Invite not found or already used" }, 404);
+    }
+    if (result.reason === "expired") {
+      return c.json({ error: "INVITE_EXPIRED", message: "This invite has expired" }, 410);
+    }
+    return c.json(
+      { error: "FORBIDDEN", message: "This invite was sent to a different email address" },
+      403
+    );
+  }
+
+  return c.json({ org: result.org, member: result.member });
+});
+
+router.delete("/invites/:inviteId", async (c) => {
+  const user = c.get("user");
+  const inviteId = c.req.param("inviteId");
+  const db = getDb();
+  const [invite] = await db
+    .select({ id: organizationInvitesTable.id, email: organizationInvitesTable.email })
+    .from(organizationInvitesTable)
+    .where(eq(organizationInvitesTable.id, inviteId))
+    .limit(1);
+  if (!invite || invite.email.toLowerCase() !== user.email.toLowerCase()) {
+    return c.json({ error: "NOT_FOUND", message: "Invite not found" }, 404);
+  }
+  await db.delete(organizationInvitesTable).where(eq(organizationInvitesTable.id, inviteId));
+  return c.json({ ok: true });
 });
 
 router.delete("/:orgId/invites/:inviteId", async (c) => {

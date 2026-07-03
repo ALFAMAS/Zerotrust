@@ -4,6 +4,7 @@ import type { Locale } from "../../shared/locale";
 import { billingEventEmailTemplate } from "../../templates/emails/billing-event";
 import { magicLinkEmailTemplate } from "../../templates/emails/magic-link";
 import { notificationEmailTemplate } from "../../templates/emails/notification";
+import { orgInviteEmailTemplate } from "../../templates/emails/org-invite";
 import { otpEmailTemplate } from "../../templates/emails/otp";
 import { passwordResetEmailTemplate } from "../../templates/emails/password-reset";
 import { securityAlertEmailTemplate } from "../../templates/emails/security-alert";
@@ -195,6 +196,29 @@ export async function sendBillingEventEmail(
 ): Promise<void> {
   const { subject, html, text } = billingEventEmailTemplate({
     ...data,
+    appName: APP_NAME,
+    appUrl: APP_URL,
+  });
+  await sendEmail({ to, subject, html, text });
+}
+
+export async function sendOrgInviteEmail(
+  to: string,
+  data: {
+    inviterName: string;
+    orgName: string;
+    role: string;
+    acceptUrl: string;
+    expiresInDays?: number;
+  }
+): Promise<void> {
+  const { subject, html, text } = orgInviteEmailTemplate({
+    email: to,
+    inviterName: data.inviterName,
+    orgName: data.orgName,
+    role: data.role,
+    acceptUrl: data.acceptUrl,
+    expiresInDays: data.expiresInDays ?? 7,
     appName: APP_NAME,
     appUrl: APP_URL,
   });

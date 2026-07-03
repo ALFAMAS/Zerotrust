@@ -94,6 +94,7 @@ export const queryKeys = {
     invites: (orgId: string) => [...queryKeys.organizations.detail(orgId), "invites"] as const,
     securityPolicy: (orgId: string) =>
       [...queryKeys.organizations.detail(orgId), "securityPolicy"] as const,
+    myInvites: () => [...queryKeys.organizations.all, "myInvites"] as const,
   },
   support: {
     all: ["support"] as const,

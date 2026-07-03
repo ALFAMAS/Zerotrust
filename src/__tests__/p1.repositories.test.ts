@@ -11,7 +11,11 @@ import {
   setSubscriptionPaused,
   upsertCheckoutSubscription,
 } from "../db/repositories/billingSubscriptions.repository";
-import { createOrganizationWithOwner, transferOrganizationOwnership } from "../db/repositories/orgs.repository";
+import {
+  acceptOrgInvite,
+  createOrganizationWithOwner,
+  transferOrganizationOwnership,
+} from "../db/repositories/orgs.repository";
 import { awardPoints } from "../db/repositories/pointsLedger.repository";
 import {
   completePasskeyAuthentication,
@@ -38,6 +42,7 @@ function makeBuilder(queue: unknown[][] = []) {
     update: vi.fn().mockReturnThis(),
     set: vi.fn().mockReturnThis(),
     onConflictDoUpdate: vi.fn().mockResolvedValue(undefined),
+    onConflictDoNothing: vi.fn().mockResolvedValue(undefined),
     returning: vi.fn(() => Promise.resolve(queue[i++] ?? [])),
   };
   return builder;
@@ -70,6 +75,96 @@ describe("P1 transactional repositories", () => {
       role: "owner",
       joinedAt: expect.any(Date),
     });
+  });
+
+  it("accepts a valid invite: upserts membership, marks it consumed, and returns org+member", async () => {
+    const future = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    const invite = {
+      id: "inv-1",
+      orgId: "org-1",
+      email: "invitee@example.com",
+      role: "member",
+      token: "tok-1",
+      invitedBy: "inviter-1",
+      expiresAt: future,
+      usedAt: null,
+    };
+    const tx = makeBuilder([
+      [invite],
+      [{ role: "member" }],
+      [{ id: "org-1", name: "Acme", slug: "acme" }],
+    ]);
+    const db = makeTxDb(tx);
+    mockGetDb.mockReturnValue(db as never);
+
+    const result = await acceptOrgInvite({
+      token: "tok-1",
+      userId: "user-1",
+      userEmail: "INVITEE@example.com",
+    });
+
+    expect(db.transaction).toHaveBeenCalledTimes(1);
+    expect(tx.onConflictDoNothing).toHaveBeenCalledWith({
+      target: expect.any(Array),
+    });
+    expect(tx.update).toHaveBeenCalledTimes(1);
+    expect(tx.set).toHaveBeenCalledWith({ usedAt: expect.any(Date) });
+    expect(result).toEqual({
+      ok: true,
+      org: { id: "org-1", name: "Acme", slug: "acme" },
+      member: { role: "member" },
+    });
+  });
+
+  it("rejects accepting an invite sent to a different email", async () => {
+    const future = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    const tx = makeBuilder([
+      [{ id: "inv-1", orgId: "org-1", email: "someone-else@example.com", expiresAt: future, usedAt: null, role: "member", invitedBy: "x" }],
+    ]);
+    const db = makeTxDb(tx);
+    mockGetDb.mockReturnValue(db as never);
+
+    const result = await acceptOrgInvite({
+      token: "tok-1",
+      userId: "user-1",
+      userEmail: "invitee@example.com",
+    });
+
+    expect(result).toEqual({ ok: false, reason: "email_mismatch" });
+    expect(tx.insert).not.toHaveBeenCalled();
+  });
+
+  it("rejects accepting an expired invite", async () => {
+    const past = new Date(Date.now() - 1000);
+    const tx = makeBuilder([
+      [{ id: "inv-1", orgId: "org-1", email: "invitee@example.com", expiresAt: past, usedAt: null, role: "member", invitedBy: "x" }],
+    ]);
+    const db = makeTxDb(tx);
+    mockGetDb.mockReturnValue(db as never);
+
+    const result = await acceptOrgInvite({
+      token: "tok-1",
+      userId: "user-1",
+      userEmail: "invitee@example.com",
+    });
+
+    expect(result).toEqual({ ok: false, reason: "expired" });
+    expect(tx.insert).not.toHaveBeenCalled();
+  });
+
+  it("rejects accepting an unknown or already-used invite", async () => {
+    const tx = makeBuilder([[]]);
+    const db = makeTxDb(tx);
+    mockGetDb.mockReturnValue(db as never);
+
+    const result = await acceptOrgInvite({
+      token: "missing-token",
+      userId: "user-1",
+      userEmail: "invitee@example.com",
+    });
+
+    expect(result).toEqual({ ok: false, reason: "not_found" });
+    expect(tx.insert).not.toHaveBeenCalled();
   });
 
   it("transfers org ownership and both member roles inside one transaction", async () => {

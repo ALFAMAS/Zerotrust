@@ -8,7 +8,10 @@ import { Input } from "@/components/ui/input";
 import { ErrorState } from "@/components/ui/States";
 import { useToast } from "@/context/ToastContext";
 import {
+  useAcceptInviteMutation,
   useCreateOrganizationMutation,
+  useDeclineOrgInviteMutation,
+  useMyOrgInvitesQuery,
   useOrganizationsListQuery,
 } from "@/lib/server-state/organizations";
 
@@ -23,8 +26,13 @@ export default function OrganizationsPage() {
   const { toast } = useToast();
   const orgsQuery = useOrganizationsListQuery();
   const createMutation = useCreateOrganizationMutation();
+  const myInvitesQuery = useMyOrgInvitesQuery();
+  const acceptInviteMutation = useAcceptInviteMutation();
+  const declineInviteMutation = useDeclineOrgInviteMutation();
+  const [respondingInviteId, setRespondingInviteId] = useState<string | null>(null);
 
   const orgs = orgsQuery.data?.orgs ?? [];
+  const pendingInvites = myInvitesQuery.data?.data ?? [];
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [orgName, setOrgName] = useState("");
   const [orgSlug, setOrgSlug] = useState("");
@@ -68,6 +76,39 @@ export default function OrganizationsPage() {
     }
   }
 
+  async function handleAcceptInvite(token: string, inviteId: string) {
+    setRespondingInviteId(inviteId);
+    try {
+      const result = await acceptInviteMutation.mutateAsync({ token });
+      toast({
+        message: `You've joined ${result?.org?.name ?? "the organization"}!`,
+        type: "success",
+      });
+    } catch (err: unknown) {
+      toast({
+        message: err instanceof Error ? err.message : "Failed to accept invite",
+        type: "error",
+      });
+    } finally {
+      setRespondingInviteId(null);
+    }
+  }
+
+  async function handleDeclineInvite(inviteId: string) {
+    setRespondingInviteId(inviteId);
+    try {
+      await declineInviteMutation.mutateAsync(inviteId);
+      toast({ message: "Invitation declined", type: "success" });
+    } catch (err: unknown) {
+      toast({
+        message: err instanceof Error ? err.message : "Failed to decline invite",
+        type: "error",
+      });
+    } finally {
+      setRespondingInviteId(null);
+    }
+  }
+
   if (orgsQuery.error && !orgsQuery.data) {
     return (
       <ErrorState
@@ -91,6 +132,55 @@ export default function OrganizationsPage() {
           {showCreateForm ? "Cancel" : "Create organization"}
         </Button>
       </div>
+
+      {pendingInvites.length > 0 && (
+        <div className="mb-6">
+          <h2 className="text-base font-semibold text-foreground mb-3">Pending invitations</h2>
+          <div className="space-y-3">
+            {pendingInvites.map(({ invite, org }) => (
+              <div
+                key={invite.id}
+                className="flex flex-wrap items-center justify-between gap-3 bg-card border border-primary/30 rounded-xl p-4"
+              >
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-foreground">{org.name}</span>
+                    <span
+                      className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                        ROLE_COLORS[invite.role] ?? ROLE_COLORS.member
+                      }`}
+                    >
+                      {invite.role}
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Invitation expires {new Date(invite.expiresAt).toLocaleDateString()}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    className="text-xs px-3 py-1.5 h-auto"
+                    onClick={() => handleDeclineInvite(invite.id)}
+                    disabled={respondingInviteId === invite.id}
+                  >
+                    Decline
+                  </Button>
+                  <Button
+                    type="button"
+                    className="text-xs px-3 py-1.5 h-auto bg-primary hover:bg-primary/90 text-primary-foreground"
+                    onClick={() => handleAcceptInvite(invite.token, invite.id)}
+                    disabled={respondingInviteId === invite.id}
+                  >
+                    Accept
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <ServerStateStatus
         isFetching={orgsQuery.isFetching}

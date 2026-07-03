@@ -8,29 +8,6 @@ Does not duplicate shipped work in [`tdone.md`](./tdone.md) (P0–P5 complete)._
 
 ---
 
-### P0 — Correctness (broken shipped surfaces)
-
-#### B1 — `POST /orgs/invites/accept` backend route missing
-
-**Status:** Open — UI calls a route that does not exist.
-
-**Evidence:** `packages/ui/src/app/invite/[token]/page.tsx` and
-`packages/ui/src/lib/server-state/organizations.ts` (`ORG_INVITES_ACCEPT_PATH`) POST
-to `/orgs/invites/accept`. `src/api/routes/org.routes.ts` has create/list/revoke
-invites under `/:orgId/invites` but no accept handler. Listed as unmatched in
-`docs/api-ui-integration-matrix.md`. No route tests cover accept.
-
-**Acceptance criteria:**
-
-- Add `POST /orgs/invites/accept` (token in body) that validates the invite,
-  checks the authenticated user's email, creates membership, and marks the invite
-  consumed.
-- Document in `openapi.json` / regenerate SDK.
-- Route tests + integration-matrix regen show zero unmatched for this path.
-- `/invite/[token]` page accepts successfully in manual or E2E test.
-
----
-
 ### P1 — Security & access control gaps
 
 #### B4 — Test coverage ratchet toward 85%
@@ -45,8 +22,7 @@ branches (floors 64/56 in `vitest.config.ts`); UI **~47%** lines
 
 - Raise Vitest coverage floors incrementally as measured coverage grows (target
   ≥85% lines/branches long-term per scorecard).
-- Prioritize untested hot paths: auth flows, billing webhooks, org invite accept
-  (B1).
+- Prioritize untested hot paths: auth flows, billing webhooks.
 
 ---
 
@@ -109,6 +85,7 @@ E-010 still **Not started**. E-001, E-004–E-006, E-009 complete (2026-07-03).
 | Item | Verdict |
 | --- | --- |
 | P0–P5 audit backlog (repos, worker topology, TanStack Query, ES optional, anchoring, compliance docs) | Shipped — [`tdone.md`](./tdone.md) |
+| B1 `POST /orgs/invites/accept` missing + ALFA-3 invite visibility/notifications | Shipped — [`tdone.md`](./tdone.md) Organizations & Teams |
 | E2 TanStack Query migration | Complete — `docs/tanstack-query-progress.md` (48/48 data pages) |
 | E6 repository layer | Complete — nine repos under `src/db/repositories/` |
 | Audit log external anchoring (P5.1) | Shipped — `src/audit/anchor.ts`, migration `0029`, `audit.anchor` job |

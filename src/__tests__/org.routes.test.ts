@@ -11,10 +11,15 @@ vi.mock("../db", () => ({ getDb: vi.fn(), getReadDb: vi.fn() }));
 vi.mock("../db/repositories/orgs.repository", () => ({
   createOrganizationWithOwner: vi.fn(),
   transferOrganizationOwnership: vi.fn(),
+  acceptOrgInvite: vi.fn(),
 }));
 
 vi.mock("../logger", () => ({
   getLogger: () => ({ info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() }),
+}));
+
+vi.mock("../services/notifications/email.service", () => ({
+  sendOrgInviteEmail: vi.fn().mockResolvedValue(undefined),
 }));
 
 // Stubbed so requests authenticate via `x-test-user-id`; omit it → 401.
@@ -256,6 +261,124 @@ describe("org RBAC — member removal", () => {
     const res = await req(app, `/${ORG}/members/${OWNER}`, { method: "DELETE", uid: OWNER });
     expect(res.status).toBe(403);
     expect((await res.json()).message).toMatch(/owner/i);
+    expect(db.delete).not.toHaveBeenCalled();
+  });
+});
+
+describe("org invites — mine / accept / decline", () => {
+  it("401s an unauthenticated caller listing their invites", async () => {
+    const app = await getRouter();
+    const res = await req(app, "/invites/mine");
+    expect(res.status).toBe(401);
+  });
+
+  it("uses the read replica connection to list the caller's pending invites", async () => {
+    const readDb = makeDb();
+    readDb.limit.mockResolvedValueOnce([]);
+    const { getReadDb } = await import("../db");
+    vi.mocked(getReadDb).mockReturnValue(readDb as any);
+    const app = await getRouter();
+
+    const res = await req(app, "/invites/mine", { uid: MEMBER });
+
+    expect(res.status).toBe(200);
+    expect(getReadDb).toHaveBeenCalledTimes(1);
+  });
+
+  it("accepts a valid invite", async () => {
+    const { acceptOrgInvite } = await import("../db/repositories/orgs.repository");
+    vi.mocked(acceptOrgInvite).mockResolvedValueOnce({
+      ok: true,
+      org: { id: ORG, name: "Acme", slug: "acme" },
+      member: { role: "member" },
+    } as any);
+    const app = await getRouter();
+
+    const res = await req(app, "/invites/accept", {
+      method: "POST",
+      uid: MEMBER,
+      body: { token: "sometoken" },
+    });
+
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.org.name).toBe("Acme");
+    expect(body.member.role).toBe("member");
+  });
+
+  it("validates the accept body", async () => {
+    const app = await getRouter();
+    const res = await req(app, "/invites/accept", {
+      method: "POST",
+      uid: MEMBER,
+      body: {},
+    });
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toBe("VALIDATION_ERROR");
+  });
+
+  it("404s accepting an invite for a different email", async () => {
+    const { acceptOrgInvite } = await import("../db/repositories/orgs.repository");
+    vi.mocked(acceptOrgInvite).mockResolvedValueOnce({
+      ok: false,
+      reason: "email_mismatch",
+    } as any);
+    const app = await getRouter();
+
+    const res = await req(app, "/invites/accept", {
+      method: "POST",
+      uid: MEMBER,
+      body: { token: "sometoken" },
+    });
+
+    expect(res.status).toBe(403);
+  });
+
+  it("410s accepting an expired invite", async () => {
+    const { acceptOrgInvite } = await import("../db/repositories/orgs.repository");
+    vi.mocked(acceptOrgInvite).mockResolvedValueOnce({ ok: false, reason: "expired" } as any);
+    const app = await getRouter();
+
+    const res = await req(app, "/invites/accept", {
+      method: "POST",
+      uid: MEMBER,
+      body: { token: "sometoken" },
+    });
+
+    expect(res.status).toBe(410);
+  });
+
+  it("404s accepting an unknown/used invite", async () => {
+    const { acceptOrgInvite } = await import("../db/repositories/orgs.repository");
+    vi.mocked(acceptOrgInvite).mockResolvedValueOnce({ ok: false, reason: "not_found" } as any);
+    const app = await getRouter();
+
+    const res = await req(app, "/invites/accept", {
+      method: "POST",
+      uid: MEMBER,
+      body: { token: "sometoken" },
+    });
+
+    expect(res.status).toBe(404);
+  });
+
+  it("lets the invited user decline their own invite", async () => {
+    db.limit.mockResolvedValueOnce([{ id: "inv-1", email: `${MEMBER}@example.com` }]);
+    const app = await getRouter();
+
+    const res = await req(app, "/invites/inv-1", { method: "DELETE", uid: MEMBER });
+
+    expect(res.status).toBe(200);
+    expect(db.delete).toHaveBeenCalled();
+  });
+
+  it("404s declining an invite addressed to someone else", async () => {
+    db.limit.mockResolvedValueOnce([{ id: "inv-1", email: "someone-else@example.com" }]);
+    const app = await getRouter();
+
+    const res = await req(app, "/invites/inv-1", { method: "DELETE", uid: MEMBER });
+
+    expect(res.status).toBe(404);
     expect(db.delete).not.toHaveBeenCalled();
   });
 });
