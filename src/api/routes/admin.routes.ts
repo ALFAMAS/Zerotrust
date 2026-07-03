@@ -23,6 +23,7 @@ import {
 import { countRows } from "../../shared/dbCount";
 import { internalError } from "../../shared/httpErrors";
 import { paginated, parsePaginatedQuery } from "../../shared/pagination";
+import { isAdmin } from "../../shared/roles";
 import type { HonoEnv, User } from "../../shared/types";
 
 const router = new Hono<HonoEnv>();
@@ -31,6 +32,25 @@ const logger = getLogger("admin-routes");
 // Auth + admin guard on all admin routes
 router.use("*", authMiddleware);
 router.use("*", requireAdmin);
+
+/**
+ * True when `targetId` is the platform's only remaining active admin —
+ * i.e. deactivating/demoting them would leave nobody able to administer
+ * the platform. Self-targeting is guarded separately by callers (an admin
+ * must not be able to lock themselves out even while other admins exist).
+ */
+async function wouldOrphanAdmins(db: ReturnType<typeof getDb>, targetId: string): Promise<boolean> {
+  const remainingActiveAdmins = await countRows(
+    db,
+    usersTable,
+    and(
+      ne(usersTable.id, targetId),
+      eq(usersTable.status, "active"),
+      sql`'admin' = ANY(${usersTable.roles})`
+    )
+  );
+  return remainingActiveAdmins === 0;
+}
 
 // GET /settings
 router.get("/settings", async (c) => {
@@ -168,6 +188,7 @@ router.get("/users/:id", async (c) => {
 router.patch("/users/:id", async (c) => {
   try {
     const admin = c.get("user");
+    const targetId = c.req.param("id");
     const body = await c.req.json();
     const allowed: Record<string, unknown> = {};
 
@@ -184,12 +205,40 @@ router.patch("/users/:id", async (c) => {
       return c.json({ error: "INVALID_REQUEST", message: "No updatable fields provided" }, 400);
     }
 
-    allowed.updatedAt = new Date();
     const db = getDb();
+
+    // H4: deactivating an admin (suspending/deleting/reverting to pending)
+    // is destructive and hard to reverse. Block an admin from doing it to
+    // themselves — accidental self-lockout even while other admins exist —
+    // and block it outright when the target is the platform's last
+    // remaining active admin.
+    if (typeof allowed.status === "string" && allowed.status !== "active") {
+      const [target] = await db
+        .select({ id: usersTable.id, roles: usersTable.roles, status: usersTable.status })
+        .from(usersTable)
+        .where(eq(usersTable.id, targetId))
+        .limit(1);
+      if (target && isAdmin(target) && target.status === "active") {
+        if (target.id === admin.id) {
+          return c.json(
+            { error: "SELF_LOCKOUT", message: "You cannot change your own account status" },
+            409
+          );
+        }
+        if (await wouldOrphanAdmins(db, target.id)) {
+          return c.json(
+            { error: "LAST_ADMIN", message: "Cannot deactivate the last remaining active admin" },
+            409
+          );
+        }
+      }
+    }
+
+    allowed.updatedAt = new Date();
     const rows = await db
       .update(usersTable)
       .set(allowed)
-      .where(eq(usersTable.id, c.req.param("id")))
+      .where(eq(usersTable.id, targetId))
       .returning({
         id: usersTable.id,
         email: usersTable.email,
@@ -200,7 +249,7 @@ router.patch("/users/:id", async (c) => {
     if (rows.length === 0) {
       return c.json({ error: "USER_NOT_FOUND", message: "User not found" }, 404);
     }
-    await invalidateUserCache(c.req.param("id"));
+    await invalidateUserCache(targetId);
     // A status change (suspend/reinstate/soft-delete via this generic path)
     // or display-name edit on someone else's account is a privileged action —
     // record it in the tamper-evident chain.
@@ -217,6 +266,28 @@ router.delete("/users/:id", async (c) => {
     const admin = c.get("user");
     const id = c.req.param("id");
     const db = getDb();
+
+    // H4: same self-lockout / last-admin protections as the PATCH status path.
+    const [target] = await db
+      .select({ id: usersTable.id, roles: usersTable.roles, status: usersTable.status })
+      .from(usersTable)
+      .where(eq(usersTable.id, id))
+      .limit(1);
+    if (target && isAdmin(target) && target.status === "active") {
+      if (target.id === admin.id) {
+        return c.json(
+          { error: "SELF_LOCKOUT", message: "You cannot delete your own account" },
+          409
+        );
+      }
+      if (await wouldOrphanAdmins(db, target.id)) {
+        return c.json(
+          { error: "LAST_ADMIN", message: "Cannot delete the last remaining active admin" },
+          409
+        );
+      }
+    }
+
     const rows = await db
       .update(usersTable)
       .set({ status: "deleted", updatedAt: new Date() })
@@ -481,7 +552,7 @@ router.delete("/users/:id/roles/:roleName", async (c) => {
 
     const db = getDb();
     const userRows = await db
-      .select({ id: usersTable.id, roles: usersTable.roles })
+      .select({ id: usersTable.id, roles: usersTable.roles, status: usersTable.status })
       .from(usersTable)
       .where(eq(usersTable.id, userId))
       .limit(1);
@@ -489,7 +560,26 @@ router.delete("/users/:id/roles/:roleName", async (c) => {
       return c.json({ error: "USER_NOT_FOUND", message: "User not found" }, 404);
     }
 
-    const currentRoles = (userRows[0].roles as string[]) || [];
+    const target = userRows[0];
+    const currentRoles = (target.roles as string[]) || [];
+
+    // H4: revoking the admin role is exactly as destructive as deactivating
+    // the account — same self-lockout / last-admin guards apply.
+    if (roleName === "admin" && currentRoles.includes("admin") && target.status === "active") {
+      if (target.id === admin.id) {
+        return c.json(
+          { error: "SELF_LOCKOUT", message: "You cannot revoke your own admin role" },
+          409
+        );
+      }
+      if (await wouldOrphanAdmins(db, target.id)) {
+        return c.json(
+          { error: "LAST_ADMIN", message: "Cannot revoke the last remaining active admin" },
+          409
+        );
+      }
+    }
+
     const updatedRoles = currentRoles.filter((r) => r !== roleName);
     await db
       .update(usersTable)

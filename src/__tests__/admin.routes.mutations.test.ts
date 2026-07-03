@@ -8,8 +8,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("../db", () => ({ getDb: vi.fn(), getReadDb: vi.fn() }));
 
+// Default: "no other active admins" (last-admin guard trips) unless a test
+// overrides it with mockResolvedValueOnce/mockResolvedValue.
+const countRows = vi.fn().mockResolvedValue(0);
 vi.mock("../shared/dbCount", () => ({
-  countRows: vi.fn().mockResolvedValue(0),
+  countRows: (...a: unknown[]) => countRows(...a),
 }));
 
 const auditLog = vi.fn().mockResolvedValue(undefined);
@@ -187,7 +190,8 @@ describe("admin.routes mutations — audit coverage (C2)", () => {
 
   it("DELETE /users/:id/roles/:roleName audits a role revoke", async () => {
     const { chain, queueSelect } = makeQueuedDb();
-    queueSelect([{ id: TARGET_USER_ID, roles: ["user", "admin"] }]);
+    queueSelect([{ id: TARGET_USER_ID, roles: ["user", "admin"], status: "active" }]);
+    countRows.mockResolvedValueOnce(2); // other active admins remain
     const app = await getApp(chain);
 
     const res = await req(app, "DELETE", `/admin/users/${TARGET_USER_ID}/roles/admin`);
@@ -196,6 +200,145 @@ describe("admin.routes mutations — audit coverage (C2)", () => {
     expect(body.roles).toEqual(["user"]);
     expect(auditLog).toHaveBeenCalledWith("admin.role_revoked", ADMIN_ID, TARGET_USER_ID, true, {
       role: "admin",
+    });
+  });
+});
+
+// ── H4: last-admin / self-lockout guards ────────────────────────────────────
+
+describe("admin.routes mutations — last-admin & self-lockout guards (H4)", () => {
+  describe("PATCH /users/:id (deactivating an admin)", () => {
+    it("409s when an admin tries to change their own status", async () => {
+      const { chain, queueSelect } = makeQueuedDb();
+      queueSelect([{ id: ADMIN_ID, roles: ["admin"], status: "active" }]);
+      const app = await getApp(chain);
+
+      const res = await req(app, "PATCH", `/admin/users/${ADMIN_ID}`, { status: "suspended" });
+      expect(res.status).toBe(409);
+      const body = await res.json();
+      expect(body.error).toBe("SELF_LOCKOUT");
+      expect(auditLog).not.toHaveBeenCalled();
+    });
+
+    it("409s when deactivating the last remaining active admin", async () => {
+      const { chain, queueSelect } = makeQueuedDb();
+      queueSelect([{ id: TARGET_USER_ID, roles: ["admin"], status: "active" }]);
+      countRows.mockResolvedValueOnce(0); // no other active admins
+      const app = await getApp(chain);
+
+      const res = await req(app, "PATCH", `/admin/users/${TARGET_USER_ID}`, {
+        status: "suspended",
+      });
+      expect(res.status).toBe(409);
+      const body = await res.json();
+      expect(body.error).toBe("LAST_ADMIN");
+    });
+
+    it("allows deactivating an admin when other active admins remain", async () => {
+      const { chain, queueSelect, queueReturning } = makeQueuedDb();
+      queueSelect([{ id: TARGET_USER_ID, roles: ["admin"], status: "active" }]);
+      countRows.mockResolvedValueOnce(2); // other active admins remain
+      queueReturning([
+        { id: TARGET_USER_ID, email: "t@example.com", displayName: "T", status: "suspended" },
+      ]);
+      const app = await getApp(chain);
+
+      const res = await req(app, "PATCH", `/admin/users/${TARGET_USER_ID}`, {
+        status: "suspended",
+      });
+      expect(res.status).toBe(200);
+      expect(auditLog).toHaveBeenCalled();
+    });
+
+    it("allows deactivating a non-admin user regardless of admin count", async () => {
+      const { chain, queueSelect, queueReturning } = makeQueuedDb();
+      queueSelect([{ id: TARGET_USER_ID, roles: ["user"], status: "active" }]);
+      queueReturning([
+        { id: TARGET_USER_ID, email: "t@example.com", displayName: "T", status: "suspended" },
+      ]);
+      const app = await getApp(chain);
+
+      const res = await req(app, "PATCH", `/admin/users/${TARGET_USER_ID}`, {
+        status: "suspended",
+      });
+      expect(res.status).toBe(200);
+      // countRows must not even matter here — the guard should short-circuit
+      // on "target isn't an active admin" before ever counting.
+      expect(auditLog).toHaveBeenCalled();
+    });
+  });
+
+  describe("DELETE /users/:id (soft-delete)", () => {
+    it("409s when an admin tries to delete their own account", async () => {
+      const { chain, queueSelect } = makeQueuedDb();
+      queueSelect([{ id: ADMIN_ID, roles: ["admin"], status: "active" }]);
+      const app = await getApp(chain);
+
+      const res = await req(app, "DELETE", `/admin/users/${ADMIN_ID}`);
+      expect(res.status).toBe(409);
+      const body = await res.json();
+      expect(body.error).toBe("SELF_LOCKOUT");
+    });
+
+    it("409s when deleting the last remaining active admin", async () => {
+      const { chain, queueSelect } = makeQueuedDb();
+      queueSelect([{ id: TARGET_USER_ID, roles: ["admin"], status: "active" }]);
+      countRows.mockResolvedValueOnce(0);
+      const app = await getApp(chain);
+
+      const res = await req(app, "DELETE", `/admin/users/${TARGET_USER_ID}`);
+      expect(res.status).toBe(409);
+      const body = await res.json();
+      expect(body.error).toBe("LAST_ADMIN");
+    });
+
+    it("allows deleting an admin when other active admins remain", async () => {
+      const { chain, queueSelect, queueReturning } = makeQueuedDb();
+      queueSelect([{ id: TARGET_USER_ID, roles: ["admin"], status: "active" }]);
+      countRows.mockResolvedValueOnce(2);
+      queueReturning([{ id: TARGET_USER_ID }]);
+      const app = await getApp(chain);
+
+      const res = await req(app, "DELETE", `/admin/users/${TARGET_USER_ID}`);
+      expect(res.status).toBe(200);
+      expect(auditLog).toHaveBeenCalledWith("admin.user_deleted", ADMIN_ID, TARGET_USER_ID, true);
+    });
+  });
+
+  describe("DELETE /users/:id/roles/:roleName (revoking admin)", () => {
+    it("409s when an admin tries to revoke their own admin role", async () => {
+      const { chain, queueSelect } = makeQueuedDb();
+      queueSelect([{ id: ADMIN_ID, roles: ["admin"], status: "active" }]);
+      const app = await getApp(chain);
+
+      const res = await req(app, "DELETE", `/admin/users/${ADMIN_ID}/roles/admin`);
+      expect(res.status).toBe(409);
+      const body = await res.json();
+      expect(body.error).toBe("SELF_LOCKOUT");
+    });
+
+    it("409s when revoking admin from the last remaining active admin", async () => {
+      const { chain, queueSelect } = makeQueuedDb();
+      queueSelect([{ id: TARGET_USER_ID, roles: ["user", "admin"], status: "active" }]);
+      countRows.mockResolvedValueOnce(0);
+      const app = await getApp(chain);
+
+      const res = await req(app, "DELETE", `/admin/users/${TARGET_USER_ID}/roles/admin`);
+      expect(res.status).toBe(409);
+      const body = await res.json();
+      expect(body.error).toBe("LAST_ADMIN");
+    });
+
+    it("allows revoking a non-admin role regardless of admin count", async () => {
+      const { chain, queueSelect } = makeQueuedDb();
+      queueSelect([{ id: TARGET_USER_ID, roles: ["user", "editor"], status: "active" }]);
+      const app = await getApp(chain);
+
+      const res = await req(app, "DELETE", `/admin/users/${TARGET_USER_ID}/roles/editor`);
+      expect(res.status).toBe(200);
+      expect(auditLog).toHaveBeenCalledWith("admin.role_revoked", ADMIN_ID, TARGET_USER_ID, true, {
+        role: "editor",
+      });
     });
   });
 });
