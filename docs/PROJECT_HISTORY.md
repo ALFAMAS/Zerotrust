@@ -11,7 +11,7 @@ git history at the path noted.
 | Topic | Canonical doc |
 | --- | --- |
 | Standing production-readiness audit | [`AUDIT.md`](./AUDIT.md) |
-| Prioritized backlog (P0–P4) | [`../todo.md`](../todo.md) |
+| Prioritized backlog (P5+) | [`../todo.md`](../todo.md) |
 | Current architecture + proposals | [`ARCHITECTURE.md`](./ARCHITECTURE.md) |
 | Feature-removal record (2026-06-28 slim-down) | _Removed_ — see migrations `0020`–`0024` and `tdone.md` |
 | Shipped-feature ledger | [`../tdone.md`](../tdone.md) |

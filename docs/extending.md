@@ -98,6 +98,105 @@ it in `src/mfa/`. Register the channel name in the settings model and UI.
 
 ---
 
+## BFF / httpOnly cookie migration (fork hardening — not default)
+
+The default template stores access and refresh tokens in `localStorage`
+(`packages/ui/src/lib/auth.ts`) because the Next.js UI (`:3000`) and Hono API
+(`:1337`) are separate origins. Any XSS payload can read those tokens. This is a
+documented tradeoff — see [ADR 008](./adr/008-token-storage-design-revisit.md).
+
+Forks that need stronger XSS resistance should adopt the **BFF
+(Backend-for-Frontend)** pattern: a thin Next.js route handler proxies auth
+requests, strips tokens from JSON responses, and sets httpOnly cookies instead.
+The default template does **not** ship this path; follow the checklist below.
+
+### When to adopt
+
+- Your UI and API are **same-site** in production (or you control cookie
+  `SameSite`/CORS/credentials end-to-end).
+- XSS resistance matters more than direct browser→API SDK access.
+- You accept the extra deploy surface (BFF proxy) and loss of user-token access
+  from pure client-side SDK consumers (use API keys for those instead).
+
+### Migration checklist
+
+1. **Add a catch-all BFF route** — create
+   `packages/ui/src/app/api/auth/[...path]/route.ts` that forwards auth
+   requests to `NEXT_PUBLIC_ZEROTRUST_URL`, converts login/refresh JSON token
+   pairs into `Set-Cookie` headers (`httpOnly`, `Secure`, `SameSite=Lax`), and
+   strips tokens from the response body.
+2. **Gate behind an env flag** — only mount the BFF when
+   `NEXT_PUBLIC_BFF_AUTH=true` (document in `.env.example`). Default remains
+   `localStorage`.
+3. **Replace client token storage** — update `packages/ui/src/lib/auth.ts`:
+   remove `localStorage` reads/writes; read the access token from a server-only
+   cookie via `cookies()` in Server Components / route handlers, or expose a
+   narrow `/api/auth/token` endpoint that returns only the short-lived access
+   token (never the refresh token).
+4. **Update `apiClient.ts`** — attach `Authorization` from the server-side
+   cookie on BFF-proxied requests, or route all authenticated calls through the
+   BFF so the browser never holds bearer tokens.
+5. **Scope the refresh cookie** — path `/api/auth/token/refresh` only; access
+   cookie path `/` with a short `max-age` matching the 1h access-token TTL.
+6. **Verify zero `localStorage` leakage** — grep for `za_access_token` /
+   `za_refresh_token` and confirm no references remain when BFF mode is on.
+7. **Re-test OAuth/MFA flows** — magic links, OAuth callbacks, and MFA
+   step-up must still land tokens in cookies, not redirect URLs (CWE-532).
+8. **Document your fork** — note in your README that BFF mode is enabled and
+   cross-origin SPA token access is no longer supported.
+
+### Optional reference implementation
+
+A minimal BFF skeleton (not shipped in the template):
+
+```ts
+// packages/ui/src/app/api/auth/[...path]/route.ts (fork-only)
+import { type NextRequest, NextResponse } from "next/server";
+
+const API = process.env.NEXT_PUBLIC_ZEROTRUST_URL ?? "http://localhost:1337";
+
+export async function POST(
+  req: NextRequest,
+  { params }: { params: Promise<{ path: string[] }> },
+) {
+  const { path } = await params;
+  const upstream = await fetch(`${API}/auth/${path.join("/")}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: await req.text(),
+    redirect: "error",
+    signal: AbortSignal.timeout(15_000),
+  });
+  const body = await upstream.json();
+  if (body.accessToken) {
+    const res = NextResponse.json({ user: body.user });
+    res.cookies.set("za_access_token", body.accessToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "lax",
+      path: "/",
+      maxAge: 3600,
+    });
+    if (body.refreshToken) {
+      res.cookies.set("za_refresh_token", body.refreshToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "lax",
+        path: "/api/auth/token/refresh",
+        maxAge: 60 * 60 * 24 * 30,
+      });
+    }
+    return res;
+  }
+  return NextResponse.json(body, { status: upstream.status });
+}
+```
+
+See ADR 008 Options B/C for the full tradeoff analysis and hybrid in-memory
+variant.
+
+---
+
 ## Pluggability checklist (for any new integration)
 
 - **Config over code:** read credentials from `process.env` via the config

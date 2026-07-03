@@ -117,19 +117,17 @@ jobs:
         uses: semgrep/semgrep-action@v1
         with:
           config: p/owasp-top-ten
-      # Non-blocking for now: the trivy-action's setup step currently fails while
-      # installing the Trivy binary (v0.64.1) on the runner — before any scan
-      # runs — so it gates every PR without providing signal. Semgrep (above) and
-      # `bun audit --prod` (lint job) remain the blocking security gates. Flip
-      # back to blocking once a working trivy-action/binary combo is pinned.
+      # P4.6: pinned to immutable 0.35.0 release (Trivy v0.69.3). Older mutable
+      # tags were compromised in the Mar 2026 supply-chain incident; 0.35.0 is
+      # the known-safe combo per Aqua advisory GHSA-69fq-xp46-6x23.
       - name: Trivy filesystem scan
-        continue-on-error: true
         uses: aquasecurity/trivy-action@0.35.0
         with:
           scan-type: fs
           scan-ref: .
           severity: CRITICAL,HIGH
           exit-code: "1"
+          version: v0.69.3
 
   build-ui:
     name: Build UI

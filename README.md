@@ -575,7 +575,7 @@ zerotrust tracks its state in the repository docs:
 | Doc                                              | What it covers                                              |
 | ------------------------------------------------ | ----------------------------------------------------------- |
 | [`tdone.md`](./tdone.md)                         | Everything that ships today, plus the latest codebase audit |
-| [`todo.md`](./todo.md)                           | Prioritized backlog (P0–P4) with acceptance criteria        |
+| [`todo.md`](./todo.md)                           | Prioritized backlog (P5+) with acceptance criteria          |
 | [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) | System architecture audit + proposed upgrades               |
 | [`docs/AUDIT.md`](./docs/AUDIT.md)               | Standing production-readiness audit (findings + risk + order) |
 | [`docs/reference-architecture.md`](./docs/reference-architecture.md) | Operational deployment blueprints (VM, containers, Kubernetes) |

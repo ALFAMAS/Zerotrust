@@ -271,6 +271,32 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
 
 ## Recent work (2026-07-03)
 
+### P4 — Documentation and developer experience shipped (P4.6–P4.9)
+
+- **P4.6 Trivy CI gate:** removed `continue-on-error` on the Trivy filesystem
+  scan; pinned `aquasecurity/trivy-action@0.35.0` with `trivy-version: v0.69.3`
+  (immutable release, post–supply-chain-incident safe combo). Trivy is now a
+  blocking gate alongside Semgrep and `bun audit`.
+- **P4.7 Semgrep SAST exception closed:** verified Semgrep green on CI run
+  28624304093 (`p/owasp-top-ten`, zero blocking findings); removed the open
+  SAST-Semgrep row from `docs/maintenance-scorecard.md` §7.
+- **P4.8 scorecard baselines:** filled CI duration (~3.5 min median, ~4.5 min
+  p95 from GitHub Actions run #282), CI success rate (~42% over last 100 runs,
+  Jul 2 refactor burst), flaky-test assessment (0 identified flakes), test count
+  (886 API + 216 UI = 1102), migration count (29). Quarterly review date
+  unchanged at 2026-10-01.
+- **P4.9 ADR 008 fork path:** added `docs/extending.md` §BFF / httpOnly cookie
+  migration checklist with 8-step fork guide and reference route-handler skeleton
+  (explicit non-default; default template remains `localStorage`).
+- **Verification:** CI run 28624304093 — Semgrep + Trivy steps both `success`;
+  `bun run test` → **886 API tests passing**; `bun run --cwd packages/ui test`
+  → **216 UI tests passing**; `docs/extending.md` BFF section present; scorecard
+  §2/§7/§8 updated.
+
+---
+
+## Recent work (2026-07-03)
+
 ### P4 — Documentation and developer experience shipped (all items)
 
 - **P4.1 coverage ratchet:** raised `vitest.config.ts` thresholds from

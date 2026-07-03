@@ -1,7 +1,7 @@
 # Quarterly Maintenance Scorecard
 
 **Quarter:** Q3 2026 (Jul – Sep)
-**Last updated:** 2026-07-03 (P3 scalability shipped)
+**Last updated:** 2026-07-03 (P4 documentation & DX shipped)
 **Owner:** Platform team
 
 Tracked trend: dependency freshness, CI health, test health, migration health,
@@ -29,14 +29,14 @@ Node v24.15.0.
 
 | Metric | Current | Target | Trend |
 |---|---|---|---|
-| CI success rate (last 30 days) | _TBD_ (no metrics pipeline yet) | ≥95% | — |
-| CI median duration (main PR) | _TBD_ | <5 min | — |
-| CI p95 duration | _TBD_ | <10 min | — |
-| Flaky tests (failing ≥2 of last 10 runs) | _TBD_ | 0 | — |
+| CI success rate (last 30 days) | **~42%** (100 runs, Jun 3–Jul 3; Jul 2 refactor burst) | ≥95% | 🔴 |
+| CI median duration (main PR) | **~3.5 min** wall-clock (run #282, 2026-07-02) | <5 min | ✅ |
+| CI p95 duration | **~4.5 min** (successful runs, Jul 1–2 sample) | <10 min | ✅ |
+| Flaky tests (failing ≥2 of last 10 runs) | **0** identified (failures are lint/build/schema, not test flakes) | 0 | ✅ |
 | `verify:generated` drift failures | 0 (idempotent regen verified) | 0 | ✅ |
 
-**Jobs:** `lint:ci` (Biome) · `type-check` (tsc) · `test` (Vitest, 864+ API tests) ·
-`migrations:check` (destructive DDL gate) · `verify:generated` (SDK+docs drift) · UI build · SAST (Semgrep) · Trivy filesystem
+**Jobs:** `lint:ci` (Biome) · `type-check` (tsc) · `test` (Vitest, 886 API tests) ·
+`migrations:check` (destructive DDL gate) · `verify:generated` (SDK+docs drift) · UI build · SAST (Semgrep, blocking) · Trivy filesystem (blocking, `trivy-action@0.35.0`)
 
 ---
 
@@ -110,8 +110,11 @@ see `tests/load/full-suite.k6.js` thresholds.
 
 | ID | Finding | Severity | Opened | Target fix | Status |
 |---|---|---|---|---|---|
-| SAST-Semgrep | CI Semgrep job red (pre-existing) | Low | 2026-06 | Q3 | Triaged |
-| — | — | — | — | — | — |
+| — | _No open security exceptions_ | — | — | — | — |
+
+**Closed (P4.7):** SAST-Semgrep — was triaged Low (2026-06); verified green on
+`main` CI run 28624304093 (2026-07-02). `p/owasp-top-ten` passes with zero
+blocking findings.
 
 **Open security items from AUDIT.md:** `/metrics` is open by default unless
 `METRICS_AUTH_TOKEN` is set (S3). P4.2 shipped: deployment checklist now
@@ -127,12 +130,12 @@ ungated `/metrics` exceptions to zero.
 
 | Metric | Current | Target | Trend |
 |---|---|---|---|
-| ADRs written for load-bearing decisions | 7 (001–007) | All major | ✅ |
+| ADRs written for load-bearing decisions | 8 (001–008) | All major | ✅ |
 | Standing audit freshness | 2026-07-03 | <quarter old | ✅ |
 | `verify:generated` (API reference drift) | 0 diff | 0 diff | ✅ |
 | Unaddressed TODO P0 items | 0 (P0.1–P0.3 done) | 0 | ✅ |
 | Unaddressed TODO P1 items | 0 (P1.1–P1.5 done) | 0 | ✅ |
-| Unaddressed TODO P4 items | 0 (P4.1–P4.5 done) | 0 | ✅ |
+| Unaddressed TODO P4 items | 0 (P4.1–P4.9 done) | 0 | ✅ |
 
 ---
 
