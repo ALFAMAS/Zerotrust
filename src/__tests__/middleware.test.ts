@@ -148,37 +148,19 @@ describe("Account Lockout Middleware", () => {
   });
 });
 
-// ── Geo-Fencing ────────────────────────────────────────────────────────────
+// ── Geo-Fencing (removed — org policy enforced in sessionPolicy.service) ──
 
-describe("Geo-Fencing Middleware", () => {
-  it("passes through when geo-fencing is disabled", async () => {
-    const { geoFencingMiddleware } = await import("../middleware/geoFencing");
+// ── Inferred client country ────────────────────────────────────────────────
+
+describe("inferClientCountry", () => {
+  it("returns empty string when IP is unknown", async () => {
+    const { inferClientCountry } = await import("../shared/inferClientCountry");
+    const { Hono } = await import("hono");
     const app = new Hono();
-    app.use("*", geoFencingMiddleware());
-    app.get("/test", (c) => c.json({ ok: true }));
+    app.get("/test", (c) => c.json({ country: inferClientCountry(c) }));
     const res = await app.request("/test");
-    expect(res.status).toBe(200);
-  });
-});
-
-// ── Temporal Access ────────────────────────────────────────────────────────
-
-describe("Temporal Access Middleware", () => {
-  it("allows access when no schedule restriction is set", async () => {
-    const { temporalAccessMiddleware } =
-      await import("../middleware/temporalAccess");
-    const app = new Hono<any>();
-    app.use("*", async (c, next) => {
-      c.set("user", {
-        id: "u1",
-        sessionConfig: { scheduleRestriction: { enabled: false } },
-      });
-      await next();
-    });
-    app.use("*", temporalAccessMiddleware());
-    app.get("/test", (c) => c.json({ ok: true }));
-    const res = await app.request("/test");
-    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.country).toBe("");
   });
 });
 

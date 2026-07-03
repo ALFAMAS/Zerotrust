@@ -35,6 +35,7 @@ function makeBuilder(queue: unknown[][] = []) {
     select: vi.fn().mockReturnThis(),
     from: vi.fn().mockReturnThis(),
     where: vi.fn().mockReturnThis(),
+    for: vi.fn().mockReturnThis(),
     orderBy: vi.fn().mockReturnThis(),
     limit: vi.fn(() => Promise.resolve(queue[i++] ?? [])),
     insert: vi.fn().mockReturnThis(),
@@ -328,6 +329,7 @@ describe("P1 transactional repositories", () => {
 
     expect(db.transaction).toHaveBeenCalledTimes(1);
     expect(tx.select).toHaveBeenCalledTimes(1);
+    expect(tx.for).toHaveBeenCalledWith("update");
     expect(tx.update).toHaveBeenCalledTimes(1);
     expect(tx.set).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -337,7 +339,10 @@ describe("P1 transactional repositories", () => {
   });
 
   it("completes passkey authentication with session and refresh token in one transaction", async () => {
-    const tx = makeBuilder([[{ id: "session-1", userId: "user-1" }]]);
+    const tx = makeBuilder([
+      [{ id: "user-1" }],
+      [{ id: "session-1", userId: "user-1" }],
+    ]);
     const db = makeTxDb(tx);
     mockGetDb.mockReturnValue(db as never);
 
@@ -361,6 +366,7 @@ describe("P1 transactional repositories", () => {
     });
 
     expect(db.transaction).toHaveBeenCalledTimes(1);
+    expect(tx.for).toHaveBeenCalledWith("update");
     expect(tx.update).toHaveBeenCalledTimes(1);
     expect(tx.insert).toHaveBeenCalledTimes(2);
     expect(session.id).toBe("session-1");

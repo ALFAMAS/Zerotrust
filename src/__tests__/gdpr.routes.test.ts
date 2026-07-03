@@ -36,11 +36,20 @@ vi.mock("../db/schema", () => ({
   sessionsTable: {},
   auditLogsTable: {},
   organizationMembersTable: {},
+  walletsTable: {},
+  walletTransactionsTable: {},
+  supportTicketsTable: {},
+  supportTicketMessagesTable: {},
+  feedbackTable: {},
+  notificationsTable: {},
 }));
 vi.mock("drizzle-orm", () => ({
   eq: vi.fn(),
   and: vi.fn(),
+  or: vi.fn(),
   desc: vi.fn(),
+  inArray: vi.fn(),
+  sql: vi.fn(),
 }));
 vi.mock("../middleware/auth", () => ({
   authMiddleware: vi.fn().mockImplementation(async (c: any, next: any) => {
@@ -111,7 +120,18 @@ const mockProfile = {
   lastLoginAt: null,
   sessionConfig: {},
   metadata: null,
-  mfa: { totp: { enabled: false }, webauthn: { enabled: false } },
+  passkeys: [
+    {
+      credentialId: "cred-1",
+      publicKey: "secret-not-exported",
+      counter: 1,
+      backedUp: false,
+      transports: ["internal"],
+      name: "MacBook",
+      createdAt: new Date("2026-01-01"),
+    },
+  ],
+  mfa: { totp: { enabled: false }, webauthn: { enabled: true } },
 };
 
 describe("GDPR Routes", () => {
@@ -122,9 +142,9 @@ describe("GDPR Routes", () => {
 
   it("GET /gdpr/export returns user data as JSON", async () => {
     enqueueDb([mockProfile]); // profile query
-    enqueueDb([]); // sessions
-    enqueueDb([]); // audit logs
-    enqueueDb([]); // org memberships
+    // Eight parallel reads (sessions, audit, memberships, wallet, transactions,
+    // support tickets, feedback, notifications)
+    for (let i = 0; i < 8; i++) enqueueDb([]);
 
     const app = await buildApp();
     const res = await app.request("/gdpr/export");
@@ -135,6 +155,15 @@ describe("GDPR Routes", () => {
     expect(body).toHaveProperty("sessions");
     expect(body).toHaveProperty("auditLogs");
     expect(body).toHaveProperty("organizations");
+    expect(body).toHaveProperty("wallet");
+    expect(body).toHaveProperty("walletTransactions");
+    expect(body).toHaveProperty("supportTickets");
+    expect(body).toHaveProperty("feedback");
+    expect(body).toHaveProperty("notifications");
+    expect(body.profile.passkeys).toEqual([
+      expect.objectContaining({ credentialId: "cred-1", name: "MacBook" }),
+    ]);
+    expect(body.profile.passkeys[0]).not.toHaveProperty("publicKey");
     expect(body).toHaveProperty("exportedAt");
   });
 

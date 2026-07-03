@@ -205,7 +205,7 @@ export async function getOrgBranding(orgId: string): Promise<ResolvedBranding> {
 // wires it up). `organizations.storageRegion` is a logical label for routing
 // hints and compliance reporting — it does not select a separate database or S3
 // bucket in the default single-region deployment. Physical per-region storage is
-// tracked as CP-1 (full) in todo.md.
+// tracked as CP-1 (full) in todo.md — blueprint in docs/adr/009-data-residency-sharding.md.
 interface ResidencyConfigExtension {
   residency?: { strictMode?: boolean };
 }

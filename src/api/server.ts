@@ -18,9 +18,8 @@ import { metricsAuthMiddleware, metricsMiddleware, metricsRoute } from "../metri
 import { API_VERSIONS, apiVersioning, CURRENT_API_VERSION } from "../middleware/apiVersioning";
 import { authMiddleware, requireAdmin } from "../middleware/auth";
 import { corsOptionsFromEnv } from "../middleware/cors";
-import { geoFencingMiddleware } from "../middleware/geoFencing";
+import { inferredCountryMiddleware } from "../middleware/inferredCountry";
 import { rateLimit } from "../middleware/rateLimiting";
-import { temporalAccessMiddleware } from "../middleware/temporalAccess";
 import notificationChannelRoutes from "../notifications/routes";
 import {
   initStripeWebhookQueueConsumer,
@@ -110,6 +109,7 @@ export async function createServer() {
   app.use("*", cors(corsOptionsFromEnv()));
   app.use("*", securityHeaders());
   app.use("*", inputSanitizationMiddleware());
+  app.use("*", inferredCountryMiddleware());
   // Compress JSON, HTML, and text responses to reduce transfer time for dashboard/API reads.
   // Bun is pinned to >= 1.3, where `CompressionStream` is available.
   app.use("*", compress());
@@ -235,8 +235,6 @@ export async function createServer() {
     "/protected",
     rateLimit({ points: 200, windowSecs: 60 }),
     authMiddleware,
-    geoFencingMiddleware(),
-    temporalAccessMiddleware(),
     (c) => {
       return c.json({ ok: true, user: c.get("user")?.id });
     }

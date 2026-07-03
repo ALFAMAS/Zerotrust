@@ -1,19 +1,41 @@
-import { and, desc, eq, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, or, sql } from "drizzle-orm";
 import { Hono } from "hono";
 import { getDb, getReadDb } from "../../db";
 import {
   auditLogsTable,
+  feedbackTable,
+  notificationsTable,
   organizationMembersTable,
   sessionsTable,
+  supportTicketMessagesTable,
+  supportTicketsTable,
   usersTable,
+  walletTransactionsTable,
+  walletsTable,
 } from "../../db/schema";
 import { getLogger } from "../../logger";
 import { authMiddleware } from "../../middleware/auth";
 import { rateLimit } from "../../middleware/rateLimiting";
-import type { HonoEnv, User } from "../../shared/types";
+import type { HonoEnv, Passkey, User } from "../../shared/types";
 
 const router = new Hono<HonoEnv>();
 const logger = getLogger("gdpr");
+
+function exportPasskeyMetadata(passkeys: Passkey[] | null | undefined) {
+  return (passkeys ?? []).map((pk) => ({
+    credentialId: pk.credentialId,
+    name: pk.name,
+    deviceType: pk.deviceType,
+    backedUp: pk.backedUp,
+    transports: pk.transports,
+    aaguid: pk.aaguid,
+    attestationFormat: pk.attestationFormat,
+    counter: pk.counter,
+    createdAt: pk.createdAt,
+    lastUsedAt: pk.lastUsedAt,
+    orgId: pk.orgId,
+  }));
+}
 
 // ── GDPR Data Export ──────────────────────────────────────────────────────────
 
@@ -26,22 +48,64 @@ router.get("/export", rateLimit({ points: 3, windowSecs: 3600 }), authMiddleware
 
     if (!profile) return c.json({ error: "USER_NOT_FOUND" }, 404);
 
-    const sessions = await db
-      .select()
-      .from(sessionsTable)
-      .where(eq(sessionsTable.userId, user.id))
-      .orderBy(desc(sessionsTable.createdAt));
+    const [
+      sessions,
+      auditLogs,
+      memberships,
+      wallet,
+      walletTransactions,
+      supportTickets,
+      feedback,
+      notifications,
+    ] = await Promise.all([
+      db
+        .select()
+        .from(sessionsTable)
+        .where(eq(sessionsTable.userId, user.id))
+        .orderBy(desc(sessionsTable.createdAt)),
+      db
+        .select()
+        .from(auditLogsTable)
+        .where(
+          or(eq(auditLogsTable.actorId, user.id), eq(auditLogsTable.targetId, user.id))
+        )
+        .orderBy(desc(auditLogsTable.timestamp)),
+      db
+        .select()
+        .from(organizationMembersTable)
+        .where(eq(organizationMembersTable.userId, user.id)),
+      db.select().from(walletsTable).where(eq(walletsTable.userId, user.id)).limit(1),
+      db
+        .select()
+        .from(walletTransactionsTable)
+        .where(eq(walletTransactionsTable.userId, user.id))
+        .orderBy(desc(walletTransactionsTable.createdAt)),
+      db
+        .select()
+        .from(supportTicketsTable)
+        .where(eq(supportTicketsTable.userId, user.id))
+        .orderBy(desc(supportTicketsTable.createdAt)),
+      db
+        .select()
+        .from(feedbackTable)
+        .where(eq(feedbackTable.userId, user.id))
+        .orderBy(desc(feedbackTable.createdAt)),
+      db
+        .select()
+        .from(notificationsTable)
+        .where(eq(notificationsTable.userId, user.id))
+        .orderBy(desc(notificationsTable.createdAt)),
+    ]);
 
-    const auditLogs = await db
-      .select()
-      .from(auditLogsTable)
-      .where(eq(auditLogsTable.actorId, user.id))
-      .orderBy(desc(auditLogsTable.timestamp));
-
-    const memberships = await db
-      .select()
-      .from(organizationMembersTable)
-      .where(eq(organizationMembersTable.userId, user.id));
+    const ticketIds = supportTickets.map((t) => t.id);
+    const supportMessages =
+      ticketIds.length > 0
+        ? await db
+            .select()
+            .from(supportTicketMessagesTable)
+            .where(inArray(supportTicketMessagesTable.ticketId, ticketIds))
+            .orderBy(desc(supportTicketMessagesTable.createdAt))
+        : [];
 
     const exportData = {
       exportedAt: new Date().toISOString(),
@@ -62,6 +126,7 @@ router.get("/export", rateLimit({ points: 3, windowSecs: 3600 }), authMiddleware
           totp: { enabled: (profile.mfa as User["mfa"] | null)?.totp?.enabled },
           webauthn: { enabled: (profile.mfa as User["mfa"] | null)?.webauthn?.enabled },
         },
+        passkeys: exportPasskeyMetadata(profile.passkeys as Passkey[] | null),
       },
       sessions: sessions.map((s) => ({
         id: s.id,
@@ -75,6 +140,9 @@ router.get("/export", rateLimit({ points: 3, windowSecs: 3600 }), authMiddleware
       })),
       auditLogs: auditLogs.map((log) => ({
         action: log.action,
+        actorId: log.actorId,
+        targetId: log.targetId,
+        targetType: log.targetType,
         ipAddress: log.ipAddress,
         country: log.country,
         success: log.success,
@@ -84,6 +152,64 @@ router.get("/export", rateLimit({ points: 3, windowSecs: 3600 }), authMiddleware
         orgId: m.orgId,
         role: m.role,
         joinedAt: m.joinedAt,
+      })),
+      wallet: wallet[0]
+        ? {
+            balance: wallet[0].balance,
+            lifetimeBalance: wallet[0].lifetimeBalance,
+            currency: wallet[0].currency,
+            autoTopUp: wallet[0].autoTopUp,
+            autoTopUpThreshold: wallet[0].autoTopUpThreshold,
+            autoTopUpAmount: wallet[0].autoTopUpAmount,
+            createdAt: wallet[0].createdAt,
+            updatedAt: wallet[0].updatedAt,
+          }
+        : null,
+      walletTransactions: walletTransactions.map((tx) => ({
+        id: tx.id,
+        amount: tx.amount,
+        balanceAfter: tx.balanceAfter,
+        type: tx.type,
+        description: tx.description,
+        createdAt: tx.createdAt,
+      })),
+      supportTickets: supportTickets.map((t) => ({
+        id: t.id,
+        orgId: t.orgId,
+        subject: t.subject,
+        status: t.status,
+        priority: t.priority,
+        createdAt: t.createdAt,
+        updatedAt: t.updatedAt,
+        messages: supportMessages
+          .filter((m) => m.ticketId === t.id)
+          .map((m) => ({
+            id: m.id,
+            authorId: m.authorId,
+            authorRole: m.authorRole,
+            body: m.body,
+            createdAt: m.createdAt,
+          })),
+      })),
+      feedback: feedback.map((f) => ({
+        id: f.id,
+        orgId: f.orgId,
+        type: f.type,
+        score: f.score,
+        comment: f.comment,
+        context: f.context,
+        metadata: f.metadata,
+        createdAt: f.createdAt,
+      })),
+      notifications: notifications.map((n) => ({
+        id: n.id,
+        type: n.type,
+        title: n.title,
+        body: n.body,
+        link: n.link,
+        read: n.read,
+        readAt: n.readAt,
+        createdAt: n.createdAt,
       })),
     };
 

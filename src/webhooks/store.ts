@@ -1,5 +1,6 @@
 import { and, desc, eq, inArray } from "drizzle-orm";
 import { getDb } from "../db";
+import { withOrgRls } from "../db/rls";
 import { webhookEndpointsTable } from "../db/schema";
 import type { WebhookEndpoint, WebhookEventType } from "./types";
 
@@ -77,73 +78,101 @@ function orgScopeWhere(orgIds: string[]) {
   return inArray(webhookEndpointsTable.orgId, orgIds);
 }
 
+type DbLike = ReturnType<typeof getDb>;
+
+/** Apply transaction-local RLS when a single org is in scope. */
+async function withOptionalOrgRls<T>(
+  orgIds: string[] | undefined,
+  userId: string | undefined,
+  fn: (db: DbLike) => Promise<T>
+): Promise<T> {
+  if (orgIds?.length === 1) {
+    return withOrgRls({ orgId: orgIds[0], userId }, fn);
+  }
+  return fn(getDb());
+}
+
 export class WebhookStore {
-  async registerEndpoint(endpoint: WebhookEndpointInput): Promise<WebhookEndpoint> {
-    const db = getDb();
-    const [record] = await db
-      .insert(webhookEndpointsTable)
-      .values(valuesForInsert(endpoint))
-      .returning();
-    return fromRow(record);
+  async registerEndpoint(
+    endpoint: WebhookEndpointInput,
+    userId?: string
+  ): Promise<WebhookEndpoint> {
+    const run = async (db: DbLike) => {
+      const [record] = await db
+        .insert(webhookEndpointsTable)
+        .values(valuesForInsert(endpoint))
+        .returning();
+      return fromRow(record);
+    };
+    if (endpoint.orgId) {
+      return withOrgRls({ orgId: endpoint.orgId, userId }, run);
+    }
+    return run(getDb());
   }
 
   async updateEndpoint(
     id: string,
     partial: Partial<WebhookEndpointInput>,
-    orgIds?: string[]
+    orgIds?: string[],
+    userId?: string
   ): Promise<WebhookEndpoint | null> {
-    const db = getDb();
-    const where =
-      orgIds && orgIds.length > 0
-        ? and(eq(webhookEndpointsTable.id, id), orgScopeWhere(orgIds))
-        : eq(webhookEndpointsTable.id, id);
-    const [record] = await db
-      .update(webhookEndpointsTable)
-      .set(valuesForUpdate(partial))
-      .where(where)
-      .returning();
-    return record ? fromRow(record) : null;
-  }
-
-  async deleteEndpoint(id: string, orgIds?: string[]): Promise<boolean> {
-    const db = getDb();
-    const where =
-      orgIds && orgIds.length > 0
-        ? and(eq(webhookEndpointsTable.id, id), orgScopeWhere(orgIds))
-        : eq(webhookEndpointsTable.id, id);
-    const [record] = await db.delete(webhookEndpointsTable).where(where).returning({
-      id: webhookEndpointsTable.id,
+    return withOptionalOrgRls(orgIds, userId, async (db) => {
+      const where =
+        orgIds && orgIds.length > 0
+          ? and(eq(webhookEndpointsTable.id, id), orgScopeWhere(orgIds))
+          : eq(webhookEndpointsTable.id, id);
+      const [record] = await db
+        .update(webhookEndpointsTable)
+        .set(valuesForUpdate(partial))
+        .where(where)
+        .returning();
+      return record ? fromRow(record) : null;
     });
-    return Boolean(record);
   }
 
-  async getEndpoint(id: string, orgIds?: string[]): Promise<WebhookEndpoint | null> {
-    const db = getDb();
-    const where =
-      orgIds && orgIds.length > 0
-        ? and(eq(webhookEndpointsTable.id, id), orgScopeWhere(orgIds))
-        : eq(webhookEndpointsTable.id, id);
-    const rows = await db.select().from(webhookEndpointsTable).where(where).limit(1);
-    return rows[0] ? fromRow(rows[0]) : null;
+  async deleteEndpoint(id: string, orgIds?: string[], userId?: string): Promise<boolean> {
+    return withOptionalOrgRls(orgIds, userId, async (db) => {
+      const where =
+        orgIds && orgIds.length > 0
+          ? and(eq(webhookEndpointsTable.id, id), orgScopeWhere(orgIds))
+          : eq(webhookEndpointsTable.id, id);
+      const [record] = await db.delete(webhookEndpointsTable).where(where).returning({
+        id: webhookEndpointsTable.id,
+      });
+      return Boolean(record);
+    });
+  }
+
+  async getEndpoint(id: string, orgIds?: string[], userId?: string): Promise<WebhookEndpoint | null> {
+    return withOptionalOrgRls(orgIds, userId, async (db) => {
+      const where =
+        orgIds && orgIds.length > 0
+          ? and(eq(webhookEndpointsTable.id, id), orgScopeWhere(orgIds))
+          : eq(webhookEndpointsTable.id, id);
+      const rows = await db.select().from(webhookEndpointsTable).where(where).limit(1);
+      return rows[0] ? fromRow(rows[0]) : null;
+    });
   }
 
   async getEndpointsForEvent(
     event: WebhookEventType,
-    orgId?: string
+    orgId?: string,
+    userId?: string
   ): Promise<WebhookEndpoint[]> {
-    const endpoints = orgId ? await this.listEndpointsForOrgs([orgId]) : [];
+    const endpoints = orgId ? await this.listEndpointsForOrgs([orgId], userId) : [];
     return endpoints.filter((ep) => ep.active && ep.events.includes(event));
   }
 
-  async listEndpointsForOrgs(orgIds: string[]): Promise<WebhookEndpoint[]> {
+  async listEndpointsForOrgs(orgIds: string[], userId?: string): Promise<WebhookEndpoint[]> {
     if (orgIds.length === 0) return [];
-    const db = getDb();
-    const rows = await db
-      .select()
-      .from(webhookEndpointsTable)
-      .where(orgScopeWhere(orgIds))
-      .orderBy(desc(webhookEndpointsTable.createdAt));
-    return rows.map(fromRow);
+    return withOptionalOrgRls(orgIds, userId, async (db) => {
+      const rows = await db
+        .select()
+        .from(webhookEndpointsTable)
+        .where(orgScopeWhere(orgIds))
+        .orderBy(desc(webhookEndpointsTable.createdAt));
+      return rows.map(fromRow);
+    });
   }
 }
 

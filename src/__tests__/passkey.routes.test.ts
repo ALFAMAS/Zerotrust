@@ -106,6 +106,7 @@ function makeDbChain() {
     select: vi.fn().mockReturnThis(),
     from: vi.fn().mockReturnThis(),
     where: vi.fn().mockReturnThis(),
+    for: vi.fn().mockReturnThis(),
     limit: vi.fn(() => Promise.resolve(state.limitResult)),
     insert: vi.fn().mockReturnThis(),
     values: vi.fn().mockReturnThis(),
@@ -324,6 +325,7 @@ describe("passkey.routes", () => {
       db.__state.selectAllResult = [
         { id: TEST_USER_ID, email: "alice@example.com", passkeys: [PASSKEY] },
       ];
+      db.__state.limitResult = [{ id: TEST_USER_ID }];
       db.__state.returningResult = [{ id: "session-1" }];
       verifyAuthenticationResponse.mockResolvedValueOnce({
         verified: true,

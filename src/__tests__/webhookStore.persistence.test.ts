@@ -19,7 +19,28 @@ vi.mock("../db", () => ({
     select: h.select,
     update: h.update,
     delete: h.delete,
+    transaction: vi.fn(async (fn: (tx: unknown) => unknown) =>
+      fn({
+        insert: h.insert,
+        select: h.select,
+        update: h.update,
+        delete: h.delete,
+        execute: vi.fn().mockResolvedValue(undefined),
+      })
+    ),
   }),
+}));
+
+vi.mock("../db/rls", () => ({
+  withOrgRls: vi.fn(async (_ctx: unknown, fn: (tx: unknown) => unknown) =>
+    fn({
+      insert: h.insert,
+      select: h.select,
+      update: h.update,
+      delete: h.delete,
+      execute: vi.fn().mockResolvedValue(undefined),
+    })
+  ),
 }));
 
 import { WebhookStore } from "../webhooks/store";

@@ -385,6 +385,10 @@ export type HonoEnv = {
     };
     /** MCP token payload. */
     mcpToken?: Record<string, unknown>;
+    /** Active org from `X-Org-Id` when orgRlsMiddleware is mounted. */
+    activeOrgId?: string;
+    /** Transaction-scoped DB client with RLS context (orgRlsMiddleware only). */
+    dbTx?: unknown;
   };
 };
 

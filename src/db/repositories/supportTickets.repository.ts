@@ -1,5 +1,6 @@
 import { eq } from "drizzle-orm";
 import { getDb } from "..";
+import { setOrgRlsContext } from "../rls";
 import { supportTicketMessagesTable, supportTicketsTable } from "../schema";
 
 export type SupportTicketStatus = "open" | "pending" | "closed";
@@ -32,6 +33,9 @@ export interface UpdateSupportTicketStatusInput {
 export async function createSupportTicketWithMessage(input: CreateSupportTicketInput) {
   const db = getDb();
   return db.transaction(async (tx) => {
+    if (input.orgId) {
+      await setOrgRlsContext(tx, { orgId: input.orgId, userId: input.userId });
+    }
     const [ticket] = await tx
       .insert(supportTicketsTable)
       .values({

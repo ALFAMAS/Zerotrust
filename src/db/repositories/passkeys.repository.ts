@@ -21,6 +21,7 @@ export async function registerPasskey(userId: string, newPasskey: Passkey): Prom
       .select({ passkeys: usersTable.passkeys, mfa: usersTable.mfa })
       .from(usersTable)
       .where(eq(usersTable.id, userId))
+      .for("update")
       .limit(1);
     if (!row) throw new Error("USER_NOT_FOUND");
 
@@ -52,6 +53,14 @@ export interface CompletePasskeyAuthenticationInput {
 export async function completePasskeyAuthentication(input: CompletePasskeyAuthenticationInput) {
   const db = getDb();
   return db.transaction(async (tx) => {
+    const [locked] = await tx
+      .select({ id: usersTable.id })
+      .from(usersTable)
+      .where(eq(usersTable.id, input.userId))
+      .for("update")
+      .limit(1);
+    if (!locked) throw new Error("USER_NOT_FOUND");
+
     await tx
       .update(usersTable)
       .set({ passkeys: input.updatedPasskeys, updatedAt: new Date() })

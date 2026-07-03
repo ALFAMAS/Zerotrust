@@ -143,7 +143,7 @@ export {
   requireReverification,
   sensitiveReverification,
 } from "./middleware/continuousVerification";
-export { geoFencingMiddleware } from "./middleware/geoFencing";
+export { inferredCountryMiddleware } from "./middleware/inferredCountry";
 export {
   clearPoPNonces,
   requireProofOfPossession,
@@ -162,7 +162,6 @@ export {
   revokeAllSessionsForUser,
   revokeSession,
 } from "./middleware/sessionControl";
-export { temporalAccessMiddleware } from "./middleware/temporalAccess";
 export type { TokenBindingOptions } from "./middleware/tokenBinding";
 // ─── Token Binding ────────────────────────────────────────────────────────────
 export { tokenBindingMiddleware } from "./middleware/tokenBinding";

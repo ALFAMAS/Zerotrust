@@ -17,7 +17,7 @@ app.use("*", authMiddleware);
 app.get("/", async (c) => {
   const user = c.get("user");
   const orgIds = await getUserOrgIds(user.id);
-  const endpoints = await webhookStore.listEndpointsForOrgs(orgIds);
+  const endpoints = await webhookStore.listEndpointsForOrgs(orgIds, user.id);
   return c.json(endpoints);
 });
 
@@ -91,15 +91,18 @@ app.post("/", async (c) => {
     );
   }
 
-  const endpoint = await webhookStore.registerEndpoint({
-    url,
-    secret,
-    events,
-    orgId: orgResolution.orgId,
-    headers,
-    active: true,
-    retryPolicy: retryPolicy ?? { maxRetries: 3, backoffMs: 1000 },
-  });
+  const endpoint = await webhookStore.registerEndpoint(
+    {
+      url,
+      secret,
+      events,
+      orgId: orgResolution.orgId,
+      headers,
+      active: true,
+      retryPolicy: retryPolicy ?? { maxRetries: 3, backoffMs: 1000 },
+    },
+    user.id
+  );
 
   return c.json(endpoint, 201);
 });
@@ -109,7 +112,7 @@ app.get("/:id", async (c) => {
   const user = c.get("user");
   const id = c.req.param("id");
   const orgIds = await getUserOrgIds(user.id);
-  const endpoint = await webhookStore.getEndpoint(id, orgIds);
+  const endpoint = await webhookStore.getEndpoint(id, orgIds, user.id);
 
   if (!endpoint) {
     return c.json(
@@ -149,7 +152,7 @@ app.patch("/:id", async (c) => {
   delete body.tenantId;
   delete body.orgId;
 
-  const updated = await webhookStore.updateEndpoint(id, body, orgIds);
+  const updated = await webhookStore.updateEndpoint(id, body, orgIds, user.id);
 
   if (!updated) {
     return c.json(
@@ -170,7 +173,7 @@ app.delete("/:id", async (c) => {
   const user = c.get("user");
   const id = c.req.param("id");
   const orgIds = await getUserOrgIds(user.id);
-  const deleted = await webhookStore.deleteEndpoint(id, orgIds);
+  const deleted = await webhookStore.deleteEndpoint(id, orgIds, user.id);
 
   if (!deleted) {
     return c.json(
@@ -192,7 +195,7 @@ app.get("/:id/deliveries", async (c) => {
   const user = c.get("user");
   const id = c.req.param("id");
   const orgIds = await getUserOrgIds(user.id);
-  const endpoint = await webhookStore.getEndpoint(id, orgIds);
+  const endpoint = await webhookStore.getEndpoint(id, orgIds, user.id);
   if (!endpoint) {
     return c.json(
       {
@@ -226,7 +229,7 @@ app.post("/:id/ping", async (c) => {
   const user = c.get("user");
   const id = c.req.param("id");
   const orgIds = await getUserOrgIds(user.id);
-  const endpoint = await webhookStore.getEndpoint(id, orgIds);
+  const endpoint = await webhookStore.getEndpoint(id, orgIds, user.id);
 
   if (!endpoint) {
     return c.json(

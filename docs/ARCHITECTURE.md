@@ -1,8 +1,9 @@
 # Architecture
 
 Audited 2026-07-04. Describes the system as it is today, then records shipped
-upgrades. Verified open backlog is empty — see [`../todo.md`](../todo.md); the
-standing audit is [`AUDIT.md`](./AUDIT.md).
+upgrades. Short-term audit backlog is shipped — see [`../tdone.md`](../tdone.md); five
+long-term items remain in [`../todo.md`](../todo.md). Standing audit:
+[`AUDIT.md`](./AUDIT.md).
 
 ## 1. Overview
 
@@ -45,7 +46,7 @@ guards:
 5. Static `/uploads/*`
 6. **Route module**, which applies its own guards from `src/middleware/`:
    `authMiddleware` (PASETO verify) or `apiKeyAuth`, then as needed
-   `rateLimiting`, `requirePlan`, `requireAdmin`, `geoFencing`, `temporalAccess`,
+   `rateLimiting`, `requirePlan`, `requireAdmin`, `inferredCountry`,
    `continuousVerification`, `tokenBinding`, `deviceAttestation`, `sessionControl`.
 
 Auth resolves a `user` (and optional `apiKey`) onto the Hono context; handlers

@@ -19,7 +19,7 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
 | Migrations | 34 (latest: `0034_drop_webhook_tenant_id`) |
 | Route mounts in `server.ts` | 29 |
 | UI pages | 53 |
-| Tests | 1318 (1076 API + 242 UI, 134 files) |
+| Tests | 1317 (1075 API + 242 UI, 134 files) |
 | ADRs | 8 |
 | Stack | Hono 4 · TypeScript 6 · Bun · Next.js 16 · Drizzle ORM · PostgreSQL · Redis |
 
@@ -155,7 +155,7 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
 
 ## GDPR, Compliance & Privacy
 
-- ✅ GDPR data export — JSON download of all user data
+- ✅ GDPR data export — JSON download of all user data (profile, sessions, audit logs as actor or target, org memberships, wallet + transactions, support tickets + messages, feedback, notifications, passkey metadata)
 - ✅ Account deletion — 30-day soft-delete grace period, then full PII purge
 - ✅ Data retention — auto-purge audit logs, sessions, OTPs after configurable intervals
 - ✅ Legal hold — prevents PII purge for held users
@@ -277,6 +277,34 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
 ---
 
 ## Recent work (2026-07-04)
+
+### ARCH-3 — Remove dead geo/temporal middleware (shipped)
+
+- **Deleted:** `src/middleware/geoFencing.ts`, `src/middleware/temporalAccess.ts` (demo-only
+  `/protected` mounts; org country/session limits live in `sessionPolicy.service.ts`).
+- **Added:** `src/shared/inferClientCountry.ts` + global `inferredCountryMiddleware()` so
+  login/session creation and risk scoring get a country from client IP without duplicate
+  enforcement paths.
+- **Docs:** `docs/ARCHITECTURE.md` middleware list updated.
+- **Regression:** `src/__tests__/middleware.test.ts` (inferClientCountry), server mount
+  no longer references removed middleware.
+- **Verification (2026-07-04):** targeted middleware + server security header tests pass.
+
+### FS-3 — Passkey JSONB row-lock (shipped)
+
+- **`passkeys.repository.ts`:** `registerPasskey()` and `completePasskeyAuthentication()`
+  `SELECT … FOR UPDATE` the user row inside the transaction before read-modify-write on
+  `passkeys` / `mfa`.
+- **Regression:** `src/__tests__/p1.repositories.test.ts` asserts `.for("update")`.
+- **Verification (2026-07-04):** P1 repository tests pass.
+
+### CP-2 — GDPR Art. 15 export completeness (shipped)
+
+- **`GET /gdpr/export`:** adds wallet balance + transactions, support tickets (with
+  messages), feedback, in-app notifications, passkey metadata (no raw public keys); audit
+  logs include rows where the user is `actorId` **or** `targetId`.
+- **Regression:** `src/__tests__/gdpr.routes.test.ts`.
+- **Verification (2026-07-04):** GDPR route tests pass.
 
 ### ARCH-1 — Remove orphaned `tenants` multi-tenancy model (shipped)
 
