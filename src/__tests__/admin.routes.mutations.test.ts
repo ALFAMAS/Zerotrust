@@ -342,3 +342,89 @@ describe("admin.routes mutations — last-admin & self-lockout guards (H4)", () 
     });
   });
 });
+
+// ── H5: PUT /settings validation ────────────────────────────────────────────
+
+describe("admin.routes mutations — settings validation (H5)", () => {
+  it("rejects an out-of-bounds sessionTTLSeconds", async () => {
+    const { chain } = makeQueuedDb();
+    const app = await getApp(chain);
+
+    const res = await req(app, "PUT", "/admin/settings", { sessionTTLSeconds: 10 });
+    expect(res.status).toBe(400);
+    const body = await res.json();
+    expect(body.error).toBe("VALIDATION_ERROR");
+    expect(auditLog).not.toHaveBeenCalled();
+  });
+
+  it("rejects accountLockoutThreshold of 0 (would disable lockout entirely)", async () => {
+    const { chain } = makeQueuedDb();
+    const app = await getApp(chain);
+
+    const res = await req(app, "PUT", "/admin/settings", { accountLockoutThreshold: 0 });
+    expect(res.status).toBe(400);
+  });
+
+  it("rejects a non-URL appUrl", async () => {
+    const { chain } = makeQueuedDb();
+    const app = await getApp(chain);
+
+    const res = await req(app, "PUT", "/admin/settings", { appUrl: "not-a-url" });
+    expect(res.status).toBe(400);
+  });
+
+  it("rejects an unknown/unexpected field instead of silently persisting it", async () => {
+    const { chain } = makeQueuedDb();
+    const app = await getApp(chain);
+
+    const res = await req(app, "PUT", "/admin/settings", { updatedBy: "someone-else" });
+    expect(res.status).toBe(400);
+    expect(auditLog).not.toHaveBeenCalled();
+  });
+
+  it("rejects the wrong type for a boolean field", async () => {
+    const { chain } = makeQueuedDb();
+    const app = await getApp(chain);
+
+    const res = await req(app, "PUT", "/admin/settings", { requireMfaForAll: "true" });
+    expect(res.status).toBe(400);
+  });
+
+  it("accepts a valid multi-field update within bounds", async () => {
+    const { chain } = makeQueuedDb();
+    const app = await getApp(chain);
+
+    const res = await req(app, "PUT", "/admin/settings", {
+      sessionTTLSeconds: 7200,
+      maxConcurrentSessions: 3,
+      accountLockoutThreshold: 5,
+      requireMfaForAll: true,
+    });
+    expect(res.status).toBe(200);
+    expect(auditLog).toHaveBeenCalledWith(
+      "admin.settings_updated",
+      ADMIN_ID,
+      "saas_settings",
+      true,
+      {
+        changes: {
+          sessionTTLSeconds: 7200,
+          maxConcurrentSessions: 3,
+          accountLockoutThreshold: 5,
+          requireMfaForAll: true,
+        },
+      }
+    );
+  });
+
+  it("still accepts a comma-separated allowedEmailDomains string", async () => {
+    const { chain } = makeQueuedDb();
+    const app = await getApp(chain);
+
+    const res = await req(app, "PUT", "/admin/settings", {
+      allowedEmailDomains: "example.com, acme.org",
+    });
+    expect(res.status).toBe(200);
+    expect(auditLog).toHaveBeenCalled();
+  });
+});
