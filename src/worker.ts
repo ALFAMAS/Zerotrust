@@ -35,7 +35,11 @@ const logger = getLogger("worker");
 
 async function shutdown(signal: string): Promise<void> {
   logger.info(`Worker ${signal === "SIGTERM" ? "shutting down" : "interrupted"}`);
-  await Promise.allSettled([shutdownJobScheduler(), shutdownEmailQueue(), shutdownStripeWebhookQueue()]);
+  await Promise.allSettled([
+    shutdownJobScheduler(),
+    shutdownEmailQueue(),
+    shutdownStripeWebhookQueue(),
+  ]);
   process.exit(0);
 }
 

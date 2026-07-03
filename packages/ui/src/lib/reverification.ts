@@ -35,7 +35,11 @@ export function getReverificationHandler(): ReverificationHandler | null {
 export function requestReverificationChallenge(
   type: "totp" | "otp" | "passkey" = "totp"
 ): Promise<ReverificationChallenge> {
-  return apiPost<ReverificationChallenge>("/auth/verify/challenge", { type }, { skipReverify: true });
+  return apiPost<ReverificationChallenge>(
+    "/auth/verify/challenge",
+    { type },
+    { skipReverify: true }
+  );
 }
 
 export function submitReverificationResponse(body: {

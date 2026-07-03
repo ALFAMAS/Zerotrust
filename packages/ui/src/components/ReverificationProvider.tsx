@@ -12,10 +12,10 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import {
+  type ReverificationContext,
   registerReverificationHandler,
   requestReverificationChallenge,
   submitReverificationResponse,
-  type ReverificationContext,
 } from "@/lib/reverification";
 import { isWebAuthnAvailable, startAuthentication } from "@/lib/webauthn";
 

@@ -22,7 +22,7 @@
  * entirely, matching the previous behavior for `singleInstance` jobs (all
  * current registry jobs are single-instance).
  */
-import { Queue, Worker, type Job } from "bullmq";
+import { type Job, Queue, Worker } from "bullmq";
 import Redis from "ioredis";
 import { getLogger } from "../logger";
 import { getJob, JOB_REGISTRY, type JobDef } from "./registry";

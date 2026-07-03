@@ -48,12 +48,9 @@ export function buildAdminRecentUsersPath(limit = 5): string {
   return `/admin/users?limit=${limit}`;
 }
 
-export function buildAdminUsersListPath(params: {
-  page?: number;
-  limit?: number;
-  search?: string;
-  status?: string;
-} = {}): string {
+export function buildAdminUsersListPath(
+  params: { page?: number; limit?: number; search?: string; status?: string } = {}
+): string {
   const search = new URLSearchParams();
   const page = params.page ?? 1;
   const limit = params.limit ?? DEFAULT_ADMIN_LIST_LIMIT;
@@ -88,12 +85,9 @@ function normalizeRecentUsers(
   return [];
 }
 
-function normalizeAdminUsersListParams(params: {
-  page?: number;
-  limit?: number;
-  search?: string;
-  status?: string;
-} = {}) {
+function normalizeAdminUsersListParams(
+  params: { page?: number; limit?: number; search?: string; status?: string } = {}
+) {
   return {
     page: params.page ?? 1,
     limit: params.limit ?? DEFAULT_ADMIN_LIST_LIMIT,
@@ -180,18 +174,15 @@ export function billingPricingPrefetchOptions(
   return queryOptions({
     queryKey: queryKeys.billing.pricing(currency, locale),
     queryFn: () =>
-      serverApiGet<{ plans: Array<{ plan: string; formatted: string; pppDiscountPercent: number }> }>(
-        buildBillingPricingPath(currency, locale)
-      ),
+      serverApiGet<{
+        plans: Array<{ plan: string; formatted: string; pppDiscountPercent: number }>;
+      }>(buildBillingPricingPath(currency, locale)),
   });
 }
 
-export function adminUsersListPrefetchOptions(params: {
-  page?: number;
-  limit?: number;
-  search?: string;
-  status?: string;
-} = {}) {
+export function adminUsersListPrefetchOptions(
+  params: { page?: number; limit?: number; search?: string; status?: string } = {}
+) {
   const normalized = normalizeAdminUsersListParams(params);
   return queryOptions({
     queryKey: queryKeys.admin.users.list(

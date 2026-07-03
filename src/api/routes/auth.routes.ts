@@ -1474,70 +1474,76 @@ router.post("/me/link", authMiddleware, rateLimit({ points: 10, windowSecs: 60 }
 
 // ── POST /auth/me/email — change email (requires current password) ───────────
 
-router.post("/me/email", authMiddleware, sensitiveReverification, rateLimit({ points: 5, windowSecs: 60 }), async (c) => {
-  try {
-    const user = c.get("user");
-    const { newEmail, password } = await c.req.json().catch(() => ({}));
-    if (!newEmail || !password) {
-      return c.json(
-        {
-          error: "INVALID_REQUEST",
-          message: "newEmail and password required",
-        },
-        400
-      );
+router.post(
+  "/me/email",
+  authMiddleware,
+  sensitiveReverification,
+  rateLimit({ points: 5, windowSecs: 60 }),
+  async (c) => {
+    try {
+      const user = c.get("user");
+      const { newEmail, password } = await c.req.json().catch(() => ({}));
+      if (!newEmail || !password) {
+        return c.json(
+          {
+            error: "INVALID_REQUEST",
+            message: "newEmail and password required",
+          },
+          400
+        );
+      }
+
+      const db = getDb();
+      const [row] = await db.select().from(usersTable).where(eq(usersTable.id, user.id)).limit(1);
+      if (!row?.passwordHash) {
+        return c.json(
+          {
+            error: "REAUTH_REQUIRED",
+            message: "Password verification required",
+          },
+          403
+        );
+      }
+
+      const valid = await bcrypt.compare(password, row.passwordHash);
+      if (!valid) {
+        return c.json({ error: "INVALID_CREDENTIALS", message: "Incorrect password" }, 401);
+      }
+
+      const normalized = String(newEmail).toLowerCase().trim();
+      const [taken] = await db
+        .select({ id: usersTable.id })
+        .from(usersTable)
+        .where(eq(usersTable.email, normalized))
+        .limit(1);
+      if (taken) {
+        return c.json({ error: "EMAIL_TAKEN", message: "Email already in use" }, 409);
+      }
+
+      const previousEmail = row.email;
+      await db
+        .update(usersTable)
+        .set({ email: normalized, updatedAt: new Date() })
+        .where(eq(usersTable.id, user.id));
+      await invalidateUserCache(user.id);
+
+      // Account takeover detection: email change shortly after a password
+      // reset (or other sensitive change) revokes other sessions and alerts
+      // both the old and new address.
+      void recordAndRespond(user.id, "email_change", {
+        email: normalized,
+        previousEmail,
+        displayName: row.displayName ?? normalized,
+        ipAddress: getClientIp(c),
+        userAgent: c.req.header("user-agent"),
+      });
+
+      return c.json({ success: true, email: normalized });
+    } catch (err) {
+      return internalError(c, logger, "Email change error", err);
     }
-
-    const db = getDb();
-    const [row] = await db.select().from(usersTable).where(eq(usersTable.id, user.id)).limit(1);
-    if (!row?.passwordHash) {
-      return c.json(
-        {
-          error: "REAUTH_REQUIRED",
-          message: "Password verification required",
-        },
-        403
-      );
-    }
-
-    const valid = await bcrypt.compare(password, row.passwordHash);
-    if (!valid) {
-      return c.json({ error: "INVALID_CREDENTIALS", message: "Incorrect password" }, 401);
-    }
-
-    const normalized = String(newEmail).toLowerCase().trim();
-    const [taken] = await db
-      .select({ id: usersTable.id })
-      .from(usersTable)
-      .where(eq(usersTable.email, normalized))
-      .limit(1);
-    if (taken) {
-      return c.json({ error: "EMAIL_TAKEN", message: "Email already in use" }, 409);
-    }
-
-    const previousEmail = row.email;
-    await db
-      .update(usersTable)
-      .set({ email: normalized, updatedAt: new Date() })
-      .where(eq(usersTable.id, user.id));
-    await invalidateUserCache(user.id);
-
-    // Account takeover detection: email change shortly after a password
-    // reset (or other sensitive change) revokes other sessions and alerts
-    // both the old and new address.
-    void recordAndRespond(user.id, "email_change", {
-      email: normalized,
-      previousEmail,
-      displayName: row.displayName ?? normalized,
-      ipAddress: getClientIp(c),
-      userAgent: c.req.header("user-agent"),
-    });
-
-    return c.json({ success: true, email: normalized });
-  } catch (err) {
-    return internalError(c, logger, "Email change error", err);
   }
-});
+);
 
 // ── POST /auth/me/avatar ──────────────────────────────────────────────────────
 

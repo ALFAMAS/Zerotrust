@@ -155,11 +155,7 @@ async function dispatch<T>(
       (parsed as { error?: string; code?: string; level?: string; reason?: string } | null) ?? {};
     const errorCode = body.code ?? body.error;
 
-    if (
-      errorCode === "REVERIFICATION_REQUIRED" &&
-      !options.skipReverify &&
-      !options._reverified
-    ) {
+    if (errorCode === "REVERIFICATION_REQUIRED" && !options.skipReverify && !options._reverified) {
       const handler = getReverificationHandler();
       if (handler) {
         const verified = await handler({ level: body.level, reason: body.reason });
