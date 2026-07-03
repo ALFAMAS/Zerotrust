@@ -1,4 +1,4 @@
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq, inArray } from "drizzle-orm";
 import { getDb } from "../db";
 import { webhookEndpointsTable } from "../db/schema";
 import type { WebhookEndpoint, WebhookEventType } from "./types";
@@ -40,7 +40,7 @@ function fromRow(row: WebhookEndpointRow): WebhookEndpoint {
     url: row.url,
     secret: row.secret,
     events: normalizeEvents(row.events),
-    ...(row.tenantId ? { tenantId: row.tenantId } : {}),
+    ...(row.orgId ? { orgId: row.orgId } : {}),
     active: row.active,
     createdAt: row.createdAt,
     ...(normalizeHeaders(row.headers) ? { headers: normalizeHeaders(row.headers) } : {}),
@@ -53,7 +53,7 @@ function valuesForInsert(endpoint: WebhookEndpointInput) {
     url: endpoint.url,
     secret: endpoint.secret,
     events: endpoint.events,
-    tenantId: endpoint.tenantId ?? null,
+    orgId: endpoint.orgId ?? null,
     active: endpoint.active,
     headers: endpoint.headers ?? {},
     retryPolicy: endpoint.retryPolicy,
@@ -65,12 +65,16 @@ function valuesForUpdate(partial: Partial<WebhookEndpointInput>) {
   if (partial.url !== undefined) values.url = partial.url;
   if (partial.secret !== undefined) values.secret = partial.secret;
   if (partial.events !== undefined) values.events = partial.events;
-  if (partial.tenantId !== undefined) values.tenantId = partial.tenantId ?? null;
+  if (partial.orgId !== undefined) values.orgId = partial.orgId ?? null;
   if (partial.active !== undefined) values.active = partial.active;
   if (partial.headers !== undefined) values.headers = partial.headers ?? {};
   if (partial.retryPolicy !== undefined) values.retryPolicy = partial.retryPolicy;
   values.updatedAt = new Date();
   return values;
+}
+
+function orgScopeWhere(orgIds: string[]) {
+  return inArray(webhookEndpointsTable.orgId, orgIds);
 }
 
 export class WebhookStore {
@@ -85,52 +89,60 @@ export class WebhookStore {
 
   async updateEndpoint(
     id: string,
-    partial: Partial<WebhookEndpointInput>
+    partial: Partial<WebhookEndpointInput>,
+    orgIds?: string[]
   ): Promise<WebhookEndpoint | null> {
     const db = getDb();
+    const where =
+      orgIds && orgIds.length > 0
+        ? and(eq(webhookEndpointsTable.id, id), orgScopeWhere(orgIds))
+        : eq(webhookEndpointsTable.id, id);
     const [record] = await db
       .update(webhookEndpointsTable)
       .set(valuesForUpdate(partial))
-      .where(eq(webhookEndpointsTable.id, id))
+      .where(where)
       .returning();
     return record ? fromRow(record) : null;
   }
 
-  async deleteEndpoint(id: string): Promise<boolean> {
+  async deleteEndpoint(id: string, orgIds?: string[]): Promise<boolean> {
     const db = getDb();
-    const [record] = await db
-      .delete(webhookEndpointsTable)
-      .where(eq(webhookEndpointsTable.id, id))
-      .returning({ id: webhookEndpointsTable.id });
+    const where =
+      orgIds && orgIds.length > 0
+        ? and(eq(webhookEndpointsTable.id, id), orgScopeWhere(orgIds))
+        : eq(webhookEndpointsTable.id, id);
+    const [record] = await db.delete(webhookEndpointsTable).where(where).returning({
+      id: webhookEndpointsTable.id,
+    });
     return Boolean(record);
   }
 
-  async getEndpoint(id: string): Promise<WebhookEndpoint | null> {
+  async getEndpoint(id: string, orgIds?: string[]): Promise<WebhookEndpoint | null> {
     const db = getDb();
-    const rows = await db
-      .select()
-      .from(webhookEndpointsTable)
-      .where(eq(webhookEndpointsTable.id, id))
-      .limit(1);
+    const where =
+      orgIds && orgIds.length > 0
+        ? and(eq(webhookEndpointsTable.id, id), orgScopeWhere(orgIds))
+        : eq(webhookEndpointsTable.id, id);
+    const rows = await db.select().from(webhookEndpointsTable).where(where).limit(1);
     return rows[0] ? fromRow(rows[0]) : null;
   }
 
   async getEndpointsForEvent(
     event: WebhookEventType,
-    tenantId?: string
+    orgId?: string
   ): Promise<WebhookEndpoint[]> {
-    const endpoints = await this.listEndpoints(tenantId);
+    const endpoints = orgId ? await this.listEndpointsForOrgs([orgId]) : [];
     return endpoints.filter((ep) => ep.active && ep.events.includes(event));
   }
 
-  async listEndpoints(tenantId?: string): Promise<WebhookEndpoint[]> {
+  async listEndpointsForOrgs(orgIds: string[]): Promise<WebhookEndpoint[]> {
+    if (orgIds.length === 0) return [];
     const db = getDb();
-    const base = db.select().from(webhookEndpointsTable);
-    const rows = tenantId
-      ? await base
-          .where(eq(webhookEndpointsTable.tenantId, tenantId))
-          .orderBy(desc(webhookEndpointsTable.createdAt))
-      : await base.orderBy(desc(webhookEndpointsTable.createdAt));
+    const rows = await db
+      .select()
+      .from(webhookEndpointsTable)
+      .where(orgScopeWhere(orgIds))
+      .orderBy(desc(webhookEndpointsTable.createdAt));
     return rows.map(fromRow);
   }
 }

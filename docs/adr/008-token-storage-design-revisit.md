@@ -51,8 +51,8 @@ require stronger XSS resistance should adopt the **BFF (Backend-for-Frontend)
 - **Cons:** XSS-accessible. An injected script can read and exfiltrate both
   tokens.
 - **Mitigations already in place:** 1h access-token TTL, single-use refresh
-  rotation with family revocation on reuse detection, CSP headers, input
-  sanitization middleware.
+  rotation with family revocation on reuse detection, custom `securityHeaders()`
+  middleware (CSP, HSTS, frame-options) on the API, input sanitization middleware.
 
 ### Option B — BFF / httpOnly cookies (fork hardening)
 

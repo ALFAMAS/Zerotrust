@@ -22,7 +22,7 @@
  *     `safeExternalRedirect` flow, not raw `fetch`.
  */
 
-import { clearToken, getRefreshToken, getToken, setToken } from "./auth";
+import { clearToken, getToken, setToken } from "./auth";
 import { getReverificationHandler } from "./reverification";
 
 const BASE_URL = process.env.NEXT_PUBLIC_ZEROTRUST_URL || "http://localhost:1337";
@@ -82,17 +82,16 @@ async function fetchWithTimeout(
 }
 
 async function tryRefresh(): Promise<boolean> {
-  const refreshToken = getRefreshToken();
-  if (!refreshToken) return false;
   const res = await fetch(`${BASE_URL}/auth/token/refresh`, {
     method: "POST",
+    credentials: "include",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ refreshToken }),
+    body: JSON.stringify({}),
   }).catch(() => null);
   if (!res?.ok) return false;
   const data = await res.json().catch(() => null);
   if (!data?.accessToken) return false;
-  setToken(data.accessToken, data.refreshToken);
+  setToken(data.accessToken);
   return true;
 }
 
@@ -119,7 +118,7 @@ async function dispatch<T>(
     try {
       res = await fetchWithTimeout(
         url,
-        { ...init, method, headers },
+        { ...init, method, headers, credentials: "include" },
         options.timeoutMs ?? FETCH_TIMEOUT_MS
       );
     } catch (err) {
@@ -165,7 +164,7 @@ async function dispatch<T>(
       }
     }
 
-    if (!options._refreshed && getRefreshToken()) {
+    if (!options._refreshed && errorCode !== "REVERIFICATION_REQUIRED") {
       const refreshed = await tryRefresh();
       if (refreshed) {
         return dispatch<T>(method, path, init, { ...options, _refreshed: true });

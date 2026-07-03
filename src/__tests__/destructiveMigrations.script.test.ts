@@ -36,6 +36,6 @@ describe("destructive-migrations gate (P3.5)", () => {
     // explicitly approves 7 entries across 5 pre-existing files.
     const { stdout } = runGate();
     const approvedCount = parseInt(stdout.match(/(\d+) destructive/)?.[1] ?? "0", 10);
-    expect(approvedCount).toBeGreaterThanOrEqual(7);
+    expect(approvedCount).toBeGreaterThanOrEqual(10);
   });
 });

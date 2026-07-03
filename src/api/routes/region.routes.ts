@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 import { z } from "zod";
 import { authMiddleware } from "../../middleware/auth";
+import { requirePlan } from "../../middleware/requirePlan";
 import {
   getOrgBranding,
   regionForCountry,
@@ -80,8 +81,11 @@ const brandingSchema = z.object({
   customLoginUrl: z.string().url().optional(),
 });
 
-// PUT /orgs/:orgId/branding — update branding
-router.put("/orgs/:orgId/branding", async (c) => {
+// PUT /orgs/:orgId/branding — update branding (Pro+)
+router.put(
+  "/orgs/:orgId/branding",
+  requirePlan("customRoles", { orgIdParam: "orgId" }),
+  async (c) => {
   const orgId = c.req.param("orgId");
   const body = await c.req.json().catch(() => ({}));
   const parsed = brandingSchema.safeParse(body);
@@ -90,14 +94,18 @@ router.put("/orgs/:orgId/branding", async (c) => {
   }
   await setOrgBranding(orgId, parsed.data);
   return c.json({ success: true });
-});
+  }
+);
 
 const domainSchema = z.object({
   domain: z.string().max(255).nullable(),
 });
 
-// PUT /orgs/:orgId/domain — set custom domain
-router.put("/orgs/:orgId/domain", async (c) => {
+// PUT /orgs/:orgId/domain — set custom domain (Enterprise)
+router.put(
+  "/orgs/:orgId/domain",
+  requirePlan("ssoSaml", { orgIdParam: "orgId" }),
+  async (c) => {
   const orgId = c.req.param("orgId");
   const body = await c.req.json().catch(() => ({}));
   const parsed = domainSchema.safeParse(body);
@@ -110,14 +118,18 @@ router.put("/orgs/:orgId/domain", async (c) => {
   } catch (err: any) {
     return c.json({ error: "CONFLICT", message: err.message }, 409);
   }
-});
+  }
+);
 
 const regionSchema = z.object({
   region: z.enum(["us", "eu", "apac"]),
 });
 
-// PUT /orgs/:orgId/region — set data residency region
-router.put("/orgs/:orgId/region", async (c) => {
+// PUT /orgs/:orgId/region — set data residency region (Enterprise)
+router.put(
+  "/orgs/:orgId/region",
+  requirePlan("ssoSaml", { orgIdParam: "orgId" }),
+  async (c) => {
   const orgId = c.req.param("orgId");
   const body = await c.req.json().catch(() => ({}));
   const parsed = regionSchema.safeParse(body);
@@ -126,6 +138,7 @@ router.put("/orgs/:orgId/region", async (c) => {
   }
   await setOrgStorageRegion(orgId, parsed.data.region as StorageRegion);
   return c.json({ success: true, region: parsed.data.region });
-});
+  }
+);
 
 export default router;

@@ -1,8 +1,8 @@
 /**
  * Cross-Tenant JIT (Just-In-Time) Privilege Escalation
  *
- * Allows a user in tenant A to request temporary elevated access to a resource
- * in tenant B. Requires approval from an admin in tenant B.
+ * Allows a user in org A to request temporary elevated access to a resource
+ * in org B. Requires approval from an admin in org B.
  *
  * Backed by the `cross_tenant_jit_requests` table so grants and the approval
  * trail survive restarts. Expiry is computed lazily: an approved grant whose
@@ -20,13 +20,13 @@ import type { HonoEnv } from "../shared/types";
 export interface CrossTenantJITRequest {
   id: string;
   requestorUserId: string;
-  requestorTenantId: string;
-  targetTenantId: string;
+  requestorOrgId: string;
+  targetOrgId: string;
   targetResource: string; // e.g. "admin:users:read"
   justification: string;
   ttlSeconds: number; // max 3600 (1 hour)
   status: "pending" | "approved" | "denied" | "expired";
-  approvedBy?: string; // userId of approver in target tenant
+  approvedBy?: string; // userId of approver in target org
   approvedAt?: Date;
   expiresAt?: Date;
   createdAt: Date;
@@ -46,8 +46,8 @@ function fromRow(row: JITRow): CrossTenantJITRequest {
   return {
     id: row.id,
     requestorUserId: row.requestorUserId,
-    requestorTenantId: row.requestorTenantId,
-    targetTenantId: row.targetTenantId,
+    requestorOrgId: row.requestorOrgId,
+    targetOrgId: row.targetOrgId,
     targetResource: row.targetResource,
     justification: row.justification,
     ttlSeconds: row.ttlSeconds,
@@ -72,8 +72,8 @@ class CrossTenantJITStore {
       .insert(crossTenantJITRequestsTable)
       .values({
         requestorUserId: req.requestorUserId,
-        requestorTenantId: req.requestorTenantId,
-        targetTenantId: req.targetTenantId,
+        requestorOrgId: req.requestorOrgId,
+        targetOrgId: req.targetOrgId,
         targetResource: req.targetResource,
         justification: req.justification,
         ttlSeconds: ttl,
@@ -100,8 +100,6 @@ class CrossTenantJITStore {
    */
   async approve(id: string, approverId: string): Promise<CrossTenantJITRequest | null> {
     const db = getDb();
-    // Read the pending row first so we know its (immutable) ttl, then approve in
-    // a single write guarded on status = pending to avoid a double-approve race.
     const existing = await db
       .select()
       .from(crossTenantJITRequestsTable)
@@ -140,8 +138,8 @@ class CrossTenantJITStore {
     return row ? fromRow(row) : null;
   }
 
-  /** List all requests made by a specific user in a specific tenant. */
-  async listByRequestor(userId: string, tenantId: string): Promise<CrossTenantJITRequest[]> {
+  /** List all requests made by a specific user in a specific org. */
+  async listByRequestor(userId: string, orgId: string): Promise<CrossTenantJITRequest[]> {
     const db = getDb();
     const rows = await db
       .select()
@@ -149,19 +147,19 @@ class CrossTenantJITStore {
       .where(
         and(
           eq(crossTenantJITRequestsTable.requestorUserId, userId),
-          eq(crossTenantJITRequestsTable.requestorTenantId, tenantId)
+          eq(crossTenantJITRequestsTable.requestorOrgId, orgId)
         )
       );
     return rows.map(fromRow);
   }
 
-  /** List all requests targeting a specific tenant. */
-  async listByTarget(tenantId: string): Promise<CrossTenantJITRequest[]> {
+  /** List all requests targeting a specific org. */
+  async listByTarget(orgId: string): Promise<CrossTenantJITRequest[]> {
     const db = getDb();
     const rows = await db
       .select()
       .from(crossTenantJITRequestsTable)
-      .where(eq(crossTenantJITRequestsTable.targetTenantId, tenantId));
+      .where(eq(crossTenantJITRequestsTable.targetOrgId, orgId));
     return rows.map(fromRow);
   }
 
@@ -178,11 +176,11 @@ export const crossTenantJITStore = new CrossTenantJITStore();
 
 /**
  * Hono middleware that validates the caller has an active cross-tenant
- * JIT grant for the given target tenant and resource.
+ * JIT grant for the given target org and resource.
  *
  * Reads the grant ID from the X-JIT-Grant-ID request header.
  */
-export function requireCrossTenantJIT(targetTenantId: string, resource: string) {
+export function requireCrossTenantJIT(targetOrgId: string, resource: string) {
   return createMiddleware<HonoEnv>(async (c, next) => {
     const grantId = c.req.header("x-jit-grant-id");
 
@@ -212,9 +210,9 @@ export function requireCrossTenantJIT(targetTenantId: string, resource: string) 
       );
     }
 
-    if (grant.targetTenantId !== targetTenantId) {
+    if (grant.targetOrgId !== targetOrgId) {
       return c.json(
-        { error: "JIT_GRANT_TENANT_MISMATCH", message: "JIT grant targets a different tenant" },
+        { error: "JIT_GRANT_ORG_MISMATCH", message: "JIT grant targets a different organization" },
         403
       );
     }
@@ -240,16 +238,16 @@ export function requireCrossTenantJIT(targetTenantId: string, resource: string) 
  */
 export function requestCrossTenantAccess(
   requestorUserId: string,
-  requestorTenantId: string,
-  targetTenantId: string,
+  requestorOrgId: string,
+  targetOrgId: string,
   targetResource: string,
   justification: string,
   ttlSeconds: number = 3600
 ): Promise<CrossTenantJITRequest> {
   return crossTenantJITStore.create({
     requestorUserId,
-    requestorTenantId,
-    targetTenantId,
+    requestorOrgId,
+    targetOrgId,
     targetResource,
     justification,
     ttlSeconds: Math.min(ttlSeconds, 3600),

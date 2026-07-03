@@ -3,7 +3,10 @@
  * Mounted at /jit/cross-tenant
  */
 
+import { and, eq } from "drizzle-orm";
 import { Hono } from "hono";
+import { getReadDb } from "../db";
+import { organizationMembersTable } from "../db/schema";
 import { authMiddleware } from "../middleware/auth";
 import type { HonoEnv } from "../shared/types";
 import { crossTenantJITStore, requestCrossTenantAccess } from "./cross-tenant";
@@ -11,6 +14,27 @@ import { crossTenantJITStore, requestCrossTenantAccess } from "./cross-tenant";
 const app = new Hono<HonoEnv>();
 
 app.use("*", authMiddleware);
+
+async function userOrgIds(userId: string): Promise<string[]> {
+  const rows = await getReadDb()
+    .select({ orgId: organizationMembersTable.orgId })
+    .from(organizationMembersTable)
+    .where(eq(organizationMembersTable.userId, userId));
+  return rows.map((r) => r.orgId);
+}
+
+async function resolveRequestorOrgId(
+  userId: string,
+  requestedOrgId?: string
+): Promise<{ orgId: string } | { error: "NO_ORG" | "ORG_REQUIRED" | "FORBIDDEN" }> {
+  const orgIds = await userOrgIds(userId);
+  if (orgIds.length === 0) return { error: "NO_ORG" };
+  if (requestedOrgId) {
+    return orgIds.includes(requestedOrgId) ? { orgId: requestedOrgId } : { error: "FORBIDDEN" };
+  }
+  if (orgIds.length === 1) return { orgId: orgIds[0]! };
+  return { error: "ORG_REQUIRED" };
+}
 
 // ─── POST / — create a cross-tenant JIT request ───────────────────────────────
 
@@ -23,30 +47,43 @@ app.post("/", async (c) => {
   }
 
   const body = await c.req.json<{
-    targetTenantId?: string;
+    targetOrgId?: string;
+    requestorOrgId?: string;
     targetResource?: string;
     justification?: string;
     ttlSeconds?: number;
   }>();
 
-  const { targetTenantId, targetResource, justification, ttlSeconds } = body;
+  const { targetOrgId, requestorOrgId, targetResource, justification, ttlSeconds } = body;
 
-  if (!targetTenantId || !targetResource || !justification) {
+  if (!targetOrgId || !targetResource || !justification) {
     return c.json(
       {
         error: "INVALID_REQUEST",
-        message: "targetTenantId, targetResource, and justification are required",
+        message: "targetOrgId, targetResource, and justification are required",
       },
       400
     );
+  }
+
+  const source = await resolveRequestorOrgId(userId, requestorOrgId);
+  if ("error" in source) {
+    const status = source.error === "FORBIDDEN" ? 403 : 400;
+    const message =
+      source.error === "ORG_REQUIRED"
+        ? "requestorOrgId is required when you belong to multiple organizations"
+        : source.error === "NO_ORG"
+          ? "You must belong to an organization to request cross-tenant access"
+          : "You are not a member of the requested source organization";
+    return c.json({ error: source.error, message }, status);
   }
 
   const ttl = Math.min(Number(ttlSeconds) || 3600, 3600);
 
   const jitRequest = await requestCrossTenantAccess(
     userId,
-    "default",
-    targetTenantId,
+    source.orgId,
+    targetOrgId,
     targetResource,
     justification,
     ttl
@@ -65,24 +102,53 @@ app.get("/", async (c) => {
     return c.json({ error: "UNAUTHENTICATED", message: "Authentication required" }, 401);
   }
 
-  const requests = await crossTenantJITStore.listByRequestor(userId, "default");
+  const orgId = c.req.query("orgId");
+  const source = await resolveRequestorOrgId(userId, orgId);
+  if ("error" in source) {
+    const status = source.error === "FORBIDDEN" ? 403 : 400;
+    return c.json({ error: source.error, message: "orgId query parameter required" }, status);
+  }
+
+  const requests = await crossTenantJITStore.listByRequestor(userId, source.orgId);
   return c.json(requests);
 });
 
-// ─── GET /incoming — list requests targeting my tenant (admin only) ───────────
+// ─── GET /incoming — list requests targeting my org (admin only) ───────────
 
 app.get("/incoming", async (c) => {
   const user = c.get("user");
   const userRoles: string[] = user?.roles ?? [];
+  const userId = user?.id;
 
-  if (!userRoles.includes("admin") && !userRoles.includes("tenant_admin")) {
+  if (!userId) {
+    return c.json({ error: "UNAUTHENTICATED", message: "Authentication required" }, 401);
+  }
+
+  const targetOrgId = c.req.query("orgId");
+  if (!targetOrgId) {
+    return c.json({ error: "ORG_REQUIRED", message: "orgId query parameter is required" }, 400);
+  }
+
+  const [membership] = await getReadDb()
+    .select({ role: organizationMembersTable.role })
+    .from(organizationMembersTable)
+    .where(
+      and(
+        eq(organizationMembersTable.orgId, targetOrgId),
+        eq(organizationMembersTable.userId, userId)
+      )
+    )
+    .limit(1);
+
+  const isOrgAdmin = membership?.role === "owner" || membership?.role === "admin";
+  if (!isOrgAdmin && !userRoles.includes("admin") && !userRoles.includes("tenant_admin")) {
     return c.json(
-      { error: "ACCESS_DENIED", message: "Admin role required to view incoming JIT requests" },
+      { error: "ACCESS_DENIED", message: "Org admin role required to view incoming JIT requests" },
       403
     );
   }
 
-  const requests = await crossTenantJITStore.listByTarget("default");
+  const requests = await crossTenantJITStore.listByTarget(targetOrgId);
   return c.json(requests);
 });
 
@@ -111,17 +177,29 @@ app.post("/:id/approve", async (c) => {
     return c.json({ error: "UNAUTHENTICATED", message: "Authentication required" }, 401);
   }
 
-  if (!userRoles.includes("admin") && !userRoles.includes("tenant_admin")) {
-    return c.json(
-      { error: "ACCESS_DENIED", message: "Admin role required to approve JIT requests" },
-      403
-    );
-  }
-
   const jitRequest = await crossTenantJITStore.get(id);
 
   if (!jitRequest) {
     return c.json({ error: "NOT_FOUND", message: `JIT request ${id} not found` }, 404);
+  }
+
+  const [membership] = await getReadDb()
+    .select({ role: organizationMembersTable.role })
+    .from(organizationMembersTable)
+    .where(
+      and(
+        eq(organizationMembersTable.orgId, jitRequest.targetOrgId),
+        eq(organizationMembersTable.userId, approverId)
+      )
+    )
+    .limit(1);
+
+  const isOrgAdmin = membership?.role === "owner" || membership?.role === "admin";
+  if (!isOrgAdmin && !userRoles.includes("admin") && !userRoles.includes("tenant_admin")) {
+    return c.json(
+      { error: "ACCESS_DENIED", message: "Org admin role required to approve JIT requests" },
+      403
+    );
   }
 
   const approved = await crossTenantJITStore.approve(id, approverId);
@@ -148,17 +226,29 @@ app.post("/:id/deny", async (c) => {
     return c.json({ error: "UNAUTHENTICATED", message: "Authentication required" }, 401);
   }
 
-  if (!userRoles.includes("admin") && !userRoles.includes("tenant_admin")) {
-    return c.json(
-      { error: "ACCESS_DENIED", message: "Admin role required to deny JIT requests" },
-      403
-    );
-  }
-
   const jitRequest = await crossTenantJITStore.get(id);
 
   if (!jitRequest) {
     return c.json({ error: "NOT_FOUND", message: `JIT request ${id} not found` }, 404);
+  }
+
+  const [membership] = await getReadDb()
+    .select({ role: organizationMembersTable.role })
+    .from(organizationMembersTable)
+    .where(
+      and(
+        eq(organizationMembersTable.orgId, jitRequest.targetOrgId),
+        eq(organizationMembersTable.userId, approverId)
+      )
+    )
+    .limit(1);
+
+  const isOrgAdmin = membership?.role === "owner" || membership?.role === "admin";
+  if (!isOrgAdmin && !userRoles.includes("admin") && !userRoles.includes("tenant_admin")) {
+    return c.json(
+      { error: "ACCESS_DENIED", message: "Org admin role required to deny JIT requests" },
+      403
+    );
   }
 
   const denied = await crossTenantJITStore.deny(id, approverId);

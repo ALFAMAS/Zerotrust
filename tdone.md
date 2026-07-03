@@ -16,10 +16,10 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
 | Service files | 46 |
 | DB tables | 41 |
 | Middleware | 21 |
-| Migrations | 29 (latest: `0029_audit_log_anchors`) |
+| Migrations | 30 (latest: `0030_webhook_endpoints_org_id`) |
 | Route mounts in `server.ts` | 30 |
 | UI pages | 53 |
-| Tests | 1242 (1003 API + 239 UI, 181 files) |
+| Tests | 1319 (1080 API + 239 UI, 134 files) |
 | ADRs | 8 |
 | Stack | Hono 4 · TypeScript 6 · Bun · Next.js 16 · Drizzle ORM · PostgreSQL · Redis |
 
@@ -192,7 +192,7 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
 - ✅ PASETO v4 — AES-256-GCM
 - ✅ CSFLE field encryption — `CSFLEManager`, key versioning, encrypt/decrypt plugin (**software key store only**; TPM / Secure Enclave / PKCS#11 providers are unimplemented stubs — see `src/crypto/hardware-key-store.ts`)
 - ✅ Software key store — `SoftwareKeyProvider` via `KEY_PROVIDER=software|auto`; hardware providers fail fast at startup if explicitly requested
-- ✅ Security headers — Hono `secureHeaders` on every route
+- ✅ Security headers — custom `securityHeaders()` middleware (CSP, HSTS preload, X-Frame-Options DENY) on every route
 - ✅ Global input sanitization — strips dangerous HTML, neutralizes XSS payloads
 - ✅ CORS — configurable allowlist, fails closed in production
 - ✅ API versioning — `X-API-Version` header / `/vN` prefix, deprecation/sunset headers
@@ -277,6 +277,47 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
 ---
 
 ## Recent work (2026-07-04)
+
+### ZT-1 — Webhook management cross-tenant IDOR (shipped)
+
+- **Routes:** `GET/POST /webhooks` and `GET/PATCH/DELETE/POST …/:id` scope by caller org
+  memberships via `src/webhooks/orgScope.ts`; client `tenantId` query/body is ignored.
+- **Schema:** migration `0030_webhook_endpoints_org_id` adds `org_id` FK; store matches on
+  `org_id` with legacy `tenant_id` backfill compat.
+- **Store:** `listEndpointsForOrgs`, org-scoped `getEndpoint` / `updateEndpoint` /
+  `deleteEndpoint`.
+- **Regression:** `src/__tests__/webhooks.routes.test.ts` — org A cannot list/read/mutate
+  org B webhooks (7 tests).
+- **Verification (2026-07-04):** `bun run test -- src/__tests__/webhooks.routes.test.ts`
+  → **7 passed**; full API suite → **1080 passed**.
+
+### ZT-2 — Content-Security-Policy in production (shipped)
+
+- **`server.ts`:** replaced Hono `secureHeaders()` with canonical `securityHeaders()`
+  from `src/middleware/securityHeaders.ts` (CSP, HSTS preload, frame denial).
+- **Regression:** `src/__tests__/server.securityHeaders.test.ts` — `createServer()` returns
+  `content-security-policy` on `/health` + wiring assertion on `server.ts`.
+- **ADR 008:** mitigations list updated to reference active CSP middleware.
+- **Verification (2026-07-04):** `bun run test -- src/__tests__/server.securityHeaders.test.ts`
+  → **2 passed**.
+
+### CP-1 — SOC 2 data residency risk register honesty (shipped)
+
+- **R-006** downgraded from `mitigated` → `partial` in `compliance.service.ts`; mitigation
+  text documents logical `storageRegion` tagging only (single Postgres/S3 per deploy).
+- **R-005** mitigation softened to remove overclaimed residency controls.
+- **`region.service.ts`:** comment clarifies `storageRegion` is a label, not physical routing.
+- **Evidence:** `docs/compliance/evidence/2026/risk-assessment/2026-annual-risk-assessment.md`
+  and `docs/compliance/soc2-auditor-readiness.md` updated (R-006 partial).
+
+### DQ-1 — Dockerfile starts the API (shipped)
+
+- **`Dockerfile`:** `BUN_VERSION=1.3.14` / `NODE_VERSION=20-alpine` interpolated into
+  `FROM oven/bun:` / `node:`; `CMD` → `bun dist/api/server.js` / `node dist/api/server.js`
+  (not `index.ts` export barrel).
+- **CI:** `docker-smoke` job in `.github/workflows/ci.yml` builds image and curls `/health`.
+- **Verification (2026-07-04):** `bun run test --run` → **1080 passed**; Dockerfile CMD
+  points at `dist/api/server.js`.
 
 ### T5 — Test coverage ratchet toward 85% (shipped)
 

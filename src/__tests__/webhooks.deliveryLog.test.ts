@@ -14,6 +14,11 @@ vi.mock("../middleware/auth", () => ({
   },
 }));
 
+vi.mock("../webhooks/orgScope", () => ({
+  getUserOrgIds: vi.fn(async () => ["org-test"]),
+  resolveOrgForWebhookCreate: vi.fn(),
+}));
+
 vi.mock("../webhooks/store", () => ({
   webhookStore: {
     registerEndpoint: vi.fn(async (input: any) => {
@@ -21,13 +26,21 @@ vi.mock("../webhooks/store", () => ({
       h.endpoints.push(endpoint);
       return endpoint;
     }),
-    deleteEndpoint: vi.fn(async (id: string) => {
+    getEndpoint: vi.fn(async (id: string, orgIds?: string[]) => {
+      const ep = h.endpoints.find((e) => e.id === id) ?? null;
+      if (!ep) return null;
+      const ownerOrg = ep.orgId ?? ep.tenantId;
+      if (orgIds && orgIds.length > 0 && ownerOrg && !orgIds.includes(ownerOrg)) return null;
+      return ep;
+    }),
+    deleteEndpoint: vi.fn(async (id: string, orgIds?: string[]) => {
       const idx = h.endpoints.findIndex((ep) => ep.id === id);
       if (idx === -1) return false;
+      const ownerOrg = h.endpoints[idx]!.orgId ?? h.endpoints[idx]!.tenantId;
+      if (orgIds && orgIds.length > 0 && ownerOrg && !orgIds.includes(ownerOrg)) return false;
       h.endpoints.splice(idx, 1);
       return true;
     }),
-    getEndpoint: vi.fn(async (id: string) => h.endpoints.find((ep) => ep.id === id) ?? null),
   },
 }));
 
@@ -110,6 +123,7 @@ describe("GET /webhooks/:id/deliveries", () => {
       url: "https://example.test/hook",
       secret: "s3cret",
       events: ["user.created"],
+      orgId: "org-test",
       active: true,
       retryPolicy: { maxRetries: 0, backoffMs: 1000 },
     });
@@ -134,6 +148,6 @@ describe("GET /webhooks/:id/deliveries", () => {
     // The signing secret must never leak into the delivery log response.
     expect(JSON.stringify(body)).not.toContain("s3cret");
 
-    await webhookStore.deleteEndpoint(ep.id);
+    await webhookStore.deleteEndpoint(ep.id, ["org-test"]);
   });
 });

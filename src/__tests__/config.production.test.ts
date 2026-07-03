@@ -12,8 +12,10 @@ async function loadFreshConfig(): Promise<() => unknown> {
 
 function setBaseEnv(): void {
   process.env.DATABASE_URL = "postgresql://test:test@localhost/test";
-  process.env.TOKEN_SECRET_HEX = "a".repeat(64);
-  process.env.CSFLE_MASTER_KEY_HEX = "b".repeat(64);
+  process.env.TOKEN_SECRET_HEX =
+    "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2";
+  process.env.CSFLE_MASTER_KEY_HEX =
+    "f6e5d4c3b2a1f6e5d4c3b2a1f6e5d4c3b2a1f6e5d4c3b2a1f6e5d4c3b2a1f6e5";
 }
 
 describe("P4.3 — Production fail-fast config validation", () => {
@@ -105,13 +107,28 @@ describe("P4.3 — Production fail-fast config validation", () => {
     expect(() => loadConfig()).toThrow(/BACKUP_ENCRYPTION_KEY_HEX/);
   });
 
+  it("refuses to boot in production with placeholder TOKEN_SECRET_HEX (ZT-4)", async () => {
+    process.env.NODE_ENV = "production";
+    setBaseEnv();
+    process.env.TOKEN_SECRET_HEX = "0".repeat(64);
+    process.env.METRICS_AUTH_TOKEN = "secret-token";
+    process.env.CORS_ALLOWED_ORIGINS = "https://app.example.com";
+    process.env.REDIS_URI = "redis://localhost:6379";
+    process.env.BACKUP_ENCRYPTION_KEY_HEX =
+      "d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6";
+    process.env.BACKUP_REQUIRE_ENCRYPTION = "true";
+    const loadConfig = await loadFreshConfig();
+    expect(() => loadConfig()).toThrow(/placeholder value/);
+  });
+
   it("allows production boot when all prod-only env vars are set", async () => {
     process.env.NODE_ENV = "production";
     setBaseEnv();
     process.env.METRICS_AUTH_TOKEN = "secret-token";
     process.env.CORS_ALLOWED_ORIGINS = "https://app.example.com";
     process.env.REDIS_URI = "redis://localhost:6379";
-    process.env.BACKUP_ENCRYPTION_KEY_HEX = "c".repeat(64);
+    process.env.BACKUP_ENCRYPTION_KEY_HEX =
+      "d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6";
     process.env.BACKUP_REQUIRE_ENCRYPTION = "true";
     const loadConfig = await loadFreshConfig();
     expect(() => loadConfig()).not.toThrow();

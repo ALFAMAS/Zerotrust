@@ -14,6 +14,7 @@ import {
 } from "../../db/schema";
 import { auditLog, getLogger } from "../../logger";
 import { authMiddleware, requireAdmin } from "../../middleware/auth";
+import { requirePlan } from "../../middleware/requirePlan";
 import { revokeAllSessionsForUser, revokeSession } from "../../middleware/sessionControl";
 import { getSettings, type SaaSSettings, SettingsVersionConflictError, updateSettings } from "../../models/settings.model";
 import { invalidateUserCache } from "../../services/auth/userStateCache.service";
@@ -786,8 +787,8 @@ router.delete("/jit-grants/:id", async (c) => {
 
 // ── Audit Logs ───────────────────────────────────────────────────────────────
 
-// GET /audit-logs?page=1&limit=50&action=&actorId=
-router.get("/audit-logs", async (c) => {
+// GET /audit-logs?page=1&limit=50&action=&actorId= (Pro+ audit log export)
+router.get("/audit-logs", requirePlan("auditLog"), async (c) => {
   try {
     const { page, limit, offset } = parsePaginatedQuery(c.req.query(), {
       defaultLimit: 50,
@@ -820,8 +821,8 @@ router.get("/audit-logs", async (c) => {
   }
 });
 
-// GET /audit-logs/verify?limit=1000 — verify the tamper-evidence hash chain
-router.get("/audit-logs/verify", async (c) => {
+// GET /audit-logs/verify?limit=1000 — verify the tamper-evidence hash chain (Pro+)
+router.get("/audit-logs/verify", requirePlan("auditLog"), async (c) => {
   try {
     const limit = Math.min(parseInt(c.req.query("limit") || "1000", 10), 10000);
     const result = await verifyAuditChain(limit);

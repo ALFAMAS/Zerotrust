@@ -47,7 +47,7 @@ describe("WebhookStore persistence", () => {
         url: "https://hooks.example.test/zerotrust",
         secret: "whsec_test",
         events: ["user.created"],
-        tenantId: "tenant-1",
+        orgId: "00000000-0000-0000-0000-0000000000aa",
         active: true,
         headers: { "X-Custom": "yes" },
         retryPolicy: { maxRetries: 2, backoffMs: 500 },
@@ -60,7 +60,7 @@ describe("WebhookStore persistence", () => {
       url: "https://hooks.example.test/zerotrust",
       secret: "whsec_test",
       events: ["user.created"],
-      tenantId: "tenant-1",
+      orgId: "00000000-0000-0000-0000-0000000000aa",
       active: true,
       headers: { "X-Custom": "yes" },
       retryPolicy: { maxRetries: 2, backoffMs: 500 },
@@ -72,7 +72,7 @@ describe("WebhookStore persistence", () => {
         url: "https://hooks.example.test/zerotrust",
         secret: "whsec_test",
         events: ["user.created"],
-        tenantId: "tenant-1",
+        orgId: "00000000-0000-0000-0000-0000000000aa",
         active: true,
       })
     );

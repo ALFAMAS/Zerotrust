@@ -146,6 +146,7 @@ describe("admin read routes — read replica", () => {
 
   it("GET /admin/audit-logs uses getReadDb", async () => {
     const readDb = makeDb();
+    readDb.limit.mockResolvedValueOnce([{ plan: "pro", status: "active" }]);
     const app = await getApp(readDb);
     const { getReadDb } = await import("../db");
 

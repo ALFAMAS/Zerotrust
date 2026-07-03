@@ -15,31 +15,7 @@
 
 _Sourced from the 2026-07-04 senior-level Zero Trust SaaS audit (static code review). Does not duplicate shipped work in [`tdone.md`](./tdone.md) or closed items in [`docs/AUDIT.md`](./docs/AUDIT.md)._
 
-**Verification baseline (2026-07-04):** `bun run test` → 1003 API + 239 UI tests; nine repos under `src/db/repositories/`; SOC 2 observation window active (2026-07-04 — 2027-07-03).
-
----
-
-## Immediate (this week — security / compliance blockers)
-
-- [ ] **ZT-1** — **Critical** — Cross-tenant IDOR in webhook management API  
-  **Problem:** `GET /webhooks` returns every endpoint system-wide (including HMAC `secret`) when `tenantId` is omitted; `tenantId` is an unverified query/body param. `GET/PATCH/DELETE /webhooks/:id` and `POST /webhooks/:id/ping` perform pure ID lookups with no ownership check. Exploitable via the shipped UI (`/dashboard/webhooks`).  
-  **Fix:** Scope endpoints server-side from the caller's org membership (never from request-supplied `tenantId`); add ownership checks on every `:id` route; add regression test (org A cannot read/mutate org B's webhooks).  
-  **Paths:** `src/webhooks/routes.ts`, `src/webhooks/store.ts`, `packages/ui/src/lib/server-state/webhooks.ts`, `packages/ui/src/app/dashboard/webhooks/page.tsx`
-
-- [ ] **ZT-2** — **High** — Content-Security-Policy never sent in production  
-  **Problem:** `src/middleware/securityHeaders.ts` implements CSP/HSTS/frame-options and is unit-tested in isolation, but `src/api/server.ts` mounts Hono's bare `secureHeaders()` instead — no `Content-Security-Policy` header, weaker HSTS and `X-Frame-Options`. Undermines ADR 008's stated XSS compensating control for `localStorage` tokens.  
-  **Fix:** Replace or compose with `securityHeaders()` in `server.ts`; add integration test on the real app asserting `content-security-policy` is present.  
-  **Paths:** `src/api/server.ts`, `src/middleware/securityHeaders.ts`, `src/__tests__/middleware.test.ts`, `docs/adr/008-token-storage-design-revisit.md`
-
-- [ ] **CP-1** — **Critical** — SOC 2 risk register overstates data residency controls  
-  **Problem:** Risk R-006 ("Data residency violation") is marked `mitigated` citing `storageRegion`, geo-routing, and `canAccessRegion()` — but `canAccessRegion()`'s strict branch never runs (`residency` is not in config), fallback allows EU→US access, and `storageRegion` is a label only (single `DATABASE_URL` + one S3 config for the deployment).  
-  **Fix:** Immediately downgrade R-006 to `partial`/`open` in auditor-facing evidence; either implement real per-region storage routing or restate the product claim as logical region tagging only.  
-  **Paths:** `src/services/compliance/compliance.service.ts`, `src/services/ops/region.service.ts`, `src/db/schema.ts` (`organizations.storageRegion`), `docs/compliance/soc2-auditor-readiness.md`, `docs/compliance/evidence/2026/risk-assessment/2026-annual-risk-assessment.md`
-
-- [ ] **DQ-1** — **High** — Shipped `Dockerfile` does not start the API  
-  **Problem:** (1) `BUN_VERSION`/`NODE_VERSION` ARGs are never interpolated into `FROM` lines — stages use bare `bun`/`node` (effectively `:latest`), ignoring `.bun-version`. (2) Runtime `CMD` launches `src/index.ts` / `dist/index.js` (export barrel, no listener) instead of `dist/api/server.js` (what `package.json` `"start"` uses). `docker compose up` for the API service never binds a port.  
-  **Fix:** Interpolate version tags in `FROM`; point `CMD` at `src/api/server.ts` / `dist/api/server.js`; add CI job that builds the image and curls `/health`.  
-  **Paths:** `Dockerfile`, `src/index.ts`, `src/api/server.ts`, `package.json`, `docker-compose.yml`, `.bun-version`
+**Verification baseline (2026-07-04):** `bun run test` → 1080 API tests; nine repos under `src/db/repositories/`; SOC 2 observation window active (2026-07-04 — 2027-07-03). Immediate security/compliance blockers (ZT-1, ZT-2, CP-1, DQ-1) shipped — see [`tdone.md`](./tdone.md).
 
 ---
 
@@ -75,9 +51,9 @@ _Sourced from the 2026-07-04 senior-level Zero Trust SaaS audit (static code rev
   **Fix:** Reject all-zero / documented example values in production; optional compose healthcheck fail when placeholder detected with `NODE_ENV=production`.  
   **Paths:** `src/config/index.ts`, `docker-compose.yml`, `.env.example`, `src/__tests__/config.production.test.ts`
 
-- [ ] **ZT-3** — **Medium** — Bearer tokens in `localStorage` (revisit after ZT-2)  
-  **Problem:** Access + refresh tokens in `localStorage`; access token mirrored in a non-`httpOnly` cookie for RSC prefetch. Documented trade-off (ADR 008) but CSP compensating control is inactive (ZT-2).  
-  **Fix:** After ZT-2, evaluate ADR 008 Option C (in-memory access token + `httpOnly` refresh cookie) as a lower-cost intermediate step.  
+- [ ] **ZT-3** — **Medium** — Bearer tokens in `localStorage` (revisit after ZT-2 — CSP now active)  
+  **Problem:** Access + refresh tokens in `localStorage`; access token mirrored in a non-`httpOnly` cookie for RSC prefetch. Documented trade-off (ADR 008); CSP compensating control is now shipped (ZT-2).  
+  **Fix:** Evaluate ADR 008 Option C (in-memory access token + `httpOnly` refresh cookie) as a lower-cost intermediate step.  
   **Paths:** `packages/ui/src/lib/auth.ts`, `docs/adr/008-token-storage-design-revisit.md`, `docs/adr/006-token-storage-and-rotation.md`
 
 - [ ] **MT-2** — **Medium** — Cross-tenant JIT uses unvalidated free-text tenant IDs  
@@ -86,9 +62,9 @@ _Sourced from the 2026-07-04 senior-level Zero Trust SaaS audit (static code rev
   **Paths:** `src/db/schema.ts`, `src/jit/routes.ts`, `src/jit/`
 
 - [ ] **MT-3** — **Low** — Inconsistent tenant-scoping columns  
-  **Problem:** Most tables use `orgId uuid` FK to `organizations`; `webhook_endpoints.tenant_id` is nullable `text` with no FK — two non-interoperable conventions.  
-  **Fix:** Standardize on `orgId uuid references organizations.id`; migrate `webhook_endpoints.tenant_id` as part of ZT-1 fix.  
-  **Paths:** `src/db/schema.ts`, `src/webhooks/store.ts`, `drizzle/` (new migration)
+  **Problem:** Most tables use `orgId uuid` FK to `organizations`; `webhook_endpoints` now has `org_id` FK (migration `0030`, ZT-1) but legacy nullable `tenant_id` text remains for backfill compat.  
+  **Fix:** Drop `tenant_id` after all rows backfilled and dispatch paths use `org_id` only.  
+  **Paths:** `src/db/schema.ts`, `src/webhooks/store.ts`, `drizzle/` (cleanup migration)
 
 ---
 

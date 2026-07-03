@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 import { Hono } from "hono";
 import { compress } from "hono/compress";
 import { cors } from "hono/cors";
-import { secureHeaders } from "hono/secure-headers";
+import { securityHeaders } from "../middleware/securityHeaders";
 import { initializezerotrust } from "..";
 import { initSentry } from "../instrument";
 import jitRoutes from "../jit/routes";
@@ -54,7 +54,6 @@ import regionRoutes from "./routes/region.routes";
 import searchRoutes from "./routes/search.routes";
 import sessionRoutes from "./routes/session.routes";
 import supportRoutes from "./routes/support.routes";
-import tenantRoutes from "./routes/tenant.routes";
 import unsubscribeRoutes from "./routes/unsubscribe.routes";
 import verificationRoutes from "./routes/verification.routes";
 import walletRoutes from "./routes/wallet.routes";
@@ -109,7 +108,7 @@ export async function createServer() {
   }
 
   app.use("*", cors(corsOptionsFromEnv()));
-  app.use("*", secureHeaders());
+  app.use("*", securityHeaders());
   app.use("*", inputSanitizationMiddleware());
   // Compress JSON, HTML, and text responses to reduce transfer time for dashboard/API reads.
   // Bun is pinned to >= 1.3, where `CompressionStream` is available.
@@ -163,8 +162,6 @@ export async function createServer() {
   // ─── Cross-tenant JIT access routes ───────────────────────────────────────
   // Request + admin approval for temporary elevated access across tenants.
   app.route("/jit/cross-tenant", jitRoutes);
-  // Tenant management (CRUD + per-tenant SSO config + plans).
-  app.route("/admin/tenants", tenantRoutes);
 
   // ─── Anomaly admin routes ─────────────────────────────────────────────────
   app.route("/admin/anomaly", anomalyRoutes);

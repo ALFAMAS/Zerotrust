@@ -21,6 +21,11 @@ import {
   usersTable,
 } from "../../db/schema";
 import { getLogger } from "../../logger";
+import {
+  clearRefreshTokenCookie,
+  readRefreshTokenFromRequest,
+  setRefreshTokenCookie,
+} from "../../shared/authCookies";
 import { authMiddleware } from "../../middleware/auth";
 import { sensitiveReverification } from "../../middleware/continuousVerification";
 import {
@@ -294,15 +299,15 @@ async function issueAuthenticatedSession(
     userAgent: c.req.header("user-agent"),
   });
 
+  setRefreshTokenCookie(c, refreshTokenPlain, cfg.session.refreshTokenTTL);
+
   return {
     body: {
       accessToken,
-      refreshToken: refreshTokenPlain,
       expiresIn: cfg.session.defaultTTL,
       tokenType: "Bearer",
     },
-    // Exposed for callers (OAuth callback) that must persist the session id
-    // alongside the issued tokens. Not part of the public login response.
+    refreshTokenPlain,
     sessionId: session.id,
   };
 }
@@ -743,7 +748,8 @@ router.post(
   requireProofOfPossession(),
   async (c) => {
     try {
-      const { refreshToken } = await c.req.json();
+      const body = await c.req.json().catch(() => ({}));
+      const refreshToken = readRefreshTokenFromRequest(c, body.refreshToken);
       if (!refreshToken) {
         return c.json({ error: "INVALID_REQUEST", message: "refreshToken required" }, 400);
       }
@@ -828,9 +834,10 @@ router.post(
         },
       });
 
+      setRefreshTokenCookie(c, newRefreshPlain, cfg.session.refreshTokenTTL);
+
       return c.json({
         accessToken,
-        refreshToken: newRefreshPlain,
         expiresIn: cfg.session.defaultTTL,
         tokenType: "Bearer",
       });
@@ -839,6 +846,12 @@ router.post(
     }
   }
 );
+
+// POST /logout — clear httpOnly refresh cookie (ADR 008 Option C)
+router.post("/logout", async (c) => {
+  clearRefreshTokenCookie(c);
+  return c.json({ success: true });
+});
 
 // POST /oauth/state
 router.post("/oauth/state", rateLimit({ points: 20, windowSecs: 60 }), async (c) => {
@@ -1014,7 +1027,7 @@ router.get("/oauth/:provider/callback", rateLimit({ points: 20, windowSecs: 60 }
     // Mint the session through the shared helper so OAuth logins get the same
     // device fingerprinting, new-device alerting, and max-device enforcement as
     // password logins.
-    const { body, sessionId } = await issueAuthenticatedSession(c, user);
+    const { body, sessionId, refreshTokenPlain } = await issueAuthenticatedSession(c, user);
 
     // Hand the tokens off via a short-lived, one-time exchange code rather than
     // putting them in the redirect URL (browser history, logs, Referer). The SPA
@@ -1026,7 +1039,7 @@ router.get("/oauth/:provider/callback", rateLimit({ points: 20, windowSecs: 60 }
       userId: user.id,
       sessionId,
       accessToken: body.accessToken,
-      refreshToken: body.refreshToken,
+      refreshToken: refreshTokenPlain,
       expiresAt: new Date(Date.now() + EXCHANGE_CODE_TTL_SECS * 1000),
     });
 
@@ -1070,9 +1083,11 @@ router.post("/oauth/exchange", rateLimit({ points: 10, windowSecs: 60 }), async 
       .set({ usedAt: new Date() })
       .where(eq(oauthExchangeCodesTable.code, code));
 
+    const cfg = getConfig();
+    setRefreshTokenCookie(c, row.refreshToken, cfg.session.refreshTokenTTL);
+
     return c.json({
       accessToken: row.accessToken,
-      refreshToken: row.refreshToken,
     });
   } catch (err) {
     return internalError(c, logger, "OAuth exchange error", err, "Token exchange failed");

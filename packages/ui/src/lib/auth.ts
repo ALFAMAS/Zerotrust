@@ -1,7 +1,15 @@
-const ACCESS_TOKEN_KEY = "za_access_token";
-const REFRESH_TOKEN_KEY = "za_refresh_token";
-/** Cookie mirror for RSC server prefetch (see docs/ui-http-client.md). */
+/**
+ * ADR 008 Option C — in-memory access token + httpOnly refresh cookie.
+ * Refresh tokens never touch localStorage or JS-readable storage.
+ */
+
 const ACCESS_TOKEN_COOKIE = "za_access_token";
+
+/** Legacy keys — cleared on logout for users upgrading from Option A. */
+const LEGACY_ACCESS_KEY = "za_access_token";
+const LEGACY_REFRESH_KEY = "za_refresh_token";
+
+let accessTokenMemory: string | null = null;
 
 function setAccessTokenCookie(accessToken: string): void {
   // biome-ignore lint/suspicious/noDocumentCookie: first-party auth cookie for RSC prefetch
@@ -15,28 +23,60 @@ function clearAccessTokenCookie(): void {
 
 export function getToken(): string | null {
   if (typeof window === "undefined") return null;
-  return localStorage.getItem(ACCESS_TOKEN_KEY);
+  return accessTokenMemory;
 }
 
+/** Refresh token is httpOnly — not readable from JS (returns null by design). */
 export function getRefreshToken(): string | null {
-  if (typeof window === "undefined") return null;
-  return localStorage.getItem(REFRESH_TOKEN_KEY);
+  return null;
 }
 
-export function setToken(accessToken: string, refreshToken?: string): void {
+export function setToken(accessToken: string, _refreshToken?: string): void {
   if (typeof window === "undefined") return;
-  localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
-  if (refreshToken) localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
+  accessTokenMemory = accessToken;
+  localStorage.removeItem(LEGACY_ACCESS_KEY);
+  localStorage.removeItem(LEGACY_REFRESH_KEY);
   setAccessTokenCookie(accessToken);
 }
 
-export function clearToken(): void {
+export async function clearToken(): Promise<void> {
   if (typeof window === "undefined") return;
-  localStorage.removeItem(ACCESS_TOKEN_KEY);
-  localStorage.removeItem(REFRESH_TOKEN_KEY);
+  accessTokenMemory = null;
+  localStorage.removeItem(LEGACY_ACCESS_KEY);
+  localStorage.removeItem(LEGACY_REFRESH_KEY);
   clearAccessTokenCookie();
+  const base = process.env.NEXT_PUBLIC_ZEROTRUST_URL || "http://localhost:1337";
+  try {
+    await fetch(`${base}/auth/logout`, { method: "POST", credentials: "include" });
+  } catch {
+    // best-effort — cookie may already be gone
+  }
 }
 
 export function isAuthenticated(): boolean {
   return getToken() !== null;
+}
+
+/** Attempt silent refresh via httpOnly cookie (page reload bootstrap). */
+export async function bootstrapAccessToken(): Promise<string | null> {
+  if (typeof window === "undefined") return null;
+  if (accessTokenMemory) return accessTokenMemory;
+  const base = process.env.NEXT_PUBLIC_ZEROTRUST_URL || "http://localhost:1337";
+  try {
+    const res = await fetch(`${base}/auth/token/refresh`, {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({}),
+    });
+    if (!res.ok) return null;
+    const data = (await res.json()) as { accessToken?: string };
+    if (data.accessToken) {
+      setToken(data.accessToken);
+      return data.accessToken;
+    }
+  } catch {
+    return null;
+  }
+  return null;
 }

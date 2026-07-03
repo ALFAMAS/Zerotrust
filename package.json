@@ -39,6 +39,7 @@
     "load:auth-cache": "k6 run tests/load/auth-cache.k6.js",
     "load:login": "k6 run tests/load/login.k6.js",
     "boundaries:check": "bun run scripts/check-boundaries.ts",
+    "org-scoping:check": "bun run scripts/check-org-scoping.ts",
     "migrations:check": "bun run scripts/check-destructive-migrations.ts",
     "type-check": "node ./node_modules/typescript/lib/tsc.js --noEmit",
     "prepare": "bunx husky",

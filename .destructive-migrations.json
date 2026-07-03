@@ -35,6 +35,26 @@
       "file": "drizzle/0024_drop_enterprise_federation.sql",
       "pattern": "DROP COLUMN",
       "reason": "Pre-existing destructive migration (pre-P3.5 baseline)"
+    },
+    {
+      "file": "drizzle/0032_drop_tenants.sql",
+      "pattern": "DROP TABLE",
+      "reason": "ARCH-1 — remove orphaned tenants table; organizations is the tenancy boundary"
+    },
+    {
+      "file": "drizzle/0033_jit_org_ids.sql",
+      "pattern": "DROP COLUMN",
+      "reason": "MT-2 — replace free-text JIT tenant IDs with org FKs"
+    },
+    {
+      "file": "drizzle/0034_drop_webhook_tenant_id.sql",
+      "pattern": "DROP COLUMN",
+      "reason": "MT-3 — webhook isolation uses org_id only"
+    },
+    {
+      "file": "drizzle/0034_drop_webhook_tenant_id.sql",
+      "pattern": "DROP INDEX",
+      "reason": "MT-3 — drop legacy tenant_id index after column removal"
     }
   ]
 }

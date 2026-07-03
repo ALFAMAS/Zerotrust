@@ -142,9 +142,9 @@ async function retryDelivery(
 export async function dispatchEvent(
   event: WebhookEventType,
   payload: Record<string, unknown>,
-  tenantId?: string
+  orgId?: string
 ): Promise<void> {
-  const endpoints = await webhookStore.getEndpointsForEvent(event, tenantId);
+  const endpoints = await webhookStore.getEndpointsForEvent(event, orgId);
 
   await Promise.allSettled(
     endpoints.map(async (endpoint) => {

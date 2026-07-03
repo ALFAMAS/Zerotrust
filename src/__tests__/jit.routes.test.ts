@@ -13,6 +13,27 @@ vi.mock("../middleware/auth", () => ({
   },
 }));
 
+const ORG_A = "00000000-0000-0000-0000-000000000001";
+const ORG_B = "00000000-0000-0000-0000-000000000002";
+
+vi.mock("../db", () => ({
+  getReadDb: () => ({
+    select: () => ({
+      from: () => ({
+        where: () => {
+          const membershipRows = [{ orgId: ORG_A, role: "member" }];
+          return {
+            limit: async () => [{ role: "admin" }],
+            then(resolve: (v: typeof membershipRows) => void) {
+              resolve(membershipRows);
+            },
+          };
+        },
+      }),
+    }),
+  }),
+}));
+
 // The store is DB-backed in production; these tests exercise the route layer
 // (validation, role guards, state transitions, status codes), so we back it with
 // a faithful in-memory fake — no database required.
@@ -22,8 +43,8 @@ vi.mock("../jit/cross-tenant", () => {
   return {
     requestCrossTenantAccess: async (
       requestorId: string,
-      sourceTenantId: string,
-      targetTenantId: string,
+      requestorOrgId: string,
+      targetOrgId: string,
       targetResource: string,
       justification: string,
       ttlSeconds: number
@@ -31,9 +52,9 @@ vi.mock("../jit/cross-tenant", () => {
       const id = `jit-${++seq}`;
       const rec = {
         id,
-        requestorId,
-        sourceTenantId,
-        targetTenantId,
+        requestorUserId: requestorId,
+        requestorOrgId,
+        targetOrgId,
         targetResource,
         justification,
         status: "pending",
@@ -44,9 +65,10 @@ vi.mock("../jit/cross-tenant", () => {
       return rec;
     },
     crossTenantJITStore: {
-      listByRequestor: async (userId: string) =>
-        [...store.values()].filter((r) => r.requestorId === userId),
-      listByTarget: async () => [...store.values()],
+      listByRequestor: async (userId: string, orgId: string) =>
+        [...store.values()].filter((r) => r.requestorUserId === userId && r.requestorOrgId === orgId),
+      listByTarget: async (orgId: string) =>
+        [...store.values()].filter((r) => r.targetOrgId === orgId),
       get: async (id: string) => store.get(id) ?? null,
       approve: async (id: string, approverId: string) => {
         const r = store.get(id);
@@ -91,7 +113,8 @@ function req(
 }
 
 const validBody = {
-  targetTenantId: "tenant-b",
+  targetOrgId: ORG_B,
+  requestorOrgId: ORG_A,
   targetResource: "admin:users:read",
   justification: "Investigating a support ticket",
 };
@@ -103,7 +126,7 @@ describe("Cross-tenant JIT routes", () => {
   });
 
   it("returns 400 when required fields are missing", async () => {
-    const res = await req("/", { method: "POST", body: { targetTenantId: "tenant-b" }, userId: REQUESTOR });
+    const res = await req("/", { method: "POST", body: { targetOrgId: "x" }, userId: REQUESTOR });
     expect(res.status).toBe(400);
     expect((await res.json()).error).toBe("INVALID_REQUEST");
   });
@@ -115,7 +138,7 @@ describe("Cross-tenant JIT routes", () => {
     expect(created.status).toBe("pending");
     expect(created.id).toBeTruthy();
 
-    const listRes = await req("/", { userId: REQUESTOR });
+    const listRes = await req(`/?orgId=${ORG_A}`, { userId: REQUESTOR });
     expect(listRes.status).toBe(200);
     const mine = await listRes.json();
     expect(mine.some((r: any) => r.id === created.id)).toBe(true);
@@ -132,12 +155,12 @@ describe("Cross-tenant JIT routes", () => {
   });
 
   it("hides the incoming inbox from non-admins", async () => {
-    const res = await req("/incoming", { userId: REQUESTOR, roles: "user" });
+    const res = await req(`/incoming?orgId=${ORG_B}`, { userId: REQUESTOR, roles: "user" });
     expect(res.status).toBe(403);
   });
 
   it("lets an admin view the incoming inbox", async () => {
-    const res = await req("/incoming", { userId: ADMIN, roles: "admin" });
+    const res = await req(`/incoming?orgId=${ORG_B}`, { userId: ADMIN, roles: "admin" });
     expect(res.status).toBe(200);
     expect(Array.isArray(await res.json())).toBe(true);
   });

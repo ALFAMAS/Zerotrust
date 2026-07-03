@@ -52,7 +52,7 @@ Month: 2026-07
 Reviewer: Mas Yasin Arafat
 Readiness status: Observation window started; pre-engagement evidence complete
 Completed evidence: E-001–E-013; engagement letter, system description, window confirmation
-Open blockers: None
+Open blockers: R-006 data residency (logical tagging only; physical sharding tracked as CP-1 full in todo.md)
 Auditor requests: Kickoff complete; first monthly portal submission due August
 Next actions: Monthly readiness record; Q4 quarterly cycle by 2026-10-01
 ```

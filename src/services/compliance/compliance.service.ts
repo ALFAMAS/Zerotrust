@@ -289,7 +289,7 @@ export async function seedRiskAssessment(year: number): Promise<void> {
       impact: 5,
       riskScore: 10,
       treatment: "mitigate",
-      mitigation: "CSFLE field encryption, data residency controls, access reviews, audit logging",
+      mitigation: "CSFLE field encryption, access reviews, audit logging; logical org region tagging (see R-006)",
       owner: "dpo",
       status: "mitigated",
     },
@@ -303,9 +303,10 @@ export async function seedRiskAssessment(year: number): Promise<void> {
       impact: 4,
       riskScore: 8,
       treatment: "mitigate",
-      mitigation: "Per-org storageRegion, geo-routing middleware, canAccessRegion enforcement",
+      mitigation:
+        "Logical org storageRegion label + geo-routing hints only; single shared Postgres/S3 per deployment — physical per-region sharding not implemented (tracked as CP-1 full)",
       owner: "dpo",
-      status: "mitigated",
+      status: "partial",
     },
     {
       year,

@@ -42,7 +42,6 @@ const navItems: NavItem[] = [
   { href: "/admin/settings/auth", icon: KeyRound, label: "Auth Settings" },
   { href: "/admin/jit", icon: ShieldQuestion, label: "JIT Requests" },
   { href: "/admin/jit-grants", icon: Shield, label: "JIT Grants" },
-  { href: "/admin/tenants", icon: Building2, label: "Tenants" },
   { href: "/admin/regions", icon: Globe2, label: "Data Residency" },
   { href: "/admin/search", icon: Search, label: "Search Index" },
   { href: "/admin/content", icon: FileText, label: "Content" },

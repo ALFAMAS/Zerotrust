@@ -1,0 +1,38 @@
+{
+  "orgScopedTables": [
+    "webhookEndpointsTable",
+    "organizationMembersTable",
+    "orgCustomRolesTable",
+    "orgSecurityPoliciesTable",
+    "trustedDevicesTable",
+    "supportTicketsTable",
+    "taxExemptionsTable"
+  ],
+  "scanDirs": ["src/webhooks", "src/api/routes"],
+  "allowlist": {
+    "src/webhooks/store.ts": "orgScopeWhere / listEndpointsForOrgs centralizes org filters",
+    "src/api/routes/org.routes.ts": "membership-scoped org routes",
+    "src/api/routes/admin.routes.ts": "platform admin — intentional cross-org reads",
+    "src/api/routes/admin-tools.routes.ts": "platform admin tools",
+    "src/api/routes/billing.routes.ts": "billing scoped by authenticated user/org subscription",
+    "src/api/routes/billing.webhooks.ts": "Stripe webhook ingress — no org context",
+    "src/api/routes/gdpr.routes.ts": "exports actor's own audit rows only",
+    "src/api/routes/search.routes.ts": "search validates org membership in handler",
+    "src/api/routes/support.routes.ts": "tickets scoped by userId/orgId in repository",
+    "src/api/routes/globalization.routes.ts": "tax endpoints validate org membership",
+    "src/api/routes/passkey.routes.ts": "optional orgId with membership assert",
+    "src/api/routes/api-keys.routes.ts": "keys scoped by userId with optional org membership check"
+  },
+  "orgPredicatePatterns": [
+    "orgScopeWhere",
+    "listEndpointsForOrgs",
+    "getUserOrgIds",
+    "resolveOrgForWebhookCreate",
+    "requireMember",
+    "requireAdmin",
+    "requireOwner",
+    "organizationMembersTable.orgId",
+    "eq\\([^)]*orgId",
+    "inArray\\([^)]*orgId"
+  ]
+}

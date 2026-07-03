@@ -202,9 +202,10 @@ export async function getOrgBranding(orgId: string): Promise<ResolvedBranding> {
 }
 
 // `residency.strictMode` is not part of the config schema today (no env var
-// wires it up) — this typed extension documents the extension point honestly
-// instead of hiding it behind `as any`. The check below is currently always
-// false (falls through to the EU/APAC rule) until a real config field lands.
+// wires it up). `organizations.storageRegion` is a logical label for routing
+// hints and compliance reporting — it does not select a separate database or S3
+// bucket in the default single-region deployment. Physical per-region storage is
+// tracked as CP-1 (full) in todo.md.
 interface ResidencyConfigExtension {
   residency?: { strictMode?: boolean };
 }

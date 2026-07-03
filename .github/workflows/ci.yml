@@ -32,6 +32,8 @@ jobs:
         # so the gate never actually ran.
         run: bun audit --prod --audit-level=high
       - run: bun run type-check
+      - name: Org-scoping lint (MT-1)
+        run: bun run org-scoping:check
 
   test:
     name: Tests
@@ -102,6 +104,69 @@ jobs:
         with:
           name: coverage-report
           path: coverage/
+
+  docker-smoke:
+    name: Docker image smoke test
+    runs-on: ubuntu-latest
+    needs: [test]
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: zerotrust
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: zerotrust_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql://zerotrust:password@localhost:5432/zerotrust_test
+      REDIS_URI: redis://localhost:6379
+      TOKEN_SECRET_HEX: a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2
+      CSFLE_MASTER_KEY_HEX: f6e5d4c3b2a1f6e5d4c3b2a1f6e5d4c3b2a1f6e5d4c3b2a1f6e5d4c3b2a1f6e5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: .bun-version
+      - run: bun install --frozen-lockfile
+      - name: Apply database schema
+        run: bun run db:push
+      - name: Build production API image
+        run: docker build -t zerotrust-api:ci .
+      - name: Run API container and probe /health
+        run: |
+          docker run -d --name zerotrust-api-smoke \
+            -e DATABASE_URL="${DATABASE_URL}" \
+            -e REDIS_URI="${REDIS_URI}" \
+            -e TOKEN_SECRET_HEX="${TOKEN_SECRET_HEX}" \
+            -e CSFLE_MASTER_KEY_HEX="${CSFLE_MASTER_KEY_HEX}" \
+            -e WORKER_MODE=true \
+            -e PORT=3000 \
+            -p 3000:3000 \
+            zerotrust-api:ci
+          for i in $(seq 1 45); do
+            if curl -sf http://localhost:3000/health; then
+              echo "API healthy"
+              exit 0
+            fi
+            sleep 2
+          done
+          docker logs zerotrust-api-smoke
+          exit 1
 
   security-scan:
     name: SAST & Dependency Scans

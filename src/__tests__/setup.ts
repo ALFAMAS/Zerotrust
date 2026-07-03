@@ -23,6 +23,10 @@ function ensureEnv(name: string, value: string): void {
 
 ensureEnv("TOKEN_SECRET_HEX", TEST_KEY);
 ensureEnv("CSFLE_MASTER_KEY_HEX", TEST_KEY);
+ensureEnv(
+  "DATABASE_URL",
+  process.env.DATABASE_URL ?? "postgresql://zerotrust:password@localhost:5432/zerotrust_test"
+);
 
 if (!process.env.NODE_ENV) {
   process.env.NODE_ENV = "test";

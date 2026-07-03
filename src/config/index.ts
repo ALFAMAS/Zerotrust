@@ -1,4 +1,5 @@
 import type { zerotrustConfig } from "../shared/types";
+import { isPlaceholderSecretHex } from "../shared/placeholderSecrets";
 
 function generateSecureKey(byteLength: number): string {
   if (typeof crypto === "undefined") {
@@ -121,6 +122,21 @@ function validateConfig(config: zerotrustConfig): void {
 
   if (!config.security.csfleMasterKeyHex || config.security.csfleMasterKeyHex.length < 64) {
     errors.push("CSFLE_MASTER_KEY_HEX must be at least 32 bytes (64 hex chars)");
+  }
+
+  if (process.env.NODE_ENV === "production") {
+    for (const [name, value] of [
+      ["TOKEN_SECRET_HEX", config.security.tokenSecretHex],
+      ["CSFLE_MASTER_KEY_HEX", config.security.csfleMasterKeyHex],
+      ["BACKUP_ENCRYPTION_KEY_HEX", process.env.BACKUP_ENCRYPTION_KEY_HEX],
+      ["METRICS_AUTH_TOKEN", process.env.METRICS_AUTH_TOKEN],
+    ] as const) {
+      if (value && isPlaceholderSecretHex(value)) {
+        errors.push(
+          `${name} is a documented placeholder value and cannot be used in production — generate with: openssl rand -hex 32`
+        );
+      }
+    }
   }
 
   let hasValidOAuth = false;

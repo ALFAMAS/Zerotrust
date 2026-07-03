@@ -12,7 +12,6 @@ import {
   unique,
   uuid,
 } from "drizzle-orm/pg-core";
-import type { OidcConfig, SamlConfig, TenantSettings } from "../models/tenant.model";
 
 /** Per-organization branding overrides (white-label). */
 export interface OrgBranding {
@@ -290,11 +289,17 @@ export const oauthExchangeCodesTable = pgTable("oauth_exchange_codes", {
 
 // Cross-tenant JIT (just-in-time) privilege-escalation requests. Durable so
 // approvals + grants survive restarts and provide an audit trail.
-export const crossTenantJITRequestsTable = pgTable("cross_tenant_jit_requests", {
+export const crossTenantJITRequestsTable = pgTable(
+  "cross_tenant_jit_requests",
+  {
   id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
   requestorUserId: uuid("requestor_user_id").notNull(),
-  requestorTenantId: text("requestor_tenant_id").notNull().default("default"),
-  targetTenantId: text("target_tenant_id").notNull(),
+  requestorOrgId: uuid("requestor_org_id")
+    .notNull()
+    .references(() => organizationsTable.id, { onDelete: "cascade" }),
+  targetOrgId: uuid("target_org_id")
+    .notNull()
+    .references(() => organizationsTable.id, { onDelete: "cascade" }),
   targetResource: text("target_resource").notNull(),
   justification: text("justification").notNull(),
   ttlSeconds: integer("ttl_seconds").notNull(),
@@ -304,7 +309,12 @@ export const crossTenantJITRequestsTable = pgTable("cross_tenant_jit_requests", 
   approvedAt: timestamp("approved_at", { withTimezone: true }),
   expiresAt: timestamp("expires_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
-});
+  },
+  (t) => ({
+    crossTenantJitRequestorOrgIdx: index("cross_tenant_jit_requestor_org_idx").on(t.requestorOrgId),
+    crossTenantJitTargetOrgIdx: index("cross_tenant_jit_target_org_idx").on(t.targetOrgId),
+  })
+);
 
 // Trusted federation (RFC 8693 token-exchange) providers. Durable registry so
 // providers configured via the admin UI persist across restarts.
@@ -725,27 +735,6 @@ export const usageCountersTable = pgTable(
   })
 );
 
-// ── Tenants (multi-tenancy: CRUD + per-tenant SSO config + plans) ──────────────
-
-export const tenantsTable = pgTable("tenants", {
-  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
-  slug: text("slug").notNull().unique(),
-  name: text("name").notNull(),
-  displayName: text("display_name").notNull(),
-  status: text("status").notNull().default("active"),
-  plan: text("plan").notNull().default("free"),
-  settings: jsonb("settings")
-    .$type<TenantSettings>()
-    .notNull()
-    .default(
-      sql`'{"allowedDomains":[],"enforceSSO":false,"mfaRequired":false,"sessionTTL":3600,"maxUsers":100,"allowedCountries":[]}'::jsonb`
-    ),
-  oidcConfig: jsonb("oidc_config").$type<OidcConfig>(),
-  samlConfig: jsonb("saml_config").$type<SamlConfig>(),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().default(sql`now()`),
-});
-
 // ── Feature flags ─────────────────────────────────────────────────────────────
 
 // Web Push subscriptions (RFC 8030/8291). One row per browser/device push
@@ -796,7 +785,7 @@ export const webhookEndpointsTable = pgTable(
   "webhook_endpoints",
   {
     id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
-    tenantId: text("tenant_id"),
+    orgId: uuid("org_id").references(() => organizationsTable.id, { onDelete: "cascade" }),
     url: text("url").notNull(),
     secret: text("secret").notNull(),
     events: jsonb("events").notNull().default(sql`'[]'::jsonb`),
@@ -809,7 +798,7 @@ export const webhookEndpointsTable = pgTable(
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().default(sql`now()`),
   },
   (t) => ({
-    webhookEndpointsTenantIdx: index("webhook_endpoints_tenant_idx").on(t.tenantId),
+    webhookEndpointsOrgIdx: index("webhook_endpoints_org_idx").on(t.orgId),
     webhookEndpointsActiveIdx: index("webhook_endpoints_active_idx").on(t.active),
     webhookEndpointsCreatedIdx: index("webhook_endpoints_created_idx").on(t.createdAt),
   })

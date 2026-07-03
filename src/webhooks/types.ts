@@ -22,7 +22,7 @@ export interface WebhookEndpoint {
   url: string;
   secret: string; // HMAC-SHA256 signing secret
   events: WebhookEventType[];
-  tenantId?: string;
+  orgId?: string;
   active: boolean;
   createdAt: Date;
   headers?: Record<string, string>; // custom headers to include

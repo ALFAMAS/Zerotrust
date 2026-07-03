@@ -10,6 +10,8 @@ import {
 import { supportTicketMessagesTable, supportTicketsTable } from "../../db/schema";
 import { getLogger } from "../../logger";
 import { authMiddleware } from "../../middleware/auth";
+import { resolvePlan } from "../../middleware/requirePlan";
+import { planAllows } from "../../shared/plans";
 import { rateLimit } from "../../middleware/rateLimiting";
 import { internalError } from "../../shared/httpErrors";
 import { hasAnyRole } from "../../shared/roles";
@@ -43,6 +45,16 @@ router.post("/", rateLimit({ points: 20, windowSecs: 3600 }), async (c) => {
   const parsed = createSchema.safeParse(body);
   if (!parsed.success)
     return c.json({ error: "INVALID_REQUEST", issues: parsed.error.issues }, 400);
+
+  if (parsed.data.priority === "high") {
+    const plan = await resolvePlan(user.id, parsed.data.orgId);
+    if (!planAllows(plan, "prioritySupport")) {
+      return c.json(
+        { error: "PLAN_REQUIRED", requiredFeature: "prioritySupport", currentPlan: plan },
+        403
+      );
+    }
+  }
 
   try {
     const { ticket, message } = await createSupportTicketWithMessage({

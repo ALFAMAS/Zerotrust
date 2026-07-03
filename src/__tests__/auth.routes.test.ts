@@ -399,7 +399,7 @@ describe("POST /login", () => {
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.accessToken).toBeTruthy();
-    expect(body.refreshToken).toBeTruthy();
+    expect(body.refreshToken).toBeUndefined();
     expect(body.tokenType).toBe("Bearer");
     expect(body.expiresIn).toBe(3600);
   });
@@ -560,7 +560,7 @@ describe("POST /login with MFA enabled + POST /login/mfa", () => {
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.accessToken).toBeTruthy();
-    expect(body.refreshToken).toBeTruthy();
+    expect(body.refreshToken).toBeUndefined();
     expect(body.tokenType).toBe("Bearer");
   });
 
@@ -913,7 +913,7 @@ describe("POST /token/refresh", () => {
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.accessToken).toBeTruthy();
-    expect(body.refreshToken).toBeTruthy();
+    expect(body.refreshToken).toBeUndefined();
     expect(body.tokenType).toBe("Bearer");
     expect(rotateRefreshToken).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -1204,7 +1204,7 @@ describe("POST /oauth/exchange", () => {
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.accessToken).toBe("at");
-    expect(body.refreshToken).toBe("rt");
+    expect(body.refreshToken).toBeUndefined();
   });
 });
 

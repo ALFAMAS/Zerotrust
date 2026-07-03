@@ -1,70 +1,73 @@
 # Multi-stage Dockerfile supporting both Bun and Node.js
 # Build with: docker build -t zerotrust:latest .
-# Build with Node: docker build -t zerotrust:node --build-arg RUNTIME=node .
+# Build with Node runtime: docker build -t zerotrust:node --build-arg RUNTIME=node .
 
-ARG RUNTIME=bun
-ARG BUN_VERSION=1.1.0
+ARG BUN_VERSION=1.3.14
 ARG NODE_VERSION=20-alpine
+ARG RUNTIME=bun
 
 # ─── Stage 1: Builder ────────────────────────────────────────────────────────
 
-FROM ${RUNTIME} AS builder
+FROM oven/bun:${BUN_VERSION} AS builder
 
 WORKDIR /app
 
-# Copy package files
 COPY package.json bun.lockb* package-lock.json* ./
 
-# Install dependencies
-RUN if [ "${RUNTIME}" = "bun" ]; then \
-      bun install --frozen-lockfile; \
-    else \
-      npm ci; \
-    fi
+RUN bun install --frozen-lockfile
 
-# Copy source code
 COPY . .
 
-# Build TypeScript
-RUN if [ "${RUNTIME}" = "bun" ]; then \
-      bun run build; \
-    else \
-      npm run build; \
-    fi
+RUN bun run build
 
-# ─── Stage 2: Runtime ───────────────────────────────────────────────────────
+# ─── Stage 2: Runtime (Bun) ───────────────────────────────────────────────────
 
-FROM ${RUNTIME}
+FROM oven/bun:${BUN_VERSION} AS runtime-bun
 
 WORKDIR /app
 
-# Copy built application from builder
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
 COPY package.json ./
 
-# Create non-root user for security
 RUN useradd -m -u 1000 zerotrust && chown -R zerotrust:zerotrust /app
 USER zerotrust
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-  CMD if [ "${RUNTIME}" = "bun" ]; then \
-        bun fetch http://localhost:3000/health || exit 1; \
-      else \
-        node -e "require('http').get('http://localhost:3000/health', r => { process.exit(r.statusCode !== 200 ? 1 : 0); })"; \
-      fi
-
-# Expose port
-EXPOSE 3000
-
-# Set environment
 ENV NODE_ENV=production
 ENV LOG_FORMAT=json
+ENV PORT=3000
 
-# Start application
-CMD if [ "${RUNTIME}" = "bun" ]; then \
-      bun run --hot src/index.ts; \
-    else \
-      node dist/index.js; \
-    fi
+EXPOSE 3000
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
+  CMD bun -e "fetch('http://127.0.0.1:' + (process.env.PORT || '3000') + '/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"
+
+CMD ["bun", "dist/api/server.js"]
+
+# ─── Stage 3: Runtime (Node) ──────────────────────────────────────────────────
+
+FROM node:${NODE_VERSION} AS runtime-node
+
+WORKDIR /app
+
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/node_modules ./node_modules
+COPY package.json ./
+
+RUN adduser -D -u 1000 zerotrust && chown -R zerotrust:zerotrust /app
+USER zerotrust
+
+ENV NODE_ENV=production
+ENV LOG_FORMAT=json
+ENV PORT=3000
+
+EXPOSE 3000
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
+  CMD node -e "require('http').get('http://127.0.0.1:' + (process.env.PORT || '3000') + '/health', r => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"
+
+CMD ["node", "dist/api/server.js"]
+
+# ─── Final stage (select via --build-arg RUNTIME=bun|node) ─────────────────────
+
+FROM runtime-${RUNTIME} AS runtime

@@ -167,23 +167,6 @@ export type { TokenBindingOptions } from "./middleware/tokenBinding";
 // ─── Token Binding ────────────────────────────────────────────────────────────
 export { tokenBindingMiddleware } from "./middleware/tokenBinding";
 export { allowOnlyMethods, requireFields } from "./middleware/validation";
-export type {
-  CreateTenantData,
-  OidcConfig,
-  SamlConfig,
-  Tenant,
-  TenantSettings,
-  UpdateTenantData,
-} from "./models/tenant.model";
-// ─── Multi-Tenant ────────────────────────────────────────────────────────────
-export {
-  createTenant,
-  deleteTenant,
-  getAllTenants,
-  getTenant,
-  getTenantBySlug,
-  updateTenant,
-} from "./models/tenant.model";
 // ─── Notifications (Slack / Teams / PagerDuty) ────────────────────────────────
 export {
   initNotificationsFromEnv,

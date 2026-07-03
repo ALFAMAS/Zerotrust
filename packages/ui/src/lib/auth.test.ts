@@ -1,8 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-// auth.ts guards every call with `typeof window === "undefined"`, so to exercise
-// the real logic we install a minimal window + localStorage in the node test
-// environment.
 function installBrowser() {
   const store = new Map<string, string>();
   let cookie = "";
@@ -22,6 +19,7 @@ function installBrowser() {
   };
   (globalThis as any).window = { localStorage, document: (globalThis as any).document };
   (globalThis as any).localStorage = localStorage;
+  (globalThis as any).fetch = vi.fn().mockResolvedValue({ ok: true });
   return store;
 }
 
@@ -29,44 +27,41 @@ function uninstallBrowser() {
   (globalThis as any).window = undefined;
   (globalThis as any).localStorage = undefined;
   (globalThis as any).document = undefined;
+  (globalThis as any).fetch = undefined;
 }
 
-describe("auth token helpers", () => {
+describe("auth token helpers (ADR 008 Option C)", () => {
   beforeEach(() => {
     installBrowser();
     vi.resetModules();
   });
   afterEach(() => uninstallBrowser());
 
-  it("stores and reads back the access + refresh tokens", async () => {
+  it("stores access token in memory and mirrors cookie for RSC prefetch", async () => {
     const { setToken, getToken, getRefreshToken } = await import("./auth");
-    setToken("access-1", "refresh-1");
+    setToken("access-1", "refresh-ignored");
     expect(getToken()).toBe("access-1");
-    expect(getRefreshToken()).toBe("refresh-1");
+    expect(getRefreshToken()).toBeNull();
     expect((globalThis as any).document.cookie).toContain("za_access_token=access-1");
   });
 
-  it("setToken without a refresh token leaves the access token only", async () => {
-    const { setToken, getToken, getRefreshToken } = await import("./auth");
-    setToken("access-only");
-    expect(getToken()).toBe("access-only");
-    expect(getRefreshToken()).toBeNull();
-  });
-
-  it("clearToken removes BOTH tokens (no refresh token left behind on logout)", async () => {
-    const { setToken, clearToken, getToken, getRefreshToken } = await import("./auth");
-    setToken("a", "r");
-    clearToken();
+  it("clearToken clears memory and calls logout to drop httpOnly refresh cookie", async () => {
+    const { setToken, clearToken, getToken } = await import("./auth");
+    setToken("a");
+    await clearToken();
     expect(getToken()).toBeNull();
-    expect(getRefreshToken()).toBeNull();
+    expect((globalThis as any).fetch).toHaveBeenCalledWith(
+      expect.stringContaining("/auth/logout"),
+      expect.objectContaining({ method: "POST", credentials: "include" })
+    );
   });
 
-  it("isAuthenticated reflects access-token presence", async () => {
+  it("isAuthenticated reflects in-memory access token", async () => {
     const { setToken, clearToken, isAuthenticated } = await import("./auth");
     expect(isAuthenticated()).toBe(false);
     setToken("a");
     expect(isAuthenticated()).toBe(true);
-    clearToken();
+    await clearToken();
     expect(isAuthenticated()).toBe(false);
   });
 
