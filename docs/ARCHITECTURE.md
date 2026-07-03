@@ -1,9 +1,8 @@
 # Architecture
 
-Audited 2026-06-28. Describes
-the system as it is today, then proposes upgrades. Forward-looking operational
-fixes that overlap with CI/deploy safety live in the backlog
-([`../todo.md`](../todo.md)); the standing audit is [`AUDIT.md`](./AUDIT.md).
+Audited 2026-07-04. Describes the system as it is today, then records shipped
+upgrades. Verified open backlog is empty — see [`../todo.md`](../todo.md); the
+standing audit is [`AUDIT.md`](./AUDIT.md).
 
 ## 1. Overview
 
@@ -70,7 +69,7 @@ read it via `c.get("user")`.
 ## 4. State & data
 
 - **PostgreSQL** (Drizzle ORM, `postgres` driver) — system of record, 41 tables,
-  27 versioned migrations in `drizzle/`. Sensitive columns use **CSFLE**
+  29 versioned migrations in `drizzle/`. Sensitive columns use **CSFLE**
   (client-side field encryption) with key-version rotation.
 - **Redis** (ioredis) — session validation cache (`session:{tokenId}` with
   debounced `lastActivityAt` writes and **DB fallback when Redis is down**),
@@ -113,9 +112,9 @@ single-process deploys:
   audit anchoring — with retry/exponential-backoff and dead-letter visibility
   (`getFailedScheduledJobs()`).
 
-**Proposed upgrade P1** (split HTTP and worker processes) and the queue-backed
-scheduler upgrade are both **shipped** — see `docs/deployment.md`
-§Production background-worker topology and §Queue-backed cron scheduling (B5).
+Worker/scheduler split and queue-backed cron scheduling are **shipped** — see
+[`deployment.md`](./deployment.md) §Production background-worker topology and
+§Queue-backed cron scheduling.
 
 ## 7. Observability & ops
 
@@ -131,7 +130,7 @@ scheduler upgrade are both **shipped** — see `docs/deployment.md`
 
 Next.js 16 App Router (React 19, Tailwind + shadcn/ui, next-intl EN/ES/FR/AR
 with RTL, PWA/VAPID). Talks to the API through `packages/ui/src/lib` (auth-token
-client), TanStack Query server-state modules, and the generated SDK. Six
+client), TanStack Query server-state modules, and the generated SDK. Ten
 high-traffic routes prefetch via RSC `HydrationBoundary` (see
 [`ui-http-client.md`](./ui-http-client.md)); remaining data pages hydrate from
 client-side TanStack Query. A built-in Next.js MCP dev server is exposed at
@@ -139,9 +138,7 @@ client-side TanStack Query. A built-in Next.js MCP dev server is exposed at
 
 ---
 
-## Proposed upgrades
-
-Prioritized; **P1 is a correctness bug**, the rest are improvements.
+## Proposed upgrades (all shipped)
 
 | # | Change | Why | Effort |
 | --- | --- | --- | --- |
@@ -179,14 +176,12 @@ deployments a Postgres `tsvector` + GIN index covers this without running ES.
 ES is opt-in for large tenants (`ELASTICSEARCH_ENABLED=true`); default off to
 shed an operational dependency — consistent with the slim-down's goal.
 
-### P4 — Server-side data fetching on the dashboard — **Shipped** (P3.4 + P3.6)
+### P4 — Server-side data fetching on the dashboard — **Shipped** (P3.4 + P3.6 + P3.11)
 
-Six high-traffic dashboard/admin pages prefetch authenticated reads server-side
+Ten high-traffic dashboard/admin pages prefetch authenticated reads server-side
 via `serverApiClient` + TanStack Query `HydrationBoundary` (see
-[`ui-http-client.md`](./ui-http-client.md)): `/dashboard`, `/admin`,
-`/dashboard/wallet`, `/dashboard/billing`, `/admin/users`, `/admin/sessions`.
-Client components (`*Client.tsx`) share query keys with prefetch — no duplicate
-fetch on hydration.
+[`ui-http-client.md`](./ui-http-client.md)). Client components (`*Client.tsx`)
+share query keys with prefetch — no duplicate fetch on hydration.
 
 ### P5 — Containerized, orchestrator-friendly deploys — **Shipped**
 
@@ -210,5 +205,5 @@ module boundaries.
 
 ---
 
-These proposals are advisory. Open items that map to the active backlog live in
+All proposals above are shipped. Verified open backlog is empty — see
 [`../todo.md`](../todo.md).

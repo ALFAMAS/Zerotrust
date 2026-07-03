@@ -3,8 +3,8 @@
 **Date:** 2026-06-29
 **Scope:** Full repository — `src/` (Hono API), `packages/ui/` (Next.js), `packages/client/`
 (generated SDK), build/CI config, migrations, and docs.
-**Baseline at audit time:** type-check clean, `biome ci` clean, **1065 tests passing**
-(152 files), `verify:generated` clean.
+**Baseline at audit time:** type-check clean, `biome ci` clean, **1242 tests passing**
+(1003 API + 239 UI, 181 files), `verify:generated` clean.
 
 This document is the standing audit. It complements [`docs/ARCHITECTURE.md`](./ARCHITECTURE.md)
 (current-state architecture) and supersedes the earlier dated audit/recommendation
@@ -62,7 +62,7 @@ biggest maintainability asset in the repo.
   not reflected (`src/middleware/cors.ts`).
 - **Rate limiting is applied per-route** on every auth-sensitive endpoint
   (login, register, MFA, password reset, magic link) with tuned points/windows.
-- **Strong test coverage** for a template — 1065 tests including dedicated CWE
+- **Strong test coverage** for a template — 1242 tests including dedicated CWE
   regression tests (`dbBackup.cwe78.test.ts`, redaction tests, safe-redirect/safe-fetch).
 - **Reproducibility tooling** — pinned formatters/codegen, a single
   `verify:generated` drift gate, scheduled dependency-update workflow.

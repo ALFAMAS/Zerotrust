@@ -1,7 +1,7 @@
 # Quarterly Maintenance Scorecard
 
 **Quarter:** Q3 2026 (Jul – Sep)
-**Last updated:** 2026-07-04 (T5 coverage ratchet shipped — queryKeys + SecurityClient)
+**Last updated:** 2026-07-04 (full-repo backlog audit — open product backlog 0)
 **Owner:** Platform team
 
 Tracked trend: dependency freshness, CI health, test health, migration health,

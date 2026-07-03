@@ -592,12 +592,12 @@ zerotrust tracks its state in the repository docs:
 | [`docs/compliance`](./docs/compliance/README.md) | Compliance policies, procedures, and evidence templates     |
 | [`packages/client`](./packages/client/README.md) | Generated TypeScript SDK package and usage notes            |
 
-Latest audit note (2026-07-03): a clean `bun install` restores a fully working
+Latest audit note (2026-07-04): a clean `bun install` restores a fully working
 tree — `bun run lint:ci`, `bun run type-check`, `bun run boundaries:check`, the
-**1065-test suite** (152 files), and the UI build all pass. Transactional
-repositories, a dedicated worker with a BullMQ-backed job scheduler, and module
-boundaries are all shipped. See [`tdone.md`](./tdone.md) for the full feature
-catalog.
+**1242-test suite** (1003 API + 239 UI, 181 files), and the UI build all pass.
+Transactional repositories, a dedicated worker with a BullMQ-backed job scheduler,
+and module boundaries are all shipped. Verified open backlog is empty — see
+[`todo.md`](./todo.md). Full feature catalog in [`tdone.md`](./tdone.md).
 
 ---
 

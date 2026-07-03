@@ -1,9 +1,12 @@
 # Codebase Audit Report — SaaS Starter Template Readiness
 
-**Date:** 2026-07-03
+**Date:** 2026-07-03 (reconciled 2026-07-04)
 **Scope:** Full repo (`src/` Hono API + `packages/ui/` Next.js 16 + `packages/client/` SDK + infra/docs)
 **Audited by:** Hermes Agent (static scan + build/test/lint verification)
 **Purpose:** Determine readiness to fork as a base for a new SaaS project.
+
+**Status:** All fork-blocking and should-fix items below are **shipped**. Verified
+open backlog is empty — see [`todo.md`](./todo.md).
 
 ---
 

@@ -59,7 +59,8 @@ synchronously.
 - **Negative:** The BullMQ consumer and interval schedulers must not run in
   every API replica. Production deploys set `WORKER_MODE=true` on API processes
   and run exactly one `bun run src/worker.ts` instance (see `docs/deployment.md`;
-  P1.2). Redis leader locks in `jobs/scheduler.ts` remain a guardrail.
+  P1.2). BullMQ's atomic job delivery replaces the former Redis leader-lock
+  scheduler design (B5).
 
 ## References
 

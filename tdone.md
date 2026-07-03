@@ -19,7 +19,7 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
 | Migrations | 29 (latest: `0029_audit_log_anchors`) |
 | Route mounts in `server.ts` | 30 |
 | UI pages | 53 |
-| Tests | 1229+ (997 API + 232 UI, 176 files) |
+| Tests | 1242 (1003 API + 239 UI, 181 files) |
 | ADRs | 8 |
 | Stack | Hono 4 · TypeScript 6 · Bun · Next.js 16 · Drizzle ORM · PostgreSQL · Redis |
 
@@ -1012,8 +1012,8 @@ missing paths.
   record filed.
 - **Evidence register:** E-011–E-013 added to
   [`docs/compliance/evidence-register.md`](./docs/compliance/evidence-register.md).
-- **Backlog cleanup:** C1 removed from [`todo.md`](./todo.md); scorecard open
-  backlog count updated to 1 (T5 only).
+- **Backlog cleanup:** C1 removed from [`todo.md`](./todo.md); verified open
+  product backlog count **0** (T5 shipped 2026-07-04).
 
 **Verification (2026-07-04):** All acceptance criteria met — auditor engaged,
 observation window set, system description and engagement letter recorded under
