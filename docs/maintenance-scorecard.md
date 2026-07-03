@@ -1,7 +1,7 @@
 # Quarterly Maintenance Scorecard
 
 **Quarter:** Q3 2026 (Jul – Sep)
-**Last updated:** 2026-07-04 (T5 coverage increment — UI triage + API ratchet)
+**Last updated:** 2026-07-04 (T5 coverage ratchet shipped — queryKeys + SecurityClient)
 **Owner:** Platform team
 
 Tracked trend: dependency freshness, CI health, test health, migration health,
@@ -44,7 +44,8 @@ drift (not flaky tests) during the Jul 2 refactor burst. Remediation applied to
 [`ci-health/2026-07-03-ci-recovery.md`](./compliance/evidence/2026/Q3/ci-health/2026-07-03-ci-recovery.md).
 Rolling 30-day success rate reaches ≥95% as green runs accumulate post-remediation.
 
-**Jobs:** `lint:ci` (Biome) · `type-check` (tsc) · `test` (Vitest, 997 API tests) ·
+**Jobs:** `lint:ci` (Biome) · `type-check` (tsc) · `test` (Vitest, 1003 API tests) ·
+`test:coverage:ui` (UI ratchet) · `test:coverage` (API ratchet) ·
 `migrations:check` (destructive DDL gate) · `verify:generated` (SDK+docs drift) · UI build · SAST (Semgrep, blocking) · Trivy filesystem (blocking, `trivy-action@0.35.0`)
 
 ---
@@ -53,14 +54,20 @@ Rolling 30-day success rate reaches ≥95% as green runs accumulate post-remedia
 
 | Metric | Current | Target | Trend |
 |---|---|---|---|
-| Total test count | 997 API + 232 UI = **1229** (176 files) | Growing | ✅ |
-| API unit test coverage (lines) | **66.60%** measured; ≥66% ratchet (`vitest.config.ts`) | ≥85% long-term | 🔶 ↑ |
-| API unit test coverage (branches) | **59.74%** measured; ≥59% ratchet | ≥85% long-term | 🔶 ↑ |
-| UI page/component coverage (lines) | **53.85%** measured; ≥53% ratchet on `packages/ui` app/components/lib | ≥85% long-term | 🔶 ↑ |
+| Total test count | 1003 API + 239 UI = **1242** (181 files) | Growing | ✅ |
+| API unit test coverage (lines) | **67.41%** measured; ≥67% ratchet (`vitest.config.ts`) | ≥85% long-term | 🔶 ↑ |
+| API unit test coverage (branches) | **60.02%** measured; ≥60% ratchet | ≥85% long-term | 🔶 ↑ |
+| UI page/component coverage (lines) | **54.59%** measured; ≥54% ratchet on `packages/ui` app/components/lib | ≥85% long-term | 🔶 ↑ |
 | Page-level component tests | 27 `.test.tsx` under `packages/ui/src/app/` + client splits (organizations, settings, invite, access-reviews + prior pages) | High-traffic flows covered | ✅ |
 | E2E smoke passing | 6 Playwright specs (auth, public, dashboard-polish, wallet, webhooks, security) | 100% | ✅ |
 | Playwright E2E passing | 6 specs in CI `e2e-ui` job | 100% | ✅ |
 | k6 load test thresholds met | CI `load-test` job: p95 &lt;100ms, p99 &lt;300ms (`full-suite.k6.js`) | p95 &lt;100ms, p99 &lt;300ms | ✅ |
+
+**Notes (T5 shipped, 2026-07-04):** Added `queryKeys.test.ts` (root suite) and
+expanded `SecurityClient` page tests (TOTP verify/disable, OAuth, passkeys).
+API floors raised to 67/66/60/65; UI floors to 54/52/46/51. CI now runs
+`bun run test:coverage:ui` as a blocking gate. All **239 UI tests** green;
+measured API 67.41% lines / 60.02% branches; UI 54.59% lines.
 
 **Notes (T5 increment, 2026-07-04):** Fixed 13 UI failures caused by P3.11 async
 RSC `page.tsx` wrappers — server-state tests now render `*Client` components.
@@ -166,7 +173,7 @@ token-gated scrape configs.
 | Open backlog (B6–B7) | 0 (P3 Operations & compliance shipped) | 0 | ✅ |
 | P1 security & access control gaps | 0 (B1, B3, ALFA-3 done) | 0 | ✅ |
 | P2 infrastructure backlog | 0 (B4, B5 done) | 0 | ✅ |
-| Open product backlog ([`todo.md`](../todo.md)) | **1** (T5 coverage→85% ongoing) | Trending down | 🔶 |
+| Open product backlog ([`todo.md`](../todo.md)) | **0** (T5 shipped 2026-07-04) | Trending down | ✅ |
 
 ---
 

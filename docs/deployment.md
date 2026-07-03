@@ -29,7 +29,7 @@ Reference for the **CI/CD & Documentation** deliverable.
 | Job | Gates | Notes |
 | --- | --- | --- |
 | **Lint & Type Check** | Biome + `bun audit --prod` + `tsc` | dependency audit is blocking (high+) |
-| **Tests** | Vitest suite; SDK-drift, API/UI matrix & shadcn report committed-checks | coverage is a **blocking ratchet gate** (~60% floor, raised as coverage improves toward the 85% target — see `vitest.config.ts`) |
+| **Tests** | Vitest suite; SDK-drift, API/UI matrix & shadcn report committed-checks | API + UI coverage are **blocking ratchet gates** (~67% / ~55% line floors, raised as coverage improves toward the 85% target — see `vitest.config.ts` and `packages/ui/vitest.config.ts`; CI runs `test:coverage` and `test:coverage:ui`) |
 | **SAST & Dependency Scans** | Semgrep (`p/owasp-top-ten`) + Trivy filesystem (`aquasecurity/trivy-action@0.35.0`, Trivy v0.69.3) | both blocking on CRITICAL/HIGH; complements `bun audit` in the lint job |
 | **Build UI** | `next build` | |
 | **Playwright E2E & a11y** | full-stack smoke against a started API+UI | needs the app running with Postgres+Redis services |

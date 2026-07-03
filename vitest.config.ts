@@ -16,14 +16,14 @@ export default defineConfig({
       provider: "v8",
       reporter: ["text", "json", "html", "json-summary"],
       exclude: ["node_modules/", "src/__tests__/setup.ts", "src/**/*.test.ts", "src/**/*.spec.ts"],
-      // Ratchet thresholds (T5 increment, 2026-07-04): measured coverage is ~66.6%
-      // lines, ~65.2% statements, ~59.7% branches, ~61.8% functions (after
-      // plans.ts, apiHelpers ok/fail/dbGuard tests).
+      // Ratchet thresholds (T5 shipped, 2026-07-04): measured coverage is ~67.4%
+      // lines, ~65.9% statements, ~60.0% branches, ~66.1% functions (after
+      // queryKeys.ts full coverage in root UI suite).
       // Floors sit at or just below baseline; raise toward 85% long-term target.
       thresholds: {
-        lines: 66,
-        functions: 61,
-        branches: 59,
+        lines: 67,
+        functions: 66,
+        branches: 60,
         statements: 65,
       },
     },

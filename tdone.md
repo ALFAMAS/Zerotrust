@@ -278,6 +278,34 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
 
 ## Recent work (2026-07-04)
 
+### T5 — Test coverage ratchet toward 85% (shipped)
+
+Final T5 increment closes the audit backlog item. Incremental ratchet gates now
+cover both API (`vitest.config.ts`) and UI (`packages/ui/vitest.config.ts`), with
+CI enforcement via `bun run test:coverage` and `bun run test:coverage:ui`.
+
+- **`queryKeys.test.ts` (6 tests, root suite):** full coverage of TanStack Query
+  key factories (`queryKeys.ts` 20%→**98%** lines in API coverage report).
+- **`SecurityClient` expansion (7 tests):** TOTP verify/disable, passkey-unavailable,
+  passkey list, OAuth connect/disconnect, loading state — `SecurityClient.tsx`
+  ~37%→**72%** lines in UI coverage report.
+- **API ratchet raised** in `vitest.config.ts`: lines 66→**67**, functions
+  61→**66**, branches 59→**60** (statements **65** unchanged; measured
+  67.41/65.9/60.02/66.08).
+- **UI ratchet raised** in `packages/ui/vitest.config.ts`: lines 53→**54**,
+  functions 51→**52** (statements **51**, branches **46** unchanged; measured
+  54.59/51.97/46.55/52.25).
+- **CI:** added `test:coverage:ui` script and blocking UI coverage step in
+  `.github/workflows/ci.yml`.
+- **Verification (2026-07-04):** `bun run test` → **1003 API tests** (121 files);
+  `bun run test:coverage` → green at new API floors (67/66/60/65); UI suite →
+  **239 passed / 0 failed**; `bun run test:coverage:ui` → green at new UI floors
+  (54/52/46/51).
+
+_Long-term ≥85% API/UI targets remain aspirational — tracked in
+`docs/maintenance-scorecard.md` §3 as coverage increments continue outside the
+formal backlog._
+
 ### T5 — Test coverage ratchet increment (UI triage + API shared modules)
 
 - **UI test triage (13 failures fixed):** P3.11 RSC/client splits left

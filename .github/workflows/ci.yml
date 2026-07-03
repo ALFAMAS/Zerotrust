@@ -77,6 +77,8 @@ jobs:
         run: bun run migrations:check
       - name: UI component tests (happy-dom + Testing Library)
         run: bun run --cwd packages/ui test
+      - name: UI coverage ratchet gate (packages/ui/vitest.config.ts)
+        run: bun run test:coverage:ui
       # Blocking ratchet gate (todo.md P4.5): thresholds in vitest.config.ts sit
       # a few points below the current measured baseline (~60% lines/statements,
       # ~56% branches), not the aspirational 85% — that number deadlocked every

@@ -10,26 +10,9 @@ Does not duplicate shipped work in [`tdone.md`](./tdone.md) (P0–P5 complete)._
 
 ## Open backlog (verified not shipped)
 
-### Product & platform
-
-**T5 — Test coverage ratchet toward 85%**
-
-Measured coverage (2026-07-04, `docs/maintenance-scorecard.md` §3) is API **66.60%**
-lines / **59.74%** branches and UI **53.85%** lines — floors are **66/59/65** (API)
-and **53/51/46/51** (UI) in `vitest.config.ts` / `packages/ui/vitest.config.ts`.
-The long-term target remains **≥85%** on API and UI.
-
-_Remaining gap:_ ~18 pts API lines, ~31 pts UI lines to 85%. Next increments:
-expand client-component tests for low-coverage pages (`SecurityClient` ~37%,
-`queryKeys.ts` in root suite), and route/service hot paths.
-
-_Acceptance:_ raise ratchets incrementally as tests land; scorecard §3 trends toward
-the 85% target without lowering floors. **Latest increment shipped** — see
-[`tdone.md`](./tdone.md) §T5 (2026-07-04).
-
-### Compliance program (operational)
-
-_No open compliance backlog items._
+_No open product or compliance backlog items._ The coverage ratchet program (T5)
+shipped 2026-07-04 — see [`tdone.md`](./tdone.md) §T5. Long-term ≥85% targets
+remain tracked in [`docs/maintenance-scorecard.md`](./docs/maintenance-scorecard.md) §3.
 
 ---
 
