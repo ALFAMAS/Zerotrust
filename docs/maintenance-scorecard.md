@@ -152,6 +152,7 @@ token-gated scrape configs.
 | Open backlog (B6–B7) | 0 (P3 Operations & compliance shipped) | 0 | ✅ |
 | P1 security & access control gaps | 0 (B1, B3, ALFA-3 done) | 0 | ✅ |
 | P2 infrastructure backlog | 0 (B4, B5 done) | 0 | ✅ |
+| Open product backlog ([`todo.md`](../todo.md)) | **3** (T5 coverage→85%, D3 OpenAPI, C1 SOC 2 auditor) | Trending down | 🔶 |
 
 ---
 

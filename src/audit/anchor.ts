@@ -11,7 +11,7 @@ import { desc } from "drizzle-orm";
 import { getDb, getReadDb } from "../db";
 import { auditLogAnchorsTable } from "../db/schema";
 import { getLogger } from "../logger";
-import { getS3Config, isS3BackupEnabled } from "../services/ops/objectStorage.service";
+import { getS3Config, isS3BackupEnabled } from "../shared/s3Config";
 import { getAuditChainTip } from "./chain";
 
 const logger = getLogger("audit-anchor");

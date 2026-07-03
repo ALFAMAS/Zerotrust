@@ -7,16 +7,24 @@ vi.mock("@/lib/serverApiClient", () => ({
 
 import {
   AUTH_ME_PATH,
+  ADMIN_AUDIT_LOGS_PATH,
+  OAUTH_PROVIDERS_PATH,
+  ORG_INVITES_MINE_PATH,
+  ORGS_PATH,
   adminRecentUsersPrefetchOptions,
   adminSessionsListPrefetchOptions,
   adminStatsPrefetchOptions,
   adminUsersListPrefetchOptions,
+  auditEntriesPrefetchOptions,
   authMePrefetchOptions,
   billingSubscriptionPrefetchOptions,
   buildAdminRecentUsersPath,
   buildAdminSessionsListPath,
   buildAdminUsersListPath,
   buildWalletTransactionPath,
+  myOrgInvitesPrefetchOptions,
+  oauthProvidersPrefetchOptions,
+  organizationsListPrefetchOptions,
   walletPrefetchOptions,
   walletTransactionsPrefetchOptions,
 } from "./prefetch";
@@ -93,5 +101,27 @@ describe("prefetch options factories", () => {
     serverApiGetMock.mockResolvedValueOnce({ data: [], pagination: { total: 0 } });
     await adminSessionsListPrefetchOptions({ page: 1, limit: 20 }).queryFn?.({} as never);
     expect(serverApiGetMock).toHaveBeenCalledWith("/admin/sessions?page=1&limit=20");
+  });
+
+  it("P3.11 prefetch options call security, settings, orgs, and audit paths", async () => {
+    serverApiGetMock.mockResolvedValueOnce({ id: "u1" });
+    await authMePrefetchOptions().queryFn?.({} as never);
+    expect(serverApiGetMock).toHaveBeenCalledWith(AUTH_ME_PATH);
+
+    serverApiGetMock.mockResolvedValueOnce({ google: true });
+    await oauthProvidersPrefetchOptions().queryFn?.({} as never);
+    expect(serverApiGetMock).toHaveBeenCalledWith(OAUTH_PROVIDERS_PATH);
+
+    serverApiGetMock.mockResolvedValueOnce({ orgs: [] });
+    await organizationsListPrefetchOptions().queryFn?.({} as never);
+    expect(serverApiGetMock).toHaveBeenCalledWith(ORGS_PATH);
+
+    serverApiGetMock.mockResolvedValueOnce({ data: [], pagination: { total: 0 } });
+    await myOrgInvitesPrefetchOptions().queryFn?.({} as never);
+    expect(serverApiGetMock).toHaveBeenCalledWith(ORG_INVITES_MINE_PATH);
+
+    serverApiGetMock.mockResolvedValueOnce({ data: [] });
+    await auditEntriesPrefetchOptions().queryFn?.({} as never);
+    expect(serverApiGetMock).toHaveBeenCalledWith(ADMIN_AUDIT_LOGS_PATH);
   });
 });

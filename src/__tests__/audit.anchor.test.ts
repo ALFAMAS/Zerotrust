@@ -17,7 +17,7 @@ vi.mock("../db", () => ({
   getReadDb: h.getReadDb,
 }));
 
-vi.mock("../services/ops/objectStorage.service", () => ({
+vi.mock("../shared/s3Config", () => ({
   isS3BackupEnabled: h.isS3BackupEnabled,
   getS3Config: h.getS3Config,
 }));

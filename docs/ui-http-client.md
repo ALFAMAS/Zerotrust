@@ -23,9 +23,9 @@ the initial server render.
 
 ---
 
-## Server-side prefetch (RSC — P3.4 pilot + P3.6 expansion)
+## Server-side prefetch (RSC — P3.4 pilot + P3.6 + P3.11 expansion)
 
-Six high-traffic dashboard/admin pages prefetch authenticated reads on the server:
+Ten high-traffic dashboard/admin pages prefetch authenticated reads on the server:
 
 | Route | Prefetched queries | Client component |
 | --- | --- | --- |
@@ -35,6 +35,10 @@ Six high-traffic dashboard/admin pages prefetch authenticated reads on the serve
 | `/dashboard/billing` | subscription, currencies, pricing (USD/en-US) | `BillingClient.tsx` |
 | `/admin/users` | paginated users list (page 1) | `UsersClient.tsx` |
 | `/admin/sessions` | paginated sessions list (page 1) | `SessionsClient.tsx` |
+| `/dashboard/security` | `auth/me` | `SecurityClient.tsx` |
+| `/dashboard/settings` | `/auth/oauth/providers` | `SettingsClient.tsx` |
+| `/dashboard/organizations` | `/orgs`, `/orgs/invites/mine` | `OrganizationsClient.tsx` |
+| `/admin/audit` | `/admin/audit-logs` | `AuditClient.tsx` |
 
 ### How it works
 

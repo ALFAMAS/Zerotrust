@@ -62,7 +62,7 @@ read it via `c.get("user")`.
 | Data | `db/` | Drizzle schema (41 tables) + connection; `models/` thin table re-exports |
 | Crypto | `crypto/` | `paseto-v4` (v4.local), `csfle` (field encryption), `hardware-key-store`, `codes` |
 | MFA | `mfa/` | TOTP, Email OTP channel, FIDO MDS3 |
-| OAuth | `oauth/` | provider factory + adapters (Google/GitHub/Apple/Facebook) |
+| OAuth | `oauth/` | provider factory + adapters (Google/GitHub/Facebook; Apple Sign In not yet implemented) |
 | Access | `jit/` | cross-tenant just-in-time elevation |
 | Platform | `audit/` `metrics/` `telemetry/` `webhooks/` `notifications/` `ssf/` | hash-chained audit log, Prometheus, OTel, outbound webhooks, SSF receiver |
 | Cross-cutting | `shared/` `config/` `logger/` `templates/` | safe-fetch/redirect guards, typed config, structured logging, email templates |
@@ -131,9 +131,11 @@ scheduler upgrade are both **shipped** — see `docs/deployment.md`
 
 Next.js 16 App Router (React 19, Tailwind + shadcn/ui, next-intl EN/ES/FR/AR
 with RTL, PWA/VAPID). Talks to the API through `packages/ui/src/lib` (auth-token
-client) and the generated SDK. Many dashboard pages fetch **client-side** in
-`useEffect`. A built-in Next.js MCP dev server is exposed at `/_next/mcp` for
-coding agents.
+client), TanStack Query server-state modules, and the generated SDK. Six
+high-traffic routes prefetch via RSC `HydrationBoundary` (see
+[`ui-http-client.md`](./ui-http-client.md)); remaining data pages hydrate from
+client-side TanStack Query. A built-in Next.js MCP dev server is exposed at
+`/_next/mcp` for coding agents.
 
 ---
 
@@ -146,7 +148,7 @@ Prioritized; **P1 is a correctness bug**, the rest are improvements.
 | **P1** | Split HTTP and worker/scheduler processes (or instance-guard the schedulers) | **Correctness** — duplicate jobs under cluster mode | **Shipped** (P1.2, P1.5) |
 | P2 | Adopt expand/contract migrations; gate destructive DDL | Safe rollbacks; the `0020`–`0024` drops are irreversible | **Shipped** (P3.5) — CI destructive-migration gate |
 | P3 | Make Elasticsearch fully optional / default to Postgres FTS | Drop an operational dependency post-slim-down | **Shipped** (2026-07-03) |
-| P4 | Move hot dashboard reads to Server Components / route handlers | TTFB, fewer client waterfalls | **Shipped** (P3.4 pilot + P3.6 — six prefetched routes) |
+| P4 | Move hot dashboard reads to Server Components / route handlers | TTFB, fewer client waterfalls | **Shipped** (P3.4 pilot + P3.6 + P3.11 — ten prefetched routes) |
 | P5 | Containerize (Dockerfile + compose) and split health/readiness | Reproducible deploys, orchestrator-friendly | **Shipped** — Dockerfile + `docker-compose.yml` + readiness |
 | P6 | Fail-fast typed config validation at boot | Catch missing prod secrets before serving traffic | **Shipped** (P4.3) |
 | P7 | Group `services/` by domain | **Shipped 2026-07-03** — files live under `auth/`, `billing/`, `notifications/`, `compliance/`, `ops/`, and `shared/` | Done |

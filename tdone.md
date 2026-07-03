@@ -28,7 +28,7 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
 ## Authentication & Identity
 
 - ✅ Email + password with configurable account lockout (threshold + auto-unlock)
-- `[~]` OAuth — Google, GitHub, Facebook (admin-toggleable); Apple module in `src/oauth/providers/apple.ts` but factory wiring pending ([`todo.md`](./todo.md) B2)
+- `[~]` OAuth — Google, GitHub, Facebook (admin-toggleable); Apple Sign In not implemented
 - ✅ Magic links (passwordless, 15-minute TTL, email-delivered)
 - ✅ Passkeys / WebAuthn FIDO2 — register, authenticate, resident keys, MDS3 attestation policy
 - ✅ TOTP (Google Authenticator, Authy, 1Password)
@@ -277,6 +277,29 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
 ---
 
 ## Recent work (2026-07-03)
+
+### M4 — Module boundary violation resolved
+
+- Extracted env-driven S3 configuration to `src/shared/s3Config.ts` (`getS3Config`,
+  `isS3BackupEnabled`, `s3RetentionDays`). `src/audit/anchor.ts` now imports from
+  the shared layer instead of `services/ops/objectStorage.service`; ops object
+  storage re-exports the shared helpers for backward compatibility.
+- **Verification (2026-07-03):** `bun run boundaries:check` → **0 violations**;
+  `bun run test -- src/__tests__/audit.anchor.test.ts src/__tests__/s3Config.test.ts
+  src/__tests__/objectStorage.service.test.ts` → **57 tests passing**;
+  `bun run type-check` → pass.
+
+### P3.11 — RSC server prefetch expansion (four pages)
+
+- Split `SecurityClient`, `SettingsClient`, `OrganizationsClient`, and `AuditClient`
+  from RSC `page.tsx` wrappers with `HydrationBoundary` prefetch via extended
+  `prefetch.ts` (`oauthProviders`, `organizationsList`, `myOrgInvites`,
+  `auditEntries`). Ten prefetched routes total (P3.4/P3.6 pilot + this expansion).
+- Documented in [`docs/ui-http-client.md`](./docs/ui-http-client.md).
+- **Verification (2026-07-03):** `bun run test -- packages/ui/src/lib/server-state/prefetch.test.ts`
+  → **8 tests passing**; `bun run --cwd packages/ui build` → pass (52 app routes).
+
+---
 
 ### P1 — Security & access control gaps shipped
 
@@ -829,7 +852,7 @@ Shipped P3.6–P3.10 (final P3 backlog slice; P3.1–P3.5 above):
 - Split `WalletClient`, `BillingClient`, `UsersClient`, `SessionsClient` from RSC
   `page.tsx` wrappers with `HydrationBoundary` prefetch via extended
   `prefetch.ts` (wallet, billing subscription/currencies/pricing, admin users/sessions).
-- Documented in [`docs/ui-http-client.md`](./docs/ui-http-client.md) — six prefetched routes total.
+- Documented in [`docs/ui-http-client.md`](./docs/ui-http-client.md) — ten prefetched routes total.
 
 ### P3.7 — UI test coverage ratchet (+5 pts)
 

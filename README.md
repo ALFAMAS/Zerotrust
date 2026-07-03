@@ -65,7 +65,7 @@ rebuilding login for the hundredth time.
 ### Authentication & identity
 
 - Email + password with configurable account lockout
-- OAuth — Google, GitHub, Facebook (admin-toggleable per provider); Apple provider module exists — factory wiring tracked in [`todo.md`](./todo.md) B2
+- OAuth — Google, GitHub, Facebook (admin-toggleable per provider); Apple Sign In not yet implemented
 - Magic links (passwordless, 15-minute TTL)
 - Passkeys / WebAuthn (FIDO2, resident keys, MDS3 attestation policy)
 - TOTP (Google Authenticator / Authy) + Email OTP
@@ -582,7 +582,7 @@ zerotrust tracks its state in the repository docs:
 | Doc                                              | What it covers                                              |
 | ------------------------------------------------ | ----------------------------------------------------------- |
 | [`tdone.md`](./tdone.md)                         | Everything that ships today, plus the latest codebase audit |
-| [`todo.md`](./todo.md)                           | Verified open backlog — see **Not backlog** table for shipped items                 |
+| [`todo.md`](./todo.md)                           | Verified open backlog (T5 coverage, D3 OpenAPI, C1 auditor) plus **Not backlog** shipped/intentional items |
 | [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) | System architecture audit + proposed upgrades               |
 | [`docs/AUDIT.md`](./docs/AUDIT.md)               | Standing production-readiness audit (findings + risk + order) |
 | [`docs/reference-architecture.md`](./docs/reference-architecture.md) | Operational deployment blueprints (VM, containers, Kubernetes) |

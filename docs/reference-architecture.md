@@ -439,7 +439,7 @@ scrape_configs:
 
 External providers (optional):
   SMTP · Stripe · Elasticsearch · Sentry
-  OAuth (Google/GitHub/Apple/Facebook) · Telegram Bot
+  OAuth (Google/GitHub/Facebook) · SMTP · Stripe · Elasticsearch · Sentry
 ```
 
 ---

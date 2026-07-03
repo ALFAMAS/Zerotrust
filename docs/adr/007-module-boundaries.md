@@ -33,7 +33,7 @@ shared  ◄──  integrations  ◄──  identity  ◄──  tenancy  ◄─
 | Domain | Paths | Owns |
 |---|---|---|
 | **shared** | `src/shared/` | Canonical modules — pagination, safe fetch/redirect, crypto hash, HTTP errors, roles, sanitization, API helpers |
-| **integrations** | `src/oauth/`, `src/notifications/`, `src/mfa/channels/`, `src/templates/` | Third-party connectors — OAuth providers (Google/GitHub/Apple/Facebook), email service, MFA OTP channels, web push, notification dispatch |
+| **integrations** | `src/oauth/`, `src/notifications/`, `src/mfa/channels/`, `src/templates/` | Third-party connectors — OAuth providers (Google/GitHub/Facebook; Apple Sign In planned), email service, MFA OTP channels, web push, notification dispatch |
 | **identity** | `src/api/routes/auth.*`, `src/api/routes/session.*`, `src/api/routes/passkey.*`, `src/api/routes/mfa.*`, `src/api/routes/magic-link.*`, `src/api/routes/verification.*`, `src/services/token.*`, `src/services/email*`, `src/services/magicLink.*`, `src/services/passwordBreach.*`, `src/services/session*`, `src/crypto/`, `src/middleware/auth.ts` | Authentication, session lifecycle, tokens, password management, MFA, passkeys |
 | **tenancy** | `src/api/routes/org.*`, `src/api/routes/tenant.*`, `src/jit/` | Organizations, teams, roles, invites, cross-tenant JIT |
 | **billing** | `src/api/routes/billing.*`, `src/api/routes/wallet.*`, `src/services/wallet.*`, `src/services/stripe*`, `src/db/repositories/stripe*` | Stripe billing, subscriptions, webhooks, wallet ledger |

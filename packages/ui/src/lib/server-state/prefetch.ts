@@ -13,7 +13,11 @@ import type {
   AdminSession,
   AdminStats,
   AdminUserListItem,
+  AuditEntry,
   AuthMe,
+  ConnectedProviders,
+  MyOrgInvite,
+  OrganizationsListResponse,
   PaginatedResponse,
   UserSession,
   Wallet,
@@ -23,6 +27,10 @@ import type {
 export const AUTH_ME_PATH = "/auth/me";
 export const USER_SESSIONS_PATH = "/sessions";
 export const ADMIN_STATS_PATH = "/admin/stats";
+export const OAUTH_PROVIDERS_PATH = "/auth/oauth/providers";
+export const ORGS_PATH = "/orgs";
+export const ORG_INVITES_MINE_PATH = "/orgs/invites/mine";
+export const ADMIN_AUDIT_LOGS_PATH = "/admin/audit-logs";
 export const WALLET_PATH = "/wallet";
 export const BILLING_SUBSCRIPTION_PATH = "/billing/subscription";
 export const BILLING_CURRENCIES_PATH = "/billing/currencies";
@@ -199,5 +207,35 @@ export function adminSessionsListPrefetchOptions(params: { page?: number; limit?
     queryKey: queryKeys.admin.sessions.list(normalized),
     queryFn: () =>
       serverApiGet<PaginatedResponse<AdminSession>>(buildAdminSessionsListPath(normalized)),
+  });
+}
+
+export function oauthProvidersPrefetchOptions() {
+  return queryOptions({
+    queryKey: queryKeys.auth.oauthProviders(),
+    queryFn: () => serverApiGet<ConnectedProviders>(OAUTH_PROVIDERS_PATH),
+  });
+}
+
+export function organizationsListPrefetchOptions() {
+  return queryOptions({
+    queryKey: queryKeys.organizations.list(),
+    queryFn: () => serverApiGet<OrganizationsListResponse>(ORGS_PATH),
+  });
+}
+
+export function myOrgInvitesPrefetchOptions() {
+  return queryOptions({
+    queryKey: queryKeys.organizations.myInvites(),
+    queryFn: () => serverApiGet<PaginatedResponse<MyOrgInvite>>(ORG_INVITES_MINE_PATH),
+  });
+}
+
+type AuditEntriesResponse = { data: AuditEntry[]; pagination?: unknown } | AuditEntry[];
+
+export function auditEntriesPrefetchOptions() {
+  return queryOptions({
+    queryKey: queryKeys.audit.entries(),
+    queryFn: () => serverApiGet<AuditEntriesResponse>(ADMIN_AUDIT_LOGS_PATH),
   });
 }
