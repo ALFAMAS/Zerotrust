@@ -594,9 +594,9 @@ zerotrust tracks its state in the repository docs:
 
 Latest audit note (2026-07-04): a clean `bun install` restores a fully working
 tree — `bun run lint:ci`, `bun run type-check`, `bun run boundaries:check`, the
-**1242-test suite** (1003 API + 239 UI, 181 files), and the UI build all pass.
+**1323-test suite** (1081 API + 242 UI, 194 files), and the UI build all pass.
 Transactional repositories, a dedicated worker with a BullMQ-backed job scheduler,
-and module boundaries are all shipped. Verified open backlog is empty — see
+and module boundaries are all shipped. Five long-term items remain — see
 [`todo.md`](./todo.md). Full feature catalog in [`tdone.md`](./tdone.md).
 
 ---

@@ -16,11 +16,11 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
 | Service files | 46 |
 | DB tables | 40 |
 | Middleware | 21 |
-| Migrations | 34 (latest: `0034_drop_webhook_tenant_id`) |
+| Migrations | 35 (latest: `0035_org_rls_policies`) |
 | Route mounts in `server.ts` | 29 |
 | UI pages | 53 |
-| Tests | 1317 (1075 API + 242 UI, 134 files) |
-| ADRs | 8 |
+| Tests | 1323 (1081 API + 242 UI, 136 files) |
+| ADRs | 9 |
 | Stack | Hono 4 · TypeScript 6 · Bun · Next.js 16 · Drizzle ORM · PostgreSQL · Redis |
 
 ---
@@ -277,6 +277,30 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
 ---
 
 ## Recent work (2026-07-04)
+
+### MT-1 (phase 1) — Postgres RLS foundation (shipped)
+
+- **Migration:** `drizzle/0035_org_rls_policies.sql` — `app_rls_org_allowed()` +
+  policies on `webhook_endpoints`, `support_tickets`, `subscriptions`.
+- **Runtime:** `src/db/rls.ts` (`setOrgRlsContext`, `withOrgRls`); optional
+  `src/middleware/orgRls.ts` for `X-Org-Id` + transaction-scoped context.
+- **Wiring:** `webhooks/store.ts` and `supportTickets.repository.ts` set RLS
+  context inside org-scoped transactions.
+- **Regression:** `src/__tests__/rls.test.ts`, `migrations.test.ts` (RLS policy assertions).
+- **Remaining (todo):** pool-safe request-wide context from `authMiddleware`, more tables.
+
+### DI-1 (phase 1) — Schema directory barrel (shipped)
+
+- **Layout:** `src/db/schema/{index,types,tables}.ts`; `schema.ts` re-exports barrel.
+- **Extracted:** `OrgBranding` → `schema/types.ts`.
+- **Remaining (todo):** split `tables.ts` into domain modules (`identity`, `billing`, …).
+
+### CP-1 (blueprint) — Region-sharding ADR (shipped)
+
+- **ADR 009:** [`docs/adr/009-data-residency-sharding.md`](./docs/adr/009-data-residency-sharding.md)
+  — physical per-region Postgres/S3 topology + fork checklist.
+- **`region.service.ts`:** comment links ADR 009; R-006 stays `partial` until code ships.
+- **Remaining (todo):** `getDbForRegion()` + per-region env implementation.
 
 ### ARCH-3 — Remove dead geo/temporal middleware (shipped)
 

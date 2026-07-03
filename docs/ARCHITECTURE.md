@@ -79,7 +79,7 @@ predicates on org-scoped tables.
 ## 4. State & data
 
 - **PostgreSQL** (Drizzle ORM, `postgres` driver) — system of record, 40 tables,
-  34 versioned migrations in `drizzle/`. Sensitive columns use **CSFLE**
+  35 versioned migrations in `drizzle/` (including org RLS policies in `0035`). Sensitive columns use **CSFLE**
   (client-side field encryption) with key-version rotation.
 - **Redis** (ioredis) — session validation cache (`session:{tokenId}` with
   debounced `lastActivityAt` writes and **DB fallback when Redis is down**),
@@ -216,5 +216,6 @@ module boundaries.
 
 ---
 
-All proposals above are shipped. Verified open backlog is empty — see
-[`../todo.md`](../todo.md).
+All proposals above are shipped. Five long-term items remain — see
+[`../todo.md`](../todo.md) (MT-1 RLS phase 2, CP-1 sharding, DI-1 schema split,
+DQ-2 coverage, ZT-3 BFF fork path).
