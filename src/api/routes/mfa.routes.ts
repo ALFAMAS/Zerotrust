@@ -6,6 +6,7 @@ import { otpsTable, usersTable } from "../../db/schema";
 import { getLogger } from "../../logger";
 import { sendOTP } from "../../mfa";
 import { authMiddleware } from "../../middleware/auth";
+import { sensitiveReverification } from "../../middleware/continuousVerification";
 import { getSettings } from "../../models/settings.model";
 import { sendOtpEmail } from "../../services/notifications/email.service";
 import { internalError } from "../../shared/httpErrors";
@@ -171,7 +172,7 @@ router.post("/totp/verify", async (c) => {
 });
 
 // DELETE /totp
-router.delete("/totp", async (c) => {
+router.delete("/totp", sensitiveReverification, async (c) => {
   try {
     const userId = c.get("user").id;
     const db = getDb();

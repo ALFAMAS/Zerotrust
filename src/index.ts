@@ -141,6 +141,7 @@ export {
   getVerification,
   recordVerification,
   requireReverification,
+  sensitiveReverification,
 } from "./middleware/continuousVerification";
 export { geoFencingMiddleware } from "./middleware/geoFencing";
 export {

@@ -39,18 +39,32 @@ export function getVerification(sessionId: string): VerificationRecord | null {
   return rec;
 }
 
+function verificationLevelSatisfies(
+  record: VerificationRecord,
+  requiredLevel: "soft" | "hard"
+): boolean {
+  if (requiredLevel === "soft") return record.level === "soft" || record.level === "hard";
+  return record.level === "hard";
+}
+
+function recentVerificationCovers(
+  sessionId: string,
+  requiredLevel: "soft" | "hard",
+  maxAgeSeconds: number
+): boolean {
+  const rec = getVerification(sessionId);
+  if (!rec) return false;
+  if ((Date.now() - rec.verifiedAt) / 1000 >= maxAgeSeconds) return false;
+  return verificationLevelSatisfies(rec, requiredLevel);
+}
+
+/** Pre-configured guard for password change, MFA disable, billing cancel, org transfer, etc. */
+export const sensitiveReverification = requireReverification({ sensitiveOperation: true });
+
 export function requireReverification(opts: ContinuousVerificationOptions = {}) {
   return createMiddleware<HonoEnv>(async (c, next) => {
     const session = c.get("session");
     if (!session) return next();
-
-    const maxAge = opts.maxAgeSeconds;
-    if (maxAge !== undefined) {
-      const rec = getVerification(session.id);
-      if (rec && (Date.now() - rec.verifiedAt) / 1000 < maxAge) {
-        return next();
-      }
-    }
 
     const request = {
       country: c.get("inferredCountry") ?? undefined,
@@ -72,6 +86,12 @@ export function requireReverification(opts: ContinuousVerificationOptions = {}) 
     const assessment = assessSessionRisk(factors);
 
     if (assessment.requiresReverification) {
+      const maxAge = opts.maxAgeSeconds ?? assessment.maxAgeSeconds;
+      const requiredLevel = assessment.level === "hard" ? "hard" : "soft";
+      if (recentVerificationCovers(session.id, requiredLevel, maxAge)) {
+        return next();
+      }
+
       logger.warn("Re-verification required", {
         sessionId: session.id,
         level: assessment.level,

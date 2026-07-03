@@ -39,8 +39,6 @@ here instead of appearing as dashboard gaps.
 | GET | /admin/slo | src/api/server.ts |
 | POST | /admin/uploads/presigned | src/api/routes/admin.routes.ts |
 | GET | /api/versions | src/api/server.ts |
-| POST | /auth/verify/challenge | src/api/routes/verification.routes.ts |
-| POST | /auth/verify/respond | src/api/routes/verification.routes.ts |
 | GET | /auth/verify/status | src/api/routes/verification.routes.ts |
 | POST | /billing/tax/quote | src/api/routes/globalization.routes.ts |
 | GET | /billing/usage | src/api/routes/billing.routes.ts |
@@ -130,6 +128,8 @@ here instead of appearing as dashboard gaps.
 | GET | /auth/pow/challenge | packages/ui/src/lib/pow.ts |
 | POST | /auth/register | packages/ui/src/lib/server-state/authForms.ts |
 | FETCH | /auth/token/refresh | packages/ui/src/lib/apiClient.ts |
+| POST | /auth/verify/challenge | packages/ui/src/lib/reverification.ts |
+| POST | /auth/verify/respond | packages/ui/src/lib/reverification.ts |
 | POST | /auth/verify-email | packages/ui/src/lib/server-state/authForms.ts |
 | POST | /auth/verify-email/resend | packages/ui/src/lib/server-state/auth.ts |
 | POST | /billing/cancel | packages/ui/src/lib/server-state/billing.ts |

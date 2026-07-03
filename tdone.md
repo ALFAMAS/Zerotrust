@@ -47,7 +47,7 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
 ## Access Control & Abuse Defense
 
 - ✅ RBAC + ABAC with just-in-time privilege escalation
-- `[~]` Continuous access evaluation — middleware + `/auth/verify/*` routes exist; not mounted on sensitive routes and no UI challenge flow ([`todo.md`](./todo.md) B3)
+- ✅ Continuous access evaluation — `sensitiveReverification` mounted on MFA disable, email change, OAuth unlink, org transfer, and billing cancel; UI `ReverificationProvider` + `apiClient` intercept `REVERIFICATION_REQUIRED`, run `/auth/verify/challenge` → `/auth/verify/respond`, and retry the original mutation
 - ✅ Anomaly detection — flags unusual login location / time / device
 - ✅ Rate limiting — per-IP sliding window, Redis-backed with in-memory fallback
 - ✅ Credential-stuffing defense (per-IP) + account lockout (per-account)
@@ -731,5 +731,20 @@ Shipped P3.6–P3.10 (final P3 backlog slice; P3.1–P3.5 above):
 
 **Verification (2026-07-03):** `bun run test` → 886 API tests; UI suite → 216 tests;
 `bun run test:coverage` green at 64% line ratchet; `bun run build` + UI build pass.
+
+### B3 — Continuous access re-verification (end-to-end)
+
+- `sensitiveReverification` middleware guards sensitive routes: `DELETE /auth/mfa/totp`,
+  `POST /auth/me/email`, `DELETE /auth/oauth/:provider`, `POST /orgs/:orgId/transfer`,
+  `POST /billing/cancel`.
+- Recent verification in `verificationStore` satisfies soft/hard level requirements before
+  re-challenging; middleware exported as `sensitiveReverification` from `src/index.ts`.
+- UI: `ReverificationProvider` dialog (TOTP / email OTP / passkey), `apiClient` intercepts
+  `REVERIFICATION_REQUIRED` and retries after successful `/auth/verify/respond`.
+- Tests: `continuousVerification.test.ts`, `mfa.routes.test.ts` (disable TOTP path),
+  `apiClient.test.ts` (handler + retry).
+
+**Verification (2026-07-03):** 35 targeted tests green (`continuousVerification`,
+`mfa.routes` DELETE /totp, `apiClient` re-verification retry).
 
 ---

@@ -4,13 +4,21 @@ const tokens = { access: null as string | null };
 
 vi.mock("./auth", () => ({
   getToken: () => tokens.access,
+  getRefreshToken: () => null,
+  setToken: vi.fn(),
   clearToken: vi.fn(),
+}));
+
+const reverificationHandler = vi.fn();
+vi.mock("./reverification", () => ({
+  getReverificationHandler: () => reverificationHandler,
 }));
 
 const fetchMock = vi.fn();
 beforeEach(() => {
   tokens.access = null;
   fetchMock.mockReset();
+  reverificationHandler.mockReset();
   (globalThis as unknown as { fetch: typeof fetch }).fetch = fetchMock as unknown as typeof fetch;
 });
 
@@ -153,5 +161,47 @@ describe("apiClient — error surface", () => {
       method: "PUT",
       body: JSON.stringify({ appName: "ZeroAuth" }),
     });
+  });
+});
+
+describe("apiClient — continuous re-verification", () => {
+  it("runs the registered handler and retries after REVERIFICATION_REQUIRED", async () => {
+    tokens.access = "tok";
+    reverificationHandler.mockResolvedValueOnce(true);
+    fetchMock
+      .mockResolvedValueOnce(
+        jsonResponse(401, {
+          error: "REVERIFICATION_REQUIRED",
+          level: "soft",
+          reason: "Sensitive operation requires re-verification",
+        })
+      )
+      .mockResolvedValueOnce(jsonResponse(200, { disabled: true }));
+
+    const result = await apiDelete<{ disabled: boolean }>("/auth/mfa/totp");
+    expect(reverificationHandler).toHaveBeenCalledWith({
+      level: "soft",
+      reason: "Sensitive operation requires re-verification",
+    });
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(result.disabled).toBe(true);
+  });
+
+  it("surfaces REVERIFICATION_REQUIRED when the handler declines", async () => {
+    tokens.access = "tok";
+    reverificationHandler.mockResolvedValueOnce(false);
+    fetchMock.mockResolvedValueOnce(
+      jsonResponse(401, {
+        error: "REVERIFICATION_REQUIRED",
+        level: "soft",
+        reason: "Sensitive operation requires re-verification",
+      })
+    );
+
+    await expect(apiDelete("/auth/mfa/totp")).rejects.toMatchObject({
+      code: "REVERIFICATION_REQUIRED",
+      status: 401,
+    });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 });

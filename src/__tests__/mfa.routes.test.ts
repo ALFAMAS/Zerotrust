@@ -54,6 +54,7 @@ vi.mock("qrcode", () => ({
 }));
 
 const TEST_USER_ID = "00000000-0000-0000-0000-000000000001";
+const TEST_SESSION_ID = "00000000-0000-0000-0000-0000000000ff";
 let testUser: Record<string, unknown>;
 vi.mock("../middleware/auth", () => ({
   authMiddleware: async (c: any, next: any) => {
@@ -62,6 +63,7 @@ vi.mock("../middleware/auth", () => ({
       return c.json({ error: "TOKEN_INVALID", message: "unauthenticated" }, 401);
     }
     c.set("user", testUser);
+    c.set("session", { id: TEST_SESSION_ID, userId: uid, lastActivityAt: new Date() });
     return next();
   },
 }));
@@ -222,7 +224,16 @@ describe("mfa.routes", () => {
       expect(res.status).toBe(401);
     });
 
-    it("disables TOTP", async () => {
+    it("requires continuous re-verification before disabling TOTP", async () => {
+      const app = await getApp();
+      const res = await del(app, "/totp");
+      expect(res.status).toBe(401);
+      expect((await res.json()).error).toBe("REVERIFICATION_REQUIRED");
+    });
+
+    it("disables TOTP after recent re-verification", async () => {
+      const { recordVerification } = await import("../middleware/continuousVerification");
+      recordVerification(TEST_SESSION_ID, "soft");
       db.limit.mockResolvedValueOnce([
         { mfa: { totp: { enabled: true, secret: "S", backupCodes: [] } } },
       ]);

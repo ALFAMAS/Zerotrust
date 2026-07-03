@@ -23,6 +23,7 @@
  */
 
 import { clearToken, getRefreshToken, getToken, setToken } from "./auth";
+import { getReverificationHandler } from "./reverification";
 
 const BASE_URL = process.env.NEXT_PUBLIC_ZEROTRUST_URL || "http://localhost:1337";
 
@@ -47,6 +48,12 @@ export interface ApiClientOptions {
   timeoutMs?: number;
   /** Extra headers to merge in (e.g. `x-workload-key` for workload issue). */
   extraHeaders?: Record<string, string>;
+  /** Internal: do not intercept REVERIFICATION_REQUIRED (challenge/respond calls). */
+  skipReverify?: boolean;
+  /** Internal: request already retried after successful re-verification. */
+  _reverified?: boolean;
+  /** Internal: request already retried after token refresh. */
+  _refreshed?: boolean;
 }
 
 function buildAuthHeaders(skipAuth: boolean): Record<string, string> {
@@ -93,8 +100,7 @@ async function dispatch<T>(
   method: string,
   path: string,
   init: Omit<RequestInit, "method" | "signal">,
-  options: ApiClientOptions = {},
-  isRetry = false
+  options: ApiClientOptions = {}
 ): Promise<T> {
   const url = `${BASE_URL}${path}`;
   const headers: Record<string, string> = {
@@ -132,14 +138,6 @@ async function dispatch<T>(
 
   if (!res) throw lastErr;
 
-  if (res.status === 401 && !options.skipAuth && !isRetry && getRefreshToken()) {
-    const refreshed = await tryRefresh();
-    if (refreshed) {
-      return dispatch<T>(method, path, init, options, true);
-    }
-    clearToken();
-  }
-
   if (res.status === 204) return undefined as T;
 
   const text = await res.text().catch(() => "");
@@ -152,10 +150,38 @@ async function dispatch<T>(
     }
   }
 
+  if (res.status === 401 && !options.skipAuth) {
+    const body =
+      (parsed as { error?: string; code?: string; level?: string; reason?: string } | null) ?? {};
+    const errorCode = body.code ?? body.error;
+
+    if (
+      errorCode === "REVERIFICATION_REQUIRED" &&
+      !options.skipReverify &&
+      !options._reverified
+    ) {
+      const handler = getReverificationHandler();
+      if (handler) {
+        const verified = await handler({ level: body.level, reason: body.reason });
+        if (verified) {
+          return dispatch<T>(method, path, init, { ...options, _reverified: true });
+        }
+      }
+    }
+
+    if (!options._refreshed && getRefreshToken()) {
+      const refreshed = await tryRefresh();
+      if (refreshed) {
+        return dispatch<T>(method, path, init, { ...options, _refreshed: true });
+      }
+      clearToken();
+    }
+  }
+
   if (!res.ok) {
-    const errBody = (parsed as { message?: string; code?: string } | null) ?? {};
+    const errBody = (parsed as { message?: string; code?: string; error?: string } | null) ?? {};
     const err = Object.assign(new Error(errBody.message || `HTTP ${res.status}`), {
-      code: errBody.code,
+      code: errBody.code ?? errBody.error,
       status: res.status,
     }) as ApiError;
     throw err;

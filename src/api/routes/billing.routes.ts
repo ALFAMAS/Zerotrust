@@ -9,6 +9,7 @@ import {
 import { feedbackTable, organizationMembersTable, subscriptionsTable } from "../../db/schema";
 import { auditLog, getLogger } from "../../logger";
 import { authMiddleware } from "../../middleware/auth";
+import { sensitiveReverification } from "../../middleware/continuousVerification";
 import { getStripe } from "../../services/billing/stripeWebhookProcessor";
 import { getUsageSummary } from "../../services/billing/usage.service";
 import { internalError } from "../../shared/httpErrors";
@@ -166,7 +167,7 @@ router.post("/change-plan", authMiddleware, async (c) => {
 
 // POST /billing/cancel — body: { orgId?, reason?, comment?, action?: "cancel" | "pause" }
 // Cancellation survey is stored as feedback; pause uses Stripe pause_collection.
-router.post("/cancel", authMiddleware, async (c) => {
+router.post("/cancel", authMiddleware, sensitiveReverification, async (c) => {
   const user = c.get("user");
   const body = await c.req.json().catch(() => ({}));
   const orgId = body.orgId as string | undefined;

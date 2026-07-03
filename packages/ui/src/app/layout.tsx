@@ -6,6 +6,7 @@ import AnalyticsScript from "@/components/AnalyticsScript";
 import CookieBanner from "@/components/CookieBanner";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { QueryProvider } from "@/components/QueryProvider";
+import { ReverificationProvider } from "@/components/ReverificationProvider";
 import ServiceWorkerRegistrar from "@/components/ServiceWorkerRegistrar";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { brand } from "@/config/brand";
@@ -84,12 +85,14 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
             <ErrorBoundary>
               <QueryProvider>
-                <ToastProvider>
-                  {children}
-                  <CookieBanner />
-                  <AnalyticsScript />
-                  <ServiceWorkerRegistrar />
-                </ToastProvider>
+                <ReverificationProvider>
+                  <ToastProvider>
+                    {children}
+                    <CookieBanner />
+                    <AnalyticsScript />
+                    <ServiceWorkerRegistrar />
+                  </ToastProvider>
+                </ReverificationProvider>
               </QueryProvider>
             </ErrorBoundary>
           </ThemeProvider>

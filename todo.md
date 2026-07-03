@@ -33,28 +33,6 @@ invites under `/:orgId/invites` but no accept handler. Listed as unmatched in
 
 ### P1 — Security & access control gaps
 
-#### B3 — Continuous access re-verification not integrated end-to-end
-
-**Status:** Open — backend primitives exist; not mounted or surfaced in UI.
-
-**Evidence:** `requireReverification()` in `src/middleware/continuousVerification.ts`
-and `/auth/verify/*` routes in `verification.routes.ts` exist, but
-`requireReverification` is never mounted on any route (only re-exported from
-`src/index.ts`). No UI handler for `REVERIFICATION_REQUIRED` or
-`/auth/verify/challenge`. `tdone.md` overstates this as fully shipped.
-
-**Acceptance criteria:**
-
-- Mount `requireReverification({ sensitiveOperation: true })` on agreed sensitive
-  routes (password change, MFA disable, org transfer, billing cancel, etc.).
-- UI intercepts `REVERIFICATION_REQUIRED` (apiClient or mutation error boundary),
-  runs challenge/respond flow, and retries the original action.
-- Route + UI tests cover at least one sensitive path end-to-end.
-
----
-
-### P2 — Quality & maintainability
-
 #### B4 — Test coverage ratchet toward 85%
 
 **Status:** Open — long-term target; ratchets below goal.
@@ -68,7 +46,7 @@ branches (floors 64/56 in `vitest.config.ts`); UI **~47%** lines
 - Raise Vitest coverage floors incrementally as measured coverage grows (target
   ≥85% lines/branches long-term per scorecard).
 - Prioritize untested hot paths: auth flows, billing webhooks, org invite accept
-  (B1), continuous verification (B3).
+  (B1).
 
 ---
 

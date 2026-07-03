@@ -16,6 +16,7 @@ import {
 } from "../../db/schema";
 import { getLogger } from "../../logger";
 import { authMiddleware } from "../../middleware/auth";
+import { sensitiveReverification } from "../../middleware/continuousVerification";
 import { countRows } from "../../shared/dbCount";
 import { paginated, parsePaginatedQuery } from "../../shared/pagination";
 import type { HonoEnv } from "../../shared/types";
@@ -224,7 +225,7 @@ router.delete("/:orgId/members/:userId", async (c) => {
   return c.json({ ok: true });
 });
 
-router.post("/:orgId/transfer", async (c) => {
+router.post("/:orgId/transfer", sensitiveReverification, async (c) => {
   const user = c.get("user");
   const orgId = c.req.param("orgId");
   if (!(await requireOwner(orgId, user.id))) return c.json({ error: "FORBIDDEN" }, 403);

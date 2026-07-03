@@ -22,6 +22,7 @@ import {
 } from "../../db/schema";
 import { getLogger } from "../../logger";
 import { authMiddleware } from "../../middleware/auth";
+import { sensitiveReverification } from "../../middleware/continuousVerification";
 import {
   isIpBlocked,
   recordIpLoginFailure,
@@ -1288,7 +1289,7 @@ router.post("/me/nps", authMiddleware, async (c) => {
 // Removes the linked social-login provider. Refuses to remove the user's *only*
 // remaining login method (no password + this is the last provider), which would
 // otherwise lock them out of their account.
-router.delete("/oauth/:provider", authMiddleware, async (c) => {
+router.delete("/oauth/:provider", authMiddleware, sensitiveReverification, async (c) => {
   try {
     const user = c.get("user");
     const provider = c.req.param("provider");
@@ -1473,7 +1474,7 @@ router.post("/me/link", authMiddleware, rateLimit({ points: 10, windowSecs: 60 }
 
 // ── POST /auth/me/email — change email (requires current password) ───────────
 
-router.post("/me/email", authMiddleware, rateLimit({ points: 5, windowSecs: 60 }), async (c) => {
+router.post("/me/email", authMiddleware, sensitiveReverification, rateLimit({ points: 5, windowSecs: 60 }), async (c) => {
   try {
     const user = c.get("user");
     const { newEmail, password } = await c.req.json().catch(() => ({}));
