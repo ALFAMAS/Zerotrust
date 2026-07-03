@@ -11,7 +11,7 @@ git history at the path noted.
 | Topic | Canonical doc |
 | --- | --- |
 | Standing production-readiness audit | [`AUDIT.md`](./AUDIT.md) |
-| Prioritized backlog (P5+) | [`../todo.md`](../todo.md) |
+| Prioritized backlog | [`../todo.md`](../todo.md) |
 | Current architecture + proposals | [`ARCHITECTURE.md`](./ARCHITECTURE.md) |
 | Feature-removal record (2026-06-28 slim-down) | _Removed_ — see migrations `0020`–`0024` and `tdone.md` |
 | Shipped-feature ledger | [`../tdone.md`](../tdone.md) |
@@ -61,10 +61,9 @@ _Was: `docs/PRODUCTION_SAFETY_TODO.md`_
 
 Forward-looking CI/CD and release-safety punch list. **Section A (make CI green)
 shipped** — type-check, lint, and tests went green (697 passing at the time);
-the magic-link `randomBytes` outage (A1) was fixed. The remaining operational
-items (§B deploy/data safety, §C branch protection, §D hardening hygiene) were
-**moved into [`../todo.md`](../todo.md)** (see its "Operational hardening" group)
-so there is one backlog.
+the magic-link `randomBytes` outage (A1) was fixed. Remaining operational items
+from §B–§D were either shipped (see [`../tdone.md`](../tdone.md)) or superseded
+by the standing audit; open work is tracked in [`../todo.md`](../todo.md).
 
 ## 2026-06-28 — SaaS Template Architecture Recommendations
 _Was: `docs/SAAS_TEMPLATE_ARCHITECTURE_RECOMMENDATIONS.md`_
@@ -74,5 +73,5 @@ recommended maintainability/stability upgrades (bounded modules, repository/
 transaction layer, worker isolation + the PM2 `-i max` cluster-mode duplication
 bug, plugin/capability contract for optional-heavy integrations, typed UI↔API
 contracts, UI component tests, operational reference architecture, ADRs +
-maintenance scorecard). **All recommendations are now tracked** in
-[`AUDIT.md`](./AUDIT.md) (findings) and [`../todo.md`](../todo.md) (P1–P4 backlog).
+maintenance scorecard). **Recommendations shipped or tracked** in
+[`AUDIT.md`](./AUDIT.md) (findings) and [`../todo.md`](../todo.md) (verified backlog B1–B7).

@@ -161,7 +161,7 @@ For each migrated page:
 6. Use `useMutation` for writes; apply optimistic updates only when rollback is straightforward.
 7. Invalidate exact domain keys after writes.
 8. Run targeted test, targeted Biome check, root type build, and UI build.
-9. Update this file plus `todo.md`/`tdone.md` after verification.
+9. Update this file and `tdone.md` after verification.
 
 ## Local verification commands
 

@@ -129,13 +129,17 @@ incident under load or attack) · **Medium** (correctness/maintainability debt) 
 1. ~~**Repository + transaction layer** for refresh-token rotation, session
    lifecycle, billing, wallet ledger, org role transitions (C1, M1).~~ **Done**
    (P1.1, 2026-07-03).
-2. **Centralized jobs module** with Zod payloads, retry/backoff, dead-letter,
-   idempotency keys, and single-leader scheduling (C3, P1).
+2. ~~**Centralized jobs module** with Zod payloads, retry/backoff, dead-letter,
+   idempotency keys, and single-leader scheduling (C3, P1).~~ **Partial**
+   (2026-07-03) — `src/jobs/registry.ts` + scheduler with Zod schemas,
+   idempotency keys, and Redis leader election; still `setInterval`-based. Optional
+   queue-backed upgrade tracked as B5 in [`todo.md`](../todo.md).
 3. ~~**Module boundaries + import-linter** and an ADR for dependency direction (M3).~~ **Done**
    (P2.2, 2026-07-03).
 4. ~~**Typed event payloads**, chip away at `as any` (M2).~~ **Done** (M1, 2026-07-01).
-5. **UI component/integration tests** for auth/billing/admin flows (T1).
-6. **ADRs + maintenance scorecard** (D2).
+5. ~~**UI component/integration tests** for auth/billing/admin flows (T1).~~ **Done**
+   (P3.1, P3.7).
+6. ~~**ADRs + maintenance scorecard** (D2).~~ **Done** (P4.4–P4.5).
 
 ## 6. Changes made in this audit pass
 

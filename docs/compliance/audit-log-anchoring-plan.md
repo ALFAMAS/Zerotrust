@@ -51,7 +51,9 @@ AUDIT_ANCHOR_S3_PREFIX=audit-anchors/  # uses BACKUP_S3_* credentials when set
 Anchors are stored in Postgres (`audit_log_anchors`) and, when S3 backup credentials are
 configured, uploaded as append-only JSON objects under `AUDIT_ANCHOR_S3_PREFIX`.
 
-## Open Questions (production)
+## Production tuning (optional)
 
 - Which external anchor target should be primary for long-term retention (object lock)?
 - Should anchors be signed with a separate key from application secrets?
+
+These are deployment decisions, not open implementation work.

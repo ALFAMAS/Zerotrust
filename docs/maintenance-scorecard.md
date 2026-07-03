@@ -61,8 +61,8 @@ Node v24.15.0.
 |---|---|---|---|
 | Pending (unapplied) migrations | 0 (latest: `0029_audit_log_anchors`) | 0 | ✅ |
 | Irreversible migrations in last quarter | 5 (`0020`–`0024`, DROP CASCADE) — gated by `.destructive-migrations.json` + CI | 0 new without allowlist | ✅ |
-| Migration applied with rollback tested | _TBD_ (DR drill pending) | All destructive | — |
-| `db:generate` drift (`drizzle/` vs schema) | _TBD_ | No diff | — |
+| Migration applied with rollback tested | 2026-07-03 restore drill ([evidence](./compliance/evidence/2026/Q3/backup-restore-drills/2026-07-03-restore-drill.md)) | All destructive | ✅ |
+| `db:generate` drift (`drizzle/` vs schema) | 0 (verified locally 2026-07-03) | No diff | ✅ |
 
 **Notes:** Migrations `0020`–`0024` are irreversible `DROP … CASCADE`, allowlisted in
 `.destructive-migrations.json`. New destructive DDL is blocked by `bun run migrations:check`
@@ -76,9 +76,9 @@ Node v24.15.0.
 |---|---|---|---|
 | Last `db:backup` success | _TBD_ (no prod deploy yet) | <24h ago | — |
 | Backup S3 upload confirmed | _TBD_ | <24h ago | — |
-| Last restore drill | _TBD_ (runbook exists, drill pending) | <quarter ago | — |
-| Restore RTO (time to recovered) | _TBD_ | <30 min | — |
-| Restore RPO (data loss window) | _TBD_ | <1 hour | — |
+| Last restore drill | 2026-07-03 ([Q3 drill](./compliance/evidence/2026/Q3/backup-restore-drills/2026-07-03-restore-drill.md)) | <quarter ago | ✅ |
+| Restore RTO (time to recovered) | _TBD_ (no prod deploy yet) | <30 min | — |
+| Restore RPO (data loss window) | _TBD_ (no prod deploy yet) | <1 hour | — |
 | `BACKUP_REQUIRE_ENCRYPTION` enforced in prod | Yes (P4.3 fail-fast gate) | `true` | ✅ |
 
 **Notes:** P4.3 now enforces `BACKUP_REQUIRE_ENCRYPTION=true` and
@@ -116,13 +116,9 @@ see `tests/load/full-suite.k6.js` thresholds.
 `main` CI run 28624304093 (2026-07-02). `p/owasp-top-ten` passes with zero
 blocking findings.
 
-**Open security items from AUDIT.md:** `/metrics` is open by default unless
-`METRICS_AUTH_TOKEN` is set (S3). P4.2 shipped: deployment checklist now
-**requires** `METRICS_AUTH_TOKEN` in production, and the reference architecture
-documents token-gated scrape configs for both Kubernetes (ServiceMonitor +
-bearer secret) and VM/PM2 (`prometheus.yml` + `credentials_file`). Per-deploy
-enforcement is an operational responsibility; the scorecard tracks open
-ungated `/metrics` exceptions to zero.
+**Open security items from AUDIT.md:** `/metrics` gate — **Fixed** (P4.2).
+Production boot requires `METRICS_AUTH_TOKEN`; reference architecture documents
+token-gated scrape configs.
 
 ---
 
@@ -136,6 +132,7 @@ ungated `/metrics` exceptions to zero.
 | Unaddressed TODO P0 items | 0 (P0.1–P0.3 done) | 0 | ✅ |
 | Unaddressed TODO P1 items | 0 (P1.1–P1.5 done) | 0 | ✅ |
 | Unaddressed TODO P4 items | 0 (P4.1–P4.9 done) | 0 | ✅ |
+| Open backlog (B1–B7) | 7 verified items | Trending down | 🔶 |
 
 ---
 

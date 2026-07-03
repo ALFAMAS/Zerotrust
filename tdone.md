@@ -28,7 +28,7 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
 ## Authentication & Identity
 
 - ✅ Email + password with configurable account lockout (threshold + auto-unlock)
-- ✅ OAuth — Google, GitHub, Apple, Facebook (admin-toggleable per provider)
+- `[~]` OAuth — Google, GitHub, Facebook (admin-toggleable); Apple module in `src/oauth/providers/apple.ts` but factory wiring pending ([`todo.md`](./todo.md) B2)
 - ✅ Magic links (passwordless, 15-minute TTL, email-delivered)
 - ✅ Passkeys / WebAuthn FIDO2 — register, authenticate, resident keys, MDS3 attestation policy
 - ✅ TOTP (Google Authenticator, Authy, 1Password)
@@ -47,7 +47,7 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
 ## Access Control & Abuse Defense
 
 - ✅ RBAC + ABAC with just-in-time privilege escalation
-- ✅ Continuous access evaluation — re-verification challenges after sensitive operations
+- `[~]` Continuous access evaluation — middleware + `/auth/verify/*` routes exist; not mounted on sensitive routes and no UI challenge flow ([`todo.md`](./todo.md) B3)
 - ✅ Anomaly detection — flags unusual login location / time / device
 - ✅ Rate limiting — per-IP sliding window, Redis-backed with in-memory fallback
 - ✅ Credential-stuffing defense (per-IP) + account lockout (per-account)
@@ -446,8 +446,8 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
 
 ### Fork-readiness audit (`AUDIT-REPORT.md`) — completed items
 
-All fork-blocking (must-fix) and should-fix audit items are resolved. Open
-follow-ups (**E2**, E4–E6 info debt) remain in [`todo.md`](./todo.md).
+All fork-blocking (must-fix) and should-fix audit items from this report are
+resolved. Verified open work is tracked in [`todo.md`](./todo.md) (B1–B7).
 
 | ID | Item | Resolution |
 | --- | --- | --- |
