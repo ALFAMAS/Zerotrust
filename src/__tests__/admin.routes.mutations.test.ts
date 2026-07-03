@@ -1,0 +1,201 @@
+import { Hono } from "hono";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+// ── Mocks ──────────────────────────────────────────────────────────────────
+// admin.routes.ts imports with EXTENSIONLESS specifiers (../../db,
+// ../../logger, ...), so mock specifier strings here must be extensionless
+// too (../db, ../logger, ...).
+
+vi.mock("../db", () => ({ getDb: vi.fn(), getReadDb: vi.fn() }));
+
+vi.mock("../shared/dbCount", () => ({
+  countRows: vi.fn().mockResolvedValue(0),
+}));
+
+const auditLog = vi.fn().mockResolvedValue(undefined);
+vi.mock("../logger", () => ({
+  getLogger: () => ({ info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() }),
+  auditLog: (...a: unknown[]) => auditLog(...a),
+}));
+
+const ADMIN_ID = "admin-00000000-0000-0000-0000-000000000001";
+vi.mock("../middleware/auth", () => ({
+  authMiddleware: async (c: any, next: any) => {
+    c.set("user", { id: ADMIN_ID, email: "admin@example.com", roles: ["admin"] });
+    return next();
+  },
+  requireAdmin: async (_c: any, next: any) => next(),
+}));
+
+vi.mock("../models/settings.model", () => ({
+  getSettings: vi.fn().mockResolvedValue({}),
+  updateSettings: vi.fn().mockImplementation(async (partial: Record<string, unknown>) => partial),
+}));
+
+const invalidateUserCache = vi.fn();
+vi.mock("../services/auth/userStateCache.service", () => ({
+  invalidateUserCache: (...a: unknown[]) => invalidateUserCache(...a),
+}));
+
+const revokeAllSessionsForUser = vi.fn().mockResolvedValue(1);
+const revokeSession = vi.fn();
+vi.mock("../middleware/sessionControl", () => ({
+  revokeAllSessionsForUser: (...a: unknown[]) => revokeAllSessionsForUser(...a),
+  revokeSession: (...a: unknown[]) => revokeSession(...a),
+}));
+
+// ── Helpers ────────────────────────────────────────────────────────────────
+
+const TARGET_USER_ID = "user-00000000-0000-0000-0000-000000000002";
+
+/** Queue-based DB mock: each `.limit()` call consumes the next queued select
+ * result; each `.returning()` call consumes the next queued write result. */
+function makeQueuedDb() {
+  const selectResults: unknown[][] = [];
+  const returningResults: unknown[][] = [];
+  let selectIdx = 0;
+  let returningIdx = 0;
+
+  const chain: any = {
+    select: vi.fn().mockReturnThis(),
+    from: vi.fn().mockReturnThis(),
+    where: vi.fn().mockReturnThis(),
+    limit: vi.fn().mockImplementation(() => Promise.resolve(selectResults[selectIdx++] ?? [])),
+    update: vi.fn().mockReturnThis(),
+    set: vi.fn().mockReturnThis(),
+    returning: vi
+      .fn()
+      .mockImplementation(() => Promise.resolve(returningResults[returningIdx++] ?? [])),
+  };
+
+  return {
+    chain,
+    queueSelect: (rows: unknown[]) => selectResults.push(rows),
+    queueReturning: (rows: unknown[]) => returningResults.push(rows),
+  };
+}
+
+async function getApp(db: ReturnType<typeof makeQueuedDb>["chain"]) {
+  const { getDb, getReadDb } = await import("../db");
+  vi.mocked(getDb).mockReturnValue(db);
+  vi.mocked(getReadDb).mockReturnValue(db);
+  const { default: router } = await import("../api/routes/admin.routes");
+  return new Hono().route("/admin", router);
+}
+
+function req(app: Hono, method: string, path: string, body?: unknown) {
+  return app.request(path, {
+    method,
+    headers: { "Content-Type": "application/json" },
+    body: body !== undefined ? JSON.stringify(body) : undefined,
+  });
+}
+
+beforeEach(() => {
+  vi.resetModules();
+  vi.clearAllMocks();
+  revokeAllSessionsForUser.mockResolvedValue(1);
+});
+afterEach(() => vi.clearAllMocks());
+
+// ── C2: every sensitive admin mutation must land in the audit chain ────────
+
+describe("admin.routes mutations — audit coverage (C2)", () => {
+  it("PUT /settings audits the change with the admin id and the diff", async () => {
+    const { chain } = makeQueuedDb();
+    const app = await getApp(chain);
+
+    const res = await req(app, "PUT", "/admin/settings", { requireMfaForAll: true });
+    expect(res.status).toBe(200);
+    expect(auditLog).toHaveBeenCalledWith(
+      "admin.settings_updated",
+      ADMIN_ID,
+      "saas_settings",
+      true,
+      { changes: { requireMfaForAll: true } }
+    );
+  });
+
+  it("PATCH /users/:id audits a status change", async () => {
+    const { chain, queueReturning } = makeQueuedDb();
+    queueReturning([
+      { id: TARGET_USER_ID, email: "target@example.com", displayName: "Target", status: "suspended" },
+    ]);
+    const app = await getApp(chain);
+
+    const res = await req(app, "PATCH", `/admin/users/${TARGET_USER_ID}`, { status: "suspended" });
+    expect(res.status).toBe(200);
+    expect(auditLog).toHaveBeenCalledWith(
+      "admin.user_updated",
+      ADMIN_ID,
+      TARGET_USER_ID,
+      true,
+      { changes: expect.objectContaining({ status: "suspended" }) }
+    );
+  });
+
+  it("PATCH /users/:id does NOT audit when the target user is not found", async () => {
+    const { chain, queueReturning } = makeQueuedDb();
+    queueReturning([]); // no rows updated — user not found
+    const app = await getApp(chain);
+
+    const res = await req(app, "PATCH", `/admin/users/${TARGET_USER_ID}`, { status: "suspended" });
+    expect(res.status).toBe(404);
+    expect(auditLog).not.toHaveBeenCalled();
+  });
+
+  it("DELETE /users/:id audits the soft-delete", async () => {
+    const { chain, queueReturning } = makeQueuedDb();
+    queueReturning([{ id: TARGET_USER_ID }]);
+    const app = await getApp(chain);
+
+    const res = await req(app, "DELETE", `/admin/users/${TARGET_USER_ID}`);
+    expect(res.status).toBe(200);
+    expect(revokeAllSessionsForUser).toHaveBeenCalledWith(TARGET_USER_ID);
+    expect(auditLog).toHaveBeenCalledWith("admin.user_deleted", ADMIN_ID, TARGET_USER_ID, true);
+  });
+
+  it("POST /users/:id/roles audits a role grant", async () => {
+    const { chain, queueSelect } = makeQueuedDb();
+    queueSelect([{ id: "role-1" }]); // role lookup
+    queueSelect([{ id: TARGET_USER_ID, roles: ["user"] }]); // user lookup
+    const app = await getApp(chain);
+
+    const res = await req(app, "POST", `/admin/users/${TARGET_USER_ID}/roles`, {
+      roleName: "admin",
+    });
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.roles).toEqual(["user", "admin"]);
+    expect(auditLog).toHaveBeenCalledWith("admin.role_granted", ADMIN_ID, TARGET_USER_ID, true, {
+      role: "admin",
+    });
+  });
+
+  it("POST /users/:id/roles does NOT audit a no-op grant (role already present)", async () => {
+    const { chain, queueSelect } = makeQueuedDb();
+    queueSelect([{ id: "role-1" }]);
+    queueSelect([{ id: TARGET_USER_ID, roles: ["user", "admin"] }]);
+    const app = await getApp(chain);
+
+    const res = await req(app, "POST", `/admin/users/${TARGET_USER_ID}/roles`, {
+      roleName: "admin",
+    });
+    expect(res.status).toBe(200);
+    expect(auditLog).not.toHaveBeenCalled();
+  });
+
+  it("DELETE /users/:id/roles/:roleName audits a role revoke", async () => {
+    const { chain, queueSelect } = makeQueuedDb();
+    queueSelect([{ id: TARGET_USER_ID, roles: ["user", "admin"] }]);
+    const app = await getApp(chain);
+
+    const res = await req(app, "DELETE", `/admin/users/${TARGET_USER_ID}/roles/admin`);
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.roles).toEqual(["user"]);
+    expect(auditLog).toHaveBeenCalledWith("admin.role_revoked", ADMIN_ID, TARGET_USER_ID, true, {
+      role: "admin",
+    });
+  });
+});

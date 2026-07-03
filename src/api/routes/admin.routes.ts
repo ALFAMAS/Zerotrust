@@ -11,7 +11,7 @@ import {
   sessionsTable,
   usersTable,
 } from "../../db/schema";
-import { getLogger } from "../../logger";
+import { auditLog, getLogger } from "../../logger";
 import { authMiddleware, requireAdmin } from "../../middleware/auth";
 import { revokeAllSessionsForUser, revokeSession } from "../../middleware/sessionControl";
 import { getSettings, updateSettings } from "../../models/settings.model";
@@ -48,6 +48,10 @@ router.put("/settings", async (c) => {
     const body = await c.req.json();
     const adminId = c.get("user").id;
     const updated = await updateSettings(body, adminId);
+    // Platform-wide auth/security settings (MFA requirement, lockout
+    // threshold, session TTL, registration) are a high-value target — every
+    // change must land in the tamper-evident audit chain, not just app logs.
+    await auditLog("admin.settings_updated", adminId, "saas_settings", true, { changes: body });
     return c.json(updated);
   } catch (err) {
     return internalError(
@@ -163,6 +167,7 @@ router.get("/users/:id", async (c) => {
 // PATCH /users/:id
 router.patch("/users/:id", async (c) => {
   try {
+    const admin = c.get("user");
     const body = await c.req.json();
     const allowed: Record<string, unknown> = {};
 
@@ -196,6 +201,10 @@ router.patch("/users/:id", async (c) => {
       return c.json({ error: "USER_NOT_FOUND", message: "User not found" }, 404);
     }
     await invalidateUserCache(c.req.param("id"));
+    // A status change (suspend/reinstate/soft-delete via this generic path)
+    // or display-name edit on someone else's account is a privileged action —
+    // record it in the tamper-evident chain.
+    await auditLog("admin.user_updated", admin.id, rows[0].id, true, { changes: allowed });
     return c.json(rows[0]);
   } catch (err) {
     return internalError(c, logger, "Admin update user error", err, "Failed to update user");
@@ -205,6 +214,7 @@ router.patch("/users/:id", async (c) => {
 // DELETE /users/:id
 router.delete("/users/:id", async (c) => {
   try {
+    const admin = c.get("user");
     const id = c.req.param("id");
     const db = getDb();
     const rows = await db
@@ -219,6 +229,7 @@ router.delete("/users/:id", async (c) => {
 
     await invalidateUserCache(id);
     await revokeAllSessionsForUser(id);
+    await auditLog("admin.user_deleted", admin.id, id, true);
     return c.json({ deleted: true, userId: id });
   } catch (err) {
     return internalError(c, logger, "Admin delete user error", err, "Failed to delete user");
@@ -415,6 +426,7 @@ router.post("/roles", async (c) => {
 // POST /users/:id/roles — assign role to user
 router.post("/users/:id/roles", async (c) => {
   try {
+    const admin = c.get("user");
     const userId = c.req.param("id");
     const { roleName } = await c.req.json();
     if (!roleName) {
@@ -448,6 +460,9 @@ router.post("/users/:id/roles", async (c) => {
         .set({ roles: updatedRoles, updatedAt: new Date() })
         .where(eq(usersTable.id, userId));
       await invalidateUserCache(userId);
+      // Privilege escalation is the single highest-value audit event this
+      // router can emit — a grant must be traceable to who did it and when.
+      await auditLog("admin.role_granted", admin.id, userId, true, { role: roleName });
       return c.json({ success: true, roles: updatedRoles });
     }
 
@@ -460,6 +475,7 @@ router.post("/users/:id/roles", async (c) => {
 // DELETE /users/:id/roles/:roleName — revoke role from user
 router.delete("/users/:id/roles/:roleName", async (c) => {
   try {
+    const admin = c.get("user");
     const userId = c.req.param("id");
     const roleName = c.req.param("roleName");
 
@@ -480,6 +496,7 @@ router.delete("/users/:id/roles/:roleName", async (c) => {
       .set({ roles: updatedRoles, updatedAt: new Date() })
       .where(eq(usersTable.id, userId));
     await invalidateUserCache(userId);
+    await auditLog("admin.role_revoked", admin.id, userId, true, { role: roleName });
     return c.json({ success: true, roles: updatedRoles });
   } catch (err) {
     return internalError(c, logger, "Admin revoke role error", err, "Failed to remove role");
