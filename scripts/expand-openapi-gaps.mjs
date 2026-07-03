@@ -172,8 +172,8 @@ function buildOperation(route) {
     summary: humanize(path, method),
     parameters: pathParameters(path),
     responses: {
-      "200": { description: "Success" },
-      "400": {
+      200: { description: "Success" },
+      400: {
         description: "Bad request",
         content: {
           "application/json": {
