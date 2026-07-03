@@ -17,11 +17,11 @@ is tracked in [`evidence-register.md`](./evidence-register.md) and
 | Vendor management   | [vendor-management-register.md](./vendor-management-register.md)             | Populated; Q3 2026 review complete             |
 | Incident response   | [incident-response-runbook.md](./incident-response-runbook.md)               | Q3 2026 tabletop recorded                      |
 | Backup/restore      | [backup-restore-runbook.md](./backup-restore-runbook.md)                     | Q3 2026 restore drill recorded                 |
-| Access reviews      | [access-review-procedure.md](./access-review-procedure.md)                   | Maps to shipped access-review tooling          |
-| Monitoring          | [monitoring-evidence-procedure.md](./monitoring-evidence-procedure.md)       | Drafted; on-call records ongoing               |
+| Access reviews      | [access-review-procedure.md](./access-review-procedure.md)                   | Q3 2026 review recorded                        |
+| Monitoring          | [monitoring-evidence-procedure.md](./monitoring-evidence-procedure.md)       | Jul 2026 monitoring packet recorded            |
 | SOC 2 planning      | [soc2-auditor-readiness.md](./soc2-auditor-readiness.md)                     | Drafted; auditor + window TBD                  |
 | Audit log hardening | [audit-log-anchoring-plan.md](./audit-log-anchoring-plan.md)                 | Implemented 2026-07-03                         |
-| Evidence tracker    | [evidence-register.md](./evidence-register.md)                               | Q3 2026 baseline entries complete              |
+| Evidence tracker    | [evidence-register.md](./evidence-register.md)                               | Q3 2026 evidence cycle complete (E-001–E-010)  |
 
 ## Evidence Storage Convention
 

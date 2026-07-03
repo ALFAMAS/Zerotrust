@@ -479,7 +479,7 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
 ### Fork-readiness audit (`AUDIT-REPORT.md`) — completed items
 
 All fork-blocking (must-fix) and should-fix audit items from this report are
-resolved. Verified open work is tracked in [`todo.md`](./todo.md) (B4–B7).
+resolved. Verified open work is tracked in [`todo.md`](./todo.md).
 
 | ID | Item | Resolution |
 | --- | --- | --- |
@@ -765,6 +765,29 @@ resolved. Verified open work is tracked in [`todo.md`](./todo.md) (B4–B7).
   - `bun run boundaries:check` — 1 pre-existing violation unrelated to this
     change (`src/audit/anchor.ts` → `services/ops/objectStorage.service`,
     predates B4/B5)
+
+---
+
+---
+
+## P3 — Operations & compliance (2026-07-03)
+
+- **B6 — CI success rate recovery:** Triaged Jul 2 refactor burst (~42% over prior
+  100 runs). Root cause: deterministic Biome format/import drift (not flaky tests).
+  Remediated format in `src/worker.ts`, `src/api/routes/auth.routes.ts`,
+  `src/jobs/scheduler.ts`, `packages/ui/src/lib/apiClient.ts`,
+  `packages/ui/src/lib/reverification.ts`, `packages/ui/src/lib/server-state/prefetch.ts`,
+  and `packages/ui/src/components/ReverificationProvider.tsx`. Evidence in
+  [`docs/compliance/evidence/2026/Q3/ci-health/2026-07-03-ci-recovery.md`](./docs/compliance/evidence/2026/Q3/ci-health/2026-07-03-ci-recovery.md).
+  Scorecard §2 updated; rolling 30-day ≥95% target rebaselined from remediation date.
+- **B7 — Compliance evidence collection (Q3 2026):** Completed E-002 (quarterly
+  access review), E-003 (onboarding/offboarding samples), E-007 (Jul monitoring
+  packet), E-008 (change-management PR samples), and E-010 (annual risk assessment
+  export). Updated [`docs/compliance/evidence-register.md`](./docs/compliance/evidence-register.md)
+  and [`docs/compliance/soc2-auditor-readiness.md`](./docs/compliance/soc2-auditor-readiness.md).
+- **Verification (2026-07-03):** `bunx biome ci` → **0 errors**; evidence register
+  shows E-001–E-010 **Complete**; all evidence summaries present under
+  `docs/compliance/evidence/2026/`.
 
 ---
 

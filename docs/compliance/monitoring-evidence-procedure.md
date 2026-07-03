@@ -2,7 +2,7 @@
 
 Owner: Mas Yasin Arafat  
 Review cadence: Monthly evidence review, quarterly audit sample  
-Status: Draft, needs alert and on-call records
+Status: Active — Jul 2026 packet recorded
 
 ## Scope
 

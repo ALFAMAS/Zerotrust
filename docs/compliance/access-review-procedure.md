@@ -2,7 +2,7 @@
 
 Owner: Mas Yasin Arafat  
 Review cadence: Quarterly  
-Status: Draft, maps to shipped access-review tooling
+Status: Active — Q3 2026 review recorded
 
 zerotrust ships access review tooling under `/admin/access-reviews`, backed by
 `access_reviews` and `access_review_items`.

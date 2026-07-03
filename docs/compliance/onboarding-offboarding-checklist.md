@@ -2,7 +2,7 @@
 
 Owner: Mas Yasin Arafat  
 Review cadence: Quarterly sample review  
-Status: Draft, ready to use
+Status: Active — Q3 2026 sample review recorded
 
 Use this checklist for employees, contractors, and service accounts with access
 to zerotrust systems.

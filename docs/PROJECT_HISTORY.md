@@ -73,5 +73,5 @@ recommended maintainability/stability upgrades (bounded modules, repository/
 transaction layer, worker isolation + the PM2 `-i max` cluster-mode duplication
 bug, plugin/capability contract for optional-heavy integrations, typed UI↔API
 contracts, UI component tests, operational reference architecture, ADRs +
-maintenance scorecard). **Recommendations shipped or tracked** in
-[`AUDIT.md`](./AUDIT.md) (findings) and [`../todo.md`](../todo.md) (verified backlog B6–B7).
+maintenance scorecard). **Recommendations shipped** — see [`AUDIT.md`](./AUDIT.md)
+(findings) and [`../tdone.md`](../tdone.md) (shipped work catalog).

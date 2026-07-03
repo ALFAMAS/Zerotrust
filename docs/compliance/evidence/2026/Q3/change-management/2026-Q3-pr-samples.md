@@ -9,7 +9,7 @@ Source system: GitHub pull requests + `.github/workflows/ci.yml`
 Raw evidence location: GitHub PR history (links below; no customer data)  
 Summary: Sample of representative changes merged through the standard PR → CI → review path during Q3 2026. Each sample shows lint, type-check, test, `verify:generated`, SAST (Semgrep), and Trivy gates enforced before merge.  
 Result: Pass — changes followed documented CI workflow with blocking quality gates.  
-Follow-up actions: Maintain branch-protection requiring green CI; track success-rate recovery in E-006/B6 evidence.
+Follow-up actions: Maintain branch-protection requiring green CI; see B6 evidence in [`ci-health/2026-07-03-ci-recovery.md`](../ci-health/2026-07-03-ci-recovery.md).
 
 ## Sample changes
 

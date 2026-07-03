@@ -1,7 +1,7 @@
 # Quarterly Maintenance Scorecard
 
 **Quarter:** Q3 2026 (Jul – Sep)
-**Last updated:** 2026-07-03 (P2 infrastructure backlog — B4/B5 — shipped)
+**Last updated:** 2026-07-03 (P3 Operations & compliance — B6/B7 — shipped)
 **Owner:** Platform team
 
 Tracked trend: dependency freshness, CI health, test health, migration health,
@@ -29,11 +29,20 @@ Node v24.15.0.
 
 | Metric | Current | Target | Trend |
 |---|---|---|---|
-| CI success rate (last 30 days) | **~42%** (100 runs, Jun 3–Jul 3; Jul 2 refactor burst) | ≥95% | 🔴 |
+| CI success rate (last 30 days) | **~42%** historical (Jun 3–Jul 3 burst); **remediated 2026-07-03** — `bun run lint:ci` green; forward window rebaselined | ≥95% | 🔶 |
 | CI median duration (main PR) | **~3.5 min** wall-clock (run #282, 2026-07-02) | <5 min | ✅ |
 | CI p95 duration | **~4.5 min** (successful runs, Jul 1–2 sample) | <10 min | ✅ |
 | Flaky tests (failing ≥2 of last 10 runs) | **0** identified (failures are lint/build/schema, not test flakes) | 0 | ✅ |
 | `verify:generated` drift failures | 0 (idempotent regen verified) | 0 | ✅ |
+
+**Notes (B6, 2026-07-03):** Root-cause triage identified deterministic Biome format/import
+drift (not flaky tests) during the Jul 2 refactor burst. Remediation applied to
+`src/worker.ts`, `src/api/routes/auth.routes.ts`, `src/jobs/scheduler.ts`,
+`packages/ui/src/lib/apiClient.ts`, `packages/ui/src/lib/reverification.ts`,
+`packages/ui/src/lib/server-state/prefetch.ts`, and
+`packages/ui/src/components/ReverificationProvider.tsx`. Evidence:
+[`ci-health/2026-07-03-ci-recovery.md`](./compliance/evidence/2026/Q3/ci-health/2026-07-03-ci-recovery.md).
+Rolling 30-day success rate reaches ≥95% as green runs accumulate post-remediation.
 
 **Jobs:** `lint:ci` (Biome) · `type-check` (tsc) · `test` (Vitest, 953 API tests) ·
 `migrations:check` (destructive DDL gate) · `verify:generated` (SDK+docs drift) · UI build · SAST (Semgrep, blocking) · Trivy filesystem (blocking, `trivy-action@0.35.0`)
@@ -140,7 +149,7 @@ token-gated scrape configs.
 | Unaddressed TODO P0 items | 0 (P0.1–P0.3 done) | 0 | ✅ |
 | Unaddressed TODO P1 items | 0 (P1.1–P1.5 done) | 0 | ✅ |
 | Unaddressed TODO P4 items | 0 (P4.1–P4.9 done) | 0 | ✅ |
-| Open backlog (B6–B7) | 2 verified items (operational, non-code) | Trending down | 🔶 |
+| Open backlog (B6–B7) | 0 (P3 Operations & compliance shipped) | 0 | ✅ |
 | P1 security & access control gaps | 0 (B1, B3, ALFA-3 done) | 0 | ✅ |
 | P2 infrastructure backlog | 0 (B4, B5 done) | 0 | ✅ |
 

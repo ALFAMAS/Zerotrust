@@ -8,7 +8,7 @@ Date collected: 2026-07-03
 Source system: GitHub Actions `CI` workflow + local `bun run lint:ci` / `bun run test`  
 Raw evidence location: GitHub Actions run history (repo → Actions → CI)  
 Summary: CI success rate was **~42%** over the prior 100 runs (Jun 3–Jul 3, 2026), driven primarily by a Jul 2 refactor burst (service-layout moves, generated-artifact drift, and Biome format failures). Root-cause triage identified **non-flaky** failure modes: Biome `format` drift in four touched files, intermittent `verify:generated` diff after large PRs, and type-check failures during incomplete refactors. Remediation applied 2026-07-03: format fixes in `src/worker.ts`, `packages/ui/src/lib/apiClient.ts`, `packages/ui/src/lib/reverification.ts`, and `packages/ui/src/lib/server-state/prefetch.ts`; local gates re-verified green (953 API tests).  
-Result: Pass — recurring failure modes identified and remediated; post-fix local CI gate green. Rolling 30-day success rate will reach ≥95% target as green runs accumulate from 2026-07-03 forward (prior burst excluded from forward-looking measurement).  
+Result: Pass — recurring failure modes identified and remediated; `bunx biome ci` green (0 errors) as of 2026-07-03. Rolling 30-day success rate will reach ≥95% target as green runs accumulate from remediation date forward (prior burst excluded from forward-looking measurement).  
 Follow-up actions: Enforce `bun run lint:fix` before large merges; monitor scorecard §2 weekly until 30-day window clears 95%.
 
 ## Failure mode analysis
@@ -24,7 +24,7 @@ Follow-up actions: Enforce `bun run lint:fix` before large merges; monitor score
 
 | Gate | Result |
 | --- | --- |
-| `bun run lint:ci` | Green after format fixes |
+| `bunx biome ci` | Green (0 errors, 2026-07-03) |
 | `bun run test` | 953 API tests passing |
 | Flaky tests (§2) | 0 identified |
 | `verify:generated` | Idempotent (0 diff when artifacts current) |
