@@ -160,7 +160,7 @@ export interface Passkey {
 }
 
 export interface OAuthProvider {
-  provider: "google" | "facebook" | "github" | "apple";
+  provider: "google" | "facebook" | "github";
   providerId: string;
   email?: string;
   connectedAt: Date;

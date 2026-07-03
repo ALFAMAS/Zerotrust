@@ -73,8 +73,8 @@ export function getProviderAdapter(provider: string): ProviderAdapter {
       };
 
     default:
-      // Configured but unimplemented (e.g. apple). Fail loudly rather than
-      // returning a null profile the caller misreports as a generic failure.
+      // Configured but unimplemented. Fail loudly rather than returning a null
+      // profile the caller misreports as a generic failure.
       return {
         async exchangeCode() {
           logger.error("No OAuth adapter implemented for provider", { provider });

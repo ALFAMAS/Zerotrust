@@ -57,7 +57,7 @@
     },
     {
       "name": "OAuth",
-      "description": "Social sign-in and provider callback flows for Google, GitHub, Apple, and Facebook."
+      "description": "Social sign-in and provider callback flows for Google, GitHub, and Facebook."
     },
     {
       "name": "Organizations",

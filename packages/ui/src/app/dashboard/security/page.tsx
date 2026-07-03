@@ -301,7 +301,7 @@ export default function SecurityPage() {
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
-            {["google", "github", "facebook", "apple"].map((provider) => {
+            {["google", "github", "facebook"].map((provider) => {
               const linked = user?.oauthProviders?.some((p) => p.provider === provider);
               return (
                 <div

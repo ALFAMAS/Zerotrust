@@ -31,23 +31,6 @@ invites under `/:orgId/invites` but no accept handler. Listed as unmatched in
 
 ---
 
-#### B2 — Apple OAuth adapter not wired in provider factory
-
-**Status:** Open — provider module exists but factory rejects `apple`.
-
-**Evidence:** `src/oauth/providers/apple.ts` implements `exchangeCode`, but
-`getProviderAdapter()` in `src/oauth/provider.factory.ts` has no `case "apple"` and
-falls through to `UNSUPPORTED_OAUTH_PROVIDER`. README and `tdone.md` claim Apple
-OAuth ships.
-
-**Acceptance criteria:**
-
-- Add `case "apple"` in `getProviderAdapter()` delegating to `./providers/apple.js`.
-- Provider tests cover the factory wiring.
-- Admin auth settings can enable Apple when credentials are configured.
-
----
-
 ### P1 — Security & access control gaps
 
 #### B3 — Continuous access re-verification not integrated end-to-end

@@ -21,7 +21,6 @@ function configuredExternalRedirectHosts(): Set<string> {
   const hosts = new Set([
     "accounts.google.com",
     "github.com",
-    "appleid.apple.com",
     "www.facebook.com",
     "facebook.com",
     "checkout.stripe.com",

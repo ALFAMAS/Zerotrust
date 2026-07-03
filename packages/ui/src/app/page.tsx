@@ -62,7 +62,7 @@ const features = [
   {
     icon: Globe,
     title: "Social & OAuth",
-    desc: "Google, GitHub, Apple and Facebook providers wired up out of the box.",
+    desc: "Google, GitHub, and Facebook providers wired up out of the box.",
   },
   {
     icon: RadioTower,

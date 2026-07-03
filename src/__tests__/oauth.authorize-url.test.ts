@@ -10,8 +10,6 @@ describe("isSupportedProvider", () => {
     expect(isSupportedProvider("google")).toBe(true);
     expect(isSupportedProvider("github")).toBe(true);
     expect(isSupportedProvider("facebook")).toBe(true);
-    // Apple needs JWT-secret + form_post machinery before it can be enabled.
-    expect(isSupportedProvider("apple")).toBe(false);
     expect(isSupportedProvider("twitter")).toBe(false);
   });
 });

@@ -17,10 +17,6 @@ export interface ProviderMeta {
   supportsPKCE: boolean;
 }
 
-// Apple is intentionally omitted: it requires a JWT client secret signed with a
-// .p8 key plus a `response_mode=form_post` callback, which the current static
-// `clientSecret` config and GET callback don't support. Enable it only once that
-// machinery exists, otherwise the flow fails after the consent screen.
 export const PROVIDER_META: Record<string, ProviderMeta> = {
   google: {
     label: "Google",
