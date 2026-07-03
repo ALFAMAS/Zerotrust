@@ -1,7 +1,8 @@
 "use client";
 
 import { Wallet as WalletIcon } from "lucide-react";
-import { useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { Suspense, useState } from "react";
 import { ServerStateStatus } from "@/components/ServerStateStatus";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -17,6 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { navigateToSafeExternal } from "@/lib/safeRedirect";
 import {
   useTopUpWalletMutation,
   useWalletQuery,
@@ -27,7 +29,8 @@ const fmt = (d?: string | null) => (d ? new Date(d).toLocaleString() : "—");
 const money = (cents: number, currency = "USD") =>
   new Intl.NumberFormat(undefined, { style: "currency", currency }).format((cents ?? 0) / 100);
 
-export default function WalletClient() {
+function WalletContent() {
+  const params = useSearchParams();
   const walletQuery = useWalletQuery();
   const transactionsQuery = useWalletTransactionsQuery({ limit: 30 });
   const topUpMutation = useTopUpWalletMutation();
@@ -64,8 +67,8 @@ export default function WalletClient() {
 
     const amountCents = Math.round(dollars * 100);
     try {
-      await topUpMutation.mutateAsync(amountCents);
-      showToast(`Added ${money(amountCents, currency)}`);
+      const { url } = await topUpMutation.mutateAsync(amountCents);
+      navigateToSafeExternal(url, "/dashboard/wallet");
     } catch (err) {
       showToast(err instanceof Error ? err.message : "Top-up failed");
     }
@@ -89,6 +92,18 @@ export default function WalletClient() {
       )}
 
       <WalletHeader />
+
+      {params.get("success") === "1" && (
+        <div className="rounded-xl border border-green-700 bg-green-900/30 p-4 text-sm text-green-300">
+          Payment received. Your wallet balance will update shortly after Stripe confirms the
+          payment.
+        </div>
+      )}
+      {params.get("canceled") === "1" && (
+        <div className="rounded-xl border border-yellow-700 bg-yellow-900/30 p-4 text-sm text-yellow-300">
+          Checkout canceled. You have not been charged.
+        </div>
+      )}
 
       <ServerStateStatus
         isFetching={isRefetching}
@@ -121,7 +136,7 @@ export default function WalletClient() {
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Add funds</CardTitle>
-            <CardDescription>Top up your account credit.</CardDescription>
+            <CardDescription>Pay securely with Stripe to add account credit.</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleTopUp} className="flex items-end gap-3">
@@ -137,7 +152,7 @@ export default function WalletClient() {
                 />
               </div>
               <Button type="submit" disabled={topUpMutation.isPending || !wallet}>
-                {topUpMutation.isPending ? "Adding…" : "Top up"}
+                {topUpMutation.isPending ? "Redirecting…" : "Pay with Stripe"}
               </Button>
             </form>
           </CardContent>
@@ -181,14 +196,12 @@ export default function WalletClient() {
                 )}
                 {!isInitialLoading &&
                   txs.map((tx) => (
-                    <TableRow key={tx.id} className={tx.optimistic ? "opacity-75" : undefined}>
+                    <TableRow key={tx.id}>
                       <TableCell className="text-xs text-muted-foreground">
                         {fmt(tx.createdAt)}
                       </TableCell>
                       <TableCell>
-                        <Badge variant={tx.optimistic ? "secondary" : "outline"}>
-                          {tx.type.replace(/_/g, " ")}
-                        </Badge>
+                        <Badge variant="outline">{tx.type.replace(/_/g, " ")}</Badge>
                       </TableCell>
                       <TableCell className="text-muted-foreground">
                         {tx.description ?? "—"}
@@ -210,6 +223,14 @@ export default function WalletClient() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function WalletClient() {
+  return (
+    <Suspense>
+      <WalletContent />
+    </Suspense>
   );
 }
 

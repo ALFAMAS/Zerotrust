@@ -35,21 +35,21 @@ const DEFAULT_CONFIG: Partial<zerotrustConfig> = {
         clientSecret: process.env.OAUTH_GOOGLE_CLIENT_SECRET || "",
         redirectUri:
           process.env.OAUTH_GOOGLE_REDIRECT_URI ||
-          "http://localhost:3000/auth/oauth/google/callback",
+          "http://localhost:1337/auth/oauth/google/callback",
       },
       facebook: {
         clientId: process.env.OAUTH_FACEBOOK_CLIENT_ID || "",
         clientSecret: process.env.OAUTH_FACEBOOK_CLIENT_SECRET || "",
         redirectUri:
           process.env.OAUTH_FACEBOOK_REDIRECT_URI ||
-          "http://localhost:3000/auth/oauth/facebook/callback",
+          "http://localhost:1337/auth/oauth/facebook/callback",
       },
       github: {
         clientId: process.env.OAUTH_GITHUB_CLIENT_ID || "",
         clientSecret: process.env.OAUTH_GITHUB_CLIENT_SECRET || "",
         redirectUri:
           process.env.OAUTH_GITHUB_REDIRECT_URI ||
-          "http://localhost:3000/auth/oauth/github/callback",
+          "http://localhost:1337/auth/oauth/github/callback",
       },
     },
   },

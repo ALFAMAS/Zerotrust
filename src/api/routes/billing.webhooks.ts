@@ -33,11 +33,11 @@ router.post("/webhook", async (c) => {
   try {
     const stripe = getStripe();
     const rawBody = await c.req.raw.arrayBuffer();
-    event = stripe.webhooks.constructEvent(
+    event = (await stripe.webhooks.constructEventAsync(
       Buffer.from(rawBody),
       sig,
       webhookSecret
-    ) as StripeWebhookEvent;
+    )) as StripeWebhookEvent;
   } catch (err) {
     logger.error("Webhook signature verification failed", err as Error);
     return c.json({ error: "INVALID_SIGNATURE" }, 400);

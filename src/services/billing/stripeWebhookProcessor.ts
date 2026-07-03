@@ -16,6 +16,8 @@ import {
 } from "../../db/repositories/billingSubscriptions.repository";
 import { subscriptionsTable } from "../../db/schema";
 import { getLogger } from "../../logger/index";
+import { topUpWallet } from "./wallet.service";
+import { WALLET_TOP_UP_METADATA_PURPOSE } from "./walletTopUp.service";
 
 const logger = getLogger("stripe-webhook-processor");
 
@@ -42,6 +44,11 @@ interface StripeCheckoutSessionPayload {
 }
 interface StripeInvoicePayload {
   subscription: string | null;
+}
+interface StripePaymentIntentPayload {
+  id: string;
+  amount: number;
+  metadata: { userId?: string; purpose?: string } | null;
 }
 
 export function getStripe(): Stripe {
@@ -157,6 +164,19 @@ export async function processStripeEvent(type: string, object: unknown): Promise
       if (existing?.status !== "past_due") break;
 
       await clearSubscriptionDunning({ subscriptionId: existing.id });
+      break;
+    }
+
+    case "payment_intent.succeeded": {
+      const pi = object as StripePaymentIntentPayload;
+      const userId = pi.metadata?.userId;
+      if (pi.metadata?.purpose !== WALLET_TOP_UP_METADATA_PURPOSE || !userId) break;
+
+      await topUpWallet(userId, pi.amount, {
+        stripePaymentIntentId: pi.id,
+        description: "Wallet top-up",
+      });
+      logger.info("Wallet credited from payment intent", { userId, paymentIntentId: pi.id });
       break;
     }
 

@@ -4,12 +4,13 @@ import { useState } from "react";
 import { ServerStateStatus } from "@/components/ServerStateStatus";
 import { Button } from "@/components/ui/button";
 import { ErrorState } from "@/components/ui/States";
+import { brand } from "@/config/brand";
 import {
   useDisconnectOAuthProviderMutation,
   useOAuthProvidersQuery,
 } from "@/lib/server-state/auth";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000";
+const API_BASE = brand.apiUrl;
 
 export default function SettingsClient() {
   const providersQuery = useOAuthProvidersQuery();

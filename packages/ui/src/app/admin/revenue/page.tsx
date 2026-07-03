@@ -24,6 +24,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { brand } from "@/config/brand";
 import { useRevenueQuery, useSendBroadcastMutation } from "@/lib/server-state/revenue";
 
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
@@ -57,7 +58,7 @@ export default function RevenuePage() {
   }
 
   const fmt = (n: number) => `$${n.toLocaleString()}`;
-  const oauthBase = process.env.NEXT_PUBLIC_ZEROTRUST_URL || "http://localhost:3000";
+  const oauthBase = brand.apiUrl;
 
   const inputClasses =
     "w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring";

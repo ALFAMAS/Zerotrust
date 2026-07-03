@@ -160,10 +160,11 @@ const EXCLUDED_CONTENT_TYPES = new Set([
 
 /**
  * Path prefixes excluded from sanitization.
- * SSF event receivers verify a signature over the raw JSON body — mutating
- * the payload would invalidate the signature, so these routes opt out.
+ * SSF and Stripe webhook receivers verify a signature over the raw JSON body —
+ * parsing or mutating the payload would invalidate the signature, so these
+ * routes opt out.
  */
-const EXCLUDED_PATH_PREFIXES = ["/ssf/"];
+const EXCLUDED_PATH_PREFIXES = ["/ssf/", "/billing/webhook"];
 
 /**
  * Hono middleware that sanitizes JSON bodies, query params, path params,
@@ -178,7 +179,7 @@ export function inputSanitizationMiddleware() {
       return next();
     }
 
-    // Skip routes that need raw body integrity (SSF signature verification)
+    // Skip routes that need raw body integrity (SSF / Stripe signature verification)
     const path = c.req.path;
     if (EXCLUDED_PATH_PREFIXES.some((prefix) => path.startsWith(prefix))) {
       return next();

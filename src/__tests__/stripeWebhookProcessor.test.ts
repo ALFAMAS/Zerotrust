@@ -12,6 +12,7 @@ const h = vi.hoisted(() => ({
   applySubscriptionLifecycleUpdate: vi.fn().mockResolvedValue(undefined),
   recordInvoicePaymentFailure: vi.fn().mockResolvedValue(undefined),
   clearSubscriptionDunning: vi.fn().mockResolvedValue(undefined),
+  topUpWallet: vi.fn().mockResolvedValue({ balance: 500, transactionId: "tx-wallet" }),
 }));
 
 vi.mock("stripe", () => ({
@@ -25,6 +26,10 @@ vi.mock("../db/repositories/billingSubscriptions.repository", () => ({
   applySubscriptionLifecycleUpdate: h.applySubscriptionLifecycleUpdate,
   recordInvoicePaymentFailure: h.recordInvoicePaymentFailure,
   clearSubscriptionDunning: h.clearSubscriptionDunning,
+}));
+
+vi.mock("../services/billing/wallet.service", () => ({
+  topUpWallet: h.topUpWallet,
 }));
 
 let selectQueue: unknown[][] = [];
@@ -185,6 +190,31 @@ describe("processStripeEvent (billing webhook processor)", () => {
       await processStripeEvent("invoice.payment_succeeded", { subscription: "sub_1" });
 
       expect(h.clearSubscriptionDunning).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("payment_intent.succeeded", () => {
+    it("credits the wallet for a wallet top-up payment intent", async () => {
+      await processStripeEvent("payment_intent.succeeded", {
+        id: "pi_wallet_1",
+        amount: 2500,
+        metadata: { userId: "user-1", purpose: "wallet_top_up" },
+      });
+
+      expect(h.topUpWallet).toHaveBeenCalledWith("user-1", 2500, {
+        stripePaymentIntentId: "pi_wallet_1",
+        description: "Wallet top-up",
+      });
+    });
+
+    it("ignores payment intents without wallet top-up metadata", async () => {
+      await processStripeEvent("payment_intent.succeeded", {
+        id: "pi_other",
+        amount: 1000,
+        metadata: { userId: "user-1", purpose: "other" },
+      });
+
+      expect(h.topUpWallet).not.toHaveBeenCalled();
     });
   });
 

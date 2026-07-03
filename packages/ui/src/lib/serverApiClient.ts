@@ -10,6 +10,9 @@ import { cookies } from "next/headers";
 
 const BASE_URL = process.env.NEXT_PUBLIC_ZEROTRUST_URL || "http://localhost:1337";
 
+/** Abort server-side API fetches before RSC blocks for tens of seconds. */
+const FETCH_TIMEOUT_MS = 10_000;
+
 export class ServerApiError extends Error {
   status: number;
   code?: string;
@@ -36,10 +39,29 @@ export async function serverApiGet<T>(path: string, options: ServerApiGetOptions
     if (token) headers.Authorization = `Bearer ${decodeURIComponent(token)}`;
   }
 
-  const res = await fetch(`${BASE_URL}${path}`, {
-    headers,
-    cache: "no-store",
-  });
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+  let res: Response;
+  try {
+    res = await fetch(`${BASE_URL}${path}`, {
+      headers,
+      cache: "no-store",
+      // Never follow Next.js UI redirects (/wallet → /dashboard/wallet) when the
+      // API URL is misconfigured to point at the UI origin — that causes RSC loops.
+      redirect: "error",
+      signal: controller.signal,
+    });
+  } catch (err) {
+    if (err instanceof Error && err.name === "AbortError") {
+      throw new ServerApiError(
+        `API request timed out after ${FETCH_TIMEOUT_MS}ms — is the backend running on ${BASE_URL}?`,
+        504
+      );
+    }
+    throw err;
+  } finally {
+    clearTimeout(timer);
+  }
 
   if (!res.ok) {
     let message = res.statusText || "Request failed";

@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
+import { UI_ROUTE_REDIRECTS } from "./src/config/uiRouteRedirects";
 
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
@@ -40,6 +41,12 @@ const nextConfig: NextConfig = {
     // Coding agents can call get_routes, get_errors, get_logs,
     // get_page_metadata, and get_project_metadata via this endpoint.
     mcpServer: true,
+  },
+
+  // API paths (`/auth/*`, `/wallet`, …) and hreflang `/<locale>` prefixes are aliased
+  // to the matching App Router pages — see src/config/uiRouteRedirects.ts.
+  async redirects() {
+    return UI_ROUTE_REDIRECTS;
   },
 };
 

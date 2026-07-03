@@ -15,6 +15,7 @@ import {
   useNotificationsUnreadCountQuery,
 } from "@/lib/server-state/notifications";
 import type { Notification } from "@/lib/server-state/types";
+import { brand } from "@/config/brand";
 import { cn } from "@/lib/utils";
 
 function typeIcon(type: Notification["type"]): string {
@@ -55,7 +56,7 @@ export function NotificationBell() {
 
     const connect = () => {
       const es = new EventSource(
-        `${process.env.NEXT_PUBLIC_ZEROTRUST_URL || "http://localhost:3000"}/notifications/sse?token=${token}`
+        `${brand.apiUrl}/notifications/sse?token=${token}`
       );
       esRef.current = es;
 

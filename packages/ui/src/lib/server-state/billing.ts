@@ -117,10 +117,19 @@ export function useBillingPortalMutation() {
   });
 }
 
+export interface BillingUsageMetric {
+  used: number;
+  limit: number;
+}
+
+/** Matches GET /billing/usage (`UsageSummary` in usage.service.ts). */
 export interface BillingUsageSummary {
-  apiCalls: { used: number; limit: number };
-  seats: { used: number; limit: number };
-  plan: string;
+  period: string;
+  metrics: {
+    api_calls?: BillingUsageMetric;
+    seats?: BillingUsageMetric;
+    storage_bytes?: BillingUsageMetric;
+  };
 }
 
 export interface TaxExemption {

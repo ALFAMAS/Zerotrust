@@ -103,6 +103,28 @@ describe("input sanitization middleware", () => {
     expect(res.status).toBe(200);
     await expect(res.json()).resolves.toEqual(rawPayload);
   });
+
+  it("does not consume Stripe webhook bodies before signature verification", async () => {
+    const app = new Hono();
+    app.use("*", inputSanitizationMiddleware());
+    app.post("/billing/webhook", async (c) => {
+      const raw = Buffer.from(await c.req.raw.arrayBuffer()).toString("utf8");
+      return c.json({ raw });
+    });
+
+    const payload = JSON.stringify({ id: "evt_1", type: "payment_intent.succeeded" });
+    const res = await app.request("/billing/webhook", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "stripe-signature": "sig_test",
+      },
+      body: payload,
+    });
+
+    expect(res.status).toBe(200);
+    await expect(res.json()).resolves.toEqual({ raw: payload });
+  });
 });
 
 describe("sanitizeInputString", () => {

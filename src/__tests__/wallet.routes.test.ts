@@ -1,12 +1,21 @@
 import { Hono } from "hono";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+vi.mock("../logger", () => ({
+  getLogger: () => ({ info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() }),
+}));
+
 // Stub auth: authenticate via x-test-user-id, mirroring the real middleware.
 vi.mock("../middleware/auth", () => ({
   authMiddleware: async (c: any, next: any) => {
     const uid = c.req.header("x-test-user-id");
     if (!uid) return c.json({ error: "TOKEN_INVALID" }, 401);
-    c.set("user", { id: uid, email: "u@example.com", roles: ["user"] });
+    c.set("user", {
+      id: uid,
+      email: "u@example.com",
+      displayName: "Test User",
+      roles: ["user"],
+    });
     await next();
   },
 }));
@@ -14,12 +23,18 @@ vi.mock("../middleware/auth", () => ({
 vi.mock("../services/billing/wallet.service", () => ({
   getWallet: vi.fn().mockResolvedValue({ balance: 100, lifetimeBalance: 200, currency: "usd", autoTopUp: false }),
   getWalletTransactions: vi.fn().mockResolvedValue([]),
-  topUpWallet: vi.fn().mockResolvedValue({ balance: 150, transactionId: "tx-1" }),
   spendFromWallet: vi.fn().mockResolvedValue({ balance: 50, transactionId: "tx-2" }),
   countWalletTransactions: vi.fn().mockResolvedValue(0),
 }));
 
+vi.mock("../services/billing/walletTopUp.service", () => ({
+  createWalletTopUpCheckout: vi
+    .fn()
+    .mockResolvedValue({ url: "https://checkout.stripe.com/c/pay/cs_test", sessionId: "cs_test" }),
+}));
+
 import walletRoutes from "../api/routes/wallet.routes";
+import { createWalletTopUpCheckout } from "../services/billing/walletTopUp.service";
 
 function app() {
   const a = new Hono();
@@ -49,7 +64,7 @@ describe("wallet routes", () => {
     expect(body.pagination.total).toBe(0);
   });
 
-  it("POST /wallet/top-up adds funds", async () => {
+  it("POST /wallet/top-up starts Stripe Checkout instead of crediting directly", async () => {
     const res = await app().request("/wallet/top-up", {
       method: "POST",
       headers: { "x-test-user-id": "user-1", "content-type": "application/json" },
@@ -57,7 +72,14 @@ describe("wallet routes", () => {
     });
     expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body.balance).toBe(150);
+    expect(body.url).toBe("https://checkout.stripe.com/c/pay/cs_test");
+    expect(body.sessionId).toBe("cs_test");
+    expect(createWalletTopUpCheckout).toHaveBeenCalledWith({
+      userId: "user-1",
+      email: "u@example.com",
+      displayName: "Test User",
+      amountCents: 50,
+    });
   });
 
   it("POST /wallet/spend deducts funds", async () => {

@@ -38,6 +38,12 @@ const CANCEL_REASONS = [
   "Other",
 ];
 
+function formatUsageMetric(metric: { used: number; limit: number } | undefined): string {
+  if (!metric) return "—";
+  const limit = metric.limit < 0 ? "Unlimited" : metric.limit.toLocaleString();
+  return `${metric.used.toLocaleString()} / ${limit}`;
+}
+
 const PLANS = [
   {
     id: "free",
@@ -207,20 +213,23 @@ function BillingContent() {
         </div>
       )}
 
-      {usage && (
+      {usage?.metrics && (
         <div className="mb-8 bg-card border border-border rounded-xl p-6">
           <h2 className="font-display text-lg font-semibold text-foreground mb-4">Usage</h2>
+          {usage.period && (
+            <p className="text-muted-foreground text-xs mb-4">Billing period: {usage.period}</p>
+          )}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
             <div>
               <p className="text-muted-foreground">API calls</p>
               <p className="text-foreground font-medium">
-                {usage.apiCalls.used} / {usage.apiCalls.limit}
+                {formatUsageMetric(usage.metrics.api_calls)}
               </p>
             </div>
             <div>
               <p className="text-muted-foreground">Seats</p>
               <p className="text-foreground font-medium">
-                {usage.seats.used} / {usage.seats.limit}
+                {formatUsageMetric(usage.metrics.seats)}
               </p>
             </div>
           </div>

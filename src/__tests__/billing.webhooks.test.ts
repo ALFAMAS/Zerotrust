@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 // Shared mock fns created via vi.hoisted so they exist before the (hoisted)
 // module imports run their mock factories.
 const h = vi.hoisted(() => {
-  const constructEvent = vi.fn();
+  const constructEventAsync = vi.fn();
   const subscriptionsRetrieve = vi.fn();
   const claim = vi.fn();
   const release = vi.fn();
@@ -13,7 +13,7 @@ const h = vi.hoisted(() => {
   // the synchronous fallback path unchanged; individual tests can override.
   const enqueue = vi.fn().mockResolvedValue(false);
   return {
-    constructEvent,
+    constructEventAsync,
     subscriptionsRetrieve,
     claim,
     release,
@@ -22,12 +22,12 @@ const h = vi.hoisted(() => {
   };
 });
 
-// Stripe: the handler builds `new Stripe()` and calls webhooks.constructEvent.
+// Stripe: the handler builds `new Stripe()` and calls webhooks.constructEventAsync.
 // Use a normal function (not an arrow) so it is `new`-able as a constructor.
 vi.mock("stripe", () => ({
   default: vi.fn(function StripeMock() {
     return {
-      webhooks: { constructEvent: h.constructEvent },
+      webhooks: { constructEventAsync: h.constructEventAsync },
       subscriptions: { retrieve: h.subscriptionsRetrieve },
     };
   }),
@@ -93,7 +93,7 @@ function post(body = "{}", headers: Record<string, string> = { "stripe-signature
 describe("POST /billing/webhook — idempotency", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    h.constructEvent.mockReturnValue(subscriptionUpdatedEvent());
+    h.constructEventAsync.mockResolvedValue(subscriptionUpdatedEvent());
     h.applySubscriptionLifecycleUpdate.mockResolvedValue(undefined);
     h.release.mockResolvedValue(undefined);
     h.enqueue.mockResolvedValue(false);

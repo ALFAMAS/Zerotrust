@@ -85,4 +85,15 @@ describe("serverApiClient", () => {
       message: "Bad Gateway",
     });
   });
+
+  it("does not follow redirects (prevents UI route-alias loops)", async () => {
+    cookiesMock.mockResolvedValue({ get: () => undefined });
+    fetchMock.mockResolvedValueOnce(jsonResponse(200, { ok: true }));
+
+    await serverApiGet("/wallet");
+
+    const [, init] = fetchMock.mock.calls[0];
+    expect(init.redirect).toBe("error");
+    expect(init.signal).toBeDefined();
+  });
 });

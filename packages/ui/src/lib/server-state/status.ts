@@ -3,6 +3,7 @@
 import { queryOptions, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { apiGet } from "@/lib/apiClient";
+import { brand } from "@/config/brand";
 import { queryKeys } from "./queryKeys";
 import type { StatusData } from "./types";
 
@@ -11,7 +12,7 @@ export const statusKeys = queryKeys.status;
 export const STATUS_PATH = "/status";
 export const STATUS_STREAM_PATH = "/status/stream";
 
-const API_URL = process.env.NEXT_PUBLIC_ZEROTRUST_URL || "http://localhost:3000";
+const API_URL = brand.apiUrl;
 
 export function fetchStatus(): Promise<StatusData> {
   return apiGet<StatusData>(STATUS_PATH, { skipAuth: true });

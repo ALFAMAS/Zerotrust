@@ -43,6 +43,28 @@ test.describe("public pages", () => {
     await expect(page.getByRole("button", { name: /passkey/i })).toBeVisible();
   });
 
+  test("/auth/login redirects to the login page (API path alias)", async ({ page }) => {
+    await page.goto("/auth/login");
+    await expect(page).toHaveURL(/\/login$/);
+    await expect(page.getByRole("heading", { name: /welcome back/i })).toBeVisible();
+  });
+
+  test("/wallet redirects to the dashboard wallet page (API path alias)", async ({ page }) => {
+    await page.goto("/wallet");
+    await expect(page).toHaveURL(/\/dashboard\/wallet/);
+  });
+
+  test("/en/dashboard redirects to /dashboard (locale prefix alias)", async ({ page }) => {
+    await page.goto("/en/dashboard");
+    await expect(page).toHaveURL(/\/dashboard$/);
+  });
+
+  test("/en redirects to the landing page (hreflang locale prefix)", async ({ page }) => {
+    await page.goto("/en");
+    await expect(page).toHaveURL(/\/(?:$|\?)/);
+    await expect(page.getByRole("heading", { name: /ship secure auth/i })).toBeVisible();
+  });
+
   test("navigates between login and register", async ({ page }) => {
     await page.goto("/login");
     await page.getByRole("link", { name: /create one/i }).click();

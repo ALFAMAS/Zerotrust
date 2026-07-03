@@ -1,16 +1,22 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { act } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import WalletClient from "@/app/dashboard/wallet/WalletClient";
 import { mockApiGet, mockApiPost } from "@/test/apiClientMock";
-import {
-  buildWalletTransactionPath,
-  optimisticTopUpTransaction,
-  walletKeys,
-} from "./wallet";
+import { buildWalletTransactionPath, walletKeys } from "./wallet";
 
+const searchParams = new URLSearchParams();
+vi.mock("next/navigation", () => ({
+  useSearchParams: () => searchParams,
+}));
+
+vi.mock("@/lib/safeRedirect", () => ({
+  navigateToSafeExternal: vi.fn(),
+}));
+
+import { navigateToSafeExternal } from "@/lib/safeRedirect";
 
 const wallet = {
   balance: 2500,
@@ -55,7 +61,10 @@ function mockWalletSuccess(overrides?: { txs?: typeof transactions; delayed?: bo
 }
 
 describe("wallet TanStack Query server state", () => {
-  
+  beforeEach(() => {
+    vi.mocked(navigateToSafeExternal).mockReset();
+  });
+
   it("models wallet domain query keys and colocated query paths", () => {
     expect(walletKeys.detail()).toEqual(["wallet", "detail"]);
     expect(walletKeys.transactions({ limit: 30 })).toEqual([
@@ -97,12 +106,14 @@ describe("wallet TanStack Query server state", () => {
     expect(screen.getByText("Showing cached wallet data while refreshing.")).toBeInTheDocument();
   });
 
-  it("optimistically updates balance and transactions during a top-up, then invalidates targeted wallet keys", async () => {
-    mockWalletSuccess({ delayed: true });
-    let resolveTopUp: (value: unknown) => void = () => {};
-    mockApiPost.mockReturnValue(new Promise((resolve) => (resolveTopUp = resolve)));
-    const { queryClient } = renderWithQueryClient(<WalletClient />);
-    const invalidateSpy = vi.spyOn(queryClient, "invalidateQueries");
+  it("starts Stripe Checkout and redirects instead of crediting balance immediately", async () => {
+    mockWalletSuccess();
+    mockApiPost.mockResolvedValue({
+      url: "https://checkout.stripe.com/c/pay/cs_test",
+      sessionId: "cs_test",
+    });
+
+    renderWithQueryClient(<WalletClient />);
 
     await waitFor(() => {
       expect(screen.getAllByText((text) => text.includes("25.00")).length).toBeGreaterThan(0);
@@ -110,21 +121,15 @@ describe("wallet TanStack Query server state", () => {
 
     await userEvent.clear(screen.getByLabelText("Amount (USD)"));
     await userEvent.type(screen.getByLabelText("Amount (USD)"), "10");
-    await userEvent.click(screen.getByRole("button", { name: "Top up" }));
+    await userEvent.click(screen.getByRole("button", { name: "Pay with Stripe" }));
 
     expect(mockApiPost).toHaveBeenCalledWith("/wallet/top-up", { amount: 1000 });
     await waitFor(() => {
-      expect(screen.getAllByText((text) => text.includes("35.00")).length).toBeGreaterThan(0);
+      expect(navigateToSafeExternal).toHaveBeenCalledWith(
+        "https://checkout.stripe.com/c/pay/cs_test",
+        "/dashboard/wallet"
+      );
     });
-    expect(
-      within(screen.getByRole("table")).getByText("Top-up pending confirmation")
-    ).toBeInTheDocument();
-    expect(optimisticTopUpTransaction(wallet, 1000).balanceAfter).toBe(3500);
-
-    resolveTopUp({});
-    await waitFor(() => {
-      expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: walletKeys.detail() });
-      expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: walletKeys.transactions() });
-    });
+    expect(screen.getAllByText((text) => text.includes("25.00")).length).toBeGreaterThan(0);
   });
 });
