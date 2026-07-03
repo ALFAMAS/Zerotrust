@@ -32,6 +32,12 @@ docs/compliance/evidence/
       monitoring/
       vendor-reviews/
       change-management/
+    auditor-engagement/
+      system-description.md
+      system-description-template.md
+      engagement-checklist.md
+      engagement-letter-summary.md
+      observation-window.md
 ```
 
 ## Evidence Summary Template

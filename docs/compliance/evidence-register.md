@@ -2,7 +2,7 @@
 
 Owner: Mas Yasin Arafat  
 Review cadence: Monthly  
-Status: Active — Q3 2026 evidence cycle complete (2026-07-03)
+Status: Active — Q3 2026 evidence cycle complete; SOC 2 observation window active (2026-07-04)
 
 Use this register to track evidence collected for SOC 2 and internal compliance.
 Store the evidence itself outside the repository unless it is intentionally
@@ -22,6 +22,9 @@ public and non-sensitive.
 | E-008 | Change Management | PR/CI sample | 2026-Q3 | Mas Yasin Arafat | [Q3 PR samples](./evidence/2026/Q3/change-management/2026-Q3-pr-samples.md) | Complete | Representative merged PRs |
 | E-009 | Audit Log | Integrity + external anchoring | 2026-Q3 | Mas Yasin Arafat | [Anchor implementation](./evidence/2026/Q3/audit-log/2026-07-03-anchor-implementation.md) | Complete | `bun run audit:anchor-verify` |
 | E-010 | Risk Assessment | Risk register and treatment plan | 2026 | Mas Yasin Arafat | [2026 annual export](./evidence/2026/risk-assessment/2026-annual-risk-assessment.md) | Complete | `/admin/compliance` risk register |
+| E-011 | SOC 2 Engagement | Engagement letter (redacted summary) | 2026 | Mas Yasin Arafat | [Engagement letter](./evidence/auditor-engagement/engagement-letter-summary.md) | Complete | Signed 2026-07-04; raw PDF in controlled storage |
+| E-012 | SOC 2 Engagement | Observation window confirmation | 2026-07-04 — 2027-07-03 | Mas Yasin Arafat | [Observation window](./evidence/auditor-engagement/observation-window.md) | Complete | 12-month Type II window |
+| E-013 | SOC 2 Engagement | System description v1.0 | 2026 | Mas Yasin Arafat | [System description](./evidence/auditor-engagement/system-description.md) | Complete | Auditor sign-off 2026-07-04 |
 
 ## Evidence Quality Rules
 

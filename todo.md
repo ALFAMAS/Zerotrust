@@ -14,36 +14,22 @@ Does not duplicate shipped work in [`tdone.md`](./tdone.md) (P0–P5 complete)._
 
 **T5 — Test coverage ratchet toward 85%**
 
-Measured coverage (2026-07-03, `docs/maintenance-scorecard.md` §3) is API **65.81%**
-lines / **58.54%** branches and UI **53.71%** lines — floors are **65/58/53** in
-`vitest.config.ts` / `packages/ui/vitest.config.ts`. The long-term target remains
-**≥85%** on API and UI.
+Measured coverage (2026-07-04, `docs/maintenance-scorecard.md` §3) is API **66.60%**
+lines / **59.74%** branches and UI **53.85%** lines — floors are **66/59/65** (API)
+and **53/51/46/51** (UI) in `vitest.config.ts` / `packages/ui/vitest.config.ts`.
+The long-term target remains **≥85%** on API and UI.
+
+_Remaining gap:_ ~18 pts API lines, ~31 pts UI lines to 85%. Next increments:
+expand client-component tests for low-coverage pages (`SecurityClient` ~37%,
+`queryKeys.ts` in root suite), and route/service hot paths.
 
 _Acceptance:_ raise ratchets incrementally as tests land; scorecard §3 trends toward
-the 85% target without lowering floors.
-
-**D3 — OpenAPI / SDK schema expansion**
-
-`docs/api-reference.md` notes that some lower-traffic admin, webhook, tenant, and
-email-event routes may still need schema-level expansion. The integration matrix
-discovers **198** backend routes vs **102** paths in `src/api/openapi.json`; ops
-routes such as `/metrics`, `/webhooks/email/event`, and `/ssf/events` are
-intentionally absent from the UI but should be documented for SDK consumers when
-needed.
-
-_Acceptance:_ expand `openapi.json` for the remaining product-facing routes;
-`bun run verify:generated` stays clean.
+the 85% target without lowering floors. **Latest increment shipped** — see
+[`tdone.md`](./tdone.md) §T5 (2026-07-04).
 
 ### Compliance program (operational)
 
-**C1 — SOC 2 Type II auditor engagement**
-
-`docs/compliance/soc2-auditor-readiness.md` lists **Not started** for system
-description, auditor selection, and observation-window confirmation. Q3 2026
-evidence (E-001–E-010) is complete; external audit scheduling is not.
-
-_Acceptance:_ auditor engaged, observation window set, system description and
-engagement letter recorded in `docs/compliance/evidence/`.
+_No open compliance backlog items._
 
 ---
 

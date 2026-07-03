@@ -194,258 +194,435 @@ export class zerotrustClient {
   }
 
   /**
-   * Register a new user
+   * Get security.txt (/.well-known/security.txt)
    *
-   * @route POST /auth/register
+   * @route GET /.well-known/security.txt
    */
-  postAuthRegister(body: { email: string; password: string; displayName?: string }): Promise<{ success?: boolean; userId?: string }> {
-    return this.request("POST", `/auth/register`, { body });
+  getWellKnownSecurityTxt(): Promise<unknown> {
+    return this.request("GET", `/.well-known/security.txt`);
   }
 
   /**
-   * Login with email and password
+   * Get access-reviews (/admin/access-reviews)
    *
-   * @route POST /auth/login
+   * @route GET /admin/access-reviews
    */
-  postAuthLogin(body: { email: string; password: string }): Promise<TokenResponse> {
-    return this.request("POST", `/auth/login`, { body });
+  getAdminAccessReviews(): Promise<unknown> {
+    return this.request("GET", `/admin/access-reviews`);
   }
 
   /**
-   * Rotate refresh token and issue new access token
+   * Create access-reviews (/admin/access-reviews)
    *
-   * @route POST /auth/token/refresh
+   * @route POST /admin/access-reviews
    */
-  postAuthTokenRefresh(body: { refreshToken: string }): Promise<TokenResponse> {
-    return this.request("POST", `/auth/token/refresh`, { body });
+  postAdminAccessReviews(body?: Record<string, unknown>): Promise<unknown> {
+    return this.request("POST", `/admin/access-reviews`, { body });
   }
 
   /**
-   * Revoke current session
+   * Get id (/admin/access-reviews/{id})
    *
-   * @route POST /auth/logout
-   */
-  postAuthLogout(): Promise<{ success?: boolean }> {
-    return this.request("POST", `/auth/logout`);
-  }
-
-  /**
-   * Revoke all sessions for the authenticated user
-   *
-   * @route POST /auth/logout/all
-   */
-  postAuthLogoutAll(): Promise<{ success?: boolean }> {
-    return this.request("POST", `/auth/logout/all`);
-  }
-
-  /**
-   * Generate an ephemeral OAuth state token (PKCE/nonce)
-   *
-   * @route POST /auth/oauth/state
-   */
-  postAuthOauthState(body?: { codeChallenge?: string; redirectUri?: string }): Promise<{ state?: string; nonce?: string; ttlSeconds?: number }> {
-    return this.request("POST", `/auth/oauth/state`, { body });
-  }
-
-  /**
-   * Begin OAuth authorization flow (returns the provider's authorize URL)
-   *
-   * Generates a CSRF state and (where supported) a server-side PKCE pair, then returns the provider authorization URL the client should navigate to. The PKCE code_verifier never leaves the server.
-   *
-   * @route GET /auth/oauth/{provider}/authorize
-   * @param provider path parameter
-   */
-  getAuthOauthByProviderAuthorize(provider: "google" | "github" | "facebook"): Promise<{ authorizeUrl?: string; state?: string }> {
-    return this.request("GET", `/auth/oauth/${encodeURIComponent(provider)}/authorize`);
-  }
-
-  /**
-   * OAuth authorization code callback
-   *
-   * Provider redirects here with an authorization code. On success the server creates a session, stores the tokens under a one-time exchange code, and 302-redirects to the frontend at /login?oauth_code=<code>. The SPA redeems it via POST /auth/oauth/exchange.
-   *
-   * @route GET /auth/oauth/{provider}/callback
-   * @param provider path parameter
-   */
-  getAuthOauthByProviderCallback(provider: "google" | "github" | "facebook", query: { code: string; state: string }): Promise<unknown> {
-    return this.request("GET", `/auth/oauth/${encodeURIComponent(provider)}/callback`, { query });
-  }
-
-  /**
-   * Redeem a one-time OAuth exchange code for tokens
-   *
-   * Exchanges the single-use code delivered to /login?oauth_code=<code> for the access and refresh tokens. Keeps tokens out of the URL/history.
-   *
-   * @route POST /auth/oauth/exchange
-   */
-  postAuthOauthExchange(body: { code: string }): Promise<{ accessToken?: string; refreshToken?: string }> {
-    return this.request("POST", `/auth/oauth/exchange`, { body });
-  }
-
-  /**
-   * Request a password reset OTP
-   *
-   * @route POST /auth/password-reset/request
-   */
-  postAuthPasswordResetRequest(body: { email: string; channel?: "email" }): Promise<{ success?: boolean; message?: string }> {
-    return this.request("POST", `/auth/password-reset/request`, { body });
-  }
-
-  /**
-   * Confirm password reset with OTP
-   *
-   * @route POST /auth/password-reset/confirm
-   */
-  postAuthPasswordResetConfirm(body: { email: string; code: string; newPassword: string }): Promise<{ success?: boolean }> {
-    return this.request("POST", `/auth/password-reset/confirm`, { body });
-  }
-
-  /**
-   * Email unsubscribe landing (API-only HTML)
-   *
-   * API/SDK-only. Verifies a signed token from email links and returns an HTML confirmation page (not JSON). No dashboard UI — email templates link directly to this API route.
-   *
-   * @route GET /auth/unsubscribe
-   */
-  getAuthUnsubscribe(query: { token: string }): Promise<unknown> {
-    return this.request("GET", `/auth/unsubscribe`, { query });
-  }
-
-  /**
-   * Get WebAuthn registration options
-   *
-   * @route POST /auth/passkey/register/options
-   */
-  postAuthPasskeyRegisterOptions(): Promise<unknown> {
-    return this.request("POST", `/auth/passkey/register/options`);
-  }
-
-  /**
-   * Complete WebAuthn registration
-   *
-   * @route POST /auth/passkey/register
-   */
-  postAuthPasskeyRegister(body: { body: Record<string, unknown>; name?: string }): Promise<{ success?: boolean; credentialId?: string }> {
-    return this.request("POST", `/auth/passkey/register`, { body });
-  }
-
-  /**
-   * Get WebAuthn authentication options
-   *
-   * @route POST /auth/passkey/authenticate/options
-   */
-  postAuthPasskeyAuthenticateOptions(body?: { email?: string }): Promise<unknown> {
-    return this.request("POST", `/auth/passkey/authenticate/options`, { body });
-  }
-
-  /**
-   * Complete WebAuthn authentication
-   *
-   * @route POST /auth/passkey/authenticate
-   */
-  postAuthPasskeyAuthenticate(body: { body: Record<string, unknown>; challengeKey: string }): Promise<TokenResponse> {
-    return this.request("POST", `/auth/passkey/authenticate`, { body });
-  }
-
-  /**
-   * Remove a registered passkey
-   *
-   * @route DELETE /auth/passkey/{credentialId}
-   * @param credentialId path parameter
-   */
-  deleteAuthPasskeyByCredentialId(credentialId: string): Promise<unknown> {
-    return this.request("DELETE", `/auth/passkey/${encodeURIComponent(credentialId)}`);
-  }
-
-  /**
-   * Initialize TOTP setup — returns secret and QR code
-   *
-   * @route POST /auth/mfa/totp/setup
-   */
-  postAuthMfaTotpSetup(): Promise<{ secret?: string; otpAuthUrl?: string; qrDataUrl?: string }> {
-    return this.request("POST", `/auth/mfa/totp/setup`);
-  }
-
-  /**
-   * Verify TOTP code and activate TOTP MFA
-   *
-   * @route POST /auth/mfa/totp/verify
-   */
-  postAuthMfaTotpVerify(body: { code: string }): Promise<{ success?: boolean; backupCodes?: string[] }> {
-    return this.request("POST", `/auth/mfa/totp/verify`, { body });
-  }
-
-  /**
-   * Disable TOTP (requires valid TOTP code)
-   *
-   * @route POST /auth/mfa/totp/disable
-   */
-  postAuthMfaTotpDisable(body: { code: string }): Promise<unknown> {
-    return this.request("POST", `/auth/mfa/totp/disable`, { body });
-  }
-
-  /**
-   * Regenerate backup codes (invalidates existing ones)
-   *
-   * @route POST /auth/mfa/backup-codes/regenerate
-   */
-  postAuthMfaBackupCodesRegenerate(body: { code: string }): Promise<{ backupCodes?: string[] }> {
-    return this.request("POST", `/auth/mfa/backup-codes/regenerate`, { body });
-  }
-
-  /**
-   * Redeem a backup code for authentication
-   *
-   * @route POST /auth/mfa/backup-codes/redeem
-   */
-  postAuthMfaBackupCodesRedeem(body: { code: string }): Promise<{ success?: boolean; remainingCodes?: number }> {
-    return this.request("POST", `/auth/mfa/backup-codes/redeem`, { body });
-  }
-
-  /**
-   * Send Email OTP
-   *
-   * @route POST /auth/mfa/otp/send
-   */
-  postAuthMfaOtpSend(body: { channel: "email"; target: string }): Promise<{ success?: boolean; expiresIn?: number }> {
-    return this.request("POST", `/auth/mfa/otp/send`, { body });
-  }
-
-  /**
-   * Verify channel OTP
-   *
-   * @route POST /auth/mfa/otp/verify
-   */
-  postAuthMfaOtpVerify(body: { code: string; channel: "email" }): Promise<unknown> {
-    return this.request("POST", `/auth/mfa/otp/verify`, { body });
-  }
-
-  /**
-   * List active sessions for authenticated user
-   *
-   * @route GET /sessions
-   */
-  getSessions(query?: { limit?: number; offset?: number; activeOnly?: boolean }): Promise<{ sessions?: Session[]; total?: number; limit?: number; offset?: number }> {
-    return this.request("GET", `/sessions`, { query });
-  }
-
-  /**
-   * Revoke all other sessions (keep current)
-   *
-   * @route DELETE /sessions
-   */
-  deleteSessions(): Promise<{ success?: boolean; revokedCount?: number }> {
-    return this.request("DELETE", `/sessions`);
-  }
-
-  /**
-   * Revoke a specific session
-   *
-   * @route DELETE /sessions/{id}
+   * @route GET /admin/access-reviews/{id}
    * @param id path parameter
    */
-  deleteSessionsById(id: string): Promise<unknown> {
-    return this.request("DELETE", `/sessions/${encodeURIComponent(id)}`);
+  getAdminAccessReviewsById(id: string): Promise<unknown> {
+    return this.request("GET", `/admin/access-reviews/${encodeURIComponent(id)}`);
+  }
+
+  /**
+   * Create complete (/admin/access-reviews/{id}/complete)
+   *
+   * @route POST /admin/access-reviews/{id}/complete
+   * @param id path parameter
+   */
+  postAdminAccessReviewsByIdComplete(id: string, body?: Record<string, unknown>): Promise<unknown> {
+    return this.request("POST", `/admin/access-reviews/${encodeURIComponent(id)}/complete`, { body });
+  }
+
+  /**
+   * Update itemId (/admin/access-reviews/{id}/items/{itemId})
+   *
+   * @route PATCH /admin/access-reviews/{id}/items/{itemId}
+   * @param id path parameter
+   * @param itemId path parameter
+   */
+  patchAdminAccessReviewsByIdItemsByItemId(id: string, itemId: string, body?: Record<string, unknown>): Promise<unknown> {
+    return this.request("PATCH", `/admin/access-reviews/${encodeURIComponent(id)}/items/${encodeURIComponent(itemId)}`, { body });
+  }
+
+  /**
+   * Get userId (/admin/anomaly/baseline/{userId})
+   *
+   * @route GET /admin/anomaly/baseline/{userId}
+   * @param userId path parameter
+   */
+  getAdminAnomalyBaselineByUserId(userId: string): Promise<unknown> {
+    return this.request("GET", `/admin/anomaly/baseline/${encodeURIComponent(userId)}`);
+  }
+
+  /**
+   * Delete userId (/admin/anomaly/baseline/{userId})
+   *
+   * @route DELETE /admin/anomaly/baseline/{userId}
+   * @param userId path parameter
+   */
+  deleteAdminAnomalyBaselineByUserId(userId: string): Promise<unknown> {
+    return this.request("DELETE", `/admin/anomaly/baseline/${encodeURIComponent(userId)}`);
+  }
+
+  /**
+   * Get baselines (/admin/anomaly/baselines)
+   *
+   * @route GET /admin/anomaly/baselines
+   */
+  getAdminAnomalyBaselines(): Promise<unknown> {
+    return this.request("GET", `/admin/anomaly/baselines`);
+  }
+
+  /**
+   * Create score (/admin/anomaly/score)
+   *
+   * @route POST /admin/anomaly/score
+   */
+  postAdminAnomalyScore(body?: Record<string, unknown>): Promise<unknown> {
+    return this.request("POST", `/admin/anomaly/score`, { body });
+  }
+
+  /**
+   * Get attachments (/admin/attachments)
+   *
+   * @route GET /admin/attachments
+   */
+  getAdminAttachments(): Promise<unknown> {
+    return this.request("GET", `/admin/attachments`);
+  }
+
+  /**
+   * Create upload (/admin/attachments/upload)
+   *
+   * @route POST /admin/attachments/upload
+   */
+  postAdminAttachmentsUpload(body?: Record<string, unknown>): Promise<unknown> {
+    return this.request("POST", `/admin/attachments/upload`, { body });
+  }
+
+  /**
+   * Query audit log (admin only)
+   *
+   * @route GET /admin/audit-logs
+   */
+  getAdminAuditLogs(query?: { limit?: number; offset?: number; action?: string; actorId?: string }): Promise<unknown> {
+    return this.request("GET", `/admin/audit-logs`, { query });
+  }
+
+  /**
+   * Get verify (/admin/audit-logs/verify)
+   *
+   * @route GET /admin/audit-logs/verify
+   */
+  getAdminAuditLogsVerify(): Promise<unknown> {
+    return this.request("GET", `/admin/audit-logs/verify`);
+  }
+
+  /**
+   * Get export (/admin/audit/export)
+   *
+   * @route GET /admin/audit/export
+   */
+  getAdminAuditExport(): Promise<unknown> {
+    return this.request("GET", `/admin/audit/export`);
+  }
+
+  /**
+   * Create broadcast (/admin/broadcast)
+   *
+   * @route POST /admin/broadcast
+   */
+  postAdminBroadcast(body?: Record<string, unknown>): Promise<unknown> {
+    return this.request("POST", `/admin/broadcast`, { body });
+  }
+
+  /**
+   * Get feedback (/admin/feedback)
+   *
+   * @route GET /admin/feedback
+   */
+  getAdminFeedback(): Promise<unknown> {
+    return this.request("GET", `/admin/feedback`);
+  }
+
+  /**
+   * List JIT access grants (admin only)
+   *
+   * @route GET /admin/jit-grants
+   */
+  getAdminJitGrants(query?: { status?: "pending" | "approved" | "denied" | "expired" | "revoked" }): Promise<unknown> {
+    return this.request("GET", `/admin/jit-grants`, { query });
+  }
+
+  /**
+   * Revoke an approved JIT grant (admin only)
+   *
+   * @route DELETE /admin/jit-grants/{id}
+   * @param id path parameter
+   */
+  deleteAdminJitGrantsById(id: string): Promise<unknown> {
+    return this.request("DELETE", `/admin/jit-grants/${encodeURIComponent(id)}`);
+  }
+
+  /**
+   * Approve a JIT grant request (admin only)
+   *
+   * @route POST /admin/jit-grants/{id}/approve
+   * @param id path parameter
+   */
+  postAdminJitGrantsByIdApprove(id: string): Promise<unknown> {
+    return this.request("POST", `/admin/jit-grants/${encodeURIComponent(id)}/approve`);
+  }
+
+  /**
+   * Deny a JIT grant request (admin only)
+   *
+   * @route POST /admin/jit-grants/{id}/deny
+   * @param id path parameter
+   */
+  postAdminJitGrantsByIdDeny(id: string): Promise<unknown> {
+    return this.request("POST", `/admin/jit-grants/${encodeURIComponent(id)}/deny`);
+  }
+
+  /**
+   * Create lifecycle-emails (/admin/lifecycle-emails)
+   *
+   * @route POST /admin/lifecycle-emails
+   */
+  postAdminLifecycleEmails(body?: Record<string, unknown>): Promise<unknown> {
+    return this.request("POST", `/admin/lifecycle-emails`, { body });
+  }
+
+  /**
+   * Get channels (/admin/notifications/channels)
+   *
+   * @route GET /admin/notifications/channels
+   */
+  getAdminNotificationsChannels(): Promise<unknown> {
+    return this.request("GET", `/admin/notifications/channels`);
+  }
+
+  /**
+   * Create channels (/admin/notifications/channels)
+   *
+   * @route POST /admin/notifications/channels
+   */
+  postAdminNotificationsChannels(body?: Record<string, unknown>): Promise<unknown> {
+    return this.request("POST", `/admin/notifications/channels`, { body });
+  }
+
+  /**
+   * Update id (/admin/notifications/channels/{id})
+   *
+   * @route PATCH /admin/notifications/channels/{id}
+   * @param id path parameter
+   */
+  patchAdminNotificationsChannelsById(id: string, body?: Record<string, unknown>): Promise<unknown> {
+    return this.request("PATCH", `/admin/notifications/channels/${encodeURIComponent(id)}`, { body });
+  }
+
+  /**
+   * Delete id (/admin/notifications/channels/{id})
+   *
+   * @route DELETE /admin/notifications/channels/{id}
+   * @param id path parameter
+   */
+  deleteAdminNotificationsChannelsById(id: string): Promise<unknown> {
+    return this.request("DELETE", `/admin/notifications/channels/${encodeURIComponent(id)}`);
+  }
+
+  /**
+   * Create test (/admin/notifications/channels/{id}/test)
+   *
+   * @route POST /admin/notifications/channels/{id}/test
+   * @param id path parameter
+   */
+  postAdminNotificationsChannelsByIdTest(id: string, body?: Record<string, unknown>): Promise<unknown> {
+    return this.request("POST", `/admin/notifications/channels/${encodeURIComponent(id)}/test`, { body });
+  }
+
+  /**
+   * Get config (/admin/notifications/config)
+   *
+   * @route GET /admin/notifications/config
+   */
+  getAdminNotificationsConfig(): Promise<unknown> {
+    return this.request("GET", `/admin/notifications/config`);
+  }
+
+  /**
+   * Create test (/admin/notifications/test)
+   *
+   * @route POST /admin/notifications/test
+   */
+  postAdminNotificationsTest(body?: Record<string, unknown>): Promise<unknown> {
+    return this.request("POST", `/admin/notifications/test`, { body });
+  }
+
+  /**
+   * Get revenue (/admin/revenue)
+   *
+   * @route GET /admin/revenue
+   */
+  getAdminRevenue(): Promise<unknown> {
+    return this.request("GET", `/admin/revenue`);
+  }
+
+  /**
+   * List all roles (admin only)
+   *
+   * @route GET /admin/roles
+   */
+  getAdminRoles(): Promise<unknown> {
+    return this.request("GET", `/admin/roles`);
+  }
+
+  /**
+   * Create a new role (admin only)
+   *
+   * @route POST /admin/roles
+   */
+  postAdminRoles(body: { name: string; displayName: string; description?: string; parentRoleName?: string; permissions?: unknown[] }): Promise<unknown> {
+    return this.request("POST", `/admin/roles`, { body });
+  }
+
+  /**
+   * Get sessions (/admin/sessions)
+   *
+   * @route GET /admin/sessions
+   */
+  getAdminSessions(): Promise<unknown> {
+    return this.request("GET", `/admin/sessions`);
+  }
+
+  /**
+   * Revoke a specific session by ID (admin only)
+   *
+   * @route DELETE /admin/sessions/{id}
+   * @param id path parameter
+   */
+  deleteAdminSessionsById(id: string): Promise<unknown> {
+    return this.request("DELETE", `/admin/sessions/${encodeURIComponent(id)}`);
+  }
+
+  /**
+   * Get settings (/admin/settings)
+   *
+   * @route GET /admin/settings
+   */
+  getAdminSettings(): Promise<unknown> {
+    return this.request("GET", `/admin/settings`);
+  }
+
+  /**
+   * Update settings (/admin/settings)
+   *
+   * @route PUT /admin/settings
+   */
+  putAdminSettings(body?: Record<string, unknown>): Promise<unknown> {
+    return this.request("PUT", `/admin/settings`, { body });
+  }
+
+  /**
+   * Get slo (/admin/slo)
+   *
+   * @route GET /admin/slo
+   */
+  getAdminSlo(): Promise<unknown> {
+    return this.request("GET", `/admin/slo`);
+  }
+
+  /**
+   * Get stats (/admin/stats)
+   *
+   * @route GET /admin/stats
+   */
+  getAdminStats(): Promise<unknown> {
+    return this.request("GET", `/admin/stats`);
+  }
+
+  /**
+   * Get tenants (/admin/tenants)
+   *
+   * @route GET /admin/tenants
+   */
+  getAdminTenants(): Promise<unknown> {
+    return this.request("GET", `/admin/tenants`);
+  }
+
+  /**
+   * Create tenants (/admin/tenants)
+   *
+   * @route POST /admin/tenants
+   */
+  postAdminTenants(body?: Record<string, unknown>): Promise<unknown> {
+    return this.request("POST", `/admin/tenants`, { body });
+  }
+
+  /**
+   * Get id (/admin/tenants/{id})
+   *
+   * @route GET /admin/tenants/{id}
+   * @param id path parameter
+   */
+  getAdminTenantsById(id: string): Promise<unknown> {
+    return this.request("GET", `/admin/tenants/${encodeURIComponent(id)}`);
+  }
+
+  /**
+   * Update id (/admin/tenants/{id})
+   *
+   * @route PUT /admin/tenants/{id}
+   * @param id path parameter
+   */
+  putAdminTenantsById(id: string, body?: Record<string, unknown>): Promise<unknown> {
+    return this.request("PUT", `/admin/tenants/${encodeURIComponent(id)}`, { body });
+  }
+
+  /**
+   * Delete id (/admin/tenants/{id})
+   *
+   * @route DELETE /admin/tenants/{id}
+   * @param id path parameter
+   */
+  deleteAdminTenantsById(id: string): Promise<unknown> {
+    return this.request("DELETE", `/admin/tenants/${encodeURIComponent(id)}`);
+  }
+
+  /**
+   * Create plan (/admin/tenants/{id}/plan)
+   *
+   * @route POST /admin/tenants/{id}/plan
+   * @param id path parameter
+   */
+  postAdminTenantsByIdPlan(id: string, body?: Record<string, unknown>): Promise<unknown> {
+    return this.request("POST", `/admin/tenants/${encodeURIComponent(id)}/plan`, { body });
+  }
+
+  /**
+   * Get stats (/admin/tenants/{id}/stats)
+   *
+   * @route GET /admin/tenants/{id}/stats
+   * @param id path parameter
+   */
+  getAdminTenantsByIdStats(id: string): Promise<unknown> {
+    return this.request("GET", `/admin/tenants/${encodeURIComponent(id)}/stats`);
+  }
+
+  /**
+   * Create presigned (/admin/uploads/presigned)
+   *
+   * @route POST /admin/uploads/presigned
+   */
+  postAdminUploadsPresigned(body?: Record<string, unknown>): Promise<unknown> {
+    return this.request("POST", `/admin/uploads/presigned`, { body });
   }
 
   /**
@@ -488,6 +665,46 @@ export class zerotrustClient {
   }
 
   /**
+   * Create force-logout (/admin/users/{id}/force-logout)
+   *
+   * @route POST /admin/users/{id}/force-logout
+   * @param id path parameter
+   */
+  postAdminUsersByIdForceLogout(id: string, body?: Record<string, unknown>): Promise<unknown> {
+    return this.request("POST", `/admin/users/${encodeURIComponent(id)}/force-logout`, { body });
+  }
+
+  /**
+   * Create impersonate (/admin/users/{id}/impersonate)
+   *
+   * @route POST /admin/users/{id}/impersonate
+   * @param id path parameter
+   */
+  postAdminUsersByIdImpersonate(id: string, body?: Record<string, unknown>): Promise<unknown> {
+    return this.request("POST", `/admin/users/${encodeURIComponent(id)}/impersonate`, { body });
+  }
+
+  /**
+   * Create legal-hold (/admin/users/{id}/legal-hold)
+   *
+   * @route POST /admin/users/{id}/legal-hold
+   * @param id path parameter
+   */
+  postAdminUsersByIdLegalHold(id: string, body?: Record<string, unknown>): Promise<unknown> {
+    return this.request("POST", `/admin/users/${encodeURIComponent(id)}/legal-hold`, { body });
+  }
+
+  /**
+   * Update plan (/admin/users/{id}/plan)
+   *
+   * @route PUT /admin/users/{id}/plan
+   * @param id path parameter
+   */
+  putAdminUsersByIdPlan(id: string, body?: Record<string, unknown>): Promise<unknown> {
+    return this.request("PUT", `/admin/users/${encodeURIComponent(id)}/plan`, { body });
+  }
+
+  /**
    * Assign role to user (admin only)
    *
    * @route POST /admin/users/{id}/roles
@@ -506,6 +723,16 @@ export class zerotrustClient {
    */
   deleteAdminUsersByIdRolesByRoleName(id: string, roleName: string): Promise<unknown> {
     return this.request("DELETE", `/admin/users/${encodeURIComponent(id)}/roles/${encodeURIComponent(roleName)}`);
+  }
+
+  /**
+   * Update segment (/admin/users/{id}/segment)
+   *
+   * @route PUT /admin/users/{id}/segment
+   * @param id path parameter
+   */
+  putAdminUsersByIdSegment(id: string, body?: Record<string, unknown>): Promise<unknown> {
+    return this.request("PUT", `/admin/users/${encodeURIComponent(id)}/segment`, { body });
   }
 
   /**
@@ -529,88 +756,734 @@ export class zerotrustClient {
   }
 
   /**
-   * Revoke a specific session by ID (admin only)
+   * Get export (/admin/users/export)
    *
-   * @route DELETE /admin/sessions/{id}
+   * @route GET /admin/users/export
+   */
+  getAdminUsersExport(): Promise<unknown> {
+    return this.request("GET", `/admin/users/export`);
+  }
+
+  /**
+   * Get segments (/admin/users/segments)
+   *
+   * @route GET /admin/users/segments
+   */
+  getAdminUsersSegments(): Promise<unknown> {
+    return this.request("GET", `/admin/users/segments`);
+  }
+
+  /**
+   * Get deliveries (/admin/webhooks/{webhookId}/deliveries)
+   *
+   * @route GET /admin/webhooks/{webhookId}/deliveries
+   * @param webhookId path parameter
+   */
+  getAdminWebhooksByWebhookIdDeliveries(webhookId: string): Promise<unknown> {
+    return this.request("GET", `/admin/webhooks/${encodeURIComponent(webhookId)}/deliveries`);
+  }
+
+  /**
+   * List API keys
+   *
+   * @route GET /api-keys
+   */
+  getApiKeys(): Promise<{ apiKeys?: ApiKey[] }> {
+    return this.request("GET", `/api-keys`);
+  }
+
+  /**
+   * Create API key
+   *
+   * @route POST /api-keys
+   */
+  postApiKeys(body: { name: string; scopes?: string[]; expiresAt?: string }): Promise<{ apiKey?: ApiKey; secret?: string }> {
+    return this.request("POST", `/api-keys`, { body });
+  }
+
+  /**
+   * Revoke API key
+   *
+   * @route DELETE /api-keys/{id}
    * @param id path parameter
    */
-  deleteAdminSessionsById(id: string): Promise<unknown> {
-    return this.request("DELETE", `/admin/sessions/${encodeURIComponent(id)}`);
+  deleteApiKeysById(id: string): Promise<SuccessResponse> {
+    return this.request("DELETE", `/api-keys/${encodeURIComponent(id)}`);
   }
 
   /**
-   * List all roles (admin only)
+   * Get versions (/api/versions)
    *
-   * @route GET /admin/roles
+   * @route GET /api/versions
    */
-  getAdminRoles(): Promise<unknown> {
-    return this.request("GET", `/admin/roles`);
+  getApiVersions(): Promise<unknown> {
+    return this.request("GET", `/api/versions`);
   }
 
   /**
-   * Create a new role (admin only)
+   * Login with email and password
    *
-   * @route POST /admin/roles
+   * @route POST /auth/login
    */
-  postAdminRoles(body: { name: string; displayName: string; description?: string; parentRoleName?: string; permissions?: unknown[] }): Promise<unknown> {
-    return this.request("POST", `/admin/roles`, { body });
+  postAuthLogin(body: { email: string; password: string }): Promise<TokenResponse> {
+    return this.request("POST", `/auth/login`, { body });
   }
 
   /**
-   * List JIT access grants (admin only)
+   * Create mfa (/auth/login/mfa)
    *
-   * @route GET /admin/jit-grants
+   * @route POST /auth/login/mfa
    */
-  getAdminJitGrants(query?: { status?: "pending" | "approved" | "denied" | "expired" | "revoked" }): Promise<unknown> {
-    return this.request("GET", `/admin/jit-grants`, { query });
+  postAuthLoginMfa(body?: Record<string, unknown>): Promise<unknown> {
+    return this.request("POST", `/auth/login/mfa`, { body });
   }
 
   /**
-   * Approve a JIT grant request (admin only)
+   * Revoke current session
    *
-   * @route POST /admin/jit-grants/{id}/approve
+   * @route POST /auth/logout
+   */
+  postAuthLogout(): Promise<{ success?: boolean }> {
+    return this.request("POST", `/auth/logout`);
+  }
+
+  /**
+   * Revoke all sessions for the authenticated user
+   *
+   * @route POST /auth/logout/all
+   */
+  postAuthLogoutAll(): Promise<{ success?: boolean }> {
+    return this.request("POST", `/auth/logout/all`);
+  }
+
+  /**
+   * Create send (/auth/magic-link/send)
+   *
+   * @route POST /auth/magic-link/send
+   */
+  postAuthMagicLinkSend(body?: Record<string, unknown>): Promise<unknown> {
+    return this.request("POST", `/auth/magic-link/send`, { body });
+  }
+
+  /**
+   * Get verify (/auth/magic-link/verify)
+   *
+   * @route GET /auth/magic-link/verify
+   */
+  getAuthMagicLinkVerify(): Promise<unknown> {
+    return this.request("GET", `/auth/magic-link/verify`);
+  }
+
+  /**
+   * Create verify (/auth/magic-link/verify)
+   *
+   * @route POST /auth/magic-link/verify
+   */
+  postAuthMagicLinkVerify(body?: Record<string, unknown>): Promise<unknown> {
+    return this.request("POST", `/auth/magic-link/verify`, { body });
+  }
+
+  /**
+   * Get me (/auth/me)
+   *
+   * @route GET /auth/me
+   */
+  getAuthMe(): Promise<unknown> {
+    return this.request("GET", `/auth/me`);
+  }
+
+  /**
+   * Update me (/auth/me)
+   *
+   * @route PATCH /auth/me
+   */
+  patchAuthMe(body?: Record<string, unknown>): Promise<unknown> {
+    return this.request("PATCH", `/auth/me`, { body });
+  }
+
+  /**
+   * Create avatar (/auth/me/avatar)
+   *
+   * @route POST /auth/me/avatar
+   */
+  postAuthMeAvatar(body?: Record<string, unknown>): Promise<unknown> {
+    return this.request("POST", `/auth/me/avatar`, { body });
+  }
+
+  /**
+   * Create email (/auth/me/email)
+   *
+   * @route POST /auth/me/email
+   */
+  postAuthMeEmail(body?: Record<string, unknown>): Promise<unknown> {
+    return this.request("POST", `/auth/me/email`, { body });
+  }
+
+  /**
+   * Create link (/auth/me/link)
+   *
+   * @route POST /auth/me/link
+   */
+  postAuthMeLink(body?: Record<string, unknown>): Promise<unknown> {
+    return this.request("POST", `/auth/me/link`, { body });
+  }
+
+  /**
+   * Create nps (/auth/me/nps)
+   *
+   * @route POST /auth/me/nps
+   */
+  postAuthMeNps(body?: Record<string, unknown>): Promise<unknown> {
+    return this.request("POST", `/auth/me/nps`, { body });
+  }
+
+  /**
+   * Get should-prompt (/auth/me/nps/should-prompt)
+   *
+   * @route GET /auth/me/nps/should-prompt
+   */
+  getAuthMeNpsShouldPrompt(): Promise<unknown> {
+    return this.request("GET", `/auth/me/nps/should-prompt`);
+  }
+
+  /**
+   * Create onboarding-complete (/auth/me/onboarding-complete)
+   *
+   * @route POST /auth/me/onboarding-complete
+   */
+  postAuthMeOnboardingComplete(body?: Record<string, unknown>): Promise<unknown> {
+    return this.request("POST", `/auth/me/onboarding-complete`, { body });
+  }
+
+  /**
+   * Redeem a backup code for authentication
+   *
+   * @route POST /auth/mfa/backup-codes/redeem
+   */
+  postAuthMfaBackupCodesRedeem(body: { code: string }): Promise<{ success?: boolean; remainingCodes?: number }> {
+    return this.request("POST", `/auth/mfa/backup-codes/redeem`, { body });
+  }
+
+  /**
+   * Regenerate backup codes (invalidates existing ones)
+   *
+   * @route POST /auth/mfa/backup-codes/regenerate
+   */
+  postAuthMfaBackupCodesRegenerate(body: { code: string }): Promise<{ backupCodes?: string[] }> {
+    return this.request("POST", `/auth/mfa/backup-codes/regenerate`, { body });
+  }
+
+  /**
+   * Send Email OTP
+   *
+   * @route POST /auth/mfa/otp/send
+   */
+  postAuthMfaOtpSend(body: { channel: "email"; target: string }): Promise<{ success?: boolean; expiresIn?: number }> {
+    return this.request("POST", `/auth/mfa/otp/send`, { body });
+  }
+
+  /**
+   * Verify channel OTP
+   *
+   * @route POST /auth/mfa/otp/verify
+   */
+  postAuthMfaOtpVerify(body: { code: string; channel: "email" }): Promise<unknown> {
+    return this.request("POST", `/auth/mfa/otp/verify`, { body });
+  }
+
+  /**
+   * Delete totp (/auth/mfa/totp)
+   *
+   * @route DELETE /auth/mfa/totp
+   */
+  deleteAuthMfaTotp(): Promise<unknown> {
+    return this.request("DELETE", `/auth/mfa/totp`);
+  }
+
+  /**
+   * Disable TOTP (requires valid TOTP code)
+   *
+   * @route POST /auth/mfa/totp/disable
+   */
+  postAuthMfaTotpDisable(body: { code: string }): Promise<unknown> {
+    return this.request("POST", `/auth/mfa/totp/disable`, { body });
+  }
+
+  /**
+   * Initialize TOTP setup — returns secret and QR code
+   *
+   * @route POST /auth/mfa/totp/setup
+   */
+  postAuthMfaTotpSetup(): Promise<{ secret?: string; otpAuthUrl?: string; qrDataUrl?: string }> {
+    return this.request("POST", `/auth/mfa/totp/setup`);
+  }
+
+  /**
+   * Verify TOTP code and activate TOTP MFA
+   *
+   * @route POST /auth/mfa/totp/verify
+   */
+  postAuthMfaTotpVerify(body: { code: string }): Promise<{ success?: boolean; backupCodes?: string[] }> {
+    return this.request("POST", `/auth/mfa/totp/verify`, { body });
+  }
+
+  /**
+   * Delete provider (/auth/oauth/{provider})
+   *
+   * @route DELETE /auth/oauth/{provider}
+   * @param provider path parameter
+   */
+  deleteAuthOauthByProvider(provider: string): Promise<unknown> {
+    return this.request("DELETE", `/auth/oauth/${encodeURIComponent(provider)}`);
+  }
+
+  /**
+   * Begin OAuth authorization flow (returns the provider's authorize URL)
+   *
+   * Generates a CSRF state and (where supported) a server-side PKCE pair, then returns the provider authorization URL the client should navigate to. The PKCE code_verifier never leaves the server.
+   *
+   * @route GET /auth/oauth/{provider}/authorize
+   * @param provider path parameter
+   */
+  getAuthOauthByProviderAuthorize(provider: "google" | "github" | "facebook"): Promise<{ authorizeUrl?: string; state?: string }> {
+    return this.request("GET", `/auth/oauth/${encodeURIComponent(provider)}/authorize`);
+  }
+
+  /**
+   * OAuth authorization code callback
+   *
+   * Provider redirects here with an authorization code. On success the server creates a session, stores the tokens under a one-time exchange code, and 302-redirects to the frontend at /login?oauth_code=<code>. The SPA redeems it via POST /auth/oauth/exchange.
+   *
+   * @route GET /auth/oauth/{provider}/callback
+   * @param provider path parameter
+   */
+  getAuthOauthByProviderCallback(provider: "google" | "github" | "facebook", query: { code: string; state: string }): Promise<unknown> {
+    return this.request("GET", `/auth/oauth/${encodeURIComponent(provider)}/callback`, { query });
+  }
+
+  /**
+   * Redeem a one-time OAuth exchange code for tokens
+   *
+   * Exchanges the single-use code delivered to /login?oauth_code=<code> for the access and refresh tokens. Keeps tokens out of the URL/history.
+   *
+   * @route POST /auth/oauth/exchange
+   */
+  postAuthOauthExchange(body: { code: string }): Promise<{ accessToken?: string; refreshToken?: string }> {
+    return this.request("POST", `/auth/oauth/exchange`, { body });
+  }
+
+  /**
+   * Generate an ephemeral OAuth state token (PKCE/nonce)
+   *
+   * @route POST /auth/oauth/state
+   */
+  postAuthOauthState(body?: { codeChallenge?: string; redirectUri?: string }): Promise<{ state?: string; nonce?: string; ttlSeconds?: number }> {
+    return this.request("POST", `/auth/oauth/state`, { body });
+  }
+
+  /**
+   * Remove a registered passkey
+   *
+   * @route DELETE /auth/passkey/{credentialId}
+   * @param credentialId path parameter
+   */
+  deleteAuthPasskeyByCredentialId(credentialId: string): Promise<unknown> {
+    return this.request("DELETE", `/auth/passkey/${encodeURIComponent(credentialId)}`);
+  }
+
+  /**
+   * Complete WebAuthn authentication
+   *
+   * @route POST /auth/passkey/authenticate
+   */
+  postAuthPasskeyAuthenticate(body: { body: Record<string, unknown>; challengeKey: string }): Promise<TokenResponse> {
+    return this.request("POST", `/auth/passkey/authenticate`, { body });
+  }
+
+  /**
+   * Get WebAuthn authentication options
+   *
+   * @route POST /auth/passkey/authenticate/options
+   */
+  postAuthPasskeyAuthenticateOptions(body?: { email?: string }): Promise<unknown> {
+    return this.request("POST", `/auth/passkey/authenticate/options`, { body });
+  }
+
+  /**
+   * Create verify (/auth/passkey/authenticate/verify)
+   *
+   * @route POST /auth/passkey/authenticate/verify
+   */
+  postAuthPasskeyAuthenticateVerify(body?: Record<string, unknown>): Promise<unknown> {
+    return this.request("POST", `/auth/passkey/authenticate/verify`, { body });
+  }
+
+  /**
+   * Complete WebAuthn registration
+   *
+   * @route POST /auth/passkey/register
+   */
+  postAuthPasskeyRegister(body: { body: Record<string, unknown>; name?: string }): Promise<{ success?: boolean; credentialId?: string }> {
+    return this.request("POST", `/auth/passkey/register`, { body });
+  }
+
+  /**
+   * Get WebAuthn registration options
+   *
+   * @route POST /auth/passkey/register/options
+   */
+  postAuthPasskeyRegisterOptions(): Promise<unknown> {
+    return this.request("POST", `/auth/passkey/register/options`);
+  }
+
+  /**
+   * Create verify (/auth/passkey/register/verify)
+   *
+   * @route POST /auth/passkey/register/verify
+   */
+  postAuthPasskeyRegisterVerify(body?: Record<string, unknown>): Promise<unknown> {
+    return this.request("POST", `/auth/passkey/register/verify`, { body });
+  }
+
+  /**
+   * Confirm password reset with OTP
+   *
+   * @route POST /auth/password-reset/confirm
+   */
+  postAuthPasswordResetConfirm(body: { email: string; code: string; newPassword: string }): Promise<{ success?: boolean }> {
+    return this.request("POST", `/auth/password-reset/confirm`, { body });
+  }
+
+  /**
+   * Request a password reset OTP
+   *
+   * @route POST /auth/password-reset/request
+   */
+  postAuthPasswordResetRequest(body: { email: string; channel?: "email" }): Promise<{ success?: boolean; message?: string }> {
+    return this.request("POST", `/auth/password-reset/request`, { body });
+  }
+
+  /**
+   * Get challenge (/auth/pow/challenge)
+   *
+   * @route GET /auth/pow/challenge
+   */
+  getAuthPowChallenge(): Promise<unknown> {
+    return this.request("GET", `/auth/pow/challenge`);
+  }
+
+  /**
+   * Register a new user
+   *
+   * @route POST /auth/register
+   */
+  postAuthRegister(body: { email: string; password: string; displayName?: string }): Promise<{ success?: boolean; userId?: string }> {
+    return this.request("POST", `/auth/register`, { body });
+  }
+
+  /**
+   * Rotate refresh token and issue new access token
+   *
+   * @route POST /auth/token/refresh
+   */
+  postAuthTokenRefresh(body: { refreshToken: string }): Promise<TokenResponse> {
+    return this.request("POST", `/auth/token/refresh`, { body });
+  }
+
+  /**
+   * Email unsubscribe landing (API-only HTML)
+   *
+   * API/SDK-only. Verifies a signed token from email links and returns an HTML confirmation page (not JSON). No dashboard UI — email templates link directly to this API route.
+   *
+   * @route GET /auth/unsubscribe
+   */
+  getAuthUnsubscribe(query: { token: string }): Promise<unknown> {
+    return this.request("GET", `/auth/unsubscribe`, { query });
+  }
+
+  /**
+   * Create verify-email (/auth/verify-email)
+   *
+   * @route POST /auth/verify-email
+   */
+  postAuthVerifyEmail(body?: Record<string, unknown>): Promise<unknown> {
+    return this.request("POST", `/auth/verify-email`, { body });
+  }
+
+  /**
+   * Create resend (/auth/verify-email/resend)
+   *
+   * @route POST /auth/verify-email/resend
+   */
+  postAuthVerifyEmailResend(body?: Record<string, unknown>): Promise<unknown> {
+    return this.request("POST", `/auth/verify-email/resend`, { body });
+  }
+
+  /**
+   * Create challenge (/auth/verify/challenge)
+   *
+   * @route POST /auth/verify/challenge
+   */
+  postAuthVerifyChallenge(body?: Record<string, unknown>): Promise<unknown> {
+    return this.request("POST", `/auth/verify/challenge`, { body });
+  }
+
+  /**
+   * Create respond (/auth/verify/respond)
+   *
+   * @route POST /auth/verify/respond
+   */
+  postAuthVerifyRespond(body?: Record<string, unknown>): Promise<unknown> {
+    return this.request("POST", `/auth/verify/respond`, { body });
+  }
+
+  /**
+   * Get status (/auth/verify/status)
+   *
+   * @route GET /auth/verify/status
+   */
+  getAuthVerifyStatus(): Promise<unknown> {
+    return this.request("GET", `/auth/verify/status`);
+  }
+
+  /**
+   * Cancel or pause subscription
+   *
+   * @route POST /billing/cancel
+   */
+  postBillingCancel(body: { action?: "cancel" | "pause"; reason?: string; comment?: string }): Promise<GenericObject> {
+    return this.request("POST", `/billing/cancel`, { body });
+  }
+
+  /**
+   * Change subscription plan
+   *
+   * @route POST /billing/change-plan
+   */
+  postBillingChangePlan(body: { plan: string; priceId?: string }): Promise<GenericObject> {
+    return this.request("POST", `/billing/change-plan`, { body });
+  }
+
+  /**
+   * Create Stripe checkout session
+   *
+   * @route POST /billing/checkout
+   */
+  postBillingCheckout(body: { priceId?: string; plan?: string }): Promise<{ url?: string }> {
+    return this.request("POST", `/billing/checkout`, { body });
+  }
+
+  /**
+   * List supported billing currencies
+   *
+   * @route GET /billing/currencies
+   */
+  getBillingCurrencies(): Promise<{ currencies?: GenericObject[] }> {
+    return this.request("GET", `/billing/currencies`);
+  }
+
+  /**
+   * Create Stripe billing portal session
+   *
+   * @route POST /billing/portal
+   */
+  postBillingPortal(body: Record<string, unknown>): Promise<{ url?: string }> {
+    return this.request("POST", `/billing/portal`, { body });
+  }
+
+  /**
+   * Get localized plan pricing
+   *
+   * @route GET /billing/pricing
+   */
+  getBillingPricing(query?: { currency?: string; locale?: string }): Promise<{ plans?: GenericObject[] }> {
+    return this.request("GET", `/billing/pricing`, { query });
+  }
+
+  /**
+   * Reactivate subscription
+   *
+   * @route POST /billing/reactivate
+   */
+  postBillingReactivate(body: Record<string, unknown>): Promise<GenericObject> {
+    return this.request("POST", `/billing/reactivate`, { body });
+  }
+
+  /**
+   * Get current subscription
+   *
+   * @route GET /billing/subscription
+   */
+  getBillingSubscription(): Promise<BillingSubscription> {
+    return this.request("GET", `/billing/subscription`);
+  }
+
+  /**
+   * List tax exemptions
+   *
+   * @route GET /billing/tax-exemptions
+   */
+  getBillingTaxExemptions(): Promise<GenericObject> {
+    return this.request("GET", `/billing/tax-exemptions`);
+  }
+
+  /**
+   * Create tax exemption request
+   *
+   * @route POST /billing/tax-exemptions
+   */
+  postBillingTaxExemptions(body: GenericObject): Promise<GenericObject> {
+    return this.request("POST", `/billing/tax-exemptions`, { body });
+  }
+
+  /**
+   * Update tax exemption status
+   *
+   * @route POST /billing/tax-exemptions/{id}/status
    * @param id path parameter
    */
-  postAdminJitGrantsByIdApprove(id: string): Promise<unknown> {
-    return this.request("POST", `/admin/jit-grants/${encodeURIComponent(id)}/approve`);
+  postBillingTaxExemptionsByIdStatus(id: string, body: { status?: string }): Promise<GenericObject> {
+    return this.request("POST", `/billing/tax-exemptions/${encodeURIComponent(id)}/status`, { body });
   }
 
   /**
-   * Deny a JIT grant request (admin only)
+   * Quote sales tax / VAT
    *
-   * @route POST /admin/jit-grants/{id}/deny
-   * @param id path parameter
+   * @route POST /billing/tax/quote
    */
-  postAdminJitGrantsByIdDeny(id: string): Promise<unknown> {
-    return this.request("POST", `/admin/jit-grants/${encodeURIComponent(id)}/deny`);
+  postBillingTaxQuote(body: GenericObject): Promise<GenericObject> {
+    return this.request("POST", `/billing/tax/quote`, { body });
   }
 
   /**
-   * Revoke an approved JIT grant (admin only)
+   * Get current billing usage
    *
-   * @route DELETE /admin/jit-grants/{id}
-   * @param id path parameter
+   * @route GET /billing/usage
    */
-  deleteAdminJitGrantsById(id: string): Promise<unknown> {
-    return this.request("DELETE", `/admin/jit-grants/${encodeURIComponent(id)}`);
+  getBillingUsage(): Promise<GenericObject> {
+    return this.request("GET", `/billing/usage`);
   }
 
   /**
-   * Query audit log (admin only)
+   * Validate VAT number
    *
-   * @route GET /admin/audit-logs
+   * @route GET /billing/vat/validate
    */
-  getAdminAuditLogs(query?: { limit?: number; offset?: number; action?: string; actorId?: string }): Promise<unknown> {
-    return this.request("GET", `/admin/audit-logs`, { query });
+  getBillingVatValidate(query: { vatNumber: string; country?: string }): Promise<GenericObject> {
+    return this.request("GET", `/billing/vat/validate`, { query });
   }
 
   /**
-   * Receive a Security Event Token (SET) from a provider
+   * Stripe billing webhook (signature-verified)
    *
-   * @route POST /ssf/events
+   * @route POST /billing/webhook
    */
-  postSsfEvents(body: Record<string, unknown>): Promise<unknown> {
-    return this.request("POST", `/ssf/events`, { body });
+  postBillingWebhook(body?: Record<string, unknown>): Promise<unknown> {
+    return this.request("POST", `/billing/webhook`, { body });
+  }
+
+  /**
+   * Get annual risk assessment
+   *
+   * @route GET /compliance/risk-assessment/{year}
+   * @param year path parameter
+   */
+  getComplianceRiskAssessmentByYear(year: string): Promise<GenericObject> {
+    return this.request("GET", `/compliance/risk-assessment/${encodeURIComponent(year)}`);
+  }
+
+  /**
+   * Create risk assessment item
+   *
+   * @route POST /compliance/risk-assessment/{year}
+   * @param year path parameter
+   */
+  postComplianceRiskAssessmentByYear(year: string, body: GenericObject): Promise<GenericObject> {
+    return this.request("POST", `/compliance/risk-assessment/${encodeURIComponent(year)}`, { body });
+  }
+
+  /**
+   * Update risk assessment item
+   *
+   * @route PUT /compliance/risk-assessment/{year}/{riskId}
+   * @param year path parameter
+   * @param riskId path parameter
+   */
+  putComplianceRiskAssessmentByYearByRiskId(year: string, riskId: string, body: GenericObject): Promise<GenericObject> {
+    return this.request("PUT", `/compliance/risk-assessment/${encodeURIComponent(year)}/${encodeURIComponent(riskId)}`, { body });
+  }
+
+  /**
+   * List SOC 2 controls
+   *
+   * @route GET /compliance/soc2/controls
+   */
+  getComplianceSoc2Controls(): Promise<GenericObject> {
+    return this.request("GET", `/compliance/soc2/controls`);
+  }
+
+  /**
+   * Update SOC 2 control status
+   *
+   * @route PUT /compliance/soc2/controls/{controlId}
+   * @param controlId path parameter
+   */
+  putComplianceSoc2ControlsByControlId(controlId: string, body: GenericObject): Promise<GenericObject> {
+    return this.request("PUT", `/compliance/soc2/controls/${encodeURIComponent(controlId)}`, { body });
+  }
+
+  /**
+   * Get SOC 2 readiness summary
+   *
+   * @route GET /compliance/soc2/readiness
+   */
+  getComplianceSoc2Readiness(): Promise<GenericObject> {
+    return this.request("GET", `/compliance/soc2/readiness`);
+  }
+
+  /**
+   * Submit product feedback
+   *
+   * @route POST /feedback
+   */
+  postFeedback(body: { type: "nps" | "csat" | "thumbs"; score: number; comment?: string; context?: string; orgId?: string; metadata?: GenericObject }): Promise<GenericObject> {
+    return this.request("POST", `/feedback`, { body });
+  }
+
+  /**
+   * Request account deletion
+   *
+   * @route DELETE /gdpr/account
+   */
+  deleteGdprAccount(body?: { password?: string; reason?: string }): Promise<GenericObject> {
+    return this.request("DELETE", `/gdpr/account`, { body });
+  }
+
+  /**
+   * Cancel pending account deletion
+   *
+   * @route POST /gdpr/account/deletion/cancel
+   */
+  postGdprAccountDeletionCancel(body: Record<string, unknown>): Promise<SuccessResponse> {
+    return this.request("POST", `/gdpr/account/deletion/cancel`, { body });
+  }
+
+  /**
+   * Export authenticated user data
+   *
+   * @route GET /gdpr/export
+   */
+  getGdprExport(): Promise<GenericObject> {
+    return this.request("GET", `/gdpr/export`);
+  }
+
+  /**
+   * Get health (/health)
+   *
+   * @route GET /health
+   */
+  getHealth(): Promise<unknown> {
+    return this.request("GET", `/health`);
   }
 
   /**
@@ -620,6 +1493,163 @@ export class zerotrustClient {
    */
   getHealthz(): Promise<{ status?: "ok"; redis?: string; elasticsearch?: string }> {
     return this.request("GET", `/healthz`);
+  }
+
+  /**
+   * Get cross-tenant (/jit/cross-tenant)
+   *
+   * @route GET /jit/cross-tenant
+   */
+  getJitCrossTenant(): Promise<unknown> {
+    return this.request("GET", `/jit/cross-tenant`);
+  }
+
+  /**
+   * Create cross-tenant (/jit/cross-tenant)
+   *
+   * @route POST /jit/cross-tenant
+   */
+  postJitCrossTenant(body?: Record<string, unknown>): Promise<unknown> {
+    return this.request("POST", `/jit/cross-tenant`, { body });
+  }
+
+  /**
+   * Create approve (/jit/cross-tenant/{id}/approve)
+   *
+   * @route POST /jit/cross-tenant/{id}/approve
+   * @param id path parameter
+   */
+  postJitCrossTenantByIdApprove(id: string, body?: Record<string, unknown>): Promise<unknown> {
+    return this.request("POST", `/jit/cross-tenant/${encodeURIComponent(id)}/approve`, { body });
+  }
+
+  /**
+   * Create deny (/jit/cross-tenant/{id}/deny)
+   *
+   * @route POST /jit/cross-tenant/{id}/deny
+   * @param id path parameter
+   */
+  postJitCrossTenantByIdDeny(id: string, body?: Record<string, unknown>): Promise<unknown> {
+    return this.request("POST", `/jit/cross-tenant/${encodeURIComponent(id)}/deny`, { body });
+  }
+
+  /**
+   * Get incoming (/jit/cross-tenant/incoming)
+   *
+   * @route GET /jit/cross-tenant/incoming
+   */
+  getJitCrossTenantIncoming(): Promise<unknown> {
+    return this.request("GET", `/jit/cross-tenant/incoming`);
+  }
+
+  /**
+   * Get requestId (/jit/cross-tenant/status/{requestId})
+   *
+   * @route GET /jit/cross-tenant/status/{requestId}
+   * @param requestId path parameter
+   */
+  getJitCrossTenantStatusByRequestId(requestId: string): Promise<unknown> {
+    return this.request("GET", `/jit/cross-tenant/status/${encodeURIComponent(requestId)}`);
+  }
+
+  /**
+   * Get metrics (/metrics)
+   *
+   * @route GET /metrics
+   */
+  getMetrics(): Promise<unknown> {
+    return this.request("GET", `/metrics`);
+  }
+
+  /**
+   * List notifications
+   *
+   * @route GET /notifications
+   */
+  getNotifications(query?: { page?: number; limit?: number }): Promise<{ notifications?: Notification[] }> {
+    return this.request("GET", `/notifications`, { query });
+  }
+
+  /**
+   * Mark notification as read
+   *
+   * @route POST /notifications/{id}/read
+   * @param id path parameter
+   */
+  postNotificationsByIdRead(id: string, body: Record<string, unknown>): Promise<SuccessResponse> {
+    return this.request("POST", `/notifications/${encodeURIComponent(id)}/read`, { body });
+  }
+
+  /**
+   * Get notification preferences
+   *
+   * @route GET /notifications/preferences
+   */
+  getNotificationsPreferences(): Promise<GenericObject> {
+    return this.request("GET", `/notifications/preferences`);
+  }
+
+  /**
+   * Update notification preferences
+   *
+   * @route PUT /notifications/preferences
+   */
+  putNotificationsPreferences(body: GenericObject): Promise<GenericObject> {
+    return this.request("PUT", `/notifications/preferences`, { body });
+  }
+
+  /**
+   * Get web-push public key
+   *
+   * @route GET /notifications/push/public-key
+   */
+  getNotificationsPushPublicKey(): Promise<{ publicKey?: string }> {
+    return this.request("GET", `/notifications/push/public-key`);
+  }
+
+  /**
+   * Subscribe to web-push notifications
+   *
+   * @route POST /notifications/push/subscribe
+   */
+  postNotificationsPushSubscribe(body: GenericObject): Promise<SuccessResponse> {
+    return this.request("POST", `/notifications/push/subscribe`, { body });
+  }
+
+  /**
+   * Unsubscribe from web-push notifications
+   *
+   * @route POST /notifications/push/unsubscribe
+   */
+  postNotificationsPushUnsubscribe(body: GenericObject): Promise<SuccessResponse> {
+    return this.request("POST", `/notifications/push/unsubscribe`, { body });
+  }
+
+  /**
+   * Mark all notifications as read
+   *
+   * @route POST /notifications/read-all
+   */
+  postNotificationsReadAll(body: Record<string, unknown>): Promise<SuccessResponse> {
+    return this.request("POST", `/notifications/read-all`, { body });
+  }
+
+  /**
+   * Open notification SSE stream
+   *
+   * @route GET /notifications/sse
+   */
+  getNotificationsSse(): Promise<unknown> {
+    return this.request("GET", `/notifications/sse`);
+  }
+
+  /**
+   * Get unread notification count
+   *
+   * @route GET /notifications/unread-count
+   */
+  getNotificationsUnreadCount(): Promise<{ count?: number }> {
+    return this.request("GET", `/notifications/unread-count`);
   }
 
   /**
@@ -671,37 +1701,6 @@ export class zerotrustClient {
   }
 
   /**
-   * List organization members
-   *
-   * @route GET /orgs/{orgId}/members
-   * @param orgId path parameter
-   */
-  getOrgsByOrgIdMembers(orgId: string): Promise<unknown> {
-    return this.request("GET", `/orgs/${encodeURIComponent(orgId)}/members`);
-  }
-
-  /**
-   * Remove a member (cannot remove the last owner)
-   *
-   * @route DELETE /orgs/{orgId}/members/{userId}
-   * @param orgId path parameter
-   * @param userId path parameter
-   */
-  deleteOrgsByOrgIdMembersByUserId(orgId: string, userId: string): Promise<unknown> {
-    return this.request("DELETE", `/orgs/${encodeURIComponent(orgId)}/members/${encodeURIComponent(userId)}`);
-  }
-
-  /**
-   * Transfer organization ownership
-   *
-   * @route POST /orgs/{orgId}/transfer
-   * @param orgId path parameter
-   */
-  postOrgsByOrgIdTransfer(orgId: string, body: { newOwnerId: string }): Promise<unknown> {
-    return this.request("POST", `/orgs/${encodeURIComponent(orgId)}/transfer`, { body });
-  }
-
-  /**
    * List pending invites
    *
    * @route GET /orgs/{orgId}/invites
@@ -722,34 +1721,6 @@ export class zerotrustClient {
   }
 
   /**
-   * List the authenticated user's pending org invites
-   *
-   * @route GET /orgs/invites/mine
-   */
-  getOrgsInvitesMine(): Promise<unknown> {
-    return this.request("GET", `/orgs/invites/mine`);
-  }
-
-  /**
-   * Accept a pending org invite by token
-   *
-   * @route POST /orgs/invites/accept
-   */
-  postOrgsInvitesAccept(body: { token: string }): Promise<unknown> {
-    return this.request("POST", `/orgs/invites/accept`, { body });
-  }
-
-  /**
-   * Decline (delete) one of the caller's own pending invites
-   *
-   * @route DELETE /orgs/invites/{inviteId}
-   * @param inviteId path parameter
-   */
-  deleteOrgsInvitesByInviteId(inviteId: string): Promise<unknown> {
-    return this.request("DELETE", `/orgs/invites/${encodeURIComponent(inviteId)}`);
-  }
-
-  /**
    * Revoke a pending invite
    *
    * @route DELETE /orgs/{orgId}/invites/{inviteId}
@@ -758,6 +1729,27 @@ export class zerotrustClient {
    */
   deleteOrgsByOrgIdInvitesByInviteId(orgId: string, inviteId: string): Promise<unknown> {
     return this.request("DELETE", `/orgs/${encodeURIComponent(orgId)}/invites/${encodeURIComponent(inviteId)}`);
+  }
+
+  /**
+   * List organization members
+   *
+   * @route GET /orgs/{orgId}/members
+   * @param orgId path parameter
+   */
+  getOrgsByOrgIdMembers(orgId: string): Promise<unknown> {
+    return this.request("GET", `/orgs/${encodeURIComponent(orgId)}/members`);
+  }
+
+  /**
+   * Remove a member (cannot remove the last owner)
+   *
+   * @route DELETE /orgs/{orgId}/members/{userId}
+   * @param orgId path parameter
+   * @param userId path parameter
+   */
+  deleteOrgsByOrgIdMembersByUserId(orgId: string, userId: string): Promise<unknown> {
+    return this.request("DELETE", `/orgs/${encodeURIComponent(orgId)}/members/${encodeURIComponent(userId)}`);
   }
 
   /**
@@ -781,168 +1773,117 @@ export class zerotrustClient {
   }
 
   /**
-   * Get current subscription
+   * Transfer organization ownership
    *
-   * @route GET /billing/subscription
+   * @route POST /orgs/{orgId}/transfer
+   * @param orgId path parameter
    */
-  getBillingSubscription(): Promise<BillingSubscription> {
-    return this.request("GET", `/billing/subscription`);
+  postOrgsByOrgIdTransfer(orgId: string, body: { newOwnerId: string }): Promise<unknown> {
+    return this.request("POST", `/orgs/${encodeURIComponent(orgId)}/transfer`, { body });
   }
 
   /**
-   * Get current billing usage
+   * Decline (delete) one of the caller's own pending invites
    *
-   * @route GET /billing/usage
+   * @route DELETE /orgs/invites/{inviteId}
+   * @param inviteId path parameter
    */
-  getBillingUsage(): Promise<GenericObject> {
-    return this.request("GET", `/billing/usage`);
+  deleteOrgsInvitesByInviteId(inviteId: string): Promise<unknown> {
+    return this.request("DELETE", `/orgs/invites/${encodeURIComponent(inviteId)}`);
   }
 
   /**
-   * Create Stripe checkout session
+   * Accept a pending org invite by token
    *
-   * @route POST /billing/checkout
+   * @route POST /orgs/invites/accept
    */
-  postBillingCheckout(body: { priceId?: string; plan?: string }): Promise<{ url?: string }> {
-    return this.request("POST", `/billing/checkout`, { body });
+  postOrgsInvitesAccept(body: { token: string }): Promise<unknown> {
+    return this.request("POST", `/orgs/invites/accept`, { body });
   }
 
   /**
-   * Change subscription plan
+   * List the authenticated user's pending org invites
    *
-   * @route POST /billing/change-plan
+   * @route GET /orgs/invites/mine
    */
-  postBillingChangePlan(body: { plan: string; priceId?: string }): Promise<GenericObject> {
-    return this.request("POST", `/billing/change-plan`, { body });
+  getOrgsInvitesMine(): Promise<unknown> {
+    return this.request("GET", `/orgs/invites/mine`);
   }
 
   /**
-   * Cancel or pause subscription
+   * Get protected (/protected)
    *
-   * @route POST /billing/cancel
+   * @route GET /protected
    */
-  postBillingCancel(body: { action?: "cancel" | "pause"; reason?: string; comment?: string }): Promise<GenericObject> {
-    return this.request("POST", `/billing/cancel`, { body });
+  getProtected(): Promise<unknown> {
+    return this.request("GET", `/protected`);
   }
 
   /**
-   * Reactivate subscription
+   * Resolve storage region for country
    *
-   * @route POST /billing/reactivate
+   * @route GET /regions/for-country
    */
-  postBillingReactivate(body: Record<string, unknown>): Promise<GenericObject> {
-    return this.request("POST", `/billing/reactivate`, { body });
+  getRegionsForCountry(query?: { country?: string }): Promise<{ country?: string | null; region?: string }> {
+    return this.request("GET", `/regions/for-country`, { query });
   }
 
   /**
-   * Create Stripe billing portal session
+   * Get region health
    *
-   * @route POST /billing/portal
+   * @route GET /regions/health
    */
-  postBillingPortal(body: Record<string, unknown>): Promise<{ url?: string }> {
-    return this.request("POST", `/billing/portal`, { body });
+  getRegionsHealth(): Promise<GenericObject> {
+    return this.request("GET", `/regions/health`);
   }
 
   /**
-   * List supported billing currencies
+   * Get organization branding
    *
-   * @route GET /billing/currencies
+   * @route GET /regions/orgs/{orgId}/branding
+   * @param orgId path parameter
    */
-  getBillingCurrencies(): Promise<{ currencies?: GenericObject[] }> {
-    return this.request("GET", `/billing/currencies`);
+  getRegionsOrgsByOrgIdBranding(orgId: string): Promise<GenericObject> {
+    return this.request("GET", `/regions/orgs/${encodeURIComponent(orgId)}/branding`);
   }
 
   /**
-   * Get localized plan pricing
+   * Update organization branding
    *
-   * @route GET /billing/pricing
+   * @route PUT /regions/orgs/{orgId}/branding
+   * @param orgId path parameter
    */
-  getBillingPricing(query?: { currency?: string; locale?: string }): Promise<{ plans?: GenericObject[] }> {
-    return this.request("GET", `/billing/pricing`, { query });
+  putRegionsOrgsByOrgIdBranding(orgId: string, body: GenericObject): Promise<SuccessResponse> {
+    return this.request("PUT", `/regions/orgs/${encodeURIComponent(orgId)}/branding`, { body });
   }
 
   /**
-   * Quote sales tax / VAT
+   * Set organization custom domain
    *
-   * @route POST /billing/tax/quote
+   * @route PUT /regions/orgs/{orgId}/domain
+   * @param orgId path parameter
    */
-  postBillingTaxQuote(body: GenericObject): Promise<GenericObject> {
-    return this.request("POST", `/billing/tax/quote`, { body });
+  putRegionsOrgsByOrgIdDomain(orgId: string, body: { domain?: string | null }): Promise<SuccessResponse> {
+    return this.request("PUT", `/regions/orgs/${encodeURIComponent(orgId)}/domain`, { body });
   }
 
   /**
-   * Validate VAT number
+   * Set organization data residency region
    *
-   * @route GET /billing/vat/validate
+   * @route PUT /regions/orgs/{orgId}/region
+   * @param orgId path parameter
    */
-  getBillingVatValidate(query: { vatNumber: string; country?: string }): Promise<GenericObject> {
-    return this.request("GET", `/billing/vat/validate`, { query });
+  putRegionsOrgsByOrgIdRegion(orgId: string, body: { region: "us" | "eu" | "apac" }): Promise<{ success?: boolean; region?: string }> {
+    return this.request("PUT", `/regions/orgs/${encodeURIComponent(orgId)}/region`, { body });
   }
 
   /**
-   * List tax exemptions
+   * Resolve organization by custom domain
    *
-   * @route GET /billing/tax-exemptions
+   * @route GET /regions/resolve
    */
-  getBillingTaxExemptions(): Promise<GenericObject> {
-    return this.request("GET", `/billing/tax-exemptions`);
-  }
-
-  /**
-   * Create tax exemption request
-   *
-   * @route POST /billing/tax-exemptions
-   */
-  postBillingTaxExemptions(body: GenericObject): Promise<GenericObject> {
-    return this.request("POST", `/billing/tax-exemptions`, { body });
-  }
-
-  /**
-   * Update tax exemption status
-   *
-   * @route POST /billing/tax-exemptions/{id}/status
-   * @param id path parameter
-   */
-  postBillingTaxExemptionsByIdStatus(id: string, body: { status?: string }): Promise<GenericObject> {
-    return this.request("POST", `/billing/tax-exemptions/${encodeURIComponent(id)}/status`, { body });
-  }
-
-  /**
-   * Get wallet balance
-   *
-   * @route GET /wallet
-   */
-  getWallet(): Promise<Wallet> {
-    return this.request("GET", `/wallet`);
-  }
-
-  /**
-   * List wallet transactions
-   *
-   * @route GET /wallet/transactions
-   */
-  getWalletTransactions(query?: { page?: number; limit?: number }): Promise<{ transactions?: GenericObject[]; meta?: PaginatedMeta }> {
-    return this.request("GET", `/wallet/transactions`, { query });
-  }
-
-  /**
-   * Top up wallet
-   *
-   * @route POST /wallet/top-up
-   */
-  postWalletTopUp(body: { amount?: number; currency?: string }): Promise<GenericObject> {
-    return this.request("POST", `/wallet/top-up`, { body });
-  }
-
-  /**
-   * Spend wallet balance (API/SDK-only)
-   *
-   * Programmatic wallet debit for integrations and background jobs. Not exposed in the dashboard UI — use the API or generated SDK from server-side code with a user or service token.
-   *
-   * @route POST /wallet/spend
-   */
-  postWalletSpend(body: { amount?: number; reason?: string; metadata?: GenericObject }): Promise<GenericObject> {
-    return this.request("POST", `/wallet/spend`, { body });
+  getRegionsResolve(query?: { domain?: string }): Promise<GenericObject> {
+    return this.request("GET", `/regions/resolve`, { query });
   }
 
   /**
@@ -952,15 +1893,6 @@ export class zerotrustClient {
    */
   getSearch(query?: { q?: string; type?: string; page?: number; limit?: number }): Promise<GenericObject> {
     return this.request("GET", `/search`, { query });
-  }
-
-  /**
-   * Ranked smart search
-   *
-   * @route GET /search/smart
-   */
-  getSearchSmart(query?: { q?: string; type?: string }): Promise<GenericObject> {
-    return this.request("GET", `/search/smart`, { query });
   }
 
   /**
@@ -993,62 +1925,76 @@ export class zerotrustClient {
   }
 
   /**
-   * Get SOC 2 readiness summary
+   * Ranked smart search
    *
-   * @route GET /compliance/soc2/readiness
+   * @route GET /search/smart
    */
-  getComplianceSoc2Readiness(): Promise<GenericObject> {
-    return this.request("GET", `/compliance/soc2/readiness`);
+  getSearchSmart(query?: { q?: string; type?: string }): Promise<GenericObject> {
+    return this.request("GET", `/search/smart`, { query });
   }
 
   /**
-   * List SOC 2 controls
+   * Get security.txt (/security.txt)
    *
-   * @route GET /compliance/soc2/controls
+   * @route GET /security.txt
    */
-  getComplianceSoc2Controls(): Promise<GenericObject> {
-    return this.request("GET", `/compliance/soc2/controls`);
+  getSecurityTxt(): Promise<unknown> {
+    return this.request("GET", `/security.txt`);
   }
 
   /**
-   * Update SOC 2 control status
+   * List active sessions for authenticated user
    *
-   * @route PUT /compliance/soc2/controls/{controlId}
-   * @param controlId path parameter
+   * @route GET /sessions
    */
-  putComplianceSoc2ControlsByControlId(controlId: string, body: GenericObject): Promise<GenericObject> {
-    return this.request("PUT", `/compliance/soc2/controls/${encodeURIComponent(controlId)}`, { body });
+  getSessions(query?: { limit?: number; offset?: number; activeOnly?: boolean }): Promise<{ sessions?: Session[]; total?: number; limit?: number; offset?: number }> {
+    return this.request("GET", `/sessions`, { query });
   }
 
   /**
-   * Get annual risk assessment
+   * Revoke all other sessions (keep current)
    *
-   * @route GET /compliance/risk-assessment/{year}
-   * @param year path parameter
+   * @route DELETE /sessions
    */
-  getComplianceRiskAssessmentByYear(year: string): Promise<GenericObject> {
-    return this.request("GET", `/compliance/risk-assessment/${encodeURIComponent(year)}`);
+  deleteSessions(): Promise<{ success?: boolean; revokedCount?: number }> {
+    return this.request("DELETE", `/sessions`);
   }
 
   /**
-   * Create risk assessment item
+   * Revoke a specific session
    *
-   * @route POST /compliance/risk-assessment/{year}
-   * @param year path parameter
+   * @route DELETE /sessions/{id}
+   * @param id path parameter
    */
-  postComplianceRiskAssessmentByYear(year: string, body: GenericObject): Promise<GenericObject> {
-    return this.request("POST", `/compliance/risk-assessment/${encodeURIComponent(year)}`, { body });
+  deleteSessionsById(id: string): Promise<unknown> {
+    return this.request("DELETE", `/sessions/${encodeURIComponent(id)}`);
   }
 
   /**
-   * Update risk assessment item
+   * Receive a Security Event Token (SET) from a provider
    *
-   * @route PUT /compliance/risk-assessment/{year}/{riskId}
-   * @param year path parameter
-   * @param riskId path parameter
+   * @route POST /ssf/events
    */
-  putComplianceRiskAssessmentByYearByRiskId(year: string, riskId: string, body: GenericObject): Promise<GenericObject> {
-    return this.request("PUT", `/compliance/risk-assessment/${encodeURIComponent(year)}/${encodeURIComponent(riskId)}`, { body });
+  postSsfEvents(body: Record<string, unknown>): Promise<unknown> {
+    return this.request("POST", `/ssf/events`, { body });
+  }
+
+  /**
+   * Get status (/status)
+   *
+   * @route GET /status
+   */
+  getStatus(): Promise<unknown> {
+    return this.request("GET", `/status`);
+  }
+
+  /**
+   * Get stream (/status/stream)
+   *
+   * @route GET /status/stream
+   */
+  getStatusStream(): Promise<unknown> {
+    return this.request("GET", `/status/stream`);
   }
 
   /**
@@ -1100,224 +2046,117 @@ export class zerotrustClient {
   }
 
   /**
-   * Submit product feedback
+   * Get wallet balance
    *
-   * @route POST /feedback
+   * @route GET /wallet
    */
-  postFeedback(body: { type: "nps" | "csat" | "thumbs"; score: number; comment?: string; context?: string; orgId?: string; metadata?: GenericObject }): Promise<GenericObject> {
-    return this.request("POST", `/feedback`, { body });
+  getWallet(): Promise<Wallet> {
+    return this.request("GET", `/wallet`);
   }
 
   /**
-   * Export authenticated user data
+   * Spend wallet balance (API/SDK-only)
    *
-   * @route GET /gdpr/export
+   * Programmatic wallet debit for integrations and background jobs. Not exposed in the dashboard UI — use the API or generated SDK from server-side code with a user or service token.
+   *
+   * @route POST /wallet/spend
    */
-  getGdprExport(): Promise<GenericObject> {
-    return this.request("GET", `/gdpr/export`);
+  postWalletSpend(body: { amount?: number; reason?: string; metadata?: GenericObject }): Promise<GenericObject> {
+    return this.request("POST", `/wallet/spend`, { body });
   }
 
   /**
-   * Request account deletion
+   * Top up wallet
    *
-   * @route DELETE /gdpr/account
+   * @route POST /wallet/top-up
    */
-  deleteGdprAccount(body?: { password?: string; reason?: string }): Promise<GenericObject> {
-    return this.request("DELETE", `/gdpr/account`, { body });
+  postWalletTopUp(body: { amount?: number; currency?: string }): Promise<GenericObject> {
+    return this.request("POST", `/wallet/top-up`, { body });
   }
 
   /**
-   * Cancel pending account deletion
+   * List wallet transactions
    *
-   * @route POST /gdpr/account/deletion/cancel
+   * @route GET /wallet/transactions
    */
-  postGdprAccountDeletionCancel(body: Record<string, unknown>): Promise<SuccessResponse> {
-    return this.request("POST", `/gdpr/account/deletion/cancel`, { body });
+  getWalletTransactions(query?: { page?: number; limit?: number }): Promise<{ transactions?: GenericObject[]; meta?: PaginatedMeta }> {
+    return this.request("GET", `/wallet/transactions`, { query });
   }
 
   /**
-   * List notifications
+   * Get webhooks (/webhooks)
    *
-   * @route GET /notifications
+   * @route GET /webhooks
    */
-  getNotifications(query?: { page?: number; limit?: number }): Promise<{ notifications?: Notification[] }> {
-    return this.request("GET", `/notifications`, { query });
+  getWebhooks(): Promise<unknown> {
+    return this.request("GET", `/webhooks`);
   }
 
   /**
-   * Get unread notification count
+   * Create webhooks (/webhooks)
    *
-   * @route GET /notifications/unread-count
+   * @route POST /webhooks
    */
-  getNotificationsUnreadCount(): Promise<{ count?: number }> {
-    return this.request("GET", `/notifications/unread-count`);
+  postWebhooks(body?: Record<string, unknown>): Promise<unknown> {
+    return this.request("POST", `/webhooks`, { body });
   }
 
   /**
-   * Mark notification as read
+   * Get id (/webhooks/{id})
    *
-   * @route POST /notifications/{id}/read
+   * @route GET /webhooks/{id}
    * @param id path parameter
    */
-  postNotificationsByIdRead(id: string, body: Record<string, unknown>): Promise<SuccessResponse> {
-    return this.request("POST", `/notifications/${encodeURIComponent(id)}/read`, { body });
+  getWebhooksById(id: string): Promise<unknown> {
+    return this.request("GET", `/webhooks/${encodeURIComponent(id)}`);
   }
 
   /**
-   * Mark all notifications as read
+   * Update id (/webhooks/{id})
    *
-   * @route POST /notifications/read-all
-   */
-  postNotificationsReadAll(body: Record<string, unknown>): Promise<SuccessResponse> {
-    return this.request("POST", `/notifications/read-all`, { body });
-  }
-
-  /**
-   * Open notification SSE stream
-   *
-   * @route GET /notifications/sse
-   */
-  getNotificationsSse(): Promise<unknown> {
-    return this.request("GET", `/notifications/sse`);
-  }
-
-  /**
-   * Get notification preferences
-   *
-   * @route GET /notifications/preferences
-   */
-  getNotificationsPreferences(): Promise<GenericObject> {
-    return this.request("GET", `/notifications/preferences`);
-  }
-
-  /**
-   * Update notification preferences
-   *
-   * @route PUT /notifications/preferences
-   */
-  putNotificationsPreferences(body: GenericObject): Promise<GenericObject> {
-    return this.request("PUT", `/notifications/preferences`, { body });
-  }
-
-  /**
-   * Get web-push public key
-   *
-   * @route GET /notifications/push/public-key
-   */
-  getNotificationsPushPublicKey(): Promise<{ publicKey?: string }> {
-    return this.request("GET", `/notifications/push/public-key`);
-  }
-
-  /**
-   * Subscribe to web-push notifications
-   *
-   * @route POST /notifications/push/subscribe
-   */
-  postNotificationsPushSubscribe(body: GenericObject): Promise<SuccessResponse> {
-    return this.request("POST", `/notifications/push/subscribe`, { body });
-  }
-
-  /**
-   * Unsubscribe from web-push notifications
-   *
-   * @route POST /notifications/push/unsubscribe
-   */
-  postNotificationsPushUnsubscribe(body: GenericObject): Promise<SuccessResponse> {
-    return this.request("POST", `/notifications/push/unsubscribe`, { body });
-  }
-
-  /**
-   * Resolve organization by custom domain
-   *
-   * @route GET /regions/resolve
-   */
-  getRegionsResolve(query?: { domain?: string }): Promise<GenericObject> {
-    return this.request("GET", `/regions/resolve`, { query });
-  }
-
-  /**
-   * Get region health
-   *
-   * @route GET /regions/health
-   */
-  getRegionsHealth(): Promise<GenericObject> {
-    return this.request("GET", `/regions/health`);
-  }
-
-  /**
-   * Resolve storage region for country
-   *
-   * @route GET /regions/for-country
-   */
-  getRegionsForCountry(query?: { country?: string }): Promise<{ country?: string | null; region?: string }> {
-    return this.request("GET", `/regions/for-country`, { query });
-  }
-
-  /**
-   * Get organization branding
-   *
-   * @route GET /regions/orgs/{orgId}/branding
-   * @param orgId path parameter
-   */
-  getRegionsOrgsByOrgIdBranding(orgId: string): Promise<GenericObject> {
-    return this.request("GET", `/regions/orgs/${encodeURIComponent(orgId)}/branding`);
-  }
-
-  /**
-   * Update organization branding
-   *
-   * @route PUT /regions/orgs/{orgId}/branding
-   * @param orgId path parameter
-   */
-  putRegionsOrgsByOrgIdBranding(orgId: string, body: GenericObject): Promise<SuccessResponse> {
-    return this.request("PUT", `/regions/orgs/${encodeURIComponent(orgId)}/branding`, { body });
-  }
-
-  /**
-   * Set organization custom domain
-   *
-   * @route PUT /regions/orgs/{orgId}/domain
-   * @param orgId path parameter
-   */
-  putRegionsOrgsByOrgIdDomain(orgId: string, body: { domain?: string | null }): Promise<SuccessResponse> {
-    return this.request("PUT", `/regions/orgs/${encodeURIComponent(orgId)}/domain`, { body });
-  }
-
-  /**
-   * Set organization data residency region
-   *
-   * @route PUT /regions/orgs/{orgId}/region
-   * @param orgId path parameter
-   */
-  putRegionsOrgsByOrgIdRegion(orgId: string, body: { region: "us" | "eu" | "apac" }): Promise<{ success?: boolean; region?: string }> {
-    return this.request("PUT", `/regions/orgs/${encodeURIComponent(orgId)}/region`, { body });
-  }
-
-  /**
-   * List API keys
-   *
-   * @route GET /api-keys
-   */
-  getApiKeys(): Promise<{ apiKeys?: ApiKey[] }> {
-    return this.request("GET", `/api-keys`);
-  }
-
-  /**
-   * Create API key
-   *
-   * @route POST /api-keys
-   */
-  postApiKeys(body: { name: string; scopes?: string[]; expiresAt?: string }): Promise<{ apiKey?: ApiKey; secret?: string }> {
-    return this.request("POST", `/api-keys`, { body });
-  }
-
-  /**
-   * Revoke API key
-   *
-   * @route DELETE /api-keys/{id}
+   * @route PATCH /webhooks/{id}
    * @param id path parameter
    */
-  deleteApiKeysById(id: string): Promise<SuccessResponse> {
-    return this.request("DELETE", `/api-keys/${encodeURIComponent(id)}`);
+  patchWebhooksById(id: string, body?: Record<string, unknown>): Promise<unknown> {
+    return this.request("PATCH", `/webhooks/${encodeURIComponent(id)}`, { body });
+  }
+
+  /**
+   * Delete id (/webhooks/{id})
+   *
+   * @route DELETE /webhooks/{id}
+   * @param id path parameter
+   */
+  deleteWebhooksById(id: string): Promise<unknown> {
+    return this.request("DELETE", `/webhooks/${encodeURIComponent(id)}`);
+  }
+
+  /**
+   * Get deliveries (/webhooks/{id}/deliveries)
+   *
+   * @route GET /webhooks/{id}/deliveries
+   * @param id path parameter
+   */
+  getWebhooksByIdDeliveries(id: string): Promise<unknown> {
+    return this.request("GET", `/webhooks/${encodeURIComponent(id)}/deliveries`);
+  }
+
+  /**
+   * Create ping (/webhooks/{id}/ping)
+   *
+   * @route POST /webhooks/{id}/ping
+   * @param id path parameter
+   */
+  postWebhooksByIdPing(id: string, body?: Record<string, unknown>): Promise<unknown> {
+    return this.request("POST", `/webhooks/${encodeURIComponent(id)}/ping`, { body });
+  }
+
+  /**
+   * Inbound email provider event webhook
+   *
+   * @route POST /webhooks/email/event
+   */
+  postWebhooksEmailEvent(body?: Record<string, unknown>): Promise<unknown> {
+    return this.request("POST", `/webhooks/email/event`, { body });
   }
 }

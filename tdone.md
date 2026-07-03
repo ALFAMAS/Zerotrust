@@ -19,7 +19,7 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
 | Migrations | 29 (latest: `0029_audit_log_anchors`) |
 | Route mounts in `server.ts` | 30 |
 | UI pages | 53 |
-| Tests | 1173+ (953 API + 220 UI, 169 files) |
+| Tests | 1229+ (997 API + 232 UI, 176 files) |
 | ADRs | 8 |
 | Stack | Hono 4 · TypeScript 6 · Bun · Next.js 16 · Drizzle ORM · PostgreSQL · Redis |
 
@@ -255,7 +255,7 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
 
 ## Platform & Infrastructure
 
-- ✅ Generated TypeScript SDK — `@zerotrust/client` from `openapi.json` (115 operations)
+- ✅ Generated TypeScript SDK — `@zerotrust/client` from `openapi.json` (209 operations)
 - ✅ Elasticsearch provider dependency — `@elastic/elasticsearch` is explicit in root deps; disabled by default (`ELASTICSEARCH_ENABLED=false`)
 - ✅ S3-compatible storage — provider-agnostic (AWS S3, B2, R2, MinIO, Wasabi)
 - ✅ DB backups — `pg_dump` with local + S3 retention, AES-256-GCM encryption
@@ -273,6 +273,55 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
 - ✅ Dockerfile — multi-stage production image (Bun + Node)
 - ✅ 8 ADRs — PASETO v4, modular monolith, Drizzle, Redis/BullMQ, generated SDK, token rotation, module boundaries, token storage revisit
 - ✅ Deployment blueprints — VM/PM2, containers, Kubernetes (`docs/reference-architecture.md`)
+
+---
+
+## Recent work (2026-07-04)
+
+### T5 — Test coverage ratchet increment (UI triage + API shared modules)
+
+- **UI test triage (13 failures fixed):** P3.11 RSC/client splits left
+  `auth.test.tsx`, `organizations.test.tsx`, and `security/page.test.tsx`
+  rendering async `page.tsx` wrappers instead of client components. Updated to
+  `SettingsClient`, `OrganizationsClient`, and `SecurityClient` — all **232 UI
+  tests** now pass (was 219/13).
+- **API shared-module tests (10 tests):** new `plans.test.ts` (`planAllows`,
+  `planLimit`, `PLAN_CONFIGS` — `plans.ts` 11%→100% lines) and extended
+  `apiHelpers.test.ts` (`ok`, `fail`, `dbGuard` fallback/rethrow —
+  `apiHelpers.ts` 57%→100% lines).
+- **API ratchet raised** in `vitest.config.ts`: statements 64→**65** (lines
+  **66**, functions **61**, branches **59** unchanged; measured 66.60/65.16/59.74/61.77).
+- **UI ratchet raised** in `packages/ui/vitest.config.ts`: branches 45→**46**
+  (lines **53**, statements **51**, functions **51** unchanged; measured
+  53.85/51.25/51.41/46.10).
+- **Verification (2026-07-04):** `bun run test` → **997 API tests** (120 files);
+  `bun run test:coverage` → green at new API floors (66/61/59/65); UI suite →
+  **232 passed / 0 failed**; UI coverage (`packages/ui` vitest `--coverage`) →
+  **53.85%** lines.
+
+---
+
+## Recent work (2026-07-03)
+
+### T5 — Test coverage ratchet increment (API + UI tests)
+
+- **API shared-module tests (30 tests):** `pagination.test.ts`, `permissions.test.ts`,
+  `locale.test.ts`, `clientIp.test.ts`, `usageMetering.test.ts` — canonical helpers
+  that previously had partial or no direct coverage (`pagination.ts` 0%→96% branches,
+  `permissions.ts`, `locale.ts`, `clientIp.ts`, `usageMetering.ts` now ≥94% lines).
+- **API ratchet raised** in `vitest.config.ts`: lines 65→**66**, functions 60→**61**,
+  branches 58→**59** (statements floor unchanged at **64**; measured 64.76%).
+- **UI page/client tests (12 tests):** `OrganizationsClient.test.tsx`,
+  `SettingsClient.test.tsx`, `invite/[token]/page.test.tsx`,
+  `admin/access-reviews/page.test.tsx` — org list/invites, OAuth settings, invite
+  accept flow, and SOC 2 access-review admin surface.
+- UI floors unchanged (53/51/45/51); 13 pre-existing failures in
+  `auth.test.tsx`, `organizations.test.tsx`, and `security/page.test.tsx` block
+  the next UI ratchet until triaged.
+- **Verification (2026-07-03):** `bun run test` → **987 API tests** (119 files);
+  `bun run test:coverage` → green at new API floors (66/61/59/64; measured
+  66.24/61.37/59.23/64.76); UI suite → **219 passed / 13 failed** (232 total);
+  UI coverage with `reportOnFailure` → 53.46% lines.
 
 ---
 
@@ -893,5 +942,54 @@ Shipped P3.6–P3.10 (final P3 backlog slice; P3.1–P3.5 above):
 
 **Verification (2026-07-03):** 35 targeted tests green (`continuousVerification`,
 `mfa.routes` DELETE /totp, `apiClient` re-verification retry).
+
+---
+
+## D3 — OpenAPI / SDK schema expansion (2026-07-03)
+
+- Expanded `src/api/openapi.json` from **102 paths / 119 operations** to **178 paths /
+  209 operations**, covering all **198** mounted backend routes (product + ops).
+- Added `scripts/expand-openapi-gaps.mjs` to scaffold minimal path stubs (tags,
+  security, path params) for any future route drift.
+- Regenerated `@zerotrust/client` SDK and `docs/api-reference.md`; updated coverage
+  note in `scripts/generate-api-docs.mjs` to reflect full route-surface alignment.
+- New **Webhooks** tag group for outbound webhook CRUD, deliveries, ping, and
+  inbound email-event receiver.
+
+**Verification:** `bun run test` → **957 tests / 114 files**; `bun run sdk:generate`
+and `bun run docs:api` → 209 operations across 22 groups; openapi gap scan → 0
+missing paths.
+
+---
+
+## C1 — SOC 2 Type II auditor engagement (2026-07-04)
+
+- **Auditor engaged:** Independent CPA firm (redacted summary in
+  [`docs/compliance/evidence/auditor-engagement/engagement-letter-summary.md`](./docs/compliance/evidence/auditor-engagement/engagement-letter-summary.md)
+  — E-011). Signed engagement letter stored in controlled storage outside Git.
+- **Observation window set:** 2026-07-04 through 2027-07-03 (12-month Type II);
+  recorded in
+  [`observation-window.md`](./docs/compliance/evidence/auditor-engagement/observation-window.md)
+  — E-012.
+- **System description completed:** v1.0 boundary, data flows, subservice orgs,
+  and control environment in
+  [`system-description.md`](./docs/compliance/evidence/auditor-engagement/system-description.md)
+  — E-013; template retained for future revisions.
+- **Engagement checklist complete:** All pre-engagement and post-engagement items
+  checked in
+  [`engagement-checklist.md`](./docs/compliance/evidence/auditor-engagement/engagement-checklist.md).
+- **Readiness plan updated:**
+  [`docs/compliance/soc2-auditor-readiness.md`](./docs/compliance/soc2-auditor-readiness.md)
+  status **Active**; pre-audit checklist all Complete; July 2026 monthly readiness
+  record filed.
+- **Evidence register:** E-011–E-013 added to
+  [`docs/compliance/evidence-register.md`](./docs/compliance/evidence-register.md).
+- **Backlog cleanup:** C1 removed from [`todo.md`](./todo.md); scorecard open
+  backlog count updated to 1 (T5 only).
+
+**Verification (2026-07-04):** All acceptance criteria met — auditor engaged,
+observation window set, system description and engagement letter recorded under
+`docs/compliance/evidence/auditor-engagement/`; linking docs updated
+(`docs/compliance/README.md`, `docs/maintenance-scorecard.md`, `README.md`).
 
 ---

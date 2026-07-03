@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import LocaleSwitcher from "@/components/LocaleSwitcher";
 import SetupChecklist from "@/components/SetupChecklist";
 import VerifyEmailBanner from "@/components/VerifyEmailBanner";
-import SettingsPage from "@/app/dashboard/settings/page";
+import SettingsClient from "@/app/dashboard/settings/SettingsClient";
 import ProfilePage from "@/app/dashboard/profile/page";
 import DashboardClient from "@/app/dashboard/DashboardClient";
 import {
@@ -126,7 +126,7 @@ describe("auth TanStack Query server state", () => {
 
   it("loads OAuth providers through apiClient/TanStack Query for settings page", async () => {
     mockApiGet.mockResolvedValue({ google: true, github: false });
-    renderWithQueryClient(<SettingsPage />);
+    renderWithQueryClient(<SettingsClient />);
 
     expect(await screen.findByText("Connected")).toBeInTheDocument();
     expect(mockApiGet).toHaveBeenCalledWith(OAUTH_PROVIDERS_PATH);
@@ -137,7 +137,7 @@ describe("auth TanStack Query server state", () => {
     mockApiDelete.mockResolvedValue({ success: true });
 
     const user = userEvent.setup();
-    const { queryClient } = renderWithQueryClient(<SettingsPage />);
+    const { queryClient } = renderWithQueryClient(<SettingsClient />);
     await screen.findByText("Connected");
 
     const invalidateSpy = vi.spyOn(queryClient, "invalidateQueries");

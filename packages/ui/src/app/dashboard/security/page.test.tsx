@@ -3,7 +3,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { mockApiGet, mockApiPost } from "@/test/apiClientMock";
-import SecurityPage from "./page";
+import SecurityClient from "./SecurityClient";
 
 vi.mock("@/lib/webauthn", () => ({
   isWebAuthnAvailable: () => false,
@@ -25,7 +25,7 @@ function renderSecurity() {
   });
   return render(
     <QueryClientProvider client={queryClient}>
-      <SecurityPage />
+      <SecurityClient />
     </QueryClientProvider>
   );
 }

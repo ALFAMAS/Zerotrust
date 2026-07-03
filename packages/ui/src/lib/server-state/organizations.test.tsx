@@ -2,7 +2,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import OrganizationsPage from "@/app/dashboard/organizations/page";
+import OrganizationsClient from "@/app/dashboard/organizations/OrganizationsClient";
 import { mockApiDelete, mockApiGet, mockApiPost } from "@/test/apiClientMock";
 import {
   buildDeclineOrgInvitePath,
@@ -70,7 +70,7 @@ describe("organizations TanStack Query server state", () => {
 
   it("renders organizations through apiClient/TanStack Query, not legacy api.get", async () => {
     mockApiGet.mockResolvedValue({ orgs: [orgMembership] });
-    renderWithQueryClient(<OrganizationsPage />);
+    renderWithQueryClient(<OrganizationsClient />);
 
     expect(await screen.findByText("Acme Corp")).toBeInTheDocument();
     expect(mockApiGet).toHaveBeenCalledWith(ORGS_PATH);
@@ -78,7 +78,7 @@ describe("organizations TanStack Query server state", () => {
 
   it("renders error + retry when organizations list fails", async () => {
     mockApiGet.mockRejectedValueOnce(new Error("orgs unavailable"));
-    renderWithQueryClient(<OrganizationsPage />);
+    renderWithQueryClient(<OrganizationsClient />);
 
     expect(await screen.findByText("orgs unavailable")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Try again" })).toBeInTheDocument();
@@ -86,10 +86,13 @@ describe("organizations TanStack Query server state", () => {
 
   it("creates organization via mutation and invalidates the list", async () => {
     mockApiGet.mockResolvedValue({ orgs: [] });
-    mockApiPost.mockResolvedValue({ id: "org_2" });
+    mockApiPost.mockResolvedValue({
+      org: { id: "org_2", name: "New Org", slug: "new-org" },
+      member: { role: "owner" },
+    });
 
     const user = userEvent.setup();
-    const { queryClient } = renderWithQueryClient(<OrganizationsPage />);
+    const { queryClient } = renderWithQueryClient(<OrganizationsClient />);
     await screen.findByText(/don't belong to any organizations/i);
 
     const invalidateSpy = vi.spyOn(queryClient, "invalidateQueries");
@@ -146,7 +149,7 @@ describe("organizations page — pending invitations", () => {
       <QueryClientProvider
         client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}
       >
-        <OrganizationsPage />
+        <OrganizationsClient />
       </QueryClientProvider>
     );
 
@@ -164,7 +167,7 @@ describe("organizations page — pending invitations", () => {
       <QueryClientProvider
         client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}
       >
-        <OrganizationsPage />
+        <OrganizationsClient />
       </QueryClientProvider>
     );
 
@@ -189,7 +192,7 @@ describe("organizations page — pending invitations", () => {
       <QueryClientProvider
         client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}
       >
-        <OrganizationsPage />
+        <OrganizationsClient />
       </QueryClientProvider>
     );
 
@@ -213,7 +216,7 @@ describe("organizations page — pending invitations", () => {
       <QueryClientProvider
         client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}
       >
-        <OrganizationsPage />
+        <OrganizationsClient />
       </QueryClientProvider>
     );
 

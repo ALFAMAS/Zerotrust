@@ -55,12 +55,10 @@ lines.push("");
 lines.push(`**${opCount} operations** across ${tags.length} groups.`);
 lines.push("");
 lines.push(
-  "> **Coverage note:** this lists the operations currently described in " +
-    "`openapi.json`. Coverage includes auth/admin/MFA/sessions/OAuth, organizations, " +
-    "billing, wallet, search, compliance, support, feedback, notifications, GDPR, " +
-    "regions, and API keys. Some lower-traffic admin/tools, webhook, tenant, and " +
-    "email-event routes may still require schema-level expansion; see " +
-    "`src/api/server.ts` for the full mounted surface."
+  "> **Coverage note:** this lists every operation described in `openapi.json`, " +
+    "aligned with the mounted route surface in `src/api/server.ts` (198 backend " +
+    "routes). Request/response schemas for lower-traffic admin, webhook, tenant, " +
+    "and ops endpoints use minimal stubs; enrich per-route schemas as SDK consumers need them."
 );
 lines.push("");
 lines.push("## Contents");
