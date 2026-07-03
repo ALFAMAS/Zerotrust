@@ -12,14 +12,14 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
 
 | Metric | Count |
 |--------|------:|
-| Route modules | 27 |
+| Route modules | 26 |
 | Service files | 46 |
-| DB tables | 41 |
+| DB tables | 40 |
 | Middleware | 21 |
-| Migrations | 30 (latest: `0030_webhook_endpoints_org_id`) |
-| Route mounts in `server.ts` | 30 |
+| Migrations | 34 (latest: `0034_drop_webhook_tenant_id`) |
+| Route mounts in `server.ts` | 29 |
 | UI pages | 53 |
-| Tests | 1319 (1080 API + 239 UI, 134 files) |
+| Tests | 1318 (1076 API + 242 UI, 134 files) |
 | ADRs | 8 |
 | Stack | Hono 4 · TypeScript 6 · Bun · Next.js 16 · Drizzle ORM · PostgreSQL · Redis |
 
@@ -37,7 +37,7 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
 - ✅ Refresh tokens — SHA-256 hashed, rotated on use, long-lived
 - ✅ Session management — list, revoke, device fingerprinting, concurrent-session caps
 - ✅ Auth hot path — session+user loaded via one JOIN on cache miss; optional 5 s Redis user-state cache on cache hit
-- ✅ Silent token refresh — UI replays 401 via `POST /auth/token/refresh`
+- ✅ Silent token refresh — UI replays 401 via `POST /auth/token/refresh` (httpOnly refresh cookie + in-memory access token, ADR 008 Option C)
 - ✅ Account merge / linking — `POST /auth/me/link` adds OAuth providers to existing account
 - ✅ HIBP (HaveIBeenPwned) breach check on register / password change (fails open)
 - ✅ Login notification email — new-device alert with one-click revoke
@@ -81,7 +81,7 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
 - ✅ Stripe customer portal — manage cards, cancel, download invoices
 - ✅ Stripe webhook handler — idempotent (replay-safe via `processed_stripe_events`)
 - ✅ Subscription management — plan, status, period dates per user
-- ✅ `requirePlan()` middleware — `403 PLAN_REQUIRED` when feature not on plan
+- ✅ `requirePlan()` middleware — `403 PLAN_REQUIRED` when feature not on plan; wired on admin audit logs, org branding/domain/region, and high-priority support tickets
 - ✅ Plan configs — free / pro / enterprise feature matrix (`src/shared/plans.ts`)
 - ✅ Per-org billing — one subscription per organization
 - ✅ Trial period — 14-day trial with expiry email + upgrade prompt
@@ -277,6 +277,78 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
 ---
 
 ## Recent work (2026-07-04)
+
+### ARCH-1 — Remove orphaned `tenants` multi-tenancy model (shipped)
+
+- **Decision:** `organizations` is the sole tenancy boundary; deleted orphaned
+  `tenants` table, routes, model, and OpenAPI/SDK surface.
+- **Migration:** `drizzle/0032_drop_tenants.sql`.
+- **Removed:** `src/api/routes/tenant.routes.ts`, `src/models/tenant.model.ts`,
+  tenant mount from `server.ts`; `/admin/tenants` UI redirects to
+  `/dashboard/organizations`.
+- **Regression:** `src/__tests__/server.securityHeaders.test.ts` — no
+  `/admin/tenants` mount in `createServer()`.
+- **Verification (2026-07-04):** `bun run test --run` → **1076 passed**.
+
+### ARCH-2 — `/admin/tenants/*` missing authMiddleware (shipped via ARCH-1)
+
+- Orphaned tenant admin surface removed with ARCH-1; wiring bug no longer
+  reachable. Covered by server mount assertion above.
+
+### MT-1 — Org-scoping CI lint (shipped)
+
+- **Script:** `scripts/check-org-scoping.ts` + `scripts/org-scoped-tables.json`
+  flags Drizzle queries on org-scoped tables missing an org predicate.
+- **CI:** `bun run org-scoping:check` in `.github/workflows/ci.yml`.
+- **Verification (2026-07-04):** `bun run org-scoping:check` → **33 files scanned, 0 violations**.
+
+### FS-1 — Audit log DB immutability (shipped)
+
+- **Migration:** `drizzle/0031_audit_logs_immutable.sql` — `BEFORE UPDATE OR DELETE`
+  triggers on `audit_logs`.
+- **Docs:** `docs/reference-architecture.md` + `docs/compliance/audit-log-anchoring-plan.md`
+  — `AUDIT_ANCHOR_ENABLED=true` default for production reference deploys.
+- **Verification (2026-07-04):** migration present in `drizzle/`; destructive-migrations
+  manifest approved.
+
+### FS-2 — Wire `requirePlan()` to paywalled routes (shipped)
+
+- **`requirePlan.ts`:** org-scoped plan resolution via `resolvePlan(userId, orgId)`.
+- **Routes:** admin audit logs (`auditLog`), org branding/domain/region (`customRoles`,
+  `ssoSaml`), high-priority support tickets (`prioritySupport`).
+- **Regression:** `src/__tests__/requirePlan.test.ts`.
+- **Verification (2026-07-04):** `bun run test -- src/__tests__/requirePlan.test.ts` → pass.
+
+### ZT-4 — Reject placeholder secrets in production (shipped)
+
+- **`src/shared/placeholderSecrets.ts`** + production guard in `validateConfig()`.
+- **Updated:** `.env.example`, `docker-compose.yml` comments.
+- **Regression:** `src/__tests__/config.production.test.ts` — placeholder hex refused.
+- **Verification (2026-07-04):** `bun run test -- src/__tests__/config.production.test.ts` → pass.
+
+### ZT-3 — ADR 008 Option C token storage (shipped)
+
+- **API:** `src/shared/authCookies.ts`; login/refresh/oauth set httpOnly refresh
+  cookie; `POST /auth/logout` clears it; JSON bodies omit `refreshToken`.
+- **UI:** in-memory access token (`auth.ts`); `apiClient.ts` uses
+  `credentials: "include"` for refresh.
+- **ADR 008** updated — Option C is default template.
+- **Verification (2026-07-04):** `bun run --cwd packages/ui test --run` → **242 passed**.
+
+### MT-2 — Cross-tenant JIT org FKs (shipped)
+
+- **Schema:** `cross_tenant_jit_requests.requestor_org_id` / `target_org_id` UUID FKs
+  to `organizations`.
+- **Migration:** `drizzle/0033_jit_org_ids.sql`.
+- **Routes:** `src/jit/routes.ts` resolves org membership via `organizationMembersTable`.
+- **Regression:** `src/__tests__/jit.routes.test.ts`.
+- **Verification (2026-07-04):** JIT tests pass in full suite.
+
+### MT-3 — Drop `webhook_endpoints.tenant_id` (shipped)
+
+- **Migration:** `drizzle/0034_drop_webhook_tenant_id.sql`; store uses `org_id` only.
+- **Regression:** `src/__tests__/webhookStore.persistence.test.ts`.
+- **Verification (2026-07-04):** webhook tests pass in full suite.
 
 ### ZT-1 — Webhook management cross-tenant IDOR (shipped)
 
@@ -593,10 +665,8 @@ formal backlog._
   TanStack Query queries. Audit entries auto-fetch with loading/error states;
   hash-chain integrity verify is a manual refetch (`enabled: false`). Domain
   keys/hooks live in `server-state/audit.ts`.
-- Migrated `/admin/tenants` from ad-hoc `useEffect` + legacy `api` calls to
-  TanStack Query queries/mutations. Tenant list auto-fetches with loading/error
-  states; create/plan/status/delete use optimistic list updates with rollback
-  and targeted invalidation. Domain keys/hooks live in `server-state/tenants.ts`.
+- ~~Migrated `/admin/tenants`~~ — removed with ARCH-1 (2026-07-04); page redirects
+  to `/dashboard/organizations`.
 - Covered loading, error + retry, empty, stale cached data, and background
   refetch states in UI and tests.
 - Verification: `NODE_ENV=test bun run --cwd packages/ui test --

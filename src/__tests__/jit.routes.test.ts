@@ -23,7 +23,7 @@ vi.mock("../db", () => ({
         where: () => {
           const membershipRows = [{ orgId: ORG_A, role: "member" }];
           return {
-            limit: async () => [{ role: "admin" }],
+            limit: async () => [{ role: "member" }],
             then(resolve: (v: typeof membershipRows) => void) {
               resolve(membershipRows);
             },

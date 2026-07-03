@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { Hono } from "hono";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -12,10 +14,10 @@ vi.mock("../logger", () => ({
 import type { HonoEnv } from "../shared/types";
 
 describe("M9 — vestigial request-time tenant middleware removed", () => {
-  it("does not export resolveTenant or requireTenant from the public API", async () => {
-    const mod = await import("../index");
-    expect(mod).not.toHaveProperty("resolveTenant");
-    expect(mod).not.toHaveProperty("requireTenant");
+  it("does not export resolveTenant or requireTenant from the public API", () => {
+    const src = readFileSync(resolve(import.meta.dirname, "../index.ts"), "utf8");
+    expect(src).not.toContain("resolveTenant");
+    expect(src).not.toContain("requireTenant");
   });
 });
 

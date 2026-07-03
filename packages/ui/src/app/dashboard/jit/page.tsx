@@ -23,7 +23,7 @@ export default function JITRequestPage() {
   const requestsQuery = useMyJitRequestsQuery();
   const submitMutation = useSubmitJitRequestMutation();
   const [form, setForm] = useState({
-    targetTenantId: "",
+    targetOrgId: "",
     targetResource: "",
     justification: "",
     ttlMinutes: 60,
@@ -34,16 +34,16 @@ export default function JITRequestPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!form.targetTenantId || !form.targetResource || !form.justification) return;
+    if (!form.targetOrgId || !form.targetResource || !form.justification) return;
     try {
       await submitMutation.mutateAsync({
-        targetTenantId: form.targetTenantId.trim(),
+        targetOrgId: form.targetOrgId.trim(),
         targetResource: form.targetResource.trim(),
         justification: form.justification.trim(),
         ttlSeconds: Math.min(form.ttlMinutes * 60, 3600),
       });
       toast({ message: "Access request submitted for approval", type: "success" });
-      setForm({ targetTenantId: "", targetResource: "", justification: "", ttlMinutes: 60 });
+      setForm({ targetOrgId: "", targetResource: "", justification: "", ttlMinutes: 60 });
     } catch (err: unknown) {
       toast({
         message: err instanceof Error ? err.message : "Failed to submit request",
@@ -71,13 +71,13 @@ export default function JITRequestPage() {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="space-y-1.5">
             <label htmlFor="page-f0" className="text-sm font-medium text-foreground">
-              Target tenant ID
+              Target organization ID
             </label>
             <Input
               id="page-f0"
-              value={form.targetTenantId}
-              onChange={(e) => setForm({ ...form, targetTenantId: e.target.value })}
-              placeholder="acme-corp"
+              value={form.targetOrgId}
+              onChange={(e) => setForm({ ...form, targetOrgId: e.target.value })}
+              placeholder="00000000-0000-0000-0000-000000000001"
               required
               className="w-full rounded-lg border border-border bg-muted px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none"
             />
@@ -181,7 +181,7 @@ export default function JITRequestPage() {
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
                     <span className="font-mono text-sm text-foreground">{r.targetResource}</span>
-                    <span className="text-xs text-muted-foreground">@ {r.targetTenantId}</span>
+                    <span className="text-xs text-muted-foreground">→ {r.targetOrgId}</span>
                   </div>
                   <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">
                     {r.justification}

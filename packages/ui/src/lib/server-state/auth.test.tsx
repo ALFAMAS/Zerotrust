@@ -24,6 +24,7 @@ import {
   mockApiPost,
   mockApiPostFormData,
 } from "@/test/apiClientMock";
+import { setToken } from "@/lib/auth";
 
 vi.mock("@/lib/toast", () => ({
   useToast: () => ({ toast: vi.fn() }),
@@ -108,7 +109,7 @@ describe("auth TanStack Query server state", () => {
   });
 
   it("persists locale via patch mutation in LocaleSwitcher when signed in", async () => {
-    localStorage.setItem("za_access_token", "token_1");
+    setToken("token_1");
     mockApiPatch.mockResolvedValue({ locale: "es" });
     const reload = vi.fn();
     Object.defineProperty(window, "location", {

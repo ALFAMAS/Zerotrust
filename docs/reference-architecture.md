@@ -456,6 +456,45 @@ External providers (optional):
 | Cost (min) | $10–20/mo VM | $20–50/mo platform | $50–100/mo cluster baseline |
 | Best for | Prototypes, small teams | Growing teams, managed infra | Enterprise, multi-region |
 
+---
+
+## Production security defaults (all blueprints)
+
+These env vars and DB objects are **required or strongly recommended** for
+production reference deployments (FS-1 / ZT-4, 2026-07-04).
+
+### Secrets and config validation
+
+- `TOKEN_SECRET_HEX`, `CSFLE_MASTER_KEY_HEX`, and `BACKUP_ENCRYPTION_KEY_HEX`
+  must be 32-byte random hex — **not** all-zero or documented `.env.example`
+  placeholders. `validateConfig()` refuses to boot in `NODE_ENV=production`
+  when a known placeholder is detected (`src/shared/placeholderSecrets.ts`).
+- `METRICS_AUTH_TOKEN`, `CORS_ALLOWED_ORIGINS`, and `REDIS_URI` are required
+  in production (see deployment checklist in `docs/deployment-checklist.md`).
+
+### Audit log immutability and anchoring
+
+- Migration `0031_audit_logs_immutable.sql` installs `BEFORE UPDATE OR DELETE`
+  triggers on `audit_logs` — rows are append-only at the database layer even if
+  application code regresses.
+- Enable external anchoring in production:
+
+```env
+AUDIT_ANCHOR_ENABLED=true
+AUDIT_ANCHOR_ENVIRONMENT=production
+AUDIT_ANCHOR_S3_PREFIX=audit-anchors/
+```
+
+- Schedule `bun run audit:anchor` (or the BullMQ `audit.anchor` job on the worker)
+  at least daily; verify with `bun run audit:anchor-verify` after DR drills.
+  See `docs/compliance/audit-log-anchoring-plan.md`.
+
+### Browser token storage (ZT-3)
+
+- Default UI uses in-memory access tokens + httpOnly refresh cookies. Set
+  `CORS_ALLOWED_ORIGINS` to the exact UI origin(s) so credentialed refresh works.
+- For fork hardening beyond Option C, see ADR 008 Option B and `docs/extending.md`.
+
 **Recommendation:** start with Blueprint 1 or 2 (managed DB + object storage),
 defer k8s until you have a dedicated platform team. The codebase is designed for
 this progression — no architecture change is needed to move from one blueprint

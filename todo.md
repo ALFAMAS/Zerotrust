@@ -15,56 +15,7 @@
 
 _Sourced from the 2026-07-04 senior-level Zero Trust SaaS audit (static code review). Does not duplicate shipped work in [`tdone.md`](./tdone.md) or closed items in [`docs/AUDIT.md`](./docs/AUDIT.md)._
 
-**Verification baseline (2026-07-04):** `bun run test` → 1080 API tests; nine repos under `src/db/repositories/`; SOC 2 observation window active (2026-07-04 — 2027-07-03). Immediate security/compliance blockers (ZT-1, ZT-2, CP-1, DQ-1) shipped — see [`tdone.md`](./tdone.md).
-
----
-
-## Short-term (this quarter)
-
-- [ ] **ARCH-1** — **High** — Two incompatible multi-tenancy models coexist  
-  **Problem:** `organizations` is the real, wired tenancy boundary; `tenants` table (OIDC/SAML config, no FK to orgs/users) is orphaned enterprise-SSO leftover after migration `0024_drop_enterprise_federation.sql`. `cross_tenant_jit_requests` uses free-text tenant IDs defaulting to `"default"`.  
-  **Fix:** Either wire `tenants` → `organizations` (1:1 FK) and reconcile JIT fields, or delete `tenants` table/routes and document JIT tenant fields as informational-only.  
-  **Paths:** `src/db/schema.ts`, `drizzle/0024_drop_enterprise_federation.sql`, `src/api/routes/tenant.routes.ts`, `src/models/tenant.model.ts`, `src/jit/`
-
-- [ ] **ARCH-2** — **Medium** — `/admin/tenants/*` missing `authMiddleware`  
-  **Problem:** `tenant.routes.ts` checks `isAdmin(c.get("user"))` but never runs `authMiddleware` first; `server.ts` mounts the router bare. `c.get("user")` is always `undefined` on the real server — entire admin tenant surface 403s for everyone. Unit tests inject `user` directly, masking the wiring bug.  
-  **Fix:** Add `router.use("*", authMiddleware)` before the admin guard (mirror `admin.routes.ts`); add integration test through `createServer()`.  
-  **Paths:** `src/api/routes/tenant.routes.ts`, `src/api/server.ts`, `src/__tests__/tenant.routes.test.ts`
-
-- [ ] **MT-1** — **High** — No org-scoping lint / query guard (process fix)  
-  **Problem:** Tenant isolation is 100% ad hoc per-handler `WHERE orgId = …` with no RLS or CI lint. ZT-1 proves one forgotten check causes silent cross-tenant data leaks.  
-  **Fix:** Add grep-based CI lint or a Drizzle query-builder wrapper requiring an explicit org filter for org-scoped tables; fail build when a query lacks an org predicate.  
-  **Paths:** `src/db/schema.ts`, `scripts/` (new check), `.github/workflows/ci.yml`
-
-- [ ] **FS-1** — **Medium** — Audit log immutability is app-layer only  
-  **Problem:** Hash chain detects tampering via `verifyAuditChain()` but no DB trigger/role prevents direct `UPDATE`/`DELETE` on `audit_logs`. Trailing row deletion moves the chain tip backward with no in-chain evidence unless external anchoring is enabled.  
-  **Fix:** Add `BEFORE UPDATE OR DELETE` trigger (or `REVOKE UPDATE, DELETE` for app role); enable `AUDIT_ANCHOR_ENABLED` by default in production reference architecture.  
-  **Paths:** `src/audit/chain.ts`, `src/audit/anchor.ts`, `drizzle/` (new migration), `docs/reference-architecture.md`, `docs/compliance/audit-log-anchoring-plan.md`
-
-- [ ] **FS-2** — **Medium** — `requirePlan()` built but mounted on zero routes  
-  **Problem:** `requirePlan()` and `planAllows()` are implemented and unit-tested but never called from any route — README advertises server-side plan gates that are inert. Even if wired, lookup is by `userId` only, not `orgId` subscription.  
-  **Fix:** Apply `requirePlan("feature")` to paywalled routes (and fix org-subscription lookup), or document plan gating as UI-only.  
-  **Paths:** `src/middleware/requirePlan.ts`, `src/shared/plans.ts`, `src/__tests__/plans.test.ts`, `src/api/routes/`
-
-- [ ] **ZT-4** — **Medium** — Config validation accepts known placeholder secrets  
-  **Problem:** `validateConfig()` checks length ≥ 64 hex chars only; the all-zero placeholder in `docker-compose.yml` and `.env.example` passes. A production deploy copying compose without rotating secrets boots with a publicly known PASETO/CSFLE key.  
-  **Fix:** Reject all-zero / documented example values in production; optional compose healthcheck fail when placeholder detected with `NODE_ENV=production`.  
-  **Paths:** `src/config/index.ts`, `docker-compose.yml`, `.env.example`, `src/__tests__/config.production.test.ts`
-
-- [ ] **ZT-3** — **Medium** — Bearer tokens in `localStorage` (revisit after ZT-2 — CSP now active)  
-  **Problem:** Access + refresh tokens in `localStorage`; access token mirrored in a non-`httpOnly` cookie for RSC prefetch. Documented trade-off (ADR 008); CSP compensating control is now shipped (ZT-2).  
-  **Fix:** Evaluate ADR 008 Option C (in-memory access token + `httpOnly` refresh cookie) as a lower-cost intermediate step.  
-  **Paths:** `packages/ui/src/lib/auth.ts`, `docs/adr/008-token-storage-design-revisit.md`, `docs/adr/006-token-storage-and-rotation.md`
-
-- [ ] **MT-2** — **Medium** — Cross-tenant JIT uses unvalidated free-text tenant IDs  
-  **Problem:** `cross_tenant_jit_requests.requestor_tenant_id` / `target_tenant_id` are plain `text`, not FKs to `organizations` or `tenants`, default `"default"`. Cannot validate tenant membership at the data layer.  
-  **Fix:** Back with real `orgId` FKs or scope/rename as stub pending ARCH-1 cleanup.  
-  **Paths:** `src/db/schema.ts`, `src/jit/routes.ts`, `src/jit/`
-
-- [ ] **MT-3** — **Low** — Inconsistent tenant-scoping columns  
-  **Problem:** Most tables use `orgId uuid` FK to `organizations`; `webhook_endpoints` now has `org_id` FK (migration `0030`, ZT-1) but legacy nullable `tenant_id` text remains for backfill compat.  
-  **Fix:** Drop `tenant_id` after all rows backfilled and dispatch paths use `org_id` only.  
-  **Paths:** `src/db/schema.ts`, `src/webhooks/store.ts`, `drizzle/` (cleanup migration)
+**Verification baseline (2026-07-04):** `bun run test` → 1076 API + 242 UI tests (1318 total); migrations through `0034`; SOC 2 observation window active (2026-07-04 — 2027-07-03). Short-term audit backlog (ARCH-1, ARCH-2, MT-1–3, FS-1–2, ZT-3–4) shipped — see [`tdone.md`](./tdone.md).
 
 ---
 
@@ -80,8 +31,8 @@ _Sourced from the 2026-07-04 senior-level Zero Trust SaaS audit (static code rev
   **Fix:** If data residency is a contractual commitment, implement region-sharded storage (separate DB/bucket per region, request routed by org `storageRegion`).  
   **Paths:** `src/services/ops/region.service.ts`, `src/config/index.ts`, `docs/deployment.md`, `docs/reference-architecture.md`
 
-- [ ] **DI-1** — **Low** — Monolithic 949-line schema file  
-  **Problem:** All 41 tables in one `schema.ts` — merge-conflict and navigation cost; orphaned `tenants` definition easy to miss (ARCH-1).  
+- [ ] **DI-1** — **Low** — Monolithic schema file  
+  **Problem:** All tables in one `schema.ts` — merge-conflict and navigation cost.  
   **Fix:** Split by domain (`schema/identity.ts`, `schema/billing.ts`, etc.) re-exported from `schema/index.ts`, mirroring `services/` domain regrouping.  
   **Paths:** `src/db/schema.ts`, `src/db/index.ts`
 
@@ -121,5 +72,5 @@ _Sourced from the 2026-07-04 senior-level Zero Trust SaaS audit (static code rev
 | TanStack Query migration (48/48 data pages) | Complete — [`docs/tanstack-query-progress.md`](./docs/tanstack-query-progress.md) |
 | Audit log external anchoring (P5.1) | Shipped — `src/audit/anchor.ts`, migration `0029` |
 | Apple Sign In OAuth | Deferred — no `src/oauth/providers/apple.ts` |
-| BFF / httpOnly cookie auth (default) | Fork path — ADR 008; tracked as ZT-3 long-term |
+| BFF / httpOnly cookie auth (default) | Fork path — ADR 008 Option B; Option C (in-memory + httpOnly refresh) shipped as ZT-3 |
 | `GET /auth/unsubscribe`, `POST /wallet/spend` UI gaps | SDK-only by design — `docs/api-ui-integration-matrix.md` |

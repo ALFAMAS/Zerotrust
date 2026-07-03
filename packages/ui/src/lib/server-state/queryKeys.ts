@@ -105,11 +105,6 @@ export const queryKeys = {
     entries: (filters: object = {}) => [...queryKeys.audit.all, "entries", filters] as const,
     verify: () => [...queryKeys.audit.all, "verify"] as const,
   },
-  tenants: {
-    all: ["tenants"] as const,
-    list: (filters: object = {}) => [...queryKeys.tenants.all, "list", filters] as const,
-    detail: (id: string) => [...queryKeys.tenants.all, "detail", id] as const,
-  },
   jit: {
     all: ["jit"] as const,
     incoming: () => [...queryKeys.jit.all, "incoming"] as const,

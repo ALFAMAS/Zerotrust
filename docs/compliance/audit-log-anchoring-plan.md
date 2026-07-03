@@ -14,6 +14,7 @@ database so database-level tampering is easier to prove.
 - `insertAuditLog()` chains entries under an advisory lock.
 - `verifyAuditChain()` detects edits, deletes, and reordering.
 - Admin UI exposes integrity verification.
+- `audit_logs` rows are append-only at the database layer (migration `0031` trigger).
 - **Anchoring (P5.1):** `audit_log_anchors` table (migration `0029`), `runAuditAnchor()`,
   scheduled `audit.anchor` job, and `bun run audit:anchor-verify`.
 
@@ -43,7 +44,7 @@ database so database-level tampering is easier to prove.
 ## Configuration
 
 ```env
-AUDIT_ANCHOR_ENABLED=false          # set true in production
+AUDIT_ANCHOR_ENABLED=true           # required in production reference deployments
 AUDIT_ANCHOR_ENVIRONMENT=production # defaults to NODE_ENV
 AUDIT_ANCHOR_S3_PREFIX=audit-anchors/  # uses BACKUP_S3_* credentials when set
 ```

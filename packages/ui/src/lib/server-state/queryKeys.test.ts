@@ -112,7 +112,7 @@ describe("queryKeys", () => {
     expect(queryKeys.organizations.myInvites()).toEqual(["organizations", "myInvites"]);
   });
 
-  it("builds support, audit, tenant, jit, and compliance keys", () => {
+  it("builds support, audit, jit, and compliance keys", () => {
     expect(queryKeys.support.list({ status: "open" })).toEqual([
       "support",
       "list",
@@ -121,8 +121,6 @@ describe("queryKeys", () => {
     expect(queryKeys.support.detail("t1")).toEqual(["support", "detail", "t1"]);
     expect(queryKeys.audit.entries({ actor: "u1" })).toEqual(["audit", "entries", { actor: "u1" }]);
     expect(queryKeys.audit.verify()).toEqual(["audit", "verify"]);
-    expect(queryKeys.tenants.list()).toEqual(["tenants", "list", {}]);
-    expect(queryKeys.tenants.detail("tenant1")).toEqual(["tenants", "detail", "tenant1"]);
     expect(queryKeys.jit.incoming()).toEqual(["jit", "incoming"]);
     expect(queryKeys.jit.myRequests()).toEqual(["jit", "myRequests"]);
     expect(queryKeys.compliance.soc2Readiness()).toEqual(["compliance", "soc2Readiness"]);

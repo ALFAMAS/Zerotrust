@@ -94,49 +94,6 @@ export interface CreateSupportTicketInput {
   priority?: "low" | "normal" | "high";
 }
 
-export type TenantPlan = "free" | "starter" | "pro" | "enterprise";
-export type TenantStatus = "active" | "trial" | "suspended" | "deleted";
-
-export interface Tenant {
-  id: string;
-  slug: string;
-  name: string;
-  displayName?: string;
-  status: TenantStatus;
-  plan: TenantPlan;
-  createdAt?: string;
-}
-
-export interface TenantsResponse {
-  tenants: Tenant[];
-  total?: number;
-  page?: number;
-  limit?: number;
-}
-
-export interface TenantsListParams {
-  limit?: number;
-  page?: number;
-  status?: string;
-  plan?: string;
-}
-
-export interface CreateTenantInput {
-  slug: string;
-  name: string;
-  plan?: TenantPlan;
-}
-
-export interface UpdateTenantStatusInput {
-  id: string;
-  status: TenantStatus;
-}
-
-export interface ChangeTenantPlanInput {
-  id: string;
-  plan: TenantPlan;
-}
-
 export interface AuditEntry {
   id: string;
   action: string;
@@ -166,8 +123,8 @@ export type JitRequestStatus = "pending" | "approved" | "denied" | "expired";
 export interface JitRequest {
   id: string;
   requestorUserId: string;
-  requestorTenantId: string;
-  targetTenantId: string;
+  requestorOrgId: string;
+  targetOrgId: string;
   targetResource: string;
   justification: string;
   ttlSeconds: number;
@@ -179,7 +136,8 @@ export interface JitRequest {
 }
 
 export interface CreateJitRequestInput {
-  targetTenantId: string;
+  targetOrgId: string;
+  requestorOrgId?: string;
   targetResource: string;
   justification: string;
   ttlSeconds: number;

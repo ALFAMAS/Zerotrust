@@ -14,8 +14,8 @@ vi.mock("@/lib/toast", () => ({
 const pendingRequest = {
   id: "jit_1",
   requestorUserId: "user_1",
-  requestorTenantId: "tenant_a",
-  targetTenantId: "default",
+  requestorOrgId: "00000000-0000-0000-0000-0000000000aa",
+  targetOrgId: "00000000-0000-0000-0000-0000000000bb",
   targetResource: "admin:users:read",
   justification: "Need access for audit",
   ttlSeconds: 3600,
@@ -134,14 +134,14 @@ describe("jit TanStack Query server state", () => {
 
     const invalidateSpy = vi.spyOn(queryClient, "invalidateQueries");
 
-    await user.type(screen.getByLabelText("Target tenant ID"), "acme-corp");
+    await user.type(screen.getByLabelText("Target organization ID"), "00000000-0000-0000-0000-0000000000cc");
     await user.type(screen.getByLabelText("Resource"), "admin:users:read");
     await user.type(screen.getByLabelText("Justification"), "Need access for audit");
     await user.click(screen.getByRole("button", { name: "Request access" }));
 
     await waitFor(() =>
       expect(mockApiPost).toHaveBeenCalledWith(MY_JIT_REQUESTS_PATH, {
-        targetTenantId: "acme-corp",
+        targetOrgId: "00000000-0000-0000-0000-0000000000cc",
         targetResource: "admin:users:read",
         justification: "Need access for audit",
         ttlSeconds: 3600,

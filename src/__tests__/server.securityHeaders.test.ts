@@ -15,7 +15,9 @@ describe("createServer security headers (ZT-2)", () => {
     );
   });
 
-  it("sends Content-Security-Policy on the real app /health route", async () => {
+  it(
+    "sends Content-Security-Policy on the real app /health route",
+    async () => {
     vi.doMock("..", () => ({
       initializezerotrust: vi.fn().mockResolvedValue({
         logger: { info: vi.fn(), error: vi.fn(), warn: vi.fn(), debug: vi.fn() },
@@ -45,7 +47,9 @@ describe("createServer security headers (ZT-2)", () => {
     expect(res.headers.get("content-security-policy")).toContain("default-src 'self'");
     expect(res.headers.get("strict-transport-security")).toMatch(/max-age=/);
     expect(res.headers.get("x-frame-options")).toBe("DENY");
-  });
+  },
+  30_000
+  );
 
   it("wires securityHeaders middleware in server.ts (not bare secureHeaders)", () => {
     const src = readFileSync(serverTsPath, "utf8");

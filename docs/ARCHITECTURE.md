@@ -14,8 +14,8 @@ zerotrust is a **Bun monorepo** with three deployables:
 | `packages/ui/` | Next.js 16 (App Router, React 19) dashboard/admin/landing | 3000 |
 | `packages/client/` | Generated, dependency-free TypeScript SDK (from `src/api/openapi.json`) | — |
 
-It is a **modular monolith**: one API process exposes ~27 route modules backed
-by ~45 services and ~21 middleware, persisting to PostgreSQL (41 tables) with
+It is a **modular monolith**: one API process exposes ~26 route modules backed
+by ~45 services and ~21 middleware, persisting to PostgreSQL (40 tables) with
 Redis for sessions/rate-limiting/queue. There are no internal network hops
 between domains — modules call each other in-process.
 
@@ -51,6 +51,15 @@ guards:
 Auth resolves a `user` (and optional `apiKey`) onto the Hono context; handlers
 read it via `c.get("user")`.
 
+### Multi-tenancy boundary
+
+**Organizations are the sole tenancy boundary** (ARCH-1, 2026-07-04). The
+orphaned `tenants` table and `/admin/tenants` routes were removed. Org-scoped
+data uses `org_id` / `orgId` UUID FKs to `organizations`. Cross-tenant JIT
+requests reference `requestor_org_id` and `target_org_id` (MT-2). CI lint
+(`bun run org-scoping:check`, MT-1) scans route/store code for missing org
+predicates on org-scoped tables.
+
 ## 3. Module map (`src/`)
 
 | Area | Dir(s) | Responsibility |
@@ -58,7 +67,7 @@ read it via `c.get("user")`.
 | HTTP | `api/` | Hono app, route mounting, OpenAPI spec |
 | Domain logic | `services/{auth,billing,notifications,compliance,ops,shared}/` (48 files) | token, session, email/queue, billing, wallet, globalization, search, compliance, backup, SLO, alerting… |
 | Middleware | `middleware/` (~20) | auth, rate limiting, CSRF/headers, plan gating, abuse defense, API versioning |
-| Data | `db/` | Drizzle schema (41 tables) + connection; `models/` thin table re-exports |
+| Data | `db/` | Drizzle schema (40 tables) + connection; `models/` thin table re-exports |
 | Crypto | `crypto/` | `paseto-v4` (v4.local), `csfle` (field encryption), `hardware-key-store`, `codes` |
 | MFA | `mfa/` | TOTP, Email OTP channel, FIDO MDS3 |
 | OAuth | `oauth/` | provider factory + adapters (Google/GitHub/Facebook; Apple Sign In not yet implemented) |
@@ -68,8 +77,8 @@ read it via `c.get("user")`.
 
 ## 4. State & data
 
-- **PostgreSQL** (Drizzle ORM, `postgres` driver) — system of record, 41 tables,
-  29 versioned migrations in `drizzle/`. Sensitive columns use **CSFLE**
+- **PostgreSQL** (Drizzle ORM, `postgres` driver) — system of record, 40 tables,
+  34 versioned migrations in `drizzle/`. Sensitive columns use **CSFLE**
   (client-side field encryption) with key-version rotation.
 - **Redis** (ioredis) — session validation cache (`session:{tokenId}` with
   debounced `lastActivityAt` writes and **DB fallback when Redis is down**),

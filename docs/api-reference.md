@@ -4,13 +4,13 @@ _Generated from `src/api/openapi.json` (zerotrust API v1.0.0) — run `bun run d
 
 Live, interactive docs: **Swagger UI at `/docs`** (dev). Full request/response types: the generated **`@zerotrust/client`** SDK (`packages/client`). 🔒 = requires authentication.
 
-**209 operations** across 22 groups.
+**202 operations** across 22 groups.
 
 > **Coverage note:** this lists every operation described in `openapi.json`, aligned with the mounted route surface in `src/api/server.ts` (198 backend routes). Request/response schemas for lower-traffic admin, webhook, tenant, and ops endpoints use minimal stubs; enrich per-route schemas as SDK consumers need them.
 
 ## Contents
 
-- [Admin](#admin) (54)
+- [Admin](#admin) (47)
 - [API Keys](#api-keys) (3)
 - [Auth](#auth) (20)
 - [Billing](#billing) (15)
@@ -69,13 +69,6 @@ Administrative settings, user management, audit visibility, and privileged opera
 | PUT | `/admin/settings` | Update settings (/admin/settings) | 🔒 |
 | GET | `/admin/slo` | Get slo (/admin/slo) | 🔒 |
 | GET | `/admin/stats` | Get stats (/admin/stats) | 🔒 |
-| GET | `/admin/tenants` | Get tenants (/admin/tenants) | 🔒 |
-| POST | `/admin/tenants` | Create tenants (/admin/tenants) | 🔒 |
-| GET | `/admin/tenants/{id}` | Get id (/admin/tenants/{id}) | 🔒 |
-| PUT | `/admin/tenants/{id}` | Update id (/admin/tenants/{id}) | 🔒 |
-| DELETE | `/admin/tenants/{id}` | Delete id (/admin/tenants/{id}) | 🔒 |
-| POST | `/admin/tenants/{id}/plan` | Create plan (/admin/tenants/{id}/plan) | 🔒 |
-| GET | `/admin/tenants/{id}/stats` | Get stats (/admin/tenants/{id}/stats) | 🔒 |
 | POST | `/admin/uploads/presigned` | Create presigned (/admin/uploads/presigned) | 🔒 |
 | GET | `/admin/users` | List all users (admin only) | 🔒 |
 | GET | `/admin/users/{id}` | Get user by ID (admin only) | 🔒 |
