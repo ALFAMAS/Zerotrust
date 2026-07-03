@@ -576,7 +576,7 @@ formal backlog._
   build` passes; `bun run --cwd packages/ui build` passes; `bun run lint` exits
   0 with existing script warnings only.
 
-### Fork-readiness audit (`AUDIT-REPORT.md`) — completed items
+### Fork-readiness audit — completed items
 
 All fork-blocking (must-fix) and should-fix audit items from this report are
 resolved. Verified open work is tracked in [`todo.md`](./todo.md).
@@ -616,7 +616,7 @@ resolved. Verified open work is tracked in [`todo.md`](./todo.md).
 - **Bun runtime bump:** `.bun-version` now pins Bun 1.3.14; `server.ts` mounts
   Hono `compress()` directly after verifying `CompressionStream` exists in the
   pinned runtime (`bun -e`). The old P4 Bun bump follow-up was removed from
-  `todo.md` / `AUDIT-REPORT.md`.
+  `todo.md`.
 
 - **API↔UI integration scanner:** `scripts/audit-api-ui-map.mjs` now recognizes
   canonical `apiClient` helpers plus `useApi`/`usePaginatedApi`, ignores UI test
@@ -850,8 +850,8 @@ resolved. Verified open work is tracked in [`todo.md`](./todo.md).
     now shuts it down gracefully (alongside the email/Stripe queues) on
     `SIGTERM`/`SIGINT`.
   - `docs/deployment.md` — new §Queue-backed cron scheduling (B5) documents
-    the topology; `.env.example`, `README.md`, `docs/AUDIT.md`,
-    `AUDIT-REPORT.md`, and `docs/reference-architecture.md` updated to drop
+    the topology;     `.env.example`, `README.md`, `docs/AUDIT.md`, and
+    `docs/reference-architecture.md` updated to drop
     stale "leader-elected `setInterval`" references.
 
 - **Verification (2026-07-03):**
