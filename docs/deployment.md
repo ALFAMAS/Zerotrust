@@ -79,9 +79,11 @@ Use one of these two topologies deliberately:
 
 1. **Recommended clustered production:** API replicas set `WORKER_MODE=true` and
    only initialize request/producer paths. One separate worker process runs
-   `bun run src/worker.ts` and owns BullMQ consumers plus scheduled jobs. Keep
-   the worker replica count at **1**; Redis leader locks are a guardrail, not a
-   substitute for intentional topology.
+   `bun run src/worker.ts` and owns the BullMQ consumers — email queue, Stripe
+   webhook queue, and the scheduled-job queue. Keep the worker replica count at
+   **1** as a deliberate topology choice — BullMQ delivers each job to exactly
+   one consumer by design, so extra worker replicas are a guardrail for
+   throughput, not a correctness requirement.
 2. **Single-process development / small deploy:** omit `WORKER_MODE=true`; the
    API process starts schedulers in-process. This is fine for local dev and one
    API replica, but production startup logs a warning so clustered deploys do
@@ -96,6 +98,36 @@ WORKER_MODE=true bun run src/api/server.ts
 # Dedicated background worker (exactly one instance)
 bun run src/worker.ts
 ```
+
+### Queue-backed cron scheduling (B5)
+
+Scheduled jobs declared in `src/jobs/registry.ts` (data retention, notification
+email fallback, billing lifecycle, daily `pg_dump` backup, audit anchoring) run
+through a BullMQ job scheduler (`src/jobs/scheduler.ts`) instead of a raw
+`setInterval` loop:
+
+- **Scheduling:** `Queue.upsertJobScheduler()` upserts one repeatable job per
+  registry entry, using its `intervalHours` as an every-X-hours cadence — the
+  BullMQ equivalent of a cron entry, without a separate cron daemon.
+- **Retry/backoff:** each job gets up to 3 attempts with exponential backoff
+  (starting at 60s) via `defaultJobOptions`, matching the pattern already used
+  by the email queue (`emailQueue.ts`) and the Stripe webhook queue
+  (`stripeWebhookQueue.ts`).
+- **Dead-letter visibility:** failed attempts are retained (`removeOnFail`)
+  instead of vanishing after a failed `setInterval` tick; `getFailedScheduledJobs()`
+  exposes them for ops inspection.
+- **Idempotent replay + failure recovery:** jobs with a registry `idempotencyKey`
+  (e.g. `audit.anchor`) are marked complete in Redis only *after* a successful
+  run. Replaying an already-completed tick is a no-op; a failed attempt is not
+  marked complete, so a BullMQ retry actually re-executes the handler. Proven
+  by `src/__tests__/scheduler.test.ts`.
+- **Single-instance execution:** BullMQ atomically hands each scheduled job to
+  exactly one consumer, so the previous Redis `SET NX PX` leader lock is no
+  longer needed to prevent duplicate execution across replicas.
+
+Without `REDIS_URI` set, BullMQ cannot connect and scheduled jobs do not run —
+same behavior as before this change (all current registry jobs are
+single-instance).
 
 ---
 

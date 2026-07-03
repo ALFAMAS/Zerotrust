@@ -74,4 +74,4 @@ transaction layer, worker isolation + the PM2 `-i max` cluster-mode duplication
 bug, plugin/capability contract for optional-heavy integrations, typed UI↔API
 contracts, UI component tests, operational reference architecture, ADRs +
 maintenance scorecard). **Recommendations shipped or tracked** in
-[`AUDIT.md`](./AUDIT.md) (findings) and [`../todo.md`](../todo.md) (verified backlog B1–B7).
+[`AUDIT.md`](./AUDIT.md) (findings) and [`../todo.md`](../todo.md) (verified backlog B6–B7).

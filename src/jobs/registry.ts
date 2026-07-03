@@ -3,12 +3,14 @@
  *
  * Every periodic job in zerotrust is declared here with its name, schedule,
  * a Zod payload schema for type-safe job data, and an optional idempotency
- * key builder. The scheduler (scheduler.ts) reads this registry to know
- * what to run and how to guard against duplicates.
+ * key builder. The scheduler (scheduler.ts) reads this registry to upsert a
+ * BullMQ job scheduler (repeatable job) per entry and to know how to guard
+ * against duplicate execution.
  *
- * Jobs that should only run on a single instance (leader-elected) set
- * `singleInstance: true` — the scheduler acquires a Redis lock before
- * dispatching them.
+ * `singleInstance: true` documents that a job must only ever run once per
+ * tick. BullMQ's queue delivers each scheduled job to exactly one worker by
+ * design, so this is enforced structurally rather than via a Redis leader
+ * lock — the flag is kept for documentation/intent.
  */
 import { z } from "zod";
 

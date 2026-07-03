@@ -8,43 +8,6 @@ Does not duplicate shipped work in [`tdone.md`](./tdone.md) (P0–P5 complete)._
 
 ---
 
-### P1 — Security & access control gaps
-
-#### B4 — Test coverage ratchet toward 85%
-
-**Status:** Open — long-term target; ratchets below goal.
-
-**Evidence:** `docs/maintenance-scorecard.md` §3 — API **64.1%** lines / **56.2%**
-branches (floors 64/56 in `vitest.config.ts`); UI **~47%** lines
-(`packages/ui/vitest.config.ts`). 892 API + 216 UI tests pass (2026-07-03).
-
-**Acceptance criteria:**
-
-- Raise Vitest coverage floors incrementally as measured coverage grows (target
-  ≥85% lines/branches long-term per scorecard).
-- Prioritize untested hot paths: auth flows, billing webhooks.
-
----
-
-#### B5 — Queue-backed cron scheduling (scale-out path)
-
-**Status:** Open — mitigated, not fully implemented.
-
-**Evidence:** `src/jobs/registry.ts` declares jobs with Zod schemas and idempotency
-keys; `src/jobs/scheduler.ts` still uses `setInterval` + Redis leader lock (no
-BullMQ cron, dead-letter, or retry/backoff for scheduled jobs). `WORKER_MODE` +
-dedicated worker (`src/worker.ts`) mitigates duplicate execution in production.
-`AUDIT-REPORT.md` E5 documents this as acceptable for a starter template.
-
-**Acceptance criteria:**
-
-- Scheduled jobs dispatch through BullMQ (or equivalent) with retry/backoff and
-  dead-letter visibility.
-- Scheduler unit tests prove idempotent replay and failure recovery.
-- `docs/deployment.md` documents the queue-backed topology.
-
----
-
 ### P3 — Operations & compliance (non-code)
 
 #### B6 — CI success rate recovery
@@ -53,7 +16,7 @@ dedicated worker (`src/worker.ts`) mitigates duplicate execution in production.
 
 **Evidence:** `docs/maintenance-scorecard.md` §2 — **~42%** success over last 100
 runs (Jun 3–Jul 3, Jul 2 refactor burst); target ≥95%. Current test suite green
-locally (892 API tests, 2026-07-03).
+locally (953 API tests, 2026-07-03).
 
 **Acceptance criteria:**
 
@@ -85,7 +48,8 @@ E-010 still **Not started**. E-001, E-004–E-006, E-009 complete (2026-07-03).
 | Item | Verdict |
 | --- | --- |
 | P0–P5 audit backlog (repos, worker topology, TanStack Query, ES optional, anchoring, compliance docs) | Shipped — [`tdone.md`](./tdone.md) |
-| B1 `POST /orgs/invites/accept` missing + ALFA-3 invite visibility/notifications | Shipped — [`tdone.md`](./tdone.md) Organizations & Teams |
+| P1 security & access control (B1 invite accept, B3 re-verification, ALFA-3) | Shipped — [`tdone.md`](./tdone.md) §P1 Security & access control |
+| P2 infrastructure backlog (B4 coverage ratchet, B5 queue-backed cron scheduling) | Shipped — [`tdone.md`](./tdone.md) §P2 — Infrastructure backlog |
 | E2 TanStack Query migration | Complete — `docs/tanstack-query-progress.md` (48/48 data pages) |
 | E6 repository layer | Complete — nine repos under `src/db/repositories/` |
 | Audit log external anchoring (P5.1) | Shipped — `src/audit/anchor.ts`, migration `0029`, `audit.anchor` job |

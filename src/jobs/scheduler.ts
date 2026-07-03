@@ -1,163 +1,118 @@
 /**
- * Single-instance job scheduler with Redis leader election.
+ * BullMQ-backed job scheduler (B5 — queue-backed cron scheduling).
  *
- * Each job in the registry that sets `singleInstance: true` acquires a Redis
- * lock before executing. When Redis is unavailable (no REDIS_URI), every
- * instance skips — this prevents duplicate execution in cluster mode.
+ * Jobs declared in the registry with `intervalHours` are scheduled through a
+ * BullMQ job scheduler (`Queue.upsertJobScheduler`) instead of `setInterval`.
+ * That gets us, for free:
+ *   - exactly-one-worker delivery per tick — BullMQ atomically hands each job
+ *     to a single consumer, so the old Redis leader lock is no longer needed
+ *     to prevent duplicate execution across instances/replicas.
+ *   - retry with exponential backoff on failure (`defaultJobOptions` below).
+ *   - dead-letter visibility — failed jobs stay in the queue (`getFailed()`)
+ *     instead of silently vanishing after a failed `setInterval` tick.
  *
- * On-demand (non-interval) jobs and jobs with `singleInstance: false` are
- * dispatched directly without locking.
+ * Idempotency (registry `idempotencyKey`) still guards against re-running an
+ * already-completed tick: the "completed" marker is written to Redis only
+ * *after* a successful run, so:
+ *   - replaying an already-completed tick is a no-op (idempotent replay)
+ *   - a failed attempt is NOT marked complete, so a BullMQ retry actually
+ *     re-executes the handler (failure recovery)
+ *
+ * Without REDIS_URI, BullMQ cannot connect — scheduled jobs are skipped
+ * entirely, matching the previous behavior for `singleInstance` jobs (all
+ * current registry jobs are single-instance).
  */
+import { Queue, Worker, type Job } from "bullmq";
 import Redis from "ioredis";
 import { getLogger } from "../logger";
-import { JOB_REGISTRY, type JobDef } from "./registry";
+import { getJob, JOB_REGISTRY, type JobDef } from "./registry";
 
 const logger = getLogger("jobs-scheduler");
-const LOCK_PREFIX = "zerotrust:job:lock:";
-const DEFAULT_LOCK_TTL = 300; // 5 minutes — a job that takes longer should extend
 
-let redis: Redis | null = null;
+// BullMQ v5 disallows ":" in queue names (it's the Redis key separator).
+const QUEUE_NAME = "zerotrust-scheduled-jobs";
+const IDEMPOTENCY_PREFIX = "zerotrust:job:completed:";
+const IDEMPOTENCY_TTL_MS = 7 * 24 * 3600 * 1000; // 7 days
 
-function getRedis(): Redis | null {
-  if (!process.env.REDIS_URI) return null;
-  if (!redis) {
-    redis = new Redis(process.env.REDIS_URI, {
-      maxRetriesPerRequest: 2,
-      retryStrategy: () => null, // fail fast
-    });
+let _queue: Queue | null = null;
+let _worker: Worker | null = null;
+let _redis: Redis | null = null;
+
+function parseRedisUri(uri: string): { host: string; port: number; password?: string } | null {
+  try {
+    const url = new URL(uri);
+    return {
+      host: url.hostname,
+      port: parseInt(url.port || "6379", 10),
+      password: url.password ? decodeURIComponent(url.password) : undefined,
+    };
+  } catch {
+    return null;
   }
-  return redis;
 }
 
-/**
- * Acquire a distributed lock for a job. Returns true if the lock was acquired
- * (this instance is the leader for this tick), false if another instance holds
- * the lock.
- */
-async function acquireLock(jobName: string): Promise<boolean> {
-  const r = getRedis();
-  if (!r) return false; // no Redis → no leader → skip
-  const key = `${LOCK_PREFIX}${jobName}`;
-  const result = await r.set(key, "1", "PX", DEFAULT_LOCK_TTL * 1000, "NX");
-  return result === "OK";
+/** The underlying BullMQ queue — for ops/admin introspection (e.g. failed-job counts). */
+export function getScheduledJobQueue(): Queue | null {
+  return _queue;
 }
 
-/** Release a lock after job completion. */
-async function releaseLock(jobName: string): Promise<void> {
-  const r = getRedis();
-  if (!r) return;
-  await r.del(`${LOCK_PREFIX}${jobName}`);
+/** Dead-letter visibility: list the most recent failed scheduled-job attempts. */
+export async function getFailedScheduledJobs(limit = 20): Promise<Job[]> {
+  if (!_queue) return [];
+  return _queue.getFailed(0, Math.max(0, limit - 1));
 }
 
-/**
- * Track completed job ticks for idempotency. Uses a Redis sorted set:
- *   key = zerotrust:job:completed:<name>
- *   member = idempotency key
- *   score = timestamp
- * Auto-expires entries older than 7 days.
- */
-async function isDuplicate(jobDef: JobDef, payload: unknown): Promise<boolean> {
-  if (!jobDef.idempotencyKey) return false;
-  const r = getRedis();
-  if (!r) return false;
-  const key = `zerotrust:job:completed:${jobDef.name}`;
+async function isAlreadyCompleted(jobDef: JobDef, payload: unknown): Promise<boolean> {
+  if (!jobDef.idempotencyKey || !_redis) return false;
+  const key = `${IDEMPOTENCY_PREFIX}${jobDef.name}`;
   const idKey = jobDef.idempotencyKey(payload);
-  const added = await r.zadd(key, "NX", Date.now(), idKey);
-  if (added === 0) return true; // already present
-  // Trim old entries
-  await r.zremrangebyscore(key, 0, Date.now() - 7 * 24 * 3600 * 1000);
-  return false;
+  const score = await _redis.zscore(key, idKey);
+  return score !== null;
 }
 
-/** Start all interval jobs from the registry. */
-export function startJobScheduler() {
-  const hasRedis = !!process.env.REDIS_URI;
-
-  for (const jobDef of JOB_REGISTRY) {
-    if (!jobDef.intervalHours) continue; // on-demand only
-
-    const intervalMs = jobDef.intervalHours * 3600 * 1000;
-    logger.info("Registering job", {
-      job: jobDef.name,
-      intervalHours: jobDef.intervalHours,
-      singleInstance: jobDef.singleInstance,
-    });
-
-    setInterval(async () => {
-      try {
-        if (jobDef.singleInstance && hasRedis) {
-          const locked = await acquireLock(jobDef.name);
-          if (!locked) {
-            logger.debug("Skipping job — lock held by another instance", { job: jobDef.name });
-            return;
-          }
-          try {
-            await runJob(jobDef);
-          } finally {
-            await releaseLock(jobDef.name);
-          }
-        } else if (jobDef.singleInstance && !hasRedis) {
-          logger.debug("Skipping job — no Redis, cannot guarantee single instance", {
-            job: jobDef.name,
-          });
-        } else {
-          await runJob(jobDef);
-        }
-      } catch (err) {
-        logger.error("Job scheduler tick failed", { job: jobDef.name, error: String(err) });
-      }
-    }, intervalMs);
-  }
-
-  return {};
-}
-
-/** Execute a single job tick. */
-async function runJob(jobDef: JobDef) {
-  const payload = {}; // Most jobs have no payload; extend when jobs need params
-  const dup = await isDuplicate(jobDef, payload);
-  if (dup) {
-    logger.debug("Skipping duplicate job tick", { job: jobDef.name });
-    return;
-  }
-
-  logger.info("Running job", { job: jobDef.name });
-  // Dynamically import the job handler to avoid bundling all services at boot
-  const handled = await dispatchJob(jobDef, payload);
-  if (!handled) {
-    logger.warn("No handler registered for job", { job: jobDef.name });
-  }
+async function markCompleted(jobDef: JobDef, payload: unknown): Promise<void> {
+  if (!jobDef.idempotencyKey || !_redis) return;
+  const key = `${IDEMPOTENCY_PREFIX}${jobDef.name}`;
+  const idKey = jobDef.idempotencyKey(payload);
+  await _redis.zadd(key, Date.now(), idKey);
+  await _redis.zremrangebyscore(key, 0, Date.now() - IDEMPOTENCY_TTL_MS);
 }
 
 /**
- * Map job names to their handler functions.
- * Only the scheduled jobs need entries here; on-demand jobs are dispatched
- * elsewhere.
+ * Map job names to their (one-shot) handler functions. Only scheduled jobs
+ * need entries here; on-demand jobs are dispatched elsewhere. Handlers are
+ * the plain run-once functions (not the legacy `start*Scheduler` wrappers,
+ * which own their own `setInterval` and are kept only for direct callers /
+ * existing tests) — BullMQ now owns all periodic re-triggering.
  */
 async function dispatchJob(jobDef: JobDef, _payload: unknown): Promise<boolean> {
   switch (jobDef.name) {
     case "retention.purge": {
-      const { startRetentionScheduler } = await import("../services/compliance/dataRetention.js");
-      await startRetentionScheduler(jobDef.intervalHours!);
+      const { runRetentionPolicies } = await import("../services/compliance/dataRetention.js");
+      await runRetentionPolicies();
       return true;
     }
     case "notifications.emailFallback": {
-      const { startNotificationEmailFallbackScheduler } = await import(
+      const { sendNotificationEmailFallbacks } = await import(
         "../services/notifications/notificationEmailFallback.js"
       );
-      await startNotificationEmailFallbackScheduler(jobDef.intervalHours!);
+      await sendNotificationEmailFallbacks();
       return true;
     }
     case "billing.lifecycle": {
-      const { startBillingLifecycleScheduler } = await import(
+      const { runBillingLifecycle } = await import(
         "../services/billing/billingLifecycle.service.js"
       );
-      await startBillingLifecycleScheduler(jobDef.intervalHours!);
+      await runBillingLifecycle();
       return true;
     }
     case "backup.daily": {
-      const { startBackupScheduler } = await import("../services/ops/dbBackup.service.js");
-      await startBackupScheduler(jobDef.intervalHours!);
+      if (process.env.BACKUP_ENABLED !== "true") {
+        logger.info("Skipping DB backup job — BACKUP_ENABLED is not true");
+        return true;
+      }
+      const { runBackup } = await import("../services/ops/dbBackup.service.js");
+      await runBackup();
       return true;
     }
     case "audit.anchor": {
@@ -168,4 +123,118 @@ async function dispatchJob(jobDef: JobDef, _payload: unknown): Promise<boolean> 
     default:
       return false;
   }
+}
+
+/**
+ * Execute a single scheduled job tick, honoring idempotency. Exported so
+ * tests can drive it directly (mirrors the BullMQ processor callback).
+ */
+export async function processScheduledJob(job: Job): Promise<void> {
+  const jobDef = getJob(job.name);
+  if (!jobDef) {
+    logger.warn("No registry entry for scheduled job", { job: job.name });
+    return;
+  }
+
+  if (await isAlreadyCompleted(jobDef, job.data)) {
+    logger.info("Skipping already-completed scheduled job (idempotent replay)", {
+      job: jobDef.name,
+    });
+    return;
+  }
+
+  logger.info("Running scheduled job", { job: jobDef.name, attempt: job.attemptsMade + 1 });
+  const handled = await dispatchJob(jobDef, job.data);
+  if (!handled) {
+    logger.warn("No handler registered for scheduled job", { job: jobDef.name });
+    return;
+  }
+  await markCompleted(jobDef, job.data);
+}
+
+/**
+ * Start the BullMQ-backed scheduler: upserts a job scheduler (BullMQ's
+ * repeatable-job primitive) for every registry entry with `intervalHours`,
+ * then starts the worker that consumes them.
+ *
+ * Call once per process that should own scheduled jobs — the dedicated
+ * worker in production, or the API process in single-process/dev deployments
+ * (see `src/jobs/topology.ts`, which gates which process calls this).
+ */
+export async function startJobScheduler(redisUri = process.env.REDIS_URI): Promise<void> {
+  if (!redisUri) {
+    logger.warn("REDIS_URI not set — scheduled jobs (BullMQ) will not run");
+    return;
+  }
+  const conn = parseRedisUri(redisUri);
+  if (!conn) {
+    logger.warn("Cannot parse REDIS_URI — scheduled jobs (BullMQ) will not run");
+    return;
+  }
+
+  if (!_redis) {
+    _redis = new Redis(redisUri, { maxRetriesPerRequest: 2, retryStrategy: () => null });
+  }
+
+  if (!_queue) {
+    _queue = new Queue(QUEUE_NAME, {
+      connection: conn,
+      defaultJobOptions: {
+        attempts: 3,
+        backoff: { type: "exponential", delay: 60_000 },
+        removeOnComplete: 20,
+        removeOnFail: 100, // dead-letter visibility — keep recent failures inspectable
+      },
+    });
+  }
+
+  for (const jobDef of JOB_REGISTRY) {
+    if (!jobDef.intervalHours) continue; // on-demand only
+    await _queue.upsertJobScheduler(
+      jobDef.name,
+      { every: jobDef.intervalHours * 3600 * 1000 },
+      { name: jobDef.name, data: {} }
+    );
+    logger.info("Registered BullMQ job scheduler", {
+      job: jobDef.name,
+      intervalHours: jobDef.intervalHours,
+    });
+  }
+
+  if (!_worker) {
+    _worker = new Worker(QUEUE_NAME, processScheduledJob, { connection: conn });
+
+    _worker.on("completed", (job) => {
+      logger.info("Scheduled job completed", { jobId: job.id, job: job.name });
+    });
+
+    _worker.on("failed", (job, err) => {
+      if (!job) {
+        logger.error("Scheduled job failed (no job context)", err as Error);
+        return;
+      }
+      const attemptsMax = job.opts.attempts ?? 1;
+      logger.error(
+        `Scheduled job ${job.id} (${job.name}) failed (attempt ${job.attemptsMade}/${attemptsMax}): ` +
+          `${(err as Error).message}`,
+        err as Error
+      );
+    });
+
+    logger.info("Scheduled job worker started", { queue: QUEUE_NAME });
+  }
+}
+
+/** Graceful shutdown — closes the worker, queue, and idempotency Redis connection. */
+export async function shutdownJobScheduler(): Promise<void> {
+  try {
+    await _worker?.close();
+    await _queue?.close();
+    await _redis?.quit();
+  } catch {
+    // ignore shutdown errors
+  }
+  _worker = null;
+  _queue = null;
+  _redis = null;
 }

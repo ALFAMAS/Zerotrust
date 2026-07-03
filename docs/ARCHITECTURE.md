@@ -101,14 +101,21 @@ read it via `c.get("user")`.
 
 ## 6. Background work
 
-Started in-process by `startServer()`:
+Owned by the dedicated worker (`src/worker.ts`) in production (`WORKER_MODE=true`
+on API replicas); started in-process by `startServer()` only for local dev /
+single-process deploys:
 
 - **BullMQ email queue** consumer (when `REDIS_URI` is set).
-- Cron-style schedulers (24h): data retention purge, notification email
-  fallback, billing lifecycle (trial/dunning/win-back), `pg_dump` backup.
+- **BullMQ Stripe webhook queue** consumer.
+- **BullMQ job scheduler** (`src/jobs/scheduler.ts`, `Queue.upsertJobScheduler`)
+  for cron-style jobs (24h): data retention purge, notification email
+  fallback, billing lifecycle (trial/dunning/win-back), `pg_dump` backup,
+  audit anchoring — with retry/exponential-backoff and dead-letter visibility
+  (`getFailedScheduledJobs()`).
 
-> ⚠️ See **Proposed upgrade P1** — these run in the same process as HTTP and are
-> **not instance-guarded**, which is unsafe under the README's PM2 cluster mode.
+**Proposed upgrade P1** (split HTTP and worker processes) and the queue-backed
+scheduler upgrade are both **shipped** — see `docs/deployment.md`
+§Production background-worker topology and §Queue-backed cron scheduling (B5).
 
 ## 7. Observability & ops
 

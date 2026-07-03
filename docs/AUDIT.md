@@ -90,7 +90,7 @@ incident under load or attack) · **Medium** (correctness/maintainability debt) 
 | --- | --- | --- | --- |
 | C1 | **Hot-path writes are not transactional.** Refresh-token rotation, billing mutations, org role transitions, and points-ledger writes ran as sequential inline Drizzle. | High | **Fixed** (P1.1, P1.4) — nine transactional repositories; routes/services delegate |
 | C2 | The Stripe webhook body is typed `any` end-to-end (`event: any`, `event.data.object as any`). A shape change from Stripe fails silently at runtime rather than at compile time. | Medium | **Fixed** (P2.1) — `Stripe.Event` + explicit per-case payload interfaces |
-| C3 | Background schedulers (retention, billing lifecycle, backups, notification fallback) are fire-and-forget `setInterval`s started in-process with no shared job registry, retry/backoff, dead-letter, or idempotency keys. A second API replica runs every scheduler twice. | High | **Mitigated** (P1.2, P1.5) — `WORKER_MODE=true` defers schedulers to `src/worker.ts`; deploy blueprints default API to worker mode; production API startup warns when misconfigured; Redis leader locks remain as guardrail |
+| C3 | Background schedulers (retention, billing lifecycle, backups, notification fallback) are fire-and-forget `setInterval`s started in-process with no shared job registry, retry/backoff, dead-letter, or idempotency keys. A second API replica runs every scheduler twice. | High | **Fixed** (P1.2, P1.5, B5) — `WORKER_MODE=true` defers schedulers to `src/worker.ts`; scheduled jobs now dispatch through a BullMQ job scheduler (`src/jobs/scheduler.ts`) with retry/backoff, dead-letter visibility, and idempotency-guarded replay — BullMQ's own atomic job delivery replaces the Redis leader-lock as the duplicate-execution guard |
 | C4 | **`compress()` middleware crashed the API under the old pinned runtime.** Hono's `compress()` needs the global `CompressionStream`, absent in Bun < 1.3. The repo now pins Bun 1.3.14 and mounts compression directly after verifying the global exists. | High | **Fixed** — see §6 |
 
 ### 4.3 Maintainability
@@ -105,7 +105,7 @@ incident under load or attack) · **Medium** (correctness/maintainability debt) 
 
 | # | Finding | Risk | Status |
 | --- | --- | --- | --- |
-| P1 | In-process `setInterval` schedulers (C3) do not scale horizontally — duplicate work per replica. Needs a single-leader or queue-backed scheduler. | High | **Mitigated** (P1.2, P1.5) — dedicated worker + `WORKER_MODE`; deploy defaults; leader election in `jobs/scheduler.ts` |
+| P1 | In-process `setInterval` schedulers (C3) do not scale horizontally — duplicate work per replica. Needs a single-leader or queue-backed scheduler. | High | **Fixed** (P1.2, P1.5, B5) — dedicated worker + `WORKER_MODE`; deploy defaults; queue-backed BullMQ scheduler in `jobs/scheduler.ts` |
 | P2 | `checkout.session.completed` calls the Stripe API (`subscriptions.retrieve`) inside the request path; fine today, but webhook handlers should offload heavy work to the queue as volume grows. | Low | **Fixed** (P3.3) — BullMQ offload with sync fallback |
 | P3 | Read-replica routing exists (`getReadDb`) but is opt-in per call site; list/admin/analytics endpoints should default to the replica. | Low | **Fixed** (P3.2) — read-heavy admin/analytics/org/notification/session/support handlers route through `getReadDb()` |
 
@@ -113,7 +113,7 @@ incident under load or attack) · **Medium** (correctness/maintainability debt) 
 
 | # | Finding | Risk | Status |
 | --- | --- | --- | --- |
-| T1 | **No UI component/integration tests.** `packages/ui` has only `lib/*.test.ts`; auth/billing/admin page flows are untested. | Medium | **Fixed** (P3.1, P3.7) — happy-dom harness + 23 page tests + server-state modules; UI ratchet at ~47% lines |
+| T1 | **No UI component/integration tests.** `packages/ui` has only `lib/*.test.ts`; auth/billing/admin page flows are untested. | Medium | **Fixed** (P3.1, P3.7, B4) — happy-dom harness + 23 page tests + server-state modules; UI ratchet at 53% lines (measured 53.71%) |
 | T2 | No route-level test for billing-webhook idempotency end-to-end (the new repository is unit-tested; the handler path is not). | Low | **Fixed** (P1.3) |
 | T3 | 2 dashboard E2E tests had drifted from the shipped UI (asserted copy/behavior no component renders); they were red on `main`, masked by the login-500 crash (C4). | Medium | **Fixed this PR** — see §6 |
 
@@ -130,10 +130,12 @@ incident under load or attack) · **Medium** (correctness/maintainability debt) 
    lifecycle, billing, wallet ledger, org role transitions (C1, M1).~~ **Done**
    (P1.1, 2026-07-03).
 2. ~~**Centralized jobs module** with Zod payloads, retry/backoff, dead-letter,
-   idempotency keys, and single-leader scheduling (C3, P1).~~ **Partial**
-   (2026-07-03) — `src/jobs/registry.ts` + scheduler with Zod schemas,
-   idempotency keys, and Redis leader election; still `setInterval`-based. Optional
-   queue-backed upgrade tracked as B5 in [`todo.md`](../todo.md).
+   idempotency keys, and single-leader scheduling (C3, P1).~~ **Done**
+   (P2 infrastructure backlog / B5, 2026-07-03) — `src/jobs/registry.ts` + a
+   BullMQ-backed scheduler (`src/jobs/scheduler.ts`, `Queue.upsertJobScheduler`)
+   with retry/backoff, dead-letter visibility (`getFailedScheduledJobs()`), and
+   idempotency-key-guarded replay/failure-recovery. See
+   [`tdone.md`](../tdone.md) §P2 — Infrastructure backlog.
 3. ~~**Module boundaries + import-linter** and an ADR for dependency direction (M3).~~ **Done**
    (P2.2, 2026-07-03).
 4. ~~**Typed event payloads**, chip away at `as any` (M2).~~ **Done** (M1, 2026-07-01).

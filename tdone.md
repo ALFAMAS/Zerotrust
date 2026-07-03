@@ -19,7 +19,7 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
 | Migrations | 29 (latest: `0029_audit_log_anchors`) |
 | Route mounts in `server.ts` | 30 |
 | UI pages | 53 |
-| Tests | 1108+ (892 API + 216 UI, 165 files) |
+| Tests | 1173+ (953 API + 220 UI, 169 files) |
 | ADRs | 8 |
 | Stack | Hono 4 · TypeScript 6 · Bun · Next.js 16 · Drizzle ORM · PostgreSQL · Redis |
 
@@ -264,7 +264,7 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
 - ✅ Pre-signed upload URLs — direct-to-storage via S3 PUT
 - ✅ File attachments — `fileAttachmentsTable`, admin upload + listing
 - ✅ Repository layer — 4 transactional repos (authSessions, stripeEvents, wallet, pointsLedger)
-- ✅ Background jobs — registry with Zod schemas, Redis-lock leader election, dedicated worker (`src/worker.ts`)
+- ✅ Background jobs — registry with Zod schemas, BullMQ-backed job scheduler with retry/backoff + dead-letter visibility, dedicated worker (`src/worker.ts`)
 - ✅ Module boundaries — `.boundaries.json` + `scripts/check-boundaries.ts`, CI-enforced
 - ✅ Shared canonical modules — pagination, safeFetch, safeRedirect, cryptoHash, httpErrors, apiClient
 - ✅ UI HTTP client boundary — canonical `apiClient` helpers for JSON, FormData, blob, retry, refresh replay; legacy `api` facade documented
@@ -278,11 +278,37 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
 
 ## Recent work (2026-07-03)
 
+### P1 — Security & access control gaps shipped
+
+- **B1 — Org invite acceptance:** `POST /orgs/invites/accept` validates
+  token/email/expiry and creates membership in one transaction via
+  `acceptOrgInvite` (`src/db/repositories/orgs.repository.ts`). OpenAPI/SDK
+  regenerated; `docs/api-ui-integration-matrix.md` shows the path wired from
+  `packages/ui/src/lib/server-state/organizations.ts` and
+  `packages/ui/src/app/invite/[token]/page.tsx`.
+- **ALFA-3 — Invitee visibility + notifications:** `GET /orgs/invites/mine`
+  lists pending invites for the authenticated user; `/dashboard/organizations`
+  renders accept/decline actions. Creating an invite (`POST /orgs/:orgId/invites`)
+  fires an in-app notification for existing accounts and a branded email via
+  `sendOrgInviteEmail` (non-blocking — invite row is source of truth).
+- **B3 — Continuous access re-verification (end-to-end):** `sensitiveReverification`
+  guards `DELETE /auth/mfa/totp`, `POST /auth/me/email`, `DELETE /auth/oauth/:provider`,
+  `POST /orgs/:orgId/transfer`, and `POST /billing/cancel`. UI
+  `ReverificationProvider` + `apiClient` intercept `REVERIFICATION_REQUIRED`,
+  run `/auth/verify/challenge` → `/auth/verify/respond`, and retry the original
+  mutation.
+- **Verification (2026-07-03):** `bun run test -- src/__tests__/org.routes.test.ts
+  src/__tests__/p1.repositories.test.ts src/__tests__/continuousVerification.test.ts
+  src/__tests__/mfa.routes.test.ts src/__tests__/verification.routes.test.ts`
+  → **81 tests passing**; `bun run verify:generated` → **0 diff**.
+
+---
+
 ### P5 — Compliance and security hardening shipped
 
 - **P5.1 Audit log external anchoring:** migration `0029_audit_log_anchors`; `src/audit/anchor.ts`
   with `runAuditAnchor()` + `verifyAuditAnchors()`; scheduled `audit.anchor` job (24h,
-  leader-elected); CLI `bun run audit:anchor` and `bun run audit:anchor-verify`; optional
+  BullMQ-scheduled); CLI `bun run audit:anchor` and `bun run audit:anchor-verify`; optional
   S3 upload under `AUDIT_ANCHOR_S3_PREFIX`; evidence in
   `docs/compliance/evidence/2026/Q3/audit-log/`.
 - **P5.2 Compliance evidence program:** policies approved 2026-07-03; vendor register
@@ -453,7 +479,7 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
 ### Fork-readiness audit (`AUDIT-REPORT.md`) — completed items
 
 All fork-blocking (must-fix) and should-fix audit items from this report are
-resolved. Verified open work is tracked in [`todo.md`](./todo.md) (B1–B7).
+resolved. Verified open work is tracked in [`todo.md`](./todo.md) (B4–B7).
 
 | ID | Item | Resolution |
 | --- | --- | --- |
@@ -670,6 +696,75 @@ resolved. Verified open work is tracked in [`todo.md`](./todo.md) (B1–B7).
   - `bun run lint` — pass (warnings only in scripts)
   - `bun run verify:generated` — regenerates SDK + API docs + integration matrix
     (diff vs committed baseline expected until regenerated artifacts are committed)
+
+---
+
+## P2 — Infrastructure backlog (2026-07-03)
+
+- **B4 — Test coverage ratchet:** raised floors to match measured coverage —
+  API `vitest.config.ts` lines 64→**65**, functions 59→**60**, branches
+  56→**58**, statements 62→**64** (measured 65.81% / 60.41% / 58.54% / 64.29%);
+  UI `packages/ui/vitest.config.ts` lines 47→**53**, functions →**51**,
+  branches →**45**, statements →**51** (measured 53.71% / 51.79% / 45.6% /
+  51.12%). Added targeted tests for the two hot paths called out in the
+  acceptance criteria:
+  - **Auth flows:** `authMiddleware.branches.test.ts` (17 tests) covers the
+    branches `auth.middleware.join.test.ts` didn't — missing/malformed
+    Authorization header, expired/tampered access tokens, DB error during
+    session lookup, expired/revoked sessions, org session-policy rejection,
+    concurrent-session-cap eviction, suspended/deleted accounts, and
+    `optionalAuthMiddleware`'s anonymous-fallback paths. `src/middleware/auth.ts`
+    line coverage: 56%→**93%**.
+  - **Billing webhooks:** `stripeWebhookProcessor.test.ts` (12 tests) drives
+    every Stripe event-type branch directly (`checkout.session.completed`
+    user- and org-owned, `customer.subscription.updated`/`.deleted`,
+    `invoice.payment_failed`/`.payment_succeeded`, and the unhandled-event
+    default) — previously only the `subscription.updated` path was covered
+    indirectly through `billing.webhooks.test.ts`.
+    `stripeWebhookProcessor.ts` line coverage: 38%→**100%**.
+
+- **B5 — Queue-backed cron scheduling:** migrated `src/jobs/scheduler.ts` from
+  `setInterval` + a Redis `SET NX PX` leader lock to a BullMQ job scheduler
+  (`Queue.upsertJobScheduler`) — one repeatable job per `src/jobs/registry.ts`
+  entry, using its `intervalHours` as an every-X-hours cadence.
+  - **Retry/backoff + dead-letter:** `defaultJobOptions` gives every scheduled
+    job 3 attempts with exponential backoff (60s base), matching the existing
+    `emailQueue.ts` / `stripeWebhookQueue.ts` patterns; failed jobs are
+    retained (`removeOnFail`) and exposed via `getFailedScheduledJobs()`
+    instead of vanishing after a failed `setInterval` tick.
+  - **Idempotent replay + failure recovery:** the registry `idempotencyKey`
+    marker is now written to Redis only *after* a successful run, so
+    replaying an already-completed tick is a no-op, while a failed attempt is
+    **not** marked complete — a BullMQ retry actually re-executes the
+    handler. `src/__tests__/scheduler.test.ts` (15 tests) proves both.
+  - **Single-instance execution:** BullMQ hands each scheduled job to exactly
+    one consumer atomically, so the Redis leader lock is no longer needed to
+    prevent duplicate execution across API/worker replicas.
+  - Job dispatch now calls the one-shot handler functions directly
+    (`runRetentionPolicies()`, `sendNotificationEmailFallbacks()`,
+    `runBillingLifecycle()`, `runBackup()` gated on `BACKUP_ENABLED`,
+    `runAuditAnchor()`) instead of the legacy `start*Scheduler` wrappers,
+    which owned their own internal `setInterval` and are kept only for direct
+    callers / existing tests (`dataRetention.test.ts`).
+  - `src/worker.ts` owns the scheduler consumer via `startJobScheduler()` and
+    now shuts it down gracefully (alongside the email/Stripe queues) on
+    `SIGTERM`/`SIGINT`.
+  - `docs/deployment.md` — new §Queue-backed cron scheduling (B5) documents
+    the topology; `.env.example`, `README.md`, `docs/AUDIT.md`,
+    `AUDIT-REPORT.md`, and `docs/reference-architecture.md` updated to drop
+    stale "leader-elected `setInterval`" references.
+
+- **Verification (2026-07-03):**
+  - `bun run test` — **953 passed** (113 files)
+  - `NODE_ENV=test bun run --cwd packages/ui test` — **220 passed** (56 files)
+  - `bun run test:coverage` — green at the new floors (65/60/58/64 lines/
+    functions/branches/statements; measured 65.81/60.41/58.54/64.29)
+  - `bun run --cwd packages/ui test -- --coverage` — green at the new floors
+    (53/51/45/51; measured 53.71/51.79/45.6/51.12)
+  - `bun run type-check` — pass
+  - `bun run boundaries:check` — 1 pre-existing violation unrelated to this
+    change (`src/audit/anchor.ts` → `services/ops/objectStorage.service`,
+    predates B4/B5)
 
 ---
 

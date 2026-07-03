@@ -172,10 +172,12 @@ each other in-process; there are no internal network hops.
 ### Background work
 
 A BullMQ email-queue consumer plus scheduled jobs (data retention, notification
-fallback, billing lifecycle, `pg_dump` backup) run as a dedicated worker process
-(`src/worker.ts`) with Redis-lock leader election (`SET NX PX`) for single-instance
-enforcement. In local dev the API process still starts schedulers in-process when
-`WORKER_MODE` is unset.
+fallback, billing lifecycle, `pg_dump` backup, audit anchoring) run as a
+dedicated worker process (`src/worker.ts`). Scheduled jobs dispatch through a
+BullMQ job scheduler (`Queue.upsertJobScheduler`) with retry/exponential-backoff
+and dead-letter visibility — BullMQ delivers each job to exactly one consumer,
+so no Redis leader lock is needed for single-instance enforcement. In local dev
+the API process still starts schedulers in-process when `WORKER_MODE` is unset.
 
 ---
 
@@ -580,7 +582,7 @@ zerotrust tracks its state in the repository docs:
 | Doc                                              | What it covers                                              |
 | ------------------------------------------------ | ----------------------------------------------------------- |
 | [`tdone.md`](./tdone.md)                         | Everything that ships today, plus the latest codebase audit |
-| [`todo.md`](./todo.md)                           | Verified open backlog (B1–B7) with acceptance criteria      |
+| [`todo.md`](./todo.md)                           | Verified open backlog (B6–B7, operational/non-code) with acceptance criteria      |
 | [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) | System architecture audit + proposed upgrades               |
 | [`docs/AUDIT.md`](./docs/AUDIT.md)               | Standing production-readiness audit (findings + risk + order) |
 | [`docs/reference-architecture.md`](./docs/reference-architecture.md) | Operational deployment blueprints (VM, containers, Kubernetes) |
@@ -593,7 +595,7 @@ zerotrust tracks its state in the repository docs:
 Latest audit note (2026-07-03): a clean `bun install` restores a fully working
 tree — `bun run lint:ci`, `bun run type-check`, `bun run boundaries:check`, the
 **1065-test suite** (152 files), and the UI build all pass. Transactional
-repositories, dedicated worker with Redis-lock leader election, and module
+repositories, a dedicated worker with a BullMQ-backed job scheduler, and module
 boundaries are all shipped. See [`tdone.md`](./tdone.md) for the full feature
 catalog.
 

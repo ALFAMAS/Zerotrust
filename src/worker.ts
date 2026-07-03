@@ -7,11 +7,15 @@
  *   - The BullMQ email queue consumer
  *   - The BullMQ Stripe webhook queue consumer (the API process only
  *     produces — the HTTP endpoint lives there — this process consumes)
- *   - All scheduled interval jobs (retention, billing lifecycle,
- *     notification fallback, daily backup)
+ *   - The BullMQ scheduled-job scheduler + consumer (retention, billing
+ *     lifecycle, notification fallback, daily backup, audit anchor) — see
+ *     `src/jobs/scheduler.ts` for the BullMQ job-scheduler + retry/backoff
+ *     details.
  *
- * Only ONE worker instance should run at a time. The job scheduler
- * uses Redis locks to enforce single-instance for each job tick.
+ * Only ONE worker instance should run at a time. BullMQ delivers each
+ * scheduled job to exactly one consumer, so running more than one worker is
+ * a topology guardrail (see docs/deployment.md), not a correctness
+ * requirement.
  *
  * When this worker is running, the API process (server.ts) detects it via
  * the WORKER_MODE env flag and skips its own scheduler / queue-consumer
@@ -19,12 +23,21 @@
  * always arrive there).
  */
 import "dotenv/config";
-import { startJobScheduler } from "./jobs/scheduler";
+import { shutdownJobScheduler, startJobScheduler } from "./jobs/scheduler";
 import { getLogger } from "./logger";
-import { initStripeWebhookQueueConsumer } from "./services/billing/stripeWebhookQueue";
-import { initEmailQueue } from "./services/notifications/emailQueue";
+import {
+  initStripeWebhookQueueConsumer,
+  shutdownStripeWebhookQueue,
+} from "./services/billing/stripeWebhookQueue";
+import { initEmailQueue, shutdownEmailQueue } from "./services/notifications/emailQueue";
 
 const logger = getLogger("worker");
+
+async function shutdown(signal: string): Promise<void> {
+  logger.info(`Worker ${signal === "SIGTERM" ? "shutting down" : "interrupted"}`);
+  await Promise.allSettled([shutdownJobScheduler(), shutdownEmailQueue(), shutdownStripeWebhookQueue()]);
+  process.exit(0);
+}
 
 async function main() {
   logger.info("Worker starting");
@@ -44,20 +57,13 @@ async function main() {
     logger.warn("REDIS_URI not set — email queue consumer skipped");
   }
 
-  // Start all interval jobs with leader election
-  startJobScheduler();
+  // Start the BullMQ-backed scheduled-job scheduler + consumer
+  await startJobScheduler();
   logger.info("Job scheduler started");
 
   // Keep the process alive
-  process.on("SIGTERM", () => {
-    logger.info("Worker shutting down");
-    process.exit(0);
-  });
-
-  process.on("SIGINT", () => {
-    logger.info("Worker interrupted");
-    process.exit(0);
-  });
+  process.on("SIGTERM", () => void shutdown("SIGTERM"));
+  process.on("SIGINT", () => void shutdown("SIGINT"));
 }
 
 main().catch((err) => {

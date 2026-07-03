@@ -76,9 +76,9 @@ export async function createServer() {
   registerGlobalErrorHandler(app, logger);
 
   // Background jobs: when a dedicated worker process is running, defer all
-  // schedulers and the email queue consumer to it (single-instance via Redis
-  // lock). In local dev / single-server deploys without WORKER_MODE, start
-  // them in-process as before.
+  // BullMQ schedulers/consumers (email queue + scheduled jobs) to it. In
+  // local dev / single-server deploys without WORKER_MODE, start them
+  // in-process as before.
   const jobTopology = resolveBackgroundJobTopology(process.env);
   warnIfApiRunsSchedulersInProduction(initLogger, jobTopology);
 
@@ -99,8 +99,10 @@ export async function createServer() {
       initStripeWebhookQueueConsumer(process.env.REDIS_URI);
     }
 
-    // Start all interval jobs with leader election
-    startJobScheduler();
+    // Start all scheduled jobs via the BullMQ-backed scheduler
+    startJobScheduler().catch((err: Error) =>
+      initLogger.error("Scheduled job scheduler init failed", err)
+    );
     initLogger.info("Background jobs started in API process (WORKER_MODE not set)");
   } else {
     initLogger.info("Background jobs deferred to dedicated worker (WORKER_MODE=true)");

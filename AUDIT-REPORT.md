@@ -15,9 +15,9 @@
 
 ## E. Architecture / maintainability debt
 
-### E5. 🟡 Background scheduler is in-process (documented, mitigated)
+### E5. ✅ Queue-backed cron scheduling (P2 infrastructure backlog / B5)
 
-`docs/AUDIT.md` C3/P1 flags this: `setInterval`-based schedulers in `src/jobs/scheduler.ts` run in every API replica unless `WORKER_MODE=true`. Production deploy blueprints (README PM2, `docker-compose.yml`, `docs/reference-architecture.md`) default API replicas to `WORKER_MODE=true` with exactly one dedicated worker (`src/worker.ts`). The leader-election lock remains a guardrail. Fine for a starter template; optional queue-backed scheduling is tracked as **B5** in [`todo.md`](./todo.md).
+`docs/AUDIT.md` C3/P1 tracked this: scheduled jobs now dispatch through a BullMQ job scheduler (`src/jobs/scheduler.ts`, `Queue.upsertJobScheduler`) with retry/exponential-backoff and dead-letter visibility (`getFailedScheduledJobs()`), replacing the `setInterval` + Redis-leader-lock design — BullMQ's atomic per-job delivery is the duplicate-execution guard now. Idempotency (registry `idempotencyKey`) still guards replay, proven by scheduler unit tests (idempotent replay is a no-op; a failed attempt is not marked complete, so a retry re-executes the handler). Production deploy blueprints (README PM2, `docker-compose.yml`, `docs/reference-architecture.md`) default API replicas to `WORKER_MODE=true` with exactly one dedicated worker (`src/worker.ts`) that owns the BullMQ scheduler consumer. See [`tdone.md`](./tdone.md) §P2 — Infrastructure backlog.
 
 ### E6. ✅ Repository layer expanded (P1.1 + P1.4)
 

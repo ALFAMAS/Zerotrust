@@ -178,7 +178,9 @@ volumes:
 
 - **API:** horizontal (add replicas). Stateless aside from token secret (must
   match across replicas).
-- **Worker:** single replica (leader-elected or Redis-locked).
+- **Worker:** single replica (BullMQ delivers each scheduled/queued job to
+  exactly one consumer, but keep replicas at 1 as a deliberate topology choice
+  rather than relying on that as a substitute for intentional scaling).
 - **UI:** 1-2 replicas for HA; Next.js ISR cache is per-instance.
 
 ### Deployment (rolling)
@@ -292,7 +294,7 @@ kind: Deployment
 metadata:
   name: zerotrust-worker
 spec:
-  replicas: 1  # single instance — leader-elected
+  replicas: 1  # single instance — BullMQ owns exactly-once job delivery
   selector:
     matchLabels:
       app: zerotrust-worker

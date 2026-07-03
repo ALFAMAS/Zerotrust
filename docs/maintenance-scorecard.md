@@ -1,7 +1,7 @@
 # Quarterly Maintenance Scorecard
 
 **Quarter:** Q3 2026 (Jul – Sep)
-**Last updated:** 2026-07-03 (P4 documentation & DX shipped)
+**Last updated:** 2026-07-03 (P2 infrastructure backlog — B4/B5 — shipped)
 **Owner:** Platform team
 
 Tracked trend: dependency freshness, CI health, test health, migration health,
@@ -35,7 +35,7 @@ Node v24.15.0.
 | Flaky tests (failing ≥2 of last 10 runs) | **0** identified (failures are lint/build/schema, not test flakes) | 0 | ✅ |
 | `verify:generated` drift failures | 0 (idempotent regen verified) | 0 | ✅ |
 
-**Jobs:** `lint:ci` (Biome) · `type-check` (tsc) · `test` (Vitest, 886 API tests) ·
+**Jobs:** `lint:ci` (Biome) · `type-check` (tsc) · `test` (Vitest, 953 API tests) ·
 `migrations:check` (destructive DDL gate) · `verify:generated` (SDK+docs drift) · UI build · SAST (Semgrep, blocking) · Trivy filesystem (blocking, `trivy-action@0.35.0`)
 
 ---
@@ -44,14 +44,22 @@ Node v24.15.0.
 
 | Metric | Current | Target | Trend |
 |---|---|---|---|
-| Total test count | 886 API + 216 UI = **1102** (164 files) | Growing | ✅ |
-| API unit test coverage (lines) | **64.1%** measured; ≥64% ratchet (`vitest.config.ts`) | ≥85% long-term | 🔶 ↑ |
-| API unit test coverage (branches) | **56.2%** measured; ≥56% ratchet | ≥85% long-term | 🔶 ↑ |
-| UI page/component coverage (lines) | **~47%** ratchet on `packages/ui` app/components/lib | ≥85% long-term | 🔶 ↑ |
+| Total test count | 953 API + 220 UI = **1173** (169 files) | Growing | ✅ |
+| API unit test coverage (lines) | **65.81%** measured; ≥65% ratchet (`vitest.config.ts`) | ≥85% long-term | 🔶 ↑ |
+| API unit test coverage (branches) | **58.54%** measured; ≥58% ratchet | ≥85% long-term | 🔶 ↑ |
+| UI page/component coverage (lines) | **53.71%** measured; ≥53% ratchet on `packages/ui` app/components/lib | ≥85% long-term | 🔶 ↑ |
 | Page-level component tests | 23 `.test.tsx` under `packages/ui/src/app/` (wallet, webhooks, support, api-keys, notifications, admin feedback/roles/tenants + prior pages) | High-traffic flows covered | ✅ |
 | E2E smoke passing | 6 Playwright specs (auth, public, dashboard-polish, wallet, webhooks, security) | 100% | ✅ |
 | Playwright E2E passing | 6 specs in CI `e2e-ui` job | 100% | ✅ |
 | k6 load test thresholds met | CI `load-test` job: p95 &lt;100ms, p99 &lt;300ms (`full-suite.k6.js`) | p95 &lt;100ms, p99 &lt;300ms | ✅ |
+
+**Notes (B4, 2026-07-03):** Coverage ratchet raised alongside targeted tests for
+previously-undertested hot paths — `src/jobs/scheduler.ts` (BullMQ job-scheduler
+registration, idempotent replay, failure recovery; 15 tests), the billing webhook
+processor `stripeWebhookProcessor.ts` (31%→93% line coverage; 12 tests covering
+every event-type branch), and `authMiddleware`/`optionalAuthMiddleware` branch
+coverage (56%→93% line coverage; 17 tests covering expired/revoked sessions, org
+policy rejection, concurrent-session eviction, suspended/deleted accounts).
 
 ---
 
@@ -132,7 +140,9 @@ token-gated scrape configs.
 | Unaddressed TODO P0 items | 0 (P0.1–P0.3 done) | 0 | ✅ |
 | Unaddressed TODO P1 items | 0 (P1.1–P1.5 done) | 0 | ✅ |
 | Unaddressed TODO P4 items | 0 (P4.1–P4.9 done) | 0 | ✅ |
-| Open backlog (B1–B7) | 7 verified items | Trending down | 🔶 |
+| Open backlog (B6–B7) | 2 verified items (operational, non-code) | Trending down | 🔶 |
+| P1 security & access control gaps | 0 (B1, B3, ALFA-3 done) | 0 | ✅ |
+| P2 infrastructure backlog | 0 (B4, B5 done) | 0 | ✅ |
 
 ---
 
