@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { and, desc, eq, gt, ilike, ne, or, sql } from "drizzle-orm";
 import { Hono } from "hono";
+import { z } from "zod";
 import { verifyAuditChain } from "../../audit/chain";
 import { getDb, getReadDb } from "../../db";
 import {
@@ -11,10 +12,10 @@ import {
   sessionsTable,
   usersTable,
 } from "../../db/schema";
-import { getLogger } from "../../logger";
+import { auditLog, getLogger } from "../../logger";
 import { authMiddleware, requireAdmin } from "../../middleware/auth";
 import { revokeAllSessionsForUser, revokeSession } from "../../middleware/sessionControl";
-import { getSettings, updateSettings } from "../../models/settings.model";
+import { getSettings, type SaaSSettings, updateSettings } from "../../models/settings.model";
 import { invalidateUserCache } from "../../services/auth/userStateCache.service";
 import {
   ALLOWED_UPLOAD_CONTENT_TYPES,
@@ -23,6 +24,7 @@ import {
 import { countRows } from "../../shared/dbCount";
 import { internalError } from "../../shared/httpErrors";
 import { paginated, parsePaginatedQuery } from "../../shared/pagination";
+import { isAdmin } from "../../shared/roles";
 import type { HonoEnv, User } from "../../shared/types";
 
 const router = new Hono<HonoEnv>();
@@ -31,6 +33,25 @@ const logger = getLogger("admin-routes");
 // Auth + admin guard on all admin routes
 router.use("*", authMiddleware);
 router.use("*", requireAdmin);
+
+/**
+ * True when `targetId` is the platform's only remaining active admin —
+ * i.e. deactivating/demoting them would leave nobody able to administer
+ * the platform. Self-targeting is guarded separately by callers (an admin
+ * must not be able to lock themselves out even while other admins exist).
+ */
+async function wouldOrphanAdmins(db: ReturnType<typeof getDb>, targetId: string): Promise<boolean> {
+  const remainingActiveAdmins = await countRows(
+    db,
+    usersTable,
+    and(
+      ne(usersTable.id, targetId),
+      eq(usersTable.status, "active"),
+      sql`'admin' = ANY(${usersTable.roles})`
+    )
+  );
+  return remainingActiveAdmins === 0;
+}
 
 // GET /settings
 router.get("/settings", async (c) => {
@@ -42,12 +63,86 @@ router.get("/settings", async (c) => {
   }
 });
 
-// PUT /settings
+// PUT /settings — every field is optional (partial update), but a field that
+// IS present must fall within safe bounds. `.strict()` rejects unexpected
+// keys outright rather than silently spreading them into the settings row.
+const settingsUpdateSchema = z
+  .object({
+    emailPasswordEnabled: z.boolean(),
+    googleOAuthEnabled: z.boolean(),
+    githubOAuthEnabled: z.boolean(),
+    magicLinkEnabled: z.boolean(),
+    passkeyEnabled: z.boolean(),
+    totpEnabled: z.boolean(),
+    emailOtpEnabled: z.boolean(),
+    smsOtpEnabled: z.boolean(),
+    requireMfaForAll: z.boolean(),
+    // 5 minutes .. 30 days
+    sessionTTLSeconds: z
+      .number()
+      .int()
+      .min(300)
+      .max(30 * 24 * 60 * 60),
+    maxConcurrentSessions: z.number().int().min(1).max(100),
+    accountLockoutEnabled: z.boolean(),
+    accountLockoutThreshold: z.number().int().min(1).max(50),
+    // up to 24h
+    accountLockoutDurationMinutes: z
+      .number()
+      .int()
+      .min(1)
+      .max(24 * 60),
+    registrationEnabled: z.boolean(),
+    requireEmailVerification: z.boolean(),
+    // The model also accepts a comma-separated string and splits it —
+    // preserved here so existing callers aren't broken.
+    allowedEmailDomains: z.union([
+      z.string().max(2000),
+      z.array(z.string().trim().min(1).max(253)).max(100),
+    ]),
+    appName: z.string().trim().min(1).max(120),
+    appUrl: z.string().url().max(2048),
+    supportEmail: z.union([z.string().email(), z.literal("")]),
+    logoUrl: z.union([z.string().url(), z.literal("")]),
+  })
+  .strict()
+  .partial();
+
 router.put("/settings", async (c) => {
   try {
-    const body = await c.req.json();
+    const body = await c.req.json().catch(() => ({}));
+    const parsed = settingsUpdateSchema.safeParse(body);
+    if (!parsed.success) {
+      return c.json(
+        {
+          error: "VALIDATION_ERROR",
+          message: parsed.error.issues[0]?.message,
+          issues: parsed.error.issues,
+        },
+        400
+      );
+    }
+
     const adminId = c.get("user").id;
-    const updated = await updateSettings(body, adminId);
+    // Route owns the string→array normalization for allowedEmailDomains so
+    // updateSettings() keeps an honest Partial<SaaSSettings> signature.
+    const settingsUpdate: Partial<SaaSSettings> = {
+      ...parsed.data,
+      allowedEmailDomains:
+        typeof parsed.data.allowedEmailDomains === "string"
+          ? parsed.data.allowedEmailDomains
+              .split(",")
+              .map((d) => d.trim())
+              .filter(Boolean)
+          : parsed.data.allowedEmailDomains,
+    };
+    const updated = await updateSettings(settingsUpdate, adminId);
+    // Platform-wide auth/security settings (MFA requirement, lockout
+    // threshold, session TTL, registration) are a high-value target — every
+    // change must land in the tamper-evident audit chain, not just app logs.
+    await auditLog("admin.settings_updated", adminId, "saas_settings", true, {
+      changes: parsed.data,
+    });
     return c.json(updated);
   } catch (err) {
     return internalError(
@@ -163,6 +258,8 @@ router.get("/users/:id", async (c) => {
 // PATCH /users/:id
 router.patch("/users/:id", async (c) => {
   try {
+    const admin = c.get("user");
+    const targetId = c.req.param("id");
     const body = await c.req.json();
     const allowed: Record<string, unknown> = {};
 
@@ -179,12 +276,40 @@ router.patch("/users/:id", async (c) => {
       return c.json({ error: "INVALID_REQUEST", message: "No updatable fields provided" }, 400);
     }
 
-    allowed.updatedAt = new Date();
     const db = getDb();
+
+    // H4: deactivating an admin (suspending/deleting/reverting to pending)
+    // is destructive and hard to reverse. Block an admin from doing it to
+    // themselves — accidental self-lockout even while other admins exist —
+    // and block it outright when the target is the platform's last
+    // remaining active admin.
+    if (typeof allowed.status === "string" && allowed.status !== "active") {
+      const [target] = await db
+        .select({ id: usersTable.id, roles: usersTable.roles, status: usersTable.status })
+        .from(usersTable)
+        .where(eq(usersTable.id, targetId))
+        .limit(1);
+      if (target && isAdmin(target) && target.status === "active") {
+        if (target.id === admin.id) {
+          return c.json(
+            { error: "SELF_LOCKOUT", message: "You cannot change your own account status" },
+            409
+          );
+        }
+        if (await wouldOrphanAdmins(db, target.id)) {
+          return c.json(
+            { error: "LAST_ADMIN", message: "Cannot deactivate the last remaining active admin" },
+            409
+          );
+        }
+      }
+    }
+
+    allowed.updatedAt = new Date();
     const rows = await db
       .update(usersTable)
       .set(allowed)
-      .where(eq(usersTable.id, c.req.param("id")))
+      .where(eq(usersTable.id, targetId))
       .returning({
         id: usersTable.id,
         email: usersTable.email,
@@ -195,7 +320,11 @@ router.patch("/users/:id", async (c) => {
     if (rows.length === 0) {
       return c.json({ error: "USER_NOT_FOUND", message: "User not found" }, 404);
     }
-    await invalidateUserCache(c.req.param("id"));
+    await invalidateUserCache(targetId);
+    // A status change (suspend/reinstate/soft-delete via this generic path)
+    // or display-name edit on someone else's account is a privileged action —
+    // record it in the tamper-evident chain.
+    await auditLog("admin.user_updated", admin.id, rows[0].id, true, { changes: allowed });
     return c.json(rows[0]);
   } catch (err) {
     return internalError(c, logger, "Admin update user error", err, "Failed to update user");
@@ -205,8 +334,31 @@ router.patch("/users/:id", async (c) => {
 // DELETE /users/:id
 router.delete("/users/:id", async (c) => {
   try {
+    const admin = c.get("user");
     const id = c.req.param("id");
     const db = getDb();
+
+    // H4: same self-lockout / last-admin protections as the PATCH status path.
+    const [target] = await db
+      .select({ id: usersTable.id, roles: usersTable.roles, status: usersTable.status })
+      .from(usersTable)
+      .where(eq(usersTable.id, id))
+      .limit(1);
+    if (target && isAdmin(target) && target.status === "active") {
+      if (target.id === admin.id) {
+        return c.json(
+          { error: "SELF_LOCKOUT", message: "You cannot delete your own account" },
+          409
+        );
+      }
+      if (await wouldOrphanAdmins(db, target.id)) {
+        return c.json(
+          { error: "LAST_ADMIN", message: "Cannot delete the last remaining active admin" },
+          409
+        );
+      }
+    }
+
     const rows = await db
       .update(usersTable)
       .set({ status: "deleted", updatedAt: new Date() })
@@ -219,6 +371,7 @@ router.delete("/users/:id", async (c) => {
 
     await invalidateUserCache(id);
     await revokeAllSessionsForUser(id);
+    await auditLog("admin.user_deleted", admin.id, id, true);
     return c.json({ deleted: true, userId: id });
   } catch (err) {
     return internalError(c, logger, "Admin delete user error", err, "Failed to delete user");
@@ -415,6 +568,7 @@ router.post("/roles", async (c) => {
 // POST /users/:id/roles — assign role to user
 router.post("/users/:id/roles", async (c) => {
   try {
+    const admin = c.get("user");
     const userId = c.req.param("id");
     const { roleName } = await c.req.json();
     if (!roleName) {
@@ -448,6 +602,9 @@ router.post("/users/:id/roles", async (c) => {
         .set({ roles: updatedRoles, updatedAt: new Date() })
         .where(eq(usersTable.id, userId));
       await invalidateUserCache(userId);
+      // Privilege escalation is the single highest-value audit event this
+      // router can emit — a grant must be traceable to who did it and when.
+      await auditLog("admin.role_granted", admin.id, userId, true, { role: roleName });
       return c.json({ success: true, roles: updatedRoles });
     }
 
@@ -460,12 +617,13 @@ router.post("/users/:id/roles", async (c) => {
 // DELETE /users/:id/roles/:roleName — revoke role from user
 router.delete("/users/:id/roles/:roleName", async (c) => {
   try {
+    const admin = c.get("user");
     const userId = c.req.param("id");
     const roleName = c.req.param("roleName");
 
     const db = getDb();
     const userRows = await db
-      .select({ id: usersTable.id, roles: usersTable.roles })
+      .select({ id: usersTable.id, roles: usersTable.roles, status: usersTable.status })
       .from(usersTable)
       .where(eq(usersTable.id, userId))
       .limit(1);
@@ -473,13 +631,33 @@ router.delete("/users/:id/roles/:roleName", async (c) => {
       return c.json({ error: "USER_NOT_FOUND", message: "User not found" }, 404);
     }
 
-    const currentRoles = (userRows[0].roles as string[]) || [];
+    const target = userRows[0];
+    const currentRoles = (target.roles as string[]) || [];
+
+    // H4: revoking the admin role is exactly as destructive as deactivating
+    // the account — same self-lockout / last-admin guards apply.
+    if (roleName === "admin" && currentRoles.includes("admin") && target.status === "active") {
+      if (target.id === admin.id) {
+        return c.json(
+          { error: "SELF_LOCKOUT", message: "You cannot revoke your own admin role" },
+          409
+        );
+      }
+      if (await wouldOrphanAdmins(db, target.id)) {
+        return c.json(
+          { error: "LAST_ADMIN", message: "Cannot revoke the last remaining active admin" },
+          409
+        );
+      }
+    }
+
     const updatedRoles = currentRoles.filter((r) => r !== roleName);
     await db
       .update(usersTable)
       .set({ roles: updatedRoles, updatedAt: new Date() })
       .where(eq(usersTable.id, userId));
     await invalidateUserCache(userId);
+    await auditLog("admin.role_revoked", admin.id, userId, true, { role: roleName });
     return c.json({ success: true, roles: updatedRoles });
   } catch (err) {
     return internalError(c, logger, "Admin revoke role error", err, "Failed to remove role");

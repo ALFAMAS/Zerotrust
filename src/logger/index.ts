@@ -277,6 +277,8 @@ export function createChildLogger(module: string, context?: LogContext): Logger 
  * Audit log helper - specifically for security-sensitive operations
  * Always goes to both console and Elasticsearch
  */
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export async function auditLog(
   action: string,
   actor: string,
@@ -312,6 +314,34 @@ export async function auditLog(
     logger.info(`AUDIT: ${action} by ${actor}`, auditEntry);
   } else {
     logger.warn(`AUDIT FAILED: ${action} by ${actor}`, auditEntry);
+  }
+
+  // Persist into the tamper-evident hash-chained audit_logs table (SOC 2
+  // CC7). This used to be console/SIEM/ES only — the "AUDIT: ..." log line
+  // looked like a durable record but was never written to the chain, so
+  // sensitive actions (impersonation, plan overrides, billing changes,
+  // takeover flags) left no immutable trail. Dynamic import avoids a static
+  // circular dependency: audit/chain.ts calls getLogger() from this module
+  // at load time (same reason services/shared/siem.service.ts documents for
+  // not importing the logger back). A chain-write failure is logged loudly
+  // but must not fail the caller's request — auditLog() has never thrown,
+  // and callers up and down the stack (some `void auditLog(...)`) depend on
+  // that contract.
+  try {
+    const { insertAuditLog } = await import("../audit/chain.js");
+    await insertAuditLog({
+      action,
+      actorId: UUID_RE.test(actor) ? actor : null,
+      targetId: target || null,
+      success,
+      resourceDetails: details ?? null,
+      errorCode: error ? error.message.slice(0, 500) : null,
+    });
+  } catch (chainErr) {
+    logger.error(
+      `Failed to persist audit log to hash chain (action=${action}, actor=${actor})`,
+      chainErr as Error
+    );
   }
 
   // Fan out to an external SIEM when configured (fire-and-forget, never throws).

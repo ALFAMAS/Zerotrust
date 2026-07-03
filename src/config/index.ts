@@ -88,6 +88,24 @@ const DEFAULT_CONFIG: Partial<zerotrustConfig> = {
 
 export function loadConfig(): zerotrustConfig {
   const config = DEFAULT_CONFIG as zerotrustConfig;
+  // Outside production this is a soft warning rather than a hard error (see
+  // the production-only fail-fast gate in validateConfig): local/test runs
+  // shouldn't need real secrets, but a developer should still know their
+  // tokens/CSFLE data won't survive a restart.
+  if (process.env.NODE_ENV !== "production" && process.env.NODE_ENV !== "test") {
+    if (!process.env.TOKEN_SECRET_HEX) {
+      console.warn(
+        "WARNING: TOKEN_SECRET_HEX not set — using an ephemeral, randomly generated key. " +
+          "Tokens will stop validating on restart. Set TOKEN_SECRET_HEX in .env for stable sessions."
+      );
+    }
+    if (!process.env.CSFLE_MASTER_KEY_HEX) {
+      console.warn(
+        "WARNING: CSFLE_MASTER_KEY_HEX not set — using an ephemeral, randomly generated key. " +
+          "CSFLE-encrypted data will become unrecoverable on restart. Set CSFLE_MASTER_KEY_HEX in .env."
+      );
+    }
+  }
   validateConfig(config);
   return config;
 }
@@ -128,6 +146,28 @@ function validateConfig(config: zerotrustConfig): void {
   // When NODE_ENV=production, refuse to boot unless critical operational
   // secrets are set. These are warnings/silent in dev but hard errors in prod.
   if (process.env.NODE_ENV === "production") {
+    // TOKEN_SECRET_HEX / CSFLE_MASTER_KEY_HEX silently fall back to a
+    // randomly generated key (see generateSecureKey above) when unset — that
+    // fallback satisfies the length check a few lines up, so a missing env
+    // var was never actually caught. In a multi-replica production deploy
+    // each process would mint its OWN ephemeral tokenSecretHex, so a token
+    // signed by one replica is rejected by another (intermittent 401s), and
+    // an ephemeral csfleMasterKeyHex makes every CSFLE-encrypted column
+    // permanently undecryptable the moment the process restarts. Fail
+    // closed instead of booting on a key nobody wrote down.
+    if (!process.env.TOKEN_SECRET_HEX) {
+      errors.push(
+        "TOKEN_SECRET_HEX is required in production (it silently falls back to a random, " +
+          "process-local key otherwise — breaking tokens across replicas/restarts). Generate with: openssl rand -hex 32"
+      );
+    }
+    if (!process.env.CSFLE_MASTER_KEY_HEX) {
+      errors.push(
+        "CSFLE_MASTER_KEY_HEX is required in production (it silently falls back to a random, " +
+          "process-local key otherwise — making CSFLE-encrypted data unrecoverable on restart). Generate with: openssl rand -hex 32"
+      );
+    }
+
     // /metrics must be token-gated in production
     if (!process.env.METRICS_AUTH_TOKEN) {
       errors.push(

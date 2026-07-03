@@ -4,8 +4,11 @@
 # Peer dependencies are automatically installed (default: true)
 peer = true
 
-# Whether to automatically install optional dependencies (default: false)
-optional = false
+# Whether to automatically install optional dependencies (default: true).
+# Must stay true: esbuild/drizzle-kit ship their platform binary (e.g.
+# @esbuild/linux-x64) as an optionalDependency. Disabling this breaks
+# `db:push` / drizzle-kit on every platform ("Cannot find module .../esbuild").
+optional = true
 
 # Whether to allow downloading dependencies from the registry (default: true)
 frozenLockfile = false

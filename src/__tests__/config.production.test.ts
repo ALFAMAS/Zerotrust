@@ -41,6 +41,27 @@ describe("P4.3 — Production fail-fast config validation", () => {
     expect(() => loadConfig()).not.toThrow();
   });
 
+  it("refuses to boot in production without TOKEN_SECRET_HEX (H3)", async () => {
+    process.env.NODE_ENV = "production";
+    setBaseEnv();
+    // Unset after setBaseEnv() so the module falls back to
+    // generateSecureKey(32) — a 64-char generated key still satisfies the
+    // length-only check, which is exactly the gap H3 closes: only an
+    // explicit presence check catches "silently generated, never written
+    // down" in production.
+    delete process.env.TOKEN_SECRET_HEX;
+    const loadConfig = await loadFreshConfig();
+    expect(() => loadConfig()).toThrow(/TOKEN_SECRET_HEX is required in production/);
+  });
+
+  it("refuses to boot in production without CSFLE_MASTER_KEY_HEX (H3)", async () => {
+    process.env.NODE_ENV = "production";
+    setBaseEnv();
+    delete process.env.CSFLE_MASTER_KEY_HEX;
+    const loadConfig = await loadFreshConfig();
+    expect(() => loadConfig()).toThrow(/CSFLE_MASTER_KEY_HEX is required in production/);
+  });
+
   it("refuses to boot in production without METRICS_AUTH_TOKEN", async () => {
     process.env.NODE_ENV = "production";
     setBaseEnv();
@@ -96,6 +117,53 @@ describe("P4.3 — Production fail-fast config validation", () => {
     process.env.BACKUP_ENABLED = "false";
     const loadConfig = await loadFreshConfig();
     expect(() => loadConfig()).not.toThrow();
+  });
+});
+
+describe("H3 — ephemeral-secret warning outside production", () => {
+  const originalEnv = { ...process.env };
+
+  afterEach(() => {
+    process.env = { ...originalEnv };
+    vi.restoreAllMocks();
+  });
+
+  it("warns when TOKEN_SECRET_HEX is unset in development", async () => {
+    process.env.NODE_ENV = "development";
+    process.env.DATABASE_URL = "postgresql://test:test@localhost/test";
+    process.env.CSFLE_MASTER_KEY_HEX = "b".repeat(64);
+    delete process.env.TOKEN_SECRET_HEX;
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+    const loadConfig = await loadFreshConfig();
+    loadConfig();
+
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringMatching(/TOKEN_SECRET_HEX not set/));
+  });
+
+  it("warns when CSFLE_MASTER_KEY_HEX is unset in development", async () => {
+    process.env.NODE_ENV = "development";
+    process.env.DATABASE_URL = "postgresql://test:test@localhost/test";
+    process.env.TOKEN_SECRET_HEX = "a".repeat(64);
+    delete process.env.CSFLE_MASTER_KEY_HEX;
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+    const loadConfig = await loadFreshConfig();
+    loadConfig();
+
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringMatching(/CSFLE_MASTER_KEY_HEX not set/));
+  });
+
+  it("does not warn when both secrets are explicitly set", async () => {
+    process.env.NODE_ENV = "development";
+    setBaseEnv();
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+    const loadConfig = await loadFreshConfig();
+    loadConfig();
+
+    expect(warnSpy).not.toHaveBeenCalledWith(expect.stringMatching(/TOKEN_SECRET_HEX/));
+    expect(warnSpy).not.toHaveBeenCalledWith(expect.stringMatching(/CSFLE_MASTER_KEY_HEX/));
   });
 });
 

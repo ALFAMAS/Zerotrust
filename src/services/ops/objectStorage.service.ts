@@ -37,8 +37,8 @@ import { getS3Config as readS3Config, type S3Config } from "../../shared/s3Confi
 
 const logger = getLogger("object-storage");
 
-export type { S3Config };
 export { getS3Config, isS3BackupEnabled, s3RetentionDays } from "../../shared/s3Config";
+export type { S3Config };
 
 export interface S3Object {
   key: string;
