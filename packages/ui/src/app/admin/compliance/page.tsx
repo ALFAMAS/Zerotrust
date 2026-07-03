@@ -2,6 +2,7 @@
 
 import { Loader2, ShieldCheck } from "lucide-react";
 import { useState } from "react";
+import DonutChart from "@/components/admin/DonutChart";
 import { ServerStateStatus } from "@/components/ServerStateStatus";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -161,6 +162,23 @@ export default function CompliancePage() {
                   </CardHeader>
                 </Card>
               </div>
+
+              {readiness && readiness.total > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Control status</CardTitle>
+                    <CardDescription>
+                      Distribution from the current SOC 2 readiness summary
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <DonutChart
+                      labels={["Implemented", "Partial", "Planned"]}
+                      series={[readiness.implemented, readiness.partial, readiness.planned]}
+                    />
+                  </CardContent>
+                </Card>
+              )}
 
               <Card>
                 <CardHeader>

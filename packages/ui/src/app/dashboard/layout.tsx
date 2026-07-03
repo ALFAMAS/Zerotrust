@@ -7,7 +7,6 @@ import {
   LayoutDashboard,
   LifeBuoy,
   Monitor,
-  Plug,
   Search,
   ShieldCheck,
   ShieldQuestion,
@@ -44,7 +43,6 @@ const navItems: NavItem[] = [
   { href: "/dashboard/billing", label: "Billing", icon: CreditCard },
   { href: "/dashboard/wallet", label: "Wallet", icon: Wallet },
   { href: "/dashboard/jit", label: "Cross-tenant", icon: ShieldQuestion },
-  { href: "/dashboard/settings", label: "Connected Apps", icon: Plug },
   { href: "/dashboard/support", label: "Support", icon: LifeBuoy },
   { href: "/dashboard/account", label: "Account", icon: UserCog },
 ];

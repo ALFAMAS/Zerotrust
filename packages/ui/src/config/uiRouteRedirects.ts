@@ -39,7 +39,6 @@ const DASHBOARD_API_ALIASES: ReadonlyArray<{ apiBase: string; uiBase: string; pr
     { apiBase: "/jit/cross-tenant", uiBase: "/dashboard/jit" },
     // Common shortcuts — no matching API page, but users expect these URLs.
     { apiBase: "/profile", uiBase: "/dashboard/profile" },
-    { apiBase: "/settings", uiBase: "/dashboard/settings" },
     { apiBase: "/security", uiBase: "/dashboard/security" },
     { apiBase: "/account", uiBase: "/dashboard/account" },
   ];

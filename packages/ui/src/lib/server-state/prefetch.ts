@@ -15,7 +15,6 @@ import type {
   AdminUserListItem,
   AuditEntry,
   AuthMe,
-  ConnectedProviders,
   MyOrgInvite,
   OrganizationsListResponse,
   PaginatedResponse,
@@ -27,7 +26,6 @@ import type {
 export const AUTH_ME_PATH = "/auth/me";
 export const USER_SESSIONS_PATH = "/sessions";
 export const ADMIN_STATS_PATH = "/admin/stats";
-export const OAUTH_PROVIDERS_PATH = "/auth/oauth/providers";
 export const ORGS_PATH = "/orgs";
 export const ORG_INVITES_MINE_PATH = "/orgs/invites/mine";
 export const ADMIN_AUDIT_LOGS_PATH = "/admin/audit-logs";
@@ -207,13 +205,6 @@ export function adminSessionsListPrefetchOptions(params: { page?: number; limit?
     queryKey: queryKeys.admin.sessions.list(normalized),
     queryFn: () =>
       serverApiGet<PaginatedResponse<AdminSession>>(buildAdminSessionsListPath(normalized)),
-  });
-}
-
-export function oauthProvidersPrefetchOptions() {
-  return queryOptions({
-    queryKey: queryKeys.auth.oauthProviders(),
-    queryFn: () => serverApiGet<ConnectedProviders>(OAUTH_PROVIDERS_PATH),
   });
 }
 

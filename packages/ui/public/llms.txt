@@ -24,7 +24,6 @@ zerotrust is a self-hostable authentication platform with a Node/Hono REST API a
 - [Webhooks](/dashboard/webhooks): Subscribe to and manage event webhooks.
 - [Billing](/dashboard/billing): Manage subscription plans and Stripe billing.
 - [Organizations](/dashboard/organizations): Create organizations, invite members, and assign roles.
-- [Settings](/dashboard/settings): User preferences and configuration.
 
 ## Capabilities
 

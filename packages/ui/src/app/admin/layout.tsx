@@ -24,7 +24,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import AppShell from "@/components/app-shell/AppShell";
 import type { NavItem } from "@/components/app-shell/AppSidebar";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -56,45 +56,59 @@ const navItems: NavItem[] = [
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const authed = isAuthenticated();
-  const { data: me, isPending, isError } = useAuthMeQuery(authed);
+  const [ready, setReady] = useState(false);
+  const [authorized, setAuthorized] = useState<boolean | null>(null);
+  const tokenPresent = ready && isAuthenticated();
+  const { data: me, isPending, isError } = useAuthMeQuery(tokenPresent);
 
   useEffect(() => {
-    if (!authed) {
-      router.replace("/login");
-      return;
-    }
-    if (isPending) return;
-    if (isError || !me) {
-      router.replace("/login");
-      return;
-    }
-    if (!me.roles?.includes("admin")) {
-      router.replace("/dashboard");
-    }
-  }, [authed, router, me, isPending, isError]);
+    setReady(true);
+  }, []);
 
-  // null = still checking, false = not an admin, true = authorized
-  let authorized: boolean | null = null;
-  if (!authed) authorized = false;
-  else if (isPending) authorized = null;
-  else if (isError || !me) authorized = false;
-  else if (!me.roles?.includes("admin")) authorized = false;
-  else authorized = true;
+  useEffect(() => {
+    if (!ready) return;
+
+    if (!isAuthenticated()) {
+      setAuthorized(false);
+      router.replace("/login");
+      return;
+    }
+
+    if (isPending) return;
+
+    if (isError || !me) {
+      setAuthorized(false);
+      router.replace("/login");
+      return;
+    }
+
+    if (!me.roles?.includes("admin")) {
+      setAuthorized(false);
+      router.replace("/dashboard");
+      return;
+    }
+
+    setAuthorized(true);
+  }, [ready, isPending, isError, me, router]);
 
   function handleSignOut() {
     clearToken();
     router.push("/login");
   }
 
-  // Until the admin role is confirmed, don't render the admin shell or its
-  // children (which would otherwise fire admin API calls and 403).
+  // Until mounted and auth is resolved, show the same placeholder on server and client.
+  if (!ready || authorized === null) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background text-foreground">
+        <p className="text-sm text-muted-foreground">Checking access…</p>
+      </div>
+    );
+  }
+
   if (authorized !== true) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background text-foreground">
-        <p className="text-sm text-muted-foreground">
-          {authorized === false ? "Access denied. Redirecting…" : "Checking access…"}
-        </p>
+        <p className="text-sm text-muted-foreground">Access denied. Redirecting…</p>
       </div>
     );
   }

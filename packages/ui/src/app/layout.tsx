@@ -75,14 +75,22 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       lang={locale}
       dir={directionForLocale(locale)}
       suppressHydrationWarning
-      className={`${fontDisplay.variable} ${fontSans.variable} ${fontMono.variable}`}
+      className={`dark ${fontDisplay.variable} ${fontSans.variable} ${fontMono.variable}`}
     >
+      <head>
+        <script
+          // biome-ignore lint/security/noDangerouslySetInnerHtml: static theme bootstrap (same pattern as next-themes)
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var d=document.documentElement,c=d.classList;c.remove('light','dark');var e=localStorage.getItem('theme');if(e==='system'||(!e&&true)){var m=window.matchMedia('(prefers-color-scheme: dark)');c.add(m.matches?'dark':'light')}else if(e==='light'||e==='dark'){c.add(e)}else{c.add('dark')}var cs=e==='system'?(window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'):(e||'dark');if(cs==='light'||cs==='dark')d.style.colorScheme=cs}catch(e){}})();`,
+          }}
+        />
+      </head>
       <body className="bg-background font-sans text-foreground antialiased">
         <a href="#main-content" className="skip-to-main">
           Skip to main content
         </a>
         <NextIntlClientProvider messages={messages}>
-          <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+          <ThemeProvider defaultTheme="dark" enableSystem>
             <ErrorBoundary>
               <QueryProvider>
                 <ReverificationProvider>

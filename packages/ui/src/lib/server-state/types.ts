@@ -444,11 +444,6 @@ export interface AdminSessionsListParams {
 
 export type OAuthProvider = "google" | "github";
 
-export interface ConnectedProviders {
-  google?: boolean;
-  github?: boolean;
-}
-
 export interface GdprDeletionResponse {
   scheduledFor?: string;
   message?: string;

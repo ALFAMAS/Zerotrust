@@ -5,7 +5,6 @@ import { apiDelete, apiGet, apiPatch, apiPost, apiPostFormData } from "@/lib/api
 import { queryKeys } from "./queryKeys";
 import type {
   AuthMe,
-  ConnectedProviders,
   OAuthProvider,
   PatchAuthMeInput,
   TotpSetupResponse,
@@ -18,7 +17,6 @@ export const AUTH_ME_PATH = "/auth/me";
 export const AUTH_ME_AVATAR_PATH = "/auth/me/avatar";
 export const VERIFY_EMAIL_RESEND_PATH = "/auth/verify-email/resend";
 export const ONBOARDING_COMPLETE_PATH = "/auth/me/onboarding-complete";
-export const OAUTH_PROVIDERS_PATH = "/auth/oauth/providers";
 export const TOTP_PATH = "/auth/mfa/totp";
 export const TOTP_SETUP_PATH = "/auth/mfa/totp/setup";
 export const TOTP_VERIFY_PATH = "/auth/mfa/totp/verify";
@@ -74,28 +72,12 @@ export function useOnboardingCompleteMutation() {
   });
 }
 
-export function fetchOAuthProviders(): Promise<ConnectedProviders> {
-  return apiGet<ConnectedProviders>(OAUTH_PROVIDERS_PATH);
-}
-
-export function oauthProvidersQueryOptions() {
-  return queryOptions({
-    queryKey: authKeys.oauthProviders(),
-    queryFn: fetchOAuthProviders,
-  });
-}
-
-export function useOAuthProvidersQuery() {
-  return useQuery(oauthProvidersQueryOptions());
-}
-
 export function useDisconnectOAuthProviderMutation() {
   const queryClient = useQueryClient();
 
   return useMutation<unknown, Error, OAuthProvider | string>({
     mutationFn: (provider) => apiDelete(`/auth/oauth/${provider}`),
     onSettled: () => {
-      void queryClient.invalidateQueries({ queryKey: authKeys.oauthProviders() });
       void queryClient.invalidateQueries({ queryKey: authKeys.me() });
     },
   });

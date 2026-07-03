@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import AreaTrendChart from "@/components/admin/AreaTrendChart";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -15,7 +16,7 @@ import {
 } from "@/components/ui/table";
 import { useAuditEntriesQuery, useAuditVerifyQuery } from "@/lib/server-state/audit";
 import type { AuditEntry } from "@/lib/server-state/types";
-import { auditEntriesFromResponse } from "./auditData";
+import { auditEntriesFromResponse, auditVolumeByDay } from "./auditData";
 
 export default function AuditClient() {
   const entriesQuery = useAuditEntriesQuery();
@@ -23,6 +24,15 @@ export default function AuditClient() {
   const [selected, setSelected] = useState<AuditEntry | null>(null);
 
   const entries = entriesQuery.data ? auditEntriesFromResponse(entriesQuery.data) : [];
+  const volumeByDay = useMemo(
+    () =>
+      auditVolumeByDay(entries).map((row) => ({
+        date: row.date,
+        value: row.count,
+      })),
+    [entries]
+  );
+  const hasVolume = volumeByDay.some((row) => row.value > 0);
   const verify = verifyQuery.data ?? null;
   const loading = entriesQuery.isPending;
   const verifying = verifyQuery.isFetching;
@@ -104,6 +114,19 @@ export default function AuditClient() {
         <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
           {loadError}
         </div>
+      )}
+
+      {!loadError && entries.length > 0 && (
+        <Card>
+          <CardContent className="pt-6">
+            <h2 className="mb-1 font-medium text-foreground">Event volume (14 days)</h2>
+            <p className="mb-4 text-xs text-muted-foreground">
+              Daily count from loaded audit entries
+              {!hasVolume ? " — no events in this window yet" : ""}
+            </p>
+            <AreaTrendChart loading={loading} points={volumeByDay} seriesLabel="Events" />
+          </CardContent>
+        </Card>
       )}
 
       <Card>

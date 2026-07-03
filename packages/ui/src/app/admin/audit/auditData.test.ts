@@ -1,5 +1,30 @@
 import { describe, expect, it } from "vitest";
-import { auditEntriesFromResponse, type AuditEntry } from "./auditData";
+import {
+  auditEntriesFromResponse,
+  auditVolumeByDay,
+  type AuditEntry,
+} from "./auditData";
+
+describe("auditVolumeByDay", () => {
+  it("returns zero-filled buckets for the requested window", () => {
+    const rows = auditVolumeByDay([], 3);
+    expect(rows).toHaveLength(3);
+    expect(rows.every((row) => row.count === 0)).toBe(true);
+  });
+
+  it("counts entries on their UTC calendar day", () => {
+    const day = "2026-07-01";
+    const entries: AuditEntry[] = [
+      { id: "1", action: "login", createdAt: `${day}T10:00:00.000Z` },
+      { id: "2", action: "logout", createdAt: `${day}T18:30:00.000Z` },
+      { id: "3", action: "login", createdAt: "2019-01-01T00:00:00.000Z" },
+    ];
+
+    const rows = auditVolumeByDay(entries, 14);
+    const match = rows.find((row) => row.date.toISOString().startsWith(day));
+    expect(match?.count).toBe(2);
+  });
+});
 
 describe("auditEntriesFromResponse", () => {
   it("keeps an empty API response empty instead of injecting sample rows", () => {

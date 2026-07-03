@@ -5,14 +5,13 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import LocaleSwitcher from "@/components/LocaleSwitcher";
 import SetupChecklist from "@/components/SetupChecklist";
 import VerifyEmailBanner from "@/components/VerifyEmailBanner";
-import SettingsClient from "@/app/dashboard/settings/SettingsClient";
+import SecurityClient from "@/app/dashboard/security/SecurityClient";
 import ProfilePage from "@/app/dashboard/profile/page";
 import DashboardClient from "@/app/dashboard/DashboardClient";
 import {
   AUTH_ME_PATH,
   AUTH_ME_AVATAR_PATH,
   ONBOARDING_COMPLETE_PATH,
-  OAUTH_PROVIDERS_PATH,
   TOTP_PATH,
   VERIFY_EMAIL_RESEND_PATH,
   authKeys,
@@ -28,6 +27,11 @@ import {
 
 vi.mock("@/lib/toast", () => ({
   useToast: () => ({ toast: vi.fn() }),
+}));
+
+vi.mock("@/lib/webauthn", () => ({
+  isWebAuthnAvailable: () => false,
+  startRegistration: vi.fn(),
 }));
 
 const unverifiedUser = {
@@ -124,27 +128,35 @@ describe("auth TanStack Query server state", () => {
     expect(reload).toHaveBeenCalled();
   });
 
-  it("loads OAuth providers through apiClient/TanStack Query for settings page", async () => {
-    mockApiGet.mockResolvedValue({ google: true, github: false });
-    renderWithQueryClient(<SettingsClient />);
+  it("loads OAuth providers through apiClient/TanStack Query for security page", async () => {
+    mockApiGet.mockResolvedValue({
+      ...completeUser,
+      oauthProviders: [{ provider: "google" }],
+    });
+    renderWithQueryClient(<SecurityClient />);
 
-    expect(await screen.findByText("Connected")).toBeInTheDocument();
-    expect(mockApiGet).toHaveBeenCalledWith(OAUTH_PROVIDERS_PATH);
+    expect(await screen.findByText("Connected Accounts")).toBeInTheDocument();
+    expect(screen.getByText("Connected")).toBeInTheDocument();
+    expect(mockApiGet).toHaveBeenCalledWith(AUTH_ME_PATH);
   });
 
   it("disconnects OAuth provider via apiDelete mutation, not legacy api.delete", async () => {
-    mockApiGet.mockResolvedValue({ google: true, github: false });
+    vi.stubGlobal("confirm", () => true);
+    mockApiGet.mockResolvedValue({
+      ...completeUser,
+      oauthProviders: [{ provider: "google" }],
+    });
     mockApiDelete.mockResolvedValue({ success: true });
 
     const user = userEvent.setup();
-    const { queryClient } = renderWithQueryClient(<SettingsClient />);
-    await screen.findByText("Connected");
+    const { queryClient } = renderWithQueryClient(<SecurityClient />);
+    await screen.findByText("Connected Accounts");
 
     const invalidateSpy = vi.spyOn(queryClient, "invalidateQueries");
     await user.click(screen.getByRole("button", { name: "Disconnect" }));
 
     await waitFor(() => expect(mockApiDelete).toHaveBeenCalledWith("/auth/oauth/google"));
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: authKeys.oauthProviders() });
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: authKeys.me() });
   });
 
   it("loads profile through useAuthMeQuery on profile page, not legacy api.get", async () => {

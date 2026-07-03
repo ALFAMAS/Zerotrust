@@ -54,12 +54,6 @@ const PAGES: SearchResult[] = [
     description: "Account settings",
     href: "/dashboard/account",
   },
-  {
-    type: "setting",
-    title: "Connected Apps",
-    description: "Connected applications",
-    href: "/dashboard/settings",
-  },
 ];
 
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {

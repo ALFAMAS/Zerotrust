@@ -8,7 +8,6 @@ vi.mock("@/lib/serverApiClient", () => ({
 import {
   AUTH_ME_PATH,
   ADMIN_AUDIT_LOGS_PATH,
-  OAUTH_PROVIDERS_PATH,
   ORG_INVITES_MINE_PATH,
   ORGS_PATH,
   adminRecentUsersPrefetchOptions,
@@ -23,7 +22,6 @@ import {
   buildAdminUsersListPath,
   buildWalletTransactionPath,
   myOrgInvitesPrefetchOptions,
-  oauthProvidersPrefetchOptions,
   organizationsListPrefetchOptions,
   walletPrefetchOptions,
   walletTransactionsPrefetchOptions,
@@ -103,14 +101,10 @@ describe("prefetch options factories", () => {
     expect(serverApiGetMock).toHaveBeenCalledWith("/admin/sessions?page=1&limit=20");
   });
 
-  it("P3.11 prefetch options call security, settings, orgs, and audit paths", async () => {
+  it("P3.11 prefetch options call security, orgs, and audit paths", async () => {
     serverApiGetMock.mockResolvedValueOnce({ id: "u1" });
     await authMePrefetchOptions().queryFn?.({} as never);
     expect(serverApiGetMock).toHaveBeenCalledWith(AUTH_ME_PATH);
-
-    serverApiGetMock.mockResolvedValueOnce({ google: true });
-    await oauthProvidersPrefetchOptions().queryFn?.({} as never);
-    expect(serverApiGetMock).toHaveBeenCalledWith(OAUTH_PROVIDERS_PATH);
 
     serverApiGetMock.mockResolvedValueOnce({ orgs: [] });
     await organizationsListPrefetchOptions().queryFn?.({} as never);

@@ -2,7 +2,6 @@ export const queryKeys = {
   auth: {
     all: ["auth"] as const,
     me: () => [...queryKeys.auth.all, "me"] as const,
-    oauthProviders: () => [...queryKeys.auth.all, "oauthProviders"] as const,
   },
   admin: {
     all: ["admin"] as const,

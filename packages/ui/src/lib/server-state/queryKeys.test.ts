@@ -5,7 +5,6 @@ describe("queryKeys", () => {
   it("builds stable auth keys", () => {
     expect(queryKeys.auth.all).toEqual(["auth"]);
     expect(queryKeys.auth.me()).toEqual(["auth", "me"]);
-    expect(queryKeys.auth.oauthProviders()).toEqual(["auth", "oauthProviders"]);
   });
 
   it("builds admin list and detail keys with filters", () => {

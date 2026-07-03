@@ -39,6 +39,34 @@
     --ring: 239 84% 67%;
 
     --radius: 0.5rem;
+
+    /* Bklit UI chart tokens (full color values — not hsl() components) */
+    --chart-background: hsl(224 71% 4%);
+    --chart-foreground: hsl(210 20% 96%);
+    --chart-foreground-muted: hsl(218 11% 65%);
+    --chart-label: hsl(218 11% 65%);
+    --chart-1: hsl(239 84% 67%);
+    --chart-2: hsl(234 89% 74%);
+    --chart-3: hsl(243 75% 59%);
+    --chart-4: hsl(258 90% 66%);
+    --chart-5: hsl(217 91% 60%);
+    --chart-line-primary: var(--chart-1);
+    --chart-line-secondary: var(--chart-2);
+    --chart-crosshair: hsl(239 84% 67%);
+    --chart-grid: hsl(215 28% 22%);
+    --chart-brush-border: var(--chart-grid);
+    --chart-tooltip-background: hsl(221 39% 11% / 0.92);
+    --chart-tooltip-foreground: hsl(210 20% 96%);
+    --chart-tooltip-muted: hsl(218 11% 65%);
+    --chart-marker-background: hsl(221 39% 11%);
+    --chart-marker-border: hsl(215 28% 22%);
+    --chart-marker-foreground: hsl(210 20% 96%);
+    --chart-scale-01: hsl(239 84% 67% / 0.12);
+    --chart-scale-02: hsl(239 84% 67% / 0.22);
+    --chart-scale-03: hsl(239 84% 67% / 0.34);
+    --chart-scale-04: hsl(239 84% 67% / 0.48);
+    --chart-scale-05: hsl(239 84% 67% / 0.62);
+    --chart-scale-pattern-color: hsl(224 71% 4%);
   }
 }
 
