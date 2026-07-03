@@ -10,9 +10,20 @@
  *
  * Configure via `CORS_ALLOWED_ORIGINS` (comma-separated). `APP_URL` is always
  * trusted. Set `CORS_ALLOWED_ORIGINS=*` to deliberately opt back into wildcard.
+ *
+ * In non-production, when no allowlist is configured, only localhost dev
+ * origins (and `APP_URL`) are permitted — arbitrary origins are not reflected.
  */
 
 import type { cors } from "hono/cors";
+
+/** Browser origins allowed in development when `CORS_ALLOWED_ORIGINS` is unset. */
+export const DEV_CORS_ORIGINS = [
+  "http://localhost:3000",
+  "http://localhost:1337",
+  "http://127.0.0.1:3000",
+  "http://127.0.0.1:1337",
+] as const;
 
 type CorsOptions = Parameters<typeof cors>[0];
 
@@ -45,7 +56,8 @@ export function corsPolicyFromEnv(env: NodeJS.ProcessEnv = process.env): CorsPol
  *
  * - Explicit wildcard opt-in → `*`.
  * - Origin on the allowlist → reflect it (enables credentialed requests safely).
- * - No allowlist configured, non-production → reflect the caller (dev convenience).
+ * - No allowlist configured, non-production → allow only {@link DEV_CORS_ORIGINS}
+ *   plus `APP_URL` (no reflect-any).
  * - No allowlist configured, production → deny (return `null`): fail closed.
  */
 export function resolveCorsOrigin(
@@ -56,7 +68,8 @@ export function resolveCorsOrigin(
   const origin = requestOrigin?.replace(/\/$/, "");
   if (origin && policy.allowedOrigins.includes(origin)) return origin;
   if (policy.allowedOrigins.length === 0 && !policy.isProduction) {
-    return requestOrigin ?? "*";
+    if (origin && (DEV_CORS_ORIGINS as readonly string[]).includes(origin)) return origin;
+    return null;
   }
   return null;
 }

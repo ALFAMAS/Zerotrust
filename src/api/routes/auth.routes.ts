@@ -1555,7 +1555,11 @@ const ALLOWED_AVATAR_TYPES: Record<string, string> = {
 };
 const MAX_AVATAR_BYTES = 5 * 1024 * 1024; // 5 MB
 
-router.post("/me/avatar", authMiddleware, async (c) => {
+router.post(
+  "/me/avatar",
+  authMiddleware,
+  rateLimit({ points: 10, windowSecs: 3600 }),
+  async (c) => {
   try {
     const user = c.get("user");
     const formData = await c.req.formData();

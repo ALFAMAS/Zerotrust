@@ -175,10 +175,14 @@ export function tenantRateLimit(opts: { windowMs: number; max: number; message?:
     if (!cfg.rateLimiting.enabled) return next();
 
     const tenantId = c.get("tenantId");
+    const authenticated = Boolean(c.get("user"));
     let key: string;
     let points: number;
 
-    if (tenantId) {
+    // Tenant-scoped buckets are only safe when the caller is authenticated —
+    // otherwise an anonymous client could spoof X-Tenant-ID (if resolveTenant
+    // were mounted) and exhaust another tenant's quota (audit finding M9).
+    if (tenantId && authenticated) {
       const storedQuota = tenantQuotaMap.get(tenantId);
       points = storedQuota ? storedQuota.requestsPerMinute : defaultMax;
       key = `tenant:${tenantId}`;

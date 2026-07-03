@@ -188,7 +188,10 @@ describe("password-reset.routes", () => {
       // Old pending OTPs are cleared before the new one is inserted.
       expect(chain.delete).toHaveBeenCalled();
       expect(chain.insert).toHaveBeenCalled();
-      expect(sendOTP).toHaveBeenCalledWith("email", USER_EMAIL, expect.any(String));
+      const issuedCode = sendOTP.mock.calls[0]?.[2] as string;
+      // C1: must be a high-entropy token, not a 6-digit numeric OTP.
+      expect(issuedCode.length).toBeGreaterThan(20);
+      expect(sendOTP).toHaveBeenCalledWith("email", USER_EMAIL, issuedCode);
     });
   });
 

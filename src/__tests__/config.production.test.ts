@@ -41,6 +41,15 @@ describe("P4.3 — Production fail-fast config validation", () => {
     expect(() => loadConfig()).not.toThrow();
   });
 
+  it("refuses to boot when DATABASE_URL is unset (M10)", async () => {
+    process.env.NODE_ENV = "development";
+    delete process.env.DATABASE_URL;
+    process.env.TOKEN_SECRET_HEX = "a".repeat(64);
+    process.env.CSFLE_MASTER_KEY_HEX = "b".repeat(64);
+    const loadConfig = await loadFreshConfig();
+    expect(() => loadConfig()).toThrow(/DATABASE_URL environment variable is required/);
+  });
+
   it("refuses to boot in production without TOKEN_SECRET_HEX (H3)", async () => {
     process.env.NODE_ENV = "production";
     setBaseEnv();

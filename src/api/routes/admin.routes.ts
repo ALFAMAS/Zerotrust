@@ -15,7 +15,7 @@ import {
 import { auditLog, getLogger } from "../../logger";
 import { authMiddleware, requireAdmin } from "../../middleware/auth";
 import { revokeAllSessionsForUser, revokeSession } from "../../middleware/sessionControl";
-import { getSettings, type SaaSSettings, updateSettings } from "../../models/settings.model";
+import { getSettings, type SaaSSettings, SettingsVersionConflictError, updateSettings } from "../../models/settings.model";
 import { invalidateUserCache } from "../../services/auth/userStateCache.service";
 import {
   ALLOWED_UPLOAD_CONTENT_TYPES,
@@ -104,6 +104,7 @@ const settingsUpdateSchema = z
     appUrl: z.string().url().max(2048),
     supportEmail: z.union([z.string().email(), z.literal("")]),
     logoUrl: z.union([z.string().url(), z.literal("")]),
+    version: z.number().int().nonnegative().optional(),
   })
   .strict()
   .partial();
@@ -136,7 +137,9 @@ router.put("/settings", async (c) => {
               .filter(Boolean)
           : parsed.data.allowedEmailDomains,
     };
-    const updated = await updateSettings(settingsUpdate, adminId);
+    const expectedVersion = parsed.data.version;
+    delete (settingsUpdate as { version?: number }).version;
+    const updated = await updateSettings(settingsUpdate, adminId, expectedVersion);
     // Platform-wide auth/security settings (MFA requirement, lockout
     // threshold, session TTL, registration) are a high-value target — every
     // change must land in the tamper-evident audit chain, not just app logs.
@@ -145,6 +148,15 @@ router.put("/settings", async (c) => {
     });
     return c.json(updated);
   } catch (err) {
+    if (err instanceof SettingsVersionConflictError) {
+      return c.json(
+        {
+          error: "VERSION_CONFLICT",
+          message: "Settings were modified by another admin; refresh and retry",
+        },
+        409
+      );
+    }
     return internalError(
       c,
       logger,

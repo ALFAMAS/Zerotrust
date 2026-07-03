@@ -20,27 +20,45 @@ export async function topUpWallet(
 
   const db = getDb();
   return db.transaction(async (tx) => {
+    // Stripe webhook retries must not double-credit the same payment intent.
+    if (opts.stripePaymentIntentId) {
+      const [existing] = await tx
+        .select()
+        .from(walletTransactionsTable)
+        .where(eq(walletTransactionsTable.stripePaymentIntentId, opts.stripePaymentIntentId))
+        .limit(1);
+      if (existing) {
+        return { balance: existing.balanceAfter, transactionId: existing.id };
+      }
+    }
+
     const [wallet] = await tx
       .select()
       .from(walletsTable)
       .where(eq(walletsTable.userId, userId))
       .limit(1);
 
-    const currentBalance = wallet?.balance ?? 0;
-    const currentLifetime = wallet?.lifetimeBalance ?? 0;
-    const newBalance = currentBalance + amount;
-    const newLifetime = currentLifetime + amount;
-
     if (!wallet) {
-      await tx
-        .insert(walletsTable)
-        .values({ userId, balance: newBalance, lifetimeBalance: newLifetime });
-    } else {
-      await tx
-        .update(walletsTable)
-        .set({ balance: newBalance, lifetimeBalance: newLifetime, updatedAt: new Date() })
-        .where(eq(walletsTable.userId, userId));
+      await tx.insert(walletsTable).values({ userId, balance: 0, lifetimeBalance: 0 });
     }
+
+    // Atomic SQL increment — mirrors spendFromWallet's conditional UPDATE so
+    // concurrent top-ups cannot clobber each other under READ COMMITTED.
+    const [updated] = await tx
+      .update(walletsTable)
+      .set({
+        balance: sql`${walletsTable.balance} + ${amount}`,
+        lifetimeBalance: sql`${walletsTable.lifetimeBalance} + ${amount}`,
+        updatedAt: new Date(),
+      })
+      .where(eq(walletsTable.userId, userId))
+      .returning({ balance: walletsTable.balance });
+
+    if (!updated) {
+      throw new Error("Wallet not found after insert");
+    }
+
+    const newBalance = updated.balance;
 
     const [txn] = await tx
       .insert(walletTransactionsTable)

@@ -1,4 +1,4 @@
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, sql } from "drizzle-orm";
 import { Hono } from "hono";
 import { getDb, getReadDb } from "../../db";
 import {
@@ -203,12 +203,20 @@ export async function purgeScheduledDeletions(): Promise<number> {
   let purged = 0;
 
   try {
-    const pending = await db.select().from(usersTable);
-    for (const u of pending) {
-      const meta = (u.metadata as Record<string, unknown>) ?? {};
-      const scheduledFor = meta.deletionScheduledFor as string | undefined;
-      if (!scheduledFor || new Date(scheduledFor) > now) continue;
+    // Target only users past their scheduled deletion date — not a full-table
+    // scan. Accounts on legal hold are exempt (spoliation/compliance).
+    const pending = await db
+      .select({ id: usersTable.id })
+      .from(usersTable)
+      .where(
+        and(
+          eq(usersTable.legalHold, false),
+          sql`${usersTable.metadata}->>'deletionScheduledFor' IS NOT NULL`,
+          sql`(${usersTable.metadata}->>'deletionScheduledFor')::timestamptz <= ${now.toISOString()}::timestamptz`
+        )
+      );
 
+    for (const u of pending) {
       await db
         .update(usersTable)
         .set({

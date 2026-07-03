@@ -167,6 +167,7 @@ export const auditLogsTable = pgTable(
   },
   (t) => ({
     auditLogsTimestampIdx: index("audit_logs_timestamp_idx").on(t.timestamp),
+    auditLogsActorIdIdx: index("audit_logs_actor_id_idx").on(t.actorId),
   })
 );
 
@@ -252,18 +253,24 @@ export const refreshTokensTable = pgTable(
   })
 );
 
-export const otpsTable = pgTable("otps", {
-  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: text("user_id").notNull(),
-  code: text("code").notNull(),
-  type: text("type").notNull(),
-  channel: text("channel").notNull(),
-  target: text("target").notNull(),
-  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
-  usedAt: timestamp("used_at", { withTimezone: true }),
-  attempts: integer("attempts").notNull().default(0),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
-});
+export const otpsTable = pgTable(
+  "otps",
+  {
+    id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+    userId: text("user_id").notNull(),
+    code: text("code").notNull(),
+    type: text("type").notNull(),
+    channel: text("channel").notNull(),
+    target: text("target").notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    usedAt: timestamp("used_at", { withTimezone: true }),
+    attempts: integer("attempts").notNull().default(0),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
+  },
+  (t) => ({
+    otpsUserIdTypeIdx: index("otps_user_id_type_idx").on(t.userId, t.type),
+  })
+);
 
 // Short-lived OAuth exchange codes. After the OAuth callback creates a session,
 // the tokens are stored here under a one-time code that the frontend redeems
@@ -346,6 +353,7 @@ export const saasSettingsTable = pgTable("saas_settings", {
   appUrl: text("app_url").notNull().default("http://localhost:3000"),
   supportEmail: text("support_email").notNull().default(""),
   logoUrl: text("logo_url").notNull().default(""),
+  version: integer("version").notNull().default(0),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().default(sql`now()`),
   updatedBy: text("updated_by"),
 });
@@ -387,6 +395,7 @@ export const organizationsTable = pgTable(
     storageRegion: text("storage_region").notNull().default("us"),
     // References the tenant this org belongs to (for multi-tenant platform).
     tenantId: uuid("tenant_id"),
+    version: integer("version").notNull().default(0),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
   },
@@ -948,6 +957,9 @@ export const walletTransactionsTable = pgTable(
     walletTransactionsUserIdCreatedIdx: index("wallet_transactions_user_id_created_idx").on(
       t.userId,
       t.createdAt
+    ),
+    walletTransactionsStripePiUnique: unique("wallet_transactions_stripe_pi_unique").on(
+      t.stripePaymentIntentId
     ),
   })
 );

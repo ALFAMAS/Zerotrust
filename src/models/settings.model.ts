@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { getDb } from "../db";
 import { saasSettingsTable } from "../db/schema";
 
@@ -24,11 +24,49 @@ export interface SaaSSettings {
   appUrl: string;
   supportEmail: string;
   logoUrl: string;
+  version: number;
   updatedAt: Date;
   updatedBy?: string | null;
 }
 
+/** Thrown when an optimistic-lock version check fails (HTTP 409). */
+export class SettingsVersionConflictError extends Error {
+  constructor() {
+    super("VERSION_CONFLICT");
+    this.name = "SettingsVersionConflictError";
+  }
+}
+
 const SINGLETON_ID = "saas-settings";
+
+function rowToSettings(row: typeof saasSettingsTable.$inferSelect): SaaSSettings {
+  return {
+    emailPasswordEnabled: row.emailPasswordEnabled,
+    googleOAuthEnabled: row.googleOAuthEnabled,
+    githubOAuthEnabled: row.githubOAuthEnabled,
+    magicLinkEnabled: row.magicLinkEnabled,
+    passkeyEnabled: row.passkeyEnabled,
+    totpEnabled: row.totpEnabled,
+    emailOtpEnabled: row.emailOtpEnabled,
+    smsOtpEnabled: row.smsOtpEnabled,
+    requireMfaForAll: row.requireMfaForAll,
+    sessionTTLSeconds: row.sessionTTLSeconds,
+    maxConcurrentSessions: row.maxConcurrentSessions,
+    accountLockoutEnabled: row.accountLockoutEnabled,
+    accountLockoutThreshold: row.accountLockoutThreshold,
+    accountLockoutDurationMinutes: row.accountLockoutDurationMinutes,
+    registrationEnabled: row.registrationEnabled,
+    requireEmailVerification: row.requireEmailVerification,
+    allowedEmailDomains: row.allowedEmailDomains ?? [],
+    appName: row.appName,
+    appUrl: row.appUrl,
+    supportEmail: row.supportEmail,
+    logoUrl: row.logoUrl,
+    version: row.version,
+    updatedAt: row.updatedAt,
+    updatedBy: row.updatedBy,
+  };
+}
 
 export async function getSettings(): Promise<SaaSSettings> {
   const db = getDb();
@@ -39,32 +77,7 @@ export async function getSettings(): Promise<SaaSSettings> {
     .limit(1);
 
   if (rows.length > 0) {
-    const row = rows[0];
-    return {
-      emailPasswordEnabled: row.emailPasswordEnabled,
-      googleOAuthEnabled: row.googleOAuthEnabled,
-      githubOAuthEnabled: row.githubOAuthEnabled,
-      magicLinkEnabled: row.magicLinkEnabled,
-      passkeyEnabled: row.passkeyEnabled,
-      totpEnabled: row.totpEnabled,
-      emailOtpEnabled: row.emailOtpEnabled,
-      smsOtpEnabled: row.smsOtpEnabled,
-      requireMfaForAll: row.requireMfaForAll,
-      sessionTTLSeconds: row.sessionTTLSeconds,
-      maxConcurrentSessions: row.maxConcurrentSessions,
-      accountLockoutEnabled: row.accountLockoutEnabled,
-      accountLockoutThreshold: row.accountLockoutThreshold,
-      accountLockoutDurationMinutes: row.accountLockoutDurationMinutes,
-      registrationEnabled: row.registrationEnabled,
-      requireEmailVerification: row.requireEmailVerification,
-      allowedEmailDomains: row.allowedEmailDomains ?? [],
-      appName: row.appName,
-      appUrl: row.appUrl,
-      supportEmail: row.supportEmail,
-      logoUrl: row.logoUrl,
-      updatedAt: row.updatedAt,
-      updatedBy: row.updatedBy,
-    };
+    return rowToSettings(rows[0]);
   }
 
   // Create defaults if not found
@@ -84,10 +97,12 @@ export async function getSettings(): Promise<SaaSSettings> {
 
 export async function updateSettings(
   partial: Partial<SaaSSettings>,
-  updatedBy?: string
+  updatedBy?: string,
+  expectedVersion?: number
 ): Promise<SaaSSettings> {
   const db = getDb();
-  const update: Record<string, unknown> = { ...partial, updatedAt: new Date() };
+  const { version: _omitVersion, updatedAt: _omitUpdatedAt, ...fields } = partial;
+  const update: Record<string, unknown> = { ...fields, updatedAt: new Date() };
   if (updatedBy) update.updatedBy = updatedBy;
   if (typeof update.allowedEmailDomains === "string") {
     update.allowedEmailDomains = (update.allowedEmailDomains as string)
@@ -96,12 +111,33 @@ export async function updateSettings(
       .filter(Boolean);
   }
 
+  if (expectedVersion !== undefined) {
+    const [row] = await db
+      .update(saasSettingsTable)
+      .set({
+        ...update,
+        version: sql`${saasSettingsTable.version} + 1`,
+      })
+      .where(
+        and(eq(saasSettingsTable.id, SINGLETON_ID), eq(saasSettingsTable.version, expectedVersion))
+      )
+      .returning();
+
+    if (!row) {
+      throw new SettingsVersionConflictError();
+    }
+    return rowToSettings(row);
+  }
+
   await db
     .insert(saasSettingsTable)
     .values({ id: SINGLETON_ID, ...update })
     .onConflictDoUpdate({
       target: saasSettingsTable.id,
-      set: { ...update },
+      set: {
+        ...update,
+        version: sql`${saasSettingsTable.version} + 1`,
+      },
     });
 
   return getSettings();

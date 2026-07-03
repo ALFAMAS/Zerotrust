@@ -8,14 +8,18 @@ const logger = getLogger("tenant-middleware");
 /**
  * Resolve the current tenant from the request.
  *
- * Resolution order:
- * 1. X-Tenant-ID header (slug)
- * 2. Subdomain: <slug>.auth.example.com
- * 3. Query param: ?tenant=<slug>
+ * Resolution order (header/query intentionally excluded — see audit M9):
+ * 1. Subdomain: <slug>.auth.example.com
  *
  * Stores the tenantId in context via c.set("tenantId", tenantId).
  * Calls next() even when no tenant is found so single-tenant deployments
  * continue working without this middleware configured.
+ *
+ * NOT mounted in server.ts today — the live isolation boundary is
+ * `organizations` + `organization_members`. If this middleware is wired in the
+ * future, it must run after auth and validate that the principal belongs to
+ * the resolved tenant; never trust `X-Tenant-ID` or `?tenant=` from anonymous
+ * callers.
  */
 export function resolveTenant() {
   return createMiddleware<HonoEnv>(async (c, next) => {
@@ -48,15 +52,9 @@ export const requireTenant = createMiddleware<HonoEnv>(async (c, next) => {
 });
 
 function extractTenantSlug(c: Context<HonoEnv>): string | null {
-  // 1. Explicit header
-  const header = c.req.header("x-tenant-id");
-  if (header?.trim()) return header.trim().toLowerCase();
-
-  // 2. Query param
-  const qp = c.req.query("tenant");
-  if (qp?.trim()) return qp.trim().toLowerCase();
-
-  // 3. Subdomain (e.g. acme.auth.example.com)
+  // Subdomain only (e.g. acme.auth.example.com). X-Tenant-ID / ?tenant= are
+  // not trusted here — they would let unauthenticated callers pick a tenant
+  // bucket for rate limiting or future row-level filters (audit finding M9).
   const host = c.req.header("host") ?? "";
   const hostname = host.split(":")[0] ?? "";
   const parts = hostname.split(".");

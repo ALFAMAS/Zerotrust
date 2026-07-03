@@ -58,7 +58,9 @@ router.post("/request", rateLimit({ points: 5, windowSecs: 3600 }), async (c) =>
       .delete(otpsTable)
       .where(and(eq(otpsTable.userId, user.id), eq(otpsTable.type, "password_reset")));
 
-    const code = crypto.randomInt(100000, 999999).toString();
+    // 32-byte CSPRNG token (~256 bits) — not a 6-digit OTP. Delivered via email
+    // link so there is no UX cost vs a short numeric code.
+    const code = crypto.randomBytes(32).toString("base64url");
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
 
     await db.insert(otpsTable).values({

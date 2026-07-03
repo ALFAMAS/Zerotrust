@@ -1,5 +1,5 @@
 import { randomBytes } from "node:crypto";
-import { and, desc, eq, gt, isNull } from "drizzle-orm";
+import { and, desc, eq, gt, isNull, sql } from "drizzle-orm";
 import { Hono } from "hono";
 import { z } from "zod";
 import { getDb, getReadDb } from "../../db";
@@ -35,6 +35,7 @@ const updateOrgSchema = z.object({
   name: z.string().trim().min(1).max(120).optional(),
   logoUrl: z.string().url().nullable().optional(),
   billingEmail: z.string().email().nullable().optional(),
+  version: z.number().int().nonnegative().optional(),
 });
 const inviteSchema = z.object({
   email: z.string().email(),
@@ -164,10 +165,33 @@ router.put("/:orgId", async (c) => {
   const parsed = updateOrgSchema.safeParse(await c.req.json().catch(() => ({})));
   if (!parsed.success)
     return c.json({ error: "VALIDATION_ERROR", message: parsed.error.issues[0]?.message }, 400);
+  const { version: expectedVersion, ...updates } = parsed.data;
   const db = getDb();
+  const setPayload = { ...updates, updatedAt: new Date() };
+
+  if (expectedVersion !== undefined) {
+    const [org] = await db
+      .update(organizationsTable)
+      .set({ ...setPayload, version: sql`${organizationsTable.version} + 1` })
+      .where(
+        and(eq(organizationsTable.id, orgId), eq(organizationsTable.version, expectedVersion))
+      )
+      .returning();
+    if (!org) {
+      return c.json(
+        {
+          error: "VERSION_CONFLICT",
+          message: "Organization was modified elsewhere; refresh and retry",
+        },
+        409
+      );
+    }
+    return c.json({ org });
+  }
+
   const [org] = await db
     .update(organizationsTable)
-    .set({ ...parsed.data, updatedAt: new Date() })
+    .set({ ...setPayload, version: sql`${organizationsTable.version} + 1` })
     .where(eq(organizationsTable.id, orgId))
     .returning();
   return c.json({ org });

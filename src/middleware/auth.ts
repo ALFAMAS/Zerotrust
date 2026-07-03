@@ -302,8 +302,19 @@ export const authMiddleware = createMiddleware<HonoEnv>(async (c, next) => {
 
     c.set("token", payload);
 
-    // Derive audit principal from token (agent/human + delegation chain)
-    const auditPrincipal = principalFromToken(payload);
+    // Derive audit principal from token (agent/human + delegation chain).
+    // Impersonation sessions also record the admin in session.deviceFingerprint;
+    // merge that into act_as so forensics see the full chain even for tokens
+    // minted before act_as was added to the impersonation payload.
+    let auditPrincipal = principalFromToken(payload);
+    const impersonatorId = (session.deviceFingerprint as { impersonatedBy?: string })
+      ?.impersonatedBy;
+    if (impersonatorId) {
+      const chain = auditPrincipal.actAs ?? [];
+      if (!chain.includes(impersonatorId)) {
+        auditPrincipal = { ...auditPrincipal, actAs: [...chain, impersonatorId] };
+      }
+    }
     c.set("auditPrincipal", auditPrincipal);
 
     // Refresh last activity — throttled. Skipping the write on hot sessions

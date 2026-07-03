@@ -50,6 +50,13 @@ async function getTokenService() {
 router.post("/users/:id/impersonate", async (c) => {
   try {
     const admin = c.get("user");
+    const token = c.get("token");
+    if (token?.scope?.includes("impersonation") || (token?.act_as?.length ?? 0) > 0) {
+      return c.json(
+        { error: "FORBIDDEN", message: "Cannot impersonate while in an impersonation session" },
+        403
+      );
+    }
     const targetId = c.req.param("id");
 
     const db = getDb();
@@ -68,6 +75,7 @@ router.post("/users/:id/impersonate", async (c) => {
       sid: sessionId,
       aud: "zerotrust",
       scope: ["openid", "impersonation"],
+      act_as: [admin.id],
     });
     const payload = await tokenSvc.verifyAccessToken(accessToken);
 

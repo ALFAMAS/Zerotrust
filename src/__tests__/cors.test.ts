@@ -2,13 +2,14 @@ import { describe, expect, it } from "vitest";
 import { corsPolicyFromEnv, resolveCorsOrigin } from "../middleware/cors";
 
 describe("CORS origin policy", () => {
-  it("reflects any origin in development when nothing is configured", () => {
+  it("allows localhost dev origins when nothing is configured", () => {
     const policy = corsPolicyFromEnv({
       NODE_ENV: "development",
     } as NodeJS.ProcessEnv);
-    expect(resolveCorsOrigin("https://evil.example", policy)).toBe(
-      "https://evil.example",
+    expect(resolveCorsOrigin("http://localhost:3000", policy)).toBe(
+      "http://localhost:3000",
     );
+    expect(resolveCorsOrigin("https://evil.example", policy)).toBeNull();
   });
 
   it("fails closed in production when no allowlist is configured", () => {

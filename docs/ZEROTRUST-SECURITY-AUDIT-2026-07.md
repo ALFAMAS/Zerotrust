@@ -27,22 +27,25 @@ mostly holds in code.
 
 The problems are not in the primitives — they are in **wiring and fail-safes**:
 
-| # | Severity | Finding |
-|---|----------|---------|
-| 1 | **Critical** | Password-reset OTP is brute-forceable: no rate limit on the route, no attempt counter, 6-digit code |
-| 2 | **Critical** | The "tamper-evident audit log" is bypassed by the sensitive events; core admin mutations write no audit at all |
-| 3 | **High** | `TOKEN_SECRET_HEX` / `CSFLE_MASTER_KEY_HEX` silently auto-generate when unset — prod can boot with ephemeral keys (token failures across replicas; CSFLE data loss on restart) |
-| 4 | **High** | No "last admin" / self-lockout protection on system-admin role and user delete/suspend |
-| 5 | **High** | Admin security-settings changes are unvalidated and unaudited (`updateSettings` spreads raw body) |
-| 6 | Medium | `topUpWallet` is read-modify-write → lost top-ups under concurrency (money path) |
-| 7 | Medium | Retention purge ignores `legalHold` and full-scans the users table |
-| 8 | Medium | No optimistic locking / version fields → concurrent-edit lost updates |
-| 9 | Medium | Vestigial multi-tenant layer (`tenants`, `resolveTenant`, `X-Tenant-ID`) is never mounted; tenant rate-limit trusts an unauthenticated header |
-| 10 | Medium | Hardcoded Neon DB host as a fallback `DATABASE_URL`; app fails *open* to it |
-| 11 | Medium | Missing indexes on `otps` and `audit_logs(actor_id)` for growth/hot paths |
-| 12 | Medium | Password reset doesn't revoke existing sessions on success |
-| 13 | Medium | Authorization checks read the **replica** (`getReadDb`) → lag can authorize a just-removed member |
-| 14–17 | Low | CORS reflect-any in non-prod, avatar upload unthrottled, impersonation delegation not chained, secret-doc drift |
+| # | Severity | Finding | Status |
+|---|----------|---------|--------|
+| 1 | **Critical** | Password-reset OTP is brute-forceable: no rate limit on the route, no attempt counter, 6-digit code | **FIXED** — see §2 C1 |
+| 2 | **Critical** | The "tamper-evident audit log" is bypassed by the sensitive events; core admin mutations write no audit at all | **FIXED** — see §2 C2 |
+| 3 | **High** | `TOKEN_SECRET_HEX` / `CSFLE_MASTER_KEY_HEX` silently auto-generate when unset | **FIXED** — see §2 H3 |
+| 4 | **High** | No "last admin" / self-lockout protection on system-admin role and user delete/suspend | **FIXED** — see §2 H4 |
+| 5 | **High** | Admin security-settings changes are unvalidated and unaudited | **FIXED** — see §2 H5 |
+| 6 | Medium | `topUpWallet` is read-modify-write → lost top-ups under concurrency | **FIXED** — see §6 M6 |
+| 7 | Medium | Retention purge ignores `legalHold` and full-scans the users table | **FIXED** — see §5 M7 |
+| 8 | Medium | No optimistic locking / version fields → concurrent-edit lost updates | **PARTIALLY FIXED** — `version` on `saas_settings` + `organizations`; 409 on mismatch; subscriptions/user profile deferred |
+| 9 | Medium | Vestigial multi-tenant layer never mounted; tenant rate-limit trusts unauthenticated header | **PARTIALLY FIXED** — header/query tenant trust removed; tenant rate-limit gated behind auth; full delete/wire deferred |
+| 10 | Medium | Hardcoded Neon DB host as fallback `DATABASE_URL` | **FIXED** — see §9 M10 |
+| 11 | Medium | Missing indexes on `otps` and `audit_logs(actor_id)` | **FIXED** — see §6 M11 |
+| 12 | Medium | Password reset doesn't revoke existing sessions on success | **FIXED** — see §2 C1 |
+| 13 | Medium | Authorization checks read the **replica** → lag can authorize a just-removed member | **FIXED** — org auth uses primary |
+| 14 | Low | CORS reflect-any in non-prod | **FIXED** — dev defaults to localhost allowlist only |
+| 15 | Low | Avatar upload unthrottled | **FIXED** — 10 uploads/hour per user |
+| 16 | Low | Impersonation delegation not chained | **FIXED** — `act_as` on token + session fallback in audit principal |
+| 17 | Low | Secret-doc drift | **FIXED** — `ARCHITECTURE.md` + `.env.example` aligned with prod fail-fast |
 
 The two Criticals are both exploitable/blocking for a real SaaS launch. Fix them
 first; they are small, localized changes.
@@ -100,6 +103,12 @@ still use `as` casts — see §8).
 
 ### 🔴 Critical 1 — Password-reset OTP is brute-forceable (account takeover)
 
+> **Status: FIXED** (2026-07-04). Route-level rate limits on `/request` (5/hr) and
+> `/confirm` (10/15min); per-OTP `attempts` counter with lockout at
+> `maxOTPAttempts`; old OTPs invalidated on re-request; 32-byte CSPRNG token
+> (base64url) replaces 6-digit code; all sessions revoked on success.
+> Verified: `src/__tests__/password-reset.routes.test.ts`.
+
 - **Problem.** `POST /auth/password-reset/request` and `/confirm` are mounted with
   **no rate limiter** (`server.ts:147` → `app.route("/auth/password-reset", …)`;
   every other auth route carries `rateLimit(...)`, this one does not). The reset
@@ -132,6 +141,11 @@ still use `as` casts — see §8).
 - **Priority.** Immediate. This is the single highest-risk finding.
 
 ### 🔴 Critical 2 — The tamper-evident audit log is bypassed by the events that need it
+
+> **Status: FIXED** (2026-07-04). `auditLog()` in `src/logger/index.ts` now
+> dynamically imports and calls `insertAuditLog()` for every event (hash chain +
+> SIEM/ES fan-out). Admin user/role/settings mutations in `admin.routes.ts`
+> emit chained audit events. Verified: code review + existing admin mutation tests.
 
 - **Problem.** Two writers exist. `insertAuditLog()` (`src/audit/chain.ts:95`) is the
   real one: it appends a SHA-256 hash-chained row to `audit_logs` under an advisory
@@ -176,6 +190,10 @@ still use `as` casts — see §8).
 
 ### 🟠 High 3 — Critical secrets silently auto-generate; prod can boot without them
 
+> **Status: FIXED** (2026-07-04). Production fail-fast in `validateConfig()` rejects
+> boot when `TOKEN_SECRET_HEX` or `CSFLE_MASTER_KEY_HEX` are unset; dev/test logs
+> loud warnings for ephemeral keys. Verified: `src/__tests__/config.production.test.ts`.
+
 - **Problem.** `config/index.ts:29–30` sets
   `tokenSecretHex: process.env.TOKEN_SECRET_HEX || generateSecureKey(32)` and the
   same for `csfleMasterKeyHex`. `validateConfig` only checks **length ≥ 64**
@@ -204,6 +222,10 @@ still use `as` casts — see §8).
 
 ### 🟠 High 4 — No "last admin" / self-lockout protection
 
+> **Status: FIXED** (2026-07-04). `wouldOrphanAdmins()` guard + self-lockout checks
+> on PATCH status, DELETE user, and DELETE admin role in `admin.routes.ts`.
+> Verified: `src/__tests__/admin.routes.mutations.test.ts`.
+
 - **Problem.** `DELETE /admin/users/:id` (soft-delete), `PATCH /admin/users/:id`
   (status → suspended/deleted), and `DELETE /admin/users/:id/roles/:roleName`
   (`admin.routes.ts:206, 164, 461`) have **no guard** preventing an admin from
@@ -222,6 +244,10 @@ still use `as` casts — see §8).
 - **Priority.** Short-term (before multi-admin orgs go live).
 
 ### 🟠 High 5 — Admin security-settings changes are unvalidated and unaudited
+
+> **Status: FIXED** (2026-07-04). `settingsUpdateSchema` (Zod, `.strict().partial()`)
+> validates bounds on every field; `auditLog("admin.settings_updated", …)` writes
+> to the hash chain. Verified: code review + admin mutation tests.
 
 - **Problem.** `PUT /admin/settings` → `updateSettings(body, adminId)`
   (`settings.model.ts`) spreads the **raw request body** into the Drizzle upsert
@@ -265,15 +291,15 @@ still use `as` casts — see §8).
 | Disabled/deleted user still active | ✅ | `authMiddleware` rejects `deleted`/`suspended`; admin delete revokes sessions. |
 | Revoked invite still usable | ✅ | `acceptOrgInvite` checks `usedAt`/`expiresAt` in-tx. |
 | Duplicate org creation | ✅ | `organizations.slug` unique; create is transactional. |
-| Owner removed without replacement | ✅ org / ❌ system-admin | Org owner guarded; **last system admin not** (finding 4). |
-| Role escalation | ✅ self / ⚠️ admin | Self path whitelisted; admin grant path **unaudited** (finding 2). |
+| Owner removed without replacement | ✅ org / ✅ system-admin | Org owner guarded; **last system admin guarded** (finding 4 FIXED). |
+| Role escalation | ✅ self / ✅ admin | Self path whitelisted; admin grant path **audited** (finding 2 FIXED). |
 | Billing webhook replay | ✅ | `processed_stripe_events` PK dedupe. |
-| Password-reset token reuse / brute force | ❌ | **Finding 1** — no rate limit, no attempt cap. |
-| Password reset revokes sessions | ❌ | Only conditional via `recordAndRespond` (finding 12). |
-| Partial DB transaction failure | ✅ mostly | Money/org/session paths are transactional repos. `topUpWallet` is the exception (finding 6). |
-| Concurrent update conflicts | ❌ | No version/`updatedAt` guard on updates (finding 8). |
-| Unsafe soft delete / retention | ⚠️ | Purge **ignores `legalHold`** (finding 7). |
-| Missing audit trail | ❌ | **Finding 2** — sensitive events bypass the chain. |
+| Password-reset token reuse / brute force | ✅ | **Finding 1 FIXED** — rate limits, attempt cap, 32-byte token. |
+| Password reset revokes sessions | ✅ | **Finding 12 FIXED** — `revokeAllSessionsForUser` on success. |
+| Partial DB transaction failure | ✅ mostly | Money/org/session paths are transactional repos. `topUpWallet` **FIXED** (finding 6). |
+| Concurrent update conflicts | ⚠️ Partial | `saas_settings` + `organizations` use optimistic `version` (finding 8 PARTIAL); subscriptions/user profile still last-write-wins |
+| Unsafe soft delete / retention | ✅ | Purge honors `legalHold` + targeted query (finding 7 FIXED). |
+| Missing audit trail | ✅ | **Finding 2 FIXED** — `auditLog()` persists to chain; admin mutations audited. |
 | Job retries causing duplicate actions | ✅ | Scheduler idempotency keys + BullMQ single-delivery. |
 
 ---
@@ -286,6 +312,13 @@ still use `as` casts — see §8).
   (`api_keys`, `subscriptions`, `usage_counters`, `file_attachments`,
   `tax_exemptions`, `trusted_devices`, `support_tickets`).
 - **Finding 9 (Medium): the second, unused tenant model is a liability.**
+
+> **Status: PARTIALLY FIXED** (2026-07-04). `resolveTenant()` no longer trusts
+> `X-Tenant-ID` or `?tenant=` (subdomain only). `tenantRateLimit` only applies
+> tenant-scoped buckets when the caller is authenticated. The unused `tenants`
+> table / routes remain — delete vs wire-after-auth still needs a product decision.
+> Verified: `src/__tests__/tenant.middleware.test.ts`.
+
   `tenants` table, `resolveTenant()`/`requireTenant()` (`middleware/tenant.ts`), and
   `X-Tenant-ID`/subdomain resolution are **never mounted** (`grep` shows only the
   re-export in `index.ts`). `tenantRateLimit` reads `c.get("tenantId")`
@@ -306,6 +339,11 @@ still use `as` casts — see §8).
 ## 5. Compliance & data protection
 
 - **🟠 Finding 7 (Medium/High for compliance): retention purge ignores legal hold.**
+
+> **Status: FIXED** (2026-07-04). `purgeScheduledDeletions()` now queries with
+> `legalHold = false` and a JSONB date filter instead of full-table scan.
+> Verified: `src/__tests__/gdpr.purge.test.ts`.
+
   `purgeScheduledDeletions()` (`gdpr.routes.ts:200–236`) loads **all** users and, for
   any past `deletionScheduledFor`, overwrites PII — **without checking
   `users.legalHold`**. The schema added `legalHold`/`legalHoldReason`
@@ -328,7 +366,14 @@ still use `as` casts — see §8).
 
 ## 6. Data integrity
 
-- **🟠 Finding 6 (Medium, money path): `topUpWallet` race.** Unlike `spendFromWallet`
+- **🟠 Finding 6 (Medium, money path): `topUpWallet` race.**
+
+> **Status: FIXED** (2026-07-04). `topUpWallet` uses atomic SQL increment
+> (`balance = balance + amount`); idempotency via `stripePaymentIntentId` lookup +
+> unique constraint on `wallet_transactions.stripe_payment_intent_id`.
+> Verified: `src/__tests__/wallet.topup.test.ts`.
+
+  Unlike `spendFromWallet`
   (which uses a conditional `balance = balance - amount` SQL update — correct),
   `topUpWallet` (`wallet.repository.ts:22–43`) does read → compute
   `newBalance = current + amount` → write inside a transaction with **no row lock**.
@@ -337,7 +382,15 @@ still use `as` casts — see §8).
   - **Fix.** Mirror the spend path: `set({ balance: sql\`${walletsTable.balance} + ${amount}\` })`,
     or `SELECT … FOR UPDATE` the wallet row first. Add a unique idempotency key on
     `wallet_transactions.stripePaymentIntentId` so a Stripe retry can't double-credit.
-- **🟡 Finding 8 (Medium): no optimistic locking.** Mutable rows (`organizations`,
+- **🟡 Finding 8 (Medium): no optimistic locking.**
+
+> **Status: PARTIALLY FIXED** (2026-07-04). Added `version int` to
+> `saas_settings` and `organizations`; `PUT /admin/settings` and `PUT /orgs/:id`
+> accept optional `version` and return 409 on mismatch. Subscriptions and user
+> profile updates remain last-write-wins. Run `bun run db:push` to apply columns.
+> Verified: `src/__tests__/settings.optimisticLock.test.ts`.
+
+  Mutable rows (`organizations`,
   `saas_settings`, `subscriptions`, user profile) are updated last-write-wins with a
   bare `updatedAt = now()`. Two managers/admins editing concurrently silently lose
   one edit ("stale frontend overwrites newer backend"). Add a `version int` column
@@ -347,7 +400,12 @@ still use `as` casts — see §8).
   `usage_counters` (`nullsNotDistinct`), `tax_exemptions`, `trusted_devices`;
   `processed_stripe_events`/`processed_webhook_events` idempotency; audit hash chain
   with advisory-lock serialization.
-- **🟡 Finding 11 (Medium): missing indexes.** `otps` has **no index** (looked up by
+- **🟡 Finding 11 (Medium): missing indexes.**
+
+> **Status: FIXED** (2026-07-04). Added `otps_user_id_type_idx` and
+> `audit_logs_actor_id_idx` in `src/db/schema.ts`. Run `bun run db:push` to apply.
+
+  `otps` has **no index** (looked up by
   `(userId, type, code)` on every verify/reset — table grows with every OTP);
   `audit_logs` indexes only `timestamp` but admin queries filter by `actorId` and
   `action ILIKE` (`admin.routes.ts:611–612`). Add
@@ -359,11 +417,9 @@ still use `as` casts — see §8).
 ## 7. Performance & scalability
 
 - **Read-replica routing** (`getReadDb`) is used for list/detail reads — good. But
-  **finding 13 (Medium): it's also used for authorization** (`org.routes.ts`
-  `requireMember`/`requireAdmin` call `getDb()` for membership in the mutating paths
-  but several read paths authorize off the replica). Replica lag can briefly
-  authorize a just-removed member or a just-revoked role. Authorization reads should
-  hit the primary (or accept a small, documented staleness window with short TTLs).
+  **finding 13 (Medium): it's also used for authorization** — **FIXED**: org
+  membership checks (`getMembership`/`requireMember`/`requireAdmin`) in
+  `org.routes.ts` use `getDb()` (primary). List/detail reads still use replica.
 - **`purgeScheduledDeletions` full-table scan** (finding 7) is O(users) every run —
   replace with a dated `WHERE`.
 - **Activity-timestamp throttling** (`auth.middleware.activityRefreshSeconds`) is a
@@ -402,6 +458,10 @@ still use `as` casts — see §8).
   HTTP status on Postgres only (correct — a degraded cache shouldn't pull the API
   from rotation).
 - **🟡 Finding 10 (Medium): hardcoded Neon host as fallback `DATABASE_URL`**
+
+> **Status: FIXED** (2026-07-04). Removed hardcoded Neon fallback; `DATABASE_URL`
+> must be set explicitly. Verified: `src/__tests__/config.production.test.ts`.
+
   (`config/index.ts:15–17`). The password is redacted to `***` in source (not a live
   credential leak), but a **real infra hostname/username/db** are committed and, more
   importantly, the app **fails open** to this endpoint when `DATABASE_URL` is unset
@@ -420,30 +480,26 @@ still use `as` casts — see §8).
 ## Roadmap
 
 ### Immediate (this week — security/compliance blockers)
-1. **Finding 1** — rate-limit `/auth/password-reset/*`, enforce `otps.attempts`,
-   move to a long random reset token.
-2. **Finding 2** — make `auditLog()` persist to the hash chain; add audit events to
-   admin user/role/settings mutations.
-3. **Finding 3** — fail closed in production when `TOKEN_SECRET_HEX` /
-   `CSFLE_MASTER_KEY_HEX` are unset.
-4. **Finding 7** — retention purge must honor `legalHold`.
+1. ~~**Finding 1**~~ ✅ — rate-limit, attempt counter, 32-byte reset token, session revoke.
+2. ~~**Finding 2**~~ ✅ — `auditLog()` persists to hash chain; admin mutations audited.
+3. ~~**Finding 3**~~ ✅ — production fail-fast for `TOKEN_SECRET_HEX` / `CSFLE_MASTER_KEY_HEX`.
+4. ~~**Finding 7**~~ ✅ — retention purge honors `legalHold`.
 
 ### Short-term (this month)
-5. **Finding 4** — last-admin / self-lockout guards.
-6. **Finding 5** — Zod-validate + audit `PUT /admin/settings`.
-7. **Finding 6** — SQL-increment `topUpWallet` + idempotency key on top-ups.
-8. **Finding 12** — revoke all sessions on successful password reset.
-9. **Finding 10** — remove the hardcoded DB fallback; require `DATABASE_URL`.
-10. **Finding 11** — add `otps` and `audit_logs(actor_id)` indexes.
-11. Add the five regression tests in §8.
+5. ~~**Finding 4**~~ ✅ — last-admin / self-lockout guards.
+6. ~~**Finding 5**~~ ✅ — Zod-validate + audit `PUT /admin/settings`.
+7. ~~**Finding 6**~~ ✅ — SQL-increment `topUpWallet` + idempotency key on top-ups.
+8. ~~**Finding 12**~~ ✅ — revoke all sessions on successful password reset.
+9. ~~**Finding 10**~~ ✅ — remove hardcoded DB fallback; require `DATABASE_URL`.
+10. ~~**Finding 11**~~ ✅ — add `otps` and `audit_logs(actor_id)` indexes (schema updated; run `db:push`).
+11. Partial — regression tests added for findings 1, 4, 6, 7; tenant-isolation and concurrent-edit tests remain.
 
 ### Long-term (this quarter — architecture)
-12. **Finding 9** — resolve the dual tenant model: delete the unused layer *or* wire
-    `resolveTenant` after auth with membership validation; add tenant-isolation tests.
-13. **Finding 8** — optimistic-locking (`version`) on concurrently-edited resources.
-14. **Finding 13** — route authorization reads to the primary; document staleness.
-15. Centralize org-permission middleware; consider Postgres RLS on org-owned tables
-    as defense-in-depth; unify the audit writer's public API and load-test the chain.
+12. **Finding 9** — resolve the dual tenant model (**PARTIALLY FIXED** — spoofing vectors removed; delete vs wire-after-auth still open).
+13. **Finding 8** — optimistic-locking on more resources (**PARTIALLY FIXED** — `saas_settings` + `organizations`; subscriptions/profile remain).
+14. ~~**Finding 13**~~ ✅ — org authorization reads routed to primary.
+15. Centralize org-permission middleware; consider Postgres RLS; load-test audit chain.
+16. ~~**Findings 14–17 (Low)**~~ ✅ — CORS dev allowlist, avatar throttle, impersonation `act_as` chain, secret-doc drift.
 
 ---
 

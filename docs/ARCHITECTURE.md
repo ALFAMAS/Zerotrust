@@ -193,8 +193,9 @@ probes that check DB/Redis.
 ### P6 — Fail-fast config — **Shipped** (P4.3)
 
 `validateConfig()` in `src/config/index.ts` refuses boot in
-`NODE_ENV=production` when required secrets (`METRICS_AUTH_TOKEN`,
-`CORS_ALLOWED_ORIGINS`, `REDIS_URI`, backup encryption keys) are missing or weak.
+`NODE_ENV=production` when required secrets (`TOKEN_SECRET_HEX`,
+`CSFLE_MASTER_KEY_HEX`, `METRICS_AUTH_TOKEN`, `CORS_ALLOWED_ORIGINS`,
+`REDIS_URI`, backup encryption keys) are missing or weak.
 
 ### P7 — Domain-oriented service layout — shipped 2026-07-03
 
