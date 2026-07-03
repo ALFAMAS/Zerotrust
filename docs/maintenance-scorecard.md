@@ -59,7 +59,7 @@ Node v24.15.0.
 
 | Metric | Current | Target | Trend |
 |---|---|---|---|
-| Pending (unapplied) migrations | 0 (latest: `0029_points_ledger`) | 0 | ✅ |
+| Pending (unapplied) migrations | 0 (latest: `0029_audit_log_anchors`) | 0 | ✅ |
 | Irreversible migrations in last quarter | 5 (`0020`–`0024`, DROP CASCADE) — gated by `.destructive-migrations.json` + CI | 0 new without allowlist | ✅ |
 | Migration applied with rollback tested | _TBD_ (DR drill pending) | All destructive | — |
 | `db:generate` drift (`drizzle/` vs schema) | _TBD_ | No diff | — |

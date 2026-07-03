@@ -556,8 +556,13 @@ locale in `src/i18n/request.ts` and the `LocaleSwitcher` component.
 - **Input sanitization** — a global middleware strips dangerous HTML and neutralizes
   `javascript:`/event-handler payloads in request bodies, query, path, and form
   fields (XSS / CWE-79), skipping sensitive fields and signed/SSF payloads.
-- **Audit** — tamper-evident SHA-256 hash-chained audit log in Postgres; optional Elasticsearch +
-  SIEM streaming for large deployments.
+- **Audit** — tamper-evident SHA-256 hash-chained audit log in Postgres; optional
+  external anchoring to `audit_log_anchors` + S3 (`AUDIT_ANCHOR_ENABLED`); optional
+  Elasticsearch + SIEM streaming for large deployments.
+- **Key storage** — CSFLE and token material use the **software** key provider only.
+  TPM, Secure Enclave, and PKCS#11 code paths exist as documented stubs and throw
+  (or fail fast) if selected via `KEY_PROVIDER`; there is no post-quantum crypto in
+  `src/crypto/`.
 - **Disclosure** — `/.well-known/security.txt` (RFC 9116); set `SECURITY_CONTACT`.
   Report vulnerabilities per [`SECURITY.md`](./SECURITY.md) — please do not open public
   issues for security reports.

@@ -1,11 +1,11 @@
 # Audit Log Anchoring Plan
 
 Owner: Mas Yasin Arafat  
-Review cadence: Before implementation, then annually  
-Status: Design draft, not implemented
+Review cadence: Annually  
+Status: **Implemented** (2026-07-03)
 
-zerotrust already has a tamper-evident audit log hash chain. This plan covers the
-optional hardening step: anchoring the latest `entry_hash` outside the primary
+zerotrust already has a tamper-evident audit log hash chain. This document describes the
+external anchoring hardening step: recording the latest `entry_hash` outside the primary
 database so database-level tampering is easier to prove.
 
 ## Current Control
@@ -14,18 +14,8 @@ database so database-level tampering is easier to prove.
 - `insertAuditLog()` chains entries under an advisory lock.
 - `verifyAuditChain()` detects edits, deletes, and reordering.
 - Admin UI exposes integrity verification.
-
-## Proposed Anchor
-
-Create a scheduled job that records the latest audit `seq` and `entry_hash` to an
-external append-only location.
-
-Acceptable anchor targets:
-
-- Cloud object storage with object lock / retention.
-- Third-party transparency log.
-- Dedicated append-only audit service.
-- Signed email to a restricted compliance mailbox as a lightweight interim step.
+- **Anchoring (P5.1):** `audit_log_anchors` table (migration `0029`), `runAuditAnchor()`,
+  scheduled `audit.anchor` job, and `bun run audit:anchor-verify`.
 
 ## Anchor Record
 
@@ -37,21 +27,31 @@ Acceptable anchor targets:
   "latestSeq": 123,
   "latestEntryHash": "hex",
   "previousAnchorHash": "hex or null",
-  "anchorHash": "hex",
-  "signature": "optional detached signature"
+  "anchorHash": "hex"
 }
 ```
 
-## Implementation Steps
+## Operations
 
-1. Add `audit_log_anchors` table or object-storage writer.
-2. Add scheduled anchor job.
-3. Add verification command that compares database chain to anchors.
-4. Alert when anchoring fails.
-5. Store anchor evidence monthly.
+| Action | Command / job |
+| --- | --- |
+| Scheduled anchor | `audit.anchor` job (24h, `AUDIT_ANCHOR_ENABLED=true`) |
+| One-shot anchor | `bun run audit:anchor` |
+| Verify tip vs anchor | `bun run audit:anchor-verify` |
+| Evidence | `docs/compliance/evidence/YYYY/QN/audit-log/` |
 
-## Open Questions
+## Configuration
 
-- Which external anchor target should be used for production?
-- Is object-lock retention available on the configured object storage provider?
+```env
+AUDIT_ANCHOR_ENABLED=false          # set true in production
+AUDIT_ANCHOR_ENVIRONMENT=production # defaults to NODE_ENV
+AUDIT_ANCHOR_S3_PREFIX=audit-anchors/  # uses BACKUP_S3_* credentials when set
+```
+
+Anchors are stored in Postgres (`audit_log_anchors`) and, when S3 backup credentials are
+configured, uploaded as append-only JSON objects under `AUDIT_ANCHOR_S3_PREFIX`.
+
+## Open Questions (production)
+
+- Which external anchor target should be primary for long-term retention (object lock)?
 - Should anchors be signed with a separate key from application secrets?

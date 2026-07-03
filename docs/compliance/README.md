@@ -6,22 +6,22 @@ review cadence, required evidence, and where product controls already exist.
 
 ## Current Status
 
-These documents are implementation-ready drafts owned by Mas Yasin Arafat. They
-still need approval dates and recurring evidence before they can be used as audit
-evidence.
+These documents are approved for operational use as of **2026-07-03**. Recurring evidence
+is tracked in [`evidence-register.md`](./evidence-register.md) and
+[`evidence/`](./evidence/README.md).
 
 | Area                | Document                                                                     | Status                                         |
 | ------------------- | ---------------------------------------------------------------------------- | ---------------------------------------------- |
-| Policies            | [policies.md](./policies.md)                                                 | Drafted, pending approval                      |
-| Access lifecycle    | [onboarding-offboarding-checklist.md](./onboarding-offboarding-checklist.md) | Drafted, ready to use                          |
-| Vendor management   | [vendor-management-register.md](./vendor-management-register.md)             | Template drafted, needs vendor entries         |
-| Incident response   | [incident-response-runbook.md](./incident-response-runbook.md)               | Drafted, needs tabletop exercise               |
-| Backup/restore      | [backup-restore-runbook.md](./backup-restore-runbook.md)                     | Drafted, needs restore drill evidence          |
-| Access reviews      | [access-review-procedure.md](./access-review-procedure.md)                   | Drafted, maps to shipped access-review tooling |
-| Monitoring          | [monitoring-evidence-procedure.md](./monitoring-evidence-procedure.md)       | Drafted, needs alert/on-call records           |
-| SOC 2 planning      | [soc2-auditor-readiness.md](./soc2-auditor-readiness.md)                     | Drafted, needs auditor + window                |
-| Audit log hardening | [audit-log-anchoring-plan.md](./audit-log-anchoring-plan.md)                 | Design drafted, not implemented                |
-| Evidence tracker    | [evidence-register.md](./evidence-register.md)                               | Template drafted                               |
+| Policies            | [policies.md](./policies.md)                                                 | Approved 2026-07-03                            |
+| Access lifecycle    | [onboarding-offboarding-checklist.md](./onboarding-offboarding-checklist.md) | Ready to use                                   |
+| Vendor management   | [vendor-management-register.md](./vendor-management-register.md)             | Populated; Q3 2026 review complete             |
+| Incident response   | [incident-response-runbook.md](./incident-response-runbook.md)               | Q3 2026 tabletop recorded                      |
+| Backup/restore      | [backup-restore-runbook.md](./backup-restore-runbook.md)                     | Q3 2026 restore drill recorded                 |
+| Access reviews      | [access-review-procedure.md](./access-review-procedure.md)                   | Maps to shipped access-review tooling          |
+| Monitoring          | [monitoring-evidence-procedure.md](./monitoring-evidence-procedure.md)       | Drafted; on-call records ongoing               |
+| SOC 2 planning      | [soc2-auditor-readiness.md](./soc2-auditor-readiness.md)                     | Drafted; auditor + window TBD                  |
+| Audit log hardening | [audit-log-anchoring-plan.md](./audit-log-anchoring-plan.md)                 | Implemented 2026-07-03                         |
+| Evidence tracker    | [evidence-register.md](./evidence-register.md)                               | Q3 2026 baseline entries complete              |
 
 ## Evidence Storage Convention
 
@@ -76,6 +76,8 @@ Do not commit:
 ## Links To Product Controls
 
 - Tamper-evident audit log: `src/audit/chain.ts`, migration `0013`, admin verify UI.
+- Audit log external anchoring: `src/audit/anchor.ts`, migration `0029`, `audit.anchor` job,
+  `bun run audit:anchor-verify`.
 - Access reviews: `src/api/routes/access-review.routes.ts`, admin UI under
   `/admin/access-reviews`.
 - Legal hold: `src/services/legalHold.service.ts`.

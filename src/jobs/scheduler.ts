@@ -160,6 +160,11 @@ async function dispatchJob(jobDef: JobDef, _payload: unknown): Promise<boolean> 
       await startBackupScheduler(jobDef.intervalHours!);
       return true;
     }
+    case "audit.anchor": {
+      const { runAuditAnchor } = await import("../audit/anchor.js");
+      await runAuditAnchor();
+      return true;
+    }
     default:
       return false;
   }

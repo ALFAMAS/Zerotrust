@@ -204,6 +204,13 @@
       "when": 1783033200000,
       "tag": "0028_points_ledger",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1783119600000,
+      "tag": "0029_audit_log_anchors",
+      "breakpoints": true
     }
   ]
 }

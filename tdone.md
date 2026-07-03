@@ -16,10 +16,10 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
 | Service files | 46 |
 | DB tables | 41 |
 | Middleware | 21 |
-| Migrations | 28 (latest: `0027_webhook_endpoints`) |
+| Migrations | 29 (latest: `0029_audit_log_anchors`) |
 | Route mounts in `server.ts` | 30 |
 | UI pages | 53 |
-| Tests | 1102+ (886 API + 216 UI, 164 files) |
+| Tests | 1108+ (892 API + 216 UI, 165 files) |
 | ADRs | 8 |
 | Stack | Hono 4 · TypeScript 6 · Bun · Next.js 16 · Drizzle ORM · PostgreSQL · Redis |
 
@@ -158,6 +158,7 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
 - ✅ CAN-SPAM unsubscribe — one-click signed tokens
 - ✅ Bug-bounty / responsible-disclosure — `/.well-known/security.txt` (RFC 9116)
 - ✅ Tamper-evident audit log — SHA-256 hash-chained rows, advisory-locked chain, integrity verification
+- ✅ Audit log external anchoring — scheduled `audit.anchor` job, `audit_log_anchors` table, `bun run audit:anchor-verify`, optional S3 upload
 - ✅ Access reviews — admin snapshots privileged role grants, approve/flag/revoke decisions
 - ✅ SOC 2 Type II readiness map — controls mapped to TSC CC6–CC8, A1, C1/P
 - ✅ Risk assessment — annual risk register with likelihood × impact scoring
@@ -183,14 +184,14 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
 ## Security & Cryptography
 
 - ✅ PASETO v4 — AES-256-GCM
-- ✅ CSFLE field encryption — `CSFLEManager`, key versioning, encrypt/decrypt plugin
+- ✅ CSFLE field encryption — `CSFLEManager`, key versioning, encrypt/decrypt plugin (**software key store only**; TPM / Secure Enclave / PKCS#11 providers are unimplemented stubs — see `src/crypto/hardware-key-store.ts`)
+- ✅ Software key store — `SoftwareKeyProvider` via `KEY_PROVIDER=software|auto`; hardware providers fail fast at startup if explicitly requested
 - ✅ Security headers — Hono `secureHeaders` on every route
 - ✅ Global input sanitization — strips dangerous HTML, neutralizes XSS payloads
 - ✅ CORS — configurable allowlist, fails closed in production
 - ✅ API versioning — `X-API-Version` header / `/vN` prefix, deprecation/sunset headers
 - ✅ CWE hardening — CWE-601 (safe redirects), CWE-918 (SSRF guards), CWE-78 (no shell injection), CWE-22 (safe upload keys), CWE-532 (no secrets in logs), CWE-1333 (ReDoS), CWE-327 (SHA-256+/AES-256-GCM), CWE-1427 (LDAP/identifier escaping)
 - ✅ Agent-aware audit log — `AuditPrincipal` (human/agent) derived from token
-- ✅ `[~]` Post-quantum crypto — hybrid KEM provider (not yet productized)
 
 ## User Dashboard
 
@@ -266,6 +267,26 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
 - ✅ Dockerfile — multi-stage production image (Bun + Node)
 - ✅ 8 ADRs — PASETO v4, modular monolith, Drizzle, Redis/BullMQ, generated SDK, token rotation, module boundaries, token storage revisit
 - ✅ Deployment blueprints — VM/PM2, containers, Kubernetes (`docs/reference-architecture.md`)
+
+---
+
+## Recent work (2026-07-03)
+
+### P5 — Compliance and security hardening shipped
+
+- **P5.1 Audit log external anchoring:** migration `0029_audit_log_anchors`; `src/audit/anchor.ts`
+  with `runAuditAnchor()` + `verifyAuditAnchors()`; scheduled `audit.anchor` job (24h,
+  leader-elected); CLI `bun run audit:anchor` and `bun run audit:anchor-verify`; optional
+  S3 upload under `AUDIT_ANCHOR_S3_PREFIX`; evidence in
+  `docs/compliance/evidence/2026/Q3/audit-log/`.
+- **P5.2 Compliance evidence program:** policies approved 2026-07-03; vendor register
+  populated with Q3 review; restore drill + incident tabletop recorded under
+  `docs/compliance/evidence/2026/Q3/`; evidence register updated (E-001, E-004–E-006, E-009).
+- **P5.3 Hardware key-store clarity:** README + `tdone.md` state software CSFLE/key store
+  only; removed `[~]` post-quantum claim (no PQC code in `src/crypto/`).
+- **Verification:** `bun run test -- src/__tests__/audit.anchor.test.ts` → **6 tests passing**;
+  `bunx biome check src/audit/anchor.ts src/audit/chain.ts` → **0 errors**;
+  compliance docs status table updated in `docs/compliance/README.md`.
 
 ---
 

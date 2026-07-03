@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm";
 import {
+  bigint,
   bigserial,
   boolean,
   index,
@@ -166,6 +167,26 @@ export const auditLogsTable = pgTable(
   },
   (t) => ({
     auditLogsTimestampIdx: index("audit_logs_timestamp_idx").on(t.timestamp),
+  })
+);
+
+/** External anchor records for the tamper-evident audit hash chain (SOC 2 CC7). */
+export const auditLogAnchorsTable = pgTable(
+  "audit_log_anchors",
+  {
+    id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+    anchoredAt: timestamp("anchored_at", { withTimezone: true }).notNull(),
+    environment: text("environment").notNull(),
+    latestSeq: bigint("latest_seq", { mode: "number" }).notNull(),
+    latestEntryHash: text("latest_entry_hash").notNull(),
+    previousAnchorHash: text("previous_anchor_hash"),
+    anchorHash: text("anchor_hash").notNull(),
+    externalKey: text("external_key"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
+  },
+  (t) => ({
+    auditLogAnchorsAnchoredAtIdx: index("audit_log_anchors_anchored_at_idx").on(t.anchoredAt),
+    auditLogAnchorsLatestSeqIdx: index("audit_log_anchors_latest_seq_idx").on(t.latestSeq),
   })
 );
 

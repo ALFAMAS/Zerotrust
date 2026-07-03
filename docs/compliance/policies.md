@@ -3,7 +3,7 @@
 Owner: Mas Yasin Arafat  
 Approver: Mas Yasin Arafat  
 Review cadence: Annual, and after material architecture or regulatory changes  
-Status: Draft, pending approval
+Status: **Approved** — effective 2026-07-03 (next review 2027-07-03)
 
 ## 1. Information Security Policy
 

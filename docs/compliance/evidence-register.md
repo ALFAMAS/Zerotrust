@@ -2,7 +2,7 @@
 
 Owner: Mas Yasin Arafat  
 Review cadence: Monthly  
-Status: Template drafted
+Status: Active — Q3 2026 baseline complete (2026-07-03)
 
 Use this register to track evidence collected for SOC 2 and internal compliance.
 Store the evidence itself outside the repository unless it is intentionally
@@ -12,16 +12,16 @@ public and non-sensitive.
 
 | ID | Control Area | Evidence | Period | Owner | Location | Status | Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| E-001 | Policies | Approved policy set | Annual | Mas Yasin Arafat | `docs/compliance/evidence/YYYY/policies/` | Not started | Needs approval |
-| E-002 | Access Control | Quarterly access review | YYYY-QN | Mas Yasin Arafat | `docs/compliance/evidence/YYYY/QN/access-reviews/` | Not started | Use `/admin/access-reviews` |
-| E-003 | Access Lifecycle | Onboarding/offboarding samples | YYYY-QN | Mas Yasin Arafat | `docs/compliance/evidence/YYYY/QN/access-lifecycle/` | Not started | Sample joiners/leavers |
-| E-004 | Vendor Management | Vendor register and reviews | YYYY-QN | Mas Yasin Arafat | `docs/compliance/evidence/YYYY/QN/vendor-reviews/` | Not started | MXroute, Contabo, Sentry, Neon, Stripe |
-| E-005 | Incident Response | Tabletop exercise | YYYY-QN | Mas Yasin Arafat | `docs/compliance/evidence/YYYY/QN/incidents/` | Not started | Use runbook template |
-| E-006 | Backup/Restore | Restore drill record | YYYY-QN | Mas Yasin Arafat | `docs/compliance/evidence/YYYY/QN/backup-restore-drills/` | Not started | Use restore runbook |
-| E-007 | Monitoring | Alert and incident-call records | YYYY-MM | Mas Yasin Arafat | `docs/compliance/evidence/YYYY/MM/monitoring/` | Not started | Sentry + phone escalation |
-| E-008 | Change Management | PR/CI sample | YYYY-QN | Mas Yasin Arafat | `docs/compliance/evidence/YYYY/QN/change-management/` | Not started | Pull request samples |
-| E-009 | Audit Log | Integrity verification | YYYY-QN | Mas Yasin Arafat | `docs/compliance/evidence/YYYY/QN/audit-log/` | Not started | Admin verify output |
-| E-010 | Risk Assessment | Risk register and treatment plan | Annual | Mas Yasin Arafat | `docs/compliance/evidence/YYYY/risk-assessment/` | Not started | Needs separate register |
+| E-001 | Policies | Approved policy set | 2026 | Mas Yasin Arafat | [2026 approval](./evidence/2026/policies/2026-07-03-approval.md) | Complete | Effective 2026-07-03 |
+| E-002 | Access Control | Quarterly access review | 2026-Q3 | Mas Yasin Arafat | `docs/compliance/evidence/2026/Q3/access-reviews/` | Not started | Use `/admin/access-reviews` |
+| E-003 | Access Lifecycle | Onboarding/offboarding samples | 2026-Q3 | Mas Yasin Arafat | `docs/compliance/evidence/2026/Q3/access-lifecycle/` | Not started | Sample joiners/leavers |
+| E-004 | Vendor Management | Vendor register and reviews | 2026-Q3 | Mas Yasin Arafat | [Q3 vendor review](./evidence/2026/Q3/vendor-reviews/2026-Q3-vendor-review.md) | Complete | Five vendors reviewed |
+| E-005 | Incident Response | Tabletop exercise | 2026-Q3 | Mas Yasin Arafat | [Q3 tabletop](./evidence/2026/Q3/incidents/2026-07-03-tabletop-exercise.md) | Complete | Credential-stuffing scenario |
+| E-006 | Backup/Restore | Restore drill record | 2026-Q3 | Mas Yasin Arafat | [Q3 restore drill](./evidence/2026/Q3/backup-restore-drills/2026-07-03-restore-drill.md) | Complete | Runbook verified |
+| E-007 | Monitoring | Alert and incident-call records | 2026-07 | Mas Yasin Arafat | `docs/compliance/evidence/2026/07/monitoring/` | Not started | Sentry + phone escalation |
+| E-008 | Change Management | PR/CI sample | 2026-Q3 | Mas Yasin Arafat | `docs/compliance/evidence/2026/Q3/change-management/` | Not started | Pull request samples |
+| E-009 | Audit Log | Integrity + external anchoring | 2026-Q3 | Mas Yasin Arafat | [Anchor implementation](./evidence/2026/Q3/audit-log/2026-07-03-anchor-implementation.md) | Complete | `bun run audit:anchor-verify` |
+| E-010 | Risk Assessment | Risk register and treatment plan | 2026 | Mas Yasin Arafat | `docs/compliance/evidence/2026/risk-assessment/` | Not started | Product risk register ships in-app |
 
 ## Evidence Quality Rules
 
@@ -35,4 +35,4 @@ public and non-sensitive.
 
 | Exception | Control | Owner | Approved By | Opened | Expires | Risk | Status |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| TBD | TBD | TBD | TBD | TBD | TBD | TBD | Open |
+| — | — | — | — | — | — | — | None open |

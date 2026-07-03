@@ -161,3 +161,16 @@ export async function verifyAuditChain(limit = 1000): Promise<ChainVerifyResult>
   if (!rows.length) logger.debug("Audit chain verify: no chained rows yet");
   return { ok: true, checked };
 }
+
+/** Latest hash-chained audit row (chain tip), or null when no chained rows exist. */
+export async function getAuditChainTip(): Promise<{ seq: number; entryHash: string } | null> {
+  const db = getReadDb();
+  const [row] = await db
+    .select({ seq: auditLogsTable.seq, entryHash: auditLogsTable.entryHash })
+    .from(auditLogsTable)
+    .where(isNotNull(auditLogsTable.entryHash))
+    .orderBy(desc(auditLogsTable.seq))
+    .limit(1);
+  if (!row?.entryHash) return null;
+  return { seq: row.seq, entryHash: row.entryHash };
+}

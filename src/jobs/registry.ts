@@ -61,6 +61,17 @@ export const JOB_REGISTRY: JobDef[] = [
     singleInstance: true,
     schema: z.object({}),
   },
+  {
+    name: "audit.anchor",
+    description: "Anchor latest audit hash-chain tip to DB + optional object storage",
+    intervalHours: 24,
+    singleInstance: true,
+    schema: z.object({}),
+    idempotencyKey: () => {
+      const day = new Date().toISOString().slice(0, 10);
+      return `audit-anchor-${day}`;
+    },
+  },
 ] as const;
 
 /** Look up a job definition by name. */
