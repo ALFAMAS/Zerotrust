@@ -447,7 +447,31 @@ still use `as` casts — see §8).
 
 ---
 
+## Appendix A — Checklist items verified **sound** (no finding)
+
+These items from the review scope were checked against source and are correctly
+implemented — recorded here so the audit explicitly closes every checklist item,
+and so these controls are preserved through the fixes above.
+
+| Item | Verdict | Evidence |
+|---|---|---|
+| **CSRF** | ✅ N/A by design | No cookie-based session anywhere in the API — zero `setCookie`/`getCookie`/`Set-Cookie` in `src/api` or `src/middleware`. Auth is `Authorization: Bearer <PASETO>` only, which browsers don't attach cross-site, so classic CSRF doesn't apply. (Trade-off: `localStorage` tokens are XSS-readable — see `AUDIT-REPORT.md`; the global input sanitizer is the compensating control.) |
+| **User-defined webhook SSRF** | ✅ Guarded | `src/webhooks/delivery.ts:88` sends via `fetchPublicUrl(endpoint.url, …)` (rejects IP literals, private/loopback/link-local/metadata hosts, non-default ports; `redirect:"error"` + timeout). Matches the CWE-918 rule. |
+| **Webhook authenticity** | ✅ Signed | Outbound deliveries are HMAC-SHA256 signed (`createHmac`, `X-zerotrust-Signature` — `delivery.ts:14,64,69`). Stripe inbound verified against the raw body (`billing.webhooks.ts:35`). |
+| **IDOR / object-level access** | ✅ Scoped (spot-checked) | `api-keys` filters/deletes by `and(eq(id), eq(userId, user.id))` (`api-keys.routes.ts:46,123`); `wallet` reads by `user.id` (`wallet.routes.ts:29,46`); `support` enforces `ticket.userId !== user.id && !isAgent → 403` and list-scopes by `userId` (`support.routes.ts:73,93,128,168`). No object-ownership IDOR on the routes reviewed. |
+| **MFA / passkeys** | ✅ Present | TOTP + Email OTP + WebAuthn/passkeys (dedicated `passkeys` table, MDS3 attestation policy per org). Org policy can `requireMfaForAll` (see finding 5 re: audit of that toggle). |
+| **Session revocation / rotation** | ✅ Sound | `authMiddleware` rejects expired/revoked sessions and `deleted`/`suspended` users; refresh rotation + reuse-family revocation (§2 "sound" list). |
+| **Unsafe uploads** | ✅ Mostly | Avatar upload validates content-type against an allowlist and derives the extension server-side (`auth.routes.ts:1550,1568,1585`) → no path traversal / stored-XSS via extension. (Minor: unthrottled — Low finding 15.) |
+
+> **Object-level access caveat.** The spot-check covered `api-keys`, `wallet`, and
+> `support`. Before relying on "no IDOR," add an automated test that iterates every
+> `:id`/`:orgId` route with a second user's token and asserts 403/404 — this is the
+> only way to keep the property from regressing as routes are added.
+
+---
+
 *Findings are ranked by exploitability and blast radius, and every one cites a
 concrete location in the current tree. Items the code gets right (token rotation,
-webhook idempotency, wallet spend, transactional repos, input sanitization) are
-called out so they're preserved through the fixes above.*
+webhook idempotency + SSRF-guarded delivery, wallet spend, transactional repos,
+input sanitization, Bearer-only CSRF posture, object-scoped reads) are called out
+so they're preserved through the fixes above.*
