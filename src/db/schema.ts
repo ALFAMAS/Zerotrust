@@ -68,6 +68,7 @@ export const usersTable = pgTable("users", {
   metadata: jsonb("metadata"),
   // Customer segment tag — used by CS/success teams to categorize accounts.
   customerSegment: text("customer_segment"), // "champion" | "at_risk" | "expansion" | "new" | null
+  version: integer("version").notNull().default(0),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().default(sql`now()`),
 });
@@ -393,8 +394,6 @@ export const organizationsTable = pgTable(
     customDomain: text("custom_domain"),
     branding: jsonb("branding").$type<OrgBranding>(),
     storageRegion: text("storage_region").notNull().default("us"),
-    // References the tenant this org belongs to (for multi-tenant platform).
-    tenantId: uuid("tenant_id"),
     version: integer("version").notNull().default(0),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
@@ -402,7 +401,6 @@ export const organizationsTable = pgTable(
   (t) => ({
     organizationsCustomDomainIdx: index("organizations_custom_domain_idx").on(t.customDomain),
     organizationsStorageRegionIdx: index("organizations_storage_region_idx").on(t.storageRegion),
-    organizationsTenantIdx: index("organizations_tenant_idx").on(t.tenantId),
   })
 );
 
@@ -617,6 +615,7 @@ export const subscriptionsTable = pgTable(
     trialEnd: timestamp("trial_end"),
     canceledAt: timestamp("canceled_at"),
     metadata: jsonb("metadata"),
+    version: integer("version").notNull().default(0),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
   },

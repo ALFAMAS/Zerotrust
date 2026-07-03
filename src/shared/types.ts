@@ -359,7 +359,6 @@ export type HonoEnv = {
     token: TokenPayload;
     popVerified?: boolean;
     inferredCountry?: string;
-    tenantId?: string;
     apiKeyId?: string;
     apiKeyScopes?: string[];
     /** "live" or "test" — set by apiKeyAuth so handlers can branch to sandbox data. */

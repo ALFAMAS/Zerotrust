@@ -163,7 +163,6 @@ export {
   revokeSession,
 } from "./middleware/sessionControl";
 export { temporalAccessMiddleware } from "./middleware/temporalAccess";
-export { requireTenant, resolveTenant } from "./middleware/tenant";
 export type { TokenBindingOptions } from "./middleware/tokenBinding";
 // ─── Token Binding ────────────────────────────────────────────────────────────
 export { tokenBindingMiddleware } from "./middleware/tokenBinding";

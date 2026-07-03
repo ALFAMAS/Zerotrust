@@ -172,6 +172,10 @@ router.post("/cancel", authMiddleware, sensitiveReverification, async (c) => {
   const body = await c.req.json().catch(() => ({}));
   const orgId = body.orgId as string | undefined;
   const action = (body.action as string) === "pause" ? "pause" : "cancel";
+  const expectedVersion =
+    typeof body.version === "number" && Number.isInteger(body.version) && body.version >= 0
+      ? body.version
+      : undefined;
 
   if (orgId && !(await canManageOrgBilling(orgId, user.id))) {
     return c.json({ error: "FORBIDDEN", message: "Org owner or admin required" }, 403);
@@ -202,7 +206,21 @@ router.post("/cancel", authMiddleware, sensitiveReverification, async (c) => {
       await stripe.subscriptions.update(sub.stripeSubscriptionId, {
         pause_collection: { behavior: "mark_uncollectible" },
       });
-      await setSubscriptionPaused({ subscriptionId: sub.id, userId: user.id, reason: body.reason });
+      const ok = await setSubscriptionPaused({
+        subscriptionId: sub.id,
+        userId: user.id,
+        reason: body.reason,
+        expectedVersion,
+      });
+      if (!ok) {
+        return c.json(
+          {
+            error: "VERSION_CONFLICT",
+            message: "Subscription was modified elsewhere; refresh and retry",
+          },
+          409
+        );
+      }
       await auditLog("billing.paused", user.id, sub.id, true, { reason: body.reason });
       return c.json({ success: true, action: "paused" });
     }
@@ -210,11 +228,21 @@ router.post("/cancel", authMiddleware, sensitiveReverification, async (c) => {
     await stripe.subscriptions.update(sub.stripeSubscriptionId, {
       cancel_at_period_end: true,
     });
-    await scheduleSubscriptionCancellation({
+    const ok = await scheduleSubscriptionCancellation({
       subscriptionId: sub.id,
       userId: user.id,
       reason: body.reason,
+      expectedVersion,
     });
+    if (!ok) {
+      return c.json(
+        {
+          error: "VERSION_CONFLICT",
+          message: "Subscription was modified elsewhere; refresh and retry",
+        },
+        409
+      );
+    }
     await auditLog("billing.cancel_scheduled", user.id, sub.id, true, { reason: body.reason });
 
     // Retention offer the UI can present after scheduling the cancel
@@ -235,6 +263,10 @@ router.post("/reactivate", authMiddleware, async (c) => {
   const user = c.get("user");
   const body = await c.req.json().catch(() => ({}));
   const orgId = body.orgId as string | undefined;
+  const expectedVersion =
+    typeof body.version === "number" && Number.isInteger(body.version) && body.version >= 0
+      ? body.version
+      : undefined;
 
   if (orgId && !(await canManageOrgBilling(orgId, user.id))) {
     return c.json({ error: "FORBIDDEN", message: "Org owner or admin required" }, 403);
@@ -251,7 +283,16 @@ router.post("/reactivate", authMiddleware, async (c) => {
       cancel_at_period_end: false,
       pause_collection: null,
     });
-    await reactivateSubscription({ subscriptionId: sub.id });
+    const ok = await reactivateSubscription({ subscriptionId: sub.id, expectedVersion });
+    if (!ok) {
+      return c.json(
+        {
+          error: "VERSION_CONFLICT",
+          message: "Subscription was modified elsewhere; refresh and retry",
+        },
+        409
+      );
+    }
     await auditLog("billing.reactivated", user.id, sub.id, true);
 
     return c.json({ success: true });

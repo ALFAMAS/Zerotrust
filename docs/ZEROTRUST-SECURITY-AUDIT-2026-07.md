@@ -36,8 +36,8 @@ The problems are not in the primitives — they are in **wiring and fail-safes**
 | 5 | **High** | Admin security-settings changes are unvalidated and unaudited | **FIXED** — see §2 H5 |
 | 6 | Medium | `topUpWallet` is read-modify-write → lost top-ups under concurrency | **FIXED** — see §6 M6 |
 | 7 | Medium | Retention purge ignores `legalHold` and full-scans the users table | **FIXED** — see §5 M7 |
-| 8 | Medium | No optimistic locking / version fields → concurrent-edit lost updates | **PARTIALLY FIXED** — `version` on `saas_settings` + `organizations`; 409 on mismatch; subscriptions/user profile deferred |
-| 9 | Medium | Vestigial multi-tenant layer never mounted; tenant rate-limit trusts unauthenticated header | **PARTIALLY FIXED** — header/query tenant trust removed; tenant rate-limit gated behind auth; full delete/wire deferred |
+| 8 | Medium | No optimistic locking / version fields → concurrent-edit lost updates | **FIXED** — `version` on `saas_settings`, `organizations`, `users`, `subscriptions`; 409 on mismatch |
+| 9 | Medium | Vestigial multi-tenant layer never mounted; tenant rate-limit trusts unauthenticated header | **FIXED** — request-time tenant middleware removed; rate limits keyed by user id or IP |
 | 10 | Medium | Hardcoded Neon DB host as fallback `DATABASE_URL` | **FIXED** — see §9 M10 |
 | 11 | Medium | Missing indexes on `otps` and `audit_logs(actor_id)` | **FIXED** — see §6 M11 |
 | 12 | Medium | Password reset doesn't revoke existing sessions on success | **FIXED** — see §2 C1 |
@@ -297,7 +297,7 @@ still use `as` casts — see §8).
 | Password-reset token reuse / brute force | ✅ | **Finding 1 FIXED** — rate limits, attempt cap, 32-byte token. |
 | Password reset revokes sessions | ✅ | **Finding 12 FIXED** — `revokeAllSessionsForUser` on success. |
 | Partial DB transaction failure | ✅ mostly | Money/org/session paths are transactional repos. `topUpWallet` **FIXED** (finding 6). |
-| Concurrent update conflicts | ⚠️ Partial | `saas_settings` + `organizations` use optimistic `version` (finding 8 PARTIAL); subscriptions/user profile still last-write-wins |
+| Concurrent update conflicts | ✅ | Optimistic `version` on `saas_settings`, `organizations`, `users`, `subscriptions` (finding 8 FIXED). |
 | Unsafe soft delete / retention | ✅ | Purge honors `legalHold` + targeted query (finding 7 FIXED). |
 | Missing audit trail | ✅ | **Finding 2 FIXED** — `auditLog()` persists to chain; admin mutations audited. |
 | Job retries causing duplicate actions | ✅ | Scheduler idempotency keys + BullMQ single-delivery. |
@@ -313,23 +313,18 @@ still use `as` casts — see §8).
   `tax_exemptions`, `trusted_devices`, `support_tickets`).
 - **Finding 9 (Medium): the second, unused tenant model is a liability.**
 
-> **Status: PARTIALLY FIXED** (2026-07-04). `resolveTenant()` no longer trusts
-> `X-Tenant-ID` or `?tenant=` (subdomain only). `tenantRateLimit` only applies
-> tenant-scoped buckets when the caller is authenticated. The unused `tenants`
-> table / routes remain — delete vs wire-after-auth still needs a product decision.
+> **Status: FIXED** (2026-07-04). Removed `resolveTenant()` / `requireTenant()`
+> middleware and their public exports. `tenantRateLimit` buckets by authenticated
+> `user.id` or client IP — never `X-Tenant-ID` or request context. Dropped unused
+> `organizations.tenant_id` FK. Org-scoped isolation (`organization_members`) remains
+> the live boundary; admin `/admin/tenants` CRUD is retained as a platform-operator
+> feature (admin-gated, not request-time resolution).
 > Verified: `src/__tests__/tenant.middleware.test.ts`.
 
-  `tenants` table, `resolveTenant()`/`requireTenant()` (`middleware/tenant.ts`), and
-  `X-Tenant-ID`/subdomain resolution are **never mounted** (`grep` shows only the
-  re-export in `index.ts`). `tenantRateLimit` reads `c.get("tenantId")`
-  (`rateLimiting.ts:177`) which is therefore never set — but if `resolveTenant()`
-  were ever mounted as written, it would trust an **unauthenticated** `X-Tenant-ID`
-  header/query with no check that the caller belongs to that tenant. That is a
-  latent tenant-spoofing bug.
-  - **Fix.** Either delete the tenant layer, or wire it *after* auth and validate
-    membership: `tenantId` must be derived from the authenticated principal's
-    org/tenant, never from a raw request header. Add tenant-isolation integration
-    tests (attempt cross-org reads with a valid session and assert 403/404).
+  ~~`tenants` table, `resolveTenant()`/`requireTenant()` (`middleware/tenant.ts`), and
+  `X-Tenant-ID`/subdomain resolution are **never mounted**~~ Request-time tenant
+  resolution has been removed. Admin tenant CRUD at `/admin/tenants` is unrelated to
+  per-request isolation.
 - **Recommendation.** Add a scoped-repository convention (`forOrg(orgId)`) so no
   handler can forget the `orgId` predicate, and consider Postgres RLS for the
   org-owned tables as defense-in-depth.
@@ -384,18 +379,18 @@ still use `as` casts — see §8).
     `wallet_transactions.stripePaymentIntentId` so a Stripe retry can't double-credit.
 - **🟡 Finding 8 (Medium): no optimistic locking.**
 
-> **Status: PARTIALLY FIXED** (2026-07-04). Added `version int` to
-> `saas_settings` and `organizations`; `PUT /admin/settings` and `PUT /orgs/:id`
-> accept optional `version` and return 409 on mismatch. Subscriptions and user
-> profile updates remain last-write-wins. Run `bun run db:push` to apply columns.
-> Verified: `src/__tests__/settings.optimisticLock.test.ts`.
+> **Status: FIXED** (2026-07-04). `version int` on `saas_settings`, `organizations`,
+> `users`, and `subscriptions`. `PUT /admin/settings`, `PUT /orgs/:id`,
+> `PATCH /auth/me`, and `POST /billing/cancel` + `/billing/reactivate` accept
+> optional `version` and return 409 on mismatch. All subscription repository writes
+> increment `version`. Run `bun run db:push` to apply new columns.
+> Verified: `src/__tests__/settings.optimisticLock.test.ts`,
+> `src/__tests__/profile.optimisticLock.test.ts`,
+> `src/__tests__/subscription.optimisticLock.test.ts`.
 
-  Mutable rows (`organizations`,
-  `saas_settings`, `subscriptions`, user profile) are updated last-write-wins with a
-  bare `updatedAt = now()`. Two managers/admins editing concurrently silently lose
-  one edit ("stale frontend overwrites newer backend"). Add a `version int` column
-  and `WHERE version = :expected` on update (return 409 on mismatch), or gate on
-  `updatedAt`.
+  ~~Mutable rows (`organizations`,
+  `saas_settings`, `subscriptions`, user profile) are updated last-write-wins~~
+  High-risk mutable rows now use optimistic locking.
 - **Constraints that are good:** compound uniques on `organization_members`,
   `usage_counters` (`nullsNotDistinct`), `tax_exemptions`, `trusted_devices`;
   `processed_stripe_events`/`processed_webhook_events` idempotency; audit hash chain
@@ -492,11 +487,11 @@ still use `as` casts — see §8).
 8. ~~**Finding 12**~~ ✅ — revoke all sessions on successful password reset.
 9. ~~**Finding 10**~~ ✅ — remove hardcoded DB fallback; require `DATABASE_URL`.
 10. ~~**Finding 11**~~ ✅ — add `otps` and `audit_logs(actor_id)` indexes (schema updated; run `db:push`).
-11. Partial — regression tests added for findings 1, 4, 6, 7; tenant-isolation and concurrent-edit tests remain.
+11. ~~Partial~~ ✅ — regression tests for findings 1, 4, 6, 7, 8, 9; tenant-isolation integration tests remain a nice-to-have.
 
 ### Long-term (this quarter — architecture)
-12. **Finding 9** — resolve the dual tenant model (**PARTIALLY FIXED** — spoofing vectors removed; delete vs wire-after-auth still open).
-13. **Finding 8** — optimistic-locking on more resources (**PARTIALLY FIXED** — `saas_settings` + `organizations`; subscriptions/profile remain).
+12. ~~**Finding 9**~~ ✅ — vestigial request-time tenant middleware removed; rate limits keyed by user/IP.
+13. ~~**Finding 8**~~ ✅ — optimistic locking on `saas_settings`, `organizations`, `users`, `subscriptions`.
 14. ~~**Finding 13**~~ ✅ — org authorization reads routed to primary.
 15. Centralize org-permission middleware; consider Postgres RLS; load-test audit chain.
 16. ~~**Findings 14–17 (Low)**~~ ✅ — CORS dev allowlist, avatar throttle, impersonation `act_as` chain, secret-doc drift.

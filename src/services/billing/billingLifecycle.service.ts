@@ -13,7 +13,7 @@
  * extra tables are needed and emails are never sent twice for a stage.
  */
 
-import { and, eq, isNotNull } from "drizzle-orm";
+import { and, eq, isNotNull, sql } from "drizzle-orm";
 import { getDb } from "../../db/index";
 import { subscriptionsTable, usersTable } from "../../db/schema";
 import { getLogger } from "../../logger/index";
@@ -66,7 +66,11 @@ async function saveMeta(subId: string, patch: LifecycleMeta, current: LifecycleM
   const db = getDb();
   await db
     .update(subscriptionsTable)
-    .set({ metadata: { ...current, ...patch }, updatedAt: new Date() })
+    .set({
+      metadata: { ...current, ...patch },
+      updatedAt: new Date(),
+      version: sql`${subscriptionsTable.version} + 1`,
+    })
     .where(eq(subscriptionsTable.id, subId));
 }
 

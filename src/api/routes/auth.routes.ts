@@ -1100,6 +1100,7 @@ router.get("/me", authMiddleware, async (c) => {
         emailVerifiedAt: usersTable.emailVerifiedAt,
         metadata: usersTable.metadata,
         locale: usersTable.locale,
+        version: usersTable.version,
         mfa: usersTable.mfa,
         passkeys: usersTable.passkeys,
         oauthProviders: usersTable.oauthProviders,
@@ -1167,6 +1168,7 @@ const patchMeSchema = z.object({
     .nullable()
     .optional(),
   locale: z.enum(SUPPORTED_LOCALES).optional(),
+  version: z.number().int().nonnegative().optional(),
 });
 
 router.patch("/me", authMiddleware, async (c) => {
@@ -1177,23 +1179,48 @@ router.patch("/me", authMiddleware, async (c) => {
     if (!parsed.success)
       return c.json({ error: "INVALID_REQUEST", issues: parsed.error.issues }, 400);
 
+    const { version: expectedVersion, ...fields } = parsed.data;
     const db = getDb();
+    const setPayload = { ...fields, updatedAt: new Date() };
+
+    const returningFields = {
+      id: usersTable.id,
+      email: usersTable.email,
+      username: usersTable.username,
+      displayName: usersTable.displayName,
+      avatarUrl: usersTable.avatarUrl,
+      roles: usersTable.roles,
+      status: usersTable.status,
+      phone: usersTable.phone,
+      locale: usersTable.locale,
+      version: usersTable.version,
+      updatedAt: usersTable.updatedAt,
+    };
+
+    if (expectedVersion !== undefined) {
+      const [updated] = await db
+        .update(usersTable)
+        .set({ ...setPayload, version: sql`${usersTable.version} + 1` })
+        .where(and(eq(usersTable.id, user.id), eq(usersTable.version, expectedVersion)))
+        .returning(returningFields);
+      if (!updated) {
+        return c.json(
+          {
+            error: "VERSION_CONFLICT",
+            message: "Profile was modified elsewhere; refresh and retry",
+          },
+          409
+        );
+      }
+      await invalidateUserCache(user.id);
+      return c.json(updated);
+    }
+
     const [updated] = await db
       .update(usersTable)
-      .set({ ...parsed.data, updatedAt: new Date() })
+      .set({ ...setPayload, version: sql`${usersTable.version} + 1` })
       .where(eq(usersTable.id, user.id))
-      .returning({
-        id: usersTable.id,
-        email: usersTable.email,
-        username: usersTable.username,
-        displayName: usersTable.displayName,
-        avatarUrl: usersTable.avatarUrl,
-        roles: usersTable.roles,
-        status: usersTable.status,
-        phone: usersTable.phone,
-        locale: usersTable.locale,
-        updatedAt: usersTable.updatedAt,
-      });
+      .returning(returningFields);
     if (!updated) return c.json({ error: "USER_NOT_FOUND" }, 404);
     await invalidateUserCache(user.id);
     return c.json(updated);

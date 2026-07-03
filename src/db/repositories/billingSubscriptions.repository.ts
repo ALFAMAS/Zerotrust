@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { getDb } from "..";
 import { subscriptionsTable } from "../schema";
 
@@ -21,6 +21,42 @@ export interface CheckoutSubscriptionInput extends SubscriptionLifecycleUpdateIn
   stripeCustomerId: string | null;
 }
 
+/** False when an optimistic-lock version check fails. */
+export type SubscriptionMutationResult = boolean;
+
+type DbClient = ReturnType<typeof getDb>;
+
+async function updateSubscriptionRow(
+  subscriptionId: string,
+  set: Record<string, unknown>,
+  expectedVersion?: number,
+  tx?: DbClient
+): Promise<SubscriptionMutationResult> {
+  const db = tx ?? getDb();
+  const patch = {
+    ...set,
+    updatedAt: new Date(),
+    version: sql`${subscriptionsTable.version} + 1`,
+  };
+
+  if (expectedVersion !== undefined) {
+    const [row] = await db
+      .update(subscriptionsTable)
+      .set(patch)
+      .where(
+        and(
+          eq(subscriptionsTable.id, subscriptionId),
+          eq(subscriptionsTable.version, expectedVersion)
+        )
+      )
+      .returning({ id: subscriptionsTable.id });
+    return Boolean(row);
+  }
+
+  await db.update(subscriptionsTable).set(patch).where(eq(subscriptionsTable.id, subscriptionId));
+  return true;
+}
+
 export async function upsertCheckoutSubscription(input: CheckoutSubscriptionInput): Promise<void> {
   const db = getDb();
   await db.transaction(async (tx) => {
@@ -30,7 +66,11 @@ export async function upsertCheckoutSubscription(input: CheckoutSubscriptionInpu
       .values(values)
       .onConflictDoUpdate({
         target: input.orgId ? subscriptionsTable.orgId : subscriptionsTable.userId,
-        set: { ...values, updatedAt: new Date() },
+        set: {
+          ...values,
+          updatedAt: new Date(),
+          version: sql`${subscriptionsTable.version} + 1`,
+        },
       });
   });
 }
@@ -42,7 +82,11 @@ export async function applySubscriptionLifecycleUpdate(
   await db.transaction(async (tx) => {
     await tx
       .update(subscriptionsTable)
-      .set({ ...input, updatedAt: new Date() })
+      .set({
+        ...input,
+        updatedAt: new Date(),
+        version: sql`${subscriptionsTable.version} + 1`,
+      })
       .where(eq(subscriptionsTable.stripeSubscriptionId, input.stripeSubscriptionId));
   });
 }
@@ -51,38 +95,46 @@ export async function setSubscriptionPaused(input: {
   subscriptionId: string;
   userId: string;
   reason?: unknown;
-}): Promise<void> {
-  const db = getDb();
-  await db.transaction(async (tx) => {
-    await tx
-      .update(subscriptionsTable)
-      .set({ status: "paused", updatedAt: new Date() })
-      .where(eq(subscriptionsTable.id, input.subscriptionId));
-  });
+  expectedVersion?: number;
+}): Promise<SubscriptionMutationResult> {
+  return getDb().transaction(async (tx) =>
+    updateSubscriptionRow(
+      input.subscriptionId,
+      { status: "paused" },
+      input.expectedVersion,
+      tx
+    )
+  );
 }
 
 export async function scheduleSubscriptionCancellation(input: {
   subscriptionId: string;
   userId: string;
   reason?: unknown;
-}): Promise<void> {
-  const db = getDb();
-  await db.transaction(async (tx) => {
-    await tx
-      .update(subscriptionsTable)
-      .set({ cancelAtPeriodEnd: true, updatedAt: new Date() })
-      .where(eq(subscriptionsTable.id, input.subscriptionId));
-  });
+  expectedVersion?: number;
+}): Promise<SubscriptionMutationResult> {
+  return getDb().transaction(async (tx) =>
+    updateSubscriptionRow(
+      input.subscriptionId,
+      { cancelAtPeriodEnd: true },
+      input.expectedVersion,
+      tx
+    )
+  );
 }
 
-export async function reactivateSubscription(input: { subscriptionId: string }): Promise<void> {
-  const db = getDb();
-  await db.transaction(async (tx) => {
-    await tx
-      .update(subscriptionsTable)
-      .set({ cancelAtPeriodEnd: false, status: "active", updatedAt: new Date() })
-      .where(eq(subscriptionsTable.id, input.subscriptionId));
-  });
+export async function reactivateSubscription(input: {
+  subscriptionId: string;
+  expectedVersion?: number;
+}): Promise<SubscriptionMutationResult> {
+  return getDb().transaction(async (tx) =>
+    updateSubscriptionRow(
+      input.subscriptionId,
+      { cancelAtPeriodEnd: false, status: "active" },
+      input.expectedVersion,
+      tx
+    )
+  );
 }
 
 export async function recordInvoicePaymentFailure(input: {
@@ -100,7 +152,12 @@ export async function recordInvoicePaymentFailure(input: {
   await db.transaction(async (tx) => {
     await tx
       .update(subscriptionsTable)
-      .set({ status: "past_due", metadata, updatedAt: new Date() })
+      .set({
+        status: "past_due",
+        metadata,
+        updatedAt: new Date(),
+        version: sql`${subscriptionsTable.version} + 1`,
+      })
       .where(eq(subscriptionsTable.id, input.subscriptionId));
   });
 }
@@ -110,7 +167,12 @@ export async function clearSubscriptionDunning(input: { subscriptionId: string }
   await db.transaction(async (tx) => {
     await tx
       .update(subscriptionsTable)
-      .set({ status: "active", metadata: {}, updatedAt: new Date() })
+      .set({
+        status: "active",
+        metadata: {},
+        updatedAt: new Date(),
+        version: sql`${subscriptionsTable.version} + 1`,
+      })
       .where(eq(subscriptionsTable.id, input.subscriptionId));
   });
 }
