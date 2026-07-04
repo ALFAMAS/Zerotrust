@@ -144,7 +144,7 @@ here instead of appearing as dashboard gaps.
 | GET | /compliance/soc2/controls | packages/ui/src/lib/server-state/compliance.ts |
 | PUT | /compliance/soc2/controls | packages/ui/src/lib/server-state/compliance.ts |
 | GET | /compliance/soc2/readiness | packages/ui/src/lib/server-state/compliance.ts |
-| POST | /feedback | packages/ui/src/components/FeedbackWidget.tsx |
+| POST | /feedback | packages/ui/src/lib/server-state/feedback.ts |
 | DELETE | /gdpr/account | packages/ui/src/lib/server-state/account.ts |
 | POST | /gdpr/account/deletion/cancel | packages/ui/src/lib/server-state/account.ts |
 | GET | /gdpr/export | packages/ui/src/lib/server-state/account.ts |

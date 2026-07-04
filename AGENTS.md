@@ -26,6 +26,7 @@ The "Canonical shared modules" table in `CLAUDE.md` is authoritative. Key entrie
 - **Server fetch** → `src/shared/safeFetch.ts`
 - **Token hashing** → `src/shared/cryptoHash.ts`
 - **UI API calls** → `packages/ui/src/lib/apiClient.ts`
+- **UI server state (reads/writes)** → `packages/ui/src/lib/server-state/*` (TanStack Query hooks; see `docs/ui-http-client.md`)
 - **Client redirects** → `packages/ui/src/lib/safeRedirect.ts`
 
 When adding a new feature that matches one of these patterns, extend the canonical module — never inline a new implementation.

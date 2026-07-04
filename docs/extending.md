@@ -111,3 +111,46 @@ it in `src/mfa/`. Register the channel name in the settings model and UI.
   happy path + a provider-error path with the network mocked (see
   `src/__tests__/oauth.test.ts`).
 - **Document it here** and in `.env.example`.
+
+---
+
+## Add frontend data fetching (TanStack Query)
+
+All dashboard/admin pages fetch API data through TanStack Query hooks in
+`packages/ui/src/lib/server-state/`, not ad-hoc `useEffect` + `apiClient` calls
+in page components.
+
+### Architecture
+
+| Piece | Location |
+| --- | --- |
+| App provider | `packages/ui/src/components/QueryProvider.tsx` (mounted in root `app/layout.tsx`) |
+| Query key factory | `packages/ui/src/lib/server-state/queryKeys.ts` |
+| Domain module | `packages/ui/src/lib/server-state/<domain>.ts` — fetchers, `queryOptions`, hooks, mutations |
+| Shared types | `packages/ui/src/lib/server-state/types.ts` |
+| RSC prefetch | `packages/ui/src/lib/server-state/prefetch.ts` + `HydrationBoundary` in `page.tsx` |
+| Stale/refetch UI | `packages/ui/src/components/ServerStateStatus.tsx` |
+
+HTTP still goes through `apiClient.ts` (`apiGet`, `apiPost`, …) — **inside**
+server-state modules only.
+
+### Checklist for a new page or API surface
+
+1. **Add query keys** — extend `queryKeys.ts` with a stable hierarchical key
+   (e.g. `queryKeys.widgets.list({ page })`).
+2. **Create or extend a domain module** — mirror `apiKeys.ts`:
+   - `fetch*` functions calling `apiClient`
+   - `*QueryOptions()` using `queryOptions({ queryKey, queryFn, enabled })`
+   - `use*Query()` / `use*Mutation()` hooks exported for pages
+3. **Mutations** — use `useMutation`; call
+   `queryClient.invalidateQueries({ queryKey: … })` on `onSettled` (or optimistic
+   updates with rollback when the list is simple).
+4. **Page component** — import hooks from `@/lib/server-state/<domain>`; keep
+   forms, modals, and filters as local `useState`.
+5. **Tests** — mock `@/lib/apiClient` via `@/test/apiClientMock`; test the
+   client component. Add `queryKeys` coverage when keys are non-trivial.
+6. **Optional RSC prefetch** — for high-traffic reads, add fetchers to
+   `prefetch.ts` and wrap the page in `HydrationBoundary` (see
+   [`docs/ui-http-client.md`](./ui-http-client.md)).
+
+Progress tracker: [`docs/tanstack-query-progress.md`](./tanstack-query-progress.md).

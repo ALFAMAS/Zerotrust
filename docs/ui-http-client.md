@@ -1,11 +1,58 @@
 # UI HTTP client patterns
 
-How the Next.js UI talks to the Hono API — client-side (`apiClient.ts`), server-side
-prefetch (`serverApiClient.ts`), and TanStack Query hydration (P3.4 pilot).
+How the Next.js UI talks to the Hono API — client-side (`apiClient.ts`), TanStack
+Query server-state modules, server-side prefetch (`serverApiClient.ts`), and
+hydration.
 
 ---
 
-## Client-side reads and mutations (default)
+## TanStack Query server-state (default for pages)
+
+All page-level reads and writes go through domain modules in
+[`packages/ui/src/lib/server-state/`](../packages/ui/src/lib/server-state/):
+
+| Layer | Role |
+| --- | --- |
+| `queryKeys.ts` | Hierarchical cache keys (`queryKeys.auth.me()`, `queryKeys.organizations.detail(id)`, …) |
+| `<domain>.ts` | `fetch*` helpers, `queryOptions`, `use*Query`, `use*Mutation` |
+| `types.ts` | Shared response/input types |
+| `prefetch.ts` | RSC-safe fetchers + `queryOptions` for server prefetch |
+| `QueryProvider.tsx` | Single app-level `QueryClientProvider` (30s stale time, no refetch on focus) |
+
+Pages import hooks (`useAuthMeQuery`, `useOrganizationsListQuery`, …) — not
+`apiGet`/`apiPost` directly. One-off utilities (`push.ts`, `pow.ts`) may call
+`apiClient` without TanStack Query when there is no cached server state.
+
+**Adding a domain hook** (see `apiKeys.ts`):
+
+```ts
+export function apiKeysListQueryOptions() {
+  return queryOptions({
+    queryKey: queryKeys.apiKeys.list(),
+    queryFn: fetchApiKeysList,
+  });
+}
+
+export function useApiKeysListQuery() {
+  return useQuery(apiKeysListQueryOptions());
+}
+
+export function useRevokeApiKeyMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id) => apiDelete(buildApiKeyPath(id)),
+    onSettled: () => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.apiKeys.list() });
+    },
+  });
+}
+```
+
+Write-only surfaces (e.g. `feedback.ts`) export mutation hooks only.
+
+---
+
+## Client-side HTTP transport
 
 All browser HTTP goes through [`packages/ui/src/lib/apiClient.ts`](../packages/ui/src/lib/apiClient.ts):
 
@@ -14,16 +61,23 @@ All browser HTTP goes through [`packages/ui/src/lib/apiClient.ts`](../packages/u
 - Retries transient failures with exponential backoff
 - Surfaces a consistent `{ message, code, status }` error shape
 
-TanStack Query hooks in `packages/ui/src/lib/server-state/` wrap `apiGet` /
-`apiPost` / etc. Pages import hooks (`useAuthMeQuery`, `useAdminStatsQuery`, …)
-rather than calling `fetch` directly.
+Used by server-state fetchers and mutations. Do not call from page components for
+cached resources — use the matching `use*Query` / `use*Mutation` hook instead.
 
-**When to use:** all client-rendered pages, mutations, and polling/refetch after
-the initial server render.
+**When to use:** mutations/queries inside `server-state/*`, utilities without
+cache needs, and polling/refetch after the initial server render.
 
 ---
 
-## Server-side prefetch (RSC — P3.4 pilot + P3.6 + P3.11 expansion)
+## Legacy note
+
+`packages/ui/src/lib/hooks/useApi.ts` has been removed. All product pages use
+TanStack Query via `server-state/*`. See
+[`docs/tanstack-query-progress.md`](./tanstack-query-progress.md).
+
+---
+
+## Server-side prefetch (RSC)
 
 Ten high-traffic dashboard/admin pages prefetch authenticated reads on the server:
 

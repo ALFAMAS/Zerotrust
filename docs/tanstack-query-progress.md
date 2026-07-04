@@ -23,9 +23,11 @@ Tracks the frontend server-state migration from ad-hoc `useEffect` + local loadi
 | Metric | Count |
 | --- | --- |
 | App `page.tsx` files | 53 |
-| Migrated to TanStack Query | 48 |
+| Migrated to TanStack Query | 49 |
 | Remaining (`lib/api` relative imports) | 0 |
 | Remaining (other legacy: `useApi`, raw `fetch`, `useEffect`+`apiGet`) | 0 |
+
+Legacy `useApi` / `usePaginatedApi` hooks removed (2026-07-05); all pages use `server-state/*`.
 | Static / no server state | 5 |
 | **Data-fetching completion** | **100%** (48/48) |
 
@@ -104,6 +106,7 @@ Relative `lib/api` imports in app `page.tsx`: **0**.
 | `/admin/search` | [x] | Search index management + provider via `adminSearch.ts`. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/adminSearch.test.tsx` |
 | `/admin/webhooks` | [x] | Admin-wide webhook delivery log lookup via `adminWebhooks.ts`. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/adminWebhooks.test.tsx` |
 | `/dashboard/billing` (extended) | [x] | Usage, VAT validate, tax exemptions, change-plan added to existing `billing.ts` surface. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/billing.test.tsx` |
+| `FeedbackWidget` (shared) | [x] | Generic feedback submit via `feedback.ts` mutation hook. | — |
 | `/admin/regions` (extended) | [x] | Org branding + custom domain forms added to `regions.ts`. | `NODE_ENV=test bun run --cwd packages/ui test -- src/lib/server-state/regions.test.tsx` |
 
 ## P2 product-surface pages (2026-07-03)

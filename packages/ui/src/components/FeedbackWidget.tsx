@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 
-import { apiPost } from "@/lib/apiClient";
+import { useSubmitFeedbackMutation } from "@/lib/server-state/feedback";
 
 type FeedbackType = "nps" | "thumbs";
 
@@ -21,15 +21,6 @@ interface Props {
 
 const DISMISS_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 
-async function submitFeedback(payload: {
-  type: FeedbackType;
-  score: number;
-  comment?: string;
-  context?: string;
-}) {
-  await apiPost("/feedback", payload);
-}
-
 export default function FeedbackWidget({
   type = "nps",
   context = "general",
@@ -40,7 +31,7 @@ export default function FeedbackWidget({
   const [step, setStep] = useState<"prompt" | "comment" | "done">("prompt");
   const [score, setScore] = useState<number | null>(null);
   const [comment, setComment] = useState("");
-  const [submitting, setSubmitting] = useState(false);
+  const submitFeedbackMutation = useSubmitFeedbackMutation();
 
   useEffect(() => {
     const dismissed = localStorage.getItem(storageKey);
@@ -62,9 +53,8 @@ export default function FeedbackWidget({
 
   async function handleSubmit() {
     if (score === null) return;
-    setSubmitting(true);
     try {
-      await submitFeedback({
+      await submitFeedbackMutation.mutateAsync({
         type,
         score,
         comment: comment || undefined,
@@ -73,7 +63,6 @@ export default function FeedbackWidget({
     } catch {
       // non-blocking
     } finally {
-      setSubmitting(false);
       setStep("done");
       localStorage.setItem(storageKey, String(Date.now() + DISMISS_TTL_MS));
       setTimeout(() => setVisible(false), 2500);
@@ -166,8 +155,12 @@ export default function FeedbackWidget({
             className="mb-3 resize-none"
           />
           <div className="flex gap-2">
-            <Button onClick={handleSubmit} disabled={submitting} className="flex-1">
-              {submitting ? "Sending…" : "Send"}
+            <Button
+              onClick={handleSubmit}
+              disabled={submitFeedbackMutation.isPending}
+              className="flex-1"
+            >
+              {submitFeedbackMutation.isPending ? "Sending…" : "Send"}
             </Button>
             <Button variant="outline" onClick={dismiss}>
               Skip

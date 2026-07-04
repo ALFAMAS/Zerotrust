@@ -9,12 +9,6 @@ import {
   adminDashboardKeys,
 } from "@/lib/server-state/adminDashboard";
 
-vi.mock("@/lib/hooks/useApi", () => ({
-  useApi: () => {
-    throw new Error("legacy useApi should not be called");
-  },
-}));
-
 const stats = {
   totalUsers: 100,
   activeUsers: 80,
