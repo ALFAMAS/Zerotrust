@@ -5,7 +5,11 @@ import { join } from "node:path";
 describe("database migrations", () => {
   const schemaSql = () => {
     const root = process.cwd();
-    return readFileSync(join(root, "src", "db", "schema", "tables.ts"), "utf8");
+    const schemaDir = join(root, "src", "db", "schema");
+    return readdirSync(schemaDir)
+      .filter((name) => name.endsWith(".ts") && name !== "index.ts" && name !== "tables.ts")
+      .map((name) => readFileSync(join(schemaDir, name), "utf8"))
+      .join("\n");
   };
 
   const migrationSql = () =>
@@ -36,6 +40,7 @@ describe("database migrations", () => {
     const sql = migrationSql();
     expect(sql).toContain('CREATE POLICY "webhook_endpoints_org_rls"');
     expect(sql).toContain('CREATE POLICY "support_tickets_org_rls"');
+    expect(sql).toContain('CREATE POLICY "usage_counters_org_rls"');
     expect(sql).toContain("app_rls_org_allowed");
   });
 });

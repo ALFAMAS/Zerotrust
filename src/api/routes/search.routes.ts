@@ -2,7 +2,6 @@ import { Hono } from "hono";
 import { z } from "zod";
 import { getLogger } from "../../logger";
 import { authMiddleware } from "../../middleware/auth";
-import { isValidRegion } from "../../services/ops/region.service";
 import {
   deleteDocument,
   indexDocument,
@@ -23,19 +22,17 @@ router.use("*", authMiddleware);
 
 // ── Global search ─────────────────────────────────────────────────────────────
 
-// GET /search?q=...&orgId=...&type=...&region=...&page=...&limit=...
+// GET /search?q=...&orgId=...&type=...&page=...&limit=...
 router.get("/", async (c) => {
   const { page, limit } = parsePaginatedQuery(c.req.query(), { defaultLimit: 20, maxLimit: 50 });
   const type = c.req.query("type") as SearchableType | undefined;
-  const rawRegion = c.req.query("region");
-  const region = rawRegion && isValidRegion(rawRegion) ? rawRegion : undefined;
   const q = c.req.query("q");
   const orgId = c.req.query("orgId");
   if (!q || q.length < 1 || q.length > 200) {
     return c.json({ error: "INVALID_REQUEST", message: "q must be 1-200 chars" }, 400);
   }
   try {
-    const results = await search({ query: q, orgId, type, region, limit });
+    const results = await search({ query: q, orgId, type, limit });
     return c.json({
       provider: results.provider,
       ...paginated(results.hits, { page, limit, total: results.total }),
@@ -50,7 +47,6 @@ router.get("/", async (c) => {
 const smartSearchSchema = z.object({
   q: z.string().min(1).max(500),
   orgId: z.string().uuid().optional(),
-  region: z.enum(["us", "eu", "apac"]).optional(),
   limit: z.coerce.number().int().min(1).max(20).optional(),
 });
 
@@ -64,7 +60,6 @@ router.get("/smart", async (c) => {
     const results = await smartSearch({
       query: parsed.data.q,
       orgId: parsed.data.orgId,
-      region: parsed.data.region,
       limit: parsed.data.limit ?? 10,
     });
     return c.json(results);
@@ -81,7 +76,6 @@ const indexSchema = z.object({
   orgId: z.string().uuid(),
   title: z.string().min(1).max(500),
   content: z.string().max(50_000).optional(),
-  region: z.enum(["us", "eu", "apac"]).optional(),
   metadata: z.record(z.string(), z.unknown()).optional(),
 });
 
@@ -98,7 +92,6 @@ router.post("/index", async (c) => {
     orgId: parsed.data.orgId,
     title: parsed.data.title,
     content: parsed.data.content ?? "",
-    region: parsed.data.region ?? "us",
     metadata: parsed.data.metadata,
   });
   return c.json({ success: ok });

@@ -9,6 +9,7 @@ import {
 import { feedbackTable, organizationMembersTable, subscriptionsTable } from "../../db/schema";
 import { auditLog, getLogger } from "../../logger";
 import { authMiddleware } from "../../middleware/auth";
+import { orgRlsMiddleware } from "../../middleware/orgRls";
 import { sensitiveReverification } from "../../middleware/continuousVerification";
 import { getStripe } from "../../services/billing/stripeWebhookProcessor";
 import { getUsageSummary } from "../../services/billing/usage.service";
@@ -17,6 +18,9 @@ import type { HonoEnv } from "../../shared/types";
 
 const router = new Hono<HonoEnv>();
 const logger = getLogger("billing-routes");
+
+router.use("*", authMiddleware);
+router.use("*", orgRlsMiddleware({ allowQueryOrg: true }));
 
 /** Trial length for new subscriptions; 0 disables trials. */
 function trialDays(): number {
@@ -46,7 +50,7 @@ async function findSubscription(opts: { userId?: string; orgId?: string }) {
 }
 
 // GET /billing/subscription?orgId= — user subscription, or the org's when orgId given
-router.get("/subscription", authMiddleware, async (c) => {
+router.get("/subscription", async (c) => {
   const user = c.get("user");
   const orgId = c.req.query("orgId");
 
@@ -60,7 +64,7 @@ router.get("/subscription", authMiddleware, async (c) => {
 });
 
 // GET /billing/usage?orgId= — usage counters vs plan limits
-router.get("/usage", authMiddleware, async (c) => {
+router.get("/usage", async (c) => {
   const user = c.get("user");
   const orgId = c.req.query("orgId");
 
@@ -74,7 +78,7 @@ router.get("/usage", authMiddleware, async (c) => {
 
 // POST /billing/checkout — body: { priceId, orgId? }
 // With orgId the subscription belongs to the organization (per-org billing).
-router.post("/checkout", authMiddleware, async (c) => {
+router.post("/checkout", async (c) => {
   const user = c.get("user");
   const body = await c.req.json().catch(() => ({}));
   const priceId = body.priceId as string;
@@ -124,7 +128,7 @@ router.post("/checkout", authMiddleware, async (c) => {
 
 // POST /billing/change-plan — body: { priceId, orgId?, when?: "now" | "period_end" }
 // Upgrades prorate immediately by default; downgrades can defer to period end.
-router.post("/change-plan", authMiddleware, async (c) => {
+router.post("/change-plan", async (c) => {
   const user = c.get("user");
   const body = await c.req.json().catch(() => ({}));
   const priceId = body.priceId as string;
@@ -167,7 +171,7 @@ router.post("/change-plan", authMiddleware, async (c) => {
 
 // POST /billing/cancel — body: { orgId?, reason?, comment?, action?: "cancel" | "pause" }
 // Cancellation survey is stored as feedback; pause uses Stripe pause_collection.
-router.post("/cancel", authMiddleware, sensitiveReverification, async (c) => {
+router.post("/cancel", sensitiveReverification, async (c) => {
   const user = c.get("user");
   const body = await c.req.json().catch(() => ({}));
   const orgId = body.orgId as string | undefined;
@@ -259,7 +263,7 @@ router.post("/cancel", authMiddleware, sensitiveReverification, async (c) => {
 });
 
 // POST /billing/reactivate — undo a scheduled cancellation or resume a pause
-router.post("/reactivate", authMiddleware, async (c) => {
+router.post("/reactivate", async (c) => {
   const user = c.get("user");
   const body = await c.req.json().catch(() => ({}));
   const orgId = body.orgId as string | undefined;
@@ -302,7 +306,7 @@ router.post("/reactivate", authMiddleware, async (c) => {
 });
 
 // POST /billing/portal
-router.post("/portal", authMiddleware, async (c) => {
+router.post("/portal", async (c) => {
   const user = c.get("user");
   const body = await c.req.json().catch(() => ({}));
   const orgId = body.orgId as string | undefined;

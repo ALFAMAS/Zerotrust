@@ -10,6 +10,7 @@ import {
 import { supportTicketMessagesTable, supportTicketsTable } from "../../db/schema";
 import { getLogger } from "../../logger";
 import { authMiddleware } from "../../middleware/auth";
+import { orgRlsMiddleware } from "../../middleware/orgRls";
 import { resolvePlan } from "../../middleware/requirePlan";
 import { planAllows } from "../../shared/plans";
 import { rateLimit } from "../../middleware/rateLimiting";
@@ -21,6 +22,7 @@ const router = new Hono<HonoEnv>();
 const logger = getLogger("support-routes");
 
 router.use("*", authMiddleware);
+router.use("*", orgRlsMiddleware({ allowQueryOrg: true }));
 
 const TICKET_STATUSES = ["open", "pending", "closed"] as const;
 

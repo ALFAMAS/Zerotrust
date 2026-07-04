@@ -1752,24 +1752,6 @@ export class zerotrustClient {
   }
 
   /**
-   * Resolve storage region for country
-   *
-   * @route GET /regions/for-country
-   */
-  getRegionsForCountry(query?: { country?: string }): Promise<{ country?: string | null; region?: string }> {
-    return this.request("GET", `/regions/for-country`, { query });
-  }
-
-  /**
-   * Get region health
-   *
-   * @route GET /regions/health
-   */
-  getRegionsHealth(): Promise<GenericObject> {
-    return this.request("GET", `/regions/health`);
-  }
-
-  /**
    * Get organization branding
    *
    * @route GET /regions/orgs/{orgId}/branding
@@ -1797,16 +1779,6 @@ export class zerotrustClient {
    */
   putRegionsOrgsByOrgIdDomain(orgId: string, body: { domain?: string | null }): Promise<SuccessResponse> {
     return this.request("PUT", `/regions/orgs/${encodeURIComponent(orgId)}/domain`, { body });
-  }
-
-  /**
-   * Set organization data residency region
-   *
-   * @route PUT /regions/orgs/{orgId}/region
-   * @param orgId path parameter
-   */
-  putRegionsOrgsByOrgIdRegion(orgId: string, body: { region: "us" | "eu" | "apac" }): Promise<{ success?: boolean; region?: string }> {
-    return this.request("PUT", `/regions/orgs/${encodeURIComponent(orgId)}/region`, { body });
   }
 
   /**

@@ -194,7 +194,7 @@ export async function createServer() {
   app.route("/billing", globalizationRoutes);
 
   // ─── Region / tenant routes ────────────────────────────────────────────────
-  // Custom domain resolution, per-org branding, data residency.
+  // Custom domain resolution and per-org branding.
   app.route("/regions", regionRoutes);
 
   // ─── Search routes ─────────────────────────────────────────────────────────

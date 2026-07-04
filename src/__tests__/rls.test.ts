@@ -35,3 +35,12 @@ describe("withOrgRls", () => {
     expect(result).toBe("ok");
   });
 });
+
+describe("withRlsBypass", () => {
+  it("runs callback with bypass context", async () => {
+    const { withRlsBypass } = await import("../db/rls");
+    const result = await withRlsBypass(async () => "bypassed");
+    expect(result).toBe("bypassed");
+    expect(execute).toHaveBeenCalled();
+  });
+});

@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import { authMiddleware } from "../middleware/auth";
+import { orgRlsMiddleware } from "../middleware/orgRls";
 import { assertSafeFetchUrl } from "../shared/safeFetch";
 import type { HonoEnv } from "../shared/types";
 import { deliverWebhook } from "./delivery";
@@ -12,6 +13,7 @@ const app = new Hono<HonoEnv>();
 
 // Auth guard for all webhook admin routes
 app.use("*", authMiddleware);
+app.use("*", orgRlsMiddleware());
 
 // GET / — list endpoints for the caller's org memberships only
 app.get("/", async (c) => {

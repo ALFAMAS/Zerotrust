@@ -4,7 +4,7 @@ _Generated from `src/api/openapi.json` (zerotrust API v1.0.0) — run `bun run d
 
 Live, interactive docs: **Swagger UI at `/docs`** (dev). Full request/response types: the generated **`@zerotrust/client`** SDK (`packages/client`). 🔒 = requires authentication.
 
-**202 operations** across 22 groups.
+**199 operations** across 22 groups.
 
 > **Coverage note:** this lists every operation described in `openapi.json`, aligned with the mounted route surface in `src/api/server.ts` (198 backend routes). Request/response schemas for lower-traffic admin, webhook, tenant, and ops endpoints use minimal stubs; enrich per-route schemas as SDK consumers need them.
 
@@ -24,7 +24,7 @@ Live, interactive docs: **Swagger UI at `/docs`** (dev). Full request/response t
 - [Organizations](#organizations) (22)
 - [Passkeys](#passkeys) (7)
 - [Password Reset](#password-reset) (2)
-- [Regions](#regions) (7)
+- [Regions](#regions) (4)
 - [Search](#search) (5)
 - [Sessions](#sessions) (3)
 - [Shared Signals](#shared-signals) (1)
@@ -301,16 +301,13 @@ Password reset request, verification, and completion endpoints.
 
 ## Regions
 
-Custom domain resolution, region health, geo-routing, branding, domains, and data residency.
+Custom domain resolution and per-organization branding.
 
 | Method | Path | Summary | Auth |
 | --- | --- | --- | --- |
-| GET | `/regions/for-country` | Resolve storage region for country |  |
-| GET | `/regions/health` | Get region health |  |
 | GET | `/regions/orgs/{orgId}/branding` | Get organization branding | 🔒 |
 | PUT | `/regions/orgs/{orgId}/branding` | Update organization branding | 🔒 |
 | PUT | `/regions/orgs/{orgId}/domain` | Set organization custom domain | 🔒 |
-| PUT | `/regions/orgs/{orgId}/region` | Set organization data residency region | 🔒 |
 | GET | `/regions/resolve` | Resolve organization by custom domain |  |
 
 ## Search

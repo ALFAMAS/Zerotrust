@@ -10,18 +10,18 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
 
 ## Quick stats
 
-| Metric | Count |
-|--------|------:|
-| Route modules | 26 |
-| Service files | 46 |
-| DB tables | 40 |
-| Middleware | 21 |
-| Migrations | 35 (latest: `0035_org_rls_policies`) |
-| Route mounts in `server.ts` | 29 |
-| UI pages | 53 |
-| Tests | 1323 (1081 API + 242 UI, 136 files) |
-| ADRs | 9 |
-| Stack | Hono 4 · TypeScript 6 · Bun · Next.js 16 · Drizzle ORM · PostgreSQL · Redis |
+| Metric                      |                                                                       Count |
+| --------------------------- | --------------------------------------------------------------------------: |
+| Route modules               |                                                                          26 |
+| Service files               |                                                                          46 |
+| DB tables                   |                                                                          40 |
+| Middleware                  |                                                                          21 |
+| Migrations                  |                                      36 (latest: `0036_usage_counters_rls`) |
+| Route mounts in `server.ts` |                                                                          29 |
+| UI pages                    |                                                                          53 |
+| Tests                       |                                         1328 (1086 API + 242 UI, 138 files) |
+| ADRs                        |                                                                           9 |
+| Stack                       | Hono 4 · TypeScript 6 · Bun · Next.js 16 · Drizzle ORM · PostgreSQL · Redis |
 
 ---
 
@@ -278,6 +278,25 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
 
 ## Recent work (2026-07-04)
 
+### MT-1 — Postgres RLS defense-in-depth (shipped)
+
+- **Migrations:** `0035_org_rls_policies.sql` (webhooks, support, subscriptions);
+  `0036_usage_counters_rls.sql` (usage counters).
+- **Runtime:** `src/db/rls.ts` (`setOrgRlsContext`, `withOrgRls`, `withRlsBypass`);
+  `src/db/resolveOrgContext.ts`; `src/middleware/orgRls.ts` mounted on `/webhooks`,
+  `/support`, `/billing` (pool-safe transaction + `app.org_id`).
+- **`authMiddleware`:** resolves `X-Org-Id` → `activeOrgId` on context before handlers.
+- **Bypass:** platform admin / support `?all=true` sets `app.rls_bypass`; workers
+  remain permissive when org context unset.
+- **Regression:** `orgRls.middleware.test.ts`, `rls.test.ts`, `migrations.test.ts`,
+  `support.routes.test.ts`.
+
+### DI-1 — Schema split by domain (shipped)
+
+- **Modules:** `src/db/schema/{identity,organizations,audit,platform,support,api,billing,webhooks,compliance,files}.ts`
+  re-exported from `tables.ts` barrel + `index.ts`.
+- **Helper:** `scripts/split-schema-domains.ts` for future table additions.
+
 ### MT-1 (phase 1) — Postgres RLS foundation (shipped)
 
 - **Migration:** `drizzle/0035_org_rls_policies.sql` — `app_rls_org_allowed()` +
@@ -289,18 +308,16 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
 - **Regression:** `src/__tests__/rls.test.ts`, `migrations.test.ts` (RLS policy assertions).
 - **Remaining (todo):** pool-safe request-wide context from `authMiddleware`, more tables.
 
-### DI-1 (phase 1) — Schema directory barrel (shipped)
+### DI-1 (phase 1) — Schema directory barrel (shipped — superseded by full DI-1 above)
 
 - **Layout:** `src/db/schema/{index,types,tables}.ts`; `schema.ts` re-exports barrel.
 - **Extracted:** `OrgBranding` → `schema/types.ts`.
 - **Remaining (todo):** split `tables.ts` into domain modules (`identity`, `billing`, …).
 
-### CP-1 (blueprint) — Region-sharding ADR (shipped)
+### CP-1 — Data residency (removed 2026-07-05)
 
-- **ADR 009:** [`docs/adr/009-data-residency-sharding.md`](./docs/adr/009-data-residency-sharding.md)
-  — physical per-region Postgres/S3 topology + fork checklist.
-- **`region.service.ts`:** comment links ADR 009; R-006 stays `partial` until code ships.
-- **Remaining (todo):** `getDbForRegion()` + per-region env implementation.
+- **Reverted:** Per-region sharding, `storageRegion` column, ADR 009, `regionPools.ts`, and residency UI/API removed. Template is single-server (one Postgres + one object store per deploy).
+- **Kept:** Custom domain resolution and org branding in `region.service.ts` / `/regions` routes.
 
 ### ARCH-3 — Remove dead geo/temporal middleware (shipped)
 
@@ -385,6 +402,8 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
 - **UI:** in-memory access token (`auth.ts`); `apiClient.ts` uses
   `credentials: "include"` for refresh.
 - **ADR 008** updated — Option C is default template.
+- **2026-07-05:** Closed ZT-3 backlog; removed BFF fork-path docs from `todo.md`,
+  `docs/extending.md`, and ADR 008 — hybrid is the final web design.
 - **Verification (2026-07-04):** `bun run --cwd packages/ui test --run` → **242 passed**.
 
 ### MT-2 — Cross-tenant JIT org FKs (shipped)
@@ -425,14 +444,10 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
 - **Verification (2026-07-04):** `bun run test -- src/__tests__/server.securityHeaders.test.ts`
   → **2 passed**.
 
-### CP-1 — SOC 2 data residency risk register honesty (shipped)
+### CP-1 — SOC 2 data residency risk register (superseded 2026-07-05)
 
-- **R-006** downgraded from `mitigated` → `partial` in `compliance.service.ts`; mitigation
-  text documents logical `storageRegion` tagging only (single Postgres/S3 per deploy).
-- **R-005** mitigation softened to remove overclaimed residency controls.
-- **`region.service.ts`:** comment clarifies `storageRegion` is a label, not physical routing.
-- **Evidence:** `docs/compliance/evidence/2026/risk-assessment/2026-annual-risk-assessment.md`
-  and `docs/compliance/soc2-auditor-readiness.md` updated (R-006 partial).
+- **Removed:** Data residency / per-region sharding feature set (see CP-1 removal note above).
+- **R-006** updated to reflect single-server deployment (`mitigated`); no residency routing claims.
 
 ### DQ-1 — Dockerfile starts the API (shipped)
 
@@ -528,7 +543,7 @@ formal backlog._
   storage re-exports the shared helpers for backward compatibility.
 - **Verification (2026-07-03):** `bun run boundaries:check` → **0 violations**;
   `bun run test -- src/__tests__/audit.anchor.test.ts src/__tests__/s3Config.test.ts
-  src/__tests__/objectStorage.service.test.ts` → **57 tests passing**;
+src/__tests__/objectStorage.service.test.ts` → **57 tests passing**;
   `bun run type-check` → pass.
 
 ### P3.11 — RSC server prefetch expansion (four pages)
@@ -563,8 +578,8 @@ formal backlog._
   run `/auth/verify/challenge` → `/auth/verify/respond`, and retry the original
   mutation.
 - **Verification (2026-07-03):** `bun run test -- src/__tests__/org.routes.test.ts
-  src/__tests__/p1.repositories.test.ts src/__tests__/continuousVerification.test.ts
-  src/__tests__/mfa.routes.test.ts src/__tests__/verification.routes.test.ts`
+src/__tests__/p1.repositories.test.ts src/__tests__/continuousVerification.test.ts
+src/__tests__/mfa.routes.test.ts src/__tests__/verification.routes.test.ts`
   → **81 tests passing**; `bun run verify:generated` → **0 diff**.
 
 ---
@@ -640,7 +655,7 @@ formal backlog._
   options (SPA+BFF, full BFF, hybrid in-memory).
 - **Verification:** `bun run test -- src/__tests__/config.production.test.ts`
   → **7 tests passing**; `bunx biome check src/config/index.ts
-  src/__tests__/config.production.test.ts` → **0 errors**;
+src/__tests__/config.production.test.ts` → **0 errors**;
   `ls docs/adr/*.md` → **8 ADRs** (001–008). Full `bun run build` /
   `bun run type-check` remain blocked by pre-existing P2.2 service-layout
   import gaps, not by P4 changes.
@@ -722,21 +737,21 @@ formal backlog._
 - Covered loading, error + retry, empty, stale cached data, and background
   refetch states in UI and tests.
 - Verification: `NODE_ENV=test bun run --cwd packages/ui test --
-  src/lib/server-state/wallet.test.tsx` → **5 tests passing**;
+src/lib/server-state/wallet.test.tsx` → **5 tests passing**;
   `NODE_ENV=test bun run --cwd packages/ui test --
-  src/lib/server-state/webhooks.test.tsx` → **5 tests passing**;
+src/lib/server-state/webhooks.test.tsx` → **5 tests passing**;
   `NODE_ENV=test bun run --cwd packages/ui test --
-  src/lib/server-state/billing.test.tsx` → **3 tests passing**;
+src/lib/server-state/billing.test.tsx` → **3 tests passing**;
   `NODE_ENV=test bun run --cwd packages/ui test --
-  src/lib/server-state/support.test.tsx` → **5 tests passing**;
+src/lib/server-state/support.test.tsx` → **5 tests passing**;
   `NODE_ENV=test bun run --cwd packages/ui test --
-  src/lib/server-state/audit.test.tsx` → **3 tests passing**;
+src/lib/server-state/audit.test.tsx` → **3 tests passing**;
   `NODE_ENV=test bun run --cwd packages/ui test --
-  src/lib/server-state/tenants.test.tsx` → **4 tests passing**;
+src/lib/server-state/tenants.test.tsx` → **4 tests passing**;
   `NODE_ENV=test bun run --cwd packages/ui test --
-  src/app/dashboard/billing/page.test.tsx` → **9 tests passing**;
+src/app/dashboard/billing/page.test.tsx` → **9 tests passing**;
   root `bun run test` → **838 tests / 99 files passing**; `bun run
-  build` passes; `bun run --cwd packages/ui build` passes; `bun run lint` exits
+build` passes; `bun run --cwd packages/ui build` passes; `bun run lint` exits
   0 with existing script warnings only.
 
 ### Fork-readiness audit — completed items
@@ -744,29 +759,29 @@ formal backlog._
 All fork-blocking (must-fix) and should-fix audit items from this report are
 resolved. Verified open work is tracked in [`todo.md`](./todo.md).
 
-| ID | Item | Resolution |
-| --- | --- | --- |
-| A1 | UI production build | `next-themes` wrapper fixed; `bun run --cwd packages/ui build` passes |
-| A2 | Lint / CRLF / floating promises | `.gitattributes` enforces LF; no-floating-promise fixes; `bun run lint` exits 0 |
-| B1 | Reset-password flow | Uses OTP `/auth/password-reset/confirm` |
-| B2 | Stale `/admin/users/invite` | Removed |
-| B3/B6 | Hook dependency hazards | `verify`, `fetchOrgs`, `fetchSessions`, `showToast` stabilized |
-| B4 | Revoke-all sessions | Uses `DELETE /sessions` |
-| B5 | Admin force logout | Uses `/force-logout` |
-| B7 | Input sanitization placement | Mounted before routes |
-| B8 | Admin broadcast email | Fan-out routes through BullMQ |
-| B9 | Admin sessions pagination | `page`/`limit` + Previous/Next controls |
-| C1 | Smart search stub | Ranked PostgreSQL `websearch_to_tsquery`; semantic claims removed |
-| C2 | Elasticsearch dependency | `@elastic/elasticsearch` explicit in root deps |
-| C3 | Hardware key-store claims | README says software store; hardware providers are stubs |
-| C4 | OAuth account linking UI | Connect/disconnect on security page |
-| C5 | Notification preferences UI | Per-category × per-channel grid |
-| C6 | NPS / onboarding routes | Confirmed in `auth.routes.ts` |
-| C7 | Customer segments UI | Segment selector on admin user detail |
-| C8 | Webhook endpoint persistence | Drizzle `webhook_endpoints` + migration `0027` |
-| E1 | UI HTTP client boundary | `apiClient.ts` canonical; `docs/ui-http-client.md` |
-| E3 | shadcn migration | **0 raw controls** (`bun run ui:audit`) |
-| P4 | Bun runtime bump | `.bun-version` pinned to 1.3.14; `compress()` guard removed after `CompressionStream` verification |
+| ID    | Item                            | Resolution                                                                                         |
+| ----- | ------------------------------- | -------------------------------------------------------------------------------------------------- |
+| A1    | UI production build             | `next-themes` wrapper fixed; `bun run --cwd packages/ui build` passes                              |
+| A2    | Lint / CRLF / floating promises | `.gitattributes` enforces LF; no-floating-promise fixes; `bun run lint` exits 0                    |
+| B1    | Reset-password flow             | Uses OTP `/auth/password-reset/confirm`                                                            |
+| B2    | Stale `/admin/users/invite`     | Removed                                                                                            |
+| B3/B6 | Hook dependency hazards         | `verify`, `fetchOrgs`, `fetchSessions`, `showToast` stabilized                                     |
+| B4    | Revoke-all sessions             | Uses `DELETE /sessions`                                                                            |
+| B5    | Admin force logout              | Uses `/force-logout`                                                                               |
+| B7    | Input sanitization placement    | Mounted before routes                                                                              |
+| B8    | Admin broadcast email           | Fan-out routes through BullMQ                                                                      |
+| B9    | Admin sessions pagination       | `page`/`limit` + Previous/Next controls                                                            |
+| C1    | Smart search stub               | Ranked PostgreSQL `websearch_to_tsquery`; semantic claims removed                                  |
+| C2    | Elasticsearch dependency        | `@elastic/elasticsearch` explicit in root deps                                                     |
+| C3    | Hardware key-store claims       | README says software store; hardware providers are stubs                                           |
+| C4    | OAuth account linking UI        | Connect/disconnect on security page                                                                |
+| C5    | Notification preferences UI     | Per-category × per-channel grid                                                                    |
+| C6    | NPS / onboarding routes         | Confirmed in `auth.routes.ts`                                                                      |
+| C7    | Customer segments UI            | Segment selector on admin user detail                                                              |
+| C8    | Webhook endpoint persistence    | Drizzle `webhook_endpoints` + migration `0027`                                                     |
+| E1    | UI HTTP client boundary         | `apiClient.ts` canonical; `docs/ui-http-client.md`                                                 |
+| E3    | shadcn migration                | **0 raw controls** (`bun run ui:audit`)                                                            |
+| P4    | Bun runtime bump                | `.bun-version` pinned to 1.3.14; `compress()` guard removed after `CompressionStream` verification |
 
 - **E3 shadcn migration (complete)** — All raw HTML controls migrated to
   shadcn/ui primitives (`Button`, `Input`, `Textarea`, `Checkbox`). Added
@@ -834,7 +849,7 @@ resolved. Verified open work is tracked in [`todo.md`](./todo.md).
 - **M2 — Notification adapter pattern:** Extracted Slack/Teams/PagerDuty into
   standalone adapter modules behind a `NotificationAdapter` capability interface.
   Adding a new provider is now "write one module + register it." Isolated adapter
-  + dispatcher tests added.
+  - dispatcher tests added.
 
 - **H3 — UI component/integration tests:** happy-dom + Testing Library harness.
   Grew from 11 to 58 tests across 8 files (login, register, reset-password,
@@ -996,7 +1011,7 @@ resolved. Verified open work is tracked in [`todo.md`](./todo.md).
     retained (`removeOnFail`) and exposed via `getFailedScheduledJobs()`
     instead of vanishing after a failed `setInterval` tick.
   - **Idempotent replay + failure recovery:** the registry `idempotencyKey`
-    marker is now written to Redis only *after* a successful run, so
+    marker is now written to Redis only _after_ a successful run, so
     replaying an already-completed tick is a no-op, while a failed attempt is
     **not** marked complete — a BullMQ retry actually re-executes the
     handler. `src/__tests__/scheduler.test.ts` (15 tests) proves both.
@@ -1013,7 +1028,7 @@ resolved. Verified open work is tracked in [`todo.md`](./todo.md).
     now shuts it down gracefully (alongside the email/Stripe queues) on
     `SIGTERM`/`SIGINT`.
   - `docs/deployment.md` — new §Queue-backed cron scheduling (B5) documents
-    the topology;     `.env.example`, `README.md`, `docs/AUDIT.md`, and
+    the topology; `.env.example`, `README.md`, `docs/AUDIT.md`, and
     `docs/reference-architecture.md` updated to drop
     stale "leader-elected `setInterval`" references.
 
@@ -1059,6 +1074,7 @@ resolved. Verified open work is tracked in [`todo.md`](./todo.md).
 Shipped P3.6–P3.10 (final P3 backlog slice; P3.1–P3.5 above):
 
 ### P3.1 — UI test coverage toward 85%
+
 - Added page/component tests: dashboard home, profile, security/MFA, org settings,
   admin overview, compliance, regions (15 total under `packages/ui/src/app/`).
 - API coverage ratchet raised to 63% lines / 57% branches; UI package ratchet added
@@ -1066,21 +1082,25 @@ Shipped P3.6–P3.10 (final P3 backlog slice; P3.1–P3.5 above):
 - [`docs/maintenance-scorecard.md`](./docs/maintenance-scorecard.md) §3 updated.
 
 ### P3.2 — Read replica defaults
+
 - Read-heavy admin/analytics/org/notification/session/support handlers route through
   `getReadDb()`; route tests assert replica usage on admin list endpoints.
 - Replica lag expectations in [`docs/deployment.md`](./docs/deployment.md) §Read replica routing.
 
 ### P3.3 — Elasticsearch optional
+
 - `elasticsearch.enabled` defaults to `false`; Postgres FTS + hash-chain audit work without ES.
 - Config + search service tests prove database provider when ES is disabled.
 - README and deployment docs describe ES as opt-in for large tenants.
 
 ### P3.4 — RSC server prefetch pilot
+
 - `/dashboard` and `/admin` prefetch TanStack Query data server-side with
   `HydrationBoundary`; client components handle mutations.
 - Pattern in [`docs/ui-http-client.md`](./docs/ui-http-client.md).
 
 ### P3.5 — Destructive migration CI gate
+
 - `scripts/check-destructive-migrations.ts` + `.destructive-migrations.json` in
   CI (`migrations:check`) and pre-commit; tests in `destructiveMigrations.script.test.ts`.
 

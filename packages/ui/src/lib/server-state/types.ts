@@ -492,15 +492,6 @@ export interface BroadcastResponse {
   recipients: number;
 }
 
-export interface RegionHealth {
-  status: string;
-  regions: string[];
-}
-
-export interface SetOrgRegionInput {
-  region: string;
-}
-
 export type SearchHitType = "user" | "org" | "note" | "ticket";
 
 export interface SearchHit {

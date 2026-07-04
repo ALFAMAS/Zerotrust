@@ -9,11 +9,11 @@ long-term items remain in [`../todo.md`](../todo.md). Standing audit:
 
 zerotrust is a **Bun monorepo** with three deployables:
 
-| Package | What it is | Port |
-| --- | --- | --- |
-| `src/` | Hono + TypeScript HTTP API | 1337 |
-| `packages/ui/` | Next.js 16 (App Router, React 19) dashboard/admin/landing | 3000 |
-| `packages/client/` | Generated, dependency-free TypeScript SDK (from `src/api/openapi.json`) | — |
+| Package            | What it is                                                              | Port |
+| ------------------ | ----------------------------------------------------------------------- | ---- |
+| `src/`             | Hono + TypeScript HTTP API                                              | 1337 |
+| `packages/ui/`     | Next.js 16 (App Router, React 19) dashboard/admin/landing               | 3000 |
+| `packages/client/` | Generated, dependency-free TypeScript SDK (from `src/api/openapi.json`) | —    |
 
 It is a **modular monolith**: one API process exposes ~26 route modules backed
 by ~45 services and ~21 middleware, persisting to PostgreSQL (40 tables) with
@@ -63,18 +63,18 @@ predicates on org-scoped tables.
 
 ## 3. Module map (`src/`)
 
-| Area | Dir(s) | Responsibility |
-| --- | --- | --- |
-| HTTP | `api/` | Hono app, route mounting, OpenAPI spec |
-| Domain logic | `services/{auth,billing,notifications,compliance,ops,shared}/` (48 files) | token, session, email/queue, billing, wallet, globalization, search, compliance, backup, SLO, alerting… |
-| Middleware | `middleware/` (~20) | auth, rate limiting, CSRF/headers, plan gating, abuse defense, API versioning |
-| Data | `db/` | Drizzle schema (40 tables) + connection; `models/` thin table re-exports |
-| Crypto | `crypto/` | `paseto-v4` (v4.local), `csfle` (field encryption), `hardware-key-store`, `codes` |
-| MFA | `mfa/` | TOTP, Email OTP channel, FIDO MDS3 |
-| OAuth | `oauth/` | provider factory + adapters (Google/GitHub/Facebook; Apple Sign In not yet implemented) |
-| Access | `jit/` | cross-tenant just-in-time elevation |
-| Platform | `audit/` `metrics/` `telemetry/` `webhooks/` `notifications/` `ssf/` | hash-chained audit log, Prometheus, OTel, outbound webhooks, SSF receiver |
-| Cross-cutting | `shared/` `config/` `logger/` `templates/` | safe-fetch/redirect guards, typed config, structured logging, email templates |
+| Area          | Dir(s)                                                                    | Responsibility                                                                                          |
+| ------------- | ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| HTTP          | `api/`                                                                    | Hono app, route mounting, OpenAPI spec                                                                  |
+| Domain logic  | `services/{auth,billing,notifications,compliance,ops,shared}/` (48 files) | token, session, email/queue, billing, wallet, globalization, search, compliance, backup, SLO, alerting… |
+| Middleware    | `middleware/` (~20)                                                       | auth, rate limiting, CSRF/headers, plan gating, abuse defense, API versioning                           |
+| Data          | `db/`                                                                     | Drizzle schema (40 tables) + connection; `models/` thin table re-exports                                |
+| Crypto        | `crypto/`                                                                 | `paseto-v4` (v4.local), `csfle` (field encryption), `hardware-key-store`, `codes`                       |
+| MFA           | `mfa/`                                                                    | TOTP, Email OTP channel, FIDO MDS3                                                                      |
+| OAuth         | `oauth/`                                                                  | provider factory + adapters (Google/GitHub/Facebook; Apple Sign In not yet implemented)                 |
+| Access        | `jit/`                                                                    | cross-tenant just-in-time elevation                                                                     |
+| Platform      | `audit/` `metrics/` `telemetry/` `webhooks/` `notifications/` `ssf/`      | hash-chained audit log, Prometheus, OTel, outbound webhooks, SSF receiver                               |
+| Cross-cutting | `shared/` `config/` `logger/` `templates/`                                | safe-fetch/redirect guards, typed config, structured logging, email templates                           |
 
 ## 4. State & data
 
@@ -150,15 +150,15 @@ client-side TanStack Query. A built-in Next.js MCP dev server is exposed at
 
 ## Proposed upgrades (all shipped)
 
-| # | Change | Why | Effort |
-| --- | --- | --- | --- |
-| **P1** | Split HTTP and worker/scheduler processes (or instance-guard the schedulers) | **Correctness** — duplicate jobs under cluster mode | **Shipped** (P1.2, P1.5) |
-| P2 | Adopt expand/contract migrations; gate destructive DDL | Safe rollbacks; the `0020`–`0024` drops are irreversible | **Shipped** (P3.5) — CI destructive-migration gate |
-| P3 | Make Elasticsearch fully optional / default to Postgres FTS | Drop an operational dependency post-slim-down | **Shipped** (2026-07-03) |
-| P4 | Move hot dashboard reads to Server Components / route handlers | TTFB, fewer client waterfalls | **Shipped** (P3.4 pilot + P3.6 + P3.11 — ten prefetched routes) |
-| P5 | Containerize (Dockerfile + compose) and split health/readiness | Reproducible deploys, orchestrator-friendly | **Shipped** — Dockerfile + `docker-compose.yml` + readiness |
-| P6 | Fail-fast typed config validation at boot | Catch missing prod secrets before serving traffic | **Shipped** (P4.3) |
-| P7 | Group `services/` by domain | **Shipped 2026-07-03** — files live under `auth/`, `billing/`, `notifications/`, `compliance/`, `ops/`, and `shared/` | Done |
+| #      | Change                                                                       | Why                                                                                                                   | Effort                                                          |
+| ------ | ---------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| **P1** | Split HTTP and worker/scheduler processes (or instance-guard the schedulers) | **Correctness** — duplicate jobs under cluster mode                                                                   | **Shipped** (P1.2, P1.5)                                        |
+| P2     | Adopt expand/contract migrations; gate destructive DDL                       | Safe rollbacks; the `0020`–`0024` drops are irreversible                                                              | **Shipped** (P3.5) — CI destructive-migration gate              |
+| P3     | Make Elasticsearch fully optional / default to Postgres FTS                  | Drop an operational dependency post-slim-down                                                                         | **Shipped** (2026-07-03)                                        |
+| P4     | Move hot dashboard reads to Server Components / route handlers               | TTFB, fewer client waterfalls                                                                                         | **Shipped** (P3.4 pilot + P3.6 + P3.11 — ten prefetched routes) |
+| P5     | Containerize (Dockerfile + compose) and split health/readiness               | Reproducible deploys, orchestrator-friendly                                                                           | **Shipped** — Dockerfile + `docker-compose.yml` + readiness     |
+| P6     | Fail-fast typed config validation at boot                                    | Catch missing prod secrets before serving traffic                                                                     | **Shipped** (P4.3)                                              |
+| P7     | Group `services/` by domain                                                  | **Shipped 2026-07-03** — files live under `auth/`, `billing/`, `notifications/`, `compliance/`, `ops/`, and `shared/` | Done                                                            |
 
 ### P1 — Separate the worker from the API process (correctness) — **Shipped** (P1.2, P1.5)
 
@@ -216,6 +216,5 @@ module boundaries.
 
 ---
 
-All proposals above are shipped. Five long-term items remain — see
-[`../todo.md`](../todo.md) (MT-1 RLS phase 2, CP-1 sharding, DI-1 schema split,
-DQ-2 coverage, ZT-3 BFF fork path).
+All proposals above are shipped. One long-term item remains — see
+[`../todo.md`](../todo.md) (DQ-2 coverage ratchet).

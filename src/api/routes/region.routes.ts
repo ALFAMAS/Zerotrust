@@ -4,13 +4,9 @@ import { authMiddleware } from "../../middleware/auth";
 import { requirePlan } from "../../middleware/requirePlan";
 import {
   getOrgBranding,
-  regionForCountry,
-  regionHealth,
   resolveOrgByDomain,
-  type StorageRegion,
   setOrgBranding,
   setOrgCustomDomain,
-  setOrgStorageRegion,
 } from "../../services/ops/region.service";
 import type { HonoEnv } from "../../shared/types";
 
@@ -30,7 +26,6 @@ router.get("/resolve", async (c) => {
     orgName: org.orgName,
     orgSlug: org.orgSlug,
     customDomain: org.customDomain,
-    storageRegion: org.storageRegion,
     branding: {
       appName: org.branding.appName,
       brandColor: org.branding.brandColor,
@@ -40,20 +35,6 @@ router.get("/resolve", async (c) => {
       customLoginUrl: org.branding.customLoginUrl,
     },
   });
-});
-
-// ── Public: region health ─────────────────────────────────────────────────────
-
-router.get("/health", (c) => {
-  return c.json(regionHealth());
-});
-
-// ── Public: region for country (geo-routing helper) ──────────────────────────
-
-router.get("/for-country", (c) => {
-  const country = c.req.query("country") ?? c.req.header("x-country-code") ?? null;
-  const region = regionForCountry(country);
-  return c.json({ country, region });
 });
 
 // ── Authenticated: get org branding ───────────────────────────────────────────
@@ -118,26 +99,6 @@ router.put(
   } catch (err: any) {
     return c.json({ error: "CONFLICT", message: err.message }, 409);
   }
-  }
-);
-
-const regionSchema = z.object({
-  region: z.enum(["us", "eu", "apac"]),
-});
-
-// PUT /orgs/:orgId/region — set data residency region (Enterprise)
-router.put(
-  "/orgs/:orgId/region",
-  requirePlan("ssoSaml", { orgIdParam: "orgId" }),
-  async (c) => {
-  const orgId = c.req.param("orgId");
-  const body = await c.req.json().catch(() => ({}));
-  const parsed = regionSchema.safeParse(body);
-  if (!parsed.success) {
-    return c.json({ error: "INVALID_REQUEST", issues: parsed.error.issues }, 400);
-  }
-  await setOrgStorageRegion(orgId, parsed.data.region as StorageRegion);
-  return c.json({ success: true, region: parsed.data.region });
   }
 );
 

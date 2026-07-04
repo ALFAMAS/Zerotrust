@@ -2,7 +2,6 @@ import { sql } from "drizzle-orm";
 import { getConfig } from "../../config/index";
 import { getReadDb } from "../../db/index";
 import { getLogger } from "../../logger/index";
-import type { StorageRegion } from "./region.service";
 
 const logger = getLogger("search-service");
 
@@ -14,7 +13,6 @@ export interface SearchDocument {
   orgId: string;
   title: string;
   content: string;
-  region: StorageRegion;
   metadata?: Record<string, unknown>;
 }
 
@@ -76,7 +74,6 @@ export async function ensureIndex(type: SearchableType): Promise<boolean> {
             title: { type: "text", analyzer: "standard" },
             content: { type: "text", analyzer: "standard" },
             orgId: { type: "keyword" },
-            region: { type: "keyword" },
             type: { type: "keyword" },
           },
         },
@@ -104,7 +101,6 @@ export async function indexDocument(doc: SearchDocument): Promise<boolean> {
         title: doc.title,
         content: doc.content,
         orgId: doc.orgId,
-        region: doc.region,
         type: doc.type,
         ...doc.metadata,
       },
@@ -127,7 +123,6 @@ export async function bulkIndex(docs: SearchDocument[]): Promise<number> {
         title: doc.title,
         content: doc.content,
         orgId: doc.orgId,
-        region: doc.region,
         type: doc.type,
         ...doc.metadata,
       },
@@ -158,23 +153,21 @@ export async function search(params: {
   query: string;
   orgId?: string;
   type?: SearchableType;
-  region?: StorageRegion;
   limit?: number;
 }): Promise<SearchResults> {
-  const { query, orgId, type, region, limit = 20 } = params;
+  const { query, orgId, type, limit = 20 } = params;
   const client = getEsClient();
 
   if (client) {
-    return searchElasticsearch(query, orgId, type, region, limit);
+    return searchElasticsearch(query, orgId, type, limit);
   }
-  return searchDatabase(query, orgId, type, region, limit);
+  return searchDatabase(query, orgId, type, limit);
 }
 
 async function searchElasticsearch(
   query: string,
   orgId: string | undefined,
   type: SearchableType | undefined,
-  region: StorageRegion | undefined,
   limit: number
 ): Promise<SearchResults> {
   const client = getEsClient();
@@ -189,7 +182,6 @@ async function searchElasticsearch(
   ];
   const filter: any[] = [];
   if (orgId) filter.push({ term: { orgId } });
-  if (region) filter.push({ term: { region } });
 
   const indices = type
     ? [indexName(type)]
@@ -223,7 +215,7 @@ async function searchElasticsearch(
     };
   } catch (err) {
     logger.warn("ES search failed, falling back to DB", { error: String(err) });
-    return searchDatabase(query, orgId, type, region, limit);
+    return searchDatabase(query, orgId, type, limit);
   }
 }
 
@@ -231,7 +223,6 @@ async function searchDatabase(
   query: string,
   _orgId: string | undefined,
   type: SearchableType | undefined,
-  _region: StorageRegion | undefined,
   limit: number
 ): Promise<SearchResults> {
   const db = getReadDb();
@@ -269,7 +260,6 @@ async function searchDatabase(
 export interface SemanticSearchRequest {
   query: string;
   orgId?: string;
-  region?: StorageRegion;
   limit?: number;
 }
 
@@ -291,25 +281,23 @@ interface RankedSearchRow {
  * support tickets in one bounded query.
  */
 export async function smartSearch(params: SemanticSearchRequest): Promise<SearchResults> {
-  const { query, orgId, region, limit = 10 } = params;
+  const { query, orgId, limit = 10 } = params;
   const client = getEsClient();
 
   if (client) {
-    return searchElasticsearch(query, orgId, undefined, region, limit);
+    return searchElasticsearch(query, orgId, undefined, limit);
   }
 
-  return smartSearchDatabase(query, orgId, region, limit);
+  return smartSearchDatabase(query, orgId, limit);
 }
 
 async function smartSearchDatabase(
   query: string,
   orgId: string | undefined,
-  region: StorageRegion | undefined,
   limit: number
 ): Promise<SearchResults> {
   const db = getReadDb();
   const orgFilter = orgId ?? null;
-  const regionFilter = region ?? null;
   const rows = await db.execute<RankedSearchRow>(sql`
     WITH search_query AS (
       SELECT
@@ -359,7 +347,6 @@ async function smartSearchDatabase(
           setweight(to_tsvector('simple', COALESCE(o.slug, '')), 'B')
         ) OR o.name ILIKE ('%' || sq.raw_query || '%') OR o.slug ILIKE ('%' || sq.raw_query || '%'))
         AND (${orgFilter}::uuid IS NULL OR o.id = ${orgFilter}::uuid)
-        AND (${regionFilter}::text IS NULL OR o.storage_region = ${regionFilter}::text)
 
       UNION ALL
 

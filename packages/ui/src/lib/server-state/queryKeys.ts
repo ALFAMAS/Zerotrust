@@ -142,7 +142,6 @@ export const queryKeys = {
   },
   regions: {
     all: ["regions"] as const,
-    health: () => [...queryKeys.regions.all, "health"] as const,
     branding: (orgId: string) => [...queryKeys.regions.all, "branding", orgId] as const,
   },
   search: {

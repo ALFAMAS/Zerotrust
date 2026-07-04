@@ -17,7 +17,6 @@ const COLUMNS: { name: string; type: string; default?: string }[] = [
   { name: "sso_config", type: "jsonb" },
   { name: "custom_domain", type: "text" },
   { name: "branding", type: "jsonb" },
-  { name: "storage_region", type: "text", default: "'us'" },
   { name: "tenant_id", type: "uuid" },
 ];
 

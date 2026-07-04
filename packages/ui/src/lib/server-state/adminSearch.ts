@@ -16,7 +16,6 @@ export interface IndexDocumentInput {
   orgId: string;
   title: string;
   content?: string;
-  region?: "us" | "eu" | "apac";
 }
 
 export const adminSearchKeys = queryKeys.admin.searchIndex;

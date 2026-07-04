@@ -25,9 +25,7 @@ export default defineConfig({
       reporter: ["text", "json-summary"],
       include: ["src/app/**/*.{tsx,ts}", "src/components/**/*.{tsx,ts}", "src/lib/**/*.{tsx,ts}"],
       exclude: ["**/*.test.tsx", "**/*.test.ts", "src/test/**"],
-      // UI page/component ratchet (T5, 2026-07-04): measured is ~54.6% lines,
-      // ~52.0% statements, ~52.3% functions, ~46.6% branches on app/ pages —
-      // floors sit at or just below baseline; raise toward 85% as page tests expand.
+      // UI ratchet (DQ-2): floors aligned to measured baseline (~54.6% lines).
       thresholds: {
         lines: 54,
         functions: 52,

@@ -55,6 +55,16 @@
       "file": "drizzle/0034_drop_webhook_tenant_id.sql",
       "pattern": "DROP INDEX",
       "reason": "MT-3 — drop legacy tenant_id index after column removal"
+    },
+    {
+      "file": "drizzle/0037_drop_storage_region.sql",
+      "pattern": "DROP INDEX",
+      "reason": "Remove data residency feature — drop unused storage_region index"
+    },
+    {
+      "file": "drizzle/0037_drop_storage_region.sql",
+      "pattern": "DROP COLUMN",
+      "reason": "Remove data residency feature — drop storage_region column from organizations"
     }
   ]
 }

@@ -50,3 +50,8 @@ export async function withOrgRls<T>(ctx: OrgRlsContext, fn: (tx: DbTx) => Promis
     return fn(tx);
   });
 }
+
+/** Worker / admin / migration paths that must read or write across all org rows. */
+export async function withRlsBypass<T>(fn: (tx: DbTx) => Promise<T>): Promise<T> {
+  return withOrgRls({ bypass: true }, fn);
+}

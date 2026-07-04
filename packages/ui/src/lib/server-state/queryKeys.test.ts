@@ -145,7 +145,6 @@ describe("queryKeys", () => {
     expect(queryKeys.notifications.unreadCount()).toEqual(["notifications", "unreadCount"]);
     expect(queryKeys.notifications.preferences()).toEqual(["notifications", "preferences"]);
     expect(queryKeys.nps.shouldPrompt()).toEqual(["nps", "shouldPrompt"]);
-    expect(queryKeys.regions.health()).toEqual(["regions", "health"]);
     expect(queryKeys.regions.branding("org1")).toEqual(["regions", "branding", "org1"]);
     expect(queryKeys.search.results({ q: "ada" })).toEqual(["search", "results", { q: "ada" }]);
     expect(queryKeys.sessions.list()).toEqual(["sessions", "list"]);

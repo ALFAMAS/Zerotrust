@@ -24,6 +24,7 @@ import type {
   User,
 } from "../shared/types";
 import { ErrorCodes, zerotrustError } from "../shared/types";
+import { resolveAndSetActiveOrg } from "../db/resolveOrgContext";
 import { revokeSession } from "./sessionControl";
 
 const logger = getLogger("auth-middleware");
@@ -334,10 +335,15 @@ export const authMiddleware = createMiddleware<HonoEnv>(async (c, next) => {
         .where(eq(sessionsTable.id, session.id));
     }
 
+    // Resolve `X-Org-Id` into Hono context; `orgRlsMiddleware` sets `app.org_id`
+    // inside a transaction on org-scoped routers.
+    await resolveAndSetActiveOrg(c, c.get("user"));
+
     logger.debug("✓ Token verified", {
       userId: payload.sub,
       sessionId: payload.sid,
       principal: describePrincipal(auditPrincipal),
+      activeOrgId: c.get("activeOrgId"),
     });
     return next();
   } catch (error) {

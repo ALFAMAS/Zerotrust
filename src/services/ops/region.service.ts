@@ -1,84 +1,6 @@
 import { eq, sql } from "drizzle-orm";
-import { getConfig } from "../../config/index";
 import { getDb, getReadDb } from "../../db/index";
 import { type OrgBranding, organizationsTable } from "../../db/schema";
-
-// ── Region constants ─────────────────────────────────────────────────────────
-
-export type StorageRegion = "us" | "eu" | "apac";
-
-const VALID_REGIONS: StorageRegion[] = ["us", "eu", "apac"];
-
-/** Map country codes to their data-residency region. */
-const COUNTRY_TO_REGION: Record<string, StorageRegion> = {
-  // EU/EEA
-  DE: "eu",
-  FR: "eu",
-  IT: "eu",
-  ES: "eu",
-  NL: "eu",
-  BE: "eu",
-  AT: "eu",
-  PL: "eu",
-  SE: "eu",
-  DK: "eu",
-  FI: "eu",
-  IE: "eu",
-  PT: "eu",
-  GR: "eu",
-  CZ: "eu",
-  RO: "eu",
-  HU: "eu",
-  BG: "eu",
-  HR: "eu",
-  SK: "eu",
-  SI: "eu",
-  EE: "eu",
-  LV: "eu",
-  LT: "eu",
-  LU: "eu",
-  MT: "eu",
-  CY: "eu",
-  GB: "eu",
-  CH: "eu",
-  NO: "eu",
-  IS: "eu",
-  // APAC
-  JP: "apac",
-  CN: "apac",
-  KR: "apac",
-  IN: "apac",
-  SG: "apac",
-  AU: "apac",
-  NZ: "apac",
-  TW: "apac",
-  HK: "apac",
-  MY: "apac",
-  TH: "apac",
-  VN: "apac",
-  PH: "apac",
-  ID: "apac",
-  BD: "apac",
-  PK: "apac",
-  // US (default for everything else)
-  US: "us",
-  CA: "us",
-  MX: "us",
-  BR: "us",
-  AR: "us",
-  CO: "us",
-  CL: "us",
-};
-
-export function regionForCountry(countryCode: string | null | undefined): StorageRegion {
-  if (!countryCode) return "us";
-  const cc = countryCode.toUpperCase();
-  return COUNTRY_TO_REGION[cc] ?? "us";
-}
-
-export function isValidRegion(region: string): region is StorageRegion {
-  return VALID_REGIONS.includes(region as StorageRegion);
-}
 
 // ── Custom domain / subdomain resolution ────────────────────────────────────
 
@@ -87,7 +9,6 @@ export interface ResolvedOrg {
   orgName: string;
   orgSlug: string;
   customDomain: string | null;
-  storageRegion: StorageRegion;
   branding: ResolvedBranding;
 }
 
@@ -158,7 +79,6 @@ export async function resolveOrgByDomain(hostname: string): Promise<ResolvedOrg 
     orgName: orgRow.name,
     orgSlug: orgRow.slug,
     customDomain: orgRow.customDomain ?? null,
-    storageRegion: orgRow.storageRegion as StorageRegion,
     branding: {
       ...DEFAULT_BRANDING,
       ...(orgRow.branding ?? {}),
@@ -194,29 +114,10 @@ export async function getOrgBranding(orgId: string): Promise<ResolvedBranding> {
     orgName: "",
     orgSlug: "",
     customDomain: null,
-    storageRegion: "us",
     branding,
   });
 
   return branding;
-}
-
-// `residency.strictMode` is not part of the config schema today (no env var
-// wires it up). `organizations.storageRegion` is a logical label for routing
-// hints and compliance reporting — it does not select a separate database or S3
-// bucket in the default single-region deployment. Physical per-region storage is
-// tracked as CP-1 (full) in todo.md — blueprint in docs/adr/009-data-residency-sharding.md.
-interface ResidencyConfigExtension {
-  residency?: { strictMode?: boolean };
-}
-
-export function canAccessRegion(requestRegion: StorageRegion, dataRegion: StorageRegion): boolean {
-  const cfg = getConfig() as ReturnType<typeof getConfig> & ResidencyConfigExtension;
-  if (cfg.residency?.strictMode) {
-    return requestRegion === dataRegion;
-  }
-  if (dataRegion === "eu" && requestRegion === "apac") return false;
-  return true;
 }
 
 export async function setOrgCustomDomain(orgId: string, domain: string | null): Promise<boolean> {
@@ -257,18 +158,4 @@ export async function setOrgBranding(
     .set({ branding: merged, updatedAt: new Date() })
     .where(eq(organizationsTable.id, orgId));
   orgCache.clear();
-}
-
-export async function setOrgStorageRegion(orgId: string, region: StorageRegion): Promise<void> {
-  if (!isValidRegion(region)) throw new Error(`Invalid region: ${region}`);
-  const db = getDb();
-  await db
-    .update(organizationsTable)
-    .set({ storageRegion: region, updatedAt: new Date() })
-    .where(eq(organizationsTable.id, orgId));
-  orgCache.clear();
-}
-
-export function regionHealth(): { status: string; regions: string[] } {
-  return { status: "ok", regions: [...VALID_REGIONS] };
 }

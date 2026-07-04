@@ -31,20 +31,20 @@ strategy, migration ordering, and rollback procedure.
 
 ### Runtime topology
 
-| Component | Process | Replicas | Notes |
-|---|---|---|---|
-| API | `WORKER_MODE=true pm2 start dist/api/server.js -i max` | N (CPU count) | Cluster mode; schedulers/consumers deferred to worker |
-| Worker | `pm2 start dist/worker.js -i 1 --name zerotrust-worker` | 1 | Owns BullMQ consumers + scheduled jobs |
-| UI | `pm2 start npm --name zerotrust-ui -- start` | 1 (fork) | Next.js production server |
-| nginx | systemd | 1 | TLS termination, static asset caching |
+| Component | Process                                                 | Replicas      | Notes                                                 |
+| --------- | ------------------------------------------------------- | ------------- | ----------------------------------------------------- |
+| API       | `WORKER_MODE=true pm2 start dist/api/server.js -i max`  | N (CPU count) | Cluster mode; schedulers/consumers deferred to worker |
+| Worker    | `pm2 start dist/worker.js -i 1 --name zerotrust-worker` | 1             | Owns BullMQ consumers + scheduled jobs                |
+| UI        | `pm2 start npm --name zerotrust-ui -- start`            | 1 (fork)      | Next.js production server                             |
+| nginx     | systemd                                                 | 1             | TLS termination, static asset caching                 |
 
 ### Services
 
-| Layer | Provider options |
-|---|---|
-| PostgreSQL | Neon, Supabase, AWS RDS, or self-hosted `apt install postgresql` |
-| Redis | Upstash, Redis Cloud, AWS ElastiCache, or self-hosted `apt install redis` |
-| Object storage | AWS S3, Backblaze B2, Cloudflare R2, MinIO (S3-compatible) |
+| Layer          | Provider options                                                          |
+| -------------- | ------------------------------------------------------------------------- |
+| PostgreSQL     | Neon, Supabase, AWS RDS, or self-hosted `apt install postgresql`          |
+| Redis          | Upstash, Redis Cloud, AWS ElastiCache, or self-hosted `apt install redis` |
+| Object storage | AWS S3, Backblaze B2, Cloudflare R2, MinIO (S3-compatible)                |
 
 ### Scaling model
 
@@ -52,7 +52,7 @@ strategy, migration ordering, and rollback procedure.
   4-8 workers, postgres connection pooling becomes the bottleneck — move to
   Blueprint 2 or 3.
 - **UI:** single process; Next.js ISR/revalidation handles cache freshness.
-  Static assets (/_next/static) served by nginx.
+  Static assets (/\_next/static) served by nginx.
 - **Workers:** production API replicas set `WORKER_MODE=true`; run exactly 1
   dedicated worker process via `pm2 start dist/worker.js -i 1`.
 
@@ -82,10 +82,10 @@ strategy, migration ordering, and rollback procedure.
 
 ### RTO / RPO
 
-| Metric | Target |
-|---|---|
-| RTO (recovery time) | <30 min (app) / <2h (DB restore from S3) |
-| RPO (data loss) | <1 hour (nightly backup + Redis pub/sub for sessions) |
+| Metric              | Target                                                |
+| ------------------- | ----------------------------------------------------- |
+| RTO (recovery time) | <30 min (app) / <2h (DB restore from S3)              |
+| RPO (data loss)     | <1 hour (nightly backup + Redis pub/sub for sessions) |
 
 ---
 
@@ -193,10 +193,10 @@ volumes:
 
 ### RTO / RPO
 
-| Metric | Target |
-|---|---|
-| RTO | <5 min (container restart) |
-| RPO | Managed DB point-in-time recovery (<5 min typically) |
+| Metric | Target                                               |
+| ------ | ---------------------------------------------------- |
+| RTO    | <5 min (container restart)                           |
+| RPO    | Managed DB point-in-time recovery (<5 min typically) |
 
 ---
 
@@ -247,27 +247,27 @@ spec:
         app: zerotrust-api
     spec:
       containers:
-      - name: api
-        image: registry.example.com/zerotrust-api:latest
-        ports:
-        - containerPort: 1337
-        env:
-        - name: WORKER_MODE
-          value: "true"
-        envFrom:
-        - secretRef:
-            name: zerotrust-env
-        livenessProbe:
-          httpGet: { path: /health, port: 1337 }
-          initialDelaySeconds: 10
-          periodSeconds: 15
-        readinessProbe:
-          httpGet: { path: /healthz, port: 1337 }
-          initialDelaySeconds: 5
-          periodSeconds: 10
-        resources:
-          requests: { memory: "256Mi", cpu: "250m" }
-          limits:   { memory: "512Mi", cpu: "500m" }
+        - name: api
+          image: registry.example.com/zerotrust-api:latest
+          ports:
+            - containerPort: 1337
+          env:
+            - name: WORKER_MODE
+              value: "true"
+          envFrom:
+            - secretRef:
+                name: zerotrust-env
+          livenessProbe:
+            httpGet: { path: /health, port: 1337 }
+            initialDelaySeconds: 10
+            periodSeconds: 15
+          readinessProbe:
+            httpGet: { path: /healthz, port: 1337 }
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests: { memory: "256Mi", cpu: "250m" }
+            limits: { memory: "512Mi", cpu: "500m" }
 ---
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
@@ -281,12 +281,12 @@ spec:
   minReplicas: 3
   maxReplicas: 12
   metrics:
-  - type: Resource
-    resource:
-      name: cpu
-      target:
-        type: Utilization
-        averageUtilization: 70
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
 ---
 # worker-deployment.yaml
 apiVersion: apps/v1
@@ -294,7 +294,7 @@ kind: Deployment
 metadata:
   name: zerotrust-worker
 spec:
-  replicas: 1  # single instance — BullMQ owns exactly-once job delivery
+  replicas: 1 # single instance — BullMQ owns exactly-once job delivery
   selector:
     matchLabels:
       app: zerotrust-worker
@@ -303,17 +303,17 @@ spec:
       affinity:
         podAntiAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
-          - labelSelector:
-              matchLabels:
-                app: zerotrust-worker
-            topologyKey: kubernetes.io/hostname
+            - labelSelector:
+                matchLabels:
+                  app: zerotrust-worker
+              topologyKey: kubernetes.io/hostname
       containers:
-      - name: worker
-        image: registry.example.com/zerotrust-api:latest
-        command: ["bun", "dist/worker.js"]
-        envFrom:
-        - secretRef:
-            name: zerotrust-env
+        - name: worker
+          image: registry.example.com/zerotrust-api:latest
+          command: ["bun", "dist/worker.js"]
+          envFrom:
+            - secretRef:
+                name: zerotrust-env
 ```
 
 ### Migration strategy
@@ -331,12 +331,12 @@ spec:
     spec:
       restartPolicy: Never
       containers:
-      - name: migrate
-        image: registry.example.com/zerotrust-api:latest
-        command: ["bun", "run", "db:migrate"]
-        envFrom:
-        - secretRef:
-            name: zerotrust-env
+        - name: migrate
+          image: registry.example.com/zerotrust-api:latest
+          command: ["bun", "run", "db:migrate"]
+          envFrom:
+            - secretRef:
+                name: zerotrust-env
 ```
 
 ### TLS / cert-manager
@@ -349,8 +349,8 @@ metadata:
 spec:
   secretName: zerotrust-tls-secret
   dnsNames:
-  - api.example.com
-  - example.com
+    - api.example.com
+    - example.com
   issuerRef:
     name: letsencrypt-prod
     kind: ClusterIssuer
@@ -378,11 +378,11 @@ spec:
     matchLabels:
       app: zerotrust-api
   endpoints:
-  - port: http
-    path: /metrics
-    bearerTokenSecret:
-      name: zerotrust-metrics-auth
-      key: token
+    - port: http
+      path: /metrics
+      bearerTokenSecret:
+        name: zerotrust-metrics-auth
+        key: token
 ```
 
 For VM/PM2 deploys without a ServiceMonitor, set `METRICS_AUTH_TOKEN` in the
@@ -401,10 +401,10 @@ scrape_configs:
 
 ### RTO / RPO
 
-| Metric | Target |
-|---|---|
-| RTO | <2 min (pod restart) / <5 min (node failure + reschedule) |
-| RPO | Managed DB point-in-time recovery (seconds to minutes) |
+| Metric | Target                                                    |
+| ------ | --------------------------------------------------------- |
+| RTO    | <2 min (pod restart) / <5 min (node failure + reschedule) |
+| RPO    | Managed DB point-in-time recovery (seconds to minutes)    |
 
 ---
 
@@ -446,15 +446,15 @@ External providers (optional):
 
 ## Choosing a blueprint
 
-| Factor | Blueprint 1 (VM) | Blueprint 2 (Containers) | Blueprint 3 (k8s) |
-|---|---|---|---|
-| Setup time | Hours | Hours–1 day | Days–weeks |
-| Ops burden | Medium (OS updates, PM2) | Low (platform handles) | High (cluster maintenance) |
-| Scaling ceiling | ~4-8 workers before DB pool limit | 10+ replicas (stateless) | 50+ pods (cluster capacity) |
-| Rollback speed | Manual (git checkout + restart) | Container tag swap | Helm rollback / Argo CD |
-| Multi-region | Manual DNS failover | Platform-dependent | Native (topology spread) |
-| Cost (min) | $10–20/mo VM | $20–50/mo platform | $50–100/mo cluster baseline |
-| Best for | Prototypes, small teams | Growing teams, managed infra | Enterprise, multi-region |
+| Factor          | Blueprint 1 (VM)                  | Blueprint 2 (Containers)     | Blueprint 3 (k8s)           |
+| --------------- | --------------------------------- | ---------------------------- | --------------------------- |
+| Setup time      | Hours                             | Hours–1 day                  | Days–weeks                  |
+| Ops burden      | Medium (OS updates, PM2)          | Low (platform handles)       | High (cluster maintenance)  |
+| Scaling ceiling | ~4-8 workers before DB pool limit | 10+ replicas (stateless)     | 50+ pods (cluster capacity) |
+| Rollback speed  | Manual (git checkout + restart)   | Container tag swap           | Helm rollback / Argo CD     |
+| Multi-region    | Manual DNS failover               | Platform-dependent           | Native (topology spread)    |
+| Cost (min)      | $10–20/mo VM                      | $20–50/mo platform           | $50–100/mo cluster baseline |
+| Best for        | Prototypes, small teams           | Growing teams, managed infra | Enterprise, multi-region    |
 
 ---
 
@@ -489,11 +489,12 @@ AUDIT_ANCHOR_S3_PREFIX=audit-anchors/
   at least daily; verify with `bun run audit:anchor-verify` after DR drills.
   See `docs/compliance/audit-log-anchoring-plan.md`.
 
-### Browser token storage (ZT-3)
+### Browser token storage
 
-- Default UI uses in-memory access tokens + httpOnly refresh cookies. Set
+- UI uses in-memory access tokens + httpOnly refresh cookies (ADR 008). Set
   `CORS_ALLOWED_ORIGINS` to the exact UI origin(s) so credentialed refresh works.
-- For fork hardening beyond Option C, see ADR 008 Option B and `docs/extending.md`.
+- Native clients (e.g. React Native) call the Hono API directly with bearer tokens
+  in device secure storage — not through the Next.js app.
 
 **Recommendation:** start with Blueprint 1 or 2 (managed DB + object storage),
 defer k8s until you have a dedicated platform team. The codebase is designed for

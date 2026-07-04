@@ -2,10 +2,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it } from "vitest";
-import { mockApiGet, mockApiPut } from "@/test/apiClientMock";
+import { mockApiPut } from "@/test/apiClientMock";
 import RegionsPage from "./page";
-
-const health = { status: "ok", regions: ["us", "eu", "apac"] };
 
 function renderRegions() {
   const queryClient = new QueryClient({
@@ -20,37 +18,31 @@ function renderRegions() {
 
 describe("RegionsPage", () => {
   beforeEach(() => {
-    mockApiGet.mockReset();
     mockApiPut.mockReset();
   });
 
-  it("renders region health status", async () => {
-    mockApiGet.mockResolvedValue(health);
+  it("renders branding and domain sections", () => {
     renderRegions();
 
-    expect(await screen.findByText("ok")).toBeInTheDocument();
-    expect(screen.getByText("Region health")).toBeInTheDocument();
+    expect(screen.getByText("Branding & Domains")).toBeInTheDocument();
+    expect(screen.getByText("Org branding")).toBeInTheDocument();
+    expect(screen.getByText("Custom domain")).toBeInTheDocument();
   });
 
-  it("sets org region via mutation", async () => {
-    mockApiGet.mockResolvedValue(health);
+  it("updates org branding via mutation", async () => {
     mockApiPut.mockResolvedValue({ success: true });
     const user = userEvent.setup();
     renderRegions();
-    await screen.findByText("ok");
 
-    await user.type(screen.getByLabelText("Organization ID", { selector: "#orgId" }), "org-1");
-    await user.click(screen.getByRole("button", { name: "Set region" }));
+    await user.type(screen.getByLabelText("Organization ID", { selector: "#brandingOrgId" }), "org-1");
+    await user.type(screen.getByLabelText("App name"), "Acme");
+    await user.click(screen.getByRole("button", { name: "Save branding" }));
 
     await waitFor(() => {
-      expect(mockApiPut).toHaveBeenCalledWith("/regions/orgs/org-1/region", { region: "us" });
+      expect(mockApiPut).toHaveBeenCalledWith("/regions/orgs/org-1/branding", {
+        appName: "Acme",
+        brandColor: "#6366f1",
+      });
     });
-  });
-
-  it("shows error when health check fails", async () => {
-    mockApiGet.mockRejectedValue(new Error("regions down"));
-    renderRegions();
-
-    expect(await screen.findByText("regions down")).toBeInTheDocument();
   });
 });

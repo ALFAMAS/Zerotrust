@@ -73,7 +73,7 @@
     },
     {
       "name": "Regions",
-      "description": "Custom domain resolution, region health, geo-routing, branding, domains, and data residency."
+      "description": "Custom domain resolution and per-organization branding."
     },
     {
       "name": "Search",
@@ -7047,67 +7047,6 @@
         }
       }
     },
-    "/regions/for-country": {
-      "get": {
-        "tags": [
-          "Regions"
-        ],
-        "summary": "Resolve storage region for country",
-        "responses": {
-          "200": {
-            "description": "Region",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "country": {
-                      "type": [
-                        "string",
-                        "null"
-                      ]
-                    },
-                    "region": {
-                      "type": "string"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "country",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ]
-      }
-    },
-    "/regions/health": {
-      "get": {
-        "tags": [
-          "Regions"
-        ],
-        "summary": "Get region health",
-        "responses": {
-          "200": {
-            "description": "Region health",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GenericObject"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/regions/orgs/{orgId}/branding": {
       "get": {
         "tags": [
@@ -7240,72 +7179,6 @@
                     "type": [
                       "string",
                       "null"
-                    ]
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/regions/orgs/{orgId}/region": {
-      "put": {
-        "tags": [
-          "Regions"
-        ],
-        "summary": "Set organization data residency region",
-        "responses": {
-          "200": {
-            "description": "Updated",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "region": {
-                      "type": "string"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "BearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "orgId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": [
-                  "region"
-                ],
-                "properties": {
-                  "region": {
-                    "type": "string",
-                    "enum": [
-                      "us",
-                      "eu",
-                      "apac"
                     ]
                   }
                 }
