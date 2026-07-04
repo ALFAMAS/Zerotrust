@@ -1,15 +1,13 @@
 import { Hono } from "hono";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-// ── Mocks ──────────────────────────────────────────────────────────────────
-// mfa.routes.ts imports with EXTENSIONLESS specifiers (../../db, ../../mfa),
-// so mock specifier strings here must be extensionless too (../db, ../mfa).
+// Plugin routes import core modules via ../../src/... — mock those specifiers.
 
-vi.mock("../db", () => ({
+vi.mock("../../src/db/index.js", () => ({
   getDb: vi.fn(),
 }));
 
-vi.mock("../logger", () => ({
+vi.mock("../../src/logger/index.js", () => ({
   getLogger: () => ({
     info: vi.fn(),
     warn: vi.fn(),
@@ -19,21 +17,20 @@ vi.mock("../logger", () => ({
 }));
 
 const sendOTP = vi.fn().mockResolvedValue(true);
-vi.mock("../mfa", () => ({
+vi.mock("../../src/services/auth/otpDelivery.service.js", () => ({
   sendOTP: (...a: unknown[]) => sendOTP(...a),
 }));
 
 const sendOtpEmail = vi.fn().mockResolvedValue(undefined);
-vi.mock("../services/notifications/email.service", () => ({
+vi.mock("../../src/services/notifications/email.service.js", () => ({
   sendOtpEmail: (...a: unknown[]) => sendOtpEmail(...a),
 }));
 
 const getSettings = vi.fn();
-vi.mock("../models/settings.model", () => ({
+vi.mock("../../src/models/settings.model.js", () => ({
   getSettings: (...a: unknown[]) => getSettings(...a),
 }));
 
-// otpauth: TOTP().validate("111111") is valid, secret.base32 is a stable value.
 vi.mock("otpauth", () => ({
   TOTP: class {
     secret = { base32: "TESTSECRETBASE32" };
@@ -56,7 +53,7 @@ vi.mock("qrcode", () => ({
 const TEST_USER_ID = "00000000-0000-0000-0000-000000000001";
 const TEST_SESSION_ID = "00000000-0000-0000-0000-0000000000ff";
 let testUser: Record<string, unknown>;
-vi.mock("../middleware/auth", () => ({
+vi.mock("../../src/middleware/auth.js", () => ({
   authMiddleware: async (c: any, next: any) => {
     const uid = c.req.header("x-test-user-id");
     if (!uid) {
@@ -67,8 +64,6 @@ vi.mock("../middleware/auth", () => ({
     return next();
   },
 }));
-
-// ── Helpers ──────────────────────────────────────────────────────────────────
 
 function makeDbChain() {
   const chain: any = {
@@ -87,7 +82,7 @@ function makeDbChain() {
 }
 
 async function getApp() {
-  const { default: router } = await import("../api/routes/mfa.routes");
+  const { default: router } = await import("../../plugins/mfa/routes");
   return new Hono().route("/", router);
 }
 
@@ -102,8 +97,6 @@ function del(app: Hono, path: string, authed = true) {
   if (authed) headers["x-test-user-id"] = TEST_USER_ID;
   return app.request(path, { method: "DELETE", headers });
 }
-
-// ── Tests ──────────────────────────────────────────────────────────────────
 
 describe("mfa.routes", () => {
   let db: ReturnType<typeof makeDbChain>;
@@ -122,7 +115,7 @@ describe("mfa.routes", () => {
       appUrl: "http://localhost:3000",
     });
     db = makeDbChain();
-    const { getDb } = await import("../db");
+    const { getDb } = await import("../../src/db/index.js");
     vi.mocked(getDb).mockReturnValue(db as any);
   });
 

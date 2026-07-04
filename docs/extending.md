@@ -2,8 +2,9 @@
 
 How to plug new third-party integrations into the platform. The architecture is
 **env-first** (most providers switch via configuration, no code) and uses small
-**adapter modules** where code is needed (OAuth). Every example below points at
-the real file you touch.
+**adapter modules** where code is needed (OAuth). For **self-contained features**
+(auth methods, billing add-ons, etc.), use the [**plugin system**](./plugins.md)
+(`plugins/<id>/` folders loaded at API boot).
 
 > See also the **Customizing** section of the [README](../README.md) for
 > renaming the app, adding an API route, custom org roles, and adding a locale.
@@ -15,13 +16,13 @@ the real file you touch.
 OAuth providers are adapters behind a factory, so adding one is two small files
 of change plus env.
 
-1. **Implement the adapter** — create `src/oauth/providers/<name>.ts` exporting
+1. **Implement the adapter** — create `plugins/oauth/providers/<name>.ts` exporting
    an `exchangeCode` that returns the normalized shape the callback consumes
    (copy `google.ts`/`github.ts` as a template):
 
    ```ts
-   // src/oauth/providers/<name>.ts
-   import type { NormalizedProfile } from "../provider.factory";
+   // plugins/oauth/providers/<name>.ts
+   import type { NormalizedProfile } from "../provider.factory.js";
 
    export async function exchangeCode(
      code: string,
@@ -37,7 +38,7 @@ of change plus env.
    ```
 
 2. **Register it in the factory** — add a `case "<name>"` to
-   `getProviderAdapter()` in `src/oauth/provider.factory.ts` that dynamically
+   `getProviderAdapter()` in `plugins/oauth/provider.factory.ts` that dynamically
    imports your module (mirror the existing `google`/`github` cases). Providers
    configured but missing a case fail loudly with `UNSUPPORTED_OAUTH_PROVIDER`.
 
@@ -94,7 +95,7 @@ MFA currently supports TOTP and Email OTP. Email OTP uses the same Nodemailer
 SMTP transport as transactional email (see above). To add a new MFA channel
 (e.g. SMS via Twilio, push-based), implement a sender with the same
 `(recipient, message) => Promise<void>` shape the OTP dispatcher calls and wire
-it in `src/mfa/`. Register the channel name in the settings model and UI.
+it in `src/services/auth/otpDelivery.service.ts`. Register the channel name in the settings model and UI.
 
 ---
 

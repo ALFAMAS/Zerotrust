@@ -4,7 +4,6 @@ import dotenv from "dotenv";
 import { Hono } from "hono";
 import { compress } from "hono/compress";
 import { cors } from "hono/cors";
-import { securityHeaders } from "../middleware/securityHeaders";
 import { initializezerotrust } from "..";
 import { initSentry } from "../instrument";
 import jitRoutes from "../jit/routes";
@@ -20,7 +19,10 @@ import { authMiddleware, requireAdmin } from "../middleware/auth";
 import { corsOptionsFromEnv } from "../middleware/cors";
 import { inferredCountryMiddleware } from "../middleware/inferredCountry";
 import { rateLimit } from "../middleware/rateLimiting";
+import { securityHeaders } from "../middleware/securityHeaders";
 import notificationChannelRoutes from "../notifications/routes";
+import { loadPlugins } from "../plugins/loader";
+import { getPluginRegistry } from "../plugins/registry";
 import {
   initStripeWebhookQueueConsumer,
   initStripeWebhookQueueProducer,
@@ -43,8 +45,6 @@ import emailEventRoutes from "./routes/email-events.routes";
 import feedbackRoutes from "./routes/feedback.routes";
 import gdprRoutes from "./routes/gdpr.routes";
 import globalizationRoutes from "./routes/globalization.routes";
-import magicLinkRoutes from "./routes/magic-link.routes";
-import mfaRoutes from "./routes/mfa.routes";
 import notificationRoutes from "./routes/notification.routes";
 import orgRoutes from "./routes/org.routes";
 import passkeyRoutes from "./routes/passkey.routes";
@@ -122,6 +122,15 @@ export async function createServer() {
   // Public registry of supported API versions and their lifecycle status
   app.get("/api/versions", (c) => c.json({ current: CURRENT_API_VERSION, versions: API_VERSIONS }));
 
+  // Loaded feature plugins (see plugins/ + docs/plugins.md)
+  app.get("/api/plugins", (c) => {
+    const registry = getPluginRegistry();
+    return c.json({ plugins: registry?.toPublicJson() ?? [] });
+  });
+
+  // Load plug-in features from plugins/<id>/
+  await loadPlugins(app, { failFast: process.env.NODE_ENV === "production" });
+
   // Prometheus scrape endpoint. Open by default for scraper compatibility;
   // set METRICS_AUTH_TOKEN to require `Authorization: Bearer <token>`.
   app.get("/metrics", metricsAuthMiddleware(), metricsRoute);
@@ -144,8 +153,6 @@ export async function createServer() {
   app.route("/auth", authRoutes);
   app.route("/auth", unsubscribeRoutes);
   app.route("/auth/password-reset", passwordResetRoutes);
-  app.route("/auth/magic-link", magicLinkRoutes);
-  app.route("/auth/mfa", mfaRoutes);
   app.route("/auth/passkey", passkeyRoutes);
 
   // ─── Session routes ───────────────────────────────────────────────────────
@@ -231,14 +238,9 @@ export async function createServer() {
   });
 
   // ─── Protected example route ──────────────────────────────────────────────
-  app.get(
-    "/protected",
-    rateLimit({ points: 200, windowSecs: 60 }),
-    authMiddleware,
-    (c) => {
-      return c.json({ ok: true, user: c.get("user")?.id });
-    }
-  );
+  app.get("/protected", rateLimit({ points: 200, windowSecs: 60 }), authMiddleware, (c) => {
+    return c.json({ ok: true, user: c.get("user")?.id });
+  });
 
   // ─── Responsible disclosure (RFC 9116) ──────────────────────────────────────
   const securityTxt = () => {

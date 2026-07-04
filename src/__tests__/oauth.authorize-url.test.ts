@@ -3,7 +3,7 @@ import {
   buildAuthorizationUrl,
   isSupportedProvider,
   PROVIDER_META,
-} from "../oauth/authorize-url";
+} from "../../plugins/oauth/authorize-url";
 
 describe("isSupportedProvider", () => {
   it("accepts implemented providers and rejects others", () => {

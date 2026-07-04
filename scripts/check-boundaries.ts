@@ -96,7 +96,8 @@ function walk(dir: string, files: string[] = []): string[] {
 }
 
 const srcDir = resolve(ROOT, "src");
-const sourceFiles = walk(srcDir);
+const pluginsDir = resolve(ROOT, "plugins");
+const sourceFiles = [...walk(srcDir), ...walk(pluginsDir)];
 
 // ── parse imports ────────────────────────────────────────────────────────
 

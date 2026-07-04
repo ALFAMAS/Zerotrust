@@ -22,13 +22,13 @@ describe("MFA channels", () => {
 
   describe("OTP dispatcher", () => {
     it("dispatches to email channel", async () => {
-      const { sendOTP } = await import("../mfa");
+      const { sendOTP } = await import("../services/auth/otpDelivery.service");
       const result = await sendOTP("email", "test@example.com", "999888");
       expect(result).toBeTruthy();
     });
 
     it("returns false for unsupported channel", async () => {
-      const { sendOTP } = await import("../mfa");
+      const { sendOTP } = await import("../services/auth/otpDelivery.service");
       const result = await sendOTP("email", "test@example.com", "111222");
       expect(typeof result).toBe("boolean");
     });

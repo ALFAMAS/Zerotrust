@@ -17,13 +17,13 @@
         "src/middleware/rateLimiter/",
         "src/middleware/apiKeyAuth.ts",
         "src/middleware/requirePlan.ts",
-        "src/middleware/requireAdmin.ts"
+        "src/middleware/requireAdmin.ts",
+        "src/plugins/"
       ],
       "can_import": []
     },
     "integrations": {
       "paths": [
-        "src/oauth/",
         "src/notifications/dispatcher.ts",
         "src/notifications/formatters.ts",
         "src/mfa/channels/",
@@ -37,15 +37,11 @@
         "src/api/routes/auth.routes.ts",
         "src/api/routes/session.routes.ts",
         "src/api/routes/passkey.routes.ts",
-        "src/api/routes/mfa.routes.ts",
-        "src/api/routes/magic-link.routes.ts",
         "src/api/routes/verification.routes.ts",
         "src/api/routes/api-keys.routes.ts",
         "src/services/auth/",
         "src/crypto/",
-        "src/mfa/index.ts",
-        "src/mfa/fido-mds3.ts",
-        "src/mfa/resident-keys.ts",
+        "src/mfa/",
         "src/db/repositories/authSessions.repository.ts",
         "src/middleware/auth.ts",
         "src/middleware/deviceAttestation.ts",
@@ -101,6 +97,10 @@
         "src/notifications/routes.ts"
       ],
       "can_import": ["shared", "integrations", "identity", "tenancy", "billing", "compliance"]
+    },
+    "plugins": {
+      "paths": ["plugins/"],
+      "can_import": ["shared", "integrations", "identity"]
     }
   }
 }

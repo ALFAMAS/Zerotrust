@@ -6,7 +6,7 @@ import { getConfig } from "../../config";
 import { getDb } from "../../db";
 import { otpsTable, usersTable } from "../../db/schema";
 import { getLogger } from "../../logger";
-import { sendOTP } from "../../mfa";
+import { sendOTP } from "../../services/auth/otpDelivery.service";
 import { revokeAllSessionsForUser } from "../../middleware/sessionControl";
 import { rateLimit } from "../../middleware/rateLimiting";
 import { recordAndRespond } from "../../services/auth/accountTakeover.service";

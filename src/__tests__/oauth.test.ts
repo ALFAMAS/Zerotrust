@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 const mockFetch = vi.fn();
 global.fetch = mockFetch;
 
-vi.mock("../logger", () => ({
+vi.mock("../../../src/logger/index.js", () => ({
   getLogger: () => ({
     info: vi.fn(),
     warn: vi.fn(),
@@ -12,7 +12,7 @@ vi.mock("../logger", () => ({
   }),
 }));
 
-vi.mock("../config", () => ({
+vi.mock("../../src/config/index.js", () => ({
   getConfig: () => ({
     oauth: {
       providers: {
@@ -48,7 +48,7 @@ describe("OAuth adapters", () => {
         .mockResolvedValueOnce({ ok: true, json: async () => tokens })
         .mockResolvedValueOnce({ ok: true, json: async () => profileRaw });
 
-      const { exchangeCode } = await import("../oauth/providers/google");
+      const { exchangeCode } = await import("../../plugins/oauth/providers/google");
       const result = await exchangeCode("code123", "cid", "csecret", "http://localhost/cb");
 
       expect(result.tokens.access_token).toBe("gat");
@@ -59,7 +59,7 @@ describe("OAuth adapters", () => {
 
     it("throws on token exchange failure", async () => {
       mockFetch.mockResolvedValueOnce({ ok: false, status: 400, text: async () => "bad request" });
-      const { exchangeCode } = await import("../oauth/providers/google");
+      const { exchangeCode } = await import("../../plugins/oauth/providers/google");
       await expect(
         exchangeCode("bad-code", "cid", "csecret", "http://localhost/cb")
       ).rejects.toThrow("400");
@@ -74,7 +74,7 @@ describe("OAuth adapters", () => {
       };
       mockFetch.mockResolvedValueOnce({ ok: true, json: async () => refreshed });
 
-      const { refreshToken } = await import("../oauth/providers/google");
+      const { refreshToken } = await import("../../plugins/oauth/providers/google");
       const result = await refreshToken("old-refresh", "cid", "csecret");
       expect(result.access_token).toBe("new-gat");
     });
@@ -89,7 +89,7 @@ describe("OAuth adapters", () => {
         .mockResolvedValueOnce({ ok: true, json: async () => tokens })
         .mockResolvedValueOnce({ ok: true, json: async () => profile });
 
-      const { exchangeCode } = await import("../oauth/providers/facebook");
+      const { exchangeCode } = await import("../../plugins/oauth/providers/facebook");
       const result = await exchangeCode("code", "cid", "csecret", "http://localhost/cb");
 
       expect(result.tokens.access_token).toBe("fat");
@@ -99,7 +99,7 @@ describe("OAuth adapters", () => {
 
     it("throws on token exchange failure", async () => {
       mockFetch.mockResolvedValueOnce({ ok: false, status: 403, text: async () => "forbidden" });
-      const { exchangeCode } = await import("../oauth/providers/facebook");
+      const { exchangeCode } = await import("../../plugins/oauth/providers/facebook");
       await expect(exchangeCode("bad", "cid", "csecret", "http://localhost/cb")).rejects.toThrow(
         "403"
       );
@@ -108,22 +108,22 @@ describe("OAuth adapters", () => {
 
   describe("provider.factory", () => {
     it("returns google adapter", async () => {
-      const { getProviderAdapter } = await import("../oauth/provider.factory");
+      const { getProviderAdapter } = await import("../../plugins/oauth/provider.factory");
       const adapter = getProviderAdapter("google");
       expect(typeof adapter.exchangeCode).toBe("function");
     });
 
     it("returns github adapter", async () => {
-      const { getProviderAdapter } = await import("../oauth/provider.factory");
+      const { getProviderAdapter } = await import("../../plugins/oauth/provider.factory");
       const adapter = getProviderAdapter("github");
       expect(typeof adapter.exchangeCode).toBe("function");
     });
 
     it("throws for unconfigured provider", async () => {
-      vi.doMock("../config", () => ({
+      vi.doMock("../../src/config/index.js", () => ({
         getConfig: () => ({ oauth: { providers: {} } }),
       }));
-      const { getProviderAdapter } = await import("../oauth/provider.factory");
+      const { getProviderAdapter } = await import("../../plugins/oauth/provider.factory");
       expect(() => getProviderAdapter("twitter")).toThrow("not configured");
     });
   });

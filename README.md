@@ -66,7 +66,7 @@ rebuilding login for the hundredth time.
 
 - Email + password with configurable account lockout
 - OAuth — Google, GitHub, Facebook (admin-toggleable per provider); Apple Sign In not yet implemented
-- Magic links (passwordless, 15-minute TTL)
+- Magic links (passwordless, 15-minute TTL) — [`plugins/magic-link/`](./plugins/magic-link/)
 - Passkeys / WebAuthn (FIDO2, resident keys, MDS3 attestation policy)
 - TOTP (Google Authenticator / Authy) + Email OTP
 - PASETO v4 access tokens + rotating, hashed refresh tokens
@@ -368,7 +368,7 @@ bun run build          # compile the API to dist/
 
 ```bash
 # API replicas (port 1337) — cluster mode; defer schedulers to the worker below
-WORKER_MODE=true pm2 start dist/api/server.js --name zerotrust-api -i max
+WORKER_MODE=true pm2 start dist/src/api/server.js --name zerotrust-api -i max
 
 # Dedicated background worker (exactly one instance)
 pm2 start dist/worker.js --name zerotrust-worker -i 1
@@ -483,10 +483,15 @@ GET    /health · /healthz · /metrics (Prometheus)
 
 ```
 .
-├── src/                            # API (Hono + TypeScript + Drizzle)
+├── plugins/                        # Feature plugins (plug-and-play; see docs/plugins.md)
+│   ├── magic-link/                 # Fully migrated example
+│   ├── mfa/                        # Scaffold (routes re-export from src during migration)
+│   └── oauth/                      # Migration scaffold (README + manifest template)
+├── src/                            # API core (Hono + TypeScript + Drizzle)
 │   ├── api/
-│   │   ├── server.ts               # Hono app + route mounting (port 1337)
-│   │   └── routes/                 # auth, mfa, passkey, admin, orgs, billing, wallet, search…
+│   │   ├── server.ts               # Hono app + plugin loader (port 1337)
+│   │   └── routes/                 # core routes not yet extracted to plugins/
+│   ├── plugins/                    # Plugin loader, registry, types
 │   ├── db/                         # Drizzle schema + connection (PostgreSQL)
 │   ├── services/                   # token, email, MFA, OAuth, objectStorage, dbBackup…
 │   ├── middleware/                 # auth, rate limiting, CSRF, inputSanitization, requirePlan…

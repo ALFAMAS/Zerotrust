@@ -75,7 +75,7 @@ export {
   recordMFA,
   recordRateLimit,
 } from "./metrics";
-export { sendOTP } from "./mfa";
+export { sendOTP } from "./services/auth/otpDelivery.service";
 export type {
   AttestationPolicy,
   AttestationVerificationResult,
@@ -175,7 +175,7 @@ export type {
   NotificationChannel,
   NotificationEvent,
 } from "./notifications/types";
-export { getProviderAdapter } from "./oauth/provider.factory";
+export { getProviderAdapter } from "../plugins/oauth/provider.factory.js";
 export type {
   AnomalySignals,
   BehaviorObservation,
