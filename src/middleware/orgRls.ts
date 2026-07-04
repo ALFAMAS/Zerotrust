@@ -1,10 +1,6 @@
 import { createMiddleware } from "hono/factory";
+import { orgIdFromRequest, shouldBypassOrgRls, verifyOrgMembership } from "../db/resolveOrgContext";
 import { withOrgRls } from "../db/rls";
-import {
-  orgIdFromRequest,
-  shouldBypassOrgRls,
-  verifyOrgMembership,
-} from "../db/resolveOrgContext";
 import type { HonoEnv } from "../shared/types";
 
 export interface OrgRlsMiddlewareOptions {
@@ -36,8 +32,7 @@ export function orgRlsMiddleware(opts: OrgRlsMiddlewareOptions = {}) {
       });
     }
 
-    const orgId =
-      c.get("activeOrgId") ?? orgIdFromRequest(c, opts.allowQueryOrg);
+    const orgId = c.get("activeOrgId") ?? orgIdFromRequest(c, opts.allowQueryOrg);
     if (!orgId) return next();
 
     if (!(await verifyOrgMembership(orgId, user.id, user))) {

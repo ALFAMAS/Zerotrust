@@ -13,20 +13,18 @@ import { recordAndRespond } from "../../services/auth/accountTakeover.service";
 import { rejectIfBreached } from "../../services/auth/passwordBreach.service";
 import { sendPasswordResetEmail } from "../../services/notifications/email.service";
 import { getClientIp } from "../../shared/clientIp";
+import { hashTokenSha256 } from "../../shared/cryptoHash";
 import type { HonoEnv } from "../../shared/types";
 import { ErrorCodes } from "../../shared/types";
 
 const router = new Hono<HonoEnv>();
 const logger = getLogger("password-reset-routes");
 
-/**
- * Constant-time OTP comparison. Both inputs are normalized to a fixed-length
- * buffer first so a length mismatch (e.g. a malformed `code`) can't throw or
- * short-circuit into a timing side-channel.
- */
-function safeCodeEquals(candidate: string, expected: string): boolean {
-  const a = Buffer.from(String(candidate).padEnd(32, "\0"));
-  const b = Buffer.from(String(expected).padEnd(32, "\0"));
+/** Constant-time digest comparison (SHA-256 hex, 64 chars). */
+function safeDigestEquals(candidate: string, expected: string): boolean {
+  const a = Buffer.from(String(candidate));
+  const b = Buffer.from(String(expected));
+  if (a.length !== b.length) return false;
   return crypto.timingSafeEqual(a, b);
 }
 
@@ -61,11 +59,12 @@ router.post("/request", rateLimit({ points: 5, windowSecs: 3600 }), async (c) =>
     // 32-byte CSPRNG token (~256 bits) — not a 6-digit OTP. Delivered via email
     // link so there is no UX cost vs a short numeric code.
     const code = crypto.randomBytes(32).toString("base64url");
+    const codeHash = hashTokenSha256(code);
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
 
     await db.insert(otpsTable).values({
       userId: user.id,
-      code,
+      code: codeHash,
       type: "password_reset",
       channel: "email",
       target: user.email,
@@ -166,7 +165,8 @@ router.post("/confirm", rateLimit({ points: 10, windowSecs: 900 }), async (c) =>
       return genericInvalid();
     }
 
-    if (!safeCodeEquals(code, otp.code)) {
+    const submittedHash = hashTokenSha256(String(code).trim());
+    if (!safeDigestEquals(submittedHash, otp.code)) {
       await db
         .update(otpsTable)
         .set({ attempts: sql`${otpsTable.attempts} + 1` })

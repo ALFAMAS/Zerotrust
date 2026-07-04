@@ -10,6 +10,7 @@ import { generateNumericCode } from "../../crypto/codes";
 import { getDb } from "../../db";
 import {
   revokeRefreshTokenFamily,
+  revokeSessionAtLogout,
   rotateRefreshToken,
 } from "../../db/repositories/authSessions.repository";
 import {
@@ -23,7 +24,7 @@ import {
   readRefreshTokenFromRequest,
   setRefreshTokenCookie,
 } from "../../shared/authCookies";
-import { authMiddleware } from "../../middleware/auth";
+import { authMiddleware, optionalAuthMiddleware } from "../../middleware/auth";
 import { sensitiveReverification } from "../../middleware/continuousVerification";
 import {
   isIpBlocked,
@@ -83,6 +84,16 @@ function hashToken(token: string) {
 const MFA_CHALLENGE_AUD = "mfa";
 const MFA_CHALLENGE_SCOPE = "mfa:challenge";
 const MFA_CHALLENGE_TTL_SECS = 300;
+
+/** Lazy dummy hash — same bcrypt cost as real passwords to resist timing enumeration. */
+let dummyPasswordHashPromise: Promise<string> | null = null;
+async function dummyPasswordHash(): Promise<string> {
+  if (!dummyPasswordHashPromise) {
+    const cfg = getConfig();
+    dummyPasswordHashPromise = bcrypt.hash("invalid-credentials-timing-pad", cfg.security.bcryptRounds);
+  }
+  return dummyPasswordHashPromise;
+}
 
 /** A user must clear a second factor at login once TOTP is verified+enabled. */
 function userRequiresMfa(user: { mfa?: unknown }): boolean {
@@ -420,13 +431,9 @@ router.post("/login", rateLimit({ points: 20, windowSecs: 60 }), async (c) => {
       .where(eq(usersTable.email, email.toLowerCase()))
       .limit(1);
     const user = users[0];
-    if (!user?.passwordHash) {
-      recordIpLoginFailure(clientIp, email);
-      return c.json({ error: "INVALID_CREDENTIALS", message: "Invalid credentials" }, 401);
-    }
-
-    const valid = await bcrypt.compare(password, user.passwordHash);
-    if (!valid) {
+    const hashToVerify = user?.passwordHash ?? (await dummyPasswordHash());
+    const valid = await bcrypt.compare(password, hashToVerify);
+    if (!user?.passwordHash || !valid) {
       recordIpLoginFailure(clientIp, email);
       return c.json({ error: "INVALID_CREDENTIALS", message: "Invalid credentials" }, 401);
     }
@@ -661,10 +668,20 @@ router.post(
   }
 );
 
-// POST /logout — clear httpOnly refresh cookie (ADR 008 Option C)
-router.post("/logout", async (c) => {
-  clearRefreshTokenCookie(c);
-  return c.json({ success: true });
+// POST /logout — revoke server-side session + refresh token, then clear cookie (ADR 008)
+router.post("/logout", optionalAuthMiddleware, async (c) => {
+  try {
+    const body = await c.req.json().catch(() => ({}));
+    const refreshToken = readRefreshTokenFromRequest(c, body.refreshToken);
+    await revokeSessionAtLogout({
+      sessionId: c.get("session")?.id,
+      refreshTokenPlain: refreshToken,
+    });
+    clearRefreshTokenCookie(c);
+    return c.json({ success: true });
+  } catch (err) {
+    return internalError(c, logger, "Logout error", err);
+  }
 });
 
 // ── GET /auth/me ──────────────────────────────────────────────────────────────

@@ -63,8 +63,9 @@ Forward-looking CI/CD and release-safety punch list. **Section A (make CI green)
 shipped** — type-check, lint, and tests went green (697 passing at the time);
 the magic-link `randomBytes` outage (A1) was fixed. Remaining operational items
 from §B–§D were either shipped (see [`../tdone.md`](../tdone.md)) or superseded
-by the standing audit; verified open work is in [`../todo.md`](../todo.md) (empty
-as of 2026-07-04 — T5 shipped).
+by the standing audit; verified open work is in [`../todo.md`](../todo.md)
+(SEC-5…SEC-27 + DQ-2 as of 2026-07-05 security baseline re-audit; SEC-1…SEC-4
+shipped; SEC-28 documented out-of-scope).
 
 ## 2026-06-28 — SaaS Template Architecture Recommendations
 _Was: `docs/SAAS_TEMPLATE_ARCHITECTURE_RECOMMENDATIONS.md`_

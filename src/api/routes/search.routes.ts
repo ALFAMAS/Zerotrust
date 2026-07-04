@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { z } from "zod";
 import { getLogger } from "../../logger";
 import { authMiddleware } from "../../middleware/auth";
+import { orgRlsMiddleware } from "../../middleware/orgRls";
 import {
   deleteDocument,
   indexDocument,
@@ -19,6 +20,7 @@ const logger = getLogger("search-routes");
 
 // ── Auth guard ────────────────────────────────────────────────────────────────
 router.use("*", authMiddleware);
+router.use("*", orgRlsMiddleware({ allowQueryOrg: true }));
 
 // ── Global search ─────────────────────────────────────────────────────────────
 

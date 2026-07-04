@@ -65,7 +65,17 @@ vi.mock("../middleware/auth", () => ({
     c.set("user", { id: uid, email: "alice@example.com", roles: ["user"] });
     return next();
   },
-  optionalAuthMiddleware: async (_c: any, next: any) => next(),
+  optionalAuthMiddleware: async (c: any, next: any) => {
+    const auth = c.req.header("authorization");
+    const sessionId = c.req.header("x-test-session-id");
+    if (auth?.startsWith("Bearer ") && sessionId) {
+      c.set("session", {
+        id: sessionId,
+        userId: c.req.header("x-test-user-id") ?? "00000000-0000-0000-0000-000000000001",
+      });
+    }
+    return next();
+  },
 }));
 
 vi.mock("../logger", () => ({
@@ -105,6 +115,7 @@ vi.mock("../services/auth/accountTakeover.service", () => ({
 
 vi.mock("../db/repositories/authSessions.repository", () => ({
   revokeRefreshTokenFamily: vi.fn().mockResolvedValue(undefined),
+  revokeSessionAtLogout: vi.fn().mockResolvedValue(true),
   rotateRefreshToken: vi.fn().mockResolvedValue({ id: "00000000-0000-0000-0000-000000000002" }),
 }));
 
@@ -414,6 +425,67 @@ describe("POST /login", () => {
       body: JSON.stringify({ email: "alice@example.com", password: "pass" }),
     });
     expect(res.status).toBe(500);
+  });
+});
+
+// ── POST /logout ─────────────────────────────────────────────────────────────
+
+describe("POST /logout", () => {
+  beforeEach(() => vi.resetModules());
+  afterEach(() => vi.clearAllMocks());
+
+  it("revokes the session server-side and clears the refresh cookie", async () => {
+    const { revokeSessionAtLogout } = await import("../db/repositories/authSessions.repository");
+    const router = await getRouter();
+    const app = new Hono().route("/", router);
+    const res = await app.request("/logout", {
+      method: "POST",
+      headers: {
+        Authorization: "Bearer test-access",
+        "x-test-session-id": SESSION_ID,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({}),
+    });
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ success: true });
+    expect(revokeSessionAtLogout).toHaveBeenCalledWith({
+      sessionId: SESSION_ID,
+      refreshTokenPlain: undefined,
+    });
+  });
+
+  it("passes refresh token from body when present", async () => {
+    const { revokeSessionAtLogout } = await import("../db/repositories/authSessions.repository");
+    const router = await getRouter();
+    const app = new Hono().route("/", router);
+    const refreshToken = "b".repeat(96);
+    const res = await app.request("/logout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ refreshToken }),
+    });
+    expect(res.status).toBe(200);
+    expect(revokeSessionAtLogout).toHaveBeenCalledWith({
+      sessionId: undefined,
+      refreshTokenPlain: refreshToken,
+    });
+  });
+
+  it("still succeeds when no session or refresh token is supplied (cookie-only cleanup)", async () => {
+    const { revokeSessionAtLogout } = await import("../db/repositories/authSessions.repository");
+    const router = await getRouter();
+    const app = new Hono().route("/", router);
+    const res = await app.request("/logout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({}),
+    });
+    expect(res.status).toBe(200);
+    expect(revokeSessionAtLogout).toHaveBeenCalledWith({
+      sessionId: undefined,
+      refreshTokenPlain: undefined,
+    });
   });
 });
 

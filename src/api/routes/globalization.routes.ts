@@ -10,6 +10,7 @@ import { getReadDb } from "../../db";
 import { organizationMembersTable } from "../../db/schema";
 import { getLogger } from "../../logger";
 import { authMiddleware } from "../../middleware/auth";
+import { orgRlsMiddleware } from "../../middleware/orgRls";
 import {
   calculateTax,
   getExchangeRates,
@@ -149,43 +150,53 @@ const submitExemptionSchema = z.object({
 });
 
 // POST /billing/tax-exemptions — submit a tax ID / VAT number (org owner/admin)
-router.post("/tax-exemptions", authMiddleware, async (c) => {
-  try {
-    const user = c.get("user");
-    const body = await c.req.json().catch(() => ({}));
-    const parsed = submitExemptionSchema.safeParse(body);
-    if (!parsed.success) {
-      return c.json({ error: "INVALID_REQUEST", issues: parsed.error.issues }, 400);
-    }
-    if (!(await canManageOrg(parsed.data.orgId, user.id))) {
-      return c.json({ error: "FORBIDDEN", message: "Org owner or admin required" }, 403);
-    }
+router.post(
+  "/tax-exemptions",
+  authMiddleware,
+  orgRlsMiddleware({ allowQueryOrg: true }),
+  async (c) => {
+    try {
+      const user = c.get("user");
+      const body = await c.req.json().catch(() => ({}));
+      const parsed = submitExemptionSchema.safeParse(body);
+      if (!parsed.success) {
+        return c.json({ error: "INVALID_REQUEST", issues: parsed.error.issues }, 400);
+      }
+      if (!(await canManageOrg(parsed.data.orgId, user.id))) {
+        return c.json({ error: "FORBIDDEN", message: "Org owner or admin required" }, 403);
+      }
 
-    const result = await submitTaxExemption({ ...parsed.data, submittedBy: user.id });
-    if (!result.ok) {
-      return c.json({ error: result.error, message: result.reason }, 400);
+      const result = await submitTaxExemption({ ...parsed.data, submittedBy: user.id });
+      if (!result.ok) {
+        return c.json({ error: result.error, message: result.reason }, 400);
+      }
+      return c.json({ exemption: result.exemption }, 201);
+    } catch (err) {
+      return internalError(c, logger, "Submit exemption error", err);
     }
-    return c.json({ exemption: result.exemption }, 201);
-  } catch (err) {
-    return internalError(c, logger, "Submit exemption error", err);
   }
-});
+);
 
 // GET /billing/tax-exemptions?orgId=... — list an org's exemptions (member)
-router.get("/tax-exemptions", authMiddleware, async (c) => {
-  try {
-    const user = c.get("user");
-    const orgId = c.req.query("orgId");
-    if (!orgId) return c.json({ error: "INVALID_REQUEST", message: "orgId required" }, 400);
-    if (!(await isOrgMember(orgId, user.id))) {
-      return c.json({ error: "FORBIDDEN" }, 403);
+router.get(
+  "/tax-exemptions",
+  authMiddleware,
+  orgRlsMiddleware({ allowQueryOrg: true }),
+  async (c) => {
+    try {
+      const user = c.get("user");
+      const orgId = c.req.query("orgId");
+      if (!orgId) return c.json({ error: "INVALID_REQUEST", message: "orgId required" }, 400);
+      if (!(await isOrgMember(orgId, user.id))) {
+        return c.json({ error: "FORBIDDEN" }, 403);
+      }
+      const exemptions = await listTaxExemptions(orgId);
+      return c.json({ exemptions });
+    } catch (err) {
+      return internalError(c, logger, "List exemptions error", err);
     }
-    const exemptions = await listTaxExemptions(orgId);
-    return c.json({ exemptions });
-  } catch (err) {
-    return internalError(c, logger, "List exemptions error", err);
   }
-});
+);
 
 const statusSchema = z.object({ status: z.enum(["verified", "rejected", "pending"]) });
 

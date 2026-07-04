@@ -7,6 +7,7 @@ vi.mock("../db", () => ({
 import { getDb } from "../db";
 import {
   revokeRefreshTokenFamily,
+  revokeSessionAtLogout,
   rotateRefreshToken,
 } from "../db/repositories/authSessions.repository";
 
@@ -125,5 +126,60 @@ describe("authSessions repository", () => {
         },
       })
     ).rejects.toThrow(expected);
+  });
+
+  it("revokes session and refresh token on logout inside one transaction", async () => {
+    const refreshWhere = vi.fn().mockResolvedValue(undefined);
+    const refreshSet = vi.fn().mockReturnValue({ where: refreshWhere });
+    const sessionWhere = vi.fn().mockResolvedValue(undefined);
+    const sessionSet = vi.fn().mockReturnValue({ where: sessionWhere });
+    const update = vi
+      .fn()
+      .mockReturnValueOnce({ set: refreshSet })
+      .mockReturnValueOnce({ set: sessionSet })
+      .mockReturnValueOnce({ set: refreshSet });
+    const selectLimit = vi
+      .fn()
+      .mockResolvedValue([{ id: "rt-1", sessionId: "session-1" }]);
+    const selectWhere = vi.fn().mockReturnValue({ limit: selectLimit });
+    const selectFrom = vi.fn().mockReturnValue({ where: selectWhere });
+    const select = vi.fn().mockReturnValue({ from: selectFrom });
+    const tx = { update, select };
+    const transaction = vi.fn(async (callback) => callback(tx));
+    mockGetDb.mockReturnValue({ transaction } as never);
+
+    const revoked = await revokeSessionAtLogout({
+      refreshTokenPlain: "plain-refresh-token",
+    });
+
+    expect(revoked).toBe(true);
+    expect(transaction).toHaveBeenCalledTimes(1);
+    expect(update).toHaveBeenCalledTimes(3);
+    expect(sessionSet).toHaveBeenCalledWith(
+      expect.objectContaining({
+        isActive: false,
+        revokedReason: "logout",
+        revokedAt: expect.any(Date),
+      })
+    );
+  });
+
+  it("revokes by session id when bearer auth supplies the active session", async () => {
+    const where = vi.fn().mockResolvedValue(undefined);
+    const set = vi.fn().mockReturnValue({ where });
+    const update = vi.fn().mockReturnValue({ set });
+    const tx = { update };
+    const transaction = vi.fn(async (callback) => callback(tx));
+    mockGetDb.mockReturnValue({ transaction } as never);
+
+    const revoked = await revokeSessionAtLogout({ sessionId: "session-9" });
+
+    expect(revoked).toBe(true);
+    expect(update).toHaveBeenCalledTimes(2);
+    expect(set).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({ isActive: false, revokedReason: "logout" })
+    );
+    expect(set).toHaveBeenNthCalledWith(2, { isRevoked: true });
   });
 });

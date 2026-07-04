@@ -1,7 +1,7 @@
 # Quarterly Maintenance Scorecard
 
 **Quarter:** Q3 2026 (Jul – Sep)
-**Last updated:** 2026-07-04 (full-repo backlog audit — open product backlog 0)
+**Last updated:** 2026-07-05 (security baseline re-audit — SEC-5…SEC-27 open in [`todo.md`](../todo.md); SEC-1…SEC-4 + SEC-28 shipped — [`tdone.md`](../tdone.md))
 **Owner:** Platform team
 
 Tracked trend: dependency freshness, CI health, test health, migration health,
@@ -158,6 +158,12 @@ blocking findings.
 Production boot requires `METRICS_AUTH_TOKEN`; reference architecture documents
 token-gated scrape configs.
 
+**Security baseline ([`docs/security.md`](./security.md)):** **23 open** SEC-5…SEC-27
+in [`todo.md`](../todo.md) (3 High: `assertCan`, SSE `?token=`, CSRF origin; 19 Medium;
+1 Low/Ops: VPS firewall runbook). SEC-1…SEC-4 shipped 2026-07-05; SEC-28 documented
+out-of-scope. CWE hardening (601/918/78/22/532/1333/327/1427/79) tracked in
+`CLAUDE.md` / `AGENTS.md` — do not duplicate as SEC items.
+
 ---
 
 ## 8. Docs & ADR Health
@@ -173,7 +179,8 @@ token-gated scrape configs.
 | Open backlog (B6–B7) | 0 (P3 Operations & compliance shipped) | 0 | ✅ |
 | P1 security & access control gaps | 0 (B1, B3, ALFA-3 done) | 0 | ✅ |
 | P2 infrastructure backlog | 0 (B4, B5 done) | 0 | ✅ |
-| Open product backlog ([`todo.md`](../todo.md)) | **0** (T5 shipped 2026-07-04) | Trending down | ✅ |
+| Open product backlog ([`todo.md`](../todo.md)) | **24** (SEC-5…SEC-27 + DQ-2) | Trending down | 🔶 |
+| Security baseline gaps ([`docs/security.md`](./security.md) §0–§10) | **23 open** (SEC-5…SEC-27); SEC-1…SEC-4 shipped 2026-07-05 | 0 | 🔶 |
 
 ---
 

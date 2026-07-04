@@ -1,6 +1,7 @@
 import { eq } from "drizzle-orm";
 import { getDb } from "..";
 import { refreshTokensTable, sessionsTable } from "../schema";
+import { hashTokenSha256 } from "../../shared/cryptoHash";
 
 export type RefreshSessionInsert = typeof sessionsTable.$inferInsert;
 export type RefreshTokenReplacementInsert = Omit<
@@ -62,4 +63,62 @@ export async function rotateRefreshToken(input: RotateRefreshTokenInput) {
 
     return session;
   });
+}
+
+export interface RevokeSessionAtLogoutInput {
+  /** Active session from Bearer auth (preferred). */
+  sessionId?: string;
+  /** Plain refresh token from httpOnly cookie or request body. */
+  refreshTokenPlain?: string;
+}
+
+/**
+ * Revoke the current web session and its refresh token on logout. Both mutations
+ * commit or roll back together so a stolen token cannot survive cookie deletion.
+ */
+export async function revokeSessionAtLogout(
+  input: RevokeSessionAtLogoutInput
+): Promise<boolean> {
+  const db = getDb();
+  let revoked = false;
+
+  await db.transaction(async (tx) => {
+    let sessionId = input.sessionId;
+
+    if (input.refreshTokenPlain) {
+      const tokenHash = hashTokenSha256(input.refreshTokenPlain);
+      const rtRows = await tx
+        .select({ id: refreshTokensTable.id, sessionId: refreshTokensTable.sessionId })
+        .from(refreshTokensTable)
+        .where(eq(refreshTokensTable.tokenHash, tokenHash))
+        .limit(1);
+      const rt = rtRows[0];
+      if (rt) {
+        sessionId = sessionId ?? rt.sessionId ?? undefined;
+        await tx
+          .update(refreshTokensTable)
+          .set({ isRevoked: true })
+          .where(eq(refreshTokensTable.id, rt.id));
+        revoked = true;
+      }
+    }
+
+    if (sessionId) {
+      await tx
+        .update(sessionsTable)
+        .set({
+          isActive: false,
+          revokedAt: new Date(),
+          revokedReason: "logout",
+        })
+        .where(eq(sessionsTable.id, sessionId));
+      await tx
+        .update(refreshTokensTable)
+        .set({ isRevoked: true })
+        .where(eq(refreshTokensTable.sessionId, sessionId));
+      revoked = true;
+    }
+  });
+
+  return revoked;
 }

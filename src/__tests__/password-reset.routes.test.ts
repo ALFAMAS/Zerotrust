@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { hashTokenSha256 } from "../shared/cryptoHash";
 
 // ── Mocks ──────────────────────────────────────────────────────────────────
 // password-reset.routes.ts imports with EXTENSIONLESS specifiers
@@ -38,7 +39,7 @@ vi.mock("../config", () => ({
 }));
 
 const sendOTP = vi.fn().mockResolvedValue(true);
-vi.mock("../mfa", () => ({
+vi.mock("../services/auth/otpDelivery.service", () => ({
   sendOTP: (...a: unknown[]) => sendOTP(...a),
 }));
 
@@ -74,10 +75,16 @@ const USER_ID = "00000000-0000-0000-0000-000000000001";
 const USER_EMAIL = "alice@example.com";
 
 function makeOtpRow(overrides: Record<string, unknown> = {}) {
+  const plainCode = (overrides.code as string | undefined) ?? "123456";
+  const storedCode =
+    typeof overrides.code === "string" && overrides.code.length === 64
+      ? overrides.code
+      : hashTokenSha256(plainCode);
+  const { code: _ignored, ...rest } = overrides;
   return {
     id: "otp-1",
     userId: USER_ID,
-    code: "123456",
+    code: storedCode,
     type: "password_reset",
     channel: "email",
     target: USER_EMAIL,
@@ -85,7 +92,7 @@ function makeOtpRow(overrides: Record<string, unknown> = {}) {
     usedAt: null,
     attempts: 0,
     createdAt: new Date(),
-    ...overrides,
+    ...rest,
   };
 }
 
@@ -192,6 +199,9 @@ describe("password-reset.routes", () => {
       // C1: must be a high-entropy token, not a 6-digit numeric OTP.
       expect(issuedCode.length).toBeGreaterThan(20);
       expect(sendOTP).toHaveBeenCalledWith("email", USER_EMAIL, issuedCode);
+      const stored = chain.values.mock.calls[0]?.[0] as { code?: string };
+      expect(stored.code).toBe(hashTokenSha256(issuedCode));
+      expect(stored.code).not.toBe(issuedCode);
     });
   });
 

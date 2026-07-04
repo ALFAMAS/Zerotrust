@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 import { z } from "zod";
 import { authMiddleware } from "../../middleware/auth";
+import { orgRlsMiddleware } from "../../middleware/orgRls";
 import { requirePlan } from "../../middleware/requirePlan";
 import {
   getOrgBranding,
@@ -40,6 +41,7 @@ router.get("/resolve", async (c) => {
 // ── Authenticated: get org branding ───────────────────────────────────────────
 
 router.use("/orgs/*", authMiddleware);
+router.use("/orgs/*", orgRlsMiddleware());
 
 // GET /orgs/:orgId/branding — get branding config for an org
 router.get("/orgs/:orgId/branding", async (c) => {
@@ -67,14 +69,14 @@ router.put(
   "/orgs/:orgId/branding",
   requirePlan("customRoles", { orgIdParam: "orgId" }),
   async (c) => {
-  const orgId = c.req.param("orgId");
-  const body = await c.req.json().catch(() => ({}));
-  const parsed = brandingSchema.safeParse(body);
-  if (!parsed.success) {
-    return c.json({ error: "INVALID_REQUEST", issues: parsed.error.issues }, 400);
-  }
-  await setOrgBranding(orgId, parsed.data);
-  return c.json({ success: true });
+    const orgId = c.req.param("orgId");
+    const body = await c.req.json().catch(() => ({}));
+    const parsed = brandingSchema.safeParse(body);
+    if (!parsed.success) {
+      return c.json({ error: "INVALID_REQUEST", issues: parsed.error.issues }, 400);
+    }
+    await setOrgBranding(orgId, parsed.data);
+    return c.json({ success: true });
   }
 );
 
@@ -83,10 +85,7 @@ const domainSchema = z.object({
 });
 
 // PUT /orgs/:orgId/domain — set custom domain (Enterprise)
-router.put(
-  "/orgs/:orgId/domain",
-  requirePlan("ssoSaml", { orgIdParam: "orgId" }),
-  async (c) => {
+router.put("/orgs/:orgId/domain", requirePlan("ssoSaml", { orgIdParam: "orgId" }), async (c) => {
   const orgId = c.req.param("orgId");
   const body = await c.req.json().catch(() => ({}));
   const parsed = domainSchema.safeParse(body);
@@ -99,7 +98,6 @@ router.put(
   } catch (err: any) {
     return c.json({ error: "CONFLICT", message: err.message }, 409);
   }
-  }
-);
+});
 
 export default router;

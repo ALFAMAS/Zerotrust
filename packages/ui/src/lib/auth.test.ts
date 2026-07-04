@@ -45,14 +45,18 @@ describe("auth token helpers (ADR 008 Option C)", () => {
     expect((globalThis as any).document.cookie).toContain("za_access_token=access-1");
   });
 
-  it("clearToken clears memory and calls logout to drop httpOnly refresh cookie", async () => {
+  it("clearToken clears memory and calls logout with bearer token before wipe", async () => {
     const { setToken, clearToken, getToken } = await import("./auth");
     setToken("a");
     await clearToken();
     expect(getToken()).toBeNull();
     expect((globalThis as any).fetch).toHaveBeenCalledWith(
       expect.stringContaining("/auth/logout"),
-      expect.objectContaining({ method: "POST", credentials: "include" })
+      expect.objectContaining({
+        method: "POST",
+        credentials: "include",
+        headers: { Authorization: "Bearer a" },
+      })
     );
   });
 

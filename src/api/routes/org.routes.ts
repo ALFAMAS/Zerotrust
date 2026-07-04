@@ -19,6 +19,7 @@ import {
 import { getLogger } from "../../logger";
 import { authMiddleware } from "../../middleware/auth";
 import { sensitiveReverification } from "../../middleware/continuousVerification";
+import { orgRlsMiddleware } from "../../middleware/orgRls";
 import { sendOrgInviteEmail } from "../../services/notifications/email.service";
 import { countRows } from "../../shared/dbCount";
 import { paginated, parsePaginatedQuery } from "../../shared/pagination";
@@ -105,6 +106,7 @@ function publicDbError(error: unknown): string {
 }
 
 router.use("*", authMiddleware);
+router.use("*", orgRlsMiddleware());
 
 router.get("/", async (c) => {
   const user = c.get("user");
@@ -173,9 +175,7 @@ router.put("/:orgId", async (c) => {
     const [org] = await db
       .update(organizationsTable)
       .set({ ...setPayload, version: sql`${organizationsTable.version} + 1` })
-      .where(
-        and(eq(organizationsTable.id, orgId), eq(organizationsTable.version, expectedVersion))
-      )
+      .where(and(eq(organizationsTable.id, orgId), eq(organizationsTable.version, expectedVersion)))
       .returning();
     if (!org) {
       return c.json(

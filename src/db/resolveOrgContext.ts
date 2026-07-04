@@ -1,14 +1,16 @@
 import { and, eq } from "drizzle-orm";
 import type { Context } from "hono";
-import { getDb } from "./index";
-import { organizationMembersTable } from "./schema";
 import { hasAnyRole, isAdmin } from "../shared/roles";
 import type { HonoEnv, User } from "../shared/types";
+import { getDb } from "./index";
+import { organizationMembersTable } from "./schema";
 
-/** Resolve org id from `X-Org-Id` header or `orgId` query param. */
+/** Resolve org id from `X-Org-Id`, `:orgId` path param, or `orgId` query param. */
 export function orgIdFromRequest(c: Context<HonoEnv>, allowQuery = false): string | undefined {
   const header = c.req.header("x-org-id")?.trim();
   if (header) return header;
+  const pathParam = c.req.param("orgId")?.trim();
+  if (pathParam) return pathParam;
   if (allowQuery) return c.req.query("orgId")?.trim() || undefined;
   return undefined;
 }

@@ -587,7 +587,7 @@ zerotrust tracks its state in the repository docs:
 | Doc                                              | What it covers                                              |
 | ------------------------------------------------ | ----------------------------------------------------------- |
 | [`tdone.md`](./tdone.md)                         | Everything that ships today, plus the latest codebase audit |
-| [`todo.md`](./todo.md)                           | Verified open backlog (empty as of 2026-07-04) plus **Not backlog** shipped/intentional items |
+| [`todo.md`](./todo.md)                           | Open backlog — security baseline gaps SEC-5…SEC-27 (2026-07-05 audit) plus long-term DQ-2 |
 | [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) | System architecture audit + proposed upgrades               |
 | [`docs/AUDIT.md`](./docs/AUDIT.md)               | Standing production-readiness audit (findings + risk + order) |
 | [`docs/reference-architecture.md`](./docs/reference-architecture.md) | Operational deployment blueprints (VM, containers, Kubernetes) |
@@ -597,12 +597,15 @@ zerotrust tracks its state in the repository docs:
 | [`docs/compliance`](./docs/compliance/README.md) | Compliance policies, procedures, and evidence templates     |
 | [`packages/client`](./packages/client/README.md) | Generated TypeScript SDK package and usage notes            |
 
-Latest audit note (2026-07-04): a clean `bun install` restores a fully working
+Latest audit note (2026-07-05): a clean `bun install` restores a fully working
 tree — `bun run lint:ci`, `bun run type-check`, `bun run boundaries:check`, the
-**1323-test suite** (1081 API + 242 UI, 194 files), and the UI build all pass.
+**1328-test suite** (1086 API + 242 UI, 138 files), and the UI build all pass.
 Transactional repositories, a dedicated worker with a BullMQ-backed job scheduler,
-and module boundaries are all shipped. Five long-term items remain — see
-[`todo.md`](./todo.md). Full feature catalog in [`tdone.md`](./tdone.md).
+and module boundaries are all shipped. **24 open backlog items** remain — 23
+security-baseline gaps (SEC-5…SEC-27) from the [`docs/security.md`](./docs/security.md)
+cross-audit plus long-term DQ-2 — see [`todo.md`](./todo.md). SEC-1…SEC-4 and
+SEC-28 shipped 2026-07-05 — see [`tdone.md`](./tdone.md) § Security baseline audit.
+Full feature catalog in [`tdone.md`](./tdone.md).
 
 ---
 

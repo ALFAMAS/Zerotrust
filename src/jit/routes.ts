@@ -8,12 +8,14 @@ import { Hono } from "hono";
 import { getReadDb } from "../db";
 import { organizationMembersTable } from "../db/schema";
 import { authMiddleware } from "../middleware/auth";
+import { orgRlsMiddleware } from "../middleware/orgRls";
 import type { HonoEnv } from "../shared/types";
 import { crossTenantJITStore, requestCrossTenantAccess } from "./cross-tenant";
 
 const app = new Hono<HonoEnv>();
 
 app.use("*", authMiddleware);
+app.use("*", orgRlsMiddleware({ allowQueryOrg: true }));
 
 async function userOrgIds(userId: string): Promise<string[]> {
   const rows = await getReadDb()

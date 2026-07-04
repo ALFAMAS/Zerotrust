@@ -4,31 +4,9 @@
 
 Audit date: **2026-07-05**. Verified/completed items moved to [`tdone.md`](./tdone.md) § Security baseline audit.
 
+**Verification (2026-07-05, re-audited):** SEC-5…SEC-27 rechecked against codebase, tests, and CI — **23 items remain open** below. **SEC-1…SEC-4 shipped 2026-07-05** → [`tdone.md`](./tdone.md) § Security baseline audit (evidence: `revokeSessionAtLogout`, `auth.login-timing.test.ts`, `hashTokenSha256` in `password-reset.routes.ts`, `0038_org_rls_expansion.sql`). **SEC-28** (Expo out-of-scope) documented → [`tdone.md`](./tdone.md). DQ-2 unchanged (API floors 67/60% lines/branches per scorecard; long-term 85% target). **SEC-23 note:** weekly grouped bumps via `.github/workflows/dependency-update.yml` exist, but no Dependabot/Renovate manifest — item stays open.
+
 ### Critical / High
-
-- [ ] **SEC-1** — **Critical** — `POST /auth/logout` does not revoke server-side sessions (§1)  
-       **Problem:** `POST /auth/logout` only clears the httpOnly refresh cookie; it does not revoke the Postgres session row, refresh-token hash, or invalidate the in-memory/PASETO access token. Stolen tokens remain valid until TTL. `docs/security.md` §1: “Logout = server-side revocation, not cookie deletion.”  
-       **Fix:** Require auth (or accept refresh cookie), revoke current session + refresh token in `authSessions.repository`, then clear cookie; UI `clearToken()` already calls this route.  
-       **Paths:** `src/api/routes/auth.routes.ts`, `src/middleware/sessionControl.ts`, `src/db/repositories/authSessions.repository.ts`, `packages/ui/src/lib/auth.ts`  
-       **Refs:** §1 Web sessions
-
-- [ ] **SEC-2** — **High** — Login timing enumeration — no dummy password verify (§1)  
-       **Problem:** `POST /auth/login` returns immediately when the user is missing (`!user?.passwordHash`) without running `bcrypt.compare` against a dummy hash, leaking account existence via response timing.  
-       **Fix:** Always run constant-time password verification (dummy hash when user absent); keep identical body/status.  
-       **Paths:** `src/api/routes/auth.routes.ts`  
-       **Refs:** §1 Passwords (enumeration resistance)
-
-- [ ] **SEC-3** — **High** — Password-reset tokens stored plaintext, not hashed (§1 / CWE-532)  
-       **Problem:** `password-reset.routes.ts` inserts the 32-byte reset code into `otpsTable.code` in plaintext. A DB dump yields live reset links. Baseline requires hashed, single-use tokens ≤15 min.  
-       **Fix:** Store `hashTokenSha256(code)`; compare on confirm; keep anti-enumeration response shape.  
-       **Paths:** `src/api/routes/password-reset.routes.ts`, `src/shared/cryptoHash.ts`, `src/db/schema/identity.ts` (`otpsTable`)  
-       **Refs:** §1 Passwords (reset tokens)
-
-- [ ] **SEC-4** — **High** — Postgres RLS covers 4 of ~40 org-scoped tables (§2)  
-       **Problem:** RLS enabled only on `webhook_endpoints`, `support_tickets`, `subscriptions`, `usage_counters` (`0035`/`0036`). Other org-bound tables rely on handler conventions + CI lint — a missed filter is IDOR.  
-       **Fix:** Extend `FORCE ROW LEVEL SECURITY` + `app_rls_org_allowed()` policies to remaining org-scoped tables in `scripts/org-scoped-tables.json`; wire `withOrgRls` / `orgRls` middleware on more route mounts.  
-       **Paths:** `drizzle/0035_org_rls_policies.sql`, `drizzle/0036_usage_counters_rls.sql`, `src/db/rls.ts`, `src/middleware/orgRls.ts`, `scripts/org-scoped-tables.json`  
-       **Refs:** §2 Postgres RLS
 
 - [ ] **SEC-5** — **High** — No single `assertCan()` authorization choke point (§2)  
        **Problem:** Org authz is scattered (`requireMember`, `requireOwner`, inline `hasOrgPermission`, `requireAdmin`). Baseline requires one deny-by-default gate for new endpoints.  
@@ -141,8 +119,8 @@ Audit date: **2026-07-05**. Verified/completed items moved to [`tdone.md`](./tdo
        **Refs:** §7; §8 Supply chain
 
 - [ ] **SEC-23** — **Medium** — No Renovate/Dependabot config (§8)  
-       **Problem:** Lockfile committed and `bun audit` runs, but no automated dependency update bot configured in repo.  
-       **Fix:** Add `.github/dependabot.yml` or `renovate.json` for npm/bun + GitHub Actions.  
+       **Problem:** Lockfile committed and `bun audit` runs; weekly `dependency-update.yml` opens grouped PRs but baseline expects Dependabot/Renovate manifest for npm/bun + GitHub Actions.  
+       **Fix:** Add `.github/dependabot.yml` or `renovate.json` (can complement the existing weekly workflow).  
        **Paths:** `.github/`  
        **Refs:** §8 Supply chain
 
@@ -171,12 +149,6 @@ Audit date: **2026-07-05**. Verified/completed items moved to [`tdone.md`](./tdo
        **Fix:** Add/check deploy checklist in `docs/deployment.md` with ufw + bind-address steps; optional CI doc lint.  
        **Paths:** `docs/deployment.md`, `docs/reference-architecture.md`  
        **Refs:** §9 Ops
-
-- [ ] **SEC-28** — **Low** — Expo / React Native client not present (§5)  
-       **Problem:** Baseline §5 (SecureStore, PKCE via `expo-auth-session`, EAS code signing) has no implementation — web + API only.  
-       **Fix:** When adding mobile: follow §5 checklist; until then document as out-of-scope in `docs/security.md` cross-ref.  
-       **Paths:** N/A (greenfield mobile app)  
-       **Refs:** §5 Expo
 
 ---
 

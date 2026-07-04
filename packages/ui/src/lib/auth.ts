@@ -41,16 +41,23 @@ export function setToken(accessToken: string, _refreshToken?: string): void {
 
 export async function clearToken(): Promise<void> {
   if (typeof window === "undefined") return;
+  const base = process.env.NEXT_PUBLIC_ZEROTRUST_URL || "http://localhost:1337";
+  const token = accessTokenMemory;
+  try {
+    const headers: Record<string, string> = {};
+    if (token) headers.Authorization = `Bearer ${token}`;
+    await fetch(`${base}/auth/logout`, {
+      method: "POST",
+      credentials: "include",
+      headers,
+    });
+  } catch {
+    // best-effort — cookie may already be gone
+  }
   accessTokenMemory = null;
   localStorage.removeItem(LEGACY_ACCESS_KEY);
   localStorage.removeItem(LEGACY_REFRESH_KEY);
   clearAccessTokenCookie();
-  const base = process.env.NEXT_PUBLIC_ZEROTRUST_URL || "http://localhost:1337";
-  try {
-    await fetch(`${base}/auth/logout`, { method: "POST", credentials: "include" });
-  } catch {
-    // best-effort — cookie may already be gone
-  }
 }
 
 export function isAuthenticated(): boolean {

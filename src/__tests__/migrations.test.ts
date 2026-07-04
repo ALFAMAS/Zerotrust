@@ -41,6 +41,10 @@ describe("database migrations", () => {
     expect(sql).toContain('CREATE POLICY "webhook_endpoints_org_rls"');
     expect(sql).toContain('CREATE POLICY "support_tickets_org_rls"');
     expect(sql).toContain('CREATE POLICY "usage_counters_org_rls"');
+    expect(sql).toContain('CREATE POLICY "organization_members_org_rls"');
+    expect(sql).toContain('CREATE POLICY "tax_exemptions_org_rls"');
+    expect(sql).toContain('CREATE POLICY "cross_tenant_jit_requests_org_rls"');
     expect(sql).toContain("app_rls_org_allowed");
+    expect(sql).toContain("app_rls_jit_request_allowed");
   });
 });

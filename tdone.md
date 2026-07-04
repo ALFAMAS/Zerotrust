@@ -16,7 +16,7 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
 | Service files               |                                                                          46 |
 | DB tables                   |                                                                          40 |
 | Middleware                  |                                                                          21 |
-| Migrations                  |                                      36 (latest: `0036_usage_counters_rls`) |
+| Migrations                  |                                      38 (latest: `0038_org_rls_expansion`) |
 | Route mounts in `server.ts` |                                                                          29 |
 | UI pages                    |                                                                          53 |
 | Tests                       |                                         1328 (1086 API + 242 UI, 138 files) |
@@ -201,11 +201,11 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
 
 ### Security baseline audit — verified 2026-07-05 (`docs/security.md`)
 
-Cross-audit of `docs/security.md` §0–§10. Open gaps tracked in [`todo.md`](./todo.md) as **SEC-1…SEC-28**.
+Cross-audit of `docs/security.md` §0–§10. Open gaps tracked in [`todo.md`](./todo.md) as **SEC-5…SEC-27** (SEC-1…SEC-4 and SEC-28 shipped 2026-07-05). **Re-verified 2026-07-05:** code inspection confirms SEC-5…SEC-27 unchanged; no new SEC items added.
 
 #### §0 — Structural posture
 
-- ✅ **Tenant isolation (partial):** org-scoped webhook routes (ZT-1), org-scoping CI (`scripts/check-org-scoping.ts`), `authMiddleware` + `activeOrgId`, Postgres RLS on 4 tables (MT-1), repository layer for hot writes
+- ✅ **Tenant isolation (partial):** org-scoped webhook routes (ZT-1), org-scoping CI (`scripts/check-org-scoping.ts`), `authMiddleware` + `activeOrgId`, Postgres RLS on all 14 `org_id` tables (MT-1 + SEC-4), repository layer for hot writes
 - ✅ **Web token storage (ADR 008 Option C):** httpOnly refresh cookie + in-memory access token; legacy localStorage keys cleared on login/logout (`packages/ui/src/lib/auth.ts`, `src/shared/authCookies.ts`)
 - ✅ **Next.js middleware is not the auth boundary:** no `middleware.ts` auth gate; API `authMiddleware` + client guards on `/dashboard` / `/admin`; CVE-2025-29927 lesson documented in baseline
 
@@ -213,6 +213,10 @@ Cross-audit of `docs/security.md` §0–§10. Open gaps tracked in [`todo.md`](.
 
 - ✅ Hand-rolled auth (Better Auth not adopted — deliberate template choice; baseline §1 spec followed where implemented)
 - ✅ Password register/login with bcrypt + configurable rounds; HIBP breach check on register/change
+- ✅ **SEC-1 (2026-07-05):** `POST /auth/logout` revokes Postgres session + refresh token via `revokeSessionAtLogout()` before clearing cookie; UI `clearToken()` sends Bearer token so session id is available (refresh cookie path is `/auth/token/refresh` only)
+- ✅ **SEC-2 (2026-07-05):** Login runs `bcrypt.compare` against a lazy dummy hash when user missing — same 401 body/status (`auth.login-timing.test.ts`)
+- ✅ **SEC-3 (2026-07-05):** Password-reset codes stored as `hashTokenSha256(code)` in `otpsTable`; confirm compares hashed digest (`password-reset.routes.test.ts`)
+- ✅ **SEC-4 (2026-07-05):** Postgres RLS on all 14 org-scoped tables (`0038_org_rls_expansion.sql`); `orgRlsMiddleware` on org/search/JIT/region/tax routes; `:orgId` path resolves RLS context (`migrations.test.ts`, `resolveOrgContext.test.ts`)
 - ✅ Password-reset anti-enumeration — identical `{ sent: true }` for unknown emails (`password-reset.routes.ts`)
 - ✅ Reset token TTL ≤15 min (15 min DB expiry; email copy mentions 30 min — cosmetic only)
 - ✅ New session ID on login — `randomUUID()` per `issueAuthenticatedSession.service.ts` (session fixation mitigated)
@@ -230,7 +234,7 @@ Cross-audit of `docs/security.md` §0–§10. Open gaps tracked in [`todo.md`](.
 
 - ✅ Org membership checks — `requireMember` / `requireOwner` in `org.routes.ts`
 - ✅ RBAC + ABAC — `hasOrgPermission`, custom org roles, JIT cross-tenant grants
-- ✅ Postgres RLS defense-in-depth — `0035_org_rls_policies.sql`, `0036_usage_counters_rls.sql`; runtime `setOrgRlsContext` / `withOrgRls` (`src/db/rls.ts`, `src/middleware/orgRls.ts`)
+- ✅ Postgres RLS defense-in-depth — `0035_org_rls_policies.sql`, `0036_usage_counters_rls.sql`, `0038_org_rls_expansion.sql` (14 org-scoped tables); runtime `setOrgRlsContext` / `withOrgRls` (`src/db/rls.ts`, `src/middleware/orgRls.ts` on `/orgs`, `/webhooks`, `/support`, `/billing`, `/search`, `/regions/orgs/*`, `/jit/cross-tenant`)
 - ✅ Non-sequential UUID primary keys across schema
 - ✅ Cross-tenant webhook IDOR closed (ZT-1); org FK hardening (MT-2, MT-3)
 
@@ -257,7 +261,7 @@ Cross-audit of `docs/security.md` §0–§10. Open gaps tracked in [`todo.md`](.
 
 #### §5 — Expo / React Native
 
-- `[~]` **Out of scope** — no Expo/React Native app in monorepo; §5 checklist applies when mobile client is added (see SEC-28 in `todo.md`)
+- `[~]` **Out of scope** — no Expo/React Native app in monorepo; §5 checklist applies when mobile client is added (`docs/security.md` §5 template-scope note; SEC-28 shipped 2026-07-05)
 - ✅ Baseline explicitly skips cert pinning, root/jailbreak detection, JS obfuscation — accepted for product tier
 
 #### §6 — Database
@@ -366,6 +370,36 @@ Cross-audit of `docs/security.md` §0–§10. Open gaps tracked in [`todo.md`](.
 - ✅ Dockerfile — multi-stage production image (Bun + Node)
 - ✅ 8 ADRs — PASETO v4, modular monolith, Drizzle, Redis/BullMQ, generated SDK, token rotation, module boundaries, token storage revisit
 - ✅ Deployment blueprints — VM/PM2, containers, Kubernetes (`docs/reference-architecture.md`)
+
+---
+
+## Recent work (2026-07-05)
+
+### SEC-4 — Postgres RLS expansion (shipped)
+
+- **Migration:** `drizzle/0038_org_rls_expansion.sql` — `FORCE ROW LEVEL SECURITY` +
+  `app_rls_org_allowed()` on `organization_members`, `organization_invites`,
+  `org_security_policies`, `org_custom_roles`, `trusted_devices`, `tax_exemptions`,
+  `api_keys`, `file_attachments`, `feedback`; `app_rls_jit_request_allowed()` on
+  `cross_tenant_jit_requests`. Brings total org-scoped RLS coverage to **14 tables**
+  (all schema tables with an `org_id` column).
+- **Runtime:** `orgIdFromRequest()` now resolves `:orgId` path params;
+  `orgRlsMiddleware` wired on `/orgs`, `/search`, `/regions/orgs/*`,
+  `/jit/cross-tenant`, and globalization tax-exemption routes.
+- **Regression:** `migrations.test.ts`, `resolveOrgContext.test.ts`,
+  `orgRls.middleware.test.ts`, `rls.test.ts`, `support.routes.test.ts`.
+- **Verification (2026-07-05):** targeted RLS tests → **23 passed**;
+  `bun run org-scoping:check` → **0 violations**.
+
+### SEC-28 — Expo / React Native out-of-scope documentation (shipped)
+
+- **Problem:** Baseline §5 mobile-client requirements have no implementation; acceptance
+  criteria required an explicit out-of-scope cross-ref in `docs/security.md`.
+- **Fix:** Added template-scope blockquote to `docs/security.md` §5 pointing to
+  `tdone.md` §5 and § Security baseline audit; updated `tdone.md` §5 cross-ref.
+- **Verification (2026-07-05):** No `expo` / React Native app in monorepo (grep clean);
+  `docs/security.md` §5 now states web+API-only scope; mobile implementation remains
+  greenfield when needed.
 
 ---
 
