@@ -199,6 +199,99 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
 - ✅ CWE hardening — CWE-601 (safe redirects), CWE-918 (SSRF guards), CWE-78 (no shell injection), CWE-22 (safe upload keys), CWE-532 (no secrets in logs), CWE-1333 (ReDoS), CWE-327 (SHA-256+/AES-256-GCM), CWE-1427 (LDAP/identifier escaping)
 - ✅ Agent-aware audit log — `AuditPrincipal` (human/agent) derived from token
 
+### Security baseline audit — verified 2026-07-05 (`docs/security.md`)
+
+Cross-audit of `docs/security.md` §0–§10. Open gaps tracked in [`todo.md`](./todo.md) as **SEC-1…SEC-28**.
+
+#### §0 — Structural posture
+
+- ✅ **Tenant isolation (partial):** org-scoped webhook routes (ZT-1), org-scoping CI (`scripts/check-org-scoping.ts`), `authMiddleware` + `activeOrgId`, Postgres RLS on 4 tables (MT-1), repository layer for hot writes
+- ✅ **Web token storage (ADR 008 Option C):** httpOnly refresh cookie + in-memory access token; legacy localStorage keys cleared on login/logout (`packages/ui/src/lib/auth.ts`, `src/shared/authCookies.ts`)
+- ✅ **Next.js middleware is not the auth boundary:** no `middleware.ts` auth gate; API `authMiddleware` + client guards on `/dashboard` / `/admin`; CVE-2025-29927 lesson documented in baseline
+
+#### §1 — Authentication
+
+- ✅ Hand-rolled auth (Better Auth not adopted — deliberate template choice; baseline §1 spec followed where implemented)
+- ✅ Password register/login with bcrypt + configurable rounds; HIBP breach check on register/change
+- ✅ Password-reset anti-enumeration — identical `{ sent: true }` for unknown emails (`password-reset.routes.ts`)
+- ✅ Reset token TTL ≤15 min (15 min DB expiry; email copy mentions 30 min — cosmetic only)
+- ✅ New session ID on login — `randomUUID()` per `issueAuthenticatedSession.service.ts` (session fixation mitigated)
+- ✅ Opaque server-side sessions in Postgres + Redis cache; PASETO v4 access tokens (1 h TTL)
+- ✅ Refresh tokens SHA-256 hashed at rest; rotation on use with reuse detection → family revoke (`authSessions.repository.ts`, `auth.routes.ts`)
+- ✅ TOTP, passkeys, email OTP, magic links; MFA columns in schema from day one
+- ✅ Session management UI — list devices, revoke individual / all (`session.routes.ts`)
+- ✅ OAuth PKCE for Google/GitHub providers (`plugins/oauth/authorize-url.ts`, `routes.ts`)
+- ✅ OAuth CSRF state minting (`POST /auth/oauth/state`)
+- ✅ Credential-stuffing defense (per-IP) + per-account lockout middleware
+- ✅ Email verification flow — issue, confirm, resend (`auth.routes.ts`)
+- ✅ Account takeover detection — password reset / email change revokes sessions
+
+#### §2 — Authorization & tenant isolation
+
+- ✅ Org membership checks — `requireMember` / `requireOwner` in `org.routes.ts`
+- ✅ RBAC + ABAC — `hasOrgPermission`, custom org roles, JIT cross-tenant grants
+- ✅ Postgres RLS defense-in-depth — `0035_org_rls_policies.sql`, `0036_usage_counters_rls.sql`; runtime `setOrgRlsContext` / `withOrgRls` (`src/db/rls.ts`, `src/middleware/orgRls.ts`)
+- ✅ Non-sequential UUID primary keys across schema
+- ✅ Cross-tenant webhook IDOR closed (ZT-1); org FK hardening (MT-2, MT-3)
+
+#### §3 — Hono API hardening
+
+- ✅ Middleware stack (partial baseline): CORS allowlist (`corsOptionsFromEnv`), `securityHeaders()` (CSP enforce + HSTS preload), global input sanitization, inferred-country, compress, metrics, telemetry, API versioning
+- ✅ Redis-backed rate limiting with in-memory fallback; tighter limits on `/auth/*` routes
+- ✅ Global error handler — no stack/DB errors to client; `requestId` in JSON + `x-request-id` header (`src/api/errorHandler.ts`)
+- ✅ Stripe webhook — raw body before `constructEventAsync`, signature verify, idempotent claim (`billing.webhooks.ts`, `stripeEvents.repository.ts`)
+- ✅ Outbound fetch SSRF guards — `assertSafeFetchHost` / `fetchPublicUrl` / `fetchFixedUrl` (`src/shared/safeFetch.ts`)
+- ✅ Safe redirects — `safeRelativeRedirect` / `isRegisteredRedirectUri` (CWE-601)
+- ✅ Upload safety — server-derived keys, magic-byte validation (`uploadSafety.ts`, `presignedUpload.service.ts`)
+- ✅ Idempotency on money-adjacent paths — Stripe events, wallet top-up, outbound webhooks, email-event receiver, SSF receiver
+- ✅ No `sql.raw()` with user input (grep clean)
+- ✅ Zod used on several routes (e.g. `patchMeSchema`); mass-assignment guarded on profile patch
+
+#### §4 — Next.js
+
+- ✅ Open redirect protection — `packages/ui/src/lib/safeRedirect.ts` + tests; magic-link verify uses `safeRelativeRedirect`
+- ✅ CSP enforced via API `securityHeaders()` (ZT-2)
+- ✅ No user-influenced `dangerouslySetInnerHTML` (theme flash script in `layout.tsx` only — static)
+- ✅ `NEXT_PUBLIC_*` vars are branding/analytics/API URL only — no secrets in prefix (see `packages/ui/.env.example`)
+- ✅ Data fetching via canonical `apiClient` + TanStack Query — not raw unauthenticated fetches for privileged data
+
+#### §5 — Expo / React Native
+
+- `[~]` **Out of scope** — no Expo/React Native app in monorepo; §5 checklist applies when mobile client is added (see SEC-28 in `todo.md`)
+- ✅ Baseline explicitly skips cert pinning, root/jailbreak detection, JS obfuscation — accepted for product tier
+
+#### §6 — Database
+
+- ✅ Drizzle parameterized queries; no `sql.raw()` usage
+- ✅ Automated encrypted backups + restore runbook (`dbBackup.service.ts`, `docs/deployment.md`)
+- ✅ Audit log immutability — DB triggers + hash chain (FS-1)
+
+#### §7 — Secrets & environment
+
+- ✅ Production fail-fast — `validateConfig()` refuses placeholder secrets, missing `METRICS_AUTH_TOKEN`, CORS, Redis, backup keys (P4.3, ZT-4)
+- ✅ `.env.example` documents required vars; secrets not committed
+
+#### §8 — Supply chain & CI
+
+- ✅ Lockfile committed (`bun.lock`)
+- ✅ `bun audit --prod --audit-level=high` CI gate
+- ✅ Semgrep OWASP SAST + Trivy filesystem scan (blocking, P4.6/P4.7)
+- ✅ Module boundary enforcement (`scripts/check-boundaries.ts`)
+
+#### §9 — Ops
+
+- ✅ HSTS with preload in `securityHeaders()`
+- ✅ Tamper-evident hash-chained audit log + external anchoring (P5.1)
+- ✅ Incident response / breach runbook — `docs/compliance/incident-response-runbook.md`
+- ✅ SOC 2 readiness map, evidence register, auditor engagement (C1)
+- ✅ Australian Privacy Act / NDB awareness documented in compliance policies
+
+#### §10 — PR checklist (standing)
+
+- ✅ Org-scoping CI lint for new Drizzle queries on org tables
+- ✅ CWE hardening canonical modules documented in `CLAUDE.md` / `AGENTS.md`
+- ✅ Destructive migration CI gate (`scripts/check-destructive-migrations.ts`)
+
 ## User Dashboard
 
 - ✅ Profile — display name, avatar, language preference
