@@ -66,7 +66,7 @@ describe("purgeScheduledDeletions (M7)", () => {
     selectResults.push([{ id: "user-due" }]);
     selectResults.push([]);
 
-    const { purgeScheduledDeletions } = await import("../api/routes/gdpr.routes");
+    const { purgeScheduledDeletions } = await import("../services/compliance/dataRetention");
     const count = await purgeScheduledDeletions();
 
     expect(count).toBe(1);
@@ -77,7 +77,7 @@ describe("purgeScheduledDeletions (M7)", () => {
   it("returns 0 when no users are due for purge", async () => {
     selectResults.push([]);
 
-    const { purgeScheduledDeletions } = await import("../api/routes/gdpr.routes");
+    const { purgeScheduledDeletions } = await import("../services/compliance/dataRetention");
     const count = await purgeScheduledDeletions();
 
     expect(count).toBe(0);

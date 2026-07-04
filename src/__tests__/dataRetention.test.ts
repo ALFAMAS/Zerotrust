@@ -1,10 +1,18 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
-const { mockDb, setCount, setHeld, resetDb } = vi.hoisted(() => {
+const { mockDb, setCount, setHeld, setPendingDeletions, getUpdateCalls, resetDb } = vi.hoisted(() => {
   // Per-table delete results, keyed by a tag on the (mocked) schema table —
   // order-independent so concurrent runRetentionPolicies() can't shuffle them.
   let counts: Record<string, any> = {};
   let heldRows: { id: string }[] = [];
+  // Rows eligible for the GDPR scheduled-deletion purge — separate from
+  // `heldRows` (legal holds) since purgeScheduledDeletions() and
+  // getHeldUserIds() both select() from the same mocked usersTable but for
+  // different purposes; defaults to [] (nothing pending) so the aggregate
+  // runRetentionPolicies() test doesn't have to care about call ordering
+  // between the two concurrent purges.
+  let pendingDeletionRows: { id: string; legalHold: boolean }[] = [];
+  const updateCalls: { table: string; set: any }[] = [];
   const makeDeleteChain = (table: any): any => {
     const tag = table?.__t ?? "unknown";
     const c: any = {};
@@ -14,16 +22,35 @@ const { mockDb, setCount, setHeld, resetDb } = vi.hoisted(() => {
     c.where = () => Promise.resolve(counts[tag] ?? { count: 0 });
     return c;
   };
-  const makeSelectChain = (): any => {
+  const makeSelectChain = (columns: any): any => {
     const c: any = {};
     c.from = () => c;
-    c.where = () => Promise.resolve(heldRows);
+    // purgeScheduledDeletions() selects {id, legalHold} (two columns);
+    // getHeldUserIds() selects {id} (one column) — enough to disambiguate
+    // the two call sites sharing this mock without real query introspection.
+    c.where = () =>
+      Promise.resolve(columns && Object.keys(columns).length > 1 ? pendingDeletionRows : heldRows);
+    return c;
+  };
+  const makeUpdateChain = (table: any): any => {
+    const tag = table?.__t ?? "users";
+    const c: any = {};
+    let pendingSet: any;
+    c.set = (values: any) => {
+      pendingSet = values;
+      return c;
+    };
+    c.where = (whereClause: any) => {
+      updateCalls.push({ table: tag, set: pendingSet, where: whereClause });
+      return Promise.resolve(undefined);
+    };
     return c;
   };
   return {
     mockDb: {
       delete: (table: any) => makeDeleteChain(table),
-      select: () => makeSelectChain(),
+      select: (columns: any) => makeSelectChain(columns),
+      update: (table: any) => makeUpdateChain(table),
     },
     setCount: (tag: string, count: number) => {
       counts[tag] = { count };
@@ -31,9 +58,15 @@ const { mockDb, setCount, setHeld, resetDb } = vi.hoisted(() => {
     setHeld: (ids: string[]) => {
       heldRows = ids.map((id) => ({ id }));
     },
+    setPendingDeletions: (rows: { id: string; legalHold: boolean }[]) => {
+      pendingDeletionRows = rows;
+    },
+    getUpdateCalls: () => updateCalls,
     resetDb: () => {
       counts = {};
       heldRows = [];
+      pendingDeletionRows = [];
+      updateCalls.length = 0;
     },
   };
 });
@@ -44,14 +77,18 @@ vi.mock("../db/schema", () => ({
   sessionsTable: { __t: "sessions" },
   refreshTokensTable: { __t: "refresh" },
   otpsTable: { __t: "otps" },
-  usersTable: { id: "id", legalHold: "legal_hold" },
+  usersTable: { __t: "users", id: "id", legalHold: "legal_hold", metadata: "metadata" },
 }));
 vi.mock("drizzle-orm", () => ({
   lt: vi.fn(),
   and: vi.fn((...args) => ({ and: args })),
-  eq: vi.fn(),
+  eq: vi.fn((col: unknown, val: unknown) => ({ eq: [col, val] })),
   or: vi.fn(),
   notInArray: vi.fn((col, ids) => ({ notInArray: ids })),
+  sql: Object.assign(
+    (strings: TemplateStringsArray, ...values: unknown[]) => ({ strings, values }),
+    { raw: (s: string) => s }
+  ),
 }));
 vi.mock("../config", () => ({
   getConfig: () => ({
@@ -146,6 +183,53 @@ describe("Data Retention Service", () => {
     expect(result.sessions).toBe(4);
     expect(result.refreshTokens).toBe(6);
     expect(result.otps).toBe(1);
+    // M7: the GDPR account-deletion purge is now part of the scheduled
+    // retention run — it used to be defined but never actually invoked
+    // anywhere, so the "deleted in 30 days" promise was never kept.
+    expect(result.gdprDeletions).toBe(0);
+  });
+
+  // ── M7: GDPR scheduled-deletion purge respects legal hold ─────────────────
+
+  describe("purgeScheduledDeletions (M7)", () => {
+    it("purges accounts whose deletion grace period has elapsed", async () => {
+      setPendingDeletions([
+        { id: "user-a", legalHold: false },
+        { id: "user-b", legalHold: false },
+      ]);
+      const { purgeScheduledDeletions } = await import("../services/compliance/dataRetention");
+      const count = await purgeScheduledDeletions();
+      expect(count).toBe(2);
+      const updates = getUpdateCalls();
+      expect(updates).toHaveLength(2);
+      expect(updates.every((u) => u.set.status === "deleted")).toBe(true);
+    });
+
+    it("never purges an account under legal hold, even if it's in the candidate set", async () => {
+      // Simulates the query-level filter being bypassed/weakened: a
+      // legal-hold row still reaches the loop, and the in-loop guard must
+      // catch it (defense in depth) rather than the row simply never being
+      // fetched.
+      setPendingDeletions([
+        { id: "user-a", legalHold: false },
+        { id: "user-held", legalHold: true },
+      ]);
+      const { purgeScheduledDeletions } = await import("../services/compliance/dataRetention");
+      const count = await purgeScheduledDeletions();
+      expect(count).toBe(1);
+      const updates = getUpdateCalls();
+      // Only user-a's row should ever reach an UPDATE — user-held must
+      // never be targeted despite being in the candidate set.
+      expect(updates).toHaveLength(1);
+      expect(updates[0].where).toEqual({ eq: ["id", "user-a"] });
+    });
+
+    it("returns 0 and does not throw when nothing is pending", async () => {
+      setPendingDeletions([]);
+      const { purgeScheduledDeletions } = await import("../services/compliance/dataRetention");
+      await expect(purgeScheduledDeletions()).resolves.toBe(0);
+      expect(getUpdateCalls()).toHaveLength(0);
+    });
   });
 
   it("scheduler starts and stops without errors", async () => {

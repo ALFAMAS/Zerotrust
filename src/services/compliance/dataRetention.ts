@@ -1,6 +1,12 @@
-import { and, eq, lt, notInArray, or } from "drizzle-orm";
+import { and, eq, lt, notInArray, or, sql } from "drizzle-orm";
 import { getDb } from "../../db/index";
-import { auditLogsTable, otpsTable, refreshTokensTable, sessionsTable } from "../../db/schema";
+import {
+  auditLogsTable,
+  otpsTable,
+  refreshTokensTable,
+  sessionsTable,
+  usersTable,
+} from "../../db/schema";
 import { getLogger } from "../../logger/index";
 import { getHeldUserIds } from "./legalHold.service";
 
@@ -103,21 +109,91 @@ export async function purgeExpiredOtps(retentionDays?: number): Promise<number> 
   }
 }
 
+/**
+ * Purge PII for accounts whose 30-day GDPR deletion grace period (set by
+ * `DELETE /gdpr/account`) has elapsed. Query-level filter: only rows with a
+ * due deletion schedule that are NOT under legal hold are even loaded —
+ * `legalHold` exists specifically to exempt an account from this purge (e.g.
+ * active audit/legal defensibility). A previous version of this function
+ * loaded every user row with no WHERE clause at all and never checked
+ * legalHold; it was also never wired into the scheduled retention run, so
+ * the "your data will be permanently deleted in 30 days" promise made by
+ * the GDPR deletion-request endpoint was never actually fulfilled.
+ */
+export async function purgeScheduledDeletions(): Promise<number> {
+  const db = getDb();
+  const now = new Date();
+  let purged = 0;
+
+  try {
+    const pending = await db
+      .select({ id: usersTable.id, legalHold: usersTable.legalHold })
+      .from(usersTable)
+      .where(
+        and(
+          eq(usersTable.legalHold, false),
+          sql`${usersTable.metadata} ->> 'deletionScheduledFor' IS NOT NULL`,
+          sql`(${usersTable.metadata} ->> 'deletionScheduledFor')::timestamptz <= ${now}`
+        )
+      );
+
+    for (const u of pending) {
+      // Defense in depth: even if the query-level filter above is ever
+      // weakened or bypassed, a legal-hold account must never be purged.
+      if (u.legalHold) {
+        logger.warn("Skipped purge of legal-hold user", { userId: u.id });
+        continue;
+      }
+
+      await db
+        .update(usersTable)
+        .set({
+          email: `deleted-${u.id}@deleted.invalid`,
+          username: null,
+          displayName: "Deleted User",
+          passwordHash: null,
+          phone: null,
+          avatarUrl: null,
+          attributes: {},
+          metadata: { purgedAt: now.toISOString() },
+          status: "deleted",
+          updatedAt: now,
+        })
+        .where(eq(usersTable.id, u.id));
+
+      purged++;
+      logger.info("User PII purged", { userId: u.id });
+    }
+  } catch (err) {
+    logger.error("Purge scheduled deletions failed", err as Error);
+  }
+
+  return purged;
+}
+
 export async function runRetentionPolicies(policy?: Partial<RetentionPolicy>): Promise<{
   auditLogs: number;
   sessions: number;
   refreshTokens: number;
   otps: number;
+  gdprDeletions: number;
 }> {
-  const [auditLogs, sessions, refreshTokens, otps] = await Promise.all([
+  const [auditLogs, sessions, refreshTokens, otps, gdprDeletions] = await Promise.all([
     purgeOldAuditLogs(policy?.auditLogRetentionDays),
     purgeExpiredSessions(policy?.sessionRetentionDays),
     purgeExpiredRefreshTokens(policy?.refreshTokenRetentionDays),
     purgeExpiredOtps(policy?.otpRetentionDays),
+    purgeScheduledDeletions(),
   ]);
 
-  logger.info("Data retention run complete", { auditLogs, sessions, refreshTokens, otps });
-  return { auditLogs, sessions, refreshTokens, otps };
+  logger.info("Data retention run complete", {
+    auditLogs,
+    sessions,
+    refreshTokens,
+    otps,
+    gdprDeletions,
+  });
+  return { auditLogs, sessions, refreshTokens, otps, gdprDeletions };
 }
 
 // ── Optional: Simple interval-based scheduler ────────────────────────────────
