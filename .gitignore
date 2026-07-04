@@ -8,6 +8,11 @@ bun.lockb
 dist/
 build/
 *.tsbuildinfo
+# Accidental tsc emit beside sources (canonical output is dist/)
+src/**/*.js
+src/**/*.js.map
+plugins/**/*.js
+plugins/**/*.js.map
 
 # Environment variables
 .env
