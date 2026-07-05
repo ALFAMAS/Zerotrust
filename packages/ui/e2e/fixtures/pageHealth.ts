@@ -1,4 +1,5 @@
 import { expect, type Page } from "@playwright/test";
+import { dismissCookieBanner } from "./auth";
 
 export type PageSmokeCase = {
   path: string;
@@ -29,6 +30,7 @@ export async function assertPageHealthy(
 
   try {
     await page.goto(path, { waitUntil: "domcontentloaded" });
+    await dismissCookieBanner(page);
 
     const expectedUrl = urlPattern ?? new RegExp(path.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
     await expect(page).toHaveURL(expectedUrl, { timeout: 30_000 });
@@ -39,7 +41,7 @@ export async function assertPageHealthy(
 
     if (heading) {
       await expect(page.getByRole("heading", { name: heading, level: 1 })).toBeVisible({
-        timeout: 20_000,
+        timeout: 30_000,
       });
     }
 

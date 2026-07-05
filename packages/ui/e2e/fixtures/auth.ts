@@ -11,9 +11,16 @@ export const E2E_PASSWORD = `E2e!${Date.now()}aB9x#Qz`;
 /** Dismiss the cookie banner when it blocks interactions. */
 export async function dismissCookieBanner(page: Page): Promise<void> {
   const accept = page.getByRole("button", { name: "Accept All" });
-  if (await accept.isVisible().catch(() => false)) {
-    await accept.click();
-  }
+  const visible = await accept.isVisible({ timeout: 1500 }).catch(() => false);
+  if (!visible) return;
+  await accept.click({ force: true, timeout: 3000 }).catch(() => {});
+}
+
+/** Open the dashboard command palette without relying on keyboard shortcuts. */
+export async function openCommandPalette(page: Page): Promise<void> {
+  await page.evaluate(() => {
+    document.dispatchEvent(new CustomEvent("zerotrust:open-command-palette"));
+  });
 }
 
 /**
@@ -24,6 +31,35 @@ export async function seedMockAuth(page: Page, token = "test-token"): Promise<vo
   await page.addInitScript((accessToken: string) => {
     document.cookie = `za_access_token=${encodeURIComponent(accessToken)};path=/;max-age=3600;samesite=lax`;
   }, token);
+}
+
+export async function loginViaUi(
+  page: Page,
+  email: string,
+  password = E2E_PASSWORD
+): Promise<void> {
+  await page.goto("/login");
+  await dismissCookieBanner(page);
+  await page.getByLabel("Email").fill(email);
+  await page.getByLabel("Password", { exact: true }).fill(password);
+  await page.getByRole("button", { name: "Sign in", exact: true }).click();
+  await expect(page).toHaveURL(/\/dashboard/, { timeout: 30_000 });
+}
+
+export async function registerAndGetUserId(page: Page, email = uniqueEmail()): Promise<{
+  email: string;
+  userId: string;
+  token: string;
+}> {
+  await registerViaUi(page, email);
+  const token = await readAccessToken(page);
+  if (!token) throw new Error("Missing access token after registration");
+  const meRes = await page.request.get("http://localhost:1337/auth/me", {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!meRes.ok()) throw new Error(`auth/me failed: ${meRes.status()}`);
+  const me = (await meRes.json()) as { id: string };
+  return { email, userId: me.id, token };
 }
 
 export async function registerViaUi(page: Page, email: string): Promise<void> {

@@ -62,3 +62,75 @@ export async function mockAuthenticatedShell(
     })
   );
 }
+
+/** Mock billing endpoints for the billing page. */
+export async function mockBillingApis(page: Page): Promise<void> {
+  await page.route("http://localhost:1337/billing/subscription", (route) =>
+    route.fulfill({
+      json: {
+        plan: "free",
+        status: "active",
+        cancelAtPeriodEnd: false,
+        currentPeriodEnd: null,
+      },
+    })
+  );
+  await page.route("http://localhost:1337/billing/usage", (route) =>
+    route.fulfill({
+      json: {
+        apiKeys: { used: 1, limit: 2 },
+        orgMembers: { used: 1, limit: 5 },
+        webhooks: { used: 0, limit: 3 },
+      },
+    })
+  );
+  await page.route("http://localhost:1337/billing/currencies", (route) =>
+    route.fulfill({ json: { currencies: ["USD", "EUR"] } })
+  );
+  await page.route("http://localhost:1337/billing/pricing*", (route) =>
+    route.fulfill({
+      json: {
+        plans: [
+          { plan: "pro", formatted: "$29", pppDiscountPercent: 0 },
+          { plan: "enterprise", formatted: "Custom", pppDiscountPercent: 0 },
+        ],
+      },
+    })
+  );
+}
+
+/** Admin shell: authenticated user with system admin role. */
+export async function mockAdminShell(
+  page: Page,
+  user: MockUser = { ...DEFAULT_USER, id: "admin-mock", roles: ["user", "admin"] }
+): Promise<void> {
+  await mockAuthenticatedShell(page, user);
+}
+
+/** Mock login → MFA challenge → MFA verify for the login page. */
+export async function mockLoginMfaFlow(page: Page, token = "mfa-session-token"): Promise<void> {
+  await page.route("http://localhost:1337/auth/login", async (route) => {
+    if (route.request().method() !== "POST") {
+      await route.continue();
+      return;
+    }
+    await route.fulfill({ json: { mfaRequired: true, mfaToken: "mfa-tok-e2e" } });
+  });
+  await page.route("http://localhost:1337/auth/login/mfa", async (route) => {
+    await route.fulfill({
+      json: { accessToken: token, refreshToken: "refresh-mfa-e2e" },
+    });
+  });
+}
+
+/** Mock OAuth exchange-code redemption on the login page. */
+export async function mockOAuthExchange(
+  page: Page,
+  token = "oauth-access-token"
+): Promise<void> {
+  await page.route("http://localhost:1337/auth/oauth/exchange", async (route) => {
+    await route.fulfill({
+      json: { accessToken: token, refreshToken: "oauth-refresh-e2e" },
+    });
+  });
+}
