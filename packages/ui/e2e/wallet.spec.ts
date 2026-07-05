@@ -1,10 +1,9 @@
 import { expect, test } from "@playwright/test";
+import { mockAuthenticatedShell } from "./fixtures/apiMocks";
 
 test.describe("wallet page", () => {
   test.beforeEach(async ({ page }) => {
-    await page.addInitScript(() => {
-      localStorage.setItem("za_access_token", "test-token");
-    });
+    await mockAuthenticatedShell(page);
   });
 
   test("shows wallet balance from the API", async ({ page }) => {
@@ -20,6 +19,6 @@ test.describe("wallet page", () => {
     await page.goto("/dashboard/wallet");
 
     await expect(page.getByRole("heading", { name: "Wallet" })).toBeVisible();
-    await expect(page.getByText("$42.00")).toBeVisible();
+    await expect(page.locator("#main-content").getByText("$42.00")).toBeVisible();
   });
 });

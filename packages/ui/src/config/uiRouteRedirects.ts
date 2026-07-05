@@ -42,8 +42,8 @@ const DASHBOARD_API_ALIASES: ReadonlyArray<{
   { apiBase: "/jit/cross-tenant", uiBase: "/dashboard/jit" },
   // Common shortcuts — no matching API page, but users expect these URLs.
   { apiBase: "/profile", uiBase: "/dashboard/profile" },
-  { apiBase: "/security", uiBase: "/dashboard/security" },
   { apiBase: "/account", uiBase: "/dashboard/account" },
+  // NOTE: do not alias /security — the public responsible-disclosure page lives at /security.
 ];
 
 function dashboardAliasRedirects(): UiRedirect[] {

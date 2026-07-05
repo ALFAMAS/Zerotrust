@@ -23,6 +23,12 @@ export default defineConfig({
     screenshot: "only-on-failure",
   },
 
+  // Prefer the user-level browser cache on Windows dev machines (sandbox installs
+  // land in a temp path that Playwright test runs may not see).
+  ...(process.platform === "win32" && process.env.LOCALAPPDATA
+    ? { cacheDir: `${process.env.LOCALAPPDATA}/ms-playwright` }
+    : {}),
+
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
 
   // Boots the whole app. NEXT_PUBLIC_ZEROTRUST_URL points the UI's API client at
@@ -40,6 +46,7 @@ export default defineConfig({
     env: {
       NEXT_PUBLIC_ZEROTRUST_URL: "http://localhost:1337",
       HIBP_CHECK_ENABLED: "false",
+      RATE_LIMITING_ENABLED: "false",
     },
   },
 });
