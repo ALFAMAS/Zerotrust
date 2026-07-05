@@ -52,10 +52,15 @@ vi.mock("../middleware/auth", () => ({
     c.set("user", { id: CALLER_ID, email: "caller@example.com", roles: ["user"] });
     return next();
   },
+  requireEmailVerified: async (_c: any, next: any) => next(),
 }));
 
 vi.mock("../middleware/continuousVerification", () => ({
   sensitiveReverification: async (_c: any, next: any) => next(),
+}));
+
+vi.mock("../middleware/orgRls", () => ({
+  orgRlsMiddleware: () => async (_c: any, next: any) => next(),
 }));
 
 vi.mock("../services/billing/stripeWebhookProcessor", () => ({ getStripe: vi.fn() }));
