@@ -10,8 +10,8 @@ import {
   supportTicketMessagesTable,
   supportTicketsTable,
   usersTable,
-  walletTransactionsTable,
   walletsTable,
+  walletTransactionsTable,
 } from "../../db/schema";
 import { getLogger } from "../../logger";
 import { authMiddleware } from "../../middleware/auth";
@@ -66,9 +66,7 @@ router.get("/export", rateLimit({ points: 3, windowSecs: 3600 }), authMiddleware
       db
         .select()
         .from(auditLogsTable)
-        .where(
-          or(eq(auditLogsTable.actorId, user.id), eq(auditLogsTable.targetId, user.id))
-        )
+        .where(or(eq(auditLogsTable.actorId, user.id), eq(auditLogsTable.targetId, user.id)))
         .orderBy(desc(auditLogsTable.timestamp)),
       db
         .select()

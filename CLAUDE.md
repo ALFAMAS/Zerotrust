@@ -91,6 +91,10 @@ packages/ui/src/
   The service worker (`packages/ui/public/sw.js`) only registers in production builds.
 - **Lint**: `bun run lint:fix` — Biome (single Rust-based tool replaces ESLint + Prettier) runs automatically on commit via husky
 
+## Quality rules
+
+Cross-agent performance, accessibility, best-practice, and SEO directives are in [`AGENTS.md`](./AGENTS.md) § Quality rules. Apply only the Web block when editing `packages/ui/` and the API block when editing `src/`. Do not add SEO scaffolding to authenticated dashboard routes. Mobile/Expo rules in [`docs/Agentqualityrules.MD`](./docs/Agentqualityrules.MD) apply only if that surface is added to the repo.
+
 ## MCP servers
 
 Only one MCP is needed for this repo, already registered in `.mcp.json`:
@@ -117,7 +121,7 @@ These global skills map to the work this repo involves (invoke with `/<name>`):
 | `/webapp-testing`          | Drive/verify the UI with Playwright                                      |
 | `/verify` · `/run`         | Confirm a change works in the running app, not just in tests             |
 | `/changelog-generator`     | Release notes (repo uses semantic-release + conventional commits)        |
-| `/graphify`                | Refresh the knowledge graph (`graphify-out/`) — first step of shipping   |
+
 
 ## Security hardening rules (mandatory for all agents)
 

@@ -115,7 +115,7 @@ describe("P4.3 — Production fail-fast config validation", () => {
     process.env.CORS_ALLOWED_ORIGINS = "https://app.example.com";
     process.env.REDIS_URI = "redis://localhost:6379";
     process.env.BACKUP_ENCRYPTION_KEY_HEX =
-      "d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6";
+      "c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5";
     process.env.BACKUP_REQUIRE_ENCRYPTION = "true";
     const loadConfig = await loadFreshConfig();
     expect(() => loadConfig()).toThrow(/placeholder value/);
@@ -128,7 +128,7 @@ describe("P4.3 — Production fail-fast config validation", () => {
     process.env.CORS_ALLOWED_ORIGINS = "https://app.example.com";
     process.env.REDIS_URI = "redis://localhost:6379";
     process.env.BACKUP_ENCRYPTION_KEY_HEX =
-      "d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6";
+      "c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5";
     process.env.BACKUP_REQUIRE_ENCRYPTION = "true";
     const loadConfig = await loadFreshConfig();
     expect(() => loadConfig()).not.toThrow();
@@ -190,6 +190,38 @@ describe("H3 — ephemeral-secret warning outside production", () => {
 
     expect(warnSpy).not.toHaveBeenCalledWith(expect.stringMatching(/TOKEN_SECRET_HEX/));
     expect(warnSpy).not.toHaveBeenCalledWith(expect.stringMatching(/CSFLE_MASTER_KEY_HEX/));
+  });
+});
+
+describe("SEC-21 — Zod env schema (src/config/env.ts)", () => {
+  const originalEnv = { ...process.env };
+
+  afterEach(() => {
+    process.env = { ...originalEnv };
+  });
+
+  it("parseEnv rejects invalid TOKEN_SECRET_HEX format", async () => {
+    process.env.NODE_ENV = "development";
+    setBaseEnv();
+    process.env.TOKEN_SECRET_HEX = "too-short";
+    vi.resetModules();
+    const { parseEnv } = await import("../config/env");
+    expect(() => parseEnv(process.env)).toThrow(/TOKEN_SECRET_HEX must be at least 32 bytes/);
+  });
+
+  it("parseEnv accepts REDIS_URL alias in production", async () => {
+    process.env.NODE_ENV = "production";
+    setBaseEnv();
+    process.env.METRICS_AUTH_TOKEN = "secret-token";
+    process.env.CORS_ALLOWED_ORIGINS = "https://app.example.com";
+    delete process.env.REDIS_URI;
+    process.env.REDIS_URL = "redis://localhost:6379";
+    process.env.BACKUP_ENCRYPTION_KEY_HEX =
+      "c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5";
+    process.env.BACKUP_REQUIRE_ENCRYPTION = "true";
+    vi.resetModules();
+    const { parseEnv } = await import("../config/env");
+    expect(() => parseEnv(process.env)).not.toThrow();
   });
 });
 

@@ -1,7 +1,9 @@
-import { eq } from "drizzle-orm";
-import { getDb } from "..";
-import { refreshTokensTable, sessionsTable } from "../schema";
+import { and, eq, inArray } from "drizzle-orm";
 import { hashTokenSha256 } from "../../shared/cryptoHash";
+import type { User } from "../../shared/types";
+import { getDb } from "..";
+import { verifyOrgMembership } from "../orgMembership";
+import { refreshTokensTable, sessionsTable } from "../schema";
 
 export type RefreshSessionInsert = typeof sessionsTable.$inferInsert;
 export type RefreshTokenReplacementInsert = Omit<
@@ -16,28 +18,37 @@ export interface RotateRefreshTokenInput {
 }
 
 /**
- * Revoke every refresh token and active session for a user after refresh-token
+ * Revoke every refresh token and active session in a token family after refresh
  * reuse detection. Both mutations must commit or roll back together.
  */
 export async function revokeRefreshTokenFamily(
-  userId: string,
+  familyId: string,
   reason = "refresh_token_reuse"
 ): Promise<void> {
   const db = getDb();
   await db.transaction(async (tx) => {
+    const familySessions = await tx
+      .select({ sessionId: refreshTokensTable.sessionId })
+      .from(refreshTokensTable)
+      .where(eq(refreshTokensTable.familyId, familyId));
+
+    const sessionIds = [...new Set(familySessions.map((row) => row.sessionId))];
+
     await tx
       .update(refreshTokensTable)
       .set({ isRevoked: true })
-      .where(eq(refreshTokensTable.userId, userId));
+      .where(eq(refreshTokensTable.familyId, familyId));
 
-    await tx
-      .update(sessionsTable)
-      .set({
-        isActive: false,
-        revokedAt: new Date(),
-        revokedReason: reason,
-      })
-      .where(eq(sessionsTable.userId, userId));
+    if (sessionIds.length > 0) {
+      await tx
+        .update(sessionsTable)
+        .set({
+          isActive: false,
+          revokedAt: new Date(),
+          revokedReason: reason,
+        })
+        .where(inArray(sessionsTable.id, sessionIds));
+    }
   });
 }
 
@@ -76,9 +87,7 @@ export interface RevokeSessionAtLogoutInput {
  * Revoke the current web session and its refresh token on logout. Both mutations
  * commit or roll back together so a stolen token cannot survive cookie deletion.
  */
-export async function revokeSessionAtLogout(
-  input: RevokeSessionAtLogoutInput
-): Promise<boolean> {
+export async function revokeSessionAtLogout(input: RevokeSessionAtLogoutInput): Promise<boolean> {
   const db = getDb();
   let revoked = false;
 
@@ -121,4 +130,31 @@ export async function revokeSessionAtLogout(
   });
 
   return revoked;
+}
+
+export interface SetSessionActiveOrgInput {
+  sessionId: string;
+  orgId: string | null;
+  userId: string;
+  user: User;
+}
+
+/**
+ * Persist (or clear) the active org on a session. Membership is verified unless
+ * clearing. Returns whether a row was updated.
+ */
+export async function setSessionActiveOrg(input: SetSessionActiveOrgInput): Promise<boolean> {
+  if (input.orgId !== null) {
+    const allowed = await verifyOrgMembership(input.orgId, input.userId, input.user);
+    if (!allowed) return false;
+  }
+
+  const db = getDb();
+  const [updated] = await db
+    .update(sessionsTable)
+    .set({ activeOrgId: input.orgId, updatedAt: new Date() })
+    .where(and(eq(sessionsTable.id, input.sessionId), eq(sessionsTable.userId, input.userId)))
+    .returning({ id: sessionsTable.id });
+
+  return Boolean(updated);
 }

@@ -1,13 +1,7 @@
 "use client";
 
 import type { Transition } from "motion/react";
-import {
-  createContext,
-  type ReactNode,
-  type RefObject,
-  useContext,
-  useMemo,
-} from "react";
+import { createContext, type ReactNode, type RefObject, useContext, useMemo } from "react";
 
 // CSS variable references for ring chart theming
 export const ringCssVars = {
@@ -152,9 +146,7 @@ export function RingProvider({
 
   return (
     <RingStableContext.Provider value={stable}>
-      <RingHoverContext.Provider value={hover}>
-        {children}
-      </RingHoverContext.Provider>
+      <RingHoverContext.Provider value={hover}>{children}</RingHoverContext.Provider>
     </RingStableContext.Provider>
   );
 }

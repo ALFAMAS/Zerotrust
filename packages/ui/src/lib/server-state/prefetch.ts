@@ -1,3 +1,5 @@
+import "server-only";
+
 /**
  * TanStack Query options for server-side prefetch (P3.4 / P3.6).
  *

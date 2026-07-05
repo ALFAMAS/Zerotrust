@@ -297,6 +297,7 @@ export interface AuthMe {
   lastLoginAt?: string | null;
   emailVerified: boolean;
   emailVerifiedAt?: string | null;
+  activeOrgId?: string | null;
   locale?: string;
   metadata?: Record<string, unknown>;
   attributes?: { emailVerified?: boolean };

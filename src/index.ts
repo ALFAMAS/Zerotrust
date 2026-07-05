@@ -1,5 +1,6 @@
 // ─── Configuration ───────────────────────────────────────────────────────────
 
+export { getProviderAdapter } from "../plugins/oauth/provider.factory.js";
 export { createServer as createApiServer } from "./api/server";
 export {
   flushAuditPipeline,
@@ -9,7 +10,6 @@ export {
   shutdownAuditPipeline,
 } from "./audit";
 export { getConfig, loadConfig, resetConfig } from "./config";
-
 // ─── Encryption (CSFLE) ──────────────────────────────────────────────────────
 export {
   type EncryptionKeyVersion,
@@ -75,7 +75,6 @@ export {
   recordMFA,
   recordRateLimit,
 } from "./metrics";
-export { sendOTP } from "./services/auth/otpDelivery.service";
 export type {
   AttestationPolicy,
   AttestationVerificationResult,
@@ -128,6 +127,8 @@ export {
 export {
   checkAccountLockout,
   clearLockout,
+  computeBackoffDelayMs,
+  getLoginThrottle,
   isAccountLocked,
   recordFailedLogin,
   recordSuccessfulLogin,
@@ -175,7 +176,6 @@ export type {
   NotificationChannel,
   NotificationEvent,
 } from "./notifications/types";
-export { getProviderAdapter } from "../plugins/oauth/provider.factory.js";
 export type {
   AnomalySignals,
   BehaviorObservation,
@@ -191,6 +191,7 @@ export { AuthorizationEngine } from "./services/auth/authz.service";
 export { FingerprintService } from "./services/auth/fingerprint.service";
 // ─── Magic Links ─────────────────────────────────────────────────────────────
 export { sendMagicLink, verifyMagicLink } from "./services/auth/magicLink.service";
+export { sendOTP } from "./services/auth/otpDelivery.service";
 export type {
   RiskAssessment,
   RiskFactors,

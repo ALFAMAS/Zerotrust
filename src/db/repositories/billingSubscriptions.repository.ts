@@ -98,12 +98,7 @@ export async function setSubscriptionPaused(input: {
   expectedVersion?: number;
 }): Promise<SubscriptionMutationResult> {
   return getDb().transaction(async (tx) =>
-    updateSubscriptionRow(
-      input.subscriptionId,
-      { status: "paused" },
-      input.expectedVersion,
-      tx
-    )
+    updateSubscriptionRow(input.subscriptionId, { status: "paused" }, input.expectedVersion, tx)
   );
 }
 

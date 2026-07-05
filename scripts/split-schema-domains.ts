@@ -46,12 +46,7 @@ const domains: Record<string, string[]> = {
     "trustedDevicesTable",
     "crossTenantJITRequestsTable",
   ],
-  audit: [
-    "auditLogsTable",
-    "auditLogAnchorsTable",
-    "accessReviewsTable",
-    "accessReviewItemsTable",
-  ],
+  audit: ["auditLogsTable", "auditLogAnchorsTable", "accessReviewsTable", "accessReviewItemsTable"],
   platform: [
     "saasSettingsTable",
     "notificationsTable",
@@ -70,11 +65,7 @@ const domains: Record<string, string[]> = {
     "walletTransactionsTable",
     "taxExemptionsTable",
   ],
-  webhooks: [
-    "webhookEndpointsTable",
-    "webhookDeliveryLogsTable",
-    "processedWebhookEventsTable",
-  ],
+  webhooks: ["webhookEndpointsTable", "webhookDeliveryLogsTable", "processedWebhookEventsTable"],
   compliance: ["soc2ControlsTable", "riskAssessmentsTable"],
   files: ["fileAttachmentsTable"],
 };

@@ -489,6 +489,16 @@ AUDIT_ANCHOR_S3_PREFIX=audit-anchors/
   at least daily; verify with `bun run audit:anchor-verify` after DR drills.
   See `docs/compliance/audit-log-anchoring-plan.md`.
 
+### Postgres dual roles (SEC-25)
+
+- **`DATABASE_URL`** — runtime app user (`zerotrust_app_user`): DML only, no DDL,
+  `row_security = on`, subject to `FORCE ROW LEVEL SECURITY` policies from drizzle
+  migrations.
+- **`DATABASE_MIGRATOR_URL`** — deploy/migrate user (`zerotrust_migrator_user`):
+  DDL for `bun run db:migrate` only; never mount on API/worker pods.
+- Bootstrap: `scripts/setup-postgres-roles.sql` (run once per database after initial
+  schema). Full runbook: `docs/deployment.md` § Postgres roles.
+
 ### Browser token storage
 
 - UI uses in-memory access tokens + httpOnly refresh cookies (ADR 008). Set

@@ -4,6 +4,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Bell } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { brand } from "@/config/brand";
+import { getToken } from "@/lib/auth";
 import { useFormat } from "@/lib/format";
 import { navigateToSafeRelative } from "@/lib/safeRedirect";
 import {
@@ -15,7 +17,7 @@ import {
   useNotificationsUnreadCountQuery,
 } from "@/lib/server-state/notifications";
 import type { Notification } from "@/lib/server-state/types";
-import { brand } from "@/config/brand";
+import { connectAuthenticatedSse } from "@/lib/sseClient";
 import { cn } from "@/lib/utils";
 
 function typeIcon(type: Notification["type"]): string {
@@ -38,7 +40,6 @@ export function NotificationBell() {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-  const esRef = useRef<EventSource | null>(null);
 
   const { data: unreadData } = useNotificationsUnreadCountQuery();
   const unreadCount = unreadData?.count ?? 0;
@@ -46,40 +47,30 @@ export function NotificationBell() {
   const markReadMutation = useMarkNotificationReadMutation();
   const markAllReadMutation = useMarkAllNotificationsReadMutation();
 
-  // SSE for real-time unread count updates (replaces 30s polling)
+  // SSE for real-time unread count updates (Bearer auth via fetch — no ?token=)
   useEffect(() => {
-    const token =
-      typeof window !== "undefined"
-        ? (localStorage.getItem("token") ?? sessionStorage.getItem("token"))
-        : null;
-    if (!token) return;
+    const disconnect = connectAuthenticatedSse({
+      url: `${brand.apiUrl}/notifications/sse`,
+      getToken,
+      onEvent: (event, data) => {
+        if (event === "notification") {
+          bumpNotificationsUnreadCountCache(queryClient);
+          return;
+        }
+        if (event === "unread_count") {
+          try {
+            const parsed = JSON.parse(data) as { count?: number };
+            if (typeof parsed.count === "number") {
+              setNotificationsUnreadCountCache(queryClient, parsed.count);
+            }
+          } catch {
+            // ignore malformed payloads
+          }
+        }
+      },
+    });
 
-    const connect = () => {
-      const es = new EventSource(
-        `${brand.apiUrl}/notifications/sse?token=${token}`
-      );
-      esRef.current = es;
-
-      es.addEventListener("notification", () => {
-        bumpNotificationsUnreadCountCache(queryClient);
-      });
-
-      es.addEventListener("unread_count", ((e: MessageEvent) => {
-        const data = JSON.parse(e.data);
-        setNotificationsUnreadCountCache(queryClient, data.count);
-      }) as EventListener);
-
-      es.onerror = () => {
-        es.close();
-        setTimeout(connect, 5000);
-      };
-    };
-
-    connect();
-
-    return () => {
-      esRef.current?.close();
-    };
+    return disconnect;
   }, [queryClient]);
 
   // Close dropdown on click-outside or Escape

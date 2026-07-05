@@ -85,6 +85,25 @@ vi.mock("../logger", () => ({
     error: vi.fn(),
     debug: vi.fn(),
   }),
+  auditLog: vi.fn().mockResolvedValue(undefined),
+}));
+
+const recordLoginSuccess = vi.fn();
+const recordLoginFailure = vi.fn();
+vi.mock("../services/auth/loginAudit.service", () => ({
+  recordLoginSuccess: (...args: unknown[]) => recordLoginSuccess(...args),
+  recordLoginFailure: (...args: unknown[]) => recordLoginFailure(...args),
+}));
+
+vi.mock("../models/settings.model", () => ({
+  getSettings: vi.fn().mockResolvedValue({
+    accountLockoutEnabled: true,
+    accountLockoutThreshold: 8,
+    accountLockoutDurationMinutes: 1,
+    emailPasswordEnabled: true,
+    registrationEnabled: true,
+    requireEmailVerification: true,
+  }),
 }));
 
 vi.mock("../oauth/provider.factory", () => ({
@@ -113,6 +132,22 @@ vi.mock("../services/auth/accountTakeover.service", () => ({
     .mockResolvedValue({ flagged: false, recentEvents: [] }),
 }));
 
+vi.mock("../shared/passwordHash", async () => {
+  const bcrypt = await import("bcryptjs");
+  return {
+    hashPassword: vi.fn().mockImplementation((pw: string) =>
+      bcrypt.hash(pw, 4).then(() => "$argon2id$mockhash")
+    ),
+    dummyPasswordHash: vi.fn().mockImplementation(() => bcrypt.hash("pad", 4)),
+    verifyPassword: vi.fn().mockImplementation((pw: string, hash: string) =>
+      bcrypt.compare(pw, hash)
+    ),
+    passwordNeedsRehash: vi.fn().mockImplementation((hash: string) =>
+      hash.startsWith("$2")
+    ),
+  };
+});
+
 vi.mock("../db/repositories/authSessions.repository", () => ({
   revokeRefreshTokenFamily: vi.fn().mockResolvedValue(undefined),
   revokeSessionAtLogout: vi.fn().mockResolvedValue(true),
@@ -122,6 +157,7 @@ vi.mock("../db/repositories/authSessions.repository", () => ({
 // ── Helpers ────────────────────────────────────────────────────────────────
 
 const USER_ID = "00000000-0000-0000-0000-000000000001";
+const FAMILY_ID = "00000000-0000-0000-0000-000000000099";
 const SESSION_ID = "00000000-0000-0000-0000-000000000002";
 
 function makeDbChain(returnValue: any) {
@@ -369,6 +405,12 @@ describe("POST /login", () => {
     expect(res.status).toBe(401);
     const body = await res.json();
     expect(body.error).toBe("INVALID_CREDENTIALS");
+    expect(recordLoginFailure).toHaveBeenCalledWith(
+      expect.objectContaining({
+        email: "nobody@example.com",
+        reason: "invalid_credentials",
+      }),
+    );
   });
 
   it("returns 401 on wrong password", async () => {
@@ -413,6 +455,14 @@ describe("POST /login", () => {
     expect(body.refreshToken).toBeUndefined();
     expect(body.tokenType).toBe("Bearer");
     expect(body.expiresIn).toBe(3600);
+    expect(recordLoginSuccess).toHaveBeenCalledWith(
+      expect.objectContaining({
+        userId: USER_ID,
+        email: "alice@example.com",
+        method: "password",
+        sessionId: SESSION_ID,
+      }),
+    );
   });
 
   it("returns 500 on unexpected error", async () => {
@@ -920,6 +970,7 @@ describe("POST /token/refresh", () => {
         id: "rt-1",
         userId: USER_ID,
         sessionId: SESSION_ID,
+        familyId: FAMILY_ID,
         tokenHash: "hash",
         isRevoked: true, // already rotated → replay = theft signal
         expiresAt: new Date(Date.now() + 3_600_000),
@@ -935,7 +986,7 @@ describe("POST /token/refresh", () => {
     expect(res.status).toBe(401);
     const body = await res.json();
     expect(body.error).toBe("TOKEN_REUSE_DETECTED");
-    expect(revokeRefreshTokenFamily).toHaveBeenCalledWith(USER_ID, "refresh_token_reuse");
+    expect(revokeRefreshTokenFamily).toHaveBeenCalledWith(FAMILY_ID, "refresh_token_reuse");
   });
 
   it("returns 401 when refresh token is expired", async () => {
@@ -967,6 +1018,7 @@ describe("POST /token/refresh", () => {
         id: "rt-1",
         userId: USER_ID,
         sessionId: SESSION_ID,
+        familyId: FAMILY_ID,
         tokenHash: "hash",
         isRevoked: false,
         expiresAt: new Date(Date.now() + 3_600_000),
@@ -991,7 +1043,7 @@ describe("POST /token/refresh", () => {
       expect.objectContaining({
         oldRefreshTokenId: "rt-1",
         session: expect.objectContaining({ userId: USER_ID, isActive: true }),
-        refreshToken: expect.objectContaining({ userId: USER_ID }),
+        refreshToken: expect.objectContaining({ userId: USER_ID, familyId: FAMILY_ID }),
       })
     );
   });
@@ -1351,9 +1403,9 @@ describe("Route-level rate limiting", () => {
   });
 });
 
-// ── Account Lockout (via route) ────────────────────────────────────────────
+// ── Progressive login backoff ──────────────────────────────────────────────
 
-describe("Account lockout after failed login attempts", () => {
+describe("Progressive login backoff after failed attempts", () => {
   beforeEach(async () => {
     vi.resetModules();
     const { clearLockout } = await import("../middleware/accountLockout");
@@ -1362,41 +1414,37 @@ describe("Account lockout after failed login attempts", () => {
 
   afterEach(() => vi.clearAllMocks());
 
-  it("records failed login attempts on the account", async () => {
-    const { recordFailedLogin, isAccountLocked } =
-      await import("../middleware/accountLockout");
-    const email = `fail-test-${Date.now()}@example.com`;
-
-    // Under the threshold (default MAX_ATTEMPTS = 5)
-    for (let i = 0; i < 3; i++) recordFailedLogin(email);
-    expect(isAccountLocked(email).locked).toBe(false);
+  it("does not delay before the first failure", async () => {
+    const { isAccountLocked } = await import("../middleware/accountLockout");
+    expect(isAccountLocked("fresh@example.com").locked).toBe(false);
   });
 
-  it("locks account after exceeding attempt threshold", async () => {
-    const { recordFailedLogin, isAccountLocked } =
+  it("applies exponential delay after failed logins", async () => {
+    const { recordFailedLogin, isAccountLocked, computeBackoffDelayMs } =
       await import("../middleware/accountLockout");
-    const email = `lock-test-${Date.now()}@example.com`;
+    const email = `backoff-${Date.now()}@example.com`;
 
-    for (let i = 0; i < 5; i++) recordFailedLogin(email);
+    recordFailedLogin(email);
     expect(isAccountLocked(email).locked).toBe(true);
+    expect(computeBackoffDelayMs(1)).toBe(1000);
+    expect(computeBackoffDelayMs(3)).toBe(4000);
   });
 
-  it("remains locked until lockout duration expires", async () => {
-    const { recordFailedLogin, isAccountLocked } =
+  it("requires proof-of-work after the configured threshold", async () => {
+    const { recordFailedLogin, getLoginThrottle } =
       await import("../middleware/accountLockout");
-    const email = `persist-lock-${Date.now()}@example.com`;
+    const email = `pow-${Date.now()}@example.com`;
 
-    for (let i = 0; i < 5; i++) recordFailedLogin(email);
-    // Still locked immediately after
-    expect(isAccountLocked(email).locked).toBe(true);
+    for (let i = 0; i < 8; i++) recordFailedLogin(email, { powThreshold: 8 });
+    expect(getLoginThrottle(email, { powThreshold: 8 }).requiresPow).toBe(true);
   });
 
-  it("clears lockout on successful login", async () => {
+  it("clears backoff state on successful login", async () => {
     const { recordFailedLogin, isAccountLocked, recordSuccessfulLogin } =
       await import("../middleware/accountLockout");
-    const email = `unlock-test-${Date.now()}@example.com`;
+    const email = `unlock-${Date.now()}@example.com`;
 
-    for (let i = 0; i < 5; i++) recordFailedLogin(email);
+    recordFailedLogin(email);
     expect(isAccountLocked(email).locked).toBe(true);
 
     recordSuccessfulLogin(email);

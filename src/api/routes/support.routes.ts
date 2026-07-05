@@ -11,10 +11,10 @@ import { supportTicketMessagesTable, supportTicketsTable } from "../../db/schema
 import { getLogger } from "../../logger";
 import { authMiddleware } from "../../middleware/auth";
 import { orgRlsMiddleware } from "../../middleware/orgRls";
-import { resolvePlan } from "../../middleware/requirePlan";
-import { planAllows } from "../../shared/plans";
 import { rateLimit } from "../../middleware/rateLimiting";
+import { resolvePlan } from "../../middleware/requirePlan";
 import { internalError } from "../../shared/httpErrors";
+import { planAllows } from "../../shared/plans";
 import { hasAnyRole } from "../../shared/roles";
 import type { HonoEnv } from "../../shared/types";
 

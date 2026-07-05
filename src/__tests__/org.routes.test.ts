@@ -27,7 +27,26 @@ vi.mock("../middleware/auth", () => ({
   authMiddleware: async (c: any, next: any) => {
     const uid = c.req.header("x-test-user-id");
     if (!uid) return c.json({ error: "TOKEN_INVALID" }, 401);
-    c.set("user", { id: uid, email: `${uid}@example.com`, roles: ["user"] });
+    const verified = c.req.header("x-test-email-verified") !== "false";
+    c.set("user", {
+      id: uid,
+      email: `${uid}@example.com`,
+      roles: ["user"],
+      emailVerifiedAt: verified ? new Date("2026-01-01T00:00:00Z") : null,
+    });
+    return next();
+  },
+  requireEmailVerified: async (c: any, next: any) => {
+    const user = c.get("user");
+    if (!user?.emailVerifiedAt) {
+      return c.json(
+        {
+          error: "EMAIL_NOT_VERIFIED",
+          message: "Email verification required before this action",
+        },
+        403
+      );
+    }
     return next();
   },
 }));
@@ -62,9 +81,10 @@ async function getRouter() {
   return new Hono().route("/orgs", router);
 }
 
-function req(app: Hono, path: string, opts: { method?: string; uid?: string; body?: unknown } = {}) {
+function req(app: Hono, path: string, opts: { method?: string; uid?: string; body?: unknown; emailVerified?: boolean } = {}) {
   const headers: Record<string, string> = { "Content-Type": "application/json" };
   if (opts.uid) headers["x-test-user-id"] = opts.uid;
+  if (opts.emailVerified === false) headers["x-test-email-verified"] = "false";
   return app.request(`/orgs${path}`, {
     method: opts.method ?? "GET",
     headers,
@@ -84,7 +104,7 @@ beforeEach(async () => {
 
 afterEach(() => vi.clearAllMocks());
 
-const membership = (role: string) => [{ orgId: ORG, userId: OWNER, role }];
+const membership = (role: string, userId: string) => [{ orgId: ORG, userId, role }];
 
 describe("org RBAC — authentication", () => {
   it("401s an unauthenticated caller", async () => {
@@ -110,7 +130,7 @@ describe("org RBAC — member tier (read)", () => {
 
   it("uses the read replica connection for org detail after membership check", async () => {
     const readDb = makeDb();
-    db.limit.mockResolvedValueOnce(membership("member"));
+    db.limit.mockResolvedValueOnce(membership("member", MEMBER));
     readDb.limit.mockResolvedValueOnce([
       { id: ORG, name: "Acme", slug: "acme", logoUrl: null, billingEmail: null },
     ]);
@@ -134,7 +154,7 @@ describe("org RBAC — member tier (read)", () => {
 
   it("uses the read replica connection for the members list after membership check", async () => {
     const readDb = makeDb();
-    db.limit.mockResolvedValueOnce(membership("member"));
+    db.limit.mockResolvedValueOnce(membership("member", MEMBER));
     readDb.limit.mockResolvedValueOnce([]);
     const { getReadDb } = await import("../db");
     vi.mocked(getReadDb).mockReturnValue(readDb as any);
@@ -149,14 +169,14 @@ describe("org RBAC — member tier (read)", () => {
 
 describe("org RBAC — admin tier", () => {
   it("403s a plain member from updating the org", async () => {
-    db.limit.mockResolvedValueOnce(membership("member"));
+    db.limit.mockResolvedValueOnce(membership("member", MEMBER));
     const app = await getRouter();
     const res = await req(app, `/${ORG}`, { method: "PUT", uid: MEMBER, body: { name: "New" } });
     expect(res.status).toBe(403);
   });
 
   it("lets an admin update the org", async () => {
-    db.limit.mockResolvedValueOnce(membership("admin"));
+    db.limit.mockResolvedValueOnce(membership("admin", ADMIN));
     db.returning.mockResolvedValueOnce([{ id: ORG, name: "New" }]);
     const app = await getRouter();
     const res = await req(app, `/${ORG}`, { method: "PUT", uid: ADMIN, body: { name: "New" } });
@@ -165,7 +185,7 @@ describe("org RBAC — admin tier", () => {
   });
 
   it("403s a viewer from creating an invite", async () => {
-    db.limit.mockResolvedValueOnce(membership("viewer"));
+    db.limit.mockResolvedValueOnce(membership("viewer", MEMBER));
     const app = await getRouter();
     const res = await req(app, `/${ORG}/invites`, {
       method: "POST",
@@ -176,7 +196,7 @@ describe("org RBAC — admin tier", () => {
   });
 
   it("lets an admin create an invite", async () => {
-    db.limit.mockResolvedValueOnce(membership("admin"));
+    db.limit.mockResolvedValueOnce(membership("admin", ADMIN));
     db.returning.mockResolvedValueOnce([{ id: "inv-1", email: "x@example.com", role: "member" }]);
     const app = await getRouter();
     const res = await req(app, `/${ORG}/invites`, {
@@ -189,7 +209,7 @@ describe("org RBAC — admin tier", () => {
   });
 
   it("validates the invite body", async () => {
-    db.limit.mockResolvedValueOnce(membership("admin"));
+    db.limit.mockResolvedValueOnce(membership("admin", ADMIN));
     const app = await getRouter();
     const res = await req(app, `/${ORG}/invites`, {
       method: "POST",
@@ -202,7 +222,7 @@ describe("org RBAC — admin tier", () => {
 
   it("uses the read replica connection for the invites list after admin check", async () => {
     const readDb = makeDb();
-    db.limit.mockResolvedValueOnce(membership("admin"));
+    db.limit.mockResolvedValueOnce(membership("admin", ADMIN));
     readDb.limit.mockResolvedValueOnce([]);
     const { getReadDb } = await import("../db");
     vi.mocked(getReadDb).mockReturnValue(readDb as any);
@@ -217,7 +237,7 @@ describe("org RBAC — admin tier", () => {
 
 describe("org RBAC — owner tier", () => {
   it("403s an admin (non-owner) from deleting the org", async () => {
-    db.limit.mockResolvedValueOnce(membership("admin"));
+    db.limit.mockResolvedValueOnce(membership("admin", ADMIN));
     const app = await getRouter();
     const res = await req(app, `/${ORG}`, { method: "DELETE", uid: ADMIN });
     expect(res.status).toBe(403);
@@ -225,7 +245,7 @@ describe("org RBAC — owner tier", () => {
   });
 
   it("lets the owner delete the org", async () => {
-    db.limit.mockResolvedValueOnce(membership("owner"));
+    db.limit.mockResolvedValueOnce(membership("owner", OWNER));
     const app = await getRouter();
     const res = await req(app, `/${ORG}`, { method: "DELETE", uid: OWNER });
     expect(res.status).toBe(200);
@@ -233,7 +253,7 @@ describe("org RBAC — owner tier", () => {
   });
 
   it("403s a non-owner from transferring ownership", async () => {
-    db.limit.mockResolvedValueOnce(membership("admin"));
+    db.limit.mockResolvedValueOnce(membership("admin", ADMIN));
     const app = await getRouter();
     const res = await req(app, `/${ORG}/transfer`, {
       method: "POST",
@@ -246,7 +266,7 @@ describe("org RBAC — owner tier", () => {
 
 describe("org RBAC — member removal", () => {
   it("403s a plain member trying to remove someone else", async () => {
-    db.limit.mockResolvedValueOnce(membership("member")); // current user
+    db.limit.mockResolvedValueOnce(membership("member", MEMBER)); // current user
     const app = await getRouter();
     const res = await req(app, `/${ORG}/members/${ADMIN}`, { method: "DELETE", uid: MEMBER });
     expect(res.status).toBe(403);
@@ -255,8 +275,8 @@ describe("org RBAC — member removal", () => {
 
   it("refuses to remove the owner even when requested by the owner", async () => {
     db.limit
-      .mockResolvedValueOnce(membership("owner")) // current user
-      .mockResolvedValueOnce(membership("owner")); // target is also owner
+      .mockResolvedValueOnce(membership("owner", OWNER)) // current user
+      .mockResolvedValueOnce(membership("owner", OWNER)); // target is also owner
     const app = await getRouter();
     const res = await req(app, `/${ORG}/members/${OWNER}`, { method: "DELETE", uid: OWNER });
     expect(res.status).toBe(403);
@@ -403,5 +423,17 @@ describe("org create", () => {
     const res = await req(app, "", { method: "POST", uid: OWNER, body: { name: "Acme" } });
     expect(res.status).toBe(201);
     expect((await res.json()).org.slug).toBe("acme");
+  });
+
+  it("returns 403 when email is not verified", async () => {
+    const app = await getRouter();
+    const res = await req(app, "", {
+      method: "POST",
+      uid: OWNER,
+      emailVerified: false,
+      body: { name: "Acme" },
+    });
+    expect(res.status).toBe(403);
+    expect((await res.json()).error).toBe("EMAIL_NOT_VERIFIED");
   });
 });

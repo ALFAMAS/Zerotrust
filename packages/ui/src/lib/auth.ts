@@ -1,6 +1,10 @@
 /**
  * ADR 008 Option C — in-memory access token + httpOnly refresh cookie.
  * Refresh tokens never touch localStorage or JS-readable storage.
+ *
+ * RSC prefetch mirror (SEC-20): `za_access_token` is a short-lived, JS-readable
+ * cookie so Server Components can authenticate prefetch via `serverApiClient.ts`.
+ * See ADR 008 § "RSC prefetch mirror" for TTL, scope, and mitigations.
  */
 
 const ACCESS_TOKEN_COOKIE = "za_access_token";
@@ -12,6 +16,7 @@ const LEGACY_REFRESH_KEY = "za_refresh_token";
 let accessTokenMemory: string | null = null;
 
 function setAccessTokenCookie(accessToken: string): void {
+  // ADR 008 § RSC prefetch mirror — not httpOnly; 1h TTL; cleared on logout.
   // biome-ignore lint/suspicious/noDocumentCookie: first-party auth cookie for RSC prefetch
   document.cookie = `${ACCESS_TOKEN_COOKIE}=${encodeURIComponent(accessToken)};path=/;max-age=3600;samesite=lax`;
 }

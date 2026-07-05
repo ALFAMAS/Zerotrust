@@ -79,6 +79,7 @@ async function issueTokensForUser(userId: string, c: Context<HonoEnv>) {
     userId: user.id,
     sessionId: session.id,
     tokenHash: hashToken(refreshTokenPlain),
+    familyId: crypto.randomUUID(),
     expiresAt: new Date(Date.now() + cfg.session.refreshTokenTTL * 1000),
   });
 

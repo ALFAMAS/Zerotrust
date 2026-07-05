@@ -16,7 +16,12 @@ import { auditLog, getLogger } from "../../logger";
 import { authMiddleware, requireAdmin } from "../../middleware/auth";
 import { requirePlan } from "../../middleware/requirePlan";
 import { revokeAllSessionsForUser, revokeSession } from "../../middleware/sessionControl";
-import { getSettings, type SaaSSettings, SettingsVersionConflictError, updateSettings } from "../../models/settings.model";
+import {
+  getSettings,
+  type SaaSSettings,
+  SettingsVersionConflictError,
+  updateSettings,
+} from "../../models/settings.model";
 import { invalidateUserCache } from "../../services/auth/userStateCache.service";
 import {
   ALLOWED_UPLOAD_CONTENT_TYPES,

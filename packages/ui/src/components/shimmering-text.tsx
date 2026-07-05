@@ -4,10 +4,7 @@ import { motion, useReducedMotion, type Variants } from "motion/react";
 import { type ComponentProps, useCallback } from "react";
 import { cn } from "@/lib/utils";
 
-export type ShimmeringTextProps = Omit<
-  ComponentProps<typeof motion.span>,
-  "children"
-> & {
+export type ShimmeringTextProps = Omit<ComponentProps<typeof motion.span>, "children"> & {
   /** The text to render with the shimmering effect. */
   text: string;
   /**

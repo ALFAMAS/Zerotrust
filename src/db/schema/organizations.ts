@@ -13,8 +13,8 @@ import {
   unique,
   uuid,
 } from "drizzle-orm/pg-core";
-import type { OrgBranding } from "./types";
 import { usersTable } from "./identity";
+import type { OrgBranding } from "./types";
 
 export const organizationsTable = pgTable(
   "organizations",
@@ -159,23 +159,23 @@ export const trustedDevicesTable = pgTable(
 export const crossTenantJITRequestsTable = pgTable(
   "cross_tenant_jit_requests",
   {
-  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
-  requestorUserId: uuid("requestor_user_id").notNull(),
-  requestorOrgId: uuid("requestor_org_id")
-    .notNull()
-    .references(() => organizationsTable.id, { onDelete: "cascade" }),
-  targetOrgId: uuid("target_org_id")
-    .notNull()
-    .references(() => organizationsTable.id, { onDelete: "cascade" }),
-  targetResource: text("target_resource").notNull(),
-  justification: text("justification").notNull(),
-  ttlSeconds: integer("ttl_seconds").notNull(),
-  // pending | approved | denied | expired
-  status: text("status").notNull().default("pending"),
-  approvedBy: uuid("approved_by"),
-  approvedAt: timestamp("approved_at", { withTimezone: true }),
-  expiresAt: timestamp("expires_at", { withTimezone: true }),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
+    id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+    requestorUserId: uuid("requestor_user_id").notNull(),
+    requestorOrgId: uuid("requestor_org_id")
+      .notNull()
+      .references(() => organizationsTable.id, { onDelete: "cascade" }),
+    targetOrgId: uuid("target_org_id")
+      .notNull()
+      .references(() => organizationsTable.id, { onDelete: "cascade" }),
+    targetResource: text("target_resource").notNull(),
+    justification: text("justification").notNull(),
+    ttlSeconds: integer("ttl_seconds").notNull(),
+    // pending | approved | denied | expired
+    status: text("status").notNull().default("pending"),
+    approvedBy: uuid("approved_by"),
+    approvedAt: timestamp("approved_at", { withTimezone: true }),
+    expiresAt: timestamp("expires_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
   },
   (t) => ({
     crossTenantJitRequestorOrgIdx: index("cross_tenant_jit_requestor_org_idx").on(t.requestorOrgId),

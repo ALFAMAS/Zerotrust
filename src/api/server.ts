@@ -17,6 +17,8 @@ import { metricsAuthMiddleware, metricsMiddleware, metricsRoute } from "../metri
 import { API_VERSIONS, apiVersioning, CURRENT_API_VERSION } from "../middleware/apiVersioning";
 import { authMiddleware, requireAdmin } from "../middleware/auth";
 import { corsOptionsFromEnv } from "../middleware/cors";
+import { bodySizeLimitMiddleware } from "../middleware/bodySizeLimit";
+import { csrfOriginMiddleware } from "../middleware/csrfOrigin";
 import { inferredCountryMiddleware } from "../middleware/inferredCountry";
 import { rateLimit } from "../middleware/rateLimiting";
 import { securityHeaders } from "../middleware/securityHeaders";
@@ -107,6 +109,8 @@ export async function createServer() {
   }
 
   app.use("*", cors(corsOptionsFromEnv()));
+  app.use("*", csrfOriginMiddleware());
+  app.use("*", bodySizeLimitMiddleware);
   app.use("*", securityHeaders());
   app.use("*", inputSanitizationMiddleware());
   app.use("*", inferredCountryMiddleware());
@@ -115,6 +119,9 @@ export async function createServer() {
   app.use("*", compress());
   app.use("*", metricsMiddleware());
   app.use("*", telemetryMiddleware());
+
+  // Global per-IP rate limit (baseline §3); per-user bucket enforced in authMiddleware.
+  app.use("*", rateLimit());
 
   // API version negotiation + deprecation/sunset headers
   app.use("*", apiVersioning());

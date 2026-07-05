@@ -16,6 +16,7 @@
 // NB: intentionally no logger import — this module is called from auditLog()
 // inside the logger, so importing the logger back would be circular.
 import { fetchFixedUrl } from "../../shared/safeFetch";
+import { redactLogEntry } from "../../shared/logRedaction";
 
 export function isSiemEnabled(): boolean {
   return process.env.SIEM_ENABLED === "true" && Boolean(process.env.SIEM_ENDPOINT);
@@ -36,12 +37,12 @@ export async function streamToSiem(event: Record<string, unknown>): Promise<bool
   const apiKey = process.env.SIEM_API_KEY;
   if (authHeader && apiKey) headers[authHeader] = apiKey;
 
-  const payload = {
+  const payload = redactLogEntry({
     source: process.env.SIEM_SOURCE ?? "zerotrust",
     ddsource: process.env.SIEM_SOURCE ?? "zerotrust",
     "@timestamp": new Date().toISOString(),
     ...event,
-  };
+  });
 
   try {
     // SIEM endpoint is operator-controlled env config and may legitimately be

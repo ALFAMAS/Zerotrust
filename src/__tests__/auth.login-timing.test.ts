@@ -1,14 +1,14 @@
 import { Hono } from "hono";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-const bcryptCompare = vi.fn().mockResolvedValue(false);
-const bcryptHash = vi.fn().mockResolvedValue("$2a$04$dummyhashfordummycompare");
+const verifyPassword = vi.fn().mockResolvedValue(false);
+const dummyPasswordHash = vi.fn().mockResolvedValue("$argon2id$dummyhashfordummycompare");
 
-vi.mock("bcryptjs", () => ({
-  default: {
-    compare: (...args: unknown[]) => bcryptCompare(...args),
-    hash: (...args: unknown[]) => bcryptHash(...args),
-  },
+vi.mock("../shared/passwordHash", () => ({
+  verifyPassword: (...args: unknown[]) => verifyPassword(...args),
+  dummyPasswordHash: (...args: unknown[]) => dummyPasswordHash(...args),
+  hashPassword: vi.fn(),
+  passwordNeedsRehash: vi.fn().mockReturnValue(false),
 }));
 
 vi.mock("../db", () => ({
@@ -35,6 +35,26 @@ vi.mock("../middleware/credentialStuffing", () => ({
   recordIpLoginSuccess: vi.fn(),
 }));
 
+vi.mock("../models/settings.model", () => ({
+  getSettings: vi.fn().mockResolvedValue({
+    accountLockoutEnabled: false,
+    accountLockoutThreshold: 8,
+    accountLockoutDurationMinutes: 1,
+  }),
+}));
+
+vi.mock("../middleware/accountLockout", () => ({
+  getLoginThrottle: vi.fn().mockReturnValue({ delayed: false, requiresPow: false }),
+  recordFailedLogin: vi.fn(),
+  recordSuccessfulLogin: vi.fn(),
+  verifyPowSolution: vi.fn().mockReturnValue({ ok: true }),
+}));
+
+vi.mock("../services/auth/loginAudit.service", () => ({
+  recordLoginFailure: vi.fn(),
+  recordLoginSuccess: vi.fn(),
+}));
+
 function makeDbChain(returnValue: unknown[]) {
   return {
     select: vi.fn().mockReturnThis(),
@@ -48,13 +68,13 @@ describe("POST /login timing enumeration resistance (SEC-2)", () => {
   beforeEach(() => {
     vi.resetModules();
     vi.clearAllMocks();
-    bcryptCompare.mockResolvedValue(false);
-    bcryptHash.mockResolvedValue("$2a$04$dummyhashfordummycompare");
+    verifyPassword.mockResolvedValue(false);
+    dummyPasswordHash.mockResolvedValue("$argon2id$dummyhashfordummycompare");
   });
 
   afterEach(() => vi.clearAllMocks());
 
-  it("runs bcrypt.compare against a dummy hash when the user is missing", async () => {
+  it("runs verifyPassword against a dummy hash when the user is missing", async () => {
     const db = makeDbChain([]);
     const { getDb } = await import("../db");
     vi.mocked(getDb).mockReturnValue(db as never);
@@ -69,8 +89,8 @@ describe("POST /login timing enumeration resistance (SEC-2)", () => {
 
     expect(res.status).toBe(401);
     expect(await res.json()).toMatchObject({ error: "INVALID_CREDENTIALS" });
-    expect(bcryptCompare).toHaveBeenCalledTimes(1);
-    expect(bcryptCompare.mock.calls[0]?.[1]).toBe("$2a$04$dummyhashfordummycompare");
-    expect(bcryptHash).toHaveBeenCalled();
+    expect(verifyPassword).toHaveBeenCalledTimes(1);
+    expect(verifyPassword.mock.calls[0]?.[1]).toBe("$argon2id$dummyhashfordummycompare");
+    expect(dummyPasswordHash).toHaveBeenCalled();
   });
 });

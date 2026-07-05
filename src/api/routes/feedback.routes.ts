@@ -6,6 +6,7 @@ import { feedbackTable } from "../../db/schema";
 import { getLogger } from "../../logger";
 import { authMiddleware } from "../../middleware/auth";
 import { rateLimit } from "../../middleware/rateLimiting";
+import { zValidator } from "../../middleware/zodValidation";
 import { internalError } from "../../shared/httpErrors";
 import type { HonoEnv } from "../../shared/types";
 
@@ -22,12 +23,14 @@ const submitSchema = z.object({
 });
 
 // POST /feedback
-router.post("/", authMiddleware, rateLimit({ points: 10, windowSecs: 3600 }), async (c) => {
+router.post(
+  "/",
+  authMiddleware,
+  rateLimit({ points: 10, windowSecs: 3600 }),
+  zValidator("json", submitSchema),
+  async (c) => {
   const user = c.get("user");
-  const body = await c.req.json().catch(() => ({}));
-  const parsed = submitSchema.safeParse(body);
-  if (!parsed.success)
-    return c.json({ error: "INVALID_REQUEST", issues: parsed.error.issues }, 400);
+  const parsed = c.req.valid("json");
 
   try {
     const db = getDb();
@@ -35,20 +38,21 @@ router.post("/", authMiddleware, rateLimit({ points: 10, windowSecs: 3600 }), as
       .insert(feedbackTable)
       .values({
         userId: user.id,
-        orgId: parsed.data.orgId ?? null,
-        type: parsed.data.type,
-        score: parsed.data.score,
-        comment: parsed.data.comment ?? null,
-        context: parsed.data.context ?? null,
-        metadata: parsed.data.metadata ?? null,
+        orgId: parsed.orgId ?? null,
+        type: parsed.type,
+        score: parsed.score,
+        comment: parsed.comment ?? null,
+        context: parsed.context ?? null,
+        metadata: parsed.metadata ?? null,
       })
       .returning();
 
-    logger.info("Feedback submitted", { userId: user.id, type: parsed.data.type });
+    logger.info("Feedback submitted", { userId: user.id, type: parsed.type });
     return c.json(entry, 201);
   } catch (err) {
     return internalError(c, logger, "Submit feedback error", err);
   }
-});
+  }
+);
 
 export default router;

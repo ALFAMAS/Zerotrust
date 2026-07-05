@@ -110,8 +110,7 @@ export const Ring = memo(function Ring({
       return "";
     }
     const radii = getRingRadii(index);
-    const corner =
-      lineCap === "round" ? (radii.outerRadius - radii.innerRadius) / 2 : 0;
+    const corner = lineCap === "round" ? (radii.outerRadius - radii.innerRadius) / 2 : 0;
     return generateArcPath(
       radii.innerRadius,
       radii.outerRadius,
@@ -123,14 +122,8 @@ export const Ring = memo(function Ring({
 
   const enterScale = useTransform(expandProgress, [0, 1], [0, 1]);
 
-  const handleMouseEnter = useCallback(
-    () => setHoveredIndex(index),
-    [index, setHoveredIndex]
-  );
-  const handleMouseLeave = useCallback(
-    () => setHoveredIndex(null),
-    [setHoveredIndex]
-  );
+  const handleMouseEnter = useCallback(() => setHoveredIndex(index), [index, setHoveredIndex]);
+  const handleMouseLeave = useCallback(() => setHoveredIndex(null), [setHoveredIndex]);
 
   if (!ringData) {
     return null;
@@ -143,26 +136,13 @@ export const Ring = memo(function Ring({
   const isFaded = hoveredIndex !== null && hoveredIndex !== index;
   const isPushedOut = hoveredIndex !== null && hoveredIndex < index;
 
-  const cornerRadius =
-    lineCap === "round" ? (outerRadius - innerRadius) / 2 : 0;
-  const bgPath = generateArcPath(
-    innerRadius,
-    outerRadius,
-    startAngle,
-    endAngle,
-    cornerRadius
-  );
+  const cornerRadius = lineCap === "round" ? (outerRadius - innerRadius) / 2 : 0;
+  const bgPath = generateArcPath(innerRadius, outerRadius, startAngle, endAngle, cornerRadius);
   const progressEndAngle = startAngle + arcRange * progress;
   const progressPath =
     progressEndAngle <= startAngle + 0.01
       ? ""
-      : generateArcPath(
-          innerRadius,
-          outerRadius,
-          startAngle,
-          progressEndAngle,
-          cornerRadius
-        );
+      : generateArcPath(innerRadius, outerRadius, startAngle, progressEndAngle, cornerRadius);
 
   const hoverScale = ringHoverScale(isHovered, isPushedOut);
   const layerOpacity = isFaded ? 0.35 : 1;

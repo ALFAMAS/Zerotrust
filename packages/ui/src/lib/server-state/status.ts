@@ -2,8 +2,8 @@
 
 import { queryOptions, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
-import { apiGet } from "@/lib/apiClient";
 import { brand } from "@/config/brand";
+import { apiGet } from "@/lib/apiClient";
 import { queryKeys } from "./queryKeys";
 import type { StatusData } from "./types";
 

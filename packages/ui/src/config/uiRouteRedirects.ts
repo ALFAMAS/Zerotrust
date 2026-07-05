@@ -25,23 +25,26 @@ export const AUTH_UI_REDIRECTS: UiRedirect[] = [
 export const LOGIN_PAGE_PATH = "/login";
 
 /** API top-level paths that share a name with dashboard pages but live under `/dashboard/*` in the UI. */
-const DASHBOARD_API_ALIASES: ReadonlyArray<{ apiBase: string; uiBase: string; preserveSubpath?: boolean }> =
-  [
-    { apiBase: "/wallet", uiBase: "/dashboard/wallet" },
-    { apiBase: "/billing", uiBase: "/dashboard/billing" },
-    { apiBase: "/sessions", uiBase: "/dashboard/sessions" },
-    { apiBase: "/notifications", uiBase: "/dashboard/notifications" },
-    { apiBase: "/api-keys", uiBase: "/dashboard/api-keys" },
-    { apiBase: "/webhooks", uiBase: "/dashboard/webhooks" },
-    { apiBase: "/support", uiBase: "/dashboard/support" },
-    { apiBase: "/search", uiBase: "/dashboard/search" },
-    { apiBase: "/orgs", uiBase: "/dashboard/organizations", preserveSubpath: true },
-    { apiBase: "/jit/cross-tenant", uiBase: "/dashboard/jit" },
-    // Common shortcuts — no matching API page, but users expect these URLs.
-    { apiBase: "/profile", uiBase: "/dashboard/profile" },
-    { apiBase: "/security", uiBase: "/dashboard/security" },
-    { apiBase: "/account", uiBase: "/dashboard/account" },
-  ];
+const DASHBOARD_API_ALIASES: ReadonlyArray<{
+  apiBase: string;
+  uiBase: string;
+  preserveSubpath?: boolean;
+}> = [
+  { apiBase: "/wallet", uiBase: "/dashboard/wallet" },
+  { apiBase: "/billing", uiBase: "/dashboard/billing" },
+  { apiBase: "/sessions", uiBase: "/dashboard/sessions" },
+  { apiBase: "/notifications", uiBase: "/dashboard/notifications" },
+  { apiBase: "/api-keys", uiBase: "/dashboard/api-keys" },
+  { apiBase: "/webhooks", uiBase: "/dashboard/webhooks" },
+  { apiBase: "/support", uiBase: "/dashboard/support" },
+  { apiBase: "/search", uiBase: "/dashboard/search" },
+  { apiBase: "/orgs", uiBase: "/dashboard/organizations", preserveSubpath: true },
+  { apiBase: "/jit/cross-tenant", uiBase: "/dashboard/jit" },
+  // Common shortcuts — no matching API page, but users expect these URLs.
+  { apiBase: "/profile", uiBase: "/dashboard/profile" },
+  { apiBase: "/security", uiBase: "/dashboard/security" },
+  { apiBase: "/account", uiBase: "/dashboard/account" },
+];
 
 function dashboardAliasRedirects(): UiRedirect[] {
   const rules: UiRedirect[] = [];

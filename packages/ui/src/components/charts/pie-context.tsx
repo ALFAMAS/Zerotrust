@@ -1,13 +1,7 @@
 "use client";
 
 import type { Transition } from "motion/react";
-import {
-  createContext,
-  type ReactNode,
-  type RefObject,
-  useContext,
-  useMemo,
-} from "react";
+import { createContext, type ReactNode, type RefObject, useContext, useMemo } from "react";
 
 // CSS variable references for pie chart theming
 export const pieCssVars = {
@@ -107,13 +101,7 @@ export type PieContextValue = PieStableContextValue & PieHoverContextValue;
 const PieStableContext = createContext<PieStableContextValue | null>(null);
 const PieHoverContext = createContext<PieHoverContextValue | null>(null);
 
-export function PieProvider({
-  children,
-  value,
-}: {
-  children: ReactNode;
-  value: PieContextValue;
-}) {
+export function PieProvider({ children, value }: { children: ReactNode; value: PieContextValue }) {
   const stable = useMemo<PieStableContextValue>(
     () => ({
       data: value.data,
@@ -169,9 +157,7 @@ export function PieProvider({
 
   return (
     <PieStableContext.Provider value={stable}>
-      <PieHoverContext.Provider value={hover}>
-        {children}
-      </PieHoverContext.Provider>
+      <PieHoverContext.Provider value={hover}>{children}</PieHoverContext.Provider>
     </PieStableContext.Provider>
   );
 }

@@ -7,11 +7,10 @@
 import { getConfig } from "../config";
 import { getLogger } from "../logger";
 import { fetchFixedUrl } from "../shared/safeFetch";
+import { redactLogEntry } from "../shared/logRedaction";
 import type { AuditLog } from "../shared/types";
 
 const logger = getLogger("audit-pipeline");
-
-const SENSITIVE_FIELDS = new Set(["code", "token", "secret", "password", "otp", "pin"]);
 
 interface ESBulkItem {
   index: { _index: string; _id?: string };
@@ -22,19 +21,7 @@ const pendingDocs: AuditLog[] = [];
 let esClient: any = null;
 
 function maskSensitiveFields(doc: Record<string, unknown>): Record<string, unknown> {
-  const result: Record<string, unknown> = {};
-  for (const [key, value] of Object.entries(doc)) {
-    const lowerKey = key.toLowerCase();
-    const isSensitive = [...SENSITIVE_FIELDS].some((f) => lowerKey.includes(f));
-    if (isSensitive && typeof value === "string") {
-      result[key] = "[REDACTED]";
-    } else if (value && typeof value === "object" && !Array.isArray(value)) {
-      result[key] = maskSensitiveFields(value as Record<string, unknown>);
-    } else {
-      result[key] = value;
-    }
-  }
-  return result;
+  return redactLogEntry(doc);
 }
 
 function getIndexName(): string {

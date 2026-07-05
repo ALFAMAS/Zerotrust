@@ -7,6 +7,7 @@ import { getConfig } from "../config";
 import { streamToSiem } from "../services/shared/siem.service";
 import { type AuditPrincipal, principalAuditFields } from "../shared/principal";
 import { fetchFixedUrl } from "../shared/safeFetch";
+import { redactLogEntry } from "../shared/logRedaction";
 import type { zerotrustConfig } from "../shared/types";
 
 export interface LogContext {
@@ -124,13 +125,13 @@ class Logger {
       return; // Skip logs below configured level
     }
 
-    const logEntry = {
+    const logEntry = redactLogEntry({
       timestamp: new Date().toISOString(),
       level,
       message,
       ...this.context,
       ...data,
-    };
+    });
 
     // Output based on configured format
     if (this.config.logging.format === "json") {

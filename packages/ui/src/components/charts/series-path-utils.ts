@@ -52,9 +52,7 @@ export function interpolateSeriesPathPoints(
     }
 
     const previousTarget = index > 0 ? to[index - 1] : undefined;
-    const previousSource = previousTarget
-      ? fromByKey.get(previousTarget.key)
-      : undefined;
+    const previousSource = previousTarget ? fromByKey.get(previousTarget.key) : undefined;
     const nextTarget = index < to.length - 1 ? to[index + 1] : undefined;
     const nextSource = nextTarget ? fromByKey.get(nextTarget.key) : undefined;
     const anchor = previousSource ?? nextSource ?? from[0] ?? target;
@@ -67,10 +65,7 @@ export function interpolateSeriesPathPoints(
   });
 }
 
-export function seriesPathFromPoints(
-  points: SeriesPathPoint[],
-  curve: CurveFactory
-): string {
+export function seriesPathFromPoints(points: SeriesPathPoint[], curve: CurveFactory): string {
   if (points.length === 0) {
     return "";
   }

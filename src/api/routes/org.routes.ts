@@ -17,12 +17,18 @@ import {
   usersTable,
 } from "../../db/schema";
 import { getLogger } from "../../logger";
-import { authMiddleware } from "../../middleware/auth";
+import { authMiddleware, requireEmailVerified } from "../../middleware/auth";
 import { sensitiveReverification } from "../../middleware/continuousVerification";
 import { orgRlsMiddleware } from "../../middleware/orgRls";
 import { sendOrgInviteEmail } from "../../services/notifications/email.service";
 import { countRows } from "../../shared/dbCount";
 import { paginated, parsePaginatedQuery } from "../../shared/pagination";
+import {
+  AuthorizationError,
+  assertCan,
+  authorizeOrg,
+  type OrgMembershipContext,
+} from "../../shared/permissions";
 import type { HonoEnv } from "../../shared/types";
 
 const router = new Hono<HonoEnv>();
@@ -68,7 +74,7 @@ function slugify(value: string): string {
   return slug || `org-${randomBytes(4).toString("hex")}`;
 }
 
-async function getMembership(orgId: string, userId: string) {
+async function getMembership(orgId: string, userId: string): Promise<OrgMembershipContext | null> {
   const db = getDb();
   const [membership] = await db
     .select()
@@ -77,23 +83,15 @@ async function getMembership(orgId: string, userId: string) {
       and(eq(organizationMembersTable.orgId, orgId), eq(organizationMembersTable.userId, userId))
     )
     .limit(1);
-  return membership;
+  if (!membership) return null;
+  return { orgId: membership.orgId, userId: membership.userId, role: membership.role };
 }
 
-async function requireMember(orgId: string, userId: string) {
-  const membership = await getMembership(orgId, userId);
-  return membership ?? null;
-}
-
-async function requireAdmin(orgId: string, userId: string) {
-  const membership = await getMembership(orgId, userId);
-  if (membership?.role === "owner" || membership?.role === "admin") return membership;
-  return null;
-}
-
-async function requireOwner(orgId: string, userId: string) {
-  const membership = await getMembership(orgId, userId);
-  return membership?.role === "owner" ? membership : null;
+function forbiddenResponse(c: { json: (body: unknown, status: number) => Response }, err: unknown) {
+  if (err instanceof AuthorizationError) {
+    return c.json({ error: err.code, message: err.message }, 403);
+  }
+  throw err;
 }
 
 function publicDbError(error: unknown): string {
@@ -119,7 +117,7 @@ router.get("/", async (c) => {
   return c.json({ orgs });
 });
 
-router.post("/", async (c) => {
+router.post("/", requireEmailVerified, async (c) => {
   const user = c.get("user");
   const parsed = createOrgSchema.safeParse(await c.req.json().catch(() => ({})));
   if (!parsed.success) {
@@ -142,8 +140,10 @@ router.post("/", async (c) => {
 router.get("/:orgId", async (c) => {
   const user = c.get("user");
   const orgId = c.req.param("orgId");
-  if (!(await requireMember(orgId, user.id))) {
-    return c.json({ error: "FORBIDDEN", message: "Not a member of this organization" }, 403);
+  try {
+    await authorizeOrg(user, "org:read", orgId, getMembership);
+  } catch (err) {
+    return forbiddenResponse(c, err);
   }
   const db = getReadDb();
   const [org] = await db
@@ -163,7 +163,11 @@ router.get("/:orgId", async (c) => {
 router.put("/:orgId", async (c) => {
   const user = c.get("user");
   const orgId = c.req.param("orgId");
-  if (!(await requireAdmin(orgId, user.id))) return c.json({ error: "FORBIDDEN" }, 403);
+  try {
+    await authorizeOrg(user, "org:update", orgId, getMembership);
+  } catch (err) {
+    return forbiddenResponse(c, err);
+  }
   const parsed = updateOrgSchema.safeParse(await c.req.json().catch(() => ({})));
   if (!parsed.success)
     return c.json({ error: "VALIDATION_ERROR", message: parsed.error.issues[0]?.message }, 400);
@@ -200,7 +204,11 @@ router.put("/:orgId", async (c) => {
 router.delete("/:orgId", async (c) => {
   const user = c.get("user");
   const orgId = c.req.param("orgId");
-  if (!(await requireOwner(orgId, user.id))) return c.json({ error: "FORBIDDEN" }, 403);
+  try {
+    await authorizeOrg(user, "org:delete", orgId, getMembership);
+  } catch (err) {
+    return forbiddenResponse(c, err);
+  }
   await getDb().delete(organizationsTable).where(eq(organizationsTable.id, orgId));
   return c.json({ ok: true });
 });
@@ -208,7 +216,11 @@ router.delete("/:orgId", async (c) => {
 router.get("/:orgId/members", async (c) => {
   const user = c.get("user");
   const orgId = c.req.param("orgId");
-  if (!(await requireMember(orgId, user.id))) return c.json({ error: "FORBIDDEN" }, 403);
+  try {
+    await authorizeOrg(user, "members:read", orgId, getMembership);
+  } catch (err) {
+    return forbiddenResponse(c, err);
+  }
   const { page, limit, offset } = parsePaginatedQuery(c.req.query());
   const where = eq(organizationMembersTable.orgId, orgId);
   const db = getReadDb();
@@ -239,8 +251,17 @@ router.delete("/:orgId/members/:userId", async (c) => {
   const orgId = c.req.param("orgId");
   const userId = c.req.param("userId");
   const currentMembership = await getMembership(orgId, currentUser.id);
-  if (!currentMembership) return c.json({ error: "FORBIDDEN" }, 403);
-  if (currentMembership.role !== "owner" && currentUser.id !== userId) {
+  try {
+    assertCan(
+      currentUser,
+      "members:remove",
+      { type: "org", orgId },
+      { membership: currentMembership }
+    );
+  } catch (err) {
+    return forbiddenResponse(c, err);
+  }
+  if (currentMembership!.role !== "owner" && currentUser.id !== userId) {
     return c.json({ error: "FORBIDDEN" }, 403);
   }
   const targetMembership = await getMembership(orgId, userId);
@@ -258,7 +279,11 @@ router.delete("/:orgId/members/:userId", async (c) => {
 router.post("/:orgId/transfer", sensitiveReverification, async (c) => {
   const user = c.get("user");
   const orgId = c.req.param("orgId");
-  if (!(await requireOwner(orgId, user.id))) return c.json({ error: "FORBIDDEN" }, 403);
+  try {
+    await authorizeOrg(user, "org:transfer", orgId, getMembership);
+  } catch (err) {
+    return forbiddenResponse(c, err);
+  }
   const parsed = transferSchema.safeParse(await c.req.json().catch(() => ({})));
   if (!parsed.success)
     return c.json({ error: "VALIDATION_ERROR", message: parsed.error.issues[0]?.message }, 400);
@@ -275,7 +300,11 @@ router.post("/:orgId/transfer", sensitiveReverification, async (c) => {
 router.get("/:orgId/invites", async (c) => {
   const user = c.get("user");
   const orgId = c.req.param("orgId");
-  if (!(await requireAdmin(orgId, user.id))) return c.json({ error: "FORBIDDEN" }, 403);
+  try {
+    await authorizeOrg(user, "invites:read", orgId, getMembership);
+  } catch (err) {
+    return forbiddenResponse(c, err);
+  }
   const { page, limit, offset } = parsePaginatedQuery(c.req.query());
   const where = eq(organizationInvitesTable.orgId, orgId);
   const db = getReadDb();
@@ -295,7 +324,11 @@ router.get("/:orgId/invites", async (c) => {
 router.post("/:orgId/invites", async (c) => {
   const user = c.get("user");
   const orgId = c.req.param("orgId");
-  if (!(await requireAdmin(orgId, user.id))) return c.json({ error: "FORBIDDEN" }, 403);
+  try {
+    await authorizeOrg(user, "invites:manage", orgId, getMembership);
+  } catch (err) {
+    return forbiddenResponse(c, err);
+  }
   const parsed = inviteSchema.safeParse(await c.req.json().catch(() => ({})));
   if (!parsed.success)
     return c.json({ error: "VALIDATION_ERROR", message: parsed.error.issues[0]?.message }, 400);
@@ -435,7 +468,11 @@ router.delete("/invites/:inviteId", async (c) => {
 router.delete("/:orgId/invites/:inviteId", async (c) => {
   const user = c.get("user");
   const orgId = c.req.param("orgId");
-  if (!(await requireAdmin(orgId, user.id))) return c.json({ error: "FORBIDDEN" }, 403);
+  try {
+    await authorizeOrg(user, "invites:manage", orgId, getMembership);
+  } catch (err) {
+    return forbiddenResponse(c, err);
+  }
   await getDb()
     .delete(organizationInvitesTable)
     .where(
@@ -450,7 +487,11 @@ router.delete("/:orgId/invites/:inviteId", async (c) => {
 router.get("/:orgId/security/policy", async (c) => {
   const user = c.get("user");
   const orgId = c.req.param("orgId");
-  if (!(await requireAdmin(orgId, user.id))) return c.json({ error: "FORBIDDEN" }, 403);
+  try {
+    await authorizeOrg(user, "security:read", orgId, getMembership);
+  } catch (err) {
+    return forbiddenResponse(c, err);
+  }
   const db = getReadDb();
   const [policy] = await db
     .select()
@@ -476,7 +517,11 @@ router.get("/:orgId/security/policy", async (c) => {
 router.put("/:orgId/security/policy", async (c) => {
   const user = c.get("user");
   const orgId = c.req.param("orgId");
-  if (!(await requireAdmin(orgId, user.id))) return c.json({ error: "FORBIDDEN" }, 403);
+  try {
+    await authorizeOrg(user, "security:manage", orgId, getMembership);
+  } catch (err) {
+    return forbiddenResponse(c, err);
+  }
   const parsed = securityPolicySchema.safeParse(await c.req.json().catch(() => ({})));
   if (!parsed.success)
     return c.json({ error: "VALIDATION_ERROR", message: parsed.error.issues[0]?.message }, 400);

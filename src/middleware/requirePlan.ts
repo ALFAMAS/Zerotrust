@@ -1,5 +1,5 @@
-import type { Context } from "hono";
 import { eq } from "drizzle-orm";
+import type { Context } from "hono";
 import { createMiddleware } from "hono/factory";
 import { getDb } from "../db";
 import { subscriptionsTable } from "../db/schema";
@@ -41,6 +41,8 @@ async function resolvePlan(userId: string, orgId?: string): Promise<Plan> {
 }
 
 function readOrgId(c: Context<HonoEnv>, opts?: RequirePlanOptions): string | undefined {
+  const fromContext = c.get("activeOrgId");
+  if (fromContext) return fromContext;
   if (opts?.orgIdParam) {
     const fromParam = c.req.param(opts.orgIdParam);
     if (fromParam) return fromParam;
@@ -49,8 +51,7 @@ function readOrgId(c: Context<HonoEnv>, opts?: RequirePlanOptions): string | und
     const fromQuery = c.req.query(opts.orgIdQuery);
     if (fromQuery) return fromQuery;
   }
-  const headerName = opts?.orgIdHeader ?? "x-org-id";
-  return c.req.header(headerName) ?? undefined;
+  return undefined;
 }
 
 export function requirePlan(feature: string, opts?: RequirePlanOptions) {

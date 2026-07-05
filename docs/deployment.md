@@ -165,6 +165,29 @@ and info/warn/error logs stream to daily indices. Kibana dashboards under
 
 ---
 
+## Postgres roles (app vs migrator — SEC-25)
+
+Production reference deploys use **two database credentials**:
+
+| Role | Env var | Used by | Capabilities |
+| --- | --- | --- | --- |
+| **App** | `DATABASE_URL` | API + worker runtime | `SELECT`/`INSERT`/`UPDATE`/`DELETE` only; subject to `FORCE ROW LEVEL SECURITY` on org-scoped tables |
+| **Migrator** | `DATABASE_MIGRATOR_URL` | `bun run db:migrate` / deploy job only | DDL (`CREATE`/`ALTER`/`DROP`) for schema changes |
+
+Local dev may keep a single superuser (`zerotrust`) in `docker-compose.yml`. Before
+going internet-facing:
+
+1. Apply migrations once with the existing deploy user.
+2. Run `scripts/setup-postgres-roles.sql` as a superuser (creates
+   `zerotrust_app_user` + `zerotrust_migrator_user` — **change placeholder passwords**).
+3. Point runtime `DATABASE_URL` at the app user; run future migrations with
+   `DATABASE_MIGRATOR_URL` (or export it only in the CI/deploy migrate step).
+
+Kubernetes: the migrate Job should use `DATABASE_MIGRATOR_URL`; Deployments use
+`DATABASE_URL`. See `docs/reference-architecture.md` § Production security defaults.
+
+---
+
 ## Read replica routing
 
 When `DATABASE_URL_READ_REPLICA` is set, read-heavy API handlers call

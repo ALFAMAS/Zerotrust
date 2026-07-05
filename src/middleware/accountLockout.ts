@@ -4,29 +4,28 @@ import type { HonoEnv } from "../shared/types";
 
 const logger = getLogger("account-lockout");
 
-const MAX_ATTEMPTS = parseInt(process.env.MAX_LOGIN_ATTEMPTS || "5", 10);
-const LOCKOUT_DURATION_MS = parseInt(process.env.LOCKOUT_DURATION_MS || String(30 * 60 * 1000), 10);
+/** Base delay before the next login attempt after the first failure (ms). */
+const BASE_DELAY_MS = parseInt(process.env.LOGIN_BACKOFF_BASE_MS || "1000", 10);
+/** Cap on progressive delay (ms). Overridden by settings maxDelayMinutes when provided. */
+const DEFAULT_MAX_DELAY_MS = parseInt(process.env.LOGIN_BACKOFF_MAX_MS || "60000", 10);
+/** Failures after which proof-of-work is required (no hard lockout). */
+const DEFAULT_POW_THRESHOLD = parseInt(process.env.LOGIN_POW_THRESHOLD || "8", 10);
+/** Reset failure count after this idle window (ms). */
+const FAILURE_WINDOW_MS = 60 * 60 * 1000;
 
 interface AttemptRecord {
   count: number;
-  firstAttemptAt: number;
-  lockedUntil?: number;
+  lastAttemptAt: number;
+  delayUntil?: number;
 }
 
-interface LockoutEntry {
-  count: number;
-  lastAttemptAt: Date;
-  lockedUntil?: Date;
-}
-
-const attemptMap = new Map<string, AttemptRecord>();
-const failedAttempts = new Map<string, LockoutEntry>();
+const failedAttempts = new Map<string, AttemptRecord>();
 
 setInterval(
   () => {
-    const now = new Date();
+    const now = Date.now();
     for (const [email, entry] of failedAttempts.entries()) {
-      if (now.getTime() - entry.lastAttemptAt.getTime() > 60 * 60 * 1000) {
+      if (now - entry.lastAttemptAt > FAILURE_WINDOW_MS) {
         failedAttempts.delete(email);
       }
     }
@@ -34,47 +33,129 @@ setInterval(
   10 * 60 * 1000
 ).unref();
 
-export function isAccountLocked(email: string): { locked: boolean; lockedUntil?: string } {
-  const key = email.toLowerCase();
-  const entry = failedAttempts.get(key);
-  if (!entry?.lockedUntil) return { locked: false };
-  if (entry.lockedUntil > new Date())
-    return { locked: true, lockedUntil: entry.lockedUntil.toISOString() };
-  entry.lockedUntil = undefined;
-  entry.count = 0;
-  failedAttempts.set(key, entry);
-  return { locked: false };
+export interface LoginBackoffSettings {
+  /** When false, progressive backoff and PoW are skipped entirely. */
+  enabled?: boolean;
+  /** Failures before PoW is required (maps to platform accountLockoutThreshold). */
+  powThreshold?: number;
+  /** Max delay cap in minutes (maps to platform accountLockoutDurationMinutes). */
+  maxDelayMinutes?: number;
 }
 
-export function recordFailedLogin(
+function normalizeKey(email: string): string {
+  return email.toLowerCase();
+}
+
+function maxDelayMs(settings?: LoginBackoffSettings): number {
+  if (settings?.maxDelayMinutes != null && settings.maxDelayMinutes > 0) {
+    return settings.maxDelayMinutes * 60 * 1000;
+  }
+  return DEFAULT_MAX_DELAY_MS;
+}
+
+function powThreshold(settings?: LoginBackoffSettings): number {
+  return settings?.powThreshold ?? DEFAULT_POW_THRESHOLD;
+}
+
+/** Exponential backoff: 1s, 2s, 4s, … capped at maxDelayMs. Never hard-locks. */
+export function computeBackoffDelayMs(failureCount: number, settings?: LoginBackoffSettings): number {
+  if (failureCount <= 0) return 0;
+  const uncapped = BASE_DELAY_MS * 2 ** (failureCount - 1);
+  return Math.min(uncapped, maxDelayMs(settings));
+}
+
+function getOrResetEntry(key: string): AttemptRecord | undefined {
+  const entry = failedAttempts.get(key);
+  if (!entry) return undefined;
+  if (Date.now() - entry.lastAttemptAt > FAILURE_WINDOW_MS) {
+    failedAttempts.delete(key);
+    return undefined;
+  }
+  return entry;
+}
+
+export interface LoginThrottleState {
+  /** True when the caller must wait before retrying (429). */
+  delayed: boolean;
+  retryAfterSeconds?: number;
+  /** True when a valid PoW solution must accompany the login request. */
+  requiresPow: boolean;
+  failureCount: number;
+}
+
+export function getLoginThrottle(
   email: string,
-  settings?: { threshold: number; durationMinutes: number }
-): void {
-  const key = email.toLowerCase();
-  const now = new Date();
-  const threshold = settings?.threshold ?? MAX_ATTEMPTS;
-  const durationMs = settings?.durationMinutes
-    ? settings.durationMinutes * 60 * 1000
-    : LOCKOUT_DURATION_MS;
+  settings?: LoginBackoffSettings
+): LoginThrottleState {
+  if (settings?.enabled === false) {
+    return { delayed: false, requiresPow: false, failureCount: 0 };
+  }
 
-  const entry = failedAttempts.get(key) || { count: 0, lastAttemptAt: now };
+  const key = normalizeKey(email);
+  const entry = getOrResetEntry(key);
+  if (!entry) {
+    return { delayed: false, requiresPow: false, failureCount: 0 };
+  }
 
-  if (entry.lockedUntil && entry.lockedUntil > now) return;
+  const threshold = powThreshold(settings);
+  const requiresPow = entry.count >= threshold;
+  const now = Date.now();
+
+  if (entry.delayUntil && entry.delayUntil > now) {
+    return {
+      delayed: true,
+      retryAfterSeconds: Math.ceil((entry.delayUntil - now) / 1000),
+      requiresPow,
+      failureCount: entry.count,
+    };
+  }
+
+  return { delayed: false, requiresPow, failureCount: entry.count };
+}
+
+/** Backward-compatible alias — "locked" means a progressive delay is active, not a hard ban. */
+export function isAccountLocked(
+  email: string,
+  settings?: LoginBackoffSettings
+): { locked: boolean; lockedUntil?: string; requiresPow?: boolean } {
+  const throttle = getLoginThrottle(email, settings);
+  if (throttle.delayed && throttle.retryAfterSeconds) {
+    return {
+      locked: true,
+      lockedUntil: new Date(Date.now() + throttle.retryAfterSeconds * 1000).toISOString(),
+      requiresPow: throttle.requiresPow,
+    };
+  }
+  return { locked: false, requiresPow: throttle.requiresPow };
+}
+
+export function recordFailedLogin(email: string, settings?: LoginBackoffSettings): void {
+  if (settings?.enabled === false) return;
+
+  const key = normalizeKey(email);
+  const now = Date.now();
+  const entry = getOrResetEntry(key) ?? { count: 0, lastAttemptAt: now };
 
   entry.count += 1;
   entry.lastAttemptAt = now;
-
-  if (entry.count >= threshold) {
-    entry.lockedUntil = new Date(now.getTime() + durationMs);
-    logger.warn("Account locked due to failed attempts", { email: key, attempts: entry.count });
-  }
+  const delayMs = computeBackoffDelayMs(entry.count, settings);
+  entry.delayUntil = delayMs > 0 ? now + delayMs : undefined;
 
   failedAttempts.set(key, entry);
+
+  if (entry.count >= powThreshold(settings)) {
+    logger.warn("Login failures require proof-of-work", { email: key, attempts: entry.count });
+  } else if (delayMs > 0) {
+    logger.info("Login progressive delay applied", {
+      email: key,
+      attempts: entry.count,
+      delayMs,
+    });
+  }
 }
 
 export function recordSuccessfulLogin(email: string): void {
-  failedAttempts.delete(email.toLowerCase());
-  attemptMap.delete(email);
+  failedAttempts.delete(normalizeKey(email));
 }
 
 export function checkAccountLockout() {
@@ -83,18 +164,15 @@ export function checkAccountLockout() {
     const email = body?.email as string | undefined;
     if (!email) return next();
 
-    const key = email.toLowerCase();
-    const entry = failedAttempts.get(key);
-
-    if (entry?.lockedUntil && entry.lockedUntil > new Date()) {
-      const retryAfterSeconds = Math.ceil((entry.lockedUntil.getTime() - Date.now()) / 1000);
-      c.header("Retry-After", String(retryAfterSeconds));
+    const throttle = getLoginThrottle(email);
+    if (throttle.delayed && throttle.retryAfterSeconds) {
+      c.header("Retry-After", String(throttle.retryAfterSeconds));
       return c.json(
         {
-          error: "ACCOUNT_LOCKED",
-          message: "Account is temporarily locked due to too many failed login attempts",
-          retryAfter: retryAfterSeconds,
-          lockedUntil: entry.lockedUntil.toISOString(),
+          error: "TOO_MANY_ATTEMPTS",
+          message: "Too many failed login attempts. Please wait before trying again.",
+          retryAfter: throttle.retryAfterSeconds,
+          requiresPow: throttle.requiresPow,
         },
         429
       );
@@ -105,6 +183,5 @@ export function checkAccountLockout() {
 }
 
 export function clearLockout(email: string): void {
-  failedAttempts.delete(email.toLowerCase());
-  attemptMap.delete(email);
+  failedAttempts.delete(normalizeKey(email));
 }

@@ -166,9 +166,7 @@ const PieChartCore = memo(function PieChartCore({
   enterStaggerScale,
   geometryScrubbing,
 }: PieChartInnerProps) {
-  const [internalHoveredIndex, setInternalHoveredIndex] = useState<
-    number | null
-  >(null);
+  const [internalHoveredIndex, setInternalHoveredIndex] = useState<number | null>(null);
   const [animationKey] = useState(0);
   const [isLoaded, setIsLoaded] = useState(false);
 
@@ -196,10 +194,7 @@ const PieChartCore = memo(function PieChartCore({
   const innerRadius = innerRadiusProp;
 
   // Calculate total value
-  const totalValue = useMemo(
-    () => data.reduce((sum, d) => sum + d.value, 0),
-    [data]
-  );
+  const totalValue = useMemo(() => data.reduce((sum, d) => sum + d.value, 0), [data]);
 
   // Get color for a slice index
   const getColor = useCallback(
@@ -418,10 +413,7 @@ const PieChartCore = memo(function PieChartCore({
   );
 }, pieChartCorePropsEqual);
 
-function pieChartCorePropsEqual(
-  prev: PieChartInnerProps,
-  next: PieChartInnerProps
-): boolean {
+function pieChartCorePropsEqual(prev: PieChartInnerProps, next: PieChartInnerProps): boolean {
   return (
     prev.width === next.width &&
     prev.height === next.height &&
@@ -493,10 +485,7 @@ export function PieChart({
 
   // Otherwise use ParentSize for responsive sizing
   return (
-    <div
-      className={cn("relative aspect-square w-full", className)}
-      ref={containerRef}
-    >
+    <div className={cn("relative aspect-square w-full", className)} ref={containerRef}>
       <ParentSize debounceTime={10}>
         {({ width, height }) => (
           <PieChartInner

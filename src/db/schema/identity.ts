@@ -79,10 +79,13 @@ export const sessionsTable = pgTable(
     proofOfPossessionKey: text("proof_of_possession_key"),
     continuousEvalResult: jsonb("continuous_eval_result"),
     anomalyFlags: jsonb("anomaly_flags"),
+    /** SEC-11: authoritative tenant context for this session (not client headers). */
+    activeOrgId: uuid("active_org_id"),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().default(sql`now()`),
   },
   (t) => ({
+    sessionsActiveOrgIdIdx: index("sessions_active_org_id_idx").on(t.activeOrgId),
     sessionsUserIdIsActiveIdx: index("sessions_user_id_is_active_idx").on(t.userId, t.isActive),
     sessionsExpiresAtIsActiveIdx: index("sessions_expires_at_is_active_idx").on(
       t.expiresAt,
@@ -132,6 +135,7 @@ export const refreshTokensTable = pgTable(
       .notNull()
       .references(() => sessionsTable.id, { onDelete: "cascade" }),
     tokenHash: text("token_hash").notNull().unique(),
+    familyId: uuid("family_id").notNull().default(sql`gen_random_uuid()`),
     expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
     usedAt: timestamp("used_at", { withTimezone: true }),
     isRevoked: boolean("is_revoked").notNull().default(false),
@@ -144,6 +148,7 @@ export const refreshTokensTable = pgTable(
       t.expiresAt
     ),
     refreshTokensSessionIdIdx: index("refresh_tokens_session_id_idx").on(t.sessionId),
+    refreshTokensFamilyIdIdx: index("refresh_tokens_family_id_idx").on(t.familyId),
   })
 );
 

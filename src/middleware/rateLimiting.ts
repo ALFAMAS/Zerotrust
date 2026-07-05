@@ -1,6 +1,7 @@
 import { createMiddleware } from "hono/factory";
 import { getConfig } from "../config";
 import { getLogger } from "../logger";
+import { recordRateLimit } from "../metrics";
 import { clearInMemoryBuckets } from "../services/shared/rateLimiter/inmemory";
 import type { HonoEnv } from "../shared/types";
 import { ErrorCodes } from "../shared/types";
@@ -140,6 +141,44 @@ export async function consumeRateLimit(
     retryAfterSecs: windowSecs - (now - bucket.windowStart),
     remaining: points - bucket.count,
   };
+}
+
+/**
+ * Per-authenticated-user sliding window (Redis-backed when available).
+ * Call after `authMiddleware` sets `c.get("user")`, or use `enforceUserRateLimit`.
+ */
+export async function enforceUserRateLimit(
+  userId: string
+): Promise<{ allowed: boolean; retryAfterSecs: number }> {
+  const cfg = getConfig();
+  if (!cfg.rateLimiting.enabled) {
+    return { allowed: true, retryAfterSecs: 0 };
+  }
+
+  const key = `user:${userId}`;
+  const result = await consumeRateLimit(key, cfg.rateLimiting.perUserLimit, cfg.rateLimiting.windowSecs);
+  if (!result.allowed) {
+    recordRateLimit("authenticated", userId);
+  }
+  return { allowed: result.allowed, retryAfterSecs: result.retryAfterSecs };
+}
+
+export function userRateLimit() {
+  return createMiddleware<HonoEnv>(async (c, next) => {
+    const user = c.get("user");
+    if (!user?.id) return next();
+
+    const { allowed, retryAfterSecs } = await enforceUserRateLimit(user.id);
+    if (!allowed) {
+      logger.warn("User rate limit exceeded", { userId: user.id, path: c.req.path });
+      c.header("Retry-After", String(retryAfterSecs));
+      return c.json(
+        { error: ErrorCodes.RATE_LIMIT_EXCEEDED, message: "Too many requests" },
+        429
+      );
+    }
+    return next();
+  });
 }
 
 // ─── Multi-Tenant Rate Limiting ───────────────────────────────────────────────

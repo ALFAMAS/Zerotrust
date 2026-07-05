@@ -103,35 +103,34 @@ describe("Rate Limiting Middleware", () => {
   });
 });
 
-// ── Account Lockout ────────────────────────────────────────────────────────
+// ── Progressive login backoff ──────────────────────────────────────────────
 
-describe("Account Lockout Middleware", () => {
+describe("Progressive login backoff", () => {
   beforeEach(async () => {
     const { clearLockout } = await import("../middleware/accountLockout");
     clearLockout("lockout-test@example.com");
   });
 
-  it("is not locked initially", async () => {
+  it("is not delayed initially", async () => {
     const { isAccountLocked } = await import("../middleware/accountLockout");
     const { locked } = isAccountLocked("fresh-user@example.com");
     expect(locked).toBe(false);
   });
 
-  it("records failed logins and tracks count", async () => {
+  it("applies delay after a failed login", async () => {
     const { recordFailedLogin, isAccountLocked } =
       await import("../middleware/accountLockout");
     const email = `lockout-test-${Date.now()}@example.com`;
-    await recordFailedLogin(email);
-    await recordFailedLogin(email);
+    recordFailedLogin(email);
     const { locked } = isAccountLocked(email);
-    expect(locked).toBe(false);
+    expect(locked).toBe(true);
   });
 
-  it("clears lockout after successful login", async () => {
+  it("clears backoff after successful login", async () => {
     const { recordFailedLogin, recordSuccessfulLogin, isAccountLocked } =
       await import("../middleware/accountLockout");
     const email = `clear-test-${Date.now()}@example.com`;
-    await recordFailedLogin(email);
+    recordFailedLogin(email);
     recordSuccessfulLogin(email);
     const { locked } = isAccountLocked(email);
     expect(locked).toBe(false);
@@ -141,7 +140,7 @@ describe("Account Lockout Middleware", () => {
     const { recordFailedLogin, clearLockout, isAccountLocked } =
       await import("../middleware/accountLockout");
     const email = `clear2-${Date.now()}@example.com`;
-    await recordFailedLogin(email);
+    recordFailedLogin(email);
     clearLockout(email);
     const { locked } = isAccountLocked(email);
     expect(locked).toBe(false);

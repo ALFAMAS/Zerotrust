@@ -329,3 +329,26 @@ describe("POST /notifications/read-all", () => {
     expect(res.status).toBe(401);
   });
 });
+
+describe("GET /notifications/sse", () => {
+  afterEach(() => {
+    vi.clearAllMocks();
+    vi.doUnmock("../middleware/auth");
+  });
+
+  it("opens an SSE stream for authenticated users", async () => {
+    const app = await getApp(makeDbChain([]));
+    const res = await app.request("/sse", {
+      headers: { Authorization: "Bearer test-token" },
+    });
+    // auth is stubbed — handler runs; stream response is returned
+    expect(res.status).toBe(200);
+    expect(res.headers.get("content-type")).toContain("text/event-stream");
+  });
+
+  it("returns 401 for unauthenticated SSE requests", async () => {
+    const app = await getUnauthApp();
+    const res = await app.request("/sse");
+    expect(res.status).toBe(401);
+  });
+});

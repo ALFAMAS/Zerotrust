@@ -452,6 +452,7 @@ router.post("/authenticate/verify", async (c) => {
       refreshToken: {
         userId: user.id,
         tokenHash: hashToken(refreshTokenPlain),
+        familyId: crypto.randomUUID(),
         expiresAt: new Date(Date.now() + cfg.session.refreshTokenTTL * 1000),
       },
     });

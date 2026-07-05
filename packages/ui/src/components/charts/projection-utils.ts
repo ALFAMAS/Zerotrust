@@ -44,10 +44,7 @@ function readDate(row: Record<string, unknown>, xDataKey: string): Date | null {
   return null;
 }
 
-function readValue(
-  row: Record<string, unknown>,
-  seriesKey: string
-): number | null {
+function readValue(row: Record<string, unknown>, seriesKey: string): number | null {
   const raw = row[seriesKey];
   return typeof raw === "number" && Number.isFinite(raw) ? raw : null;
 }
@@ -174,9 +171,7 @@ function buildAutoFutureValues(options: {
     ];
   }
 
-  const result: ProjectionPoint[] = [
-    { date: new Date(anchorTime), value: anchorValue },
-  ];
+  const result: ProjectionPoint[] = [{ date: new Date(anchorTime), value: anchorValue }];
 
   for (let i = 1; i <= horizonPoints; i++) {
     const t = anchorTime + intervalMs * i;
@@ -248,8 +243,7 @@ function buildTargetPath(options: {
   horizonPoints: number;
   intervalMs: number;
 }): ProjectionPoint[] {
-  const { anchorTime, anchorValue, endValue, horizonPoints, intervalMs } =
-    options;
+  const { anchorTime, anchorValue, endValue, horizonPoints, intervalMs } = options;
   const endTime = anchorTime + intervalMs * horizonPoints;
   return [
     { date: new Date(anchorTime), value: anchorValue },
@@ -258,9 +252,7 @@ function buildTargetPath(options: {
 }
 
 /** Build a projection path from historical chart data or explicit points. */
-export function buildProjectionPath(
-  options: BuildProjectionPathOptions
-): ProjectionPoint[] {
+export function buildProjectionPath(options: BuildProjectionPathOptions): ProjectionPoint[] {
   const {
     sourceData,
     seriesKey,

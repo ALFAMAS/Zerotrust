@@ -9,7 +9,7 @@
  * Exit code: 0 if clean, 1 if violations found.
  */
 
-import { readFileSync, readdirSync, statSync } from "node:fs";
+import { readdirSync, readFileSync, statSync } from "node:fs";
 import { basename, relative, resolve } from "node:path";
 
 interface OrgScopeConfig {

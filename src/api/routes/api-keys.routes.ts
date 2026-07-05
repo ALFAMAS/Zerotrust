@@ -5,7 +5,7 @@ import { z } from "zod";
 import { getDb, getReadDb } from "../../db";
 import { apiKeysTable, organizationMembersTable } from "../../db/schema";
 import { getLogger } from "../../logger";
-import { authMiddleware } from "../../middleware/auth";
+import { authMiddleware, requireEmailVerified } from "../../middleware/auth";
 import { rateLimit } from "../../middleware/rateLimiting";
 import { internalError } from "../../shared/httpErrors";
 import type { HonoEnv } from "../../shared/types";
@@ -23,8 +23,11 @@ const createSchema = z.object({
   monthlyQuota: z.number().int().min(1).max(2_000_000_000).optional(),
 });
 
+router.use("*", authMiddleware);
+router.use("*", requireEmailVerified);
+
 // GET /api-keys
-router.get("/", authMiddleware, async (c) => {
+router.get("/", async (c) => {
   const user = c.get("user");
   const db = getReadDb();
 
@@ -49,7 +52,7 @@ router.get("/", authMiddleware, async (c) => {
 });
 
 // POST /api-keys
-router.post("/", authMiddleware, rateLimit({ points: 20, windowSecs: 3600 }), async (c) => {
+router.post("/", rateLimit({ points: 20, windowSecs: 3600 }), async (c) => {
   const user = c.get("user");
   const body = await c.req.json().catch(() => ({}));
   const parsed = createSchema.safeParse(body);
@@ -111,7 +114,7 @@ router.post("/", authMiddleware, rateLimit({ points: 20, windowSecs: 3600 }), as
 });
 
 // DELETE /api-keys/:id
-router.delete("/:id", authMiddleware, async (c) => {
+router.delete("/:id", async (c) => {
   const user = c.get("user");
   const id = c.req.param("id");
   const db = getDb();

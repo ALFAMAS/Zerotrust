@@ -107,12 +107,15 @@ Ten high-traffic dashboard/admin pages prefetch authenticated reads on the serve
    cache means no loading skeleton on first paint when prefetch succeeded.
    Mutations still run client-side via `apiClient.ts`.
 
-### Auth cookie mirror
+### Auth cookie mirror (ADR 008 § RSC prefetch mirror — SEC-20)
 
 `packages/ui/src/lib/auth.ts` writes `za_access_token` to a first-party cookie
 when the user logs in so RSC can authenticate server prefetch. The cookie is
-cleared on logout. It mirrors the access token already in `localStorage`; it is
-not httpOnly (same threat model as localStorage-based SPA auth).
+cleared on logout. It is **not** httpOnly — XSS during an active session can read
+it (same threat model as in-memory access). Accepted tradeoff documented in
+[`docs/adr/008-token-storage-design-revisit.md`](../../docs/adr/008-token-storage-design-revisit.md):
+`path=/`, `SameSite=Lax`, `max-age=3600` (1 h), mitigated by short TTL + httpOnly
+refresh cookie + CSP.
 
 ### Adding a new server-prefetched page
 

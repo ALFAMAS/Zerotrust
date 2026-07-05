@@ -14,9 +14,22 @@ export const RegisterSchema = z.object({
   displayName: z.string().min(1).max(100).optional(),
 });
 
+/** Register body including optional PoW and locale fields. */
+export const RegisterBodySchema = RegisterSchema.extend({
+  locale: z.string().optional(),
+  powChallenge: z.string().optional(),
+  powSolution: z.string().optional(),
+});
+
 export const LoginSchema = z.object({
   email: z.string().email("Invalid email address"),
   password: z.string().min(1, "Password is required"),
+});
+
+/** Login body including optional PoW fields for progressive backoff. */
+export const LoginBodySchema = LoginSchema.extend({
+  powChallenge: z.string().optional(),
+  powSolution: z.string().optional(),
 });
 
 export const RefreshTokenSchema = z.object({

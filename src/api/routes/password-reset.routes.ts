@@ -1,19 +1,24 @@
 import crypto from "node:crypto";
-import bcrypt from "bcryptjs";
 import { and, eq, gt, sql } from "drizzle-orm";
 import { Hono } from "hono";
 import { getConfig } from "../../config";
 import { getDb } from "../../db";
 import { otpsTable, usersTable } from "../../db/schema";
 import { getLogger } from "../../logger";
-import { sendOTP } from "../../services/auth/otpDelivery.service";
-import { revokeAllSessionsForUser } from "../../middleware/sessionControl";
 import { rateLimit } from "../../middleware/rateLimiting";
+import { zValidator } from "../../middleware/zodValidation";
+import { revokeAllSessionsForUser } from "../../middleware/sessionControl";
+import {
+  PasswordResetConfirmSchema,
+  PasswordResetRequestSchema,
+} from "../schemas/auth.schema";
 import { recordAndRespond } from "../../services/auth/accountTakeover.service";
+import { sendOTP } from "../../services/auth/otpDelivery.service";
 import { rejectIfBreached } from "../../services/auth/passwordBreach.service";
 import { sendPasswordResetEmail } from "../../services/notifications/email.service";
 import { getClientIp } from "../../shared/clientIp";
 import { hashTokenSha256 } from "../../shared/cryptoHash";
+import { hashPassword } from "../../shared/passwordHash";
 import type { HonoEnv } from "../../shared/types";
 import { ErrorCodes } from "../../shared/types";
 
@@ -29,9 +34,13 @@ function safeDigestEquals(candidate: string, expected: string): boolean {
 }
 
 // POST /request — send a password-reset OTP
-router.post("/request", rateLimit({ points: 5, windowSecs: 3600 }), async (c) => {
+router.post(
+  "/request",
+  rateLimit({ points: 5, windowSecs: 3600 }),
+  zValidator("json", PasswordResetRequestSchema),
+  async (c) => {
   try {
-    const { email } = (await c.req.json()) as { email: string };
+    const { email } = c.req.valid("json");
 
     const db = getDb();
     const users = await db
@@ -93,16 +102,17 @@ router.post("/request", rateLimit({ points: 5, windowSecs: 3600 }), async (c) =>
       500
     );
   }
-});
+  }
+);
 
 // POST /confirm — verify OTP and update password
-router.post("/confirm", rateLimit({ points: 10, windowSecs: 900 }), async (c) => {
+router.post(
+  "/confirm",
+  rateLimit({ points: 10, windowSecs: 900 }),
+  zValidator("json", PasswordResetConfirmSchema),
+  async (c) => {
   try {
-    const { email, code, newPassword } = (await c.req.json()) as {
-      email: string;
-      code: string;
-      newPassword: string;
-    };
+    const { email, code, newPassword } = c.req.valid("json");
 
     const db = getDb();
 
@@ -180,7 +190,7 @@ router.post("/confirm", rateLimit({ points: 10, windowSecs: 900 }), async (c) =>
       return c.json({ code: "PASSWORD_BREACHED", message: breachMessage, details: [] }, 400);
     }
 
-    const passwordHash = await bcrypt.hash(newPassword, cfg.security.bcryptRounds);
+    const passwordHash = await hashPassword(newPassword);
 
     await db
       .update(usersTable)
@@ -216,6 +226,7 @@ router.post("/confirm", rateLimit({ points: 10, windowSecs: 900 }), async (c) =>
       500
     );
   }
-});
+  }
+);
 
 export default router;

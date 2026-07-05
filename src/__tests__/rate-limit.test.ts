@@ -13,7 +13,7 @@ vi.mock("../config", () => ({
       csfleMasterKeyHex: "b".repeat(64),
       csflekeyRotationIntervalDays: 90,
     },
-    rateLimiting: { enabled: true, perIpLimit: 10, windowSecs: 60 },
+    rateLimiting: { enabled: true, perIpLimit: 10, perUserLimit: 5, windowSecs: 60 },
     geofencing: { enabled: false, allowedCountries: [], allowedIpRanges: [] },
     mfa: {
       totpWindow: 1,
@@ -348,7 +348,7 @@ describe("Redis Rate Limiter — consumePoint", () => {
 // Shared config factory — re-used in beforeEach so each test starts clean
 const enabledRateLimitConfig = () => ({
   getConfig: () => ({
-    rateLimiting: { enabled: true, perIpLimit: 10, windowSecs: 60 },
+    rateLimiting: { enabled: true, perIpLimit: 10, perUserLimit: 5, windowSecs: 60 },
     session: {
       defaultTTL: 3600,
       refreshTokenTTL: 604800,
@@ -400,7 +400,7 @@ describe("rateLimit Hono middleware", () => {
     // picks up the disabled version.
     vi.doMock("../config", () => ({
       getConfig: () => ({
-        rateLimiting: { enabled: false, perIpLimit: 3, windowSecs: 60 },
+        rateLimiting: { enabled: false, perIpLimit: 3, perUserLimit: 3, windowSecs: 60 },
         session: {
           defaultTTL: 3600,
           refreshTokenTTL: 604800,
@@ -608,5 +608,36 @@ describe("configureTenantQuota and getTenantQuota", () => {
     const { getTenantQuota } = await import("../middleware/rateLimiting");
     const quota = getTenantQuota("tenant-unknown");
     expect(quota).toBeNull();
+  });
+});
+
+// ── Per-user authenticated rate limiting (SEC-15) ────────────────────────────
+
+describe("enforceUserRateLimit", () => {
+  beforeEach(async () => {
+    const { clearRateLimiter } = await import("../middleware/rateLimiting");
+    clearRateLimiter();
+  });
+
+  it("allows requests within the per-user budget", async () => {
+    const { enforceUserRateLimit } = await import("../middleware/rateLimiting");
+    const userId = `user-allowed-${Date.now()}`;
+
+    for (let i = 0; i < 5; i++) {
+      const result = await enforceUserRateLimit(userId);
+      expect(result.allowed).toBe(true);
+    }
+  });
+
+  it("blocks when the per-user budget is exhausted", async () => {
+    const { enforceUserRateLimit } = await import("../middleware/rateLimiting");
+    const userId = `user-blocked-${Date.now()}`;
+
+    for (let i = 0; i < 5; i++) {
+      await enforceUserRateLimit(userId);
+    }
+    const blocked = await enforceUserRateLimit(userId);
+    expect(blocked.allowed).toBe(false);
+    expect(blocked.retryAfterSecs).toBeGreaterThan(0);
   });
 });

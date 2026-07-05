@@ -1,16 +1,16 @@
 import * as nodeCrypto from "node:crypto";
-import type { Context } from "hono";
 import { eq } from "drizzle-orm";
+import type { Context } from "hono";
 import { getConfig } from "../../config";
 import { getDb } from "../../db";
 import { refreshTokensTable, sessionsTable, usersTable } from "../../db/schema";
-import { setRefreshTokenCookie } from "../../shared/authCookies";
 import { enforceMaxConcurrentDevices } from "../../middleware/sessionControl";
+import { setRefreshTokenCookie } from "../../shared/authCookies";
+import { getClientIp } from "../../shared/clientIp";
+import type { HonoEnv } from "../../shared/types";
 import { FingerprintService } from "./fingerprint.service";
 import { notifyIfNewDevice } from "./loginNotification.service";
 import { TokenService } from "./token.service";
-import { getClientIp } from "../../shared/clientIp";
-import type { HonoEnv } from "../../shared/types";
 
 let tokenServiceInstance: TokenService | null = null;
 
@@ -77,10 +77,12 @@ export async function issueAuthenticatedSession(
 
   const refreshTokenPlain = await tokenSvc.signRefreshToken();
   const refreshTokenHash = hashToken(refreshTokenPlain);
+  const familyId = nodeCrypto.randomUUID();
   await db.insert(refreshTokensTable).values({
     userId: user.id,
     sessionId: session.id,
     tokenHash: refreshTokenHash,
+    familyId,
     expiresAt: new Date(Date.now() + cfg.session.refreshTokenTTL * 1000),
   });
 

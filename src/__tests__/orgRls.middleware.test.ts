@@ -8,12 +8,9 @@ const withOrgRls = vi.fn(async (_ctx: unknown, fn: (tx: unknown) => unknown) => 
   return fn(tx);
 });
 
-vi.mock("../db/resolveOrgContext", () => ({
-  orgIdFromRequest: vi.fn((c: { req: { header: (n: string) => string | undefined } }) =>
-    c.req.header("x-org-id")
-  ),
-  shouldBypassOrgRls: vi.fn(() => false),
+vi.mock("../db/orgMembership", () => ({
   verifyOrgMembership,
+  shouldBypassOrgRls: vi.fn(() => false),
 }));
 
 vi.mock("../db/rls", () => ({
@@ -46,17 +43,18 @@ describe("orgRlsMiddleware", () => {
     verifyOrgMembership.mockResolvedValue(true);
   });
 
-  it("wraps handler in withOrgRls when X-Org-Id is present", async () => {
+  it("wraps handler in withOrgRls when activeOrgId is on context", async () => {
     const { orgRlsMiddleware } = await import("../middleware/orgRls");
     const app = new Hono<HonoEnv>();
     app.use("*", async (c, next) => {
       c.set("user", testUser());
+      c.set("activeOrgId", "org-1");
       await next();
     });
     app.use("*", orgRlsMiddleware());
     app.get("/", (c) => c.json({ ok: true, hasTx: Boolean(c.get("dbTx")) }));
 
-    const res = await app.request("/", { headers: { "x-org-id": "org-1" } });
+    const res = await app.request("/");
     expect(res.status).toBe(200);
     expect(withOrgRls).toHaveBeenCalledWith(
       { orgId: "org-1", userId: "user-1" },
@@ -64,6 +62,21 @@ describe("orgRlsMiddleware", () => {
     );
     const body = (await res.json()) as { hasTx: boolean };
     expect(body.hasTx).toBe(true);
+  });
+
+  it("ignores X-Org-Id header without session activeOrgId", async () => {
+    const { orgRlsMiddleware } = await import("../middleware/orgRls");
+    const app = new Hono<HonoEnv>();
+    app.use("*", async (c, next) => {
+      c.set("user", testUser());
+      await next();
+    });
+    app.use("*", orgRlsMiddleware());
+    app.get("/", (c) => c.json({ ok: true }));
+
+    const res = await app.request("/", { headers: { "x-org-id": "org-spoofed" } });
+    expect(res.status).toBe(200);
+    expect(withOrgRls).not.toHaveBeenCalled();
   });
 
   it("passes through when no org context", async () => {

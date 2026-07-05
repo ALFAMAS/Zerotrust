@@ -3,6 +3,7 @@ import type { Context, Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import type { ContentfulStatusCode } from "hono/utils/http-status";
 import { getLogger } from "../logger";
+import { redactLogString } from "../shared/logRedaction";
 import { ErrorCodes, type HonoEnv, zerotrustError } from "../shared/types";
 
 type ApiLogger = {
@@ -38,20 +39,7 @@ function requestIdFor(c: Context): string {
 }
 
 function redact(value: string): string {
-  return value
-    .replace(
-      /\b(password|passwd|pwd|secret|client_secret|token|access_token|refresh_token|api[_-]?key|authorization|otp)\s*[:=]\s*["']?[^"'\s,;&}]+/gi,
-      "$1=[REDACTED]"
-    )
-    .replace(/\bBearer\s+[A-Za-z0-9._~+/-]+=*/gi, "Bearer [REDACTED]")
-    .replace(
-      /\b(postgres(?:ql)?:\/\/[^:\s/@]+:)([^@\s]+)(@[^/\s]+(?:\/[^\s]*)?)/gi,
-      "$1[REDACTED]$3"
-    )
-    .replace(
-      /([?&](?:password|secret|client_secret|token|access_token|refresh_token|api_key|otp)=)[^&\s]+/gi,
-      "$1[REDACTED]"
-    );
+  return redactLogString(value);
 }
 
 function errorField(value: unknown): string | undefined {

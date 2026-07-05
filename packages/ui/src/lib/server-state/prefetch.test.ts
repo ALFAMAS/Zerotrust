@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+vi.mock("server-only", () => ({}));
+
 const serverApiGetMock = vi.fn();
 vi.mock("@/lib/serverApiClient", () => ({
   serverApiGet: (...args: unknown[]) => serverApiGetMock(...args),

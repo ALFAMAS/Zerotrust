@@ -1,5 +1,5 @@
+import { parseEnv } from "./env";
 import type { zerotrustConfig } from "../shared/types";
-import { isPlaceholderSecretHex } from "../shared/placeholderSecrets";
 
 function generateSecureKey(byteLength: number): string {
   if (typeof crypto === "undefined") {
@@ -66,6 +66,7 @@ const DEFAULT_CONFIG: Partial<zerotrustConfig> = {
     enabled: process.env.RATE_LIMITING_ENABLED !== "false",
     redisUri: process.env.REDIS_URI,
     perIpLimit: parseInt(process.env.RATE_LIMIT_PER_IP || "100", 10),
+    perUserLimit: parseInt(process.env.RATE_LIMIT_PER_USER || "200", 10),
     windowSecs: parseInt(process.env.RATE_LIMIT_WINDOW_SECS || "60", 10),
   },
   geofencing: {
@@ -86,6 +87,7 @@ const DEFAULT_CONFIG: Partial<zerotrustConfig> = {
 };
 
 export function loadConfig(): zerotrustConfig {
+  parseEnv();
   const config = DEFAULT_CONFIG as zerotrustConfig;
   // Outside production this is a soft warning rather than a hard error (see
   // the production-only fail-fast gate in validateConfig): local/test runs
@@ -124,21 +126,6 @@ function validateConfig(config: zerotrustConfig): void {
     errors.push("CSFLE_MASTER_KEY_HEX must be at least 32 bytes (64 hex chars)");
   }
 
-  if (process.env.NODE_ENV === "production") {
-    for (const [name, value] of [
-      ["TOKEN_SECRET_HEX", config.security.tokenSecretHex],
-      ["CSFLE_MASTER_KEY_HEX", config.security.csfleMasterKeyHex],
-      ["BACKUP_ENCRYPTION_KEY_HEX", process.env.BACKUP_ENCRYPTION_KEY_HEX],
-      ["METRICS_AUTH_TOKEN", process.env.METRICS_AUTH_TOKEN],
-    ] as const) {
-      if (value && isPlaceholderSecretHex(value)) {
-        errors.push(
-          `${name} is a documented placeholder value and cannot be used in production — generate with: openssl rand -hex 32`
-        );
-      }
-    }
-  }
-
   let hasValidOAuth = false;
   for (const creds of Object.values(config.oauth.providers)) {
     if (creds.clientId && creds.clientSecret) {
@@ -154,71 +141,6 @@ function validateConfig(config: zerotrustConfig): void {
   const mfaChannelsEnabled = config.mfa.channels.email.enabled ? 1 : 0;
   if (mfaChannelsEnabled === 0) {
     errors.push("At least one MFA channel must be enabled");
-  }
-
-  // ── Production-only fail-fast gates (P4.3) ─────────────────────────────
-  // When NODE_ENV=production, refuse to boot unless critical operational
-  // secrets are set. These are warnings/silent in dev but hard errors in prod.
-  if (process.env.NODE_ENV === "production") {
-    // TOKEN_SECRET_HEX / CSFLE_MASTER_KEY_HEX silently fall back to a
-    // randomly generated key (see generateSecureKey above) when unset — that
-    // fallback satisfies the length check a few lines up, so a missing env
-    // var was never actually caught. In a multi-replica production deploy
-    // each process would mint its OWN ephemeral tokenSecretHex, so a token
-    // signed by one replica is rejected by another (intermittent 401s), and
-    // an ephemeral csfleMasterKeyHex makes every CSFLE-encrypted column
-    // permanently undecryptable the moment the process restarts. Fail
-    // closed instead of booting on a key nobody wrote down.
-    if (!process.env.TOKEN_SECRET_HEX) {
-      errors.push(
-        "TOKEN_SECRET_HEX is required in production (it silently falls back to a random, " +
-          "process-local key otherwise — breaking tokens across replicas/restarts). Generate with: openssl rand -hex 32"
-      );
-    }
-    if (!process.env.CSFLE_MASTER_KEY_HEX) {
-      errors.push(
-        "CSFLE_MASTER_KEY_HEX is required in production (it silently falls back to a random, " +
-          "process-local key otherwise — making CSFLE-encrypted data unrecoverable on restart). Generate with: openssl rand -hex 32"
-      );
-    }
-
-    // /metrics must be token-gated in production
-    if (!process.env.METRICS_AUTH_TOKEN) {
-      errors.push(
-        "METRICS_AUTH_TOKEN is required in production — /metrics is open without it. Generate with: openssl rand -hex 32"
-      );
-    }
-
-    // CORS must be explicitly configured in production
-    if (!process.env.CORS_ALLOWED_ORIGINS) {
-      errors.push(
-        "CORS_ALLOWED_ORIGINS is required in production — set it to your app/admin origins"
-      );
-    }
-
-    // Redis is required for rate limiting, sessions, and BullMQ in production
-    if (!process.env.REDIS_URI) {
-      errors.push(
-        "REDIS_URI is required in production — rate limiting, BullMQ queues, and session caching depend on it"
-      );
-    }
-
-    // Backup encryption must be enabled when backups are in use
-    if (process.env.BACKUP_ENABLED !== "false") {
-      if (
-        !process.env.BACKUP_ENCRYPTION_KEY_HEX ||
-        process.env.BACKUP_ENCRYPTION_KEY_HEX.length < 64
-      ) {
-        errors.push(
-          "BACKUP_ENCRYPTION_KEY_HEX must be at least 32 bytes (64 hex chars) in production, or set BACKUP_ENABLED=false to explicitly opt out. Generate with: openssl rand -hex 32"
-        );
-      }
-      if (process.env.BACKUP_REQUIRE_ENCRYPTION !== "true") {
-        errors.push(
-          "BACKUP_REQUIRE_ENCRYPTION must be set to 'true' in production (or set BACKUP_ENABLED=false to opt out of backups)"
-        );
-      }
-    }
   }
 
   if (errors.length > 0) {

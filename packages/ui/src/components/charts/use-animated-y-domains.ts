@@ -13,10 +13,7 @@ import {
 } from "./y-domain-utils";
 
 function lerpDomain(from: YDomain, to: YDomain, progress: number): YDomain {
-  return [
-    from[0] + (to[0] - from[0]) * progress,
-    from[1] + (to[1] - from[1]) * progress,
-  ];
+  return [from[0] + (to[0] - from[0]) * progress, from[1] + (to[1] - from[1]) * progress];
 }
 
 function snapDomains(
@@ -64,8 +61,7 @@ function tweenDomains({
 
   let needsTween = false;
   for (const axisId of axisIds) {
-    const from =
-      fromSnapshot[axisId] ?? destination[axisId] ?? ([0, 100] as YDomain);
+    const from = fromSnapshot[axisId] ?? destination[axisId] ?? ([0, 100] as YDomain);
     const to = destination[axisId] ?? from;
     if (shouldTweenYDomain(from, to)) {
       needsTween = true;
@@ -81,8 +77,7 @@ function tweenDomains({
 
   const fromByAxis: Record<string, YDomain> = {};
   for (const axisId of axisIds) {
-    fromByAxis[axisId] = fromSnapshot[axisId] ??
-      destination[axisId] ?? [0, 100];
+    fromByAxis[axisId] = fromSnapshot[axisId] ?? destination[axisId] ?? [0, 100];
   }
 
   const control = animate(0, 1, {
@@ -91,12 +86,9 @@ function tweenDomains({
     onUpdate: (progress) => {
       const next: Record<string, YDomain> = {};
       for (const axisId of axisIds) {
-        const from =
-          fromByAxis[axisId] ?? destination[axisId] ?? ([0, 100] as YDomain);
+        const from = fromByAxis[axisId] ?? destination[axisId] ?? ([0, 100] as YDomain);
         const to = destination[axisId] ?? from;
-        next[axisId] = shouldTweenYDomain(from, to)
-          ? lerpDomain(from, to, progress)
-          : to;
+        next[axisId] = shouldTweenYDomain(from, to) ? lerpDomain(from, to, progress) : to;
       }
       animatedRef.current = next;
       setAnimatedByAxis(next);
@@ -229,14 +221,7 @@ export function useAnimatedYDomains({
     }
 
     snapDomains(targetRef.current, setAnimatedByAxis, animatedRef);
-  }, [
-    chartPhase,
-    durationMs,
-    enabled,
-    reducedMotion,
-    targetSignature,
-    tweenOnTargetChange,
-  ]);
+  }, [chartPhase, durationMs, enabled, reducedMotion, targetSignature, tweenOnTargetChange]);
 
   return animatedByAxis;
 }

@@ -49,7 +49,7 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
 - ✅ RBAC + ABAC with just-in-time privilege escalation
 - ✅ Continuous access evaluation — `sensitiveReverification` mounted on MFA disable, email change, OAuth unlink, org transfer, and billing cancel; UI `ReverificationProvider` + `apiClient` intercept `REVERIFICATION_REQUIRED`, run `/auth/verify/challenge` → `/auth/verify/respond`, and retry the original mutation
 - ✅ Anomaly detection — flags unusual login location / time / device
-- ✅ Rate limiting — per-IP sliding window, Redis-backed with in-memory fallback
+- ✅ Rate limiting — per-IP sliding window + per-authenticated-user bucket (SEC-15), Redis-backed with in-memory fallback
 - ✅ Credential-stuffing defense (per-IP) + account lockout (per-account)
 - ✅ Optional signup proof-of-work
 - ✅ API key rate limiting + quotas — per-key `rateLimitPerMinute`, `monthlyQuota`, 429 + `Retry-After`
@@ -201,38 +201,53 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
 
 ### Security baseline audit — verified 2026-07-05 (`docs/security.md`)
 
-Cross-audit of `docs/security.md` §0–§10. Open gaps tracked in [`todo.md`](./todo.md) as **SEC-5…SEC-27** (SEC-1…SEC-4 and SEC-28 shipped 2026-07-05). **Re-verified 2026-07-05:** code inspection confirms SEC-5…SEC-27 unchanged; no new SEC items added.
+Cross-audit of `docs/security.md` §0–§10. Open gaps tracked in [`todo.md`](./todo.md) as **SEC-27** only (SEC-1…SEC-26 and SEC-28 shipped 2026-07-05). **Re-verified 2026-07-05:** SEC-23…SEC-26 closed (Dependabot, pinned Actions, Postgres roles, login audit).
 
 #### §0 — Structural posture
 
-- ✅ **Tenant isolation (partial):** org-scoped webhook routes (ZT-1), org-scoping CI (`scripts/check-org-scoping.ts`), `authMiddleware` + `activeOrgId`, Postgres RLS on all 14 `org_id` tables (MT-1 + SEC-4), repository layer for hot writes
+- ✅ **Tenant isolation (partial):** org-scoped webhook routes (ZT-1), org-scoping CI (`scripts/check-org-scoping.ts`), session-derived `activeOrgId` (SEC-11), org-scoped repo factory exemplar (SEC-12), Postgres RLS on all 14 `org_id` tables (MT-1 + SEC-4), repository layer for hot writes
 - ✅ **Web token storage (ADR 008 Option C):** httpOnly refresh cookie + in-memory access token; legacy localStorage keys cleared on login/logout (`packages/ui/src/lib/auth.ts`, `src/shared/authCookies.ts`)
 - ✅ **Next.js middleware is not the auth boundary:** no `middleware.ts` auth gate; API `authMiddleware` + client guards on `/dashboard` / `/admin`; CVE-2025-29927 lesson documented in baseline
 
 #### §1 — Authentication
 
 - ✅ Hand-rolled auth (Better Auth not adopted — deliberate template choice; baseline §1 spec followed where implemented)
-- ✅ Password register/login with bcrypt + configurable rounds; HIBP breach check on register/change
-- ✅ **SEC-1 (2026-07-05):** `POST /auth/logout` revokes Postgres session + refresh token via `revokeSessionAtLogout()` before clearing cookie; UI `clearToken()` sends Bearer token so session id is available (refresh cookie path is `/auth/token/refresh` only)
-- ✅ **SEC-2 (2026-07-05):** Login runs `bcrypt.compare` against a lazy dummy hash when user missing — same 401 body/status (`auth.login-timing.test.ts`)
+- ✅ Password register/login/reset with argon2id (OWASP-minimum params) + bcrypt upgrade-on-login; HIBP breach check on register/change
+- ✅ **SEC-8 (2026-07-05):** Canonical `src/shared/passwordHash.ts` — `Bun.password` argon2id (19 MiB / timeCost 2); bcrypt verify fallback + rehash on login; dummy argon2id hash for SEC-2 timing (`passwordHash.test.ts`, `auth.login-timing.test.ts`)
+- ✅ **SEC-9 (2026-07-05):** Refresh cookie renamed to `__Host-za_refresh_token`, `path: "/"`, `Secure` + `HttpOnly`; legacy `za_refresh_token` read/cleared during migration (`authCookies.ts`, `authCookies.test.ts`)
+- ✅ **SEC-10 (2026-07-05):** `family_id` on `refresh_tokens` (`0039_refresh_token_family_id.sql`); rotation preserves family; reuse revokes family sessions only (`authSessions.repository.ts`, `auth.routes.test.ts`)
+- ✅ **SEC-1 (2026-07-05):** `POST /auth/logout` revokes Postgres session + refresh token via `revokeSessionAtLogout()` before clearing cookie; UI `clearToken()` sends Bearer token so session id is available
+- ✅ **SEC-2 (2026-07-05):** Login runs password verify against a lazy dummy hash when user missing — same 401 body/status (`auth.login-timing.test.ts`)
 - ✅ **SEC-3 (2026-07-05):** Password-reset codes stored as `hashTokenSha256(code)` in `otpsTable`; confirm compares hashed digest (`password-reset.routes.test.ts`)
 - ✅ **SEC-4 (2026-07-05):** Postgres RLS on all 14 org-scoped tables (`0038_org_rls_expansion.sql`); `orgRlsMiddleware` on org/search/JIT/region/tax routes; `:orgId` path resolves RLS context (`migrations.test.ts`, `resolveOrgContext.test.ts`)
+- ✅ **SEC-11 (2026-07-05):** `sessions.active_org_id` (`0040_session_active_org_id.sql`); `resolveAndSetActiveOrg()` derives tenant from session row; `X-Org-Id` hint-only for bootstrap; `PUT /sessions/active-org`; refresh rotation preserves org (`resolveOrgContext.test.ts`, `orgRls.middleware.test.ts`, `setSessionActiveOrg.test.ts`)
+- ✅ **SEC-12 (2026-07-05):** `createOrgScopedContext()` + `webhooksRepo(orgId)` factory exemplar; CI patterns extended in `scripts/org-scoped-tables.json` (`orgScopedFactory.test.ts`, `webhooks.repository.test.ts`)
+- ✅ **SEC-13 (2026-07-05):** Global `bodySizeLimitMiddleware` in `server.ts` — 1 MiB JSON/text, 10 MiB multipart (`bodySizeLimit.middleware.test.ts`)
+- ✅ **SEC-5 (2026-07-05):** Deny-by-default `assertCan()` + `authorizeOrg()` in `src/shared/permissions.ts`; org hot paths migrated (`org.routes.ts`); tests in `permissions.test.ts`, `org.routes.test.ts`
+- ✅ **SEC-6 (2026-07-05):** Notification SSE uses `connectAuthenticatedSse()` with in-memory Bearer token (ADR 008) — no `?token=` or localStorage (`NotificationBell.tsx`, `sseClient.ts`)
+- ✅ **SEC-7 (2026-07-05):** Cookie-session CSRF origin middleware (`csrfOriginMiddleware`) mounted in `server.ts`; Bearer/API-key/webhook exempt; tests in `csrfOrigin.middleware.test.ts`
+- ✅ **SEC-17 (2026-07-05):** Hard account lockout replaced with progressive exponential backoff + PoW at threshold; wired into `POST /auth/login` via platform settings (`accountLockout.ts`, `auth.routes.ts`; `middleware.test.ts`, `auth.routes.test.ts`)
+- ✅ **SEC-18 (2026-07-05):** `requireEmailVerified` middleware blocks unverified users from org create, billing, and API keys (uniform 403 `EMAIL_NOT_VERIFIED`; `auth.ts`, `org.routes.ts`, `billing.routes.ts`, `api-keys.routes.ts`; `org.routes.test.ts`)
+- ✅ **SEC-19 (2026-07-05):** `server-only` boundary on `serverApiClient.ts` and `prefetch.ts`; client graph audit clean (no `"use client"` imports)
+- ✅ **SEC-20 (2026-07-05):** RSC prefetch mirror cookie `za_access_token` documented as accepted tradeoff in ADR 008 — `path=/`, `SameSite=Lax`, 1 h TTL, cleared on logout; refresh remains httpOnly (`auth.ts`, `serverApiClient.ts`, `docs/adr/008-token-storage-design-revisit.md`)
+- ✅ **SEC-21 (2026-07-05):** `src/config/env.ts` Zod `EnvSchema` + `parseEnv()` at boot — `DATABASE_URL`, `TOKEN_SECRET_HEX`, `CSFLE_MASTER_KEY_HEX`, `REDIS_URI`/`REDIS_URL`, `APP_URL`, `CORS_ALLOWED_ORIGINS`, `METRICS_AUTH_TOKEN`, `STRIPE_WEBHOOK_SECRET`, backup keys; production fail-fast preserved (`config.production.test.ts`)
+- ✅ **SEC-22 (2026-07-05):** `gitleaks/gitleaks-action@v2` in `.github/workflows/ci.yml` `security-scan` job (full-history checkout)
 - ✅ Password-reset anti-enumeration — identical `{ sent: true }` for unknown emails (`password-reset.routes.ts`)
 - ✅ Reset token TTL ≤15 min (15 min DB expiry; email copy mentions 30 min — cosmetic only)
 - ✅ New session ID on login — `randomUUID()` per `issueAuthenticatedSession.service.ts` (session fixation mitigated)
 - ✅ Opaque server-side sessions in Postgres + Redis cache; PASETO v4 access tokens (1 h TTL)
-- ✅ Refresh tokens SHA-256 hashed at rest; rotation on use with reuse detection → family revoke (`authSessions.repository.ts`, `auth.routes.ts`)
+- ✅ Refresh tokens SHA-256 hashed at rest; rotation on use with reuse detection → scoped family revoke by `family_id` (`authSessions.repository.ts`, `auth.routes.ts`)
 - ✅ TOTP, passkeys, email OTP, magic links; MFA columns in schema from day one
 - ✅ Session management UI — list devices, revoke individual / all (`session.routes.ts`)
 - ✅ OAuth PKCE for Google/GitHub providers (`plugins/oauth/authorize-url.ts`, `routes.ts`)
 - ✅ OAuth CSRF state minting (`POST /auth/oauth/state`)
-- ✅ Credential-stuffing defense (per-IP) + per-account lockout middleware
+- ✅ Credential-stuffing defense (per-IP) + progressive login backoff (exponential delay + PoW at threshold; no hard account lockout)
 - ✅ Email verification flow — issue, confirm, resend (`auth.routes.ts`)
 - ✅ Account takeover detection — password reset / email change revokes sessions
 
 #### §2 — Authorization & tenant isolation
 
-- ✅ Org membership checks — `requireMember` / `requireOwner` in `org.routes.ts`
+- ✅ Org membership checks — `assertCan()` / `authorizeOrg()` in `org.routes.ts` (SEC-5); legacy `hasOrgPermission` retained for matrix
 - ✅ RBAC + ABAC — `hasOrgPermission`, custom org roles, JIT cross-tenant grants
 - ✅ Postgres RLS defense-in-depth — `0035_org_rls_policies.sql`, `0036_usage_counters_rls.sql`, `0038_org_rls_expansion.sql` (14 org-scoped tables); runtime `setOrgRlsContext` / `withOrgRls` (`src/db/rls.ts`, `src/middleware/orgRls.ts` on `/orgs`, `/webhooks`, `/support`, `/billing`, `/search`, `/regions/orgs/*`, `/jit/cross-tenant`)
 - ✅ Non-sequential UUID primary keys across schema
@@ -240,7 +255,10 @@ Cross-audit of `docs/security.md` §0–§10. Open gaps tracked in [`todo.md`](.
 
 #### §3 — Hono API hardening
 
-- ✅ Middleware stack (partial baseline): CORS allowlist (`corsOptionsFromEnv`), `securityHeaders()` (CSP enforce + HSTS preload), global input sanitization, inferred-country, compress, metrics, telemetry, API versioning
+- ✅ Middleware stack (partial baseline): CORS allowlist (`corsOptionsFromEnv`), `csrfOriginMiddleware()` (SEC-7), `bodySizeLimitMiddleware` — 1 MiB JSON / 10 MiB multipart (SEC-13), `securityHeaders()` (CSP enforce + HSTS preload), global input sanitization, inferred-country, compress, metrics, telemetry, API versioning
+- ✅ **SEC-14 (2026-07-05):** Canonical `zValidator` wrapper (`src/middleware/zodValidation.ts`) on `@hono/zod-validator`; adopted on auth register/login, password-reset, feedback; mass-assignment audit — profile/org patches use whitelist Zod schemas before `.set()` (`zodValidation.test.ts`, `password-reset.routes.test.ts`)
+- ✅ **SEC-15 (2026-07-05):** Global per-IP `rateLimit()` mounted in `server.ts`; per-user Redis/in-memory bucket (`RATE_LIMIT_PER_USER`, default 200/min) enforced in `authMiddleware` via `enforceUserRateLimit()` (`rate-limit.test.ts`)
+- ✅ **SEC-16 (2026-07-05):** Centralized `redactLogEntry()` / `redactLogString()` in `src/shared/logRedaction.ts` — applied in `getLogger()`, audit ES pipeline, SIEM fan-out; error handler reuses shared redactor (`logRedaction.test.ts`, `apiErrorHandler.test.ts`)
 - ✅ Redis-backed rate limiting with in-memory fallback; tighter limits on `/auth/*` routes
 - ✅ Global error handler — no stack/DB errors to client; `requestId` in JSON + `x-request-id` header (`src/api/errorHandler.ts`)
 - ✅ Stripe webhook — raw body before `constructEventAsync`, signature verify, idempotent claim (`billing.webhooks.ts`, `stripeEvents.repository.ts`)
@@ -249,7 +267,7 @@ Cross-audit of `docs/security.md` §0–§10. Open gaps tracked in [`todo.md`](.
 - ✅ Upload safety — server-derived keys, magic-byte validation (`uploadSafety.ts`, `presignedUpload.service.ts`)
 - ✅ Idempotency on money-adjacent paths — Stripe events, wallet top-up, outbound webhooks, email-event receiver, SSF receiver
 - ✅ No `sql.raw()` with user input (grep clean)
-- ✅ Zod used on several routes (e.g. `patchMeSchema`); mass-assignment guarded on profile patch
+- ✅ Input validation — canonical `zValidator` on changed hot paths (SEC-14); remaining routes migrate incrementally
 
 #### §4 — Next.js
 
@@ -258,6 +276,7 @@ Cross-audit of `docs/security.md` §0–§10. Open gaps tracked in [`todo.md`](.
 - ✅ No user-influenced `dangerouslySetInnerHTML` (theme flash script in `layout.tsx` only — static)
 - ✅ `NEXT_PUBLIC_*` vars are branding/analytics/API URL only — no secrets in prefix (see `packages/ui/.env.example`)
 - ✅ Data fetching via canonical `apiClient` + TanStack Query — not raw unauthenticated fetches for privileged data
+- ✅ **SEC-6 (2026-07-05):** Notification SSE authenticated via fetch stream + Bearer header — no token in query string
 
 #### §5 — Expo / React Native
 
@@ -269,6 +288,7 @@ Cross-audit of `docs/security.md` §0–§10. Open gaps tracked in [`todo.md`](.
 - ✅ Drizzle parameterized queries; no `sql.raw()` usage
 - ✅ Automated encrypted backups + restore runbook (`dbBackup.service.ts`, `docs/deployment.md`)
 - ✅ Audit log immutability — DB triggers + hash chain (FS-1)
+- ✅ **SEC-25 (2026-07-05):** Dual Postgres roles — `scripts/setup-postgres-roles.sql` creates `zerotrust_app_user` (DML + RLS) and `zerotrust_migrator_user` (DDL); documented in `docs/deployment.md` § Postgres roles and `docs/reference-architecture.md`; optional `DATABASE_MIGRATOR_URL` in `.env.example`
 
 #### §7 — Secrets & environment
 
@@ -281,11 +301,14 @@ Cross-audit of `docs/security.md` §0–§10. Open gaps tracked in [`todo.md`](.
 - ✅ `bun audit --prod --audit-level=high` CI gate
 - ✅ Semgrep OWASP SAST + Trivy filesystem scan (blocking, P4.6/P4.7)
 - ✅ Module boundary enforcement (`scripts/check-boundaries.ts`)
+- ✅ **SEC-23 (2026-07-05):** Dependabot manifest — `.github/dependabot.yml` for npm (root + `packages/ui`) and GitHub Actions (weekly schedule; complements `dependency-update.yml`)
+- ✅ **SEC-24 (2026-07-05):** Third-party GitHub Actions pinned by immutable commit SHA across all workflows (`ci.yml`, `dependency-update.yml`, `staging-validation.yml`, `dr-restore-drill.yml`); Dependabot `github-actions` ecosystem bumps SHAs
 
 #### §9 — Ops
 
 - ✅ HSTS with preload in `securityHeaders()`
 - ✅ Tamper-evident hash-chained audit log + external anchoring (P5.1)
+- ✅ **SEC-26 (2026-07-05):** Login success/failure appended to hash-chained audit log via `recordLoginSuccess` / `recordLoginFailure` (`loginAudit.service.ts`) on `POST /auth/login` and `POST /auth/login/mfa`; outbound `auth.login.success` / `auth.login.failure` webhook dispatch (`auth.routes.test.ts`, `loginAudit.service.test.ts`)
 - ✅ Incident response / breach runbook — `docs/compliance/incident-response-runbook.md`
 - ✅ SOC 2 readiness map, evidence register, auditor engagement (C1)
 - ✅ Australian Privacy Act / NDB awareness documented in compliance policies
@@ -374,6 +397,37 @@ Cross-audit of `docs/security.md` §0–§10. Open gaps tracked in [`todo.md`](.
 ---
 
 ## Recent work (2026-07-05)
+
+### SEC-17 — Progressive login backoff (shipped)
+
+- **Problem:** Hard account lockout after N failures enabled DoS against known emails.
+- **Fix:** Replaced with exponential backoff (1s → 2s → 4s … capped) + PoW requirement
+  at platform `accountLockoutThreshold`; no hard lockout. Wired into `POST /auth/login`
+  with settings from `getSettings()`.
+- **Paths:** `src/middleware/accountLockout.ts`, `src/api/routes/auth.routes.ts`
+- **Verification (2026-07-05):** `middleware.test.ts`, `auth.routes.test.ts` progressive
+  backoff describe blocks.
+
+### SEC-18 — Email verification gate on privileged routes (shipped)
+
+- **Problem:** `emailVerifiedAt` existed but unverified users could create orgs, manage
+  billing, and create API keys.
+- **Fix:** `requireEmailVerified` middleware returns uniform 403 `EMAIL_NOT_VERIFIED`;
+  mounted on org create, billing router, and API keys router. `authMiddleware` now
+  sets `user.emailVerifiedAt` on context.
+- **Paths:** `src/middleware/auth.ts`, `src/api/routes/org.routes.ts`,
+  `src/api/routes/billing.routes.ts`, `src/api/routes/api-keys.routes.ts`
+- **Verification (2026-07-05):** `org.routes.test.ts` — unverified create returns 403.
+
+### SEC-19 — `server-only` boundary on UI server modules (shipped)
+
+- **Problem:** Mis-importing `serverApiClient` into a client component would not fail at
+  build time.
+- **Fix:** Added `server-only` dependency; `import "server-only"` at top of
+  `serverApiClient.ts` and `prefetch.ts`. Client graph audit: no `"use client"` files
+  import these modules.
+- **Paths:** `packages/ui/package.json`, `packages/ui/src/lib/serverApiClient.ts`,
+  `packages/ui/src/lib/server-state/prefetch.ts`
 
 ### SEC-4 — Postgres RLS expansion (shipped)
 

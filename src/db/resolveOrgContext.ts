@@ -1,57 +1,70 @@
-import { and, eq } from "drizzle-orm";
 import type { Context } from "hono";
-import { hasAnyRole, isAdmin } from "../shared/roles";
 import type { HonoEnv, User } from "../shared/types";
-import { getDb } from "./index";
-import { organizationMembersTable } from "./schema";
+import { shouldBypassOrgRls, verifyOrgMembership } from "./orgMembership";
+import { setSessionActiveOrg } from "./repositories/authSessions.repository";
 
-/** Resolve org id from `X-Org-Id`, `:orgId` path param, or `orgId` query param. */
-export function orgIdFromRequest(c: Context<HonoEnv>, allowQuery = false): string | undefined {
-  const header = c.req.header("x-org-id")?.trim();
-  if (header) return header;
-  const pathParam = c.req.param("orgId")?.trim();
-  if (pathParam) return pathParam;
-  if (allowQuery) return c.req.query("orgId")?.trim() || undefined;
-  return undefined;
-}
-
-/** Whether the principal may bypass org-scoped RLS (platform admin / support agent views). */
-export function shouldBypassOrgRls(c: Context<HonoEnv>, user: User): boolean {
-  if (c.req.query("all") === "true" && (isAdmin(user) || hasAnyRole(user, ["support"]))) {
-    return true;
-  }
-  return false;
-}
-
-/** Verify org membership; platform admins always pass. */
-export async function verifyOrgMembership(
-  orgId: string,
-  userId: string,
-  user: User
-): Promise<boolean> {
-  if (isAdmin(user)) return true;
-  const db = getDb();
-  const [member] = await db
-    .select({ id: organizationMembersTable.id })
-    .from(organizationMembersTable)
-    .where(
-      and(eq(organizationMembersTable.orgId, orgId), eq(organizationMembersTable.userId, userId))
-    )
-    .limit(1);
-  return Boolean(member);
+export interface SessionOrgContext {
+  id: string;
+  activeOrgId?: string | null;
 }
 
 /**
- * Validate and store active org on the Hono context (from `authMiddleware`).
+ * Client-supplied org hints (path, query, `X-Org-Id`). Never authoritative on
+ * their own — used only to bootstrap `sessions.active_org_id` when unset.
+ */
+export function orgIdHintFromRequest(c: Context<HonoEnv>, allowQuery = false): string | undefined {
+  const pathParam = c.req.param("orgId")?.trim();
+  if (pathParam) return pathParam;
+  if (allowQuery) {
+    const queryOrg = c.req.query("orgId")?.trim();
+    if (queryOrg) return queryOrg;
+  }
+  const header = c.req.header("x-org-id")?.trim();
+  if (header) return header;
+  return undefined;
+}
+
+/** @deprecated Use `orgIdHintFromRequest` — kept for path/query-only callers. */
+export function orgIdFromRequest(c: Context<HonoEnv>, allowQuery = false): string | undefined {
+  return orgIdHintFromRequest(c, allowQuery);
+}
+
+export { shouldBypassOrgRls, verifyOrgMembership } from "./orgMembership";
+
+/** Context-aware wrapper for `shouldBypassOrgRls`. */
+export function shouldBypassOrgRlsFromContext(c: Context<HonoEnv>, user: User): boolean {
+  return shouldBypassOrgRls(user, c.req.query("all"));
+}
+
+/**
+ * Resolve active org from the session row (authoritative). When the session has
+ * no `activeOrgId`, a validated client hint may bootstrap and persist it.
  * Postgres `app.org_id` is set later by `orgRlsMiddleware` inside a transaction.
  */
 export async function resolveAndSetActiveOrg(
   c: Context<HonoEnv>,
   user: User,
+  session: SessionOrgContext,
   opts?: { allowQuery?: boolean }
 ): Promise<void> {
-  const orgId = orgIdFromRequest(c, opts?.allowQuery);
-  if (!orgId) return;
-  if (!(await verifyOrgMembership(orgId, user.id, user))) return;
-  c.set("activeOrgId", orgId);
+  if (session.activeOrgId) {
+    if (await verifyOrgMembership(session.activeOrgId, user.id, user)) {
+      c.set("activeOrgId", session.activeOrgId);
+      return;
+    }
+    await setSessionActiveOrg({ sessionId: session.id, orgId: null, userId: user.id, user });
+    return;
+  }
+
+  const hint = orgIdHintFromRequest(c, opts?.allowQuery);
+  if (!hint) return;
+  if (!(await verifyOrgMembership(hint, user.id, user))) return;
+
+  const updated = await setSessionActiveOrg({
+    sessionId: session.id,
+    orgId: hint,
+    userId: user.id,
+    user,
+  });
+  if (updated) c.set("activeOrgId", hint);
 }

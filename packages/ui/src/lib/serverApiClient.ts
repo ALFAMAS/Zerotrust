@@ -1,3 +1,5 @@
+import "server-only";
+
 /**
  * Server-side HTTP boundary for Next.js RSC / route handlers (P3.4).
  *

@@ -2,15 +2,9 @@
 
 import type { scaleBand, scaleLinear, scaleTime } from "@visx/scale";
 
-type ScaleLinear<Output, _Input = number> = ReturnType<
-  typeof scaleLinear<Output>
->;
-type ScaleTime<Output, _Input = Date | number> = ReturnType<
-  typeof scaleTime<Output>
->;
-type ScaleBand<Domain extends { toString(): string }> = ReturnType<
-  typeof scaleBand<Domain>
->;
+type ScaleLinear<Output, _Input = number> = ReturnType<typeof scaleLinear<Output>>;
+type ScaleTime<Output, _Input = Date | number> = ReturnType<typeof scaleTime<Output>>;
+type ScaleBand<Domain extends { toString(): string }> = ReturnType<typeof scaleBand<Domain>>;
 
 import type { Transition } from "motion/react";
 import {
@@ -222,10 +216,7 @@ export interface ChartContextValue extends ChartHoverContextValue {
  * (data, scales, dimensions, animation state, layout config). Consumers that
  * subscribe via `useChartStable()` skip re-renders on every mouse move.
  */
-export type ChartStableContextValue = Omit<
-  ChartContextValue,
-  keyof ChartHoverContextValue
->;
+export type ChartStableContextValue = Omit<ChartContextValue, keyof ChartHoverContextValue>;
 
 const ChartStableContext = createContext<ChartStableContextValue | null>(null);
 const ChartHoverContext = createContext<ChartHoverContextValue | null>(null);
@@ -361,9 +352,7 @@ export function ChartProvider({
 
   return (
     <ChartStableContext.Provider value={stable}>
-      <ChartHoverContext.Provider value={hover}>
-        {children}
-      </ChartHoverContext.Provider>
+      <ChartHoverContext.Provider value={hover}>{children}</ChartHoverContext.Provider>
     </ChartStableContext.Provider>
   );
 }
@@ -385,12 +374,9 @@ export function useChartStable(): ChartStableContextValue {
 }
 
 /** Y-scale for a series axis (`yAxisId` on Line / Area / YAxis). */
-export function useYScale(
-  yAxisId?: string | number
-): ScaleLinear<number, number> {
+export function useYScale(yAxisId?: string | number): ScaleLinear<number, number> {
   const { yScales, yScale } = useChartStable();
-  const id =
-    yAxisId == null || yAxisId === "" ? DEFAULT_Y_AXIS_ID : String(yAxisId);
+  const id = yAxisId == null || yAxisId === "" ? DEFAULT_Y_AXIS_ID : String(yAxisId);
   return yScales[id] ?? yScale;
 }
 

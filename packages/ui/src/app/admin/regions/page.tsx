@@ -6,10 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  useSetOrgDomainMutation,
-  useUpdateOrgBrandingMutation,
-} from "@/lib/server-state/regions";
+import { useSetOrgDomainMutation, useUpdateOrgBrandingMutation } from "@/lib/server-state/regions";
 
 export default function RegionsPage() {
   const [toast, setToast] = useState<string | null>(null);

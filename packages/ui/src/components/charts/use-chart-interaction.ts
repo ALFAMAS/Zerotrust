@@ -26,11 +26,7 @@ interface UseChartInteractionParams {
   lines: LineConfig[];
   margin: Margin;
   xAccessor: (d: Record<string, unknown>) => Date;
-  bisectDate: (
-    data: Record<string, unknown>[],
-    date: Date,
-    lo: number
-  ) => number;
+  bisectDate: (data: Record<string, unknown>[], date: Date, lo: number) => number;
   canInteract: boolean;
 }
 
@@ -63,13 +59,8 @@ export function useChartInteraction({
   canInteract,
 }: UseChartInteractionParams): ChartInteractionResult {
   const [selection, setSelection] = useState<ChartSelection | null>(null);
-  const {
-    tooltipData,
-    setTooltipData,
-    scheduleTooltip,
-    clearTooltip,
-    resetTooltipDedupe,
-  } = useScheduledTooltip<TooltipData>();
+  const { tooltipData, setTooltipData, scheduleTooltip, clearTooltip, resetTooltipDedupe } =
+    useScheduledTooltip<TooltipData>();
 
   const isDraggingRef = useRef(false);
   const dragStartXRef = useRef<number>(0);

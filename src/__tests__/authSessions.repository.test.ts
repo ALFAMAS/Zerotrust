@@ -19,20 +19,31 @@ describe("authSessions repository", () => {
   });
 
   it("revokes a reused refresh token family inside one transaction", async () => {
-    const where = vi.fn().mockResolvedValue(undefined);
-    const set = vi.fn().mockReturnValue({ where });
-    const update = vi.fn().mockReturnValue({ set });
-    const tx = { update };
+    const familyWhere = vi.fn().mockResolvedValue([
+      { sessionId: "session-1" },
+      { sessionId: "session-2" },
+    ]);
+    const familyFrom = vi.fn().mockReturnValue({ where: familyWhere });
+    const tokenWhere = vi.fn().mockResolvedValue(undefined);
+    const tokenSet = vi.fn().mockReturnValue({ where: tokenWhere });
+    const sessionWhere = vi.fn().mockResolvedValue(undefined);
+    const sessionSet = vi.fn().mockReturnValue({ where: sessionWhere });
+    const update = vi
+      .fn()
+      .mockReturnValueOnce({ set: tokenSet })
+      .mockReturnValueOnce({ set: sessionSet });
+    const select = vi.fn().mockReturnValue({ from: familyFrom });
+    const tx = { update, select };
     const transaction = vi.fn(async (callback) => callback(tx));
     mockGetDb.mockReturnValue({ transaction } as never);
 
-    await revokeRefreshTokenFamily("user-1", "refresh_token_reuse");
+    await revokeRefreshTokenFamily("family-1", "refresh_token_reuse");
 
     expect(transaction).toHaveBeenCalledTimes(1);
+    expect(select).toHaveBeenCalledTimes(1);
     expect(update).toHaveBeenCalledTimes(2);
-    expect(set).toHaveBeenNthCalledWith(1, { isRevoked: true });
-    expect(set).toHaveBeenNthCalledWith(
-      2,
+    expect(tokenSet).toHaveBeenCalledWith({ isRevoked: true });
+    expect(sessionSet).toHaveBeenCalledWith(
       expect.objectContaining({
         isActive: false,
         revokedReason: "refresh_token_reuse",
@@ -74,6 +85,7 @@ describe("authSessions repository", () => {
       refreshToken: {
         userId: "user-1",
         tokenHash: "new-refresh-hash",
+        familyId: "family-1",
         expiresAt: new Date("2026-07-07T00:00:00.000Z"),
       },
     });
@@ -91,6 +103,7 @@ describe("authSessions repository", () => {
       userId: "user-1",
       sessionId: "session-2",
       tokenHash: "new-refresh-hash",
+      familyId: "family-1",
       expiresAt: new Date("2026-07-07T00:00:00.000Z"),
     });
   });
@@ -122,6 +135,7 @@ describe("authSessions repository", () => {
         refreshToken: {
           userId: "user-1",
           tokenHash: "new-refresh-hash",
+          familyId: "family-1",
           expiresAt: new Date("2026-07-07T00:00:00.000Z"),
         },
       })

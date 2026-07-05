@@ -54,9 +54,7 @@ export function usePathStrokeMetrics(
     const d = path.getAttribute("d");
     const len = d ? path.getTotalLength() : 0;
     setMetrics((prev) =>
-      prev.pathD === d && prev.pathLength === len
-        ? prev
-        : { pathD: d, pathLength: len }
+      prev.pathD === d && prev.pathLength === len ? prev : { pathD: d, pathLength: len }
     );
   }, deps);
 
@@ -67,11 +65,7 @@ export function resolveDashTailBounds(
   dashFromIndex: number | undefined,
   dataLength: number
 ): boolean {
-  return (
-    dashFromIndex != null &&
-    dashFromIndex >= 0 &&
-    dashFromIndex < dataLength - 1
-  );
+  return dashFromIndex != null && dashFromIndex >= 0 && dashFromIndex < dataLength - 1;
 }
 
 export function resolveDashStartX(

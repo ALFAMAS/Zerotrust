@@ -1,7 +1,6 @@
 import * as nodeCrypto from "node:crypto";
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
-import bcrypt from "bcryptjs";
 import { and, eq, gt, sql } from "drizzle-orm";
 import { Hono } from "hono";
 import { z } from "zod";
@@ -13,18 +12,15 @@ import {
   revokeSessionAtLogout,
   rotateRefreshToken,
 } from "../../db/repositories/authSessions.repository";
-import {
-  otpsTable,
-  refreshTokensTable,
-  usersTable,
-} from "../../db/schema";
+import { otpsTable, refreshTokensTable, usersTable } from "../../db/schema";
 import { getLogger } from "../../logger";
-import {
-  clearRefreshTokenCookie,
-  readRefreshTokenFromRequest,
-  setRefreshTokenCookie,
-} from "../../shared/authCookies";
+import { getSettings } from "../../models/settings.model";
 import { authMiddleware, optionalAuthMiddleware } from "../../middleware/auth";
+import {
+  getLoginThrottle,
+  recordFailedLogin,
+  recordSuccessfulLogin,
+} from "../../middleware/accountLockout";
 import { sensitiveReverification } from "../../middleware/continuousVerification";
 import {
   isIpBlocked,
@@ -33,9 +29,15 @@ import {
 } from "../../middleware/credentialStuffing";
 import { requireProofOfPossession } from "../../middleware/proofOfPossession";
 import { rateLimit } from "../../middleware/rateLimiting";
+import { zValidator } from "../../middleware/zodValidation";
+import { LoginBodySchema, RegisterBodySchema } from "../schemas/auth.schema";
 import { recordAndRespond } from "../../services/auth/accountTakeover.service";
-import { issueAuthenticatedSession } from "../../services/auth/issueAuthenticatedSession.service";
 import { validateSignupEmail } from "../../services/auth/disposableEmail.service";
+import { issueAuthenticatedSession } from "../../services/auth/issueAuthenticatedSession.service";
+import {
+  recordLoginFailure,
+  recordLoginSuccess,
+} from "../../services/auth/loginAudit.service";
 import { rejectIfBreached } from "../../services/auth/passwordBreach.service";
 import {
   createPowChallenge,
@@ -54,9 +56,20 @@ import {
   parseObjectKeyFromPublicUrl,
   uploadBuffer,
 } from "../../services/ops/objectStorage.service";
+import {
+  clearRefreshTokenCookie,
+  readRefreshTokenFromRequest,
+  setRefreshTokenCookie,
+} from "../../shared/authCookies";
 import { getClientIp } from "../../shared/clientIp";
 import { internalError } from "../../shared/httpErrors";
 import { localeFromAcceptLanguage, normalizeLocale, SUPPORTED_LOCALES } from "../../shared/locale";
+import {
+  dummyPasswordHash,
+  hashPassword,
+  passwordNeedsRehash,
+  verifyPassword,
+} from "../../shared/passwordHash";
 import type { HonoEnv, OAuthProvider, Passkey, User } from "../../shared/types";
 
 const router = new Hono<HonoEnv>();
@@ -85,14 +98,19 @@ const MFA_CHALLENGE_AUD = "mfa";
 const MFA_CHALLENGE_SCOPE = "mfa:challenge";
 const MFA_CHALLENGE_TTL_SECS = 300;
 
-/** Lazy dummy hash — same bcrypt cost as real passwords to resist timing enumeration. */
-let dummyPasswordHashPromise: Promise<string> | null = null;
-async function dummyPasswordHash(): Promise<string> {
-  if (!dummyPasswordHashPromise) {
-    const cfg = getConfig();
-    dummyPasswordHashPromise = bcrypt.hash("invalid-credentials-timing-pad", cfg.security.bcryptRounds);
-  }
-  return dummyPasswordHashPromise;
+/** Upgrade legacy bcrypt password hashes to argon2id after a successful login. */
+async function rehashPasswordIfLegacy(
+  userId: string,
+  password: string,
+  storedHash: string
+): Promise<void> {
+  if (!passwordNeedsRehash(storedHash)) return;
+  const db = getDb();
+  const passwordHash = await hashPassword(password);
+  await db
+    .update(usersTable)
+    .set({ passwordHash, updatedAt: new Date() })
+    .where(eq(usersTable.id, userId));
 }
 
 /** A user must clear a second factor at login once TOTP is verified+enabled. */
@@ -186,7 +204,11 @@ router.get("/pow/challenge", rateLimit({ points: 30, windowSecs: 60 }), (c) => {
 });
 
 // POST /register
-router.post("/register", rateLimit({ points: 10, windowSecs: 60 }), async (c) => {
+router.post(
+  "/register",
+  rateLimit({ points: 10, windowSecs: 60 }),
+  zValidator("json", RegisterBodySchema),
+  async (c) => {
   try {
     const {
       email,
@@ -195,10 +217,7 @@ router.post("/register", rateLimit({ points: 10, windowSecs: 60 }), async (c) =>
       locale: bodyLocale,
       powChallenge,
       powSolution,
-    } = await c.req.json();
-    if (!email || !password) {
-      return c.json({ error: "INVALID_REQUEST", message: "email and password required" }, 400);
-    }
+    } = c.req.valid("json");
 
     // Bot/abuse mitigation: require a valid proof-of-work when enabled.
     if (isSignupPowEnabled()) {
@@ -241,7 +260,7 @@ router.post("/register", rateLimit({ points: 10, windowSecs: 60 }), async (c) =>
     }
 
     const cfg = getConfig();
-    const passwordHash = await bcrypt.hash(password, cfg.security.bcryptRounds);
+    const passwordHash = await hashPassword(password);
 
     // Preferred locale: explicit body value wins, else negotiate Accept-Language.
     const locale = bodyLocale
@@ -299,7 +318,8 @@ router.post("/register", rateLimit({ points: 10, windowSecs: 60 }), async (c) =>
   } catch (err) {
     return internalError(c, logger, "Registration error", err, "Registration failed");
   }
-});
+  }
+);
 
 // POST /verify-email — confirm ownership via emailed code (requires auth)
 //
@@ -393,15 +413,52 @@ router.post(
 );
 
 // POST /login
-router.post("/login", rateLimit({ points: 20, windowSecs: 60 }), async (c) => {
+router.post(
+  "/login",
+  rateLimit({ points: 20, windowSecs: 60 }),
+  zValidator("json", LoginBodySchema),
+  async (c) => {
   try {
-    const { email, password } = await c.req.json();
-    if (!email || !password) {
-      return c.json({ error: "INVALID_REQUEST", message: "email and password required" }, 400);
+    const { email, password, powChallenge, powSolution } = c.req.valid("json");
+
+    const settings = await getSettings();
+    const backoffSettings = {
+      enabled: settings.accountLockoutEnabled,
+      powThreshold: settings.accountLockoutThreshold,
+      maxDelayMinutes: settings.accountLockoutDurationMinutes,
+    };
+
+    const throttle = getLoginThrottle(email, backoffSettings);
+    if (throttle.delayed && throttle.retryAfterSeconds) {
+      c.header("Retry-After", String(throttle.retryAfterSeconds));
+      return c.json(
+        {
+          error: "TOO_MANY_ATTEMPTS",
+          message: "Too many failed login attempts. Please wait before trying again.",
+          retryAfter: throttle.retryAfterSeconds,
+          requiresPow: throttle.requiresPow,
+        },
+        429
+      );
+    }
+
+    if (throttle.requiresPow) {
+      const pow = verifyPowSolution(powChallenge ?? "", powSolution ?? "");
+      if (!pow.ok) {
+        return c.json(
+          {
+            error: "POW_REQUIRED",
+            message: "Proof-of-work required after repeated failed login attempts",
+            reason: pow.reason,
+            requiresPow: true,
+          },
+          428
+        );
+      }
     }
 
     // Credential-stuffing defense: block a source IP that has been failing logins
-    // across many accounts, independent of any single account's lockout.
+    // across many accounts, independent of any single account's backoff.
     const clientIp = getClientIp(c);
     const ipBlock = isIpBlocked(clientIp);
     if (ipBlock.blocked) {
@@ -432,13 +489,22 @@ router.post("/login", rateLimit({ points: 20, windowSecs: 60 }), async (c) => {
       .limit(1);
     const user = users[0];
     const hashToVerify = user?.passwordHash ?? (await dummyPasswordHash());
-    const valid = await bcrypt.compare(password, hashToVerify);
+    const valid = await verifyPassword(password, hashToVerify);
     if (!user?.passwordHash || !valid) {
+      recordFailedLogin(email, backoffSettings);
       recordIpLoginFailure(clientIp, email);
+      recordLoginFailure({
+        email: email.toLowerCase(),
+        ip: clientIp,
+        reason: "invalid_credentials",
+        userId: user?.id,
+      });
       return c.json({ error: "INVALID_CREDENTIALS", message: "Invalid credentials" }, 401);
     }
 
+    recordSuccessfulLogin(email);
     recordIpLoginSuccess(clientIp);
+    await rehashPasswordIfLegacy(user.id, password, user.passwordHash);
 
     // Password is correct, but if the account has a second factor we stop here
     // and hand back a short-lived challenge token instead of a real session.
@@ -453,12 +519,20 @@ router.post("/login", rateLimit({ points: 20, windowSecs: 60 }), async (c) => {
       });
     }
 
-    const { body } = await issueAuthenticatedSession(c, user);
+    const { body, sessionId } = await issueAuthenticatedSession(c, user);
+    recordLoginSuccess({
+      userId: user.id,
+      email: user.email,
+      ip: clientIp,
+      method: "password",
+      sessionId,
+    });
     return c.json(body);
   } catch (err) {
     return internalError(c, logger, "Login error", err, "Login failed");
   }
-});
+  }
+);
 
 // POST /login/mfa — complete a login that requires a second factor.
 // Exchanges a valid TOTP code (or one-time backup code) + the challenge token
@@ -552,10 +626,25 @@ router.post("/login/mfa", rateLimit({ points: 10, windowSecs: 60 }), async (c) =
     }
 
     if (!verified) {
+      const clientIp = getClientIp(c);
+      recordLoginFailure({
+        email: user.email,
+        ip: clientIp,
+        reason: "invalid_mfa_code",
+        userId: user.id,
+      });
       return c.json({ error: "INVALID_CODE", message: "Invalid MFA code" }, 401);
     }
 
-    const { body } = await issueAuthenticatedSession(c, user);
+    const clientIp = getClientIp(c);
+    const { body, sessionId } = await issueAuthenticatedSession(c, user);
+    recordLoginSuccess({
+      userId: user.id,
+      email: user.email,
+      ip: clientIp,
+      method: "mfa",
+      sessionId,
+    });
     return c.json(body);
   } catch (err) {
     return internalError(c, logger, "Login MFA error", err, "MFA verification failed");
@@ -597,7 +686,7 @@ router.post(
         logger.warn("Refresh token reuse detected — revoking session family", {
           userId: rt.userId,
         });
-        await revokeRefreshTokenFamily(rt.userId, "refresh_token_reuse");
+        await revokeRefreshTokenFamily(rt.familyId, "refresh_token_reuse");
         return c.json(
           {
             error: "TOKEN_REUSE_DETECTED",
@@ -619,6 +708,12 @@ router.post(
       if (!user) {
         return c.json({ error: "USER_NOT_FOUND", message: "User not found" }, 404);
       }
+
+      const [oldSession] = await db
+        .select({ activeOrgId: sessionsTable.activeOrgId })
+        .from(sessionsTable)
+        .where(eq(sessionsTable.id, rt.sessionId))
+        .limit(1);
 
       const popKey = c.req.header("x-pop-key") || undefined;
       const newSessionId = crypto.randomUUID();
@@ -647,11 +742,13 @@ router.post(
           expiresAt: new Date(payload.exp * 1000),
           lastActivityAt: new Date(),
           isActive: true,
+          activeOrgId: oldSession?.activeOrgId ?? null,
         },
         refreshToken: {
           userId: user.id,
           tokenHash: newRefreshHash,
           expiresAt: new Date(Date.now() + cfg.session.refreshTokenTTL * 1000),
+          familyId: rt.familyId,
         },
       });
 
@@ -750,6 +847,7 @@ router.get("/me", authMiddleware, async (c) => {
     return c.json({
       ...rest,
       emailVerified: row.emailVerifiedAt != null,
+      activeOrgId: c.get("activeOrgId") ?? c.get("session")?.activeOrgId ?? null,
       mfa,
       passkeys,
       oauthProviders,
@@ -950,10 +1048,11 @@ router.post(
         );
       }
 
-      const valid = await bcrypt.compare(password, row.passwordHash);
+      const valid = await verifyPassword(password, row.passwordHash);
       if (!valid) {
         return c.json({ error: "INVALID_CREDENTIALS", message: "Incorrect password" }, 401);
       }
+      await rehashPasswordIfLegacy(user.id, password, row.passwordHash);
 
       const normalized = String(newEmail).toLowerCase().trim();
       const [taken] = await db
@@ -1005,86 +1104,87 @@ router.post(
   authMiddleware,
   rateLimit({ points: 10, windowSecs: 3600 }),
   async (c) => {
-  try {
-    const user = c.get("user");
-    const formData = await c.req.formData();
-    const file = formData.get("avatar");
+    try {
+      const user = c.get("user");
+      const formData = await c.req.formData();
+      const file = formData.get("avatar");
 
-    if (!file || !(file instanceof File)) {
-      return c.json({ error: "INVALID_REQUEST", message: "avatar file required" }, 400);
-    }
+      if (!file || !(file instanceof File)) {
+        return c.json({ error: "INVALID_REQUEST", message: "avatar file required" }, 400);
+      }
 
-    const ext = ALLOWED_AVATAR_TYPES[file.type];
-    if (!ext) {
-      return c.json(
-        {
-          error: "INVALID_TYPE",
-          message: "Only JPEG, PNG, GIF, WebP images are allowed",
-        },
-        400
-      );
-    }
+      const ext = ALLOWED_AVATAR_TYPES[file.type];
+      if (!ext) {
+        return c.json(
+          {
+            error: "INVALID_TYPE",
+            message: "Only JPEG, PNG, GIF, WebP images are allowed",
+          },
+          400
+        );
+      }
 
-    if (file.size > MAX_AVATAR_BYTES) {
-      return c.json({ error: "FILE_TOO_LARGE", message: "Avatar must be under 5 MB" }, 400);
-    }
+      if (file.size > MAX_AVATAR_BYTES) {
+        return c.json({ error: "FILE_TOO_LARGE", message: "Avatar must be under 5 MB" }, 400);
+      }
 
-    const db = getDb();
-    const buffer = Buffer.from(await file.arrayBuffer());
-    const objectKey = `avatars/${user.id}-${Date.now()}.${ext}`;
+      const db = getDb();
+      const buffer = Buffer.from(await file.arrayBuffer());
+      const objectKey = `avatars/${user.id}-${Date.now()}.${ext}`;
 
-    // Prefer S3 (same bucket as backups) when configured; fall back to the
-    // legacy local-disk path when S3 isn't set so local dev keeps working.
-    let avatarUrl: string;
-    const s3Enabled = await isS3BackupEnabled();
-    if (s3Enabled) {
-      const result = await uploadBuffer({
-        key: objectKey,
-        body: buffer,
-        contentType: file.type,
-      });
-      avatarUrl = result.url;
-    } else {
-      const uploadsDir = path.join(process.cwd(), "uploads", "avatars");
-      await fs.mkdir(uploadsDir, { recursive: true });
-      const filename = `${user.id}-${Date.now()}.${ext}`;
-      const filepath = path.join(uploadsDir, filename);
-      await fs.writeFile(filepath, buffer);
-      const appUrl = process.env.APP_URL ?? "http://localhost:3000";
-      avatarUrl = `${appUrl}/uploads/avatars/${filename}`;
-    }
+      // Prefer S3 (same bucket as backups) when configured; fall back to the
+      // legacy local-disk path when S3 isn't set so local dev keeps working.
+      let avatarUrl: string;
+      const s3Enabled = await isS3BackupEnabled();
+      if (s3Enabled) {
+        const result = await uploadBuffer({
+          key: objectKey,
+          body: buffer,
+          contentType: file.type,
+        });
+        avatarUrl = result.url;
+      } else {
+        const uploadsDir = path.join(process.cwd(), "uploads", "avatars");
+        await fs.mkdir(uploadsDir, { recursive: true });
+        const filename = `${user.id}-${Date.now()}.${ext}`;
+        const filepath = path.join(uploadsDir, filename);
+        await fs.writeFile(filepath, buffer);
+        const appUrl = process.env.APP_URL ?? "http://localhost:3000";
+        avatarUrl = `${appUrl}/uploads/avatars/${filename}`;
+      }
 
-    // Best-effort: clean up the previous S3 avatar so the bucket doesn't
-    // accumulate dead objects. Failures are logged, not returned.
-    const previous = await db
-      .select({ avatarUrl: usersTable.avatarUrl })
-      .from(usersTable)
-      .where(eq(usersTable.id, user.id))
-      .limit(1);
-    const oldUrl = previous[0]?.avatarUrl ?? null;
-    if (oldUrl && oldUrl !== avatarUrl) {
-      const oldKey = parseObjectKeyFromPublicUrl(oldUrl);
-      if (oldKey) {
-        try {
-          await deleteObject(oldKey);
-        } catch (err) {
-          logger.warn("Failed to delete previous avatar from S3", {
-            error: err instanceof Error ? err.message : String(err),
-          });
+      // Best-effort: clean up the previous S3 avatar so the bucket doesn't
+      // accumulate dead objects. Failures are logged, not returned.
+      const previous = await db
+        .select({ avatarUrl: usersTable.avatarUrl })
+        .from(usersTable)
+        .where(eq(usersTable.id, user.id))
+        .limit(1);
+      const oldUrl = previous[0]?.avatarUrl ?? null;
+      if (oldUrl && oldUrl !== avatarUrl) {
+        const oldKey = parseObjectKeyFromPublicUrl(oldUrl);
+        if (oldKey) {
+          try {
+            await deleteObject(oldKey);
+          } catch (err) {
+            logger.warn("Failed to delete previous avatar from S3", {
+              error: err instanceof Error ? err.message : String(err),
+            });
+          }
         }
       }
+
+      await db
+        .update(usersTable)
+        .set({ avatarUrl, updatedAt: new Date() })
+        .where(eq(usersTable.id, user.id));
+      await invalidateUserCache(user.id);
+
+      return c.json({ avatarUrl });
+    } catch (err) {
+      return internalError(c, logger, "Avatar upload error", err);
     }
-
-    await db
-      .update(usersTable)
-      .set({ avatarUrl, updatedAt: new Date() })
-      .where(eq(usersTable.id, user.id));
-    await invalidateUserCache(user.id);
-
-    return c.json({ avatarUrl });
-  } catch (err) {
-    return internalError(c, logger, "Avatar upload error", err);
   }
-});
+);
 
 export default router;

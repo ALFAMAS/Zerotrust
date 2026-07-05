@@ -1,7 +1,9 @@
 # Quality Rules — Performance · Accessibility · Best Practices · SEO
 
+> **Agent instructions:** Web and API rules are merged into [`AGENTS.md`](../AGENTS.md) § Quality rules (with a pointer in [`CLAUDE.md`](../CLAUDE.md)). This file remains the scoped reference — especially Mobile/Expo blocks not yet in the repo.
+
 Agent directives. Scoped by surface: **Web** = Next.js · **Mobile** = Expo/React Native · **API** = Hono.
-Apply only the block matching the file you're editing. Security rules live in `SECURITY.md` — don't duplicate them here.
+Apply only the block matching the file you're editing. Security rules live in `SECURITY.md` / `CLAUDE.md` — don't duplicate them here.
 
 `N/A` blocks are intentional: do **not** invent web patterns (meta tags, ARIA) inside native code.
 

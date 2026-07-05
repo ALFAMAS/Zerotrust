@@ -10,7 +10,24 @@ const mockDb = {
 vi.mock("../db", () => ({ getDb: () => mockDb, getReadDb: () => mockDb }));
 vi.mock("../middleware/auth", () => ({
   authMiddleware: vi.fn(async (c: any, next: any) => {
-    c.set("user", { id: "user-uuid-1", email: "test@example.com" });
+    c.set("user", {
+      id: "user-uuid-1",
+      email: "test@example.com",
+      emailVerifiedAt: new Date("2026-01-01T00:00:00Z"),
+    });
+    await next();
+  }),
+  requireEmailVerified: vi.fn(async (c: any, next: any) => {
+    const user = c.get("user");
+    if (!user?.emailVerifiedAt) {
+      return c.json(
+        {
+          error: "EMAIL_NOT_VERIFIED",
+          message: "Email verification required before this action",
+        },
+        403
+      );
+    }
     await next();
   }),
 }));

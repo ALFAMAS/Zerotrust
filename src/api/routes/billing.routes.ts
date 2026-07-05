@@ -8,9 +8,9 @@ import {
 } from "../../db/repositories/billingSubscriptions.repository";
 import { feedbackTable, organizationMembersTable, subscriptionsTable } from "../../db/schema";
 import { auditLog, getLogger } from "../../logger";
-import { authMiddleware } from "../../middleware/auth";
-import { orgRlsMiddleware } from "../../middleware/orgRls";
+import { authMiddleware, requireEmailVerified } from "../../middleware/auth";
 import { sensitiveReverification } from "../../middleware/continuousVerification";
+import { orgRlsMiddleware } from "../../middleware/orgRls";
 import { getStripe } from "../../services/billing/stripeWebhookProcessor";
 import { getUsageSummary } from "../../services/billing/usage.service";
 import { internalError } from "../../shared/httpErrors";
@@ -20,6 +20,7 @@ const router = new Hono<HonoEnv>();
 const logger = getLogger("billing-routes");
 
 router.use("*", authMiddleware);
+router.use("*", requireEmailVerified);
 router.use("*", orgRlsMiddleware({ allowQueryOrg: true }));
 
 /** Trial length for new subscriptions; 0 disables trials. */

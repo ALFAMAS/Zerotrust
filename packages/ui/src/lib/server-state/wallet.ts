@@ -63,7 +63,8 @@ export function useTopUpWalletMutation() {
   const queryClient = useQueryClient();
 
   return useMutation<WalletTopUpCheckout, Error, number>({
-    mutationFn: (amountCents) => apiPost<WalletTopUpCheckout>("/wallet/top-up", { amount: amountCents }),
+    mutationFn: (amountCents) =>
+      apiPost<WalletTopUpCheckout>("/wallet/top-up", { amount: amountCents }),
     onSettled: () => {
       void queryClient.invalidateQueries({ queryKey: walletKeys.detail() });
       void queryClient.invalidateQueries({ queryKey: walletKeys.transactions() });

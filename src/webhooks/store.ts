@@ -143,7 +143,11 @@ export class WebhookStore {
     });
   }
 
-  async getEndpoint(id: string, orgIds?: string[], userId?: string): Promise<WebhookEndpoint | null> {
+  async getEndpoint(
+    id: string,
+    orgIds?: string[],
+    userId?: string
+  ): Promise<WebhookEndpoint | null> {
     return withOptionalOrgRls(orgIds, userId, async (db) => {
       const where =
         orgIds && orgIds.length > 0

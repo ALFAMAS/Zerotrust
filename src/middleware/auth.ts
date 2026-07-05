@@ -3,6 +3,7 @@ import { createMiddleware } from "hono/factory";
 import type { ContentfulStatusCode } from "hono/utils/http-status";
 import { getConfig } from "../config";
 import { getDb } from "../db";
+import { resolveAndSetActiveOrg } from "../db/resolveOrgContext";
 import { sessionsTable, usersTable } from "../db/schema";
 import { getLogger } from "../logger";
 import {
@@ -24,7 +25,7 @@ import type {
   User,
 } from "../shared/types";
 import { ErrorCodes, zerotrustError } from "../shared/types";
-import { resolveAndSetActiveOrg } from "../db/resolveOrgContext";
+import { enforceUserRateLimit } from "./rateLimiting";
 import { revokeSession } from "./sessionControl";
 
 const logger = getLogger("auth-middleware");
@@ -276,6 +277,7 @@ export const authMiddleware = createMiddleware<HonoEnv>(async (c, next) => {
       subUserIds: userRow.subUserIds ?? [],
       sessionConfig: (userRow.sessionConfig as User["sessionConfig"]) ?? {},
       lastLoginAt: userRow.lastLoginAt,
+      emailVerifiedAt: userRow.emailVerifiedAt,
       metadata: userRow.metadata as Record<string, unknown> | null,
       createdAt: userRow.createdAt,
       updatedAt: userRow.updatedAt,
@@ -297,6 +299,7 @@ export const authMiddleware = createMiddleware<HonoEnv>(async (c, next) => {
       proofOfPossessionKey: session.proofOfPossessionKey,
       continuousEvalResult: session.continuousEvalResult as Session["continuousEvalResult"],
       anomalyFlags: session.anomalyFlags as Session["anomalyFlags"],
+      activeOrgId: session.activeOrgId,
       createdAt: session.createdAt,
       updatedAt: session.updatedAt,
     });
@@ -335,9 +338,12 @@ export const authMiddleware = createMiddleware<HonoEnv>(async (c, next) => {
         .where(eq(sessionsTable.id, session.id));
     }
 
-    // Resolve `X-Org-Id` into Hono context; `orgRlsMiddleware` sets `app.org_id`
+    // Resolve active org from session (SEC-11); `orgRlsMiddleware` sets `app.org_id`
     // inside a transaction on org-scoped routers.
-    await resolveAndSetActiveOrg(c, c.get("user"));
+    await resolveAndSetActiveOrg(c, c.get("user"), {
+      id: session.id,
+      activeOrgId: session.activeOrgId,
+    });
 
     logger.debug("✓ Token verified", {
       userId: payload.sub,
@@ -345,6 +351,13 @@ export const authMiddleware = createMiddleware<HonoEnv>(async (c, next) => {
       principal: describePrincipal(auditPrincipal),
       activeOrgId: c.get("activeOrgId"),
     });
+
+    const userLimit = await enforceUserRateLimit(userRow.id);
+    if (!userLimit.allowed) {
+      c.header("Retry-After", String(userLimit.retryAfterSecs));
+      return c.json({ error: ErrorCodes.RATE_LIMIT_EXCEEDED, message: "Too many requests" }, 429);
+    }
+
     return next();
   } catch (error) {
     if (error instanceof zerotrustError) {
@@ -370,6 +383,27 @@ export const requireAdmin = createMiddleware<HonoEnv>(async (c, next) => {
   }
   if (!isAdmin(user)) {
     return c.json({ error: "FORBIDDEN", message: "Admin role required" }, 403);
+  }
+  return next();
+});
+
+/**
+ * Block privileged actions until the user has verified their email. Must run
+ * after `authMiddleware` (reads `user.emailVerifiedAt` it sets).
+ */
+export const requireEmailVerified = createMiddleware<HonoEnv>(async (c, next) => {
+  const user = c.get("user");
+  if (!user) {
+    return c.json({ error: ErrorCodes.TOKEN_INVALID, message: "Authentication required" }, 401);
+  }
+  if (!user.emailVerifiedAt) {
+    return c.json(
+      {
+        error: "EMAIL_NOT_VERIFIED",
+        message: "Email verification required before this action",
+      },
+      403
+    );
   }
   return next();
 });

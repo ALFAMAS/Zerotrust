@@ -39,6 +39,7 @@ export interface zerotrustConfig {
     enabled: boolean;
     redisUri?: string;
     perIpLimit: number;
+    perUserLimit: number;
     windowSecs: number;
   };
   geofencing: {
@@ -192,6 +193,8 @@ export interface Session {
     locationChangeDetected: boolean;
     timeAnomalyDetected: boolean;
   } | null;
+  /** SEC-11: server-persisted active org for this session. */
+  activeOrgId?: string | null;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -385,7 +388,7 @@ export type HonoEnv = {
     };
     /** MCP token payload. */
     mcpToken?: Record<string, unknown>;
-    /** Active org from `X-Org-Id` when orgRlsMiddleware is mounted. */
+    /** Active org from session row (`sessions.active_org_id`) after authMiddleware. */
     activeOrgId?: string;
     /** Transaction-scoped DB client with RLS context (orgRlsMiddleware only). */
     dbTx?: unknown;

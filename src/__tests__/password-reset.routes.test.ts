@@ -24,7 +24,7 @@ vi.mock("../config", () => ({
   getConfig: () => ({
     session: { defaultTTL: 3600, refreshTokenTTL: 604800, maxConcurrentDevices: 5 },
     security: { bcryptRounds: 4, tokenSecretHex: "a".repeat(64), csfleMasterKeyHex: "b".repeat(64) },
-    rateLimiting: { enabled: false, perIpLimit: 100, windowSecs: 60 },
+    rateLimiting: { enabled: false, perIpLimit: 100, perUserLimit: 100, windowSecs: 60 },
     geofencing: { enabled: false, allowedCountries: [], allowedIpRanges: [] },
     mfa: {
       totpWindow: 1,
@@ -63,10 +63,8 @@ vi.mock("../middleware/sessionControl", () => ({
   revokeAllSessionsForUser: (...a: unknown[]) => revokeAllSessionsForUser(...a),
 }));
 
-vi.mock("bcryptjs", () => ({
-  default: {
-    hash: vi.fn().mockResolvedValue("hashed-password"),
-  },
+vi.mock("../shared/passwordHash", () => ({
+  hashPassword: vi.fn().mockResolvedValue("$argon2id$hashed-password"),
 }));
 
 // ── Helpers ────────────────────────────────────────────────────────────────
@@ -329,7 +327,7 @@ describe("password-reset.routes", () => {
       const res = await post(app, "/confirm", {
         email: USER_EMAIL,
         code: "111111",
-        newPassword: "password123",
+        newPassword: "Password123!",
       });
 
       expect(res.status).toBe(400);

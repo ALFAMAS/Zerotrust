@@ -1,7 +1,7 @@
 "use client";
 
 import { queryOptions, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { apiDelete, apiGet } from "@/lib/apiClient";
+import { apiDelete, apiGet, apiPut } from "@/lib/apiClient";
 import { queryKeys } from "./queryKeys";
 import type {
   AdminSession,
@@ -97,6 +97,7 @@ export function useRevokeAdminSessionMutation(params: AdminSessionsListParams = 
 export const userSessionKeys = queryKeys.sessions;
 
 export const USER_SESSIONS_PATH = "/sessions";
+export const USER_SESSION_ACTIVE_ORG_PATH = "/sessions/active-org";
 
 export function buildUserSessionPath(id: string): string {
   return `${USER_SESSIONS_PATH}/${id}`;
@@ -164,6 +165,17 @@ export function useRevokeAllUserSessionsMutation() {
     mutationFn: () => apiDelete(USER_SESSIONS_PATH),
     onSettled: () => {
       void queryClient.invalidateQueries({ queryKey: userSessionKeys.list() });
+    },
+  });
+}
+
+export function useSetActiveOrgMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation<{ activeOrgId: string }, Error, { orgId: string }>({
+    mutationFn: ({ orgId }) => apiPut(USER_SESSION_ACTIVE_ORG_PATH, { orgId }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.auth.me() });
     },
   });
 }

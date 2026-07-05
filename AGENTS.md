@@ -33,3 +33,56 @@ The "Canonical shared modules" table in `CLAUDE.md` is authoritative. Key entrie
 - **Client redirects** → `packages/ui/src/lib/safeRedirect.ts`
 
 When adding a new feature that matches one of these patterns, extend the canonical module — never inline a new implementation.
+
+## Quality rules (performance · accessibility · best practices · SEO)
+
+Apply only the block matching the surface you're editing. Security rules above take precedence — do not duplicate CWE guidance here. Full scoped reference (including Mobile/Expo): [`docs/Agentqualityrules.MD`](./docs/Agentqualityrules.MD).
+
+**Scope in this repo:** Next.js UI (`packages/ui/`) and Hono API (`src/`). No Expo/mobile app — skip mobile blocks unless that surface is added.
+
+### Web (Next.js — `packages/ui/`)
+
+**Performance**
+
+- Server Components by default; `'use client'` only at interactive leaves — never on a route/layout root.
+- Images: `next/image` only (never raw `<img>`). Fonts: `next/font` (no Google Fonts `<link>`).
+- Heavy client components: `next/dynamic` with `ssr: false` where they can't render server-side.
+- No barrel-file (`index.ts` re-export) imports of large libs — they defeat tree-shaking and route splitting.
+- Stream slow data via `<Suspense>`; set `revalidate` / `cache` per fetch deliberately — don't globally opt out of caching.
+- Paginate server-side (reuse list hooks / `parsePaginatedQuery`); never ship large datasets to the client.
+- Targets: LCP < 2.5s, INP < 200ms, CLS < 0.1. (INP replaced FID — don't reference FID.)
+
+**Accessibility**
+
+- Semantic HTML (`<button>` for actions, not `<div onClick>`); landmarks (`nav` / `main` / `header`).
+- Every input has an associated `<label htmlFor>`; `alt` on every image (empty `alt=""` for decorative).
+- Text contrast ≥ 4.5:1 (≥ 3:1 large text). Keyboard: visible focus, logical tab order; modals trap-and-restore focus.
+- ARIA only when native semantics are insufficient. Form errors: `aria-describedby` + `aria-live`.
+- `<html lang>` set; respect `prefers-reduced-motion`.
+
+**Best practices**
+
+- Zero console errors/warnings in production build. HTTPS only; CSP per [`docs/security.md`](./docs/security.md).
+- `target="_blank"` carries `rel="noopener noreferrer"`. Valid HTML; error boundaries around dynamic subtrees.
+
+**SEO** (public/marketing pages only — authenticated dashboard routes are never indexed)
+
+- `generateMetadata` per route (unique `title` + `description`); Open Graph + Twitter cards on shareable pages.
+- One `<h1>` per page; logical heading order; `app/sitemap.ts` + `app/robots.ts`; canonical URLs set.
+- JSON-LD where the content type warrants it. Descriptive link text — never "click here".
+- Indexable content renders SSR/SSG — never client-only. Do not add SEO scaffolding to dashboard routes.
+
+### API (Hono — `src/`)
+
+**Performance**
+
+- No N+1 queries; index every column used in `where` / `join`; `select` only needed columns.
+- Paginate list endpoints via `parsePaginatedQuery` + `countRows` + `paginated()` (see canonical modules).
+- `Cache-Control` on cacheable GETs; stream large responses.
+- Outbound fetch: timeout + abort via `safeFetch.ts` (see security rules).
+
+**Best practices**
+
+- Correct HTTP status codes and method semantics (GET/PUT idempotent; no side effects on GET).
+- One consistent error envelope — `httpErrors.internalError` in route catch blocks; global handler in `errorHandler.ts`.
+- Structured logs with request IDs. Version the API surface. Validate all inputs (zod).

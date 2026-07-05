@@ -68,10 +68,9 @@ describe("notifications TanStack Query server state", () => {
     mockApiGet.mockReset();
     mockApiPost.mockReset();
     mockApiPut.mockReset();
-    vi.stubGlobal("EventSource", class {
-      addEventListener() {}
-      close() {}
-    });
+vi.mock("@/lib/sseClient", () => ({
+  connectAuthenticatedSse: vi.fn(() => () => {}),
+}));
   });
 
   it("models notifications domain query keys and paths", () => {

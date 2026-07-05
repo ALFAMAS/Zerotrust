@@ -1,6 +1,8 @@
 import { and, desc, eq } from "drizzle-orm";
 import { Hono } from "hono";
+import { z } from "zod";
 import { getDb, getReadDb } from "../../db";
+import { setSessionActiveOrg } from "../../db/repositories/authSessions.repository";
 import { sessionsTable } from "../../db/schema";
 import { getLogger } from "../../logger";
 import { authMiddleware } from "../../middleware/auth";
@@ -14,6 +16,39 @@ const router = new Hono<HonoEnv>();
 const logger = getLogger("session-routes");
 
 router.use("*", authMiddleware);
+
+const activeOrgSchema = z.object({
+  orgId: z.string().uuid(),
+});
+
+// PUT /active-org — persist selected org on the current session (SEC-11)
+router.put("/active-org", async (c) => {
+  try {
+    const body = activeOrgSchema.safeParse(await c.req.json().catch(() => null));
+    if (!body.success) {
+      return c.json({ error: "INVALID_REQUEST", message: "orgId (uuid) required" }, 400);
+    }
+
+    const user = c.get("user");
+    const session = c.get("session");
+    const updated = await setSessionActiveOrg({
+      sessionId: session.id,
+      orgId: body.data.orgId,
+      userId: user.id,
+      user,
+    });
+    if (!updated) {
+      return c.json(
+        { error: "ORG_ACCESS_DENIED", message: "Not a member of this organization" },
+        403
+      );
+    }
+
+    return c.json({ activeOrgId: body.data.orgId });
+  } catch (err) {
+    return internalError(c, logger, "Set active org error", err, "Failed to set active org");
+  }
+});
 
 // GET / — list user's own sessions
 router.get("/", async (c) => {

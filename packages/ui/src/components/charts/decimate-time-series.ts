@@ -64,9 +64,7 @@ export function decimateTimeSeries<T extends Record<string, unknown>>(
 
     for (let j = rangeStart; j < rangeEnd; j++) {
       const area =
-        Math.abs(
-          (ax - avgX) * (getY(data[j] as T, j) - ay) - (ax - j) * (avgY - ay)
-        ) * 0.5;
+        Math.abs((ax - avgX) * (getY(data[j] as T, j) - ay) - (ax - j) * (avgY - ay)) * 0.5;
       if (area > maxArea) {
         maxArea = area;
         maxIndex = j;

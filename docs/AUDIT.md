@@ -127,21 +127,20 @@ incident under load or attack) · **Medium** (correctness/maintainability debt) 
 ### 4.7 Security baseline cross-audit (2026-07-05)
 
 Cross-audit of [`docs/security.md`](./security.md) §0–§10 against the shipped
-codebase. **23 open gaps** tracked as **SEC-5…SEC-27** in
-[`todo.md`](../todo.md) (3 High, 19 Medium, 1 Low/Ops). **SEC-1…SEC-4 shipped
-2026-07-05**; **SEC-28** (Expo out-of-scope documentation) shipped 2026-07-05 —
+codebase. **1 open SEC item** (**SEC-27**) plus **DQ-2** in
+[`todo.md`](../todo.md). **SEC-1…SEC-26 and SEC-28 shipped 2026-07-05** —
 see [`tdone.md`](../tdone.md) § Security baseline audit and § Recent work
 (2026-07-05). Long-term test-coverage aspiration remains **DQ-2** in `todo.md`.
 
 | Priority | Open | Shipped (2026-07-05) | Examples |
 | --- | ---: | ---: | --- |
-| Critical / High | 3 | 4 | Open: `assertCan()` (SEC-5), SSE `?token=` (SEC-6), CSRF origin (SEC-7). Shipped: logout revocation (SEC-1), login timing (SEC-2), hashed reset codes (SEC-3), RLS on 14 tables (SEC-4) |
-| Medium | 19 | — | Argon2id (SEC-8), `__Host-` refresh cookie (SEC-9), refresh `family_id` (SEC-10), session-derived `activeOrgId` (SEC-11), body limit (SEC-13), gitleaks CI (SEC-22), login audit events (SEC-26), … |
+| Critical / High | 0 | 7 | Shipped: logout revocation (SEC-1), login timing (SEC-2), hashed reset codes (SEC-3), RLS on 14 tables (SEC-4), `assertCan()` (SEC-5), SSE Bearer auth (SEC-6), CSRF origin (SEC-7) |
+| Medium | 0 | 18 | Shipped: session-derived `activeOrgId` (SEC-11), body limit (SEC-13), login audit events (SEC-26), Dependabot (SEC-23), pinned Actions SHAs (SEC-24), Postgres dual roles (SEC-25), … |
 | Low / Ops | 1 | — | VPS firewall runbook (SEC-27) |
 
-**Verification (2026-07-05, re-audited):** SEC-5…SEC-27 rechecked against code,
-tests, and CI — none shipped since SEC-1…SEC-4. SEC-28 documentation cross-ref
-in `docs/security.md` §5. Per-item evidence in `todo.md` verification note and
+**Verification (2026-07-05, re-audited):** SEC-23…SEC-26 shipped 2026-07-05
+(Dependabot, SHA-pinned Actions, Postgres role bootstrap script, login audit trail).
+Only **SEC-27** remains open. Per-item evidence in `todo.md` verification note and
 [`tdone.md`](../tdone.md) § Security baseline audit.
 
 ## 5. Recommended upgrades (suggested implementation order)
