@@ -35,9 +35,7 @@ export default function AppTopbar({
       </Button>
       <span className="shrink-0 font-display font-semibold tracking-tight text-foreground md:hidden">
         {brand.name}
-        {brandSuffix && (
-          <span className="text-muted-foreground"> {brandSuffix}</span>
-        )}
+        {brandSuffix && <span className="text-muted-foreground"> {brandSuffix}</span>}
       </span>
 
       <AppTopbarSearch compact className="md:hidden" />

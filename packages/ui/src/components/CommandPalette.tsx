@@ -160,10 +160,8 @@ export function CommandPalette() {
     const q = query.toLowerCase();
     setResults(
       PAGES.filter(
-        (p) =>
-          p.title.toLowerCase().includes(q) ||
-          p.description?.toLowerCase().includes(q),
-      ),
+        (p) => p.title.toLowerCase().includes(q) || p.description?.toLowerCase().includes(q)
+      )
     );
     setSelectedIndex(0);
   }, [query]);
@@ -174,7 +172,7 @@ export function CommandPalette() {
       setQuery("");
       router.push(safeRelativeRedirect(result.href, "/dashboard"));
     },
-    [router],
+    [router]
   );
 
   // Keyboard navigation. navigateTo is declared above so the hook order and the
@@ -222,10 +220,7 @@ export function CommandPalette() {
       >
         {/* Search input */}
         <div className="flex items-center gap-3 border-b border-border bg-muted/20 px-4 py-3">
-          <Search
-            className="h-4 w-4 shrink-0 text-muted-foreground"
-            aria-hidden
-          />
+          <Search className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
           <Input
             ref={inputRef}
             type="search"
@@ -262,7 +257,7 @@ export function CommandPalette() {
                     "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors",
                     i === selectedIndex
                       ? "bg-accent text-accent-foreground"
-                      : "text-foreground hover:bg-accent hover:text-accent-foreground",
+                      : "text-foreground hover:bg-accent hover:text-accent-foreground"
                   )}
                 >
                   <span
@@ -270,15 +265,13 @@ export function CommandPalette() {
                       "flex h-7 w-7 items-center justify-center rounded-md",
                       i === selectedIndex
                         ? "bg-primary/10 text-primary"
-                        : "bg-muted text-muted-foreground",
+                        : "bg-muted text-muted-foreground"
                     )}
                   >
                     <ResultIcon icon={result.icon} type={result.type} />
                   </span>
                   <div className="min-w-0 flex-1">
-                    <div className="truncate text-sm font-medium">
-                      {result.title}
-                    </div>
+                    <div className="truncate text-sm font-medium">{result.title}</div>
                     {result.description && (
                       <div className="truncate text-xs text-muted-foreground">
                         {result.description}
@@ -303,21 +296,15 @@ export function CommandPalette() {
         {/* Footer hint */}
         <div className="flex items-center gap-4 border-t border-border px-4 py-2">
           <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
-            <kbd className="rounded border border-border bg-muted px-1 text-[10px]">
-              ↑↓
-            </kbd>
+            <kbd className="rounded border border-border bg-muted px-1 text-[10px]">↑↓</kbd>
             navigate
           </span>
           <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
-            <kbd className="rounded border border-border bg-muted px-1 text-[10px]">
-              ↵
-            </kbd>
+            <kbd className="rounded border border-border bg-muted px-1 text-[10px]">↵</kbd>
             open
           </span>
           <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
-            <kbd className="rounded border border-border bg-muted px-1 text-[10px]">
-              esc
-            </kbd>
+            <kbd className="rounded border border-border bg-muted px-1 text-[10px]">esc</kbd>
             close
           </span>
         </div>

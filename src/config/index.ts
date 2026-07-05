@@ -1,5 +1,5 @@
-import { parseEnv } from "./env";
 import type { zerotrustConfig } from "../shared/types";
+import { parseEnv } from "./env";
 
 function generateSecureKey(byteLength: number): string {
   if (typeof crypto === "undefined") {

@@ -10,10 +10,7 @@ interface AppTopbarSearchProps {
   compact?: boolean;
 }
 
-export function AppTopbarSearch({
-  className,
-  compact = false,
-}: AppTopbarSearchProps) {
+export function AppTopbarSearch({ className, compact = false }: AppTopbarSearchProps) {
   if (compact) {
     return (
       <Button
@@ -35,13 +32,11 @@ export function AppTopbarSearch({
       aria-label="Open command palette"
       className={cn(
         "flex h-9 w-full min-w-0 items-center gap-2 rounded-lg border border-input bg-muted/40 px-3 text-sm text-muted-foreground shadow-sm transition-colors hover:bg-muted/60 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-        className,
+        className
       )}
     >
       <Search className="h-4 w-4 shrink-0 opacity-70" aria-hidden />
-      <span className="min-w-0 flex-1 truncate text-left">
-        Search pages, settings…
-      </span>
+      <span className="min-w-0 flex-1 truncate text-left">Search pages, settings…</span>
       <kbd className="hidden shrink-0 rounded border border-border bg-background/80 px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground lg:inline">
         ⌘K
       </kbd>

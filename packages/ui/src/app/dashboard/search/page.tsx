@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  Building2,
-  FileText,
-  LifeBuoy,
-  Search as SearchIcon,
-  User,
-} from "lucide-react";
+import { Building2, FileText, LifeBuoy, Search as SearchIcon, User } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { ServerStateStatus } from "@/components/ServerStateStatus";
 import { Badge } from "@/components/ui/badge";
@@ -56,12 +50,10 @@ export default function SearchPage() {
   return (
     <div className="max-w-2xl">
       <h1 className="mb-1 flex items-center gap-2 font-display text-2xl font-semibold tracking-tight text-foreground">
-        <SearchIcon className="h-6 w-6 text-primary" aria-hidden="true" />{" "}
-        Search
+        <SearchIcon className="h-6 w-6 text-primary" aria-hidden="true" /> Search
       </h1>
       <p className="mb-6 text-sm text-muted-foreground">
-        Full-text search across users, organizations, notes, and support
-        tickets.
+        Full-text search across users, organizations, notes, and support tickets.
       </p>
 
       <div className="relative mb-4">
@@ -106,9 +98,7 @@ export default function SearchPage() {
             <ServerStateStatus query={searchQuery} />
             {results && (
               <Badge variant="outline" className="font-normal">
-                {results.provider === "elasticsearch"
-                  ? "Elasticsearch"
-                  : "Database"}
+                {results.provider === "elasticsearch" ? "Elasticsearch" : "Database"}
               </Badge>
             )}
           </div>
@@ -124,15 +114,10 @@ export default function SearchPage() {
               <li key={`${hit.type}-${hit.id}`}>
                 <Card>
                   <CardContent className="flex items-start gap-3 p-4">
-                    <Icon
-                      className="mt-0.5 h-4 w-4 shrink-0 text-primary"
-                      aria-hidden="true"
-                    />
+                    <Icon className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
-                        <span className="truncate font-medium text-foreground">
-                          {hit.title}
-                        </span>
+                        <span className="truncate font-medium text-foreground">{hit.title}</span>
                         <Badge variant="secondary">{meta.label}</Badge>
                       </div>
                       {hit.highlight && (
@@ -156,9 +141,7 @@ export default function SearchPage() {
               className="mx-auto mb-3 h-9 w-9 text-muted-foreground/40"
               aria-hidden="true"
             />
-            <p className="text-sm text-muted-foreground">
-              No results for “{debouncedQ}”.
-            </p>
+            <p className="text-sm text-muted-foreground">No results for “{debouncedQ}”.</p>
           </div>
         )
       )}

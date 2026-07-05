@@ -55,11 +55,7 @@ const navItems: NavItem[] = [
   { href: "/admin/audit", icon: ScrollText, label: "Audit Logs" },
 ];
 
-export default function AdminLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [ready, setReady] = useState(false);
   const [sessionReady, setSessionReady] = useState(false);
@@ -133,9 +129,7 @@ export default function AdminLayout({
   if (authorized !== true) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background text-foreground">
-        <p className="text-sm text-muted-foreground">
-          Access denied. Redirecting…
-        </p>
+        <p className="text-sm text-muted-foreground">Access denied. Redirecting…</p>
       </div>
     );
   }
@@ -144,17 +138,17 @@ export default function AdminLayout({
     <AppShell
       navItems={navItems}
       brandSuffix="Admin"
-      profileMenu={
-        <UserProfileMenu onSignOut={handleSignOut} showDashboardLink />
-      }
+      profileMenu={<UserProfileMenu onSignOut={handleSignOut} showDashboardLink />}
       actions={<ThemeToggle />}
       sidebarFooter={
         <Link
           href="/dashboard"
+          title="User dashboard"
+          aria-label="User dashboard"
           className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
         >
-          <ArrowLeft className="h-4 w-4" />
-          User dashboard
+          <ArrowLeft className="h-4 w-4 shrink-0" aria-hidden="true" />
+          <span className="sidebar-footer-label truncate">User dashboard</span>
         </Link>
       }
     >

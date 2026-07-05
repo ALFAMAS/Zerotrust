@@ -29,29 +29,29 @@ router.post(
   rateLimit({ points: 10, windowSecs: 3600 }),
   zValidator("json", submitSchema),
   async (c) => {
-  const user = c.get("user");
-  const parsed = c.req.valid("json");
+    const user = c.get("user");
+    const parsed = c.req.valid("json");
 
-  try {
-    const db = getDb();
-    const [entry] = await db
-      .insert(feedbackTable)
-      .values({
-        userId: user.id,
-        orgId: parsed.orgId ?? null,
-        type: parsed.type,
-        score: parsed.score,
-        comment: parsed.comment ?? null,
-        context: parsed.context ?? null,
-        metadata: parsed.metadata ?? null,
-      })
-      .returning();
+    try {
+      const db = getDb();
+      const [entry] = await db
+        .insert(feedbackTable)
+        .values({
+          userId: user.id,
+          orgId: parsed.orgId ?? null,
+          type: parsed.type,
+          score: parsed.score,
+          comment: parsed.comment ?? null,
+          context: parsed.context ?? null,
+          metadata: parsed.metadata ?? null,
+        })
+        .returning();
 
-    logger.info("Feedback submitted", { userId: user.id, type: parsed.type });
-    return c.json(entry, 201);
-  } catch (err) {
-    return internalError(c, logger, "Submit feedback error", err);
-  }
+      logger.info("Feedback submitted", { userId: user.id, type: parsed.type });
+      return c.json(entry, 201);
+    } catch (err) {
+      return internalError(c, logger, "Submit feedback error", err);
+    }
   }
 );
 

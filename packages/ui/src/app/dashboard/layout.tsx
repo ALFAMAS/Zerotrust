@@ -29,11 +29,7 @@ import ProductTour from "@/components/ProductTour";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { UserProfileMenu } from "@/components/UserProfileMenu";
 import VerifyEmailBanner from "@/components/VerifyEmailBanner";
-import {
-  bootstrapAccessToken,
-  clearToken,
-  isAuthenticated,
-} from "../../lib/auth";
+import { bootstrapAccessToken, clearToken, isAuthenticated } from "../../lib/auth";
 
 const navItems: NavItem[] = [
   { href: "/dashboard", label: "Overview", icon: LayoutDashboard, exact: true },
@@ -52,11 +48,7 @@ const navItems: NavItem[] = [
   { href: "/dashboard/account", label: "Account", icon: UserCog },
 ];
 
-export default function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   // null = still checking, true = authenticated. We never render the dashboard
   // shell (or let children fire authenticated API calls) until a token is present.

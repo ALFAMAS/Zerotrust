@@ -15,8 +15,9 @@
  */
 // NB: intentionally no logger import — this module is called from auditLog()
 // inside the logger, so importing the logger back would be circular.
-import { fetchFixedUrl } from "../../shared/safeFetch";
+
 import { redactLogEntry } from "../../shared/logRedaction";
+import { fetchFixedUrl } from "../../shared/safeFetch";
 
 export function isSiemEnabled(): boolean {
   return process.env.SIEM_ENABLED === "true" && Boolean(process.env.SIEM_ENDPOINT);

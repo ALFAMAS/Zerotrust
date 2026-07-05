@@ -5,9 +5,9 @@
 
 import { getConfig } from "../config";
 import { streamToSiem } from "../services/shared/siem.service";
+import { redactLogEntry } from "../shared/logRedaction";
 import { type AuditPrincipal, principalAuditFields } from "../shared/principal";
 import { fetchFixedUrl } from "../shared/safeFetch";
-import { redactLogEntry } from "../shared/logRedaction";
 import type { zerotrustConfig } from "../shared/types";
 
 export interface LogContext {

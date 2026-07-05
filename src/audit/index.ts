@@ -6,8 +6,8 @@
 
 import { getConfig } from "../config";
 import { getLogger } from "../logger";
-import { fetchFixedUrl } from "../shared/safeFetch";
 import { redactLogEntry } from "../shared/logRedaction";
+import { fetchFixedUrl } from "../shared/safeFetch";
 import type { AuditLog } from "../shared/types";
 
 const logger = getLogger("audit-pipeline");

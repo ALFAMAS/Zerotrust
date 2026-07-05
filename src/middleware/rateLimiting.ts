@@ -156,7 +156,11 @@ export async function enforceUserRateLimit(
   }
 
   const key = `user:${userId}`;
-  const result = await consumeRateLimit(key, cfg.rateLimiting.perUserLimit, cfg.rateLimiting.windowSecs);
+  const result = await consumeRateLimit(
+    key,
+    cfg.rateLimiting.perUserLimit,
+    cfg.rateLimiting.windowSecs
+  );
   if (!result.allowed) {
     recordRateLimit("authenticated", userId);
   }
@@ -172,10 +176,7 @@ export function userRateLimit() {
     if (!allowed) {
       logger.warn("User rate limit exceeded", { userId: user.id, path: c.req.path });
       c.header("Retry-After", String(retryAfterSecs));
-      return c.json(
-        { error: ErrorCodes.RATE_LIMIT_EXCEEDED, message: "Too many requests" },
-        429
-      );
+      return c.json({ error: ErrorCodes.RATE_LIMIT_EXCEEDED, message: "Too many requests" }, 429);
     }
     return next();
   });

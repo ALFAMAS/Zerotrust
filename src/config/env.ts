@@ -4,10 +4,7 @@ import { isPlaceholderSecretHex } from "../shared/placeholderSecrets";
 const HEX_SECRET_64 = /^[0-9a-fA-F]{64}$/;
 
 const optionalHexSecret = (label: string) =>
-  z
-    .string()
-    .regex(HEX_SECRET_64, `${label} must be at least 32 bytes (64 hex chars)`)
-    .optional();
+  z.string().regex(HEX_SECRET_64, `${label} must be at least 32 bytes (64 hex chars)`).optional();
 
 /**
  * Zod schema for production-critical environment variables (SEC-21).

@@ -1,10 +1,13 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { cn } from "@/lib/utils";
 import AppFooter from "./AppFooter";
 import AppSidebar, { type NavItem } from "./AppSidebar";
 import AppTopbar from "./AppTopbar";
+
+const SIDEBAR_COLLAPSED_KEY = "za_sidebar_collapsed";
 
 interface AppShellProps {
   navItems: NavItem[];
@@ -38,6 +41,27 @@ export default function AppShell({
 }: AppShellProps) {
   const _pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  useEffect(() => {
+    try {
+      setSidebarCollapsed(localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === "1");
+    } catch {
+      // localStorage unavailable (private mode)
+    }
+  }, []);
+
+  const toggleSidebarCollapsed = useCallback(() => {
+    setSidebarCollapsed((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem(SIDEBAR_COLLAPSED_KEY, next ? "1" : "0");
+      } catch {
+        // ignore
+      }
+      return next;
+    });
+  }, []);
 
   // Close the mobile drawer whenever the route changes.
   useEffect(() => {
@@ -66,9 +90,16 @@ export default function AppShell({
         onClose={() => setOpen(false)}
         brandSuffix={brandSuffix}
         footer={sidebarFooter}
+        collapsed={sidebarCollapsed}
+        onToggleCollapsed={toggleSidebarCollapsed}
       />
 
-      <div className="flex min-h-screen flex-col md:ml-64">
+      <div
+        className={cn(
+          "flex min-h-screen flex-col transition-[margin] duration-200 ease-out md:ml-16",
+          !sidebarCollapsed && "md:ml-64"
+        )}
+      >
         <AppTopbar
           brandSuffix={brandSuffix}
           onMenuClick={() => setOpen(true)}

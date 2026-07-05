@@ -1,15 +1,9 @@
 "use client";
 
-import {
-  LayoutDashboard,
-  LogOut,
-  Shield,
-  User,
-  Wallet as WalletIcon,
-} from "lucide-react";
-import { useLocale } from "next-intl";
+import { LayoutDashboard, LogOut, Shield, User, Wallet as WalletIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useLocale } from "next-intl";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,14 +23,8 @@ interface UserProfileMenuProps {
   showDashboardLink?: boolean;
 }
 
-function formatWalletBalance(
-  cents: number,
-  currency: string,
-  locale: string,
-): string {
-  return new Intl.NumberFormat(locale, { style: "currency", currency }).format(
-    (cents ?? 0) / 100,
-  );
+function formatWalletBalance(cents: number, currency: string, locale: string): string {
+  return new Intl.NumberFormat(locale, { style: "currency", currency }).format((cents ?? 0) / 100);
 }
 
 function initialsFor(name: string | undefined, email: string): string {
@@ -48,10 +36,7 @@ function initialsFor(name: string | undefined, email: string): string {
   return (source[0] ?? "?").toUpperCase();
 }
 
-export function UserProfileMenu({
-  onSignOut,
-  showDashboardLink = false,
-}: UserProfileMenuProps) {
+export function UserProfileMenu({ onSignOut, showDashboardLink = false }: UserProfileMenuProps) {
   const router = useRouter();
   const locale = useLocale();
   const { data: me } = useAuthMeQuery();
@@ -59,11 +44,7 @@ export function UserProfileMenu({
 
   const isAdmin = me?.roles?.includes("admin") ?? false;
   const currency = wallet?.currency ?? "USD";
-  const balanceLabel = formatWalletBalance(
-    wallet?.balance ?? 0,
-    currency,
-    locale,
-  );
+  const balanceLabel = formatWalletBalance(wallet?.balance ?? 0, currency, locale);
   const displayName = me?.displayName?.trim() || me?.email || "Account";
   const email = me?.email ?? "";
 
@@ -88,13 +69,9 @@ export function UserProfileMenu({
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuLabel className="font-normal">
-          <div className="truncate font-medium text-foreground">
-            {displayName}
-          </div>
+          <div className="truncate font-medium text-foreground">{displayName}</div>
           {email ? (
-            <div className="truncate text-xs font-normal text-muted-foreground">
-              {email}
-            </div>
+            <div className="truncate text-xs font-normal text-muted-foreground">{email}</div>
           ) : null}
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
@@ -122,10 +99,7 @@ export function UserProfileMenu({
           </DropdownMenuItem>
         ) : null}
         {isAdmin && !showDashboardLink ? (
-          <DropdownMenuItem
-            className="cursor-pointer"
-            onSelect={() => router.push("/admin")}
-          >
+          <DropdownMenuItem className="cursor-pointer" onSelect={() => router.push("/admin")}>
             <Shield />
             Admin
           </DropdownMenuItem>

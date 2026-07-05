@@ -35,7 +35,7 @@ export function fetchNotificationsUnreadCount(): Promise<NotificationsUnreadCoun
 
 export function fetchNotificationsList(): Promise<Notification[]> {
   return apiGet<PaginatedResponse<Notification>>(
-    `${NOTIFICATIONS_PATH}?limit=${NOTIFICATIONS_LIST_PREVIEW_LIMIT}`,
+    `${NOTIFICATIONS_PATH}?limit=${NOTIFICATIONS_LIST_PREVIEW_LIMIT}`
   ).then((response) => response.data ?? []);
 }
 
@@ -92,22 +92,17 @@ export function useUpdateNotificationPreferencesMutation() {
     UpdateNotificationPreferencesInput,
     PreferencesMutationContext
   >({
-    mutationFn: (input) =>
-      apiPut<NotificationPreferences>(NOTIFICATIONS_PREFERENCES_PATH, input),
+    mutationFn: (input) => apiPut<NotificationPreferences>(NOTIFICATIONS_PREFERENCES_PATH, input),
     onMutate: async (input) => {
       await queryClient.cancelQueries({ queryKey: preferencesKey });
-      const previous =
-        queryClient.getQueryData<NotificationPreferences>(preferencesKey);
-      queryClient.setQueryData<NotificationPreferences>(
-        preferencesKey,
-        (current) => ({
-          emailFallback: true,
-          emailFallbackDays: 3,
-          ...current,
-          ...input,
-          categories: input.categories ?? current?.categories,
-        }),
-      );
+      const previous = queryClient.getQueryData<NotificationPreferences>(preferencesKey);
+      queryClient.setQueryData<NotificationPreferences>(preferencesKey, (current) => ({
+        emailFallback: true,
+        emailFallbackDays: 3,
+        ...current,
+        ...input,
+        categories: input.categories ?? current?.categories,
+      }));
       return { previous };
     },
     onError: (_error, _input, context) => {
@@ -121,23 +116,14 @@ export function useUpdateNotificationPreferencesMutation() {
   });
 }
 
-export function setNotificationsUnreadCountCache(
-  queryClient: QueryClient,
-  count: number,
-) {
-  queryClient.setQueryData<NotificationsUnreadCount>(
-    notificationKeys.unreadCount(),
-    { count },
-  );
+export function setNotificationsUnreadCountCache(queryClient: QueryClient, count: number) {
+  queryClient.setQueryData<NotificationsUnreadCount>(notificationKeys.unreadCount(), { count });
 }
 
 export function bumpNotificationsUnreadCountCache(queryClient: QueryClient) {
-  queryClient.setQueryData<NotificationsUnreadCount>(
-    notificationKeys.unreadCount(),
-    (current) => ({
-      count: (current?.count ?? 0) + 1,
-    }),
-  );
+  queryClient.setQueryData<NotificationsUnreadCount>(notificationKeys.unreadCount(), (current) => ({
+    count: (current?.count ?? 0) + 1,
+  }));
 }
 
 interface NotificationListMutationContext {
@@ -147,11 +133,10 @@ interface NotificationListMutationContext {
 
 function updateNotificationListCache(
   queryClient: ReturnType<typeof useQueryClient>,
-  updater: (notifications: Notification[]) => Notification[],
+  updater: (notifications: Notification[]) => Notification[]
 ) {
-  queryClient.setQueryData<Notification[]>(
-    notificationKeys.list(),
-    (current) => (current ? updater(current) : current),
+  queryClient.setQueryData<Notification[]>(notificationKeys.list(), (current) =>
+    current ? updater(current) : current
   );
 }
 
@@ -165,23 +150,17 @@ export function useMarkNotificationReadMutation() {
     onMutate: async (id) => {
       await queryClient.cancelQueries({ queryKey: listKey });
       await queryClient.cancelQueries({ queryKey: unreadKey });
-      const previousUnread =
-        queryClient.getQueryData<NotificationsUnreadCount>(unreadKey);
+      const previousUnread = queryClient.getQueryData<NotificationsUnreadCount>(unreadKey);
       const previousList = queryClient.getQueryData<Notification[]>(listKey);
 
       updateNotificationListCache(queryClient, (notifications) =>
         notifications.map((notification) =>
-          notification.id === id
-            ? { ...notification, read: true }
-            : notification,
-        ),
+          notification.id === id ? { ...notification, read: true } : notification
+        )
       );
-      queryClient.setQueryData<NotificationsUnreadCount>(
-        unreadKey,
-        (current) => ({
-          count: Math.max(0, (current?.count ?? 0) - 1),
-        }),
-      );
+      queryClient.setQueryData<NotificationsUnreadCount>(unreadKey, (current) => ({
+        count: Math.max(0, (current?.count ?? 0) - 1),
+      }));
 
       return { previousUnread, previousList };
     },
@@ -209,12 +188,11 @@ export function useMarkAllNotificationsReadMutation() {
     onMutate: async () => {
       await queryClient.cancelQueries({ queryKey: listKey });
       await queryClient.cancelQueries({ queryKey: unreadKey });
-      const previousUnread =
-        queryClient.getQueryData<NotificationsUnreadCount>(unreadKey);
+      const previousUnread = queryClient.getQueryData<NotificationsUnreadCount>(unreadKey);
       const previousList = queryClient.getQueryData<Notification[]>(listKey);
 
       updateNotificationListCache(queryClient, (notifications) =>
-        notifications.map((notification) => ({ ...notification, read: true })),
+        notifications.map((notification) => ({ ...notification, read: true }))
       );
       queryClient.setQueryData<NotificationsUnreadCount>(unreadKey, {
         count: 0,
