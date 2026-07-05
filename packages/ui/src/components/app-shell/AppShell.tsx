@@ -16,7 +16,8 @@ interface AppShellProps {
   sidebarFooter?: React.ReactNode;
   /** Banner rendered directly under the topbar (e.g. verify-email prompt). */
   banner?: React.ReactNode;
-  onSignOut: () => void;
+  /** Profile avatar menu (balance, admin link, sign out). */
+  profileMenu?: React.ReactNode;
   children: React.ReactNode;
 }
 
@@ -32,7 +33,7 @@ export default function AppShell({
   actions,
   sidebarFooter,
   banner,
-  onSignOut,
+  profileMenu,
   children,
 }: AppShellProps) {
   const _pathname = usePathname();
@@ -72,7 +73,7 @@ export default function AppShell({
           brandSuffix={brandSuffix}
           onMenuClick={() => setOpen(true)}
           actions={actions}
-          onSignOut={onSignOut}
+          profileMenu={profileMenu}
         />
         {banner}
         <main

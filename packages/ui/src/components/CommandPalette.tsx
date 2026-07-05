@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { OPEN_COMMAND_PALETTE_EVENT } from "@/lib/commandPalette";
 import { safeRelativeRedirect } from "@/lib/safeRedirect";
 import { cn } from "@/lib/utils";
 
@@ -18,15 +19,30 @@ interface SearchResult {
 
 // Static dashboard destinations the command palette can jump to.
 const PAGES: SearchResult[] = [
-  { type: "page", title: "Dashboard", description: "Overview", href: "/dashboard" },
-  { type: "page", title: "Profile", description: "Your profile", href: "/dashboard/profile" },
+  {
+    type: "page",
+    title: "Dashboard",
+    description: "Overview",
+    href: "/dashboard",
+  },
+  {
+    type: "page",
+    title: "Profile",
+    description: "Your profile",
+    href: "/dashboard/profile",
+  },
   {
     type: "page",
     title: "Security",
     description: "Passkeys, MFA, sessions",
     href: "/dashboard/security",
   },
-  { type: "page", title: "Sessions", description: "Active sessions", href: "/dashboard/sessions" },
+  {
+    type: "page",
+    title: "Sessions",
+    description: "Active sessions",
+    href: "/dashboard/sessions",
+  },
   {
     type: "page",
     title: "Notifications",
@@ -39,15 +55,30 @@ const PAGES: SearchResult[] = [
     description: "Workspaces & teams",
     href: "/dashboard/organizations",
   },
-  { type: "page", title: "API Keys", description: "Manage API keys", href: "/dashboard/api-keys" },
+  {
+    type: "page",
+    title: "API Keys",
+    description: "Manage API keys",
+    href: "/dashboard/api-keys",
+  },
   {
     type: "page",
     title: "Webhooks",
     description: "Outgoing webhooks",
     href: "/dashboard/webhooks",
   },
-  { type: "page", title: "Billing", description: "Plans & invoices", href: "/dashboard/billing" },
-  { type: "page", title: "Support", description: "Contact support", href: "/dashboard/support" },
+  {
+    type: "page",
+    title: "Billing",
+    description: "Plans & invoices",
+    href: "/dashboard/billing",
+  },
+  {
+    type: "page",
+    title: "Support",
+    description: "Contact support",
+    href: "/dashboard/support",
+  },
   {
     type: "setting",
     title: "Account",
@@ -91,8 +122,13 @@ export function CommandPalette() {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Cmd+K / Ctrl+K to open
+  // Cmd+K / Ctrl+K to open; topbar search dispatches OPEN_COMMAND_PALETTE_EVENT.
   useEffect(() => {
+    function openPalette() {
+      setOpen(true);
+      setTimeout(() => inputRef.current?.focus(), 50);
+    }
+
     function handleKey(e: KeyboardEvent) {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
         e.preventDefault();
@@ -106,8 +142,13 @@ export function CommandPalette() {
         setQuery("");
       }
     }
+
+    document.addEventListener(OPEN_COMMAND_PALETTE_EVENT, openPalette);
     document.addEventListener("keydown", handleKey);
-    return () => document.removeEventListener("keydown", handleKey);
+    return () => {
+      document.removeEventListener(OPEN_COMMAND_PALETTE_EVENT, openPalette);
+      document.removeEventListener("keydown", handleKey);
+    };
   }, [open]);
 
   // Client-side page navigator: filter the static page list by the query.
@@ -119,8 +160,10 @@ export function CommandPalette() {
     const q = query.toLowerCase();
     setResults(
       PAGES.filter(
-        (p) => p.title.toLowerCase().includes(q) || p.description?.toLowerCase().includes(q)
-      )
+        (p) =>
+          p.title.toLowerCase().includes(q) ||
+          p.description?.toLowerCase().includes(q),
+      ),
     );
     setSelectedIndex(0);
   }, [query]);
@@ -131,7 +174,7 @@ export function CommandPalette() {
       setQuery("");
       router.push(safeRelativeRedirect(result.href, "/dashboard"));
     },
-    [router]
+    [router],
   );
 
   // Keyboard navigation. navigateTo is declared above so the hook order and the
@@ -178,15 +221,18 @@ export function CommandPalette() {
         className="relative w-full max-w-lg overflow-hidden rounded-xl border border-border bg-popover shadow-2xl"
       >
         {/* Search input */}
-        <div className="flex items-center gap-3 border-b border-border px-4 py-3">
-          <Search className="h-5 w-5 shrink-0 text-muted-foreground" />
+        <div className="flex items-center gap-3 border-b border-border bg-muted/20 px-4 py-3">
+          <Search
+            className="h-4 w-4 shrink-0 text-muted-foreground"
+            aria-hidden
+          />
           <Input
             ref={inputRef}
-            type="text"
+            type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search pages, notes, people..."
-            className="flex-1 border-0 bg-transparent shadow-none focus-visible:ring-0"
+            placeholder="Search pages, notes, people…"
+            className="h-9 flex-1 border-0 bg-transparent px-0 py-0 text-base shadow-none placeholder:text-muted-foreground focus-visible:ring-0 md:text-sm"
             aria-label="Search"
           />
           <kbd className="hidden shrink-0 rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground sm:inline">
@@ -216,7 +262,7 @@ export function CommandPalette() {
                     "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors",
                     i === selectedIndex
                       ? "bg-accent text-accent-foreground"
-                      : "text-foreground hover:bg-accent hover:text-accent-foreground"
+                      : "text-foreground hover:bg-accent hover:text-accent-foreground",
                   )}
                 >
                   <span
@@ -224,13 +270,15 @@ export function CommandPalette() {
                       "flex h-7 w-7 items-center justify-center rounded-md",
                       i === selectedIndex
                         ? "bg-primary/10 text-primary"
-                        : "bg-muted text-muted-foreground"
+                        : "bg-muted text-muted-foreground",
                     )}
                   >
                     <ResultIcon icon={result.icon} type={result.type} />
                   </span>
                   <div className="min-w-0 flex-1">
-                    <div className="truncate text-sm font-medium">{result.title}</div>
+                    <div className="truncate text-sm font-medium">
+                      {result.title}
+                    </div>
                     {result.description && (
                       <div className="truncate text-xs text-muted-foreground">
                         {result.description}
@@ -255,15 +303,21 @@ export function CommandPalette() {
         {/* Footer hint */}
         <div className="flex items-center gap-4 border-t border-border px-4 py-2">
           <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
-            <kbd className="rounded border border-border bg-muted px-1 text-[10px]">↑↓</kbd>
+            <kbd className="rounded border border-border bg-muted px-1 text-[10px]">
+              ↑↓
+            </kbd>
             navigate
           </span>
           <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
-            <kbd className="rounded border border-border bg-muted px-1 text-[10px]">↵</kbd>
+            <kbd className="rounded border border-border bg-muted px-1 text-[10px]">
+              ↵
+            </kbd>
             open
           </span>
           <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
-            <kbd className="rounded border border-border bg-muted px-1 text-[10px]">esc</kbd>
+            <kbd className="rounded border border-border bg-muted px-1 text-[10px]">
+              esc
+            </kbd>
             close
           </span>
         </div>

@@ -47,9 +47,10 @@ of the hard parts — token issuance, session lifecycle, MFA, RBAC, abuse
 defense, and an admin surface — so you can spend your time on product instead of
 rebuilding login for the hundredth time.
 
-- **Secure by default** — PASETO v4 tokens (no JWT footguns), bcrypt password
-  hashing, client-side field encryption (CSFLE), HaveIBeenPwned breach checks, and
-  per-IP credential-stuffing defense are on out of the box.
+- **Secure by default** — PASETO v4 tokens (no JWT footguns), argon2id password
+  hashing (bcrypt verify/rehash fallback), client-side field encryption (CSFLE),
+  HaveIBeenPwned breach checks, and per-IP credential-stuffing defense are on out
+  of the box.
 - **Team-ready** — organizations, teams, custom roles with fine-grained
   permissions, and per-org security policies are first-class, not afterthoughts.
 - **Operable** — Prometheus metrics, OpenTelemetry tracing, a public status page,
@@ -64,7 +65,7 @@ rebuilding login for the hundredth time.
 
 ### Authentication & identity
 
-- Email + password with configurable account lockout
+- Email + password with progressive login backoff (exponential delay + PoW at threshold)
 - OAuth — Google, GitHub, Facebook (admin-toggleable per provider); Apple Sign In not yet implemented
 - Magic links (passwordless, 15-minute TTL) — [`plugins/magic-link/`](./plugins/magic-link/)
 - Passkeys / WebAuthn (FIDO2, resident keys, MDS3 attestation policy)
@@ -557,9 +558,10 @@ locale in `src/i18n/request.ts` and the `LocaleSwitcher` component.
 - **Tokens** — PASETO v4 (AES-256-GCM), 1-hour access TTL; refresh tokens are
   SHA-256-hashed and rotated on use.
 - **At rest** — client-side field-level encryption (CSFLE) for sensitive columns with
-  key-version rotation; bcrypt password hashing.
-- **Abuse defense** — per-account lockout, per-IP credential-stuffing throttle,
-  HaveIBeenPwned breach checks on register/password-change, optional signup PoW.
+  key-version rotation; argon2id password hashing (bcrypt verify/rehash fallback).
+- **Abuse defense** — progressive login backoff (no hard account lockout), per-IP
+  credential-stuffing throttle, HaveIBeenPwned breach checks on register/password-change,
+  optional signup PoW.
 - **Input sanitization** — a global middleware strips dangerous HTML and neutralizes
   `javascript:`/event-handler payloads in request bodies, query, path, and form
   fields (XSS / CWE-79), skipping sensitive fields and signed/SSF payloads.
@@ -587,7 +589,7 @@ zerotrust tracks its state in the repository docs:
 | Doc                                              | What it covers                                              |
 | ------------------------------------------------ | ----------------------------------------------------------- |
 | [`tdone.md`](./tdone.md)                         | Everything that ships today, plus the latest codebase audit |
-| [`todo.md`](./todo.md)                           | Open backlog — security baseline gaps SEC-5…SEC-27 (2026-07-05 audit) plus long-term DQ-2 |
+| [`todo.md`](./todo.md)                           | Open backlog — **SEC-27** (VPS firewall runbook) + long-term **DQ-2** (2026-07-05 audit) |
 | [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) | System architecture audit + proposed upgrades               |
 | [`docs/AUDIT.md`](./docs/AUDIT.md)               | Standing production-readiness audit (findings + risk + order) |
 | [`docs/reference-architecture.md`](./docs/reference-architecture.md) | Operational deployment blueprints (VM, containers, Kubernetes) |
@@ -601,9 +603,9 @@ Latest audit note (2026-07-05): a clean `bun install` restores a fully working
 tree — `bun run lint:ci`, `bun run type-check`, `bun run boundaries:check`, the
 **1328-test suite** (1086 API + 242 UI, 138 files), and the UI build all pass.
 Transactional repositories, a dedicated worker with a BullMQ-backed job scheduler,
-and module boundaries are all shipped. **24 open backlog items** remain — 23
-security-baseline gaps (SEC-5…SEC-27) from the [`docs/security.md`](./docs/security.md)
-cross-audit plus long-term DQ-2 — see [`todo.md`](./todo.md). SEC-1…SEC-4 and
+and module boundaries are all shipped. **2 open backlog items** remain —
+**SEC-27** (VPS firewall / private DB binding runbook) plus long-term **DQ-2**
+(coverage ratchet toward 85%) — see [`todo.md`](./todo.md). SEC-1…SEC-26 and
 SEC-28 shipped 2026-07-05 — see [`tdone.md`](./tdone.md) § Security baseline audit.
 Full feature catalog in [`tdone.md`](./tdone.md).
 

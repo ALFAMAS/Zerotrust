@@ -17,7 +17,10 @@ function installBrowser() {
       cookie = value;
     },
   };
-  (globalThis as any).window = { localStorage, document: (globalThis as any).document };
+  (globalThis as any).window = {
+    localStorage,
+    document: (globalThis as any).document,
+  };
   (globalThis as any).localStorage = localStorage;
   (globalThis as any).fetch = vi.fn().mockResolvedValue({ ok: true });
   return store;
@@ -42,7 +45,9 @@ describe("auth token helpers (ADR 008 Option C)", () => {
     setToken("access-1", "refresh-ignored");
     expect(getToken()).toBe("access-1");
     expect(getRefreshToken()).toBeNull();
-    expect((globalThis as any).document.cookie).toContain("za_access_token=access-1");
+    expect((globalThis as any).document.cookie).toContain(
+      "za_access_token=access-1",
+    );
   });
 
   it("clearToken clears memory and calls logout with bearer token before wipe", async () => {
@@ -56,7 +61,7 @@ describe("auth token helpers (ADR 008 Option C)", () => {
         method: "POST",
         credentials: "include",
         headers: { Authorization: "Bearer a" },
-      })
+      }),
     );
   });
 
@@ -69,10 +74,47 @@ describe("auth token helpers (ADR 008 Option C)", () => {
     expect(isAuthenticated()).toBe(false);
   });
 
+  it("hydrates access token from the RSC mirror cookie after a full reload", async () => {
+    const { setToken, getToken, isAuthenticated } = await import("./auth");
+    setToken("access-from-login");
+    expect(getToken()).toBe("access-from-login");
+
+    vi.resetModules();
+    const reloaded = await import("./auth");
+    expect(reloaded.getToken()).toBe("access-from-login");
+    expect(reloaded.isAuthenticated()).toBe(true);
+  });
+
+  it("bootstrapAccessToken reuses the mirror cookie before calling refresh", async () => {
+    const { setToken } = await import("./auth");
+    setToken("cookie-only-access");
+    vi.resetModules();
+    const reloaded = await import("./auth");
+    await expect(reloaded.bootstrapAccessToken()).resolves.toBe(
+      "cookie-only-access",
+    );
+    expect((globalThis as any).fetch).not.toHaveBeenCalled();
+  });
+
+  it("bootstrapAccessToken refreshes when memory and mirror cookie are absent", async () => {
+    (globalThis as any).fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ accessToken: "refreshed-access" }),
+    });
+    const { bootstrapAccessToken, getToken } = await import("./auth");
+    await expect(bootstrapAccessToken()).resolves.toBe("refreshed-access");
+    expect(getToken()).toBe("refreshed-access");
+    expect((globalThis as any).fetch).toHaveBeenCalledWith(
+      expect.stringContaining("/auth/token/refresh"),
+      expect.objectContaining({ method: "POST", credentials: "include" }),
+    );
+  });
+
   it("is SSR-safe: returns null / false when window is undefined", async () => {
     uninstallBrowser();
     vi.resetModules();
-    const { getToken, getRefreshToken, isAuthenticated } = await import("./auth");
+    const { getToken, getRefreshToken, isAuthenticated } =
+      await import("./auth");
     expect(getToken()).toBeNull();
     expect(getRefreshToken()).toBeNull();
     expect(isAuthenticated()).toBe(false);

@@ -16,7 +16,7 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
 | Service files               |                                                                          46 |
 | DB tables                   |                                                                          40 |
 | Middleware                  |                                                                          21 |
-| Migrations                  |                                      38 (latest: `0038_org_rls_expansion`) |
+| Migrations                  |                                      41 (latest: `0040_session_active_org_id`) |
 | Route mounts in `server.ts` |                                                                          29 |
 | UI pages                    |                                                                          53 |
 | Tests                       |                                         1328 (1086 API + 242 UI, 138 files) |

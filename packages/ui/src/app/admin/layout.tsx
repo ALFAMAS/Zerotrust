@@ -27,8 +27,10 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import AppShell from "@/components/app-shell/AppShell";
 import type { NavItem } from "@/components/app-shell/AppSidebar";
+import { CommandPalette } from "@/components/CommandPalette";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { clearToken, isAuthenticated } from "@/lib/auth";
+import { UserProfileMenu } from "@/components/UserProfileMenu";
+import { bootstrapAccessToken, clearToken, isAuthenticated } from "@/lib/auth";
 import { useAuthMeQuery } from "@/lib/server-state/auth";
 
 const navItems: NavItem[] = [
@@ -53,11 +55,16 @@ const navItems: NavItem[] = [
   { href: "/admin/audit", icon: ScrollText, label: "Audit Logs" },
 ];
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
+export default function AdminLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const router = useRouter();
   const [ready, setReady] = useState(false);
+  const [sessionReady, setSessionReady] = useState(false);
   const [authorized, setAuthorized] = useState<boolean | null>(null);
-  const tokenPresent = ready && isAuthenticated();
+  const tokenPresent = sessionReady && isAuthenticated();
   const { data: me, isPending, isError } = useAuthMeQuery(tokenPresent);
 
   useEffect(() => {
@@ -65,7 +72,26 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }, []);
 
   useEffect(() => {
-    if (!ready) return;
+    let cancelled = false;
+
+    async function restoreSession() {
+      if (isAuthenticated()) {
+        if (!cancelled) setSessionReady(true);
+        return;
+      }
+
+      await bootstrapAccessToken();
+      if (!cancelled) setSessionReady(true);
+    }
+
+    void restoreSession();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!ready || !sessionReady) return;
 
     if (!isAuthenticated()) {
       setAuthorized(false);
@@ -88,7 +114,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     }
 
     setAuthorized(true);
-  }, [ready, isPending, isError, me, router]);
+  }, [ready, sessionReady, isPending, isError, me, router]);
 
   function handleSignOut() {
     clearToken();
@@ -107,7 +133,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   if (authorized !== true) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background text-foreground">
-        <p className="text-sm text-muted-foreground">Access denied. Redirecting…</p>
+        <p className="text-sm text-muted-foreground">
+          Access denied. Redirecting…
+        </p>
       </div>
     );
   }
@@ -116,7 +144,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     <AppShell
       navItems={navItems}
       brandSuffix="Admin"
-      onSignOut={handleSignOut}
+      profileMenu={
+        <UserProfileMenu onSignOut={handleSignOut} showDashboardLink />
+      }
       actions={<ThemeToggle />}
       sidebarFooter={
         <Link
@@ -129,6 +159,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       }
     >
       {children}
+      <CommandPalette />
     </AppShell>
   );
 }
