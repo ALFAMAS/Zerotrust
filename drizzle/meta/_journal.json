@@ -211,6 +211,13 @@
       "when": 1783119600000,
       "tag": "0029_audit_log_anchors",
       "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1783533600000,
+      "tag": "0034_otps_audit_logs_indexes",
+      "breakpoints": true
     }
   ]
 }
