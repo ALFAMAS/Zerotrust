@@ -218,6 +218,13 @@
       "when": 1783533600000,
       "tag": "0034_otps_audit_logs_indexes",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1783533700000,
+      "tag": "0035_org_settings_version",
+      "breakpoints": true
     }
   ]
 }
