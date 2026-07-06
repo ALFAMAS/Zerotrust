@@ -1707,3 +1707,73 @@ describe("POST /auth/me/link", () => {
     expect(setArg.oauthProviders[0]).toMatchObject({ provider: "google", providerId: "g-1" });
   });
 });
+
+// ── POST /me/avatar rate limiting (Low finding 15) ─────────────────────────
+// Previously this route had no throttle at all, so a caller could hammer it
+// with large multipart uploads. Exercise the REAL rateLimiting module (not
+// mocked) to confirm the route actually mounts a limiter.
+
+describe("POST /me/avatar rate limiting", () => {
+  afterEach(() => {
+    vi.clearAllMocks();
+    vi.doUnmock("../config");
+    vi.doUnmock("../services/ops/objectStorage.service");
+  });
+
+  it("blocks requests after exceeding the route's per-IP limit", async () => {
+    vi.resetModules();
+    vi.doMock("../config", () => ({
+      getConfig: () => ({
+        session: { defaultTTL: 3600, refreshTokenTTL: 604800, maxConcurrentDevices: 5 },
+        security: { bcryptRounds: 4, tokenSecretHex: "a".repeat(64), csfleMasterKeyHex: "b".repeat(64) },
+        rateLimiting: { enabled: true, perIpLimit: 100, windowSecs: 60 },
+        geofencing: { enabled: false, allowedCountries: [], allowedIpRanges: [] },
+        mfa: { totpWindow: 1, otpExpirySecs: 900, maxOTPAttempts: 5, channels: {} },
+        oauth: { providers: {} },
+        elasticsearch: { enabled: false, host: "localhost", port: 9200, indexPrefix: "zt" },
+        logging: { level: "error", format: "json" },
+      }),
+    }));
+    // Avoid touching real disk/S3 for the upload itself — only the limiter
+    // mounting is under test here.
+    vi.doMock("../services/ops/objectStorage.service", () => ({
+      isS3BackupEnabled: vi.fn().mockResolvedValue(true),
+      uploadBuffer: vi.fn().mockResolvedValue({ url: "https://cdn.example.com/avatars/x.png" }),
+      deleteObject: vi.fn().mockResolvedValue(undefined),
+      parseObjectKeyFromPublicUrl: vi.fn().mockReturnValue(null),
+    }));
+
+    const { getDb } = await import("../db");
+    vi.mocked(getDb).mockReturnValue(makeDbChain([]) as any);
+
+    const { clearRateLimiter } = await import("../middleware/rateLimiting");
+    clearRateLimiter();
+
+    const router = await getRouter();
+    const app = new Hono().route("/", router);
+
+    const hit = () => {
+      const formData = new FormData();
+      formData.append(
+        "avatar",
+        new File([new Uint8Array([137, 80, 78, 71])], "avatar.png", { type: "image/png" })
+      );
+      return app.request("/me/avatar", {
+        method: "POST",
+        headers: { "x-test-user-id": USER_ID },
+        body: formData,
+      });
+    };
+
+    const statuses: number[] = [];
+    for (let i = 0; i < 12; i++) {
+      const res = await hit();
+      statuses.push(res.status);
+    }
+
+    // points is 10/hour on the route — the 11th+ request must be throttled.
+    expect(statuses.filter((s) => s === 429).length).toBeGreaterThan(0);
+
+    clearRateLimiter();
+  });
+});

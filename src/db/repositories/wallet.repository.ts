@@ -39,7 +39,13 @@ export async function topUpWallet(
       .limit(1);
 
     if (!wallet) {
-      await tx.insert(walletsTable).values({ userId, balance: 0, lifetimeBalance: 0 });
+      // Two concurrent first-top-ups can both see "no wallet" and race this
+      // insert; user_id is the PK, so without conflict handling the loser
+      // aborts with a duplicate-key error and its credit is lost.
+      await tx
+        .insert(walletsTable)
+        .values({ userId, balance: 0, lifetimeBalance: 0 })
+        .onConflictDoNothing();
     }
 
     // Atomic SQL increment — mirrors spendFromWallet's conditional UPDATE so

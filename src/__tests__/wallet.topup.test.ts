@@ -10,7 +10,16 @@ const getDbMock = getDb as unknown as ReturnType<typeof vi.fn>;
 function fakeDb(queue: unknown[][]) {
   let i = 0;
   const builder: Record<string, unknown> = {};
-  for (const m of ["select", "from", "where", "set", "values", "update", "insert"]) {
+  for (const m of [
+    "select",
+    "from",
+    "where",
+    "set",
+    "values",
+    "update",
+    "insert",
+    "onConflictDoNothing",
+  ]) {
     builder[m] = () => builder;
   }
   builder.limit = () => Promise.resolve(queue[i++] ?? []);

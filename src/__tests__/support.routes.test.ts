@@ -142,6 +142,33 @@ describe("GET /support/:id", () => {
     const body = await res.json();
     expect(body.messages).toHaveLength(1);
   });
+
+  // M13: the ownership check gates access, so it must read the primary —
+  // same as the sibling POST /:id/messages and PATCH /:id handlers, which
+  // already used getDb(). Wires getDb() and getReadDb() to DIFFERENT mocks
+  // to prove which one the ownership check actually queries.
+  it("authorizes using getDb() (primary), not getReadDb() (replica)", async () => {
+    vi.resetModules();
+    const primaryDb = makeDbChain([makeTicket({ userId: USER_ID })]);
+    const replicaDb = makeDbChain([makeTicket({ userId: OTHER_ID })]); // stale: would 403 if used
+    const { getDb, getReadDb } = await import("../db");
+    vi.mocked(getDb).mockReturnValue(primaryDb);
+    vi.mocked(getReadDb).mockReturnValue(replicaDb);
+    vi.doMock("../middleware/auth", () => ({
+      authMiddleware: async (c: any, next: any) => {
+        c.set("user", { id: USER_ID, email: "u@test.com", roles: ["user"] });
+        return next();
+      },
+    }));
+    const { default: router } = await import("../api/routes/support.routes");
+    const app = new Hono().route("/support", router);
+
+    const res = await app.request(`/support/${TICKET_ID}`);
+    // Primary says this ticket belongs to the caller — must be authorized.
+    // If the handler still read the replica (which shows a different
+    // owner), this would wrongly 403.
+    expect(res.status).toBe(200);
+  });
 });
 
 describe("POST /support/:id/messages", () => {

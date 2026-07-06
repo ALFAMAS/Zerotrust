@@ -28,9 +28,14 @@ function trialDays(): number {
   return parseInt(process.env.TRIAL_DAYS ?? "14", 10);
 }
 
-/** Org-scoped requests require the caller to be an org owner or admin. */
+/**
+ * Org-scoped requests require the caller to be an org owner or admin. Reads
+ * the primary (M13) — this gates every org-billing action (checkout, plan
+ * changes, cancel/pause/reactivate), so a replica-lag window must not be
+ * able to authorize a member who was just demoted/removed on the primary.
+ */
 async function canManageOrgBilling(orgId: string, userId: string): Promise<boolean> {
-  const db = getReadDb();
+  const db = getDb();
   const [member] = await db
     .select({ role: organizationMembersTable.role })
     .from(organizationMembersTable)
