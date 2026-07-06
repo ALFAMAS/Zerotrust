@@ -58,6 +58,7 @@ import {
   setRefreshTokenCookie,
 } from "../../shared/authCookies";
 import { getClientIp } from "../../shared/clientIp";
+import { hashTokenSha256, safeDigestEquals } from "../../shared/cryptoHash";
 import { internalError } from "../../shared/httpErrors";
 import { localeFromAcceptLanguage, normalizeLocale, SUPPORTED_LOCALES } from "../../shared/locale";
 import {
@@ -173,7 +174,7 @@ async function issueVerification(user: {
     .where(and(eq(otpsTable.userId, user.id), eq(otpsTable.type, "email_verification")));
   await db.insert(otpsTable).values({
     userId: user.id,
-    code,
+    code: hashTokenSha256(code),
     type: "email_verification",
     channel: "email",
     target: user.email,
@@ -355,12 +356,11 @@ router.post(
           and(
             eq(otpsTable.userId, user.id),
             eq(otpsTable.type, "email_verification"),
-            eq(otpsTable.code, String(code).trim()),
             gt(otpsTable.expiresAt, new Date())
           )
         )
         .limit(1);
-      if (!otp) {
+      if (!otp || !safeDigestEquals(hashTokenSha256(String(code).trim()), otp.code)) {
         return c.json({ error: "INVALID_CODE", message: "Invalid or expired code" }, 400);
       }
 

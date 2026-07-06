@@ -13,7 +13,7 @@ import { sendOTP } from "../../services/auth/otpDelivery.service";
 import { rejectIfBreached } from "../../services/auth/passwordBreach.service";
 import { sendPasswordResetEmail } from "../../services/notifications/email.service";
 import { getClientIp } from "../../shared/clientIp";
-import { hashTokenSha256 } from "../../shared/cryptoHash";
+import { hashTokenSha256, safeDigestEquals } from "../../shared/cryptoHash";
 import { hashPassword } from "../../shared/passwordHash";
 import type { HonoEnv } from "../../shared/types";
 import { ErrorCodes } from "../../shared/types";
@@ -21,14 +21,6 @@ import { PasswordResetConfirmSchema, PasswordResetRequestSchema } from "../schem
 
 const router = new Hono<HonoEnv>();
 const logger = getLogger("password-reset-routes");
-
-/** Constant-time digest comparison (SHA-256 hex, 64 chars). */
-function safeDigestEquals(candidate: string, expected: string): boolean {
-  const a = Buffer.from(String(candidate));
-  const b = Buffer.from(String(expected));
-  if (a.length !== b.length) return false;
-  return crypto.timingSafeEqual(a, b);
-}
 
 // POST /request — send a password-reset OTP
 router.post(

@@ -218,7 +218,7 @@ Cross-audit of `docs/security.md` §0–§10. Open gaps tracked in [`todo.md`](.
 - ✅ **SEC-10 (2026-07-05):** `family_id` on `refresh_tokens` (`0039_refresh_token_family_id.sql`); rotation preserves family; reuse revokes family sessions only (`authSessions.repository.ts`, `auth.routes.test.ts`)
 - ✅ **SEC-1 (2026-07-05):** `POST /auth/logout` revokes Postgres session + refresh token via `revokeSessionAtLogout()` before clearing cookie; UI `clearToken()` sends Bearer token so session id is available
 - ✅ **SEC-2 (2026-07-05):** Login runs password verify against a lazy dummy hash when user missing — same 401 body/status (`auth.login-timing.test.ts`)
-- ✅ **SEC-3 (2026-07-05):** Password-reset codes stored as `hashTokenSha256(code)` in `otpsTable`; confirm compares hashed digest (`password-reset.routes.test.ts`)
+- ✅ **SEC-3 (2026-07-05, extended 2026-07-06):** All `otpsTable` codes stored as `hashTokenSha256(code)` — password-reset, magic-link, email verification, MFA email login, and re-verification OTPs; confirm paths use `safeDigestEquals()` (`password-reset.routes.test.ts`, `auth.routes.test.ts`, `mfa.routes.test.ts`, `verification.routes.test.ts`)
 - ✅ **SEC-4 (2026-07-05):** Postgres RLS on all 14 org-scoped tables (`0038_org_rls_expansion.sql`); `orgRlsMiddleware` on org/search/JIT/region/tax routes; `:orgId` path resolves RLS context (`migrations.test.ts`, `resolveOrgContext.test.ts`)
 - ✅ **SEC-11 (2026-07-05):** `sessions.active_org_id` (`0040_session_active_org_id.sql`); `resolveAndSetActiveOrg()` derives tenant from session row; `X-Org-Id` hint-only for bootstrap; `PUT /sessions/active-org`; refresh rotation preserves org (`resolveOrgContext.test.ts`, `orgRls.middleware.test.ts`, `setSessionActiveOrg.test.ts`)
 - ✅ **SEC-12 (2026-07-05):** `createOrgScopedContext()` + `webhooksRepo(orgId)` factory exemplar; CI patterns extended in `scripts/org-scoped-tables.json` (`orgScopedFactory.test.ts`, `webhooks.repository.test.ts`)
@@ -454,6 +454,25 @@ Cross-audit of `docs/security.md` §0–§10. Open gaps tracked in [`todo.md`](.
 - **Verification (2026-07-05):** No `expo` / React Native app in monorepo (grep clean);
   `docs/security.md` §5 now states web+API-only scope; mobile implementation remains
   greenfield when needed.
+
+---
+
+## Recent work (2026-07-06)
+
+### OTP-at-rest hashing (all `otpsTable` types)
+
+- **Problem:** Password-reset and magic-link OTPs were already SHA-256 hashed (SEC-3), but
+  email verification, MFA email login, and continuous re-verification OTPs were still stored
+  plaintext in `otpsTable` — a DB leak would expose live codes.
+- **Fix:** Store `hashTokenSha256(code)` on insert; verify by loading the live row then
+  comparing with `safeDigestEquals()` (constant-time). Centralized `safeDigestEquals()` in
+  `src/shared/cryptoHash.ts`; `password-reset.routes.ts` imports it instead of a local copy.
+- **Paths:** `src/api/routes/auth.routes.ts`, `src/api/routes/verification.routes.ts`,
+  `plugins/mfa/routes.ts`, `src/shared/cryptoHash.ts`, `src/api/routes/password-reset.routes.ts`
+- **Tests:** `verification.routes.test.ts`, `mfa.routes.test.ts`, `password-reset.routes.test.ts`,
+  `auth.routes.test.ts` (verify-email), `crypto-hash.test.ts`
+
+**Verification (2026-07-06):** targeted vitest → **61 passed** (4 files + verify-email suite).
 
 ---
 

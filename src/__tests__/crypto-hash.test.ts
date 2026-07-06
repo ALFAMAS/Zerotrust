@@ -5,6 +5,7 @@ import {
   hashTokensSha256,
   hashFingerprint,
   hashBase64Url,
+  safeDigestEquals,
   sha256Hex,
 } from "../shared/cryptoHash";
 
@@ -52,6 +53,20 @@ describe("cryptoHash — hashFingerprint", () => {
 
   it("stays deterministic for the same input", () => {
     expect(hashFingerprint("Mozilla/5.0")).toBe(hashFingerprint("Mozilla/5.0"));
+  });
+});
+
+describe("cryptoHash — safeDigestEquals", () => {
+  it("returns true for equal digests", () => {
+    const digest = hashTokenSha256("654321");
+    expect(safeDigestEquals(digest, digest)).toBe(true);
+  });
+
+  it("returns false for different digests or lengths", () => {
+    expect(safeDigestEquals(hashTokenSha256("111111"), hashTokenSha256("222222"))).toBe(
+      false
+    );
+    expect(safeDigestEquals("short", hashTokenSha256("111111"))).toBe(false);
   });
 });
 

@@ -27,3 +27,12 @@ Audit date: **2026-07-05**. Verified/completed items moved to [`tdone.md`](./tdo
        **Paths:** `vitest.config.ts`, `packages/ui/vitest.config.ts`, `docs/maintenance-scorecard.md`, `.github/workflows/ci.yml`
 
        **Status (2026-07-05):** Floors aligned to measured baseline (API 64/61/55/63; UI 54/52/46/51). Long-term 85% target — incremental ratchet ongoing.
+
+## Backlog (unprioritized)
+
+CSP / security-headers middleware (from BoxyHQ). Zerotrust's API is Bearer-only so the risk is lower than for a cookie app, but the Next.js UI would still benefit from an explicit CSP.
+CAPTCHA hook on the hottest auth endpoints (from BoxyHQ / better-auth's captcha plugin) as a bot backstop layered on the existing rate limits — an option flag, not a default.
+
+Dead-code and dependency CI checks (knip, from ixartz — carried over from v1 of this review; still not adopted). Would have mechanically caught the M9 vestigial tenant layer and future orphans like it.
+
+Atomic rate-limit consume for DB storage (from better-auth's rate limiter, which documents its increment race and guards it). Zerotrust's Redis path is atomic; the in-memory fallback is fine per-process — worth a note in the code, nothing more.

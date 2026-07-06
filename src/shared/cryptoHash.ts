@@ -11,7 +11,7 @@
  * isolated behind `hibpSha1Hex()` and is NOT re-exported here.
  */
 
-import { createHash } from "node:crypto";
+import { createHash, timingSafeEqual } from "node:crypto";
 
 /** SHA-256 hex digest of an input string, UTF-8 encoded. */
 export function sha256Hex(input: string): string {
@@ -31,6 +31,14 @@ export function sha256Hex(input: string): string {
  */
 export function hashTokenSha256(token: string): string {
   return sha256Hex(token);
+}
+
+/** Constant-time digest comparison (SHA-256 hex, 64 chars). */
+export function safeDigestEquals(candidate: string, expected: string): boolean {
+  const a = Buffer.from(String(candidate));
+  const b = Buffer.from(String(expected));
+  if (a.length !== b.length) return false;
+  return timingSafeEqual(a, b);
 }
 
 /** Map a list of tokens to their canonical SHA-256 hex digests, preserving order. */

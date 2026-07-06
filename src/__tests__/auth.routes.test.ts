@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { Hono } from "hono";
+import { hashTokenSha256 } from "../shared/cryptoHash";
 
 // ── Mocks ──────────────────────────────────────────────────────────────────
 
@@ -1504,7 +1505,7 @@ describe("POST /verify-email", () => {
     db.limit
       .mockResolvedValueOnce([makeActiveUser({ emailVerifiedAt: null })]) // user lookup
       .mockResolvedValueOnce([
-        { id: "otp-1", userId: USER_ID, code: "123456" },
+        { id: "otp-1", userId: USER_ID, code: hashTokenSha256("123456") },
       ]); // otp lookup
     const res = await post({ code: "123456" });
     expect(res.status).toBe(200);
@@ -1516,7 +1517,7 @@ describe("POST /verify-email", () => {
     db.limit
       .mockResolvedValueOnce([makeActiveUser({ emailVerifiedAt: null })])
       .mockResolvedValueOnce([
-        { id: "otp-1", userId: USER_ID, code: "123456" },
+        { id: "otp-1", userId: USER_ID, code: hashTokenSha256("123456") },
       ]);
     // Even if a different email is smuggled in the body, it is ignored.
     const res = await post({ code: "123456", email: "attacker@example.com" });

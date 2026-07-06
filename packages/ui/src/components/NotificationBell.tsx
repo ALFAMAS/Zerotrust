@@ -134,9 +134,9 @@ export function NotificationBell() {
           role="dialog"
           aria-label="Notifications"
           aria-modal="false"
-          className="absolute right-0 z-50 mt-2 w-96 max-w-[calc(100vw-24px)] overflow-hidden rounded-xl border border-border bg-popover shadow-2xl"
+          className="absolute right-0 z-50 mt-2 w-[28rem] max-w-[calc(100vw-24px)] overflow-hidden rounded-xl border border-border bg-popover shadow-2xl"
         >
-          <div className="flex items-center justify-between border-b border-border px-4 py-3">
+          <div className="flex items-center justify-between border-b border-border px-5 py-3.5">
             <span className="text-sm font-semibold text-foreground">Notifications</span>
             {unreadCount > 0 && (
               <Button variant="ghost" onClick={markAllRead} className="text-xs text-primary">
@@ -145,42 +145,54 @@ export function NotificationBell() {
             )}
           </div>
 
-          <div className="max-h-[min(28rem,calc(100vh-10rem))] overflow-y-auto">
+          <div className="max-h-[min(32rem,calc(100vh-8rem))] overflow-y-auto">
             {loadingList ? (
-              <div className="px-4 py-6 text-center text-sm text-muted-foreground">Loading…</div>
+              <div className="px-5 py-8 text-center text-sm text-muted-foreground">Loading…</div>
             ) : notifications.length === 0 ? (
-              <div className="px-4 py-6 text-center text-sm text-muted-foreground">
+              <div className="px-5 py-8 text-center text-sm text-muted-foreground">
                 No notifications
               </div>
             ) : (
-              notifications.map((n) => (
-                <Button
-                  variant="ghost"
-                  key={n.id}
-                  onClick={() => handleNotificationClick(n)}
-                  className={cn(
-                    "flex w-full items-start gap-3 border-b border-border px-4 py-3 text-left last:border-b-0",
-                    n.read && "opacity-60"
-                  )}
-                >
-                  <span className="mt-0.5 flex-shrink-0 text-lg">{typeIcon(n.type)}</span>
-                  <div className="min-w-0 flex-1">
-                    <div className="line-clamp-2 text-sm font-medium text-foreground">{n.title}</div>
-                    <div className="mt-0.5 line-clamp-3 text-sm text-muted-foreground">{n.body}</div>
-                    <div className="mt-1 text-[11px] text-muted-foreground/70">
-                      {fmt.relativeTime(n.createdAt)}
-                    </div>
-                  </div>
-                  {!n.read && (
-                    <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-primary" />
-                  )}
-                </Button>
-              ))
+              <ul role="list" className="divide-y divide-border">
+                {notifications.map((n) => (
+                  <li key={n.id}>
+                    <Button
+                      variant="ghost"
+                      onClick={() => handleNotificationClick(n)}
+                      className={cn(
+                        "flex h-auto min-h-[5.5rem] w-full items-start gap-4 whitespace-normal rounded-none px-5 py-4 text-left",
+                        n.read && "opacity-60"
+                      )}
+                    >
+                      <span className="mt-0.5 shrink-0 text-xl leading-none">
+                        {typeIcon(n.type)}
+                      </span>
+                      <div className="min-w-0 flex-1 space-y-1">
+                        <div className="line-clamp-2 text-sm font-medium leading-snug text-foreground">
+                          {n.title}
+                        </div>
+                        <div className="line-clamp-3 text-sm leading-relaxed text-muted-foreground">
+                          {n.body}
+                        </div>
+                        <div className="text-xs text-muted-foreground/70">
+                          {fmt.relativeTime(n.createdAt)}
+                        </div>
+                      </div>
+                      {!n.read && (
+                        <span
+                          className="mt-2 h-2.5 w-2.5 shrink-0 rounded-full bg-primary"
+                          aria-hidden="true"
+                        />
+                      )}
+                    </Button>
+                  </li>
+                ))}
+              </ul>
             )}
           </div>
 
           {notifications.length > 0 && (
-            <div className="border-t border-border px-4 py-2">
+            <div className="border-t border-border px-5 py-2.5">
               <Button
                 variant="ghost"
                 onClick={markAllRead}
