@@ -5,6 +5,7 @@ import { getConfig } from "../../config";
 import { getDb } from "../../db";
 import { otpsTable, usersTable } from "../../db/schema";
 import { getLogger } from "../../logger";
+import { captchaGuard } from "../../middleware/captcha";
 import { rateLimit } from "../../middleware/rateLimiting";
 import { revokeAllSessionsForUser } from "../../middleware/sessionControl";
 import { zValidator } from "../../middleware/zodValidation";
@@ -26,6 +27,7 @@ const logger = getLogger("password-reset-routes");
 router.post(
   "/request",
   rateLimit({ points: 5, windowSecs: 3600 }),
+  captchaGuard(),
   zValidator("json", PasswordResetRequestSchema),
   async (c) => {
     try {

@@ -12,6 +12,7 @@ import {
   usersTable,
 } from "../../src/db/schema/index.js";
 import { getLogger } from "../../src/logger/index.js";
+import { captchaGuard } from "../../src/middleware/captcha.js";
 import { rateLimit } from "../../src/middleware/rateLimiting.js";
 import { getSettings } from "../../src/models/settings.model.js";
 import { sendMagicLink, verifyMagicLink } from "../../src/services/auth/magicLink.service.js";
@@ -91,7 +92,7 @@ async function issueTokensForUser(userId: string, c: Context<HonoEnv>) {
   };
 }
 
-router.post("/send", rateLimit({ points: 5, windowSecs: 60 }), async (c) => {
+router.post("/send", rateLimit({ points: 5, windowSecs: 60 }), captchaGuard(), async (c) => {
   try {
     const settings = await getSettings();
     if (!settings.magicLinkEnabled) {

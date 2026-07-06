@@ -459,6 +459,38 @@ Cross-audit of `docs/security.md` §0–§10. Open gaps tracked in [`todo.md`](.
 
 ## Recent work (2026-07-06)
 
+### UI security headers (CSP + HSTS)
+
+- **`packages/ui/src/config/securityHeaders.ts`:** builds CSP, HSTS (production only),
+  X-Frame-Options, and companion headers; dev allows Turbopack/HMR (`unsafe-eval`, `ws:`).
+- **`packages/ui/next.config.ts`:** wires `headers()` on all routes.
+- **Env:** `UI_CSP` (full override), `UI_CSP_REPORT_ONLY`, `UI_CSP_REPORT_URI`.
+- **Tests:** `packages/ui/src/config/securityHeaders.test.ts`
+
+### CAPTCHA hook on auth endpoints (opt-in)
+
+- **`src/services/auth/captcha.service.ts`:** provider-agnostic verify (Turnstile, hCaptcha,
+  reCAPTCHA) via `fetchFixedUrl`; off unless `CAPTCHA_ENABLED=true` + `CAPTCHA_SECRET`.
+- **`src/middleware/captcha.ts`:** `captchaGuard()` on login, register, password-reset
+  request, magic-link send.
+- **Schemas:** optional `captchaToken` on login/register/password-reset bodies.
+- **Tests:** `src/__tests__/captcha.test.ts`
+
+### Dead-code CI (knip)
+
+- **`knip.config.ts`:** monorepo entry points (API, worker, plugins, Next.js app routes).
+- **`package.json`:** `knip` / `dead-code` scripts; wired in `.github/workflows/ci.yml`.
+- Baseline ignores for known orphan stubs and platform-specific optional deps.
+
+### Rate-limit in-memory fallback note
+
+- **`src/middleware/rateLimiting.ts`:** comment documenting per-process, non-atomic
+  semantics of the in-memory fallback (Redis path remains canonical for production).
+
+**Verification (2026-07-06):** `bun run knip`; targeted vitest for captcha + UI security headers.
+
+---
+
 ### OTP-at-rest hashing (all `otpsTable` types)
 
 - **Problem:** Password-reset and magic-link OTPs were already SHA-256 hashed (SEC-3), but

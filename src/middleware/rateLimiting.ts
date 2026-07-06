@@ -74,6 +74,9 @@ export function rateLimit(options?: { points?: number; windowSecs?: number }) {
         return next();
       }
 
+      // In-memory fallback: per-process only — not atomic across replicas and
+      // can race under concurrent requests in the same process. Acceptable as a
+      // dev/single-instance fallback; production should use Redis (atomic INCR).
       const now = Math.floor(Date.now() / 1000);
       const bucket = ipBuckets.get(ip);
 

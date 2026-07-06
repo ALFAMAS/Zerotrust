@@ -27,6 +27,7 @@ import {
   recordIpLoginSuccess,
 } from "../../middleware/credentialStuffing";
 import { requireProofOfPossession } from "../../middleware/proofOfPossession";
+import { captchaGuard } from "../../middleware/captcha";
 import { rateLimit } from "../../middleware/rateLimiting";
 import { zValidator } from "../../middleware/zodValidation";
 import { getSettings } from "../../models/settings.model";
@@ -205,6 +206,7 @@ router.get("/pow/challenge", rateLimit({ points: 30, windowSecs: 60 }), (c) => {
 router.post(
   "/register",
   rateLimit({ points: 10, windowSecs: 60 }),
+  captchaGuard(),
   zValidator("json", RegisterBodySchema),
   async (c) => {
     try {
@@ -413,6 +415,7 @@ router.post(
 router.post(
   "/login",
   rateLimit({ points: 20, windowSecs: 60 }),
+  captchaGuard(),
   zValidator("json", LoginBodySchema),
   async (c) => {
     try {

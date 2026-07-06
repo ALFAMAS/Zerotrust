@@ -14,11 +14,12 @@ export const RegisterSchema = z.object({
   displayName: z.string().min(1).max(100).optional(),
 });
 
-/** Register body including optional PoW and locale fields. */
+/** Register body including optional PoW, locale, and CAPTCHA fields. */
 export const RegisterBodySchema = RegisterSchema.extend({
   locale: z.string().optional(),
   powChallenge: z.string().optional(),
   powSolution: z.string().optional(),
+  captchaToken: z.string().optional(),
 });
 
 export const LoginSchema = z.object({
@@ -26,10 +27,11 @@ export const LoginSchema = z.object({
   password: z.string().min(1, "Password is required"),
 });
 
-/** Login body including optional PoW fields for progressive backoff. */
+/** Login body including optional PoW and CAPTCHA fields for progressive backoff. */
 export const LoginBodySchema = LoginSchema.extend({
   powChallenge: z.string().optional(),
   powSolution: z.string().optional(),
+  captchaToken: z.string().optional(),
 });
 
 export const RefreshTokenSchema = z.object({
@@ -39,6 +41,7 @@ export const RefreshTokenSchema = z.object({
 export const PasswordResetRequestSchema = z.object({
   email: z.string().email("Invalid email address"),
   channel: z.enum(["email"]).default("email"),
+  captchaToken: z.string().optional(),
 });
 
 export const PasswordResetConfirmSchema = z.object({

@@ -34,6 +34,8 @@ jobs:
       - run: bun run type-check
       - name: Org-scoping lint (MT-1)
         run: bun run org-scoping:check
+      - name: Dead-code / dependency audit (knip)
+        run: bun run knip
 
   test:
     name: Tests
