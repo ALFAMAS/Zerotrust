@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { PgDialect } from "drizzle-orm/pg-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 // Fresh permission-enforcement coverage for the rewritten org module. The prior
@@ -232,6 +233,26 @@ describe("org RBAC — admin tier", () => {
 
     expect(res.status).toBe(200);
     expect(getReadDb).toHaveBeenCalledTimes(1);
+  });
+
+  it("scopes the org invites list to unused, unexpired invites", async () => {
+    const readDb = makeDb();
+    db.limit.mockResolvedValueOnce(membership("admin", ADMIN));
+    readDb.limit.mockResolvedValueOnce([]);
+    const { getReadDb } = await import("../db");
+    vi.mocked(getReadDb).mockReturnValue(readDb as any);
+    const app = await getRouter();
+
+    await req(app, `/${ORG}/invites`, { uid: ADMIN });
+
+    const dialect = new PgDialect();
+    const whereClause = readDb.where.mock.calls[0]?.[0];
+    expect(whereClause).toBeDefined();
+    const { sql } = dialect.sqlToQuery(whereClause);
+    expect(sql).toContain('"organization_invites"."org_id"');
+    expect(sql.toLowerCase()).toContain("used_at");
+    expect(sql.toLowerCase()).toContain("is null");
+    expect(sql.toLowerCase()).toContain("expires_at");
   });
 });
 
