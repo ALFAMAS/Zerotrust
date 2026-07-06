@@ -829,7 +829,7 @@ export class zerotrustClient {
    *
    * @route PATCH /auth/me
    */
-  patchAuthMe(body?: Record<string, unknown>): Promise<unknown> {
+  patchAuthMe(body?: { displayName?: string; avatarUrl?: string | null; phone?: string | null; username?: string | null; locale?: "en" | "es" | "fr"; version?: number }): Promise<unknown> {
     return this.request("PATCH", `/auth/me`, { body });
   }
 

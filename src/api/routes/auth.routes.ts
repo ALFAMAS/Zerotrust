@@ -1,7 +1,7 @@
 import * as nodeCrypto from "node:crypto";
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
-import { and, eq, gt, sql } from "drizzle-orm";
+import { and, eq, gt, ne, sql } from "drizzle-orm";
 import { Hono } from "hono";
 import { z } from "zod";
 import { getConfig } from "../../config";
@@ -859,20 +859,22 @@ router.get("/me", authMiddleware, async (c) => {
 
 // ── PATCH /auth/me ────────────────────────────────────────────────────────────
 
-const patchMeSchema = z.object({
-  displayName: z.string().min(1).max(100).optional(),
-  avatarUrl: z.string().url().nullable().optional(),
-  phone: z.string().max(30).nullable().optional(),
-  username: z
-    .string()
-    .min(3)
-    .max(50)
-    .regex(/^[a-z0-9_-]+$/, "lowercase letters, digits, hyphens, underscores only")
-    .nullable()
-    .optional(),
-  locale: z.enum(SUPPORTED_LOCALES).optional(),
-  version: z.number().int().nonnegative().optional(),
-});
+const patchMeSchema = z
+  .object({
+    displayName: z.string().min(1).max(100).optional(),
+    avatarUrl: z.string().url().nullable().optional(),
+    phone: z.string().max(30).nullable().optional(),
+    username: z
+      .string()
+      .min(3)
+      .max(50)
+      .regex(/^[a-z0-9_-]+$/, "lowercase letters, digits, hyphens, underscores only")
+      .nullable()
+      .optional(),
+    locale: z.enum(SUPPORTED_LOCALES).optional(),
+    version: z.number().int().nonnegative().optional(),
+  })
+  .strict();
 
 router.patch("/me", authMiddleware, async (c) => {
   try {
@@ -884,6 +886,20 @@ router.patch("/me", authMiddleware, async (c) => {
 
     const { version: expectedVersion, ...fields } = parsed.data;
     const db = getDb();
+
+    if (fields.username !== undefined && fields.username !== user.username) {
+      if (fields.username !== null) {
+        const [existing] = await db
+          .select({ id: usersTable.id })
+          .from(usersTable)
+          .where(and(eq(usersTable.username, fields.username), ne(usersTable.id, user.id)))
+          .limit(1);
+        if (existing) {
+          return c.json({ error: "USERNAME_TAKEN" }, 409);
+        }
+      }
+    }
+
     const setPayload = { ...fields, updatedAt: new Date() };
 
     const returningFields = {
