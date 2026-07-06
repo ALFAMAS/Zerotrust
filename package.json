@@ -25,6 +25,7 @@
     "db:studio": "bunx drizzle-kit studio",
     "db:backup": "node scripts/db-backup.js",
     "db:restore": "node scripts/db-restore.js",
+    "bootstrap:admin": "bun scripts/bootstrap-admin.ts",
     "audit:anchor": "bun scripts/audit-anchor.ts",
     "audit:anchor-verify": "bun scripts/audit-anchor-verify.ts",
     "start": "node dist/src/api/server.js",

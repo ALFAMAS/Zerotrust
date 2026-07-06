@@ -2,15 +2,16 @@
 
 # zerotrust
 
-**Production-grade authentication & identity platform — batteries included.**
+**A production-ready SaaS starter you can clone, brand, and ship.**
 
-A full-stack auth foundation you can clone, brand, and ship: a Hono + TypeScript API
-and a Next.js dashboard/admin app, with passkeys, OAuth, MFA, RBAC/ABAC,
-organizations, billing, and an audit trail already wired together.
+Full-stack monorepo: Hono API + Next.js dashboard/admin, with authentication,
+multi-tenant organizations, Stripe billing, compliance docs, and security
+hardening already wired — so you build product features instead of rebuilding
+login for the hundredth time.
 
 [![CI](https://github.com/ALFAMAS/zerotrust/actions/workflows/ci.yml/badge.svg)](https://github.com/ALFAMAS/zerotrust/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](#license)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.4-3178c6?logo=typescript&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-6-3178c6?logo=typescript&logoColor=white)
 ![Bun](https://img.shields.io/badge/Bun-1.x-black?logo=bun&logoColor=white)
 ![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js&logoColor=white)
 ![Hono](https://img.shields.io/badge/Hono-4-e36002)
@@ -21,62 +22,83 @@ organizations, billing, and an audit trail already wired together.
 
 ## Table of contents
 
-- [Why zerotrust](#why-zerotrust)
-- [Features](#features)
-- [Tech stack](#tech-stack)
+- [Who this is for](#who-this-is-for)
+- [Why clone this instead of rolling your own](#why-clone-this-instead-of-rolling-your-own)
+- [What's included](#whats-included)
 - [Architecture](#architecture)
-- [Quick start (local development)](#quick-start-local-development)
+- [Tech stack](#tech-stack)
+- [Quick start](#quick-start)
+- [Scripts](#scripts)
+- [Production checklist](#production-checklist)
+- [Project structure](#project-structure)
 - [Configuration](#configuration)
+- [Security & compliance](#security--compliance)
+- [Customizing](#customizing)
+- [API overview](#api-overview)
 - [Testing & code quality](#testing--code-quality)
 - [Production deployment](#production-deployment)
-- [API overview](#api-overview)
-- [Project structure](#project-structure)
-- [Customizing](#customizing)
-- [Security](#security)
 - [Project status](#project-status)
 - [Contributing](#contributing)
 - [License](#license)
 
 ---
 
-## Why zerotrust
+## Who this is for
 
-Authentication is the part of every SaaS that is high-stakes, time-consuming, and
-easy to get subtly wrong. zerotrust gives you a complete, opinionated implementation
-of the hard parts — token issuance, session lifecycle, MFA, RBAC, abuse
-defense, and an admin surface — so you can spend your time on product instead of
-rebuilding login for the hundredth time.
+zerotrust is for developers and teams who want a **real SaaS foundation** — not a
+tutorial auth demo. Clone it when you need:
 
-- **Secure by default** — PASETO v4 tokens (no JWT footguns), argon2id password
-  hashing (bcrypt verify/rehash fallback), client-side field encryption (CSFLE),
-  HaveIBeenPwned breach checks, and per-IP credential-stuffing defense are on out
-  of the box.
-- **Team-ready** — organizations, teams, custom roles with fine-grained
-  permissions, and per-org security policies are first-class, not afterthoughts.
-- **Operable** — Prometheus metrics, OpenTelemetry tracing, a public status page,
-  structured logs, and Slack/Teams/PagerDuty alerting ship with the platform.
+- Multi-tenant **organizations** with roles, invites, and per-org security policies
+- **Production auth** — password, OAuth, magic links, MFA, WebAuthn/passkeys, sessions
+- **Stripe billing** — checkout, portal, trials, dunning, plan gates, wallet
+- A **Next.js app** with landing page, user dashboard, and admin console
+- **Operability** — metrics, tracing, backups, audit logs, compliance runbooks
 
-> The authoritative, always-current feature catalog lives in
-> [`tdone.md`](./tdone.md). The list below is a curated summary.
+You get a modular monolith you can deploy on a VPS, containers, or Kubernetes
+(see [`docs/reference-architecture.md`](./docs/reference-architecture.md)), with
+a generated TypeScript SDK in `packages/client`.
+
+> **Source of truth for shipped features:** this README summarizes what ships
+> today. The full catalog lives in [`tdone.md`](./tdone.md); open backlog in
+> [`todo.md`](./todo.md).
 
 ---
 
-## Features
+## Why clone this instead of rolling your own
+
+Authentication and tenant isolation are high-stakes, time-consuming, and easy to
+get subtly wrong. zerotrust ships the hard parts already integrated:
+
+| You avoid… | zerotrust ships… |
+| ---------- | ---------------- |
+| Weeks on login, sessions, and token rotation | PASETO v4 access tokens, hashed refresh rotation, session lifecycle |
+| Bolt-on MFA and passkeys later | TOTP, email OTP, WebAuthn (FIDO2), magic links |
+| Rebuilding org RBAC from scratch | Organizations, custom roles, JIT cross-tenant access |
+| Stripe webhook idempotency bugs | Replay-safe webhook handling, plan gates, billing lifecycle |
+| "We'll add compliance later" | SOC 2 readiness docs, audit hash-chain, backup runbooks |
+| Security footguns in redirects, fetches, uploads | CWE-hardened patterns enforced across the codebase |
+
+This is **batteries included**, not a minimal JWT example. Fork it, rename it,
+point DNS at it, and focus on your product surface.
+
+---
+
+## What's included
 
 ### Authentication & identity
 
 - Email + password with progressive login backoff (exponential delay + PoW at threshold)
-- OAuth — Google, GitHub, Facebook (admin-toggleable per provider); Apple Sign In not yet implemented
+- OAuth — Google, GitHub, Facebook (admin-toggleable per provider); **Apple Sign In not yet implemented**
 - Magic links (passwordless, 15-minute TTL) — [`plugins/magic-link/`](./plugins/magic-link/)
 - Passkeys / WebAuthn (FIDO2, resident keys, MDS3 attestation policy)
-- TOTP (Google Authenticator / Authy) + Email OTP
+- TOTP (Google Authenticator / Authy) + email OTP
 - PASETO v4 access tokens + rotating, hashed refresh tokens
 - Session management — list, revoke, device fingerprinting, concurrent-session caps
 
 ### Organizations & access
 
 - Organizations & teams — workspaces, invites, custom roles with fine-grained permissions
-- Cross-tenant JIT access — request + admin-approval inbox, auto-expiring
+- Cross-tenant JIT access — request + admin-approval inbox, auto-expiring grants
 
 ### Access control & abuse defense
 
@@ -97,8 +119,7 @@ rebuilding login for the hundredth time.
 ### Frontend (Next.js)
 
 - Landing page, user dashboard, and guarded admin panel in one app
-- Admin consoles — users, revenue, sessions, auth settings, JIT, and
-  SOC 2 / risk compliance
+- Admin consoles — users, revenue, sessions, auth settings, JIT, and SOC 2 / risk compliance
 - PWA — installable, offline app-shell, web push (VAPID)
 - i18n (next-intl, EN/ES/FR/AR with RTL support), locale-aware `Intl.*` formatting, dark mode
 - GDPR — cookie consent, data export, 30-day soft-delete; privacy/terms pages
@@ -112,40 +133,18 @@ rebuilding login for the hundredth time.
 - Access reviews tooling, data-retention auto-purge
 - SOC 2 readiness controls, risk register, privacy records, and compliance runbooks
 - Prometheus metrics, OpenTelemetry tracing, public `/status` page
-- S3-compatible storage (AWS S3, Backblaze B2, Cloudflare R2, MinIO, Wasabi) for
-  backups and user uploads
+- S3-compatible storage (AWS S3, Backblaze B2, Cloudflare R2, MinIO, Wasabi) for backups and user uploads
 - Automated `pg_dump` backups with local + S3 retention
 - SLO burn-rate reporting, read-replica support, k6 load/chaos harnesses
 
 ---
 
-## Tech stack
-
-| Layer         | Technology                                                                                  |
-| ------------- | ------------------------------------------------------------------------------------------- |
-| API           | [Hono](https://hono.dev) 4 · TypeScript 6 · run on [Bun](https://bun.sh)                    |
-| Database      | PostgreSQL via [Drizzle ORM](https://orm.drizzle.team) (works with Neon)                    |
-| Cache / queue | Redis (ioredis) · [BullMQ](https://docs.bullmq.io) email queue                              |
-| Frontend      | [Next.js](https://nextjs.org) 16 (App Router) · Tailwind CSS · shadcn/ui                    |
-| Crypto        | PASETO v4, `@noble/*`, CSFLE field encryption                                                |
-| Auth libs     | `@simplewebauthn/server` (WebAuthn) · `otpauth` (TOTP)                                       |
-| Observability | Prometheus (`prom-client`) · OpenTelemetry · Sentry                                         |
-| SDK           | Generated TypeScript client in `packages/client` from `src/api/openapi.json`                |
-| Tooling       | [Biome](https://biomejs.dev) (lint+format) · Vitest · Playwright · Husky · semantic-release |
-
----
-
 ## Architecture
 
-zerotrust is a Bun monorepo: a standalone API server and a Next.js app that talks
-to it. It is a **modular monolith** — one Hono API process exposes ~27 route
-modules backed by ~45 services and ~21 middleware, persisting to PostgreSQL (41
-tables) with Redis for sessions, rate limiting, and the email queue. Domains call
-each other in-process; there are no internal network hops.
-
-> **Deep dive:** [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) audits the full
-> system (request lifecycle, module map, data/state, auth/crypto, background
-> jobs, observability) and proposes upgrades.
+zerotrust is a **Bun monorepo**: a standalone Hono API and a Next.js app that
+talks to it over HTTP. One API process exposes ~27 route modules backed by
+~45 services; PostgreSQL holds state; Redis backs sessions, rate limiting, and
+the BullMQ email queue.
 
 ```
 ┌─────────────────────────┐         ┌──────────────────────────┐
@@ -167,288 +166,292 @@ each other in-process; there are no internal network hops.
 | Next.js app + admin | http://localhost:3000      | admin panel at `/admin`                |
 | API docs (Swagger)  | http://localhost:1337/docs | dev only                               |
 | Health / metrics    | `/healthz` · `/metrics`    | on the API port                        |
+| Next.js MCP (dev)   | `/_next/mcp`                | coding-agent tools when `bun dev:ui` runs |
 | PostgreSQL          | localhost:5432             | or a managed provider (e.g. Neon)      |
-| Redis               | localhost:6379             | optional — in-memory fallback if unset |
+| Redis               | localhost:6379             | optional in dev — in-memory fallback   |
 
-### Background work
+**Background work:** a BullMQ email-queue consumer plus scheduled jobs (data
+retention, billing lifecycle, `pg_dump` backup, audit anchoring) run in
+`src/worker.ts`. In local dev the API starts schedulers in-process when
+`WORKER_MODE` is unset; production should run a dedicated worker with
+`WORKER_MODE=true` on API replicas.
 
-A BullMQ email-queue consumer plus scheduled jobs (data retention, notification
-fallback, billing lifecycle, `pg_dump` backup, audit anchoring) run as a
-dedicated worker process (`src/worker.ts`). Scheduled jobs dispatch through a
-BullMQ job scheduler (`Queue.upsertJobScheduler`) with retry/exponential-backoff
-and dead-letter visibility — BullMQ delivers each job to exactly one consumer,
-so no Redis leader lock is needed for single-instance enforcement. In local dev
-the API process still starts schedulers in-process when `WORKER_MODE` is unset.
+> **Deep dive:** [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md)
 
 ---
 
-## Quick start (local development)
+## Tech stack
 
-**Prerequisites:** [Bun](https://bun.sh) 1.x · PostgreSQL 15+ (local or a managed
-URL like Neon) · Redis 7 (optional).
+| Layer         | Technology                                                                                  |
+| ------------- | ------------------------------------------------------------------------------------------- |
+| API           | [Hono](https://hono.dev) 4 · TypeScript 6 · run on [Bun](https://bun.sh)                    |
+| Database      | PostgreSQL via [Drizzle ORM](https://orm.drizzle.team) (works with Neon)                    |
+| Cache / queue | Redis (ioredis) · [BullMQ](https://docs.bullmq.io) email queue                              |
+| Frontend      | [Next.js](https://nextjs.org) 16 (App Router) · Tailwind CSS · shadcn/ui                    |
+| Crypto        | PASETO v4, `@noble/*`, CSFLE field encryption                                                |
+| Auth libs     | `@simplewebauthn/server` (WebAuthn) · `otpauth` (TOTP)                                       |
+| Observability | Prometheus (`prom-client`) · OpenTelemetry · Sentry                                         |
+| SDK           | Generated TypeScript client in `packages/client` from `src/api/openapi.json`                |
+| Tooling       | [Biome](https://biomejs.dev) (lint+format) · Vitest · Playwright · Husky · semantic-release |
+
+---
+
+## Quick start
+
+**Prerequisites:** [Bun](https://bun.sh) 1.x · PostgreSQL 15+ · Redis 7 (optional in dev)
 
 ```bash
 # 1. Clone
 git clone https://github.com/ALFAMAS/zerotrust my-app
 cd my-app
 
-# 2. Install all workspaces (API + packages/ui)
+# 2. Install (API + packages/ui workspaces)
 bun install
 
 # 3. Configure environment
 cp .env.example .env
 ```
 
-Generate the two required secrets and paste them into `.env`:
+Generate required secrets and paste into `.env`:
 
 ```bash
 openssl rand -hex 32   # → TOKEN_SECRET_HEX
 openssl rand -hex 32   # → CSFLE_MASTER_KEY_HEX
 ```
 
-Set `DATABASE_URL` (and `REDIS_URI` if you have Redis). Everything else has working
-local defaults.
+Set `DATABASE_URL` (and `REDIS_URI` if you have Redis). Set `ADMIN_EMAIL` for
+the bootstrap step below.
 
 ```bash
 # 4. Create the schema
 bun run db:push          # fast dev sync; use db:migrate for versioned migrations
 
-# 5. Run API + UI together (hot reload on both)
+# 5. Bootstrap your first admin + default org (idempotent)
+bun run bootstrap:admin
+
+# 6. Start API + UI (hot reload on both)
 bun run dev
 ```
 
-- API → **http://localhost:1337**
-- App → **http://localhost:3000**
+| URL | What |
+| --- | ---- |
+| http://localhost:1337 | API |
+| http://localhost:3000 | App (login at `/login`, admin at `/admin`) |
 
-Point the UI at the API by setting `NEXT_PUBLIC_ZEROTRUST_URL=http://localhost:1337`
-in `packages/ui/.env.local`.
+Point the UI at the API:
 
-Run them individually if you prefer:
+```bash
+# packages/ui/.env.local
+NEXT_PUBLIC_ZEROTRUST_URL=http://localhost:1337
+```
+
+Run services individually if you prefer:
 
 ```bash
 bun run dev:api    # API only (port 1337)
 bun run dev:ui     # UI only (port 3000, also starts the Next.js MCP server)
 ```
 
-### Create your first admin
+### Bootstrap admin
 
-```bash
-curl -X POST http://localhost:1337/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{"email":"admin@example.com","password":"Admin123!","displayName":"Admin"}'
+`bun run bootstrap:admin` creates a verified admin user, assigns the `admin`
+system role, and creates a default org owned by that user. Safe to re-run —
+exits cleanly if an admin already exists.
+
+| Variable | Required | Description |
+| -------- | -------- | ----------- |
+| `ADMIN_EMAIL` | ✅ | Email for the bootstrap admin |
+| `ADMIN_PASSWORD` | — | Plain-text password (prompted securely when unset) |
+| `ADMIN_DISPLAY_NAME` | — | Display name (defaults from email local-part) |
+| `BOOTSTRAP_ORG_NAME` | — | Default org name (`My Organization`) |
+| `BOOTSTRAP_ORG_SLUG` | — | Org slug (derived from name when unset) |
+
+---
+
+## Scripts
+
+| Command | Purpose |
+| ------- | ------- |
+| `bun run dev` | API + UI concurrently |
+| `bun run dev:api` / `dev:ui` | Run one side only |
+| `bun run build` | Compile API to `dist/` |
+| `bun run db:push` | Sync schema (dev) |
+| `bun run db:migrate` | Apply versioned migrations (prod) |
+| `bun run db:studio` | Drizzle Studio |
+| `bun run bootstrap:admin` | First admin + default org |
+| `bun run db:backup` / `db:restore` | Encrypted `pg_dump` backup/restore |
+| `bun run test` | Vitest suite (API + UI logic) |
+| `bun run lint` / `lint:fix` | Biome check / autofix |
+| `bun run type-check` | `tsc --noEmit` |
+| `bun run verify:generated` | Regenerate SDK + docs; fail on drift |
+| `bun run sdk:generate` | Regenerate `packages/client` SDK |
+| `bun run docs:api` | Regenerate API reference markdown |
+
+---
+
+## Production checklist
+
+Use this before pointing real users at your deployment.
+
+### Required infrastructure
+
+- [ ] **PostgreSQL** — managed (Neon, RDS, etc.) or self-hosted; use `db:migrate` on deploy
+- [ ] **Redis** — required in production (`REDIS_URI`); sessions, rate limits, BullMQ queues
+- [ ] **Separate worker** — one `src/worker.ts` process; set `WORKER_MODE=true` on API replicas
+
+### Secrets & crypto (app refuses to boot in production without these)
+
+- [ ] `TOKEN_SECRET_HEX` — 32-byte hex (`openssl rand -hex 32`)
+- [ ] `CSFLE_MASTER_KEY_HEX` — 32-byte hex for field encryption
+- [ ] `NODE_ENV=production`
+- [ ] `CORS_ALLOWED_ORIGINS` — explicit browser origins (no wildcard in prod)
+- [ ] `METRICS_AUTH_TOKEN` — protects `/metrics` scrape endpoint
+- [ ] `BACKUP_ENCRYPTION_KEY_HEX` + `BACKUP_REQUIRE_ENCRYPTION=true` (unless `BACKUP_ENABLED=false`)
+
+### Auth & domains
+
+- [ ] `API_BASE_URL` — public API URL (HTTPS)
+- [ ] `WEBAUTHN_RP_ID` — registrable domain (e.g. `yourdomain.com`)
+- [ ] `WEBAUTHN_RP_ORIGINS` — exact HTTPS origins for passkeys
+- [ ] `MAIL_*` — SMTP for magic links, OTP, transactional email
+- [ ] OAuth `OAUTH_<PROVIDER>_*` — per provider you enable
+
+### Billing (when monetizing)
+
+- [ ] `STRIPE_SECRET_KEY` + `STRIPE_WEBHOOK_SECRET`
+- [ ] `STRIPE_PRODUCT_PRO` / `STRIPE_PRODUCT_ENTERPRISE` — product → plan mapping
+- [ ] Stripe webhook endpoint → `POST /billing/webhook`
+
+### Backups & storage
+
+- [ ] `BACKUP_ENABLED=true` with `BACKUP_ENCRYPTION_KEY_HEX`
+- [ ] `BACKUP_S3_*` — S3-compatible bucket for off-site dumps (optional but recommended)
+- [ ] `UPLOADS_S3_PREFIX` / `UPLOADS_CDN_URL` — avatar and file uploads
+
+### Observability & hardening
+
+- [ ] `SENTRY_DSN` (API) and `NEXT_PUBLIC_SENTRY_DSN` (UI)
+- [ ] `SECURITY_CONTACT` — served at `/.well-known/security.txt`
+- [ ] Review [`docs/security.md`](./docs/security.md) baseline (tenant isolation, RLS, auth boundaries)
+- [ ] Run `bun run bootstrap:admin` once on a fresh production DB (or promote via admin UI later)
+
+### Frontend
+
+- [ ] `packages/ui/.env.local` — `NEXT_PUBLIC_ZEROTRUST_URL=https://api.yourdomain.com`
+- [ ] TLS termination (nginx, Caddy, load balancer) — API on 1337, UI on 3000
+
+> **Full deploy guide:** [`docs/deployment.md`](./docs/deployment.md) · **VM/K8s blueprints:** [`docs/reference-architecture.md`](./docs/reference-architecture.md)
+
+---
+
+## Project structure
+
 ```
-
-Then grant the admin role in the database:
-
-```sql
-UPDATE users SET roles = array_append(roles, 'admin') WHERE email = 'admin@example.com';
+.
+├── plugins/                 # Feature plugins (magic-link, mfa, oauth — see docs/plugins.md)
+├── src/                     # Hono API core
+│   ├── api/server.ts        # App entry (port 1337)
+│   ├── api/routes/          # Route modules
+│   ├── db/                  # Drizzle schema + repositories
+│   ├── services/            # Business logic (auth, billing, email, backup…)
+│   ├── middleware/          # Auth, rate limit, CSRF, input sanitization
+│   ├── shared/              # Pagination, permissions, safeRedirect, safeFetch…
+│   └── __tests__/           # Vitest tests
+├── packages/
+│   ├── client/              # Generated TypeScript SDK
+│   └── ui/                  # Next.js 16 app (port 3000)
+├── drizzle/                 # SQL migrations
+├── docs/compliance/         # SOC 2 policies, runbooks, evidence templates
+├── scripts/                 # bootstrap-admin, db-backup, postinstall…
+├── .env.example             # All env vars, documented inline
+└── tdone.md                 # Full shipped-feature catalog
 ```
-
-Log in at **http://localhost:3000/login** — the admin panel is at **/admin**.
 
 ---
 
 ## Configuration
 
-All variables are documented inline in [`.env.example`](./.env.example). The most
-important ones:
+All variables are documented inline in [`.env.example`](./.env.example). Highlights:
 
-| Variable                | Required | Default                  | Description                                        |
-| ----------------------- | -------- | ------------------------ | -------------------------------------------------- |
-| `TOKEN_SECRET_HEX`      | ✅       | —                        | 32-byte hex — signs PASETO v4 tokens               |
-| `CSFLE_MASTER_KEY_HEX`  | ✅       | —                        | 32-byte hex — client-side field encryption         |
-| `DATABASE_URL`          | ✅       | —                        | PostgreSQL connection string                       |
-| `REDIS_URI`             |          | `redis://localhost:6379` | Sessions, rate limiting, queue (has fallback)      |
-| `PORT`                  |          | `1337`                   | API listen port                                    |
-| `API_BASE_URL`          |          | `http://localhost:1337`  | Public API URL                                     |
-| `NODE_ENV`              |          | `development`            | `development` or `production`                      |
-| `WEBAUTHN_RP_ID`        |          | `localhost`              | **Must** match your domain in production           |
-| `WEBAUTHN_RP_ORIGINS`   |          | `http://localhost:1337`  | Allowed WebAuthn origins                           |
-| `MAIL_HOST` / `MAIL_*`  |          | —                        | SMTP — required for magic links & email OTP        |
-| `OAUTH_<PROVIDER>_*`    |          | —                        | OAuth client id/secret/redirect (per provider)     |
-| `STRIPE_SECRET_KEY`     |          | —                        | Enables billing endpoints when set                 |
-| `ELASTICSEARCH_*`       |          | disabled                 | Opt-in search mirror + audit/log streaming (Postgres FTS is the default) |
-| `BACKUP_S3_*`           |          | —                        | S3-compatible backups & uploads (see below)        |
-| `BACKUP_ENCRYPTION_KEY` |          | —                        | AES-256-GCM encryption key/passphrase for DB dumps |
+| Variable | Required | Description |
+| -------- | -------- | ----------- |
+| `TOKEN_SECRET_HEX` | ✅ prod | Signs PASETO v4 tokens |
+| `CSFLE_MASTER_KEY_HEX` | ✅ prod | Client-side field encryption |
+| `DATABASE_URL` | ✅ | PostgreSQL connection string |
+| `REDIS_URI` | ✅ prod | Sessions, rate limiting, BullMQ |
+| `ADMIN_EMAIL` | bootstrap | First admin email for `bootstrap:admin` |
+| `STRIPE_SECRET_KEY` | billing | Enables checkout/portal when set |
+| `BACKUP_S3_*` | optional | S3-compatible backups + uploads |
 
 **Frontend** (`packages/ui/.env.local`):
 
-| Variable                        | Description                                 |
-| ------------------------------- | ------------------------------------------- |
-| `NEXT_PUBLIC_ZEROTRUST_URL`     | Backend API base URL (no trailing slash)    |
-| `NEXT_PUBLIC_APP_NAME`          | App name shown in UI, emails, and meta tags |
-| `NEXT_PUBLIC_PLAUSIBLE_DOMAIN`  | Plausible Analytics domain (consent-gated)  |
-| `NEXT_PUBLIC_GA_MEASUREMENT_ID` | Google Analytics 4 ID (consent-gated)       |
-| `NEXT_PUBLIC_SENTRY_DSN`        | Sentry DSN for browser error capture        |
+| Variable | Description |
+| -------- | ----------- |
+| `NEXT_PUBLIC_ZEROTRUST_URL` | Backend API base URL (no trailing slash) |
+| `NEXT_PUBLIC_APP_NAME` | App name in UI, emails, meta tags |
+| `NEXT_PUBLIC_SENTRY_DSN` | Browser error capture |
 
-### S3-compatible storage (optional)
-
-zerotrust uses one provider-agnostic adapter for both DB backups (`backups/` prefix)
-and user uploads such as avatars (`uploads/` prefix). Set `BACKUP_S3_BUCKET` plus
-credentials to enable; `BACKUP_S3_ENDPOINT` + `BACKUP_S3_FORCE_PATH_STYLE=true` switch
-to Backblaze B2 / MinIO / R2. When unset, backups stay local and avatars fall back to
-local disk. Set `BACKUP_ENCRYPTION_KEY` (or `BACKUP_ENCRYPTION_KEY_HEX`) to encrypt DB dumps before local retention or S3 upload; use `BACKUP_REQUIRE_ENCRYPTION=true` in production to fail closed rather than write plaintext dumps. See the `BACKUP_S3_*`, `BACKUP_ENCRYPTION_*`, and `UPLOADS_S3_*` blocks in `.env.example`.
+S3-compatible storage uses one adapter for DB backups (`backups/` prefix) and
+user uploads (`uploads/` prefix). When unset, backups stay local and avatars
+fall back to disk. See `BACKUP_S3_*`, `BACKUP_ENCRYPTION_*`, and `UPLOADS_S3_*`
+blocks in `.env.example`.
 
 ---
 
-## Testing & code quality
+## Security & compliance
 
-```bash
-bun run test            # run the Vitest suite (API + packages/ui plain-logic tests)
-bun run test:watch      # watch mode
-bun run test:coverage   # coverage report
+### Security baseline
 
-bun run --cwd packages/ui test        # UI component tests (happy-dom + Testing Library)
-bun run --cwd packages/ui test:watch  # watch mode
+zerotrust enforces a documented security baseline across auth, tenant
+isolation, and common vulnerability classes (CWE-601 open redirects, CWE-918
+SSRF, CWE-78 command injection, CWE-22 path traversal, CWE-532 secrets in logs,
+and others). Agent and contributor rules in [`CLAUDE.md`](./CLAUDE.md) and
+[`AGENTS.md`](./AGENTS.md) encode these patterns — do not bypass them.
 
-bun run lint            # Biome lint (check only)
-bun run lint:fix        # Biome autofix (lint + format) — also runs on commit via Husky
-bun run type-check      # tsc --noEmit
-bun run verify:generated # regenerate SDK + API docs + drift reports, fail on any diff
-```
+| Topic | Where to read |
+| ----- | ------------- |
+| Structural security decisions | [`docs/security.md`](./docs/security.md) |
+| Production-readiness audit | [`docs/AUDIT.md`](./docs/AUDIT.md) |
+| Vulnerability disclosure | [`SECURITY.md`](./SECURITY.md) · `/.well-known/security.txt` |
+| Open security backlog | [`todo.md`](./todo.md) (SEC-27) |
+| Shipped security fixes | [`tdone.md`](./tdone.md) § Security baseline audit |
 
-Tests live in `src/__tests__/`. UI component tests are colocated next to the
-component/page they cover (`*.test.tsx`, e.g. `packages/ui/src/components/SetupChecklist.test.tsx`)
-and run under their own [`packages/ui/vitest.config.ts`](./packages/ui/vitest.config.ts)
-(happy-dom environment) — kept separate from the root config so backend tests
-stay on `environment: "node"`. CI ([`.github/workflows/ci.yml`](./.github/workflows/ci.yml))
-runs lint, type-check, the test suite, UI component tests, generated-output
-drift checks (SDK, API reference, integration matrix, shadcn report), and the
-UI build on every push and PR to `main`. A scheduled
-[dependency-update workflow](./.github/workflows/dependency-update.yml) opens a
-grouped PR each week after the same gates pass.
+**Highlights:**
 
-> Note: the HaveIBeenPwned breach check is enabled by default and reaches the network
-> during `register` tests. Set `HIBP_CHECK_ENABLED=false` for fully offline test runs.
+- PASETO v4 access tokens; refresh tokens SHA-256-hashed and rotated on use
+- Argon2id password hashing (bcrypt verify/rehash fallback)
+- CSFLE field encryption with key-version rotation
+- Global input sanitization middleware (XSS / CWE-79)
+- Tamper-evident SHA-256 hash-chained audit log in Postgres
+- HIBP breach checks, credential-stuffing defense, progressive login backoff
+
+### Compliance program
+
+Operational compliance docs (policies, runbooks, evidence templates) live in
+[`docs/compliance/`](./docs/compliance/README.md). The product ships admin
+surfaces for SOC 2 readiness, risk assessment, access reviews, and audit-log
+verification — these support your compliance program; they do not replace an
+auditor.
 
 ---
 
-## Production deployment
+## Customizing
 
-zerotrust runs anywhere Bun and Node run. The reference setup below is **Ubuntu 22.04**
-with PM2 + nginx; managed PostgreSQL/Redis (e.g. Neon + Upstash) is recommended over
-self-hosting the data stores.
+> **Adding integrations** (OAuth provider, email/SMS, S3 storage)? See
+> [`docs/extending.md`](./docs/extending.md).
 
-> For the **CI/CD pipeline**, automated **staging deploy**, and how the
-> Lighthouse/ZAP/k6/DR gates fit together, see [docs/deployment.md](./docs/deployment.md).
-
-### 1. System dependencies
-
-```bash
-apt update && apt upgrade -y
-apt install -y curl git nginx certbot python3-certbot-nginx ufw
-curl -fsSL https://bun.sh/install | bash && source ~/.bashrc
-curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && apt install -y nodejs
-npm install -g pm2
-```
-
-(If self-hosting data stores: `apt install -y postgresql redis-server` and create a
-`zerotrust` database/user + a Redis password.)
-
-### 2. Clone, configure, build
-
-```bash
-useradd -m -s /bin/bash zerotrust && su - zerotrust
-git clone https://github.com/ALFAMAS/zerotrust /home/zerotrust/app
-cd /home/zerotrust/app
-
-cp .env.example .env
-# Set at minimum: TOKEN_SECRET_HEX, CSFLE_MASTER_KEY_HEX, DATABASE_URL, REDIS_URI,
-# NODE_ENV=production, API_BASE_URL, and the WEBAUTHN_RP_* values for your domain.
-
-bun install
-bun run db:migrate     # apply versioned migrations
-bun run build          # compile the API to dist/
-```
-
-> **WebAuthn:** `WEBAUTHN_RP_ID` must equal your registrable domain (e.g.
-> `yourdomain.com`) and `WEBAUTHN_RP_ORIGINS` must list the exact HTTPS origin, or
-> passkeys will fail to register/authenticate.
-
-### 3. Run with PM2
-
-```bash
-# API replicas (port 1337) — cluster mode; defer schedulers to the worker below
-WORKER_MODE=true pm2 start dist/src/api/server.js --name zerotrust-api -i max
-
-# Dedicated background worker (exactly one instance)
-pm2 start dist/worker.js --name zerotrust-worker -i 1
-
-# UI (Next.js, port 3000)
-cd packages/ui
-echo "NEXT_PUBLIC_ZEROTRUST_URL=https://api.yourdomain.com" > .env.local
-npm run build
-pm2 start npm --name zerotrust-ui -- start
-
-pm2 save && pm2 startup    # run the printed command to enable boot persistence
-```
-
-### 4. nginx reverse proxy
-
-Two server blocks — the **API on 1337**, the **UI on 3000** (do not point both at the
-same port):
-
-```nginx
-# /etc/nginx/sites-available/zerotrust-api  →  api.yourdomain.com
-server {
-    server_name api.yourdomain.com;
-    location / {
-        proxy_pass http://127.0.0.1:1337;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_read_timeout 86400s;   # keep SSE / web-push streams open
-    }
-}
-
-# /etc/nginx/sites-available/zerotrust-ui  →  yourdomain.com
-server {
-    server_name yourdomain.com www.yourdomain.com;
-    location / {
-        proxy_pass http://127.0.0.1:3000;
-        proxy_http_version 1.1;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-}
-```
-
-```bash
-ln -s /etc/nginx/sites-available/zerotrust-api /etc/nginx/sites-enabled/
-ln -s /etc/nginx/sites-available/zerotrust-ui  /etc/nginx/sites-enabled/
-nginx -t && systemctl reload nginx
-ufw allow OpenSSH && ufw allow 'Nginx Full' && ufw enable
-```
-
-### 5. TLS
-
-```bash
-certbot --nginx -d yourdomain.com -d www.yourdomain.com
-certbot --nginx -d api.yourdomain.com
-```
-
-### Deploying updates
-
-```bash
-cd /home/zerotrust/app && git pull
-bun install && bun run db:migrate && bun run build && pm2 restart zerotrust-api
-cd packages/ui && npm install && npm run build && pm2 restart zerotrust-ui
-```
+- **Rename the app** — set `NEXT_PUBLIC_APP_NAME`; update metadata in `packages/ui/src/app/`
+- **Toggle auth methods** — Admin → **Auth Settings** (live, no restart)
+- **Add an API route** — mount in `src/api/server.ts`; reuse `authMiddleware`, `assertCan()`
+- **Add a language** — `packages/ui/messages/{locale}.json` + register in i18n config
+- **Custom org roles** — `POST /orgs/:orgId/roles` with a `permissions` array
 
 ---
 
 ## API overview
 
-A condensed map of the most-used endpoints (auth-gated routes noted). The API mounts
-its route modules in `src/api/server.ts`; browse Swagger at `/docs` (dev) for the full
-surface, or the generated [API reference](./docs/api-reference.md)
-(`bun run docs:api`) for a static, browsable list.
+Condensed map of common endpoints. Full surface: Swagger at `/docs` (dev) or
+[`docs/api-reference.md`](./docs/api-reference.md).
 
 ```
 # Auth
@@ -478,147 +481,74 @@ GET    /status        (public status page data)
 GET    /health · /healthz · /metrics (Prometheus)
 ```
 
----
-
-## Project structure
-
-```
-.
-├── plugins/                        # Feature plugins (plug-and-play; see docs/plugins.md)
-│   ├── magic-link/                 # Fully migrated example
-│   ├── mfa/                        # Scaffold (routes re-export from src during migration)
-│   └── oauth/                      # Migration scaffold (README + manifest template)
-├── src/                            # API core (Hono + TypeScript + Drizzle)
-│   ├── api/
-│   │   ├── server.ts               # Hono app + plugin loader (port 1337)
-│   │   └── routes/                 # core routes not yet extracted to plugins/
-│   ├── plugins/                    # Plugin loader, registry, types
-│   ├── db/                         # Drizzle schema + connection (PostgreSQL)
-│   ├── services/                   # token, email, MFA, OAuth, objectStorage, dbBackup…
-│   ├── middleware/                 # auth, rate limiting, CSRF, inputSanitization, requirePlan…
-│   ├── shared/                     # reusable helpers: pagination, dbCount, httpErrors, roles, safeFetch/safeRedirect…
-│   ├── jit/                        # cross-tenant just-in-time access
-│   ├── audit/ · metrics/ · webhooks/                               # ops + platform modules
-│   ├── crypto/                     # PASETO, CSFLE, software key store (hardware providers are stubs)
-│   └── __tests__/                  # Vitest unit + integration tests
-├── packages/
-│   ├── client/                     # generated dependency-free TypeScript SDK
-│   └── ui/                         # Next.js 16 app (port 3000)
-│       ├── messages/               # i18n JSON (en, es, fr, ar)
-│       └── src/
-│           ├── app/                # App Router: (auth)/, dashboard/, admin/  │
-│           ├── components/         # shared UI components
-│           └── lib/                # API client, auth tokens, helpers
-├── drizzle/                        # SQL migrations + journal
-├── docs/compliance/                # compliance policies, runbooks, and evidence templates
-├── scripts/                        # db-backup, db-restore, postinstall…
-├── .github/workflows/             # CI (lint + type-check + test + drift + UI build) + weekly deps
-├── .env.example                    # all env vars, documented inline
-└── tdone.md                        # shipped feature catalog + latest audit snapshot
-```
+Generated SDK: [`packages/client`](./packages/client/README.md)
 
 ---
 
-## Customizing
+## Testing & code quality
 
-> **Adding a third-party integration** (OAuth provider, email/SMS, S3-compatible
-> storage)? See the [Extension guide](./docs/extending.md).
-
-**Rename the app** — replace `zerotrust` across `packages/ui/src/` (start with
-`app/layout.tsx` metadata and `app/page.tsx`) and set `NEXT_PUBLIC_APP_NAME`.
-
-**Add an API route**
-
-```typescript
-// src/api/server.ts
-import myRoutes from "./routes/my.routes";
-app.route("/my-feature", myRoutes); // add authMiddleware inside the module
+```bash
+bun run test            # Vitest (API + packages/ui plain-logic tests)
+bun run test:watch      # watch mode
+bun run test:coverage   # coverage report
+bun run lint            # Biome lint
+bun run lint:fix        # autofix (also runs on commit via Husky)
+bun run type-check      # tsc --noEmit
+bun run verify:generated # SDK + API docs drift check
 ```
 
-**Read the current user** (any handler after `authMiddleware`):
+CI runs lint, type-check, tests, generated-output drift checks, and the UI
+build on every push/PR to `main`.
 
-```typescript
-const user = c.get("user");
-const isAdmin = user.roles.includes("admin");
-```
-
-**Custom org roles** — `POST /orgs/:orgId/roles` with a `permissions` array. Available
-permissions: `members:read|invite|manage`, `billing:view|manage`,
-`settings:view|manage`, `audit:view`, `roles:manage`, `invites:manage`.
-
-**Toggle auth methods** — Admin panel → **Auth Settings**; changes are live, no restart.
-
-**Add a language** — create `packages/ui/messages/{locale}.json`, then register the
-locale in `src/i18n/request.ts` and the `LocaleSwitcher` component.
+> Set `HIBP_CHECK_ENABLED=false` for fully offline test runs (breach check hits the network by default).
 
 ---
 
-## Security
+## Production deployment
 
-- **Tokens** — PASETO v4 (AES-256-GCM), 1-hour access TTL; refresh tokens are
-  SHA-256-hashed and rotated on use.
-- **At rest** — client-side field-level encryption (CSFLE) for sensitive columns with
-  key-version rotation; argon2id password hashing (bcrypt verify/rehash fallback).
-- **Abuse defense** — progressive login backoff (no hard account lockout), per-IP
-  credential-stuffing throttle, HaveIBeenPwned breach checks on register/password-change,
-  optional signup PoW.
-- **Input sanitization** — a global middleware strips dangerous HTML and neutralizes
-  `javascript:`/event-handler payloads in request bodies, query, path, and form
-  fields (XSS / CWE-79), skipping sensitive fields and signed/SSF payloads.
-- **Audit** — tamper-evident SHA-256 hash-chained audit log in Postgres; optional
-  external anchoring to `audit_log_anchors` + S3 (`AUDIT_ANCHOR_ENABLED`); optional
-  Elasticsearch + SIEM streaming for large deployments.
-- **Key storage** — CSFLE and token material use the **software** key provider only.
-  TPM, Secure Enclave, and PKCS#11 code paths exist as documented stubs and throw
-  (or fail fast) if selected via `KEY_PROVIDER`; there is no post-quantum crypto in
-  `src/crypto/`.
-- **Disclosure** — `/.well-known/security.txt` (RFC 9116); set `SECURITY_CONTACT`.
-  Report vulnerabilities per [`SECURITY.md`](./SECURITY.md) — please do not open public
-  issues for security reports.
+zerotrust runs anywhere Bun runs. Typical layout:
 
-Rotating `TOKEN_SECRET_HEX` / `CSFLE_MASTER_KEY_HEX` is supported via a dual-key
-(accept-old, sign-new) transition window; rotate, deploy, wait for old tokens to
-expire, then drop the old key.
+1. **Build** — `bun install && bun run db:migrate && bun run build`
+2. **API** — `WORKER_MODE=true` + PM2/cluster on `dist/src/api/server.js` (port 1337)
+3. **Worker** — exactly one `dist/worker.js` instance for BullMQ consumers
+4. **UI** — `npm run build && npm start` in `packages/ui` (port 3000)
+5. **Proxy** — separate TLS vhosts for API and UI; do not collapse both onto one port
+
+WebAuthn requires matching `WEBAUTHN_RP_ID` and `WEBAUTHN_RP_ORIGINS` to your
+production domain.
+
+> **Step-by-step:** [`docs/deployment.md`](./docs/deployment.md) (CI/CD, staging, k6/ZAP gates)
 
 ---
 
 ## Project status
 
-zerotrust tracks its state in the repository docs:
+zerotrust is actively maintained with a large test suite and standing production
+audit. Honest boundaries:
 
-| Doc                                              | What it covers                                              |
-| ------------------------------------------------ | ----------------------------------------------------------- |
-| [`tdone.md`](./tdone.md)                         | Everything that ships today, plus the latest codebase audit |
-| [`todo.md`](./todo.md)                           | Open backlog — **SEC-27** (VPS firewall runbook) + long-term **DQ-2** (2026-07-05 audit) |
-| [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) | System architecture audit + proposed upgrades               |
-| [`docs/AUDIT.md`](./docs/AUDIT.md)               | Standing production-readiness audit (findings + risk + order) |
-| [`docs/reference-architecture.md`](./docs/reference-architecture.md) | Operational deployment blueprints (VM, containers, Kubernetes) |
-| [`docs/adr/`](./docs/adr/)                       | Architecture Decision Records (8 load-bearing decisions)    |
-| [`docs/maintenance-scorecard.md`](./docs/maintenance-scorecard.md) | Quarterly metrics (deps, CI, tests, backups, latency) |
-| [`docs/PROJECT_HISTORY.md`](./docs/PROJECT_HISTORY.md) | Archived dated planning/audit/phase docs (consolidated)     |
-| [`docs/compliance`](./docs/compliance/README.md) | Compliance policies, procedures, and evidence templates     |
-| [`packages/client`](./packages/client/README.md) | Generated TypeScript SDK package and usage notes            |
+| Ships today | Not yet / partial |
+| ----------- | ----------------- |
+| Google, GitHub, Facebook OAuth | Apple Sign In |
+| Software key provider (CSFLE, tokens) | TPM / Secure Enclave / PKCS#11 (stubs only) |
+| Web + API | Expo mobile client (documented in security baseline, not in repo) |
+| SOC 2 readiness docs + product controls | Auditor certification (your process) |
 
-Latest audit note (2026-07-05): a clean `bun install` restores a fully working
-tree — `bun run lint:ci`, `bun run type-check`, `bun run boundaries:check`, the
-**1328-test suite** (1086 API + 242 UI, 138 files), and the UI build all pass.
-Transactional repositories, a dedicated worker with a BullMQ-backed job scheduler,
-and module boundaries are all shipped. **2 open backlog items** remain —
-**SEC-27** (VPS firewall / private DB binding runbook) plus long-term **DQ-2**
-(coverage ratchet toward 85%) — see [`todo.md`](./todo.md). SEC-1…SEC-26 and
-SEC-28 shipped 2026-07-05 — see [`tdone.md`](./tdone.md) § Security baseline audit.
-Full feature catalog in [`tdone.md`](./tdone.md).
+| Doc | Purpose |
+| --- | ------- |
+| [`tdone.md`](./tdone.md) | Everything that ships today |
+| [`todo.md`](./todo.md) | Open backlog (SEC-27, DQ-2 coverage ratchet) |
+| [`docs/AUDIT.md`](./docs/AUDIT.md) | Standing production-readiness audit |
+| [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) | System architecture deep dive |
 
 ---
 
 ## Contributing
 
-1. Branch off `main` — **do not push directly to `main`**.
-2. Commits follow [Conventional Commits](https://www.conventionalcommits.org)
-   (enforced by commitlint; releases are automated via semantic-release).
-3. Biome runs on commit via Husky — keep `bun run lint` and `bun run type-check` green.
-4. Add/adjust Vitest tests for behavior changes.
-5. Open a PR to `main`; CI must pass.
+1. Branch off `main` — **do not push directly to `main`**
+2. Refresh the knowledge graph before shipping: `/graphify . --update` (see [`CLAUDE.md`](./CLAUDE.md))
+3. Commits follow [Conventional Commits](https://www.conventionalcommits.org) (semantic-release)
+4. Keep `bun run lint` and `bun run type-check` green; add Vitest tests for behavior changes
+5. Open a PR to `main`; CI must pass
 
 ---
 
