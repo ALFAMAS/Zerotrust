@@ -1,4 +1,4 @@
-import { and, desc, eq, inArray, or, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, or } from "drizzle-orm";
 import { Hono } from "hono";
 import { getDb, getReadDb } from "../../db";
 import {
@@ -318,53 +318,5 @@ router.post(
     }
   }
 );
-
-// ── Purge Expired Deletions (called by cron/scheduler) ───────────────────────
-
-export async function purgeScheduledDeletions(): Promise<number> {
-  const db = getDb();
-  const now = new Date();
-  let purged = 0;
-
-  try {
-    // Target only users past their scheduled deletion date — not a full-table
-    // scan. Accounts on legal hold are exempt (spoliation/compliance).
-    const pending = await db
-      .select({ id: usersTable.id })
-      .from(usersTable)
-      .where(
-        and(
-          eq(usersTable.legalHold, false),
-          sql`${usersTable.metadata}->>'deletionScheduledFor' IS NOT NULL`,
-          sql`(${usersTable.metadata}->>'deletionScheduledFor')::timestamptz <= ${now.toISOString()}::timestamptz`
-        )
-      );
-
-    for (const u of pending) {
-      await db
-        .update(usersTable)
-        .set({
-          email: `deleted-${u.id}@deleted.invalid`,
-          username: null,
-          displayName: "Deleted User",
-          passwordHash: null,
-          phone: null,
-          avatarUrl: null,
-          attributes: {},
-          metadata: { purgedAt: now.toISOString() },
-          status: "deleted",
-          updatedAt: now,
-        })
-        .where(eq(usersTable.id, u.id));
-
-      purged++;
-      logger.info("User PII purged", { userId: u.id });
-    }
-  } catch (err) {
-    logger.error("Purge scheduled deletions failed", err as Error);
-  }
-
-  return purged;
-}
 
 export default router;

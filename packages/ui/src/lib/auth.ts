@@ -15,6 +15,21 @@ const LEGACY_REFRESH_KEY = "za_refresh_token";
 
 let accessTokenMemory: string | null = null;
 
+function readAccessTokenFromCookie(): string | null {
+  if (typeof document === "undefined") return null;
+  const prefix = `${ACCESS_TOKEN_COOKIE}=`;
+  for (const part of document.cookie.split(";")) {
+    const trimmed = part.trim();
+    if (!trimmed.startsWith(prefix)) continue;
+    try {
+      return decodeURIComponent(trimmed.slice(prefix.length));
+    } catch {
+      return null;
+    }
+  }
+  return null;
+}
+
 function setAccessTokenCookie(accessToken: string): void {
   // ADR 008 § RSC prefetch mirror — not httpOnly; 1h TTL; cleared on logout.
   // biome-ignore lint/suspicious/noDocumentCookie: first-party auth cookie for RSC prefetch
@@ -28,6 +43,9 @@ function clearAccessTokenCookie(): void {
 
 export function getToken(): string | null {
   if (typeof window === "undefined") return null;
+  if (accessTokenMemory) return accessTokenMemory;
+  const fromCookie = readAccessTokenFromCookie();
+  if (fromCookie) accessTokenMemory = fromCookie;
   return accessTokenMemory;
 }
 
@@ -72,7 +90,8 @@ export function isAuthenticated(): boolean {
 /** Attempt silent refresh via httpOnly cookie (page reload bootstrap). */
 export async function bootstrapAccessToken(): Promise<string | null> {
   if (typeof window === "undefined") return null;
-  if (accessTokenMemory) return accessTokenMemory;
+  const existing = getToken();
+  if (existing) return existing;
   const base = process.env.NEXT_PUBLIC_ZEROTRUST_URL || "http://localhost:1337";
   try {
     const res = await fetch(`${base}/auth/token/refresh`, {

@@ -40,6 +40,7 @@ vi.mock("../middleware/rateLimiting", () => ({
 }));
 vi.mock("../middleware/auth", () => ({
   authMiddleware: async (_c: unknown, next: () => Promise<void>) => next(),
+  optionalAuthMiddleware: async (_c: unknown, next: () => Promise<void>) => next(),
 }));
 vi.mock("../services/auth/userStateCache.service", () => ({
   invalidateUserCache: vi.fn().mockResolvedValue(undefined),
@@ -47,12 +48,44 @@ vi.mock("../services/auth/userStateCache.service", () => ({
 
 function makeDb() {
   const chain: any = {
+    select: vi.fn().mockReturnThis(),
+    from: vi.fn().mockReturnThis(),
+    limit: vi.fn().mockResolvedValue([]),
     update: vi.fn().mockReturnThis(),
     set: vi.fn().mockReturnThis(),
     where: vi.fn().mockReturnThis(),
     returning: vi.fn().mockResolvedValue([]),
   };
   return chain;
+}
+
+async function patchMe(
+  body: Record<string, unknown>,
+  userOverrides: Record<string, unknown> = {},
+) {
+  const { Hono } = await import("hono");
+  const authRoutes = (await import("../api/routes/auth.routes")).default;
+
+  const app = new Hono();
+  app.use("*", async (c, next) => {
+    c.set("user", {
+      id: "user-1",
+      email: "u@example.com",
+      username: "alice",
+      displayName: "User",
+      roles: ["user"],
+      status: "active",
+      ...userOverrides,
+    } as any);
+    return next();
+  });
+  app.route("/auth", authRoutes);
+
+  return app.request("/auth/me", {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
 }
 
 beforeEach(() => {
@@ -67,27 +100,7 @@ describe("PATCH /auth/me optimistic locking", () => {
     const { getDb } = await import("../db");
     vi.mocked(getDb).mockReturnValue(db as any);
 
-    const { Hono } = await import("hono");
-    const authRoutes = (await import("../api/routes/auth.routes")).default;
-
-    const app = new Hono();
-    app.use("*", async (c, next) => {
-      c.set("user", {
-        id: "user-1",
-        email: "u@example.com",
-        displayName: "User",
-        roles: ["user"],
-        status: "active",
-      } as any);
-      return next();
-    });
-    app.route("/auth", authRoutes);
-
-    const res = await app.request("/auth/me", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ displayName: "New Name", version: 1 }),
-    });
+    const res = await patchMe({ displayName: "New Name", version: 1 });
 
     expect(res.status).toBe(409);
     const body = await res.json();
@@ -114,31 +127,69 @@ describe("PATCH /auth/me optimistic locking", () => {
     const { getDb } = await import("../db");
     vi.mocked(getDb).mockReturnValue(db as any);
 
-    const { Hono } = await import("hono");
-    const authRoutes = (await import("../api/routes/auth.routes")).default;
-
-    const app = new Hono();
-    app.use("*", async (c, next) => {
-      c.set("user", {
-        id: "user-1",
-        email: "u@example.com",
-        displayName: "User",
-        roles: ["user"],
-        status: "active",
-      } as any);
-      return next();
-    });
-    app.route("/auth", authRoutes);
-
-    const res = await app.request("/auth/me", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ displayName: "New Name", version: 2 }),
-    });
+    const res = await patchMe({ displayName: "New Name", version: 2 });
 
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.displayName).toBe("New Name");
     expect(body.version).toBe(3);
+  });
+});
+
+describe("PATCH /auth/me mass-assignment guard", () => {
+  it("returns 400 for unknown privilege or balance fields without updating the DB", async () => {
+    const db = makeDb();
+    const { getDb } = await import("../db");
+    vi.mocked(getDb).mockReturnValue(db as any);
+
+    const res = await patchMe({ roles: ["admin"], balance: 999 });
+
+    expect(res.status).toBe(400);
+    const body = await res.json();
+    expect(body.error).toBe("INVALID_REQUEST");
+    expect(db.update).not.toHaveBeenCalled();
+  });
+});
+
+describe("PATCH /auth/me username uniqueness", () => {
+  it("returns 409 when the username is already taken by another user", async () => {
+    const db = makeDb();
+    db.limit.mockResolvedValueOnce([{ id: "other-user" }]);
+    const { getDb } = await import("../db");
+    vi.mocked(getDb).mockReturnValue(db as any);
+
+    const res = await patchMe({ username: "taken-name" });
+
+    expect(res.status).toBe(409);
+    const body = await res.json();
+    expect(body.error).toBe("USERNAME_TAKEN");
+    expect(db.update).not.toHaveBeenCalled();
+  });
+
+  it("allows keeping the same username without a uniqueness query", async () => {
+    const db = makeDb();
+    db.returning.mockResolvedValueOnce([
+      {
+        id: "user-1",
+        email: "u@example.com",
+        username: "alice",
+        displayName: "User",
+        avatarUrl: null,
+        roles: ["user"],
+        status: "active",
+        phone: null,
+        locale: "en",
+        version: 2,
+        updatedAt: new Date(),
+      },
+    ]);
+    const { getDb } = await import("../db");
+    vi.mocked(getDb).mockReturnValue(db as any);
+
+    const res = await patchMe({ username: "alice" }, { username: "alice" });
+
+    expect(res.status).toBe(200);
+    expect(db.select).not.toHaveBeenCalled();
+    expect(db.update).toHaveBeenCalled();
   });
 });

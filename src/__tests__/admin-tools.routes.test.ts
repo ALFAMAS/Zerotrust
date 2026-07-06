@@ -101,3 +101,51 @@ describe("admin tools read routes — read replica", () => {
     expect(getReadDb).toHaveBeenCalled();
   });
 });
+
+// ── Finding 16: impersonation token carries the delegation chain ───────────
+
+describe("POST /admin/users/:id/impersonate — delegation chain", () => {
+  it("mints the impersonation token with act_as: [adminId]", async () => {
+    const db = makeDb();
+    const targetId = "target-user-1";
+    db.limit.mockResolvedValueOnce([
+      { id: targetId, email: "target@example.com", displayName: "Target", roles: ["user"] },
+    ]);
+
+    const { TokenService } = await import("../services/auth/token.service");
+    const signAccessToken = vi.fn().mockResolvedValue("signed-token");
+    const verifyAccessToken = vi.fn().mockResolvedValue({ jti: "jti-1" });
+    // TokenService is invoked with `new` (inside getTokenService), so the
+    // mock implementation must be a constructable function, not an arrow fn.
+    vi.mocked(TokenService).mockImplementation(function (this: any) {
+      this.init = vi.fn();
+      this.signAccessToken = signAccessToken;
+      this.verifyAccessToken = verifyAccessToken;
+      return this;
+    } as any);
+
+    const app = await getApp(db);
+    const res = await app.request(`/admin/users/${targetId}/impersonate`, { method: "POST" });
+
+    expect(res.status).toBe(200);
+    expect(signAccessToken).toHaveBeenCalledWith(
+      expect.objectContaining({ sub: targetId, act_as: ["admin-1"] })
+    );
+  });
+
+  it("refuses to impersonate from an already-impersonated session (no chaining)", async () => {
+    vi.resetModules();
+    vi.doMock("../middleware/auth", () => ({
+      authMiddleware: async (c: any, next: any) => {
+        c.set("user", { id: "admin-1", email: "admin@example.com", roles: ["admin"] });
+        c.set("token", { scope: ["openid", "impersonation"], act_as: ["root-admin"] });
+        return next();
+      },
+      requireAdmin: async (_c: any, next: any) => next(),
+    }));
+    const app = await getApp(makeDb());
+    const res = await app.request("/admin/users/someone/impersonate", { method: "POST" });
+    expect(res.status).toBe(403);
+    vi.doUnmock("../middleware/auth");
+  });
+});

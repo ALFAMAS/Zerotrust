@@ -50,6 +50,12 @@ const inviteSchema = z.object({
 });
 const acceptInviteSchema = z.object({ token: z.string().min(1) });
 const INVITE_TTL_DAYS = 7;
+
+/** Unused and not yet expired — shared by org-admin and invitee list endpoints. */
+const pendingInviteConditions = [
+  isNull(organizationInvitesTable.usedAt),
+  gt(organizationInvitesTable.expiresAt, new Date()),
+] as const;
 const APP_URL = process.env.APP_URL ?? "http://localhost:3000";
 const transferSchema = z.object({ newOwnerId: z.string().uuid() });
 const securityPolicySchema = z.object({
@@ -306,7 +312,7 @@ router.get("/:orgId/invites", async (c) => {
     return forbiddenResponse(c, err);
   }
   const { page, limit, offset } = parsePaginatedQuery(c.req.query());
-  const where = eq(organizationInvitesTable.orgId, orgId);
+  const where = and(eq(organizationInvitesTable.orgId, orgId), ...pendingInviteConditions);
   const db = getReadDb();
   const [invites, total] = await Promise.all([
     db
@@ -396,8 +402,7 @@ router.get("/invites/mine", async (c) => {
   const { page, limit, offset } = parsePaginatedQuery(c.req.query());
   const where = and(
     eq(organizationInvitesTable.email, user.email.toLowerCase()),
-    isNull(organizationInvitesTable.usedAt),
-    gt(organizationInvitesTable.expiresAt, new Date())
+    ...pendingInviteConditions
   );
   const db = getReadDb();
   const [invites, total] = await Promise.all([

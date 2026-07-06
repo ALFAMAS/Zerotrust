@@ -11,6 +11,7 @@ import { getLogger } from "../../logger/index.js";
 import { authMiddleware } from "../../middleware/auth.js";
 import { getVerification, recordVerification } from "../../middleware/continuousVerification.js";
 import { sendOtpEmail } from "../../services/notifications/email.service.js";
+import { hashTokenSha256, safeDigestEquals } from "../../shared/cryptoHash.js";
 import type { HonoEnv } from "../../shared/types.js";
 
 const router = new Hono<HonoEnv>();
@@ -71,7 +72,7 @@ router.post("/challenge", async (c) => {
         .where(and(eq(otpsTable.userId, user.id), eq(otpsTable.type, "reverification")));
       await db.insert(otpsTable).values({
         userId: user.id,
-        code,
+        code: hashTokenSha256(code),
         type: "reverification",
         channel: "email",
         target: user.email,
@@ -174,12 +175,15 @@ router.post("/respond", async (c) => {
           and(
             eq(otpsTable.userId, user.id),
             eq(otpsTable.type, "reverification"),
-            eq(otpsTable.code, code),
             gt(otpsTable.expiresAt, new Date())
           )
         )
         .limit(1);
       if (otpRows.length === 0) return c.json({ error: "INVALID_CODE" }, 401);
+      const submittedHash = hashTokenSha256(String(code).trim());
+      if (!safeDigestEquals(submittedHash, otpRows[0].code)) {
+        return c.json({ error: "INVALID_CODE" }, 401);
+      }
       await db.delete(otpsTable).where(eq(otpsTable.id, otpRows[0].id));
       recordVerification(session.id, "soft");
       return c.json({ verified: true, level: "soft" });

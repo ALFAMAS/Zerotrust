@@ -6,6 +6,7 @@ import { NotificationBell } from "@/components/NotificationBell";
 import NotificationSettingsPage from "@/app/dashboard/notifications/page";
 import {
   NOTIFICATIONS_PATH,
+  NOTIFICATIONS_LIST_PREVIEW_LIMIT,
   NOTIFICATIONS_PREFERENCES_PATH,
   NOTIFICATIONS_READ_ALL_PATH,
   NOTIFICATIONS_UNREAD_COUNT_PATH,
@@ -47,7 +48,9 @@ function renderWithQueryClient(ui: React.ReactElement) {
     },
   });
 
-  const result = render(<QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>);
+  const result = render(
+    <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>,
+  );
   return { ...result, queryClient };
 }
 
@@ -56,8 +59,14 @@ function mockNotificationsSuccess(unreadCount = 1) {
     if (path === NOTIFICATIONS_UNREAD_COUNT_PATH) {
       return Promise.resolve({ count: unreadCount });
     }
-    if (path === NOTIFICATIONS_PATH) {
-      return Promise.resolve(notifications);
+    if (
+      path === NOTIFICATIONS_PATH ||
+      path.startsWith(`${NOTIFICATIONS_PATH}?`)
+    ) {
+      return Promise.resolve({
+        data: notifications,
+        pagination: { page: 1, limit: 5, total: notifications.length },
+      });
     }
     return Promise.reject(new Error(`unexpected apiGet path ${path}`));
   });
@@ -68,18 +77,26 @@ describe("notifications TanStack Query server state", () => {
     mockApiGet.mockReset();
     mockApiPost.mockReset();
     mockApiPut.mockReset();
-vi.mock("@/lib/sseClient", () => ({
-  connectAuthenticatedSse: vi.fn(() => () => {}),
-}));
+    vi.mock("@/lib/sseClient", () => ({
+      connectAuthenticatedSse: vi.fn(() => () => {}),
+    }));
   });
 
   it("models notifications domain query keys and paths", () => {
-    expect(notificationKeys.unreadCount()).toEqual(["notifications", "unreadCount"]);
+    expect(notificationKeys.unreadCount()).toEqual([
+      "notifications",
+      "unreadCount",
+    ]);
     expect(notificationKeys.list()).toEqual(["notifications", "list"]);
-    expect(notificationKeys.preferences()).toEqual(["notifications", "preferences"]);
+    expect(notificationKeys.preferences()).toEqual([
+      "notifications",
+      "preferences",
+    ]);
     expect(NOTIFICATIONS_UNREAD_COUNT_PATH).toBe("/notifications/unread-count");
     expect(NOTIFICATIONS_PREFERENCES_PATH).toBe("/notifications/preferences");
-    expect(buildNotificationReadPath("notif_1")).toBe("/notifications/notif_1/read");
+    expect(buildNotificationReadPath("notif_1")).toBe(
+      "/notifications/notif_1/read",
+    );
   });
 
   it("renders unread badge through apiClient/TanStack Query, not legacy api.get", async () => {
@@ -100,7 +117,9 @@ vi.mock("@/lib/sseClient", () => ({
 
     expect(await screen.findByText("Welcome")).toBeInTheDocument();
     expect(screen.getByText("New login")).toBeInTheDocument();
-    expect(mockApiGet).toHaveBeenCalledWith(NOTIFICATIONS_PATH);
+    expect(mockApiGet).toHaveBeenCalledWith(
+      `${NOTIFICATIONS_PATH}?limit=${NOTIFICATIONS_LIST_PREVIEW_LIMIT}`,
+    );
   });
 
   it("marks all notifications read via mutation and invalidates notifications cache", async () => {
@@ -117,9 +136,11 @@ vi.mock("@/lib/sseClient", () => ({
     await user.click(screen.getByRole("button", { name: "Mark all read" }));
 
     await waitFor(() =>
-      expect(mockApiPost).toHaveBeenCalledWith(NOTIFICATIONS_READ_ALL_PATH, {})
+      expect(mockApiPost).toHaveBeenCalledWith(NOTIFICATIONS_READ_ALL_PATH, {}),
     );
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: notificationKeys.all });
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: notificationKeys.all,
+    });
   });
 
   it("renders notification preferences through apiClient/TanStack Query, not legacy api.get", async () => {
@@ -144,7 +165,10 @@ vi.mock("@/lib/sseClient", () => ({
       }
       return Promise.reject(new Error(`unexpected apiGet path ${path}`));
     });
-    mockApiPut.mockResolvedValue({ emailFallback: false, emailFallbackDays: 3 });
+    mockApiPut.mockResolvedValue({
+      emailFallback: false,
+      emailFallbackDays: 3,
+    });
 
     const user = userEvent.setup();
     const { queryClient } = renderWithQueryClient(<NotificationSettingsPage />);
@@ -157,8 +181,10 @@ vi.mock("@/lib/sseClient", () => ({
     await waitFor(() =>
       expect(mockApiPut).toHaveBeenCalledWith(NOTIFICATIONS_PREFERENCES_PATH, {
         emailFallback: false,
-      })
+      }),
     );
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: notificationKeys.preferences() });
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: notificationKeys.preferences(),
+    });
   });
 });

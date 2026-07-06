@@ -5,13 +5,13 @@ Scope: multi-tenant SaaS. Cookie-authenticated web client (Next.js), bearer-auth
 Priority order matters. §1–2 are structural — getting them wrong later means a rewrite. §3–6 are middleware and discipline. §7–9 are ops.
 
 **Tracking (2026-07-05 re-audit):** Actionable gaps are numbered **SEC-*** in
-[`todo.md`](../todo.md) (open: SEC-5…SEC-27) and verified shipped/partial items
-in [`tdone.md`](../tdone.md) § Security baseline audit (SEC-1…SEC-4 shipped;
-SEC-28 Expo out-of-scope). Standing production audit:
-[`docs/AUDIT.md`](./AUDIT.md) §4.7. CWE hardening classes 601/918/78/22/532/1333/327/1427/79
-are agent-enforced in `CLAUDE.md` — do not re-list as SEC items. The CWE tables
-below use **Verified** / **Partial** / **Open** / **N/A** from the same
-re-audit pass.
+[`todo.md`](../todo.md) (open: **SEC-27** only; **DQ-2** coverage ratchet) and
+verified shipped items in [`tdone.md`](../tdone.md) § Security baseline audit
+(SEC-1…SEC-26 shipped 2026-07-05; SEC-28 Expo out-of-scope). Standing production
+audit: [`docs/AUDIT.md`](./AUDIT.md) §4.7. CWE hardening classes
+601/918/78/22/532/1333/327/1427/79 are agent-enforced in `CLAUDE.md` — do not
+re-list as SEC items. The CWE tables below use **Verified** / **Partial** /
+**Open** / **N/A** from the same re-audit pass.
 
 ---
 
@@ -405,9 +405,10 @@ Tiers are ordered by **how the flaw enters the codebase**, not by CVSS.
 
 **Status values:** `Open` → `In Progress` → `Verified` → `N/A`. Fill Owner and Evidence (file/PR/test) as you go.
 
-**Re-audit summary (2026-07-05):** Tier 1 — 4 Verified, 4 Partial, 2 Open. Tier 2 —
-majority Verified or N/A (no mobile client); Open items map to SEC-5…SEC-27 in
-`todo.md`. See [`tdone.md`](../tdone.md) § Security baseline audit for per-control evidence.
+**Re-audit summary (2026-07-05):** Tier 1 — 9 Verified, 1 Partial. Tier 2 —
+majority Verified or N/A (no mobile client); **1 open ops item** (**SEC-27** VPS
+firewall runbook) in `todo.md`. See [`tdone.md`](../tdone.md) § Security baseline
+audit for per-control evidence.
 
 ## Already covered (tracked elsewhere — do not re-list)
 
@@ -421,16 +422,16 @@ Note on the exclusions: CWE-327 is covered, but **916** (weak password hashing) 
 
 | CWE | Name                                                         | Where it bites in this stack                                                                                                               | Status  | Owner | Evidence |
 | --- | ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ | ------- | ----- | -------- |
-| 639 | Authorization Bypass Through User-Controlled Key             | The IDOR / tenant-isolation class. `GET /shifts/:id` fetches by ID, forgets the org filter. Verify the repo layer _requires_ tenant scope. | Partial | —     | RLS on 14 org tables (`0038_org_rls_expansion.sql`); org-scoping CI; SEC-5/SEC-11/SEC-12 open in `todo.md` |
-| 862 | Missing Authorization                                        | Endpoint has authN (who) but no authZ (may you touch this object).                                                                         | Open    | —     | No `assertCan()` — SEC-5 |
-| 863 | Incorrect Authorization                                      | Check exists but wrong — role compared loosely, tenant read from body not session.                                                         | Partial | —     | `X-Org-Id` header sets `activeOrgId` — SEC-11 |
-| 566 | Authz Bypass Through User-Controlled SQL Primary Key         | Drizzle/RLS-specific: query keyed on client-supplied PK with no tenant predicate.                                                          | Partial | —     | Postgres RLS + `orgRlsMiddleware`; app queries still convention-scoped |
-| 915 | Improper Control of Dynamically-Determined Object Attributes | Mass assignment — request body spread into `.set()`; client writes `orgId`/`role`/`isAdmin`. Update schemas must whitelist.                | Partial | —     | Some Zod schemas; `@hono/zod-validator` not standard — SEC-14 |
+| 639 | Authorization Bypass Through User-Controlled Key             | The IDOR / tenant-isolation class. `GET /shifts/:id` fetches by ID, forgets the org filter. Verify the repo layer _requires_ tenant scope. | Verified | —     | RLS on 14 org tables (`0038_org_rls_expansion.sql`); org-scoping CI; `assertCan()` (SEC-5); session-derived `activeOrgId` (SEC-11); org-scoped repo factory (SEC-12) |
+| 862 | Missing Authorization                                        | Endpoint has authN (who) but no authZ (may you touch this object).                                                                         | Verified | —     | `assertCan()` / `authorizeOrg()` in `src/shared/permissions.ts` (SEC-5) |
+| 863 | Incorrect Authorization                                      | Check exists but wrong — role compared loosely, tenant read from body not session.                                                         | Verified | —     | `sessions.active_org_id` authoritative; `X-Org-Id` hint-only (SEC-11) |
+| 566 | Authz Bypass Through User-Controlled SQL Primary Key         | Drizzle/RLS-specific: query keyed on client-supplied PK with no tenant predicate.                                                          | Verified | —     | Postgres RLS + `orgRlsMiddleware`; org-scoping CI |
+| 915 | Improper Control of Dynamically-Determined Object Attributes | Mass assignment — request body spread into `.set()`; client writes `orgId`/`role`/`isAdmin`. Update schemas must whitelist.                | Partial  | —     | Canonical `zValidator` on hot paths (SEC-14); remaining routes migrate incrementally |
 | 798 | Use of Hard-coded Credentials                                | The template curse: `SESSION_SECRET=changeme`, seeded default admin, committed key.                                                        | Verified | —    | `validateConfig()` + `placeholderSecrets.ts` refuse prod placeholders (ZT-4) |
-| 916 | Password Hash With Insufficient Computational Effort         | Fast/low-cost hash for passwords (SHA-256, or Argon params below OWASP floor).                                                             | Open    | —     | bcryptjs today — SEC-8 |
+| 916 | Password Hash With Insufficient Computational Effort         | Fast/low-cost hash for passwords (SHA-256, or Argon params below OWASP floor).                                                             | Verified | —     | `src/shared/passwordHash.ts` — argon2id (SEC-8); bcrypt verify/rehash fallback |
 | 347 | Improper Verification of Cryptographic Signature             | Webhook not verified against **raw** body; JWT `alg:none` / signature unchecked.                                                           | Verified | —    | Stripe raw body + `constructEventAsync`; idempotent claim (`stripeEvents.repository.ts`) |
 | 288 | Authentication Bypass Using an Alternate Path or Channel     | The Next.js middleware-skip class (CVE-2025-29927 maps here). AuthZ must live in handlers/actions, not middleware.                         | Verified | —    | No `middleware.ts` auth gate; API `authMiddleware` + client guards (`tdone.md` §0) |
-| 290 | Authentication Bypass by Spoofing                            | Trusting `x-forwarded-*` or a header to establish identity.                                                                                | Partial | —     | Bearer/cookie auth only; org from header not session — SEC-11 |
+| 290 | Authentication Bypass by Spoofing                            | Trusting `x-forwarded-*` or a header to establish identity.                                                                                | Verified | —     | Bearer/cookie auth; org from session row, not client header (SEC-11) |
 
 ---
 
@@ -443,18 +444,18 @@ Note on the exclusions: CWE-327 is covered, but **916** (weak password hashing) 
 | 1275 | Sensitive Cookie with Improper SameSite                   | Missing / `None` SameSite reopens CSRF on the web path.                    | Verified | —     | `sameSite: "Lax"` on refresh cookie |
 | 315  | Cleartext Storage of Sensitive Info in a Cookie           | Anything beyond an opaque token stored in the cookie.                      | Verified | —     | Opaque refresh token only in httpOnly cookie |
 | 312  | Cleartext Storage of Sensitive Information                | Mobile: refresh token in AsyncStorage (plaintext on disk).                 | N/A      | —     | No Expo/React Native client (`tdone.md` §5) |
-| 522  | Insufficiently Protected Credentials                      | Parent for the storage misses above; tag findings here.                    | Partial  | —     | Web ADR 008 Option C; SSE legacy `?token=` — SEC-6 |
+| 522  | Insufficiently Protected Credentials                      | Parent for the storage misses above; tag findings here.                    | Verified | —     | ADR 008 Option C; SSE Bearer via `connectAuthenticatedSse()` (SEC-6) |
 | 942  | Permissive Cross-domain Policy with Untrusted Domains     | CORS `origin:"*"` with `credentials:true`.                                 | Verified | —     | `corsOptionsFromEnv` fails closed in production |
 | 346  | Origin Validation Error                                   | Reflecting the request Origin back as allowed.                             | Verified | —     | Explicit allowlist only |
-| 352  | Cross-Site Request Forgery                                | Web cookie path without origin/token defense.                              | Open     | —     | No `hono/csrf` — SEC-7 |
+| 352  | Cross-Site Request Forgery                                | Web cookie path without origin/token defense.                              | Verified | —     | `csrfOriginMiddleware()` mounted in `server.ts` (SEC-7) |
 | 307  | Improper Restriction of Excessive Authentication Attempts | No throttle on `/auth/login` → credential stuffing.                        | Verified | —     | Per-IP rate limits on `/auth/*` |
 | 640  | Weak Password Recovery Mechanism                          | Reset token guessable, long-lived, reusable, or leaks account existence.   | Verified | —     | `hashTokenSha256` codes; anti-enumeration — SEC-3 |
 | 620  | Unverified Password Change                                | Change password without re-auth / current-password check.                  | Verified | —     | Current password required on change (`auth.routes.ts`) |
 | 521  | Weak Password Requirements                                | No policy, or a bad one.                                                   | Partial  | —     | Min length enforced; no zxcvbn tier |
 | 384  | Session Fixation                                          | Session ID not regenerated on login.                                       | Verified | —     | `randomUUID()` per login (`issueAuthenticatedSession.service.ts`) |
 | 613  | Insufficient Session Expiration                           | Tokens never expire; logout doesn't revoke server-side.                    | Verified | —     | Server-side revoke on logout — SEC-1; TTLs configured |
-| 294  | Authentication Bypass by Capture-replay                   | Refresh token replayable — no rotation / family reuse detection.           | Partial  | —     | Rotation + reuse revoke; no `family_id` — SEC-10 |
-| 203  | Observable Discrepancy                                    | Timing differences leak whether an account exists.                         | Verified | —     | Dummy bcrypt compare — SEC-2 |
+| 294  | Authentication Bypass by Capture-replay                   | Refresh token replayable — no rotation / family reuse detection.           | Verified | —     | Rotation + `family_id` reuse revoke (SEC-10) |
+| 203  | Observable Discrepancy                                    | Timing differences leak whether an account exists.                         | Verified | —     | Dummy argon2id hash compare — SEC-2 |
 | 204  | Observable Response Discrepancy                           | "No such user" vs "wrong password" differ in body/status.                  | Verified | —     | Uniform 401 on login |
 | 209  | Error Message Containing Sensitive Information            | Stack traces / DB / ORM errors returned to client.                         | Verified | —     | `errorHandler.ts` redaction |
 | 200  | Exposure of Sensitive Info to Unauthorized Actor          | Over-returning fields (password hash, other users' emails) in JSON.        | Partial  | —     | Profile routes omit hashes; spot-check new endpoints |
@@ -464,7 +465,7 @@ Note on the exclusions: CWE-327 is covered, but **916** (weak password hashing) 
 | 330  | Use of Insufficiently Random Values                       | Tokens/IDs from a non-CSPRNG.                                              | Verified | —     | `crypto.randomBytes` / `randomUUID` |
 | 338  | Use of Cryptographically Weak PRNG                        | `Math.random()` for anything security-sensitive.                           | Verified | —     | CSPRNG for tokens |
 | 340  | Generation of Predictable Numbers or Identifiers          | Sequential IDs enabling enumeration — confirm UUIDv7 is used _everywhere_. | Verified | —     | UUID PKs across schema |
-| 770  | Allocation of Resources Without Limits or Throttling      | No body-size cap, no rate limit, unbounded query results.                  | Partial  | —     | Rate limits + pagination; no global body limit — SEC-13 |
+| 770  | Allocation of Resources Without Limits or Throttling      | No body-size cap, no rate limit, unbounded query results.                  | Verified | —     | Global body limit (SEC-13) + per-IP/per-user rate limits (SEC-15) + pagination |
 | 799  | Improper Control of Interaction Frequency                 | Auth endpoints lack a dedicated aggressive rate tier.                      | Verified | —     | Tighter `/auth/*` limits |
 | 400  | Uncontrolled Resource Consumption                         | Expensive endpoints (exports, reports) with no ceiling.                    | Partial  | —     | Pagination defaults; export caps vary |
 | 319  | Cleartext Transmission of Sensitive Information           | Any HTTP path; internal service calls without TLS.                         | Partial  | —     | HSTS + TLS assumed at deploy; operator responsibility |
@@ -480,8 +481,8 @@ Note on the exclusions: CWE-327 is covered, but **916** (weak password hashing) 
 | 362  | Race Condition                                  | Payments/wallet/ledger double-processing. Mitigation: idempotency keys. Weights up hard if Ticketmet v2 ledger is in scope. | Verified | —     | Wallet atomic spend; Stripe/webhook idempotency repos |
 | 1321 | Prototype Pollution                             | JS-specific: recursive merge on untrusted input.                                                                            | Partial  | —     | Zod parsing preferred; no deep-merge on raw body |
 | 502  | Deserialization of Untrusted Data               | Any custom serialization of client data.                                                                                    | Verified | —     | JSON + Zod on touched routes |
-| 269  | Improper Privilege Management                   | Role escalation once RBAC exists (relevant if zeroauth RBAC/ABAC is pulled in).                                             | Partial  | —     | RBAC/ABAC + JIT; no `assertCan` — SEC-5 |
-| 1220 | Insufficient Granularity of Access Control      | Coarse roles where object-level control is needed.                                                                          | Partial  | —     | Custom org roles; scattered checks |
+| 269  | Improper Privilege Management                   | Role escalation once RBAC exists (relevant if zeroauth RBAC/ABAC is pulled in).                                             | Verified | —     | RBAC/ABAC + JIT; `assertCan()` on org hot paths (SEC-5) |
+| 1220 | Insufficient Granularity of Access Control      | Coarse roles where object-level control is needed.                                                                          | Partial  | —     | Custom org roles; `assertCan()` on migrated paths — extend incrementally |
 | 311  | Missing Encryption of Sensitive Data            | At-rest encryption for sensitive columns (TFN — which you shouldn't store).                                                 | Partial  | —     | CSFLE software key store only |
 | 1104 | Use of Unmaintained Third Party Components      | A template ships its dependency liability to every consumer.                                                                | Verified | —     | `bun audit` CI + weekly `dependency-update.yml` + `.github/dependabot.yml` (SEC-23) |
 | 489  | Active Debug Code                               | Debug / seed routes left enabled in prod.                                                                                   | Verified | —     | No debug mounts in `server.ts` prod paths |

@@ -16,7 +16,7 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
 | Service files               |                                                                          46 |
 | DB tables                   |                                                                          40 |
 | Middleware                  |                                                                          21 |
-| Migrations                  |                                      38 (latest: `0038_org_rls_expansion`) |
+| Migrations                  |                                      41 (latest: `0040_session_active_org_id`) |
 | Route mounts in `server.ts` |                                                                          29 |
 | UI pages                    |                                                                          53 |
 | Tests                       |                                         1328 (1086 API + 242 UI, 138 files) |
@@ -218,7 +218,7 @@ Cross-audit of `docs/security.md` §0–§10. Open gaps tracked in [`todo.md`](.
 - ✅ **SEC-10 (2026-07-05):** `family_id` on `refresh_tokens` (`0039_refresh_token_family_id.sql`); rotation preserves family; reuse revokes family sessions only (`authSessions.repository.ts`, `auth.routes.test.ts`)
 - ✅ **SEC-1 (2026-07-05):** `POST /auth/logout` revokes Postgres session + refresh token via `revokeSessionAtLogout()` before clearing cookie; UI `clearToken()` sends Bearer token so session id is available
 - ✅ **SEC-2 (2026-07-05):** Login runs password verify against a lazy dummy hash when user missing — same 401 body/status (`auth.login-timing.test.ts`)
-- ✅ **SEC-3 (2026-07-05):** Password-reset codes stored as `hashTokenSha256(code)` in `otpsTable`; confirm compares hashed digest (`password-reset.routes.test.ts`)
+- ✅ **SEC-3 (2026-07-05, extended 2026-07-06):** All `otpsTable` codes stored as `hashTokenSha256(code)` — password-reset, magic-link, email verification, MFA email login, and re-verification OTPs; confirm paths use `safeDigestEquals()` (`password-reset.routes.test.ts`, `auth.routes.test.ts`, `mfa.routes.test.ts`, `verification.routes.test.ts`)
 - ✅ **SEC-4 (2026-07-05):** Postgres RLS on all 14 org-scoped tables (`0038_org_rls_expansion.sql`); `orgRlsMiddleware` on org/search/JIT/region/tax routes; `:orgId` path resolves RLS context (`migrations.test.ts`, `resolveOrgContext.test.ts`)
 - ✅ **SEC-11 (2026-07-05):** `sessions.active_org_id` (`0040_session_active_org_id.sql`); `resolveAndSetActiveOrg()` derives tenant from session row; `X-Org-Id` hint-only for bootstrap; `PUT /sessions/active-org`; refresh rotation preserves org (`resolveOrgContext.test.ts`, `orgRls.middleware.test.ts`, `setSessionActiveOrg.test.ts`)
 - ✅ **SEC-12 (2026-07-05):** `createOrgScopedContext()` + `webhooksRepo(orgId)` factory exemplar; CI patterns extended in `scripts/org-scoped-tables.json` (`orgScopedFactory.test.ts`, `webhooks.repository.test.ts`)
@@ -454,6 +454,57 @@ Cross-audit of `docs/security.md` §0–§10. Open gaps tracked in [`todo.md`](.
 - **Verification (2026-07-05):** No `expo` / React Native app in monorepo (grep clean);
   `docs/security.md` §5 now states web+API-only scope; mobile implementation remains
   greenfield when needed.
+
+---
+
+## Recent work (2026-07-06)
+
+### UI security headers (CSP + HSTS)
+
+- **`packages/ui/src/config/securityHeaders.ts`:** builds CSP, HSTS (production only),
+  X-Frame-Options, and companion headers; dev allows Turbopack/HMR (`unsafe-eval`, `ws:`).
+- **`packages/ui/next.config.ts`:** wires `headers()` on all routes.
+- **Env:** `UI_CSP` (full override), `UI_CSP_REPORT_ONLY`, `UI_CSP_REPORT_URI`.
+- **Tests:** `packages/ui/src/config/securityHeaders.test.ts`
+
+### CAPTCHA hook on auth endpoints (opt-in)
+
+- **`src/services/auth/captcha.service.ts`:** provider-agnostic verify (Turnstile, hCaptcha,
+  reCAPTCHA) via `fetchFixedUrl`; off unless `CAPTCHA_ENABLED=true` + `CAPTCHA_SECRET`.
+- **`src/middleware/captcha.ts`:** `captchaGuard()` on login, register, password-reset
+  request, magic-link send.
+- **Schemas:** optional `captchaToken` on login/register/password-reset bodies.
+- **Tests:** `src/__tests__/captcha.test.ts`
+
+### Dead-code CI (knip)
+
+- **`knip.config.ts`:** monorepo entry points (API, worker, plugins, Next.js app routes).
+- **`package.json`:** `knip` / `dead-code` scripts; wired in `.github/workflows/ci.yml`.
+- Baseline ignores for known orphan stubs and platform-specific optional deps.
+
+### Rate-limit in-memory fallback note
+
+- **`src/middleware/rateLimiting.ts`:** comment documenting per-process, non-atomic
+  semantics of the in-memory fallback (Redis path remains canonical for production).
+
+**Verification (2026-07-06):** `bun run knip`; targeted vitest for captcha + UI security headers.
+
+---
+
+### OTP-at-rest hashing (all `otpsTable` types)
+
+- **Problem:** Password-reset and magic-link OTPs were already SHA-256 hashed (SEC-3), but
+  email verification, MFA email login, and continuous re-verification OTPs were still stored
+  plaintext in `otpsTable` — a DB leak would expose live codes.
+- **Fix:** Store `hashTokenSha256(code)` on insert; verify by loading the live row then
+  comparing with `safeDigestEquals()` (constant-time). Centralized `safeDigestEquals()` in
+  `src/shared/cryptoHash.ts`; `password-reset.routes.ts` imports it instead of a local copy.
+- **Paths:** `src/api/routes/auth.routes.ts`, `src/api/routes/verification.routes.ts`,
+  `plugins/mfa/routes.ts`, `src/shared/cryptoHash.ts`, `src/api/routes/password-reset.routes.ts`
+- **Tests:** `verification.routes.test.ts`, `mfa.routes.test.ts`, `password-reset.routes.test.ts`,
+  `auth.routes.test.ts` (verify-email), `crypto-hash.test.ts`
+
+**Verification (2026-07-06):** targeted vitest → **61 passed** (4 files + verify-email suite).
 
 ---
 

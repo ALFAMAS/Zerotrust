@@ -27,8 +27,9 @@ import { NotificationBell } from "@/components/NotificationBell";
 import { NpsSurveyPrompt } from "@/components/NpsSurveyPrompt";
 import ProductTour from "@/components/ProductTour";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { UserProfileMenu } from "@/components/UserProfileMenu";
 import VerifyEmailBanner from "@/components/VerifyEmailBanner";
-import { clearToken, isAuthenticated } from "../../lib/auth";
+import { bootstrapAccessToken, clearToken, isAuthenticated } from "../../lib/auth";
 
 const navItems: NavItem[] = [
   { href: "/dashboard", label: "Overview", icon: LayoutDashboard, exact: true },
@@ -54,11 +55,29 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [authed, setAuthed] = useState<boolean | null>(null);
 
   useEffect(() => {
-    if (!isAuthenticated()) {
+    let cancelled = false;
+
+    async function verifySession() {
+      if (isAuthenticated()) {
+        if (!cancelled) setAuthed(true);
+        return;
+      }
+
+      const token = await bootstrapAccessToken();
+      if (cancelled) return;
+
+      if (token) {
+        setAuthed(true);
+        return;
+      }
+
       router.replace("/login");
-      return;
     }
-    setAuthed(true);
+
+    void verifySession();
+    return () => {
+      cancelled = true;
+    };
   }, [router]);
 
   // Redirect this/other tabs when the token is cleared elsewhere
@@ -91,8 +110,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <AppShell
       navItems={navItems}
-      onSignOut={handleSignOut}
       banner={<VerifyEmailBanner />}
+      profileMenu={<UserProfileMenu onSignOut={handleSignOut} />}
       actions={
         <>
           <LocaleSwitcher />

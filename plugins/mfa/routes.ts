@@ -10,6 +10,7 @@ import { getSettings } from "../../src/models/settings.model.js";
 import { sendOTP } from "../../src/services/auth/otpDelivery.service.js";
 import { sendOtpEmail } from "../../src/services/notifications/email.service.js";
 import { internalError } from "../../src/shared/httpErrors.js";
+import { hashTokenSha256, safeDigestEquals } from "../../src/shared/cryptoHash.js";
 import type { HonoEnv, User } from "../../src/shared/types.js";
 
 const router = new Hono<HonoEnv>();
@@ -229,7 +230,7 @@ router.post("/otp/send", async (c) => {
 
     await db.insert(otpsTable).values({
       userId: user.id,
-      code,
+      code: hashTokenSha256(code),
       type: "login",
       channel,
       target,
@@ -270,13 +271,17 @@ router.post("/otp/verify", async (c) => {
           eq(otpsTable.userId, userId),
           eq(otpsTable.channel, channel),
           eq(otpsTable.type, "login"),
-          eq(otpsTable.code, code),
           gt(otpsTable.expiresAt, now)
         )
       )
       .limit(1);
 
     if (records.length === 0) {
+      return c.json({ error: "INVALID_CODE", message: "Invalid or expired OTP" }, 401);
+    }
+
+    const submittedHash = hashTokenSha256(String(code).trim());
+    if (!safeDigestEquals(submittedHash, records[0].code)) {
       return c.json({ error: "INVALID_CODE", message: "Invalid or expired OTP" }, 401);
     }
 

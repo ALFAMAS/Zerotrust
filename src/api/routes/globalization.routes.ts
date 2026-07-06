@@ -6,7 +6,7 @@
 import { and, eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { z } from "zod";
-import { getReadDb } from "../../db";
+import { getDb } from "../../db";
 import { organizationMembersTable } from "../../db/schema";
 import { getLogger } from "../../logger";
 import { authMiddleware } from "../../middleware/auth";
@@ -37,8 +37,11 @@ const logger = getLogger("globalization-routes");
 // authMiddleware is applied per-route (this router shares the `/billing` prefix
 // with billingRoutes, so a router-wide `use("*")` would leak onto its routes).
 
+// M13: authorization checks read the primary, not the replica — a replica
+// lag window could otherwise still authorize a member/admin who was just
+// removed/demoted on the primary.
 async function isOrgMember(orgId: string, userId: string): Promise<boolean> {
-  const db = getReadDb();
+  const db = getDb();
   const [m] = await db
     .select({ id: organizationMembersTable.id })
     .from(organizationMembersTable)
@@ -50,7 +53,7 @@ async function isOrgMember(orgId: string, userId: string): Promise<boolean> {
 }
 
 async function canManageOrg(orgId: string, userId: string): Promise<boolean> {
-  const db = getReadDb();
+  const db = getDb();
   const [m] = await db
     .select({ role: organizationMembersTable.role })
     .from(organizationMembersTable)

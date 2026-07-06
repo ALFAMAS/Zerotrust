@@ -233,23 +233,38 @@ export function inputSanitizationMiddleware() {
       return rawQueries[key];
     }) as typeof c.req.query;
 
-    // Sanitize path params — preserve original param() and wrap it
+    // Sanitize path params — preserve original param() and wrap it.
+    // Params may not be populated when middleware runs (before route match); always
+    // fall back to originalParam() so handlers can safely call param() with no key.
     const originalParam = c.req.param.bind(c.req);
     const rawParams: Record<string, string> = {};
+    const sanitizeParamValue = (key: string, value: string | undefined): string =>
+      SENSITIVE_FIELDS.has(key) ? (value ?? "") : sanitizeInputString(value ?? "");
+    const readOriginalParams = (): Record<string, string> => {
+      try {
+        return originalParam() as Record<string, string>;
+      } catch {
+        return {};
+      }
+    };
     try {
-      const params = c.req.param();
+      const params = readOriginalParams();
       for (const [key, value] of Object.entries(params)) {
-        rawParams[key] = SENSITIVE_FIELDS.has(key) ? value : sanitizeInputString(value);
+        rawParams[key] = sanitizeParamValue(key, value);
       }
     } catch {
-      // params not populated yet — wrap the accessor to sanitize on demand
+      // params not populated yet — populated lazily via originalParam on access
     }
     c.req.param = ((key?: string) => {
-      if (key === undefined) return { ...rawParams };
+      if (key === undefined) {
+        const merged: Record<string, string> = {};
+        for (const [k, v] of Object.entries(readOriginalParams())) {
+          merged[k] = rawParams[k] ?? sanitizeParamValue(k, v);
+        }
+        return merged;
+      }
       if (key in rawParams) return rawParams[key];
-      // Fallback to original for params not yet captured
-      const val = originalParam(key);
-      return SENSITIVE_FIELDS.has(key) ? val : sanitizeInputString(val ?? "");
+      return sanitizeParamValue(key, originalParam(key));
     }) as typeof c.req.param;
 
     return next();

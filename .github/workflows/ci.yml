@@ -34,6 +34,8 @@ jobs:
       - run: bun run type-check
       - name: Org-scoping lint (MT-1)
         run: bun run org-scoping:check
+      - name: Dead-code / dependency audit (knip)
+        run: bun run knip
 
   test:
     name: Tests
@@ -100,7 +102,7 @@ jobs:
         run: git diff --exit-code -- docs/shadcn-adoption-report.md
       - name: Upload coverage artifact
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: coverage-report
           path: coverage/
@@ -269,7 +271,7 @@ jobs:
           NEXT_PUBLIC_ZEROTRUST_URL: http://localhost:1337
       - name: Upload Playwright report
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: playwright-report
           path: packages/ui/playwright-report/
@@ -361,7 +363,7 @@ jobs:
 
       - name: Upload test results
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: k6-test-results
           path: tests/load/results-*.json

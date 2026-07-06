@@ -74,6 +74,9 @@ export function rateLimit(options?: { points?: number; windowSecs?: number }) {
         return next();
       }
 
+      // In-memory fallback: per-process only — not atomic across replicas and
+      // can race under concurrent requests in the same process. Acceptable as a
+      // dev/single-instance fallback; production should use Redis (atomic INCR).
       const now = Math.floor(Date.now() / 1000);
       const bucket = ipBuckets.get(ip);
 
@@ -156,7 +159,11 @@ export async function enforceUserRateLimit(
   }
 
   const key = `user:${userId}`;
-  const result = await consumeRateLimit(key, cfg.rateLimiting.perUserLimit, cfg.rateLimiting.windowSecs);
+  const result = await consumeRateLimit(
+    key,
+    cfg.rateLimiting.perUserLimit,
+    cfg.rateLimiting.windowSecs
+  );
   if (!result.allowed) {
     recordRateLimit("authenticated", userId);
   }
@@ -172,10 +179,7 @@ export function userRateLimit() {
     if (!allowed) {
       logger.warn("User rate limit exceeded", { userId: user.id, path: c.req.path });
       c.header("Retry-After", String(retryAfterSecs));
-      return c.json(
-        { error: ErrorCodes.RATE_LIMIT_EXCEEDED, message: "Too many requests" },
-        429
-      );
+      return c.json({ error: ErrorCodes.RATE_LIMIT_EXCEEDED, message: "Too many requests" }, 429);
     }
     return next();
   });

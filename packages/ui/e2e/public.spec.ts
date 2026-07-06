@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { dismissCookieBanner } from "./fixtures/auth";
 
 // Public, unauthenticated pages. These exercise rendering, navigation, and
 // client-side validation only — they do not depend on the API/DB being healthy
@@ -54,6 +55,14 @@ test.describe("public pages", () => {
     await expect(page).toHaveURL(/\/dashboard\/wallet/);
   });
 
+  test("/security serves the public disclosure page (not the dashboard)", async ({ page }) => {
+    await page.goto("/security");
+    await expect(page).toHaveURL(/\/security$/);
+    await expect(
+      page.getByRole("heading", { name: "Security & Responsible Disclosure" })
+    ).toBeVisible();
+  });
+
   test("/en/dashboard redirects to /dashboard (locale prefix alias)", async ({ page }) => {
     await page.goto("/en/dashboard");
     await expect(page).toHaveURL(/\/dashboard$/);
@@ -67,6 +76,7 @@ test.describe("public pages", () => {
 
   test("navigates between login and register", async ({ page }) => {
     await page.goto("/login");
+    await dismissCookieBanner(page);
     await page.getByRole("link", { name: /create one/i }).click();
     await expect(page).toHaveURL(/\/register/);
     await expect(page.getByRole("heading", { name: /create your account/i })).toBeVisible();

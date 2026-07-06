@@ -31,6 +31,21 @@ describe("input sanitization middleware", () => {
     expect(JSON.stringify(body.nested.bio)).not.toMatch(/<svg|onbegin/i);
   });
 
+  it("returns all path params when param() is called without a key", async () => {
+    const app = new Hono();
+    app.use("*", inputSanitizationMiddleware());
+    app.patch("/reviews/:id/items/:itemId", (c) => c.json(c.req.param()));
+
+    const res = await app.request("/reviews/review-1/items/item-2", {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ decision: "approved" }),
+    });
+
+    expect(res.status).toBe(200);
+    await expect(res.json()).resolves.toEqual({ id: "review-1", itemId: "item-2" });
+  });
+
   it("sanitizes query and path params globally but preserves sensitive query keys", async () => {
     const app = new Hono();
     app.use("*", inputSanitizationMiddleware());

@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { hashTokenSha256 } from "../../src/shared/cryptoHash";
 
 // Plugin routes import core modules via ../../src/... — mock those specifiers.
 
@@ -282,7 +283,7 @@ describe("mfa.routes", () => {
     });
 
     it("200 and deletes row on match", async () => {
-      db.limit.mockResolvedValueOnce([{ id: "otp-1" }]);
+      db.limit.mockResolvedValueOnce([{ id: "otp-1", code: hashTokenSha256("123456") }]);
       const app = await getApp();
       const res = await post(app, "/otp/verify", { channel: "email", code: "123456" });
       expect(res.status).toBe(200);

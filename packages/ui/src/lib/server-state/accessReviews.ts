@@ -4,9 +4,12 @@ import { queryOptions, useMutation, useQuery, useQueryClient } from "@tanstack/r
 import { apiGet, apiPatch, apiPost } from "@/lib/apiClient";
 import { queryKeys } from "./queryKeys";
 import type {
+  AccessReview,
   AccessReviewDecision,
   AccessReviewDetailResponse,
+  AccessReviewItem,
   AccessReviewsListResponse,
+  PaginatedResponse,
   StartAccessReviewResponse,
 } from "./types";
 
@@ -26,12 +29,29 @@ export function buildAccessReviewCompletePath(id: string): string {
   return `${ACCESS_REVIEWS_PATH}/${id}/complete`;
 }
 
+function normalizeAccessReviewsList(data: unknown): AccessReviewsListResponse {
+  if (data && typeof data === "object" && "reviews" in data) {
+    const typed = data as AccessReviewsListResponse;
+    if (Array.isArray(typed.reviews)) return typed;
+  }
+  const paginated = data as PaginatedResponse<AccessReview>;
+  return { reviews: paginated.data ?? [] };
+}
+
+function normalizeAccessReviewDetail(data: unknown): AccessReviewDetailResponse {
+  const raw = data as AccessReviewDetailResponse & {
+    items?: AccessReviewItem[] | PaginatedResponse<AccessReviewItem>;
+  };
+  const items = Array.isArray(raw.items) ? raw.items : (raw.items?.data ?? []);
+  return { review: raw.review, items };
+}
+
 export function fetchAccessReviewsList(): Promise<AccessReviewsListResponse> {
-  return apiGet<AccessReviewsListResponse>(ACCESS_REVIEWS_PATH);
+  return apiGet<unknown>(ACCESS_REVIEWS_PATH).then(normalizeAccessReviewsList);
 }
 
 export function fetchAccessReviewDetail(id: string): Promise<AccessReviewDetailResponse> {
-  return apiGet<AccessReviewDetailResponse>(buildAccessReviewDetailPath(id));
+  return apiGet<unknown>(buildAccessReviewDetailPath(id)).then(normalizeAccessReviewDetail);
 }
 
 export function accessReviewsListQueryOptions() {

@@ -1,25 +1,14 @@
 import { expect, test } from "@playwright/test";
+import {
+  clearClientSession,
+  E2E_PASSWORD,
+  registerViaUi,
+  uniqueEmail,
+} from "./fixtures/auth";
 
 // Full authenticated flows against the running stack (UI :3000 + API :1337 +
 // Postgres + Redis). Each test provisions its own fresh account through the UI,
 // so there is no shared fixture state to reset.
-
-function uniqueEmail(): string {
-  return `e2e_${Date.now()}_${Math.floor(Math.random() * 1e6)}@example.com`;
-}
-
-// Strong + effectively-random so the live HIBP breach check (if enabled) won't
-// reject it; the webServer also runs with HIBP_CHECK_ENABLED=false.
-const PASSWORD = `E2e!${Date.now()}aB9x#Qz`;
-
-async function registerViaUi(page: import("@playwright/test").Page, email: string) {
-  await page.goto("/register");
-  await page.getByLabel("Display Name").fill("E2E User");
-  await page.getByLabel("Email").fill(email);
-  await page.getByLabel("Password", { exact: true }).fill(PASSWORD);
-  await page.getByLabel("Confirm Password").fill(PASSWORD);
-  await page.getByRole("button", { name: /create account/i }).click();
-}
 
 test.describe("authenticated flows", () => {
   test("register a new account and land on the dashboard", async ({ page }) => {
@@ -33,12 +22,10 @@ test.describe("authenticated flows", () => {
     // Register (auto-logs in), then clear the stored session to force a fresh
     // login through the form.
     await registerViaUi(page, email);
-    await expect(page).toHaveURL(/\/dashboard/, { timeout: 30_000 });
-    await page.evaluate(() => localStorage.clear());
+    await clearClientSession(page);
 
-    await page.goto("/login");
     await page.getByLabel("Email").fill(email);
-    await page.getByLabel("Password", { exact: true }).fill(PASSWORD);
+    await page.getByLabel("Password", { exact: true }).fill(E2E_PASSWORD);
     await page.getByRole("button", { name: "Sign in", exact: true }).click();
 
     await expect(page).toHaveURL(/\/dashboard/, { timeout: 30_000 });

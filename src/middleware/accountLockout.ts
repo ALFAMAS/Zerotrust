@@ -58,7 +58,10 @@ function powThreshold(settings?: LoginBackoffSettings): number {
 }
 
 /** Exponential backoff: 1s, 2s, 4s, … capped at maxDelayMs. Never hard-locks. */
-export function computeBackoffDelayMs(failureCount: number, settings?: LoginBackoffSettings): number {
+export function computeBackoffDelayMs(
+  failureCount: number,
+  settings?: LoginBackoffSettings
+): number {
   if (failureCount <= 0) return 0;
   const uncapped = BASE_DELAY_MS * 2 ** (failureCount - 1);
   return Math.min(uncapped, maxDelayMs(settings));

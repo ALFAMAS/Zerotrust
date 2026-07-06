@@ -135,7 +135,7 @@ Re-introducing any of these patterns is a review blocker.
 | **CWE-918** SSRF | Any server-side `fetch`/HTTP whose host comes from user input (webhook URL, notification/webhook URL, remote metadata URL, image proxy, SSF receiver, etc.) must reject IP literals, private/loopback/link-local/metadata hosts, non-default ports, and fetch with `redirect: "error"` plus `AbortSignal.timeout(...)`. Fixed SaaS/provider URLs and operator-controlled internal URLs do not need the public-host guard, but still need timeout + no redirects. | `assertSafeFetchHost` / `assertSafeFetchUrl` in `src/shared/safeFetch.ts` (used by `src/notifications/dispatcher.ts`, `src/mfa/fido-mds3.ts`, `src/webhooks/delivery.ts`, `src/ssf/sender.ts`) |
 | **CWE-78** OS command injection | Never `spawn(cmd, args, { shell: true })`. Always pass args as a literal argv with `shell: false`. Never interpolate user input into a command string. If a Windows `.cmd` shim is unavoidable, gate `shell:true` on the command literally ending in `.cmd` (or on `process.platform === "win32"` for npm). | `run()` in `src/services/dbBackup.service.ts`, `scripts/db-backup.js`, `scripts/db-restore.js`, `scripts/postinstall.js` |
 | **CWE-22** Path traversal | Filenames/object keys written to disk or S3 must be server-derived (uuid/random + timestamp + validated extension). Never use the client filename directly, even just for the extension. Validate extensions against an allowlist map (`safeExtensionForContentType`, `ALLOWED_AVATAR_TYPES`). | `src/services/uploadSafety.ts`, `src/services/presignedUpload.service.ts`, `src/api/routes/admin.routes.ts`, `auth.routes.ts` avatar upload |
-| **CWE-532** Secrets in logs | Log only identifiers (userId, providerId, scope, client_id). Never log raw token/secret/password values. Do not put access/refresh tokens in redirect URLs or query strings (SSE/EventSource, `?token=`) — use `Authorization` headers, httpOnly cookies, or short-lived ticket endpoints. OAuth: use the short-lived exchange-code pattern (see `POST /oauth/exchange`). Do not put OAuth provider access tokens/client secrets in outbound request URLs; use POST bodies or `Authorization` headers. | OAuth exchange flow in `plugins/oauth/routes.ts`; magic-link GET verify in `plugins/magic-link/routes.ts`; Facebook provider in `plugins/oauth/providers/facebook.ts`; **open:** `NotificationBell.tsx` SSE `?token=` — SEC-6 in `todo.md` |
+| **CWE-532** Secrets in logs | Log only identifiers (userId, providerId, scope, client_id). Never log raw token/secret/password values. Do not put access/refresh tokens in redirect URLs or query strings (SSE/EventSource, `?token=`) — use `Authorization` headers, httpOnly cookies, or short-lived ticket endpoints. OAuth: use the short-lived exchange-code pattern (see `POST /oauth/exchange`). Do not put OAuth provider access tokens/client secrets in outbound request URLs; use POST bodies or `Authorization` headers. | OAuth exchange flow in `plugins/oauth/routes.ts`; magic-link GET verify in `plugins/magic-link/routes.ts`; Facebook provider in `plugins/oauth/providers/facebook.ts`; notification SSE via `connectAuthenticatedSse()` + Bearer (`packages/ui/src/lib/sseClient.ts`, `NotificationBell.tsx`) |
 | **CWE-1333** ReDoS / regex injection | Never `new RegExp(\`...${interpolated}...\`)` with unescaped interpolation. Escape metacharacters (`escapeRegExp`) or use `String.split().join()` for literal substitution. Avoid nested quantifiers `(a+)+` in patterns run on attacker input; cap input length for regex parsers over untrusted data. | `escapeRegExp` in `src/db/storageFallback.ts` |
 | **CWE-327** Broken/risky crypto | Use SHA-256+ for hashes, AES-256-GCM for encryption, `crypto.randomBytes`/`randomUUID` for tokens. SHA-1 is only permitted for the HIBP k-anonymity breach check (`passwordBreach.service.ts`). Use `scryptSync`/`argon2` with a per-key random salt, never a hardcoded salt. The static-salt `scryptSync(raw, "zerotrust-db-backup", 32)` fallback in backup scripts is deprecated — use `BACKUP_ENCRYPTION_KEY_HEX` (32 raw bytes). | `src/services/dbBackup.service.ts`, `scripts/db-backup.js`, `scripts/db-restore.js` |
 | **CWE-1427** External control of identifier | When user input selects a system identifier (DB table/column, object key, hostname), it must be escaped/validated before use. DB identifiers go through Drizzle's parameterized `sql` tag, never string interpolation; object keys are server-derived and extension-validated. | `safeExtensionForContentType` in `src/services/uploadSafety.ts` |
@@ -148,13 +148,13 @@ MFA, WebAuthn, CSFLE, breach checks, or any new `fetch`/`spawn`/`fs.writeFile`.
 ### Security baseline (`docs/security.md`)
 
 Structural gaps beyond the CWE table above are tracked as **SEC-*** in
-[`todo.md`](./todo.md) (open: SEC-5…SEC-27) with verified fixes in
-[`tdone.md`](./tdone.md) § Security baseline audit. When touching authz, sessions,
-or tenant isolation: prefer `hasOrgPermission()` / `requireMember` patterns from
-`src/shared/permissions.ts` and org-scoped repositories; do not add inline
-`user.roles?.includes` checks. Target state is a single `assertCan()` choke point
-(SEC-5 — not yet implemented). New passwords should plan for `Bun.password` argon2id
-(SEC-8 — bcrypt today). Next.js `middleware.ts` must not become an auth boundary.
+[`todo.md`](./todo.md) (open: **SEC-27** only; **DQ-2** coverage ratchet) with
+verified fixes in [`tdone.md`](./tdone.md) § Security baseline audit (SEC-1…SEC-26,
+SEC-28 shipped 2026-07-05). When touching authz, sessions, or tenant isolation:
+prefer `assertCan()` / `authorizeOrg()` from `src/shared/permissions.ts` and
+org-scoped repositories; do not add inline `user.roles?.includes` checks. Passwords
+use `src/shared/passwordHash.ts` (`Bun.password` argon2id with bcrypt verify/rehash
+fallback). Next.js `middleware.ts` must not become an auth boundary.
 
 ## Canonical shared modules (extend, don't duplicate)
 
@@ -166,7 +166,12 @@ Every agent working in this repo MUST reuse these modules instead of re-implemen
 | `src/shared/dbCount.ts` | `countRows(db, table, where?)` | `COUNT(*)` for list endpoints — pairs with `paginated()` inside a `Promise.all`. Never inline `select({ count: sql\`count(*)::int\` })`. |
 | `src/shared/httpErrors.ts` | `internalError(c, logger, logLabel, err, clientMessage?)` | **The** helper for explicit route `catch` blocks: logs the error, returns the canonical `{ error: "INTERNAL_ERROR" }` 500 (CWE-532 — never serialize the raw error). Used in ~115 handlers. |
 | `src/shared/roles.ts` | `hasRole(user, role)`, `hasAnyRole(user, roles)`, `isAdmin(user)` | System-level role checks on the principal's `roles` array. Null-safe / fail-closed; never inline `user.roles?.includes(...)`. |
-| `src/shared/permissions.ts` | `hasOrgPermission()`, org role helpers | Org-scoped authorization — reuse instead of inline permission logic. Target: `assertCan()` (SEC-5, not yet shipped). |
+| `src/shared/permissions.ts` | `assertCan()`, `authorizeOrg()`, `hasOrgPermission()` | Org-scoped authorization — reuse instead of inline permission logic. |
+| `src/shared/passwordHash.ts` | `hashPassword()`, `verifyPassword()`, `dummyPasswordHash()` | Password hashing (argon2id + bcrypt fallback/rehash) — never inline `Bun.password` or bcrypt. |
+| `src/middleware/zodValidation.ts` | `zValidator()` | Canonical `@hono/zod-validator` wrapper — use parsed output, whitelist update schemas. |
+| `src/shared/logRedaction.ts` | `redactLogEntry()`, `redactLogString()` | Structured log + error redaction (CWE-532) — used by `getLogger()` and audit pipelines. |
+| `src/middleware/csrfOrigin.ts` | `csrfOriginMiddleware()` | Cookie-session CSRF origin check — mounted globally; Bearer/API-key/webhook paths exempt. |
+| `src/middleware/bodySizeLimit.ts` | `bodySizeLimitMiddleware()` | Global body-size cap (1 MiB JSON/text, 10 MiB multipart). |
 | `src/shared/safeRedirect.ts` | `safeRelativeRedirect()`, `appRedirectUrl()`, `isRegisteredRedirectUri()` | All server-side redirects (CWE-601). |
 | `src/shared/safeFetch.ts` | `assertSafeFetchHost()`, `assertSafeFetchUrl()`, `fetchPublicUrl()`, `fetchFixedUrl()` | Any server-side HTTP to non-fixed hosts (CWE-918). |
 | `src/shared/cryptoHash.ts` | `hashTokenSha256()`, `hashTokensSha256()`, `hashFingerprint()`, `hashBase64Url()` | Hashing tokens/fingerprints — never inline `createHash()`. |

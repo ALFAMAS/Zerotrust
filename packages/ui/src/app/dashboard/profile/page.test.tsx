@@ -59,6 +59,22 @@ describe("ProfilePage", () => {
     expect(await screen.findByText("Profile updated successfully.")).toBeInTheDocument();
   });
 
+  it("opens enlarged profile photo when avatar is clicked", async () => {
+    mockApiGet.mockResolvedValue({
+      ...mockUser,
+      avatarUrl: "https://example.com/avatar.png",
+    });
+    const user = userEvent.setup();
+    renderProfile();
+    await screen.findByText("Profile Settings");
+
+    await user.click(await screen.findByRole("button", { name: "View profile photo" }));
+
+    expect(await screen.findByRole("dialog")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Profile photo" })).toBeInTheDocument();
+    expect(screen.getByAltText("Profile photo of Ada Lovelace")).toBeInTheDocument();
+  });
+
   it("shows error when loading fails", async () => {
     mockApiGet.mockRejectedValue(new Error("network error"));
     renderProfile();

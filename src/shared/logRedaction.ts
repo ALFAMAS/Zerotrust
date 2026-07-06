@@ -13,8 +13,7 @@ const SENSITIVE_STRING_RE =
 
 const BEARER_RE = /\bBearer\s+[A-Za-z0-9._~+/-]+=*/gi;
 
-const DB_URL_RE =
-  /\b(postgres(?:ql)?:\/\/[^:\s/@]+:)([^@\s]+)(@[^/\s]+(?:\/[^\s]*)?)/gi;
+const DB_URL_RE = /\b(postgres(?:ql)?:\/\/[^:\s/@]+:)([^@\s]+)(@[^/\s]+(?:\/[^\s]*)?)/gi;
 
 const QUERY_SECRET_RE =
   /([?&](?:password|secret|client_secret|token|access_token|refresh_token|api_key|otp)=)[^&\s]+/gi;

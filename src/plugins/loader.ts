@@ -13,10 +13,14 @@ import type { PluginLoadResult, ZerotrustPlugin } from "./types";
 const logger = getLogger("plugin-loader");
 
 function resolvePluginEntryPath(id: string, cwd = process.cwd()): string | null {
-  const prodJs = join(cwd, "dist", "plugins", id, "index.js");
-  if (existsSync(prodJs)) return prodJs;
-
   const devTs = join(cwd, "plugins", id, "index.ts");
+  const prodJs = join(cwd, "dist", "plugins", id, "index.js");
+
+  // In development/e2e, prefer source plugins so they share the API process DB
+  // singleton. Stale dist/ copies load a separate module graph and break routes
+  // that call getDb() (e.g. magic-link verify → getSettings()).
+  if (process.env.NODE_ENV !== "production" && existsSync(devTs)) return devTs;
+  if (existsSync(prodJs)) return prodJs;
   if (existsSync(devTs)) return devTs;
 
   return null;

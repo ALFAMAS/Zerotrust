@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
+import { buildUiSecurityHeaders } from "./src/config/securityHeaders";
 import { UI_ROUTE_REDIRECTS } from "./src/config/uiRouteRedirects";
 
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
@@ -47,6 +48,18 @@ const nextConfig: NextConfig = {
   // to the matching App Router pages — see src/config/uiRouteRedirects.ts.
   async redirects() {
     return UI_ROUTE_REDIRECTS;
+  },
+
+  // Security headers (CSP, HSTS, frame denial) — see src/config/securityHeaders.ts.
+  // Override full policy with UI_CSP; report-only with UI_CSP_REPORT_ONLY=true.
+  async headers() {
+    const securityHeaders = buildUiSecurityHeaders();
+    return [
+      {
+        source: "/:path*",
+        headers: securityHeaders,
+      },
+    ];
   },
 };
 

@@ -97,7 +97,11 @@ router.get("/:id", async (c) => {
   const user = c.get("user");
   const id = c.req.param("id");
   try {
-    const db = getReadDb();
+    // M13: the ownership check below gates access, so this must read the
+    // primary like the sibling POST /:id/messages and PATCH /:id handlers
+    // already do — a replica-lag window must not let a stale ticket.userId
+    // grant or deny access inconsistently with those siblings.
+    const db = getDb();
     const [ticket] = await db
       .select()
       .from(supportTicketsTable)

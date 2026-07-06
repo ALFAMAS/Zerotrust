@@ -43,6 +43,10 @@ describe("uiRouteRedirects", () => {
     it("maps /jit/cross-tenant to /dashboard/jit", () => {
       expect(findRedirect("/jit/cross-tenant")?.destination).toBe("/dashboard/jit");
     });
+
+    it("does not steal the public /security disclosure page", () => {
+      expect(findRedirect("/security")).toBeUndefined();
+    });
   });
 
   describe("locale prefix stripping", () => {

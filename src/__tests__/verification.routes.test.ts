@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { hashTokenSha256 } from "../shared/cryptoHash";
 
 // ── Mocks ──────────────────────────────────────────────────────────────────
 // verification.routes.ts imports with explicit `.js` specifiers (nodenext), so
@@ -237,7 +238,7 @@ describe("verification.routes", () => {
     });
 
     it("otp valid code → verified soft, deletes row", async () => {
-      db.limit.mockResolvedValueOnce([{ id: "otp-1" }]);
+      db.limit.mockResolvedValueOnce([{ id: "otp-1", code: hashTokenSha256("654321") }]);
       const app = await getApp();
       const res = await req(app, "/respond", { type: "otp", code: "654321" });
       expect(res.status).toBe(200);

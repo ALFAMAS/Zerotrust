@@ -13,6 +13,7 @@ import type {
   Notification,
   NotificationPreferences,
   NotificationsUnreadCount,
+  PaginatedResponse,
   UpdateNotificationPreferencesInput,
 } from "./types";
 
@@ -33,7 +34,9 @@ export function fetchNotificationsUnreadCount(): Promise<NotificationsUnreadCoun
 }
 
 export function fetchNotificationsList(): Promise<Notification[]> {
-  return apiGet<Notification[]>(NOTIFICATIONS_PATH);
+  return apiGet<PaginatedResponse<Notification>>(
+    `${NOTIFICATIONS_PATH}?limit=${NOTIFICATIONS_LIST_PREVIEW_LIMIT}`
+  ).then((response) => response.data ?? []);
 }
 
 export function notificationsUnreadCountQueryOptions() {
@@ -191,7 +194,9 @@ export function useMarkAllNotificationsReadMutation() {
       updateNotificationListCache(queryClient, (notifications) =>
         notifications.map((notification) => ({ ...notification, read: true }))
       );
-      queryClient.setQueryData<NotificationsUnreadCount>(unreadKey, { count: 0 });
+      queryClient.setQueryData<NotificationsUnreadCount>(unreadKey, {
+        count: 0,
+      });
 
       return { previousUnread, previousList };
     },

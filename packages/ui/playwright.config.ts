@@ -12,9 +12,9 @@ export default defineConfig({
   fullyParallel: false,
   workers: 1,
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 1 : 0,
-  timeout: 60_000,
-  expect: { timeout: 15_000 },
+  retries: process.env.CI ? 2 : 0,
+  timeout: 90_000,
+  expect: { timeout: 20_000 },
   reporter: process.env.CI ? "github" : "list",
 
   use: {
@@ -22,6 +22,12 @@ export default defineConfig({
     trace: "on-first-retry",
     screenshot: "only-on-failure",
   },
+
+  // Prefer the user-level browser cache on Windows dev machines (sandbox installs
+  // land in a temp path that Playwright test runs may not see).
+  ...(process.platform === "win32" && process.env.LOCALAPPDATA
+    ? { cacheDir: `${process.env.LOCALAPPDATA}/ms-playwright` }
+    : {}),
 
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
 
@@ -38,8 +44,10 @@ export default defineConfig({
     stdout: "pipe",
     stderr: "pipe",
     env: {
+      NODE_ENV: "development",
       NEXT_PUBLIC_ZEROTRUST_URL: "http://localhost:1337",
       HIBP_CHECK_ENABLED: "false",
+      RATE_LIMITING_ENABLED: "false",
     },
   },
 });

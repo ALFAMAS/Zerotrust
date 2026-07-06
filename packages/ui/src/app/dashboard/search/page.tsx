@@ -58,14 +58,14 @@ export default function SearchPage() {
 
       <div className="relative mb-4">
         <SearchIcon
-          className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 text-muted-foreground"
+          className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground"
           aria-hidden="true"
         />
         <Input
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder="Search…"
-          className="pl-9"
+          placeholder="Search users, orgs, notes, tickets…"
+          className="h-10 w-full rounded-lg border-input bg-muted/30 pl-9 shadow-sm transition-colors focus-visible:bg-background"
           aria-label="Search query"
         />
       </div>

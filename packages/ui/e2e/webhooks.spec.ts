@@ -1,10 +1,9 @@
 import { expect, test } from "@playwright/test";
+import { mockAuthenticatedShell } from "./fixtures/apiMocks";
 
 test.describe("webhooks page", () => {
   test.beforeEach(async ({ page }) => {
-    await page.addInitScript(() => {
-      localStorage.setItem("za_access_token", "test-token");
-    });
+    await mockAuthenticatedShell(page);
   });
 
   test("lists webhook endpoints", async ({ page }) => {
@@ -12,11 +11,11 @@ test.describe("webhooks page", () => {
       route.fulfill({
         json: [
           {
-            id: "wh1",
+            id: "wh-1",
             url: "https://hooks.example.com/zt",
             events: ["user.created"],
-            enabled: true,
-            createdAt: "2026-06-01T00:00:00Z",
+            active: true,
+            createdAt: new Date().toISOString(),
           },
         ],
       })

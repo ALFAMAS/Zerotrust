@@ -1,7 +1,7 @@
 import * as nodeCrypto from "node:crypto";
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
-import { and, eq, gt, sql } from "drizzle-orm";
+import { and, eq, gt, ne, sql } from "drizzle-orm";
 import { Hono } from "hono";
 import { z } from "zod";
 import { getConfig } from "../../config";
@@ -14,13 +14,12 @@ import {
 } from "../../db/repositories/authSessions.repository";
 import { otpsTable, refreshTokensTable, usersTable } from "../../db/schema";
 import { getLogger } from "../../logger";
-import { getSettings } from "../../models/settings.model";
-import { authMiddleware, optionalAuthMiddleware } from "../../middleware/auth";
 import {
   getLoginThrottle,
   recordFailedLogin,
   recordSuccessfulLogin,
 } from "../../middleware/accountLockout";
+import { authMiddleware, optionalAuthMiddleware } from "../../middleware/auth";
 import { sensitiveReverification } from "../../middleware/continuousVerification";
 import {
   isIpBlocked,
@@ -28,16 +27,14 @@ import {
   recordIpLoginSuccess,
 } from "../../middleware/credentialStuffing";
 import { requireProofOfPossession } from "../../middleware/proofOfPossession";
+import { captchaGuard } from "../../middleware/captcha";
 import { rateLimit } from "../../middleware/rateLimiting";
 import { zValidator } from "../../middleware/zodValidation";
-import { LoginBodySchema, RegisterBodySchema } from "../schemas/auth.schema";
+import { getSettings } from "../../models/settings.model";
 import { recordAndRespond } from "../../services/auth/accountTakeover.service";
 import { validateSignupEmail } from "../../services/auth/disposableEmail.service";
 import { issueAuthenticatedSession } from "../../services/auth/issueAuthenticatedSession.service";
-import {
-  recordLoginFailure,
-  recordLoginSuccess,
-} from "../../services/auth/loginAudit.service";
+import { recordLoginFailure, recordLoginSuccess } from "../../services/auth/loginAudit.service";
 import { rejectIfBreached } from "../../services/auth/passwordBreach.service";
 import {
   createPowChallenge,
@@ -62,6 +59,7 @@ import {
   setRefreshTokenCookie,
 } from "../../shared/authCookies";
 import { getClientIp } from "../../shared/clientIp";
+import { hashTokenSha256, safeDigestEquals } from "../../shared/cryptoHash";
 import { internalError } from "../../shared/httpErrors";
 import { localeFromAcceptLanguage, normalizeLocale, SUPPORTED_LOCALES } from "../../shared/locale";
 import {
@@ -71,6 +69,7 @@ import {
   verifyPassword,
 } from "../../shared/passwordHash";
 import type { HonoEnv, OAuthProvider, Passkey, User } from "../../shared/types";
+import { LoginBodySchema, RegisterBodySchema } from "../schemas/auth.schema";
 
 const router = new Hono<HonoEnv>();
 const logger = getLogger("auth-routes");
@@ -176,7 +175,7 @@ async function issueVerification(user: {
     .where(and(eq(otpsTable.userId, user.id), eq(otpsTable.type, "email_verification")));
   await db.insert(otpsTable).values({
     userId: user.id,
-    code,
+    code: hashTokenSha256(code),
     type: "email_verification",
     channel: "email",
     target: user.email,
@@ -207,117 +206,118 @@ router.get("/pow/challenge", rateLimit({ points: 30, windowSecs: 60 }), (c) => {
 router.post(
   "/register",
   rateLimit({ points: 10, windowSecs: 60 }),
+  captchaGuard(),
   zValidator("json", RegisterBodySchema),
   async (c) => {
-  try {
-    const {
-      email,
-      password,
-      displayName,
-      locale: bodyLocale,
-      powChallenge,
-      powSolution,
-    } = c.req.valid("json");
+    try {
+      const {
+        email,
+        password,
+        displayName,
+        locale: bodyLocale,
+        powChallenge,
+        powSolution,
+      } = c.req.valid("json");
 
-    // Bot/abuse mitigation: require a valid proof-of-work when enabled.
-    if (isSignupPowEnabled()) {
-      const pow = verifyPowSolution(powChallenge ?? "", powSolution ?? "");
-      if (!pow.ok) {
+      // Bot/abuse mitigation: require a valid proof-of-work when enabled.
+      if (isSignupPowEnabled()) {
+        const pow = verifyPowSolution(powChallenge ?? "", powSolution ?? "");
+        if (!pow.ok) {
+          return c.json(
+            {
+              error: "POW_REQUIRED",
+              message: "Proof-of-work challenge failed",
+              reason: pow.reason,
+            },
+            400
+          );
+        }
+      }
+
+      const normalizedEmail = String(email).toLowerCase().trim();
+      const emailValidation = await validateSignupEmail(normalizedEmail);
+      if (!emailValidation.allowed) {
         return c.json(
-          {
-            error: "POW_REQUIRED",
-            message: "Proof-of-work challenge failed",
-            reason: pow.reason,
-          },
-          400
+          { error: emailValidation.code, message: emailValidation.message },
+          emailValidation.code === "INVALID_EMAIL" ? 400 : 422
         );
       }
-    }
 
-    const normalizedEmail = String(email).toLowerCase().trim();
-    const emailValidation = await validateSignupEmail(normalizedEmail);
-    if (!emailValidation.allowed) {
-      return c.json(
-        { error: emailValidation.code, message: emailValidation.message },
-        emailValidation.code === "INVALID_EMAIL" ? 400 : 422
-      );
-    }
+      const db = getDb();
+      const existing = await db
+        .select()
+        .from(usersTable)
+        .where(eq(usersTable.email, normalizedEmail))
+        .limit(1);
+      if (existing.length > 0) {
+        return c.json({ error: "USER_ALREADY_EXISTS", message: "User already exists" }, 409);
+      }
 
-    const db = getDb();
-    const existing = await db
-      .select()
-      .from(usersTable)
-      .where(eq(usersTable.email, normalizedEmail))
-      .limit(1);
-    if (existing.length > 0) {
-      return c.json({ error: "USER_ALREADY_EXISTS", message: "User already exists" }, 409);
-    }
+      // HaveIBeenPwned breach check (k-anonymity — fails open on network errors)
+      const breachMessage = await rejectIfBreached(password);
+      if (breachMessage) {
+        return c.json({ error: "PASSWORD_BREACHED", message: breachMessage }, 400);
+      }
 
-    // HaveIBeenPwned breach check (k-anonymity — fails open on network errors)
-    const breachMessage = await rejectIfBreached(password);
-    if (breachMessage) {
-      return c.json({ error: "PASSWORD_BREACHED", message: breachMessage }, 400);
-    }
+      const cfg = getConfig();
+      const passwordHash = await hashPassword(password);
 
-    const cfg = getConfig();
-    const passwordHash = await hashPassword(password);
+      // Preferred locale: explicit body value wins, else negotiate Accept-Language.
+      const locale = bodyLocale
+        ? normalizeLocale(bodyLocale)
+        : localeFromAcceptLanguage(c.req.header("accept-language"));
 
-    // Preferred locale: explicit body value wins, else negotiate Accept-Language.
-    const locale = bodyLocale
-      ? normalizeLocale(bodyLocale)
-      : localeFromAcceptLanguage(c.req.header("accept-language"));
-
-    const [user] = await db
-      .insert(usersTable)
-      .values({
-        email: normalizedEmail,
-        passwordHash,
-        displayName: displayName || normalizedEmail.split("@")[0],
-        locale,
-        roles: ["user"],
-        attributes: {},
-        mfa: {
-          totp: { enabled: false, backupCodes: [] },
-          webauthn: { enabled: false },
-        },
-        passkeys: [],
-        oauthProviders: [],
-        status: "active",
-        sessionConfig: {
-          maxDevices: cfg.session.maxConcurrentDevices,
-          allowedCountries: cfg.geofencing.allowedCountries,
-          allowedIpRanges: cfg.geofencing.allowedIpRanges,
-          scheduleRestriction: {
-            enabled: false,
-            timezone: "UTC",
-            allowedDays: [],
-            allowedHoursStart: 0,
-            allowedHoursEnd: 23,
+      const [user] = await db
+        .insert(usersTable)
+        .values({
+          email: normalizedEmail,
+          passwordHash,
+          displayName: displayName || normalizedEmail.split("@")[0],
+          locale,
+          roles: ["user"],
+          attributes: {},
+          mfa: {
+            totp: { enabled: false, backupCodes: [] },
+            webauthn: { enabled: false },
           },
-        },
-      })
-      .returning();
+          passkeys: [],
+          oauthProviders: [],
+          status: "active",
+          sessionConfig: {
+            maxDevices: cfg.session.maxConcurrentDevices,
+            allowedCountries: cfg.geofencing.allowedCountries,
+            allowedIpRanges: cfg.geofencing.allowedIpRanges,
+            scheduleRestriction: {
+              enabled: false,
+              timezone: "UTC",
+              allowedDays: [],
+              allowedHoursStart: 0,
+              allowedHoursEnd: 23,
+            },
+          },
+        })
+        .returning();
 
-    const loginUrl = `${process.env.APP_URL ?? "http://localhost:3000"}/login`;
-    void sendWelcomeEmail(user.email, {
-      name: user.displayName ?? user.email,
-      loginUrl,
-      locale,
-    });
-
-    // Kick off email verification (code + magic link). Non-fatal on failure.
-    try {
-      await issueVerification(user);
-    } catch (e) {
-      logger.warn("Failed to issue email verification on register", {
-        error: String(e),
+      const loginUrl = `${process.env.APP_URL ?? "http://localhost:3000"}/login`;
+      void sendWelcomeEmail(user.email, {
+        name: user.displayName ?? user.email,
+        loginUrl,
+        locale,
       });
-    }
 
-    return c.json({ success: true, userId: user.id }, 201);
-  } catch (err) {
-    return internalError(c, logger, "Registration error", err, "Registration failed");
-  }
+      // Kick off email verification (code + magic link). Non-fatal on failure.
+      try {
+        await issueVerification(user);
+      } catch (e) {
+        logger.warn("Failed to issue email verification on register", {
+          error: String(e),
+        });
+      }
+
+      return c.json({ success: true, userId: user.id }, 201);
+    } catch (err) {
+      return internalError(c, logger, "Registration error", err, "Registration failed");
+    }
   }
 );
 
@@ -358,12 +358,11 @@ router.post(
           and(
             eq(otpsTable.userId, user.id),
             eq(otpsTable.type, "email_verification"),
-            eq(otpsTable.code, String(code).trim()),
             gt(otpsTable.expiresAt, new Date())
           )
         )
         .limit(1);
-      if (!otp) {
+      if (!otp || !safeDigestEquals(hashTokenSha256(String(code).trim()), otp.code)) {
         return c.json({ error: "INVALID_CODE", message: "Invalid or expired code" }, 400);
       }
 
@@ -416,121 +415,122 @@ router.post(
 router.post(
   "/login",
   rateLimit({ points: 20, windowSecs: 60 }),
+  captchaGuard(),
   zValidator("json", LoginBodySchema),
   async (c) => {
-  try {
-    const { email, password, powChallenge, powSolution } = c.req.valid("json");
+    try {
+      const { email, password, powChallenge, powSolution } = c.req.valid("json");
 
-    const settings = await getSettings();
-    const backoffSettings = {
-      enabled: settings.accountLockoutEnabled,
-      powThreshold: settings.accountLockoutThreshold,
-      maxDelayMinutes: settings.accountLockoutDurationMinutes,
-    };
+      const settings = await getSettings();
+      const backoffSettings = {
+        enabled: settings.accountLockoutEnabled,
+        powThreshold: settings.accountLockoutThreshold,
+        maxDelayMinutes: settings.accountLockoutDurationMinutes,
+      };
 
-    const throttle = getLoginThrottle(email, backoffSettings);
-    if (throttle.delayed && throttle.retryAfterSeconds) {
-      c.header("Retry-After", String(throttle.retryAfterSeconds));
-      return c.json(
-        {
-          error: "TOO_MANY_ATTEMPTS",
-          message: "Too many failed login attempts. Please wait before trying again.",
-          retryAfter: throttle.retryAfterSeconds,
-          requiresPow: throttle.requiresPow,
-        },
-        429
-      );
-    }
-
-    if (throttle.requiresPow) {
-      const pow = verifyPowSolution(powChallenge ?? "", powSolution ?? "");
-      if (!pow.ok) {
+      const throttle = getLoginThrottle(email, backoffSettings);
+      if (throttle.delayed && throttle.retryAfterSeconds) {
+        c.header("Retry-After", String(throttle.retryAfterSeconds));
         return c.json(
           {
-            error: "POW_REQUIRED",
-            message: "Proof-of-work required after repeated failed login attempts",
-            reason: pow.reason,
-            requiresPow: true,
+            error: "TOO_MANY_ATTEMPTS",
+            message: "Too many failed login attempts. Please wait before trying again.",
+            retryAfter: throttle.retryAfterSeconds,
+            requiresPow: throttle.requiresPow,
           },
-          428
+          429
         );
       }
-    }
 
-    // Credential-stuffing defense: block a source IP that has been failing logins
-    // across many accounts, independent of any single account's backoff.
-    const clientIp = getClientIp(c);
-    const ipBlock = isIpBlocked(clientIp);
-    if (ipBlock.blocked) {
-      if (ipBlock.retryAfterSecs) c.header("Retry-After", String(ipBlock.retryAfterSecs));
-      return c.json(
-        {
-          error: "TOO_MANY_ATTEMPTS",
-          message: "Too many failed login attempts from this network. Try again later.",
-          retryAfter: ipBlock.retryAfterSecs,
-        },
-        429
-      );
-    }
+      if (throttle.requiresPow) {
+        const pow = verifyPowSolution(powChallenge ?? "", powSolution ?? "");
+        if (!pow.ok) {
+          return c.json(
+            {
+              error: "POW_REQUIRED",
+              message: "Proof-of-work required after repeated failed login attempts",
+              reason: pow.reason,
+              requiresPow: true,
+            },
+            428
+          );
+        }
+      }
 
-    const db = getDb();
-    // Select only fields required for password login. This keeps login working
-    // when optional profile/compliance columns have not been migrated yet.
-    const users = await db
-      .select({
-        id: usersTable.id,
-        email: usersTable.email,
-        passwordHash: usersTable.passwordHash,
-        displayName: usersTable.displayName,
-        mfa: usersTable.mfa,
-      })
-      .from(usersTable)
-      .where(eq(usersTable.email, email.toLowerCase()))
-      .limit(1);
-    const user = users[0];
-    const hashToVerify = user?.passwordHash ?? (await dummyPasswordHash());
-    const valid = await verifyPassword(password, hashToVerify);
-    if (!user?.passwordHash || !valid) {
-      recordFailedLogin(email, backoffSettings);
-      recordIpLoginFailure(clientIp, email);
-      recordLoginFailure({
-        email: email.toLowerCase(),
+      // Credential-stuffing defense: block a source IP that has been failing logins
+      // across many accounts, independent of any single account's backoff.
+      const clientIp = getClientIp(c);
+      const ipBlock = isIpBlocked(clientIp);
+      if (ipBlock.blocked) {
+        if (ipBlock.retryAfterSecs) c.header("Retry-After", String(ipBlock.retryAfterSecs));
+        return c.json(
+          {
+            error: "TOO_MANY_ATTEMPTS",
+            message: "Too many failed login attempts from this network. Try again later.",
+            retryAfter: ipBlock.retryAfterSecs,
+          },
+          429
+        );
+      }
+
+      const db = getDb();
+      // Select only fields required for password login. This keeps login working
+      // when optional profile/compliance columns have not been migrated yet.
+      const users = await db
+        .select({
+          id: usersTable.id,
+          email: usersTable.email,
+          passwordHash: usersTable.passwordHash,
+          displayName: usersTable.displayName,
+          mfa: usersTable.mfa,
+        })
+        .from(usersTable)
+        .where(eq(usersTable.email, email.toLowerCase()))
+        .limit(1);
+      const user = users[0];
+      const hashToVerify = user?.passwordHash ?? (await dummyPasswordHash());
+      const valid = await verifyPassword(password, hashToVerify);
+      if (!user?.passwordHash || !valid) {
+        recordFailedLogin(email, backoffSettings);
+        recordIpLoginFailure(clientIp, email);
+        recordLoginFailure({
+          email: email.toLowerCase(),
+          ip: clientIp,
+          reason: "invalid_credentials",
+          userId: user?.id,
+        });
+        return c.json({ error: "INVALID_CREDENTIALS", message: "Invalid credentials" }, 401);
+      }
+
+      recordSuccessfulLogin(email);
+      recordIpLoginSuccess(clientIp);
+      await rehashPasswordIfLegacy(user.id, password, user.passwordHash);
+
+      // Password is correct, but if the account has a second factor we stop here
+      // and hand back a short-lived challenge token instead of a real session.
+      // The caller must clear the second factor via POST /login/mfa.
+      if (userRequiresMfa(user)) {
+        const mfaToken = await issueMfaChallengeToken(user);
+        return c.json({
+          mfaRequired: true,
+          mfaToken,
+          methods: ["totp"],
+          expiresIn: MFA_CHALLENGE_TTL_SECS,
+        });
+      }
+
+      const { body, sessionId } = await issueAuthenticatedSession(c, user);
+      recordLoginSuccess({
+        userId: user.id,
+        email: user.email,
         ip: clientIp,
-        reason: "invalid_credentials",
-        userId: user?.id,
+        method: "password",
+        sessionId,
       });
-      return c.json({ error: "INVALID_CREDENTIALS", message: "Invalid credentials" }, 401);
+      return c.json(body);
+    } catch (err) {
+      return internalError(c, logger, "Login error", err, "Login failed");
     }
-
-    recordSuccessfulLogin(email);
-    recordIpLoginSuccess(clientIp);
-    await rehashPasswordIfLegacy(user.id, password, user.passwordHash);
-
-    // Password is correct, but if the account has a second factor we stop here
-    // and hand back a short-lived challenge token instead of a real session.
-    // The caller must clear the second factor via POST /login/mfa.
-    if (userRequiresMfa(user)) {
-      const mfaToken = await issueMfaChallengeToken(user);
-      return c.json({
-        mfaRequired: true,
-        mfaToken,
-        methods: ["totp"],
-        expiresIn: MFA_CHALLENGE_TTL_SECS,
-      });
-    }
-
-    const { body, sessionId } = await issueAuthenticatedSession(c, user);
-    recordLoginSuccess({
-      userId: user.id,
-      email: user.email,
-      ip: clientIp,
-      method: "password",
-      sessionId,
-    });
-    return c.json(body);
-  } catch (err) {
-    return internalError(c, logger, "Login error", err, "Login failed");
-  }
   }
 );
 
@@ -859,20 +859,22 @@ router.get("/me", authMiddleware, async (c) => {
 
 // ── PATCH /auth/me ────────────────────────────────────────────────────────────
 
-const patchMeSchema = z.object({
-  displayName: z.string().min(1).max(100).optional(),
-  avatarUrl: z.string().url().nullable().optional(),
-  phone: z.string().max(30).nullable().optional(),
-  username: z
-    .string()
-    .min(3)
-    .max(50)
-    .regex(/^[a-z0-9_-]+$/, "lowercase letters, digits, hyphens, underscores only")
-    .nullable()
-    .optional(),
-  locale: z.enum(SUPPORTED_LOCALES).optional(),
-  version: z.number().int().nonnegative().optional(),
-});
+const patchMeSchema = z
+  .object({
+    displayName: z.string().min(1).max(100).optional(),
+    avatarUrl: z.string().url().nullable().optional(),
+    phone: z.string().max(30).nullable().optional(),
+    username: z
+      .string()
+      .min(3)
+      .max(50)
+      .regex(/^[a-z0-9_-]+$/, "lowercase letters, digits, hyphens, underscores only")
+      .nullable()
+      .optional(),
+    locale: z.enum(SUPPORTED_LOCALES).optional(),
+    version: z.number().int().nonnegative().optional(),
+  })
+  .strict();
 
 router.patch("/me", authMiddleware, async (c) => {
   try {
@@ -884,6 +886,20 @@ router.patch("/me", authMiddleware, async (c) => {
 
     const { version: expectedVersion, ...fields } = parsed.data;
     const db = getDb();
+
+    if (fields.username !== undefined && fields.username !== user.username) {
+      if (fields.username !== null) {
+        const [existing] = await db
+          .select({ id: usersTable.id })
+          .from(usersTable)
+          .where(and(eq(usersTable.username, fields.username), ne(usersTable.id, user.id)))
+          .limit(1);
+        if (existing) {
+          return c.json({ error: "USERNAME_TAKEN" }, 409);
+        }
+      }
+    }
+
     const setPayload = { ...fields, updatedAt: new Date() };
 
     const returningFields = {

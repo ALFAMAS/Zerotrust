@@ -7,6 +7,13 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ErrorState } from "@/components/ui/States";
@@ -32,6 +39,7 @@ export default function ProfilePage() {
   });
   const [msg, setMsg] = useState("");
   const [msgType, setMsgType] = useState<"success" | "error">("success");
+  const [avatarPreviewOpen, setAvatarPreviewOpen] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -138,12 +146,27 @@ export default function ProfilePage() {
         </CardHeader>
         <CardContent>
           <div className="flex items-center gap-5">
-            <Avatar className="h-20 w-20 border-2 border-border">
-              {form.avatarUrl ? <AvatarImage src={form.avatarUrl} alt="Avatar" /> : null}
-              <AvatarFallback className="bg-primary text-2xl font-bold text-primary-foreground">
-                {initials}
-              </AvatarFallback>
-            </Avatar>
+            {form.avatarUrl ? (
+              <button
+                type="button"
+                onClick={() => setAvatarPreviewOpen(true)}
+                className="shrink-0 rounded-full ring-offset-background transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                aria-label="View profile photo"
+              >
+                <Avatar className="h-20 w-20 cursor-pointer border-2 border-border">
+                  <AvatarImage src={form.avatarUrl} alt="Profile photo, click to enlarge" />
+                  <AvatarFallback className="bg-primary text-2xl font-bold text-primary-foreground">
+                    {initials}
+                  </AvatarFallback>
+                </Avatar>
+              </button>
+            ) : (
+              <Avatar className="h-20 w-20 border-2 border-border">
+                <AvatarFallback className="bg-primary text-2xl font-bold text-primary-foreground">
+                  {initials}
+                </AvatarFallback>
+              </Avatar>
+            )}
             <div className="min-w-0 flex-1">
               <p className="mb-3 text-sm text-muted-foreground">
                 Upload a JPEG, PNG, GIF, or WebP image (max 5 MB).
@@ -167,6 +190,25 @@ export default function ProfilePage() {
           </div>
         </CardContent>
       </Card>
+
+      <Dialog open={avatarPreviewOpen} onOpenChange={setAvatarPreviewOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Profile photo</DialogTitle>
+            <DialogDescription className="sr-only">
+              Enlarged view of your profile photo. Press Escape to close.
+            </DialogDescription>
+          </DialogHeader>
+          {form.avatarUrl ? (
+            // biome-ignore lint/performance/noImgElement: user avatar URL from any host; next/image needs known domains
+            <img
+              src={form.avatarUrl}
+              alt={`Profile photo of ${user?.displayName || "user"}`}
+              className="mx-auto max-h-[70vh] w-full rounded-lg object-contain"
+            />
+          ) : null}
+        </DialogContent>
+      </Dialog>
 
       <Card className="mb-6">
         <CardHeader>

@@ -1,7 +1,7 @@
 # Quarterly Maintenance Scorecard
 
 **Quarter:** Q3 2026 (Jul – Sep)
-**Last updated:** 2026-07-05 (security baseline re-audit — SEC-5…SEC-27 open in [`todo.md`](../todo.md); SEC-1…SEC-4 + SEC-28 shipped — [`tdone.md`](../tdone.md))
+**Last updated:** 2026-07-05 (security baseline re-audit — **SEC-27** + **DQ-2** open in [`todo.md`](../todo.md); SEC-1…SEC-26 + SEC-28 shipped — [`tdone.md`](../tdone.md))
 **Owner:** Platform team
 
 Tracked trend: dependency freshness, CI health, test health, migration health,
@@ -97,14 +97,14 @@ policy rejection, concurrent-session eviction, suspended/deleted accounts).
 
 | Metric | Current | Target | Trend |
 |---|---|---|---|
-| Pending (unapplied) migrations | 0 (latest: `0029_audit_log_anchors`) | 0 | ✅ |
+| Pending (unapplied) migrations | 0 (latest: `0040_session_active_org_id`) | 0 | ✅ |
 | Irreversible migrations in last quarter | 5 (`0020`–`0024`, DROP CASCADE) — gated by `.destructive-migrations.json` + CI | 0 new without allowlist | ✅ |
 | Migration applied with rollback tested | 2026-07-03 restore drill ([evidence](./compliance/evidence/2026/Q3/backup-restore-drills/2026-07-03-restore-drill.md)) | All destructive | ✅ |
 | `db:generate` drift (`drizzle/` vs schema) | 0 (verified locally 2026-07-03) | No diff | ✅ |
 
 **Notes:** Migrations `0020`–`0024` are irreversible `DROP … CASCADE`, allowlisted in
 `.destructive-migrations.json`. New destructive DDL is blocked by `bun run migrations:check`
-(CI + pre-commit). Total migrations: 29.
+(CI + pre-commit). Total migrations: 41 (`0000`–`0040`).
 
 ---
 
@@ -158,11 +158,11 @@ blocking findings.
 Production boot requires `METRICS_AUTH_TOKEN`; reference architecture documents
 token-gated scrape configs.
 
-**Security baseline ([`docs/security.md`](./security.md)):** **23 open** SEC-5…SEC-27
-in [`todo.md`](../todo.md) (3 High: `assertCan`, SSE `?token=`, CSRF origin; 19 Medium;
-1 Low/Ops: VPS firewall runbook). SEC-1…SEC-4 shipped 2026-07-05; SEC-28 documented
-out-of-scope. CWE hardening (601/918/78/22/532/1333/327/1427/79) tracked in
-`CLAUDE.md` / `AGENTS.md` — do not duplicate as SEC items.
+**Security baseline ([`docs/security.md`](./security.md)):** **1 open** SEC item
+(**SEC-27** — VPS firewall / private Postgres+Redis binding) plus **DQ-2**
+(coverage ratchet) in [`todo.md`](../todo.md). SEC-1…SEC-26 shipped 2026-07-05;
+SEC-28 documented out-of-scope. CWE hardening (601/918/78/22/532/1333/327/1427/79)
+tracked in `CLAUDE.md` / `AGENTS.md` — do not duplicate as SEC items.
 
 ---
 
@@ -179,8 +179,8 @@ out-of-scope. CWE hardening (601/918/78/22/532/1333/327/1427/79) tracked in
 | Open backlog (B6–B7) | 0 (P3 Operations & compliance shipped) | 0 | ✅ |
 | P1 security & access control gaps | 0 (B1, B3, ALFA-3 done) | 0 | ✅ |
 | P2 infrastructure backlog | 0 (B4, B5 done) | 0 | ✅ |
-| Open product backlog ([`todo.md`](../todo.md)) | **24** (SEC-5…SEC-27 + DQ-2) | Trending down | 🔶 |
-| Security baseline gaps ([`docs/security.md`](./security.md) §0–§10) | **23 open** (SEC-5…SEC-27); SEC-1…SEC-4 shipped 2026-07-05 | 0 | 🔶 |
+| Open product backlog ([`todo.md`](../todo.md)) | **2** (SEC-27 + DQ-2) | Trending down | 🔶 |
+| Security baseline gaps ([`docs/security.md`](./security.md) §0–§10) | **1 open** (SEC-27); SEC-1…SEC-26 shipped 2026-07-05 | 0 | 🔶 |
 
 ---
 

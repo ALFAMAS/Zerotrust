@@ -30,7 +30,8 @@
       "Bash(node ./node_modules/typescript/lib/tsc.js --noEmit)",
       "Bash(ls *.md)",
       "Bash(wc -l todo.md tdone.md)",
-      "Bash(find . -maxdepth 2 -iname \"audit-report.md\")"
+      "Bash(find . -maxdepth 2 -iname \"audit-report.md\")",
+      "mcp__Claude_Code_Remote__send_later"
     ]
   },
   "enableAllProjectMcpServers": true,

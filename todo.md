@@ -27,3 +27,7 @@ Audit date: **2026-07-05**. Verified/completed items moved to [`tdone.md`](./tdo
        **Paths:** `vitest.config.ts`, `packages/ui/vitest.config.ts`, `docs/maintenance-scorecard.md`, `.github/workflows/ci.yml`
 
        **Status (2026-07-05):** Floors aligned to measured baseline (API 64/61/55/63; UI 54/52/46/51). Long-term 85% target — incremental ratchet ongoing.
+
+## Backlog (unprioritized)
+
+_(empty — see [`tdone.md`](./tdone.md) § Recent work 2026-07-06)_

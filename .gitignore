@@ -38,6 +38,7 @@ test-results/
 playwright-report/
 blob-report/
 .playwright/
+packages/ui/e2e/.auth/
 **/.last-run.json
 
 # Runtime
