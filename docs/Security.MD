@@ -8,7 +8,7 @@ Priority order matters. §1–2 are structural — getting them wrong later mean
 [`todo.md`](../todo.md) (open: **SEC-27** only; **DQ-2** coverage ratchet) and
 verified shipped items in [`tdone.md`](../tdone.md) § Security baseline audit
 (SEC-1…SEC-26 shipped 2026-07-05; SEC-28 Expo out-of-scope). Standing production
-audit: [`docs/AUDIT.md`](./AUDIT.md) §4.7. CWE hardening classes
+audit decisions are tracked in this security baseline. CWE hardening classes
 601/918/78/22/532/1333/327/1427/79 are agent-enforced in `CLAUDE.md` — do not
 re-list as SEC items. The CWE tables below use **Verified** / **Partial** /
 **Open** / **N/A** from the same re-audit pass.

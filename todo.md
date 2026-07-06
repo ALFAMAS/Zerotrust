@@ -4,7 +4,7 @@
 
 Audit date: **2026-07-05**. Verified/completed items moved to [`tdone.md`](./tdone.md) § Security baseline audit.
 
-**Verification (2026-07-05, re-audited):** SEC-17…SEC-27 rechecked — **2 items remain open** below (1 SEC + DQ-2). **SEC-1…SEC-16 shipped 2026-07-05** → [`tdone.md`](./tdone.md) § Security baseline audit (SEC-14: `@hono/zod-validator`; SEC-15: per-user rate limit; SEC-16: log redaction). **SEC-20…SEC-26 shipped 2026-07-05** → [`tdone.md`](./tdone.md) § Security baseline audit. **SEC-28** (Expo out-of-scope) documented → [`tdone.md`](./tdone.md). DQ-2 unchanged.
+**Verification (2026-07-06, re-audited):** SEC-17…SEC-27 rechecked — **2 items remain open** below (1 SEC + DQ-2). SEC-1…SEC-28 shipped → [`tdone.md`](./tdone.md) § Security baseline audit.
 
 ### Low / Ops (document + deploy)
 

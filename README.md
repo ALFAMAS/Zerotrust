@@ -411,7 +411,6 @@ and others). Agent and contributor rules in [`CLAUDE.md`](./CLAUDE.md) and
 | Topic | Where to read |
 | ----- | ------------- |
 | Structural security decisions | [`docs/security.md`](./docs/security.md) |
-| Production-readiness audit | [`docs/AUDIT.md`](./docs/AUDIT.md) |
 | Vulnerability disclosure | [`SECURITY.md`](./SECURITY.md) · `/.well-known/security.txt` |
 | Open security backlog | [`todo.md`](./todo.md) (SEC-27) |
 | Shipped security fixes | [`tdone.md`](./tdone.md) § Security baseline audit |
@@ -537,7 +536,6 @@ audit. Honest boundaries:
 | --- | ------- |
 | [`tdone.md`](./tdone.md) | Everything that ships today |
 | [`todo.md`](./todo.md) | Open backlog (SEC-27, DQ-2 coverage ratchet) |
-| [`docs/AUDIT.md`](./docs/AUDIT.md) | Standing production-readiness audit |
 | [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) | System architecture deep dive |
 
 ---

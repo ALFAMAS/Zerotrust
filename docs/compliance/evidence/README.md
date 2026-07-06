@@ -34,7 +34,6 @@ docs/compliance/evidence/
       change-management/
     auditor-engagement/
       system-description.md
-      system-description-template.md
       engagement-checklist.md
       engagement-letter-summary.md
       observation-window.md

@@ -154,4 +154,4 @@ server-state modules only.
    `prefetch.ts` and wrap the page in `HydrationBoundary` (see
    [`docs/ui-http-client.md`](./ui-http-client.md)).
 
-Progress tracker: [`docs/tanstack-query-progress.md`](./tanstack-query-progress.md).
+TanStack Query migration is complete — see [`docs/ui-http-client.md`](./ui-http-client.md).

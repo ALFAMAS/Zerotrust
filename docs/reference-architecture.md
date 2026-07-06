@@ -487,7 +487,7 @@ AUDIT_ANCHOR_S3_PREFIX=audit-anchors/
 
 - Schedule `bun run audit:anchor` (or the BullMQ `audit.anchor` job on the worker)
   at least daily; verify with `bun run audit:anchor-verify` after DR drills.
-  See `docs/compliance/audit-log-anchoring-plan.md`.
+  See [`docs/compliance/README.md`](./compliance/README.md).
 
 ### Postgres dual roles (SEC-25)
 

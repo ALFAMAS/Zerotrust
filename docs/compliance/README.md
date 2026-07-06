@@ -20,7 +20,6 @@ is tracked in [`evidence-register.md`](./evidence-register.md) and
 | Access reviews      | [access-review-procedure.md](./access-review-procedure.md)                   | Q3 2026 review recorded                        |
 | Monitoring          | [monitoring-evidence-procedure.md](./monitoring-evidence-procedure.md)       | Jul 2026 monitoring packet recorded            |
 | SOC 2 planning      | [soc2-auditor-readiness.md](./soc2-auditor-readiness.md)                     | Auditor engaged; observation window 2026-07-04 — 2027-07-03 |
-| Audit log hardening | [audit-log-anchoring-plan.md](./audit-log-anchoring-plan.md)                 | Implemented 2026-07-03                         |
 | Evidence tracker    | [evidence-register.md](./evidence-register.md)                               | E-001–E-013 complete; observation window active |
 
 ## Evidence Storage Convention

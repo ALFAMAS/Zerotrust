@@ -1,8 +1,7 @@
 # zerotrust — Shipped Features
 
 The authoritative catalog of what zerotrust ships today. Update this file when you
-ship a feature. Planned work lives in [`todo.md`](./todo.md); the standing audit
-is [`docs/AUDIT.md`](./docs/AUDIT.md).
+ship a feature. Planned work lives in [`todo.md`](./todo.md).
 
 > **Legend:** ✅ shipped · `[~]` partial / behind a flag
 
@@ -20,7 +19,6 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
 | Route mounts in `server.ts` |                                                                          29 |
 | UI pages                    |                                                                          53 |
 | Tests                       |                                         1328 (1086 API + 242 UI, 138 files) |
-| ADRs                        |                                                                           9 |
 | Stack                       | Hono 4 · TypeScript 6 · Bun · Next.js 16 · Drizzle ORM · PostgreSQL · Redis |
 
 ---
@@ -37,7 +35,7 @@ is [`docs/AUDIT.md`](./docs/AUDIT.md).
 - ✅ Refresh tokens — SHA-256 hashed, rotated on use, long-lived
 - ✅ Session management — list, revoke, device fingerprinting, concurrent-session caps
 - ✅ Auth hot path — session+user loaded via one JOIN on cache miss; optional 5 s Redis user-state cache on cache hit
-- ✅ Silent token refresh — UI replays 401 via `POST /auth/token/refresh` (httpOnly refresh cookie + in-memory access token, ADR 008 Option C)
+- ✅ Silent token refresh — UI replays 401 via `POST /auth/token/refresh` (httpOnly refresh cookie + in-memory access token)
 - ✅ Account merge / linking — `POST /auth/me/link` adds OAuth providers to existing account
 - ✅ HIBP (HaveIBeenPwned) breach check on register / password change (fails open)
 - ✅ Login notification email — new-device alert with one-click revoke
@@ -206,7 +204,7 @@ Cross-audit of `docs/security.md` §0–§10. Open gaps tracked in [`todo.md`](.
 #### §0 — Structural posture
 
 - ✅ **Tenant isolation (partial):** org-scoped webhook routes (ZT-1), org-scoping CI (`scripts/check-org-scoping.ts`), session-derived `activeOrgId` (SEC-11), org-scoped repo factory exemplar (SEC-12), Postgres RLS on all 14 `org_id` tables (MT-1 + SEC-4), repository layer for hot writes
-- ✅ **Web token storage (ADR 008 Option C):** httpOnly refresh cookie + in-memory access token; legacy localStorage keys cleared on login/logout (`packages/ui/src/lib/auth.ts`, `src/shared/authCookies.ts`)
+- ✅ **Web token storage:** httpOnly refresh cookie + in-memory access token; legacy localStorage keys cleared on login/logout (`packages/ui/src/lib/auth.ts`, `src/shared/authCookies.ts`)
 - ✅ **Next.js middleware is not the auth boundary:** no `middleware.ts` auth gate; API `authMiddleware` + client guards on `/dashboard` / `/admin`; CVE-2025-29927 lesson documented in baseline
 
 #### §1 — Authentication
@@ -224,12 +222,12 @@ Cross-audit of `docs/security.md` §0–§10. Open gaps tracked in [`todo.md`](.
 - ✅ **SEC-12 (2026-07-05):** `createOrgScopedContext()` + `webhooksRepo(orgId)` factory exemplar; CI patterns extended in `scripts/org-scoped-tables.json` (`orgScopedFactory.test.ts`, `webhooks.repository.test.ts`)
 - ✅ **SEC-13 (2026-07-05):** Global `bodySizeLimitMiddleware` in `server.ts` — 1 MiB JSON/text, 10 MiB multipart (`bodySizeLimit.middleware.test.ts`)
 - ✅ **SEC-5 (2026-07-05):** Deny-by-default `assertCan()` + `authorizeOrg()` in `src/shared/permissions.ts`; org hot paths migrated (`org.routes.ts`); tests in `permissions.test.ts`, `org.routes.test.ts`
-- ✅ **SEC-6 (2026-07-05):** Notification SSE uses `connectAuthenticatedSse()` with in-memory Bearer token (ADR 008) — no `?token=` or localStorage (`NotificationBell.tsx`, `sseClient.ts`)
+- ✅ **SEC-6 (2026-07-05):** Notification SSE uses `connectAuthenticatedSse()` with in-memory Bearer token — no `?token=` or localStorage (`NotificationBell.tsx`, `sseClient.ts`)
 - ✅ **SEC-7 (2026-07-05):** Cookie-session CSRF origin middleware (`csrfOriginMiddleware`) mounted in `server.ts`; Bearer/API-key/webhook exempt; tests in `csrfOrigin.middleware.test.ts`
 - ✅ **SEC-17 (2026-07-05):** Hard account lockout replaced with progressive exponential backoff + PoW at threshold; wired into `POST /auth/login` via platform settings (`accountLockout.ts`, `auth.routes.ts`; `middleware.test.ts`, `auth.routes.test.ts`)
 - ✅ **SEC-18 (2026-07-05):** `requireEmailVerified` middleware blocks unverified users from org create, billing, and API keys (uniform 403 `EMAIL_NOT_VERIFIED`; `auth.ts`, `org.routes.ts`, `billing.routes.ts`, `api-keys.routes.ts`; `org.routes.test.ts`)
 - ✅ **SEC-19 (2026-07-05):** `server-only` boundary on `serverApiClient.ts` and `prefetch.ts`; client graph audit clean (no `"use client"` imports)
-- ✅ **SEC-20 (2026-07-05):** RSC prefetch mirror cookie `za_access_token` documented as accepted tradeoff in ADR 008 — `path=/`, `SameSite=Lax`, 1 h TTL, cleared on logout; refresh remains httpOnly (`auth.ts`, `serverApiClient.ts`, `docs/adr/008-token-storage-design-revisit.md`)
+- ✅ **SEC-20 (2026-07-05):** RSC prefetch mirror cookie `za_access_token` documented as accepted tradeoff — `path=/`, `SameSite=Lax`, 1 h TTL, cleared on logout; refresh remains httpOnly (`auth.ts`, `serverApiClient.ts`)
 - ✅ **SEC-21 (2026-07-05):** `src/config/env.ts` Zod `EnvSchema` + `parseEnv()` at boot — `DATABASE_URL`, `TOKEN_SECRET_HEX`, `CSFLE_MASTER_KEY_HEX`, `REDIS_URI`/`REDIS_URL`, `APP_URL`, `CORS_ALLOWED_ORIGINS`, `METRICS_AUTH_TOKEN`, `STRIPE_WEBHOOK_SECRET`, backup keys; production fail-fast preserved (`config.production.test.ts`)
 - ✅ **SEC-22 (2026-07-05):** `gitleaks/gitleaks-action@v2` in `.github/workflows/ci.yml` `security-scan` job (full-history checkout)
 - ✅ Password-reset anti-enumeration — identical `{ sent: true }` for unknown emails (`password-reset.routes.ts`)
@@ -375,6 +373,7 @@ Cross-audit of `docs/security.md` §0–§10. Open gaps tracked in [`todo.md`](.
 
 ## Platform & Infrastructure
 
+- ✅ Bootstrap admin — `bun run bootstrap:admin` idempotent first admin + default org (`bootstrapAdmin.service.ts`)
 - ✅ Generated TypeScript SDK — `@zerotrust/client` from `openapi.json` (209 operations)
 - ✅ Elasticsearch provider dependency — `@elastic/elasticsearch` is explicit in root deps; disabled by default (`ELASTICSEARCH_ENABLED=false`)
 - ✅ S3-compatible storage — provider-agnostic (AWS S3, B2, R2, MinIO, Wasabi)
@@ -489,6 +488,14 @@ Cross-audit of `docs/security.md` §0–§10. Open gaps tracked in [`todo.md`](.
 
 **Verification (2026-07-06):** `bun run knip`; targeted vitest for captcha + UI security headers.
 
+### Bootstrap admin CLI (idempotent first admin + org)
+
+- **`scripts/bootstrap-admin.ts`** + **`src/services/bootstrap/bootstrapAdmin.service.ts`:** `bun run bootstrap:admin` creates a verified admin user (or promotes an existing account), assigns the `admin` system role, and creates a default org — idempotent when an admin already exists.
+- **Env:** `ADMIN_EMAIL` (required), optional `ADMIN_PASSWORD`, `ADMIN_DISPLAY_NAME`, `BOOTSTRAP_ORG_NAME`, `BOOTSTRAP_ORG_SLUG` (documented in `.env.example` and README).
+- **Tests:** `src/__tests__/bootstrapAdmin.service.test.ts`
+
+**Verification (2026-07-06):** targeted vitest for bootstrap service.
+
 ---
 
 ### OTP-at-rest hashing (all `otpsTable` types)
@@ -548,7 +555,7 @@ Cross-audit of `docs/security.md` §0–§10. Open gaps tracked in [`todo.md`](.
 
 ### CP-1 — Data residency (removed 2026-07-05)
 
-- **Reverted:** Per-region sharding, `storageRegion` column, ADR 009, `regionPools.ts`, and residency UI/API removed. Template is single-server (one Postgres + one object store per deploy).
+- **Reverted:** Per-region sharding, `storageRegion` column, `regionPools.ts`, and residency UI/API removed. Template is single-server (one Postgres + one object store per deploy).
 - **Kept:** Custom domain resolution and org branding in `region.service.ts` / `/regions` routes.
 
 ### ARCH-3 — Remove dead geo/temporal middleware (shipped)
@@ -607,7 +614,7 @@ Cross-audit of `docs/security.md` §0–§10. Open gaps tracked in [`todo.md`](.
 
 - **Migration:** `drizzle/0031_audit_logs_immutable.sql` — `BEFORE UPDATE OR DELETE`
   triggers on `audit_logs`.
-- **Docs:** `docs/reference-architecture.md` + `docs/compliance/audit-log-anchoring-plan.md`
+- **Docs:** `docs/reference-architecture.md` + `docs/compliance/README.md`
   — `AUDIT_ANCHOR_ENABLED=true` default for production reference deploys.
 - **Verification (2026-07-04):** migration present in `drizzle/`; destructive-migrations
   manifest approved.
@@ -627,15 +634,12 @@ Cross-audit of `docs/security.md` §0–§10. Open gaps tracked in [`todo.md`](.
 - **Regression:** `src/__tests__/config.production.test.ts` — placeholder hex refused.
 - **Verification (2026-07-04):** `bun run test -- src/__tests__/config.production.test.ts` → pass.
 
-### ZT-3 — ADR 008 Option C token storage (shipped)
+### ZT-3 — Token storage (shipped)
 
 - **API:** `src/shared/authCookies.ts`; login/refresh/oauth set httpOnly refresh
   cookie; `POST /auth/logout` clears it; JSON bodies omit `refreshToken`.
 - **UI:** in-memory access token (`auth.ts`); `apiClient.ts` uses
   `credentials: "include"` for refresh.
-- **ADR 008** updated — Option C is default template.
-- **2026-07-05:** Closed ZT-3 backlog; removed BFF fork-path docs from `todo.md`,
-  `docs/extending.md`, and ADR 008 — hybrid is the final web design.
 - **Verification (2026-07-04):** `bun run --cwd packages/ui test --run` → **242 passed**.
 
 ### MT-2 — Cross-tenant JIT org FKs (shipped)
@@ -672,7 +676,7 @@ Cross-audit of `docs/security.md` §0–§10. Open gaps tracked in [`todo.md`](.
   from `src/middleware/securityHeaders.ts` (CSP, HSTS preload, frame denial).
 - **Regression:** `src/__tests__/server.securityHeaders.test.ts` — `createServer()` returns
   `content-security-policy` on `/health` + wiring assertion on `server.ts`.
-- **ADR 008:** mitigations list updated to reference active CSP middleware.
+- Mitigations list updated to reference active CSP middleware.
 - **Verification (2026-07-04):** `bun run test -- src/__tests__/server.securityHeaders.test.ts`
   → **2 passed**.
 
@@ -850,7 +854,7 @@ src/__tests__/mfa.routes.test.ts src/__tests__/verification.routes.test.ts`
   Jul 2 refactor burst), flaky-test assessment (0 identified flakes), test count
   (886 API + 216 UI = 1102), migration count (29). Quarterly review date
   unchanged at 2026-10-01.
-- **P4.9 ADR 008 fork path:** added `docs/extending.md` §BFF / httpOnly cookie
+- **P4.9 token storage fork path:** added `docs/extending.md` §BFF / httpOnly cookie
   migration checklist with 8-step fork guide and reference route-handler skeleton
   (explicit non-default; default template remains `localStorage`).
 - **Verification:** CI run 28624304093 — Semgrep + Trivy steps both `success`;
@@ -880,16 +884,14 @@ src/__tests__/mfa.routes.test.ts src/__tests__/verification.routes.test.ts`
   Q3 2026 baseline — dependency freshness (0 major behind, esbuild low
   advisory), CI health (827+ tests, 0 generated drift), migration health
   (29 total, 5 irreversible), backup encryption enforced via P4.3 gate,
-  7 ADRs, 0 open P0/P1/P4 items.
-- **P4.5 token storage design revisit:** added ADR 008
-  (`docs/adr/008-token-storage-design-revisit.md`) documenting the
+  0 open P0/P1/P4 items.
+- **P4.5 token storage design revisit:** added a design note documenting the
   localStorage vs BFF/httpOnly cookie tradeoff with three migration
   options (SPA+BFF, full BFF, hybrid in-memory).
 - **Verification:** `bun run test -- src/__tests__/config.production.test.ts`
   → **7 tests passing**; `bunx biome check src/config/index.ts
 src/__tests__/config.production.test.ts` → **0 errors**;
-  `ls docs/adr/*.md` → **8 ADRs** (001–008). Full `bun run build` /
-  `bun run type-check` remain blocked by pre-existing P2.2 service-layout
+  Full `bun run build` / `bun run type-check` remain blocked by pre-existing P2.2 service-layout
   import gaps, not by P4 changes.
 
 ---
@@ -946,7 +948,7 @@ src/__tests__/config.production.test.ts` → **0 errors**;
   to TanStack Query queries/mutations. The top-up mutation applies an optimistic
   wallet balance + pending transaction row, rolls back on error, and targets
   wallet detail/transaction invalidation after writes.
-- Added `docs/tanstack-query-progress.md` as the page-by-page migration tracker.
+- TanStack Query migration tracked in-repo until complete; patterns now in `docs/ui-http-client.md`.
 - Migrated `/dashboard/webhooks` from ad-hoc `useEffect` + legacy `api.get`
   state to TanStack Query queries/mutations. The webhook list and delivery-log
   fetches use domain keys; toggle/delete apply optimistic list updates with
@@ -1184,13 +1186,12 @@ resolved. Verified open work is tracked in [`todo.md`](./todo.md).
   infers HTTP methods per call site, and trims `PRODUCT_SURFACE_DISPOSITIONS` to
   SDK-only routes (`GET /auth/unsubscribe`, `POST /wallet/spend`).
 
-- **P2.5 — Reconcile stale audit / status docs:** `docs/AUDIT.md`, `README.md`,
-  and `docs/ARCHITECTURE.md` updated to match shipped work (1065+ tests, 8 ADRs,
-  module boundaries, metrics gate, read replicas, ADRs).
+- **P2.5 — Reconcile stale audit / status docs:** `README.md` and
+  `docs/ARCHITECTURE.md` updated to match shipped work (1065+ tests, module boundaries,
+  metrics gate, read replicas).
 
 - **P2.6 — Server-state tests for P2.3 modules:** `adminContent.test.tsx` and
-  `adminWebhooks.test.tsx` with loading/error/mutation coverage; tracker rows in
-  `docs/tanstack-query-progress.md`.
+  `adminWebhooks.test.tsx` with loading/error/mutation coverage (TanStack Query migration complete).
 
 - **P2.7 — `serverApiClient` / RSC prefetch tests:** `serverApiClient.test.ts`
   (cookie Bearer auth, `skipAuth`, error mapping) and `prefetch.test.ts`
@@ -1260,8 +1261,8 @@ resolved. Verified open work is tracked in [`todo.md`](./todo.md).
     now shuts it down gracefully (alongside the email/Stripe queues) on
     `SIGTERM`/`SIGINT`.
   - `docs/deployment.md` — new §Queue-backed cron scheduling (B5) documents
-    the topology; `.env.example`, `README.md`, `docs/AUDIT.md`, and
-    `docs/reference-architecture.md` updated to drop
+    the topology; `.env.example`, `README.md`, and `docs/reference-architecture.md`
+    updated to drop
     stale "leader-elected `setInterval`" references.
 
 - **Verification (2026-07-03):**

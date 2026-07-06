@@ -12,7 +12,6 @@ storage / evidence portal).
 | Artifact | File | Status |
 | --- | --- | --- |
 | System description (completed) | [`system-description.md`](./system-description.md) | Complete (E-013) |
-| System description draft template | [`system-description-template.md`](./system-description-template.md) | Superseded by v1.0 system description |
 | Engagement checklist | [`engagement-checklist.md`](./engagement-checklist.md) | Complete |
 | Engagement letter (redacted summary) | [`engagement-letter-summary.md`](./engagement-letter-summary.md) | Complete (E-011) |
 | Observation window confirmation | [`observation-window.md`](./observation-window.md) | Complete (E-012) |

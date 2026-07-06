@@ -56,7 +56,7 @@ Write-only surfaces (e.g. `feedback.ts`) export mutation hooks only.
 
 All browser HTTP goes through [`packages/ui/src/lib/apiClient.ts`](../packages/ui/src/lib/apiClient.ts):
 
-- Attaches the Bearer access token from `localStorage`
+- Attaches the Bearer access token from in-memory auth state
 - Enforces same-origin `NEXT_PUBLIC_ZEROTRUST_URL`
 - Retries transient failures with exponential backoff
 - Surfaces a consistent `{ message, code, status }` error shape
@@ -69,11 +69,11 @@ cache needs, and polling/refetch after the initial server render.
 
 ---
 
-## Legacy note
+## Migration status
 
-`packages/ui/src/lib/hooks/useApi.ts` has been removed. All product pages use
-TanStack Query via `server-state/*`. See
-[`docs/tanstack-query-progress.md`](./tanstack-query-progress.md).
+TanStack Query migration is **complete** (2026-07-05): all data-fetching pages use
+`server-state/*` hooks; legacy `useApi` / `packages/ui/src/lib/api.ts` removed.
+Add new surfaces by extending domain modules per the patterns above.
 
 ---
 
@@ -107,15 +107,14 @@ Ten high-traffic dashboard/admin pages prefetch authenticated reads on the serve
    cache means no loading skeleton on first paint when prefetch succeeded.
    Mutations still run client-side via `apiClient.ts`.
 
-### Auth cookie mirror (ADR 008 § RSC prefetch mirror — SEC-20)
+### Auth cookie mirror (RSC prefetch mirror — SEC-20)
 
 `packages/ui/src/lib/auth.ts` writes `za_access_token` to a first-party cookie
 when the user logs in so RSC can authenticate server prefetch. The cookie is
 cleared on logout. It is **not** httpOnly — XSS during an active session can read
 it (same threat model as in-memory access). Accepted tradeoff documented in
-[`docs/adr/008-token-storage-design-revisit.md`](../../docs/adr/008-token-storage-design-revisit.md):
-`path=/`, `SameSite=Lax`, `max-age=3600` (1 h), mitigated by short TTL + httpOnly
-refresh cookie + CSP.
+the security baseline: `path=/`, `SameSite=Lax`, `max-age=3600` (1 h), mitigated
+by short TTL + httpOnly refresh cookie + CSP.
 
 ### Adding a new server-prefetched page
 

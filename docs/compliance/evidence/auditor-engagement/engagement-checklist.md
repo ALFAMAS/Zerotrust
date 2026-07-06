@@ -21,8 +21,7 @@ Status: **Complete** — engagement signed 2026-07-04; observation window active
 
 ## System description
 
-- [x] Draft template prepared ([`system-description-template.md`](./system-description-template.md))
-- [x] Complete system description from template ([`system-description.md`](./system-description.md), E-013)
+- [x] Complete system description ([`system-description.md`](./system-description.md), E-013)
 - [x] Engineering review of boundary and data-flow sections
 - [x] Auditor review / sign-off on system description (2026-07-04)
 
