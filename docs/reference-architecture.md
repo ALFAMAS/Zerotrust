@@ -501,7 +501,7 @@ AUDIT_ANCHOR_S3_PREFIX=audit-anchors/
 
 ### Browser token storage
 
-- UI uses in-memory access tokens + httpOnly refresh cookies (ADR 008). Set
+- UI uses in-memory access tokens + httpOnly refresh cookies. Set
   `CORS_ALLOWED_ORIGINS` to the exact UI origin(s) so credentialed refresh works.
 - Native clients (e.g. React Native) call the Hono API directly with bearer tokens
   in device secure storage — not through the Next.js app.

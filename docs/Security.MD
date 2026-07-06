@@ -439,12 +439,12 @@ Note on the exclusions: CWE-327 is covered, but **916** (weak password hashing) 
 
 | CWE  | Name                                                      | Where it bites in this stack                                               | Status   | Owner | Evidence |
 | ---- | --------------------------------------------------------- | -------------------------------------------------------------------------- | -------- | ----- | -------- |
-| 1004 | Sensitive Cookie Without HttpOnly                         | Session cookie readable by JS → XSS lifts it.                              | Accepted | —     | Refresh httpOnly (`authCookies.ts`); RSC mirror `za_access_token` documented in ADR 008 § SEC-20 |
+| 1004 | Sensitive Cookie Without HttpOnly                         | Session cookie readable by JS → XSS lifts it.                              | Accepted | —     | Refresh httpOnly (`authCookies.ts`); RSC mirror `za_access_token` (see `packages/ui/src/lib/authTokens.ts`) |
 | 614  | Sensitive Cookie Without Secure                           | Session cookie sent over HTTP.                                             | Verified | —     | `secure: true` in production cookie options |
 | 1275 | Sensitive Cookie with Improper SameSite                   | Missing / `None` SameSite reopens CSRF on the web path.                    | Verified | —     | `sameSite: "Lax"` on refresh cookie |
 | 315  | Cleartext Storage of Sensitive Info in a Cookie           | Anything beyond an opaque token stored in the cookie.                      | Verified | —     | Opaque refresh token only in httpOnly cookie |
 | 312  | Cleartext Storage of Sensitive Information                | Mobile: refresh token in AsyncStorage (plaintext on disk).                 | N/A      | —     | No Expo/React Native client (`tdone.md` §5) |
-| 522  | Insufficiently Protected Credentials                      | Parent for the storage misses above; tag findings here.                    | Verified | —     | ADR 008 Option C; SSE Bearer via `connectAuthenticatedSse()` (SEC-6) |
+| 522  | Insufficiently Protected Credentials                      | Parent for the storage misses above; tag findings here.                    | Verified | —     | In-memory access + httpOnly refresh; SSE Bearer via `connectAuthenticatedSse()` (SEC-6) |
 | 942  | Permissive Cross-domain Policy with Untrusted Domains     | CORS `origin:"*"` with `credentials:true`.                                 | Verified | —     | `corsOptionsFromEnv` fails closed in production |
 | 346  | Origin Validation Error                                   | Reflecting the request Origin back as allowed.                             | Verified | —     | Explicit allowlist only |
 | 352  | Cross-Site Request Forgery                                | Web cookie path without origin/token defense.                              | Verified | —     | `csrfOriginMiddleware()` mounted in `server.ts` (SEC-7) |

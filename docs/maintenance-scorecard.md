@@ -154,7 +154,7 @@ see `tests/load/full-suite.k6.js` thresholds.
 `main` CI run 28624304093 (2026-07-02). `p/owasp-top-ten` passes with zero
 blocking findings.
 
-**Open security items from AUDIT.md:** `/metrics` gate — **Fixed** (P4.2).
+**Metrics gate (P4.2):** `/metrics` gate — **Fixed**.
 Production boot requires `METRICS_AUTH_TOKEN`; reference architecture documents
 token-gated scrape configs.
 
@@ -166,12 +166,10 @@ tracked in `CLAUDE.md` / `AGENTS.md` — do not duplicate as SEC items.
 
 ---
 
-## 8. Docs & ADR Health
+## 8. Docs health
 
 | Metric | Current | Target | Trend |
 |---|---|---|---|
-| ADRs written for load-bearing decisions | 8 (001–008) | All major | ✅ |
-| Standing audit freshness | 2026-07-03 | <quarter old | ✅ |
 | `verify:generated` (API reference drift) | 0 diff | 0 diff | ✅ |
 | Unaddressed TODO P0 items | 0 (P0.1–P0.3 done) | 0 | ✅ |
 | Unaddressed TODO P1 items | 0 (P1.1–P1.5 done) | 0 | ✅ |

@@ -1,9 +1,8 @@
 # Architecture
 
 Audited 2026-07-04. Describes the system as it is today, then records shipped
-upgrades. Short-term audit backlog is shipped — see [`../tdone.md`](../tdone.md); five
-long-term items remain in [`../todo.md`](../todo.md). Standing audit:
-[`AUDIT.md`](./AUDIT.md).
+upgrades. Shipped work is in [`../tdone.md`](../tdone.md); open backlog in
+[`../todo.md`](../todo.md).
 
 ## 1. Overview
 

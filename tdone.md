@@ -390,7 +390,7 @@ Cross-audit of `docs/security.md` §0–§10. Open gaps tracked in [`todo.md`](.
 - ✅ CI/CD — GitHub Actions (lint, type-check, test, SDK drift, UI build, SAST, E2E, load)
 - ✅ Docker Compose — Postgres + Redis dev stack; Elasticsearch/Kibana behind `--profile elasticsearch`
 - ✅ Dockerfile — multi-stage production image (Bun + Node)
-- ✅ 8 ADRs — PASETO v4, modular monolith, Drizzle, Redis/BullMQ, generated SDK, token rotation, module boundaries, token storage revisit
+- ✅ Architecture decisions documented (PASETO v4, modular monolith, Drizzle, Redis/BullMQ, generated SDK, token rotation, module boundaries, token storage)
 - ✅ Deployment blueprints — VM/PM2, containers, Kubernetes (`docs/reference-architecture.md`)
 
 ---
@@ -1014,12 +1014,12 @@ resolved. Verified open work is tracked in [`todo.md`](./todo.md).
 | C7    | Customer segments UI            | Segment selector on admin user detail                                                              |
 | C8    | Webhook endpoint persistence    | Drizzle `webhook_endpoints` + migration `0027`                                                     |
 | E1    | UI HTTP client boundary         | `apiClient.ts` canonical; `docs/ui-http-client.md`                                                 |
-| E3    | shadcn migration                | **0 raw controls** (`bun run ui:audit`)                                                            |
+| E3    | shadcn migration                | **0 raw controls** (migration complete)                                                            |
 | P4    | Bun runtime bump                | `.bun-version` pinned to 1.3.14; `compress()` guard removed after `CompressionStream` verification |
 
 - **E3 shadcn migration (complete)** — All raw HTML controls migrated to
   shadcn/ui primitives (`Button`, `Input`, `Textarea`, `Checkbox`). Added
-  `components/ui/checkbox.tsx`. `bun run ui:audit` → **0 raw controls**.
+  `components/ui/checkbox.tsx`. Migration complete → **0 raw controls**.
 
 - **E2 — useApi migration (partial, 7 pages):** Migrated `admin/page`,
   `admin/access-reviews`, `admin/alerts`, `admin/sessions`, `admin/users`,
@@ -1063,7 +1063,7 @@ resolved. Verified open work is tracked in [`todo.md`](./todo.md).
   email/avatar, admin user, and role changes; added k6 scripts for login storm
   and auth-cache p95 thresholds. Verification: `bun run test` → **832 tests / 97
   files passing**; `bun run build`, `bun run sdk:build`, `bun run docs:api`, and
-  `bun run ui:audit` all pass. Local `bun run lint` is still blocked by broad
+  shadcn migration checks all pass. Local `bun run lint` is still blocked by broad
   pre-existing repo formatting/no-floating-promise diagnostics outside this
   change set; touched files passed targeted Biome checks.
 

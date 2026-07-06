@@ -522,8 +522,7 @@ production domain.
 
 ## Project status
 
-zerotrust is actively maintained with a large test suite and standing production
-audit. Honest boundaries:
+zerotrust is actively maintained with a large test suite. Honest boundaries:
 
 | Ships today | Not yet / partial |
 | ----------- | ----------------- |

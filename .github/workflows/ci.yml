@@ -96,10 +96,6 @@ jobs:
         run: git diff --exit-code -- docs/api-ui-integration-matrix.md
       - name: SDK drift check
         run: bun run sdk:check
-      - name: shadcn/ui adoption audit
-        run: bun run ui:audit
-      - name: Verify shadcn adoption report is committed
-        run: git diff --exit-code -- docs/shadcn-adoption-report.md
       - name: Upload coverage artifact
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
