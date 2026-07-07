@@ -41,6 +41,7 @@ Complete before pointing DNS at production. Archive signed copies in
 | 9 | Incident response + backup runbooks acknowledged by on-call | | | ☐ |
 | 10 | `METRICS_AUTH_TOKEN`, `CORS_ALLOWED_ORIGINS`, WebAuthn RP ID/origins verified | | | ☐ |
 | 11 | `/metrics` curl + `ops:smoke` bearer auth verified (OPS-1) | | | ☐ |
+| 12 | `NEXT_PUBLIC_ZEROTRUST_URL` build + `ops:smoke` UI probe verified (OPS-2) | | | ☐ |
 
 ---
 
@@ -164,7 +165,7 @@ Complete before pointing DNS at production. Archive signed copies in
 | ☐ | No Next.js `middleware.ts` auth boundary | P0 | **Done** | Intentional — `docs/security.md` §0 |
 | ☐ | shadcn redesign | P2 | **Partial** | In progress |
 | ☐ | SEO on public pages | P2 | **Done** | `app/sitemap.ts`, `app/robots.ts`, `generateMetadata` on marketing routes |
-| ☐ | `NEXT_PUBLIC_ZEROTRUST_URL` points to prod API | P0 | **Partial** | Operator must set `packages/ui/.env.local` |
+| ☐ | `NEXT_PUBLIC_ZEROTRUST_URL` points to prod API | P0 | **Done** | OPS-2 (2026-07-08): build guard + `/api/deploy-config` probe in `ops:smoke`; `docs/deployment.md` § Public API URL |
 
 ---
 

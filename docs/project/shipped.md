@@ -398,6 +398,24 @@ Cross-audit of `docs/security.md` §0–§10. **SEC-27** shipped 2026-07-08 (VPS
 
 ## Recent work (2026-07-08)
 
+### OPS-2 — `NEXT_PUBLIC_ZEROTRUST_URL` verified at deploy (shipped)
+
+- **Problem:** UI bakes `NEXT_PUBLIC_ZEROTRUST_URL` at build time; leaving the
+  localhost default breaks auth and API calls in production with no automated
+  deploy check.
+- **Fix:** Added § Public API URL verification (OPS-2) to `docs/deployment.md`
+  (build-time env, `ZEROTRUST_ENFORCE_PUBLIC_API_URL` fail-fast in
+  `next.config.ts`, curl sign-off, `ops:smoke` procedure). New
+  `GET /api/deploy-config` exposes baked `apiUrl` for probes.
+  `scripts/ops-smoke.mjs` compares UI `apiUrl` to `API_URL` when `UI_URL` is
+  set. `staging-validation.yml` passes `staging_url` as `UI_URL`.
+- **Paths:** `packages/ui/src/config/publicApiUrl.ts`,
+  `packages/ui/src/app/api/deploy-config/route.ts`, `packages/ui/next.config.ts`,
+  `scripts/ops-smoke.mjs`, `.github/workflows/staging-validation.yml`,
+  `packages/ui/.env.example`, `docs/deployment.md`, `docs/production-checklist.md`
+- **Verification (2026-07-08):** `publicApiUrl.test.ts`; `bun run boundaries:check`;
+  `config.production.test.ts`; `metrics.route.test.ts`.
+
 ### OPS-1 — `/metrics` auth verified at deploy (shipped)
 
 - **Problem:** Production fail-fast requires `METRICS_AUTH_TOKEN` (SEC-21), but operators
