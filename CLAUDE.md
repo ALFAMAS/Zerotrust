@@ -150,9 +150,9 @@ MFA, WebAuthn, CSFLE, breach checks, or any new `fetch`/`spawn`/`fs.writeFile`.
 ### Security baseline (`docs/security.md`)
 
 Structural gaps beyond the CWE table above are tracked as **SEC-*** in
-[`docs/project/todo.md`](./docs/project/todo.md) (open: **SEC-27** only; **DQ-2** coverage ratchet) with
-verified fixes in [`docs/project/shipped.md`](./docs/project/shipped.md) § Security baseline audit (SEC-1…SEC-26,
-SEC-28 shipped 2026-07-05). When touching authz, sessions, or tenant isolation:
+[`docs/project/todo.md`](./docs/project/todo.md) (open: **DQ-2** coverage ratchet only) with
+verified fixes in [`docs/project/shipped.md`](./docs/project/shipped.md) § Security baseline audit (SEC-1…SEC-27,
+SEC-28 shipped 2026-07-05; SEC-27 2026-07-08). When touching authz, sessions, or tenant isolation:
 prefer `assertCan()` / `authorizeOrg()` from `src/shared/permissions.ts` and
 org-scoped repositories; do not add inline `user.roles?.includes` checks. Passwords
 use `src/shared/passwordHash.ts` (`Bun.password` argon2id with bcrypt verify/rehash

@@ -199,7 +199,7 @@ ship a feature. Planned work lives in [`todo.md`](./todo.md) (this directory).
 
 ### Security baseline audit — verified 2026-07-05 (`docs/security.md`)
 
-Cross-audit of `docs/security.md` §0–§10. Open gaps tracked in [`todo.md`](./todo.md) as **SEC-27** only (SEC-1…SEC-26 and SEC-28 shipped 2026-07-05). **Re-verified 2026-07-05:** SEC-23…SEC-26 closed (Dependabot, pinned Actions, Postgres roles, login audit).
+Cross-audit of `docs/security.md` §0–§10. **SEC-27** shipped 2026-07-08 (VPS runbook in `docs/deployment.md`); open security baseline gap: **DQ-2** coverage ratchet only. SEC-1…SEC-26 and SEC-28 shipped 2026-07-05. **Re-verified 2026-07-05:** SEC-23…SEC-26 closed (Dependabot, pinned Actions, Postgres roles, login audit).
 
 #### §0 — Structural posture
 
@@ -307,6 +307,7 @@ Cross-audit of `docs/security.md` §0–§10. Open gaps tracked in [`todo.md`](.
 - ✅ HSTS with preload in `securityHeaders()`
 - ✅ Tamper-evident hash-chained audit log + external anchoring (P5.1)
 - ✅ **SEC-26 (2026-07-05):** Login success/failure appended to hash-chained audit log via `recordLoginSuccess` / `recordLoginFailure` (`loginAudit.service.ts`) on `POST /auth/login` and `POST /auth/login/mfa`; outbound `auth.login.success` / `auth.login.failure` webhook dispatch (`auth.routes.test.ts`, `loginAudit.service.test.ts`)
+- ✅ **SEC-27 (2026-07-08):** VPS network hardening runbook — `ufw`/cloud SG default-deny, SSH key-only, Postgres `listen_addresses` / `pg_hba.conf`, Redis `bind` + `requirepass`, Docker port-publish warnings, external `nmap` + on-host verification — `docs/deployment.md` § VPS network hardening
 - ✅ Incident response / breach runbook — `docs/compliance/incident-response-runbook.md`
 - ✅ SOC 2 readiness map, evidence register, auditor engagement (C1)
 - ✅ Australian Privacy Act / NDB awareness documented in compliance policies
@@ -396,6 +397,18 @@ Cross-audit of `docs/security.md` §0–§10. Open gaps tracked in [`todo.md`](.
 ---
 
 ## Recent work (2026-07-08)
+
+### SEC-27 — VPS firewall / private Postgres+Redis runbook (shipped)
+
+- **Problem:** `docs/security.md` §9 required ufw default-deny, private DB binds, and
+  SSH key-only auth for Coolify/VPS deploys, but no operator runbook existed in-repo.
+- **Fix:** Added § VPS network hardening (SEC-27) to `docs/deployment.md` — `ufw`
+  (or cloud SG) steps, SSH hardening, Postgres `listen_addresses` / `pg_hba.conf`,
+  Redis `bind` + `requirepass`, Docker port-publish warnings, external `nmap` +
+  on-host `ss` verification, and sign-off template linked to compliance evidence.
+- **Paths:** `docs/deployment.md`, `docs/production-checklist.md`, `docs/project/todo.md`
+- **Verification (2026-07-08):** Doc-only change; closes last open SEC baseline item
+  in `todo.md` (DQ-2 coverage ratchet remains).
 
 ### CI-2 — Module boundaries gate in CI (shipped)
 

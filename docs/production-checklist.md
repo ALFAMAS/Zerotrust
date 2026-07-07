@@ -37,7 +37,7 @@ Complete before pointing DNS at production. Archive signed copies in
 | 5 | `WORKER_MODE=true` on API replicas; exactly one `src/worker.ts` process | | | ☐ |
 | 6 | Encrypted backups tested (`bun run db:backup` + restore drill) | | | ☐ |
 | 7 | `staging-validation.yml` smoke + Lighthouse + ZAP run on staging | | | ☐ |
-| 8 | Security baseline reviewed ([`security.md`](./security.md)); SEC-27 accepted or remediated | | | ☐ |
+| 8 | Security baseline reviewed ([`security.md`](./security.md)); VPS hardening runbook applied or managed DB/Redis confirmed | | | ☐ |
 | 9 | Incident response + backup runbooks acknowledged by on-call | | | ☐ |
 | 10 | `METRICS_AUTH_TOKEN`, `CORS_ALLOWED_ORIGINS`, WebAuthn RP ID/origins verified | | | ☐ |
 
@@ -53,7 +53,7 @@ Complete before pointing DNS at production. Archive signed copies in
 | ☐ | CSRF, CORS allowlist, body limits, input sanitization | P0 | **Done** | Global stack in `src/api/server.ts` |
 | ☐ | `/metrics` auth in production | P0 | **Partial** | Requires `METRICS_AUTH_TOKEN` — see `docs/deployment.md` § Production hardening |
 | ☐ | SAST + secret scan in CI | P0 | **Done** | Gitleaks, Semgrep OWASP, Trivy, `bun audit` — `.github/workflows/ci.yml` |
-| ☐ | **SEC-27** VPS firewall / private Postgres+Redis | P1 | **Missing** | Documented in `docs/security.md` §9; operator runbook not yet in `docs/deployment.md` — [`project/todo.md`](./project/todo.md) |
+| ☐ | VPS firewall / private Postgres+Redis | P1 | **Done** | SEC-27 (2026-07-08): `docs/deployment.md` § VPS network hardening — ufw/SG, bind-address, verification |
 | ☐ | PASETO v4 + refresh rotation + argon2id passwords | P0 | **Done** | `src/crypto/paseto-v4.ts`, `src/shared/passwordHash.ts` |
 | ☐ | Tamper-evident audit log | P1 | **Done** | `src/audit/`, `scripts/audit-anchor.ts` |
 | ☐ | Apple Sign In | P2 | **Missing** | Env placeholders in `.env.example`; no `plugins/oauth/providers/apple.ts` |
@@ -257,7 +257,7 @@ Complete before pointing DNS at production. Archive signed copies in
 | ✅ Fix agent docs | `CLAUDE.md` plugin tree | Clarify `plugins/` (features) vs `src/plugins/` (loader) — **done** |
 | Add UI Dockerfile | `packages/ui/Dockerfile` + compose service | Parity with API container story |
 | Wire boundaries to CI | `boundaries:check` in `ci.yml` | **Done (CI-2, 2026-07-08)** |
-| SEC-27 runbook | Add VPS hardening to `docs/deployment.md` | Closes last open SEC item — tracked in `project/todo.md` |
+| SEC-27 runbook | Add VPS hardening to `docs/deployment.md` | **Done (SEC-27, 2026-07-08)** |
 | Group scripts | `scripts/ops/`, `scripts/codegen/`, `scripts/ci/` | Easier onboarding |
 | Optional modules folder | `src/jit`, `src/ssf`, `src/webhooks` → `src/modules/` | One mental model for mounted subsystems |
 
@@ -294,7 +294,7 @@ for API↔UI Zod schemas, `deploy/k8s/` Helm per `docs/reference-architecture.md
 
 ### Quick wins (days, high ROI)
 
-1. **SEC-27** — Add VPS hardening checklist to `docs/deployment.md` (ufw, bind-address, SSH keys).
+1. ~~**SEC-27** — Add VPS hardening checklist to `docs/deployment.md` (ufw, bind-address, SSH keys).~~ **Done (SEC-27, 2026-07-08)**
 2. **UI Docker image** — `packages/ui/Dockerfile` + compose service; document in `docs/deployment.md`.
 3. ~~**CI hardening** — Add `bun run boundaries:check` to `ci.yml`; review k6 `continue-on-error`.~~ **Done (CI-2, 2026-07-08)** — review k6 `continue-on-error` remains.
 4. **Husky** — Uncomment Biome pre-commit and commitlint in `.husky/`.
@@ -329,7 +329,7 @@ for API↔UI Zod schemas, `deploy/k8s/` Helm per `docs/reference-architecture.md
 | [`reference-architecture.md`](./reference-architecture.md) | VM, container, and Kubernetes deployment blueprints |
 | [`ARCHITECTURE.md`](./ARCHITECTURE.md) | System architecture deep dive |
 | [`maintenance-scorecard.md`](./maintenance-scorecard.md) | Quarterly metrics (dependencies, CI, coverage, DR) |
-| [`project/todo.md`](./project/todo.md) | Open backlog (SEC-27, DQ-2) |
+| [`project/todo.md`](./project/todo.md) | Open backlog (DQ-2) |
 | [`project/shipped.md`](./project/shipped.md) | Shipped feature catalog |
 | [`../README.md`](../README.md) | Quick start, env vars, production deployment summary |
 

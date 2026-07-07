@@ -133,6 +133,178 @@ single-instance).
 
 ---
 
+## VPS network hardening (SEC-27)
+
+Operator runbook for internet-facing **single-VM** deploys (Blueprint 1 in
+[`reference-architecture.md`](./reference-architecture.md), Coolify/Vultr per
+[`security.md`](./security.md) §9) where PostgreSQL and/or Redis run on the
+same host as the app.
+
+**Skip this section** when Postgres and Redis are **managed off-box** (Neon,
+Supabase, Upstash, RDS, ElastiCache, etc.) — those providers own network
+isolation. Confirm `DATABASE_URL` / `REDIS_URI` use TLS where offered and
+provider IP allowlists where available.
+
+### Goals
+
+| Control | Why |
+| --- | --- |
+| Default-deny inbound firewall | Only HTTP(S) and ops SSH reach the host |
+| Postgres bound to loopback / private NIC | Port 5432 must not answer on the public IP |
+| Redis bound to loopback / private NIC + `requirepass` | Port 6379 must not answer on the public IP |
+| SSH public-key auth only | No password or root login over SSH |
+
+### 1. Host firewall (`ufw`)
+
+On Ubuntu/Debian (adjust for `firewalld` / cloud security groups if your
+provider manages the edge):
+
+```bash
+sudo ufw default deny incoming
+sudo ufw default allow outgoing
+# Prefer restricting SSH to your ops IP:
+# sudo ufw allow from <ops-ip>/32 to any port 22 proto tcp
+sudo ufw allow OpenSSH
+sudo ufw allow 80/tcp
+sudo ufw allow 443/tcp
+sudo ufw enable
+sudo ufw status verbose
+```
+
+**Coolify note:** Coolify may install its own firewall rules. Reconcile with
+`ufw status` so Postgres/Redis are not accidentally exposed while proxy ports
+stay open.
+
+**Cloud SGs:** If the VPS sits behind a provider security group, mirror the
+same policy there (deny 5432/6379 inbound from `0.0.0.0/0`) — host `ufw` alone
+is not enough when the hypervisor forwards those ports.
+
+### 2. SSH hardening
+
+Edit `/etc/ssh/sshd_config` (or a drop-in under `/etc/ssh/sshd_config.d/`):
+
+```text
+PasswordAuthentication no
+PermitRootLogin no
+PubkeyAuthentication yes
+```
+
+Reload and verify you can still connect with your key **before** closing the
+session:
+
+```bash
+sudo systemctl reload sshd
+```
+
+### 3. PostgreSQL — private bind only
+
+**Native install** (`apt install postgresql`): in `postgresql.conf`:
+
+```text
+listen_addresses = '127.0.0.1'
+```
+
+Use a private VPC address instead of loopback only when the DB runs on a
+separate NIC in the same private network (never `0.0.0.0` on an internet-facing
+host).
+
+In `pg_hba.conf`, allow only loopback or the app subnet — pair with the dual
+roles from § Postgres roles above:
+
+```text
+host    zerotrust    zerotrust_app_user    127.0.0.1/32    scram-sha-256
+```
+
+Restart: `sudo systemctl restart postgresql`.
+
+**Docker on the same VPS:** do **not** publish Postgres to all interfaces.
+`docker-compose.yml` in this repo exposes `5432:5432` for **local dev only**.
+For production on one host, either omit `ports:` (app containers join the
+compose network) or bind to loopback:
+
+```yaml
+ports:
+  - "127.0.0.1:5432:5432"   # only if a host-native API must reach the container
+```
+
+Runtime `DATABASE_URL` should use `127.0.0.1`, the Docker service name
+(`postgres`), or a private hostname — **not** the VPS public IP when co-located.
+
+### 4. Redis — private bind + AUTH
+
+Production requires `REDIS_URI` (see `.env.example`). Self-hosted Redis must
+not listen on `0.0.0.0`.
+
+**Native install** — in `redis.conf`:
+
+```text
+bind 127.0.0.1 -::1
+protected-mode yes
+requirepass <strong-secret>
+```
+
+Restart: `sudo systemctl restart redis`.
+
+**Docker:** same rule as Postgres — no `6379:6379` on `0.0.0.0` in production.
+The dev compose file uses `--requirepass` on an internal network only; mirror
+that pattern and set:
+
+```text
+REDIS_URI=redis://:<password>@127.0.0.1:6379
+```
+
+(or `redis://:<password>@redis:6379` when the API runs in the same compose
+stack).
+
+### 5. Verification (before DNS cutover)
+
+Run these checks and archive output in
+[`compliance/evidence/`](./compliance/evidence/README.md) (pre-launch gate #8 in
+[`production-checklist.md`](./production-checklist.md)).
+
+**From outside the VPS** (another machine on the internet):
+
+```bash
+nmap -p 22,80,443,5432,6379 <vps-public-ip>
+```
+
+Expected: **22, 80, 443** open (ideally 22 restricted to ops IPs); **5432 and
+6379 closed/filtered**.
+
+**On the VPS:**
+
+```bash
+sudo ss -tlnp | grep -E ':(5432|6379)\s'
+```
+
+Expected: listeners on `127.0.0.1`, `[::1]`, or a `10.x`/`172.16`/`192.168`
+address — **not** `0.0.0.0` or the public IP.
+
+**Application path:**
+
+```bash
+curl -fsS http://127.0.0.1:1337/health
+psql "$DATABASE_URL" -c 'SELECT 1'
+redis-cli -u "$REDIS_URI" ping
+```
+
+All three must succeed while external `nmap` shows database ports closed.
+
+### 6. Sign-off template
+
+```text
+Date:
+Operator:
+VPS hostname / provider:
+Postgres: [ ] managed off-box  [ ] loopback/private bind verified
+Redis:    [ ] managed off-box  [ ] loopback/private bind + AUTH verified
+ufw status verbose: (paste)
+External nmap 5432/6379: closed/filtered
+App /health + DB + Redis ping: pass
+```
+
+---
+
 ## Elasticsearch (optional)
 
 Elasticsearch is **not required** for production. By default

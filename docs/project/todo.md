@@ -4,19 +4,9 @@
 
 Audit date: **2026-07-05**. Verified/completed items moved to [`shipped.md`](./shipped.md) § Security baseline audit.
 
-**Verification (2026-07-08):** Security baseline — SEC-27 + DQ-2 remain open. Production checklist audit (2026-07-07) added **18** tracked gaps in § Production readiness below (**18** open items total; CI-2 + DOC-1 shipped 2026-07-08).
+**Verification (2026-07-08):** Security baseline — DQ-2 remains open (SEC-27 shipped). Production checklist audit (2026-07-07) added **18** tracked gaps in § Production readiness below (**17** open items total; CI-2 + DOC-1 + SEC-27 shipped 2026-07-08).
 
 ### Low / Ops (document + deploy)
-
-- [ ] **SEC-27** — **P1** — VPS firewall / private Postgres+Redis binding (§9)
-
-       **Problem:** Codebase documents Coolify/VPS deploy but ufw/default-deny and private DB interfaces are operator runbook items, not verified in repo automation.
-
-       **Fix:** Add/check deploy checklist in `docs/deployment.md` with ufw + bind-address steps; optional CI doc lint.
-
-       **Paths:** `docs/deployment.md`, `docs/reference-architecture.md`
-
-       **Refs:** §9 Ops · [`production-checklist.md`](../production-checklist.md) § Security
 
 - [ ] **DQ-2** — **P1** — Test coverage below stated 85% target
 

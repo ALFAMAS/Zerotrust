@@ -5,7 +5,7 @@ Scope: multi-tenant SaaS. Cookie-authenticated web client (Next.js), bearer-auth
 Priority order matters. §1–2 are structural — getting them wrong later means a rewrite. §3–6 are middleware and discipline. §7–9 are ops.
 
 **Tracking (2026-07-05 re-audit):** Actionable gaps are numbered **SEC-*** in
-[`todo.md`](./project/todo.md) (open: **SEC-27** only; **DQ-2** coverage ratchet) and
+[`todo.md`](./project/todo.md) (open: **DQ-2** coverage ratchet) and
 verified shipped items in [`shipped.md`](./project/shipped.md) § Security baseline audit
 (SEC-1…SEC-26 shipped 2026-07-05; SEC-28 Expo out-of-scope). Standing production
 audit decisions are tracked in this security baseline. CWE hardening classes
@@ -374,7 +374,7 @@ export const env = Env.parse(process.env);
 ## 9. Ops — Vultr VPS + Coolify
 
 - TLS everywhere; HSTS (preload once stable).
-- Postgres and Redis bound to private interfaces / firewalled to the app only. `ufw` default-deny inbound except 80/443 + SSH. SSH keys only, no password auth.
+- Postgres and Redis bound to private interfaces / firewalled to the app only. Operator runbook: [`deployment.md`](./deployment.md) § VPS network hardening (SEC-27). `ufw` default-deny inbound except 80/443 + SSH. SSH keys only, no password auth.
 - **Append-only audit log table**: logins, failed logins, role/permission changes, data exports, payroll runs. For a workforce platform this is both a control and a sellable feature.
 - Australian Privacy Act applies to you as the platform. The employee-records exemption covers employers handling their own staff records — not a SaaS provider holding other companies' employee data. That means APP 11 (security of personal information) and the Notifiable Data Breaches scheme: write the breach-response runbook before you need it.
 
@@ -406,8 +406,9 @@ Tiers are ordered by **how the flaw enters the codebase**, not by CVSS.
 **Status values:** `Open` → `In Progress` → `Verified` → `N/A`. Fill Owner and Evidence (file/PR/test) as you go.
 
 **Re-audit summary (2026-07-05):** Tier 1 — 9 Verified, 1 Partial. Tier 2 —
-majority Verified or N/A (no mobile client); **1 open ops item** (**SEC-27** VPS
-firewall runbook) in [`todo.md`](./project/todo.md). See [`shipped.md`](./project/shipped.md) § Security baseline
+majority Verified or N/A (no mobile client); security baseline ops runbook **SEC-27**
+shipped 2026-07-08 ([`deployment.md`](./deployment.md) § VPS network hardening).
+Open backlog: **DQ-2** coverage ratchet in [`todo.md`](./project/todo.md). See [`shipped.md`](./project/shipped.md) § Security baseline
 audit for per-control evidence.
 
 ## Already covered (tracked elsewhere — do not re-list)
