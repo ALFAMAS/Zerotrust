@@ -65,6 +65,7 @@ deploy, confirm:
   <token>`) or kept on a private scrape network behind an auth proxy. Generate
   with `openssl rand -hex 32`. See the reference architecture for token-gated
   Prometheus scrape configs (Kubernetes ServiceMonitor + VM/PM2 `prometheus.yml`).
+  **Deploy sign-off:** follow § Metrics auth verification (OPS-1) below.
 - **`CORS_ALLOWED_ORIGINS` is set** — an empty allowlist fails closed in
   production (no cross-origin access), so set it to your app/admin origins.
 - **Backups are encrypted** — set `BACKUP_ENCRYPTION_KEY_HEX` and
@@ -74,6 +75,81 @@ deploy, confirm:
   one dedicated worker with `bun run src/worker.ts`. If a production API process
   starts schedulers without `WORKER_MODE=true`, startup emits a warning because
   every API replica would otherwise run the same intervals.
+
+### Metrics auth verification (OPS-1)
+
+Production boot **refuses to start** without `METRICS_AUTH_TOKEN`
+(`src/config/env.ts`). Before go-live and after every production deploy, confirm
+the scrape endpoint is token-gated and Prometheus (or your auth proxy) sends the
+matching bearer token.
+
+#### 1. Generate and set the token
+
+```bash
+export METRICS_AUTH_TOKEN="$(openssl rand -hex 32)"
+# Add to API env (PM2 ecosystem, Coolify, K8s secret, etc.)
+```
+
+For VM/PM2 Prometheus, write the same value to a root-owned file (mode `600`):
+
+```bash
+sudo install -m 600 /dev/stdin /etc/zerotrust/metrics-token <<<"$METRICS_AUTH_TOKEN"
+```
+
+For local `docker-compose.observability.yml`, copy the example and paste the token,
+uncomment `authorization` in `monitoring/prometheus.yml`, and add a bind mount:
+
+```bash
+cp monitoring/metrics-token.example monitoring/metrics-token
+# edit monitoring/metrics-token — single line, no trailing newline required
+# docker-compose.observability.yml: add under prometheus.volumes:
+#   - ./monitoring/metrics-token:/etc/prometheus/metrics-token:ro
+```
+
+#### 2. Verify with curl (pre-launch sign-off)
+
+Replace `https://api.example.com` with your public API base URL.
+
+```bash
+API=https://api.example.com
+
+# Must reject unauthenticated scrapes
+curl -fsS -o /dev/null -w "%{http_code}\n" "$API/metrics"
+# expected: 401
+
+# Must succeed with the bearer token
+curl -fsS -H "Authorization: Bearer $METRICS_AUTH_TOKEN" "$API/metrics" | head
+# expected: 200 and Prometheus text (e.g. zerotrust_request_duration_seconds)
+```
+
+Archive the command output (or `bun run ops:smoke` log) in
+[`docs/compliance/`](./compliance/README.md) evidence per environment.
+
+#### 3. Automated smoke (`ops:smoke`)
+
+When `METRICS_AUTH_TOKEN` is set in the environment, `bun run ops:smoke`:
+
+1. Asserts `/metrics` returns **401** without `Authorization`.
+2. Asserts `/metrics` returns **200** with `Authorization: Bearer <token>`.
+
+```bash
+API_URL=https://api.example.com METRICS_AUTH_TOKEN="$METRICS_AUTH_TOKEN" bun run ops:smoke
+```
+
+`staging-validation.yml` passes `secrets.METRICS_AUTH_TOKEN` into the ops-smoke
+job — configure that repository secret to match staging/production API env.
+
+#### 4. Sign-off template
+
+| Check | Pass |
+| ----- | ---- |
+| `METRICS_AUTH_TOKEN` set in production API env | ☐ |
+| Prometheus scrape (or private-network proxy) uses matching Bearer token | ☐ |
+| `curl` without token → 401; with token → 200 | ☐ |
+| `bun run ops:smoke` green with `METRICS_AUTH_TOKEN` | ☐ |
+
+Link completed rows to [`production-checklist.md`](./production-checklist.md) §
+Pre-launch sign-off item 10.
 
 ### Production background-worker topology
 

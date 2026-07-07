@@ -398,6 +398,24 @@ Cross-audit of `docs/security.md` §0–§10. **SEC-27** shipped 2026-07-08 (VPS
 
 ## Recent work (2026-07-08)
 
+### OPS-1 — `/metrics` auth verified at deploy (shipped)
+
+- **Problem:** Production fail-fast requires `METRICS_AUTH_TOKEN` (SEC-21), but operators
+  lacked a sign-off procedure and staging smoke did not assert bearer-gated scrapes;
+  `monitoring/prometheus.yml` had no Bearer scrape config.
+- **Fix:** Added § Metrics auth verification (OPS-1) to `docs/deployment.md` (curl
+  sign-off, `ops:smoke` procedure, template). `scripts/ops-smoke.mjs` now verifies
+  401 without token and 200 with `Authorization: Bearer` when `METRICS_AUTH_TOKEN` is
+  set. `monitoring/prometheus.yml` uses `credentials_file` Bearer auth; added
+  `monitoring/metrics-token.example` + compose mount. `staging-validation.yml` passes
+  `secrets.METRICS_AUTH_TOKEN`.
+- **Paths:** `docs/deployment.md`, `monitoring/prometheus.yml`,
+  `monitoring/metrics-token.example`, `scripts/ops-smoke.mjs`,
+  `docker-compose.observability.yml`, `.github/workflows/staging-validation.yml`,
+  `.env.example`, `docs/production-checklist.md`, `docs/project/todo.md`
+- **Verification (2026-07-08):** `bun run boundaries:check`; `metrics.route.test.ts`;
+  `config.production.test.ts`; targeted vitest green.
+
 ### SEC-27 — VPS firewall / private Postgres+Redis runbook (shipped)
 
 - **Problem:** `docs/security.md` §9 required ufw default-deny, private DB binds, and

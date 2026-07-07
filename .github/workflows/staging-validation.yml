@@ -26,6 +26,7 @@ jobs:
         run: bun run ops:smoke
         env:
           API_URL: ${{ inputs.api_url }}
+          METRICS_AUTH_TOKEN: ${{ secrets.METRICS_AUTH_TOKEN }}
 
   lighthouse:
     name: Lighthouse Performance

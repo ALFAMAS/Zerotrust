@@ -3,6 +3,10 @@
 #   docker compose -f docker-compose.yml -f docker-compose.observability.yml up -d prometheus alertmanager
 #   Prometheus:   http://localhost:9090
 #   Alertmanager: http://localhost:9093
+#
+# Token-gated /metrics (production-like): copy monitoring/metrics-token.example to
+# monitoring/metrics-token, set the same value as METRICS_AUTH_TOKEN on the API, and
+# ensure monitoring/prometheus.yml authorization block is active (see deployment.md OPS-1).
 
 services:
   prometheus:

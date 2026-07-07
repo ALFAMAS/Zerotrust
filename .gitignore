@@ -19,6 +19,9 @@ plugins/**/*.js.map
 .env.local
 .env.*.local
 
+# Prometheus scrape token (copy from monitoring/metrics-token.example)
+monitoring/metrics-token
+
 # IDE
 .vscode/
 .idea/
