@@ -71,7 +71,7 @@ Complete before pointing DNS at production. Archive signed copies in
 | ☐ | `.env.example` + `packages/ui/.env.example` | P0 | **Done** | Inline documentation for all vars |
 | ☐ | API `Dockerfile` (multi-stage Bun/Node) | P0 | **Done** | Root `Dockerfile`; CI docker-smoke job |
 | ☐ | `docker-compose.yml` (API + worker + PG + Redis) | P0 | **Done** | `WORKER_MODE=true` on API service |
-| ☐ | **UI container image** | P1 | **Missing** | No `packages/ui/Dockerfile`; compose has no UI service |
+| ☐ | **UI container image** | P1 | **Done** | `packages/ui/Dockerfile`; `zerotrust-ui` in `docker-compose.yml` (host :3001) |
 | ☐ | Reference architectures (VM, containers, K8s) | P1 | **Done** | `docs/reference-architecture.md` |
 | ☐ | Staging deploy workflow | P1 | **Partial** | `.github/workflows/deploy-staging.yml` — template until secrets wired |
 | ☐ | Production auto-deploy | P2 | **Missing** | Manual PM2 + nginx per README § Production deployment |
@@ -247,7 +247,7 @@ Complete before pointing DNS at production. Archive signed copies in
 | Legacy schema entry | `src/db/schema.ts` alongside `src/db/schema/` | Two schema surfaces for tooling |
 | Scripts sprawl | `scripts/` (~30 files) | Mix of ops, codegen, smoke tests, codemods |
 | Tests split three ways | `src/__tests__/`, `packages/ui/src/**/*.test.tsx`, `packages/ui/e2e/`, `tests/load/` | No single test index doc |
-| No UI in Docker | `Dockerfile` (API only), `docker-compose.yml` | Full stack locally needs `bun dev:ui` |
+| No UI in Docker | ~~`Dockerfile` (API only), `docker-compose.yml`~~ | **Resolved (INF-1)** — `packages/ui/Dockerfile` + `zerotrust-ui` service |
 | Agent tooling in repo | `.agents/`, `.codex/` | Noise for fork consumers |
 
 ### Recommended changes (priority order)
@@ -257,7 +257,7 @@ Complete before pointing DNS at production. Archive signed copies in
 | ✅ Relocate status docs | `todo.md`, `tdone.md` → `docs/project/` | Cleaner repo root — **done** |
 | ✅ Single security doc | `docs/Security.MD` → `docs/security.md` | Avoid case-collision on Windows — **done** |
 | ✅ Fix agent docs | `CLAUDE.md` plugin tree | Clarify `plugins/` (features) vs `src/plugins/` (loader) — **done** |
-| Add UI Dockerfile | `packages/ui/Dockerfile` + compose service | Parity with API container story |
+| Add UI Dockerfile | `packages/ui/Dockerfile` + compose service | **Done (INF-1, 2026-07-08)** |
 | Wire boundaries to CI | `boundaries:check` in `ci.yml` | **Done (CI-2, 2026-07-08)** |
 | SEC-27 runbook | Add VPS hardening to `docs/deployment.md` | **Done (SEC-27, 2026-07-08)** |
 | Group scripts | `scripts/ops/`, `scripts/codegen/`, `scripts/ci/` | Easier onboarding |
@@ -274,7 +274,7 @@ zerotrust/
 ├── src/                           # Hono API (unchanged)
 ├── packages/
 │   ├── client/                    # generated SDK
-│   └── ui/                        # Next.js app (+ future Dockerfile)
+│   └── ui/                        # Next.js app + Dockerfile
 ├── drizzle/
 ├── docs/
 │   ├── compliance/
@@ -297,7 +297,7 @@ for API↔UI Zod schemas, `deploy/k8s/` Helm per `docs/reference-architecture.md
 ### Quick wins (days, high ROI)
 
 1. ~~**SEC-27** — Add VPS hardening checklist to `docs/deployment.md` (ufw, bind-address, SSH keys).~~ **Done (SEC-27, 2026-07-08)**
-2. **UI Docker image** — `packages/ui/Dockerfile` + compose service; document in `docs/deployment.md`.
+2. ~~**UI Docker image** — `packages/ui/Dockerfile` + compose service; document in `docs/deployment.md`.~~ **Done (INF-1, 2026-07-08)**
 3. ~~**CI hardening** — Add `bun run boundaries:check` to `ci.yml`; review k6 `continue-on-error`.~~ **Done (CI-2, 2026-07-08)** — review k6 `continue-on-error` remains.
 4. **Husky** — Uncomment Biome pre-commit and commitlint in `.husky/`.
 5. ~~**Doc fixes** — Update root `SECURITY.md` argon2id wording.~~ **Done (DOC-1, 2026-07-08)**

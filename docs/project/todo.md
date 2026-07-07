@@ -4,7 +4,7 @@
 
 Audit date: **2026-07-05**. Verified/completed items moved to [`shipped.md`](./shipped.md) § Security baseline audit.
 
-**Verification (2026-07-08):** Security baseline — DQ-2 remains open (SEC-27 shipped). Production checklist audit (2026-07-07) added **18** tracked gaps in § Production readiness below (**15** open items total; CI-2 + DOC-1 + SEC-27 + OPS-1 + OPS-2 shipped 2026-07-08).
+**Verification (2026-07-08):** Security baseline — DQ-2 remains open (SEC-27 shipped). Production checklist audit (2026-07-07) added **18** tracked gaps in § Production readiness below (**14** open items total; CI-2 + DOC-1 + SEC-27 + OPS-1 + OPS-2 + INF-1 shipped 2026-07-08).
 
 ### Low / Ops (document + deploy)
 
@@ -54,17 +54,7 @@ Audit date: **2026-07-07**. Open gaps from [`production-checklist.md`](../produc
 
 ### Infrastructure / Deploy
 
-- [ ] **INF-1** — **P1** — UI container image
-
-       **Problem:** No `packages/ui/Dockerfile`; `docker-compose.yml` has no UI service — container deploy story is API-only.
-
-       **Fix:** Add `packages/ui/Dockerfile` (or root `Dockerfile.ui`), compose service, and document in `docs/deployment.md` + `docs/reference-architecture.md`.
-
-       **Paths:** `packages/ui/`, `docker-compose.yml`, `docs/deployment.md`
-
-       **Status:** Missing.
-
-       **Refs:** [`production-checklist.md`](../production-checklist.md) § Infrastructure / Deploy
+- [x] **INF-1** — **P1** — UI container image — **shipped 2026-07-08** → [`shipped.md`](./shipped.md) § Recent work
 
 - [ ] **INF-2** — **P1** — Staging deploy workflow secrets
 

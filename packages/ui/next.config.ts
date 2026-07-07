@@ -1,5 +1,10 @@
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
+
+const uiRoot = path.dirname(fileURLToPath(import.meta.url));
+const monorepoRoot = path.join(uiRoot, "../..");
 import { enforceProductionApiUrl } from "./src/config/publicApiUrl";
 import { buildUiSecurityHeaders } from "./src/config/securityHeaders";
 import { UI_ROUTE_REDIRECTS } from "./src/config/uiRouteRedirects";
@@ -11,6 +16,9 @@ if (process.env.ZEROTRUST_ENFORCE_PUBLIC_API_URL === "true") {
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 const nextConfig: NextConfig = {
+  output: "standalone",
+  outputFileTracingRoot: monorepoRoot,
+
   // Keep server-only telemetry hooks external in dev/build so Turbopack does
   // not rewrite optional OpenTelemetry/Sentry shims into synthetic package
   // names such as require-in-the-middle-<hash>.

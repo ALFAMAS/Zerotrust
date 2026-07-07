@@ -54,6 +54,51 @@ recurring evidence for the **DR validated** criterion (see the
 
 ---
 
+## Docker Compose (full stack)
+
+Local and staging-style container deploys use root `docker-compose.yml`:
+
+| Service | Image / build | Host port | Notes |
+| --- | --- | --- | --- |
+| `postgres` | `postgres:16-alpine` | 5432 | Dev credentials only |
+| `redis` | `redis:7-alpine` | 6379 | `requirepass` + `noeviction` for BullMQ |
+| `zerotrust` | Root `Dockerfile` | 3000 | API; `WORKER_MODE=true` defers schedulers to worker |
+| `zerotrust-worker` | Root `Dockerfile` | — | `bun dist/worker.js` |
+| `zerotrust-ui` | `packages/ui/Dockerfile` | 3001 | Next.js standalone (`output: standalone`) |
+
+Start the API + worker + data plane (UI optional):
+
+```bash
+docker compose up -d postgres redis zerotrust zerotrust-worker
+docker compose up -d zerotrust-ui   # after API is healthy
+```
+
+Or the full stack in one command:
+
+```bash
+docker compose up -d
+```
+
+Open the UI at `http://localhost:3001`. The compose file bakes
+`NEXT_PUBLIC_ZEROTRUST_URL=http://localhost:3000` at **UI image build time** so
+browser calls reach the published API port. For staging/production images, pass
+build args (and use `ZEROTRUST_ENFORCE_PUBLIC_API_URL=true` per § OPS-2):
+
+```bash
+docker build -f packages/ui/Dockerfile -t zerotrust-ui:latest \
+  --build-arg NEXT_PUBLIC_ZEROTRUST_URL=https://api.example.com \
+  --build-arg NEXT_PUBLIC_APP_URL=https://app.example.com \
+  .
+```
+
+The UI image runs `node packages/ui/server.js` from the Next.js standalone
+trace rooted at the monorepo (`outputFileTracingRoot` in `packages/ui/next.config.ts`).
+
+See also [`reference-architecture.md`](./reference-architecture.md) Blueprint 2
+(containers) for replica counts and production env wiring.
+
+---
+
 ## Production hardening checklist
 
 Endpoint exposure defaults are tuned for local dev; before an internet-facing

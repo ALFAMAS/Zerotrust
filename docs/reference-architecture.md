@@ -117,25 +117,25 @@ infra with minimal ops.
 
 ### Dockerfile targets
 
+| Image | Dockerfile | CMD |
+| --- | --- | --- |
+| API | Root `Dockerfile` (`RUNTIME=bun\|node`) | `bun dist/src/api/server.js` |
+| Worker | Root `Dockerfile` + `command: bun dist/worker.js` | BullMQ consumers + schedulers |
+| UI | `packages/ui/Dockerfile` | `node packages/ui/server.js` (Next standalone) |
+
 ```dockerfile
-# Multi-stage Dockerfile (recommended)
-FROM oven/bun:1 AS builder
-# … build steps …
+# API / worker — root Dockerfile (multi-stage Bun build)
+FROM oven/bun:1.3.14 AS builder
+# … bun install + bun run build …
+FROM oven/bun:1.3.14 AS runtime-bun
+CMD ["bun", "dist/src/api/server.js"]
 
-# API target
-FROM oven/bun:1-slim AS api
-COPY --from=builder /app/dist ./dist
-CMD ["bun", "dist/api/server.js"]
-
-# Worker target
-FROM oven/bun:1-slim AS worker
-COPY --from=builder /app/dist ./dist
-CMD ["bun", "dist/worker.js"]
-
-# UI target
-FROM node:20-slim AS ui
-COPY --from=builder /app/packages/ui/.next ./.next
-CMD ["node", "node_modules/.bin/next", "start"]
+# UI — packages/ui/Dockerfile (Next.js standalone)
+FROM oven/bun:1.3.14 AS builder
+# … bun install + next build with output: standalone …
+FROM node:20-alpine AS runtime
+COPY --from=builder /app/packages/ui/.next/standalone ./
+CMD ["node", "packages/ui/server.js"]
 ```
 
 ### docker-compose.yml (local / staging)
@@ -158,10 +158,13 @@ services:
     deploy: { replicas: 1 }
 
   ui:
-    build: { target: ui }
-    ports: ["3000:3000"]
-    env_file: packages/ui/.env.local
-    depends_on: [api]
+    build:
+      context: .
+      dockerfile: packages/ui/Dockerfile
+    ports: ["3001:3000"]
+    depends_on:
+      zerotrust:
+        condition: service_healthy
 
   postgres:
     image: postgres:16

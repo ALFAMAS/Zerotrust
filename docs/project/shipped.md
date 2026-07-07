@@ -398,6 +398,23 @@ Cross-audit of `docs/security.md` §0–§10. **SEC-27** shipped 2026-07-08 (VPS
 
 ## Recent work (2026-07-08)
 
+### INF-1 — UI container image (shipped)
+
+- **Problem:** Container deploy story was API-only — no `packages/ui/Dockerfile` and
+  no UI service in `docker-compose.yml`; operators had to run `bun dev:ui` beside compose.
+- **Fix:** Added multi-stage `packages/ui/Dockerfile` (Bun build + Node standalone runtime).
+  Enabled `output: "standalone"` and `outputFileTracingRoot` in `packages/ui/next.config.ts`.
+  Added `zerotrust-ui` compose service (host `:3001` → container `:3000`) with build-time
+  `NEXT_PUBLIC_ZEROTRUST_URL` / `NEXT_PUBLIC_APP_URL` args. Documented in
+  `docs/deployment.md` § Docker Compose (full stack) and updated
+  `docs/reference-architecture.md` Dockerfile targets.
+- **Paths:** `packages/ui/Dockerfile`, `packages/ui/next.config.ts`, `docker-compose.yml`,
+  `docs/deployment.md`, `docs/reference-architecture.md`, `docs/production-checklist.md`
+- **Verification (2026-07-08):** `bun run build` in `packages/ui` → standalone output at
+  `.next/standalone/packages/ui/server.js`; `accessReviews.test.tsx` (4 passed);
+  `publicApiUrl.test.ts` (4 passed). Docker daemon unavailable locally for `docker build`
+  smoke — image layout matches Next.js standalone monorepo contract.
+
 ### OPS-2 — `NEXT_PUBLIC_ZEROTRUST_URL` verified at deploy (shipped)
 
 - **Problem:** UI bakes `NEXT_PUBLIC_ZEROTRUST_URL` at build time; leaving the

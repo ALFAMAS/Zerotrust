@@ -39,7 +39,8 @@ function normalizeAccessReviewsList(data: unknown): AccessReviewsListResponse {
 }
 
 function normalizeAccessReviewDetail(data: unknown): AccessReviewDetailResponse {
-  const raw = data as AccessReviewDetailResponse & {
+  const raw = data as {
+    review: AccessReview;
     items?: AccessReviewItem[] | PaginatedResponse<AccessReviewItem>;
   };
   const items = Array.isArray(raw.items) ? raw.items : (raw.items?.data ?? []);

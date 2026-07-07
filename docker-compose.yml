@@ -186,6 +186,34 @@ services:
     networks:
       - zerotrust
 
+  # ─────────────────────────────────────────────────────────────────────────
+  # zerotrust Next.js UI
+  # ─────────────────────────────────────────────────────────────────────────
+  zerotrust-ui:
+    build:
+      context: .
+      dockerfile: packages/ui/Dockerfile
+      args:
+        # Browser-reachable API URL (host port maps zerotrust :3000)
+        NEXT_PUBLIC_ZEROTRUST_URL: http://localhost:3000
+        NEXT_PUBLIC_APP_URL: http://localhost:3001
+    container_name: zerotrust-ui
+    ports:
+      - "3001:3000"
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+    depends_on:
+      zerotrust:
+        condition: service_healthy
+    healthcheck:
+      test: wget --quiet --tries=1 --spider http://localhost:3000/ || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - zerotrust
+
 networks:
   zerotrust:
     driver: bridge
