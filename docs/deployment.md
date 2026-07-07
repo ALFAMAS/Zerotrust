@@ -151,6 +151,71 @@ job — configure that repository secret to match staging/production API env.
 Link completed rows to [`production-checklist.md`](./production-checklist.md) §
 Pre-launch sign-off item 10.
 
+### Public API URL verification (OPS-2)
+
+The Next.js UI bakes `NEXT_PUBLIC_ZEROTRUST_URL` at **build time**. If it still
+points at `http://localhost:1337`, production users cannot authenticate or call
+the API. Verify before go-live and after every UI deploy.
+
+#### 1. Set the URL at UI build time
+
+```bash
+# packages/ui/.env.local (or PM2 / Coolify UI service env)
+NEXT_PUBLIC_ZEROTRUST_URL=https://api.example.com   # no trailing slash
+```
+
+Production UI builds should enable the fail-fast guard:
+
+```bash
+cd packages/ui
+ZEROTRUST_ENFORCE_PUBLIC_API_URL=true \
+  NEXT_PUBLIC_ZEROTRUST_URL=https://api.example.com \
+  bun run build
+```
+
+`ZEROTRUST_ENFORCE_PUBLIC_API_URL=true` refuses localhost or unset values.
+CI omits this flag and keeps the localhost default for `next build` smoke.
+
+#### 2. Verify with curl (pre-launch sign-off)
+
+Replace hosts with your public UI and API URLs.
+
+```bash
+UI=https://app.example.com
+API=https://api.example.com
+
+curl -fsS "$UI/api/deploy-config"
+# expected: {"apiUrl":"https://api.example.com"}
+
+curl -fsS "$UI/api/deploy-config" | jq -e --arg api "$API" '.apiUrl == $api'
+# expected: exit 0
+```
+
+#### 3. Automated smoke (`ops:smoke`)
+
+When `UI_URL` (or `STAGING_URL`) is set alongside `API_URL`, `bun run ops:smoke`
+fetches `/api/deploy-config` on the UI and asserts the baked `apiUrl` matches
+`API_URL`:
+
+```bash
+UI_URL=https://app.example.com API_URL=https://api.example.com bun run ops:smoke
+```
+
+`staging-validation.yml` passes `inputs.staging_url` as `UI_URL` and
+`inputs.api_url` as `API_URL`.
+
+#### 4. Sign-off template
+
+| Check | Pass |
+| ----- | ---- |
+| `NEXT_PUBLIC_ZEROTRUST_URL` set to public API (HTTPS in production) | ☐ |
+| UI built with `ZEROTRUST_ENFORCE_PUBLIC_API_URL=true` | ☐ |
+| `curl $UI/api/deploy-config` → `apiUrl` matches public API | ☐ |
+| `bun run ops:smoke` green with `UI_URL` + `API_URL` | ☐ |
+
+Link completed rows to [`production-checklist.md`](./production-checklist.md) §
+Pre-launch sign-off item 12.
+
 ### Production background-worker topology
 
 Use one of these two topologies deliberately:

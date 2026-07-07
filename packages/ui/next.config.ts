@@ -1,7 +1,12 @@
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
+import { enforceProductionApiUrl } from "./src/config/publicApiUrl";
 import { buildUiSecurityHeaders } from "./src/config/securityHeaders";
 import { UI_ROUTE_REDIRECTS } from "./src/config/uiRouteRedirects";
+
+if (process.env.ZEROTRUST_ENFORCE_PUBLIC_API_URL === "true") {
+  enforceProductionApiUrl(process.env.NEXT_PUBLIC_ZEROTRUST_URL);
+}
 
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 

@@ -3,6 +3,7 @@ const baseUrl = (process.env.API_URL || process.env.BASE_URL || "http://localhos
   /\/$/,
   ""
 );
+const uiUrl = (process.env.UI_URL || process.env.STAGING_URL || "").replace(/\/$/, "");
 const metricsToken = process.env.METRICS_AUTH_TOKEN?.trim() || "";
 
 const checks = [
@@ -58,6 +59,43 @@ for (const check of checks) {
   } catch (err) {
     failed++;
     console.error(`FAIL ${check.name}: ${url} ${err?.message || err}`);
+  }
+}
+
+if (uiUrl && baseUrl) {
+  const configUrl = `${uiUrl}/api/deploy-config`;
+  try {
+    const res = await fetch(configUrl, {
+      headers: { Accept: "application/json" },
+      signal: AbortSignal.timeout(5000),
+      redirect: "error",
+    });
+    const body = await res.text();
+    if (!res.ok) {
+      failed++;
+      console.error(`FAIL ui-api-url: HTTP ${res.status} from ${configUrl}`);
+    } else {
+      let parsed;
+      try {
+        parsed = JSON.parse(body);
+      } catch {
+        failed++;
+        console.error(`FAIL ui-api-url: invalid JSON from ${configUrl}`);
+        parsed = null;
+      }
+      const bakedApiUrl = (parsed?.apiUrl ?? "").replace(/\/$/, "");
+      if (parsed && bakedApiUrl !== baseUrl) {
+        failed++;
+        console.error(
+          `FAIL ui-api-url: UI baked apiUrl ${bakedApiUrl || "(empty)"} !== expected API_URL ${baseUrl}`
+        );
+      } else if (parsed) {
+        console.log(`PASS ui-api-url: UI points at ${bakedApiUrl}`);
+      }
+    }
+  } catch (err) {
+    failed++;
+    console.error(`FAIL ui-api-url: ${configUrl} ${err?.message || err}`);
   }
 }
 

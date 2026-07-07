@@ -4,7 +4,7 @@
 
 Audit date: **2026-07-05**. Verified/completed items moved to [`shipped.md`](./shipped.md) § Security baseline audit.
 
-**Verification (2026-07-08):** Security baseline — DQ-2 remains open (SEC-27 shipped). Production checklist audit (2026-07-07) added **18** tracked gaps in § Production readiness below (**16** open items total; CI-2 + DOC-1 + SEC-27 + OPS-1 shipped 2026-07-08).
+**Verification (2026-07-08):** Security baseline — DQ-2 remains open (SEC-27 shipped). Production checklist audit (2026-07-07) added **18** tracked gaps in § Production readiness below (**15** open items total; CI-2 + DOC-1 + SEC-27 + OPS-1 + OPS-2 shipped 2026-07-08).
 
 ### Low / Ops (document + deploy)
 
@@ -89,18 +89,6 @@ Audit date: **2026-07-07**. Open gaps from [`production-checklist.md`](../produc
        **Status:** Missing.
 
        **Refs:** [`production-checklist.md`](../production-checklist.md) § Infrastructure / Deploy
-
-- [ ] **OPS-2** — **P0** — `NEXT_PUBLIC_ZEROTRUST_URL` points to prod API
-
-       **Problem:** UI must target the public HTTPS API; misconfiguration breaks auth and API calls in production.
-
-       **Fix:** Set `packages/ui/.env.local` (or build-time env) to production API URL; verify in pre-launch sign-off.
-
-       **Paths:** `packages/ui/.env.example`, `packages/ui/src/lib/apiClient.ts`
-
-       **Status:** Partial — operator must set at deploy.
-
-       **Refs:** [`production-checklist.md`](../production-checklist.md) § Frontend
 
 ### Observability
 
