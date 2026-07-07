@@ -69,14 +69,14 @@ a generated TypeScript SDK in `packages/client`.
 Authentication and tenant isolation are high-stakes, time-consuming, and easy to
 get subtly wrong. zerotrust ships the hard parts already integrated:
 
-| You avoid… | zerotrust ships… |
-| ---------- | ---------------- |
-| Weeks on login, sessions, and token rotation | PASETO v4 access tokens, hashed refresh rotation, session lifecycle |
-| Bolt-on MFA and passkeys later | TOTP, email OTP, WebAuthn (FIDO2), magic links |
-| Rebuilding org RBAC from scratch | Organizations, custom roles, JIT cross-tenant access |
-| Stripe webhook idempotency bugs | Replay-safe webhook handling, plan gates, billing lifecycle |
-| "We'll add compliance later" | SOC 2 readiness docs, audit hash-chain, backup runbooks |
-| Security footguns in redirects, fetches, uploads | CWE-hardened patterns enforced across the codebase |
+| You avoid…                                       | zerotrust ships…                                                    |
+| ------------------------------------------------ | ------------------------------------------------------------------- |
+| Weeks on login, sessions, and token rotation     | PASETO v4 access tokens, hashed refresh rotation, session lifecycle |
+| Bolt-on MFA and passkeys later                   | TOTP, email OTP, WebAuthn (FIDO2), magic links                      |
+| Rebuilding org RBAC from scratch                 | Organizations, custom roles, JIT cross-tenant access                |
+| Stripe webhook idempotency bugs                  | Replay-safe webhook handling, plan gates, billing lifecycle         |
+| "We'll add compliance later"                     | SOC 2 readiness docs, audit hash-chain, backup runbooks             |
+| Security footguns in redirects, fetches, uploads | CWE-hardened patterns enforced across the codebase                  |
 
 This is **batteries included**, not a minimal JWT example. Fork it, rename it,
 point DNS at it, and focus on your product surface.
@@ -160,15 +160,15 @@ the BullMQ email queue.
                                             /BullMQ queue        (large tenants only)
 ```
 
-| Service             | Local URL                  | Notes                                  |
-| ------------------- | -------------------------- | -------------------------------------- |
-| API server          | http://localhost:1337      | `PORT` env (default **1337**)          |
-| Next.js app + admin | http://localhost:3000      | admin panel at `/admin`                |
-| API docs (Swagger)  | http://localhost:1337/docs | dev only                               |
-| Health / metrics    | `/healthz` · `/metrics`    | on the API port                        |
-| Next.js MCP (dev)   | `/_next/mcp`                | coding-agent tools when `bun dev:ui` runs |
-| PostgreSQL          | localhost:5432             | or a managed provider (e.g. Neon)      |
-| Redis               | localhost:6379             | optional in dev — in-memory fallback   |
+| Service             | Local URL                  | Notes                                     |
+| ------------------- | -------------------------- | ----------------------------------------- |
+| API server          | http://localhost:1337      | `PORT` env (default **1337**)             |
+| Next.js app + admin | http://localhost:3000      | admin panel at `/admin`                   |
+| API docs (Swagger)  | http://localhost:1337/docs | dev only                                  |
+| Health / metrics    | `/healthz` · `/metrics`    | on the API port                           |
+| Next.js MCP (dev)   | `/_next/mcp`               | coding-agent tools when `bun dev:ui` runs |
+| PostgreSQL          | localhost:5432             | or a managed provider (e.g. Neon)         |
+| Redis               | localhost:6379             | optional in dev — in-memory fallback      |
 
 **Background work:** a BullMQ email-queue consumer plus scheduled jobs (data
 retention, billing lifecycle, `pg_dump` backup, audit anchoring) run in
@@ -188,8 +188,8 @@ retention, billing lifecycle, `pg_dump` backup, audit anchoring) run in
 | Database      | PostgreSQL via [Drizzle ORM](https://orm.drizzle.team) (works with Neon)                    |
 | Cache / queue | Redis (ioredis) · [BullMQ](https://docs.bullmq.io) email queue                              |
 | Frontend      | [Next.js](https://nextjs.org) 16 (App Router) · Tailwind CSS · shadcn/ui                    |
-| Crypto        | PASETO v4, `@noble/*`, CSFLE field encryption                                                |
-| Auth libs     | `@simplewebauthn/server` (WebAuthn) · `otpauth` (TOTP)                                       |
+| Crypto        | PASETO v4, `@noble/*`, CSFLE field encryption                                               |
+| Auth libs     | `@simplewebauthn/server` (WebAuthn) · `otpauth` (TOTP)                                      |
 | Observability | Prometheus (`prom-client`) · OpenTelemetry · Sentry                                         |
 | SDK           | Generated TypeScript client in `packages/client` from `src/api/openapi.json`                |
 | Tooling       | [Biome](https://biomejs.dev) (lint+format) · Vitest · Playwright · Husky · semantic-release |
@@ -233,9 +233,9 @@ bun run bootstrap:admin
 bun run dev
 ```
 
-| URL | What |
-| --- | ---- |
-| http://localhost:1337 | API |
+| URL                   | What                                       |
+| --------------------- | ------------------------------------------ |
+| http://localhost:1337 | API                                        |
 | http://localhost:3000 | App (login at `/login`, admin at `/admin`) |
 
 Point the UI at the API:
@@ -258,34 +258,34 @@ bun run dev:ui     # UI only (port 3000, also starts the Next.js MCP server)
 system role, and creates a default org owned by that user. Safe to re-run —
 exits cleanly if an admin already exists.
 
-| Variable | Required | Description |
-| -------- | -------- | ----------- |
-| `ADMIN_EMAIL` | ✅ | Email for the bootstrap admin |
-| `ADMIN_PASSWORD` | — | Plain-text password (prompted securely when unset) |
-| `ADMIN_DISPLAY_NAME` | — | Display name (defaults from email local-part) |
-| `BOOTSTRAP_ORG_NAME` | — | Default org name (`My Organization`) |
-| `BOOTSTRAP_ORG_SLUG` | — | Org slug (derived from name when unset) |
+| Variable             | Required | Description                                        |
+| -------------------- | -------- | -------------------------------------------------- |
+| `ADMIN_EMAIL`        | ✅       | Email for the bootstrap admin                      |
+| `ADMIN_PASSWORD`     | —        | Plain-text password (prompted securely when unset) |
+| `ADMIN_DISPLAY_NAME` | —        | Display name (defaults from email local-part)      |
+| `BOOTSTRAP_ORG_NAME` | —        | Default org name (`My Organization`)               |
+| `BOOTSTRAP_ORG_SLUG` | —        | Org slug (derived from name when unset)            |
 
 ---
 
 ## Scripts
 
-| Command | Purpose |
-| ------- | ------- |
-| `bun run dev` | API + UI concurrently |
-| `bun run dev:api` / `dev:ui` | Run one side only |
-| `bun run build` | Compile API to `dist/` |
-| `bun run db:push` | Sync schema (dev) |
-| `bun run db:migrate` | Apply versioned migrations (prod) |
-| `bun run db:studio` | Drizzle Studio |
-| `bun run bootstrap:admin` | First admin + default org |
-| `bun run db:backup` / `db:restore` | Encrypted `pg_dump` backup/restore |
-| `bun run test` | Vitest suite (API + UI logic) |
-| `bun run lint` / `lint:fix` | Biome check / autofix |
-| `bun run type-check` | `tsc --noEmit` |
-| `bun run verify:generated` | Regenerate SDK + docs; fail on drift |
-| `bun run sdk:generate` | Regenerate `packages/client` SDK |
-| `bun run docs:api` | Regenerate API reference markdown |
+| Command                            | Purpose                              |
+| ---------------------------------- | ------------------------------------ |
+| `bun run dev`                      | API + UI concurrently                |
+| `bun run dev:api` / `dev:ui`       | Run one side only                    |
+| `bun run build`                    | Compile API to `dist/`               |
+| `bun run db:push`                  | Sync schema (dev)                    |
+| `bun run db:migrate`               | Apply versioned migrations (prod)    |
+| `bun run db:studio`                | Drizzle Studio                       |
+| `bun run bootstrap:admin`          | First admin + default org            |
+| `bun run db:backup` / `db:restore` | Encrypted `pg_dump` backup/restore   |
+| `bun run test`                     | Vitest suite (API + UI logic)        |
+| `bun run lint` / `lint:fix`        | Biome check / autofix                |
+| `bun run type-check`               | `tsc --noEmit`                       |
+| `bun run verify:generated`         | Regenerate SDK + docs; fail on drift |
+| `bun run sdk:generate`             | Regenerate `packages/client` SDK     |
+| `bun run docs:api`                 | Regenerate API reference markdown    |
 
 ---
 
@@ -378,23 +378,23 @@ Use this before pointing real users at your deployment.
 
 All variables are documented inline in [`.env.example`](./.env.example). Highlights:
 
-| Variable | Required | Description |
-| -------- | -------- | ----------- |
-| `TOKEN_SECRET_HEX` | ✅ prod | Signs PASETO v4 tokens |
-| `CSFLE_MASTER_KEY_HEX` | ✅ prod | Client-side field encryption |
-| `DATABASE_URL` | ✅ | PostgreSQL connection string |
-| `REDIS_URI` | ✅ prod | Sessions, rate limiting, BullMQ |
-| `ADMIN_EMAIL` | bootstrap | First admin email for `bootstrap:admin` |
-| `STRIPE_SECRET_KEY` | billing | Enables checkout/portal when set |
-| `BACKUP_S3_*` | optional | S3-compatible backups + uploads |
+| Variable               | Required  | Description                             |
+| ---------------------- | --------- | --------------------------------------- |
+| `TOKEN_SECRET_HEX`     | ✅ prod   | Signs PASETO v4 tokens                  |
+| `CSFLE_MASTER_KEY_HEX` | ✅ prod   | Client-side field encryption            |
+| `DATABASE_URL`         | ✅        | PostgreSQL connection string            |
+| `REDIS_URI`            | ✅ prod   | Sessions, rate limiting, BullMQ         |
+| `ADMIN_EMAIL`          | bootstrap | First admin email for `bootstrap:admin` |
+| `STRIPE_SECRET_KEY`    | billing   | Enables checkout/portal when set        |
+| `BACKUP_S3_*`          | optional  | S3-compatible backups + uploads         |
 
 **Frontend** (`packages/ui/.env.local`):
 
-| Variable | Description |
-| -------- | ----------- |
+| Variable                    | Description                              |
+| --------------------------- | ---------------------------------------- |
 | `NEXT_PUBLIC_ZEROTRUST_URL` | Backend API base URL (no trailing slash) |
-| `NEXT_PUBLIC_APP_NAME` | App name in UI, emails, meta tags |
-| `NEXT_PUBLIC_SENTRY_DSN` | Browser error capture |
+| `NEXT_PUBLIC_APP_NAME`      | App name in UI, emails, meta tags        |
+| `NEXT_PUBLIC_SENTRY_DSN`    | Browser error capture                    |
 
 S3-compatible storage uses one adapter for DB backups (`backups/` prefix) and
 user uploads (`uploads/` prefix). When unset, backups stay local and avatars
@@ -413,13 +413,13 @@ SSRF, CWE-78 command injection, CWE-22 path traversal, CWE-532 secrets in logs,
 and others). Agent and contributor rules in [`CLAUDE.md`](./CLAUDE.md) and
 [`AGENTS.md`](./AGENTS.md) encode these patterns — do not bypass them.
 
-| Topic | Where to read |
-| ----- | ------------- |
-| Structural security decisions | [`docs/security.md`](./docs/security.md) |
-| Vulnerability disclosure | [`SECURITY.md`](./SECURITY.md) · `/.well-known/security.txt` |
-| Open security backlog | [`docs/project/todo.md`](./docs/project/todo.md) (DQ-2 coverage ratchet) |
-| Shipped security fixes | [`docs/project/shipped.md`](./docs/project/shipped.md) § Security baseline audit |
-| Production readiness | [`docs/production-checklist.md`](./docs/production-checklist.md) |
+| Topic                         | Where to read                                                                    |
+| ----------------------------- | -------------------------------------------------------------------------------- |
+| Structural security decisions | [`docs/security.md`](./docs/security.md)                                         |
+| Vulnerability disclosure      | [`SECURITY.md`](./SECURITY.md) · `/.well-known/security.txt`                     |
+| Open security backlog         | [`docs/project/todo.md`](./docs/project/todo.md) (DQ-2 coverage ratchet)         |
+| Shipped security fixes        | [`docs/project/shipped.md`](./docs/project/shipped.md) § Security baseline audit |
+| Production readiness          | [`docs/production-checklist.md`](./docs/production-checklist.md)                 |
 
 **Highlights:**
 
@@ -530,28 +530,28 @@ production domain.
 
 zerotrust is actively maintained with a large test suite. Honest boundaries:
 
-| Ships today | Not yet / partial |
-| ----------- | ----------------- |
-| Google, GitHub, Facebook OAuth | Apple Sign In |
-| Software key provider (CSFLE, tokens) | TPM / Secure Enclave / PKCS#11 (stubs only) |
-| Web + API | Expo mobile client (documented in security baseline, not in repo) |
-| SOC 2 readiness docs + product controls | Auditor certification (your process) |
+| Ships today                             | Not yet / partial                                                 |
+| --------------------------------------- | ----------------------------------------------------------------- |
+| Google, GitHub, Facebook OAuth          | Apple Sign In                                                     |
+| Software key provider (CSFLE, tokens)   | TPM / Secure Enclave / PKCS#11 (stubs only)                       |
+| Web + API                               | Expo mobile client (documented in security baseline, not in repo) |
+| SOC 2 readiness docs + product controls | Auditor certification (your process)                              |
 
-| Doc | Purpose |
-| --- | ------- |
+| Doc                                                              | Purpose                                 |
+| ---------------------------------------------------------------- | --------------------------------------- |
 | [`docs/production-checklist.md`](./docs/production-checklist.md) | Production-readiness sign-off checklist |
-| [`docs/project/shipped.md`](./docs/project/shipped.md) | Everything that ships today |
-| [`docs/project/todo.md`](./docs/project/todo.md) | Open backlog (DQ-2 coverage ratchet) |
-| [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) | System architecture deep dive |
+| [`docs/project/shipped.md`](./docs/project/shipped.md)           | Everything that ships today             |
+| [`docs/project/todo.md`](./docs/project/todo.md)                 | Open backlog (DQ-2 coverage ratchet)    |
+| [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md)                 | System architecture deep dive           |
 
 ---
 
 ## Contributing
 
 1. Branch off `main` — **do not push directly to `main`**
-3. Commits follow [Conventional Commits](https://www.conventionalcommits.org) (semantic-release)
-4. Keep `bun run lint` and `bun run type-check` green; add Vitest tests for behavior changes
-5. Open a PR to `main`; CI must pass
+2. Commits follow [Conventional Commits](https://www.conventionalcommits.org) (semantic-release)
+3. Keep `bun run lint` and `bun run type-check` green; add Vitest tests for behavior changes
+4. Open a PR to `main`; CI must pass
 
 ---
 
