@@ -105,7 +105,7 @@ Complete before pointing DNS at production. Archive signed copies in
 | ☐ | UI component tests (happy-dom) | P0 | **Done** | `packages/ui/vitest.config.ts` |
 | ☐ | Playwright E2E (full stack) | P0 | **Done** | `packages/ui/e2e/`; CI `e2e-ui` job |
 | ☐ | Coverage ratchet gates (**DQ-2**) | P1 | **Partial** | API ~67% lines / UI ~55% vs 85% aspiration — `vitest.config.ts`, `packages/ui/vitest.config.ts` |
-| ☐ | k6 load + chaos | P1 | **Partial** | `tests/load/`; CI load job may use `continue-on-error` |
+| ☐ | k6 load + chaos | P1 | **Done** | `tests/load/`; CI `load-test` job blocking with `K6_PROFILE=ci` (PERF-1) |
 | ☐ | Staging Lighthouse + OWASP ZAP | P1 | **Done** | `staging-validation.yml` (manual or chained from `deploy-staging.yml`) |
 | ☐ | Destructive migration gate | P1 | **Done** | `migrations:check` in CI; `.destructive-migrations.json` |
 
@@ -202,7 +202,7 @@ Complete before pointing DNS at production. Archive signed copies in
 | - | ---- | -------- | ------ | ----- |
 | ☐ | Rate limiting (Redis + fallback) | P0 | **Done** | `src/middleware/rateLimiting.ts` |
 | ☐ | Auth hot-path JOIN + Redis cache | P1 | **Done** | `src/services/auth/sessionCache.service.ts` |
-| ☐ | k6 p95 thresholds | P1 | **Partial** | Enforced in staging-validation; CI load tests may be non-blocking |
+| ☐ | k6 p95 thresholds | P1 | **Done** | CI blocking (`K6_PROFILE=ci`, p95<500ms); staging strict p95<100ms via `staging-validation.yml` (PERF-1) |
 | ☐ | Lighthouse >90 gate | P1 | **Partial** | Staging workflow only — `.lighthouserc.json` |
 | ☐ | Server-side pagination | P1 | **Done** | `src/shared/pagination.ts` on list endpoints |
 
@@ -298,7 +298,7 @@ for API↔UI Zod schemas, `deploy/k8s/` Helm per `docs/reference-architecture.md
 
 1. ~~**SEC-27** — Add VPS hardening checklist to `docs/deployment.md` (ufw, bind-address, SSH keys).~~ **Done (SEC-27, 2026-07-08)**
 2. ~~**UI Docker image** — `packages/ui/Dockerfile` + compose service; document in `docs/deployment.md`.~~ **Done (INF-1, 2026-07-08)**
-3. ~~**CI hardening** — Add `bun run boundaries:check` to `ci.yml`; review k6 `continue-on-error`.~~ **Done (CI-2, 2026-07-08)** — review k6 `continue-on-error` remains.
+3. ~~**CI hardening** — Add `bun run boundaries:check` to `ci.yml`; review k6 `continue-on-error`.~~ **Done (CI-2 + PERF-1, 2026-07-08)**
 4. **Husky** — Uncomment Biome pre-commit and commitlint in `.husky/`.
 5. ~~**Doc fixes** — Update root `SECURITY.md` argon2id wording.~~ **Done (DOC-1, 2026-07-08)**
 6. **Production env** — Walk README checklist; archive sign-off above in compliance evidence.

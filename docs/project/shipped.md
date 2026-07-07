@@ -398,6 +398,21 @@ Cross-audit of `docs/security.md` §0–§10. **SEC-27** shipped 2026-07-08 (VPS
 
 ## Recent work (2026-07-08)
 
+### PERF-1 — k6 load tests + p95 thresholds in CI (shipped)
+
+- **Problem:** `tests/load/` existed and `staging-validation.yml` enforced strict p95
+  thresholds, but the CI `load-test` job used `continue-on-error` on both k6 steps —
+  performance regressions could merge without failing the pipeline.
+- **Fix:** Removed `continue-on-error` from `.github/workflows/ci.yml` `load-test` job.
+  Added `K6_PROFILE=ci` with lighter scenarios and documented CI SLO floors
+  (p95&lt;500ms overall, p95&lt;300ms auth paths) in `tests/load/full-suite.k6.js` and
+  `tests/load/chaos-fault.k6.js`. Staging keeps the default profile (p95&lt;100ms).
+  Fixed invalid TypeScript syntax in `full-suite.k6.js` (`cachedTokens` annotation).
+- **Paths:** `.github/workflows/ci.yml`, `tests/load/full-suite.k6.js`,
+  `tests/load/chaos-fault.k6.js`, `docs/production-checklist.md`, `docs/project/todo.md`
+- **Verification (2026-07-08):** k6 scripts parse as valid JS; CI workflow sets
+  `K6_PROFILE=ci` on both blocking steps; staging-validation unchanged (default profile).
+
 ### INF-2 — Staging deploy workflow secrets (shipped)
 
 - **Problem:** `deploy-staging.yml` was a safe no-op template with no documented

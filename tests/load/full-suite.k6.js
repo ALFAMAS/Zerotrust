@@ -10,12 +10,16 @@
  * Run with:
  *   k6 run tests/load/full-suite.k6.js -e BASE_URL=http://localhost:1337
  *
- * Thresholds enforce the production starter target: API p95 under 100ms for the hot auth/org paths.
+ * Profiles (K6_PROFILE):
+ *   default — production/staging SLO: API p95 under 100ms for hot auth paths.
+ *   ci      — lighter load + relaxed floors for GitHub-hosted runners (p95<500ms).
  */
 
 import http from "k6/http";
 import { check, sleep, group } from "k6";
 import { Rate, Trend, Counter } from "k6/metrics";
+
+const IS_CI = __ENV.K6_PROFILE === "ci";
 
 // Custom metrics
 const loginErrorRate = new Rate("login_error_rate");
@@ -26,54 +30,90 @@ const refreshDuration = new Trend("refresh_duration_ms", true);
 const totalRequests = new Counter("total_requests");
 
 export const options = {
-  scenarios: {
-    // Scenario 1: Login storm — simulates burst of new sign-ins
-    login_storm: {
-      executor: "ramping-vus",
-      startVUs: 0,
-      stages: [
-        { duration: "30s", target: 50 },
-        { duration: "60s", target: 200 },
-        { duration: "30s", target: 0 },
-      ],
-      exec: "loginScenario",
-    },
-    // Scenario 2: Session refresh — steady token refresh load
-    session_refresh: {
-      executor: "constant-arrival-rate",
-      rate: 100,
-      timeUnit: "1s",
-      duration: "90s",
-      preAllocatedVUs: 50,
-      maxVUs: 150,
-      startTime: "10s",
-      exec: "refreshScenario",
-    },
-    // Scenario 3: Mixed reads — status, health, SLO endpoints
-    mixed_read: {
-      executor: "constant-arrival-rate",
-      rate: 200,
-      timeUnit: "1s",
-      duration: "90s",
-      preAllocatedVUs: 30,
-      maxVUs: 100,
-      startTime: "5s",
-      exec: "readScenario",
-    },
-  },
-  thresholds: {
-    // Overall SaaS-starter target: 95% of API requests under 100ms, 99% under 300ms.
-    http_req_duration: ["p(95)<100", "p(99)<300"],
-    // Hot auth-path latency budgets
-    login_duration_ms: ["p(95)<100"],
-    refresh_duration_ms: ["p(95)<100"],
-    // Error rates per scenario
-    login_error_rate: ["rate<0.05"],
-    refresh_error_rate: ["rate<0.02"],
-    read_error_rate: ["rate<0.01"],
-    // At least 99% of all requests must succeed
-    http_req_failed: ["rate<0.01"],
-  },
+  scenarios: IS_CI
+    ? {
+        login_storm: {
+          executor: "ramping-vus",
+          startVUs: 0,
+          stages: [
+            { duration: "10s", target: 20 },
+            { duration: "20s", target: 40 },
+            { duration: "10s", target: 0 },
+          ],
+          exec: "loginScenario",
+        },
+        session_refresh: {
+          executor: "constant-arrival-rate",
+          rate: 30,
+          timeUnit: "1s",
+          duration: "30s",
+          preAllocatedVUs: 20,
+          maxVUs: 60,
+          startTime: "5s",
+          exec: "refreshScenario",
+        },
+        mixed_read: {
+          executor: "constant-arrival-rate",
+          rate: 50,
+          timeUnit: "1s",
+          duration: "30s",
+          preAllocatedVUs: 15,
+          maxVUs: 40,
+          startTime: "0s",
+          exec: "readScenario",
+        },
+      }
+    : {
+        login_storm: {
+          executor: "ramping-vus",
+          startVUs: 0,
+          stages: [
+            { duration: "30s", target: 50 },
+            { duration: "60s", target: 200 },
+            { duration: "30s", target: 0 },
+          ],
+          exec: "loginScenario",
+        },
+        session_refresh: {
+          executor: "constant-arrival-rate",
+          rate: 100,
+          timeUnit: "1s",
+          duration: "90s",
+          preAllocatedVUs: 50,
+          maxVUs: 150,
+          startTime: "10s",
+          exec: "refreshScenario",
+        },
+        mixed_read: {
+          executor: "constant-arrival-rate",
+          rate: 200,
+          timeUnit: "1s",
+          duration: "90s",
+          preAllocatedVUs: 30,
+          maxVUs: 100,
+          startTime: "5s",
+          exec: "readScenario",
+        },
+      },
+  thresholds: IS_CI
+    ? {
+        http_req_duration: ["p(95)<500", "p(99)<1000"],
+        login_duration_ms: ["p(95)<300"],
+        refresh_duration_ms: ["p(95)<300"],
+        login_error_rate: ["rate<0.05"],
+        refresh_error_rate: ["rate<0.02"],
+        read_error_rate: ["rate<0.01"],
+        http_req_failed: ["rate<0.01"],
+      }
+    : {
+        http_req_duration: ["p(95)<100", "p(99)<300"],
+        login_duration_ms: ["p(95)<100"],
+        refresh_duration_ms: ["p(95)<100"],
+        login_error_rate: ["rate<0.05"],
+        refresh_error_rate: ["rate<0.02"],
+        read_error_rate: ["rate<0.01"],
+        http_req_failed: ["rate<0.01"],
+      },
 };
 
 const BASE_URL = __ENV.BASE_URL || "http://localhost:1337";
@@ -85,7 +125,7 @@ const testUsers = Array.from({ length: 50 }, (_, i) => ({
 }));
 
 // Store tokens for refresh scenario
-let cachedTokens: { accessToken: string; refreshToken: string } | null = null;
+let cachedTokens = null;
 
 /** Scenario 1: Login storm */
 export function loginScenario() {

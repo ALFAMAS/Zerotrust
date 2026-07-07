@@ -14,6 +14,10 @@
  * Run with:
  *   k6 run tests/load/chaos-fault.k6.js -e BASE_URL=http://localhost:1337
  *
+ * Profiles (K6_PROFILE):
+ *   default — full chaos load for staging/local.
+ *   ci      — shorter, lighter scenarios for the blocking CI gate.
+ *
  * For actual fault injection, stop Redis/ES before running:
  *   docker stop zerotrust-redis
  *   k6 run tests/load/chaos-fault.k6.js -e BASE_URL=http://localhost:1337
@@ -23,6 +27,8 @@ import http from "k6/http";
 import { check, sleep, group } from "k6";
 import { Rate, Trend, Counter } from "k6/metrics";
 
+const IS_CI = __ENV.K6_PROFILE === "ci";
+
 const healthErrorRate = new Rate("health_error_rate");
 const loginDegradedErrorRate = new Rate("login_degraded_error_rate");
 const metricsErrorRate = new Rate("metrics_error_rate");
@@ -31,67 +37,112 @@ const circuitBreakerTrips = new Counter("circuit_breaker_trips");
 const healthDuration = new Trend("health_duration_ms", true);
 
 export const options = {
-  scenarios: {
-    // Health must always respond, even under heavy concurrent load
-    health_under_load: {
-      executor: "constant-arrival-rate",
-      rate: 500,
-      timeUnit: "1s",
-      duration: "60s",
-      preAllocatedVUs: 100,
-      maxVUs: 300,
-    },
-    // Login under degraded conditions (Redis may be down)
-    login_degraded: {
-      executor: "ramping-vus",
-      startVUs: 0,
-      stages: [
-        { duration: "15s", target: 50 },
-        { duration: "30s", target: 100 },
-        { duration: "15s", target: 0 },
-      ],
-      startTime: "5s",
-    },
-    // Metrics endpoint must stay available
-    metrics_available: {
-      executor: "constant-arrival-rate",
-      rate: 50,
-      timeUnit: "1s",
-      duration: "60s",
-      preAllocatedVUs: 20,
-      maxVUs: 50,
-      startTime: "0s",
-    },
-    // SLO endpoint check
-    slo_endpoint: {
-      executor: "constant-arrival-rate",
-      rate: 20,
-      timeUnit: "1s",
-      duration: "60s",
-      preAllocatedVUs: 10,
-      maxVUs: 20,
-      startTime: "0s",
-    },
-    // Circuit breaker: rapid sequential requests to trigger rate limiting
-    circuit_breaker: {
-      executor: "shared-iterations",
-      vus: 10,
-      iterations: 200,
-      maxDuration: "30s",
-      startTime: "10s",
-    },
-  },
-  thresholds: {
-    // Health endpoint: must always respond, p99 under 2s even under load
-    "http_req_duration{scenario:health_under_load}": ["p(99)<2000"],
-    health_error_rate: ["rate<0.01"],
-    // Login: degraded is OK (429, 503), but no 500 crashes
-    login_degraded_error_rate: ["rate<0.15"],
-    // Metrics: must stay up
-    metrics_error_rate: ["rate<0.01"],
-    // SLO: must stay up
-    slo_error_rate: ["rate<0.05"],
-  },
+  scenarios: IS_CI
+    ? {
+        health_under_load: {
+          executor: "constant-arrival-rate",
+          rate: 100,
+          timeUnit: "1s",
+          duration: "20s",
+          preAllocatedVUs: 30,
+          maxVUs: 80,
+        },
+        login_degraded: {
+          executor: "ramping-vus",
+          startVUs: 0,
+          stages: [
+            { duration: "5s", target: 15 },
+            { duration: "10s", target: 30 },
+            { duration: "5s", target: 0 },
+          ],
+          startTime: "2s",
+        },
+        metrics_available: {
+          executor: "constant-arrival-rate",
+          rate: 20,
+          timeUnit: "1s",
+          duration: "20s",
+          preAllocatedVUs: 10,
+          maxVUs: 20,
+          startTime: "0s",
+        },
+        slo_endpoint: {
+          executor: "constant-arrival-rate",
+          rate: 10,
+          timeUnit: "1s",
+          duration: "20s",
+          preAllocatedVUs: 5,
+          maxVUs: 10,
+          startTime: "0s",
+        },
+        circuit_breaker: {
+          executor: "shared-iterations",
+          vus: 5,
+          iterations: 50,
+          maxDuration: "15s",
+          startTime: "5s",
+        },
+      }
+    : {
+        health_under_load: {
+          executor: "constant-arrival-rate",
+          rate: 500,
+          timeUnit: "1s",
+          duration: "60s",
+          preAllocatedVUs: 100,
+          maxVUs: 300,
+        },
+        login_degraded: {
+          executor: "ramping-vus",
+          startVUs: 0,
+          stages: [
+            { duration: "15s", target: 50 },
+            { duration: "30s", target: 100 },
+            { duration: "15s", target: 0 },
+          ],
+          startTime: "5s",
+        },
+        metrics_available: {
+          executor: "constant-arrival-rate",
+          rate: 50,
+          timeUnit: "1s",
+          duration: "60s",
+          preAllocatedVUs: 20,
+          maxVUs: 50,
+          startTime: "0s",
+        },
+        slo_endpoint: {
+          executor: "constant-arrival-rate",
+          rate: 20,
+          timeUnit: "1s",
+          duration: "60s",
+          preAllocatedVUs: 10,
+          maxVUs: 20,
+          startTime: "0s",
+        },
+        circuit_breaker: {
+          executor: "shared-iterations",
+          vus: 10,
+          iterations: 200,
+          maxDuration: "30s",
+          startTime: "10s",
+        },
+      },
+  thresholds: IS_CI
+    ? {
+        "http_req_duration{scenario:health_under_load}": ["p(99)<3000"],
+        health_error_rate: ["rate<0.01"],
+        login_degraded_error_rate: ["rate<0.15"],
+        metrics_error_rate: ["rate<0.01"],
+        slo_error_rate: ["rate<0.05"],
+      }
+    : {
+        "http_req_duration{scenario:health_under_load}": ["p(99)<2000"],
+        health_error_rate: ["rate<0.01"],
+        login_degraded_error_rate: ["rate<0.15"],
+        metrics_error_rate: ["rate<0.01"],
+        slo_error_rate: ["rate<0.05"],
+      },
 };
 
 const BASE_URL = __ENV.BASE_URL || "http://localhost:1337";

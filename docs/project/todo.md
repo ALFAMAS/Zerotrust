@@ -4,7 +4,7 @@
 
 Audit date: **2026-07-05**. Verified/completed items moved to [`shipped.md`](./shipped.md) § Security baseline audit.
 
-**Verification (2026-07-08):** Security baseline — DQ-2 remains open (SEC-27 shipped). Production checklist audit (2026-07-07) added **18** tracked gaps in § Production readiness below (**13** open items total; CI-2 + DOC-1 + SEC-27 + OPS-1 + OPS-2 + INF-1 + INF-2 shipped 2026-07-08).
+**Verification (2026-07-08):** Security baseline — DQ-2 remains open (SEC-27 shipped). Production checklist audit (2026-07-07) added **18** tracked gaps in § Production readiness below (**12** open items total; CI-2 + DOC-1 + SEC-27 + OPS-1 + OPS-2 + INF-1 + INF-2 + PERF-1 shipped 2026-07-08).
 
 ### Low / Ops (document + deploy)
 
@@ -86,18 +86,6 @@ Audit date: **2026-07-07**. Open gaps from [`production-checklist.md`](../produc
 
 ### Testing
 
-- [ ] **PERF-1** — **P1** — k6 load tests + p95 thresholds in CI
-
-       **Problem:** `tests/load/` exists and staging-validation enforces thresholds, but CI load job may use `continue-on-error` — regressions can slip through.
-
-       **Fix:** Review k6 job in `.github/workflows/ci.yml`; gate on staging or make blocking with agreed SLO floors.
-
-       **Paths:** `tests/load/`, `.github/workflows/ci.yml`, `.github/workflows/staging-validation.yml`
-
-       **Status:** Partial.
-
-       **Refs:** [`production-checklist.md`](../production-checklist.md) § Testing · § Performance
-
 - [ ] **PERF-2** — **P1** — Lighthouse >90 gate
 
        **Problem:** Lighthouse thresholds enforced only via manual `staging-validation.yml`, not on every PR.
@@ -109,6 +97,8 @@ Audit date: **2026-07-07**. Open gaps from [`production-checklist.md`](../produc
        **Status:** Partial.
 
        **Refs:** [`production-checklist.md`](../production-checklist.md) § Performance
+
+- [x] **PERF-1** — **P1** — k6 load tests + p95 thresholds in CI — **shipped 2026-07-08** → [`shipped.md`](./shipped.md) § Recent work
 
 ### CI/CD
 
