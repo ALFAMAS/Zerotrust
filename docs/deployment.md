@@ -37,14 +37,15 @@ Reference for the **CI/CD & Documentation** deliverable.
 | **Playwright E2E & a11y** | full-stack smoke against a started API+UI | needs the app running with Postgres+Redis services |
 | **Load & Chaos (k6)** | `tests/load/*.k6.js` | publishes k6 result artifacts; p95 thresholds enforced here |
 
-### `staging-validation.yml` — manual (`workflow_dispatch`)
+### `staging-validation.yml` — manual (`workflow_dispatch`) or chained from deploy
 
 Validates a **already-deployed** staging environment. Inputs: `staging_url`,
 `api_url`. Jobs: **ops-smoke** (`/health`, `/metrics`, `/version`, trace header),
 **Lighthouse** (`/`, `/login`, `/register` vs `.lighthouserc.json`), **OWASP ZAP**
-baseline DAST. This is where the **p95**, **Lighthouse>90**, and **DAST** exit
-criteria are measured — run it after every staging deploy and archive the
-artifacts as evidence.
+baseline DAST, **k6** load suite. Callable via `workflow_call` from
+`deploy-staging.yml` when `STAGING_UI_URL` + `STAGING_API_URL` variables are set.
+This is where the **p95**, **Lighthouse>90**, and **DAST** exit criteria are
+measured — run it after every staging deploy and archive the artifacts as evidence.
 
 ### `dr-restore-drill.yml` — scheduled + manual
 
@@ -641,18 +642,37 @@ the run duration as the measured RTO and the backup interval as the RPO in the
 ## Automated staging deploy
 
 `deploy-staging.yml` is a **manual** (`workflow_dispatch`) workflow that ships the
-current `main` to a staging host that matches the README's PM2 + nginx model,
-then chains the validation suite. It is deliberately not push-triggered — promote
-explicitly.
+chosen ref to a staging host that matches the README's PM2 + nginx model, waits for
+the API health gate, then **chains** `staging-validation.yml` (ops-smoke · Lighthouse
+· ZAP · k6). It is deliberately not push-triggered — promote explicitly.
 
-**Required repository secrets** (Settings → Secrets and variables → Actions):
+### Staging secrets (INF-2)
+
+Configure in **Settings → Secrets and variables → Actions**. Create a **`staging`**
+[environment](https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment)
+with optional required reviewers before the first real deploy.
+
+**Repository secrets** (deploy + validation):
 
 | Secret | Purpose |
 | --- | --- |
-| `STAGING_SSH_HOST` | staging server hostname/IP |
-| `STAGING_SSH_USER` | deploy user (e.g. `zerotrust`) |
-| `STAGING_SSH_KEY` | private key authorized on the host |
-| `STAGING_APP_DIR` | checkout path on the host (e.g. `/home/zerotrust/app`) |
+| `STAGING_SSH_HOST` | Staging server hostname/IP |
+| `STAGING_SSH_USER` | Deploy user (e.g. `zerotrust`) |
+| `STAGING_SSH_KEY` | Private key authorized on the host (`-----BEGIN …`) |
+| `STAGING_APP_DIR` | Checkout path on the host (e.g. `/home/zerotrust/app`) |
+| `METRICS_AUTH_TOKEN` | Must match `METRICS_AUTH_TOKEN` on the staging API — ops-smoke asserts bearer-gated `/metrics` (see § Metrics auth verification) |
+
+**Repository variables** (public URLs — no trailing slash):
+
+| Variable | Purpose |
+| --- | --- |
+| `STAGING_UI_URL` | Public staging UI origin (e.g. `https://staging.example.com`) — Lighthouse, ZAP, deploy-config smoke |
+| `STAGING_API_URL` | Public staging API origin (e.g. `https://api-staging.example.com`) — health gate, ops-smoke, k6 |
+
+Until SSH secrets are set, `deploy-staging.yml` is a **safe no-op** (notice + exit 0).
+When SSH secrets exist but URL variables are missing, deploy runs but post-deploy
+validation is skipped with a notice. Set `skip_validation: true` on manual dispatch
+to deploy without running Lighthouse/ZAP/k6.
 
 **What it runs on the host** (the README's "Deploying updates" steps):
 
@@ -662,13 +682,16 @@ bun install && bun run db:migrate && bun run build && pm2 restart zerotrust-api
 cd packages/ui && bun install && bun run build && pm2 restart zerotrust-ui
 ```
 
-After SSH deploy it dispatches `staging-validation.yml` (or run it manually) so
-ops-smoke + Lighthouse + ZAP confirm the release. Promote to production with the
+After a green validation run, archive workflow artifacts (Lighthouse, k6 JSON) in
+[`docs/compliance/`](./compliance/README.md) evidence. Promote to production with the
 README's manual steps once staging is green.
 
+`staging-validation.yml` remains available for **manual** `workflow_dispatch` against
+any already-deployed environment (pass `staging_url` + `api_url` inputs).
+
 > **Other targets** (Docker/Fly/Render/Kubernetes): swap the SSH job for your
-> platform's deploy action; keep the post-deploy `staging-validation.yml` call so
-> the same exit-criteria gates apply everywhere.
+> platform's deploy action; keep the post-deploy `staging-validation.yml` reusable call
+> so the same exit-criteria gates apply everywhere.
 
 ---
 

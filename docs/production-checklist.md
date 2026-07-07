@@ -73,7 +73,7 @@ Complete before pointing DNS at production. Archive signed copies in
 | ☐ | `docker-compose.yml` (API + worker + PG + Redis) | P0 | **Done** | `WORKER_MODE=true` on API service |
 | ☐ | **UI container image** | P1 | **Done** | `packages/ui/Dockerfile`; `zerotrust-ui` in `docker-compose.yml` (host :3001) |
 | ☐ | Reference architectures (VM, containers, K8s) | P1 | **Done** | `docs/reference-architecture.md` |
-| ☐ | Staging deploy workflow | P1 | **Partial** | `.github/workflows/deploy-staging.yml` — template until secrets wired |
+| ☐ | Staging deploy workflow | P1 | **Done** | `deploy-staging.yml` chains `staging-validation.yml`; secrets/vars documented in `docs/deployment.md` § Staging secrets |
 | ☐ | Production auto-deploy | P2 | **Missing** | Manual PM2 + nginx per README § Production deployment |
 | ☐ | Postgres role separation (app vs migrator) | P1 | **Done** | `scripts/setup-postgres-roles.sql`, `.env.example` |
 | ☐ | Encrypted backups + S3 | P0 | **Done** | `scripts/db-backup.js`, `src/services/dbBackup.service.ts` |
@@ -106,7 +106,7 @@ Complete before pointing DNS at production. Archive signed copies in
 | ☐ | Playwright E2E (full stack) | P0 | **Done** | `packages/ui/e2e/`; CI `e2e-ui` job |
 | ☐ | Coverage ratchet gates (**DQ-2**) | P1 | **Partial** | API ~67% lines / UI ~55% vs 85% aspiration — `vitest.config.ts`, `packages/ui/vitest.config.ts` |
 | ☐ | k6 load + chaos | P1 | **Partial** | `tests/load/`; CI load job may use `continue-on-error` |
-| ☐ | Staging Lighthouse + OWASP ZAP | P1 | **Done** | `staging-validation.yml` (manual dispatch) |
+| ☐ | Staging Lighthouse + OWASP ZAP | P1 | **Done** | `staging-validation.yml` (manual or chained from `deploy-staging.yml`) |
 | ☐ | Destructive migration gate | P1 | **Done** | `migrations:check` in CI; `.destructive-migrations.json` |
 
 ---
@@ -307,7 +307,7 @@ for API↔UI Zod schemas, `deploy/k8s/` Helm per `docs/reference-architecture.md
 
 7. **Coverage ratchet (DQ-2)** — Raise floors in `vitest.config.ts` / `packages/ui/vitest.config.ts`; target 70% API / 60% UI next milestone.
 8. **Repository extraction** — Move hot-path writes behind `src/db/repositories/` per `CLAUDE.md`.
-9. **Staging secrets** — Wire `deploy-staging.yml` so staging validation runs on every release candidate.
+9. ~~**Staging secrets** — Wire `deploy-staging.yml` so staging validation runs on every release candidate.~~ **Done (INF-2, 2026-07-08)**
 10. **semantic-release CI** — Add `.github/workflows/release.yml` on `main` merge.
 11. **Consolidate cross-cutting modules** — `src/jit`, `src/ssf`, `src/webhooks` under `src/modules/` (re-exports only).
 

@@ -1,13 +1,14 @@
 name: Deploy to Staging
 
 # Manual promotion only — this never auto-deploys on push. It ships the chosen
-# ref to a staging host that matches the README's PM2 + nginx model, then you run
-# Staging Validation (Lighthouse / ZAP / ops-smoke) against it.
+# ref to a staging host that matches the README's PM2 + nginx model, then
+# chains staging-validation.yml (ops-smoke · Lighthouse · ZAP · k6).
 #
-# Wire these before first use (Settings → Secrets and variables → Actions):
-#   secrets: STAGING_SSH_HOST, STAGING_SSH_USER, STAGING_SSH_KEY, STAGING_APP_DIR
-#   variables (optional): STAGING_API_URL  (enables the post-deploy health gate)
-# Without the secrets this workflow is a safe no-op template (see docs/deployment.md).
+# Wire before first use (Settings → Secrets and variables → Actions):
+#   secrets: STAGING_SSH_HOST, STAGING_SSH_USER, STAGING_SSH_KEY, STAGING_APP_DIR,
+#            METRICS_AUTH_TOKEN (must match staging API env for ops-smoke)
+#   variables: STAGING_UI_URL, STAGING_API_URL (public HTTPS URLs for validation)
+# Without SSH secrets this workflow is a safe no-op template (see docs/deployment.md).
 
 on:
   workflow_dispatch:
@@ -17,6 +18,11 @@ on:
         required: false
         default: main
         type: string
+      skip_validation:
+        description: "Skip post-deploy staging validation"
+        required: false
+        default: false
+        type: boolean
 
 concurrency:
   group: deploy-staging
@@ -28,8 +34,27 @@ jobs:
     runs-on: ubuntu-latest
     # Add required reviewers to the "staging" Environment to gate promotion.
     environment: staging
+    outputs:
+      configured: ${{ steps.check-secrets.outputs.configured }}
     steps:
+      - name: Check staging secrets
+        id: check-secrets
+        env:
+          SSH_HOST: ${{ secrets.STAGING_SSH_HOST }}
+          SSH_USER: ${{ secrets.STAGING_SSH_USER }}
+          SSH_KEY: ${{ secrets.STAGING_SSH_KEY }}
+          APP_DIR: ${{ secrets.STAGING_APP_DIR }}
+        run: |
+          set -euo pipefail
+          if [ -z "${SSH_HOST:-}" ] || [ -z "${SSH_USER:-}" ] || [ -z "${SSH_KEY:-}" ] || [ -z "${APP_DIR:-}" ]; then
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::STAGING_SSH_* secrets are not set — template no-op. Configure per docs/deployment.md § Staging secrets."
+            exit 0
+          fi
+          echo "configured=true" >> "$GITHUB_OUTPUT"
+
       - name: Deploy ${{ inputs.ref }} over SSH
+        if: steps.check-secrets.outputs.configured == 'true'
         env:
           SSH_HOST: ${{ secrets.STAGING_SSH_HOST }}
           SSH_USER: ${{ secrets.STAGING_SSH_USER }}
@@ -38,10 +63,6 @@ jobs:
           DEPLOY_REF: ${{ inputs.ref }}
         run: |
           set -euo pipefail
-          if [ -z "${SSH_HOST:-}" ] || [ -z "${SSH_KEY:-}" ]; then
-            echo "::notice::STAGING_SSH_* secrets are not set — template no-op. Configure them per docs/deployment.md."
-            exit 0
-          fi
           mkdir -p ~/.ssh && chmod 700 ~/.ssh
           printf '%s\n' "$SSH_KEY" > ~/.ssh/id_deploy
           chmod 600 ~/.ssh/id_deploy
@@ -65,6 +86,7 @@ jobs:
           EOF
 
       - name: Post-deploy health gate
+        if: steps.check-secrets.outputs.configured == 'true'
         env:
           API_URL: ${{ vars.STAGING_API_URL }}
         run: |
@@ -81,7 +103,40 @@ jobs:
           done
           echo "::error::staging API did not become healthy at $API_URL"; exit 1
 
-      - name: Next step
+      - name: Validation prerequisites
+        if: steps.check-secrets.outputs.configured == 'true'
+        env:
+          UI_URL: ${{ vars.STAGING_UI_URL }}
+          API_URL: ${{ vars.STAGING_API_URL }}
         run: |
-          echo "Deploy done. Now run the 'Staging Validation' workflow against the"
-          echo "staging URLs to measure Lighthouse / ZAP / ops-smoke (exit criteria)."
+          set -euo pipefail
+          if [ "${{ inputs.skip_validation }}" = "true" ]; then
+            echo "::notice::skip_validation=true — staging-validation.yml will not run."
+            exit 0
+          fi
+          missing=0
+          if [ -z "${UI_URL:-}" ]; then
+            echo "::notice::STAGING_UI_URL variable not set — post-deploy validation will be skipped."
+            missing=1
+          fi
+          if [ -z "${API_URL:-}" ]; then
+            echo "::notice::STAGING_API_URL variable not set — post-deploy validation will be skipped."
+            missing=1
+          fi
+          if [ "$missing" -eq 0 ]; then
+            echo "Post-deploy validation will run against UI=$UI_URL API=$API_URL"
+          fi
+
+  validate:
+    name: Staging validation
+    needs: deploy
+    if: |
+      needs.deploy.outputs.configured == 'true' &&
+      inputs.skip_validation != true &&
+      vars.STAGING_UI_URL != '' &&
+      vars.STAGING_API_URL != ''
+    uses: ./.github/workflows/staging-validation.yml
+    with:
+      staging_url: ${{ vars.STAGING_UI_URL }}
+      api_url: ${{ vars.STAGING_API_URL }}
+    secrets: inherit

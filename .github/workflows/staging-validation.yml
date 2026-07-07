@@ -11,6 +11,16 @@ on:
         description: "Public staging API URL (for ops smoke/k6)"
         required: true
         type: string
+  workflow_call:
+    inputs:
+      staging_url:
+        description: "Public staging UI URL (for Lighthouse/ZAP)"
+        required: true
+        type: string
+      api_url:
+        description: "Public staging API URL (for ops smoke/k6)"
+        required: true
+        type: string
 
 jobs:
   ops-smoke:

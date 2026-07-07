@@ -4,7 +4,7 @@
 
 Audit date: **2026-07-05**. Verified/completed items moved to [`shipped.md`](./shipped.md) § Security baseline audit.
 
-**Verification (2026-07-08):** Security baseline — DQ-2 remains open (SEC-27 shipped). Production checklist audit (2026-07-07) added **18** tracked gaps in § Production readiness below (**14** open items total; CI-2 + DOC-1 + SEC-27 + OPS-1 + OPS-2 + INF-1 shipped 2026-07-08).
+**Verification (2026-07-08):** Security baseline — DQ-2 remains open (SEC-27 shipped). Production checklist audit (2026-07-07) added **18** tracked gaps in § Production readiness below (**13** open items total; CI-2 + DOC-1 + SEC-27 + OPS-1 + OPS-2 + INF-1 + INF-2 shipped 2026-07-08).
 
 ### Low / Ops (document + deploy)
 
@@ -56,17 +56,7 @@ Audit date: **2026-07-07**. Open gaps from [`production-checklist.md`](../produc
 
 - [x] **INF-1** — **P1** — UI container image — **shipped 2026-07-08** → [`shipped.md`](./shipped.md) § Recent work
 
-- [ ] **INF-2** — **P1** — Staging deploy workflow secrets
-
-       **Problem:** `.github/workflows/deploy-staging.yml` is a template until repository secrets and host targets are wired.
-
-       **Fix:** Configure staging secrets; run `staging-validation.yml` after each staging deploy.
-
-       **Paths:** `.github/workflows/deploy-staging.yml`, `.github/workflows/staging-validation.yml`
-
-       **Status:** Partial.
-
-       **Refs:** [`production-checklist.md`](../production-checklist.md) § Infrastructure / Deploy
+- [x] **INF-2** — **P1** — Staging deploy workflow secrets — **shipped 2026-07-08** → [`shipped.md`](./shipped.md) § Recent work
 
 - [ ] **INF-3** — **P2** — Production auto-deploy
 

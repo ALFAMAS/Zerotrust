@@ -398,6 +398,24 @@ Cross-audit of `docs/security.md` §0–§10. **SEC-27** shipped 2026-07-08 (VPS
 
 ## Recent work (2026-07-08)
 
+### INF-2 — Staging deploy workflow secrets (shipped)
+
+- **Problem:** `deploy-staging.yml` was a safe no-op template with no documented
+  secret/variable contract and no automatic post-deploy validation — operators had
+  to manually dispatch `staging-validation.yml` after every staging release.
+- **Fix:** Added explicit secret/variable checklist in `docs/deployment.md`
+  § Staging secrets (`STAGING_SSH_*`, `METRICS_AUTH_TOKEN`, `STAGING_UI_URL`,
+  `STAGING_API_URL`). `deploy-staging.yml` now outputs `configured`, gates deploy
+  on full SSH secret set, and chains `staging-validation.yml` via `workflow_call`
+  when URL variables are set (`skip_validation` input to opt out). Added
+  `workflow_call` trigger to `staging-validation.yml` for reusable invocation.
+- **Paths:** `.github/workflows/deploy-staging.yml`,
+  `.github/workflows/staging-validation.yml`, `docs/deployment.md`,
+  `docs/production-checklist.md`, `docs/project/todo.md`
+- **Verification (2026-07-08):** Workflow YAML reviewed for `workflow_call` +
+  `secrets: inherit` contract; no-op path preserved when SSH secrets unset;
+  validation skipped with notice when URL variables missing.
+
 ### INF-1 — UI container image (shipped)
 
 - **Problem:** Container deploy story was API-only — no `packages/ui/Dockerfile` and
