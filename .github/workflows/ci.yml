@@ -83,7 +83,7 @@ jobs:
         run: bun run --cwd packages/ui test
       - name: UI coverage ratchet gate (packages/ui/vitest.config.ts)
         run: bun run test:coverage:ui
-      # Blocking ratchet gate (todo.md P4.5): thresholds in vitest.config.ts sit
+      # Blocking ratchet gate (docs/project/todo.md DQ-2): thresholds in vitest.config.ts sit
       # a few points below the current measured baseline (~60% lines/statements,
       # ~56% branches), not the aspirational 85% — that number deadlocked every
       # PR and made the gate meaningless. This still fails on a real regression.

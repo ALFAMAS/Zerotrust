@@ -6,7 +6,7 @@ and [Conventional Commits](https://www.conventionalcommits.org/).
 
 Releases are automated via [semantic-release](https://github.com/semantic-release/semantic-release);
 each release populates this file with generated entries. For the current feature
-status (shipped vs. pending), see [`tdone.md`](./tdone.md) and [`todo.md`](./todo.md).
+status (shipped vs. pending), see [`docs/project/shipped.md`](./docs/project/shipped.md) and [`docs/project/todo.md`](./docs/project/todo.md).
 
 ## Recent work (2026-07-01)
 

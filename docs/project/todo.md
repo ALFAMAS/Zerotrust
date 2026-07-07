@@ -2,9 +2,9 @@
 
 ## Security baseline (`docs/security.md`)
 
-Audit date: **2026-07-05**. Verified/completed items moved to [`tdone.md`](./tdone.md) § Security baseline audit.
+Audit date: **2026-07-05**. Verified/completed items moved to [`shipped.md`](./shipped.md) § Security baseline audit.
 
-**Verification (2026-07-06, re-audited):** SEC-17…SEC-27 rechecked — **2 items remain open** below (1 SEC + DQ-2). SEC-1…SEC-28 shipped → [`tdone.md`](./tdone.md) § Security baseline audit.
+**Verification (2026-07-06, re-audited):** SEC-17…SEC-27 rechecked — **2 items remain open** below (1 SEC + DQ-2). SEC-1…SEC-28 shipped → [`shipped.md`](./shipped.md) § Security baseline audit.
 
 ### Low / Ops (document + deploy)
 
@@ -30,4 +30,4 @@ Audit date: **2026-07-05**. Verified/completed items moved to [`tdone.md`](./tdo
 
 ## Backlog (unprioritized)
 
-_(empty — see [`tdone.md`](./tdone.md) § Recent work 2026-07-06)_
+_(empty — see [`shipped.md`](./shipped.md) § Recent work 2026-07-06)_

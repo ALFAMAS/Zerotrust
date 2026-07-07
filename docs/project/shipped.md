@@ -1,7 +1,7 @@
 # zerotrust — Shipped Features
 
 The authoritative catalog of what zerotrust ships today. Update this file when you
-ship a feature. Planned work lives in [`todo.md`](./todo.md).
+ship a feature. Planned work lives in [`todo.md`](./todo.md) (this directory).
 
 > **Legend:** ✅ shipped · `[~]` partial / behind a flag
 

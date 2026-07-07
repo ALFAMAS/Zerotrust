@@ -59,8 +59,8 @@ You get a modular monolith you can deploy on a VPS, containers, or Kubernetes
 a generated TypeScript SDK in `packages/client`.
 
 > **Source of truth for shipped features:** this README summarizes what ships
-> today. The full catalog lives in [`tdone.md`](./tdone.md); open backlog in
-> [`todo.md`](./todo.md).
+> today. The full catalog lives in [`docs/project/shipped.md`](./docs/project/shipped.md); open backlog in
+> [`docs/project/todo.md`](./docs/project/todo.md).
 
 ---
 
@@ -293,6 +293,9 @@ exits cleanly if an admin already exists.
 
 Use this before pointing real users at your deployment.
 
+**Full operator checklist (audit-backed, sign-off tables):**
+[`docs/production-checklist.md`](./docs/production-checklist.md)
+
 ### Required infrastructure
 
 - [ ] **PostgreSQL** — managed (Neon, RDS, etc.) or self-hosted; use `db:migrate` on deploy
@@ -361,10 +364,12 @@ Use this before pointing real users at your deployment.
 │   ├── client/              # Generated TypeScript SDK
 │   └── ui/                  # Next.js 16 app (port 3000)
 ├── drizzle/                 # SQL migrations
-├── docs/compliance/         # SOC 2 policies, runbooks, evidence templates
+├── docs/
+│   ├── compliance/          # SOC 2 policies, runbooks, evidence templates
+│   ├── production-checklist.md  # Operator sign-off checklist
+│   └── project/             # todo.md (backlog) + shipped.md (catalog)
 ├── scripts/                 # bootstrap-admin, db-backup, postinstall…
-├── .env.example             # All env vars, documented inline
-└── tdone.md                 # Full shipped-feature catalog
+└── .env.example             # All env vars, documented inline
 ```
 
 ---
@@ -412,8 +417,9 @@ and others). Agent and contributor rules in [`CLAUDE.md`](./CLAUDE.md) and
 | ----- | ------------- |
 | Structural security decisions | [`docs/security.md`](./docs/security.md) |
 | Vulnerability disclosure | [`SECURITY.md`](./SECURITY.md) · `/.well-known/security.txt` |
-| Open security backlog | [`todo.md`](./todo.md) (SEC-27) |
-| Shipped security fixes | [`tdone.md`](./tdone.md) § Security baseline audit |
+| Open security backlog | [`docs/project/todo.md`](./docs/project/todo.md) (SEC-27) |
+| Shipped security fixes | [`docs/project/shipped.md`](./docs/project/shipped.md) § Security baseline audit |
+| Production readiness | [`docs/production-checklist.md`](./docs/production-checklist.md) |
 
 **Highlights:**
 
@@ -533,8 +539,9 @@ zerotrust is actively maintained with a large test suite. Honest boundaries:
 
 | Doc | Purpose |
 | --- | ------- |
-| [`tdone.md`](./tdone.md) | Everything that ships today |
-| [`todo.md`](./todo.md) | Open backlog (SEC-27, DQ-2 coverage ratchet) |
+| [`docs/production-checklist.md`](./docs/production-checklist.md) | Production-readiness sign-off checklist |
+| [`docs/project/shipped.md`](./docs/project/shipped.md) | Everything that ships today |
+| [`docs/project/todo.md`](./docs/project/todo.md) | Open backlog (SEC-27, DQ-2 coverage ratchet) |
 | [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) | System architecture deep dive |
 
 ---

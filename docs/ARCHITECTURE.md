@@ -1,8 +1,8 @@
 # Architecture
 
 Audited 2026-07-04. Describes the system as it is today, then records shipped
-upgrades. Shipped work is in [`../tdone.md`](../tdone.md); open backlog in
-[`../todo.md`](../todo.md).
+upgrades. Shipped work is in [`project/shipped.md`](./project/shipped.md); open backlog in
+[`project/todo.md`](./project/todo.md).
 
 ## 1. Overview
 
@@ -216,4 +216,4 @@ module boundaries.
 ---
 
 All proposals above are shipped. One long-term item remains — see
-[`../todo.md`](../todo.md) (DQ-2 coverage ratchet).
+[`project/todo.md`](./project/todo.md) (DQ-2 coverage ratchet).

@@ -10,9 +10,10 @@ Monorepo: Node/Hono API (`src/`) + Next.js 16 UI (`packages/ui/`).
 | UI (Next.js) | `packages/ui/`                  | 3000                              |
 | MCP server   | auto-started with UI dev server | `http://localhost:3000/_next/mcp` |
 
-**Status docs:** [`README.md`](./README.md) is the source of truth for what ships
-today (see its **Features** section); [`docs/compliance/`](./docs/compliance/README.md)
-covers SOC 2 policies, runbooks, and evidence.
+**Status docs:** [`README.md`](./README.md) summarizes what ships today; the full catalog is in
+[`docs/project/shipped.md`](./docs/project/shipped.md) with open backlog in
+[`docs/project/todo.md`](./docs/project/todo.md). Operators: [`docs/production-checklist.md`](./docs/production-checklist.md).
+[`docs/compliance/`](./docs/compliance/README.md) covers SOC 2 policies, runbooks, and evidence.
 
 ## Running the project
 
@@ -65,13 +66,14 @@ the terminal via `logging.browserToTerminal: true` in
 ```
 src/
   api/routes/       Core Hono route modules (auth, orgs, billing…)
-  plugins/          Plugin loader, registry, types
+  plugins/          Plugin loader infrastructure only (loader, registry, types)
   services/         Business logic (email, MFA, OAuth, billing…)
   middleware/       Rate limiting, CSRF, auth guards
   db/               Drizzle ORM schema + migrations
   __tests__/        Vitest tests (unit + integration)
 
-plugins/            Feature plugins (magic-link, mfa, …) — see docs/plugins.md
+plugins/            Feature plugins at repo root (oauth, mfa, magic-link) — see docs/plugins.md
+                    Not the same as src/plugins/ (loader infrastructure only)
 
 packages/ui/src/
   app/              Next.js App Router pages
@@ -148,8 +150,8 @@ MFA, WebAuthn, CSFLE, breach checks, or any new `fetch`/`spawn`/`fs.writeFile`.
 ### Security baseline (`docs/security.md`)
 
 Structural gaps beyond the CWE table above are tracked as **SEC-*** in
-[`todo.md`](./todo.md) (open: **SEC-27** only; **DQ-2** coverage ratchet) with
-verified fixes in [`tdone.md`](./tdone.md) § Security baseline audit (SEC-1…SEC-26,
+[`docs/project/todo.md`](./docs/project/todo.md) (open: **SEC-27** only; **DQ-2** coverage ratchet) with
+verified fixes in [`docs/project/shipped.md`](./docs/project/shipped.md) § Security baseline audit (SEC-1…SEC-26,
 SEC-28 shipped 2026-07-05). When touching authz, sessions, or tenant isolation:
 prefer `assertCan()` / `authorizeOrg()` from `src/shared/permissions.ts` and
 org-scoped repositories; do not add inline `user.roles?.includes` checks. Passwords

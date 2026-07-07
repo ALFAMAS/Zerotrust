@@ -6,6 +6,8 @@ Reference for the **CI/CD & Documentation** deliverable.
 - **Manual production deploy** (VM + PM2 + nginx + TLS): see the
   [Production deployment](../README.md#production-deployment) section of the
   README — this guide does not duplicate it.
+- **Operator sign-off checklist:** [`production-checklist.md`](./production-checklist.md)
+  (audit-backed tables with P0/P1/P2 status per category).
 - **Automated staging deploy:** `.github/workflows/deploy-staging.yml` (below).
 
 ---

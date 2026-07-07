@@ -1,5 +1,5 @@
 /**
- * BullMQ offload for Stripe webhook processing (tdone.md P3.3).
+ * BullMQ offload for Stripe webhook processing (docs/project/shipped.md P3.3).
  *
  * The webhook route (billing.webhooks.ts) always verifies the signature and
  * claims the event's idempotency key synchronously — that must happen inline

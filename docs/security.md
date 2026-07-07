@@ -5,8 +5,8 @@ Scope: multi-tenant SaaS. Cookie-authenticated web client (Next.js), bearer-auth
 Priority order matters. §1–2 are structural — getting them wrong later means a rewrite. §3–6 are middleware and discipline. §7–9 are ops.
 
 **Tracking (2026-07-05 re-audit):** Actionable gaps are numbered **SEC-*** in
-[`todo.md`](../todo.md) (open: **SEC-27** only; **DQ-2** coverage ratchet) and
-verified shipped items in [`tdone.md`](../tdone.md) § Security baseline audit
+[`todo.md`](./project/todo.md) (open: **SEC-27** only; **DQ-2** coverage ratchet) and
+verified shipped items in [`shipped.md`](./project/shipped.md) § Security baseline audit
 (SEC-1…SEC-26 shipped 2026-07-05; SEC-28 Expo out-of-scope). Standing production
 audit decisions are tracked in this security baseline. CWE hardening classes
 601/918/78/22/532/1333/327/1427/79 are agent-enforced in `CLAUDE.md` — do not
@@ -313,8 +313,8 @@ Server actions are public HTTP endpoints. The `<form>` that calls one is not an 
 
 > **Template scope:** This monorepo ships **web (Next.js) + API (Hono) only** — no
 > Expo/React Native client. Requirements below apply when adding a mobile app.
-> Cataloged as out-of-scope in [`tdone.md`](../tdone.md) §5; shipped/partial baseline
-> items in [`tdone.md`](../tdone.md) § Security baseline audit.
+> Cataloged as out-of-scope in [`shipped.md`](./project/shipped.md) §5; shipped/partial baseline
+> items in [`shipped.md`](./project/shipped.md) § Security baseline audit.
 
 - **Everything in the bundle is public.** JS is extractable from any IPA/APK. No API keys, no secrets, no "hidden" endpoints client-side — privileged calls go through the backend.
 - Storage: §1. SecureStore for the refresh token, memory for the access token, AsyncStorage for nothing sensitive.
@@ -407,7 +407,7 @@ Tiers are ordered by **how the flaw enters the codebase**, not by CVSS.
 
 **Re-audit summary (2026-07-05):** Tier 1 — 9 Verified, 1 Partial. Tier 2 —
 majority Verified or N/A (no mobile client); **1 open ops item** (**SEC-27** VPS
-firewall runbook) in `todo.md`. See [`tdone.md`](../tdone.md) § Security baseline
+firewall runbook) in [`todo.md`](./project/todo.md). See [`shipped.md`](./project/shipped.md) § Security baseline
 audit for per-control evidence.
 
 ## Already covered (tracked elsewhere — do not re-list)
@@ -430,7 +430,7 @@ Note on the exclusions: CWE-327 is covered, but **916** (weak password hashing) 
 | 798 | Use of Hard-coded Credentials                                | The template curse: `SESSION_SECRET=changeme`, seeded default admin, committed key.                                                        | Verified | —    | `validateConfig()` + `placeholderSecrets.ts` refuse prod placeholders (ZT-4) |
 | 916 | Password Hash With Insufficient Computational Effort         | Fast/low-cost hash for passwords (SHA-256, or Argon params below OWASP floor).                                                             | Verified | —     | `src/shared/passwordHash.ts` — argon2id (SEC-8); bcrypt verify/rehash fallback |
 | 347 | Improper Verification of Cryptographic Signature             | Webhook not verified against **raw** body; JWT `alg:none` / signature unchecked.                                                           | Verified | —    | Stripe raw body + `constructEventAsync`; idempotent claim (`stripeEvents.repository.ts`) |
-| 288 | Authentication Bypass Using an Alternate Path or Channel     | The Next.js middleware-skip class (CVE-2025-29927 maps here). AuthZ must live in handlers/actions, not middleware.                         | Verified | —    | No `middleware.ts` auth gate; API `authMiddleware` + client guards (`tdone.md` §0) |
+| 288 | Authentication Bypass Using an Alternate Path or Channel     | The Next.js middleware-skip class (CVE-2025-29927 maps here). AuthZ must live in handlers/actions, not middleware.                         | Verified | —    | No `middleware.ts` auth gate; API `authMiddleware` + client guards (`shipped.md` §0) |
 | 290 | Authentication Bypass by Spoofing                            | Trusting `x-forwarded-*` or a header to establish identity.                                                                                | Verified | —     | Bearer/cookie auth; org from session row, not client header (SEC-11) |
 
 ---
@@ -443,7 +443,7 @@ Note on the exclusions: CWE-327 is covered, but **916** (weak password hashing) 
 | 614  | Sensitive Cookie Without Secure                           | Session cookie sent over HTTP.                                             | Verified | —     | `secure: true` in production cookie options |
 | 1275 | Sensitive Cookie with Improper SameSite                   | Missing / `None` SameSite reopens CSRF on the web path.                    | Verified | —     | `sameSite: "Lax"` on refresh cookie |
 | 315  | Cleartext Storage of Sensitive Info in a Cookie           | Anything beyond an opaque token stored in the cookie.                      | Verified | —     | Opaque refresh token only in httpOnly cookie |
-| 312  | Cleartext Storage of Sensitive Information                | Mobile: refresh token in AsyncStorage (plaintext on disk).                 | N/A      | —     | No Expo/React Native client (`tdone.md` §5) |
+| 312  | Cleartext Storage of Sensitive Information                | Mobile: refresh token in AsyncStorage (plaintext on disk).                 | N/A      | —     | No Expo/React Native client (`shipped.md` §5) |
 | 522  | Insufficiently Protected Credentials                      | Parent for the storage misses above; tag findings here.                    | Verified | —     | In-memory access + httpOnly refresh; SSE Bearer via `connectAuthenticatedSse()` (SEC-6) |
 | 942  | Permissive Cross-domain Policy with Untrusted Domains     | CORS `origin:"*"` with `credentials:true`.                                 | Verified | —     | `corsOptionsFromEnv` fails closed in production |
 | 346  | Origin Validation Error                                   | Reflecting the request Origin back as allowed.                             | Verified | —     | Explicit allowlist only |
