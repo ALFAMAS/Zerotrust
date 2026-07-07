@@ -216,7 +216,7 @@ Complete before pointing DNS at production. Archive signed copies in
 | ☐ | Biome lint/format | P0 | **Done** | `bun run lint:ci` in CI |
 | ☐ | Knip dead-code check | P1 | **Done** | In CI |
 | ☐ | Next.js MCP for agents | P2 | **Done** | `.mcp.json`, dev-only at `/_next/mcp` |
-| ☐ | graphify knowledge graph | P2 | **Partial** | Optional pre-ship step; `graphify-out/` gitignored |
+
 | ☐ | Generated SDK drift prevention | P1 | **Done** | `bun run verify:generated` |
 
 ---

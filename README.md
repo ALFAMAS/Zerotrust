@@ -549,7 +549,6 @@ zerotrust is actively maintained with a large test suite. Honest boundaries:
 ## Contributing
 
 1. Branch off `main` — **do not push directly to `main`**
-2. Refresh the knowledge graph before shipping: `/graphify . --update` (see [`CLAUDE.md`](./CLAUDE.md))
 3. Commits follow [Conventional Commits](https://www.conventionalcommits.org) (semantic-release)
 4. Keep `bun run lint` and `bun run type-check` green; add Vitest tests for behavior changes
 5. Open a PR to `main`; CI must pass

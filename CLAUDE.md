@@ -31,14 +31,10 @@ bun run build    # tsc for API; next build for UI
 
 Do **not** push directly to `main`. When work is ready to ship:
 
-1. Refresh the knowledge graph: `/graphify . --update` (incremental — `graphify-out/`
-   already has an AST cache; use full `/graphify .` only if the graph is missing).
 2. Commit on a **feature branch**.
 3. Open a **PR to `main`** (`gh pr create`).
 
-graphify's full pipeline needs an agent to run it (it dispatches extraction
-subagents), so it can't be wired into a git/CI hook — run it as the first step
-of shipping, not on push.
+
 
 ## Next.js MCP Server for Coding Agents
 

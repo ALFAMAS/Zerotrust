@@ -75,5 +75,3 @@ backups/
 # Windows junction-repair log (output of scripts/fix-junctions.ps1)
 scripts/.junction-repair.tsv
 
-
-graphify-out/

@@ -186,19 +186,6 @@ Audit date: **2026-07-07**. Open gaps from [`production-checklist.md`](../produc
 
        **Refs:** [`production-checklist.md`](../production-checklist.md) § Frontend
 
-### Developer Experience
-
-- [ ] **DX-3** — **P2** — graphify knowledge graph optional automation
-
-       **Problem:** `/graphify . --update` is a manual pre-ship step; `graphify-out/` is gitignored and not wired into CI.
-
-       **Fix:** Document as required ship step (current policy) or add optional CI artifact generation.
-
-       **Paths:** `graphify-out/`, `CLAUDE.md`, `README.md` § Contributing
-
-       **Status:** Partial — optional manual step today.
-
-       **Refs:** [`production-checklist.md`](../production-checklist.md) § Developer Experience
 
 ## Backlog (unprioritized)
 
