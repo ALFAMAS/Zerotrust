@@ -58,7 +58,7 @@ Complete before pointing DNS at production. Archive signed copies in
 | ☐ | Tamper-evident audit log | P1 | **Done** | `src/audit/`, `scripts/audit-anchor.ts` |
 | ☐ | Apple Sign In | P2 | **Missing** | Env placeholders in `.env.example`; no `plugins/oauth/providers/apple.ts` |
 | ☐ | Hardware key store (TPM/HSM) | P2 | **Partial** | Stubs in `src/crypto/hardware-key-store.ts` |
-| ☐ | `SECURITY.md` accuracy (argon2id vs bcrypt) | P2 | **Partial** | Root `SECURITY.md` may still say bcrypt; code uses argon2id |
+| ☐ | `SECURITY.md` accuracy (argon2id vs bcrypt) | P2 | **Done** | DOC-1 (2026-07-08): argon2id + bcrypt rehash wording in root `SECURITY.md` |
 
 ---
 
@@ -118,7 +118,7 @@ Complete before pointing DNS at production. Archive signed copies in
 | ☐ | API/UI integration matrix | P1 | **Done** | `scripts/audit-api-ui-map.mjs`, `docs/api-ui-integration-matrix.md` |
 | ☐ | Dependabot + weekly dependency workflow | P1 | **Done** | `.github/dependabot.yml`, `dependency-update.yml` |
 | ☐ | semantic-release automation | P2 | **Partial** | `.releaserc.json` + `bun run release`; no `.github/workflows/release.yml` |
-| ☐ | Module boundaries gate in CI | P2 | **Missing** | `boundaries:check` (`scripts/check-boundaries.ts`) not in `ci.yml` |
+| ☐ | Module boundaries gate in CI | P2 | **Done** | `boundaries:check` in `ci.yml` `lint-and-typecheck` job (CI-2, 2026-07-08) |
 | ☐ | Husky pre-commit Biome | P2 | **Partial** | Biome step commented out in `.husky/pre-commit` |
 | ☐ | Commitlint | P2 | **Partial** | Commented out in `.husky/commit-msg` |
 
@@ -256,7 +256,7 @@ Complete before pointing DNS at production. Archive signed copies in
 | ✅ Single security doc | `docs/Security.MD` → `docs/security.md` | Avoid case-collision on Windows — **done** |
 | ✅ Fix agent docs | `CLAUDE.md` plugin tree | Clarify `plugins/` (features) vs `src/plugins/` (loader) — **done** |
 | Add UI Dockerfile | `packages/ui/Dockerfile` + compose service | Parity with API container story |
-| Wire boundaries to CI | `boundaries:check` in `ci.yml` | `.boundaries.json` already maintained |
+| Wire boundaries to CI | `boundaries:check` in `ci.yml` | **Done (CI-2, 2026-07-08)** |
 | SEC-27 runbook | Add VPS hardening to `docs/deployment.md` | Closes last open SEC item — tracked in `project/todo.md` |
 | Group scripts | `scripts/ops/`, `scripts/codegen/`, `scripts/ci/` | Easier onboarding |
 | Optional modules folder | `src/jit`, `src/ssf`, `src/webhooks` → `src/modules/` | One mental model for mounted subsystems |
@@ -296,9 +296,9 @@ for API↔UI Zod schemas, `deploy/k8s/` Helm per `docs/reference-architecture.md
 
 1. **SEC-27** — Add VPS hardening checklist to `docs/deployment.md` (ufw, bind-address, SSH keys).
 2. **UI Docker image** — `packages/ui/Dockerfile` + compose service; document in `docs/deployment.md`.
-3. **CI hardening** — Add `bun run boundaries:check` to `ci.yml`; review k6 `continue-on-error`.
+3. ~~**CI hardening** — Add `bun run boundaries:check` to `ci.yml`; review k6 `continue-on-error`.~~ **Done (CI-2, 2026-07-08)** — review k6 `continue-on-error` remains.
 4. **Husky** — Uncomment Biome pre-commit and commitlint in `.husky/`.
-5. **Doc fixes** — Update root `SECURITY.md` argon2id wording.
+5. ~~**Doc fixes** — Update root `SECURITY.md` argon2id wording.~~ **Done (DOC-1, 2026-07-08)**
 6. **Production env** — Walk README checklist; archive sign-off above in compliance evidence.
 
 ### Medium effort (1–2 weeks)

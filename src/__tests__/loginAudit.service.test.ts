@@ -1,14 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 const auditLog = vi.fn().mockResolvedValue(undefined);
-const dispatchEvent = vi.fn().mockResolvedValue(undefined);
 
 vi.mock("../logger", () => ({
   auditLog: (...args: unknown[]) => auditLog(...args),
-}));
-
-vi.mock("../webhooks/delivery", () => ({
-  dispatchEvent: (...args: unknown[]) => dispatchEvent(...args),
 }));
 
 describe("loginAudit.service", () => {
@@ -16,7 +11,7 @@ describe("loginAudit.service", () => {
     vi.clearAllMocks();
   });
 
-  it("records successful login in audit chain and dispatches webhook", async () => {
+  it("records successful login in audit chain", async () => {
     const { recordLoginSuccess } = await import("../services/auth/loginAudit.service");
 
     recordLoginSuccess({
@@ -38,20 +33,9 @@ describe("loginAudit.service", () => {
         sessionId: "00000000-0000-0000-0000-000000000002",
       })
     );
-
-    expect(dispatchEvent).toHaveBeenCalledWith(
-      "auth.login.success",
-      expect.objectContaining({
-        eventId: "login:00000000-0000-0000-0000-000000000002",
-        userId: "00000000-0000-0000-0000-000000000001",
-        email: "alice@example.com",
-        method: "password",
-        ipAddress: "203.0.113.10",
-      })
-    );
   });
 
-  it("records failed login in audit chain and dispatches webhook", async () => {
+  it("records failed login in audit chain", async () => {
     const { recordLoginFailure } = await import("../services/auth/loginAudit.service");
 
     recordLoginFailure({
@@ -69,17 +53,6 @@ describe("loginAudit.service", () => {
         reason: "invalid_credentials",
         ipAddress: "203.0.113.11",
         email: "nobody@example.com",
-      })
-    );
-
-    expect(dispatchEvent).toHaveBeenCalledWith(
-      "auth.login.failure",
-      expect.objectContaining({
-        email: "nobody@example.com",
-        reason: "invalid_credentials",
-        ipAddress: "203.0.113.11",
-        userId: null,
-        eventId: expect.stringMatching(/^login-fail:/),
       })
     );
   });

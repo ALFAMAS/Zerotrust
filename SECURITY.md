@@ -25,7 +25,9 @@ expect a fix timeline and coordinated disclosure plan within 7 days.
 ## Security measures in this codebase
 
 - **Tokens** — PASETO v4 (AES-256-GCM), no JWT `alg: none` footguns.
-- **Passwords** — bcrypt hashing.
+- **Passwords** — argon2id hashing (OWASP-minimum params via `Bun.password` in
+  `src/shared/passwordHash.ts`); legacy bcrypt digests verify on login and are
+  rehashed to argon2id on the next successful authentication.
 - **Secrets** — `.env` files are git-ignored; never commit credentials.
 - **Audit** — tamper-evident SHA-256 hash-chained audit log.
 - **CWE coverage** — see the mandatory security rules table in [`CLAUDE.md`](./CLAUDE.md)

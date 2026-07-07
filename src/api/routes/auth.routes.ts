@@ -34,7 +34,7 @@ import { getSettings } from "../../models/settings.model";
 import { recordAndRespond } from "../../services/auth/accountTakeover.service";
 import { validateSignupEmail } from "../../services/auth/disposableEmail.service";
 import { issueAuthenticatedSession } from "../../services/auth/issueAuthenticatedSession.service";
-import { recordLoginFailure, recordLoginSuccess } from "../../services/auth/loginAudit.service";
+import { recordLoginFailure, recordLoginSuccess } from "../authLoginEffects";
 import { rejectIfBreached } from "../../services/auth/passwordBreach.service";
 import {
   createPowChallenge,

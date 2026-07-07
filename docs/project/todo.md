@@ -4,7 +4,7 @@
 
 Audit date: **2026-07-05**. Verified/completed items moved to [`shipped.md`](./shipped.md) § Security baseline audit.
 
-**Verification (2026-07-08):** Security baseline — SEC-27 + DQ-2 remain open. Production checklist audit (2026-07-07) added **18** tracked gaps in § Production readiness below (**20** open items total).
+**Verification (2026-07-08):** Security baseline — SEC-27 + DQ-2 remain open. Production checklist audit (2026-07-07) added **18** tracked gaps in § Production readiness below (**18** open items total; CI-2 + DOC-1 shipped 2026-07-08).
 
 ### Low / Ops (document + deploy)
 
@@ -71,18 +71,6 @@ Audit date: **2026-07-07**. Open gaps from [`production-checklist.md`](../produc
        **Paths:** `src/crypto/hardware-key-store.ts`, `README.md`
 
        **Status:** Partial — stubs only.
-
-       **Refs:** [`production-checklist.md`](../production-checklist.md) § Security
-
-- [ ] **DOC-1** — **P2** — `SECURITY.md` argon2id accuracy
-
-       **Problem:** Root `SECURITY.md` may still describe bcrypt; runtime uses argon2id via `src/shared/passwordHash.ts`.
-
-       **Fix:** Update `SECURITY.md` password-hashing section to match argon2id + bcrypt verify/rehash fallback.
-
-       **Paths:** `SECURITY.md`, `src/shared/passwordHash.ts`
-
-       **Status:** Partial.
 
        **Refs:** [`production-checklist.md`](../production-checklist.md) § Security
 
@@ -187,18 +175,6 @@ Audit date: **2026-07-07**. Open gaps from [`production-checklist.md`](../produc
        **Paths:** `.releaserc.json`, `.github/workflows/`
 
        **Status:** Partial.
-
-       **Refs:** [`production-checklist.md`](../production-checklist.md) § CI/CD
-
-- [ ] **CI-2** — **P2** — Module boundaries gate in CI
-
-       **Problem:** `bun run boundaries:check` (`scripts/check-boundaries.ts`, `.boundaries.json`) is not a blocking CI job despite being maintained.
-
-       **Fix:** Add `boundaries:check` to `.github/workflows/ci.yml` lint or test job.
-
-       **Paths:** `scripts/check-boundaries.ts`, `.boundaries.json`, `.github/workflows/ci.yml`
-
-       **Status:** Missing.
 
        **Refs:** [`production-checklist.md`](../production-checklist.md) § CI/CD
 

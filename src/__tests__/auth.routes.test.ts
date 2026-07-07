@@ -91,7 +91,7 @@ vi.mock("../logger", () => ({
 
 const recordLoginSuccess = vi.fn();
 const recordLoginFailure = vi.fn();
-vi.mock("../services/auth/loginAudit.service", () => ({
+vi.mock("../api/authLoginEffects", () => ({
   recordLoginSuccess: (...args: unknown[]) => recordLoginSuccess(...args),
   recordLoginFailure: (...args: unknown[]) => recordLoginFailure(...args),
 }));

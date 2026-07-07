@@ -50,7 +50,7 @@ vi.mock("../middleware/accountLockout", () => ({
   verifyPowSolution: vi.fn().mockReturnValue({ ok: true }),
 }));
 
-vi.mock("../services/auth/loginAudit.service", () => ({
+vi.mock("../api/authLoginEffects", () => ({
   recordLoginFailure: vi.fn(),
   recordLoginSuccess: vi.fn(),
 }));

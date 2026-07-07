@@ -18,7 +18,7 @@ ship a feature. Planned work lives in [`todo.md`](./todo.md) (this directory).
 | Migrations                  |                                      41 (latest: `0040_session_active_org_id`) |
 | Route mounts in `server.ts` |                                                                          29 |
 | UI pages                    |                                                                          53 |
-| Tests                       |                                         1328 (1086 API + 242 UI, 138 files) |
+| Tests                       |                                         1330 (1088 API + 242 UI, 139 files) |
 | Stack                       | Hono 4 · TypeScript 6 · Bun · Next.js 16 · Drizzle ORM · PostgreSQL · Redis |
 
 ---
@@ -392,6 +392,35 @@ Cross-audit of `docs/security.md` §0–§10. Open gaps tracked in [`todo.md`](.
 - ✅ Dockerfile — multi-stage production image (Bun + Node)
 - ✅ Architecture decisions documented (PASETO v4, modular monolith, Drizzle, Redis/BullMQ, generated SDK, token rotation, module boundaries, token storage)
 - ✅ Deployment blueprints — VM/PM2, containers, Kubernetes (`docs/reference-architecture.md`)
+
+---
+
+## Recent work (2026-07-08)
+
+### CI-2 — Module boundaries gate in CI (shipped)
+
+- **Problem:** `bun run boundaries:check` was maintained locally but not a blocking CI step;
+  `loginAudit.service.ts` (identity domain) imported `webhooks/delivery` (ops domain),
+  causing a pre-existing violation that blocked wiring CI.
+- **Fix:** Added `boundaries:check` to `.github/workflows/ci.yml` `lint-and-typecheck` job.
+  Moved login webhook dispatch to `src/api/authLoginEffects.ts` (composition layer outside
+  domain paths); `loginAudit.service.ts` now audit-only; `auth.routes.ts` imports effects.
+- **Paths:** `.github/workflows/ci.yml`, `src/api/authLoginEffects.ts`,
+  `src/services/auth/loginAudit.service.ts`, `src/api/routes/auth.routes.ts`,
+  `src/__tests__/authLoginEffects.test.ts`, `src/__tests__/loginAudit.service.test.ts`
+- **Verification (2026-07-08):** `bun run boundaries:check` → **0 violations**;
+  `loginAudit.service.test.ts` + `authLoginEffects.test.ts` + `auth.login-timing.test.ts`
+  → **5 passed**.
+
+### DOC-1 — `SECURITY.md` argon2id accuracy (shipped)
+
+- **Problem:** Root `SECURITY.md` still described bcrypt-only hashing; runtime uses argon2id
+  via `src/shared/passwordHash.ts` with bcrypt verify/rehash fallback for legacy digests.
+- **Fix:** Updated the password bullet in `SECURITY.md` to match argon2id (OWASP-minimum
+  params) plus bcrypt upgrade-on-login behavior.
+- **Paths:** `SECURITY.md`, `src/shared/passwordHash.ts`
+- **Verification (2026-07-08):** Doc-only change; aligned with `docs/security.md` § Passwords
+  and `passwordHash.test.ts` behavior.
 
 ---
 
