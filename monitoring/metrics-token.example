@@ -1,0 +1,5 @@
+# Copy to monitoring/metrics-token (gitignored) and paste the same value as
+# METRICS_AUTH_TOKEN on the API. Prometheus reads this file for Bearer scrape
+# auth — see docs/deployment.md § Metrics auth verification (OPS-1).
+#
+# Generate: openssl rand -hex 32

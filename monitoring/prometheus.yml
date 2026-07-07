@@ -5,9 +5,17 @@ global:
 rule_files:
   - /etc/prometheus/alerts.yml
 
+# Local dev (open /metrics): use this file as-is.
+# Production / staging: uncomment `authorization` below, create
+# `monitoring/metrics-token` from `metrics-token.example` (same value as
+# `METRICS_AUTH_TOKEN` on the API), and mount it in compose — see
+# `docs/deployment.md` § Metrics auth verification (OPS-1).
 scrape_configs:
   - job_name: zerotrust-api
     metrics_path: /metrics
+    # authorization:
+    #   type: Bearer
+    #   credentials_file: /etc/prometheus/metrics-token
     static_configs:
       - targets:
-          - zerotrust-api:3000
+          - zerotrust:3000

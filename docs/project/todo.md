@@ -4,7 +4,7 @@
 
 Audit date: **2026-07-05**. Verified/completed items moved to [`shipped.md`](./shipped.md) § Security baseline audit.
 
-**Verification (2026-07-08):** Security baseline — DQ-2 remains open (SEC-27 shipped). Production checklist audit (2026-07-07) added **18** tracked gaps in § Production readiness below (**17** open items total; CI-2 + DOC-1 + SEC-27 shipped 2026-07-08).
+**Verification (2026-07-08):** Security baseline — DQ-2 remains open (SEC-27 shipped). Production checklist audit (2026-07-07) added **18** tracked gaps in § Production readiness below (**16** open items total; CI-2 + DOC-1 + SEC-27 + OPS-1 shipped 2026-07-08).
 
 ### Low / Ops (document + deploy)
 
@@ -27,18 +27,6 @@ Audit date: **2026-07-05**. Verified/completed items moved to [`shipped.md`](./s
 Audit date: **2026-07-07**. Open gaps from [`production-checklist.md`](../production-checklist.md) rows marked **Partial**, **Missing**, or **Unknown** (Done rows omitted).
 
 ### Security
-
-- [ ] **OPS-1** — **P0** — `/metrics` auth verified at deploy
-
-       **Problem:** Production fail-fast requires `METRICS_AUTH_TOKEN` (SEC-21), but scrape endpoint protection depends on operator setting the token before go-live.
-
-       **Fix:** Confirm token set in production env; document in deploy sign-off; verify Prometheus scrape uses `Authorization: Bearer`.
-
-       **Paths:** `docs/deployment.md`, `monitoring/prometheus.yml`, `.env.example`
-
-       **Status:** Partial — code enforces; operator action required.
-
-       **Refs:** [`production-checklist.md`](../production-checklist.md) § Security
 
 - [ ] **AUTH-1** — **P2** — Apple Sign In
 

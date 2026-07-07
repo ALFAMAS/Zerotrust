@@ -40,6 +40,7 @@ Complete before pointing DNS at production. Archive signed copies in
 | 8 | Security baseline reviewed ([`security.md`](./security.md)); VPS hardening runbook applied or managed DB/Redis confirmed | | | ☐ |
 | 9 | Incident response + backup runbooks acknowledged by on-call | | | ☐ |
 | 10 | `METRICS_AUTH_TOKEN`, `CORS_ALLOWED_ORIGINS`, WebAuthn RP ID/origins verified | | | ☐ |
+| 11 | `/metrics` curl + `ops:smoke` bearer auth verified (OPS-1) | | | ☐ |
 
 ---
 
@@ -51,7 +52,7 @@ Complete before pointing DNS at production. Archive signed copies in
 | ☐ | Production fail-fast secrets | P0 | **Done** | `TOKEN_SECRET_HEX`, `CSFLE_MASTER_KEY_HEX`, `REDIS_URI` — `src/__tests__/config.production.test.ts` |
 | ☐ | Tenant isolation + Postgres RLS | P0 | **Done** | `src/middleware/orgRls.ts`; migrations `drizzle/0035_org_rls_policies.sql`, `0038_org_rls_expansion.sql`; CI `org-scoping:check` |
 | ☐ | CSRF, CORS allowlist, body limits, input sanitization | P0 | **Done** | Global stack in `src/api/server.ts` |
-| ☐ | `/metrics` auth in production | P0 | **Partial** | Requires `METRICS_AUTH_TOKEN` — see `docs/deployment.md` § Production hardening |
+| ☐ | `/metrics` auth in production | P0 | **Done** | OPS-1 (2026-07-08): deploy sign-off + `ops:smoke` bearer verify; `monitoring/prometheus.yml` Bearer scrape |
 | ☐ | SAST + secret scan in CI | P0 | **Done** | Gitleaks, Semgrep OWASP, Trivy, `bun audit` — `.github/workflows/ci.yml` |
 | ☐ | VPS firewall / private Postgres+Redis | P1 | **Done** | SEC-27 (2026-07-08): `docs/deployment.md` § VPS network hardening — ufw/SG, bind-address, verification |
 | ☐ | PASETO v4 + refresh rotation + argon2id passwords | P0 | **Done** | `src/crypto/paseto-v4.ts`, `src/shared/passwordHash.ts` |
