@@ -1,2 +1,7 @@
 #!/usr/bin/env sh
-# cd "$(git rev-parse --show-toplevel)" && bunx @commitlint/cli --edit "$1"
+cd "$(git rev-parse --show-toplevel)" && bunx @commitlint/cli --edit "$1"
+if [ $? -ne 0 ]; then
+  echo "❌ Commit message does not follow Conventional Commits"
+  echo "Example: feat(auth): add passkey enrollment"
+  exit 1
+fi

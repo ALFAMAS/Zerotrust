@@ -417,6 +417,18 @@ Cross-audit of `docs/security.md` §0–§10. **SEC-27** shipped 2026-07-08 (VPS
 - **Verification (2026-07-09):** `authSessions.repository.test.ts` +
   `admin-tools.routes.test.ts` pass; `bun run boundaries:check` green.
 
+### DX-2 — Commitlint in Husky (shipped)
+
+- **Problem:** Conventional-commit enforcement was commented out in `.husky/commit-msg`, so
+  non-conventional messages could reach `main` and break semantic-release automation.
+- **Fix:** Enabled `@commitlint/cli` in `.husky/commit-msg` with fail-fast messaging.
+  Verified `commitlint.config.js` type-enum matches `.releaserc.json` conventionalcommits
+  preset (feat, fix, docs, style, refactor, perf, test, chore, revert, build, ci, security).
+- **Paths:** `.husky/commit-msg`, `commitlint.config.js`, `docs/production-checklist.md`,
+  `docs/project/todo.md`
+- **Verification (2026-07-09):** `echo "feat(dx): test" | bunx commitlint` → **pass**;
+  `echo "bad message" | bunx commitlint` → **rejected**.
+
 ### DX-1 — Husky pre-commit Biome (shipped)
 
 - **Problem:** The Biome format/lint step was commented out in `.husky/pre-commit`, so formatting

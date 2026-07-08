@@ -102,15 +102,15 @@ Audit date: **2026-07-07**. Open gaps from [`production-checklist.md`](../produc
 
        **Refs:** [`production-checklist.md`](../production-checklist.md) § CI/CD
 
-- [ ] **DX-2** — **P2** — Commitlint in Husky
+- [x] **DX-2** — **P2** — Commitlint in Husky — **shipped 2026-07-09** → [`shipped.md`](./shipped.md) § Recent work
 
        **Problem:** Conventional-commit enforcement is commented out in `.husky/commit-msg`.
 
-       **Fix:** Uncomment commitlint hook; ensure `commitlint.config.js` matches semantic-release expectations.
+       **Fix:** Enabled commitlint in `.husky/commit-msg`; `commitlint.config.js` type-enum aligns with `.releaserc.json` conventionalcommits preset (including `security`).
 
        **Paths:** `.husky/commit-msg`, `commitlint.config.js`
 
-       **Status:** Partial.
+       **Status:** Done.
 
        **Refs:** [`production-checklist.md`](../production-checklist.md) § CI/CD · § Developer Experience
 
