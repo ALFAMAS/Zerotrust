@@ -199,7 +199,7 @@ ship a feature. Planned work lives in [`todo.md`](./todo.md) (this directory).
 
 ### Security baseline audit — verified 2026-07-05 (`docs/security.md`)
 
-Cross-audit of `docs/security.md` §0–§10. **SEC-27** shipped 2026-07-08 (VPS runbook in `docs/deployment.md`); open security baseline gap: **DQ-2** coverage ratchet only. SEC-1…SEC-26 and SEC-28 shipped 2026-07-05. **Re-verified 2026-07-05:** SEC-23…SEC-26 closed (Dependabot, pinned Actions, Postgres roles, login audit).
+Cross-audit of `docs/security.md` §0–§10. **SEC-27** shipped 2026-07-08 (VPS runbook in `docs/deployment.md`); **DQ-2** (UI coverage gate alignment) shipped 2026-07-09. **No open SEC baseline items.** SEC-1…SEC-26 and SEC-28 shipped 2026-07-05. **Re-verified 2026-07-05:** SEC-23…SEC-26 closed (Dependabot, pinned Actions, Postgres roles, login audit).
 
 #### §0 — Structural posture
 
@@ -595,8 +595,8 @@ Cross-audit of `docs/security.md` §0–§10. **SEC-27** shipped 2026-07-08 (VPS
   Redis `bind` + `requirepass`, Docker port-publish warnings, external `nmap` +
   on-host `ss` verification, and sign-off template linked to compliance evidence.
 - **Paths:** `docs/deployment.md`, `docs/production-checklist.md`, `docs/project/todo.md`
-- **Verification (2026-07-08):** Doc-only change; closes last open SEC baseline item
-  in `todo.md` (DQ-2 coverage ratchet remains).
+- **Verification (2026-07-08):** Doc-only change; closes SEC-27 (last SEC-* gap from
+  the 2026-07-05 audit). **DQ-2** shipped 2026-07-09 — security baseline fully closed.
 
 ### CI-2 — Module boundaries gate in CI (shipped)
 

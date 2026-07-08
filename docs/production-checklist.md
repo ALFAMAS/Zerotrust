@@ -306,10 +306,10 @@ for API↔UI Zod schemas, `deploy/k8s/` Helm per `docs/reference-architecture.md
 
 ### Medium effort (1–2 weeks)
 
-7. **Coverage ratchet (DQ-2)** — Raise floors in `vitest.config.ts` / `packages/ui/vitest.config.ts`; target 70% API / 60% UI next milestone.
-8. **Repository extraction** — Move hot-path writes behind `src/db/repositories/` per `CLAUDE.md`.
+7. **Coverage ratchet floors** — Raise floors in `vitest.config.ts` / `packages/ui/vitest.config.ts`; target 70% API / 60% UI next milestone (DQ-2 gate alignment shipped 2026-07-09).
+8. ~~**Repository extraction** — Move hot-path writes behind `src/db/repositories/` per `CLAUDE.md`.~~ **Done (DB-1, 2026-07-09)**
 9. ~~**Staging secrets** — Wire `deploy-staging.yml` so staging validation runs on every release candidate.~~ **Done (INF-2, 2026-07-08)**
-10. **semantic-release CI** — Add `.github/workflows/release.yml` on `main` merge.
+10. ~~**semantic-release CI** — Add `.github/workflows/release.yml` on `main` merge.~~ **Done (CI-1, 2026-07-09)**
 11. **Consolidate cross-cutting modules** — `src/jit`, `src/ssf`, `src/webhooks` under `src/modules/` (re-exports only).
 
 ### Larger refactors (fork-dependent)
@@ -332,7 +332,7 @@ for API↔UI Zod schemas, `deploy/k8s/` Helm per `docs/reference-architecture.md
 | [`reference-architecture.md`](./reference-architecture.md) | VM, container, and Kubernetes deployment blueprints |
 | [`ARCHITECTURE.md`](./ARCHITECTURE.md) | System architecture deep dive |
 | [`maintenance-scorecard.md`](./maintenance-scorecard.md) | Quarterly metrics (dependencies, CI, coverage, DR) |
-| [`project/todo.md`](./project/todo.md) | Open backlog (DQ-2) |
+| [`project/todo.md`](./project/todo.md) | Open backlog (AUTH-1, CRYPTO-1, INF-3, FE-1) |
 | [`project/shipped.md`](./project/shipped.md) | Shipped feature catalog |
 | [`../README.md`](../README.md) | Quick start, env vars, production deployment summary |
 

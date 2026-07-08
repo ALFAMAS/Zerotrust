@@ -215,5 +215,5 @@ module boundaries.
 
 ---
 
-All proposals above are shipped. One long-term item remains — see
-[`project/todo.md`](./project/todo.md) (DQ-2 coverage ratchet).
+All proposals above are shipped. Open production-readiness gaps remain — see
+[`project/todo.md`](./project/todo.md) (AUTH-1, CRYPTO-1, INF-3, FE-1).

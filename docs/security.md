@@ -5,7 +5,7 @@ Scope: multi-tenant SaaS. Cookie-authenticated web client (Next.js), bearer-auth
 Priority order matters. §1–2 are structural — getting them wrong later means a rewrite. §3–6 are middleware and discipline. §7–9 are ops.
 
 **Tracking (2026-07-05 re-audit):** Actionable gaps are numbered **SEC-*** in
-[`todo.md`](./project/todo.md) (open: **DQ-2** coverage ratchet) and
+[`todo.md`](./project/todo.md) (security baseline closed; production gaps **AUTH-1**, **CRYPTO-1**, **INF-3**, **FE-1**) and
 verified shipped items in [`shipped.md`](./project/shipped.md) § Security baseline audit
 (SEC-1…SEC-26 shipped 2026-07-05; SEC-28 Expo out-of-scope). Standing production
 audit decisions are tracked in this security baseline. CWE hardening classes
@@ -408,7 +408,7 @@ Tiers are ordered by **how the flaw enters the codebase**, not by CVSS.
 **Re-audit summary (2026-07-05):** Tier 1 — 9 Verified, 1 Partial. Tier 2 —
 majority Verified or N/A (no mobile client); security baseline ops runbook **SEC-27**
 shipped 2026-07-08 ([`deployment.md`](./deployment.md) § VPS network hardening).
-Open backlog: **DQ-2** coverage ratchet in [`todo.md`](./project/todo.md). See [`shipped.md`](./project/shipped.md) § Security baseline
+Open backlog: production-readiness gaps (**AUTH-1**, **CRYPTO-1**, **INF-3**, **FE-1**) in [`todo.md`](./project/todo.md). Security baseline closed (**DQ-2** shipped 2026-07-09). See [`shipped.md`](./project/shipped.md) § Security baseline
 audit for per-control evidence.
 
 ## Already covered (tracked elsewhere — do not re-list)
