@@ -75,7 +75,7 @@ Complete before pointing DNS at production. Archive signed copies in
 | ☐ | **UI container image** | P1 | **Done** | `packages/ui/Dockerfile`; `zerotrust-ui` in `docker-compose.yml` (host :3001) |
 | ☐ | Reference architectures (VM, containers, K8s) | P1 | **Done** | `docs/reference-architecture.md` |
 | ☐ | Staging deploy workflow | P1 | **Done** | `deploy-staging.yml` chains `staging-validation.yml`; secrets/vars documented in `docs/deployment.md` § Staging secrets |
-| ☐ | Production auto-deploy | P2 | **Missing** | Manual PM2 + nginx per README § Production deployment |
+| ☐ | Production auto-deploy | P2 | **Done** | `deploy-production.yml` (manual dispatch, production env reviewers, ops:smoke post-deploy); secrets/vars in `docs/deployment.md` § Production deploy |
 | ☐ | Postgres role separation (app vs migrator) | P1 | **Done** | `scripts/setup-postgres-roles.sql`, `.env.example` |
 | ☐ | Encrypted backups + S3 | P0 | **Done** | `scripts/db-backup.js`, `src/services/dbBackup.service.ts` |
 | ☐ | DR restore drill automation | P1 | **Done** | `.github/workflows/dr-restore-drill.yml` (weekly + manual) |
@@ -332,7 +332,7 @@ for API↔UI Zod schemas, `deploy/k8s/` Helm per `docs/reference-architecture.md
 | [`reference-architecture.md`](./reference-architecture.md) | VM, container, and Kubernetes deployment blueprints |
 | [`ARCHITECTURE.md`](./ARCHITECTURE.md) | System architecture deep dive |
 | [`maintenance-scorecard.md`](./maintenance-scorecard.md) | Quarterly metrics (dependencies, CI, coverage, DR) |
-| [`project/todo.md`](./project/todo.md) | Open backlog (AUTH-1, CRYPTO-1, INF-3, FE-1) |
+| [`project/todo.md`](./project/todo.md) | Open backlog (AUTH-1, CRYPTO-1, FE-1) |
 | [`project/shipped.md`](./project/shipped.md) | Shipped feature catalog |
 | [`../README.md`](../README.md) | Quick start, env vars, production deployment summary |
 

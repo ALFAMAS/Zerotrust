@@ -522,7 +522,7 @@ zerotrust runs anywhere Bun runs. Typical layout:
 WebAuthn requires matching `WEBAUTHN_RP_ID` and `WEBAUTHN_RP_ORIGINS` to your
 production domain.
 
-> **Step-by-step:** [`docs/deployment.md`](./docs/deployment.md) (CI/CD, staging, k6/ZAP gates)
+> **Step-by-step:** [`docs/deployment.md`](./docs/deployment.md) (CI/CD, staging + production deploy workflows, k6/ZAP gates)
 
 ---
 
@@ -541,7 +541,7 @@ zerotrust is actively maintained with a large test suite. Honest boundaries:
 | ---------------------------------------------------------------- | --------------------------------------- |
 | [`docs/production-checklist.md`](./docs/production-checklist.md) | Production-readiness sign-off checklist |
 | [`docs/project/shipped.md`](./docs/project/shipped.md)           | Everything that ships today             |
-| [`docs/project/todo.md`](./docs/project/todo.md)                 | Open backlog (AUTH-1, CRYPTO-1, INF-3, FE-1) |
+| [`docs/project/todo.md`](./docs/project/todo.md)                 | Open backlog (AUTH-1, CRYPTO-1, FE-1) |
 | [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md)                 | System architecture deep dive           |
 
 ---

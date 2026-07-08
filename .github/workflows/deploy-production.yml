@@ -1,0 +1,128 @@
+name: Deploy to Production
+
+# Manual promotion only — this never auto-deploys on push. It ships the chosen
+# ref to a production host that matches the README's PM2 + nginx model, waits
+# for the API health gate, then runs ops:smoke (health · metrics · deploy-config).
+# Full Lighthouse/ZAP/k6 gates stay on staging — do not DAST production on every deploy.
+#
+# Wire before first use (Settings → Secrets and variables → Actions):
+#   secrets (production environment): PRODUCTION_SSH_HOST, PRODUCTION_SSH_USER,
+#            PRODUCTION_SSH_KEY, PRODUCTION_APP_DIR, METRICS_AUTH_TOKEN
+#   variables: PRODUCTION_UI_URL, PRODUCTION_API_URL (public HTTPS URLs)
+# Without SSH secrets this workflow is a safe no-op template (see docs/deployment.md).
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Git ref to deploy (branch / tag / SHA)"
+        required: false
+        default: main
+        type: string
+      skip_smoke:
+        description: "Skip post-deploy ops:smoke checks"
+        required: false
+        default: false
+        type: boolean
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: SSH deploy + health gate
+    runs-on: ubuntu-latest
+    # Add required reviewers to the "production" Environment to gate promotion.
+    environment: production
+    outputs:
+      configured: ${{ steps.check-secrets.outputs.configured }}
+    steps:
+      - name: Check production secrets
+        id: check-secrets
+        env:
+          SSH_HOST: ${{ secrets.PRODUCTION_SSH_HOST }}
+          SSH_USER: ${{ secrets.PRODUCTION_SSH_USER }}
+          SSH_KEY: ${{ secrets.PRODUCTION_SSH_KEY }}
+          APP_DIR: ${{ secrets.PRODUCTION_APP_DIR }}
+        run: |
+          set -euo pipefail
+          if [ -z "${SSH_HOST:-}" ] || [ -z "${SSH_USER:-}" ] || [ -z "${SSH_KEY:-}" ] || [ -z "${APP_DIR:-}" ]; then
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::PRODUCTION_SSH_* secrets are not set — template no-op. Configure per docs/deployment.md § Production deploy."
+            exit 0
+          fi
+          echo "configured=true" >> "$GITHUB_OUTPUT"
+
+      - name: Deploy ${{ inputs.ref }} over SSH
+        if: steps.check-secrets.outputs.configured == 'true'
+        env:
+          SSH_HOST: ${{ secrets.PRODUCTION_SSH_HOST }}
+          SSH_USER: ${{ secrets.PRODUCTION_SSH_USER }}
+          SSH_KEY: ${{ secrets.PRODUCTION_SSH_KEY }}
+          APP_DIR: ${{ secrets.PRODUCTION_APP_DIR }}
+          DEPLOY_REF: ${{ inputs.ref }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/id_deploy
+          chmod 600 ~/.ssh/id_deploy
+          ssh-keyscan -H "$SSH_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+          # Mirrors docs/deployment.md § Production deploy host steps (API + worker + UI).
+          ssh -i ~/.ssh/id_deploy "$SSH_USER@$SSH_HOST" bash -se <<EOF
+          set -euo pipefail
+          cd "$APP_DIR"
+          git fetch --all --prune
+          git checkout "$DEPLOY_REF"
+          git pull --ff-only origin "$DEPLOY_REF" || true
+          bun install --frozen-lockfile
+          bun run db:migrate
+          bun run build
+          pm2 restart zerotrust-api
+          pm2 restart zerotrust-worker
+          cd packages/ui
+          bun install --frozen-lockfile
+          bun run build
+          pm2 restart zerotrust-ui
+          pm2 save
+          EOF
+
+      - name: Post-deploy health gate
+        if: steps.check-secrets.outputs.configured == 'true'
+        env:
+          API_URL: ${{ vars.PRODUCTION_API_URL }}
+        run: |
+          set -euo pipefail
+          if [ -z "${API_URL:-}" ]; then
+            echo "::notice::PRODUCTION_API_URL variable not set — skipping health gate."
+            exit 0
+          fi
+          for i in $(seq 1 30); do
+            if curl -fsS "$API_URL/health" >/dev/null 2>&1; then
+              echo "✓ production API healthy at $API_URL"; exit 0
+            fi
+            echo "waiting for production API… ($i/30)"; sleep 5
+          done
+          echo "::error::production API did not become healthy at $API_URL"; exit 1
+
+  smoke:
+    name: Post-deploy ops smoke
+    needs: deploy
+    if: |
+      needs.deploy.outputs.configured == 'true' &&
+      inputs.skip_smoke != true &&
+      vars.PRODUCTION_API_URL != ''
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
+        with:
+          bun-version-file: .bun-version
+      - run: bun install --frozen-lockfile
+      - name: Health, metrics, version, and deploy-config checks
+        run: bun run ops:smoke
+        env:
+          API_URL: ${{ vars.PRODUCTION_API_URL }}
+          UI_URL: ${{ vars.PRODUCTION_UI_URL }}
+          METRICS_AUTH_TOKEN: ${{ secrets.METRICS_AUTH_TOKEN }}

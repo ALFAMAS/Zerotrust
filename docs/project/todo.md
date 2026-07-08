@@ -10,7 +10,7 @@ Audit date: **2026-07-05**. Verified/completed items moved to [`shipped.md`](./s
 
 Audit date: **2026-07-07**. Open gaps from [`production-checklist.md`](../production-checklist.md) rows marked **Partial**, **Missing**, or **Unknown** (Done rows omitted).
 
-**Verification (2026-07-09):** **4** open items remain (AUTH-1, CRYPTO-1, INF-3, FE-1). The 2026-07-07 audit tracked 18 gaps; CI-2, DOC-1, SEC-27, OPS-1, OPS-2, INF-1, INF-2, PERF-1, PERF-2, OBS-1, CI-1, DX-2, DB-1, and DQ-2 shipped 2026-07-08–09 → [`shipped.md`](./shipped.md) § Recent work.
+**Verification (2026-07-09):** **3** open items remain (AUTH-1, CRYPTO-1, FE-1). The 2026-07-07 audit tracked 18 gaps; CI-2, DOC-1, SEC-27, OPS-1, OPS-2, INF-1, INF-2, INF-3, PERF-1, PERF-2, OBS-1, CI-1, DX-2, DB-1, and DQ-2 shipped 2026-07-08–09 → [`shipped.md`](./shipped.md) § Recent work.
 
 ### Security
 
@@ -37,20 +37,6 @@ Audit date: **2026-07-07**. Open gaps from [`production-checklist.md`](../produc
        **Status:** Partial — stubs only.
 
        **Refs:** [`production-checklist.md`](../production-checklist.md) § Security
-
-### Infrastructure / Deploy
-
-- [ ] **INF-3** — **P2** — Production auto-deploy
-
-       **Problem:** No automated production deploy workflow; operators use manual PM2 + nginx per README.
-
-       **Fix:** Add production deploy workflow or document intentional manual-only policy in `docs/deployment.md`.
-
-       **Paths:** `.github/workflows/`, `README.md`, `docs/deployment.md`
-
-       **Status:** Missing.
-
-       **Refs:** [`production-checklist.md`](../production-checklist.md) § Infrastructure / Deploy
 
 ### Frontend
 

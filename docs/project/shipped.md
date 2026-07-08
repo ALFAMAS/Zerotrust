@@ -398,6 +398,23 @@ Cross-audit of `docs/security.md` §0–§10. **SEC-27** shipped 2026-07-08 (VPS
 
 ## Recent work (2026-07-09)
 
+### INF-3 — Production auto-deploy workflow (shipped)
+
+- **Problem:** No automated production deploy workflow; operators used manual PM2 +
+  nginx steps per README with no GitHub Actions promotion path or post-deploy smoke.
+- **Fix:** Added `.github/workflows/deploy-production.yml` — manual `workflow_dispatch`
+  only, `production` environment gate (required reviewers recommended), safe no-op when
+  `PRODUCTION_SSH_*` secrets are unset. SSH deploy restarts API + worker + UI via PM2,
+  health-gates on `PRODUCTION_API_URL`, then chains `ops:smoke` (not Lighthouse/ZAP
+  against live production). Documented § Production deploy in `docs/deployment.md` with
+  secret/variable contract and promotion checklist.
+- **Paths:** `.github/workflows/deploy-production.yml`, `docs/deployment.md`,
+  `docs/production-checklist.md`, `docs/project/todo.md`, `README.md`,
+  `src/__tests__/deploy.workflows.test.ts`
+- **Verification (2026-07-09):** `deploy.workflows.test.ts` (4 passed); workflow YAML
+  reviewed for manual-only trigger, production environment, worker restart, and
+  no-op path when SSH secrets unset.
+
 ### DB-1 — Repository layer for hot-path writes (shipped)
 
 - **Problem:** Session minting for login flows and admin impersonation inserted

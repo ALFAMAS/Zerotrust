@@ -3,9 +3,10 @@
 How code gets from a PR to staging/production, and what gates it along the way.
 Reference for the **CI/CD & Documentation** deliverable.
 
-- **Manual production deploy** (VM + PM2 + nginx + TLS): see the
-  [Production deployment](../README.md#production-deployment) section of the
-  README — this guide does not duplicate it.
+- **Automated production deploy:** `.github/workflows/deploy-production.yml`
+  (manual `workflow_dispatch` — § Production deploy below). Host steps mirror the
+  README PM2 + nginx model; post-deploy runs `ops:smoke` only (not Lighthouse/ZAP
+  against live production).
 - **Operator sign-off checklist:** [`production-checklist.md`](./production-checklist.md)
   (audit-backed tables with P0/P1/P2 status per category).
 - **Automated staging deploy:** `.github/workflows/deploy-staging.yml` (below).
@@ -18,9 +19,9 @@ Reference for the **CI/CD & Documentation** deliverable.
  PR / push ──▶  ci.yml (gating)            manual ──▶ deploy-staging.yml ──▶ staging-validation.yml
                ├─ Lint & Type Check                   (build + ship to host)   (smoke · Lighthouse · ZAP)
                ├─ Tests (+ coverage, SDK,
-               │   integration & shadcn audits)        weekly/manual ──▶ dr-restore-drill.yml
-               ├─ SAST & Dependency Scans                                 (backup → restore → verify)
-               │   (Semgrep · Trivy · bun audit)
+               │   integration & shadcn audits)        manual ──▶ deploy-production.yml ──▶ ops:smoke
+               ├─ SAST & Dependency Scans              weekly/manual ──▶ dr-restore-drill.yml
+               │   (Semgrep · Trivy · bun audit)                    (backup → restore → verify)
                ├─ Build UI
                ├─ Playwright E2E & a11y smoke
                └─ Load & Chaos (k6)
@@ -779,6 +780,70 @@ any already-deployed environment (pass `staging_url` + `api_url` inputs).
 > **Other targets** (Docker/Fly/Render/Kubernetes): swap the SSH job for your
 > platform's deploy action; keep the post-deploy `staging-validation.yml` reusable call
 > so the same exit-criteria gates apply everywhere.
+
+---
+
+## Automated production deploy
+
+`deploy-production.yml` is a **manual** (`workflow_dispatch`) workflow that ships the
+chosen ref to a production host matching the README's PM2 + nginx model, waits for
+the API health gate, then runs `ops:smoke` (health · metrics · version ·
+deploy-config). It is deliberately not push-triggered — promote explicitly after
+staging is green. Full Lighthouse/ZAP/k6 gates stay on staging; do not baseline-DAST
+production on every release.
+
+### Production secrets (INF-3)
+
+Configure in **Settings → Secrets and variables → Actions**. Create a **`production`**
+[environment](https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment)
+with **required reviewers** before the first real deploy.
+
+**Environment secrets** (deploy + smoke):
+
+| Secret | Purpose |
+| --- | --- |
+| `PRODUCTION_SSH_HOST` | Production server hostname/IP |
+| `PRODUCTION_SSH_USER` | Deploy user (e.g. `zerotrust`) |
+| `PRODUCTION_SSH_KEY` | Private key authorized on the host (`-----BEGIN …`) |
+| `PRODUCTION_APP_DIR` | Checkout path on the host (e.g. `/home/zerotrust/app`) |
+| `METRICS_AUTH_TOKEN` | Must match `METRICS_AUTH_TOKEN` on the production API — ops-smoke asserts bearer-gated `/metrics` (see § Metrics auth verification) |
+
+**Repository variables** (public URLs — no trailing slash):
+
+| Variable | Purpose |
+| --- | --- |
+| `PRODUCTION_UI_URL` | Public production UI origin (e.g. `https://app.example.com`) — deploy-config smoke |
+| `PRODUCTION_API_URL` | Public production API origin (e.g. `https://api.example.com`) — health gate, ops-smoke |
+
+Until SSH secrets are set, `deploy-production.yml` is a **safe no-op** (notice + exit 0).
+When SSH secrets exist but `PRODUCTION_API_URL` is missing, deploy runs but the health
+gate and ops-smoke job are skipped with a notice. Set `skip_smoke: true` on manual
+dispatch to deploy without post-deploy smoke checks.
+
+**What it runs on the host** (production PM2 topology — includes the dedicated worker):
+
+```bash
+cd "$PRODUCTION_APP_DIR" && git pull
+bun install && bun run db:migrate && bun run build
+pm2 restart zerotrust-api && pm2 restart zerotrust-worker
+cd packages/ui && bun install && bun run build && pm2 restart zerotrust-ui
+```
+
+Ensure the host UI build uses `ZEROTRUST_ENFORCE_PUBLIC_API_URL=true` and
+`NEXT_PUBLIC_ZEROTRUST_URL` pointing at the public API (see § Public API URL
+verification). Archive a green `ops:smoke` log in
+[`docs/compliance/`](./compliance/README.md) evidence after each production deploy.
+
+**Promotion checklist:**
+
+1. Staging deploy green (`deploy-staging.yml` + `staging-validation.yml`).
+2. Required reviewers approve the `production` environment job.
+3. Dispatch `deploy-production.yml` with the same ref (tag or `main` SHA).
+4. Confirm health gate + ops-smoke pass; link artifacts in compliance evidence.
+
+> **Other targets** (Docker/Fly/Render/Kubernetes): swap the SSH job for your
+> platform's deploy action; keep the post-deploy `ops:smoke` step so OPS-1/OPS-2
+> checks still run against the live URLs.
 
 ---
 
