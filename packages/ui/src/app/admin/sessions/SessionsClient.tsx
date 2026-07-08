@@ -1,7 +1,7 @@
 "use client";
 
 import { AlertTriangle, ShieldCheck } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import { ServerStateStatus } from "@/components/ServerStateStatus";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useToast } from "@/context/ToastContext";
 import {
   useAdminSessionsListQuery,
   useRevokeAdminSessionMutation,
@@ -33,17 +34,12 @@ function anomalyCount(flags: unknown): number {
 }
 
 export default function SessionsClient() {
+  const { toast } = useToast();
   const [tab, setTab] = useState<TabFilter>("all");
   const [page, setPage] = useState(1);
-  const [toast, setToast] = useState<string | null>(null);
 
   const sessionsQuery = useAdminSessionsListQuery({ page, limit: 20 });
   const revokeMutation = useRevokeAdminSessionMutation({ page, limit: 20 });
-
-  const showToast = useCallback((msg: string) => {
-    setToast(msg);
-    setTimeout(() => setToast(null), 3000);
-  }, []);
 
   const sessions = sessionsQuery.data?.data ?? [];
   const pagination = sessionsQuery.data?.pagination;
@@ -55,9 +51,9 @@ export default function SessionsClient() {
   async function handleRevoke(session: AdminSession) {
     try {
       await revokeMutation.mutateAsync(session.id);
-      showToast("Session revoked");
+      toast({ message: "Session revoked", type: "success" });
     } catch {
-      showToast("Failed to revoke session");
+      toast({ message: "Failed to revoke session", type: "error" });
     }
   }
 
@@ -95,12 +91,6 @@ export default function SessionsClient() {
 
   return (
     <div className="space-y-6">
-      {toast && (
-        <div className="fixed top-4 right-4 z-50 rounded-lg bg-primary px-4 py-3 text-sm text-primary-foreground shadow-lg">
-          {toast}
-        </div>
-      )}
-
       <div>
         <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
           Sessions

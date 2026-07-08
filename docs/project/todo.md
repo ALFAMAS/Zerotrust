@@ -10,7 +10,7 @@ Audit date: **2026-07-05**. Verified/completed items moved to [`shipped.md`](./s
 
 Audit date: **2026-07-07**. Open gaps from [`production-checklist.md`](../production-checklist.md) rows marked **Partial**, **Missing**, or **Unknown** (Done rows omitted).
 
-**Verification (2026-07-09):** **1** open item remains (FE-1). AUTH-1 shipped 2026-07-09 → [`shipped.md`](./shipped.md) § Recent work.
+**Verification (2026-07-09):** **0** open production-readiness items. **FE-1** shipped 2026-07-09 → [`shipped.md`](./shipped.md) § Recent work.
 
 ### Security
 
@@ -18,18 +18,7 @@ _(none — AUTH-1 shipped 2026-07-09)_
 
 ### Frontend
 
-- [ ] **FE-1** — **P2** — shadcn redesign completion
-
-       **Problem:** UI redesign to shadcn components is in progress; not all dashboard/admin surfaces migrated.
-
-       **Fix:** Continue migration per frontend-design skill; track page-level completion in PRs.
-
-       **Paths:** `packages/ui/src/components/ui/`, `packages/ui/src/app/`
-
-       **Status:** Partial.
-
-       **Refs:** [`production-checklist.md`](../production-checklist.md) § Frontend
-
+_(none — FE-1 shipped 2026-07-09)_
 
 ## Backlog (unprioritized)
 

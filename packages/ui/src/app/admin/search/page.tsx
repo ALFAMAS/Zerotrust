@@ -15,6 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useToast } from "@/context/ToastContext";
 import {
   type SearchIndexType,
   useDeleteIndexedDocumentMutation,
@@ -23,10 +24,10 @@ import {
 } from "@/lib/server-state/adminSearch";
 
 export default function AdminSearchPage() {
+  const { toast } = useToast();
   const providerQuery = useSearchProviderQuery();
   const indexMutation = useIndexDocumentMutation();
   const deleteMutation = useDeleteIndexedDocumentMutation();
-  const [toast, setToast] = useState<string | null>(null);
   const [form, setForm] = useState({
     id: "",
     type: "user" as SearchIndexType,
@@ -46,11 +47,9 @@ export default function AdminSearchPage() {
         title: form.title.trim(),
         content: form.content.trim() || undefined,
       });
-      setToast("Document indexed");
-      setTimeout(() => setToast(null), 3000);
+      toast({ message: "Document indexed", type: "success" });
     } catch (err) {
-      setToast(err instanceof Error ? err.message : "Index failed");
-      setTimeout(() => setToast(null), 3000);
+      toast({ message: err instanceof Error ? err.message : "Index failed", type: "error" });
     }
   }
 
@@ -62,19 +61,12 @@ export default function AdminSearchPage() {
       setDeleteForm({ type: deleteForm.type, id: "" });
       setTimeout(() => setToast(null), 3000);
     } catch (err) {
-      setToast(err instanceof Error ? err.message : "Delete failed");
-      setTimeout(() => setToast(null), 3000);
+      toast({ message: err instanceof Error ? err.message : "Delete failed", type: "error" });
     }
   }
 
   return (
     <div className="space-y-6">
-      {toast && (
-        <div className="fixed right-4 top-4 z-50 rounded-lg bg-primary px-4 py-3 text-sm text-primary-foreground shadow-lg">
-          {toast}
-        </div>
-      )}
-
       <div className="flex items-center gap-3">
         <Search className="h-6 w-6 text-primary" />
         <div>

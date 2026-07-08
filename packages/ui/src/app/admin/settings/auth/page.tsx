@@ -1,11 +1,14 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { ServerStateStatus } from "@/components/ServerStateStatus";
 import Toggle from "@/components/Toggle";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { ErrorState } from "@/components/ui/States";
+import { Label } from "@/components/ui/label";
+import { ErrorState, LoadingSpinner } from "@/components/ui/States";
+import { useToast } from "@/context/ToastContext";
 import {
   AUTH_SETTINGS_DEFAULTS,
   useAdminAuthSettingsQuery,
@@ -66,8 +69,7 @@ export default function AuthSettingsPage() {
   const settingsQuery = useAdminAuthSettingsQuery();
   const saveMutation = useSaveAdminAuthSettingsMutation();
   const [settings, setSettings] = useState<AuthSettings>(AUTH_SETTINGS_DEFAULTS);
-  const [toast, setToast] = useState<string | null>(null);
-  const toastTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const { toast } = useToast();
 
   useEffect(() => {
     if (settingsQuery.data) {
@@ -75,11 +77,9 @@ export default function AuthSettingsPage() {
     }
   }, [settingsQuery.data]);
 
-  const showToast = useCallback((msg: string) => {
-    setToast(msg);
-    if (toastTimer.current) clearTimeout(toastTimer.current);
-    toastTimer.current = setTimeout(() => setToast(null), 3000);
-  }, []);
+  const showToast = (msg: string, type: "success" | "error") => {
+    toast({ message: msg, type });
+  };
 
   function set<K extends keyof AuthSettings>(key: K, value: AuthSettings[K]) {
     setSettings((prev) => ({ ...prev, [key]: value }));
@@ -88,18 +88,14 @@ export default function AuthSettingsPage() {
   async function handleSave() {
     try {
       await saveMutation.mutateAsync(settings);
-      showToast("Settings saved successfully");
+      showToast("Settings saved successfully", "success");
     } catch {
-      showToast("Failed to save settings");
+      showToast("Failed to save settings", "error");
     }
   }
 
   if (settingsQuery.isPending) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-muted-foreground">Loading…</div>
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
   if (settingsQuery.error && !settingsQuery.data) {
@@ -112,13 +108,7 @@ export default function AuthSettingsPage() {
   }
 
   return (
-    <div className="space-y-6 max-w-4xl">
-      {toast && (
-        <div className="fixed top-4 right-4 z-50 rounded-lg bg-primary px-4 py-3 text-sm text-foreground shadow-lg">
-          {toast}
-        </div>
-      )}
-
+    <div className="max-w-4xl space-y-6">
       <div>
         <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
           Auth Settings
@@ -136,12 +126,12 @@ export default function AuthSettingsPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="space-y-6">
-          <div className="rounded-xl bg-card border border-border p-5">
-            <h2 className="font-semibold text-foreground mb-1">Authentication Methods</h2>
-            <p className="text-xs text-muted-foreground mb-4">
-              Choose how users can sign in to your app
-            </p>
-            <div className="divide-y divide-border">
+          <Card>
+            <CardHeader>
+              <CardTitle>Authentication Methods</CardTitle>
+              <CardDescription>Choose how users can sign in to your app</CardDescription>
+            </CardHeader>
+            <CardContent className="divide-y divide-border pt-0">
               <ToggleRow
                 label="Email & Password"
                 description="Users can register and sign in with email/password"
@@ -178,15 +168,15 @@ export default function AuthSettingsPage() {
                 checked={settings.passkeyEnabled}
                 onChange={(v) => set("passkeyEnabled", v)}
               />
-            </div>
-          </div>
+            </CardContent>
+          </Card>
 
-          <div className="rounded-xl bg-card border border-border p-5">
-            <h2 className="font-semibold text-foreground mb-1">Registration</h2>
-            <p className="text-xs text-muted-foreground mb-4">
-              Control who can create new accounts
-            </p>
-            <div className="divide-y divide-border">
+          <Card>
+            <CardHeader>
+              <CardTitle>Registration</CardTitle>
+              <CardDescription>Control who can create new accounts</CardDescription>
+            </CardHeader>
+            <CardContent className="divide-y divide-border pt-0">
               <ToggleRow
                 label="Allow new registrations"
                 description="If off, only existing users can sign in"
@@ -199,33 +189,31 @@ export default function AuthSettingsPage() {
                 checked={settings.requireEmailVerification}
                 onChange={(v) => set("requireEmailVerification", v)}
               />
-            </div>
-            <div className="mt-4">
-              <label htmlFor="page-f1" className="block text-sm font-medium text-foreground mb-1">
-                Allowed Email Domains
-              </label>
+            </CardContent>
+            <CardContent className="space-y-2 border-t border-border pt-4">
+              <Label htmlFor="auth-allowed-domains">Allowed Email Domains</Label>
               <Input
-                id="page-f1"
+                id="auth-allowed-domains"
                 type="text"
                 placeholder="acme.com, corp.com (leave blank for all)"
                 value={settings.allowedEmailDomains}
                 onChange={(e) => set("allowedEmailDomains", e.target.value)}
                 className="w-full"
               />
-              <p className="mt-1 text-xs text-muted-foreground">
+              <p className="text-xs text-muted-foreground">
                 Comma-separated. Leave blank to allow all domains.
               </p>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         </div>
 
         <div className="space-y-6">
-          <div className="rounded-xl bg-card border border-border p-5">
-            <h2 className="font-semibold text-foreground mb-1">Multi-Factor Authentication</h2>
-            <p className="text-xs text-muted-foreground mb-4">
-              Second-factor options available to users
-            </p>
-            <div className="divide-y divide-border">
+          <Card>
+            <CardHeader>
+              <CardTitle>Multi-Factor Authentication</CardTitle>
+              <CardDescription>Second-factor options available to users</CardDescription>
+            </CardHeader>
+            <CardContent className="divide-y divide-border pt-0">
               <ToggleRow
                 label="Authenticator App (TOTP)"
                 description="Google Authenticator, 1Password, etc."
@@ -250,15 +238,15 @@ export default function AuthSettingsPage() {
                 checked={settings.requireMfaForAll}
                 onChange={(v) => set("requireMfaForAll", v)}
               />
-            </div>
-          </div>
+            </CardContent>
+          </Card>
 
-          <div className="rounded-xl bg-card border border-border p-5">
-            <h2 className="font-semibold text-foreground mb-1">Security Settings</h2>
-            <p className="text-xs text-muted-foreground mb-4">
-              Session and account lockout configuration
-            </p>
-            <div className="divide-y divide-border">
+          <Card>
+            <CardHeader>
+              <CardTitle>Security Settings</CardTitle>
+              <CardDescription>Session and account lockout configuration</CardDescription>
+            </CardHeader>
+            <CardContent className="divide-y divide-border pt-0">
               <NumberInput
                 label="Session Duration (seconds)"
                 value={settings.sessionTTLSeconds}
@@ -293,8 +281,8 @@ export default function AuthSettingsPage() {
                 min={5}
                 max={1440}
               />
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
 

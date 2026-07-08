@@ -1,8 +1,12 @@
 "use client";
+
+import { AlertCircle, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useRef } from "react";
-import { SkeletonCard } from "@/components/Skeleton";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { LoadingSpinner } from "@/components/ui/States";
 import { useAcceptInviteMutation } from "@/lib/server-state/organizations";
 import { getToken } from "../../../lib/auth";
 
@@ -26,10 +30,10 @@ export default function InviteAcceptPage() {
 
   if (acceptMutation.isPending) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center px-4">
-        <div className="w-full max-w-sm">
-          <SkeletonCard className="h-40" />
-          <p className="text-center text-muted-foreground text-sm mt-4">Accepting invitation…</p>
+      <div className="flex min-h-screen items-center justify-center bg-background px-4">
+        <div className="w-full max-w-sm space-y-4 text-center">
+          <LoadingSpinner />
+          <p className="text-sm text-muted-foreground">Accepting invitation…</p>
         </div>
       </div>
     );
@@ -37,22 +41,25 @@ export default function InviteAcceptPage() {
 
   if (acceptMutation.isError) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center px-4">
-        <div className="w-full max-w-sm bg-card border border-red-900 rounded-xl p-6 text-center space-y-4">
-          <div className="w-12 h-12 rounded-full bg-red-900 flex items-center justify-center mx-auto text-red-300 text-xl font-bold">
-            !
-          </div>
-          <h1 className="text-lg font-semibold text-foreground">Invite error</h1>
-          <p className="text-sm text-muted-foreground">
-            {acceptMutation.error?.message || "Failed to accept invite"}
-          </p>
-          <Link
-            href="/dashboard/organizations"
-            className="inline-block text-sm text-primary hover:text-primary/80 underline"
-          >
-            Go to Organizations
-          </Link>
-        </div>
+      <div className="flex min-h-screen items-center justify-center bg-background px-4">
+        <Card className="w-full max-w-sm border-destructive/40 text-center">
+          <CardHeader className="items-center space-y-3">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10 text-destructive">
+              <AlertCircle className="h-6 w-6" aria-hidden />
+            </div>
+            <CardTitle>Invite error</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground">
+              {acceptMutation.error?.message || "Failed to accept invite"}
+            </p>
+          </CardContent>
+          <CardFooter className="justify-center">
+            <Button variant="link" asChild>
+              <Link href="/dashboard/organizations">Go to Organizations</Link>
+            </Button>
+          </CardFooter>
+        </Card>
       </div>
     );
   }
@@ -60,34 +67,32 @@ export default function InviteAcceptPage() {
   const result = acceptMutation.data;
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4">
-      <div className="w-full max-w-sm bg-card border border-green-900 rounded-xl p-6 text-center space-y-4">
-        <div className="w-12 h-12 rounded-full bg-green-900 flex items-center justify-center mx-auto text-green-300 text-xl font-bold">
-          ✓
-        </div>
-        <h1 className="text-lg font-semibold text-foreground">
-          You&apos;ve joined {result?.org?.name ?? "the organization"}!
-        </h1>
-        <p className="text-sm text-muted-foreground capitalize">
-          Your role: <span className="font-medium text-foreground">{result?.member?.role}</span>
-        </p>
-        {result?.org && (
-          <Link
-            href={`/dashboard/organizations/${result.org.id}`}
-            className="inline-block text-sm bg-primary hover:bg-primary/90 text-foreground px-4 py-2 rounded-lg transition-colors"
-          >
-            Go to {result.org.name}
-          </Link>
-        )}
-        <div>
-          <Link
-            href="/dashboard/organizations"
-            className="text-xs text-muted-foreground hover:text-muted-foreground underline"
-          >
-            All organizations
-          </Link>
-        </div>
-      </div>
+    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+      <Card className="w-full max-w-sm border-emerald-900/40 text-center">
+        <CardHeader className="items-center space-y-3">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-400">
+            <CheckCircle2 className="h-6 w-6" aria-hidden />
+          </div>
+          <CardTitle>You&apos;ve joined {result?.org?.name ?? "the organization"}!</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm capitalize text-muted-foreground">
+            Your role: <span className="font-medium text-foreground">{result?.member?.role}</span>
+          </p>
+        </CardContent>
+        <CardFooter className="flex flex-col gap-2">
+          {result?.org && (
+            <Button asChild className="w-full">
+              <Link href={`/dashboard/organizations/${result.org.id}`}>
+                Go to {result.org.name}
+              </Link>
+            </Button>
+          )}
+          <Button variant="link" size="sm" asChild>
+            <Link href="/dashboard/organizations">All organizations</Link>
+          </Button>
+        </CardFooter>
+      </Card>
     </div>
   );
 }

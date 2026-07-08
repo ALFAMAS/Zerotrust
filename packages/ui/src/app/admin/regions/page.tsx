@@ -1,15 +1,16 @@
 "use client";
 
 import { Globe2 } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useToast } from "@/context/ToastContext";
 import { useSetOrgDomainMutation, useUpdateOrgBrandingMutation } from "@/lib/server-state/regions";
 
 export default function RegionsPage() {
-  const [toast, setToast] = useState<string | null>(null);
+  const { toast } = useToast();
   const [brandingOrgId, setBrandingOrgId] = useState("");
   const [branding, setBranding] = useState({ appName: "", brandColor: "#6366f1", logoUrl: "" });
   const [domainOrgId, setDomainOrgId] = useState("");
@@ -17,11 +18,6 @@ export default function RegionsPage() {
 
   const updateBrandingMutation = useUpdateOrgBrandingMutation();
   const setDomainMutation = useSetOrgDomainMutation();
-
-  const showToast = useCallback((msg: string) => {
-    setToast(msg);
-    setTimeout(() => setToast(null), 3000);
-  }, []);
 
   async function saveBranding(e: React.FormEvent) {
     e.preventDefault();
@@ -35,9 +31,12 @@ export default function RegionsPage() {
           logoUrl: branding.logoUrl || undefined,
         },
       });
-      showToast(`Branding updated for ${trimmed}`);
+      toast({ message: `Branding updated for ${trimmed}`, type: "success" });
     } catch (err) {
-      showToast(err instanceof Error ? err.message : "Failed to update branding");
+      toast({
+        message: err instanceof Error ? err.message : "Failed to update branding",
+        type: "error",
+      });
     }
   }
 
@@ -49,20 +48,17 @@ export default function RegionsPage() {
         orgId: trimmed,
         domain: customDomain.trim() || null,
       });
-      showToast(`Domain updated for ${trimmed}`);
+      toast({ message: `Domain updated for ${trimmed}`, type: "success" });
     } catch (err) {
-      showToast(err instanceof Error ? err.message : "Failed to set domain");
+      toast({
+        message: err instanceof Error ? err.message : "Failed to set domain",
+        type: "error",
+      });
     }
   }
 
   return (
     <div className="space-y-6">
-      {toast && (
-        <div className="fixed top-4 right-4 z-50 rounded-lg bg-primary px-4 py-3 text-sm text-primary-foreground shadow-lg">
-          {toast}
-        </div>
-      )}
-
       <div className="flex items-center gap-3">
         <Globe2 className="h-6 w-6 text-primary" />
         <div>

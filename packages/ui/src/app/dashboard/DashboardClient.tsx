@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ProgressBars } from "@/components/ProgressBars";
 import SetupChecklist from "@/components/SetupChecklist";
 import { SkeletonCard, SkeletonText } from "@/components/Skeleton";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ErrorState } from "@/components/ui/States";
 import { useAuthMeQuery } from "@/lib/server-state/auth";
 import { useUserSessionsListQuery } from "@/lib/server-state/sessions";
@@ -89,24 +90,27 @@ export default function DashboardClient() {
 
       <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-3">
         {stats.map((stat) => (
-          <div
-            key={stat.label}
-            className="flex items-center gap-4 rounded-xl border border-border bg-card p-5"
-          >
-            <span className="flex h-11 w-11 items-center justify-center rounded-lg border border-border bg-background text-primary">
-              <stat.icon className="h-5 w-5" />
-            </span>
-            <div>
-              <div className="text-sm text-muted-foreground">{stat.label}</div>
-              <div className="font-display text-xl font-semibold text-foreground">{stat.value}</div>
+          <Card key={stat.label} className="p-5">
+            <div className="flex items-center gap-4">
+              <span className="flex h-11 w-11 items-center justify-center rounded-lg border border-border bg-background text-primary">
+                <stat.icon className="h-5 w-5" />
+              </span>
+              <div>
+                <div className="text-sm text-muted-foreground">{stat.label}</div>
+                <div className="font-display text-xl font-semibold text-foreground">
+                  {stat.value}
+                </div>
+              </div>
             </div>
-          </div>
+          </Card>
         ))}
       </div>
 
-      <div className="rounded-xl border border-border bg-card p-6">
-        <h2 className="mb-4 font-medium text-foreground">Quick links</h2>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+      <Card>
+        <CardHeader>
+          <CardTitle>Quick links</CardTitle>
+        </CardHeader>
+        <CardContent className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           {quickLinks.map((link) => (
             <Link
               key={link.href + link.label}
@@ -132,8 +136,8 @@ export default function DashboardClient() {
               </span>
             </div>
           </Link>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

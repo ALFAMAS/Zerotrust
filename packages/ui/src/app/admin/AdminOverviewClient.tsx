@@ -7,7 +7,8 @@ import RadialGauge from "@/components/admin/RadialGauge";
 import Badge from "@/components/Badge";
 import { ServerStateStatus } from "@/components/ServerStateStatus";
 import { Button } from "@/components/ui/button";
-import { ErrorState } from "@/components/ui/States";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ErrorState, SkeletonList } from "@/components/ui/States";
 import {
   useAdminRecentUsersQuery,
   useAdminStatsQuery,
@@ -85,11 +86,7 @@ export default function AdminOverviewClient() {
       />
 
       {loading ? (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {[...Array(4)].map((_, i) => (
-            <div key={i} className="h-32 animate-pulse rounded-xl border border-border bg-card" />
-          ))}
-        </div>
+        <SkeletonList count={4} />
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <MetricCard icon={Users} label="Total users" value={stats?.totalUsers ?? "—"} />
@@ -104,7 +101,7 @@ export default function AdminOverviewClient() {
       )}
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <div className="rounded-xl border border-border bg-card p-5">
+        <Card className="p-5">
           <h2 className="font-medium text-foreground">User activity</h2>
           <p className="text-xs text-muted-foreground">Active in the last 30 days</p>
           <div className="mt-4">
@@ -114,9 +111,9 @@ export default function AdminOverviewClient() {
               caption={stats ? `${stats.activeUsers} of ${stats.totalUsers} users` : undefined}
             />
           </div>
-        </div>
+        </Card>
 
-        <div className="overflow-hidden rounded-xl border border-border bg-card lg:col-span-2">
+        <Card className="overflow-hidden lg:col-span-2">
           <div className="flex items-center justify-between border-b border-border px-5 py-4">
             <h2 className="font-medium text-foreground">Recent users</h2>
             <Link href="/admin/users" className="text-xs text-primary hover:text-primary/80">
@@ -142,14 +139,14 @@ export default function AdminOverviewClient() {
               </div>
             ))}
           </div>
-        </div>
+        </Card>
       </div>
 
-      <div className="overflow-hidden rounded-xl border border-border bg-card">
-        <div className="border-b border-border px-5 py-4">
-          <h2 className="font-medium text-foreground">Quick actions</h2>
-        </div>
-        <div className="grid grid-cols-2 gap-3 p-5 lg:grid-cols-4">
+      <Card className="overflow-hidden">
+        <CardHeader className="border-b border-border px-5 py-4">
+          <CardTitle>Quick actions</CardTitle>
+        </CardHeader>
+        <CardContent className="grid grid-cols-2 gap-3 p-5 lg:grid-cols-4">
           {quickActions.map((a) => (
             <Link
               key={a.href}
@@ -172,8 +169,8 @@ export default function AdminOverviewClient() {
               {exportMutation.isPending ? "Preparing…" : "Download CSV"}
             </span>
           </Button>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

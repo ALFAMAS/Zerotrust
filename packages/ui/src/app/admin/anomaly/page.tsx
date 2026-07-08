@@ -1,7 +1,7 @@
 "use client";
 
 import { Activity, Loader2, RotateCcw } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import { ServerStateStatus } from "@/components/ServerStateStatus";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useToast } from "@/context/ToastContext";
 import { riskBand } from "@/lib/anomaly";
 import {
   useAnomalyBaselinesQuery,
@@ -29,10 +30,10 @@ const LIST_PARAMS = { limit: 100 } as const;
 const fmt = (d?: string | null) => (d ? new Date(d).toLocaleString() : "—");
 
 export default function AnomalyPage() {
+  const { toast } = useToast();
   const baselinesQuery = useAnomalyBaselinesQuery(LIST_PARAMS);
   const resetMutation = useResetBaselineMutation(LIST_PARAMS);
   const scoreMutation = useScoreLoginMutation();
-  const [toast, setToast] = useState<string | null>(null);
 
   const [form, setForm] = useState({
     userId: "",
@@ -46,17 +47,12 @@ export default function AnomalyPage() {
   const hasBaselines = baselines.length > 0;
   const signals = scoreMutation.data ?? null;
 
-  const showToast = useCallback((msg: string) => {
-    setToast(msg);
-    setTimeout(() => setToast(null), 3000);
-  }, []);
-
   async function handleReset(userId: string) {
     try {
       await resetMutation.mutateAsync(userId);
-      showToast("Baseline reset");
+      toast({ message: "Baseline reset", type: "success" });
     } catch {
-      showToast("Failed to reset baseline");
+      toast({ message: "Failed to reset baseline", type: "error" });
     }
   }
 
@@ -78,12 +74,6 @@ export default function AnomalyPage() {
 
   return (
     <div className="space-y-6">
-      {toast && (
-        <div className="fixed top-4 right-4 z-50 rounded-lg bg-primary px-4 py-3 text-sm text-primary-foreground shadow-lg">
-          {toast}
-        </div>
-      )}
-
       <div className="flex items-center gap-3">
         <Activity className="h-6 w-6 text-primary" />
         <div>

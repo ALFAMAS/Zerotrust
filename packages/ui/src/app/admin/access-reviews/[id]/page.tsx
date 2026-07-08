@@ -1,7 +1,6 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useCallback, useRef, useState } from "react";
 import { ServerStateStatus } from "@/components/ServerStateStatus";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -15,6 +14,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useToast } from "@/context/ToastContext";
 import {
   useAccessReviewDetailQuery,
   useCompleteAccessReviewMutation,
@@ -32,20 +32,13 @@ const DECISION_VARIANT: Record<string, "success" | "destructive" | "warning" | "
 };
 
 export default function AccessReviewDetailPage() {
+  const { toast } = useToast();
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
-  const [toast, setToast] = useState<string | null>(null);
-  const toastTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const detailQuery = useAccessReviewDetailQuery(id);
   const decideMutation = useDecideAccessReviewItemMutation();
   const completeMutation = useCompleteAccessReviewMutation();
-
-  const showToast = useCallback((msg: string) => {
-    setToast(msg);
-    if (toastTimer.current) clearTimeout(toastTimer.current);
-    toastTimer.current = setTimeout(() => setToast(null), 3000);
-  }, []);
 
   const review = detailQuery.data?.review ?? null;
   const items = detailQuery.data?.items ?? [];
@@ -66,19 +59,19 @@ export default function AccessReviewDetailPage() {
     }
     try {
       await decideMutation.mutateAsync({ reviewId: id, itemId: item.id, decision });
-      showToast(`Marked ${decision}`);
+      toast({ message: `Marked ${decision}`, type: "success" });
     } catch {
-      showToast("Failed to record decision");
+      toast({ message: "Failed to record decision", type: "error" });
     }
   }
 
   async function complete() {
     try {
       await completeMutation.mutateAsync(id);
-      showToast("Review completed");
+      toast({ message: "Review completed", type: "success" });
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Cannot complete — items still pending";
-      showToast(message);
+      toast({ message: message, type: "error" });
     }
   }
 
@@ -106,12 +99,6 @@ export default function AccessReviewDetailPage() {
 
   return (
     <div className="space-y-6">
-      {toast && (
-        <div className="fixed top-4 right-4 z-50 rounded-lg bg-primary px-4 py-3 text-sm text-primary-foreground shadow-lg">
-          {toast}
-        </div>
-      )}
-
       <div className="flex items-start justify-between gap-4">
         <div>
           <Button

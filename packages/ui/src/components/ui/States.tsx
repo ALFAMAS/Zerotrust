@@ -1,6 +1,7 @@
 "use client";
 
 import { AlertCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 /**
  * Loading spinner placeholder. Replaces repeated loading skeleton patterns.
@@ -58,13 +59,9 @@ export function ErrorState({
       </div>
       <p className="text-sm font-medium text-foreground">{message}</p>
       {retry && (
-        <button
-          type="button"
-          onClick={retry}
-          className="mt-4 rounded-lg border border-border bg-background px-4 py-2 text-sm text-foreground hover:border-primary/50"
-        >
+        <Button type="button" variant="outline" onClick={retry} className="mt-4">
           Try again
-        </button>
+        </Button>
       )}
     </div>
   );

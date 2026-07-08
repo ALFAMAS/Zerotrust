@@ -16,6 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useToast } from "@/context/ToastContext";
 import {
   useAdminAttachmentsQuery,
   useTriggerLifecycleEmailsMutation,
@@ -23,12 +24,12 @@ import {
 } from "@/lib/server-state/adminContent";
 
 export default function AdminContentPage() {
+  const { toast } = useToast();
   const attachmentsQuery = useAdminAttachmentsQuery({ limit: 50 });
   const uploadMutation = useUploadAdminAttachmentMutation();
   const lifecycleMutation = useTriggerLifecycleEmailsMutation();
   const fileRef = useRef<HTMLInputElement>(null);
   const [feature, setFeature] = useState("admin_upload");
-  const [toast, setToast] = useState<string | null>(null);
 
   const attachments = attachmentsQuery.data?.data ?? [];
 
@@ -45,30 +46,21 @@ export default function AdminContentPage() {
       if (fileRef.current) fileRef.current.value = "";
       setTimeout(() => setToast(null), 3000);
     } catch (err) {
-      setToast(err instanceof Error ? err.message : "Upload failed");
-      setTimeout(() => setToast(null), 3000);
+      toast({ message: err instanceof Error ? err.message : "Upload failed", type: "error" });
     }
   }
 
   async function triggerLifecycle() {
     try {
       const result = await lifecycleMutation.mutateAsync();
-      setToast(`Lifecycle batch: ${result.results.sent} sent`);
-      setTimeout(() => setToast(null), 3000);
+      toast({ message: `Lifecycle batch: ${result.results.sent} sent`, type: "success" });
     } catch (err) {
-      setToast(err instanceof Error ? err.message : "Batch failed");
-      setTimeout(() => setToast(null), 3000);
+      toast({ message: err instanceof Error ? err.message : "Batch failed", type: "error" });
     }
   }
 
   return (
     <div className="space-y-6">
-      {toast && (
-        <div className="fixed right-4 top-4 z-50 rounded-lg bg-primary px-4 py-3 text-sm text-primary-foreground shadow-lg">
-          {toast}
-        </div>
-      )}
-
       <div>
         <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
           Content tools

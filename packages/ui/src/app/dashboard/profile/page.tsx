@@ -147,10 +147,12 @@ export default function ProfilePage() {
         <CardContent>
           <div className="flex items-center gap-5">
             {form.avatarUrl ? (
-              <button
+              <Button
                 type="button"
+                variant="ghost"
+                size="icon"
                 onClick={() => setAvatarPreviewOpen(true)}
-                className="shrink-0 rounded-full ring-offset-background transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                className="h-20 w-20 shrink-0 rounded-full p-0"
                 aria-label="View profile photo"
               >
                 <Avatar className="h-20 w-20 cursor-pointer border-2 border-border">
@@ -159,7 +161,7 @@ export default function ProfilePage() {
                     {initials}
                   </AvatarFallback>
                 </Avatar>
-              </button>
+              </Button>
             ) : (
               <Avatar className="h-20 w-20 border-2 border-border">
                 <AvatarFallback className="bg-primary text-2xl font-bold text-primary-foreground">

@@ -1,7 +1,7 @@
 "use client";
 
 import { Check, Loader2, Shield, X } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import { ServerStateStatus } from "@/components/ServerStateStatus";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useToast } from "@/context/ToastContext";
 import {
   useAdminJitGrantsQuery,
   useApproveAdminJitGrantMutation,
@@ -22,19 +23,14 @@ import {
 } from "@/lib/server-state/adminJitGrants";
 
 export default function AdminJitGrantsPage() {
+  const { toast } = useToast();
   const [status, setStatus] = useState<string>("pending");
   const grantsQuery = useAdminJitGrantsQuery({ status: status || undefined });
   const approveMutation = useApproveAdminJitGrantMutation();
   const denyMutation = useDenyAdminJitGrantMutation();
   const revokeMutation = useRevokeAdminJitGrantMutation();
-  const [toast, setToast] = useState<string | null>(null);
 
   const grants = grantsQuery.data?.grants ?? [];
-
-  const showToast = useCallback((msg: string) => {
-    setToast(msg);
-    setTimeout(() => setToast(null), 3000);
-  }, []);
 
   function isActing(id: string) {
     return (
@@ -47,38 +43,32 @@ export default function AdminJitGrantsPage() {
   async function approve(id: string) {
     try {
       await approveMutation.mutateAsync(id);
-      showToast("Grant approved");
+      toast({ message: "Grant approved", type: "success" });
     } catch (err) {
-      showToast(err instanceof Error ? err.message : "Action failed");
+      toast({ message: err instanceof Error ? err.message : "Action failed", type: "error" });
     }
   }
 
   async function deny(id: string) {
     try {
       await denyMutation.mutateAsync(id);
-      showToast("Grant denied");
+      toast({ message: "Grant denied", type: "error" });
     } catch (err) {
-      showToast(err instanceof Error ? err.message : "Action failed");
+      toast({ message: err instanceof Error ? err.message : "Action failed", type: "error" });
     }
   }
 
   async function revoke(id: string) {
     try {
       await revokeMutation.mutateAsync(id);
-      showToast("Grant revoked");
+      toast({ message: "Grant revoked", type: "success" });
     } catch (err) {
-      showToast(err instanceof Error ? err.message : "Action failed");
+      toast({ message: err instanceof Error ? err.message : "Action failed", type: "error" });
     }
   }
 
   return (
     <div className="max-w-4xl space-y-6">
-      {toast && (
-        <div className="fixed right-4 top-4 z-50 rounded-lg bg-primary px-4 py-3 text-sm text-primary-foreground shadow-lg">
-          {toast}
-        </div>
-      )}
-
       <div className="flex items-center gap-3">
         <Shield className="h-6 w-6 text-primary" />
         <div>

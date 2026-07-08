@@ -45,7 +45,6 @@ describe("settings TanStack Query server state", () => {
     mockSettingsSuccess();
     renderWithQueryClient(<GeneralSettingsPage />);
 
-    expect(screen.getByText("Loading…")).toBeInTheDocument();
     expect(await screen.findByDisplayValue("Acme Corp")).toBeInTheDocument();
     expect(screen.getByDisplayValue("https://app.acme.com")).toBeInTheDocument();
     expect(mockApiGet).toHaveBeenCalledWith(ADMIN_SETTINGS_PATH);

@@ -164,7 +164,7 @@ Complete before pointing DNS at production. Archive signed copies in
 | ☐ | PWA + web push | P2 | **Done** | `packages/ui/public/sw.js` (production builds only) |
 | ☐ | Security headers + CSP | P0 | **Done** | `packages/ui/src/config/securityHeaders.ts`, API `securityHeaders.ts` |
 | ☐ | No Next.js `middleware.ts` auth boundary | P0 | **Done** | Intentional — `docs/security.md` §0 |
-| ☐ | shadcn redesign | P2 | **Partial** | In progress |
+| ☐ | shadcn redesign | P2 | **Done** | shadcn/ui primitives + `States.tsx` on dashboard/admin surfaces (FE-1, 2026-07-09) |
 | ☐ | SEO on public pages | P2 | **Done** | `app/sitemap.ts`, `app/robots.ts`, `generateMetadata` on marketing routes |
 | ☐ | `NEXT_PUBLIC_ZEROTRUST_URL` points to prod API | P0 | **Done** | OPS-2 (2026-07-08): build guard + `/api/deploy-config` probe in `ops:smoke`; `docs/deployment.md` § Public API URL |
 
@@ -332,7 +332,7 @@ for API↔UI Zod schemas, `deploy/k8s/` Helm per `docs/reference-architecture.md
 | [`reference-architecture.md`](./reference-architecture.md) | VM, container, and Kubernetes deployment blueprints |
 | [`ARCHITECTURE.md`](./ARCHITECTURE.md) | System architecture deep dive |
 | [`maintenance-scorecard.md`](./maintenance-scorecard.md) | Quarterly metrics (dependencies, CI, coverage, DR) |
-| [`project/todo.md`](./project/todo.md) | Open backlog (AUTH-1, FE-1) |
+| [`project/todo.md`](./project/todo.md) | Open backlog (empty) |
 | [`project/shipped.md`](./project/shipped.md) | Shipped feature catalog |
 | [`../README.md`](../README.md) | Quick start, env vars, production deployment summary |
 

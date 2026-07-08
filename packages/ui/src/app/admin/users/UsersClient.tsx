@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useRef, useState } from "react";
+import { useState } from "react";
 import { ServerStateStatus } from "@/components/ServerStateStatus";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -23,6 +23,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useToast } from "@/context/ToastContext";
 import {
   useAdminUserListDeleteMutation,
   useAdminUserListStatusMutation,
@@ -42,9 +43,7 @@ export default function UsersClient() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [page, setPage] = useState(1);
-  const [toast, setToast] = useState<string | null>(null);
-
-  const toastTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const { toast } = useToast();
 
   const listParams = { page, search: search || undefined, status: statusFilter };
   const usersQuery = useAdminUsersListQuery(listParams);
@@ -57,19 +56,13 @@ export default function UsersClient() {
   const totalPages = pagination?.totalPages ?? 1;
   const hasUsers = users.length > 0;
 
-  const showToast = useCallback((msg: string) => {
-    setToast(msg);
-    if (toastTimer.current) clearTimeout(toastTimer.current);
-    toastTimer.current = setTimeout(() => setToast(null), 3000);
-  }, []);
-
   async function handleToggleStatus(user: AdminUserListItem) {
     const newStatus = user.status === "active" ? "suspended" : "active";
     try {
       await statusMutation.mutateAsync({ id: user.id, status: newStatus });
-      showToast(`User ${newStatus}`);
+      toast({ message: `User ${newStatus}`, type: "success" });
     } catch {
-      showToast("Action failed");
+      toast({ message: "Action failed", type: "error" });
     }
   }
 
@@ -77,20 +70,14 @@ export default function UsersClient() {
     if (!confirm(`Delete user ${user.email}? This cannot be undone.`)) return;
     try {
       await deleteMutation.mutateAsync(user.id);
-      showToast("User deleted");
+      toast({ message: "User deleted", type: "success" });
     } catch {
-      showToast("Delete failed");
+      toast({ message: "Delete failed", type: "error" });
     }
   }
 
   return (
     <div className="space-y-6">
-      {toast && (
-        <div className="fixed top-4 right-4 z-50 rounded-lg bg-primary px-4 py-3 text-sm text-primary-foreground shadow-lg">
-          {toast}
-        </div>
-      )}
-
       <div className="flex items-center justify-between">
         <div>
           <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">

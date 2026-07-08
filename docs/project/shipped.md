@@ -398,6 +398,20 @@ Cross-audit of `docs/security.md` §0–§10. **SEC-27** shipped 2026-07-08 (VPS
 
 ## Recent work (2026-07-09)
 
+### FE-1 — shadcn redesign completion (shipped)
+
+- **Problem:** Dashboard/admin surfaces still used hand-rolled card layouts, fixed-position
+  toast divs, and a few raw HTML controls outside shadcn primitives.
+- **Fix:** Migrated remaining surfaces to shared shadcn/ui components (`Card`, `Button`,
+  `Input`, `Label`, `Alert`, `States.tsx`); replaced inline toast banners with canonical
+  `useToast` (sonner); updated admin settings, dashboard overview, account, sessions,
+  wallet, invite accept, and 12 admin list/action pages; aligned Vitest mocks for toast
+  assertions.
+- **Paths:** `packages/ui/src/components/ui/`, `packages/ui/src/app/dashboard/`,
+  `packages/ui/src/app/admin/`, `packages/ui/src/app/invite/`
+- **Verification (2026-07-09):** `bun run --cwd packages/ui test` → **241 tests / 58 files**;
+  targeted Biome on touched files.
+
 ### AUTH-1 — Apple Sign In (shipped)
 
 - **Problem:** Env placeholders existed in `.env.example` but no Apple OAuth provider

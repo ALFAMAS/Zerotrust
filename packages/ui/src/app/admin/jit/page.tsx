@@ -1,10 +1,10 @@
 "use client";
 
 import { Check, Clock, Loader2, ShieldQuestion, X } from "lucide-react";
-import { useCallback, useRef, useState } from "react";
 import { ServerStateStatus } from "@/components/ServerStateStatus";
 import { Button } from "@/components/ui/button";
 import { ErrorState } from "@/components/ui/States";
+import { useToast } from "@/context/ToastContext";
 import {
   useApproveJitRequestMutation,
   useDenyJitRequestMutation,
@@ -20,23 +20,15 @@ const STATUS_STYLES: Record<JitRequestStatus, string> = {
 };
 
 export default function AdminJITPage() {
+  const { toast } = useToast();
   const incomingQuery = useIncomingJitRequestsQuery();
   const approveMutation = useApproveJitRequestMutation();
   const denyMutation = useDenyJitRequestMutation();
-  const [toast, setToast] = useState<string | null>(null);
-
-  const toastTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const requests = incomingQuery.data ?? [];
   const hasRequests = requests.length > 0;
   const pending = requests.filter((r) => r.status === "pending");
   const resolved = requests.filter((r) => r.status !== "pending");
-
-  const showToast = useCallback((msg: string) => {
-    setToast(msg);
-    if (toastTimer.current) clearTimeout(toastTimer.current);
-    toastTimer.current = setTimeout(() => setToast(null), 3000);
-  }, []);
 
   function isActing(id: string) {
     return (
@@ -48,29 +40,23 @@ export default function AdminJITPage() {
   async function approve(id: string) {
     try {
       await approveMutation.mutateAsync(id);
-      showToast("Request approved");
+      toast({ message: "Request approved", type: "success" });
     } catch (err: unknown) {
-      showToast(err instanceof Error ? err.message : "Action failed");
+      toast({ message: err instanceof Error ? err.message : "Action failed", type: "error" });
     }
   }
 
   async function deny(id: string) {
     try {
       await denyMutation.mutateAsync(id);
-      showToast("Request denied");
+      toast({ message: "Request denied", type: "success" });
     } catch (err: unknown) {
-      showToast(err instanceof Error ? err.message : "Action failed");
+      toast({ message: err instanceof Error ? err.message : "Action failed", type: "error" });
     }
   }
 
   return (
     <div className="max-w-4xl space-y-6">
-      {toast && (
-        <div className="fixed right-4 top-4 z-50 rounded-lg bg-primary px-4 py-3 text-sm text-primary-foreground shadow-lg">
-          {toast}
-        </div>
-      )}
-
       <div>
         <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
           Cross-tenant access requests

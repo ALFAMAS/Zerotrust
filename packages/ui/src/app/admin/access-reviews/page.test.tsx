@@ -1,8 +1,14 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { mockApiGet, mockApiPost } from "@/test/apiClientMock";
+
+const mockToast = vi.fn();
+vi.mock("@/context/ToastContext", () => ({
+  useToast: () => ({ toast: mockToast }),
+}));
+
 import AccessReviewsPage from "./page";
 
 function renderAccessReviews() {
@@ -23,6 +29,7 @@ describe("AccessReviewsPage", () => {
   beforeEach(() => {
     mockApiGet.mockReset();
     mockApiPost.mockReset();
+    mockToast.mockReset();
   });
 
   it("renders access review history", async () => {
@@ -59,9 +66,10 @@ describe("AccessReviewsPage", () => {
     await waitFor(() => {
       expect(mockApiPost).toHaveBeenCalledWith("/admin/access-reviews", {});
     });
-    expect(
-      await screen.findByText("Review started — 3 privileged user(s) to review")
-    ).toBeInTheDocument();
+    expect(mockToast).toHaveBeenCalledWith({
+      message: "Review started — 3 privileged user(s) to review",
+      type: "success",
+    });
   });
 
   it("shows empty state when no reviews exist", async () => {

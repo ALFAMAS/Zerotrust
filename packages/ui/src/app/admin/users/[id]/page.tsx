@@ -1,11 +1,11 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useCallback, useState } from "react";
 import Badge from "@/components/Badge";
 import { ServerStateStatus } from "@/components/ServerStateStatus";
 import { Button } from "@/components/ui/button";
 import { ErrorState } from "@/components/ui/States";
+import { useToast } from "@/context/ToastContext";
 import {
   CUSTOMER_SEGMENTS,
   useAdminUserDetailQuery,
@@ -19,6 +19,7 @@ import type { CustomerSegment } from "@/lib/server-state/types";
 const fmt = (d?: string | null) => (d ? new Date(d).toLocaleString() : "—");
 
 export default function UserDetailPage() {
+  const { toast } = useToast();
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const userQuery = useAdminUserDetailQuery(id);
@@ -26,7 +27,6 @@ export default function UserDetailPage() {
   const segmentMutation = useSetAdminUserSegmentMutation(id);
   const forceLogoutMutation = useForceLogoutAdminUserMutation(id);
   const deleteMutation = useDeleteAdminUserMutation(id);
-  const [toast, setToast] = useState<string | null>(null);
 
   const user = userQuery.data;
   const hasUser = user !== undefined;
@@ -37,18 +37,13 @@ export default function UserDetailPage() {
     forceLogoutMutation.isPending ||
     deleteMutation.isPending;
 
-  const showToast = useCallback((msg: string) => {
-    setToast(msg);
-    setTimeout(() => setToast(null), 3000);
-  }, []);
-
   async function handleForceLogout() {
     if (!confirm("Force logout all sessions for this user?")) return;
     try {
       await forceLogoutMutation.mutateAsync();
-      showToast("All sessions revoked");
+      toast({ message: "All sessions revoked", type: "success" });
     } catch {
-      showToast("Action failed");
+      toast({ message: "Action failed", type: "error" });
     }
   }
 
@@ -57,9 +52,9 @@ export default function UserDetailPage() {
     const newStatus = user.status === "active" ? "suspended" : "active";
     try {
       await updateStatusMutation.mutateAsync(newStatus);
-      showToast(`User ${newStatus}`);
+      toast({ message: `User ${newStatus}`, type: "success" });
     } catch {
-      showToast("Action failed");
+      toast({ message: "Action failed", type: "error" });
     }
   }
 
@@ -68,10 +63,10 @@ export default function UserDetailPage() {
     if (!confirm(`Permanently delete ${user.email}? This cannot be undone.`)) return;
     try {
       await deleteMutation.mutateAsync();
-      showToast("User deleted");
+      toast({ message: "User deleted", type: "success" });
       setTimeout(() => router.push("/admin/users"), 800);
     } catch {
-      showToast("Delete failed");
+      toast({ message: "Delete failed", type: "error" });
     }
   }
 
@@ -79,9 +74,9 @@ export default function UserDetailPage() {
     if (!user) return;
     try {
       await segmentMutation.mutateAsync(segment);
-      showToast(`Segment set to ${segment}`);
+      toast({ message: `Segment set to ${segment}`, type: "success" });
     } catch {
-      showToast("Failed to update segment");
+      toast({ message: "Failed to update segment", type: "error" });
     }
   }
 
@@ -105,12 +100,6 @@ export default function UserDetailPage() {
 
   return (
     <div className="space-y-6 max-w-3xl">
-      {toast && (
-        <div className="fixed top-4 right-4 z-50 rounded-lg bg-primary px-4 py-3 text-sm text-foreground shadow-lg">
-          {toast}
-        </div>
-      )}
-
       <div className="flex items-center gap-3">
         <Button
           variant="ghost"

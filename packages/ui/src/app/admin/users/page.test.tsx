@@ -4,6 +4,11 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { mockApiDelete, mockApiGet, mockApiPatch } from "@/test/apiClientMock";
 
+const mockToast = vi.fn();
+vi.mock("@/context/ToastContext", () => ({
+  useToast: () => ({ toast: mockToast }),
+}));
+
 import UsersClient from "./UsersClient";
 
 const users = [
@@ -49,6 +54,7 @@ describe("Admin UsersPage", () => {
     mockApiGet.mockReset();
     mockApiPatch.mockReset();
     mockApiDelete.mockReset();
+    mockToast.mockReset();
     window.confirm = vi.fn(() => true);
   });
 
@@ -104,7 +110,7 @@ describe("Admin UsersPage", () => {
     await waitFor(() => {
       expect(mockApiPatch).toHaveBeenCalledWith("/admin/users/u1", { status: "suspended" });
     });
-    expect(await screen.findByText("User suspended")).toBeInTheDocument();
+    expect(mockToast).toHaveBeenCalledWith({ message: "User suspended", type: "success" });
   });
 
   it("deletes a user after confirming", async () => {
@@ -121,7 +127,7 @@ describe("Admin UsersPage", () => {
     await waitFor(() => {
       expect(mockApiDelete).toHaveBeenCalledWith("/admin/users/u1");
     });
-    expect(await screen.findByText("User deleted")).toBeInTheDocument();
+    expect(mockToast).toHaveBeenCalledWith({ message: "User deleted", type: "success" });
     await waitFor(() => {
       expect(screen.queryByText("Ada Lovelace")).not.toBeInTheDocument();
     });

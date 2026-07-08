@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useRef, useState } from "react";
 import { ServerStateStatus } from "@/components/ServerStateStatus";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -15,6 +14,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useToast } from "@/context/ToastContext";
 import {
   useAccessReviewsListQuery,
   useStartAccessReviewMutation,
@@ -23,17 +23,10 @@ import {
 const fmt = (d?: string | null) => (d ? new Date(d).toLocaleString() : "—");
 
 export default function AccessReviewsPage() {
-  const [toast, setToast] = useState<string | null>(null);
-  const toastTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const { toast } = useToast();
 
   const reviewsQuery = useAccessReviewsListQuery();
   const startMutation = useStartAccessReviewMutation();
-
-  const showToast = useCallback((msg: string) => {
-    setToast(msg);
-    if (toastTimer.current) clearTimeout(toastTimer.current);
-    toastTimer.current = setTimeout(() => setToast(null), 3000);
-  }, []);
 
   const reviews = reviewsQuery.data?.reviews ?? [];
   const loading = reviewsQuery.isLoading;
@@ -42,20 +35,17 @@ export default function AccessReviewsPage() {
   async function startReview() {
     try {
       const res = await startMutation.mutateAsync();
-      showToast(`Review started — ${res.itemCount} privileged user(s) to review`);
+      toast({
+        message: `Review started — ${res.itemCount} privileged user(s) to review`,
+        type: "success",
+      });
     } catch {
-      showToast("Failed to start review");
+      toast({ message: "Failed to start review", type: "error" });
     }
   }
 
   return (
     <div className="space-y-6">
-      {toast && (
-        <div className="fixed top-4 right-4 z-50 rounded-lg bg-primary px-4 py-3 text-sm text-primary-foreground shadow-lg">
-          {toast}
-        </div>
-      )}
-
       <div className="flex items-center justify-between">
         <div>
           <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">

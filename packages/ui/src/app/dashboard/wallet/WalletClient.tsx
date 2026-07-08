@@ -4,6 +4,7 @@ import { Wallet as WalletIcon } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 import { ServerStateStatus } from "@/components/ServerStateStatus";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,6 +19,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useToast } from "@/context/ToastContext";
 import { navigateToSafeExternal } from "@/lib/safeRedirect";
 import {
   useTopUpWalletMutation,
@@ -30,11 +32,11 @@ const money = (cents: number, currency = "USD") =>
   new Intl.NumberFormat(undefined, { style: "currency", currency }).format((cents ?? 0) / 100);
 
 function WalletContent() {
+  const { toast } = useToast();
   const params = useSearchParams();
   const walletQuery = useWalletQuery();
   const transactionsQuery = useWalletTransactionsQuery({ limit: 30 });
   const topUpMutation = useTopUpWalletMutation();
-  const [toast, setToast] = useState<string | null>(null);
   const [amount, setAmount] = useState("10");
 
   const wallet = walletQuery.data ?? null;
@@ -47,11 +49,6 @@ function WalletContent() {
     (transactionsQuery.isFetching && !transactionsQuery.isPending);
   const isStale = walletQuery.isStale || transactionsQuery.isStale;
 
-  function showToast(msg: string) {
-    setToast(msg);
-    setTimeout(() => setToast(null), 3000);
-  }
-
   function refreshWallet() {
     void walletQuery.refetch();
     void transactionsQuery.refetch();
@@ -61,7 +58,7 @@ function WalletContent() {
     e.preventDefault();
     const dollars = Number(amount);
     if (!Number.isFinite(dollars) || dollars <= 0) {
-      showToast("Enter a positive amount");
+      toast({ message: "Enter a positive amount", type: "error" });
       return;
     }
 
@@ -70,7 +67,7 @@ function WalletContent() {
       const { url } = await topUpMutation.mutateAsync(amountCents);
       navigateToSafeExternal(url, "/dashboard/wallet");
     } catch (err) {
-      showToast(err instanceof Error ? err.message : "Top-up failed");
+      toast({ message: err instanceof Error ? err.message : "Top-up failed", type: "error" });
     }
   }
 
@@ -85,24 +82,20 @@ function WalletContent() {
 
   return (
     <div className="space-y-6">
-      {toast && (
-        <div className="fixed top-4 right-4 z-50 rounded-lg bg-primary px-4 py-3 text-sm text-primary-foreground shadow-lg">
-          {toast}
-        </div>
-      )}
-
       <WalletHeader />
 
       {params.get("success") === "1" && (
-        <div className="rounded-xl border border-green-700 bg-green-900/30 p-4 text-sm text-green-300">
-          Payment received. Your wallet balance will update shortly after Stripe confirms the
-          payment.
-        </div>
+        <Alert className="border-green-700 bg-green-900/30 text-green-300">
+          <AlertDescription>
+            Payment received. Your wallet balance will update shortly after Stripe confirms the
+            payment.
+          </AlertDescription>
+        </Alert>
       )}
       {params.get("canceled") === "1" && (
-        <div className="rounded-xl border border-yellow-700 bg-yellow-900/30 p-4 text-sm text-yellow-300">
-          Checkout canceled. You have not been charged.
-        </div>
+        <Alert className="border-yellow-700 bg-yellow-900/30 text-yellow-300">
+          <AlertDescription>Checkout canceled. You have not been charged.</AlertDescription>
+        </Alert>
       )}
 
       <ServerStateStatus

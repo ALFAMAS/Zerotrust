@@ -18,13 +18,14 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/context/ToastContext";
 import { useAdminRolesQuery, useCreateAdminRoleMutation } from "@/lib/server-state/adminRoles";
 
 export default function AdminRolesPage() {
+  const { toast } = useToast();
   const rolesQuery = useAdminRolesQuery();
   const createMutation = useCreateAdminRoleMutation();
   const [form, setForm] = useState({ name: "", displayName: "", description: "" });
-  const [toast, setToast] = useState<string | null>(null);
 
   const roles = rolesQuery.data?.roles ?? [];
 
@@ -38,22 +39,17 @@ export default function AdminRolesPage() {
         permissions: [],
       });
       setForm({ name: "", displayName: "", description: "" });
-      setToast("Role created");
-      setTimeout(() => setToast(null), 3000);
+      toast({ message: "Role created", type: "success" });
     } catch (err) {
-      setToast(err instanceof Error ? err.message : "Failed to create role");
-      setTimeout(() => setToast(null), 3000);
+      toast({
+        message: err instanceof Error ? err.message : "Failed to create role",
+        type: "error",
+      });
     }
   }
 
   return (
     <div className="space-y-6">
-      {toast && (
-        <div className="fixed right-4 top-4 z-50 rounded-lg bg-primary px-4 py-3 text-sm text-primary-foreground shadow-lg">
-          {toast}
-        </div>
-      )}
-
       <div className="flex items-center gap-3">
         <KeyRound className="h-6 w-6 text-primary" />
         <div>
