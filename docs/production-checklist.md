@@ -42,6 +42,7 @@ Complete before pointing DNS at production. Archive signed copies in
 | 10 | `METRICS_AUTH_TOKEN`, `CORS_ALLOWED_ORIGINS`, WebAuthn RP ID/origins verified | | | ☐ |
 | 11 | `/metrics` curl + `ops:smoke` bearer auth verified (OPS-1) | | | ☐ |
 | 12 | `NEXT_PUBLIC_ZEROTRUST_URL` build + `ops:smoke` UI probe verified (OPS-2) | | | ☐ |
+| 13 | Prometheus → Alertmanager routing + on-call receivers verified (OBS-1) | | | ☐ |
 
 ---
 
@@ -92,7 +93,7 @@ Complete before pointing DNS at production. Archive signed copies in
 | ☐ | Structured JSON logs | P1 | **Done** | `LOG_FORMAT=json` in Docker/CI |
 | ☐ | SLO burn-rate middleware | P2 | **Done** | `src/services/ops/slo.service.ts` |
 | ☐ | Local Prometheus + Alertmanager | P2 | **Done** | `docker-compose.observability.yml`, `monitoring/alerts.yml` |
-| ☐ | Production alerting wiring | P1 | **Unknown** | Config exists; connect PagerDuty/Slack to Alertmanager |
+| ☐ | Production alerting wiring | P1 | **Done** | OBS-1 (2026-07-09): `monitoring/alertmanager.yml`, `alertmanager.production.example.yml`, Prometheus→AM wiring, `ops:verify-alerting`; `docs/deployment.md` § OBS-1 |
 | ☐ | `/healthz` + public status page | P1 | **Done** | `GET /status`; wire uptime checks in your LB |
 
 ---

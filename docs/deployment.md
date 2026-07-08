@@ -262,6 +262,93 @@ UI_URL=https://app.example.com API_URL=https://api.example.com bun run ops:smoke
 Link completed rows to [`production-checklist.md`](./production-checklist.md) §
 Pre-launch sign-off item 12.
 
+### Production alerting wiring (OBS-1)
+
+Prometheus SLO rules (`monitoring/alerts.yml`) fire **page**-severity alerts for
+5xx rate, p95 latency, and missing scrapes. Operators must route those alerts
+from Alertmanager to on-call (PagerDuty, Slack, or equivalent) and archive
+wiring evidence per environment.
+
+#### 1. Local / staging stack (no secrets)
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.observability.yml up -d prometheus alertmanager
+bun run ops:verify-alerting
+```
+
+- Prometheus UI: `http://localhost:9090` — **Alerts** tab shows rule state.
+- Alertmanager UI: `http://localhost:9093` — review grouped alerts (local config
+  has no outbound receiver).
+
+`monitoring/prometheus.yml` points at `alertmanager:9093`; compose mounts
+`monitoring/alertmanager.yml` by default.
+
+#### 2. Production receivers (PagerDuty + Slack)
+
+PagerDuty and Slack credentials are **environment-specific** — never commit them.
+
+```bash
+cp monitoring/alertmanager.production.example.yml monitoring/alertmanager.production.yml
+# Edit monitoring/alertmanager.production.yml:
+#   REPLACE_WITH_PAGERDUTY_EVENTS_API_V2_KEY  → Events API v2 integration key
+#   REPLACE_WITH_SLACK_INCOMING_WEBHOOK_URL    → incoming webhook URL
+```
+
+Mount the production file when starting Alertmanager:
+
+```bash
+export ALERTMANAGER_CONFIG=./monitoring/alertmanager.production.yml
+docker compose -f docker-compose.yml -f docker-compose.observability.yml up -d alertmanager
+```
+
+For VM/Kubernetes deploys, place the same YAML at a root-owned path (mode `600`)
+and point your Alertmanager service at it.
+
+#### 3. Verify wiring (`ops:verify-alerting`)
+
+```bash
+# After Prometheus + Alertmanager are reachable
+PROMETHEUS_URL=http://localhost:9090 \
+ALERTMANAGER_URL=http://localhost:9093 \
+bun run ops:verify-alerting
+
+# Optional: post a synthetic alert (confirm it appears in Alertmanager UI or Slack)
+VERIFY_ALERTING_SEND_TEST=true bun run ops:verify-alerting
+```
+
+The script asserts:
+
+1. Alertmanager `/-/healthy` returns OK.
+2. Prometheus loaded the `zerotrust-slo` rule group (three alerts).
+3. Prometheus reports at least one active Alertmanager target.
+
+Archive command output in [`docs/compliance/`](./compliance/README.md) evidence
+per [`monitoring-evidence-procedure.md`](./compliance/monitoring-evidence-procedure.md).
+
+#### 4. End-to-end paging test (production sign-off)
+
+After production receivers are configured:
+
+1. Temporarily lower a rule threshold in a **staging** Prometheus (or use
+   `VERIFY_ALERTING_SEND_TEST=true` against staging Alertmanager).
+2. Confirm the alert appears in Alertmanager **and** the on-call channel
+   (PagerDuty incident or Slack message).
+3. Resolve the alert and confirm the resolved notification (when `send_resolved: true`).
+
+#### 5. Sign-off template
+
+| Check | Pass |
+| ----- | ---- |
+| `monitoring/alerts.yml` rules loaded in Prometheus | ☐ |
+| Prometheus `alerting.alertmanagers` targets Alertmanager | ☐ |
+| Production `alertmanager.production.yml` mounted (not committed) | ☐ |
+| PagerDuty/Slack placeholders replaced with live credentials | ☐ |
+| `bun run ops:verify-alerting` green | ☐ |
+| Synthetic or staging-fired alert received on on-call channel | ☐ |
+
+Link completed rows to [`production-checklist.md`](./production-checklist.md) §
+Pre-launch sign-off item 13 and § Observability.
+
 ### Production background-worker topology
 
 Use one of these two topologies deliberately:

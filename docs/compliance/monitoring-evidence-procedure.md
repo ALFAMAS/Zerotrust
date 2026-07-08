@@ -35,7 +35,7 @@ Collect and retain:
 | Check | Evidence |
 | --- | --- |
 | Critical alerts have owners | Alert policy export |
-| Alerts route to an active channel | Alert config screenshot |
+| Alerts route to an active channel | Alertmanager receiver config + `ops:verify-alerting` sign-off |
 | On-call rotation is populated | Schedule export |
 | Sev1/Sev2 alerts were acknowledged | Alert history |
 | Backup failures alert | Backup alert policy |

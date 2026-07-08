@@ -398,6 +398,26 @@ Cross-audit of `docs/security.md` §0–§10. **SEC-27** shipped 2026-07-08 (VPS
 
 ## Recent work (2026-07-09)
 
+### OBS-1 — Production alerting wiring (shipped)
+
+- **Problem:** Prometheus SLO rules and Alertmanager existed in compose, but
+  Prometheus did not target Alertmanager, no receiver templates existed for
+  PagerDuty/Slack, and operators lacked a sign-off procedure.
+- **Fix:** Added `monitoring/alertmanager.yml` (local-safe routing),
+  `alertmanager.production.example.yml` (PagerDuty + Slack templates),
+  Prometheus `alerting.alertmanagers` block, compose config mount via
+  `ALERTMANAGER_CONFIG`, and `bun run ops:verify-alerting` with optional
+  synthetic alert. Documented § Production alerting wiring (OBS-1) in
+  `docs/deployment.md` with pre-launch sign-off template.
+- **Paths:** `monitoring/alertmanager.yml`, `monitoring/alertmanager.production.example.yml`,
+  `monitoring/prometheus.yml`, `docker-compose.observability.yml`,
+  `scripts/verify-alerting.mjs`, `src/__tests__/monitoring.alerting.test.ts`,
+  `.env.example`, `docs/deployment.md`, `docs/production-checklist.md`,
+  `docs/compliance/monitoring-evidence-procedure.md`
+- **Verification (2026-07-09):** `monitoring.alerting.test.ts` (4 passed);
+  `bun run boundaries:check` green. Live `ops:verify-alerting` requires running
+  observability stack.
+
 ### PERF-2 — Lighthouse >90 gate in CI (shipped)
 
 - **Problem:** Lighthouse thresholds were enforced only via manual `staging-validation.yml`, not on every PR.

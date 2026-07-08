@@ -1,0 +1,62 @@
+# Production Alertmanager routing — copy to monitoring/alertmanager.production.yml
+# (gitignored), replace placeholders, and mount as the Alertmanager config file.
+# See docs/deployment.md § Production alerting wiring (OBS-1).
+#
+# Generate PagerDuty integration key: PagerDuty → Services → Integrations → Events API v2
+# Slack incoming webhook: Slack → Apps → Incoming Webhooks → Add to workspace
+
+global:
+  resolve_timeout: 5m
+
+route:
+  receiver: slack-warning
+  group_by: ["alertname", "service"]
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 4h
+  routes:
+    - match:
+        severity: page
+      receiver: pagerduty-page
+      continue: true
+    - match:
+        severity: page
+      receiver: slack-page
+    - match:
+        severity: warning
+      receiver: slack-warning
+
+receivers:
+  - name: pagerduty-page
+    pagerduty_configs:
+      - routing_key: REPLACE_WITH_PAGERDUTY_EVENTS_API_V2_KEY
+        severity: critical
+        description: "{{ .CommonAnnotations.summary }}"
+        details:
+          firing: "{{ .Alerts.Firing | len }}"
+          service: "{{ .CommonLabels.service }}"
+
+  - name: slack-page
+    slack_configs:
+      - api_url: REPLACE_WITH_SLACK_INCOMING_WEBHOOK_URL
+        channel: "#zerotrust-alerts"
+        username: zerotrust
+        title: "{{ .CommonAnnotations.summary }}"
+        text: "{{ .CommonAnnotations.description }}"
+        send_resolved: true
+
+  - name: slack-warning
+    slack_configs:
+      - api_url: REPLACE_WITH_SLACK_INCOMING_WEBHOOK_URL
+        channel: "#zerotrust-alerts"
+        username: zerotrust
+        title: "{{ .CommonAnnotations.summary }}"
+        text: "{{ .CommonAnnotations.description }}"
+        send_resolved: true
+
+inhibit_rules:
+  - source_match:
+      severity: page
+    target_match:
+      severity: warning
+    equal: ["alertname", "service"]

@@ -4,7 +4,7 @@
 
 Audit date: **2026-07-05**. Verified/completed items moved to [`shipped.md`](./shipped.md) § Security baseline audit.
 
-**Verification (2026-07-08):** Security baseline — DQ-2 remains open (SEC-27 shipped). Production checklist audit (2026-07-07) added **18** tracked gaps in § Production readiness below (**12** open items total; CI-2 + DOC-1 + SEC-27 + OPS-1 + OPS-2 + INF-1 + INF-2 + PERF-1 shipped 2026-07-08).
+**Verification (2026-07-09):** OBS-1 shipped (alerting templates + verify script). Production checklist audit (2026-07-07) added **18** tracked gaps in § Production readiness below (**11** open items total; CI-2 + DOC-1 + SEC-27 + OPS-1 + OPS-2 + INF-1 + INF-2 + PERF-1 + PERF-2 + OBS-1 shipped 2026-07-08–09).
 
 ### Low / Ops (document + deploy)
 
@@ -60,15 +60,15 @@ Audit date: **2026-07-07**. Open gaps from [`production-checklist.md`](../produc
 
 ### Observability
 
-- [ ] **OBS-1** — **P1** — Production alerting wiring
+- [x] **OBS-1** — **P1** — Production alerting wiring — **shipped 2026-07-09** → [`shipped.md`](./shipped.md) § Recent work
 
-       **Problem:** Prometheus + Alertmanager configs exist locally, but PagerDuty/Slack (or equivalent) routing is environment-specific and unverified in repo.
+       **Problem:** Prometheus + Alertmanager configs existed locally, but PagerDuty/Slack routing was environment-specific and unverified in repo.
 
-       **Fix:** Connect Alertmanager receivers to on-call; archive wiring evidence in `docs/compliance/evidence/`.
+       **Fix:** Wired Prometheus→Alertmanager in `monitoring/prometheus.yml`; added `monitoring/alertmanager.yml` (local-safe) and `alertmanager.production.example.yml` (PagerDuty + Slack templates); compose mounts config via `ALERTMANAGER_CONFIG`. Added `bun run ops:verify-alerting` and `docs/deployment.md` § OBS-1 sign-off procedure.
 
-       **Paths:** `monitoring/alerts.yml`, `docker-compose.observability.yml`, `docs/compliance/monitoring-evidence-procedure.md`
+       **Paths:** `monitoring/`, `docker-compose.observability.yml`, `scripts/verify-alerting.mjs`, `docs/deployment.md`
 
-       **Status:** Unknown — verify per environment.
+       **Status:** Done (operator secrets remain per-environment).
 
        **Refs:** [`production-checklist.md`](../production-checklist.md) § Observability
 

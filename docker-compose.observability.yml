@@ -29,6 +29,12 @@ services:
   alertmanager:
     image: prom/alertmanager:v0.27.0
     container_name: zerotrust-alertmanager
+    command:
+      - --config.file=/etc/alertmanager/alertmanager.yml
+      - --storage.path=/alertmanager
+      - --web.external-url=http://localhost:9093
+    volumes:
+      - ${ALERTMANAGER_CONFIG:-./monitoring/alertmanager.yml}:/etc/alertmanager/alertmanager.yml:ro
     ports:
       - "9093:9093"
     networks:

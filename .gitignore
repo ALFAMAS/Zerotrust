@@ -21,6 +21,8 @@ plugins/**/*.js.map
 
 # Prometheus scrape token (copy from monitoring/metrics-token.example)
 monitoring/metrics-token
+# Production Alertmanager receivers (copy from alertmanager.production.example.yml)
+monitoring/alertmanager.production.yml
 
 # IDE
 .vscode/

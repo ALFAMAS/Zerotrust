@@ -18,6 +18,7 @@
     "audit:integration": "node scripts/audit-api-ui-map.mjs",
     "verify:generated": "bun run sdk:generate && bun run docs:api && bun run audit:integration && git diff --exit-code -- packages/client/src/index.ts docs/api-reference.md docs/api-ui-integration-matrix.md",
     "ops:smoke": "node scripts/ops-smoke.mjs",
+    "ops:verify-alerting": "node scripts/verify-alerting.mjs",
     "db:generate": "bunx drizzle-kit generate",
     "db:migrate": "bunx drizzle-kit migrate",
     "db:push": "bunx drizzle-kit push",
