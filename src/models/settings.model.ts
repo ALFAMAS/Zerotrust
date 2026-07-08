@@ -6,6 +6,7 @@ export interface SaaSSettings {
   emailPasswordEnabled: boolean;
   googleOAuthEnabled: boolean;
   githubOAuthEnabled: boolean;
+  appleOAuthEnabled: boolean;
   magicLinkEnabled: boolean;
   passkeyEnabled: boolean;
   totpEnabled: boolean;
@@ -44,6 +45,7 @@ function rowToSettings(row: typeof saasSettingsTable.$inferSelect): SaaSSettings
     emailPasswordEnabled: row.emailPasswordEnabled,
     googleOAuthEnabled: row.googleOAuthEnabled,
     githubOAuthEnabled: row.githubOAuthEnabled,
+    appleOAuthEnabled: row.appleOAuthEnabled,
     magicLinkEnabled: row.magicLinkEnabled,
     passkeyEnabled: row.passkeyEnabled,
     totpEnabled: row.totpEnabled,

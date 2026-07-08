@@ -1,6 +1,6 @@
 # OAuth plugin
 
-Google, GitHub, and Facebook OAuth social login. Loaded at API boot when
+Google, GitHub, Facebook, and Apple OAuth social login. Loaded at API boot when
 `plugins/oauth/index.ts` is present and the plugin is enabled.
 
 ## Routes (mounted at `/auth`)
@@ -24,7 +24,7 @@ plugins/oauth/
   state.ts           # OAuth state / PKCE storage (Redis + in-memory fallback)
   authorize-url.ts   # Authorization URL builder
   provider.factory.ts
-  providers/         # google, github, facebook token exchange
+  providers/         # google, github, facebook, apple token exchange
 ```
 
 Provider adapters use `fetchFixedUrl` (CWE-918) and never put secrets in URLs (CWE-532).

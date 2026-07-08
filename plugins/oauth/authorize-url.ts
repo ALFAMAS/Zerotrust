@@ -28,6 +28,12 @@ export const PROVIDER_META: Record<string, ProviderMeta> = {
     scopes: ["email", "public_profile"],
     supportsPKCE: true,
   },
+  apple: {
+    label: "Apple",
+    authorizationUrl: "https://appleid.apple.com/auth/authorize",
+    scopes: ["name", "email"],
+    supportsPKCE: true,
+  },
 };
 
 export function isSupportedProvider(provider: string): provider is keyof typeof PROVIDER_META {
@@ -55,6 +61,10 @@ export function buildAuthorizationUrl(provider: string, opts: AuthorizationUrlOp
   if (meta.supportsPKCE && opts.codeChallenge) {
     url.searchParams.set("code_challenge", opts.codeChallenge);
     url.searchParams.set("code_challenge_method", "S256");
+  }
+
+  if (provider === "apple") {
+    url.searchParams.set("response_mode", "query");
   }
 
   return url.toString();

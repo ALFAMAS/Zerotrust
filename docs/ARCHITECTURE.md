@@ -70,7 +70,7 @@ predicates on org-scoped tables.
 | Data          | `db/`                                                                     | Drizzle schema (40 tables) + connection; `models/` thin table re-exports                                |
 | Crypto        | `crypto/`                                                                 | `paseto-v4` (v4.local), `csfle` (field encryption), `hardware-key-store`, `codes`                       |
 | MFA           | `mfa/`                                                                    | TOTP, Email OTP channel, FIDO MDS3                                                                      |
-| OAuth         | `oauth/`                                                                  | provider factory + adapters (Google/GitHub/Facebook; Apple Sign In not yet implemented)                 |
+| OAuth         | `oauth/`                                                                  | provider factory + adapters (Google/GitHub/Facebook/Apple)                 |
 | Access        | `jit/`                                                                    | cross-tenant just-in-time elevation                                                                     |
 | Platform      | `audit/` `metrics/` `telemetry/` `webhooks/` `notifications/` `ssf/`      | hash-chained audit log, Prometheus, OTel, outbound webhooks, SSF receiver                               |
 | Cross-cutting | `shared/` `config/` `logger/` `templates/`                                | safe-fetch/redirect guards, typed config, structured logging, email templates                           |

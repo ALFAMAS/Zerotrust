@@ -19,6 +19,7 @@ vi.mock("../../src/config/index.js", () => ({
       providers: {
         github: { clientId: "cid", clientSecret: "csecret", redirectUri: "http://localhost/cb" },
         google: { clientId: "cid", clientSecret: "csecret", redirectUri: "http://localhost/cb" },
+        apple: { clientId: "cid", clientSecret: "jwt-secret", redirectUri: "http://localhost/cb" },
       },
     },
   }),
@@ -107,6 +108,86 @@ describe("OAuth adapters", () => {
     });
   });
 
+  describe("Apple provider", () => {
+    function makeAppleIdToken(claims: Record<string, unknown>): string {
+      const header = Buffer.from(JSON.stringify({ alg: "RS256", kid: "test" })).toString(
+        "base64url"
+      );
+      const payload = Buffer.from(JSON.stringify(claims)).toString("base64url");
+      return `${header}.${payload}.signature`;
+    }
+
+    it("exchanges code and parses id_token profile", async () => {
+      const idToken = makeAppleIdToken({
+        iss: "https://appleid.apple.com",
+        aud: "cid",
+        exp: Math.floor(Date.now() / 1000) + 3600,
+        sub: "apple-001",
+        email: "user@privaterelay.appleid.com",
+        email_verified: "true",
+      });
+      const tokens = {
+        access_token: "aat",
+        token_type: "Bearer",
+        expires_in: 3600,
+        id_token: idToken,
+      };
+
+      mockFetch.mockResolvedValueOnce({ ok: true, json: async () => tokens });
+
+      const { exchangeCode } = await import("../../plugins/oauth/providers/apple");
+      const result = await exchangeCode("code123", "cid", "jwt-secret", "http://localhost/cb");
+
+      expect(result.tokens.access_token).toBe("aat");
+      expect(result.profile.id).toBe("apple-001");
+      expect(result.profile.email).toBe("user@privaterelay.appleid.com");
+      expect(result.profile.emailVerified).toBe(true);
+    });
+
+    it("merges first-sign-in name from user payload", async () => {
+      const idToken = makeAppleIdToken({
+        iss: "https://appleid.apple.com",
+        aud: "cid",
+        exp: Math.floor(Date.now() / 1000) + 3600,
+        sub: "apple-002",
+        email: "user@privaterelay.appleid.com",
+        email_verified: true,
+      });
+      const tokens = {
+        access_token: "aat",
+        token_type: "Bearer",
+        expires_in: 3600,
+        id_token: idToken,
+      };
+
+      mockFetch.mockResolvedValueOnce({ ok: true, json: async () => tokens });
+
+      const { exchangeCode } = await import("../../plugins/oauth/providers/apple");
+      const result = await exchangeCode(
+        "code123",
+        "cid",
+        "jwt-secret",
+        "http://localhost/cb",
+        "verifier",
+        { name: { firstName: "Jane", lastName: "Apple" } }
+      );
+
+      expect(result.profile.name).toBe("Jane Apple");
+      const [url, init] = mockFetch.mock.calls[0];
+      expect(url).toBe("https://appleid.apple.com/auth/token");
+      expect(init?.method).toBe("POST");
+      expect(init?.body).toContain("code_verifier=verifier");
+    });
+
+    it("throws on token exchange failure", async () => {
+      mockFetch.mockResolvedValueOnce({ ok: false, status: 400, text: async () => "bad request" });
+      const { exchangeCode } = await import("../../plugins/oauth/providers/apple");
+      await expect(
+        exchangeCode("bad-code", "cid", "jwt-secret", "http://localhost/cb")
+      ).rejects.toThrow("400");
+    });
+  });
+
   describe("provider.factory", () => {
     it("returns google adapter", async () => {
       const { getProviderAdapter } = await import("../../plugins/oauth/provider.factory");
@@ -117,6 +198,12 @@ describe("OAuth adapters", () => {
     it("returns github adapter", async () => {
       const { getProviderAdapter } = await import("../../plugins/oauth/provider.factory");
       const adapter = getProviderAdapter("github");
+      expect(typeof adapter.exchangeCode).toBe("function");
+    });
+
+    it("returns apple adapter", async () => {
+      const { getProviderAdapter } = await import("../../plugins/oauth/provider.factory");
+      const adapter = getProviderAdapter("apple");
       expect(typeof adapter.exchangeCode).toBe("function");
     });
 

@@ -25,6 +25,7 @@ const SETTINGS_ROW = {
   emailPasswordEnabled: true,
   googleOAuthEnabled: false,
   githubOAuthEnabled: false,
+  appleOAuthEnabled: false,
   magicLinkEnabled: true,
   passkeyEnabled: true,
   totpEnabled: true,

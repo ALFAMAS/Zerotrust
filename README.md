@@ -88,7 +88,7 @@ point DNS at it, and focus on your product surface.
 ### Authentication & identity
 
 - Email + password with progressive login backoff (exponential delay + PoW at threshold)
-- OAuth — Google, GitHub, Facebook (admin-toggleable per provider); **Apple Sign In not yet implemented**
+- OAuth — Google, GitHub, Facebook, Apple (admin-toggleable per provider)
 - Magic links (passwordless, 15-minute TTL) — [`plugins/magic-link/`](./plugins/magic-link/)
 - Passkeys / WebAuthn (FIDO2, resident keys, MDS3 attestation policy)
 - TOTP (Google Authenticator / Authy) + email OTP
@@ -532,7 +532,7 @@ zerotrust is actively maintained with a large test suite. Honest boundaries:
 
 | Ships today                             | Not yet / partial                                                 |
 | --------------------------------------- | ----------------------------------------------------------------- |
-| Google, GitHub, Facebook OAuth          | Apple Sign In                                                     |
+| Google, GitHub, Facebook, Apple OAuth     | —                                                                 |
 | Software key provider (CSFLE, tokens)   | TPM / Secure Enclave / PKCS#11 (fork path — see `docs/extending.md`) |
 | Web + API                               | Expo mobile client (documented in security baseline, not in repo) |
 | SOC 2 readiness docs + product controls | Auditor certification (your process)                              |

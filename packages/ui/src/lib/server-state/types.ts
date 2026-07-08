@@ -753,6 +753,7 @@ export interface AuthSettings {
   emailPasswordEnabled: boolean;
   googleOAuthEnabled: boolean;
   githubOAuthEnabled: boolean;
+  appleOAuthEnabled: boolean;
   magicLinkEnabled: boolean;
   passkeyEnabled: boolean;
   totpEnabled: boolean;

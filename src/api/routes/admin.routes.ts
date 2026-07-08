@@ -77,6 +77,7 @@ const settingsUpdateSchema = z
     emailPasswordEnabled: z.boolean(),
     googleOAuthEnabled: z.boolean(),
     githubOAuthEnabled: z.boolean(),
+    appleOAuthEnabled: z.boolean(),
     magicLinkEnabled: z.boolean(),
     passkeyEnabled: z.boolean(),
     totpEnabled: z.boolean(),

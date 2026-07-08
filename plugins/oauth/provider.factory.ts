@@ -16,7 +16,11 @@ export interface ExchangeResult {
 }
 
 export interface ProviderAdapter {
-  exchangeCode(code: string, codeVerifier?: string): Promise<ExchangeResult>;
+  exchangeCode(
+    code: string,
+    codeVerifier?: string,
+    userInfo?: import("./providers/apple.js").AppleUserInfo | null
+  ): Promise<ExchangeResult>;
 }
 
 export function getProviderAdapter(provider: string): ProviderAdapter {
@@ -58,6 +62,22 @@ export function getProviderAdapter(provider: string): ProviderAdapter {
             p.clientSecret,
             p.redirectUri,
             codeVerifier
+          );
+          return { tokens, profile };
+        },
+      };
+
+    case "apple":
+      return {
+        async exchangeCode(code, codeVerifier, userInfo) {
+          const { exchangeCode } = await import("./providers/apple.js");
+          const { tokens, profile } = await exchangeCode(
+            code,
+            p.clientId,
+            p.clientSecret,
+            p.redirectUri,
+            codeVerifier,
+            userInfo
           );
           return { tokens, profile };
         },

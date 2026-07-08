@@ -20,6 +20,7 @@ export const AUTH_SETTINGS_DEFAULTS: AuthSettings = {
   emailPasswordEnabled: true,
   googleOAuthEnabled: false,
   githubOAuthEnabled: false,
+  appleOAuthEnabled: false,
   magicLinkEnabled: false,
   passkeyEnabled: false,
   totpEnabled: false,

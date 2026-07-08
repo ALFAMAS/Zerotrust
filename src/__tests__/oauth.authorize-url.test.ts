@@ -10,6 +10,7 @@ describe("isSupportedProvider", () => {
     expect(isSupportedProvider("google")).toBe(true);
     expect(isSupportedProvider("github")).toBe(true);
     expect(isSupportedProvider("facebook")).toBe(true);
+    expect(isSupportedProvider("apple")).toBe(true);
     expect(isSupportedProvider("twitter")).toBe(false);
   });
 });
@@ -44,5 +45,15 @@ describe("buildAuthorizationUrl", () => {
 
   it("throws for an unsupported provider", () => {
     expect(() => buildAuthorizationUrl("twitter", base)).toThrow(/UNSUPPORTED_OAUTH_PROVIDER/);
+  });
+
+  it("sets response_mode=query for Apple", () => {
+    const url = new URL(
+      buildAuthorizationUrl("apple", { ...base, codeChallenge: "chal" })
+    );
+    expect(url.origin + url.pathname).toBe("https://appleid.apple.com/auth/authorize");
+    expect(url.searchParams.get("response_mode")).toBe("query");
+    expect(url.searchParams.get("scope")).toBe(PROVIDER_META.apple.scopes.join(" "));
+    expect(url.searchParams.get("code_challenge")).toBe("chal");
   });
 });

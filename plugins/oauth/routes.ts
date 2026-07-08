@@ -22,6 +22,7 @@ import {
   PROVIDER_META,
 } from "./authorize-url.js";
 import { getProviderAdapter } from "./provider.factory.js";
+import type { AppleUserInfo } from "./providers/apple.js";
 import { generateOAuthState, getAndVerifyOAuthState, OAUTH_STATE_TTL_SECS } from "./state.js";
 
 const router = new Hono<HonoEnv>();
@@ -106,9 +107,21 @@ router.get("/oauth/:provider/callback", rateLimit({ points: 20, windowSecs: 60 }
     }
 
     const adapter = getProviderAdapter(provider);
+    let appleUserInfo: AppleUserInfo | undefined;
+    if (provider === "apple") {
+      const userParam = c.req.query("user");
+      if (userParam) {
+        try {
+          appleUserInfo = JSON.parse(userParam) as AppleUserInfo;
+        } catch {
+          logger.warn("Malformed Apple user payload on callback", { provider });
+        }
+      }
+    }
+
     let result: Awaited<ReturnType<typeof adapter.exchangeCode>>;
     try {
-      result = await adapter.exchangeCode(code, codeVerifier ?? undefined);
+      result = await adapter.exchangeCode(code, codeVerifier ?? undefined, appleUserInfo);
     } catch (err) {
       if (err instanceof Error && err.message.startsWith("UNSUPPORTED_OAUTH_PROVIDER")) {
         return c.json(

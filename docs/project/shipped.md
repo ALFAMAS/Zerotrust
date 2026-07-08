@@ -26,7 +26,7 @@ ship a feature. Planned work lives in [`todo.md`](./todo.md) (this directory).
 ## Authentication & Identity
 
 - ✅ Email + password with configurable account lockout (threshold + auto-unlock)
-- `[~]` OAuth — Google, GitHub, Facebook (admin-toggleable); Apple Sign In not implemented
+- ✅ OAuth — Google, GitHub, Facebook, Apple (admin-toggleable per provider)
 - ✅ Magic links (passwordless, 15-minute TTL, email-delivered)
 - ✅ Passkeys / WebAuthn FIDO2 — register, authenticate, resident keys, MDS3 attestation policy
 - ✅ TOTP (Google Authenticator, Authy, 1Password)
@@ -397,6 +397,22 @@ Cross-audit of `docs/security.md` §0–§10. **SEC-27** shipped 2026-07-08 (VPS
 ---
 
 ## Recent work (2026-07-09)
+
+### AUTH-1 — Apple Sign In (shipped)
+
+- **Problem:** Env placeholders existed in `.env.example` but no Apple OAuth provider
+  was implemented; admin auth settings had no Apple toggle.
+- **Fix:** Added `plugins/oauth/providers/apple.ts` (PKCE token exchange via
+  `fetchFixedUrl`, id_token profile parsing, first-sign-in name merge from Apple
+  `user` callback param); wired provider into factory, authorize URL builder, and
+  config; added `appleOAuthEnabled` admin toggle + login/security UI surfaces;
+  mocked provider tests.
+- **Paths:** `plugins/oauth/providers/apple.ts`, `plugins/oauth/provider.factory.ts`,
+  `plugins/oauth/authorize-url.ts`, `plugins/oauth/routes.ts`, `src/config/index.ts`,
+  `src/db/schema/platform.ts`, `packages/ui/src/app/admin/settings/auth/page.tsx`,
+  `packages/ui/src/app/(auth)/login/page.tsx`, `.env.example`
+- **Verification (2026-07-09):** `oauth.test.ts`, `oauth.authorize-url.test.ts`;
+  `bun run boundaries:check`; `bun run lint`.
 
 ### CRYPTO-1 — Hardware key store (shipped)
 

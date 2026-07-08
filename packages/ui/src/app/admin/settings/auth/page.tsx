@@ -161,6 +161,12 @@ export default function AuthSettingsPage() {
                 onChange={(v) => set("githubOAuthEnabled", v)}
               />
               <ToggleRow
+                label="Apple Sign In"
+                description='"Continue with Apple" button on sign-in page'
+                checked={settings.appleOAuthEnabled}
+                onChange={(v) => set("appleOAuthEnabled", v)}
+              />
+              <ToggleRow
                 label="Magic Links"
                 description="Passwordless email sign-in links (15-min TTL)"
                 checked={settings.magicLinkEnabled}

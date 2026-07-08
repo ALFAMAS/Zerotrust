@@ -59,7 +59,7 @@ Complete before pointing DNS at production. Archive signed copies in
 | ☐ | VPS firewall / private Postgres+Redis | P1 | **Done** | SEC-27 (2026-07-08): `docs/deployment.md` § VPS network hardening — ufw/SG, bind-address, verification |
 | ☐ | PASETO v4 + refresh rotation + argon2id passwords | P0 | **Done** | `src/crypto/paseto-v4.ts`, `src/shared/passwordHash.ts` |
 | ☐ | Tamper-evident audit log | P1 | **Done** | `src/audit/`, `scripts/audit-anchor.ts` |
-| ☐ | Apple Sign In | P2 | **Missing** | Env placeholders in `.env.example`; no `plugins/oauth/providers/apple.ts` |
+| ☐ | Apple Sign In | P2 | **Done** | AUTH-1 (2026-07-09): `plugins/oauth/providers/apple.ts`; admin toggle; env-gated |
 | ☐ | Hardware key store (TPM/HSM) | P2 | **Done** | CRYPTO-1 (2026-07-09): software provider + boot wiring; hardware fork path in `docs/extending.md`; stubs fail fast |
 | ☐ | `SECURITY.md` accuracy (argon2id vs bcrypt) | P2 | **Done** | DOC-1 (2026-07-08): argon2id + bcrypt rehash wording in root `SECURITY.md` |
 
@@ -316,7 +316,7 @@ for API↔UI Zod schemas, `deploy/k8s/` Helm per `docs/reference-architecture.md
 
 12. **`apps/api` workspace** — Move `src/` into `apps/api` for symmetry with `apps/web`.
 13. **`packages/shared-types`** — Shared Zod schemas for API validation + UI forms.
-14. **Apple Sign In** — `plugins/oauth/providers/apple.ts`.
+14. ~~**Apple Sign In** — `plugins/oauth/providers/apple.ts`.~~ **Done (AUTH-1, 2026-07-09)**
 15. **Full RLS expansion** — All org tables + org-scoped repo factory everywhere.
 16. **Kubernetes manifests** — `deploy/k8s/` per reference architecture Blueprint 3.
 

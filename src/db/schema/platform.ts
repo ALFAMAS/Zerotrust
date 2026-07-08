@@ -18,6 +18,7 @@ export const saasSettingsTable = pgTable("saas_settings", {
   emailPasswordEnabled: boolean("email_password_enabled").notNull().default(true),
   googleOAuthEnabled: boolean("google_oauth_enabled").notNull().default(false),
   githubOAuthEnabled: boolean("github_oauth_enabled").notNull().default(false),
+  appleOAuthEnabled: boolean("apple_oauth_enabled").notNull().default(false),
   magicLinkEnabled: boolean("magic_link_enabled").notNull().default(true),
   passkeyEnabled: boolean("passkey_enabled").notNull().default(true),
   totpEnabled: boolean("totp_enabled").notNull().default(true),

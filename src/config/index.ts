@@ -52,6 +52,12 @@ const DEFAULT_CONFIG: Partial<zerotrustConfig> = {
           process.env.OAUTH_GITHUB_REDIRECT_URI ||
           "http://localhost:1337/auth/oauth/github/callback",
       },
+      apple: {
+        clientId: process.env.OAUTH_APPLE_CLIENT_ID || "",
+        clientSecret: process.env.OAUTH_APPLE_CLIENT_SECRET || "",
+        redirectUri:
+          process.env.OAUTH_APPLE_REDIRECT_URI || "http://localhost:1337/auth/oauth/apple/callback",
+      },
     },
   },
   mfa: {

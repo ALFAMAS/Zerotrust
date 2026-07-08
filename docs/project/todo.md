@@ -10,21 +10,11 @@ Audit date: **2026-07-05**. Verified/completed items moved to [`shipped.md`](./s
 
 Audit date: **2026-07-07**. Open gaps from [`production-checklist.md`](../production-checklist.md) rows marked **Partial**, **Missing**, or **Unknown** (Done rows omitted).
 
-**Verification (2026-07-09):** **2** open items remain (AUTH-1, FE-1). The 2026-07-07 audit tracked 18 gaps; CI-2, DOC-1, SEC-27, OPS-1, OPS-2, INF-1, INF-2, INF-3, PERF-1, PERF-2, OBS-1, CI-1, DX-2, DB-1, DQ-2, and CRYPTO-1 shipped 2026-07-08–09 → [`shipped.md`](./shipped.md) § Recent work.
+**Verification (2026-07-09):** **1** open item remains (FE-1). AUTH-1 shipped 2026-07-09 → [`shipped.md`](./shipped.md) § Recent work.
 
 ### Security
 
-- [ ] **AUTH-1** — **P2** — Apple Sign In
-
-       **Problem:** Env placeholders exist in `.env.example` but no Apple OAuth provider is implemented.
-
-       **Fix:** Add `plugins/oauth/providers/apple.ts` and wire provider toggle in admin auth settings.
-
-       **Paths:** `plugins/oauth/`, `.env.example`, `packages/ui/src/app/admin/auth-settings/`
-
-       **Status:** Missing.
-
-       **Refs:** [`production-checklist.md`](../production-checklist.md) § Security
+_(none — AUTH-1 shipped 2026-07-09)_
 
 ### Frontend
 
