@@ -43,6 +43,10 @@ vi.mock("../services/compliance/legalHold.service", () => ({
   setLegalHold: vi.fn(),
 }));
 
+vi.mock("../db/repositories/authSessions.repository", () => ({
+  createImpersonationSession: vi.fn().mockResolvedValue({ id: "impersonation-session-1" }),
+}));
+
 function makeDb() {
   const chain: any = {
     select: vi.fn().mockReturnThis(),
@@ -130,6 +134,28 @@ describe("POST /admin/users/:id/impersonate — delegation chain", () => {
     expect(res.status).toBe(200);
     expect(signAccessToken).toHaveBeenCalledWith(
       expect.objectContaining({ sub: targetId, act_as: ["admin-1"] })
+    );
+
+    const { createImpersonationSession } = await import("../db/repositories/authSessions.repository");
+    const sid = signAccessToken.mock.calls[0]?.[0]?.sid;
+    expect(createImpersonationSession).toHaveBeenCalledWith(
+      expect.objectContaining({
+        userId: targetId,
+        session: expect.objectContaining({
+          id: sid,
+          userId: targetId,
+          tokenId: "jti-1",
+          deviceFingerprint: {
+            impersonatedBy: "admin-1",
+            impersonatorEmail: "admin@example.com",
+          },
+          ipAddress: "admin-console",
+          userAgent: "impersonation by admin@example.com",
+          expiresAt: expect.any(Date),
+          lastActivityAt: expect.any(Date),
+          isActive: true,
+        }),
+      })
     );
   });
 

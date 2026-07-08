@@ -23,6 +23,12 @@ export interface CreateAuthenticatedSessionInput {
   refreshToken: RefreshTokenReplacementInsert;
 }
 
+export interface CreateImpersonationSessionInput {
+  /** Target user being impersonated (session.userId). */
+  userId: string;
+  session: RefreshSessionInsert;
+}
+
 /**
  * Atomically create a login session, its refresh token, and bump lastLoginAt.
  * Used on password/OAuth/magic-link login so a partial failure cannot leave an
@@ -38,6 +44,39 @@ export async function createAuthenticatedSession(input: CreateAuthenticatedSessi
       ...input.refreshToken,
       sessionId: session.id,
     });
+
+    await tx
+      .update(usersTable)
+      .set({ lastLoginAt: new Date() })
+      .where(eq(usersTable.id, input.userId));
+
+    return session;
+  });
+}
+
+/**
+ * Atomically insert an admin impersonation session and bump lastLoginAt for
+ * the impersonated (target) user.
+ *
+ * This keeps session + user write consistent under retries/timeouts and
+ * matches the transaction pattern used by `createAuthenticatedSession()`.
+ */
+export async function createImpersonationSession(input: CreateImpersonationSessionInput) {
+  const db = getDb();
+  return db.transaction(async (tx) => {
+    const fp = input.session.deviceFingerprint as
+      | { impersonatedBy?: string; impersonatorEmail?: string }
+      | undefined;
+    if (!fp?.impersonatedBy || !fp?.impersonatorEmail) {
+      throw new Error("IMPERSONATION_FINGERPRINT_MISSING");
+    }
+
+    if (fp.impersonatedBy === input.userId) {
+      throw new Error("CANNOT_IMPERSONATE_SELF");
+    }
+
+    const [session] = await tx.insert(sessionsTable).values(input.session).returning();
+    if (!session) throw new Error("SESSION_CREATE_FAILED");
 
     await tx
       .update(usersTable)

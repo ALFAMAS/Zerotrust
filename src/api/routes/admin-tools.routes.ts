@@ -12,13 +12,13 @@ import { getDb, getReadDb } from "../../db";
 import {
   auditLogsTable,
   notificationsTable,
-  sessionsTable,
   subscriptionsTable,
   usersTable,
 } from "../../db/schema";
 import { auditLog, getLogger } from "../../logger";
 import { authMiddleware, requireAdmin } from "../../middleware/auth";
 import { TokenService } from "../../services/auth/token.service";
+import { createImpersonationSession } from "../../db/repositories/authSessions.repository";
 import { setLegalHold } from "../../services/compliance/legalHold.service";
 import { sendNotificationEmail } from "../../services/notifications/email.service";
 import { enqueueEmail } from "../../services/notifications/emailQueue";
@@ -79,20 +79,23 @@ router.post("/users/:id/impersonate", async (c) => {
     });
     const payload = await tokenSvc.verifyAccessToken(accessToken);
 
-    await db.insert(sessionsTable).values({
-      id: sessionId,
+    await createImpersonationSession({
       userId: target.id,
-      tokenId: payload.jti,
-      deviceFingerprint: {
-        impersonatedBy: admin.id,
-        impersonatorEmail: admin.email,
+      session: {
+        id: sessionId,
+        userId: target.id,
+        tokenId: payload.jti,
+        deviceFingerprint: {
+          impersonatedBy: admin.id,
+          impersonatorEmail: admin.email,
+        },
+        ipAddress: getClientIp(c) || "admin-console",
+        userAgent: `impersonation by ${admin.email}`,
+        // Impersonation sessions are deliberately short: 30 minutes
+        expiresAt: new Date(Date.now() + 30 * 60 * 1000),
+        lastActivityAt: new Date(),
+        isActive: true,
       },
-      ipAddress: getClientIp(c) || "admin-console",
-      userAgent: `impersonation by ${admin.email}`,
-      // Impersonation sessions are deliberately short: 30 minutes
-      expiresAt: new Date(Date.now() + 30 * 60 * 1000),
-      lastActivityAt: new Date(),
-      isActive: true,
     });
 
     await auditLog("admin.impersonate", admin.id, target.id, true, {

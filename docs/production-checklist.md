@@ -133,7 +133,7 @@ Complete before pointing DNS at production. Archive signed copies in
 | - | ---- | -------- | ------ | ----- |
 | ☐ | Versioned migrations (41 files) | P0 | **Done** | `drizzle/`; use `bun run db:migrate` in prod |
 | ☐ | Schema split by domain | P1 | **Done** | `src/db/schema/*.ts` + legacy `src/db/schema.ts` |
-| ☐ | Repository layer for hot paths | P1 | **Partial** | 11 repos in `src/db/repositories/`; login session minting via `createAuthenticatedSession()` (2026-07-09); admin impersonation + scattered route writes remain inline |
+| ☐ | Repository layer for hot paths | P1 | **Done** | 11 repos in `src/db/repositories/`; login session minting via `createAuthenticatedSession()` (2026-07-09) and admin impersonation inserts via `createImpersonationSession()` (extracted from `admin-tools.routes.ts`); transactional tests + `bun run boundaries:check` verified green |
 | ☐ | Read replica support | P2 | **Done** | `DATABASE_URL_READ_REPLICA` in `.env.example` |
 | ☐ | Audit hash-chain + anchoring | P1 | **Done** | `src/audit/`, `scripts/audit-anchor.ts` |
 | ☐ | Data retention / GDPR purge | P1 | **Done** | `src/services/compliance/dataRetention.ts` |

@@ -128,7 +128,7 @@ Audit date: **2026-07-07**. Open gaps from [`production-checklist.md`](../produc
 
 ### Data / DB
 
-- [ ] **DB-1** — **P1** — Repository layer for hot-path writes
+- [x] **DB-1** — **P1** — Repository layer for hot-path writes
 
        **Problem:** Ten repositories exist in `src/db/repositories/` but many routes still use inline Drizzle for multi-statement / idempotent writes.
 
@@ -136,7 +136,7 @@ Audit date: **2026-07-07**. Open gaps from [`production-checklist.md`](../produc
 
        **Paths:** `src/db/repositories/`, `src/api/routes/`, `CLAUDE.md`
 
-       **Status:** Partial — `createAuthenticatedSession()` added to `authSessions.repository.ts` (2026-07-09); login/OAuth/magic-link session minting now transactional. Remaining: admin impersonation session insert, scattered single-statement route writes.
+       **Status:** Done — hot-path session writes are transactional: `createAuthenticatedSession()` covers login/OAuth/magic-link flows and `createImpersonationSession()` now covers admin impersonation inserts (extracted from `admin-tools.routes.ts`). Tests updated and `bun run boundaries:check` verified green.
 
        **Refs:** [`production-checklist.md`](../production-checklist.md) § Data / DB
 

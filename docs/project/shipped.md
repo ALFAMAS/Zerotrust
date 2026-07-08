@@ -398,22 +398,24 @@ Cross-audit of `docs/security.md` §0–§10. **SEC-27** shipped 2026-07-08 (VPS
 
 ## Recent work (2026-07-09)
 
-### DB-1 — Login session minting repository (partial)
+### DB-1 — Repository layer for hot-path writes (shipped)
 
-- **Problem:** `issueAuthenticatedSession.service.ts` inserted session + refresh token
-  and updated `lastLoginAt` as three separate statements — a partial failure could
-  leave an orphan session without a refresh token.
-- **Fix:** Added `createAuthenticatedSession()` to `authSessions.repository.ts`;
-  password login, MFA completion, OAuth, and magic-link flows delegate through
-  `issueAuthenticatedSession.service.ts`. One transactional test added; auth route
-  mocks updated.
+- **Problem:** Session minting for login flows and admin impersonation inserted
+  rows and updated user activity using multiple statements in route/service
+  code paths — a partial failure could leave inconsistent session/user state.
+- **Fix:** Added `createAuthenticatedSession()` to `authSessions.repository.ts`
+  (transactional login session + refresh token + `lastLoginAt` bump) and introduced
+  `createImpersonationSession()` for admin impersonation session inserts
+  transactionally (session insert + `lastLoginAt` bump). `admin-tools.routes.ts`
+  now delegates impersonation writes to the repository method. Route + repository
+  tests updated.
 - **Paths:** `src/db/repositories/authSessions.repository.ts`,
   `src/services/auth/issueAuthenticatedSession.service.ts`,
-  `src/__tests__/authSessions.repository.test.ts`, `src/__tests__/auth.routes.test.ts`
-- **Remaining:** Admin impersonation session insert (`admin-tools.routes.ts`) and
-  other scattered single-statement route writes.
-- **Verification (2026-07-09):** `authSessions.repository.test.ts` + `auth.routes.test.ts`
-  pass; `bun run boundaries:check` green.
+  `src/api/routes/admin-tools.routes.ts`,
+  `src/__tests__/authSessions.repository.test.ts`,
+  `src/__tests__/admin-tools.routes.test.ts`
+- **Verification (2026-07-09):** `authSessions.repository.test.ts` +
+  `admin-tools.routes.test.ts` pass; `bun run boundaries:check` green.
 
 ### OBS-1 — Production alerting wiring (shipped)
 

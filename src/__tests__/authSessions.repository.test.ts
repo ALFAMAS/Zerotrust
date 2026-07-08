@@ -7,6 +7,7 @@ vi.mock("../db", () => ({
 import { getDb } from "../db";
 import {
   createAuthenticatedSession,
+  createImpersonationSession,
   revokeRefreshTokenFamily,
   revokeSessionAtLogout,
   rotateRefreshToken,
@@ -66,6 +67,56 @@ describe("authSessions repository", () => {
       familyId: "family-1",
       expiresAt: new Date("2026-07-07T00:00:00.000Z"),
     });
+  });
+
+  it("creates impersonation session + bumps lastLoginAt inside one transaction", async () => {
+    const sessionReturning = vi.fn().mockResolvedValue([{ id: "session-imp-1" }]);
+    const sessionValues = vi.fn().mockReturnValue({ returning: sessionReturning });
+    const insert = vi.fn().mockReturnValue({ values: sessionValues });
+
+    const userWhere = vi.fn().mockResolvedValue(undefined);
+    const userSet = vi.fn().mockReturnValue({ where: userWhere });
+    const update = vi.fn().mockReturnValue({ set: userSet });
+
+    const tx = { insert, update };
+    const transaction = vi.fn(async (callback) => callback(tx));
+    mockGetDb.mockReturnValue({ transaction } as never);
+
+    const targetId = "target-user-1";
+    const adminId = "admin-1";
+
+    const session = await createImpersonationSession({
+      userId: targetId,
+      session: {
+        id: "session-imp-1",
+        userId: targetId,
+        tokenId: "jti-imp-1",
+        deviceFingerprint: {
+          impersonatedBy: adminId,
+          impersonatorEmail: "admin@example.com",
+        },
+        ipAddress: "127.0.0.1",
+        userAgent: "impersonation by admin@example.com",
+        expiresAt: new Date("2026-07-01T00:00:00.000Z"),
+        lastActivityAt: new Date("2026-07-01T00:00:00.000Z"),
+        isActive: true,
+      },
+    });
+
+    expect(session).toEqual({ id: "session-imp-1" });
+    expect(transaction).toHaveBeenCalledTimes(1);
+    expect(insert).toHaveBeenCalledTimes(1);
+    expect(update).toHaveBeenCalledTimes(1);
+    expect(sessionValues).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tokenId: "jti-imp-1",
+        deviceFingerprint: {
+          impersonatedBy: adminId,
+          impersonatorEmail: "admin@example.com",
+        },
+      })
+    );
+    expect(userSet).toHaveBeenCalledWith({ lastLoginAt: expect.any(Date) });
   });
 
   it("revokes a reused refresh token family inside one transaction", async () => {
