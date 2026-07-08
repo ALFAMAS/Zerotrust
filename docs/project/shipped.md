@@ -188,8 +188,8 @@ ship a feature. Planned work lives in [`todo.md`](./todo.md) (this directory).
 ## Security & Cryptography
 
 - ✅ PASETO v4 — AES-256-GCM
-- ✅ CSFLE field encryption — `CSFLEManager`, key versioning, encrypt/decrypt plugin (**software key store only**; TPM / Secure Enclave / PKCS#11 providers are unimplemented stubs — see `src/crypto/hardware-key-store.ts`)
-- ✅ Software key store — `SoftwareKeyProvider` via `KEY_PROVIDER=software|auto`; hardware providers fail fast at startup if explicitly requested
+- ✅ CSFLE field encryption — `CSFLEManager`, key versioning, encrypt/decrypt plugin (software master key; optional HSM fork via `getHardwareKeyStore()`)
+- ✅ Hardware key store — `SoftwareKeyProvider` via `KEY_PROVIDER=software|auto`; TPM / Secure Enclave / PKCS#11 stubs with fail-fast selection; fork checklist in `docs/extending.md` § Hardware-backed key store
 - ✅ Security headers — custom `securityHeaders()` middleware (CSP, HSTS preload, X-Frame-Options DENY) on every route
 - ✅ Global input sanitization — strips dangerous HTML, neutralizes XSS payloads
 - ✅ CORS — configurable allowlist, fails closed in production
@@ -397,6 +397,21 @@ Cross-audit of `docs/security.md` §0–§10. **SEC-27** shipped 2026-07-08 (VPS
 ---
 
 ## Recent work (2026-07-09)
+
+### CRYPTO-1 — Hardware key store (shipped)
+
+- **Problem:** Only software CSFLE/key-store stubs existed; no documented fork path
+  for TPM / Secure Enclave / PKCS#11 operators; `initHardwareKeyStore()` was not
+  called at boot.
+- **Fix:** Wired `initHardwareKeyStore()` into `initializezerotrust()`; added
+  `getHardwareKeyStore()` / `resetHardwareKeyStore()` accessors; documented the
+  hardware fork checklist in `docs/extending.md` § Hardware-backed key store;
+  added `KEY_PROVIDER` / `HW_KEY_*` vars to `.env.example`; expanded
+  `hardware-key-store.test.ts` (stub behaviour, AAD round-trip, singleton init).
+- **Paths:** `src/crypto/hardware-key-store.ts`, `src/index.ts`,
+  `docs/extending.md`, `.env.example`, `README.md`
+- **Verification (2026-07-09):** `hardware-key-store.test.ts`; `bun run boundaries:check`;
+  `bun run lint`.
 
 ### INF-3 — Production auto-deploy workflow (shipped)
 

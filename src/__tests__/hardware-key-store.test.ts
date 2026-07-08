@@ -1,16 +1,31 @@
+import fs from "node:fs";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("../logger", () => ({
   getLogger: () => ({ info: vi.fn(), warn: vi.fn(), debug: vi.fn(), error: vi.fn() }),
 }));
 
-import { createHardwareKeyStore, SoftwareKeyProvider } from "../crypto/hardware-key-store";
+import {
+  PKCS11Provider,
+  SecureEnclaveProvider,
+  SoftwareKeyProvider,
+  TPMKeyProvider,
+  createHardwareKeyStore,
+  getHardwareKeyStore,
+  initHardwareKeyStore,
+  resetHardwareKeyStore,
+} from "../crypto/hardware-key-store";
 
 describe("hardware key store provider selection", () => {
   const original = process.env.KEY_PROVIDER;
   afterEach(() => {
+    resetHardwareKeyStore();
     if (original === undefined) delete process.env.KEY_PROVIDER;
     else process.env.KEY_PROVIDER = original;
+  });
+
+  it("getHardwareKeyStore throws before init", () => {
+    expect(() => getHardwareKeyStore()).toThrow(/not initialized/i);
   });
 
   it("defaults to the software provider when KEY_PROVIDER is unset", async () => {
@@ -30,7 +45,7 @@ describe("hardware key store provider selection", () => {
     expect((await createHardwareKeyStore()).name).toBe("software");
   });
 
-  it.each(["tpm", "tpm2", "secure-enclave", "pkcs11"])(
+  it.each(["tpm", "tpm2", "secure-enclave", "pkcs11", "hsm"])(
     "fails fast at startup when an unimplemented hardware provider is requested (%s)",
     async (selector) => {
       process.env.KEY_PROVIDER = selector;
@@ -49,5 +64,72 @@ describe("hardware key store provider selection", () => {
     const ciphertext = await provider.encrypt("k1", Buffer.from("secret"));
     const plaintext = await provider.decrypt("k1", ciphertext);
     expect(plaintext.toString()).toBe("secret");
+  });
+
+  it("software provider round-trips encrypt/decrypt with AAD context", async () => {
+    delete process.env.KEY_PROVIDER;
+    const provider = await createHardwareKeyStore();
+    const context = Buffer.from("binding-context");
+    const ciphertext = await provider.encrypt("k2", Buffer.from("bound"), context);
+    const plaintext = await provider.decrypt("k2", ciphertext, context);
+    expect(plaintext.toString()).toBe("bound");
+  });
+
+  it("software provider sign returns deterministic HMAC for a stable key", async () => {
+    const provider = new SoftwareKeyProvider();
+    await provider.generateKey("sign-key", "AES-256");
+    const data = Buffer.from("payload");
+    const sig1 = await provider.sign("sign-key", data);
+    const sig2 = await provider.sign("sign-key", data);
+    expect(sig1.equals(sig2)).toBe(true);
+    expect(sig1.length).toBe(32);
+  });
+
+  it("initHardwareKeyStore assigns the singleton for getHardwareKeyStore", async () => {
+    delete process.env.KEY_PROVIDER;
+    await initHardwareKeyStore();
+    expect(getHardwareKeyStore().name).toBe("software");
+  });
+});
+
+describe("hardware provider stubs", () => {
+  it("TPMKeyProvider reports availability on Linux when /dev/tpm0 exists", async () => {
+    const existsSpy = vi.spyOn(fs, "existsSync").mockImplementation((path) => {
+      return String(path) === "/dev/tpm0";
+    });
+    const provider = new TPMKeyProvider();
+    expect(await provider.isAvailable()).toBe(process.platform === "linux");
+    existsSpy.mockRestore();
+  });
+
+  it("SecureEnclaveProvider reports available only on darwin", async () => {
+    const provider = new SecureEnclaveProvider();
+    expect(await provider.isAvailable()).toBe(process.platform === "darwin");
+  });
+
+  it("PKCS11Provider reports available when the library path exists", async () => {
+    const existsSpy = vi.spyOn(fs, "existsSync").mockReturnValue(true);
+    const provider = new PKCS11Provider("/opt/hsm/libpkcs11.so", "pin");
+    expect(await provider.isAvailable()).toBe(true);
+    existsSpy.mockRestore();
+  });
+
+  it.each([
+    [TPMKeyProvider, "generateKey"],
+    [SecureEnclaveProvider, "sign"],
+    [PKCS11Provider, "encrypt"],
+  ] as const)("stub %s.%s throws NotImplementedError", async (Ctor, method) => {
+    const provider =
+      Ctor === PKCS11Provider
+        ? new PKCS11Provider("/missing.so", "")
+        : new Ctor();
+    const op = provider[method as keyof typeof provider] as (...args: unknown[]) => Promise<unknown>;
+    const args =
+      method === "generateKey"
+        ? ["kid", "AES-256"]
+        : method === "sign"
+          ? ["kid", Buffer.from("data")]
+          : ["kid", Buffer.from("plain")];
+    await expect(op(...args)).rejects.toMatchObject({ name: "NotImplementedError" });
   });
 });

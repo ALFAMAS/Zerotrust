@@ -5,7 +5,7 @@ Scope: multi-tenant SaaS. Cookie-authenticated web client (Next.js), bearer-auth
 Priority order matters. §1–2 are structural — getting them wrong later means a rewrite. §3–6 are middleware and discipline. §7–9 are ops.
 
 **Tracking (2026-07-05 re-audit):** Actionable gaps are numbered **SEC-*** in
-[`todo.md`](./project/todo.md) (security baseline closed; production gaps **AUTH-1**, **CRYPTO-1**, **INF-3**, **FE-1**) and
+[`todo.md`](./project/todo.md) (security baseline closed; production gaps **AUTH-1**, **FE-1**) and
 verified shipped items in [`shipped.md`](./project/shipped.md) § Security baseline audit
 (SEC-1…SEC-26 shipped 2026-07-05; SEC-28 Expo out-of-scope). Standing production
 audit decisions are tracked in this security baseline. CWE hardening classes
@@ -408,7 +408,7 @@ Tiers are ordered by **how the flaw enters the codebase**, not by CVSS.
 **Re-audit summary (2026-07-05):** Tier 1 — 9 Verified, 1 Partial. Tier 2 —
 majority Verified or N/A (no mobile client); security baseline ops runbook **SEC-27**
 shipped 2026-07-08 ([`deployment.md`](./deployment.md) § VPS network hardening).
-Open backlog: production-readiness gaps (**AUTH-1**, **CRYPTO-1**, **INF-3**, **FE-1**) in [`todo.md`](./project/todo.md). Security baseline closed (**DQ-2** shipped 2026-07-09). See [`shipped.md`](./project/shipped.md) § Security baseline
+Open backlog: production-readiness gaps (**AUTH-1**, **FE-1**) in [`todo.md`](./project/todo.md). Security baseline closed (**DQ-2** shipped 2026-07-09; **CRYPTO-1** hardware key-store fork path shipped 2026-07-09). See [`shipped.md`](./project/shipped.md) § Security baseline
 audit for per-control evidence.
 
 ## Already covered (tracked elsewhere — do not re-list)
@@ -484,7 +484,7 @@ Note on the exclusions: CWE-327 is covered, but **916** (weak password hashing) 
 | 502  | Deserialization of Untrusted Data               | Any custom serialization of client data.                                                                                    | Verified | —     | JSON + Zod on touched routes |
 | 269  | Improper Privilege Management                   | Role escalation once RBAC exists (relevant if zeroauth RBAC/ABAC is pulled in).                                             | Verified | —     | RBAC/ABAC + JIT; `assertCan()` on org hot paths (SEC-5) |
 | 1220 | Insufficient Granularity of Access Control      | Coarse roles where object-level control is needed.                                                                          | Partial  | —     | Custom org roles; `assertCan()` on migrated paths — extend incrementally |
-| 311  | Missing Encryption of Sensitive Data            | At-rest encryption for sensitive columns (TFN — which you shouldn't store).                                                 | Partial  | —     | CSFLE software key store only |
+| 311  | Missing Encryption of Sensitive Data            | At-rest encryption for sensitive columns (TFN — which you shouldn't store).                                                 | Partial  | —     | CSFLE software master key; HSM fork via `docs/extending.md` § Hardware-backed key store |
 | 1104 | Use of Unmaintained Third Party Components      | A template ships its dependency liability to every consumer.                                                                | Verified | —     | `bun audit` CI + weekly `dependency-update.yml` + `.github/dependabot.yml` (SEC-23) |
 | 489  | Active Debug Code                               | Debug / seed routes left enabled in prod.                                                                                   | Verified | —     | No debug mounts in `server.ts` prod paths |
 | 1188 | Insecure Default Initialization of Resource     | Insecure default config the template ships with.                                                                            | Verified | —     | `validateConfig()` prod fail-fast (ZT-4) |

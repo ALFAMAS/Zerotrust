@@ -8,7 +8,8 @@
  * ⚠️ This build is **software-only**: the TPM / Secure Enclave / PKCS#11
  * providers below are unimplemented skeletons (every operation throws
  * `NotImplementedError`). Wiring real hardware needs native addons / host
- * tooling — see each provider's JSDoc.
+ * tooling — see each provider's JSDoc and the fork checklist in
+ * `docs/extending.md` § Hardware-backed key store.
  *
  * Provider selection is controlled by the `KEY_PROVIDER` env var:
  *   - unset / `auto`     → software provider (the only functional one); logs an
@@ -444,12 +445,32 @@ export async function createHardwareKeyStore(): Promise<HardwareKeyProvider> {
 // ─── Singleton ────────────────────────────────────────────────────────────────
 
 /** Singleton instance populated by `initHardwareKeyStore()`. */
+let hardwareKeyStoreSingleton: HardwareKeyProvider | undefined;
+
+/**
+ * Return the boot-time key-store singleton.
+ * @throws when `initHardwareKeyStore()` has not run.
+ */
+export function getHardwareKeyStore(): HardwareKeyProvider {
+  if (!hardwareKeyStoreSingleton) {
+    throw new Error("Hardware key store not initialized. Call initHardwareKeyStore() during boot.");
+  }
+  return hardwareKeyStoreSingleton;
+}
+
+/** @deprecated Prefer `getHardwareKeyStore()` — kept for SDK consumers. */
 export let hardwareKeyStore: HardwareKeyProvider;
 
 /**
  * Call once at application startup to probe available hardware providers and
- * assign the `hardwareKeyStore` singleton.
+ * assign the key-store singleton.
  */
 export async function initHardwareKeyStore(): Promise<void> {
-  hardwareKeyStore = await createHardwareKeyStore();
+  hardwareKeyStoreSingleton = await createHardwareKeyStore();
+  hardwareKeyStore = hardwareKeyStoreSingleton;
+}
+
+/** Reset singleton state (for tests). */
+export function resetHardwareKeyStore(): void {
+  hardwareKeyStoreSingleton = undefined;
 }

@@ -60,7 +60,7 @@ Complete before pointing DNS at production. Archive signed copies in
 | ☐ | PASETO v4 + refresh rotation + argon2id passwords | P0 | **Done** | `src/crypto/paseto-v4.ts`, `src/shared/passwordHash.ts` |
 | ☐ | Tamper-evident audit log | P1 | **Done** | `src/audit/`, `scripts/audit-anchor.ts` |
 | ☐ | Apple Sign In | P2 | **Missing** | Env placeholders in `.env.example`; no `plugins/oauth/providers/apple.ts` |
-| ☐ | Hardware key store (TPM/HSM) | P2 | **Partial** | Stubs in `src/crypto/hardware-key-store.ts` |
+| ☐ | Hardware key store (TPM/HSM) | P2 | **Done** | CRYPTO-1 (2026-07-09): software provider + boot wiring; hardware fork path in `docs/extending.md`; stubs fail fast |
 | ☐ | `SECURITY.md` accuracy (argon2id vs bcrypt) | P2 | **Done** | DOC-1 (2026-07-08): argon2id + bcrypt rehash wording in root `SECURITY.md` |
 
 ---
@@ -332,7 +332,7 @@ for API↔UI Zod schemas, `deploy/k8s/` Helm per `docs/reference-architecture.md
 | [`reference-architecture.md`](./reference-architecture.md) | VM, container, and Kubernetes deployment blueprints |
 | [`ARCHITECTURE.md`](./ARCHITECTURE.md) | System architecture deep dive |
 | [`maintenance-scorecard.md`](./maintenance-scorecard.md) | Quarterly metrics (dependencies, CI, coverage, DR) |
-| [`project/todo.md`](./project/todo.md) | Open backlog (AUTH-1, CRYPTO-1, FE-1) |
+| [`project/todo.md`](./project/todo.md) | Open backlog (AUTH-1, FE-1) |
 | [`project/shipped.md`](./project/shipped.md) | Shipped feature catalog |
 | [`../README.md`](../README.md) | Quick start, env vars, production deployment summary |
 

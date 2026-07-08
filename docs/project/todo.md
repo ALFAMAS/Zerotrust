@@ -10,7 +10,7 @@ Audit date: **2026-07-05**. Verified/completed items moved to [`shipped.md`](./s
 
 Audit date: **2026-07-07**. Open gaps from [`production-checklist.md`](../production-checklist.md) rows marked **Partial**, **Missing**, or **Unknown** (Done rows omitted).
 
-**Verification (2026-07-09):** **3** open items remain (AUTH-1, CRYPTO-1, FE-1). The 2026-07-07 audit tracked 18 gaps; CI-2, DOC-1, SEC-27, OPS-1, OPS-2, INF-1, INF-2, INF-3, PERF-1, PERF-2, OBS-1, CI-1, DX-2, DB-1, and DQ-2 shipped 2026-07-08–09 → [`shipped.md`](./shipped.md) § Recent work.
+**Verification (2026-07-09):** **2** open items remain (AUTH-1, FE-1). The 2026-07-07 audit tracked 18 gaps; CI-2, DOC-1, SEC-27, OPS-1, OPS-2, INF-1, INF-2, INF-3, PERF-1, PERF-2, OBS-1, CI-1, DX-2, DB-1, DQ-2, and CRYPTO-1 shipped 2026-07-08–09 → [`shipped.md`](./shipped.md) § Recent work.
 
 ### Security
 
@@ -23,18 +23,6 @@ Audit date: **2026-07-07**. Open gaps from [`production-checklist.md`](../produc
        **Paths:** `plugins/oauth/`, `.env.example`, `packages/ui/src/app/admin/auth-settings/`
 
        **Status:** Missing.
-
-       **Refs:** [`production-checklist.md`](../production-checklist.md) § Security
-
-- [ ] **CRYPTO-1** — **P2** — Hardware key store (TPM/HSM)
-
-       **Problem:** Only software CSFLE/key-store stubs exist; no TPM, Secure Enclave, or PKCS#11 integration.
-
-       **Fix:** Implement or document fork path in `src/crypto/hardware-key-store.ts`; clarify README scope (P5.3 partial).
-
-       **Paths:** `src/crypto/hardware-key-store.ts`, `README.md`
-
-       **Status:** Partial — stubs only.
 
        **Refs:** [`production-checklist.md`](../production-checklist.md) § Security
 

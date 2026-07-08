@@ -158,7 +158,7 @@ blocking findings.
 Production boot requires `METRICS_AUTH_TOKEN`; reference architecture documents
 token-gated scrape configs.
 
-**Security baseline ([`docs/security.md`](./security.md)):** **0 open** SEC items (DQ-2 shipped 2026-07-09). Production gaps in [`project/todo.md`](./project/todo.md): **AUTH-1**, **CRYPTO-1**, **INF-3**, **FE-1**. SEC-1…SEC-27 shipped
+**Security baseline ([`docs/security.md`](./security.md)):** **0 open** SEC items (DQ-2 shipped 2026-07-09). Production gaps in [`project/todo.md`](./project/todo.md): **AUTH-1**, **FE-1**. SEC-1…SEC-27 shipped
 (SEC-27 2026-07-08); SEC-28 documented out-of-scope. CWE hardening (601/918/78/22/532/1333/327/1427/79)
 tracked in `CLAUDE.md` / `AGENTS.md` — do not duplicate as SEC items.
 
@@ -175,7 +175,7 @@ tracked in `CLAUDE.md` / `AGENTS.md` — do not duplicate as SEC items.
 | Open backlog (B6–B7) | 0 (P3 Operations & compliance shipped) | 0 | ✅ |
 | P1 security & access control gaps | 0 (B1, B3, ALFA-3 done) | 0 | ✅ |
 | P2 infrastructure backlog | 0 (B4, B5 done) | 0 | ✅ |
-| Open product backlog ([`project/todo.md`](./project/todo.md)) | **4** (AUTH-1, CRYPTO-1, INF-3, FE-1) | Trending down | 🔶 |
+| Open product backlog ([`project/todo.md`](./project/todo.md)) | **2** (AUTH-1, FE-1) | Trending down | 🔶 |
 | Security baseline gaps ([`docs/security.md`](./security.md) §0–§10) | **0 open** SEC items; SEC-1…SEC-27 shipped (SEC-27 2026-07-08) | 0 | ✅ |
 
 ---

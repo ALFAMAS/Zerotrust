@@ -20,6 +20,7 @@ export {
 export type { HardwareKeyProvider } from "./crypto/hardware-key-store";
 // ─── Hardware Key Storage ─────────────────────────────────────────────────────
 export {
+  getHardwareKeyStore,
   initHardwareKeyStore,
   PKCS11Provider,
   SecureEnclaveProvider,
@@ -256,6 +257,7 @@ export async function initializezerotrust() {
   const { getConfig } = await import("./config/index.js");
   const { initializeDatabase, checkPendingMigrations } = await import("./db/index.js");
   const { initializeCSFLE } = await import("./crypto/csfle.js");
+  const { initHardwareKeyStore } = await import("./crypto/hardware-key-store.js");
   const { initializeLogger } = await import("./logger/index.js");
 
   const config = getConfig();
@@ -267,6 +269,7 @@ export async function initializezerotrust() {
   await checkPendingMigrations();
 
   await initializeCSFLE(config);
+  await initHardwareKeyStore();
 
   try {
     const { initRateLimiter } = await import("./middleware/rateLimiting.js");

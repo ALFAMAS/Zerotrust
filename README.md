@@ -417,7 +417,7 @@ and others). Agent and contributor rules in [`CLAUDE.md`](./CLAUDE.md) and
 | ----------------------------- | -------------------------------------------------------------------------------- |
 | Structural security decisions | [`docs/security.md`](./docs/security.md)                                         |
 | Vulnerability disclosure      | [`SECURITY.md`](./SECURITY.md) · `/.well-known/security.txt`                     |
-| Open backlog                | [`docs/project/todo.md`](./docs/project/todo.md) (AUTH-1, CRYPTO-1, INF-3, FE-1) |
+| Open backlog                | [`docs/project/todo.md`](./docs/project/todo.md) (AUTH-1, FE-1) |
 | Shipped security fixes        | [`docs/project/shipped.md`](./docs/project/shipped.md) § Security baseline audit |
 | Production readiness          | [`docs/production-checklist.md`](./docs/production-checklist.md)                 |
 
@@ -533,7 +533,7 @@ zerotrust is actively maintained with a large test suite. Honest boundaries:
 | Ships today                             | Not yet / partial                                                 |
 | --------------------------------------- | ----------------------------------------------------------------- |
 | Google, GitHub, Facebook OAuth          | Apple Sign In                                                     |
-| Software key provider (CSFLE, tokens)   | TPM / Secure Enclave / PKCS#11 (stubs only)                       |
+| Software key provider (CSFLE, tokens)   | TPM / Secure Enclave / PKCS#11 (fork path — see `docs/extending.md`) |
 | Web + API                               | Expo mobile client (documented in security baseline, not in repo) |
 | SOC 2 readiness docs + product controls | Auditor certification (your process)                              |
 
@@ -541,7 +541,7 @@ zerotrust is actively maintained with a large test suite. Honest boundaries:
 | ---------------------------------------------------------------- | --------------------------------------- |
 | [`docs/production-checklist.md`](./docs/production-checklist.md) | Production-readiness sign-off checklist |
 | [`docs/project/shipped.md`](./docs/project/shipped.md)           | Everything that ships today             |
-| [`docs/project/todo.md`](./docs/project/todo.md)                 | Open backlog (AUTH-1, CRYPTO-1, FE-1) |
+| [`docs/project/todo.md`](./docs/project/todo.md)                 | Open backlog (AUTH-1, FE-1) |
 | [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md)                 | System architecture deep dive           |
 
 ---

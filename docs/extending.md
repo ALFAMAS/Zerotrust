@@ -155,3 +155,60 @@ server-state modules only.
    [`docs/ui-http-client.md`](./ui-http-client.md)).
 
 TanStack Query migration is complete — see [`docs/ui-http-client.md`](./ui-http-client.md).
+
+---
+
+## Hardware-backed key store (TPM / HSM fork path)
+
+zerotrust ships a **software key provider** by default (`SoftwareKeyProvider` in
+`src/crypto/hardware-key-store.ts`). CSFLE field encryption uses its own
+`CSFLE_MASTER_KEY_HEX` derivation path; the hardware key-store abstraction is the
+fork point for operators who need TPM 2.0, Apple Secure Enclave, or PKCS#11 HSM
+backing for signing / envelope encryption workloads (PASETO keys, token signing,
+etc.).
+
+### What ships today
+
+| `KEY_PROVIDER` | Behaviour |
+| -------------- | --------- |
+| unset / `auto` | Software provider; logs if TPM / Secure Enclave hardware is detected but unsupported |
+| `software`     | Software provider (HKDF + AES-256-GCM in memory) |
+| `tpm` / `tpm2` / `secure-enclave` / `pkcs11` / `hsm` | **Fail fast at boot** — stubs are not silently selected |
+
+Boot calls `initHardwareKeyStore()` from `initializezerotrust()`; consumers use
+`getHardwareKeyStore()`.
+
+### Environment variables
+
+| Variable | Purpose |
+| -------- | ------- |
+| `KEY_PROVIDER` | `auto` (default), `software`, or a hardware selector (requires fork) |
+| `HW_KEY_MASTER_SECRET` | Optional 32-byte hex master for `SoftwareKeyProvider` HKDF (falls back to `TOKEN_SECRET_HEX`) |
+| `HW_KEY_PKCS11_LIB` | Path to PKCS#11 `.so` / `.dylib` — used only for hardware detection logging in `auto` mode |
+| `HW_KEY_PKCS11_PIN` | PKCS#11 user PIN (fork implementations only) |
+
+CSFLE continues to use `CSFLE_MASTER_KEY_HEX` independently.
+
+### Fork checklist (add real TPM / HSM support)
+
+1. **Pick a provider class** — `TPMKeyProvider`, `SecureEnclaveProvider`, or
+   `PKCS11Provider` in `src/crypto/hardware-key-store.ts`. Each class has JSDoc
+   with the native dependency to install (`tpm2-tools` + `node-tpm2`, CryptoKit
+   addon, or `pkcs11js`).
+2. **Implement `HardwareKeyProvider`** — replace `NotImplementedError` throws in
+   `generateKey`, `sign`, `encrypt`, `decrypt`, `deleteKey`, `listKeys`. Use
+   AES-256-GCM for envelope ops and CSPRNG for IVs (CWE-327).
+3. **Wire selection** — extend `createHardwareKeyStore()` to instantiate your
+   provider when `KEY_PROVIDER` matches and `isAvailable()` is true. Remove the
+   selector from `HARDWARE_PROVIDER_SELECTORS` fail-fast set once implemented.
+4. **Test in isolation** — extend `src/__tests__/hardware-key-store.test.ts`
+   with mocked native bindings; never require physical hardware in CI.
+5. **Document operator setup** — add host prerequisites (TPM device permissions,
+   HSM slot PIN, PKCS#11 library path) to `docs/deployment.md`.
+6. **Optional CSFLE bridge** — to derive CSFLE data keys inside the HSM, wrap
+   `CSFLEManager` key-version creation to call `getHardwareKeyStore().encrypt()`
+   instead of `crypto.subtle.deriveKey`. This is a separate migration because it
+   changes ciphertext layout and requires a re-encryption job.
+
+The default template intentionally stays software-only so local dev and CI need no
+special hardware.
