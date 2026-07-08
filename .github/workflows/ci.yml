@@ -218,6 +218,46 @@ jobs:
         env:
           NEXT_PUBLIC_ZEROTRUST_URL: http://localhost:3000
 
+  lighthouse-ci:
+    name: Lighthouse CI gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
+        with:
+          bun-version-file: .bun-version
+      - run: bun install --frozen-lockfile
+
+      - name: Build UI (production)
+        run: bun run --cwd packages/ui build
+        env:
+          NEXT_PUBLIC_ZEROTRUST_URL: http://localhost:3000
+
+      - name: Start UI (next start)
+        run: |
+          set -euo pipefail
+          bun run --cwd packages/ui start &
+          echo "Waiting for UI server..."
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:3000/ > /dev/null 2>&1; then
+              echo "UI server is ready"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "::error::UI server did not become ready"; exit 1
+
+      - name: Run Lighthouse CI (blocking gate — PERF-2)
+        uses: treosh/lighthouse-ci-action@3e7e23fb74242897f95c0ba9cabad3d0227b9b18 # v12
+        with:
+          urls: |
+            http://localhost:3000/
+            http://localhost:3000/login
+            http://localhost:3000/register
+          configPath: ./.lighthouserc.json
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+
   e2e-ui:
     name: Playwright E2E & Accessibility Smoke
     runs-on: ubuntu-latest

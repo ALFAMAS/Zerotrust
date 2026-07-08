@@ -398,6 +398,13 @@ Cross-audit of `docs/security.md` §0–§10. **SEC-27** shipped 2026-07-08 (VPS
 
 ## Recent work (2026-07-09)
 
+### PERF-2 — Lighthouse >90 gate in CI (shipped)
+
+- **Problem:** Lighthouse thresholds were enforced only via manual `staging-validation.yml`, not on every PR.
+- **Fix:** Added a blocking `lighthouse-ci` job to `.github/workflows/ci.yml` that builds the UI, starts `next start`, and runs Lighthouse CI against `/`, `/login`, and `/register` using `.lighthouserc.json`. Staging validation keeps uploading public artifacts for compliance evidence.
+- **Paths:** `.github/workflows/ci.yml`, `.lighthouserc.json`, `.github/workflows/staging-validation.yml`, `docs/production-checklist.md`, `docs/project/todo.md`
+- **Verification (2026-07-09):** `bun run --cwd packages/ui build` → **pass**.
+
 ### Fix refresh-token rotation crash (shipped)
 
 - **Problem:** `POST /auth/token/refresh` referenced `sessionsTable` without importing it, causing a runtime `ReferenceError` and a 500 response.

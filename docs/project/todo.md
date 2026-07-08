@@ -74,15 +74,15 @@ Audit date: **2026-07-07**. Open gaps from [`production-checklist.md`](../produc
 
 ### Testing
 
-- [ ] **PERF-2** — **P1** — Lighthouse >90 gate
+- [x] **PERF-2** — **P1** — Lighthouse >90 gate — **shipped 2026-07-09** → [`shipped.md`](./shipped.md) § Recent work
 
        **Problem:** Lighthouse thresholds enforced only via manual `staging-validation.yml`, not on every PR.
 
-       **Fix:** Run Lighthouse in staging pipeline after deploy; archive artifacts as compliance evidence.
+       **Fix:** Added a blocking Lighthouse CI job to the main PR/push workflow; staging validation remains the post-deploy evidence run.
 
-       **Paths:** `.lighthouserc.json`, `.github/workflows/staging-validation.yml`
+       **Paths:** `.github/workflows/ci.yml`, `.lighthouserc.json`, `.github/workflows/staging-validation.yml`
 
-       **Status:** Partial.
+       **Status:** Done.
 
        **Refs:** [`production-checklist.md`](../production-checklist.md) § Performance
 

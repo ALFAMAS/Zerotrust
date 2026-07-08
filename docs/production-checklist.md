@@ -203,7 +203,7 @@ Complete before pointing DNS at production. Archive signed copies in
 | ☐ | Rate limiting (Redis + fallback) | P0 | **Done** | `src/middleware/rateLimiting.ts` |
 | ☐ | Auth hot-path JOIN + Redis cache | P1 | **Done** | `src/services/auth/sessionCache.service.ts` |
 | ☐ | k6 p95 thresholds | P1 | **Done** | CI blocking (`K6_PROFILE=ci`, p95<500ms); staging strict p95<100ms via `staging-validation.yml` (PERF-1) |
-| ☐ | Lighthouse >90 gate | P1 | **Partial** | Staging workflow only — `.lighthouserc.json` |
+| ☐ | Lighthouse >90 gate | P1 | **Done** | CI runs Lighthouse against `next start` (`ci.yml` `lighthouse-ci` job) + staging validation uses `staging-validation.yml` |
 | ☐ | Server-side pagination | P1 | **Done** | `src/shared/pagination.ts` on list endpoints |
 
 ---
