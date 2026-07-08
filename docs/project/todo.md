@@ -90,17 +90,7 @@ Audit date: **2026-07-07**. Open gaps from [`production-checklist.md`](../produc
 
 ### CI/CD
 
-- [ ] **CI-1** — **P2** — semantic-release CI workflow
-
-       **Problem:** `.releaserc.json` and `bun run release` exist locally but no `.github/workflows/release.yml` automates releases on `main`.
-
-       **Fix:** Add release workflow; document in `docs/deployment.md`.
-
-       **Paths:** `.releaserc.json`, `.github/workflows/`
-
-       **Status:** Partial.
-
-       **Refs:** [`production-checklist.md`](../production-checklist.md) § CI/CD
+- [x] **CI-1** — **P2** — semantic-release CI workflow — **shipped 2026-07-09** → [`shipped.md`](./shipped.md) § Recent work
 
 - [x] **DX-2** — **P2** — Commitlint in Husky — **shipped 2026-07-09** → [`shipped.md`](./shipped.md) § Recent work
 

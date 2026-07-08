@@ -120,7 +120,7 @@ Complete before pointing DNS at production. Archive signed copies in
 | ☐ | SDK + API docs drift check | P0 | **Done** | `bun run verify:generated`, `sdk:check` |
 | ☐ | API/UI integration matrix | P1 | **Done** | `scripts/audit-api-ui-map.mjs`, `docs/api-ui-integration-matrix.md` |
 | ☐ | Dependabot + weekly dependency workflow | P1 | **Done** | `.github/dependabot.yml`, `dependency-update.yml` |
-| ☐ | semantic-release automation | P2 | **Partial** | `.releaserc.json` + `bun run release`; no `.github/workflows/release.yml` |
+| ☐ | semantic-release automation | P2 | **Done** | `.github/workflows/release.yml` runs `bun run release` on pushes to `main` using `GITHUB_TOKEN` (no extra secrets required) |
 | ☐ | Module boundaries gate in CI | P2 | **Done** | `boundaries:check` in `ci.yml` `lint-and-typecheck` job (CI-2, 2026-07-08) |
 | ☐ | Husky pre-commit Biome | P2 | **Done** | Biome runs on staged files via `.husky/pre-commit` (`bun run lint-staged`) |
 | ☐ | Commitlint | P2 | **Done** | `.husky/commit-msg` runs `@commitlint/cli`; types match `.releaserc.json` (DX-2, 2026-07-09) |

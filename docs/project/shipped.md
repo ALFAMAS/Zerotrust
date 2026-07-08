@@ -417,6 +417,18 @@ Cross-audit of `docs/security.md` §0–§10. **SEC-27** shipped 2026-07-08 (VPS
 - **Verification (2026-07-09):** `authSessions.repository.test.ts` +
   `admin-tools.routes.test.ts` pass; `bun run boundaries:check` green.
 
+### CI-1 — semantic-release CI workflow (shipped)
+
+- **Problem:** `.releaserc.json` and `bun run release` existed locally, but GitHub Actions did not
+  automate releases on pushes to `main`.
+- **Fix:** Added `.github/workflows/release.yml` to run `semantic-release` on `main` pushes using
+  Bun (`bun run release`). The workflow is guarded to never run on forks and uses `GITHUB_TOKEN`
+  (no additional secrets required).
+- **Paths:** `.github/workflows/release.yml`, `.releaserc.json`, `package.json`,
+  `docs/production-checklist.md`, `docs/project/todo.md`
+- **Verification (2026-07-09):** `bun run lint:ci` → **pass**; `bun run test --run` → **pass**;
+  `bun run release:dry` loads config and fails without `GITHUB_TOKEN` (expected locally).
+
 ### DX-2 — Commitlint in Husky (shipped)
 
 - **Problem:** Conventional-commit enforcement was commented out in `.husky/commit-msg`, so

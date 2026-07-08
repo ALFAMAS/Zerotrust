@@ -788,3 +788,16 @@ Commits follow [Conventional Commits](https://www.conventionalcommits.org);
 `semantic-release` derives the version + CHANGELOG from them (`bun run release`).
 Keep `bun run lint` and `bun run type-check` green — Husky enforces them on
 commit/push.
+
+### `release.yml` — automated releases on `main`
+
+On every push to `main`, `.github/workflows/release.yml` runs `bun run release`
+with `GITHUB_TOKEN` and:
+
+- Creates/updates the Git tag + GitHub Release notes (`@semantic-release/github`)
+- Updates `CHANGELOG.md` (`@semantic-release/changelog`)
+- Commits `CHANGELOG.md` + `package.json` back to `main` with a `[skip ci]` message
+  (`@semantic-release/git`)
+
+No additional secrets are required beyond the default `GITHUB_TOKEN`, but the repo
+must allow the workflow token to write contents (tags/commits/releases).
