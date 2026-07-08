@@ -15,9 +15,9 @@ try {
   const result = await verifyAuditAnchors();
   if (result.ok) {
     if (result.reason) {
-      console.log(`○ Audit anchor verify: ${result.reason}`);
+      console.info(`○ Audit anchor verify: ${result.reason}`);
     } else {
-      console.log(
+      console.info(
         `✓ Audit anchor verify OK (seq=${result.chainTip?.seq}, anchor=${result.anchor?.anchorHash?.slice(0, 12)}…)`
       );
     }

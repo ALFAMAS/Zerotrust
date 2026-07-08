@@ -1,6 +1,6 @@
 import { and, desc, eq, inArray } from "drizzle-orm";
 import { getDb } from "../db";
-import { withOrgRls } from "../db/rls";
+import { type OrgRlsTx, withOrgRls } from "../db/rls";
 import { webhookEndpointsTable } from "../db/schema";
 import type { WebhookEndpoint, WebhookEventType } from "./types";
 
@@ -78,7 +78,7 @@ function orgScopeWhere(orgIds: string[]) {
   return inArray(webhookEndpointsTable.orgId, orgIds);
 }
 
-type DbLike = ReturnType<typeof getDb>;
+type DbLike = ReturnType<typeof getDb> | OrgRlsTx;
 
 /** Apply transaction-local RLS when a single org is in scope. */
 async function withOptionalOrgRls<T>(
@@ -87,7 +87,7 @@ async function withOptionalOrgRls<T>(
   fn: (db: DbLike) => Promise<T>
 ): Promise<T> {
   if (orgIds?.length === 1) {
-    return withOrgRls({ orgId: orgIds[0], userId }, fn);
+    return withOrgRls({ orgId: orgIds[0], userId }, (tx) => fn(tx));
   }
   return fn(getDb());
 }

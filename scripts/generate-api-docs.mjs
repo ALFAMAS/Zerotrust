@@ -94,4 +94,4 @@ for (const tag of tags) {
 }
 
 writeFileSync(path.join(root, "docs/api-reference.md"), `${lines.join("\n")}\n`);
-console.log(`✓ Generated docs/api-reference.md (${opCount} operations, ${tags.length} groups)`);
+console.info(`✓ Generated docs/api-reference.md (${opCount} operations, ${tags.length} groups)`);

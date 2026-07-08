@@ -10,7 +10,7 @@
  */
 
 import { readdirSync, readFileSync, statSync } from "node:fs";
-import { basename, dirname, relative, resolve } from "node:path";
+import { dirname, relative, resolve } from "node:path";
 
 // ── types ────────────────────────────────────────────────────────────────
 
@@ -180,7 +180,7 @@ for (const file of sourceFiles) {
 // ── report ───────────────────────────────────────────────────────────────
 
 if (violations.length === 0) {
-  console.log("✅ No module boundary violations.");
+  console.info("✅ No module boundary violations.");
   process.exit(0);
 }
 

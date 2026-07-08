@@ -22,6 +22,8 @@ type DbTx = PgTransaction<
   ExtractTablesWithRelations<typeof schema>
 >;
 
+export type OrgRlsTx = DbTx;
+
 /**
  * Set transaction-local RLS session variables (Postgres `set_config(..., true)`).
  * Must run inside the same transaction as subsequent org-scoped queries.

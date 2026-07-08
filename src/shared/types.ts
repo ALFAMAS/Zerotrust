@@ -140,6 +140,7 @@ export interface User {
     };
   };
   lastLoginAt?: Date | null;
+  emailVerifiedAt?: Date | null;
   metadata?: Record<string, unknown> | null;
   createdAt?: Date;
   updatedAt?: Date;

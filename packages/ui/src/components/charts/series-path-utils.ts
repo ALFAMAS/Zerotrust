@@ -1,6 +1,5 @@
 import { line as d3Line } from "d3-shape";
 
-// biome-ignore lint/suspicious/noExplicitAny: d3 curve factory type
 type CurveFactory = any;
 
 export interface SeriesPathPoint {

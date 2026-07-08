@@ -71,7 +71,7 @@ function assertSafeBackupPath(file, backupDirResolved) {
 function safeSpawnOptions(extra) {
   const defaultStdio = ["ignore", "ignore", "pipe"];
   return {
-    env: { ...process.env, ...((extra && extra.env) || {}) },
+    env: { ...process.env, ...(extra?.env ?? {}) },
     stdio: extra?.stdio || defaultStdio,
     shell: false,
   };

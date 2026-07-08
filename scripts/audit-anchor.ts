@@ -19,14 +19,14 @@ await initializeDatabase();
 try {
   const result = await runAuditAnchor();
   if (result.skipped) {
-    console.log(`○ Audit anchor skipped: ${result.reason}`);
+    console.info(`○ Audit anchor skipped: ${result.reason}`);
     process.exit(0);
   }
   if (!result.ok) {
     console.error(`✗ Audit anchor failed: ${result.error}`);
     process.exit(1);
   }
-  console.log(
+  console.info(
     `✓ Audit anchor recorded (seq=${result.latestSeq}, id=${result.anchorId}${
       result.externalKey ? `, s3=${result.externalKey}` : ""
     })`

@@ -4,6 +4,9 @@ import NumberFlow from "@number-flow/react";
 import { type ReactNode, useEffect, useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
 
+type NonPromise<T> = T extends PromiseLike<any> ? never : T;
+type SyncReactNode = NonPromise<ReactNode>;
+
 /** Subset of `Intl.NumberFormatOptions` supported by NumberFlow */
 export interface ChartStatFlowFormat {
   notation?: "standard" | "compact";
@@ -66,7 +69,7 @@ export interface ChartStatFlowProps {
   suffix?: string;
   valueClassName?: string;
   labelClassName?: string;
-  icon?: ReactNode;
+  icon?: SyncReactNode;
 }
 
 /**

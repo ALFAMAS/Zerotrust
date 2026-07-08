@@ -1,8 +1,6 @@
 /** DI-1 — platform domain tables. */
 import { sql } from "drizzle-orm";
 import {
-  bigint,
-  bigserial,
   boolean,
   index,
   integer,
@@ -10,7 +8,6 @@ import {
   pgTable,
   text,
   timestamp,
-  unique,
   uuid,
 } from "drizzle-orm/pg-core";
 import { usersTable } from "./identity";

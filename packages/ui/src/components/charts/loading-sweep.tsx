@@ -18,7 +18,6 @@ import { LINE_LOADING_PULSE_EASE, LOADING_LABEL_EXIT_S } from "./line-loading-ti
  */
 
 // CurveFactory type - simplified version compatible with visx
-// biome-ignore lint/suspicious/noExplicitAny: d3 curve factory type
 type CurveFactory = any;
 
 /** One shimmer sweep, in seconds. */

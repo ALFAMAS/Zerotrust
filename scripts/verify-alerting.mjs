@@ -8,10 +8,7 @@
  *   ALERTMANAGER_URL — default http://localhost:9093
  *   VERIFY_ALERTING_SEND_TEST — when "true", POST a synthetic alert to Alertmanager
  */
-const prometheusUrl = (process.env.PROMETHEUS_URL || "http://localhost:9090").replace(
-  /\/$/,
-  ""
-);
+const prometheusUrl = (process.env.PROMETHEUS_URL || "http://localhost:9090").replace(/\/$/, "");
 const alertmanagerUrl = (process.env.ALERTMANAGER_URL || "http://localhost:9093").replace(
   /\/$/,
   ""
@@ -29,7 +26,7 @@ let failed = 0;
 async function check(name, fn) {
   try {
     await fn();
-    console.log(`PASS ${name}`);
+    console.info(`PASS ${name}`);
   } catch (err) {
     failed++;
     console.error(`FAIL ${name}: ${err?.message || err}`);

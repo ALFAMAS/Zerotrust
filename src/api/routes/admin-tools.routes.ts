@@ -9,6 +9,7 @@ import { desc, eq, inArray, lt, ne } from "drizzle-orm";
 import { Hono } from "hono";
 import { getConfig } from "../../config";
 import { getDb, getReadDb } from "../../db";
+import { createImpersonationSession } from "../../db/repositories/authSessions.repository";
 import {
   auditLogsTable,
   notificationsTable,
@@ -18,7 +19,6 @@ import {
 import { auditLog, getLogger } from "../../logger";
 import { authMiddleware, requireAdmin } from "../../middleware/auth";
 import { TokenService } from "../../services/auth/token.service";
-import { createImpersonationSession } from "../../db/repositories/authSessions.repository";
 import { setLegalHold } from "../../services/compliance/legalHold.service";
 import { sendNotificationEmail } from "../../services/notifications/email.service";
 import { enqueueEmail } from "../../services/notifications/emailQueue";

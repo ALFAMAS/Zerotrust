@@ -10,10 +10,8 @@ import {
   pgTable,
   text,
   timestamp,
-  unique,
   uuid,
 } from "drizzle-orm/pg-core";
-import { usersTable } from "./identity";
 
 export const auditLogsTable = pgTable(
   "audit_logs",

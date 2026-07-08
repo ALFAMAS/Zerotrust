@@ -11,7 +11,7 @@
  * Exit code: 0 if clean, 1 if unapproved destructive DDL is found.
  */
 
-import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import * as path from "node:path";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
@@ -126,7 +126,7 @@ const allowlist = loadAllowlist();
 const migrationFiles = listMigrationFiles();
 
 if (migrationFiles.length === 0) {
-  console.log("No migration files found — skipping destructive DDL check.");
+  console.info("No migration files found — skipping destructive DDL check.");
   process.exit(0);
 }
 
@@ -145,7 +145,7 @@ for (const file of migrationFiles) {
 }
 
 if (unapproved.length === 0) {
-  console.log(
+  console.info(
     `✅ ${totalHits} destructive statement(s) found across ${migrationFiles.length} migration(s); all approved.`
   );
   process.exit(0);

@@ -1,8 +1,6 @@
 /** DI-1 — organizations domain tables. */
 import { sql } from "drizzle-orm";
 import {
-  bigint,
-  bigserial,
   boolean,
   index,
   integer,

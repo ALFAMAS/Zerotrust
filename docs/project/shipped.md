@@ -417,6 +417,18 @@ Cross-audit of `docs/security.md` §0–§10. **SEC-27** shipped 2026-07-08 (VPS
 - **Verification (2026-07-09):** `authSessions.repository.test.ts` +
   `admin-tools.routes.test.ts` pass; `bun run boundaries:check` green.
 
+### DX-1 — Husky pre-commit Biome (shipped)
+
+- **Problem:** The Biome format/lint step was commented out in `.husky/pre-commit`, so formatting
+  drift regularly reached CI instead of failing fast locally.
+- **Fix:** Enabled Biome on staged files via `bun run lint-staged` in `.husky/pre-commit` and
+  aligned the repo with `lint:ci` (cleaned up unused suppressions/imports and applied formatting).
+  Added TypeScript support for the Bun runtime via `@types/bun` + `tsconfig.json` `types` so
+  `bun run build` stays green.
+- **Paths:** `.husky/pre-commit`, `docs/production-checklist.md`, `docs/project/todo.md`,
+  `docs/project/shipped.md`, `src/middleware/zodValidation.ts`, `src/shared/types.ts`, `tsconfig.json`
+- **Verification (2026-07-09):** `bun run lint:ci` → **pass**; `bun run build` → **pass**; `bun run test` → **pass**.
+
 ### OBS-1 — Production alerting wiring (shipped)
 
 - **Problem:** Prometheus SLO rules and Alertmanager existed in compose, but

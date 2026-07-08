@@ -48,8 +48,9 @@ export function extractReferenceAreaConfigs(children: ReactNode): ReferenceAreaC
       }
 
       const childProps = child.props as { children?: ReactNode } | undefined;
-      if (childProps?.children) {
-        visit(childProps.children);
+      const maybeChildren = childProps?.children as unknown;
+      if (maybeChildren !== null && maybeChildren !== undefined) {
+        visit(maybeChildren as ReactNode);
       }
     });
   };

@@ -1,18 +1,5 @@
 /** DI-1 — support domain tables. */
-import { sql } from "drizzle-orm";
-import {
-  bigint,
-  bigserial,
-  boolean,
-  index,
-  integer,
-  jsonb,
-  pgTable,
-  text,
-  timestamp,
-  unique,
-  uuid,
-} from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { usersTable } from "./identity";
 import { organizationsTable } from "./organizations";
 

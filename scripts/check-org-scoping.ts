@@ -9,8 +9,8 @@
  * Exit code: 0 if clean, 1 if violations found.
  */
 
-import { readdirSync, readFileSync, statSync } from "node:fs";
-import { basename, relative, resolve } from "node:path";
+import { readdirSync, readFileSync } from "node:fs";
+import { relative, resolve } from "node:path";
 
 interface OrgScopeConfig {
   orgScopedTables: string[];
@@ -75,7 +75,7 @@ const files = config.scanDirs.flatMap((dir) => walk(resolve(ROOT, dir)));
 const violations = files.flatMap(checkFile);
 
 if (violations.length === 0) {
-  console.log(`✅ org-scoping lint passed (${files.length} files scanned)`);
+  console.info(`✅ org-scoping lint passed (${files.length} files scanned)`);
   process.exit(0);
 }
 

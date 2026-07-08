@@ -32,23 +32,23 @@ async function main() {
   try {
     for (const col of COLUMNS) {
       const def = col.default ? ` DEFAULT ${col.default}` : "";
-      console.log(`Adding column organizations.${col.name} (${col.type}${def}) …`);
+      console.info(`Adding column organizations.${col.name} (${col.type}${def}) …`);
       try {
         await sql.unsafe(
           `ALTER TABLE organizations ADD COLUMN IF NOT EXISTS "${col.name}" ${col.type}${def}`
         );
-        console.log(`  ✓ done`);
+        console.info(`  ✓ done`);
       } catch (err: any) {
         // IF NOT EXISTS should prevent most failures, but log anyway
         if (err.code === "42701") {
-          console.log(`  ⚠ already exists, skipping`);
+          console.info(`  ⚠ already exists, skipping`);
         } else {
           console.error(`  ✗ ${err.message}`);
         }
       }
     }
 
-    console.log("\nDone. Restart the API and try GET /orgs again.");
+    console.info("\nDone. Restart the API and try GET /orgs again.");
   } finally {
     await sql.end();
   }

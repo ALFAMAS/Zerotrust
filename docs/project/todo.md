@@ -102,18 +102,6 @@ Audit date: **2026-07-07**. Open gaps from [`production-checklist.md`](../produc
 
        **Refs:** [`production-checklist.md`](../production-checklist.md) § CI/CD
 
-- [ ] **DX-1** — **P2** — Husky pre-commit Biome
-
-       **Problem:** Biome format/lint step is commented out in `.husky/pre-commit` — drift reaches CI instead of failing locally.
-
-       **Fix:** Uncomment Biome hook; align with `lint:ci` rules.
-
-       **Paths:** `.husky/pre-commit`, `biome.json`
-
-       **Status:** Partial.
-
-       **Refs:** [`production-checklist.md`](../production-checklist.md) § CI/CD · § Developer Experience
-
 - [ ] **DX-2** — **P2** — Commitlint in Husky
 
        **Problem:** Conventional-commit enforcement is commented out in `.husky/commit-msg`.
@@ -128,7 +116,7 @@ Audit date: **2026-07-07**. Open gaps from [`production-checklist.md`](../produc
 
 ### Data / DB
 
-- [x] **DB-1** — **P1** — Repository layer for hot-path writes
+- [ ] **DB-1** — **P1** — Repository layer for hot-path writes
 
        **Problem:** Ten repositories exist in `src/db/repositories/` but many routes still use inline Drizzle for multi-statement / idempotent writes.
 

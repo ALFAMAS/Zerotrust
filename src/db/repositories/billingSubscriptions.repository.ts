@@ -25,12 +25,14 @@ export interface CheckoutSubscriptionInput extends SubscriptionLifecycleUpdateIn
 export type SubscriptionMutationResult = boolean;
 
 type DbClient = ReturnType<typeof getDb>;
+type DbTx = Parameters<Parameters<DbClient["transaction"]>[0]>[0];
+type DbLike = DbClient | DbTx;
 
 async function updateSubscriptionRow(
   subscriptionId: string,
   set: Record<string, unknown>,
   expectedVersion?: number,
-  tx?: DbClient
+  tx?: DbLike
 ): Promise<SubscriptionMutationResult> {
   const db = tx ?? getDb();
   const patch = {

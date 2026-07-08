@@ -257,4 +257,4 @@ if (!tagNames.has("Webhooks")) {
 spec.paths = Object.fromEntries(Object.entries(paths).sort(([a], [b]) => a.localeCompare(b)));
 
 writeFileSync(OPENAPI_PATH, `${JSON.stringify(spec, null, 2)}\n`);
-console.log(`Added ${added} operations to openapi.json`);
+console.info(`Added ${added} operations to openapi.json`);

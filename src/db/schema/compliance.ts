@@ -1,18 +1,6 @@
 /** DI-1 — compliance domain tables. */
 import { sql } from "drizzle-orm";
-import {
-  bigint,
-  bigserial,
-  boolean,
-  index,
-  integer,
-  jsonb,
-  pgTable,
-  text,
-  timestamp,
-  unique,
-  uuid,
-} from "drizzle-orm/pg-core";
+import { index, integer, pgTable, text, timestamp, unique, uuid } from "drizzle-orm/pg-core";
 
 export const soc2ControlsTable = pgTable("soc2_controls", {
   id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),

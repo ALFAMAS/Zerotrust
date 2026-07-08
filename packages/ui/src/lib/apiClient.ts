@@ -169,7 +169,7 @@ async function dispatch<T>(
       if (refreshed) {
         return dispatch<T>(method, path, init, { ...options, _refreshed: true });
       }
-      clearToken();
+      await clearToken();
     }
   }
 

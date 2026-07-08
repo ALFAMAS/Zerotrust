@@ -165,15 +165,6 @@ function inferMethodsForIdentifier(source, identifier) {
   return methods.size > 0 ? [...methods] : ["GET"];
 }
 
-function inferMethodForPath(source, pathOrRef) {
-  const escaped = pathOrRef.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  for (const [fn, method] of Object.entries(API_CLIENT_METHODS)) {
-    const re = new RegExp(`\\b${fn}\\b[^(]*\\([^;\\n]*["'\`]${escaped}`);
-    if (re.test(source)) return method;
-  }
-  return inferMethodsForIdentifier(source, pathOrRef)[0];
-}
-
 function parseServerStatePaths() {
   const serverStateDir = join(ROOT, "packages/ui/src/lib/server-state");
   if (!statExists(serverStateDir)) return [];
@@ -385,6 +376,6 @@ ${rows(frontend, ["method", "path", "file"])}
 
 mkdirSync(dirname(OUT), { recursive: true });
 writeFileSync(OUT, markdown);
-console.log(
+console.info(
   `Wrote ${relativePath(OUT)} (${backend.length} backend routes, ${frontend.length} frontend calls).`
 );

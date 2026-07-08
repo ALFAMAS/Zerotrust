@@ -44,7 +44,7 @@ for (const check of checks) {
         );
         continue;
       }
-      console.log(`PASS ${check.name}: unauthenticated scrape rejected (401)`);
+      console.info(`PASS ${check.name}: unauthenticated scrape rejected (401)`);
     }
 
     const headers = check.verifyAuth ? { Authorization: `Bearer ${metricsToken}` } : {};
@@ -55,7 +55,7 @@ for (const check of checks) {
       console.error(`FAIL ${check.name}: HTTP ${res.status} from ${url}`);
       continue;
     }
-    console.log(`PASS ${check.name}: HTTP ${res.status} ${url}`);
+    console.info(`PASS ${check.name}: HTTP ${res.status} ${url}`);
   } catch (err) {
     failed++;
     console.error(`FAIL ${check.name}: ${url} ${err?.message || err}`);
@@ -90,7 +90,7 @@ if (uiUrl && baseUrl) {
           `FAIL ui-api-url: UI baked apiUrl ${bakedApiUrl || "(empty)"} !== expected API_URL ${baseUrl}`
         );
       } else if (parsed) {
-        console.log(`PASS ui-api-url: UI points at ${bakedApiUrl}`);
+        console.info(`PASS ui-api-url: UI points at ${bakedApiUrl}`);
       }
     }
   } catch (err) {

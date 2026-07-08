@@ -122,7 +122,7 @@ Complete before pointing DNS at production. Archive signed copies in
 | ☐ | Dependabot + weekly dependency workflow | P1 | **Done** | `.github/dependabot.yml`, `dependency-update.yml` |
 | ☐ | semantic-release automation | P2 | **Partial** | `.releaserc.json` + `bun run release`; no `.github/workflows/release.yml` |
 | ☐ | Module boundaries gate in CI | P2 | **Done** | `boundaries:check` in `ci.yml` `lint-and-typecheck` job (CI-2, 2026-07-08) |
-| ☐ | Husky pre-commit Biome | P2 | **Partial** | Biome step commented out in `.husky/pre-commit` |
+| ☐ | Husky pre-commit Biome | P2 | **Done** | Biome runs on staged files via `.husky/pre-commit` (`bun run lint-staged`) |
 | ☐ | Commitlint | P2 | **Partial** | Commented out in `.husky/commit-msg` |
 
 ---

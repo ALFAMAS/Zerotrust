@@ -117,7 +117,7 @@ for (const [domain, tables] of Object.entries(domains)) {
     parts.join("\n\n") +
     "\n";
   writeFileSync(join(root, "src/db/schema", `${domain}.ts`), file);
-  console.log(`Wrote ${domain} (${tables.length} tables)`);
+  console.info(`Wrote ${domain} (${tables.length} tables)`);
 }
 
 const barrel =
@@ -127,4 +127,4 @@ const barrel =
     .join("\n") +
   "\n";
 writeFileSync(join(root, "src/db/schema/tables.ts"), barrel);
-console.log("Updated tables.ts barrel");
+console.info("Updated tables.ts barrel");
