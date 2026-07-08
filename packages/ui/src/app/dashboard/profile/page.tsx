@@ -203,7 +203,7 @@ export default function ProfilePage() {
             // biome-ignore lint/performance/noImgElement: user avatar URL from any host; next/image needs known domains
             <img
               src={form.avatarUrl}
-              alt={`Profile photo of ${user?.displayName || "user"}`}
+              alt={`Profile avatar of ${user?.displayName || "user"}`}
               className="mx-auto max-h-[70vh] w-full rounded-lg object-contain"
             />
           ) : null}

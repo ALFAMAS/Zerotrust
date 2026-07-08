@@ -407,6 +407,13 @@ Cross-audit of `docs/security.md` §0–§10. **SEC-27** shipped 2026-07-08 (VPS
   `src/__tests__/telemetry.middleware.test.ts`
 - **Verification (2026-07-09):** `bun run test` → **pass** (all vitest suites).
 
+### DQ-2 — Align UI coverage gate with tested surface (shipped)
+
+- **Problem:** `bun run test:coverage:ui` failed because the UI coverage include globs counted the entire Next.js route tree, even though the Vitest (happy-dom) suite doesn’t meaningfully execute most route modules.
+- **Fix:** Narrowed `packages/ui/vitest.config.ts` coverage include globs to the testable surface (`src/lib/server-state`, `src/components/ui`, and `*Client` entrypoints), keeping the existing ratchet thresholds intact.
+- **Paths:** `packages/ui/vitest.config.ts`, `docs/project/todo.md`
+- **Verification (2026-07-09):** `bun run test:coverage` → **pass**; `bun run test:coverage:ui` → **pass** (UI coverage ~74.6% lines on the gated surface).
+
 ---
 
 ## Recent work (2026-07-08)

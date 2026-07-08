@@ -90,9 +90,10 @@ function buildDefaultCsp(): string {
 
 export function buildUiSecurityHeaders(): Array<{ key: string; value: string }> {
   const csp = buildDefaultCsp();
-  const cspHeader = process.env.UI_CSP_REPORT_ONLY === "true"
-    ? "Content-Security-Policy-Report-Only"
-    : "Content-Security-Policy";
+  const cspHeader =
+    process.env.UI_CSP_REPORT_ONLY === "true"
+      ? "Content-Security-Policy-Report-Only"
+      : "Content-Security-Policy";
 
   const headers: Array<{ key: string; value: string }> = [
     { key: cspHeader, value: csp },

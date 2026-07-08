@@ -56,7 +56,7 @@ export function usePathStrokeMetrics(
     setMetrics((prev) =>
       prev.pathD === d && prev.pathLength === len ? prev : { pathD: d, pathLength: len }
     );
-  }, deps);
+  }, [pathRef, ...deps]);
 
   return metrics;
 }

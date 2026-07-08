@@ -18,12 +18,12 @@ export function enforceProductionApiUrl(url: string | undefined): void {
   const normalized = normalizeApiUrl(url);
   if (!normalized) {
     throw new Error(
-      "NEXT_PUBLIC_ZEROTRUST_URL must be set when ZEROTRUST_ENFORCE_PUBLIC_API_URL=true",
+      "NEXT_PUBLIC_ZEROTRUST_URL must be set when ZEROTRUST_ENFORCE_PUBLIC_API_URL=true"
     );
   }
   if (isLocalhostApiUrl(normalized)) {
     throw new Error(
-      `NEXT_PUBLIC_ZEROTRUST_URL must not point at localhost for production deploy builds (got ${normalized})`,
+      `NEXT_PUBLIC_ZEROTRUST_URL must not point at localhost for production deploy builds (got ${normalized})`
     );
   }
 }

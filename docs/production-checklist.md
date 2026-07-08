@@ -104,7 +104,7 @@ Complete before pointing DNS at production. Archive signed copies in
 | ☐ | Vitest API suite (~1,086 tests) | P0 | **Done** | `src/__tests__/`, root `vitest.config.ts` |
 | ☐ | UI component tests (happy-dom) | P0 | **Done** | `packages/ui/vitest.config.ts` |
 | ☐ | Playwright E2E (full stack) | P0 | **Done** | `packages/ui/e2e/`; CI `e2e-ui` job |
-| ☐ | Coverage ratchet gates (**DQ-2**) | P1 | **Partial** | API ~67% lines / UI ~55% vs 85% aspiration — `vitest.config.ts`, `packages/ui/vitest.config.ts` |
+| ☐ | Coverage ratchet gates (**DQ-2**) | P1 | **Partial** | Ratchet floors enforce incremental progress. UI gate measures the happy-dom test surface (server-state + UI primitives + `*Client` entrypoints), not the full Next.js route tree — `vitest.config.ts`, `packages/ui/vitest.config.ts` |
 | ☐ | k6 load + chaos | P1 | **Done** | `tests/load/`; CI `load-test` job blocking with `K6_PROFILE=ci` (PERF-1) |
 | ☐ | Staging Lighthouse + OWASP ZAP | P1 | **Done** | `staging-validation.yml` (manual or chained from `deploy-staging.yml`) |
 | ☐ | Destructive migration gate | P1 | **Done** | `migrations:check` in CI; `.destructive-migrations.json` |

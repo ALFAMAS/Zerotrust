@@ -89,9 +89,12 @@ const domainImports: Record<string, string> = {
 
 const tableRegex = /export const (\w+) = pgTable[\s\S]*?\n(?:\);|\}\);)/g;
 const blocks: Record<string, string> = {};
-let m: RegExpExecArray | null;
-while ((m = tableRegex.exec(content)) !== null) {
-  blocks[m[1]] = m[0];
+for (;;) {
+  const match = tableRegex.exec(content);
+  if (!match) {
+    break;
+  }
+  blocks[match[1]] = match[0];
 }
 
 for (const [domain, tables] of Object.entries(domains)) {

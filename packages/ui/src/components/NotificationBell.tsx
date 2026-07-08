@@ -153,7 +153,7 @@ export function NotificationBell() {
                 No notifications
               </div>
             ) : (
-              <ul role="list" className="divide-y divide-border">
+              <ul className="divide-y divide-border">
                 {notifications.map((n) => (
                   <li key={n.id}>
                     <Button

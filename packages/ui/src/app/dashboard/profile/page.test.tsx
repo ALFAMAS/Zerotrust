@@ -72,7 +72,7 @@ describe("ProfilePage", () => {
 
     expect(await screen.findByRole("dialog")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Profile photo" })).toBeInTheDocument();
-    expect(screen.getByAltText("Profile photo of Ada Lovelace")).toBeInTheDocument();
+    expect(screen.getByAltText("Profile avatar of Ada Lovelace")).toBeInTheDocument();
   });
 
   it("shows error when loading fails", async () => {

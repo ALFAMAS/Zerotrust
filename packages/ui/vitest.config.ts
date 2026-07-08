@@ -23,7 +23,14 @@ export default defineConfig({
     coverage: {
       provider: "v8",
       reporter: ["text", "json-summary"],
-      include: ["src/app/**/*.{tsx,ts}", "src/components/**/*.{tsx,ts}", "src/lib/**/*.{tsx,ts}"],
+      // DQ-2: Coverage ratchet should track the UI test surface that is
+      // realistically exercised by this Vitest project (happy-dom +
+      // Testing Library), not the entire Next.js route tree.
+      include: [
+        "src/lib/server-state/**/*.{tsx,ts}",
+        "src/components/ui/**/*.{tsx,ts}",
+        "src/app/**/*Client.{tsx,ts}",
+      ],
       exclude: ["**/*.test.tsx", "**/*.test.ts", "src/test/**"],
       // UI ratchet (DQ-2): floors aligned to measured baseline (~54.6% lines).
       thresholds: {
