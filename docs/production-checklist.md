@@ -123,7 +123,7 @@ Complete before pointing DNS at production. Archive signed copies in
 | ☐ | semantic-release automation | P2 | **Partial** | `.releaserc.json` + `bun run release`; no `.github/workflows/release.yml` |
 | ☐ | Module boundaries gate in CI | P2 | **Done** | `boundaries:check` in `ci.yml` `lint-and-typecheck` job (CI-2, 2026-07-08) |
 | ☐ | Husky pre-commit Biome | P2 | **Done** | Biome runs on staged files via `.husky/pre-commit` (`bun run lint-staged`) |
-| ☐ | Commitlint | P2 | **Partial** | Commented out in `.husky/commit-msg` |
+| ☐ | Commitlint | P2 | **Done** | `.husky/commit-msg` runs `@commitlint/cli`; types match `.releaserc.json` (DX-2, 2026-07-09) |
 
 ---
 
@@ -300,7 +300,7 @@ for API↔UI Zod schemas, `deploy/k8s/` Helm per `docs/reference-architecture.md
 1. ~~**SEC-27** — Add VPS hardening checklist to `docs/deployment.md` (ufw, bind-address, SSH keys).~~ **Done (SEC-27, 2026-07-08)**
 2. ~~**UI Docker image** — `packages/ui/Dockerfile` + compose service; document in `docs/deployment.md`.~~ **Done (INF-1, 2026-07-08)**
 3. ~~**CI hardening** — Add `bun run boundaries:check` to `ci.yml`; review k6 `continue-on-error`.~~ **Done (CI-2 + PERF-1, 2026-07-08)**
-4. **Husky** — Uncomment Biome pre-commit and commitlint in `.husky/`.
+4. ~~**Husky** — Uncomment Biome pre-commit and commitlint in `.husky/`.~~ **Done (DX-1 + DX-2, 2026-07-09)**
 5. ~~**Doc fixes** — Update root `SECURITY.md` argon2id wording.~~ **Done (DOC-1, 2026-07-08)**
 6. **Production env** — Walk README checklist; archive sign-off above in compliance evidence.
 
