@@ -60,6 +60,14 @@ vi.mock("../services/auth/userStateCache.service", () => ({
   getUserCached: cacheMock.getUserCached,
 }));
 
+vi.mock("../db/resolveOrgContext", () => ({
+  resolveAndSetActiveOrg: vi.fn().mockResolvedValue(undefined),
+}));
+
+vi.mock("../middleware/rateLimiting", () => ({
+  enforceUserRateLimit: vi.fn().mockResolvedValue({ allowed: true, retryAfterSecs: 0 }),
+}));
+
 const dbMock = vi.hoisted(() => ({ current: undefined as any }));
 vi.mock("../db", () => ({ getDb: () => dbMock.current }));
 

@@ -12,7 +12,7 @@ import {
   revokeSessionAtLogout,
   rotateRefreshToken,
 } from "../../db/repositories/authSessions.repository";
-import { otpsTable, refreshTokensTable, usersTable } from "../../db/schema";
+import { otpsTable, refreshTokensTable, sessionsTable, usersTable } from "../../db/schema";
 import { getLogger } from "../../logger";
 import {
   getLoginThrottle,
@@ -20,6 +20,7 @@ import {
   recordSuccessfulLogin,
 } from "../../middleware/accountLockout";
 import { authMiddleware, optionalAuthMiddleware } from "../../middleware/auth";
+import { captchaGuard } from "../../middleware/captcha";
 import { sensitiveReverification } from "../../middleware/continuousVerification";
 import {
   isIpBlocked,
@@ -27,14 +28,12 @@ import {
   recordIpLoginSuccess,
 } from "../../middleware/credentialStuffing";
 import { requireProofOfPossession } from "../../middleware/proofOfPossession";
-import { captchaGuard } from "../../middleware/captcha";
 import { rateLimit } from "../../middleware/rateLimiting";
 import { zValidator } from "../../middleware/zodValidation";
 import { getSettings } from "../../models/settings.model";
 import { recordAndRespond } from "../../services/auth/accountTakeover.service";
 import { validateSignupEmail } from "../../services/auth/disposableEmail.service";
 import { issueAuthenticatedSession } from "../../services/auth/issueAuthenticatedSession.service";
-import { recordLoginFailure, recordLoginSuccess } from "../authLoginEffects";
 import { rejectIfBreached } from "../../services/auth/passwordBreach.service";
 import {
   createPowChallenge,
@@ -69,6 +68,7 @@ import {
   verifyPassword,
 } from "../../shared/passwordHash";
 import type { HonoEnv, OAuthProvider, Passkey, User } from "../../shared/types";
+import { recordLoginFailure, recordLoginSuccess } from "../authLoginEffects";
 import { LoginBodySchema, RegisterBodySchema } from "../schemas/auth.schema";
 
 const router = new Hono<HonoEnv>();

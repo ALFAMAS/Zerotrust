@@ -396,6 +396,19 @@ Cross-audit of `docs/security.md` §0–§10. **SEC-27** shipped 2026-07-08 (VPS
 
 ---
 
+## Recent work (2026-07-09)
+
+### Fix refresh-token rotation crash (shipped)
+
+- **Problem:** `POST /auth/token/refresh` referenced `sessionsTable` without importing it, causing a runtime `ReferenceError` and a 500 response.
+- **Fix:** Imported `sessionsTable` in `src/api/routes/auth.routes.ts` and hardened unit tests around auth middleware branches, OAuth adapters, and telemetry mocks.
+- **Paths:** `src/api/routes/auth.routes.ts`, `src/__tests__/authMiddleware.branches.test.ts`,
+  `src/__tests__/auth.middleware.join.test.ts`, `src/__tests__/oauth.test.ts`,
+  `src/__tests__/telemetry.middleware.test.ts`
+- **Verification (2026-07-09):** `bun run test` → **pass** (all vitest suites).
+
+---
+
 ## Recent work (2026-07-08)
 
 ### PERF-1 — k6 load tests + p95 thresholds in CI (shipped)

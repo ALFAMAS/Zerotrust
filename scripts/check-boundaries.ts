@@ -126,10 +126,10 @@ function resolveImport(fromFile: string, importPath: string): string | null {
     const resolved = resolve(dir, importPath);
     // Try .ts, .tsx, /index.ts, /index.tsx
     const candidates = [
-      resolved + ".ts",
-      resolved + ".tsx",
-      resolved + "/index.ts",
-      resolved + "/index.tsx",
+      `${resolved}.ts`,
+      `${resolved}.tsx`,
+      `${resolved}/index.ts`,
+      `${resolved}/index.tsx`,
       resolved,
     ];
     for (const c of candidates) {

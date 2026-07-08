@@ -46,6 +46,7 @@ vi.mock("../config", () => ({
 
 vi.mock("../logger", () => ({
   getLogger: () => loggerSpies,
+  auditLog: vi.fn().mockResolvedValue(undefined),
 }));
 
 vi.mock("../middleware/sessionControl", () => ({
@@ -68,8 +69,50 @@ vi.mock("../services/auth/accountTakeover.service", () => ({
   assessTakeoverRisk: vi.fn().mockResolvedValue({ flagged: false, recentEvents: [] }),
 }));
 
+vi.mock("../shared/httpErrors", () => ({
+  internalError: (c: any, _logger: any, _label: string, err: unknown, clientMessage?: string) => {
+    const detail = err instanceof Error ? `${err.name}: ${err.message}` : String(err);
+    return c.json(
+      { error: "INTERNAL_ERROR", message: clientMessage ?? "Internal error", detail },
+      500
+    );
+  },
+}));
+
 vi.mock("../services/auth/loginNotification.service", () => ({
   notifyIfNewDevice: vi.fn().mockResolvedValue(undefined),
+}));
+
+vi.mock("../services/auth/issueAuthenticatedSession.service", () => ({
+  issueAuthenticatedSession: vi.fn().mockResolvedValue({
+    body: { accessToken: "test-access", expiresIn: 3600, tokenType: "Bearer" },
+    sessionId: SESSION_ID,
+  }),
+}));
+
+vi.mock("../shared/passwordHash", async () => {
+  const bcrypt = await import("bcryptjs");
+  return {
+    hashPassword: vi.fn().mockImplementation((pw: string) =>
+      bcrypt.hash(pw, 4).then(() => "$argon2id$mockhash")
+    ),
+    dummyPasswordHash: vi.fn().mockImplementation(() => bcrypt.hash("pad", 4)),
+    verifyPassword: vi.fn().mockImplementation((pw: string, hash: string) =>
+      bcrypt.compare(pw, hash)
+    ),
+    passwordNeedsRehash: vi.fn().mockImplementation((hash: string) => hash.startsWith("$2")),
+  };
+});
+
+vi.mock("../models/settings.model", () => ({
+  getSettings: vi.fn().mockResolvedValue({
+    accountLockoutEnabled: true,
+    accountLockoutThreshold: 8,
+    accountLockoutDurationMinutes: 1,
+    emailPasswordEnabled: true,
+    registrationEnabled: true,
+    requireEmailVerification: true,
+  }),
 }));
 
 const USER_ID = "00000000-0000-0000-0000-000000000001";
@@ -159,7 +202,8 @@ describe("telemetry middleware trace propagation", () => {
       body: JSON.stringify({ email: "alice@example.com", password: "pass123" }),
     });
 
-    expect(res.status).toBe(200);
+    const text = await res.text();
+    expect(res.status, text).toBe(200);
     expect(res.headers.get("x-trace-id")).toBe(traceId);
     expect(loggerSpies.info).toHaveBeenCalledWith(
       "HTTP request completed",

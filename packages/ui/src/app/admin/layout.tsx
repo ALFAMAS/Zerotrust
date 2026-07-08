@@ -4,7 +4,6 @@ import {
   Activity,
   ArrowLeft,
   Bell,
-  Building2,
   ClipboardCheck,
   FileText,
   Globe2,
@@ -113,7 +112,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }, [ready, sessionReady, isPending, isError, me, router]);
 
   function handleSignOut() {
-    clearToken();
+    void clearToken();
     router.push("/login");
   }
 

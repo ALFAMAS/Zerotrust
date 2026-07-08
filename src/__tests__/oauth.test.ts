@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 const mockFetch = vi.fn();
 global.fetch = mockFetch;
 
-vi.mock("../../../src/logger/index.js", () => ({
+vi.mock("../../src/logger/index.js", () => ({
   getLogger: () => ({
     info: vi.fn(),
     warn: vi.fn(),
@@ -14,6 +14,7 @@ vi.mock("../../../src/logger/index.js", () => ({
 
 vi.mock("../../src/config/index.js", () => ({
   getConfig: () => ({
+    logging: { level: "error", format: "json" },
     oauth: {
       providers: {
         github: { clientId: "cid", clientSecret: "csecret", redirectUri: "http://localhost/cb" },
