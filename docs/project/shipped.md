@@ -398,6 +398,23 @@ Cross-audit of `docs/security.md` §0–§10. **SEC-27** shipped 2026-07-08 (VPS
 
 ## Recent work (2026-07-09)
 
+### DB-1 — Login session minting repository (partial)
+
+- **Problem:** `issueAuthenticatedSession.service.ts` inserted session + refresh token
+  and updated `lastLoginAt` as three separate statements — a partial failure could
+  leave an orphan session without a refresh token.
+- **Fix:** Added `createAuthenticatedSession()` to `authSessions.repository.ts`;
+  password login, MFA completion, OAuth, and magic-link flows delegate through
+  `issueAuthenticatedSession.service.ts`. One transactional test added; auth route
+  mocks updated.
+- **Paths:** `src/db/repositories/authSessions.repository.ts`,
+  `src/services/auth/issueAuthenticatedSession.service.ts`,
+  `src/__tests__/authSessions.repository.test.ts`, `src/__tests__/auth.routes.test.ts`
+- **Remaining:** Admin impersonation session insert (`admin-tools.routes.ts`) and
+  other scattered single-statement route writes.
+- **Verification (2026-07-09):** `authSessions.repository.test.ts` + `auth.routes.test.ts`
+  pass; `bun run boundaries:check` green.
+
 ### OBS-1 — Production alerting wiring (shipped)
 
 - **Problem:** Prometheus SLO rules and Alertmanager existed in compose, but

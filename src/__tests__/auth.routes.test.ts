@@ -159,6 +159,9 @@ vi.mock("../shared/passwordHash", async () => {
 });
 
 vi.mock("../db/repositories/authSessions.repository", () => ({
+  createAuthenticatedSession: vi
+    .fn()
+    .mockResolvedValue({ id: "00000000-0000-0000-0000-000000000002" }),
   revokeRefreshTokenFamily: vi.fn().mockResolvedValue(undefined),
   revokeSessionAtLogout: vi.fn().mockResolvedValue(true),
   rotateRefreshToken: vi.fn().mockResolvedValue({ id: "00000000-0000-0000-0000-000000000002" }),
@@ -448,10 +451,6 @@ describe("POST /login", () => {
     const hash = await bcrypt.hash("Passw0rd!", 4);
     const user = makeActiveUser({ passwordHash: hash });
     db.limit.mockResolvedValueOnce([user]);
-    // insert session returning
-    db.returning.mockResolvedValueOnce([makeSession()]);
-    // insert refresh token returning
-    db.returning.mockResolvedValueOnce([{ id: "rt-1" }]);
     const router = await getRouter();
     const app = new Hono().route("/", router);
     const res = await app.request("/login", {
@@ -678,8 +677,6 @@ describe("POST /login with MFA enabled + POST /login/mfa", () => {
 
     // 2) /login/mfa → tokens
     db.limit.mockResolvedValueOnce([user]); // user lookup by id
-    db.returning.mockResolvedValueOnce([makeSession()]); // session insert
-    db.returning.mockResolvedValueOnce([{ id: "rt-1" }]); // refresh token insert
     const code = new TOTP({
       algorithm: "SHA1",
       digits: 6,
@@ -1173,9 +1170,7 @@ describe.skip("GET /oauth/:provider/callback", () => {
     db.returning
       .mockResolvedValueOnce([
         makeActiveUser({ id: USER_ID, email: "new@example.com" }),
-      ]) // user
-      .mockResolvedValueOnce([makeSession()]) // session insert
-      .mockResolvedValueOnce([{ id: "rt-1" }]); // refresh token insert
+      ]); // user
 
     const res = await app.request(
       `/oauth/google/callback?code=abc&state=${state}`,
@@ -1613,7 +1608,6 @@ describe.skip("GET /oauth/:provider/callback — account-linking safety", () => 
     db.limit.mockResolvedValueOnce([
       makeActiveUser({ email: "user@example.com", oauthProviders: [] }),
     ]);
-    db.returning.mockResolvedValueOnce([makeSession()]); // session insert
     const { app, state } = await callbackWithProfile({
       id: "g-verified",
       email: "user@example.com",
@@ -1633,7 +1627,6 @@ describe.skip("GET /oauth/:provider/callback — account-linking safety", () => 
         oauthProviders: [{ provider: "google", providerId: "g-known" }],
       }),
     ]);
-    db.returning.mockResolvedValueOnce([makeSession()]);
     const { app, state } = await callbackWithProfile({
       id: "g-known",
       email: "user@example.com",

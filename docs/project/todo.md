@@ -136,7 +136,7 @@ Audit date: **2026-07-07**. Open gaps from [`production-checklist.md`](../produc
 
        **Paths:** `src/db/repositories/`, `src/api/routes/`, `CLAUDE.md`
 
-       **Status:** Partial.
+       **Status:** Partial — `createAuthenticatedSession()` added to `authSessions.repository.ts` (2026-07-09); login/OAuth/magic-link session minting now transactional. Remaining: admin impersonation session insert, scattered single-statement route writes.
 
        **Refs:** [`production-checklist.md`](../production-checklist.md) § Data / DB
 

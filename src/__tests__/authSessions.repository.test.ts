@@ -6,6 +6,7 @@ vi.mock("../db", () => ({
 
 import { getDb } from "../db";
 import {
+  createAuthenticatedSession,
   revokeRefreshTokenFamily,
   revokeSessionAtLogout,
   rotateRefreshToken,
@@ -16,6 +17,55 @@ const mockGetDb = vi.mocked(getDb);
 describe("authSessions repository", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  it("creates session, refresh token, and lastLoginAt inside one transaction", async () => {
+    const sessionReturning = vi.fn().mockResolvedValue([{ id: "session-1" }]);
+    const sessionValues = vi.fn().mockReturnValue({ returning: sessionReturning });
+    const refreshValues = vi.fn().mockResolvedValue(undefined);
+    const userWhere = vi.fn().mockResolvedValue(undefined);
+    const userSet = vi.fn().mockReturnValue({ where: userWhere });
+    const insert = vi
+      .fn()
+      .mockReturnValueOnce({ values: sessionValues })
+      .mockReturnValueOnce({ values: refreshValues });
+    const update = vi.fn().mockReturnValue({ set: userSet });
+    const tx = { insert, update };
+    const transaction = vi.fn(async (callback) => callback(tx));
+    mockGetDb.mockReturnValue({ transaction } as never);
+
+    const session = await createAuthenticatedSession({
+      userId: "user-1",
+      session: {
+        id: "session-1",
+        userId: "user-1",
+        tokenId: "jti-1",
+        deviceFingerprint: {},
+        ipAddress: "127.0.0.1",
+        expiresAt: new Date("2026-06-30T00:00:00.000Z"),
+        lastActivityAt: new Date("2026-06-30T00:00:00.000Z"),
+        isActive: true,
+      },
+      refreshToken: {
+        userId: "user-1",
+        tokenHash: "refresh-hash",
+        familyId: "family-1",
+        expiresAt: new Date("2026-07-07T00:00:00.000Z"),
+      },
+    });
+
+    expect(session).toEqual({ id: "session-1" });
+    expect(transaction).toHaveBeenCalledTimes(1);
+    expect(insert).toHaveBeenCalledTimes(2);
+    expect(update).toHaveBeenCalledTimes(1);
+    expect(userSet).toHaveBeenCalledWith({ lastLoginAt: expect.any(Date) });
+    expect(refreshValues).toHaveBeenCalledWith({
+      userId: "user-1",
+      sessionId: "session-1",
+      tokenHash: "refresh-hash",
+      familyId: "family-1",
+      expiresAt: new Date("2026-07-07T00:00:00.000Z"),
+    });
   });
 
   it("revokes a reused refresh token family inside one transaction", async () => {

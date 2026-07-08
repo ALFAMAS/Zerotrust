@@ -3,7 +3,7 @@ import { hashTokenSha256 } from "../../shared/cryptoHash";
 import type { User } from "../../shared/types";
 import { getDb } from "..";
 import { verifyOrgMembership } from "../orgMembership";
-import { refreshTokensTable, sessionsTable } from "../schema";
+import { refreshTokensTable, sessionsTable, usersTable } from "../schema";
 
 export type RefreshSessionInsert = typeof sessionsTable.$inferInsert;
 export type RefreshTokenReplacementInsert = Omit<
@@ -15,6 +15,37 @@ export interface RotateRefreshTokenInput {
   oldRefreshTokenId: string;
   session: RefreshSessionInsert;
   refreshToken: RefreshTokenReplacementInsert;
+}
+
+export interface CreateAuthenticatedSessionInput {
+  userId: string;
+  session: RefreshSessionInsert;
+  refreshToken: RefreshTokenReplacementInsert;
+}
+
+/**
+ * Atomically create a login session, its refresh token, and bump lastLoginAt.
+ * Used on password/OAuth/magic-link login so a partial failure cannot leave an
+ * orphan session without a refresh token (or vice versa).
+ */
+export async function createAuthenticatedSession(input: CreateAuthenticatedSessionInput) {
+  const db = getDb();
+  return db.transaction(async (tx) => {
+    const [session] = await tx.insert(sessionsTable).values(input.session).returning();
+    if (!session) throw new Error("SESSION_CREATE_FAILED");
+
+    await tx.insert(refreshTokensTable).values({
+      ...input.refreshToken,
+      sessionId: session.id,
+    });
+
+    await tx
+      .update(usersTable)
+      .set({ lastLoginAt: new Date() })
+      .where(eq(usersTable.id, input.userId));
+
+    return session;
+  });
 }
 
 /**

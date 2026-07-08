@@ -1,9 +1,7 @@
 import * as nodeCrypto from "node:crypto";
-import { eq } from "drizzle-orm";
 import type { Context } from "hono";
 import { getConfig } from "../../config";
-import { getDb } from "../../db";
-import { refreshTokensTable, sessionsTable, usersTable } from "../../db/schema";
+import { createAuthenticatedSession } from "../../db/repositories/authSessions.repository";
 import { enforceMaxConcurrentDevices } from "../../middleware/sessionControl";
 import { setRefreshTokenCookie } from "../../shared/authCookies";
 import { getClientIp } from "../../shared/clientIp";
@@ -32,7 +30,6 @@ export async function issueAuthenticatedSession(
 ) {
   const cfg = getConfig();
   const tokenSvc = await getTokenService();
-  const db = getDb();
 
   const fpInput = FingerprintService.extractFromRequest({
     headers: Object.fromEntries(c.req.raw.headers),
@@ -53,9 +50,13 @@ export async function issueAuthenticatedSession(
   });
   const payload = await tokenSvc.verifyAccessToken(accessToken);
 
-  const [session] = await db
-    .insert(sessionsTable)
-    .values({
+  const refreshTokenPlain = await tokenSvc.signRefreshToken();
+  const refreshTokenHash = hashToken(refreshTokenPlain);
+  const familyId = nodeCrypto.randomUUID();
+
+  const session = await createAuthenticatedSession({
+    userId: user.id,
+    session: {
       id: sessionId,
       userId: user.id,
       tokenId: payload.jti,
@@ -72,23 +73,16 @@ export async function issueAuthenticatedSession(
       lastActivityAt: new Date(),
       isActive: true,
       proofOfPossessionKey: payload.pop_key,
-    })
-    .returning();
-
-  const refreshTokenPlain = await tokenSvc.signRefreshToken();
-  const refreshTokenHash = hashToken(refreshTokenPlain);
-  const familyId = nodeCrypto.randomUUID();
-  await db.insert(refreshTokensTable).values({
-    userId: user.id,
-    sessionId: session.id,
-    tokenHash: refreshTokenHash,
-    familyId,
-    expiresAt: new Date(Date.now() + cfg.session.refreshTokenTTL * 1000),
+    },
+    refreshToken: {
+      userId: user.id,
+      tokenHash: refreshTokenHash,
+      familyId,
+      expiresAt: new Date(Date.now() + cfg.session.refreshTokenTTL * 1000),
+    },
   });
 
   await enforceMaxConcurrentDevices(user.id);
-
-  await db.update(usersTable).set({ lastLoginAt: new Date() }).where(eq(usersTable.id, user.id));
 
   void notifyIfNewDevice({
     userId: user.id,
