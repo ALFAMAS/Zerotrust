@@ -152,214 +152,225 @@ export default function LandingPage() {
       </nav>
 
       <main id="main-content" tabIndex={-1}>
-      {/* ── Hero ─────────────────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden">
-        <div
-          className="bg-grid mask-fade pointer-events-none absolute inset-0 opacity-60"
-          aria-hidden
-        />
-        <div
-          className="pointer-events-none absolute left-1/2 top-[-10rem] h-[32rem] w-[32rem] -translate-x-1/2 rounded-full opacity-30 blur-[160px]"
-          style={{ background: brand.color }}
-          aria-hidden
-        />
-        <div className="relative mx-auto max-w-3xl px-6 pb-20 pt-24 text-center sm:pt-28">
-          <div className="animate-fade-up mb-6 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3.5 py-1.5 text-xs font-medium text-primary">
-            <span className="relative flex h-1.5 w-1.5">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
-              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-primary" />
-            </span>
-            {brand.announcementBadge}
-          </div>
-
-          <h1
-            className="animate-fade-up font-display text-5xl font-semibold leading-[1.05] tracking-tight text-foreground sm:text-6xl"
-            style={{ animationDelay: "80ms" }}
-          >
-            {brand.heroTitle}
-            <br />
-            <span className="text-primary">{brand.heroSubtitle}</span>
-          </h1>
-
-          <p
-            className="animate-fade-up mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground"
-            style={{ animationDelay: "160ms" }}
-          >
-            {brand.heroDescription}
-          </p>
-
+        {/* ── Hero ─────────────────────────────────────────────────────────── */}
+        <section className="relative overflow-hidden">
           <div
-            className="animate-fade-up mt-10 flex flex-wrap items-center justify-center gap-3"
-            style={{ animationDelay: "240ms" }}
-          >
-            <Link href="/register" className={cn(buttonVariants({ size: "lg" }), "px-8 text-base")}>
-              Start free
-              <ArrowRight />
-            </Link>
-            <a
-              href={`${brand.apiUrl}/docs`}
-              className={cn(buttonVariants({ variant: "outline", size: "lg" }), "px-8 text-base")}
-            >
-              View API docs
-            </a>
-          </div>
-
-          {/* Quick request preview */}
-          <div
-            className="animate-fade-up mx-auto mt-14 max-w-2xl overflow-hidden rounded-xl border border-border bg-card/70 text-left shadow-2xl backdrop-blur-sm"
-            style={{ animationDelay: "320ms" }}
-          >
-            <div className="flex items-center gap-1.5 border-b border-border px-4 py-3">
-              <span className="h-3 w-3 rounded-full bg-destructive/70" />
-              <span className="h-3 w-3 rounded-full bg-yellow-500/70" />
-              <span className="h-3 w-3 rounded-full bg-emerald-500/70" />
-              <span className="ml-2 font-mono text-xs text-muted-foreground">authenticate.sh</span>
-            </div>
-            <pre className="overflow-x-auto p-4 font-mono text-[13px] leading-relaxed text-muted-foreground">
-              <code>
-                <span className="text-primary">curl</span> -X POST {brand.apiUrl}/auth/login \{"\n"}
-                {"  "}-H{" "}
-                <span className="text-emerald-400">&apos;Content-Type: application/json&apos;</span>{" "}
-                \{"\n"}
-                {"  "}-d{" "}
-                <span className="text-emerald-400">
-                  &apos;{`{"email":"you@example.com","password":"••••"}`}&apos;
-                </span>
-                {"\n\n"}
-                <span className="text-muted-foreground/60"># → 200 OK</span>
-                {"\n"}
-                {`{ `}
-                <span className="text-foreground">&quot;accessToken&quot;</span>:{" "}
-                <span className="text-emerald-400">&quot;v4.local.…&quot;</span>,{" "}
-                <span className="text-foreground">&quot;mfaRequired&quot;</span>:{" "}
-                <span className="text-primary">false</span> {`}`}
-              </code>
-            </pre>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Features ─────────────────────────────────────────────────────── */}
-      <section id="features" className="mx-auto max-w-7xl scroll-mt-20 px-6 py-20">
-        <div className="mx-auto mb-14 max-w-2xl text-center">
-          <h2 className="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-            Everything you need to ship secure auth
-          </h2>
-          <p className="mt-3 text-muted-foreground">
-            One self-hosted platform — no third-party dependency on your critical auth path.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {features.map((f) => (
-            <div
-              key={f.title}
-              className="group rounded-xl border border-border bg-card p-5 transition-colors hover:border-primary/40"
-            >
-              <span className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-background text-primary transition-colors group-hover:border-primary/40">
-                <f.icon className="h-5 w-5" />
-              </span>
-              <h3 className="font-medium text-foreground">{f.title}</h3>
-              <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{f.desc}</p>
-            </div>
-          ))}
-        </div>
-
-        {/* Also included */}
-        <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {alsoIncluded.map((a) => (
-            <div
-              key={a.label}
-              className="flex items-center gap-3 rounded-lg border border-border/60 bg-card/40 px-4 py-3"
-            >
-              <a.icon className="h-4 w-4 shrink-0 text-primary" />
-              <span className="text-sm text-muted-foreground">{a.label}</span>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ── Standards strip ──────────────────────────────────────────────── */}
-      <section className="border-y border-border/60 bg-card/30">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-x-8 gap-y-3 px-6 py-6">
-          <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-            Standards-first
-          </span>
-          {standards.map((s) => (
-            <span key={s} className="font-mono text-sm text-foreground/80">
-              {s}
-            </span>
-          ))}
-        </div>
-      </section>
-
-      {/* ── Quickstart ───────────────────────────────────────────────────── */}
-      <section className="mx-auto max-w-3xl px-6 py-20">
-        <div className="mb-12 text-center">
-          <h2 className="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-            Running in minutes
-          </h2>
-          <p className="mt-3 text-muted-foreground">
-            Self-host the whole stack with three commands.
-          </p>
-        </div>
-        <div className="space-y-5">
-          {steps.map((s) => (
-            <div key={s.step} className="flex items-start gap-4">
-              <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-border bg-card font-mono text-sm font-semibold text-indigo-300">
-                {s.step}
-              </div>
-              <div className="min-w-0 flex-1">
-                <h3 className="font-medium text-foreground">{s.title}</h3>
-                <code className="mt-2 block overflow-x-auto rounded-lg border border-border bg-card px-4 py-2.5 font-mono text-sm text-foreground/90">
-                  {s.code}
-                </code>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ── CTA ──────────────────────────────────────────────────────────── */}
-      <section className="mx-auto max-w-5xl px-6 pb-24">
-        <div className="relative overflow-hidden rounded-2xl border border-border bg-card p-10 text-center sm:p-16">
-          <div
-            className="bg-grid mask-fade pointer-events-none absolute inset-0 opacity-50"
+            className="bg-grid mask-fade pointer-events-none absolute inset-0 opacity-60"
             aria-hidden
           />
           <div
-            className="pointer-events-none absolute bottom-[-8rem] left-1/2 h-72 w-72 -translate-x-1/2 rounded-full opacity-30 blur-[120px]"
+            className="pointer-events-none absolute left-1/2 top-[-10rem] h-[32rem] w-[32rem] -translate-x-1/2 rounded-full opacity-30 blur-[160px]"
             style={{ background: brand.color }}
             aria-hidden
           />
-          <div className="relative">
-            <h2 className="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-              Own your auth stack
-            </h2>
-            <p className="mx-auto mt-3 max-w-md text-muted-foreground">
-              Self-hosted. Open source. No vendor lock-in, no per-MAU surprises.
+          <div className="relative mx-auto max-w-3xl px-6 pb-20 pt-24 text-center sm:pt-28">
+            <div className="animate-fade-up mb-6 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3.5 py-1.5 text-xs font-medium text-primary">
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
+                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-primary" />
+              </span>
+              {brand.announcementBadge}
+            </div>
+
+            <h1
+              className="animate-fade-up font-display text-5xl font-semibold leading-[1.05] tracking-tight text-foreground sm:text-6xl"
+              style={{ animationDelay: "80ms" }}
+            >
+              {brand.heroTitle}
+              <br />
+              <span className="text-primary">{brand.heroSubtitle}</span>
+            </h1>
+
+            <p
+              className="animate-fade-up mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground"
+              style={{ animationDelay: "160ms" }}
+            >
+              {brand.heroDescription}
             </p>
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+
+            <div
+              className="animate-fade-up mt-10 flex flex-wrap items-center justify-center gap-3"
+              style={{ animationDelay: "240ms" }}
+            >
               <Link
                 href="/register"
                 className={cn(buttonVariants({ size: "lg" }), "px-8 text-base")}
               >
-                Create your account
+                Start free
                 <ArrowRight />
               </Link>
               <a
-                href={brand.githubUrl}
-                target="_blank"
-                rel="noopener noreferrer"
+                href={`${brand.apiUrl}/docs`}
                 className={cn(buttonVariants({ variant: "outline", size: "lg" }), "px-8 text-base")}
               >
-                <Star />
-                Star on GitHub
+                View API docs
               </a>
             </div>
+
+            {/* Quick request preview */}
+            <div
+              className="animate-fade-up mx-auto mt-14 max-w-2xl overflow-hidden rounded-xl border border-border bg-card/70 text-left shadow-2xl backdrop-blur-sm"
+              style={{ animationDelay: "320ms" }}
+            >
+              <div className="flex items-center gap-1.5 border-b border-border px-4 py-3">
+                <span className="h-3 w-3 rounded-full bg-destructive/70" />
+                <span className="h-3 w-3 rounded-full bg-yellow-500/70" />
+                <span className="h-3 w-3 rounded-full bg-emerald-500/70" />
+                <span className="ml-2 font-mono text-xs text-muted-foreground">
+                  authenticate.sh
+                </span>
+              </div>
+              <pre className="overflow-x-auto p-4 font-mono text-[13px] leading-relaxed text-muted-foreground">
+                <code>
+                  <span className="text-primary">curl</span> -X POST {brand.apiUrl}/auth/login \
+                  {"\n"}
+                  {"  "}-H{" "}
+                  <span className="text-emerald-400">
+                    &apos;Content-Type: application/json&apos;
+                  </span>{" "}
+                  \{"\n"}
+                  {"  "}-d{" "}
+                  <span className="text-emerald-400">
+                    &apos;{`{"email":"you@example.com","password":"••••"}`}&apos;
+                  </span>
+                  {"\n\n"}
+                  <span className="text-muted-foreground/60"># → 200 OK</span>
+                  {"\n"}
+                  {`{ `}
+                  <span className="text-foreground">&quot;accessToken&quot;</span>:{" "}
+                  <span className="text-emerald-400">&quot;v4.local.…&quot;</span>,{" "}
+                  <span className="text-foreground">&quot;mfaRequired&quot;</span>:{" "}
+                  <span className="text-primary">false</span> {`}`}
+                </code>
+              </pre>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+
+        {/* ── Features ─────────────────────────────────────────────────────── */}
+        <section id="features" className="mx-auto max-w-7xl scroll-mt-20 px-6 py-20">
+          <div className="mx-auto mb-14 max-w-2xl text-center">
+            <h2 className="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+              Everything you need to ship secure auth
+            </h2>
+            <p className="mt-3 text-muted-foreground">
+              One self-hosted platform — no third-party dependency on your critical auth path.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {features.map((f) => (
+              <div
+                key={f.title}
+                className="group rounded-xl border border-border bg-card p-5 transition-colors hover:border-primary/40"
+              >
+                <span className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-background text-primary transition-colors group-hover:border-primary/40">
+                  <f.icon className="h-5 w-5" />
+                </span>
+                <h3 className="font-medium text-foreground">{f.title}</h3>
+                <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{f.desc}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Also included */}
+          <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {alsoIncluded.map((a) => (
+              <div
+                key={a.label}
+                className="flex items-center gap-3 rounded-lg border border-border/60 bg-card/40 px-4 py-3"
+              >
+                <a.icon className="h-4 w-4 shrink-0 text-primary" />
+                <span className="text-sm text-muted-foreground">{a.label}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ── Standards strip ──────────────────────────────────────────────── */}
+        <section className="border-y border-border/60 bg-card/30">
+          <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-x-8 gap-y-3 px-6 py-6">
+            <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+              Standards-first
+            </span>
+            {standards.map((s) => (
+              <span key={s} className="font-mono text-sm text-foreground/80">
+                {s}
+              </span>
+            ))}
+          </div>
+        </section>
+
+        {/* ── Quickstart ───────────────────────────────────────────────────── */}
+        <section className="mx-auto max-w-3xl px-6 py-20">
+          <div className="mb-12 text-center">
+            <h2 className="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+              Running in minutes
+            </h2>
+            <p className="mt-3 text-muted-foreground">
+              Self-host the whole stack with three commands.
+            </p>
+          </div>
+          <div className="space-y-5">
+            {steps.map((s) => (
+              <div key={s.step} className="flex items-start gap-4">
+                <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-border bg-card font-mono text-sm font-semibold text-indigo-300">
+                  {s.step}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <h3 className="font-medium text-foreground">{s.title}</h3>
+                  <code className="mt-2 block overflow-x-auto rounded-lg border border-border bg-card px-4 py-2.5 font-mono text-sm text-foreground/90">
+                    {s.code}
+                  </code>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ── CTA ──────────────────────────────────────────────────────────── */}
+        <section className="mx-auto max-w-5xl px-6 pb-24">
+          <div className="relative overflow-hidden rounded-2xl border border-border bg-card p-10 text-center sm:p-16">
+            <div
+              className="bg-grid mask-fade pointer-events-none absolute inset-0 opacity-50"
+              aria-hidden
+            />
+            <div
+              className="pointer-events-none absolute bottom-[-8rem] left-1/2 h-72 w-72 -translate-x-1/2 rounded-full opacity-30 blur-[120px]"
+              style={{ background: brand.color }}
+              aria-hidden
+            />
+            <div className="relative">
+              <h2 className="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+                Own your auth stack
+              </h2>
+              <p className="mx-auto mt-3 max-w-md text-muted-foreground">
+                Self-hosted. Open source. No vendor lock-in, no per-MAU surprises.
+              </p>
+              <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+                <Link
+                  href="/register"
+                  className={cn(buttonVariants({ size: "lg" }), "px-8 text-base")}
+                >
+                  Create your account
+                  <ArrowRight />
+                </Link>
+                <a
+                  href={brand.githubUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={cn(
+                    buttonVariants({ variant: "outline", size: "lg" }),
+                    "px-8 text-base"
+                  )}
+                >
+                  <Star />
+                  Star on GitHub
+                </a>
+              </div>
+            </div>
+          </div>
+        </section>
       </main>
 
       {/* ── Footer ───────────────────────────────────────────────────────── */}
