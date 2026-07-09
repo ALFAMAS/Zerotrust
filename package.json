@@ -140,10 +140,10 @@
     "@next/swc-wasm-web": "^16.2.4",
     "@parcel/watcher-win32-x64": "^2.5.6",
     "@swc/core-win32-x64-msvc": "^1.15.43",
-    "@rolldown/binding-darwin-arm64": "1.1.4",
-    "@rolldown/binding-darwin-x64": "1.1.4",
-    "@rolldown/binding-linux-x64-gnu": "1.1.4",
-    "@rolldown/binding-win32-x64-msvc": "1.1.4",
+    "@rolldown/binding-darwin-arm64": "1.1.5",
+    "@rolldown/binding-darwin-x64": "1.1.5",
+    "@rolldown/binding-linux-x64-gnu": "1.1.5",
+    "@rolldown/binding-win32-x64-msvc": "1.1.5",
     "@swc/core-darwin-arm64": "1.15.43",
     "@swc/core-darwin-x64": "1.15.43"
   }
