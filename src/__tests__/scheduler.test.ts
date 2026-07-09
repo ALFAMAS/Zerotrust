@@ -96,6 +96,10 @@ describe("BullMQ-backed job scheduler", () => {
     upsertJobSchedulerCalls = [];
     zsets.clear();
     delete process.env.BACKUP_ENABLED;
+    // startJobScheduler(undefined) falls back to process.env.REDIS_URI, which
+    // the CI Tests job sets for its Redis service container — clear it so the
+    // "no REDIS_URI" cases exercise the skip path deterministically.
+    delete process.env.REDIS_URI;
   });
 
   describe("startJobScheduler", () => {

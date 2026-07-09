@@ -21,6 +21,7 @@ wired. This audit found **one P0 regression** and a set of structural/hygiene it
 | ID | Priority | Finding | Status |
 | -- | -------- | ------- | ------ |
 | **MIG-1** | **P0** | 11 migration files (`0030`–`0040`) missing from `drizzle/meta/_journal.json` — `bun run db:migrate` (used by staging/production deploy workflows) will never apply them. Includes the org **RLS policies** the security checklist relies on. | **Open** |
+| **CI-3** | **P0** | `main` CI red since 2026-07-08: (a) Dependabot bumped `tailwindcss` 3→4 without migrating the v3-style `postcss.config.js`/`tailwind.config.js`/`globals.css`, breaking `next build`; (b) FE-1 left stale `setToast()` calls in two admin pages, failing typecheck; (c) `scheduler.test.ts` "no REDIS_URI" case read the CI job's real `REDIS_URI` via the default parameter. | **Fixed in this PR** |
 | **HYG-1** | P1 | Stray artifacts committed to git: `tmp-verify/`, `packages/ui/src/graphify-out/`, `packages/ui/src/app/graphify-out/` (tool caches inside the Next.js App Router tree). | **Fixed in this PR** |
 | **DEP-1** | P1 | Root `package.json` ships UI/dead deps (`tailwindcss-animate`, `xpath`) and misplaces `@types/web-push` in `dependencies`; knip `ignoreDependencies` suppresses the warnings instead of fixing them. | Open |
 | **STR-1** | P2 | `scripts/` sprawl: ~29 files mixing ops, codegen, CI checks, smoke tests, codemods, and Windows `.ps1` repair tools in one flat dir. | Open (carried from 2026-07-07) |
@@ -92,6 +93,19 @@ touched by MIG-1.
       (`SELECT * FROM pg_policies WHERE schemaname='public';`) — if they were provisioned via
       `db:push` they have them; if via `db:migrate` they do **not**
 - [x] Destructive-migration gate (`migrations:check`) — still wired in CI
+
+### CI health (CI-3 — fixed in this PR)
+
+- [x] Pin `tailwindcss` back to `^3.4.0` (v4 was never migrated); Dependabot now ignores
+      tailwindcss major bumps until a real v4 migration (`@tailwindcss/postcss`, CSS-first config)
+- [x] Replace leftover `setToast()` calls with `useToast().toast()` in
+      `packages/ui/src/app/admin/{content,search}/page.tsx`
+- [x] `scheduler.test.ts`: clear `process.env.REDIS_URI` in `beforeEach` so the skip-path tests
+      are deterministic in CI (the job exports `REDIS_URI` for its Redis service container)
+- [ ] **P1**: treat a red `main` as a stop-the-line event — five consecutive `main` runs were
+      red (2026-07-08 → 2026-07-09) without a revert; consider branch protection requiring CI on
+      push-to-main (or merge queue), since `main` currently takes direct pushes
+- [ ] **P2**: schedule the actual Tailwind v4 migration, then remove the Dependabot ignore rules
 
 ### Dependencies (DEP-1)
 

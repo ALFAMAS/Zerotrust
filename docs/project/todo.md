@@ -43,6 +43,13 @@ New open items below come from the **2026-07-09 codebase audit**
 - [ ] **STR-4 (P2)** — Retire legacy `src/db/schema.ts` and orphaned `src/models/` in favor of
       `src/db/schema/*`.
 
+### CI health
+
+- [ ] **CI-3 follow-ups (P1/P2)** — Branch protection or merge queue so a red `main` can't
+      accumulate (5 consecutive red runs 2026-07-08→09); plan the real Tailwind v4 migration and
+      then drop the Dependabot `tailwindcss` major-bump ignore. (Immediate breakage fixed
+      2026-07-09: tailwind pinned to v3, stale `setToast` calls replaced, scheduler test env leak.)
+
 ### Testing / docs
 
 - [ ] **TEST-1 (P2)** — Document the four test surfaces (API vitest, UI happy-dom, Playwright e2e,
