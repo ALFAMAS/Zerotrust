@@ -12,7 +12,7 @@ import { organizationMembersTable, usersTable } from "../../db/schema";
 import { getLogger } from "../../logger";
 import { KNOWN_HARDWARE_KEY_AAGUIDS, verifyAttestation } from "../../mfa/attestation";
 import { authMiddleware } from "../../middleware/auth";
-import { getSettings } from "../../models/settings.model";
+import { getSettings } from "../../services/shared/saasSettings.service";
 import {
   getOrgSecurityPolicy,
   toAttestationPolicy,

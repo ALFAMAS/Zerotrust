@@ -11,7 +11,7 @@ const config: KnipConfig = {
         "src/api/server.ts!",
         "src/index.ts!",
         "src/worker.ts!",
-        "scripts/*.{js,mjs,cjs,ts}!",
+        "scripts/**/*.{js,mjs,cjs,ts}!",
         "plugins/*/index.ts!",
         "tests/load/*.k6.js!",
       ],
@@ -27,8 +27,7 @@ const config: KnipConfig = {
   },
   ignore: [
     "**/*.test.ts",
-    "scripts/smoke-*/**",
-    "scripts/smoke-ui-stubs/**",
+    "scripts/smoke/**",
     // Known orphans / stubs — tracked for future wiring
     "src/api/schemas/admin.schema.ts",
     "src/api/schemas/mfa.schema.ts",

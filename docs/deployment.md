@@ -627,7 +627,7 @@ Local dev may keep a single superuser (`zerotrust`) in `docker-compose.yml`. Bef
 going internet-facing:
 
 1. Apply migrations once with the existing deploy user.
-2. Run `scripts/setup-postgres-roles.sql` as a superuser (creates
+2. Run `scripts/ops/setup-postgres-roles.sql` as a superuser (creates
    `zerotrust_app_user` + `zerotrust_migrator_user` — **change placeholder passwords**).
 3. Point runtime `DATABASE_URL` at the app user; run future migrations with
    `DATABASE_MIGRATOR_URL` (or export it only in the CI/deploy migrate step).

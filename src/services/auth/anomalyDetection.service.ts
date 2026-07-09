@@ -1,7 +1,7 @@
 import crypto from "node:crypto";
 import { eq } from "drizzle-orm";
 import { getDb, getReadDb } from "../../db/index.js";
-import { userBehaviorBaselinesTable, usersTable } from "../../db/schema.js";
+import { userBehaviorBaselinesTable, usersTable } from "../../db/schema/index.js";
 import { getLogger } from "../../logger/index.js";
 
 const logger = getLogger("anomaly-detection");

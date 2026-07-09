@@ -104,7 +104,7 @@ vi.mock("../shared/passwordHash", async () => {
   };
 });
 
-vi.mock("../models/settings.model", () => ({
+vi.mock("../services/shared/saasSettings.service", () => ({
   getSettings: vi.fn().mockResolvedValue({
     accountLockoutEnabled: true,
     accountLockoutThreshold: 8,

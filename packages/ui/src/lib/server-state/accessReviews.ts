@@ -52,7 +52,9 @@ export function fetchAccessReviewsList(): Promise<AccessReviewsListResponse> {
 }
 
 export function fetchAccessReviewDetail(id: string): Promise<AccessReviewDetailResponse> {
-  return apiGet<unknown>(buildAccessReviewDetailPath(id)).then(normalizeAccessReviewDetail);
+  return apiGet<unknown>(`${buildAccessReviewDetailPath(id)}?limit=200`).then(
+    normalizeAccessReviewDetail
+  );
 }
 
 export function accessReviewsListQueryOptions() {

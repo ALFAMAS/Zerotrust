@@ -6,7 +6,7 @@ import { compress } from "hono/compress";
 import { cors } from "hono/cors";
 import { initializezerotrust } from "..";
 import { initSentry } from "../instrument";
-import jitRoutes from "../jit/routes";
+import jitRoutes from "../modules/jit/routes";
 import { startJobScheduler } from "../jobs/scheduler";
 import {
   resolveBackgroundJobTopology,
@@ -33,13 +33,13 @@ import { initEmailQueue } from "../services/notifications/emailQueue";
 import { alertingMiddleware } from "../services/ops/alerting.service";
 import { sloAlertingMiddleware, sloRouteHandler } from "../services/ops/slo.service";
 import { initTelemetry, telemetryMiddleware } from "../telemetry";
-import webhookManagementRoutes from "../webhooks/routes";
+import webhookManagementRoutes from "../modules/webhooks/routes";
 import accessReviewRoutes from "./routes/access-review.routes";
-import adminRoutes from "./routes/admin.routes";
+import adminRoutes from "./routes/admin/index";
 import adminToolsRoutes from "./routes/admin-tools.routes";
 import anomalyRoutes from "./routes/anomaly.routes";
 import apiKeyRoutes from "./routes/api-keys.routes";
-import authRoutes from "./routes/auth.routes";
+import authRoutes from "./routes/auth/index";
 import billingRoutes from "./routes/billing.routes";
 import billingWebhookRoutes from "./routes/billing.webhooks";
 import complianceRoutes from "./routes/compliance.routes";
@@ -231,11 +231,11 @@ export async function createServer() {
     try {
       const signature = c.req.header("x-ssf-signature");
       const body = await c.req.json();
-      const { verifySSFSignature } = await import("../ssf/verify.js");
+      const { verifySSFSignature } = await import("../modules/ssf/verify.js");
       const ok = verifySSFSignature(body, signature);
       if (!ok) return c.json({ error: "INVALID_SIGNATURE" }, 401);
 
-      const { handleSSFEvent } = await import("../ssf/receiver.js");
+      const { handleSSFEvent } = await import("../modules/ssf/receiver.js");
       const result = await handleSSFEvent(body);
       return c.json(result);
     } catch (err) {
@@ -446,7 +446,7 @@ export async function createServer() {
     }
 
     try {
-      const { getSettings } = await import("../models/settings.model.js");
+      const { getSettings } = await import("../services/shared/saasSettings.service.js");
       const settings = await getSettings();
       health.settings = { appName: settings.appName };
     } catch {

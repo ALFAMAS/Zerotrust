@@ -438,7 +438,7 @@ export function generateSdk(spec: OpenApiSpec): string {
 
 export function main(): void {
   const here = path.dirname(fileURLToPath(import.meta.url));
-  const repoRoot = path.resolve(here, "..");
+  const repoRoot = path.resolve(here, "..", "..");
   const specPath = path.join(repoRoot, "src", "api", "openapi.json");
   const outDir = path.join(repoRoot, "packages", "client", "src");
   const outFile = path.join(outDir, "index.ts");

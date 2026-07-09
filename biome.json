@@ -35,10 +35,10 @@
       "!**/*.spec.tsx",
       "!**/next-env.d.ts",
       "!**/.next",
-      "!**/scripts/db-backup.js",
-      "!**/scripts/db-restore.js",
+      "!**/scripts/ops/db-backup.js",
+      "!**/scripts/ops/db-restore.js",
       "!**/scripts/postinstall.js",
-      "!**/scripts/smoke-*"
+      "!**/scripts/smoke/**"
     ]
   },
   "formatter": {

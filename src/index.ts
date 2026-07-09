@@ -50,13 +50,13 @@ export {
   sessionsTable,
   usersTable,
 } from "./db/schema";
-export type { CrossTenantJITRequest } from "./jit/cross-tenant";
+export type { CrossTenantJITRequest } from "./modules/jit/cross-tenant";
 // ─── Cross-Tenant JIT ─────────────────────────────────────────────────────────
 export {
   crossTenantJITStore,
   requestCrossTenantAccess,
   requireCrossTenantJIT,
-} from "./jit/cross-tenant";
+} from "./modules/jit/cross-tenant";
 // ─── Logging ─────────────────────────────────────────────────────────────────
 export {
   auditLog,
@@ -236,8 +236,8 @@ export {
   ErrorCodes,
   zerotrustError,
 } from "./shared/types";
-export { handleSSFEvent } from "./ssf/receiver";
-export { sendSSFEvent } from "./ssf/sender";
+export { handleSSFEvent } from "./modules/ssf/receiver";
+export { sendSSFEvent } from "./modules/ssf/sender";
 // ─── Telemetry ───────────────────────────────────────────────────────────────
 export {
   getTracer,
@@ -246,12 +246,12 @@ export {
   withSpan,
 } from "./telemetry";
 // ─── Webhooks ────────────────────────────────────────────────────────────────
-export { dispatchEvent, signPayload, webhookStore } from "./webhooks";
+export { dispatchEvent, signPayload, webhookStore } from "./modules/webhooks";
 export type {
   WebhookDelivery,
   WebhookEndpoint,
   WebhookEventType,
-} from "./webhooks/types";
+} from "./modules/webhooks/types";
 
 export async function initializezerotrust() {
   const { getConfig } = await import("./config/index.js");

@@ -28,7 +28,7 @@ vi.mock("../../src/services/notifications/email.service.js", () => ({
 }));
 
 const getSettings = vi.fn();
-vi.mock("../../src/models/settings.model.js", () => ({
+vi.mock("../../src/services/shared/saasSettings.service.js", () => ({
   getSettings: (...a: unknown[]) => getSettings(...a),
 }));
 

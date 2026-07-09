@@ -3,7 +3,7 @@ import { execFileSync } from "node:child_process";
 import * as path from "node:path";
 
 const ROOT = path.resolve(import.meta.dirname, "../..");
-const SCRIPT = path.join(ROOT, "scripts/check-destructive-migrations.ts");
+const SCRIPT = path.join(ROOT, "scripts/ci/check-destructive-migrations.ts");
 
 function runGate(env?: Record<string, string>): {
   stdout: string;

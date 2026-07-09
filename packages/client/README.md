@@ -3,7 +3,7 @@
 Dependency-free TypeScript client for the [zerotrust](https://github.com/ALFAMAS/zerotrust) API.
 
 The client is generated from [`src/api/openapi.json`](../../src/api/openapi.json) by
-[`scripts/generate-sdk.ts`](../../scripts/generate-sdk.ts). It targets the global
+[`scripts/codegen/generate-sdk.ts`](../../scripts/codegen/generate-sdk.ts). It targets the global
 `fetch` runtime (Node 18+, Bun, Deno, browsers, and Workers) and provides typed
 request bodies, query params, path params, and response types for every operation
 currently described in the OpenAPI spec.

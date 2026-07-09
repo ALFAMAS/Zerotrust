@@ -92,17 +92,9 @@ vi.mock("../config", () => ({
 }));
 
 describe("Integration: Auth flow (mocked DB)", () => {
-  let UserModel: any;
-  let SessionModel: any;
-  let RefreshTokenModel: any;
   let TokenService: any;
 
   beforeAll(async () => {
-    const models = await import("../models");
-    UserModel = models.UserModel;
-    SessionModel = models.SessionModel;
-    RefreshTokenModel = models.RefreshTokenModel;
-
     const ts = await import("../services/auth/token.service");
     TokenService = ts.TokenService;
   });

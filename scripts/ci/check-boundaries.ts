@@ -4,7 +4,7 @@
  * Reads `.boundaries.json` for domain definitions and import rules, scans
  * all source files, and reports violations. Run via:
  *
- *   bun run scripts/check-boundaries.ts
+ *   bun run scripts/ci/check-boundaries.ts
  *
  * Exit code: 0 if clean, 1 if violations found.
  */
@@ -35,7 +35,7 @@ interface Violation {
 
 // ── load config ──────────────────────────────────────────────────────────
 
-const ROOT = resolve(import.meta.dirname, "..");
+const ROOT = resolve(import.meta.dirname, "../..");
 const configPath = resolve(ROOT, ".boundaries.json");
 let config: BoundaryConfig;
 try {

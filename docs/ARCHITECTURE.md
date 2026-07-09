@@ -173,7 +173,7 @@ horizontally and defers background work when `WORKER_MODE=true`.
 ### P2 — Migration safety — **Shipped** (P3.5)
 
 41 tables / 28 migrations, several recent ones `DROP … CASCADE`. CI now flags
-`DROP`/`ALTER … DROP` in new migrations via `scripts/check-destructive-migrations.ts`
+`DROP`/`ALTER … DROP` in new migrations via `scripts/ci/check-destructive-migrations.ts`
 and `.destructive-migrations.json` (`migrations:check` job + pre-commit).
 Expand/contract discipline remains the operator runbook for irreversible DDL.
 

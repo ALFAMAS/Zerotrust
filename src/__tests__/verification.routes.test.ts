@@ -27,7 +27,7 @@ vi.mock("../services/notifications/email.service.js", () => ({
   sendOtpEmail: vi.fn().mockResolvedValue(undefined),
 }));
 
-vi.mock("../models/settings.model.js", () => ({
+vi.mock("../services/shared/saasSettings.service.js", () => ({
   getSettings: vi.fn().mockResolvedValue({
     appUrl: "http://localhost:3000",
     appName: "zerotrust",

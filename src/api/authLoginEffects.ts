@@ -6,7 +6,7 @@ import {
   type RecordLoginFailureParams,
   type RecordLoginSuccessParams,
 } from "../services/auth/loginAudit.service";
-import { dispatchEvent } from "../webhooks/delivery";
+import { dispatchEvent } from "../modules/webhooks/delivery";
 
 export type { LoginMethod, RecordLoginFailureParams, RecordLoginSuccessParams };
 

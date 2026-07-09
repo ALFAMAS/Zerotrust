@@ -6,7 +6,7 @@ import { and, eq, gt } from "drizzle-orm";
 import { Hono } from "hono";
 import { generateNumericCode } from "../../crypto/codes.js";
 import { getDb } from "../../db/index.js";
-import { otpsTable, usersTable } from "../../db/schema.js";
+import { otpsTable, usersTable } from "../../db/schema/index.js";
 import { getLogger } from "../../logger/index.js";
 import { authMiddleware } from "../../middleware/auth.js";
 import { getVerification, recordVerification } from "../../middleware/continuousVerification.js";
@@ -47,7 +47,7 @@ router.post("/challenge", async (c) => {
         return c.json({ error: "NO_PASSKEYS", message: "No passkeys registered" }, 400);
       }
       const { generateAuthenticationOptions } = await import("@simplewebauthn/server");
-      const { getSettings } = await import("../../models/settings.model.js");
+      const { getSettings } = await import("../../services/shared/saasSettings.service.js");
       const settings = await getSettings();
       const rpID = new URL(settings.appUrl || "http://localhost:3000").hostname;
       const allowCredentials = passkeys.map((pk) => ({
@@ -115,7 +115,7 @@ router.post("/respond", async (c) => {
       if (!expectedChallenge) return c.json({ error: "CHALLENGE_EXPIRED" }, 400);
 
       const { verifyAuthenticationResponse } = await import("@simplewebauthn/server");
-      const { getSettings } = await import("../../models/settings.model.js");
+      const { getSettings } = await import("../../services/shared/saasSettings.service.js");
       const settings = await getSettings();
       const appUrl = settings.appUrl || "http://localhost:3000";
       const rpID = new URL(appUrl).hostname;

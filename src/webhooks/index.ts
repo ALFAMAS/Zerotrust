@@ -1,3 +1,2 @@
-export { deliverWebhook, dispatchEvent, signPayload } from "./delivery";
-export { WebhookStore, webhookStore } from "./store";
-export type { WebhookDelivery, WebhookEndpoint, WebhookEventType } from "./types";
+/** @deprecated Import from `src/modules/webhooks` instead. */
+export * from "../modules/webhooks";

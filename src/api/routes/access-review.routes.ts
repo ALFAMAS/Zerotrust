@@ -142,6 +142,12 @@ router.get("/:id", async (c) => {
       .limit(1);
     if (!review) return c.json({ error: "NOT_FOUND", message: "Access review not found" }, 404);
 
+    const pendingCount = await countRows(
+      db,
+      accessReviewItemsTable,
+      and(eq(accessReviewItemsTable.reviewId, id), eq(accessReviewItemsTable.decision, "pending"))
+    );
+
     const where = eq(accessReviewItemsTable.reviewId, id);
     const [items, total] = await Promise.all([
       db
@@ -155,7 +161,7 @@ router.get("/:id", async (c) => {
     ]);
 
     return c.json({
-      review,
+      review: { ...review, itemCount: total, pendingCount },
       items: paginated(items, { page, limit, total }),
     });
   } catch (err) {

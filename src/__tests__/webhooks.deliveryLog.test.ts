@@ -14,12 +14,12 @@ vi.mock("../middleware/auth", () => ({
   },
 }));
 
-vi.mock("../webhooks/orgScope", () => ({
+vi.mock("../modules/webhooks/orgScope", () => ({
   getUserOrgIds: vi.fn(async () => ["org-test"]),
   resolveOrgForWebhookCreate: vi.fn(),
 }));
 
-vi.mock("../webhooks/store", () => ({
+vi.mock("../modules/webhooks/store", () => ({
   webhookStore: {
     registerEndpoint: vi.fn(async (input: any) => {
       const endpoint = { id: `ep-${h.nextId++}`, createdAt: new Date(), ...input };
@@ -44,10 +44,10 @@ vi.mock("../webhooks/store", () => ({
   },
 }));
 
-import { WebhookDeliveryLog, webhookDeliveryLog } from "../webhooks/deliveryLog";
-import { webhookStore } from "../webhooks/store";
-import webhookRouter from "../webhooks/routes";
-import type { WebhookDelivery } from "../webhooks/types";
+import { WebhookDeliveryLog, webhookDeliveryLog } from "../modules/webhooks/deliveryLog";
+import { webhookStore } from "../modules/webhooks/store";
+import webhookRouter from "../modules/webhooks/routes";
+import type { WebhookDelivery } from "../modules/webhooks/types";
 
 function makeDelivery(overrides: Partial<WebhookDelivery> = {}): WebhookDelivery {
   return {

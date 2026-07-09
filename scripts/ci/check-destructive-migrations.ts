@@ -6,7 +6,7 @@
  * New destructive migrations added without an allowlist entry fail the gate.
  *
  * Usage:
- *   bun run scripts/check-destructive-migrations.ts
+ *   bun run scripts/ci/check-destructive-migrations.ts
  *
  * Exit code: 0 if clean, 1 if unapproved destructive DDL is found.
  */
@@ -14,7 +14,7 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import * as path from "node:path";
 
-const ROOT = path.resolve(import.meta.dirname, "..");
+const ROOT = path.resolve(import.meta.dirname, "../..");
 const MIGRATIONS_DIR = path.resolve(ROOT, "drizzle");
 const ALLOWLIST_PATH = path.resolve(ROOT, ".destructive-migrations.json");
 

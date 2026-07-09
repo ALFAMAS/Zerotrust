@@ -4,7 +4,7 @@
  * Scans route and webhook modules for references to org-scoped tables and
  * requires an org-isolation predicate nearby (eq(orgId), orgScope helpers, etc.).
  *
- *   bun run scripts/check-org-scoping.ts
+ *   bun run scripts/ci/check-org-scoping.ts
  *
  * Exit code: 0 if clean, 1 if violations found.
  */
@@ -19,9 +19,9 @@ interface OrgScopeConfig {
   orgPredicatePatterns: string[];
 }
 
-const ROOT = resolve(import.meta.dirname, "..");
+const ROOT = resolve(import.meta.dirname, "../..");
 const config: OrgScopeConfig = JSON.parse(
-  readFileSync(resolve(ROOT, "scripts/org-scoped-tables.json"), "utf-8")
+  readFileSync(resolve(ROOT, "scripts/ci/org-scoped-tables.json"), "utf-8")
 );
 
 interface Violation {

@@ -1,26 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { Hono } from "hono";
 
-vi.mock("../models/index", () => ({
-  AuditModel: { create: vi.fn().mockResolvedValue({}) },
-  SessionModel: {
-    findOne: vi.fn().mockResolvedValue(null),
-    updateOne: vi.fn().mockResolvedValue({}),
-  },
-  UserModel: { findById: vi.fn().mockResolvedValue(null) },
-  RoleModel: {
-    findOne: vi
-      .fn()
-      .mockImplementation(() => ({ lean: () => Promise.resolve(null) })),
-  },
-  JITModel: {
-    find: vi.fn().mockImplementation(() => ({
-      populate: vi.fn().mockReturnThis(),
-      lean: () => Promise.resolve([]),
-    })),
-  },
-}));
-
 vi.mock("../config", () => ({
   getConfig: () => ({
     session: {

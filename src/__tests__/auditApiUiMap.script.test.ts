@@ -7,7 +7,7 @@ describe("audit-api-ui-map generator", () => {
   it("emits stable slash-separated file paths and resolves server-state path helpers", () => {
     const root = process.cwd();
 
-    execFileSync(process.execPath, [join(root, "scripts", "audit-api-ui-map.mjs")], {
+    execFileSync(process.execPath, [join(root, "scripts", "codegen", "audit-api-ui-map.mjs")], {
       cwd: root,
       stdio: "pipe",
     });

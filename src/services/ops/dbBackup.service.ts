@@ -4,7 +4,7 @@
  * older than BACKUP_RETENTION_DAYS (default 30), and optionally uploads to
  * any S3-compatible storage (AWS S3, Backblaze B2, Cloudflare R2, MinIO, ...).
  *
- *   bun run db:backup            — one-shot backup (scripts/db-backup.js)
+ *   bun run db:backup            — one-shot backup (scripts/ops/db-backup.js)
  *   BACKUP_ENABLED=true          — daily scheduler inside the API server
  *   BACKUP_DIR=./backups         — destination directory
  *   BACKUP_RETENTION_DAYS=30     — local retention window

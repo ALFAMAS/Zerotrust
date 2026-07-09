@@ -62,22 +62,37 @@ export async function verifyUserEmail(userId: string): Promise<void> {
   });
 }
 
-export async function getEmailVerificationCode(userId: string): Promise<string> {
-  return withDb(async (sql) => {
-    const rows = await sql<{ code: string }[]>`
-      SELECT code
-      FROM otps
-      WHERE user_id = ${userId}
-        AND type = 'email_verification'
-        AND expires_at > NOW()
-        AND used_at IS NULL
-      ORDER BY created_at DESC
-      LIMIT 1
+export async function seedEmailVerificationCode(userId: string, plainCode: string): Promise<void> {
+  const codeHash = hashTokenSha256(plainCode);
+  await withDb(async (sql) => {
+    const rows = await sql<{ email: string }[]>`
+      SELECT email FROM users WHERE id = ${userId}::uuid LIMIT 1
     `;
-    const code = rows[0]?.code;
-    if (!code) throw new Error(`No email verification code for user ${userId}`);
-    return code;
+    const email = rows[0]?.email;
+    if (!email) throw new Error(`No user found for id ${userId}`);
+    await sql`
+      DELETE FROM otps
+      WHERE user_id = ${userId} AND type = 'email_verification'
+    `;
+    await sql`
+      INSERT INTO otps (user_id, code, type, channel, target, expires_at)
+      VALUES (
+        ${userId},
+        ${codeHash},
+        'email_verification',
+        'email',
+        ${email},
+        NOW() + INTERVAL '30 minutes'
+      )
+    `;
   });
+}
+
+/** @deprecated OTP codes are stored hashed — use `seedEmailVerificationCode` in e2e. */
+export async function getEmailVerificationCode(userId: string): Promise<string> {
+  throw new Error(
+    "getEmailVerificationCode cannot return plaintext — use seedEmailVerificationCode(userId, code)"
+  );
 }
 
 /** Seed a password-reset code the API will accept (hashed like production). */

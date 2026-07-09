@@ -4,7 +4,7 @@ Owner: Mas Yasin Arafat
 Review cadence: Quarterly manual drill + the automated `dr-restore-drill.yml` CI run  
 Status: Active — automated restore drill in CI; record manual-drill evidence below
 
-zerotrust has backup tooling in `scripts/db-backup.js`, `scripts/db-restore.js`,
+zerotrust has backup tooling in `scripts/ops/db-backup.js`, `scripts/ops/db-restore.js`,
 and `src/services/dbBackup.service.ts`. Neon PITR may also be available depending
 on the active database plan.
 

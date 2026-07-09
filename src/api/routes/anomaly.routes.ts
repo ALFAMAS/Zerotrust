@@ -2,7 +2,7 @@ import { desc } from "drizzle-orm";
 import type { Context } from "hono";
 import { Hono } from "hono";
 import { getReadDb } from "../../db/index.js";
-import { userBehaviorBaselinesTable } from "../../db/schema.js";
+import { userBehaviorBaselinesTable } from "../../db/schema/index.js";
 import { getLogger } from "../../logger/index.js";
 import { authMiddleware } from "../../middleware/auth.js";
 import {

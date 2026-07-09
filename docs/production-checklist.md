@@ -58,7 +58,7 @@ Complete before pointing DNS at production. Archive signed copies in
 | ☐ | SAST + secret scan in CI | P0 | **Done** | Gitleaks, Semgrep OWASP, Trivy, `bun audit` — `.github/workflows/ci.yml` |
 | ☐ | VPS firewall / private Postgres+Redis | P1 | **Done** | SEC-27 (2026-07-08): `docs/deployment.md` § VPS network hardening — ufw/SG, bind-address, verification |
 | ☐ | PASETO v4 + refresh rotation + argon2id passwords | P0 | **Done** | `src/crypto/paseto-v4.ts`, `src/shared/passwordHash.ts` |
-| ☐ | Tamper-evident audit log | P1 | **Done** | `src/audit/`, `scripts/audit-anchor.ts` |
+| ☐ | Tamper-evident audit log | P1 | **Done** | `src/audit/`, `scripts/ops/audit-anchor.ts` |
 | ☐ | Apple Sign In | P2 | **Done** | AUTH-1 (2026-07-09): `plugins/oauth/providers/apple.ts`; admin toggle; env-gated |
 | ☐ | Hardware key store (TPM/HSM) | P2 | **Done** | CRYPTO-1 (2026-07-09): software provider + boot wiring; hardware fork path in `docs/extending.md`; stubs fail fast |
 | ☐ | `SECURITY.md` accuracy (argon2id vs bcrypt) | P2 | **Done** | DOC-1 (2026-07-08): argon2id + bcrypt rehash wording in root `SECURITY.md` |
@@ -76,8 +76,8 @@ Complete before pointing DNS at production. Archive signed copies in
 | ☐ | Reference architectures (VM, containers, K8s) | P1 | **Done** | `docs/reference-architecture.md` |
 | ☐ | Staging deploy workflow | P1 | **Done** | `deploy-staging.yml` chains `staging-validation.yml`; secrets/vars documented in `docs/deployment.md` § Staging secrets |
 | ☐ | Production auto-deploy | P2 | **Done** | `deploy-production.yml` (manual dispatch, production env reviewers, ops:smoke post-deploy); secrets/vars in `docs/deployment.md` § Production deploy |
-| ☐ | Postgres role separation (app vs migrator) | P1 | **Done** | `scripts/setup-postgres-roles.sql`, `.env.example` |
-| ☐ | Encrypted backups + S3 | P0 | **Done** | `scripts/db-backup.js`, `src/services/dbBackup.service.ts` |
+| ☐ | Postgres role separation (app vs migrator) | P1 | **Done** | `scripts/ops/setup-postgres-roles.sql`, `.env.example` |
+| ☐ | Encrypted backups + S3 | P0 | **Done** | `scripts/ops/db-backup.js`, `src/services/dbBackup.service.ts` |
 | ☐ | DR restore drill automation | P1 | **Done** | `.github/workflows/dr-restore-drill.yml` (weekly + manual) |
 | ☐ | Background worker topology | P0 | **Done** | API `WORKER_MODE=true`; one `src/worker.ts` — `docs/deployment.md` |
 
@@ -118,7 +118,7 @@ Complete before pointing DNS at production. Archive signed copies in
 | - | ---- | -------- | ------ | ----- |
 | ☐ | PR/push CI on `main` | P0 | **Done** | `.github/workflows/ci.yml` — lint, test, build, SAST, Docker smoke |
 | ☐ | SDK + API docs drift check | P0 | **Done** | `bun run verify:generated`, `sdk:check` |
-| ☐ | API/UI integration matrix | P1 | **Done** | `scripts/audit-api-ui-map.mjs`, `docs/api-ui-integration-matrix.md` |
+| ☐ | API/UI integration matrix | P1 | **Done** | `scripts/codegen/audit-api-ui-map.mjs`, `docs/api-ui-integration-matrix.md` |
 | ☐ | Dependabot + weekly dependency workflow | P1 | **Done** | `.github/dependabot.yml`, `dependency-update.yml` |
 | ☐ | semantic-release automation | P2 | **Done** | `.github/workflows/release.yml` runs `bun run release` on pushes to `main` using `GITHUB_TOKEN` (no extra secrets required) |
 | ☐ | Module boundaries gate in CI | P2 | **Done** | `boundaries:check` in `ci.yml` `lint-and-typecheck` job (CI-2, 2026-07-08) |
@@ -135,7 +135,7 @@ Complete before pointing DNS at production. Archive signed copies in
 | ☐ | Schema split by domain | P1 | **Done** | `src/db/schema/*.ts` + legacy `src/db/schema.ts` |
 | ☐ | Repository layer for hot paths | P1 | **Done** | 11 repos in `src/db/repositories/`; login session minting via `createAuthenticatedSession()` (2026-07-09) and admin impersonation inserts via `createImpersonationSession()` (extracted from `admin-tools.routes.ts`); transactional tests + `bun run boundaries:check` verified green |
 | ☐ | Read replica support | P2 | **Done** | `DATABASE_URL_READ_REPLICA` in `.env.example` |
-| ☐ | Audit hash-chain + anchoring | P1 | **Done** | `src/audit/`, `scripts/audit-anchor.ts` |
+| ☐ | Audit hash-chain + anchoring | P1 | **Done** | `src/audit/`, `scripts/ops/audit-anchor.ts` |
 | ☐ | Data retention / GDPR purge | P1 | **Done** | `src/services/compliance/dataRetention.ts` |
 | ☐ | Backup encryption enforced in prod | P0 | **Done** | `BACKUP_REQUIRE_ENCRYPTION=true` fail-fast — `src/services/dbBackup.service.ts` |
 

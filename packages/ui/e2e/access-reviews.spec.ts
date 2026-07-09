@@ -78,7 +78,12 @@ test.describe("access review lifecycle (real API)", () => {
       const reviewId = href!.split("/").pop()!;
 
       await reviewLink.click();
-      await expect(page.getByRole("heading", { level: 1 })).toBeVisible({ timeout: 30_000 });
+      await expect(page).toHaveURL(new RegExp(`/admin/access-reviews/${reviewId}(?:\\?.*)?$`), {
+        timeout: 30_000,
+      });
+      await expect(page.getByRole("button", { name: /complete review/i })).toBeVisible({
+        timeout: 30_000,
+      });
 
       const token = await readAccessToken(page);
       expect(token).toBeTruthy();
@@ -93,7 +98,7 @@ test.describe("access review lifecycle (real API)", () => {
 
       await approveAllPendingViaApi(page, token, reviewId);
 
-      await page.reload();
+      await page.goto(`/admin/access-reviews/${reviewId}`);
       const completeBtn = page.getByRole("button", { name: /complete review/i });
       await expect(completeBtn).toBeEnabled({ timeout: 20_000 });
       await completeBtn.click();

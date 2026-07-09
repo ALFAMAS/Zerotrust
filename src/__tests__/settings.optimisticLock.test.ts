@@ -62,7 +62,7 @@ describe("updateSettings optimistic locking", () => {
     vi.mocked(getDb).mockReturnValue(db as any);
 
     const { SettingsVersionConflictError, updateSettings } = await import(
-      "../models/settings.model"
+      "../services/shared/saasSettings.service"
     );
 
     await expect(
@@ -76,7 +76,7 @@ describe("updateSettings optimistic locking", () => {
     const { getDb } = await import("../db");
     vi.mocked(getDb).mockReturnValue(db as any);
 
-    const { updateSettings } = await import("../models/settings.model");
+    const { updateSettings } = await import("../services/shared/saasSettings.service");
     const result = await updateSettings({ requireMfaForAll: true }, "admin-1", 2);
 
     expect(result.requireMfaForAll).toBe(true);

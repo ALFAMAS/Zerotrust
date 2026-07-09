@@ -81,6 +81,6 @@ Do not commit:
   `/admin/access-reviews`.
 - Legal hold: `src/services/legalHold.service.ts`.
 - Data retention: `src/services/dataRetention.ts`.
-- Backups: `scripts/db-backup.js`, `scripts/db-restore.js`,
+- Backups: `scripts/ops/db-backup.js`, `scripts/ops/db-restore.js`,
   `src/services/dbBackup.service.ts`.
 - Responsible disclosure: `SECURITY.md`, `/.well-known/security.txt`.

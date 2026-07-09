@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { LoadingSpinner } from "@/components/ui/States";
 import { useAcceptInviteMutation } from "@/lib/server-state/organizations";
 import { getToken } from "../../../lib/auth";
@@ -47,7 +47,7 @@ export default function InviteAcceptPage() {
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10 text-destructive">
               <AlertCircle className="h-6 w-6" aria-hidden />
             </div>
-            <CardTitle>Invite error</CardTitle>
+            <h2 className="font-semibold leading-none tracking-tight">Invite error</h2>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground">
@@ -73,7 +73,9 @@ export default function InviteAcceptPage() {
           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-400">
             <CheckCircle2 className="h-6 w-6" aria-hidden />
           </div>
-          <CardTitle>You&apos;ve joined {result?.org?.name ?? "the organization"}!</CardTitle>
+          <h1 className="font-semibold leading-none tracking-tight">
+            You&apos;ve joined {result?.org?.name ?? "the organization"}!
+          </h1>
         </CardHeader>
         <CardContent>
           <p className="text-sm capitalize text-muted-foreground">

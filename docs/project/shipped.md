@@ -396,6 +396,89 @@ Cross-audit of `docs/security.md` §0–§10. **SEC-27** shipped 2026-07-08 (VPS
 
 ---
 
+## Recent work (2026-07-10)
+
+### STR-2 — Consolidate mounted subsystems under `src/modules/` (shipped)
+
+- **Problem:** Cross-cutting API subsystems (`jit`, `ssf`, `webhooks`) lived as top-level
+  roots beside layer dirs, making boundaries and navigation harder.
+- **Fix:** Moved `src/jit`, `src/ssf`, and `src/webhooks` to `src/modules/{jit,ssf,webhooks}/`,
+  updated imports and `.boundaries.json`, and left deprecated re-export shims at the old paths.
+- **Paths:** `src/modules/*`, `src/jit/*`, `src/ssf/*`, `src/webhooks/*`, `.boundaries.json`,
+  `src/api/server.ts`, `src/index.ts`, `src/__tests__/*`
+- **Verification (2026-07-10):** `bun run boundaries:check` → **pass**; targeted vitest:
+  `jit.routes`, `ssf.receiver`, `webhooks.*`, `webhookStore.persistence`, `authLoginEffects` → **pass**
+
+### STR-3 — Split oversized `auth` and `admin` route modules (shipped)
+
+- **Problem:** `auth.routes.ts` (~1,100 lines) and `admin.routes.ts` (~1,000 lines) were hard to
+  navigate and exceeded the ~500-line route-module guideline.
+- **Fix:** Split into per-resource folders mounted from index routers while preserving URL surface:
+  `src/api/routes/auth/{register,login,token,profile,avatar}.routes.ts` + `admin/{settings,users,sessions,stats,roles,jit,audit,feedback,segments,uploads}.routes.ts`;
+  left `auth.routes.ts` / `admin.routes.ts` as deprecated re-export shims.
+- **Paths:** `src/api/routes/auth/*`, `src/api/routes/admin/*`, `.boundaries.json`
+- **Verification (2026-07-10):** `bun run boundaries:check` → **pass**; targeted vitest:
+  `auth.routes`, `auth.login-timing`, `profile.optimisticLock`, `admin.routes`,
+  `admin.routes.mutations`, `settings.optimisticLock` → **pass**
+
+### CI-3e — Fix three Playwright e2e regressions from FE-1 (shipped)
+
+- **Problem:** First post-redesign e2e run failed on access-review completion (Complete button
+  stayed disabled when pending items were only on unloaded pages), email verification (fixture
+  returned hashed OTP, not plaintext), and invite accept (success title was a `div`, not a heading).
+- **Fix:** API detail now returns `pendingCount`; UI uses it for Complete button state and fetches
+  detail with `limit=200`; e2e seeds a known verification code via `seedEmailVerificationCode`;
+  invite success/error panels use semantic headings.
+- **Paths:** `src/api/routes/access-review.routes.ts`,
+  `packages/ui/src/app/admin/access-reviews/[id]/page.tsx`,
+  `packages/ui/src/lib/server-state/accessReviews.ts`,
+  `packages/ui/e2e/fixtures/db.ts`, `packages/ui/e2e/auth-flows.spec.ts`,
+  `packages/ui/src/app/invite/[token]/page.tsx`
+- **Verification (2026-07-10):** UI vitest `invite/[token]/page.test.tsx`, `admin/access-reviews/*`
+  → **pass**. Playwright (`access-reviews`, `auth-flows`, `invite` specs) requires Docker
+  Postgres/Redis — not run in this session (Docker daemon unavailable).
+
+### STR-1 — Regroup `scripts/` by purpose (shipped)
+
+- **Problem:** The flat `scripts/` directory mixed ops tooling, code generation, CI gates,
+  smoke tests, and Windows repair utilities, making paths hard to discover and harder
+  to keep consistent across package scripts and docs.
+- **Fix:** Regrouped scripts into `scripts/{ops,codegen,ci,smoke,windows}/` (kept
+  `scripts/postinstall.js` at the root), updated `package.json` script entrypoints,
+  fixed tests/imports, and updated repo docs + Biome/Knip globs to match.
+- **Paths:** `scripts/`, `package.json`, `knip.config.ts`, `biome.json`, `docs/*`,
+  `packages/client/*`, `src/__tests__/*`
+- **Verification (2026-07-10):** `bun run test --run src/__tests__/generate-sdk.test.ts`
+  and `bun run test --run src/__tests__/destructiveMigrations.script.test.ts` → **pass**
+
+### CI-3 follow-ups — Document CI health next steps (shipped)
+
+- **Problem:** CI follow-ups required to prevent a red `main` from accumulating and to
+  unblock future dependency/tooling upgrades (Tailwind v4, k6 v2), but the actions
+  span both repository changes and GitHub settings.
+- **Fix:** Added a single operator-facing checklist documenting recommended branch
+  protection/merge-queue settings plus explicit migration plans for Tailwind v4 and
+  k6 v2, including the “remove ignore/pin after migration” steps.
+- **Paths:** `docs/ci/ci-3-followups.md`, `docs/project/todo.md`
+- **Verification (2026-07-10):** Docs-only change.
+
+### STR-4 — Retire legacy `schema.ts` and `models/` (shipped)
+
+- **Problem:** Legacy DB re-export (`src/db/schema.ts`) and the leftover `src/models/`
+  layer (settings model + Drizzle table aliases) created confusing import paths and
+  extra indirection for schema access.
+- **Fix:** Removed `src/db/schema.ts` so imports resolve directly through
+  `src/db/schema/index.ts`, migrated settings access to
+  `src/services/shared/saasSettings.service.ts`, updated routes/services/tests to use
+  the new module, and removed the orphaned `src/models/` directory.
+- **Paths:** `src/db/schema/*`, `src/services/shared/saasSettings.service.ts`,
+  `src/api/routes/*`, `src/services/auth/*`, `src/__tests__/*`
+- **Verification (2026-07-10):** Targeted vitest suites passing:
+  `settings.optimisticLock`, `verification.routes`, `passkey.routes`, `magic-link`,
+  `auth.routes`, `admin.routes`.
+
+---
+
 ## Recent work (2026-07-09)
 
 ### FE-1 — shadcn redesign completion (shipped)

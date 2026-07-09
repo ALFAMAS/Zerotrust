@@ -14,7 +14,7 @@ import {
 import { getLogger } from "../../src/logger/index.js";
 import { captchaGuard } from "../../src/middleware/captcha.js";
 import { rateLimit } from "../../src/middleware/rateLimiting.js";
-import { getSettings } from "../../src/models/settings.model.js";
+import { getSettings } from "../../src/services/shared/saasSettings.service.js";
 import { sendMagicLink, verifyMagicLink } from "../../src/services/auth/magicLink.service.js";
 import { TokenService } from "../../src/services/auth/token.service.js";
 import { getClientIp } from "../../src/shared/clientIp.js";

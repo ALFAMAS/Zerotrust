@@ -499,7 +499,7 @@ AUDIT_ANCHOR_S3_PREFIX=audit-anchors/
   migrations.
 - **`DATABASE_MIGRATOR_URL`** — deploy/migrate user (`zerotrust_migrator_user`):
   DDL for `bun run db:migrate` only; never mount on API/worker pods.
-- Bootstrap: `scripts/setup-postgres-roles.sql` (run once per database after initial
+- Bootstrap: `scripts/ops/setup-postgres-roles.sql` (run once per database after initial
   schema). Full runbook: `docs/deployment.md` § Postgres roles.
 
 ### Browser token storage

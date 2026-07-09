@@ -1,5 +1,5 @@
 import { and, eq } from "drizzle-orm";
-import type { WebhookEndpoint, WebhookEventType } from "../../webhooks/types";
+import type { WebhookEndpoint, WebhookEventType } from "../../modules/webhooks/types";
 import { withOrgRls } from "../rls";
 import { webhookEndpointsTable } from "../schema";
 import { createOrgScopedContext } from "./orgScopedFactory";

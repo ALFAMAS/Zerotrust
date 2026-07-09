@@ -1,6 +1,6 @@
 import { and, eq, sql } from "drizzle-orm";
-import { getDb } from "../db";
-import { saasSettingsTable } from "../db/schema";
+import { getDb } from "../../db";
+import { saasSettingsTable } from "../../db/schema";
 
 export interface SaaSSettings {
   emailPasswordEnabled: boolean;
@@ -82,7 +82,6 @@ export async function getSettings(): Promise<SaaSSettings> {
     return rowToSettings(rows[0]);
   }
 
-  // Create defaults if not found
   const [inserted] = await db
     .insert(saasSettingsTable)
     .values({ id: SINGLETON_ID })
@@ -93,7 +92,6 @@ export async function getSettings(): Promise<SaaSSettings> {
     return getSettings();
   }
 
-  // Race condition — re-fetch
   return getSettings();
 }
 
@@ -144,3 +142,4 @@ export async function updateSettings(
 
   return getSettings();
 }
+

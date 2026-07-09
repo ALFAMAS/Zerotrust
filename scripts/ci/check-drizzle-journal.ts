@@ -10,13 +10,13 @@
  * - Fails if sets differ or order differs
  *
  * Usage:
- *   bun run scripts/check-drizzle-journal.ts
+ *   bun run scripts/ci/check-drizzle-journal.ts
  */
 
 import { readdirSync, readFileSync } from "node:fs";
 import * as path from "node:path";
 
-const ROOT = path.resolve(import.meta.dirname, "..");
+const ROOT = path.resolve(import.meta.dirname, "../..");
 const MIGRATIONS_DIR = path.resolve(ROOT, "drizzle");
 const JOURNAL_PATH = path.resolve(ROOT, "drizzle/meta/_journal.json");
 

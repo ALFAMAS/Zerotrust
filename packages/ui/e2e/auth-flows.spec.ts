@@ -8,8 +8,8 @@ import {
   uniqueEmail,
 } from "./fixtures/auth";
 import {
-  getEmailVerificationCode,
   getUserIdByEmail,
+  seedEmailVerificationCode,
   seedMagicLinkToken,
   seedPasswordResetCode,
 } from "./fixtures/db";
@@ -52,7 +52,8 @@ test.describe("auth recovery flows (real API)", () => {
 
   test("verify email with code from database", async ({ page }) => {
     const { email, userId } = await registerAndGetUserId(page);
-    const code = await getEmailVerificationCode(userId);
+    const code = "123456";
+    await seedEmailVerificationCode(userId, code);
 
     await page.goto("/verify-email");
     await dismissCookieBanner(page);

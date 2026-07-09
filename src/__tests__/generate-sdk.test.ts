@@ -7,7 +7,7 @@ import {
   generateSdk,
   operationMethodName,
   tsTypeForSchema,
-} from "../../scripts/generate-sdk";
+} from "../../scripts/codegen/generate-sdk";
 
 // ── tsTypeForSchema ───────────────────────────────────────────────────────────
 

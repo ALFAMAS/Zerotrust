@@ -50,7 +50,7 @@ vi.mock("../logger", () => ({
   }),
 }));
 
-vi.mock("../models/settings.model", () => ({
+vi.mock("../services/shared/saasSettings.service", () => ({
   getSettings: vi.fn().mockResolvedValue({
     appName: "zerotrust Test",
     appUrl: "http://localhost:3000",

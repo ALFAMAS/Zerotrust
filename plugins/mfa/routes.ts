@@ -6,7 +6,7 @@ import { otpsTable, usersTable } from "../../src/db/schema/index.js";
 import { getLogger } from "../../src/logger/index.js";
 import { authMiddleware } from "../../src/middleware/auth.js";
 import { sensitiveReverification } from "../../src/middleware/continuousVerification.js";
-import { getSettings } from "../../src/models/settings.model.js";
+import { getSettings } from "../../src/services/shared/saasSettings.service.js";
 import { sendOTP } from "../../src/services/auth/otpDelivery.service.js";
 import { sendOtpEmail } from "../../src/services/notifications/email.service.js";
 import { internalError } from "../../src/shared/httpErrors.js";

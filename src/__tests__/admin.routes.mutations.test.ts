@@ -30,7 +30,7 @@ vi.mock("../middleware/auth", () => ({
   requireAdmin: async (_c: any, next: any) => next(),
 }));
 
-vi.mock("../models/settings.model", () => ({
+vi.mock("../services/shared/saasSettings.service", () => ({
   getSettings: vi.fn().mockResolvedValue({}),
   updateSettings: vi.fn().mockImplementation(async (partial: Record<string, unknown>) => partial),
 }));

@@ -105,7 +105,7 @@ vi.mock("../api/authLoginEffects", () => ({
   recordLoginFailure: (...args: unknown[]) => recordLoginFailure(...args),
 }));
 
-vi.mock("../models/settings.model", () => ({
+vi.mock("../services/shared/saasSettings.service", () => ({
   getSettings: vi.fn().mockResolvedValue({
     accountLockoutEnabled: true,
     accountLockoutThreshold: 8,
