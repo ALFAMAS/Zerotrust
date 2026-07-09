@@ -376,7 +376,13 @@ jobs:
           sudo gpg --no-default-keyring --keyring /usr/share/keyrings/k6-archive-keyring.gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
           echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
           sudo apt-get update
-          sudo apt-get install -y k6
+          # Pin to the 1.x line: unpinned installs picked up k6 2.0.0
+          # (2026-07-08), which fails every request against localhost
+          # (100% http_req_failed) with these scripts. Revisit for a
+          # deliberate v2 migration.
+          K6_V1=$(apt-cache madison k6 | awk '{print $3}' | grep -E '^1\.' | head -1)
+          sudo apt-get install -y "k6=${K6_V1}"
+          k6 version
 
       - name: Seed test users
         run: |

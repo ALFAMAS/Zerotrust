@@ -12,7 +12,12 @@ FROM oven/bun:${BUN_VERSION} AS builder
 
 WORKDIR /app
 
-COPY package.json bun.lockb* package-lock.json* ./
+# bun.lock (text lockfile) + workspace manifests are required for a frozen
+# install; scripts/postinstall.js runs as the root postinstall hook.
+COPY package.json bun.lock ./
+COPY packages/client/package.json ./packages/client/
+COPY packages/ui/package.json ./packages/ui/
+COPY scripts/postinstall.js ./scripts/
 
 RUN bun install --frozen-lockfile
 

@@ -151,6 +151,7 @@ export default function LandingPage() {
         </div>
       </nav>
 
+      <main id="main-content" tabIndex={-1}>
       {/* ── Hero ─────────────────────────────────────────────────────────── */}
       <section className="relative overflow-hidden">
         <div
@@ -281,7 +282,7 @@ export default function LandingPage() {
       {/* ── Standards strip ──────────────────────────────────────────────── */}
       <section className="border-y border-border/60 bg-card/30">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-x-8 gap-y-3 px-6 py-6">
-          <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground/70">
+          <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
             Standards-first
           </span>
           {standards.map((s) => (
@@ -305,7 +306,7 @@ export default function LandingPage() {
         <div className="space-y-5">
           {steps.map((s) => (
             <div key={s.step} className="flex items-start gap-4">
-              <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-border bg-card font-mono text-sm font-semibold text-primary">
+              <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-border bg-card font-mono text-sm font-semibold text-indigo-300">
                 {s.step}
               </div>
               <div className="min-w-0 flex-1">
@@ -359,6 +360,7 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+      </main>
 
       {/* ── Footer ───────────────────────────────────────────────────────── */}
       <footer className="border-t border-border">
@@ -384,7 +386,7 @@ export default function LandingPage() {
 
             <div className="grid grid-cols-2 gap-8 sm:grid-cols-3">
               <div>
-                <h4 className="text-sm font-medium text-foreground">Product</h4>
+                <h3 className="text-sm font-medium text-foreground">Product</h3>
                 <ul className="mt-3 space-y-2 text-sm">
                   <li>
                     <a
@@ -405,7 +407,7 @@ export default function LandingPage() {
                 </ul>
               </div>
               <div>
-                <h4 className="text-sm font-medium text-foreground">Resources</h4>
+                <h3 className="text-sm font-medium text-foreground">Resources</h3>
                 <ul className="mt-3 space-y-2 text-sm">
                   <li>
                     <a
@@ -426,7 +428,7 @@ export default function LandingPage() {
                 </ul>
               </div>
               <div>
-                <h4 className="text-sm font-medium text-foreground">Legal</h4>
+                <h3 className="text-sm font-medium text-foreground">Legal</h3>
                 <ul className="mt-3 space-y-2 text-sm">
                   <li>
                     <Link

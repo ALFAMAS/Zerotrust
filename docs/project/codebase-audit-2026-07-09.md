@@ -102,10 +102,26 @@ touched by MIG-1.
       `packages/ui/src/app/admin/{content,search}/page.tsx`
 - [x] `scheduler.test.ts`: clear `process.env.REDIS_URI` in `beforeEach` so the skip-path tests
       are deterministic in CI (the job exports `REDIS_URI` for its Redis service container)
+- [x] Homepage accessibility gate (0.93 < 0.95): `--primary` deepened 67%→64% lightness so
+      white-on-primary buttons clear 4.5:1 app-wide; flagged `text-primary`/`/70` small text
+      lightened; footer `h4`→`h3` (heading order); `<main id="main-content" tabIndex={-1}>` added
+      to the landing page (skip-link target). Verified locally: home 1.0, login 0.97, register 0.96
+- [x] `Dockerfile` builder stage: copied `bun.lockb*` (repo migrated to text `bun.lock` — no
+      lockfile ever reached the image) and ran the root `postinstall` before `scripts/` existed.
+      Now copies `bun.lock`, workspace manifests, and `scripts/postinstall.js` before install
+- [x] k6 pinned to the 1.x line in `ci.yml` — the unpinned `apt-get install k6` started pulling
+      the brand-new k6 2.0.0, and every request against localhost fails (100% `http_req_failed`,
+      even plain `GET /status` that curl reaches fine seconds earlier)
+- [ ] **P1 — open**: 3 Playwright e2e failures, first surfaced now because CI died at build since
+      2026-07-08 (FE-1 landed without e2e ever running): access-review "Complete review" button
+      never enabled after approve-all (`access-reviews.spec.ts:98`), "email verified" heading
+      missing (`auth-flows.spec.ts:62`), invite-accept content missing (`invite.spec.ts:47`).
+      Likely FE-1 shadcn-redesign flow regressions — need a local repro with real Postgres
 - [ ] **P1**: treat a red `main` as a stop-the-line event — five consecutive `main` runs were
       red (2026-07-08 → 2026-07-09) without a revert; consider branch protection requiring CI on
       push-to-main (or merge queue), since `main` currently takes direct pushes
 - [ ] **P2**: schedule the actual Tailwind v4 migration, then remove the Dependabot ignore rules
+- [ ] **P2**: deliberate k6 v2 migration, then drop the 1.x pin
 
 ### Dependencies (DEP-1)
 
