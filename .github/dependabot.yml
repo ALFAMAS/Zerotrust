@@ -18,6 +18,11 @@ updates:
       # root manifest as well.
       - dependency-name: tailwindcss
         update-types: ["version-update:semver-major"]
+      # TypeScript 7 is the native-compiler major; Next.js 16 refuses to build
+      # with it ("Failed to install required TypeScript dependencies").
+      # Migrate deliberately once Next supports TS7, then drop this.
+      - dependency-name: typescript
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: npm
     directory: /packages/ui
@@ -31,6 +36,9 @@ updates:
       # postcss.config.js / tailwind.config.js / globals.css. Remove once the
       # v4 migration lands.
       - dependency-name: tailwindcss
+        update-types: ["version-update:semver-major"]
+      # TS7 (native compiler): Next.js 16 can't build with it — see root entry.
+      - dependency-name: typescript
         update-types: ["version-update:semver-major"]
 
   - package-ecosystem: github-actions
