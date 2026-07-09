@@ -39,6 +39,7 @@ login for the hundredth time.
 - [Production deployment](#production-deployment)
 - [Project status](#project-status)
 - [Contributing](#contributing)
+- [Support](#support)
 - [License](#license)
 
 ---
@@ -552,6 +553,15 @@ zerotrust is actively maintained with a large test suite. Honest boundaries:
 2. Commits follow [Conventional Commits](https://www.conventionalcommits.org) (semantic-release)
 3. Keep `bun run lint` and `bun run type-check` green; add Vitest tests for behavior changes
 4. Open a PR to `main`; CI must pass
+
+---
+
+## Support
+
+If zerotrust saves you time, consider supporting ongoing development:
+
+- [Buy Me a Coffee](https://buymeacoffee.com/masyasinarafat)
+- [Ko-fi](https://ko-fi.com/masyasinarafat)
 
 ---
 
