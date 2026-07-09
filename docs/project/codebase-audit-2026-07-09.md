@@ -109,17 +109,29 @@ touched by MIG-1.
 - [x] `Dockerfile` builder stage: copied `bun.lockb*` (repo migrated to text `bun.lock` — no
       lockfile ever reached the image) and ran the root `postinstall` before `scripts/` existed.
       Now copies `bun.lock`, workspace manifests, and `scripts/postinstall.js` before install
-- [x] k6 pinned to the 1.x line in `ci.yml` — the unpinned `apt-get install k6` started pulling
-      the brand-new k6 2.0.0, and every request against localhost fails (100% `http_req_failed`,
-      even plain `GET /status` that curl reaches fine seconds earlier)
+- [x] Load & Chaos gate (100% `http_req_failed`): root cause is the **rate limiter**, not k6 —
+      the k6 CI profile drives thousands of requests/minute from one IP against the default
+      global limit (100/60s per IP) and the hardcoded login limit (20/60s), so virtually every
+      request 429s and the gate could never pass (checked back through run history: it has
+      **never** been green since PERF-1 made it blocking). Fixed with
+      `RATE_LIMITING_ENABLED=false` on the load-test job only (staging validation keeps real
+      limits); verified locally — 300 rapid `/status` + 40 rapid logins all 200 with the flag,
+      429s without. k6 also pinned to 1.x for reproducibility (the apt repo now serves the new
+      2.0.0 major)
+- [x] `Dockerfile` runtime stages: `useradd -u 1000` fails (exit 4) because `oven/bun` and
+      `node:alpine` base images already ship a UID-1000 user — switched to the images' built-in
+      non-root `bun`/`node` users. Latent since the stage was written; never reached while the
+      builder stage failed earlier
 - [ ] **P1 — open**: 3 Playwright e2e failures, first surfaced now because CI died at build since
       2026-07-08 (FE-1 landed without e2e ever running): access-review "Complete review" button
       never enabled after approve-all (`access-reviews.spec.ts:98`), "email verified" heading
       missing (`auth-flows.spec.ts:62`), invite-accept content missing (`invite.spec.ts:47`).
       Likely FE-1 shadcn-redesign flow regressions — need a local repro with real Postgres
-- [ ] **P1**: treat a red `main` as a stop-the-line event — five consecutive `main` runs were
-      red (2026-07-08 → 2026-07-09) without a revert; consider branch protection requiring CI on
-      push-to-main (or merge queue), since `main` currently takes direct pushes
+- [ ] **P1**: treat a red `main` as a stop-the-line event — the last **30** completed CI runs on
+      `main` (2026-07-06 → 2026-07-09) are all failures, so "Done" rows that assume green gates
+      (e.g. PERF-1's blocking k6 gate) were never actually observed passing. Add branch
+      protection requiring CI on push-to-main (or a merge queue), since `main` currently takes
+      direct pushes
 - [ ] **P2**: schedule the actual Tailwind v4 migration, then remove the Dependabot ignore rules
 - [ ] **P2**: deliberate k6 v2 migration, then drop the 1.x pin
 

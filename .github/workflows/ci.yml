@@ -349,6 +349,12 @@ jobs:
       # PERF-1: CI profile uses lighter load + relaxed p95 floors (see tests/load/*.k6.js).
       # Staging keeps strict p95<100ms via staging-validation.yml (default profile).
       K6_PROFILE: ci
+      # The k6 scenarios drive thousands of requests/minute from one IP; the
+      # default limits (global 100/60s per IP, login 20/60s hardcoded) 429
+      # virtually every request, so this gate could never pass. Load tests
+      # measure the API, not the limiter — disable it here only. Staging
+      # validation (staging-validation.yml) keeps real limits on.
+      RATE_LIMITING_ENABLED: "false"
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
@@ -376,10 +382,9 @@ jobs:
           sudo gpg --no-default-keyring --keyring /usr/share/keyrings/k6-archive-keyring.gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
           echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
           sudo apt-get update
-          # Pin to the 1.x line: unpinned installs picked up k6 2.0.0
-          # (2026-07-08), which fails every request against localhost
-          # (100% http_req_failed) with these scripts. Revisit for a
-          # deliberate v2 migration.
+          # Pin to the 1.x line the scripts were written against — the apt
+          # repo now serves k6 2.0.0 (new major). Bump deliberately, not via
+          # whatever `apt-get install k6` happens to resolve on the day.
           K6_V1=$(apt-cache madison k6 | awk '{print $3}' | grep -E '^1\.' | head -1)
           sudo apt-get install -y "k6=${K6_V1}"
           k6 version
