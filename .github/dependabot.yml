@@ -13,6 +13,11 @@ updates:
         dependency-type: production
       development-dependencies:
         dependency-type: development
+    ignore:
+      # See the /packages/ui entry — bun workspace bumps can flow through the
+      # root manifest as well.
+      - dependency-name: tailwindcss
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: npm
     directory: /packages/ui
@@ -20,6 +25,13 @@ updates:
       interval: weekly
       day: monday
     open-pull-requests-limit: 5
+    ignore:
+      # Tailwind v4 needs a real migration (@tailwindcss/postcss, CSS-first
+      # config) — a bare major bump breaks `next build` against the v3-style
+      # postcss.config.js / tailwind.config.js / globals.css. Remove once the
+      # v4 migration lands.
+      - dependency-name: tailwindcss
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: github-actions
     directory: /

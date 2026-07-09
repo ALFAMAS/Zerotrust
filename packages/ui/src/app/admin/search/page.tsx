@@ -57,9 +57,8 @@ export default function AdminSearchPage() {
     e.preventDefault();
     try {
       await deleteMutation.mutateAsync({ type: deleteForm.type, id: deleteForm.id.trim() });
-      setToast("Document removed from index");
+      toast({ message: "Document removed from index", type: "success" });
       setDeleteForm({ type: deleteForm.type, id: "" });
-      setTimeout(() => setToast(null), 3000);
     } catch (err) {
       toast({ message: err instanceof Error ? err.message : "Delete failed", type: "error" });
     }

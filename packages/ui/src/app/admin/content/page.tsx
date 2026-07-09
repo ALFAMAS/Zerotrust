@@ -42,9 +42,8 @@ export default function AdminContentPage() {
     formData.append("feature", feature);
     try {
       await uploadMutation.mutateAsync(formData);
-      setToast("File uploaded");
+      toast({ message: "File uploaded", type: "success" });
       if (fileRef.current) fileRef.current.value = "";
-      setTimeout(() => setToast(null), 3000);
     } catch (err) {
       toast({ message: err instanceof Error ? err.message : "Upload failed", type: "error" });
     }

@@ -12,7 +12,12 @@ FROM oven/bun:${BUN_VERSION} AS builder
 
 WORKDIR /app
 
-COPY package.json bun.lockb* package-lock.json* ./
+# bun.lock (text lockfile) + workspace manifests are required for a frozen
+# install; scripts/postinstall.js runs as the root postinstall hook.
+COPY package.json bun.lock ./
+COPY packages/client/package.json ./packages/client/
+COPY packages/ui/package.json ./packages/ui/
+COPY scripts/postinstall.js ./scripts/
 
 RUN bun install --frozen-lockfile
 
@@ -30,8 +35,10 @@ COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
 COPY package.json ./
 
-RUN useradd -m -u 1000 zerotrust && chown -R zerotrust:zerotrust /app
-USER zerotrust
+# oven/bun already ships a non-root `bun` user (UID 1000); creating another
+# UID-1000 user fails with useradd exit code 4
+RUN chown -R bun:bun /app
+USER bun
 
 ENV NODE_ENV=production
 ENV LOG_FORMAT=json
@@ -54,8 +61,9 @@ COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
 COPY package.json ./
 
-RUN adduser -D -u 1000 zerotrust && chown -R zerotrust:zerotrust /app
-USER zerotrust
+# node:alpine already ships a non-root `node` user (UID 1000)
+RUN chown -R node:node /app
+USER node
 
 ENV NODE_ENV=production
 ENV LOG_FORMAT=json

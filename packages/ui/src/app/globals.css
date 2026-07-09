@@ -19,7 +19,8 @@
     --popover: 221 39% 11%;
     --popover-foreground: 210 20% 96%;
 
-    --primary: 239 84% 67%;
+    /* L 64% keeps white-on-primary buttons ≥ 4.5:1 (WCAG AA / Lighthouse gate) */
+    --primary: 239 84% 64%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 215 28% 17%;

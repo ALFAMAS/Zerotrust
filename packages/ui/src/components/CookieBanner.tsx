@@ -45,14 +45,14 @@ export default function CookieBanner() {
           {brand.name} uses cookies to improve your experience. By continuing, you accept our{" "}
           <Link
             href="/privacy"
-            className="text-primary underline underline-offset-2 transition-colors hover:text-primary/80"
+            className="text-indigo-300 underline underline-offset-2 transition-colors hover:text-indigo-200"
           >
             Privacy Policy
           </Link>{" "}
           and{" "}
           <Link
             href="/terms"
-            className="text-primary underline underline-offset-2 transition-colors hover:text-primary/80"
+            className="text-indigo-300 underline underline-offset-2 transition-colors hover:text-indigo-200"
           >
             Terms of Service
           </Link>
