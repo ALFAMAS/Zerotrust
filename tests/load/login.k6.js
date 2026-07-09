@@ -62,10 +62,15 @@ export default function () {
 
   if (loginOk && loginRes.status === 200) {
     try {
-      const body = JSON.parse(loginRes.body);
+      // Refresh token arrives as a Secure __Host- cookie (ADR 008 / SEC-9),
+      // not in the body; k6 won't replay Secure cookies over http, so pass it
+      // via the body field the endpoint still accepts.
+      const refreshCookie = loginRes.cookies["__Host-za_refresh_token"];
+      const refreshToken =
+        refreshCookie && refreshCookie.length > 0 ? refreshCookie[0].value : null;
       const refreshRes = http.post(
         `${BASE_URL}/auth/token/refresh`,
-        JSON.stringify({ refreshToken: body.refreshToken }),
+        JSON.stringify({ refreshToken }),
         { headers: { "Content-Type": "application/json" } }
       );
       check(refreshRes, { "refresh status is 200": (r) => r.status === 200 });
