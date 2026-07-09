@@ -91,7 +91,7 @@ packages/ui/src/
 
 ## Quality rules
 
-Cross-agent performance, accessibility, best-practice, and SEO directives are in [`AGENTS.md`](./AGENTS.md) § Quality rules. Apply only the Web block when editing `packages/ui/` and the API block when editing `src/`. Do not add SEO scaffolding to authenticated dashboard routes. Mobile/Expo rules in [`docs/Agentqualityrules.MD`](./docs/Agentqualityrules.MD) apply only if that surface is added to the repo.
+Cross-agent performance, accessibility, best-practice, and SEO directives are in [`AGENTS.md`](./AGENTS.md) § Quality rules. Apply only the Web block when editing `packages/ui/` and the API block when editing `src/`. Do not add SEO scaffolding to authenticated dashboard routes. Mobile/Expo rules in [`docs/agentqualityrules.md`](./docs/agentqualityrules.md) apply only if that surface is added to the repo.
 
 ## MCP servers
 

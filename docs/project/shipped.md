@@ -558,6 +558,34 @@ Cross-audit of `docs/security.md` §0–§10. **SEC-27** shipped 2026-07-08 (VPS
 - **Paths:** `packages/ui/vitest.config.ts`, `docs/project/todo.md`
 - **Verification (2026-07-09):** `bun run test:coverage` → **pass**; `bun run test:coverage:ui` → **pass** (UI coverage ~74.6% lines on the gated surface).
 
+### DOC-2 — Lowercase quality-rules doc filename (shipped)
+
+- **Problem:** `docs/Agentqualityrules.MD` violated the repo’s lowercase `.md` naming convention and caused casing drift in internal links.
+- **Fix:** Renamed the file to `docs/agentqualityrules.md` and updated references in `AGENTS.md`, `CLAUDE.md`, and the audit docs.
+- **Paths:** `docs/agentqualityrules.md`, `AGENTS.md`, `CLAUDE.md`, `docs/project/codebase-audit-2026-07-09.md`
+- **Verification (2026-07-09):** `bun run lint` → **pass**.
+
+### DEP-1 — Root dependency hygiene (shipped)
+
+- **Problem:** Root `package.json` incorrectly shipped UI-only or unused deps (`tailwindcss-animate`, `xpath`) and had `@types/web-push` in `dependencies`; `knip.config.ts` suppressed these instead of fixing them.
+- **Fix:** Removed unused/root-misplaced deps (`xpath`, `tailwindcss-animate`), moved `@types/web-push` to `devDependencies`, and dropped the corresponding `knip.config.ts` `ignoreDependencies` suppressions.
+- **Paths:** `package.json`, `bun.lock`, `knip.config.ts`
+- **Verification (2026-07-09):** `bun run knip` → **pass**; `bun run lint` → **pass**.
+
+### MIG-1 — Repair Drizzle journal drift (shipped)
+
+- **Problem:** `drizzle/meta/_journal.json` only registered migrations up through `0035_org_settings_version`, so `bun run db:migrate` (deploy path) would silently skip 11 migrations (`0030`–`0040`) including org RLS policies.
+- **Fix:** Repaired the Drizzle journal to include all `drizzle/*.sql` migrations in order and added a CI drift guard (`migrations:journal:check`) so future journal↔files mismatch fails fast. CI now applies schema via `db:migrate` (not `db:push`) against a fresh Postgres.
+- **Paths:** `drizzle/meta/_journal.json`, `scripts/check-drizzle-journal.ts`, `.github/workflows/ci.yml`, `package.json`
+- **Verification (2026-07-09):** `bun run migrations:journal:check` → **pass**; `bun run migrations:check` → **pass**; `bun run lint` → **pass**.
+
+### TEST-1 — Document test surfaces (shipped)
+
+- **Problem:** Tests live in four places (API vitest, UI happy-dom, Playwright e2e, k6) with no single index describing what each covers or which CI job runs it.
+- **Fix:** Added `docs/testing.md` mapping the four test surfaces to local commands and the corresponding CI jobs/steps.
+- **Paths:** `docs/testing.md`
+- **Verification (2026-07-09):** `bun run lint` → **pass**.
+
 ---
 
 ## Recent work (2026-07-08)

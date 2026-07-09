@@ -418,7 +418,7 @@ and others). Agent and contributor rules in [`CLAUDE.md`](./CLAUDE.md) and
 | ----------------------------- | -------------------------------------------------------------------------------- |
 | Structural security decisions | [`docs/security.md`](./docs/security.md)                                         |
 | Vulnerability disclosure      | [`SECURITY.md`](./SECURITY.md) · `/.well-known/security.txt`                     |
-| Open backlog                | [`docs/project/todo.md`](./docs/project/todo.md) (empty) |
+| Open backlog                  | [`docs/project/todo.md`](./docs/project/todo.md)                                 |
 | Shipped security fixes        | [`docs/project/shipped.md`](./docs/project/shipped.md) § Security baseline audit |
 | Production readiness          | [`docs/production-checklist.md`](./docs/production-checklist.md)                 |
 
@@ -542,7 +542,7 @@ zerotrust is actively maintained with a large test suite. Honest boundaries:
 | ---------------------------------------------------------------- | --------------------------------------- |
 | [`docs/production-checklist.md`](./docs/production-checklist.md) | Production-readiness sign-off checklist |
 | [`docs/project/shipped.md`](./docs/project/shipped.md)           | Everything that ships today             |
-| [`docs/project/todo.md`](./docs/project/todo.md)                 | Open backlog (empty) |
+| [`docs/project/todo.md`](./docs/project/todo.md)                 | Open backlog                           |
 | [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md)                 | System architecture deep dive           |
 
 ---

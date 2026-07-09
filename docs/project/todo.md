@@ -20,17 +20,7 @@ New open items below come from the **2026-07-09 codebase audit**
 
 ### Data / migrations
 
-- [ ] **MIG-1 (P0)** — Repair `drizzle/meta/_journal.json`: 11 migrations (`0030`–`0040`, incl.
-      `0035_org_rls_policies` and `0038_org_rls_expansion`) are not journaled, so
-      `bun run db:migrate` (staging/production deploy path) never applies them. Resolve duplicate
-      `0034`/`0035` prefixes, add a journal↔files drift guard to CI, and add a CI job that runs
-      `db:migrate` (not `db:push`) against a fresh Postgres. Full plan in the audit doc.
-
 ### Dependencies
-
-- [ ] **DEP-1 (P1)** — Root `package.json` hygiene: drop unused `xpath`, drop root
-      `tailwindcss-animate` (lives in `packages/ui`), move `@types/web-push` to devDependencies,
-      then remove the matching `knip.config.ts` `ignoreDependencies` suppressions.
 
 ### Structure (phased plan in audit doc § File-structure change plan)
 
@@ -57,10 +47,6 @@ New open items below come from the **2026-07-09 codebase audit**
       real Postgres; see `codebase-audit-2026-07-09.md` § CI health.
 
 ### Testing / docs
-
-- [ ] **TEST-1 (P2)** — Document the four test surfaces (API vitest, UI happy-dom, Playwright e2e,
-      k6 load) and which CI job runs each.
-- [ ] **DOC-2 (P2)** — Rename `docs/Agentqualityrules.MD` → lowercase `.md` convention.
 
 ## Backlog (unprioritized)
 

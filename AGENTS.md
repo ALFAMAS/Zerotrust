@@ -39,7 +39,7 @@ When adding a new feature that matches one of these patterns, extend the canonic
 
 ## Quality rules (performance · accessibility · best practices · SEO)
 
-Apply only the block matching the surface you're editing. Security rules above take precedence — do not duplicate CWE guidance here. Full scoped reference (including Mobile/Expo): [`docs/Agentqualityrules.MD`](./docs/Agentqualityrules.MD).
+Apply only the block matching the surface you're editing. Security rules above take precedence — do not duplicate CWE guidance here. Full scoped reference (including Mobile/Expo): [`docs/agentqualityrules.md`](./docs/agentqualityrules.md).
 
 **Scope in this repo:** Next.js UI (`packages/ui/`) and Hono API (`src/`). No Expo/mobile app — skip mobile blocks unless that surface is added.
 

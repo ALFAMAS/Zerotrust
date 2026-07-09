@@ -53,8 +53,6 @@ const config: KnipConfig = {
     "packages/ui/src/lib/offlineQueue.ts",
   ],
   ignoreDependencies: [
-    "tailwindcss-animate",
-    "xpath",
     "@radix-ui/react-popover",
     "@radix-ui/react-separator",
     "@stripe/stripe-js",

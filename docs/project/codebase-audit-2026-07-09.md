@@ -20,16 +20,16 @@ wired. This audit found **one P0 regression** and a set of structural/hygiene it
 
 | ID | Priority | Finding | Status |
 | -- | -------- | ------- | ------ |
-| **MIG-1** | **P0** | 11 migration files (`0030`–`0040`) missing from `drizzle/meta/_journal.json` — `bun run db:migrate` (used by staging/production deploy workflows) will never apply them. Includes the org **RLS policies** the security checklist relies on. | **Open** |
+| **MIG-1** | **P0** | 11 migration files (`0030`–`0040`) missing from `drizzle/meta/_journal.json` — `bun run db:migrate` (used by staging/production deploy workflows) will never apply them. Includes the org **RLS policies** the security checklist relies on. | **Fixed** |
 | **CI-3** | **P0** | `main` CI red since 2026-07-08: (a) Dependabot bumped `tailwindcss` 3→4 without migrating the v3-style `postcss.config.js`/`tailwind.config.js`/`globals.css`, breaking `next build`; (b) FE-1 left stale `setToast()` calls in two admin pages, failing typecheck; (c) `scheduler.test.ts` "no REDIS_URI" case read the CI job's real `REDIS_URI` via the default parameter. | **Fixed in this PR** |
 | **HYG-1** | P1 | Stray artifacts committed to git: `tmp-verify/`, `packages/ui/src/graphify-out/`, `packages/ui/src/app/graphify-out/` (tool caches inside the Next.js App Router tree). | **Fixed in this PR** |
-| **DEP-1** | P1 | Root `package.json` ships UI/dead deps (`tailwindcss-animate`, `xpath`) and misplaces `@types/web-push` in `dependencies`; knip `ignoreDependencies` suppresses the warnings instead of fixing them. | Open |
+| **DEP-1** | P1 | Root `package.json` ships UI/dead deps (`tailwindcss-animate`, `xpath`) and misplaces `@types/web-push` in `dependencies`; knip `ignoreDependencies` suppresses the warnings instead of fixing them. | **Fixed** |
 | **STR-1** | P2 | `scripts/` sprawl: ~29 files mixing ops, codegen, CI checks, smoke tests, codemods, and Windows `.ps1` repair tools in one flat dir. | Open (carried from 2026-07-07) |
 | **STR-2** | P2 | Cross-cutting API subsystems (`src/jit`, `src/ssf`, `src/webhooks`, `src/notifications`, `src/mfa`) sit as top-level roots beside layer dirs. | Open (carried from 2026-07-07) |
 | **STR-3** | P2 | Oversized route modules: `auth.routes.ts` (~1,200 lines), `admin.routes.ts` (~1,130 lines). | Open |
 | **STR-4** | P2 | Legacy duplicated model surfaces: `src/db/schema.ts` beside `src/db/schema/`, and orphaned `src/models/` (knip-ignored). | Open |
 | **TEST-1** | P2 | Tests live in four places (`src/__tests__/` 149 files, `packages/ui/src/**/*.test.tsx`, `packages/ui/e2e/`, `tests/load/`) with no index doc. | Open |
-| **DOC-2** | P2 | Filename casing drift (`docs/Agentqualityrules.MD`); migration count in docs ("41 files") no longer matches disk (43). | Partially fixed (count) |
+| **DOC-2** | P2 | Filename casing drift (`docs/agentqualityrules.md`); migration count in docs ("41 files") no longer matches disk (43). | **Fixed** |
 
 ---
 
@@ -168,7 +168,7 @@ touched by MIG-1.
 ### Docs (DOC-2)
 
 - [x] Migration count corrected in `production-checklist.md` (was "41 files")
-- [ ] **P2**: rename `docs/Agentqualityrules.MD` → `docs/agent-quality-rules.md` (case-collision
+- [ ] **P2**: rename `docs/agentqualityrules.md` (case-collision
       risk on case-insensitive filesystems; only lowercase-`.md` file breaking the convention)
 
 ---
