@@ -104,5 +104,4 @@ router.post("/lifecycle-emails", async (c) => {
   }
 });
 
-
 export default router;

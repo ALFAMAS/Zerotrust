@@ -1,7 +1,12 @@
 import { Hono } from "hono";
 import { z } from "zod";
 import { auditLog } from "../../../logger";
-import { getSettings, type SaaSSettings, SettingsVersionConflictError, updateSettings } from "../../../services/shared/saasSettings.service";
+import {
+  getSettings,
+  type SaaSSettings,
+  SettingsVersionConflictError,
+  updateSettings,
+} from "../../../services/shared/saasSettings.service";
 import { internalError } from "../../../shared/httpErrors";
 import type { HonoEnv } from "../../../shared/types";
 import { logger } from "./_shared";
@@ -121,6 +126,5 @@ router.put("/settings", async (c) => {
     );
   }
 });
-
 
 export default router;

@@ -50,13 +50,6 @@ export {
   sessionsTable,
   usersTable,
 } from "./db/schema";
-export type { CrossTenantJITRequest } from "./modules/jit/cross-tenant";
-// ─── Cross-Tenant JIT ─────────────────────────────────────────────────────────
-export {
-  crossTenantJITStore,
-  requestCrossTenantAccess,
-  requireCrossTenantJIT,
-} from "./modules/jit/cross-tenant";
 // ─── Logging ─────────────────────────────────────────────────────────────────
 export {
   auditLog,
@@ -168,6 +161,22 @@ export type { TokenBindingOptions } from "./middleware/tokenBinding";
 // ─── Token Binding ────────────────────────────────────────────────────────────
 export { tokenBindingMiddleware } from "./middleware/tokenBinding";
 export { allowOnlyMethods, requireFields } from "./middleware/validation";
+export type { CrossTenantJITRequest } from "./modules/jit/cross-tenant";
+// ─── Cross-Tenant JIT ─────────────────────────────────────────────────────────
+export {
+  crossTenantJITStore,
+  requestCrossTenantAccess,
+  requireCrossTenantJIT,
+} from "./modules/jit/cross-tenant";
+export { handleSSFEvent } from "./modules/ssf/receiver";
+export { sendSSFEvent } from "./modules/ssf/sender";
+// ─── Webhooks ────────────────────────────────────────────────────────────────
+export { dispatchEvent, signPayload, webhookStore } from "./modules/webhooks";
+export type {
+  WebhookDelivery,
+  WebhookEndpoint,
+  WebhookEventType,
+} from "./modules/webhooks/types";
 // ─── Notifications (Slack / Teams / PagerDuty) ────────────────────────────────
 export {
   initNotificationsFromEnv,
@@ -236,8 +245,6 @@ export {
   ErrorCodes,
   zerotrustError,
 } from "./shared/types";
-export { handleSSFEvent } from "./modules/ssf/receiver";
-export { sendSSFEvent } from "./modules/ssf/sender";
 // ─── Telemetry ───────────────────────────────────────────────────────────────
 export {
   getTracer,
@@ -245,13 +252,6 @@ export {
   telemetryMiddleware,
   withSpan,
 } from "./telemetry";
-// ─── Webhooks ────────────────────────────────────────────────────────────────
-export { dispatchEvent, signPayload, webhookStore } from "./modules/webhooks";
-export type {
-  WebhookDelivery,
-  WebhookEndpoint,
-  WebhookEventType,
-} from "./modules/webhooks/types";
 
 export async function initializezerotrust() {
   const { getConfig } = await import("./config/index.js");

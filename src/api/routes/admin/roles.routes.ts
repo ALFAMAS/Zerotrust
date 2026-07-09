@@ -173,5 +173,4 @@ router.delete("/users/:id/roles/:roleName", async (c) => {
   }
 });
 
-
 export default router;

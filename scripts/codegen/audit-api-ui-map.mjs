@@ -101,10 +101,7 @@ function parseRouteFile(filePath, prefix, routes, methods, visited = new Set()) 
   if (!statExists(filePath)) return;
 
   const source = readFileSync(filePath, "utf8");
-  const routeRe = new RegExp(
-    `(?:router|app)\\.(${methods.join("|")})\\(\\s*["']([^"']+)["']`,
-    "g"
-  );
+  const routeRe = new RegExp(`(?:router|app)\\.(${methods.join("|")})\\(\\s*["']([^"']+)["']`, "g");
   for (const match of source.matchAll(routeRe)) {
     routes.push({
       method: match[1].toUpperCase(),

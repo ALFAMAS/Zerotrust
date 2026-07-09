@@ -9,7 +9,11 @@ import { rateLimit } from "../../../middleware/rateLimiting";
 import { zValidator } from "../../../middleware/zodValidation";
 import { validateSignupEmail } from "../../../services/auth/disposableEmail.service";
 import { rejectIfBreached } from "../../../services/auth/passwordBreach.service";
-import { createPowChallenge, isSignupPowEnabled, verifyPowSolution } from "../../../services/auth/proofOfWork.service";
+import {
+  createPowChallenge,
+  isSignupPowEnabled,
+  verifyPowSolution,
+} from "../../../services/auth/proofOfWork.service";
 import { sendWelcomeEmail } from "../../../services/notifications/email.service";
 import { hashTokenSha256, safeDigestEquals } from "../../../shared/cryptoHash";
 import { internalError } from "../../../shared/httpErrors";

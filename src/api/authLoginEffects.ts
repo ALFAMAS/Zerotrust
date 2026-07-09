@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { dispatchEvent } from "../modules/webhooks/delivery";
 import {
   recordLoginFailure as auditLoginFailure,
   recordLoginSuccess as auditLoginSuccess,
@@ -6,7 +7,6 @@ import {
   type RecordLoginFailureParams,
   type RecordLoginSuccessParams,
 } from "../services/auth/loginAudit.service";
-import { dispatchEvent } from "../modules/webhooks/delivery";
 
 export type { LoginMethod, RecordLoginFailureParams, RecordLoginSuccessParams };
 

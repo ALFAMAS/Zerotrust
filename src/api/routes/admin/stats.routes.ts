@@ -37,5 +37,4 @@ router.get("/stats", async (c) => {
   }
 });
 
-
 export default router;

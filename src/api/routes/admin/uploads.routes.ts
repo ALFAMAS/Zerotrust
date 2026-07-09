@@ -4,7 +4,10 @@ import { Hono } from "hono";
 import { getDb, getReadDb } from "../../../db";
 import { fileAttachmentsTable } from "../../../db/schema";
 import { authMiddleware } from "../../../middleware/auth";
-import { ALLOWED_UPLOAD_CONTENT_TYPES, safeExtensionForContentType } from "../../../services/ops/uploadSafety";
+import {
+  ALLOWED_UPLOAD_CONTENT_TYPES,
+  safeExtensionForContentType,
+} from "../../../services/ops/uploadSafety";
 import { countRows } from "../../../shared/dbCount";
 import { internalError } from "../../../shared/httpErrors";
 import { paginated, parsePaginatedQuery } from "../../../shared/pagination";

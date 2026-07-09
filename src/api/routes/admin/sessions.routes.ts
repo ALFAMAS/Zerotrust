@@ -81,5 +81,4 @@ router.delete("/sessions/:id", async (c) => {
   }
 });
 
-
 export default router;

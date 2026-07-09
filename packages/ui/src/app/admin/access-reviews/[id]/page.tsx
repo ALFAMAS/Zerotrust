@@ -94,8 +94,7 @@ export default function AccessReviewDetailPage() {
     return <div className="py-16 text-center text-muted-foreground">Review not found.</div>;
   }
 
-  const pending =
-    review.pendingCount ?? items.filter((i) => i.decision === "pending").length;
+  const pending = review.pendingCount ?? items.filter((i) => i.decision === "pending").length;
   const isOpen = review.status !== "completed";
 
   return (

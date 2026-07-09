@@ -142,4 +142,3 @@ export async function updateSettings(
 
   return getSettings();
 }
-

@@ -12,12 +12,12 @@ import { organizationMembersTable, usersTable } from "../../db/schema";
 import { getLogger } from "../../logger";
 import { KNOWN_HARDWARE_KEY_AAGUIDS, verifyAttestation } from "../../mfa/attestation";
 import { authMiddleware } from "../../middleware/auth";
-import { getSettings } from "../../services/shared/saasSettings.service";
 import {
   getOrgSecurityPolicy,
   toAttestationPolicy,
 } from "../../services/auth/orgSecurityPolicy.service";
 import { TokenService } from "../../services/auth/token.service";
+import { getSettings } from "../../services/shared/saasSettings.service";
 import { getClientIp } from "../../shared/clientIp";
 import { hashTokenSha256 } from "../../shared/cryptoHash";
 import { internalError } from "../../shared/httpErrors";

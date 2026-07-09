@@ -115,5 +115,4 @@ router.delete("/jit-grants/:id", async (c) => {
   }
 });
 
-
 export default router;

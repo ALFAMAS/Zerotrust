@@ -64,5 +64,4 @@ router.get("/audit-logs/verify", requirePlan("auditLog"), async (c) => {
   }
 });
 
-
 export default router;

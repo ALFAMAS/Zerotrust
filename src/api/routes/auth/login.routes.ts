@@ -2,22 +2,41 @@ import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { getDb } from "../../../db";
 import { usersTable } from "../../../db/schema";
-import { getLoginThrottle, recordFailedLogin, recordSuccessfulLogin } from "../../../middleware/accountLockout";
+import {
+  getLoginThrottle,
+  recordFailedLogin,
+  recordSuccessfulLogin,
+} from "../../../middleware/accountLockout";
 import { captchaGuard } from "../../../middleware/captcha";
-import { isIpBlocked, recordIpLoginFailure, recordIpLoginSuccess } from "../../../middleware/credentialStuffing";
+import {
+  isIpBlocked,
+  recordIpLoginFailure,
+  recordIpLoginSuccess,
+} from "../../../middleware/credentialStuffing";
 import { rateLimit } from "../../../middleware/rateLimiting";
 import { zValidator } from "../../../middleware/zodValidation";
-import { getSettings } from "../../../services/shared/saasSettings.service";
 import { issueAuthenticatedSession } from "../../../services/auth/issueAuthenticatedSession.service";
 import { verifyPowSolution } from "../../../services/auth/proofOfWork.service";
-import { TokenService } from "../../../services/auth/token.service";
+import type { TokenService } from "../../../services/auth/token.service";
+import { getSettings } from "../../../services/shared/saasSettings.service";
 import { getClientIp } from "../../../shared/clientIp";
 import { internalError } from "../../../shared/httpErrors";
 import { dummyPasswordHash, verifyPassword } from "../../../shared/passwordHash";
 import type { HonoEnv, User } from "../../../shared/types";
 import { recordLoginFailure, recordLoginSuccess } from "../../authLoginEffects";
 import { LoginBodySchema } from "../../schemas/auth.schema";
-import { getTokenService, hashToken, issueMfaChallengeToken, logger, MFA_CHALLENGE_AUD, MFA_CHALLENGE_SCOPE, MFA_CHALLENGE_TTL_SECS, rehashPasswordIfLegacy, userRequiresMfa, verifyTotpCode } from "./_shared";
+import {
+  getTokenService,
+  hashToken,
+  issueMfaChallengeToken,
+  logger,
+  MFA_CHALLENGE_AUD,
+  MFA_CHALLENGE_SCOPE,
+  MFA_CHALLENGE_TTL_SECS,
+  rehashPasswordIfLegacy,
+  userRequiresMfa,
+  verifyTotpCode,
+} from "./_shared";
 
 const router = new Hono<HonoEnv>();
 // POST /login

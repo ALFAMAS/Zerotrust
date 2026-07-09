@@ -258,5 +258,4 @@ router.post("/users/:id/force-logout", async (c) => {
   }
 });
 
-
 export default router;
