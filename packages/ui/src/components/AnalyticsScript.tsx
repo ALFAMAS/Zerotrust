@@ -5,6 +5,8 @@ import { getConsent } from "@/lib/consent";
 
 const PLAUSIBLE_DOMAIN = process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN;
 const GA_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
+const POSTHOG_KEY = process.env.NEXT_PUBLIC_POSTHOG_KEY;
+const POSTHOG_HOST = process.env.NEXT_PUBLIC_POSTHOG_HOST;
 
 declare global {
   interface Window {
@@ -86,6 +88,23 @@ export default function AnalyticsScript() {
         id: "google-analytics",
         src: `https://www.googletagmanager.com/gtag/js?id=${GA_ID}`,
       });
+    }
+
+    if (POSTHOG_KEY && POSTHOG_HOST) {
+      let cancelled = false;
+      void import("posthog-js").then(({ default: posthog }) => {
+        if (cancelled) return;
+        posthog.init(POSTHOG_KEY, {
+          api_host: POSTHOG_HOST,
+          person_profiles: "identified_only",
+          capture_pageview: true,
+        });
+      });
+
+      return () => {
+        cancelled = true;
+        void import("posthog-js").then(({ default: posthog }) => posthog.reset());
+      };
     }
   }, [accepted]);
 

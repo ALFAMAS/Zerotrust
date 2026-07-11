@@ -99,6 +99,10 @@ trace rooted at the monorepo (`outputFileTracingRoot` in `packages/ui/next.confi
 See also [`reference-architecture.md`](./reference-architecture.md) Blueprint 2
 (containers) for replica counts and production env wiring.
 
+**Optional platform services** (OpenSearch, Uptime Kuma, GlitchTip, Grafana/Loki/Tempo,
+PostHog) are documented in [`infra/README.md`](./infra/README.md) with compose overlays
+`docker-compose.platform.yml` and extended `docker-compose.observability.yml`.
+
 ---
 
 ## Production hardening checklist

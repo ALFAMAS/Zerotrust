@@ -29,7 +29,7 @@ Pick a minimal subset first (metrics + dashboards + tracing + uptime + analytics
 #### Grafana
 - **Description**: Dashboards and alerting UI for metrics/logs/traces.
 - **Why for this template**: One pane to monitor API latency/error rates, auth/MFA events, and queue health once you wire data sources.
-- **Integration notes**: Point Grafana at your Prometheus; for trace exploration pair with Tempo/Jaeger (below). See `docker-compose.observability.yml` for the repo’s local “observability stack” entry point.
+- **Integration notes**: Grafana + Loki + Tempo ship in `docker-compose.observability.yml` (Grafana on `:3003`). See [`docs/infra/README.md`](./docs/infra/README.md).
 - **Effort**: **Low**
 
 #### Alertmanager
@@ -69,7 +69,7 @@ Pick a minimal subset first (metrics + dashboards + tracing + uptime + analytics
 #### PostHog (self-hosted)
 - **Description**: Product analytics + event capture + feature flags (heavier than Umami).
 - **Why for this template**: If you want funnels, cohorts, and event-based retention, PostHog is the OSS workhorse.
-- **Integration notes**: Same insertion point: `packages/ui/src/components/AnalyticsScript.tsx` (consent gate). Prefer server-to-server event ingestion for sensitive events; do not send secrets/tokens in URLs.
+- **Integration notes**: Official hobby deploy via `./scripts/ops/posthog-hobby.sh` (see [`docs/infra/README.md`](./docs/infra/README.md)). Load the snippet from `packages/ui/src/components/AnalyticsScript.tsx` (consent gate). Prefer server-to-server event ingestion for sensitive events; do not send secrets/tokens in URLs.
 - **Effort**: **Medium**
 
 ### Uptime & status
@@ -77,7 +77,7 @@ Pick a minimal subset first (metrics + dashboards + tracing + uptime + analytics
 #### Uptime Kuma
 - **Description**: Simple uptime monitoring with notifications and a basic status page.
 - **Why for this template**: Great “first monitor” for `/health`, `/version`, and (auth-gated) `/metrics` without a big observability platform.
-- **Integration notes**: Monitor the API health endpoint (`/health`) and UI deploy-config endpoint (`/api/deploy-config`), aligning with `docs/deployment.md` smoke steps (`ops:smoke`).
+- **Integration notes**: Ships in `docker-compose.platform.yml` on `:3002`. Monitor `/health`, `/version`, and UI `/api/deploy-config` per `docs/deployment.md` smoke steps (`ops:smoke`).
 - **Effort**: **Low**
 
 #### Cachet (or similar OSS status page)
@@ -91,13 +91,13 @@ Pick a minimal subset first (metrics + dashboards + tracing + uptime + analytics
 #### HashiCorp Vault
 - **Description**: Central secret storage with audit trails and short-lived credentials.
 - **Why for this template**: zerotrust has many operational secrets (DB creds, `TOKEN_SECRET_HEX`, `CSFLE_MASTER_KEY_HEX`, SMTP creds, `METRICS_AUTH_TOKEN`, etc.); Vault reduces “secret sprawl”.
-- **Integration notes**: Start by moving the highest-impact secrets from `.env` to Vault and inject them at runtime (CI/deploy). Map directly to existing env vars from `.env.example`.
+- **Integration notes**: Start by moving the highest-impact secrets from `.env` to Vault and inject them at runtime (CI/deploy). See [`docs/comparisons/secrets-infisical-vs-vault.md`](./docs/comparisons/secrets-infisical-vs-vault.md) for when Vault beats Infisical for this stack.
 - **Effort**: **Medium**
 
 #### Infisical (OSS secrets manager)
 - **Description**: Developer-friendly secret manager with a smoother UX than Vault for many teams.
 - **Why for this template**: Quick win for teams that want “managed-feeling” secret workflows while staying self-hosted.
-- **Integration notes**: Same mapping approach as Vault: treat `.env.example` as the canonical inventory and inject those env vars on deploy.
+- **Integration notes**: Map `.env.example` keys to Infisical environments and inject at deploy. Comparison with Vault: [`docs/comparisons/secrets-infisical-vs-vault.md`](./docs/comparisons/secrets-infisical-vs-vault.md).
 - **Effort**: **Low**
 
 ### Search & audit (only if you need it)
@@ -105,7 +105,7 @@ Pick a minimal subset first (metrics + dashboards + tracing + uptime + analytics
 #### OpenSearch (alternative to Elasticsearch)
 - **Description**: Elasticsearch-compatible search/log/audit stack (community fork).
 - **Why for this template**: If you want a self-hosted ELK-like workflow but prefer an OSS-leaning distribution, OpenSearch is often the default choice.
-- **Integration notes**: zerotrust’s optional search/audit integration is toggled by `ELASTICSEARCH_ENABLED` and expects an Elasticsearch-like API. Start with `docs/deployment.md` (Elasticsearch optional) and `.env.example` settings (`ELASTICSEARCH_HOST`, `ELASTICSEARCH_PORT`, `ELASTICSEARCH_INDEX_PREFIX`).
+- **Integration notes**: Ships in `docker-compose.platform.yml` (API `:9201`, Dashboards `:5602`). Set `ELASTICSEARCH_ENABLED=true` and `ELASTICSEARCH_PORT=9201`. See [`docs/infra/README.md`](./docs/infra/README.md).
 - **Effort**: **Medium**
 
 ## Skip for this template
@@ -125,5 +125,13 @@ These tools are common, but are usually a mismatch (or redundant) for this start
 - [ ] **Lock down `/metrics` in production**: set `METRICS_AUTH_TOKEN` and verify 401-without-token / 200-with-token per `docs/deployment.md`.
 
 ---
+
+Compose overlays and operator docs:
+
+- **`docker-compose.platform.yml`** — OpenSearch, Uptime Kuma, GlitchTip
+- **`docker-compose.observability.yml`** — Prometheus, Alertmanager, Grafana, Loki, Tempo
+- **`scripts/ops/posthog-hobby.sh`** — official PostHog hobby deploy
+- **`docs/infra/README.md`** — ports, integration steps, production notes
+- **`docs/comparisons/secrets-infisical-vs-vault.md`** — secrets manager comparison
 
 If you want, we can also add a `docker-compose.oss.yml` that bundles the recommended stack for local demo deployments.

@@ -1,0 +1,212 @@
+# Optional platform services for local/staging operations.
+#
+# Usage (merge with the core stack so services share the `zerotrust` network):
+#   docker compose -f docker-compose.yml -f docker-compose.platform.yml up -d
+#
+# Start individual groups:
+#   docker compose -f docker-compose.yml -f docker-compose.platform.yml up -d opensearch opensearch-dashboards
+#   docker compose -f docker-compose.yml -f docker-compose.platform.yml up -d uptime-kuma
+#   docker compose -f docker-compose.yml -f docker-compose.platform.yml up -d glitchtip-web glitchtip-worker
+#
+# PostHog is started separately via the official hobby deploy script — see
+# `scripts/ops/posthog-hobby.sh` and `docs/infra/README.md` § PostHog.
+#
+# Ports (host):
+#   OpenSearch API          http://localhost:9201
+#   OpenSearch Dashboards   http://localhost:5602
+#   Uptime Kuma             http://localhost:3002
+#   GlitchTip               http://localhost:8100
+
+services:
+  # ─────────────────────────────────────────────────────────────────────────
+  # OpenSearch: Elasticsearch-compatible search / audit mirror (opt-in)
+  # Wire zerotrust with ELASTICSEARCH_ENABLED=true and ELASTICSEARCH_HOST=localhost
+  # ELASTICSEARCH_PORT=9201 (OpenSearch uses the ES-compatible REST API).
+  # ─────────────────────────────────────────────────────────────────────────
+  opensearch:
+    image: opensearchproject/opensearch:2.15.0
+    container_name: zerotrust-opensearch
+    environment:
+      - discovery.type=single-node
+      - DISABLE_SECURITY_PLUGIN=true
+      - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+      - "9201:9200"
+      - "9600:9600"
+    volumes:
+      - opensearch_data:/usr/share/opensearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:9200 >/dev/null || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - zerotrust
+    restart: unless-stopped
+
+  opensearch-dashboards:
+    image: opensearchproject/opensearch-dashboards:2.15.0
+    container_name: zerotrust-opensearch-dashboards
+    environment:
+      - OPENSEARCH_HOSTS=["http://opensearch:9200"]
+      - DISABLE_SECURITY_DASHBOARDS_PLUGIN=true
+    ports:
+      - "5602:5601"
+    depends_on:
+      opensearch:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:5601/api/status >/dev/null || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - zerotrust
+    restart: unless-stopped
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # Uptime Kuma: synthetic uptime checks + status pages
+  # ─────────────────────────────────────────────────────────────────────────
+  uptime-kuma:
+    image: louislam/uptime-kuma:1
+    container_name: zerotrust-uptime-kuma
+    ports:
+      - "3002:3001"
+    volumes:
+      - uptime_kuma_data:/app/data
+    networks:
+      - zerotrust
+    restart: unless-stopped
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # GlitchTip: self-hosted Sentry-compatible error tracking
+  # Set SENTRY_DSN to the project DSN shown in the GlitchTip UI.
+  # ─────────────────────────────────────────────────────────────────────────
+  glitchtip-postgres:
+    image: postgres:16-alpine
+    container_name: zerotrust-glitchtip-postgres
+    environment:
+      POSTGRES_USER: glitchtip
+      POSTGRES_PASSWORD: ${GLITCHTIP_POSTGRES_PASSWORD:-glitchtip}
+      POSTGRES_DB: glitchtip
+    volumes:
+      - glitchtip_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U glitchtip -d glitchtip"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - zerotrust
+    restart: unless-stopped
+
+  glitchtip-redis:
+    image: redis:7-alpine
+    container_name: zerotrust-glitchtip-redis
+    command: redis-server --appendonly yes
+    volumes:
+      - glitchtip_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - zerotrust
+    restart: unless-stopped
+
+  glitchtip-migrate:
+    image: glitchtip/glitchtip:6
+    container_name: zerotrust-glitchtip-migrate
+    command: ./bin/run-migrate.sh
+    environment:
+      DATABASE_URL: postgres://glitchtip:${GLITCHTIP_POSTGRES_PASSWORD:-glitchtip}@glitchtip-postgres:5432/glitchtip
+      SECRET_KEY: ${GLITCHTIP_SECRET_KEY:-change-me-generate-with-openssl-rand-hex-32}
+      GLITCHTIP_DOMAIN: ${GLITCHTIP_DOMAIN:-http://localhost:8100}
+      DEFAULT_FROM_EMAIL: ${GLITCHTIP_DEFAULT_FROM_EMAIL:-noreply@zerotrust.local}
+      EMAIL_BACKEND: django.core.mail.backends.console.EmailBackend
+      REDIS_URL: redis://glitchtip-redis:6379/0
+    depends_on:
+      glitchtip-postgres:
+        condition: service_healthy
+      glitchtip-redis:
+        condition: service_healthy
+    networks:
+      - zerotrust
+    restart: "no"
+
+  glitchtip-web:
+    image: glitchtip/glitchtip:6
+    container_name: zerotrust-glitchtip-web
+    command: ./bin/run-web.sh
+    ports:
+      - "8100:8000"
+    environment:
+      DATABASE_URL: postgres://glitchtip:${GLITCHTIP_POSTGRES_PASSWORD:-glitchtip}@glitchtip-postgres:5432/glitchtip
+      SECRET_KEY: ${GLITCHTIP_SECRET_KEY:-change-me-generate-with-openssl-rand-hex-32}
+      GLITCHTIP_DOMAIN: ${GLITCHTIP_DOMAIN:-http://localhost:8100}
+      DEFAULT_FROM_EMAIL: ${GLITCHTIP_DEFAULT_FROM_EMAIL:-noreply@zerotrust.local}
+      EMAIL_BACKEND: django.core.mail.backends.console.EmailBackend
+      REDIS_URL: redis://glitchtip-redis:6379/0
+      ENABLE_USER_REGISTRATION: ${GLITCHTIP_ENABLE_USER_REGISTRATION:-true}
+      ENABLE_ORGANIZATION_CREATION: ${GLITCHTIP_ENABLE_ORGANIZATION_CREATION:-true}
+    volumes:
+      - glitchtip_uploads:/code/uploads
+    depends_on:
+      glitchtip-migrate:
+        condition: service_completed_successfully
+      glitchtip-postgres:
+        condition: service_healthy
+      glitchtip-redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8000 >/dev/null || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - zerotrust
+    restart: unless-stopped
+
+  glitchtip-worker:
+    image: glitchtip/glitchtip:6
+    container_name: zerotrust-glitchtip-worker
+    command: ./bin/run-worker.sh
+    environment:
+      DATABASE_URL: postgres://glitchtip:${GLITCHTIP_POSTGRES_PASSWORD:-glitchtip}@glitchtip-postgres:5432/glitchtip
+      SECRET_KEY: ${GLITCHTIP_SECRET_KEY:-change-me-generate-with-openssl-rand-hex-32}
+      GLITCHTIP_DOMAIN: ${GLITCHTIP_DOMAIN:-http://localhost:8100}
+      DEFAULT_FROM_EMAIL: ${GLITCHTIP_DEFAULT_FROM_EMAIL:-noreply@zerotrust.local}
+      EMAIL_BACKEND: django.core.mail.backends.console.EmailBackend
+      REDIS_URL: redis://glitchtip-redis:6379/0
+    volumes:
+      - glitchtip_uploads:/code/uploads
+    depends_on:
+      glitchtip-migrate:
+        condition: service_completed_successfully
+      glitchtip-postgres:
+        condition: service_healthy
+      glitchtip-redis:
+        condition: service_healthy
+    networks:
+      - zerotrust
+    restart: unless-stopped
+
+networks:
+  zerotrust:
+    driver: bridge
+
+volumes:
+  opensearch_data:
+    driver: local
+  uptime_kuma_data:
+    driver: local
+  glitchtip_postgres_data:
+    driver: local
+  glitchtip_redis_data:
+    driver: local
+  glitchtip_uploads:
+    driver: local
