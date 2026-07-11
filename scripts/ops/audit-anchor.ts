@@ -10,8 +10,8 @@
  *      AUDIT_ANCHOR_ENVIRONMENT (default NODE_ENV)
  */
 import "dotenv/config";
-import { runAuditAnchor } from "../src/audit/anchor";
-import { closeDatabase, initializeDatabase } from "../src/db";
+import { runAuditAnchor } from "../../src/audit/anchor";
+import { closeDatabase, initializeDatabase } from "../../src/db";
 
 process.env.AUDIT_ANCHOR_ENABLED = "true";
 
