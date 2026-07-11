@@ -17,6 +17,11 @@ rule_files:
 # `METRICS_AUTH_TOKEN` on the API), and mount it in compose — see
 # `docs/deployment.md` § Metrics auth verification (OPS-1).
 scrape_configs:
+  - job_name: prometheus
+    static_configs:
+      - targets:
+          - localhost:9090
+
   - job_name: zerotrust-api
     metrics_path: /metrics
     # authorization:

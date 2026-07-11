@@ -1,0 +1,51 @@
+# Production hardening overlay for docker-compose.platform.yml
+#
+# Merge after the base platform file (never use dev defaults on the public internet):
+#   export OPENSEARCH_ADMIN_PASSWORD='…'   # min 8 chars, upper/lower/digit/special
+#   export GRAFANA_ADMIN_PASSWORD='…'      # if also running observability prod overlay
+#   export GLITCHTIP_SECRET_KEY="$(openssl rand -hex 32)"
+#   export GLITCHTIP_POSTGRES_PASSWORD='…'
+#   docker compose \
+#     -f docker-compose.yml \
+#     -f docker-compose.platform.yml \
+#     -f docker-compose.platform.prod.example.yml \
+#     up -d
+#
+# OpenSearch: security plugin enabled (HTTP on the internal Docker network).
+# Terminate TLS at your reverse proxy before exposing :9201 / :5602 publicly.
+# See docs/infra/README.md § Production hardening.
+
+services:
+  opensearch:
+    environment:
+      - discovery.type=single-node
+      - DISABLE_SECURITY_PLUGIN=false
+      - OPENSEARCH_INITIAL_ADMIN_PASSWORD=${OPENSEARCH_ADMIN_PASSWORD:?Set OPENSEARCH_ADMIN_PASSWORD}
+      - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl -fsS -u admin:${OPENSEARCH_ADMIN_PASSWORD} http://localhost:9200 >/dev/null || exit 1",
+        ]
+
+  opensearch-dashboards:
+    environment:
+      - OPENSEARCH_HOSTS=["https://opensearch:9200"]
+      - DISABLE_SECURITY_DASHBOARDS_PLUGIN=false
+      - OPENSEARCH_USERNAME=admin
+      - OPENSEARCH_PASSWORD=${OPENSEARCH_ADMIN_PASSWORD:?Set OPENSEARCH_ADMIN_PASSWORD}
+
+  glitchtip-web:
+    environment:
+      SECRET_KEY: ${GLITCHTIP_SECRET_KEY:?Set GLITCHTIP_SECRET_KEY — openssl rand -hex 32}
+      ENABLE_USER_REGISTRATION: "false"
+      ENABLE_ORGANIZATION_CREATION: "false"
+
+  glitchtip-worker:
+    environment:
+      SECRET_KEY: ${GLITCHTIP_SECRET_KEY:?Set GLITCHTIP_SECRET_KEY — openssl rand -hex 32}
+
+  glitchtip-migrate:
+    environment:
+      SECRET_KEY: ${GLITCHTIP_SECRET_KEY:?Set GLITCHTIP_SECRET_KEY — openssl rand -hex 32}

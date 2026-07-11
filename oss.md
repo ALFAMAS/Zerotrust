@@ -69,7 +69,7 @@ Pick a minimal subset first (metrics + dashboards + tracing + uptime + analytics
 #### PostHog (self-hosted)
 - **Description**: Product analytics + event capture + feature flags (heavier than Umami).
 - **Why for this template**: If you want funnels, cohorts, and event-based retention, PostHog is the OSS workhorse.
-- **Integration notes**: Official hobby deploy via `./scripts/ops/posthog-hobby.sh` (see [`docs/infra/README.md`](./docs/infra/README.md)). Load the snippet from `packages/ui/src/components/AnalyticsScript.tsx` (consent gate). Prefer server-to-server event ingestion for sensitive events; do not send secrets/tokens in URLs.
+- **Integration notes**: Official hobby deploy via `./scripts/ops/posthog-hobby.sh` (see [`docs/infra/README.md`](./docs/infra/README.md)). **Separate from zerotrust compose** — plan for **~16 GB RAM** and **~30 GB disk**. Load the snippet from `packages/ui/src/components/AnalyticsScript.tsx` (consent gate). Prefer server-to-server event ingestion for sensitive events; do not send secrets/tokens in URLs.
 - **Effort**: **Medium**
 
 ### Uptime & status
@@ -91,7 +91,7 @@ Pick a minimal subset first (metrics + dashboards + tracing + uptime + analytics
 #### HashiCorp Vault
 - **Description**: Central secret storage with audit trails and short-lived credentials.
 - **Why for this template**: zerotrust has many operational secrets (DB creds, `TOKEN_SECRET_HEX`, `CSFLE_MASTER_KEY_HEX`, SMTP creds, `METRICS_AUTH_TOKEN`, etc.); Vault reduces “secret sprawl”.
-- **Integration notes**: Start by moving the highest-impact secrets from `.env` to Vault and inject them at runtime (CI/deploy). See [`docs/comparisons/secrets-infisical-vs-vault.md`](./docs/comparisons/secrets-infisical-vs-vault.md) for when Vault beats Infisical for this stack.
+- **Integration notes**: Local dev via `docker compose -f docker-compose.yml -f docker-compose.platform.yml up -d vault` (http://localhost:8200). Move high-impact secrets from `.env` to KV and inject at deploy. See [`docs/infra/README.md`](./docs/infra/README.md) § HashiCorp Vault and [`docs/comparisons/secrets-infisical-vs-vault.md`](./docs/comparisons/secrets-infisical-vs-vault.md).
 - **Effort**: **Medium**
 
 #### Infisical (OSS secrets manager)
@@ -129,7 +129,9 @@ These tools are common, but are usually a mismatch (or redundant) for this start
 Compose overlays and operator docs:
 
 - **`docker-compose.platform.yml`** — OpenSearch, Uptime Kuma, GlitchTip
+- **`docker-compose.platform.prod.example.yml`** — production hardening for platform overlay
 - **`docker-compose.observability.yml`** — Prometheus, Alertmanager, Grafana, Loki, Tempo
+- **`docker-compose.observability.prod.example.yml`** — Grafana password + metrics token mount
 - **`scripts/ops/posthog-hobby.sh`** — official PostHog hobby deploy
 - **`docs/infra/README.md`** — ports, integration steps, production notes
 - **`docs/comparisons/secrets-infisical-vs-vault.md`** — secrets manager comparison

@@ -7,8 +7,12 @@
 #   Loki:         http://localhost:3100
 #   Tempo:        http://localhost:3200  (OTLP HTTP on :4318)
 #
-# Ship container logs to Loki (Linux / Docker Desktop with socket access):
+# Ship container logs to Loki (Linux / Docker Desktop WSL2 backend with socket access):
 #   docker compose -f docker-compose.yml -f docker-compose.observability.yml --profile logs up -d promtail
+#
+# Production Grafana (require strong admin password — no default admin/admin):
+#   docker compose -f docker-compose.yml -f docker-compose.observability.yml \
+#     -f docker-compose.observability.prod.example.yml up -d
 #
 # Point zerotrust traces at Tempo instead of Jaeger:
 #   OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318 bun dev

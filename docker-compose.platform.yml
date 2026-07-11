@@ -7,15 +7,20 @@
 #   docker compose -f docker-compose.yml -f docker-compose.platform.yml up -d opensearch opensearch-dashboards
 #   docker compose -f docker-compose.yml -f docker-compose.platform.yml up -d uptime-kuma
 #   docker compose -f docker-compose.yml -f docker-compose.platform.yml up -d glitchtip-web glitchtip-worker
+#   docker compose -f docker-compose.yml -f docker-compose.platform.yml up -d vault
 #
 # PostHog is started separately via the official hobby deploy script — see
 # `scripts/ops/posthog-hobby.sh` and `docs/infra/README.md` § PostHog.
+#
+# Production hardening: merge `docker-compose.platform.prod.example.yml` after this
+# file (OpenSearch security plugin, GlitchTip registration lockdown).
 #
 # Ports (host):
 #   OpenSearch API          http://localhost:9201
 #   OpenSearch Dashboards   http://localhost:5602
 #   Uptime Kuma             http://localhost:3002
 #   GlitchTip               http://localhost:8100
+#   HashiCorp Vault         http://localhost:8200
 
 services:
   # ─────────────────────────────────────────────────────────────────────────
@@ -152,6 +157,7 @@ services:
       REDIS_URL: redis://glitchtip-redis:6379/0
       ENABLE_USER_REGISTRATION: ${GLITCHTIP_ENABLE_USER_REGISTRATION:-true}
       ENABLE_ORGANIZATION_CREATION: ${GLITCHTIP_ENABLE_ORGANIZATION_CREATION:-true}
+      # Production: set both to false via docker-compose.platform.prod.example.yml
     volumes:
       - glitchtip_uploads:/code/uploads
     depends_on:
@@ -191,6 +197,32 @@ services:
         condition: service_healthy
       glitchtip-redis:
         condition: service_healthy
+    networks:
+      - zerotrust
+    restart: unless-stopped
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # HashiCorp Vault: secrets management (local dev mode — in-memory, auto-unsealed)
+  # NEVER use dev mode in production. See docs/infra/README.md § HashiCorp Vault.
+  # ─────────────────────────────────────────────────────────────────────────
+  vault:
+    image: hashicorp/vault:1.17
+    container_name: zerotrust-vault
+    cap_add:
+      - IPC_LOCK
+    ports:
+      - "8200:8200"
+    environment:
+      VAULT_DEV_ROOT_TOKEN_ID: ${VAULT_DEV_ROOT_TOKEN:-dev-root-token}
+      VAULT_DEV_LISTEN_ADDRESS: 0.0.0.0:8200
+      VAULT_ADDR: http://127.0.0.1:8200
+    command: server -dev
+    healthcheck:
+      test: ["CMD", "vault", "status", "-address=http://127.0.0.1:8200"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
     networks:
       - zerotrust
     restart: unless-stopped

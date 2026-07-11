@@ -1,0 +1,28 @@
+# Production hardening overlay for docker-compose.observability.yml
+#
+#   export GRAFANA_ADMIN_PASSWORD='…'    # required — do not use admin/admin
+#   export METRICS_AUTH_TOKEN='…'        # same value as on the zerotrust API
+#   cp monitoring/metrics-token.example monitoring/metrics-token
+#   # edit monitoring/metrics-token and uncomment authorization in monitoring/prometheus.yml
+#   docker compose \
+#     -f docker-compose.yml \
+#     -f docker-compose.observability.yml \
+#     -f docker-compose.observability.prod.example.yml \
+#     up -d
+#
+# See docs/infra/README.md § Production hardening and docs/deployment.md § OPS-1.
+
+services:
+  grafana:
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?Set GRAFANA_ADMIN_PASSWORD — do not use the default admin password in production}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_AUTH_ANONYMOUS_ENABLED: "false"
+
+  prometheus:
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./monitoring/alerts.yml:/etc/prometheus/alerts.yml:ro
+      - ./monitoring/metrics-token:/etc/prometheus/metrics-token:ro
+      - prometheus_data:/prometheus

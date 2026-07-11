@@ -285,10 +285,91 @@ Rationale:
 
 ---
 
-## 9. References
+## 9. Using Vault with zerotrust
+
+This repo ships a **local dev-mode Vault** in `docker-compose.platform.yml` and
+operator steps in [`docs/infra/README.md`](../infra/README.md) § HashiCorp Vault.
+
+### Quick start
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.platform.yml up -d vault
+export VAULT_ADDR=http://localhost:8200
+export VAULT_TOKEN=dev-root-token   # or VAULT_DEV_ROOT_TOKEN from .env
+vault secrets enable -path=zerotrust kv-v2
+```
+
+Default URL: **http://localhost:8200** (UI at `/ui`).
+
+### Path layout
+
+Mirror `.env.example` keys under KV v2:
+
+| Vault path | Maps to |
+| --- | --- |
+| `zerotrust/dev/api` | Root `.env` (API + worker) |
+| `zerotrust/dev/ui` | `packages/ui/.env.local` |
+| `zerotrust/staging/api` | Staging deploy env |
+| `zerotrust/prod/api` | Production API secrets |
+
+Example:
+
+```bash
+vault kv put zerotrust/prod/api \
+  TOKEN_SECRET_HEX=<64-hex> \
+  CSFLE_MASTER_KEY_HEX=<64-hex> \
+  DATABASE_URL=postgresql://... \
+  METRICS_AUTH_TOKEN=<openssl rand -hex 32>
+```
+
+### How zerotrust consumes secrets
+
+zerotrust loads config from **process environment** (`src/config/env.ts`). No
+Vault SDK is required initially:
+
+1. **Deploy-time injection** — CI or a shell wrapper reads KV and exports env vars
+   before `bun dev`, PM2, or `docker compose up`.
+2. **Vault Agent** — renders `.env` or a systemd `EnvironmentFile` from a template
+   (recommended for production VMs).
+3. **Kubernetes** — Vault Agent sidecar or CSI driver injects files/env into pods.
+
+```bash
+# One-shot local export
+vault kv get -format=json zerotrust/dev/api \
+  | jq -r '.data.data | to_entries[] | "\(.key)=\(.value)"' > .env.vault
+set -a && source .env.vault && set +a && bun dev
+```
+
+Optional client env vars (documented in `.env.example`): `VAULT_ADDR`, `VAULT_TOKEN`,
+`VAULT_KV_MOUNT`, `VAULT_KV_PATH` — for deploy scripts, not the running API.
+
+### Init / unseal (production)
+
+The compose overlay uses **dev mode** (in-memory, auto-unsealed). Production Vault
+requires:
+
+- `vault operator init` → store Shamir unseal keys + root token offline
+- `vault operator unseal` after every restart (unless KMS auto-unseal)
+- TLS, audit devices, and AppRole/OIDC instead of long-lived root tokens
+
+See [`docs/infra/README.md`](../infra/README.md) for the full production checklist.
+
+### When Vault adds value beyond Infisical here
+
+- Short-lived **Postgres credentials** via the database secrets engine
+- **Transit** for encryption-as-a-service (key custody separate from app)
+- **PKI** for internal mTLS between platform services
+- Existing Vault Enterprise with namespaces, DR replication, and auditor familiarity
+
+For most zerotrust VPS/compose deploys, Infisical remains the lower-ops default
+(§ 8). Use Vault when one of the bullets above is a hard requirement.
+
+---
+
+## 10. References
 
 - Infisical docs: https://infisical.com/docs
 - HashiCorp Vault docs: https://developer.hashicorp.com/vault/docs
 - zerotrust env inventory: [`.env.example`](../../.env.example)
-- Platform stack operator guide: [`docs/infra/README.md`](../infra/README.md)
+- Platform stack operator guide: [`docs/infra/README.md`](../infra/README.md) (§ HashiCorp Vault)
 - OSS tooling shortlist: [`oss.md`](../../oss.md)
