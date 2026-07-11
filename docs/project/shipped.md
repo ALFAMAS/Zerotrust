@@ -662,6 +662,20 @@ Cross-audit of `docs/security.md` §0–§10. **SEC-27** shipped 2026-07-08 (VPS
 - **Paths:** `drizzle/meta/_journal.json`, `scripts/check-drizzle-journal.ts`, `.github/workflows/ci.yml`, `package.json`
 - **Verification (2026-07-09):** `bun run migrations:journal:check` → **pass**; `bun run migrations:check` → **pass**; `bun run lint` → **pass**.
 
+### MIG-3 — Baseline `db:push` databases for `db:migrate` (shipped)
+
+- **Problem:** Databases first synced with `db:push` have application tables/columns but lack Postgres RLS policies (`0035`/`0038`), audit-immutability triggers (`0031`), usage-counter RLS (`0036`), and `drizzle.__drizzle_migrations` journal rows — so switching to `db:migrate` would either skip security DDL or attempt to re-apply it.
+- **Fix:** Added operator script `db:baseline-push` that applies the four push-skipped SQL migrations idempotently, inserts missing journal rows from `drizzle/meta/_journal.json` (SHA-256 hashes matching drizzle-orm), verifies `pg_policies` on org-scoped tables and audit trigger presence, and supports `--dry-run`. Documented the workflow in `docs/deployment.md`.
+- **Paths:** `scripts/ops/db-baseline-push.ts`, `scripts/ops/db-baseline-push.lib.ts`, `package.json`, `docs/deployment.md`
+- **Verification (2026-07-12):** `bun run db:baseline-push -- --dry-run` (logic/unit) → **pass**; journal baseline helper tests → **pass**; `bun run lint` → **pass**.
+
+### MIG-4 — Schema↔migrations drift guard in CI (shipped)
+
+- **Problem:** Schema changes could ship in TypeScript without a matching `drizzle/*.sql` migration (root cause of `0041_sync_code_schema_drift` repair migration).
+- **Fix:** Added `migrations:schema:check` — runs `drizzle-kit generate`, fails on a non-empty `git diff` under `drizzle/`, restores the tree afterward. Wired into CI next to `migrations:journal:check`.
+- **Paths:** `scripts/ci/check-drizzle-schema-drift.ts`, `.github/workflows/ci.yml`, `package.json`, `src/__tests__/drizzleMigrations.script.test.ts`
+- **Verification (2026-07-12):** `bun run migrations:schema:check` → **pass**; `bun run migrations:journal:check` → **pass**; vitest schema-drift test → **pass**; `bun run lint` → **pass**.
+
 ### TEST-1 — Document test surfaces (shipped)
 
 - **Problem:** Tests live in four places (API vitest, UI happy-dom, Playwright e2e, k6) with no single index describing what each covers or which CI job runs it.

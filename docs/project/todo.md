@@ -25,14 +25,8 @@ _All items from the 2026-07-09 audit backlog are shipped — see [`shipped.md`](
 - [x] **MIG-2** — Migration chain runs green on a fresh DB and is `pg_dump`-equivalent to the code
       schema: 0017/0020 made idempotent; `0041_sync_code_schema_drift` adds columns that shipped in
       code without migrations and drops dropped-feature leftovers. Shipped 2026-07-11.
-- [ ] **MIG-3 (P1, operator)** — Existing databases provisioned via `db:push` lack the RLS policies
-      (0035/0038) and audit-immutability triggers (0031) and have no `__drizzle_migrations`
-      baseline. Before switching such an environment to `db:migrate`, apply 0031/0035/0036/0038
-      manually and baseline the journal table; verify with `SELECT * FROM pg_policies`.
-- [ ] **MIG-4 (P2)** — New schema changes MUST ship with a generated migration
-      (`bun run db:generate`) in the same PR; consider a CI guard that fails when
-      `drizzle-kit generate` against the committed journal produces a non-empty diff
-      (schema ↔ migrations drift, the root cause behind 0041).
+
+_All MIG-* items from the 2026-07-11 re-audit are shipped — see [`shipped.md`](./shipped.md) § Migration integrity._
 
 ## Deliberate toolchain migrations (unblock the pinned majors)
 

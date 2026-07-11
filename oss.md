@@ -102,6 +102,12 @@ Pick a minimal subset first (metrics + dashboards + tracing + uptime + analytics
 
 ### Search & audit (only if you need it)
 
+#### NocoDB
+- **Description**: Spreadsheet/Airtable-style UI over SQL databases (PostgreSQL, MySQL, etc.).
+- **Why for this template**: Internal ops and support teams can browse/query zerotrust Postgres without writing SQL or building one-off admin screens.
+- **Integration notes**: Ships in `docker-compose.platform.yml` on `:8080` with a **dedicated metadata Postgres** (`nocodb-postgres`). Connect to the app DB via the UI using the read-only role in `scripts/ops/setup-nocodb-readonly-role.sql` — **not** the app `DATABASE_URL`. Operator-only; no API/UI wiring. See [`docs/infra/README.md`](./docs/infra/README.md) § NocoDB.
+- **Effort**: **Low** (compose) · **Medium** (safe prod hardening + view curation)
+
 #### OpenSearch (alternative to Elasticsearch)
 - **Description**: Elasticsearch-compatible search/log/audit stack (community fork).
 - **Why for this template**: If you want a self-hosted ELK-like workflow but prefer an OSS-leaning distribution, OpenSearch is often the default choice.
@@ -128,7 +134,7 @@ These tools are common, but are usually a mismatch (or redundant) for this start
 
 Compose overlays and operator docs:
 
-- **`docker-compose.platform.yml`** — OpenSearch, Uptime Kuma, GlitchTip
+- **`docker-compose.platform.yml`** — OpenSearch, Uptime Kuma, GlitchTip, NocoDB, Vault
 - **`docker-compose.platform.prod.example.yml`** — production hardening for platform overlay
 - **`docker-compose.observability.yml`** — Prometheus, Alertmanager, Grafana, Loki, Tempo
 - **`docker-compose.observability.prod.example.yml`** — Grafana password + metrics token mount

@@ -81,6 +81,8 @@ jobs:
       - run: bun run test --reporter=verbose
       - name: Drizzle journal ↔ migration files drift guard (MIG-1)
         run: bun run migrations:journal:check
+      - name: Drizzle schema ↔ migrations drift guard (MIG-4)
+        run: bun run migrations:schema:check
       - name: Destructive migration DDL gate (P3.5)
         run: bun run migrations:check
       - name: UI component tests (happy-dom + Testing Library)

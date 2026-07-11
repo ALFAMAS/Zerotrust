@@ -639,6 +639,26 @@ going internet-facing:
 Kubernetes: the migrate Job should use `DATABASE_MIGRATOR_URL`; Deployments use
 `DATABASE_URL`. See `docs/reference-architecture.md` § Production security defaults.
 
+### Baseline `db:push` databases for `db:migrate` (MIG-3)
+
+Environments that were first provisioned with `bun run db:push` have the application
+schema but **not** the Postgres RLS policies, audit-immutability triggers, or
+`drizzle.__drizzle_migrations` journal rows that `db:migrate` relies on. Before
+switching such a database to the migrate deploy path:
+
+1. **Backup and verify** — `bun run db:backup` (see
+   [backup/restore runbook](./compliance/backup-restore-runbook.md)).
+2. **Preview** — `bun run db:baseline-push -- --dry-run` with `DATABASE_URL` pointed
+   at the target (migrator/superuser credentials).
+3. **Apply** — `bun run db:baseline-push` (applies migrations `0031`, `0035`, `0036`,
+   `0038`, backfills missing `drizzle.__drizzle_migrations` rows from
+   `drizzle/meta/_journal.json`, verifies RLS + audit triggers).
+4. **Confirm** — `SELECT * FROM pg_policies WHERE schemaname = 'public';` shows policies
+   on org-scoped tables; `bun run db:migrate` on staging should report nothing pending.
+
+Fresh databases should use `bun run db:migrate` from the start — this baseline step is
+only for legacy `db:push` environments.
+
 ---
 
 ## Read replica routing

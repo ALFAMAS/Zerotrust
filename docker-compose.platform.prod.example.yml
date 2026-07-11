@@ -5,6 +5,9 @@
 #   export GRAFANA_ADMIN_PASSWORD='…'      # if also running observability prod overlay
 #   export GLITCHTIP_SECRET_KEY="$(openssl rand -hex 32)"
 #   export GLITCHTIP_POSTGRES_PASSWORD='…'
+#   export NOCODB_JWT_SECRET="$(openssl rand -hex 32)"
+#   export NOCODB_POSTGRES_PASSWORD='…'
+#   export NOCODB_PUBLIC_URL='https://nocodb.internal.example.com'
 #   docker compose \
 #     -f docker-compose.yml \
 #     -f docker-compose.platform.yml \
@@ -49,3 +52,15 @@ services:
   glitchtip-migrate:
     environment:
       SECRET_KEY: ${GLITCHTIP_SECRET_KEY:?Set GLITCHTIP_SECRET_KEY — openssl rand -hex 32}
+
+  nocodb:
+    environment:
+      NC_AUTH_JWT_SECRET: ${NOCODB_JWT_SECRET:?Set NOCODB_JWT_SECRET — openssl rand -hex 32}
+      NC_INVITE_ONLY_SIGNUP: "true"
+      NC_DISABLE_PG_DATA_REFLECTION: "true"
+      NC_DISABLE_TELE: "true"
+      NC_PUBLIC_URL: ${NOCODB_PUBLIC_URL:?Set NOCODB_PUBLIC_URL — e.g. https://nocodb.internal.example.com}
+
+  nocodb-postgres:
+    environment:
+      POSTGRES_PASSWORD: ${NOCODB_POSTGRES_PASSWORD:?Set NOCODB_POSTGRES_PASSWORD}

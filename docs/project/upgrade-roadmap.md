@@ -17,7 +17,7 @@ live in [`todo.md`](./todo.md); this doc is the forward-looking menu.
 | # | Upgrade | Size | Why |
 | - | ------- | ---- | --- |
 | 1 | **Branch protection + merge queue on `main`** | 🟢 | Three CI-breaking direct pushes landed in one week (unmigrated Tailwind v4, unmigrated TS7, stale lockfile). Require the CI check before merge; direct pushes to `main` off. |
-| 2 | **Schema↔migrations drift guard in CI** (MIG-4) | 🟢 | Run `drizzle-kit generate` in CI and fail on a non-empty diff — prevents the "column shipped in code without a migration" class that `0041` had to repair. |
+| 2 | **Schema↔migrations drift guard in CI** (MIG-4) | ✅ shipped | Run `drizzle-kit generate` in CI and fail on a non-empty diff — prevents the "column shipped in code without a migration" class that `0041` had to repair. |
 | 3 | **Dependabot majors policy** | 🟢 | Keep grouped minor/patch bumps auto-mergeable; route majors to a `needs-migration` label instead of ignores per-package (today: tailwindcss + typescript ignored ad-hoc). |
 | 4 | **Per-PR preview environments** | 🟡 | Compose stack per PR (Fly.io/Railway/Coolify or a k8s namespace) so UI changes are reviewable without local setup. |
 

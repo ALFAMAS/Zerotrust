@@ -97,14 +97,15 @@ policy rejection, concurrent-session eviction, suspended/deleted accounts).
 
 | Metric | Current | Target | Trend |
 |---|---|---|---|
-| Pending (unapplied) migrations | 0 (latest: `0040_session_active_org_id`) | 0 | ✅ |
+| Pending (unapplied) migrations | 0 (latest: `0041_sync_code_schema_drift`) | 0 | ✅ |
 | Irreversible migrations in last quarter | 5 (`0020`–`0024`, DROP CASCADE) — gated by `.destructive-migrations.json` + CI | 0 new without allowlist | ✅ |
 | Migration applied with rollback tested | 2026-07-03 restore drill ([evidence](./compliance/evidence/2026/Q3/backup-restore-drills/2026-07-03-restore-drill.md)) | All destructive | ✅ |
-| `db:generate` drift (`drizzle/` vs schema) | 0 (verified locally 2026-07-03) | No diff | ✅ |
+| `db:generate` drift (`drizzle/` vs schema) | 0 — guarded by `migrations:schema:check` (MIG-4, verified 2026-07-12) | No diff | ✅ |
 
 **Notes:** Migrations `0020`–`0024` are irreversible `DROP … CASCADE`, allowlisted in
 `.destructive-migrations.json`. New destructive DDL is blocked by `bun run migrations:check`
-(CI + pre-commit). Total migrations: 41 (`0000`–`0040`).
+(CI + pre-commit). Schema↔migration drift is blocked by `bun run migrations:schema:check` (CI).
+Total migrations: 44 (`0000`–`0041`).
 
 ---
 

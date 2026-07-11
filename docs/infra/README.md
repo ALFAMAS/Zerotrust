@@ -1,8 +1,8 @@
 # Platform infrastructure stack
 
 Operator guide for optional self-hosted services that pair with zerotrust:
-OpenSearch, Uptime Kuma, PostHog, Grafana (full observability), GlitchTip, and
-HashiCorp Vault (secrets).
+OpenSearch, Uptime Kuma, PostHog, Grafana (full observability), GlitchTip, NocoDB,
+and HashiCorp Vault (secrets).
 
 For the broader OSS shortlist and integration rationale, see [`oss.md`](../../oss.md).
 
@@ -71,6 +71,7 @@ docker compose -f docker-compose.yml -f docker-compose.observability.yml -f dock
 | **GlitchTip** | http://localhost:8100 | `docker-compose.platform.yml` |
 | **PostHog** | http://localhost (hobby default) | `scripts/ops/posthog-hobby.sh` |
 | **HashiCorp Vault** | http://localhost:8200 | `docker-compose.platform.yml` |
+| **NocoDB** | http://localhost:8080 | `docker-compose.platform.yml` |
 | Jaeger (alternative traces) | http://localhost:16686 | `docker-compose.tracing.yml` |
 
 ---
@@ -408,6 +409,75 @@ lease expiry, or treat this as a future `src/config` enhancement.
 
 ---
 
+## NocoDB (operator spreadsheet UI)
+
+Self-hosted Airtable-style UI over SQL databases. Useful for internal ops,
+support triage, and ad-hoc reporting. **Not integrated with zerotrust app code** —
+there is no API route, UI link, or SSO bridge; operators use it as standalone
+tooling on the Docker network.
+
+### Architecture
+
+| Database | Purpose |
+| --- | --- |
+| **`nocodb-postgres`** (compose service) | NocoDB metadata only (bases, views, users) — same pattern as GlitchTip's dedicated Postgres |
+| **zerotrust Postgres** (optional external base) | Read-only browsing of app tables via UI — use a limited DB user, never `zerotrust` superuser or migrator creds |
+
+NocoDB bypasses zerotrust authorization, session org context, and CSFLE field
+decryption. Treat it like direct `psql` access with a spreadsheet UI.
+
+### Start
+
+```bash
+export NOCODB_JWT_SECRET="$(openssl rand -hex 32)"   # optional in dev; required in prod overlay
+docker compose -f docker-compose.yml -f docker-compose.platform.yml up -d nocodb
+```
+
+Open http://localhost:8080 and complete first-run admin setup (dev) or sign in
+with credentials from env (prod overlay).
+
+**Production:** merge `docker-compose.platform.prod.example.yml` — requires
+`NOCODB_JWT_SECRET`, `NOCODB_POSTGRES_PASSWORD`, and `NOCODB_PUBLIC_URL`;
+enables invite-only signup and disables Postgres schema reflection in external
+bases.
+
+### Connect to zerotrust Postgres (read-only)
+
+1. Create the read-only role (once per database):
+
+   ```bash
+   psql -U zerotrust -d zerotrust -f scripts/ops/setup-nocodb-readonly-role.sql
+   ```
+
+   Replace the placeholder password in the SQL file (or `ALTER USER`) before
+   production use.
+
+2. In the NocoDB UI: **Create base → Connect to external database → PostgreSQL**
+   - Host: `postgres` (Docker network) or `host.docker.internal` / host IP from outside compose
+   - Port: `5432`
+   - Database: `zerotrust`
+   - User: `zerotrust_nocodb_user`
+   - Password: value set in the SQL script
+
+3. Prefer **views** that omit secrets (tokens, password hashes, CSFLE ciphertext)
+   over exposing raw `users`, `sessions`, or `oauth_*` tables.
+
+### Security constraints
+
+| Risk | Mitigation |
+| --- | --- |
+| **CWE-532** secrets in URLs/logs | Do not embed app `DATABASE_URL` in compose; configure external base in UI with the limited user |
+| **Tenant isolation bypass** | NocoDB does not set org session vars — RLS may block rows or policies may not match app behavior; use sanitized views or a replica |
+| **Write corruption** | Default SQL script grants **SELECT only**; avoid granting INSERT/UPDATE/DELETE unless you accept schema drift outside Drizzle migrations |
+| **Schema pollution** | Set `NC_DISABLE_PG_DATA_REFLECTION=true` (prod overlay) so NocoDB does not create reflection schemas in app Postgres |
+| **Public exposure** | Do not publish `:8080` without TLS + auth; use invite-only signup and VPN/reverse-proxy in production |
+
+### zerotrust integration
+
+**None.** No env vars in the API or UI. Operators only.
+
+---
+
 ## Production hardening
 
 Use the example prod overlays — they fail fast when required secrets are missing
@@ -419,6 +489,9 @@ instead of falling back to dev defaults.
 export OPENSEARCH_ADMIN_PASSWORD='…'   # OpenSearch admin (security plugin on)
 export GLITCHTIP_SECRET_KEY="$(openssl rand -hex 32)"
 export GLITCHTIP_POSTGRES_PASSWORD='…'
+export NOCODB_JWT_SECRET="$(openssl rand -hex 32)"
+export NOCODB_POSTGRES_PASSWORD='…'
+export NOCODB_PUBLIC_URL='https://nocodb.internal.example.com'
 
 docker compose \
   -f docker-compose.yml \
@@ -433,6 +506,7 @@ docker compose \
 | **GlitchTip** | Open registration | `ENABLE_USER_REGISTRATION=false`, `ENABLE_ORGANIZATION_CREATION=false`; strong `GLITCHTIP_SECRET_KEY` |
 | **Uptime Kuma** | No auth on first setup | Create admin account immediately |
 | **Vault** | Dev mode, default root token | HA Raft + KMS auto-unseal, TLS, audit devices (not in compose) |
+| **NocoDB** | Open signup on first run | Invite-only signup, strong JWT secret, read-only external DB user, no public `:8080` |
 | **PostHog** | Hobby TLS via Caddy | Real domain, backup ClickHouse + Postgres; **separate host** if RAM-constrained |
 
 When OpenSearch security is enabled, point zerotrust at HTTPS with basic auth or
@@ -475,6 +549,7 @@ standard volume snapshot strategy (`docs/compliance/backup-restore-runbook.md`).
 | Uptime Kuma | No auth on first setup | Create admin account immediately |
 | PostHog | Hobby TLS via Caddy | Use real domain, backup ClickHouse + Postgres; ~16 GB RAM / ~30 GB disk |
 | Vault | Dev mode, default root token | HA Raft + KMS auto-unseal, TLS, audit devices |
+| NocoDB | Open signup on first run | Invite-only signup, read-only DB user, TLS + VPN |
 | `/metrics` | Open in dev | `METRICS_AUTH_TOKEN` required in production |
 
 ---
