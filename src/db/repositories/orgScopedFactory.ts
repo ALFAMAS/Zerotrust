@@ -23,3 +23,22 @@ export interface OrgScopedContext {
 export function createOrgScopedContext(orgId: string): OrgScopedContext {
   return { orgId: asScopedOrgId(orgId) };
 }
+
+/**
+ * Instantiate an org-scoped repository. The factory receives a validated org
+ * context and must include org predicates on every query.
+ */
+export function createOrgScopedRepository<T>(
+  orgId: string,
+  factory: (ctx: OrgScopedContext) => T
+): T {
+  return factory(createOrgScopedContext(orgId));
+}
+
+/** Require org context at repository construction (throws ORG_ID_REQUIRED). */
+export function requireOrgScopedContext(ctx: OrgScopedContext | undefined): OrgScopedContext {
+  if (!ctx?.orgId) {
+    throw new Error("ORG_ID_REQUIRED");
+  }
+  return ctx;
+}

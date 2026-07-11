@@ -345,6 +345,13 @@ Cross-audit of `docs/security.md` §0–§10. **SEC-27** shipped 2026-07-08 (VPS
 - ✅ **Onboarding checklist** — create org → invite → MFA → API key; server progress on `GET /auth/me` → `onboarding`.
 - ✅ **Admin analytics** — cohort retention, auth-method mix, anomaly session trends at `/admin/analytics`.
 
+## Security hardening (Tier 5 — shipped 2026-07-12)
+
+- ✅ **Orphan wiring (#21)** — `auth.apiKeyRotation` daily BullMQ job; device attestation + continuous eval opt-in via `DEVICE_ATTESTATION_ENABLED` / `CONTINUOUS_EVAL_ENABLED` (post-auth chain in `postAuthSecurity.ts`); knip ignores removed.
+- ✅ **Secrets manager (#22)** — `loadSecrets()` in `src/config/secretsLoader.ts` — Vault KV v2, AWS Secrets Manager (optional SDK), Doppler, or `env` default; called before `getConfig()` in bootstrap + worker.
+- ✅ **PKCS#11 HSM (#23)** — functional `PKCS11Provider` via optional `pkcs11js`; `KEY_PROVIDER=pkcs11` + `HW_KEY_PKCS11_LIB` / `HW_KEY_PKCS11_PIN`; SoftHSM test path in `docs/extending.md`.
+- ✅ **RLS + org repo factory (#24)** — migration `0043_tier5_rls_expansion.sql` on `org_feature_flags` + `org_scim_tokens`; `createOrgScopedRepository()` + `featureFlagsRepo` / `supportTicketsRepo` exemplars.
+
 ## Admin Panel
 
 - ✅ Stats dashboard — user count, active sessions, recent registrations

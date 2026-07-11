@@ -358,7 +358,8 @@ export const authMiddleware = createMiddleware<HonoEnv>(async (c, next) => {
       return c.json({ error: ErrorCodes.RATE_LIMIT_EXCEEDED, message: "Too many requests" }, 429);
     }
 
-    return next();
+    const { runPostAuthSecurity } = await import("./postAuthSecurity.js");
+    return runPostAuthSecurity(c, next);
   } catch (error) {
     if (error instanceof zerotrustError) {
       return c.json(

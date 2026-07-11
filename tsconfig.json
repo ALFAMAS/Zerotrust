@@ -42,6 +42,6 @@
       "@types": ["./src/shared/types"]
     }
   },
-  "include": ["src/**/*.ts", "plugins/**/*.ts"],
+  "include": ["src/**/*.ts", "src/**/*.d.ts", "plugins/**/*.ts"],
   "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts"]
 }

@@ -10,7 +10,11 @@ export default defineConfig({
     // instead (happy-dom + Testing Library) — this config stays environment:
     // "node" for the API suite and packages/ui's plain-logic .ts tests
     // (lib/*.test.ts), so it can't run DOM-rendering tests correctly.
-    include: ["src/**/*.{test,spec}.ts", "packages/ui/src/**/*.{test,spec}.ts", "packages/shared-types/src/**/*.test.ts"],
+    include: [
+      "src/**/*.{test,spec}.ts",
+      "packages/ui/src/**/*.{test,spec}.ts",
+      "packages/shared-types/src/**/*.test.ts",
+    ],
     exclude: ["node_modules", "dist"],
     coverage: {
       provider: "v8",

@@ -2,7 +2,7 @@ import { and, eq } from "drizzle-orm";
 import type { WebhookEndpoint, WebhookEventType } from "../../modules/webhooks/types";
 import { withOrgRls, withOrgRlsRead } from "../rls";
 import { webhookEndpointsTable } from "../schema";
-import { createOrgScopedContext } from "./orgScopedFactory";
+import { createOrgScopedRepository } from "./orgScopedFactory";
 
 type RetryPolicy = { maxRetries: number; backoffMs: number };
 
@@ -32,9 +32,7 @@ function fromRow(row: WebhookEndpointRow): WebhookEndpoint {
  * construction — every query includes an org predicate.
  */
 export function webhooksRepo(orgId: string) {
-  const { orgId: scopedOrgId } = createOrgScopedContext(orgId);
-
-  return {
+  return createOrgScopedRepository(orgId, ({ orgId: scopedOrgId }) => ({
     orgId: scopedOrgId,
 
     async listEndpoints(userId?: string): Promise<WebhookEndpoint[]> {
@@ -72,7 +70,7 @@ export function webhooksRepo(orgId: string) {
         return Boolean(row);
       });
     },
-  };
+  }));
 }
 
 /** Type helper for handlers that accept a scoped repo instance. */

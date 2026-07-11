@@ -11,9 +11,9 @@ import { auditLog, getLogger } from "../../logger";
 import { authMiddleware, requireEmailVerified } from "../../middleware/auth";
 import { sensitiveReverification } from "../../middleware/continuousVerification";
 import { orgRlsMiddleware } from "../../middleware/orgRls";
+import { recordStripeMeterEvent } from "../../services/billing/stripeMeter.service";
 import { getStripe } from "../../services/billing/stripeWebhookProcessor";
 import { getUsageSummary } from "../../services/billing/usage.service";
-import { recordStripeMeterEvent } from "../../services/billing/stripeMeter.service";
 import { internalError } from "../../shared/httpErrors";
 import type { HonoEnv } from "../../shared/types";
 

@@ -24,9 +24,7 @@ function todayKey(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
-function deriveOverall(
-  components: Record<string, StatusComponentState>
-): StatusSnapshot["status"] {
+function deriveOverall(components: Record<string, StatusComponentState>): StatusSnapshot["status"] {
   const values = Object.values(components);
   if (values.includes("down")) return "down";
   if (values.includes("degraded")) return "degraded";

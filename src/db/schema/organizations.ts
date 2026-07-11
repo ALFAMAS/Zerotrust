@@ -164,7 +164,10 @@ export const orgFeatureFlagsTable = pgTable(
     key: text("key").notNull(),
     enabled: boolean("enabled").notNull().default(false),
     rolloutPercent: integer("rollout_percent").notNull().default(100),
-    metadata: jsonb("metadata").$type<Record<string, unknown>>().notNull().default(sql`'{}'::jsonb`),
+    metadata: jsonb("metadata")
+      .$type<Record<string, unknown>>()
+      .notNull()
+      .default(sql`'{}'::jsonb`),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
   },

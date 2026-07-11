@@ -1,9 +1,9 @@
 "use client";
 
 import { Fingerprint, KeyRound, Shield } from "lucide-react";
-import { useAnalyticsQuery } from "@/lib/server-state/admin/analytics";
-import { ServerStateStatus } from "@/components/ServerStateStatus";
 import MetricCard from "@/components/admin/MetricCard";
+import { ServerStateStatus } from "@/components/ServerStateStatus";
+import { useAnalyticsQuery } from "@/lib/server-state/admin/analytics";
 
 export default function AdminAnalyticsPage() {
   const analyticsQuery = useAnalyticsQuery();
@@ -26,9 +26,21 @@ export default function AdminAnalyticsPage() {
       {data && (
         <>
           <div className="grid gap-4 sm:grid-cols-3">
-            <MetricCard icon={KeyRound} label="Password auth" value={String(data.authMethodMix.password)} />
-            <MetricCard icon={Shield} label="OAuth connected" value={String(data.authMethodMix.oauth)} />
-            <MetricCard icon={Fingerprint} label="Passkeys" value={String(data.authMethodMix.passkey)} />
+            <MetricCard
+              icon={KeyRound}
+              label="Password auth"
+              value={String(data.authMethodMix.password)}
+            />
+            <MetricCard
+              icon={Shield}
+              label="OAuth connected"
+              value={String(data.authMethodMix.oauth)}
+            />
+            <MetricCard
+              icon={Fingerprint}
+              label="Passkeys"
+              value={String(data.authMethodMix.passkey)}
+            />
           </div>
 
           <section>

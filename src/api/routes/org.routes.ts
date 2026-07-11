@@ -28,6 +28,7 @@ import { sensitiveReverification } from "../../middleware/continuousVerification
 import { orgRlsMiddleware } from "../../middleware/orgRls";
 import { sendOrgInviteEmail } from "../../services/notifications/email.service";
 import { countRows } from "../../shared/dbCount";
+import { listOrgFeatureFlags } from "../../shared/featureFlags";
 import { paginated, parsePaginatedQuery } from "../../shared/pagination";
 import {
   AuthorizationError,
@@ -35,7 +36,6 @@ import {
   authorizeOrg,
   type OrgMembershipContext,
 } from "../../shared/permissions";
-import { listOrgFeatureFlags } from "../../shared/featureFlags";
 import type { HonoEnv } from "../../shared/types";
 
 const router = new Hono<HonoEnv>();
@@ -477,7 +477,12 @@ router.put("/:orgId/security/policy", async (c) => {
 });
 
 const featureFlagSchema = z.object({
-  key: z.string().trim().min(1).max(100).regex(/^[a-z0-9_.-]+$/i),
+  key: z
+    .string()
+    .trim()
+    .min(1)
+    .max(100)
+    .regex(/^[a-z0-9_.-]+$/i),
   enabled: z.boolean(),
   rolloutPercent: z.number().int().min(0).max(100).optional(),
   metadata: z.record(z.string(), z.unknown()).optional(),

@@ -5,20 +5,15 @@
  * a software fallback that encrypts key material in memory using HKDF +
  * AES-256-GCM.
  *
- * ⚠️ This build is **software-only**: the TPM / Secure Enclave / PKCS#11
- * providers below are unimplemented skeletons (every operation throws
- * `NotImplementedError`). Wiring real hardware needs native addons / host
- * tooling — see each provider's JSDoc and the fork checklist in
- * `docs/extending.md` § Hardware-backed key store.
+ * ⚠️ TPM / Secure Enclave providers remain fork stubs. PKCS#11 is functional
+ * when `pkcs11js` is installed and `HW_KEY_PKCS11_LIB` + `HW_KEY_PKCS11_PIN`
+ * are configured (SoftHSM-compatible). Software provider is the default.
  *
  * Provider selection is controlled by the `KEY_PROVIDER` env var:
- *   - unset / `auto`     → software provider (the only functional one); logs an
- *                          informational notice if a TPM / Secure Enclave is
- *                          physically present but unsupported by this build.
- *   - `software`         → software provider.
- *   - `tpm` / `secure-enclave` / `pkcs11` → **fails fast at startup** with a
- *                          clear error, instead of silently selecting a stub
- *                          that throws on first crypto use.
+ *   - unset / `auto`     → software provider; logs when hardware is present
+ *   - `software`         → software provider
+ *   - `pkcs11` / `hsm`   → PKCS#11 HSM (requires pkcs11js + library path)
+ *   - `tpm` / `secure-enclave` → fails fast (not implemented in this build)
  */
 
 import crypto from "node:crypto";
@@ -316,73 +311,255 @@ export class SecureEnclaveProvider implements HardwareKeyProvider {
   }
 }
 
-// ─── PKCS#11 / HSM Stub ───────────────────────────────────────────────────────
+// ─── PKCS#11 / HSM ────────────────────────────────────────────────────────────
+
+/** PKCS#11 mechanism / attribute constants used with pkcs11js. */
+const CKF_SERIAL_SESSION = 0x0000_0004;
+const CKF_RW_SESSION = 0x0000_0002;
+const CKU_USER = 1;
+const CKO_SECRET_KEY = 0x0000_0004;
+const CKA_CLASS = 0x0000_0000;
+const CKA_TOKEN = 0x0000_0001;
+const CKA_PRIVATE = 0x0000_0002;
+const CKA_LABEL = 0x0000_0003;
+const CKA_VALUE = 0x0000_0011;
+const CKA_SIGN = 0x0000_0108;
+const CKA_ENCRYPT = 0x0000_0104;
+const CKA_DECRYPT = 0x0000_0105;
+const CKM_SHA256_HMAC = 0x0000_0251;
+const CKM_AES_CBC_PAD = 0x0000_010a;
+
+type Pkcs11Module = typeof import("pkcs11js");
+type Pkcs11Instance = InstanceType<Pkcs11Module["PKCS11"]>;
+
+async function loadPkcs11Module(): Promise<Pkcs11Module | null> {
+  try {
+    return await import("pkcs11js");
+  } catch {
+    return null;
+  }
+}
 
 /**
- * PKCS11Provider — stub for hardware HSM / smart card integration via PKCS#11.
+ * PKCS11Provider — hardware HSM / SoftHSM integration via pkcs11js.
  *
- * To add real PKCS#11 support:
- *   1. `npm install pkcs11js` (wraps the libp11 C library).
- *   2. Instantiate `new pkcs11js.PKCS11()`, call `load(libraryPath)`, and use
- *      `C_Login`, `C_GenerateKeyPair`, `C_Sign`, `C_Encrypt`, `C_Decrypt`.
- *   3. Replace the stub bodies below with the corresponding pkcs11js calls.
+ * Requires optional dependency `pkcs11js` and a PKCS#11 library at
+ * `HW_KEY_PKCS11_LIB`. Test locally with SoftHSM2 — see docs/extending.md.
  */
 export class PKCS11Provider implements HardwareKeyProvider {
   public name = "pkcs11";
 
+  private pkcs11: Pkcs11Instance | null = null;
+  private session: unknown = null;
+  private slot = 0;
+  private initialized = false;
+  private keyHandles = new Map<string, unknown>();
+
   constructor(
     private libraryPath: string,
-    _pin: string
+    private pin: string
   ) {}
 
+  private async ensureSession(): Promise<void> {
+    if (this.session != null) return;
+
+    const mod = await loadPkcs11Module();
+    if (!mod) {
+      throw new Error(
+        "PKCS11Provider: pkcs11js is not installed — add it as an optional dependency " +
+          "and ensure native build tools are available"
+      );
+    }
+    if (!fs.existsSync(this.libraryPath)) {
+      throw new Error(`PKCS11Provider: library not found at ${this.libraryPath}`);
+    }
+
+    const pkcs11 = new mod.PKCS11();
+    pkcs11.load(this.libraryPath);
+    pkcs11.C_Initialize();
+    this.initialized = true;
+    this.pkcs11 = pkcs11;
+
+    const slots = pkcs11.C_GetSlotList(true) as number[];
+    if (!slots.length) {
+      throw new Error("PKCS11Provider: no token slots available");
+    }
+    this.slot = slots[0]!;
+    this.session = pkcs11.C_OpenSession(this.slot, CKF_SERIAL_SESSION | CKF_RW_SESSION);
+    if (this.pin) {
+      pkcs11.C_Login(this.session, CKU_USER, this.pin);
+    }
+    logger.info("PKCS11Provider: session opened", { slot: this.slot });
+  }
+
   async isAvailable(): Promise<boolean> {
-    return fs.existsSync(this.libraryPath);
+    if (!fs.existsSync(this.libraryPath)) return false;
+    const mod = await loadPkcs11Module();
+    return mod != null;
   }
 
-  async generateKey(
-    _keyId: string,
-    _algorithm: "PASETO" | "AES-256" | "ECDSA-P256"
-  ): Promise<void> {
-    throw new NotImplementedError(
-      "PKCS11Provider.generateKey: install pkcs11js and implement C_GenerateKeyPair — see class JSDoc"
-    );
+  private async findKeyHandle(keyId: string): Promise<unknown> {
+    const cached = this.keyHandles.get(keyId);
+    if (cached) return cached;
+
+    await this.ensureSession();
+    const pkcs11 = this.pkcs11!;
+    const session = this.session!;
+    const template = [{ type: CKA_LABEL, value: keyId }];
+    pkcs11.C_FindObjectsInit(session, template);
+    const handles = pkcs11.C_FindObjects(session, 1) as unknown[];
+    pkcs11.C_FindObjectsFinal(session);
+    if (!handles.length) {
+      throw new Error(`PKCS11Provider: key not found: ${keyId}`);
+    }
+    this.keyHandles.set(keyId, handles[0]);
+    return handles[0];
   }
 
-  async sign(_keyId: string, _data: Buffer): Promise<Buffer> {
-    throw new NotImplementedError(
-      "PKCS11Provider.sign: install pkcs11js and implement C_Sign — see class JSDoc"
-    );
+  async generateKey(keyId: string, algorithm: "PASETO" | "AES-256" | "ECDSA-P256"): Promise<void> {
+    await this.ensureSession();
+    const pkcs11 = this.pkcs11!;
+    const session = this.session!;
+
+    const keySize = algorithm === "AES-256" ? 32 : 32;
+    const template = [
+      { type: CKA_TOKEN, value: true },
+      { type: CKA_PRIVATE, value: true },
+      { type: CKA_LABEL, value: keyId },
+      { type: CKA_SIGN, value: true },
+      { type: CKA_ENCRYPT, value: true },
+      { type: CKA_DECRYPT, value: true },
+      { type: CKA_VALUE, value: crypto.randomBytes(keySize) },
+    ];
+    const handle = pkcs11.C_CreateObject(session, template);
+    this.keyHandles.set(keyId, handle);
+    logger.debug("PKCS11Provider: key generated", { keyId, algorithm });
   }
 
-  async encrypt(_keyId: string, _plaintext: Buffer, _context?: Buffer): Promise<Buffer> {
-    throw new NotImplementedError(
-      "PKCS11Provider.encrypt: install pkcs11js and implement C_Encrypt — see class JSDoc"
-    );
+  async sign(keyId: string, data: Buffer): Promise<Buffer> {
+    await this.ensureSession();
+    const pkcs11 = this.pkcs11!;
+    const session = this.session!;
+    const handle = await this.findKeyHandle(keyId);
+    pkcs11.C_SignInit(session, { mechanism: CKM_SHA256_HMAC }, handle);
+    const sig = pkcs11.C_Sign(session, data, Buffer.alloc(64)) as Buffer;
+    return Buffer.from(sig);
   }
 
-  async decrypt(_keyId: string, _ciphertext: Buffer, _context?: Buffer): Promise<Buffer> {
-    throw new NotImplementedError(
-      "PKCS11Provider.decrypt: install pkcs11js and implement C_Decrypt — see class JSDoc"
-    );
+  async encrypt(keyId: string, plaintext: Buffer, context?: Buffer): Promise<Buffer> {
+    await this.ensureSession();
+    const pkcs11 = this.pkcs11!;
+    const session = this.session!;
+    const handle = await this.findKeyHandle(keyId);
+    const iv = crypto.randomBytes(16);
+    pkcs11.C_EncryptInit(session, { mechanism: CKM_AES_CBC_PAD, parameter: iv }, handle);
+    const encrypted = pkcs11.C_Encrypt(session, plaintext, Buffer.alloc(plaintext.length + 32));
+    const payload = Buffer.concat([iv, Buffer.from(encrypted as Buffer)]);
+    if (context) {
+      const binding = crypto.createHmac("sha256", context).update(payload).digest();
+      return Buffer.concat([binding.subarray(0, 16), payload]);
+    }
+    return payload;
   }
 
-  async deleteKey(_keyId: string): Promise<void> {
-    throw new NotImplementedError(
-      "PKCS11Provider.deleteKey: install pkcs11js and implement C_DestroyObject — see class JSDoc"
-    );
+  async decrypt(keyId: string, ciphertext: Buffer, context?: Buffer): Promise<Buffer> {
+    await this.ensureSession();
+    const pkcs11 = this.pkcs11!;
+    const session = this.session!;
+    const handle = await this.findKeyHandle(keyId);
+
+    let data = ciphertext;
+    if (context) {
+      const binding = crypto.createHmac("sha256", context).update(data.subarray(16)).digest();
+      if (!binding.subarray(0, 16).equals(ciphertext.subarray(0, 16))) {
+        throw new Error("PKCS11Provider: context binding mismatch");
+      }
+      data = data.subarray(16);
+    }
+
+    const iv = data.subarray(0, 16);
+    const encrypted = data.subarray(16);
+    pkcs11.C_DecryptInit(session, { mechanism: CKM_AES_CBC_PAD, parameter: iv }, handle);
+    const plain = pkcs11.C_Decrypt(session, encrypted, Buffer.alloc(encrypted.length + 32));
+    return Buffer.from(plain as Buffer);
+  }
+
+  async deleteKey(keyId: string): Promise<void> {
+    await this.ensureSession();
+    const pkcs11 = this.pkcs11!;
+    const session = this.session!;
+    const handle = await this.findKeyHandle(keyId);
+    pkcs11.C_DestroyObject(session, handle);
+    this.keyHandles.delete(keyId);
+    logger.debug("PKCS11Provider: key deleted", { keyId });
   }
 
   async listKeys(): Promise<string[]> {
-    throw new NotImplementedError(
-      "PKCS11Provider.listKeys: install pkcs11js and implement C_FindObjects — see class JSDoc"
-    );
+    await this.ensureSession();
+    const pkcs11 = this.pkcs11!;
+    const session = this.session!;
+    const template = [{ type: CKA_CLASS, value: CKO_SECRET_KEY }];
+    pkcs11.C_FindObjectsInit(session, template);
+    const handles = pkcs11.C_FindObjects(session, 100) as unknown[];
+    pkcs11.C_FindObjectsFinal(session);
+
+    const labels: string[] = [];
+    for (const handle of handles) {
+      const attrs = pkcs11.C_GetAttributeValue(session, handle, [{ type: CKA_LABEL }]) as Array<{
+        type: number;
+        value: Buffer;
+      }>;
+      const label = attrs[0]?.value?.toString("utf8");
+      if (label) labels.push(label);
+    }
+    return labels;
+  }
+
+  /** Close PKCS#11 session (tests / shutdown). */
+  async close(): Promise<void> {
+    if (this.pkcs11 && this.session != null) {
+      try {
+        this.pkcs11.C_CloseSession(this.session);
+      } catch {
+        // best effort
+      }
+    }
+    if (this.pkcs11 && this.initialized) {
+      try {
+        this.pkcs11.C_Finalize();
+      } catch {
+        // best effort
+      }
+    }
+    this.session = null;
+    this.pkcs11 = null;
+    this.initialized = false;
+    this.keyHandles.clear();
   }
 }
 
 // ─── Auto-Selection ───────────────────────────────────────────────────────────
 
-/** KEY_PROVIDER values that select an (unimplemented) hardware provider. */
-const HARDWARE_PROVIDER_SELECTORS = new Set(["tpm", "tpm2", "secure-enclave", "pkcs11", "hsm"]);
+/** KEY_PROVIDER values that select an unimplemented hardware provider. */
+const UNIMPLEMENTED_HARDWARE_SELECTORS = new Set(["tpm", "tpm2", "secure-enclave"]);
+const PKCS11_SELECTORS = new Set(["pkcs11", "hsm"]);
+
+async function createPkcs11Provider(): Promise<HardwareKeyProvider> {
+  const libraryPath = process.env.HW_KEY_PKCS11_LIB;
+  const pin = process.env.HW_KEY_PKCS11_PIN ?? "";
+  if (!libraryPath) {
+    throw new Error(
+      "KEY_PROVIDER=pkcs11 requires HW_KEY_PKCS11_LIB (path to PKCS#11 .so / .dylib)"
+    );
+  }
+  const provider = new PKCS11Provider(libraryPath, pin);
+  if (!(await provider.isAvailable())) {
+    throw new Error(
+      "PKCS11Provider unavailable — install pkcs11js and ensure HW_KEY_PKCS11_LIB exists"
+    );
+  }
+  return provider;
+}
 
 /**
  * Probe the hardware providers purely to surface an informational log line when
@@ -398,11 +575,16 @@ async function noteUnsupportedHardware(): Promise<void> {
   for (const probe of probes) {
     try {
       if (await probe.isAvailable()) {
-        logger.info(
-          `Hardware key store: detected "${probe.name}" hardware, but this build is ` +
-            "software-only — using the software provider. A hardware implementation must " +
-            "be wired up before KEY_PROVIDER can select it."
-        );
+        if (probe.name === "pkcs11") {
+          logger.info(
+            "Hardware key store: PKCS#11 library detected — set KEY_PROVIDER=pkcs11 to use it"
+          );
+        } else {
+          logger.info(
+            `Hardware key store: detected "${probe.name}" hardware, but it is not implemented ` +
+              "in this build — using the software provider."
+          );
+        }
       }
     } catch {
       // Detection threw — ignore; this is best-effort diagnostics only.
@@ -420,19 +602,25 @@ async function noteUnsupportedHardware(): Promise<void> {
 export async function createHardwareKeyStore(): Promise<HardwareKeyProvider> {
   const requested = (process.env.KEY_PROVIDER ?? "auto").trim().toLowerCase();
 
-  if (HARDWARE_PROVIDER_SELECTORS.has(requested)) {
+  if (UNIMPLEMENTED_HARDWARE_SELECTORS.has(requested)) {
     throw new Error(
-      `KEY_PROVIDER="${requested}" requested, but hardware-backed key providers ` +
-        "(TPM / Secure Enclave / PKCS#11) are not implemented in this build — every " +
-        "operation would throw. Unset KEY_PROVIDER or set KEY_PROVIDER=software."
+      `KEY_PROVIDER="${requested}" requested, but TPM / Secure Enclave providers are not ` +
+        "implemented in this build. Use KEY_PROVIDER=software or KEY_PROVIDER=pkcs11."
     );
   }
 
-  if (requested !== "auto" && requested !== "software") {
-    throw new Error(`Unknown KEY_PROVIDER="${requested}". Valid values: software, auto (default).`);
+  if (PKCS11_SELECTORS.has(requested)) {
+    const provider = await createPkcs11Provider();
+    logger.info(`Hardware key store: selected provider "${provider.name}"`);
+    return provider;
   }
 
-  // In auto mode, emit a diagnostic if hardware is present but unsupported.
+  if (requested !== "auto" && requested !== "software") {
+    throw new Error(
+      `Unknown KEY_PROVIDER="${requested}". Valid values: software, auto, pkcs11 (default: auto).`
+    );
+  }
+
   if (requested === "auto") {
     await noteUnsupportedHardware();
   }

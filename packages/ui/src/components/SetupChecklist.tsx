@@ -33,7 +33,9 @@ const ITEMS: ChecklistItem[] = [
     label: "Enable two-factor authentication",
     href: "/dashboard/security",
     check: (u) =>
-      u?.onboarding?.hasMfa === true || u?.mfa?.totp?.enabled === true || u?.mfa?.webauthn?.enabled === true,
+      u?.onboarding?.hasMfa === true ||
+      u?.mfa?.totp?.enabled === true ||
+      u?.mfa?.webauthn?.enabled === true,
   },
   {
     id: "api_key",

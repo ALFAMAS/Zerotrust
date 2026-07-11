@@ -74,6 +74,13 @@ export const JOB_REGISTRY: JobDef[] = [
       return `audit-anchor-${day}`;
     },
   },
+  {
+    name: "auth.apiKeyRotation",
+    description: "Warn users about API keys approaching expiry or exceeding recommended age",
+    intervalHours: 24,
+    singleInstance: true,
+    schema: z.object({}),
+  },
 ] as const;
 
 /** Look up a job definition by name. */

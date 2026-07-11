@@ -266,6 +266,29 @@ PostHog) are documented in [`infra/README.md`](./infra/README.md) with compose o
 
 ---
 
+## Secrets manager (Tier 5)
+
+Production secrets should not live on disk in plaintext `.env` files. Set
+`SECRETS_PROVIDER` to load from an external store **before** config validation;
+`loadSecrets()` overlays only **unset** env vars (local overrides still win).
+
+| `SECRETS_PROVIDER` | Required env | Notes |
+| ------------------ | ------------ | ----- |
+| `env` (default)    | —            | Current behaviour — `process.env` / `.env` only |
+| `vault`            | `VAULT_ADDR`, `VAULT_TOKEN`; optional `VAULT_MOUNT` (default `secret`), `VAULT_SECRET_PATH` (default `zerotrust`) | HashiCorp Vault KV v2 |
+| `aws`              | `AWS_SECRET_ID`; optional `AWS_REGION` | JSON secret payload; requires optional `@aws-sdk/client-secrets-manager` |
+| `doppler`          | `DOPPLER_TOKEN`; optional `DOPPLER_PROJECT`, `DOPPLER_CONFIG` | Doppler config secrets download API |
+
+Bootstrap order: `dotenv.config()` → `loadSecrets()` → `getConfig()`. Both the
+API (`initializezerotrust()`) and dedicated worker (`src/worker.ts`) call
+`loadSecrets()` at startup.
+
+Never log secret values. HTTP providers use `fetchFixedUrl` with timeout and
+no redirects (CWE-918). See also
+[`docs/comparisons/secrets-infisical-vs-vault.md`](./comparisons/secrets-infisical-vs-vault.md).
+
+---
+
 ## Production hardening checklist
 
 Endpoint exposure defaults are tuned for local dev; before an internet-facing

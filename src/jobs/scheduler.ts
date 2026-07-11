@@ -120,6 +120,11 @@ async function dispatchJob(jobDef: JobDef, _payload: unknown): Promise<boolean> 
       await runAuditAnchor();
       return true;
     }
+    case "auth.apiKeyRotation": {
+      const { checkApiKeyRotation } = await import("../services/auth/apiKeyRotation.service.js");
+      await checkApiKeyRotation();
+      return true;
+    }
     default:
       return false;
   }

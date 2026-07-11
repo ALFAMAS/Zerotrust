@@ -7,11 +7,7 @@ import { randomBytes } from "node:crypto";
 import { and, eq, inArray, ne } from "drizzle-orm";
 import { Hono } from "hono";
 import { getDb, getReadDb } from "../../db";
-import {
-  organizationMembersTable,
-  organizationsTable,
-  usersTable,
-} from "../../db/schema";
+import { organizationMembersTable, organizationsTable, usersTable } from "../../db/schema";
 import { getLogger } from "../../logger";
 import { scimAuthMiddleware } from "../../middleware/scimAuth";
 import {
@@ -20,12 +16,7 @@ import {
   parseScimUserName,
   toScimUser,
 } from "../../scim/mappers";
-import {
-  SCIM_GROUP_SCHEMA,
-  scimError,
-  scimList,
-  type ScimGroupResource,
-} from "../../scim/types";
+import { SCIM_GROUP_SCHEMA, type ScimGroupResource, scimError, scimList } from "../../scim/types";
 import { internalError } from "../../shared/httpErrors";
 import { hashPassword } from "../../shared/passwordHash";
 import type { HonoEnv } from "../../shared/types";
@@ -243,10 +234,7 @@ router.delete("/Users/:id", async (c) => {
     const [removed] = await db
       .delete(organizationMembersTable)
       .where(
-        and(
-          eq(organizationMembersTable.orgId, orgId),
-          eq(organizationMembersTable.userId, userId)
-        )
+        and(eq(organizationMembersTable.orgId, orgId), eq(organizationMembersTable.userId, userId))
       )
       .returning({ id: organizationMembersTable.id });
 

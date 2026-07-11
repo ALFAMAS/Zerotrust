@@ -134,6 +134,8 @@
     "undici": "^7.28.0"
   },
   "optionalDependencies": {
+    "@aws-sdk/client-secrets-manager": "^3.848.0",
+    "pkcs11js": "^2.1.0",
     "@parcel/watcher-darwin-arm64": "2.5.6",
     "@parcel/watcher-darwin-x64": "2.5.6",
     "@parcel/watcher-linux-x64-glibc": "2.5.6",

@@ -66,7 +66,11 @@ read it via `c.get("user")`.
 **Organizations are the sole tenancy boundary** (ARCH-1, 2026-07-04). The
 orphaned `tenants` table and `/admin/tenants` routes were removed. Org-scoped
 data uses `org_id` / `orgId` UUID FKs to `organizations`. Cross-tenant JIT
-requests reference `requestor_org_id` and `target_org_id` (MT-2). CI lint
+requests reference `requestor_org_id` and `target_org_id` (MT-2). Postgres RLS
+policies cover all org-scoped tables (through migration `0043_tier5_rls_expansion.sql`).
+Repositories that mutate org data should be constructed via
+`createOrgScopedRepository(orgId, factory)` or domain factories such as
+`webhooksRepo`, `featureFlagsRepo`, and `supportTicketsRepo`. CI lint
 (`bun run org-scoping:check`, MT-1) scans route/store code for missing org
 predicates on org-scoped tables.
 

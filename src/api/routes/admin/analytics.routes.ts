@@ -137,8 +137,7 @@ function buildAuthMethodMix(
 
   for (const u of users) {
     const hasPasskey = Array.isArray(u.passkeys) && u.passkeys.length > 0;
-    const hasOauth =
-      Array.isArray(u.oauthProviders) && (u.oauthProviders as unknown[]).length > 0;
+    const hasOauth = Array.isArray(u.oauthProviders) && (u.oauthProviders as unknown[]).length > 0;
     const hasPassword = Boolean(u.passwordHash);
 
     if (hasPasskey) passkey++;

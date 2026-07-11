@@ -254,7 +254,9 @@ export {
 } from "./telemetry";
 
 export async function initializezerotrust() {
+  const { loadSecrets } = await import("./config/secretsLoader.js");
   const { getConfig } = await import("./config/index.js");
+  await loadSecrets();
   const { initializeDatabase, checkPendingMigrations } = await import("./db/index.js");
   const { initializeCSFLE } = await import("./crypto/csfle.js");
   const { initHardwareKeyStore } = await import("./crypto/hardware-key-store.js");

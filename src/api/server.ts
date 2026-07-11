@@ -63,6 +63,7 @@ import walletRoutes from "./routes/wallet.routes";
 dotenv.config();
 
 import { inputSanitizationMiddleware } from "../middleware/inputSanitization";
+import { initPostAuthSecurity } from "../middleware/postAuthSecurity";
 import type { HonoEnv } from "../shared/types";
 import { registerGlobalErrorHandler } from "./errorHandler";
 
@@ -70,6 +71,7 @@ const logger = getLogger("api-server");
 export async function createServer() {
   initSentry();
   initTelemetry();
+  initPostAuthSecurity();
   const { logger: initLogger } = await initializezerotrust();
   initLogger.info("Starting API server setup");
 

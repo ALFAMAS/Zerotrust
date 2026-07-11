@@ -43,11 +43,7 @@ export interface ScimListResponse<T> {
   Resources: T[];
 }
 
-export function scimList<T>(
-  resources: T[],
-  startIndex = 1,
-  count?: number
-): ScimListResponse<T> {
+export function scimList<T>(resources: T[], startIndex = 1, count?: number): ScimListResponse<T> {
   const slice = count ? resources.slice(startIndex - 1, startIndex - 1 + count) : resources;
   return {
     schemas: [SCIM_LIST_SCHEMA],

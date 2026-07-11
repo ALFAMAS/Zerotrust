@@ -56,10 +56,10 @@ live in [`todo.md`](./todo.md); this doc is the forward-looking menu.
 
 | # | Upgrade | Size | Notes |
 | - | ------- | ---- | ----- |
-| 21 | **Wire or delete the acknowledged orphans** | 🟢 | `apiKeyRotation.service.ts`, `deviceAttestation.ts`, `continuousEval.ts` sit knip-ignored — each is either a feature a fork would want or dead weight. Decide per file. |
-| 22 | **Secrets manager integration** | 🟡 | Optional Vault/AWS-SM/Doppler loader in `src/config` so production secrets never live in `.env` files on disk. |
-| 23 | **Hardware key store fork path → shipped provider** | 🔴 | CRYPTO-1 left TPM/PKCS#11 as a documented fork path; ship at least the PKCS#11 provider for cloud HSMs. |
-| 24 | **RLS everywhere + org-scoped repo factory** | 🔴 | Policies cover high-value tables; extend to every org-scoped table and make the repository factory inject the org context by construction. |
+| 21 | **Wire or delete the acknowledged orphans** | ✅ shipped | Daily `auth.apiKeyRotation` job; device attestation + continuous eval opt-in via env (`DEVICE_ATTESTATION_ENABLED`, `CONTINUOUS_EVAL_ENABLED`); knip ignores removed. |
+| 22 | **Secrets manager integration** | ✅ shipped | `src/config/secretsLoader.ts` — Vault KV v2, AWS SM, Doppler, or `env` (default); overlays unset vars before `loadConfig()`. |
+| 23 | **Hardware key store fork path → shipped provider** | ✅ shipped | Functional `PKCS11Provider` via optional `pkcs11js`; `KEY_PROVIDER=pkcs11` + `HW_KEY_PKCS11_*`; SoftHSM path in `docs/extending.md`. |
+| 24 | **RLS everywhere + org-scoped repo factory** | ✅ shipped | Migration `0043_tier5_rls_expansion.sql` (`org_feature_flags`, `org_scim_tokens`); `createOrgScopedRepository()` + `featureFlagsRepo` / `supportTicketsRepo`. |
 
 ---
 

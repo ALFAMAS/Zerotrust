@@ -400,10 +400,7 @@ router.get("/audit/export/ndjson", async (c) => {
       c.header("X-Audit-Chain-Tip-Seq", String(result.chainTip.seq));
       c.header("X-Audit-Chain-Tip-Hash", result.chainTip.entryHash);
     }
-    c.header(
-      "Content-Disposition",
-      `attachment; filename="audit-${result.exportId}.ndjson"`
-    );
+    c.header("Content-Disposition", `attachment; filename="audit-${result.exportId}.ndjson"`);
     return c.body(result.ndjson);
   } catch (err) {
     return internalError(c, logger, "Audit NDJSON export error", err);

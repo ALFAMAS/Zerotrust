@@ -45,13 +45,19 @@ describe("hardware key store provider selection", () => {
     expect((await createHardwareKeyStore()).name).toBe("software");
   });
 
-  it.each(["tpm", "tpm2", "secure-enclave", "pkcs11", "hsm"])(
+  it.each(["tpm", "tpm2", "secure-enclave"])(
     "fails fast at startup when an unimplemented hardware provider is requested (%s)",
     async (selector) => {
       process.env.KEY_PROVIDER = selector;
       await expect(createHardwareKeyStore()).rejects.toThrow(/not implemented/i);
     }
   );
+
+  it("fails when pkcs11 is requested without HW_KEY_PKCS11_LIB", async () => {
+    delete process.env.HW_KEY_PKCS11_LIB;
+    process.env.KEY_PROVIDER = "pkcs11";
+    await expect(createHardwareKeyStore()).rejects.toThrow(/HW_KEY_PKCS11_LIB/);
+  });
 
   it("rejects an unknown KEY_PROVIDER value", async () => {
     process.env.KEY_PROVIDER = "bogus";
@@ -107,22 +113,18 @@ describe("hardware provider stubs", () => {
     expect(await provider.isAvailable()).toBe(process.platform === "darwin");
   });
 
-  it("PKCS11Provider reports available when the library path exists", async () => {
-    const existsSpy = vi.spyOn(fs, "existsSync").mockReturnValue(true);
-    const provider = new PKCS11Provider("/opt/hsm/libpkcs11.so", "pin");
-    expect(await provider.isAvailable()).toBe(true);
+  it("PKCS11Provider reports unavailable when library path is missing", async () => {
+    const existsSpy = vi.spyOn(fs, "existsSync").mockReturnValue(false);
+    const provider = new PKCS11Provider("/missing/libpkcs11.so", "pin");
+    expect(await provider.isAvailable()).toBe(false);
     existsSpy.mockRestore();
   });
 
   it.each([
     [TPMKeyProvider, "generateKey"],
     [SecureEnclaveProvider, "sign"],
-    [PKCS11Provider, "encrypt"],
   ] as const)("stub %s.%s throws NotImplementedError", async (Ctor, method) => {
-    const provider =
-      Ctor === PKCS11Provider
-        ? new PKCS11Provider("/missing.so", "")
-        : new Ctor();
+    const provider = new Ctor();
     const op = provider[method as keyof typeof provider] as (...args: unknown[]) => Promise<unknown>;
     const args =
       method === "generateKey"

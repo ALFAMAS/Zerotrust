@@ -23,6 +23,7 @@
  * always arrive there).
  */
 import "dotenv/config";
+import { loadSecrets } from "./config/secretsLoader";
 import { shutdownJobScheduler, startJobScheduler } from "./jobs/scheduler";
 import { getLogger } from "./logger";
 import {
@@ -45,6 +46,7 @@ async function shutdown(signal: string): Promise<void> {
 
 async function main() {
   logger.info("Worker starting");
+  await loadSecrets();
 
   // Start email queue consumer (BullMQ)
   if (process.env.REDIS_URI) {

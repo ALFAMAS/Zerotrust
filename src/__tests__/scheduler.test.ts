@@ -83,6 +83,11 @@ vi.mock("../audit/anchor", () => ({
   runAuditAnchor: (...args: unknown[]) => mockRunAuditAnchor(...args),
 }));
 
+const mockCheckApiKeyRotation = vi.fn().mockResolvedValue({ warned: 0, expired: 0 });
+vi.mock("../services/auth/apiKeyRotation.service", () => ({
+  checkApiKeyRotation: (...args: unknown[]) => mockCheckApiKeyRotation(...args),
+}));
+
 function fakeJob(name: string, data: Record<string, unknown> = {}, attemptsMade = 0) {
   return { name, data, attemptsMade, id: `job-${name}` };
 }
@@ -149,6 +154,14 @@ describe("BullMQ-backed job scheduler", () => {
 
       await processScheduledJob(fakeJob("audit.anchor") as any);
       expect(mockRunAuditAnchor).toHaveBeenCalledTimes(1);
+    });
+
+    it("dispatches auth.apiKeyRotation to checkApiKeyRotation", async () => {
+      const { startJobScheduler, processScheduledJob } = await import("../jobs/scheduler");
+      await startJobScheduler("redis://localhost:6379");
+
+      await processScheduledJob(fakeJob("auth.apiKeyRotation") as any);
+      expect(mockCheckApiKeyRotation).toHaveBeenCalledTimes(1);
     });
 
     it("skips backup.daily when BACKUP_ENABLED is not true", async () => {

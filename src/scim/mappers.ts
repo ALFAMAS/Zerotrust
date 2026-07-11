@@ -4,10 +4,7 @@ import { SCIM_USER_SCHEMA, type ScimUserResource } from "./types";
 type UserRow = typeof usersTable.$inferSelect;
 
 export function toScimUser(
-  user: Pick<
-    UserRow,
-    "id" | "email" | "displayName" | "status" | "createdAt" | "updatedAt"
-  >,
+  user: Pick<UserRow, "id" | "email" | "displayName" | "status" | "createdAt" | "updatedAt">,
   baseUrl?: string
 ): ScimUserResource {
   const active = user.status !== "deleted" && user.status !== "suspended";
