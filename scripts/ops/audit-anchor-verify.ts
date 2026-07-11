@@ -7,8 +7,8 @@
  * Exits 0 when verification passes; 1 on mismatch or missing anchor.
  */
 import "dotenv/config";
-import { verifyAuditAnchors } from "../src/audit/anchor";
-import { closeDatabase, initializeDatabase } from "../src/db";
+import { verifyAuditAnchors } from "../../src/audit/anchor";
+import { closeDatabase, initializeDatabase } from "../../src/db";
 
 await initializeDatabase();
 try {

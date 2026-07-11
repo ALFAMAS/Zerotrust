@@ -225,7 +225,9 @@ the bootstrap step below.
 
 ```bash
 # 4. Create the schema
-bun run db:push          # fast dev sync; use db:migrate for versioned migrations
+bun run db:migrate       # versioned migrations — also carries RLS + audit triggers
+# (`db:push` is fine for rapid dev iteration, but it syncs tables only:
+#  the RLS policies and audit-immutability triggers ship as SQL migrations)
 
 # 5. Bootstrap your first admin + default org (idempotent)
 bun run bootstrap:admin
@@ -276,8 +278,8 @@ exits cleanly if an admin already exists.
 | `bun run dev`                      | API + UI concurrently                |
 | `bun run dev:api` / `dev:ui`       | Run one side only                    |
 | `bun run build`                    | Compile API to `dist/`               |
-| `bun run db:push`                  | Sync schema (dev)                    |
-| `bun run db:migrate`               | Apply versioned migrations (prod)    |
+| `bun run db:push`                  | Sync tables from code (dev only — no RLS/trigger DDL) |
+| `bun run db:migrate`               | Apply versioned migrations (staging/prod + fresh setups) |
 | `bun run db:studio`                | Drizzle Studio                       |
 | `bun run bootstrap:admin`          | First admin + default org            |
 | `bun run db:backup` / `db:restore` | Encrypted `pg_dump` backup/restore   |
@@ -299,7 +301,9 @@ Use this before pointing real users at your deployment.
 
 ### Required infrastructure
 
-- [ ] **PostgreSQL** — managed (Neon, RDS, etc.) or self-hosted; use `db:migrate` on deploy
+- [ ] **PostgreSQL** — managed (Neon, RDS, etc.) or self-hosted; provision with `db:migrate`
+      (never `db:push` — RLS tenant-isolation policies and audit triggers only exist in the
+      migration chain)
 - [ ] **Redis** — required in production (`REDIS_URI`); sessions, rate limits, BullMQ queues
 - [ ] **Separate worker** — one `src/worker.ts` process; set `WORKER_MODE=true` on API replicas
 

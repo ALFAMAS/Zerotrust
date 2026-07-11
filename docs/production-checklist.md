@@ -52,7 +52,7 @@ Complete before pointing DNS at production. Archive signed copies in
 | - | ---- | -------- | ------ | ----- |
 | ☐ | CWE hardening (601, 918, 78, 22, 532, 1333, 327, 1427, 79) | P0 | **Done** | Canonical modules: `src/shared/safeRedirect.ts`, `safeFetch.ts`, `cryptoHash.ts`; `src/middleware/inputSanitization.ts`; enforced in `CLAUDE.md` / `AGENTS.md` |
 | ☐ | Production fail-fast secrets | P0 | **Done** | `TOKEN_SECRET_HEX`, `CSFLE_MASTER_KEY_HEX`, `REDIS_URI` — `src/__tests__/config.production.test.ts` |
-| ☐ | Tenant isolation + Postgres RLS | P0 | **Partial** | `src/middleware/orgRls.ts`; migrations `drizzle/0035_org_rls_policies.sql`, `0038_org_rls_expansion.sql`; CI `org-scoping:check`. **Caveat (MIG-1):** both RLS migrations are absent from the drizzle journal, so `db:migrate`-provisioned DBs never get the policies — verify with `pg_policies` |
+| ☐ | Tenant isolation + Postgres RLS | P0 | **Done** | `src/middleware/orgRls.ts`; migrations `drizzle/0035_org_rls_policies.sql`, `0038_org_rls_expansion.sql`; CI `org-scoping:check`. **Provisioning rule (MIG-2):** RLS policies and audit-immutability triggers exist **only in the SQL migration chain** — a `db:push`-provisioned database lacks them. Provision staging/production with `bun run db:migrate`; for DBs historically created via `db:push`, apply 0031/0035/0036/0038 manually or re-baseline, then verify with `SELECT * FROM pg_policies` |
 | ☐ | CSRF, CORS allowlist, body limits, input sanitization | P0 | **Done** | Global stack in `src/api/server.ts` |
 | ☐ | `/metrics` auth in production | P0 | **Done** | OPS-1 (2026-07-08): deploy sign-off + `ops:smoke` bearer verify; `monitoring/prometheus.yml` Bearer scrape |
 | ☐ | SAST + secret scan in CI | P0 | **Done** | Gitleaks, Semgrep OWASP, Trivy, `bun audit` — `.github/workflows/ci.yml` |
@@ -131,7 +131,7 @@ Complete before pointing DNS at production. Archive signed copies in
 
 | ☐ | Item | Priority | Status | Notes |
 | - | ---- | -------- | ------ | ----- |
-| ☐ | Versioned migrations (43 files) | P0 | **Partial** | **MIG-1 (2026-07-09):** `drizzle/meta/_journal.json` is missing 11 files (`0030`–`0040`, incl. RLS policies) and has duplicate `0034`/`0035` prefixes — `bun run db:migrate` skips them on fresh DBs. See [`project/codebase-audit-2026-07-09.md`](./project/codebase-audit-2026-07-09.md) |
+| ☐ | Versioned migrations (44 files) | P0 | **Done** | Journal complete + CI drift guard (`migrations:journal:check`, MIG-1); **MIG-2 (2026-07-11):** chain verified green end-to-end on a fresh DB and `pg_dump`-equivalent to the code schema (0017/0020 made idempotent; `0041_sync_code_schema_drift` closes columns that shipped without migrations). CI Tests job applies `db:migrate`, so the production path is exercised on every run |
 | ☐ | Schema split by domain | P1 | **Done** | `src/db/schema/*.ts` + legacy `src/db/schema.ts` |
 | ☐ | Repository layer for hot paths | P1 | **Done** | 11 repos in `src/db/repositories/`; login session minting via `createAuthenticatedSession()` (2026-07-09) and admin impersonation inserts via `createImpersonationSession()` (extracted from `admin-tools.routes.ts`); transactional tests + `bun run boundaries:check` verified green |
 | ☐ | Read replica support | P2 | **Done** | `DATABASE_URL_READ_REPLICA` in `.env.example` |

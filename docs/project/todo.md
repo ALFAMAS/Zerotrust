@@ -20,6 +20,30 @@ New open items below come from the **2026-07-09 codebase audit**
 
 _All items from the 2026-07-09 audit backlog are shipped — see [`shipped.md`](./shipped.md) § Recent work (2026-07-10)._
 
+## Migration integrity (2026-07-11 re-audit)
+
+- [x] **MIG-2** — Migration chain runs green on a fresh DB and is `pg_dump`-equivalent to the code
+      schema: 0017/0020 made idempotent; `0041_sync_code_schema_drift` adds columns that shipped in
+      code without migrations and drops dropped-feature leftovers. Shipped 2026-07-11.
+- [ ] **MIG-3 (P1, operator)** — Existing databases provisioned via `db:push` lack the RLS policies
+      (0035/0038) and audit-immutability triggers (0031) and have no `__drizzle_migrations`
+      baseline. Before switching such an environment to `db:migrate`, apply 0031/0035/0036/0038
+      manually and baseline the journal table; verify with `SELECT * FROM pg_policies`.
+- [ ] **MIG-4 (P2)** — New schema changes MUST ship with a generated migration
+      (`bun run db:generate`) in the same PR; consider a CI guard that fails when
+      `drizzle-kit generate` against the committed journal produces a non-empty diff
+      (schema ↔ migrations drift, the root cause behind 0041).
+
+## Deliberate toolchain migrations (unblock the pinned majors)
+
+- [ ] **Tailwind v4** — migrate `postcss.config.js`/`tailwind.config.js`/`globals.css`
+      (`@tailwindcss/postcss`, CSS-first config), then drop the Dependabot ignore.
+- [ ] **TypeScript 7** — adopt once Next.js supports the native compiler; drop pin + ignore.
+- [ ] **k6 v2** — validate `tests/load/*.k6.js` against v2, then unpin the apt install in `ci.yml`.
+- [ ] **Branch protection / merge queue on `main`** — direct pushes repeatedly landed red
+      (tailwind v4 bump, TS7 bump, stale lockfile); require CI before merge.
+
 ## Backlog (unprioritized)
 
-_(see audit doc for phase 5: `apps/*` workspace rename, `packages/shared-types`, `deploy/k8s/`)_
+_(see [`upgrade-roadmap.md`](./upgrade-roadmap.md) for the full upgrade catalog: `apps/*` workspace
+rename, `packages/shared-types`, `deploy/k8s/`, product-level SaaS upgrades)_

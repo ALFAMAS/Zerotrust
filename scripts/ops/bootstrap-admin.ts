@@ -11,8 +11,8 @@
 import "dotenv/config";
 import { stdin as input, stdout as output } from "node:process";
 import { createInterface } from "node:readline/promises";
-import { closeDatabase, initializeDatabase } from "../src/db";
-import { bootstrapAdmin } from "../src/services/bootstrap/bootstrapAdmin.service";
+import { closeDatabase, initializeDatabase } from "../../src/db";
+import { bootstrapAdmin } from "../../src/services/bootstrap/bootstrapAdmin.service";
 
 async function promptHidden(question: string): Promise<string> {
   return new Promise((resolve, reject) => {

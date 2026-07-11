@@ -95,7 +95,7 @@ describe("accessReviews TanStack Query server state", () => {
     renderWithQueryClient(<AccessReviewDetailPage />);
 
     expect(await screen.findByText("user@example.com")).toBeInTheDocument();
-    expect(mockApiGet).toHaveBeenCalledWith(buildAccessReviewDetailPath("rev_1"));
+    expect(mockApiGet).toHaveBeenCalledWith(`${buildAccessReviewDetailPath("rev_1")}?limit=200`);
 
     await user.click(screen.getByRole("button", { name: "Approve" }));
 
