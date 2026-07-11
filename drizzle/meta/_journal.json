@@ -302,6 +302,13 @@
       "when": 1780000042000,
       "tag": "0040_session_active_org_id",
       "breakpoints": true
+    },
+    {
+      "idx": 43,
+      "version": "7",
+      "when": 1780000043000,
+      "tag": "0041_sync_code_schema_drift",
+      "breakpoints": true
     }
   ]
 }
