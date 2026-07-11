@@ -334,6 +334,17 @@ Cross-audit of `docs/security.md` §0–§10. **SEC-27** shipped 2026-07-08 (VPS
 - ✅ Notifications — notification center with preferences
 - ✅ App shell — responsive with collapsible sidebar, sticky topbar, mobile drawer
 
+## Product/SaaS surface (Tier 4 — shipped 2026-07-12)
+
+- ✅ **Stripe usage meters** — `recordStripeMeterEvent()` + `POST /billing/usage-events`; API-key auth records `api_calls` when `STRIPE_METER_ENABLED=true` (`stripeMeter.test.ts`).
+- ✅ **Org feature flags** — `org_feature_flags` migration `0042`, `isFeatureEnabled(orgId, key, userId?)`, CRUD at `/orgs/:orgId/feature-flags`, org settings panel.
+- ✅ **Webhooks portal gaps** — delivery replay + signing-secret rotation on customer dashboard.
+- ✅ **SCIM 2.0 MVP** — `/scim/v2/Users` (list/get/create/patch/delete) + `/scim/v2/Groups`; bearer auth via `org_scim_tokens`.
+- ✅ **Audit SIEM export** — signed NDJSON at `GET /admin/audit/export/ndjson`; optional S3 upload at `POST /admin/audit/export/ndjson/upload` (`AUDIT_EXPORT_S3_PREFIX`).
+- ✅ **Status uptime history** — `GET /status/history` + timeline on public `/status` page.
+- ✅ **Onboarding checklist** — create org → invite → MFA → API key; server progress on `GET /auth/me` → `onboarding`.
+- ✅ **Admin analytics** — cohort retention, auth-method mix, anomaly session trends at `/admin/analytics`.
+
 ## Admin Panel
 
 - ✅ Stats dashboard — user count, active sessions, recent registrations
@@ -393,6 +404,126 @@ Cross-audit of `docs/security.md` §0–§10. **SEC-27** shipped 2026-07-08 (VPS
 - ✅ Dockerfile — multi-stage production image (Bun + Node)
 - ✅ Architecture decisions documented (PASETO v4, modular monolith, Drizzle, Redis/BullMQ, generated SDK, token rotation, module boundaries, token storage)
 - ✅ Deployment blueprints — VM/PM2, containers, Kubernetes (`docs/reference-architecture.md`)
+
+---
+
+## Toolchain migrations (2026-07-12)
+
+### Tailwind v4 — CSS-first config (shipped)
+
+- **Problem:** Dependabot semver-major bumps to Tailwind 4 broke `next build` against
+  the v3 PostCSS plugin surface (`tailwindcss` + `autoprefixer` in `postcss.config.js`,
+  JS `tailwind.config.js`, `@tailwind` directives).
+- **Fix:** Migrated UI to Tailwind v4: `@tailwindcss/postcss` in PostCSS, `@import
+  "tailwindcss"` + `@theme inline` tokens in `globals.css`, replaced `tailwindcss-animate`
+  with `tw-animate-css`, removed `@tailwindcss/container-queries` (built-in in v4),
+  deleted `tailwind.config.js`. Dropped both Dependabot `tailwindcss` semver-major
+  ignores.
+- **Paths:** `packages/ui/package.json`, `packages/ui/postcss.config.js`,
+  `packages/ui/src/app/globals.css`, `packages/ui/components.json`,
+  `.github/dependabot.yml`
+- **Verification (2026-07-12):** `bun run --cwd packages/ui build` → **pass** (52 routes);
+  `bun run type-check` → **pass**.
+
+### k6 v2 — CI apt pin removed (shipped)
+
+- **Problem:** CI pinned k6 1.x via `apt-cache madison` while the apt repo serves 2.x;
+  the pin blocked deliberate adoption and hid v2 breaking changes.
+- **Fix:** Reviewed all six `tests/load/*.k6.js` scripts — they use `ramping-vus` and
+  `constant-arrival-rate` only (no removed `externally-controlled` executor,
+  `options.ext.loadimpact`, or deprecated CLI flags). Removed the 1.x pin; CI installs
+  `k6` from apt stable (2.x).
+- **Paths:** `.github/workflows/ci.yml`, `tests/load/*.k6.js`
+- **Verification (2026-07-12):** Static review against
+  [k6 v2 migration guide](https://grafana.com/docs/k6/latest/get-started/migrating-to-v2/);
+  k6 not installed locally on dev host — full runtime gate is CI `Load & Chaos Tests`.
+
+---
+
+## Architecture (Tier 3) — 2026-07-12
+
+### #8 — `packages/shared-types` (shipped)
+
+- **Problem:** API Zod validation and UI form/input types drifted independently; the
+  integration matrix caught mismatches only after the fact.
+- **Fix:** New workspace `@zerotrust/shared-types` with pilot schemas: pagination query,
+  register, org invite/accept, API error envelope. API imports in `auth.schema.ts` and
+  `org.routes.ts`; UI types in `server-state/types.ts` + `orgInvites.ts`.
+- **Paths:** `packages/shared-types/`, `docs/shared-types.md`, `src/api/schemas/auth.schema.ts`,
+  `src/api/routes/org.routes.ts`, `packages/ui/src/lib/server-state/types.ts`
+- **Verification:** `bun run --cwd packages/shared-types test`; schema parity tests in
+  `packages/shared-types/src/schemas.test.ts`. SDK codegen wiring deferred (documented).
+
+### #10 — `deploy/k8s/` Helm chart (shipped)
+
+- **Problem:** Blueprint 3 in reference-architecture existed on paper only; no installable chart.
+- **Fix:** Helm chart under `deploy/k8s/helm/zerotrust/` (API/UI/worker Deployments + Services,
+  HPA, Ingress, migrate Job, ConfigMap stub) and kustomize overlays (`base/`, `staging/`,
+  `production/`).
+- **Paths:** `deploy/k8s/`, `deploy/k8s/README.md`
+- **Verification:** `helm template deploy/k8s/helm/zerotrust` (or YAML sanity when Helm absent).
+
+### #11 — Terraform/OpenTofu scaffold (shipped)
+
+- **Problem:** No IaC module for VPC + managed Postgres/Redis + object storage + DNS.
+- **Fix:** `deploy/terraform/` with AWS-default modules (network, postgres + read replicas,
+  redis, object_storage, dns). Variables for secrets; `terraform.tfvars.example` only.
+- **Paths:** `deploy/terraform/`, `deploy/terraform/README.md`
+- **Verification:** `terraform init && terraform validate` in `deploy/terraform/`.
+
+### #12 — Read-replica repository routing (shipped)
+
+- **Problem:** `getReadDb()` was called inline in routes; repositories always used primary.
+- **Fix:** `readDb()` / `writeDb()` in `src/db/repositories/dbConnections.ts`; list/read
+  methods in `orgs.repository.ts`, `authSessions.repository.ts` (`listUserSessions`),
+  `webhooks.repository.ts` (`withOrgRlsRead` for SELECTs). Routes delegate to repos where
+  practical.
+- **Paths:** `src/db/repositories/dbConnections.ts`, `src/db/rls.ts` (`withOrgRlsRead`),
+  `src/__tests__/repositories.readReplica.test.ts`, `docs/deployment.md` § Read replica routing
+- **Verification:** `bun run test src/__tests__/repositories.readReplica.test.ts`; existing
+  org/session route replica tests unchanged.
+
+### Branch protection on `main` — operator runbook (shipped)
+
+- **Problem:** Direct pushes to `main` repeatedly landed CI-red changes (unmigrated
+  Tailwind v4, TS7, stale lockfile) because no branch protection required green CI.
+- **Fix:** Added actionable branch-protection section to `docs/deployment.md` (required
+  settings, all eight CI check names, GitHub UI steps, `gh api` one-liner). Added
+  `scripts/ci/verify-branch-protection.ts` + `bun run branch-protection:check` for
+  post-setup verification.
+- **Paths:** `docs/deployment.md`, `scripts/ci/verify-branch-protection.ts`, `package.json`
+- **Verification (2026-07-12):** `bun run branch-protection:check` → **fail as expected**
+  (`ALFAMAS/zeroauth@main` unprotected — operator must apply rules via UI/`gh`).
+
+### Dependabot majors policy — label routing (shipped)
+
+- **Problem:** Per-package semver-major ignores in `.github/dependabot.yml` (e.g.
+  `typescript`) silently suppressed major bumps instead of surfacing them for review;
+  no auto-merge path existed for safe minor/patch Dependabot PRs.
+- **Fix:** Removed all `ignore:` semver-major entries from `.github/dependabot.yml`.
+  Added `dependabot-label.yml` (routes `version-update:semver-major` → `needs-migration`,
+  minor/patch → `automerge` + `dependencies`) and `dependabot-auto-merge.yml`
+  (squash auto-merge when labeled and CI green). Weekly `dependency-update.yml`
+  grouped PR uses `scripts/ci/detect-major-bumps.ts` to add `needs-migration` when
+  majors are present.
+- **Paths:** `.github/dependabot.yml`, `.github/workflows/dependabot-label.yml`,
+  `.github/workflows/dependabot-auto-merge.yml`, `.github/workflows/dependency-update.yml`,
+  `scripts/ci/detect-major-bumps.ts`, `src/__tests__/process-guardrails.workflows.test.ts`
+- **Verification (2026-07-12):** vitest `process-guardrails.workflows.test.ts` → **pass**;
+  `detect-major-bumps.ts` unit cases → **pass**.
+
+### Per-PR preview environments — CI compose smoke (shipped)
+
+- **Problem:** UI/API Docker changes required local setup to validate the full stack
+  before merge; no automated per-PR preview signal.
+- **Fix:** Added `pr-preview.yml` (build `docker-compose.preview.yml` stack per PR,
+  run `db:migrate`, probe API `/health` and UI HTTP 200, post sticky PR comment with
+  local reproduction URLs). Optional `cloud-preview` job when `PREVIEW_SSH_*` secrets
+  are configured. Documented in `docs/deployment.md` § PR preview environments.
+- **Paths:** `.github/workflows/pr-preview.yml`, `docker-compose.preview.yml`,
+  `docs/deployment.md`
+- **Verification (2026-07-12):** `docker compose -f docker-compose.preview.yml config`
+  → **pass**; vitest workflow assertions → **pass** (full runtime gate is CI `PR preview stack`).
 
 ---
 

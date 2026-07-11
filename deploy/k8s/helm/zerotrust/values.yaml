@@ -1,0 +1,101 @@
+# Default values for zerotrust Helm chart.
+# Override per environment via -f values-staging.yaml / values-production.yaml
+# or kustomize overlays under deploy/k8s/kustomize/.
+
+global:
+  imageRegistry: registry.example.com
+  imagePullSecrets: []
+
+api:
+  replicaCount: 3
+  image:
+    repository: zerotrust-api
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    port: 1337
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 250m
+    limits:
+      memory: 512Mi
+      cpu: 500m
+  hpa:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 12
+    targetCpuUtilization: 70
+  env:
+    WORKER_MODE: "true"
+    NODE_ENV: production
+  envFromSecret: zerotrust-env
+
+ui:
+  replicaCount: 2
+  image:
+    repository: zerotrust-ui
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    port: 3000
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 250m
+    limits:
+      memory: 512Mi
+      cpu: 500m
+  env:
+    NODE_ENV: production
+  envFromSecret: zerotrust-env
+
+worker:
+  replicaCount: 1
+  image:
+    repository: zerotrust-api
+    tag: latest
+    pullPolicy: IfNotPresent
+  command: ["bun", "dist/worker.js"]
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 250m
+    limits:
+      memory: 512Mi
+      cpu: 500m
+  envFromSecret: zerotrust-env
+  antiAffinity: true
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  hosts:
+    - host: example.com
+      paths:
+        - path: /
+          pathType: Prefix
+          service: ui
+    - host: api.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+          service: api
+  tls:
+    enabled: true
+    secretName: zerotrust-tls-secret
+
+migrate:
+  enabled: true
+  image:
+    repository: zerotrust-api
+    tag: latest
+  command: ["bun", "run", "db:migrate"]
+  ttlSecondsAfterFinished: 300
+  envFromSecret: zerotrust-env-migrator
+
+configMap:
+  enabled: false
+  data: {}

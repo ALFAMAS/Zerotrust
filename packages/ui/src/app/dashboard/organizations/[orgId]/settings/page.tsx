@@ -1,6 +1,7 @@
 "use client";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { OrgFeatureFlagsPanel } from "@/components/OrgFeatureFlagsPanel";
 import { ServerStateStatus } from "@/components/ServerStateStatus";
 import { SkeletonCard } from "@/components/Skeleton";
 import { Button } from "@/components/ui/button";
@@ -455,6 +456,8 @@ export default function OrgSettingsPage() {
           </Button>
         </form>
       )}
+
+      <OrgFeatureFlagsPanel orgId={orgId} />
 
       {myRole === "owner" && nonOwnerMembers.length > 0 && (
         <form

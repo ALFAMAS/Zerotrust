@@ -30,14 +30,25 @@ _All MIG-* items from the 2026-07-11 re-audit are shipped — see [`shipped.md`]
 
 ## Deliberate toolchain migrations (unblock the pinned majors)
 
-- [ ] **Tailwind v4** — migrate `postcss.config.js`/`tailwind.config.js`/`globals.css`
-      (`@tailwindcss/postcss`, CSS-first config), then drop the Dependabot ignore.
-- [ ] **TypeScript 7** — adopt once Next.js supports the native compiler; drop pin + ignore.
-- [ ] **k6 v2** — validate `tests/load/*.k6.js` against v2, then unpin the apt install in `ci.yml`.
-- [ ] **Branch protection / merge queue on `main`** — direct pushes repeatedly landed red
-      (tailwind v4 bump, TS7 bump, stale lockfile); require CI before merge.
+- [ ] **TypeScript 7** — blocked on Next.js 16.2.10: `next build` fails with
+      "Failed to install required TypeScript dependencies" when `typescript@7` is
+      installed (Next still expects TS ≤6). Root + `packages/ui` stay on `^6.0.3`;
+      Dependabot semver-major PRs for `typescript` are labeled `needs-migration`
+      (see `dependabot-label.yml`) — do not merge until Next.js documents TS7 support.
+      Re-test after each Next.js minor release.
+
+_All other deliberate toolchain migrations shipped 2026-07-12 — see [`shipped.md`](./shipped.md) § Toolchain migrations._
 
 ## Backlog (unprioritized)
 
-_(see [`upgrade-roadmap.md`](./upgrade-roadmap.md) for the full upgrade catalog: `apps/*` workspace
-rename, `packages/shared-types`, `deploy/k8s/`, product-level SaaS upgrades)_
+**Tier 1 process guardrails (upgrade-roadmap.md):** all four items shipped 2026-07-12
+(branch protection runbook, MIG-4, Dependabot label policy, PR preview compose smoke).
+Deferred toolchain work (TypeScript 7) remains in Tier 2 above.
+
+_(see [`upgrade-roadmap.md`](./upgrade-roadmap.md) for the full upgrade catalog: product-level SaaS upgrades)_
+
+## Architecture — deferred workspace rename (upgrade-roadmap #9)
+
+- [ ] **`apps/api` + `apps/web` rename** — deferred until a concrete driver (second app,
+      mobile surface, or split deployable). Blast radius: Dockerfiles, compose, CI workflows,
+      docs, and every import path. Current layout (`src/` API + `packages/ui/`) remains canonical.

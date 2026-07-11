@@ -18,12 +18,12 @@ Reference for the **CI/CD & Documentation** deliverable.
 ```
  PR / push ──▶  ci.yml (gating)            manual ──▶ deploy-staging.yml ──▶ staging-validation.yml
                ├─ Lint & Type Check                   (build + ship to host)   (smoke · Lighthouse · ZAP)
-               ├─ Tests (+ coverage, SDK,
-               │   integration & shadcn audits)        manual ──▶ deploy-production.yml ──▶ ops:smoke
-               ├─ SAST & Dependency Scans              weekly/manual ──▶ dr-restore-drill.yml
-               │   (Semgrep · Trivy · bun audit)                    (backup → restore → verify)
-               ├─ Build UI
-               ├─ Playwright E2E & a11y smoke
+               ├─ Tests (+ coverage, SDK,              pull_request ──▶ pr-preview.yml (compose smoke)
+               │   integration & shadcn audits)        Dependabot PR ──▶ dependabot-label.yml → dependabot-auto-merge.yml
+               ├─ SAST & Dependency Scans              weekly/manual ──▶ dependency-update.yml (grouped bump PR)
+               │   (Semgrep · Trivy · bun audit)       manual ──▶ deploy-production.yml ──▶ ops:smoke
+               ├─ Build UI                             weekly/manual ──▶ dr-restore-drill.yml
+               ├─ Playwright E2E & a11y smoke                     (backup → restore → verify)
                └─ Load & Chaos (k6)
 ```
 
@@ -53,6 +53,167 @@ measured — run it after every staging deploy and archive the artifacts as evid
 Backs up → encrypts → restores into an isolated Postgres → verifies. This is the
 recurring evidence for the **DR validated** criterion (see the
 [backup/restore runbook](./compliance/backup-restore-runbook.md)).
+
+---
+
+## Branch protection on `main` (required operator step)
+
+Direct pushes to `main` have repeatedly landed CI-red changes (unmigrated Tailwind
+v4, TypeScript 7, stale lockfiles). **Branch protection is a GitHub repo setting**
+— it cannot be enforced from application code. Apply it once per fork/org.
+
+### Required settings
+
+| Setting | Value |
+| --- | --- |
+| **Branch name pattern** | `main` |
+| **Require a pull request before merging** | On (≥1 approval recommended; 2 for auth/crypto) |
+| **Require status checks to pass** | On — **strict** (branch must be up to date) |
+| **Require conversation resolution** | On |
+| **Do not allow bypassing the above settings** | On for admins (recommended) |
+| **Restrict who can push to matching branches** | On — block direct pushes; allow only via PR merge |
+| **Allow force pushes** | Off |
+| **Allow deletions** | Off |
+
+### Required CI status checks
+
+These names match the `name:` fields in `.github/workflows/ci.yml` — enable **all**
+of them under *Require status checks to pass before merging*:
+
+- `Lint & Type Check`
+- `Tests`
+- `Docker image smoke test`
+- `SAST & Dependency Scans`
+- `Build UI`
+- `Lighthouse CI gate`
+- `Playwright E2E & Accessibility Smoke`
+- `Load & Chaos Tests`
+
+### Optional: merge queue
+
+For high-churn repos, enable **merge queue** on `main` after branch protection is
+green. The queue re-runs required checks on the integration commit before merge,
+reducing “green PR → red main” from fast-forward races.
+
+### Apply via GitHub UI
+
+1. Repo → **Settings** → **Branches** → **Add branch protection rule**
+2. Enter `main`, enable the settings above, and tick every CI check listed.
+3. Save. Confirm with `gh api repos/<owner>/<repo>/branches/main/protection` (404
+   means not applied yet).
+
+### Apply via `gh` CLI (repo admin)
+
+Replace `<owner>/<repo>` with your remote (e.g. `ALFAMAS/zeroauth`):
+
+```bash
+gh api --method PUT "repos/<owner>/<repo>/branches/main/protection" \
+  -H "Accept: application/vnd.github+json" \
+  --input - <<'EOF'
+{
+  "required_status_checks": {
+    "strict": true,
+    "contexts": [
+      "Lint & Type Check",
+      "Tests",
+      "Docker image smoke test",
+      "SAST & Dependency Scans",
+      "Build UI",
+      "Lighthouse CI gate",
+      "Playwright E2E & Accessibility Smoke",
+      "Load & Chaos Tests"
+    ]
+  },
+  "enforce_admins": false,
+  "required_pull_request_reviews": {
+    "dismiss_stale_reviews": true,
+    "require_code_owner_reviews": false,
+    "required_approving_review_count": 1
+  },
+  "restrictions": null,
+  "required_linear_history": false,
+  "allow_force_pushes": false,
+  "allow_deletions": false,
+  "block_creations": false,
+  "required_conversation_resolution": true
+}
+EOF
+```
+
+### Verify from CI or locally
+
+```bash
+bun run branch-protection:check
+```
+
+See `scripts/ci/verify-branch-protection.ts` — exits non-zero when `main` is
+unprotected or missing required checks (needs `gh` authenticated with `repo` scope).
+
+### Auto-merge for Dependabot (operator step)
+
+Dependabot minor/patch PRs labeled `automerge` can merge automatically once CI is
+green (`dependabot-auto-merge.yml`). Requires:
+
+| Setting | Value |
+| --- | --- |
+| **Allow auto-merge** | On (Settings → General → Pull Requests) |
+| **Branch protection** | Required CI checks from § Required CI status checks (strict) |
+| **Labels** | Created automatically by `dependabot-label.yml` (`automerge`, `needs-migration`, `dependencies`) |
+
+Semver-major Dependabot PRs receive `needs-migration` and are **never** auto-merged.
+The weekly grouped `dependency-update.yml` PR is always manual review when majors are
+detected (`needs-migration` label).
+
+---
+
+## PR preview environments
+
+Per-PR Docker stack validation runs on every pull request via
+`.github/workflows/pr-preview.yml` (job: **Build and smoke-test preview stack**).
+
+### What CI does
+
+1. Validates `docker-compose.preview.yml`
+2. Builds API + UI images from the PR head
+3. Starts Postgres + Redis, runs `bun run db:migrate`
+4. Starts API + UI containers and probes `GET /health` and UI `/`
+5. Posts/updates a sticky PR comment (`header: pr-preview`) with status and local URLs
+6. Tears down the compose project (`-p pr-<number>`)
+
+GitHub-hosted runners do **not** expose a public URL — the comment documents
+localhost-style endpoints for local reproduction:
+
+| Service | URL |
+| --- | --- |
+| API | http://localhost:3000 |
+| UI | http://localhost:3001 |
+
+```bash
+docker compose -f docker-compose.preview.yml -p pr-<number> up -d --build
+DATABASE_URL=postgresql://zerotrust:password@localhost:5432/zerotrust_preview bun run db:migrate
+```
+
+### Optional cloud preview (fork operators)
+
+To deploy the same compose stack to a staging host per PR, configure repository
+secrets (Settings → Secrets and variables → Actions):
+
+| Secret | Purpose |
+| --- | --- |
+| `PREVIEW_SSH_HOST` | Preview host hostname |
+| `PREVIEW_SSH_USER` | SSH user |
+| `PREVIEW_SSH_KEY` | Private key (deploy key) |
+| `PREVIEW_APP_DIR` | Git checkout path on the host |
+
+When all four are set, `pr-preview.yml` runs the optional **Optional cloud preview deploy**
+job after the CI smoke passes. Add a `preview` GitHub Environment with required
+reviewers if promotion should be gated.
+
+Optional repository **variables** for the sticky comment (future): `PREVIEW_PUBLIC_UI_URL`,
+`PREVIEW_PUBLIC_API_URL`.
+
+Forks without these secrets get CI-only validation — no cloud deploy, no secrets in
+PR comments.
 
 ---
 
@@ -663,16 +824,18 @@ only for legacy `db:push` environments.
 
 ## Read replica routing
 
-When `DATABASE_URL_READ_REPLICA` is set, read-heavy API handlers call
-`getReadDb()` instead of the primary connection. Mutations, auth/session
-validation, idempotent webhook claims, and any read that must reflect a write
-from the same request stay on `getDb()`.
+When `DATABASE_URL_READ_REPLICA` is set, read-heavy paths call `getReadDb()` (or
+repository helpers `readDb()` / `writeDb()` in `src/db/repositories/dbConnections.ts`).
+Mutations, auth/session validation, idempotent webhook claims, and any read that must
+reflect a write from the same request stay on `getDb()` / `writeDb()`.
 
 ### What is routed to the replica
 
 - Admin list/detail/analytics: users, sessions, roles, JIT grants, audit logs,
   feedback, segments, attachments, revenue dashboard, CSV exports
-- User/org dashboard reads: org lists, members, invites, support tickets, API
+- User/org dashboard reads: org lists, members, invites (via `orgs.repository.ts`),
+  user sessions (`authSessions.repository.ts`), webhook endpoint lists
+  (`webhooks.repository.ts` + `withOrgRlsRead`), support tickets, API
   keys, notifications, billing subscription/usage summaries, wallet transaction
   history, search (Postgres FTS fallback)
 - Compliance/analytics reads: access-review lists, anomaly baselines, audit

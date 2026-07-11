@@ -1,8 +1,8 @@
-import { and, eq, ne, sql } from "drizzle-orm";
+import { and, eq, isNull, ne, sql } from "drizzle-orm";
 import { Hono } from "hono";
 import { z } from "zod";
 import { getDb } from "../../../db";
-import { usersTable } from "../../../db/schema";
+import { apiKeysTable, organizationInvitesTable, organizationMembersTable, usersTable } from "../../../db/schema";
 import { authMiddleware } from "../../../middleware/auth";
 import { sensitiveReverification } from "../../../middleware/continuousVerification";
 import { rateLimit } from "../../../middleware/rateLimiting";
@@ -79,6 +79,27 @@ router.get("/me", authMiddleware, async (c) => {
     }));
 
     const { mfa: _m, passkeys: _p, oauthProviders: _o, ...rest } = row;
+
+    const [orgMembership] = await db
+      .select({ id: organizationMembersTable.id })
+      .from(organizationMembersTable)
+      .where(eq(organizationMembersTable.userId, user.id))
+      .limit(1);
+
+    const [apiKey] = await db
+      .select({ id: apiKeysTable.id })
+      .from(apiKeysTable)
+      .where(and(eq(apiKeysTable.userId, user.id), isNull(apiKeysTable.revokedAt)))
+      .limit(1);
+
+    const [sentInvite] = await db
+      .select({ id: organizationInvitesTable.id })
+      .from(organizationInvitesTable)
+      .where(eq(organizationInvitesTable.invitedBy, user.id))
+      .limit(1);
+
+    const mfaEnabled = mfa.totp.enabled || mfa.webauthn.enabled;
+
     return c.json({
       ...rest,
       emailVerified: row.emailVerifiedAt != null,
@@ -86,6 +107,12 @@ router.get("/me", authMiddleware, async (c) => {
       mfa,
       passkeys,
       oauthProviders,
+      onboarding: {
+        hasOrg: Boolean(orgMembership),
+        hasSentInvite: Boolean(sentInvite),
+        hasMfa: mfaEnabled,
+        hasApiKey: Boolean(apiKey),
+      },
     });
   } catch (err) {
     return internalError(c, logger, "Get current user error", err);

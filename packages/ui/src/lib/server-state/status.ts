@@ -5,17 +5,34 @@ import { useEffect } from "react";
 import { brand } from "@/config/brand";
 import { apiGet } from "@/lib/apiClient";
 import { queryKeys } from "./queryKeys";
-import type { StatusData } from "./types";
+import type { StatusData, StatusHistoryResponse } from "./types";
 
 export const statusKeys = queryKeys.status;
 
 export const STATUS_PATH = "/status";
+export const STATUS_HISTORY_PATH = "/status/history";
 export const STATUS_STREAM_PATH = "/status/stream";
 
 const API_URL = brand.apiUrl;
 
 export function fetchStatus(): Promise<StatusData> {
   return apiGet<StatusData>(STATUS_PATH, { skipAuth: true });
+}
+
+export function fetchStatusHistory(days = 90): Promise<StatusHistoryResponse> {
+  return apiGet<StatusHistoryResponse>(`${STATUS_HISTORY_PATH}?days=${days}`, { skipAuth: true });
+}
+
+export function statusHistoryQueryOptions(days = 90) {
+  return queryOptions({
+    queryKey: [...statusKeys.current(), "history", days] as const,
+    queryFn: () => fetchStatusHistory(days),
+    staleTime: 60_000,
+  });
+}
+
+export function useStatusHistoryQuery(days = 90) {
+  return useQuery(statusHistoryQueryOptions(days));
 }
 
 export function statusQueryOptions() {

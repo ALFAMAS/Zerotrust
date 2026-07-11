@@ -4,7 +4,7 @@ import { ServerStateStatus } from "@/components/ServerStateStatus";
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
 import { ErrorState } from "@/components/ui/States";
-import { useStatusQuery, useStatusStream } from "@/lib/server-state/status";
+import { useStatusHistoryQuery, useStatusQuery, useStatusStream } from "@/lib/server-state/status";
 
 const STATUS_STYLES: Record<string, { dot: string; label: string; text: string }> = {
   operational: {
@@ -27,6 +27,7 @@ const COMPONENT_LABELS: Record<string, string> = {
 
 export default function StatusPage() {
   const statusQuery = useStatusQuery();
+  const historyQuery = useStatusHistoryQuery(90);
   useStatusStream(!statusQuery.isError);
 
   const data = statusQuery.data ?? null;
@@ -136,6 +137,30 @@ export default function StatusPage() {
             API uptime: {Math.floor(data.uptimeSeconds / 3600)}h{" "}
             {Math.floor((data.uptimeSeconds % 3600) / 60)}m
           </p>
+        )}
+
+        {historyQuery.data && historyQuery.data.history.length > 0 && (
+          <section className="mt-10">
+            <h2 className="mb-3 text-sm font-semibold text-foreground">90-day uptime history</h2>
+            <div className="flex flex-wrap gap-1">
+              {historyQuery.data.history.map((snap) => (
+                <div
+                  key={snap.date}
+                  title={`${snap.date}: ${snap.status}`}
+                  className={`h-8 w-2 rounded-sm ${
+                    snap.status === "operational"
+                      ? "bg-emerald-500/80"
+                      : snap.status === "degraded"
+                        ? "bg-amber-500/80"
+                        : "bg-red-500/80"
+                  }`}
+                />
+              ))}
+            </div>
+            <p className="mt-2 text-xs text-muted-foreground">
+              Daily snapshots — green operational, amber degraded, red down
+            </p>
+          </section>
         )}
       </main>
       <SiteFooter />

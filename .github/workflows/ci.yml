@@ -392,11 +392,9 @@ jobs:
           sudo gpg --no-default-keyring --keyring /usr/share/keyrings/k6-archive-keyring.gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
           echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
           sudo apt-get update
-          # Pin to the 1.x line the scripts were written against — the apt
-          # repo now serves k6 2.0.0 (new major). Bump deliberately, not via
-          # whatever `apt-get install k6` happens to resolve on the day.
-          K6_V1=$(apt-cache madison k6 | awk '{print $3}' | grep -E '^1\.' | head -1)
-          sudo apt-get install -y "k6=${K6_V1}"
+          # k6 v2: load scripts use ramping-vus / constant-arrival-rate (no
+          # externally-controlled executor). Apt stable now resolves to 2.x.
+          sudo apt-get install -y k6
           k6 version
 
       - name: Seed test users

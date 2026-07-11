@@ -1,6 +1,13 @@
-import { and, eq } from "drizzle-orm";
-import { getDb } from "..";
-import { organizationInvitesTable, organizationMembersTable, organizationsTable } from "../schema";
+import { and, desc, eq, gt, isNull } from "drizzle-orm";
+import { countRows } from "../../shared/dbCount";
+import type { PaginationParams } from "../../shared/pagination";
+import {
+  organizationInvitesTable,
+  organizationMembersTable,
+  organizationsTable,
+  usersTable,
+} from "../schema";
+import { readDb, writeDb } from "./dbConnections";
 
 export interface CreateOrganizationWithOwnerInput {
   name: string;
@@ -28,12 +35,98 @@ export type AcceptOrgInviteResult =
     }
   | { ok: false; reason: "not_found" | "expired" | "email_mismatch" };
 
+const pendingInviteConditions = [
+  isNull(organizationInvitesTable.usedAt),
+  gt(organizationInvitesTable.expiresAt, new Date()),
+] as const;
+
+/** List organizations the user belongs to (read replica). */
+export async function listOrganizationsForUser(userId: string) {
+  const db = readDb();
+  return db
+    .select({ member: organizationMembersTable, org: organizationsTable })
+    .from(organizationMembersTable)
+    .innerJoin(organizationsTable, eq(organizationMembersTable.orgId, organizationsTable.id))
+    .where(eq(organizationMembersTable.userId, userId));
+}
+
+/** Paginated org members with user profile fields (read replica). */
+export async function listOrgMembers(orgId: string, pagination: PaginationParams) {
+  const db = readDb();
+  const where = eq(organizationMembersTable.orgId, orgId);
+  const [members, total] = await Promise.all([
+    db
+      .select({
+        member: organizationMembersTable,
+        user: {
+          id: usersTable.id,
+          email: usersTable.email,
+          displayName: usersTable.displayName,
+          avatarUrl: usersTable.avatarUrl,
+        },
+      })
+      .from(organizationMembersTable)
+      .innerJoin(usersTable, eq(organizationMembersTable.userId, usersTable.id))
+      .where(where)
+      .orderBy(desc(organizationMembersTable.joinedAt))
+      .offset(pagination.offset)
+      .limit(pagination.limit),
+    countRows(db, organizationMembersTable, where),
+  ]);
+  return { members, total };
+}
+
+/** Paginated pending org invites (read replica). */
+export async function listOrgInvites(orgId: string, pagination: PaginationParams) {
+  const db = readDb();
+  const where = and(eq(organizationInvitesTable.orgId, orgId), ...pendingInviteConditions);
+  const [invites, total] = await Promise.all([
+    db
+      .select()
+      .from(organizationInvitesTable)
+      .where(where)
+      .orderBy(desc(organizationInvitesTable.createdAt))
+      .offset(pagination.offset)
+      .limit(pagination.limit),
+    countRows(db, organizationInvitesTable, where),
+  ]);
+  return { invites, total };
+}
+
+/** Pending invites addressed to the caller's email (read replica). */
+export async function listPendingInvitesForEmail(email: string, pagination: PaginationParams) {
+  const db = readDb();
+  const where = and(
+    eq(organizationInvitesTable.email, email.toLowerCase()),
+    ...pendingInviteConditions
+  );
+  const [invites, total] = await Promise.all([
+    db
+      .select({
+        invite: organizationInvitesTable,
+        org: {
+          id: organizationsTable.id,
+          name: organizationsTable.name,
+          slug: organizationsTable.slug,
+        },
+      })
+      .from(organizationInvitesTable)
+      .innerJoin(organizationsTable, eq(organizationInvitesTable.orgId, organizationsTable.id))
+      .where(where)
+      .orderBy(desc(organizationInvitesTable.createdAt))
+      .offset(pagination.offset)
+      .limit(pagination.limit),
+    countRows(db, organizationInvitesTable, where),
+  ]);
+  return { invites, total };
+}
+
 /**
  * Create the organization and its owner membership atomically so a crash between
  * the two writes cannot leave an ownerless organization.
  */
 export async function createOrganizationWithOwner(input: CreateOrganizationWithOwnerInput) {
-  const db = getDb();
+  const db = writeDb();
   return db.transaction(async (tx) => {
     const [createdOrg] = await tx
       .insert(organizationsTable)
@@ -64,7 +157,7 @@ export async function createOrganizationWithOwner(input: CreateOrganizationWithO
  * transaction; callers perform authorization and target-member validation.
  */
 export async function transferOrganizationOwnership(input: TransferOrganizationOwnershipInput) {
-  const db = getDb();
+  const db = writeDb();
   await db.transaction(async (tx) => {
     await tx
       .update(organizationsTable)
@@ -101,7 +194,7 @@ export async function transferOrganizationOwnership(input: TransferOrganizationO
  * invite re-acceptable), and marks the invite consumed.
  */
 export async function acceptOrgInvite(input: AcceptOrgInviteInput): Promise<AcceptOrgInviteResult> {
-  const db = getDb();
+  const db = writeDb();
   return db.transaction(async (tx) => {
     const [invite] = await tx
       .select()

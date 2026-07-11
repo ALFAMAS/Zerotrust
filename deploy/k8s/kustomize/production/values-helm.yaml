@@ -1,0 +1,27 @@
+# Production Helm value overrides — use with:
+#   helm upgrade --install zerotrust deploy/k8s/helm/zerotrust -n zerotrust -f values-helm.yaml
+
+global:
+  imageRegistry: registry.example.com
+
+api:
+  replicaCount: 3
+  hpa:
+    minReplicas: 3
+    maxReplicas: 12
+
+ui:
+  replicaCount: 2
+
+ingress:
+  hosts:
+    - host: example.com
+      paths:
+        - path: /
+          pathType: Prefix
+          service: ui
+    - host: api.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+          service: api

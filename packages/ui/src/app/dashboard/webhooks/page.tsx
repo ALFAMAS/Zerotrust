@@ -30,6 +30,8 @@ import {
   useCreateWebhookEndpointMutation,
   useDeleteWebhookEndpointMutation,
   usePingWebhookEndpointMutation,
+  useReplayWebhookDeliveryMutation,
+  useRotateWebhookSecretMutation,
   useToggleWebhookEndpointMutation,
   useWebhookDeliveriesQuery,
   useWebhookEndpointsQuery,
@@ -51,6 +53,8 @@ export default function WebhooksPage() {
   const createMutation = useCreateWebhookEndpointMutation();
   const deleteMutation = useDeleteWebhookEndpointMutation();
   const pingMutation = usePingWebhookEndpointMutation();
+  const replayMutation = useReplayWebhookDeliveryMutation();
+  const rotateMutation = useRotateWebhookSecretMutation();
   const toggleMutation = useToggleWebhookEndpointMutation();
   const [createOpen, setCreateOpen] = useState(false);
   const [form, setForm] = useState({
@@ -60,6 +64,7 @@ export default function WebhooksPage() {
   });
   const [error, setError] = useState<string | null>(null);
   const [pingResult, setPingResult] = useState<Record<string, string>>({});
+  const [rotatedSecret, setRotatedSecret] = useState<string | null>(null);
   const [deliveriesFor, setDeliveriesFor] = useState<string | null>(null);
   const deliveriesQuery = useWebhookDeliveriesQuery(deliveriesFor, { limit: 50 });
 
@@ -99,6 +104,27 @@ export default function WebhooksPage() {
 
   function openDeliveries(id: string) {
     setDeliveriesFor(id);
+  }
+
+  async function rotateSecret(id: string) {
+    if (!confirm("Rotate signing secret? Update your receiver — the old secret stops working.")) {
+      return;
+    }
+    try {
+      const res = await rotateMutation.mutateAsync(id);
+      setRotatedSecret(res.secret);
+    } catch {
+      alert("Failed to rotate secret");
+    }
+  }
+
+  async function replayDelivery(endpointId: string, deliveryId: string) {
+    try {
+      await replayMutation.mutateAsync({ endpointId, deliveryId });
+      void deliveriesQuery.refetch();
+    } catch {
+      alert("Replay failed");
+    }
   }
 
   async function toggleActive(ep: WebhookEndpoint) {
@@ -202,6 +228,15 @@ export default function WebhooksPage() {
                   type="button"
                   variant="secondary"
                   size="sm"
+                  onClick={() => rotateSecret(ep.id)}
+                  disabled={rotateMutation.isPending}
+                >
+                  Rotate secret
+                </Button>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
                   onClick={() => toggleActive(ep)}
                   disabled={toggleMutation.isPending}
                 >
@@ -221,6 +256,20 @@ export default function WebhooksPage() {
             </Card>
           ))}
         </div>
+      )}
+
+      {rotatedSecret && (
+        <Dialog open={Boolean(rotatedSecret)} onOpenChange={() => setRotatedSecret(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>New signing secret</DialogTitle>
+              <DialogDescription>
+                Copy this secret now — it won&apos;t be shown again.
+              </DialogDescription>
+            </DialogHeader>
+            <code className="block break-all rounded bg-muted p-3 text-xs">{rotatedSecret}</code>
+          </DialogContent>
+        </Dialog>
       )}
 
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
@@ -322,6 +371,7 @@ export default function WebhooksPage() {
                     <TableHead>Try</TableHead>
                     <TableHead>HTTP</TableHead>
                     <TableHead>When</TableHead>
+                    <TableHead />
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -337,6 +387,19 @@ export default function WebhooksPage() {
                       <TableCell>{d.responseStatus ?? d.error ?? "—"}</TableCell>
                       <TableCell className="whitespace-nowrap text-xs text-muted-foreground">
                         {new Date(d.recordedAt).toLocaleString()}
+                      </TableCell>
+                      <TableCell>
+                        {deliveriesFor && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => replayDelivery(deliveriesFor, d.id)}
+                            disabled={replayMutation.isPending}
+                          >
+                            Replay
+                          </Button>
+                        )}
                       </TableCell>
                     </TableRow>
                   ))}

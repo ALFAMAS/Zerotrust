@@ -2,7 +2,7 @@ import type { ExtractTablesWithRelations } from "drizzle-orm";
 import { sql } from "drizzle-orm";
 import type { PgTransaction } from "drizzle-orm/pg-core";
 import type { PostgresJsQueryResultHKT } from "drizzle-orm/postgres-js";
-import { getDb } from "./index";
+import { getDb, getReadDb } from "./index";
 import type * as schema from "./schema";
 
 export const RLS_ORG_SETTING = "app.org_id";
@@ -47,6 +47,18 @@ export async function setOrgRlsContext(
 /** Run `fn` inside a transaction with org RLS context applied. */
 export async function withOrgRls<T>(ctx: OrgRlsContext, fn: (tx: DbTx) => Promise<T>): Promise<T> {
   const db = getDb();
+  return db.transaction(async (tx) => {
+    await setOrgRlsContext(tx, ctx);
+    return fn(tx);
+  });
+}
+
+/** Read-replica variant of `withOrgRls` for SELECT-heavy repository methods. */
+export async function withOrgRlsRead<T>(
+  ctx: OrgRlsContext,
+  fn: (tx: DbTx) => Promise<T>
+): Promise<T> {
+  const db = getReadDb();
   return db.transaction(async (tx) => {
     await setOrgRlsContext(tx, ctx);
     return fn(tx);

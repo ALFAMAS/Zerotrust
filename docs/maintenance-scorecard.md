@@ -1,7 +1,7 @@
 # Quarterly Maintenance Scorecard
 
 **Quarter:** Q3 2026 (Jul – Sep)
-**Last updated:** 2026-07-09 (DQ-2 shipped; **4** open production gaps in [`project/todo.md`](./project/todo.md); SEC-1…SEC-27 + SEC-28 shipped — [`project/shipped.md`](./project/shipped.md))
+**Last updated:** 2026-07-12 (Tier 3 architecture shipped: shared-types, deploy/k8s, terraform, read-replica repos)
 **Owner:** Platform team
 
 Tracked trend: dependency freshness, CI health, test health, migration health,
@@ -18,10 +18,9 @@ backup/restore RTO/RPO, production latency, open security exceptions.
 | Dependabot / Renovate PRs open | _TBD_ | ≤2 | — |
 | Known CVEs in `bun audit --prod` | 0 Critical/High (esbuild low) | 0 Critical/High | ✅ |
 
-**Notes:** Weekly dependency-update workflow runs Fridays; manual review of
-grouped PR merges. Drizzle Kit pinned to `0.31.10` due to upstream generator
-breakage. Total dependencies: 64 (root + devDependencies). Runtime: Bun 1.3.14,
-Node v24.15.0.
+**Notes:** Weekly dependency-update workflow runs Mondays; Dependabot opens individual
+PRs with label routing (`automerge` / `needs-migration` via `dependabot-label.yml`).
+Grouped `dependency-update.yml` PR merges are manual when majors are detected.
 
 ---
 
@@ -176,7 +175,8 @@ tracked in `CLAUDE.md` / `AGENTS.md` — do not duplicate as SEC items.
 | Open backlog (B6–B7) | 0 (P3 Operations & compliance shipped) | 0 | ✅ |
 | P1 security & access control gaps | 0 (B1, B3, ALFA-3 done) | 0 | ✅ |
 | P2 infrastructure backlog | 0 (B4, B5 done) | 0 | ✅ |
-| Open product backlog ([`project/todo.md`](./project/todo.md)) | **2** (AUTH-1, FE-1) | Trending down | 🔶 |
+| Deploy artifacts (k8s Helm, Terraform) | **Shipped** 2026-07-12 — [`deploy/k8s/`](../../deploy/k8s/), [`deploy/terraform/`](../../deploy/terraform/) | ✅ |
+| Shared API↔UI Zod schemas | **Shipped** 2026-07-12 — `@zerotrust/shared-types` | ✅ |
 | Security baseline gaps ([`docs/security.md`](./security.md) §0–§10) | **0 open** SEC items; SEC-1…SEC-27 shipped (SEC-27 2026-07-08) | 0 | ✅ |
 
 ---

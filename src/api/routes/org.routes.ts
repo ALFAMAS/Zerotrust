@@ -1,11 +1,16 @@
 import { randomBytes } from "node:crypto";
-import { and, desc, eq, gt, isNull, sql } from "drizzle-orm";
+import { acceptOrgInviteSchema, createOrgSchema, orgInviteSchema } from "@zerotrust/shared-types";
+import { and, eq, sql } from "drizzle-orm";
 import { Hono } from "hono";
 import { z } from "zod";
 import { getDb, getReadDb } from "../../db";
 import {
   acceptOrgInvite,
   createOrganizationWithOwner,
+  listOrganizationsForUser,
+  listOrgInvites,
+  listOrgMembers,
+  listPendingInvitesForEmail,
   transferOrganizationOwnership,
 } from "../../db/repositories/orgs.repository";
 import {
@@ -13,6 +18,7 @@ import {
   organizationInvitesTable,
   organizationMembersTable,
   organizationsTable,
+  orgFeatureFlagsTable,
   orgSecurityPoliciesTable,
   usersTable,
 } from "../../db/schema";
@@ -29,33 +35,19 @@ import {
   authorizeOrg,
   type OrgMembershipContext,
 } from "../../shared/permissions";
+import { listOrgFeatureFlags } from "../../shared/featureFlags";
 import type { HonoEnv } from "../../shared/types";
 
 const router = new Hono<HonoEnv>();
 const logger = getLogger("org-routes");
 
-const createOrgSchema = z.object({
-  name: z.string().trim().min(1).max(120),
-  slug: z.string().trim().min(1).max(80).optional(),
-});
 const updateOrgSchema = z.object({
   name: z.string().trim().min(1).max(120).optional(),
   logoUrl: z.string().url().nullable().optional(),
   billingEmail: z.string().email().nullable().optional(),
   version: z.number().int().nonnegative().optional(),
 });
-const inviteSchema = z.object({
-  email: z.string().email(),
-  role: z.enum(["admin", "member", "viewer"]).default("member"),
-});
-const acceptInviteSchema = z.object({ token: z.string().min(1) });
 const INVITE_TTL_DAYS = 7;
-
-/** Unused and not yet expired — shared by org-admin and invitee list endpoints. */
-const pendingInviteConditions = [
-  isNull(organizationInvitesTable.usedAt),
-  gt(organizationInvitesTable.expiresAt, new Date()),
-] as const;
 const APP_URL = process.env.APP_URL ?? "http://localhost:3000";
 const transferSchema = z.object({ newOwnerId: z.string().uuid() });
 const securityPolicySchema = z.object({
@@ -69,6 +61,7 @@ const securityPolicySchema = z.object({
   maxConcurrentSessions: z.number().int().min(0).default(0),
   allowedCountries: z.array(z.string().length(2)).default([]),
 });
+
 function slugify(value: string): string {
   const slug = value
     .toLowerCase()
@@ -114,12 +107,7 @@ router.use("*", orgRlsMiddleware());
 
 router.get("/", async (c) => {
   const user = c.get("user");
-  const db = getReadDb();
-  const orgs = await db
-    .select({ member: organizationMembersTable, org: organizationsTable })
-    .from(organizationMembersTable)
-    .innerJoin(organizationsTable, eq(organizationMembersTable.orgId, organizationsTable.id))
-    .where(eq(organizationMembersTable.userId, user.id));
+  const orgs = await listOrganizationsForUser(user.id);
   return c.json({ orgs });
 });
 
@@ -228,27 +216,7 @@ router.get("/:orgId/members", async (c) => {
     return forbiddenResponse(c, err);
   }
   const { page, limit, offset } = parsePaginatedQuery(c.req.query());
-  const where = eq(organizationMembersTable.orgId, orgId);
-  const db = getReadDb();
-  const [members, total] = await Promise.all([
-    db
-      .select({
-        member: organizationMembersTable,
-        user: {
-          id: usersTable.id,
-          email: usersTable.email,
-          displayName: usersTable.displayName,
-          avatarUrl: usersTable.avatarUrl,
-        },
-      })
-      .from(organizationMembersTable)
-      .innerJoin(usersTable, eq(organizationMembersTable.userId, usersTable.id))
-      .where(where)
-      .orderBy(desc(organizationMembersTable.joinedAt))
-      .offset(offset)
-      .limit(limit),
-    countRows(db, organizationMembersTable, where),
-  ]);
+  const { members, total } = await listOrgMembers(orgId, { page, limit, offset });
   return c.json(paginated(members, { page, limit, total }));
 });
 
@@ -312,18 +280,7 @@ router.get("/:orgId/invites", async (c) => {
     return forbiddenResponse(c, err);
   }
   const { page, limit, offset } = parsePaginatedQuery(c.req.query());
-  const where = and(eq(organizationInvitesTable.orgId, orgId), ...pendingInviteConditions);
-  const db = getReadDb();
-  const [invites, total] = await Promise.all([
-    db
-      .select()
-      .from(organizationInvitesTable)
-      .where(where)
-      .orderBy(desc(organizationInvitesTable.createdAt))
-      .offset(offset)
-      .limit(limit),
-    countRows(db, organizationInvitesTable, where),
-  ]);
+  const { invites, total } = await listOrgInvites(orgId, { page, limit, offset });
   return c.json(paginated(invites, { page, limit, total }));
 });
 
@@ -335,7 +292,7 @@ router.post("/:orgId/invites", async (c) => {
   } catch (err) {
     return forbiddenResponse(c, err);
   }
-  const parsed = inviteSchema.safeParse(await c.req.json().catch(() => ({})));
+  const parsed = orgInviteSchema.safeParse(await c.req.json().catch(() => ({})));
   if (!parsed.success)
     return c.json({ error: "VALIDATION_ERROR", message: parsed.error.issues[0]?.message }, 400);
   const email = parsed.data.email.toLowerCase();
@@ -400,35 +357,13 @@ router.post("/:orgId/invites", async (c) => {
 router.get("/invites/mine", async (c) => {
   const user = c.get("user");
   const { page, limit, offset } = parsePaginatedQuery(c.req.query());
-  const where = and(
-    eq(organizationInvitesTable.email, user.email.toLowerCase()),
-    ...pendingInviteConditions
-  );
-  const db = getReadDb();
-  const [invites, total] = await Promise.all([
-    db
-      .select({
-        invite: organizationInvitesTable,
-        org: {
-          id: organizationsTable.id,
-          name: organizationsTable.name,
-          slug: organizationsTable.slug,
-        },
-      })
-      .from(organizationInvitesTable)
-      .innerJoin(organizationsTable, eq(organizationInvitesTable.orgId, organizationsTable.id))
-      .where(where)
-      .orderBy(desc(organizationInvitesTable.createdAt))
-      .offset(offset)
-      .limit(limit),
-    countRows(db, organizationInvitesTable, where),
-  ]);
+  const { invites, total } = await listPendingInvitesForEmail(user.email, { page, limit, offset });
   return c.json(paginated(invites, { page, limit, total }));
 });
 
 router.post("/invites/accept", async (c) => {
   const user = c.get("user");
-  const parsed = acceptInviteSchema.safeParse(await c.req.json().catch(() => ({})));
+  const parsed = acceptOrgInviteSchema.safeParse(await c.req.json().catch(() => ({})));
   if (!parsed.success)
     return c.json({ error: "VALIDATION_ERROR", message: parsed.error.issues[0]?.message }, 400);
 
@@ -539,6 +474,79 @@ router.put("/:orgId/security/policy", async (c) => {
     })
     .returning();
   return c.json({ policy });
+});
+
+const featureFlagSchema = z.object({
+  key: z.string().trim().min(1).max(100).regex(/^[a-z0-9_.-]+$/i),
+  enabled: z.boolean(),
+  rolloutPercent: z.number().int().min(0).max(100).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
+});
+
+router.get("/:orgId/feature-flags", async (c) => {
+  const user = c.get("user");
+  const orgId = c.req.param("orgId");
+  try {
+    await authorizeOrg(user, "org:read", orgId, getMembership);
+  } catch (err) {
+    return forbiddenResponse(c, err);
+  }
+  const flags = await listOrgFeatureFlags(orgId);
+  return c.json({ flags });
+});
+
+router.put("/:orgId/feature-flags/:key", async (c) => {
+  const user = c.get("user");
+  const orgId = c.req.param("orgId");
+  const key = c.req.param("key");
+  try {
+    await authorizeOrg(user, "org:update", orgId, getMembership);
+  } catch (err) {
+    return forbiddenResponse(c, err);
+  }
+  const parsed = featureFlagSchema.safeParse({
+    ...(await c.req.json().catch(() => ({}))),
+    key,
+  });
+  if (!parsed.success) {
+    return c.json({ error: "VALIDATION_ERROR", message: parsed.error.issues[0]?.message }, 400);
+  }
+  const { enabled, rolloutPercent, metadata } = parsed.data;
+  const [flag] = await getDb()
+    .insert(orgFeatureFlagsTable)
+    .values({
+      orgId,
+      key,
+      enabled,
+      rolloutPercent: rolloutPercent ?? 100,
+      metadata: metadata ?? {},
+    })
+    .onConflictDoUpdate({
+      target: [orgFeatureFlagsTable.orgId, orgFeatureFlagsTable.key],
+      set: {
+        enabled,
+        rolloutPercent: rolloutPercent ?? 100,
+        metadata: metadata ?? {},
+        updatedAt: new Date(),
+      },
+    })
+    .returning();
+  return c.json({ flag });
+});
+
+router.delete("/:orgId/feature-flags/:key", async (c) => {
+  const user = c.get("user");
+  const orgId = c.req.param("orgId");
+  const key = c.req.param("key");
+  try {
+    await authorizeOrg(user, "org:update", orgId, getMembership);
+  } catch (err) {
+    return forbiddenResponse(c, err);
+  }
+  await getDb()
+    .delete(orgFeatureFlagsTable)
+    .where(and(eq(orgFeatureFlagsTable.orgId, orgId), eq(orgFeatureFlagsTable.key, key)));
+  return c.body(null, 204);
 });
 
 export default router;

@@ -1,26 +1,16 @@
+import {
+  passwordSchemaExport as passwordSchema,
+  type RegisterBodyInput,
+  type RegisterInput,
+  registerBodySchema,
+  registerSchema,
+} from "@zerotrust/shared-types";
 import { z } from "zod";
 
-const passwordSchema = z
-  .string()
-  .min(8, "Password must be at least 8 characters")
-  .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
-  .regex(/[a-z]/, "Password must contain at least one lowercase letter")
-  .regex(/[0-9]/, "Password must contain at least one digit")
-  .regex(/[^A-Za-z0-9]/, "Password must contain at least one special character");
-
-export const RegisterSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  password: passwordSchema,
-  displayName: z.string().min(1).max(100).optional(),
-});
+export const RegisterSchema = registerSchema;
 
 /** Register body including optional PoW, locale, and CAPTCHA fields. */
-export const RegisterBodySchema = RegisterSchema.extend({
-  locale: z.string().optional(),
-  powChallenge: z.string().optional(),
-  powSolution: z.string().optional(),
-  captchaToken: z.string().optional(),
-});
+export const RegisterBodySchema = registerBodySchema;
 
 export const LoginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -54,7 +44,7 @@ export const LogoutSchema = z.object({
   sessionId: z.string().optional(),
 });
 
-export type RegisterInput = z.infer<typeof RegisterSchema>;
+export type { RegisterBodyInput, RegisterInput };
 export type LoginInput = z.infer<typeof LoginSchema>;
 export type RefreshTokenInput = z.infer<typeof RefreshTokenSchema>;
 export type PasswordResetRequestInput = z.infer<typeof PasswordResetRequestSchema>;

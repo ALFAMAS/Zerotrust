@@ -102,6 +102,14 @@ export const apiKeyAuth = createMiddleware<HonoEnv>(async (c, next) => {
   // Metered usage: count this API call against the billing period
   void incrementUsage("api_calls", scope);
   void incrementUsage(keyMetric, scope);
+  void import("../services/billing/stripeMeter.service.js").then(({ recordStripeMeterEvent }) =>
+    recordStripeMeterEvent({
+      orgId: key.orgId ?? undefined,
+      userId: key.userId,
+      metric: "api_calls",
+      quantity: 1,
+    })
+  );
 
   c.set("user", user as unknown as User);
   c.set("apiKeyId", key.id);

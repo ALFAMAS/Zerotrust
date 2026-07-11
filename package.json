@@ -40,6 +40,7 @@
     "lint:ci": "biome ci",
     "load:auth-cache": "k6 run tests/load/auth-cache.k6.js",
     "load:login": "k6 run tests/load/login.k6.js",
+    "branch-protection:check": "bun scripts/ci/verify-branch-protection.ts",
     "boundaries:check": "bun run scripts/ci/check-boundaries.ts",
     "org-scoping:check": "bun run scripts/ci/check-org-scoping.ts",
     "migrations:check": "bun run scripts/ci/check-destructive-migrations.ts",
@@ -60,6 +61,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1075.0",
+    "@zerotrust/shared-types": "workspace:*",
     "@elastic/elasticsearch": "^9.4.2",
     "@hono/node-server": "^2.0.6",
     "@hono/zod-validator": "^0.8.0",

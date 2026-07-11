@@ -1,0 +1,14 @@
+# Example only — copy to terraform.tfvars (gitignored) and fill real values.
+# Never commit secrets.
+
+environment = "staging"
+aws_region  = "us-east-1"
+
+dns_zone_name      = "example.com"
+dns_api_hostname   = "api-staging.example.com"
+dns_app_hostname   = "staging.example.com"
+dns_ingress_target = "" # set after k8s ingress is live
+
+object_storage_bucket_name = "zerotrust-app-storage"
+
+# postgres_master_password — set via TF_VAR_postgres_master_password instead

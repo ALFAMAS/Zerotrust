@@ -15,9 +15,12 @@ All page-level reads and writes go through domain modules in
 | --- | --- |
 | `queryKeys.ts` | Hierarchical cache keys (`queryKeys.auth.me()`, `queryKeys.organizations.detail(id)`, …) |
 | `<domain>.ts` | `fetch*` helpers, `queryOptions`, `use*Query`, `use*Mutation` |
-| `types.ts` | Shared response/input types |
+| `types.ts` | Shared response/input types (core auth/org shapes from `@zerotrust/shared-types`) |
 | `prefetch.ts` | RSC-safe fetchers + `queryOptions` for server prefetch |
 | `QueryProvider.tsx` | Single app-level `QueryClientProvider` (30s stale time, no refetch on focus) |
+
+Shared Zod schemas live in [`packages/shared-types/`](../packages/shared-types/) —
+see [`docs/shared-types.md`](./shared-types.md).
 
 Pages import hooks (`useAuthMeQuery`, `useOrganizationsListQuery`, …) — not
 `apiGet`/`apiPost` directly. One-off utilities (`push.ts`, `pow.ts`) may call

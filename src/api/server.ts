@@ -52,6 +52,7 @@ import orgRoutes from "./routes/org.routes";
 import passkeyRoutes from "./routes/passkey.routes";
 import passwordResetRoutes from "./routes/password-reset.routes";
 import regionRoutes from "./routes/region.routes";
+import scimRoutes from "./routes/scim.routes";
 import searchRoutes from "./routes/search.routes";
 import sessionRoutes from "./routes/session.routes";
 import supportRoutes from "./routes/support.routes";
@@ -224,6 +225,7 @@ export async function createServer() {
   app.route("/compliance", complianceRoutes);
 
   // ─── User-facing webhook management (developer feature) ──────────────────
+  app.route("/scim/v2", scimRoutes);
   app.route("/webhooks", webhookManagementRoutes);
 
   // ─── SSF webhook endpoint ─────────────────────────────────────────────────
@@ -322,12 +324,23 @@ export async function createServer() {
         ? "degraded"
         : "operational";
 
+    void import("../services/ops/statusHistory.service.js").then(({ recordStatusSnapshot }) =>
+      recordStatusSnapshot(components)
+    );
+
     return c.json({
       status: overall,
       components,
       uptimeSeconds: Math.floor((Date.now() - serverStartedAt) / 1000),
       timestamp: new Date().toISOString(),
     });
+  });
+
+  app.get("/status/history", async (c) => {
+    const days = Math.min(90, parseInt(c.req.query("days") ?? "90", 10) || 90);
+    const { getStatusHistory } = await import("../services/ops/statusHistory.service.js");
+    const history = await getStatusHistory(days);
+    return c.json({ history, days });
   });
 
   // SSE stream for real-time status updates

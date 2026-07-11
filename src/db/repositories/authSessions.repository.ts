@@ -1,9 +1,11 @@
-import { and, eq, inArray } from "drizzle-orm";
+import { and, desc, eq, inArray } from "drizzle-orm";
 import { hashTokenSha256 } from "../../shared/cryptoHash";
+import { countRows } from "../../shared/dbCount";
+import type { PaginationParams } from "../../shared/pagination";
 import type { User } from "../../shared/types";
-import { getDb } from "..";
 import { verifyOrgMembership } from "../orgMembership";
 import { refreshTokensTable, sessionsTable, usersTable } from "../schema";
+import { readDb, writeDb } from "./dbConnections";
 
 export type RefreshSessionInsert = typeof sessionsTable.$inferInsert;
 export type RefreshTokenReplacementInsert = Omit<
@@ -35,7 +37,7 @@ export interface CreateImpersonationSessionInput {
  * orphan session without a refresh token (or vice versa).
  */
 export async function createAuthenticatedSession(input: CreateAuthenticatedSessionInput) {
-  const db = getDb();
+  const db = writeDb();
   return db.transaction(async (tx) => {
     const [session] = await tx.insert(sessionsTable).values(input.session).returning();
     if (!session) throw new Error("SESSION_CREATE_FAILED");
@@ -62,7 +64,7 @@ export async function createAuthenticatedSession(input: CreateAuthenticatedSessi
  * matches the transaction pattern used by `createAuthenticatedSession()`.
  */
 export async function createImpersonationSession(input: CreateImpersonationSessionInput) {
-  const db = getDb();
+  const db = writeDb();
   return db.transaction(async (tx) => {
     const fp = input.session.deviceFingerprint as
       | { impersonatedBy?: string; impersonatorEmail?: string }
@@ -95,7 +97,7 @@ export async function revokeRefreshTokenFamily(
   familyId: string,
   reason = "refresh_token_reuse"
 ): Promise<void> {
-  const db = getDb();
+  const db = writeDb();
   await db.transaction(async (tx) => {
     const familySessions = await tx
       .select({ sessionId: refreshTokensTable.sessionId })
@@ -127,7 +129,7 @@ export async function revokeRefreshTokenFamily(
  * replacement session, then persist the replacement refresh token.
  */
 export async function rotateRefreshToken(input: RotateRefreshTokenInput) {
-  const db = getDb();
+  const db = writeDb();
   return db.transaction(async (tx) => {
     await tx
       .update(refreshTokensTable)
@@ -158,7 +160,7 @@ export interface RevokeSessionAtLogoutInput {
  * commit or roll back together so a stolen token cannot survive cookie deletion.
  */
 export async function revokeSessionAtLogout(input: RevokeSessionAtLogoutInput): Promise<boolean> {
-  const db = getDb();
+  const db = writeDb();
   let revoked = false;
 
   await db.transaction(async (tx) => {
@@ -219,7 +221,7 @@ export async function setSessionActiveOrg(input: SetSessionActiveOrgInput): Prom
     if (!allowed) return false;
   }
 
-  const db = getDb();
+  const db = writeDb();
   const [updated] = await db
     .update(sessionsTable)
     .set({ activeOrgId: input.orgId, updatedAt: new Date() })
@@ -227,4 +229,21 @@ export async function setSessionActiveOrg(input: SetSessionActiveOrgInput): Prom
     .returning({ id: sessionsTable.id });
 
   return Boolean(updated);
+}
+
+/** Paginated active sessions for a user (read replica). */
+export async function listUserSessions(userId: string, pagination: PaginationParams) {
+  const db = readDb();
+  const where = eq(sessionsTable.userId, userId);
+  const [sessions, total] = await Promise.all([
+    db
+      .select()
+      .from(sessionsTable)
+      .where(where)
+      .orderBy(desc(sessionsTable.lastActivityAt))
+      .offset(pagination.offset)
+      .limit(pagination.limit),
+    countRows(db, sessionsTable, where),
+  ]);
+  return { sessions, total };
 }

@@ -1,0 +1,21 @@
+{{- if .Values.migrate.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "zerotrust.fullname" . }}-migrate-{{ .Release.Revision }}
+  labels:
+    {{- include "zerotrust.labels" . | nindent 4 }}
+spec:
+  ttlSecondsAfterFinished: {{ .Values.migrate.ttlSecondsAfterFinished }}
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: migrate
+          image: "{{ .Values.global.imageRegistry }}/{{ .Values.migrate.image.repository }}:{{ .Values.migrate.image.tag }}"
+          command:
+            {{- toYaml .Values.migrate.command | nindent 12 }}
+          envFrom:
+            - secretRef:
+                name: {{ .Values.migrate.envFromSecret }}
+{{- end }}

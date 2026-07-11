@@ -1,3 +1,8 @@
+import type {
+  AcceptOrgInviteInput,
+  RegisterInput as SharedRegisterInput,
+} from "@zerotrust/shared-types";
+
 export interface PaginatedResponse<T> {
   data: T[];
   pagination?: {
@@ -304,6 +309,12 @@ export interface AuthMe {
   mfa?: AuthMeMfa;
   passkeys?: AuthMePasskey[];
   oauthProviders?: Array<{ provider: string; email?: string; connectedAt?: string }>;
+  onboarding?: {
+    hasOrg?: boolean;
+    hasSentInvite?: boolean;
+    hasMfa?: boolean;
+    hasApiKey?: boolean;
+  };
 }
 
 export interface PatchAuthMeInput {
@@ -607,13 +618,11 @@ export interface LoginResponse extends LoginTokens {
   mfaToken?: string;
 }
 
-export interface RegisterInput {
-  email: string;
-  password: string;
-  displayName: string;
+/** Register payload — core fields from @zerotrust/shared-types plus optional PoW. */
+export type RegisterInput = SharedRegisterInput & {
   powChallenge?: string;
   powSolution?: string;
-}
+};
 
 export interface PasswordResetRequestInput {
   email: string;
@@ -724,9 +733,7 @@ export interface TransferOrganizationInput {
   newOwnerId: string;
 }
 
-export interface AcceptInviteInput {
-  token: string;
-}
+export type AcceptInviteInput = AcceptOrgInviteInput;
 
 export interface AcceptInviteResponse {
   org: Pick<Organization, "id" | "name" | "slug"> | null;
@@ -777,4 +784,15 @@ export interface StatusData {
   components: Record<string, StatusComponentState>;
   uptimeSeconds: number;
   timestamp: string;
+}
+
+export interface StatusHistorySnapshot {
+  date: string;
+  status: "operational" | "degraded" | "down";
+  components: Record<string, StatusComponentState>;
+}
+
+export interface StatusHistoryResponse {
+  history: StatusHistorySnapshot[];
+  days: number;
 }

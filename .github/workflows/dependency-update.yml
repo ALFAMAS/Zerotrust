@@ -30,10 +30,22 @@ jobs:
         with:
           bun-version-file: .bun-version
 
+      - name: Snapshot package manifests (pre-bump)
+        run: |
+          cp package.json /tmp/package.root.before.json
+          cp packages/ui/package.json /tmp/package.ui.before.json
+
       - name: Update dependencies to latest
         run: |
           bun update --latest
           bun install
+
+      - name: Detect semver-major bumps
+        id: majors
+        run: |
+          bun scripts/ci/detect-major-bumps.ts \
+            /tmp/package.root.before.json package.json \
+            /tmp/package.ui.before.json packages/ui/package.json
 
       - name: Lint & format
         run: bun run lint:ci
@@ -60,5 +72,7 @@ jobs:
             opened: lint, type-check, tests, generated-output drift, and the UI
             build. CI re-runs the same gates on this PR.
 
-            Review the lockfile and any major version bumps before merging.
-          labels: dependencies
+            ${{ steps.majors.outputs.has_majors == 'true' && '**Contains semver-major bumps** — manual migration review required (`needs-migration`).' || 'Minor/patch only — review lockfile then merge.' }}
+          labels: |
+            dependencies
+            ${{ steps.majors.outputs.has_majors == 'true' && 'needs-migration' || '' }}

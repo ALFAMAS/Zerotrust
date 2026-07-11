@@ -33,6 +33,11 @@ export class WebhookDeliveryLog {
     return entry;
   }
 
+  /** Look up one delivery by id (for replay). */
+  get(endpointId: string, deliveryId: string): WebhookDeliveryLogEntry | null {
+    return (this.byEndpoint.get(endpointId) ?? []).find((d) => d.id === deliveryId) ?? null;
+  }
+
   /** Most-recent-first delivery attempts for one endpoint. */
   list(endpointId: string, limit = 50): WebhookDeliveryLogEntry[] {
     return (this.byEndpoint.get(endpointId) ?? []).slice(0, limit);

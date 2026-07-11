@@ -13,6 +13,7 @@ import { sensitiveReverification } from "../../middleware/continuousVerification
 import { orgRlsMiddleware } from "../../middleware/orgRls";
 import { getStripe } from "../../services/billing/stripeWebhookProcessor";
 import { getUsageSummary } from "../../services/billing/usage.service";
+import { recordStripeMeterEvent } from "../../services/billing/stripeMeter.service";
 import { internalError } from "../../shared/httpErrors";
 import type { HonoEnv } from "../../shared/types";
 
@@ -80,6 +81,32 @@ router.get("/usage", async (c) => {
 
   const summary = await getUsageSummary(orgId ? { orgId } : { userId: user.id });
   return c.json(summary);
+});
+
+// POST /billing/usage-events — record a metered usage event (org-scoped)
+router.post("/usage-events", async (c) => {
+  const user = c.get("user");
+  const body = await c.req.json().catch(() => ({}));
+  const orgId = body.orgId as string | undefined;
+  const metric = (body.metric as string) || "api_calls";
+  const quantity = parseInt(String(body.quantity ?? "1"), 10) || 1;
+
+  if (orgId && !(await canManageOrgBilling(orgId, user.id))) {
+    return c.json({ error: "FORBIDDEN", message: "Org owner or admin required" }, 403);
+  }
+
+  const { incrementUsage } = await import("../../shared/usageMetering.js");
+  const scope = orgId ? { orgId } : { userId: user.id };
+  await incrementUsage(metric as "api_calls", scope, quantity);
+
+  const stripeRecorded = await recordStripeMeterEvent({
+    orgId,
+    userId: user.id,
+    metric,
+    quantity,
+  });
+
+  return c.json({ ok: true, metric, quantity, stripeRecorded });
 });
 
 // POST /billing/checkout — body: { priceId, orgId? }

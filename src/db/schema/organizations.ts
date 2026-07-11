@@ -154,6 +154,48 @@ export const trustedDevicesTable = pgTable(
   })
 );
 
+export const orgFeatureFlagsTable = pgTable(
+  "org_feature_flags",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    orgId: uuid("org_id")
+      .notNull()
+      .references(() => organizationsTable.id, { onDelete: "cascade" }),
+    key: text("key").notNull(),
+    enabled: boolean("enabled").notNull().default(false),
+    rolloutPercent: integer("rollout_percent").notNull().default(100),
+    metadata: jsonb("metadata").$type<Record<string, unknown>>().notNull().default(sql`'{}'::jsonb`),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (t) => ({
+    uniqOrgKey: unique().on(t.orgId, t.key),
+    orgFeatureFlagsOrgIdx: index("org_feature_flags_org_id_idx").on(t.orgId),
+  })
+);
+
+/** Per-org SCIM bearer tokens (migration 0012). */
+export const orgScimTokensTable = pgTable(
+  "org_scim_tokens",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    orgId: uuid("org_id")
+      .notNull()
+      .references(() => organizationsTable.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    tokenPrefix: text("token_prefix").notNull(),
+    tokenHash: text("token_hash").notNull().unique(),
+    expiresAt: timestamp("expires_at"),
+    lastUsedAt: timestamp("last_used_at"),
+    revokedAt: timestamp("revoked_at"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    createdBy: uuid("created_by").references(() => usersTable.id, { onDelete: "set null" }),
+  },
+  (t) => ({
+    orgScimTokensOrgIdx: index("org_scim_tokens_org_id_idx").on(t.orgId),
+  })
+);
+
 export const crossTenantJITRequestsTable = pgTable(
   "cross_tenant_jit_requests",
   {

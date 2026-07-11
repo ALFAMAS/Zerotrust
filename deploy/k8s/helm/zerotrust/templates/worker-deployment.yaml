@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "zerotrust.fullname" . }}-worker
+  labels:
+    {{- include "zerotrust.labels" . | nindent 4 }}
+    app: zerotrust-worker
+spec:
+  replicas: {{ .Values.worker.replicaCount }}
+  selector:
+    matchLabels:
+      app: zerotrust-worker
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: zerotrust-worker
+        release: {{ .Release.Name }}
+    spec:
+      {{- if .Values.worker.antiAffinity }}
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchLabels:
+                  app: zerotrust-worker
+                  release: {{ .Release.Name }}
+              topologyKey: kubernetes.io/hostname
+      {{- end }}
+      {{- with .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: worker
+          image: "{{ .Values.global.imageRegistry }}/{{ .Values.worker.image.repository }}:{{ .Values.worker.image.tag }}"
+          imagePullPolicy: {{ .Values.worker.image.pullPolicy }}
+          command:
+            {{- toYaml .Values.worker.command | nindent 12 }}
+          envFrom:
+            - secretRef:
+                name: {{ .Values.worker.envFromSecret }}
+          resources:
+            {{- toYaml .Values.worker.resources | nindent 12 }}

@@ -17,28 +17,29 @@ interface ChecklistItem {
 
 const ITEMS: ChecklistItem[] = [
   {
-    id: "email_verified",
-    label: "Verify your email",
-    href: "/verify-email",
-    check: (u) => u?.emailVerified === true || u?.attributes?.emailVerified === true,
+    id: "create_org",
+    label: "Create an organization",
+    href: "/dashboard/organizations",
+    check: (u) => u?.onboarding?.hasOrg === true,
   },
   {
-    id: "display_name",
-    label: "Set your display name",
-    href: "/dashboard/profile",
-    check: (u) => !!u?.displayName && u.displayName !== u.email,
+    id: "invite_member",
+    label: "Invite a team member",
+    href: "/dashboard/organizations",
+    check: (u) => u?.onboarding?.hasSentInvite === true,
   },
   {
     id: "mfa_enabled",
     label: "Enable two-factor authentication",
     href: "/dashboard/security",
-    check: (u) => u?.mfa?.totp?.enabled === true,
+    check: (u) =>
+      u?.onboarding?.hasMfa === true || u?.mfa?.totp?.enabled === true || u?.mfa?.webauthn?.enabled === true,
   },
   {
-    id: "avatar",
-    label: "Upload a profile photo",
-    href: "/dashboard/profile",
-    check: (u) => !!u?.avatarUrl,
+    id: "api_key",
+    label: "Create an API key",
+    href: "/dashboard/api-keys",
+    check: (u) => u?.onboarding?.hasApiKey === true,
   },
 ];
 
@@ -57,8 +58,6 @@ export default function SetupChecklist({ user }: { user: AuthMe | null }) {
   const total = ITEMS.length;
   const allDone = !!user && completed.length === total;
 
-  // Fire onboarding-complete when all items are done. Declared before any early
-  // return so the hook order stays stable across renders (Rules of Hooks).
   useEffect(() => {
     if (allDone && !celebrated) {
       setCelebrated(true);
@@ -108,7 +107,6 @@ export default function SetupChecklist({ user }: { user: AuthMe | null }) {
         {completed.length}/{total} steps completed
       </p>
 
-      {/* Progress bar */}
       <div className="mb-5 h-2 rounded-full bg-muted">
         <div className="h-2 rounded-full bg-primary transition-all" style={{ width: `${pct}%` }} />
       </div>

@@ -16,41 +16,41 @@ live in [`todo.md`](./todo.md); this doc is the forward-looking menu.
 
 | # | Upgrade | Size | Why |
 | - | ------- | ---- | --- |
-| 1 | **Branch protection + merge queue on `main`** | 🟢 | Three CI-breaking direct pushes landed in one week (unmigrated Tailwind v4, unmigrated TS7, stale lockfile). Require the CI check before merge; direct pushes to `main` off. |
+| 1 | **Branch protection + merge queue on `main`** | ✅ shipped | Operator runbook + `bun run branch-protection:check` in `docs/deployment.md` § Branch protection; apply via GitHub UI or `gh api` (repo admin). |
 | 2 | **Schema↔migrations drift guard in CI** (MIG-4) | ✅ shipped | Run `drizzle-kit generate` in CI and fail on a non-empty diff — prevents the "column shipped in code without a migration" class that `0041` had to repair. |
-| 3 | **Dependabot majors policy** | 🟢 | Keep grouped minor/patch bumps auto-mergeable; route majors to a `needs-migration` label instead of ignores per-package (today: tailwindcss + typescript ignored ad-hoc). |
-| 4 | **Per-PR preview environments** | 🟡 | Compose stack per PR (Fly.io/Railway/Coolify or a k8s namespace) so UI changes are reviewable without local setup. |
+| 3 | **Dependabot majors policy** | ✅ shipped | `dependabot-label.yml` + `dependabot-auto-merge.yml`; no per-package semver-major ignores — majors get `needs-migration`, minor/patch get `automerge`. |
+| 4 | **Per-PR preview environments** | ✅ shipped | `pr-preview.yml` + `docker-compose.preview.yml` — CI compose smoke per PR with sticky comment; optional `PREVIEW_SSH_*` cloud path documented. |
 
 ## Tier 2 — deliberate toolchain migrations (currently pinned)
 
 | # | Upgrade | Size | Notes |
 | - | ------- | ---- | ----- |
-| 5 | **Tailwind v4** | 🟡 | `@tailwindcss/postcss`, CSS-first config, migrate `globals.css` tokens; then drop both Dependabot ignores. |
-| 6 | **TypeScript 7 (native compiler)** | 🟡 | Blocked on Next.js support. API side already compiles under TS7; adopt repo-wide when Next accepts it. ~10× faster type-checks. |
-| 7 | **k6 v2** | 🟢 | Validate `tests/load/*.k6.js` against v2 semantics, unpin the apt install in `ci.yml`. |
+| 5 | **Tailwind v4** | ✅ shipped | `@tailwindcss/postcss`, CSS-first `@theme inline` in `globals.css`, `tw-animate-css`; Dependabot tailwindcss ignore removed. |
+| 6 | **TypeScript 7 (native compiler)** | 🟡 | Blocked: Next.js 16.2.10 refuses `next build` with TS7 ("Failed to install required TypeScript dependencies"). API `tsc --noEmit` may pass; adopt repo-wide when Next accepts it. |
+| 7 | **k6 v2** | ✅ shipped | Load scripts validated against v2 (no `externally-controlled` / deprecated APIs); apt pin removed in `ci.yml`. |
 
 ## Tier 3 — architecture (fork-friendly structure)
 
 | # | Upgrade | Size | Notes |
 | - | ------- | ---- | ----- |
-| 8 | **`packages/shared-types`** | 🟡 | Single source of Zod schemas consumed by API validation *and* UI forms/SDK — removes the drift the API↔UI integration matrix currently polices after the fact. |
-| 9 | **`apps/api` + `apps/web` workspace rename** | 🔴 | Symmetric workspaces; large blast radius (Dockerfiles, compose, workflows, docs) — only with a concrete driver such as a second app. |
-| 10 | **`deploy/k8s/` Helm chart** | 🟡 | Blueprint 3 in `reference-architecture.md` exists on paper; ship the chart + kustomize overlays. |
-| 11 | **Terraform/OpenTofu module** | 🟡 | VPC + managed PG/Redis + object storage + DNS in one `terraform apply`, matching the VPS hardening runbook. |
-| 12 | **Read-replica routing** | 🟡 | `DATABASE_URL_READ_REPLICA` is plumbed; add a repository-level read/write split for hot list endpoints. |
+| 8 | **`packages/shared-types`** | ✅ shipped | `@zerotrust/shared-types` — pilot Zod schemas (pagination, register, org invite, API error envelope); wired in API + UI; see [`docs/shared-types.md`](../shared-types.md). |
+| 9 | **`apps/api` + `apps/web` workspace rename** | 🔴 deferred | Symmetric workspaces; large blast radius — **blocked** until a concrete driver (e.g. second app). Tracked in [`todo.md`](./todo.md). |
+| 10 | **`deploy/k8s/` Helm chart** | ✅ shipped | `deploy/k8s/helm/zerotrust/` + kustomize overlays (`base/`, `staging/`, `production/`); see [`deploy/k8s/README.md`](../../deploy/k8s/README.md). |
+| 11 | **Terraform/OpenTofu module** | ✅ shipped | `deploy/terraform/` — VPC, RDS Postgres + replicas, ElastiCache Redis, S3, Route 53 DNS scaffold; see [`deploy/terraform/README.md`](../../deploy/terraform/README.md). |
+| 12 | **Read-replica routing** | ✅ shipped | `readDb()` / `writeDb()` in `src/db/repositories/dbConnections.ts`; org/session/webhook repos route SELECTs to replica; tests in `repositories.readReplica.test.ts`. |
 
 ## Tier 4 — product/SaaS surface (differentiators for a starter template)
 
 | # | Upgrade | Size | Notes |
 | - | ------- | ---- | ----- |
-| 13 | **Usage-based billing (Stripe meters)** | 🔴 | Wallet + points ledger exist; add metered events → Stripe usage records → invoice line items. The API-key `rate_limit_per_minute`/`monthly_quota` columns are already in the schema. |
-| 14 | **Feature flags** | 🟡 | Org-scoped flags table + `assertCan()`-style helper + admin toggle UI; unlocks progressive delivery for forks. |
-| 15 | **Customer webhooks portal** | 🟡 | Delivery/retry infra exists (`src/webhooks/`); add the dashboard surface: endpoint CRUD, delivery log, replay button, signing-secret rotation. |
-| 16 | **SCIM 2.0 provisioning** | 🔴 | `org_scim_tokens` table exists; implement /scim/v2 Users+Groups against it — the enterprise checkbox. |
-| 17 | **Audit log SIEM export** | 🟢 | Hash-chained audit log already streams to Elasticsearch; add a signed NDJSON export endpoint + S3 drop for Splunk/Datadog ingestion. |
-| 18 | **Public status page** | 🟢 | `GET /status` has components; render a public Next.js page + uptime history off it. |
-| 19 | **In-app onboarding checklist** | 🟡 | First-run task list (create org → invite → enable MFA → create API key) — big template-adoption win. |
-| 20 | **Admin analytics dashboard** | 🟡 | MRR/ARR panels exist; add cohort retention, auth-method mix, and anomaly trends from data already collected. |
+| 13 | **Usage-based billing (Stripe meters)** | ✅ shipped | `stripeMeter.service.ts` + `POST /billing/usage-events`; API-key middleware fans out meter events when `STRIPE_METER_ENABLED=true`. |
+| 14 | **Feature flags** | ✅ shipped | `org_feature_flags` table + `isFeatureEnabled()` + org settings UI panel. |
+| 15 | **Customer webhooks portal** | ✅ shipped | Dashboard CRUD + deliveries + replay + rotate-secret (`POST /webhooks/:id/replay/:deliveryId`, `POST /webhooks/:id/rotate-secret`). |
+| 16 | **SCIM 2.0 provisioning** | ✅ shipped | `/scim/v2/Users` + `/scim/v2/Groups` with org bearer tokens (`org_scim_tokens`). |
+| 17 | **Audit log SIEM export** | ✅ shipped | `GET /admin/audit/export/ndjson` (HMAC-signed) + `POST …/upload` S3 drop via `BACKUP_S3_*`. |
+| 18 | **Public status page** | ✅ shipped | `/status` page + `GET /status/history` 90-day daily snapshots (Redis or in-memory). |
+| 19 | **In-app onboarding checklist** | ✅ shipped | Org → invite → MFA → API key flow; `onboarding` hints on `GET /auth/me`. |
+| 20 | **Admin analytics dashboard** | ✅ shipped | `GET /admin/analytics` + `/admin/analytics` UI (cohorts, auth mix, anomaly trends). |
 
 ## Tier 5 — security hardening beyond baseline
 

@@ -37,6 +37,7 @@ const navItems: NavItem[] = [
   { href: "/admin/users", icon: Users, label: "Users" },
   { href: "/admin/roles", icon: KeyRound, label: "Roles" },
   { href: "/admin/revenue", icon: Wallet, label: "Revenue" },
+  { href: "/admin/analytics", icon: Activity, label: "Analytics" },
   { href: "/admin/sessions", icon: Monitor, label: "Sessions" },
   { href: "/admin/feedback", icon: MessageSquare, label: "Feedback" },
   { href: "/admin/anomaly", icon: Activity, label: "Anomaly Detection" },

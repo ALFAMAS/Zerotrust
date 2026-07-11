@@ -1,13 +1,15 @@
-import { and, desc, eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { z } from "zod";
-import { getDb, getReadDb } from "../../db";
-import { setSessionActiveOrg } from "../../db/repositories/authSessions.repository";
+import { getDb } from "../../db";
+import {
+  listUserSessions,
+  setSessionActiveOrg,
+} from "../../db/repositories/authSessions.repository";
 import { sessionsTable } from "../../db/schema";
 import { getLogger } from "../../logger";
 import { authMiddleware } from "../../middleware/auth";
 import { revokeAllSessionsForUser, revokeSession } from "../../middleware/sessionControl";
-import { countRows } from "../../shared/dbCount";
 import { internalError } from "../../shared/httpErrors";
 import { paginated, parsePaginatedQuery } from "../../shared/pagination";
 import type { DeviceFingerprint, HonoEnv } from "../../shared/types";
@@ -56,18 +58,7 @@ router.get("/", async (c) => {
     const userId = c.get("user").id;
     const currentSessionId = c.get("session")?.id;
     const { page, limit, offset } = parsePaginatedQuery(c.req.query());
-    const db = getReadDb();
-    const where = eq(sessionsTable.userId, userId);
-    const [sessions, total] = await Promise.all([
-      db
-        .select()
-        .from(sessionsTable)
-        .where(where)
-        .orderBy(desc(sessionsTable.lastActivityAt))
-        .offset(offset)
-        .limit(limit),
-      countRows(db, sessionsTable, where),
-    ]);
+    const { sessions, total } = await listUserSessions(userId, { page, limit, offset });
 
     const sanitized = sessions.map((s) => {
       const fp = s.deviceFingerprint as DeviceFingerprint | null;

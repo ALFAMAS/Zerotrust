@@ -1,6 +1,6 @@
 import { and, eq } from "drizzle-orm";
 import type { WebhookEndpoint, WebhookEventType } from "../../modules/webhooks/types";
-import { withOrgRls } from "../rls";
+import { withOrgRls, withOrgRlsRead } from "../rls";
 import { webhookEndpointsTable } from "../schema";
 import { createOrgScopedContext } from "./orgScopedFactory";
 
@@ -38,7 +38,7 @@ export function webhooksRepo(orgId: string) {
     orgId: scopedOrgId,
 
     async listEndpoints(userId?: string): Promise<WebhookEndpoint[]> {
-      return withOrgRls({ orgId: scopedOrgId, userId }, async (db) => {
+      return withOrgRlsRead({ orgId: scopedOrgId, userId }, async (db) => {
         const rows = await db
           .select()
           .from(webhookEndpointsTable)
@@ -49,7 +49,7 @@ export function webhooksRepo(orgId: string) {
     },
 
     async getEndpoint(id: string, userId?: string): Promise<WebhookEndpoint | null> {
-      return withOrgRls({ orgId: scopedOrgId, userId }, async (db) => {
+      return withOrgRlsRead({ orgId: scopedOrgId, userId }, async (db) => {
         const [row] = await db
           .select()
           .from(webhookEndpointsTable)

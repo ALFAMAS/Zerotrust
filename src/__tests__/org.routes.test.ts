@@ -9,11 +9,15 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("../db", () => ({ getDb: vi.fn(), getReadDb: vi.fn() }));
 
-vi.mock("../db/repositories/orgs.repository", () => ({
-  createOrganizationWithOwner: vi.fn(),
-  transferOrganizationOwnership: vi.fn(),
-  acceptOrgInvite: vi.fn(),
-}));
+vi.mock("../db/repositories/orgs.repository", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../db/repositories/orgs.repository")>();
+  return {
+    ...actual,
+    createOrganizationWithOwner: vi.fn(),
+    transferOrganizationOwnership: vi.fn(),
+    acceptOrgInvite: vi.fn(),
+  };
+});
 
 vi.mock("../logger", () => ({
   getLogger: () => ({ info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() }),

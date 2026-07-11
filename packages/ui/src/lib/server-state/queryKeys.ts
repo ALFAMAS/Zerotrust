@@ -28,6 +28,7 @@ export const queryKeys = {
       all: () => [...queryKeys.admin.all, "revenue"] as const,
       summary: () => [...queryKeys.admin.revenue.all(), "summary"] as const,
     },
+    analytics: () => [...queryKeys.admin.all, "analytics"] as const,
     feedback: {
       all: () => [...queryKeys.admin.all, "feedback"] as const,
       list: (filters: object = {}) => [...queryKeys.admin.feedback.all(), "list", filters] as const,

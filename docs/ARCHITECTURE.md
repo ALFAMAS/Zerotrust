@@ -13,6 +13,16 @@ zerotrust is a **Bun monorepo** with three deployables:
 | `src/`             | Hono + TypeScript HTTP API                                              | 1337 |
 | `packages/ui/`     | Next.js 16 (App Router, React 19) dashboard/admin/landing               | 3000 |
 | `packages/client/` | Generated, dependency-free TypeScript SDK (from `src/api/openapi.json`) | —    |
+| `packages/shared-types/` | Shared Zod schemas for API + UI validation | —    |
+
+Deploy artifacts (not runtime packages):
+
+| Path | What it is |
+| ---- | ---------- |
+| [`deploy/k8s/`](../deploy/k8s/) | Helm chart + Kustomize overlays (Blueprint 3) |
+| [`deploy/terraform/`](../deploy/terraform/) | VPC + managed PG/Redis + object storage + DNS scaffold |
+
+See [`docs/shared-types.md`](./shared-types.md) and [`deploy/k8s/README.md`](../deploy/k8s/README.md).
 
 It is a **modular monolith**: one API process exposes ~26 route modules backed
 by ~45 services and ~21 middleware, persisting to PostgreSQL (40 tables) with

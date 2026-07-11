@@ -377,6 +377,66 @@ router.get("/users/export", async (c) => {
   }
 });
 
+// GET /admin/audit/export/ndjson?limit=10000&since=ISO — signed NDJSON for SIEM
+router.get("/audit/export/ndjson", async (c) => {
+  try {
+    const limit = parseInt(c.req.query("limit") || "10000", 10);
+    const sinceRaw = c.req.query("since");
+    const since = sinceRaw ? new Date(sinceRaw) : undefined;
+    if (sinceRaw && Number.isNaN(since!.getTime())) {
+      return c.json({ error: "INVALID_REQUEST", message: "since must be ISO-8601" }, 400);
+    }
+
+    const { buildSignedNdjsonExport } = await import(
+      "../../services/compliance/auditExport.service.js"
+    );
+    const result = await buildSignedNdjsonExport({ limit, since });
+
+    c.header("Content-Type", "application/x-ndjson");
+    c.header("X-Audit-Export-Signature", result.signature);
+    c.header("X-Audit-Export-Id", result.exportId);
+    c.header("X-Audit-Export-Row-Count", String(result.rowCount));
+    if (result.chainTip) {
+      c.header("X-Audit-Chain-Tip-Seq", String(result.chainTip.seq));
+      c.header("X-Audit-Chain-Tip-Hash", result.chainTip.entryHash);
+    }
+    c.header(
+      "Content-Disposition",
+      `attachment; filename="audit-${result.exportId}.ndjson"`
+    );
+    return c.body(result.ndjson);
+  } catch (err) {
+    return internalError(c, logger, "Audit NDJSON export error", err);
+  }
+});
+
+// POST /admin/audit/export/ndjson/upload — export + S3 drop (when BACKUP_S3_BUCKET set)
+router.post("/audit/export/ndjson/upload", async (c) => {
+  try {
+    const body = await c.req.json().catch(() => ({}));
+    const limit = parseInt(body.limit ?? "10000", 10);
+    const sinceRaw = body.since as string | undefined;
+    const since = sinceRaw ? new Date(sinceRaw) : undefined;
+
+    const { buildSignedNdjsonExport, uploadAuditExportToS3 } = await import(
+      "../../services/compliance/auditExport.service.js"
+    );
+    const result = await buildSignedNdjsonExport({ limit, since });
+    const s3Key = await uploadAuditExportToS3(result);
+
+    return c.json({
+      exportId: result.exportId,
+      signature: result.signature,
+      rowCount: result.rowCount,
+      chainTip: result.chainTip,
+      s3Key,
+      uploaded: Boolean(s3Key),
+    });
+  } catch (err) {
+    return internalError(c, logger, "Audit NDJSON S3 upload error", err);
+  }
+});
+
 // GET /admin/audit/export?limit=10000 — CSV of recent audit log entries
 router.get("/audit/export", async (c) => {
   try {

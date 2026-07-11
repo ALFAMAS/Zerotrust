@@ -1,0 +1,76 @@
+name: Dependabot label policy
+
+# Route Dependabot PRs: semver-major → needs-migration; minor/patch → automerge.
+# Replaces per-package semver-major ignores in dependabot.yml (Tier 1 #3).
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  pull-requests: write
+
+jobs:
+  label:
+    name: Apply semver policy labels
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.user.login == 'dependabot[bot]'
+    steps:
+      - name: Fetch Dependabot metadata
+        id: metadata
+        uses: dependabot/fetch-metadata@21025c705c08248db411dc16f3619e6b5f9ea21a # v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Ensure policy labels exist
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const labels = [
+              { name: 'automerge', color: '0e8a16', description: 'Eligible for Dependabot auto-merge after CI' },
+              { name: 'needs-migration', color: 'd876e3', description: 'Semver-major bump — manual migration review required' },
+              { name: 'dependencies', color: '0366d6', description: 'Dependency update' },
+            ];
+            for (const label of labels) {
+              try {
+                await github.rest.issues.getLabel({ ...context.repo, name: label.name });
+              } catch (error) {
+                if (error.status === 404) {
+                  await github.rest.issues.createLabel({ ...context.repo, ...label });
+                } else {
+                  throw error;
+                }
+              }
+            }
+
+      - name: Apply labels from update-type
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        env:
+          UPDATE_TYPE: ${{ steps.metadata.outputs.update-type }}
+        with:
+          script: |
+            const updateType = process.env.UPDATE_TYPE ?? '';
+            const prNumber = context.payload.pull_request.number;
+            const isMajor = updateType.includes('semver-major');
+            const add = isMajor ? ['needs-migration', 'dependencies'] : ['automerge', 'dependencies'];
+            const remove = isMajor ? ['automerge'] : ['needs-migration'];
+
+            for (const name of remove) {
+              try {
+                await github.rest.issues.removeLabel({
+                  ...context.repo,
+                  issue_number: prNumber,
+                  name,
+                });
+              } catch (error) {
+                if (error.status !== 404) throw error;
+              }
+            }
+
+            await github.rest.issues.addLabels({
+              ...context.repo,
+              issue_number: prNumber,
+              labels: add,
+            });
+
+            core.info(`update-type=${updateType} → labels: ${add.join(', ')}`);

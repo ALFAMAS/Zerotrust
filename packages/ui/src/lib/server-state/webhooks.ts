@@ -154,3 +154,21 @@ export function usePingWebhookEndpointMutation() {
     },
   });
 }
+
+export function useReplayWebhookDeliveryMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation<unknown, Error, { endpointId: string; deliveryId: string }>({
+    mutationFn: ({ endpointId, deliveryId }) =>
+      apiPost(`/webhooks/${endpointId}/replay/${deliveryId}`, {}),
+    onSettled: (_data, _error, { endpointId }) => {
+      void queryClient.invalidateQueries({ queryKey: webhookKeys.deliveries(endpointId) });
+    },
+  });
+}
+
+export function useRotateWebhookSecretMutation() {
+  return useMutation<{ id: string; secret: string; rotatedAt: string }, Error, string>({
+    mutationFn: (id) => apiPost(`/webhooks/${id}/rotate-secret`, {}),
+  });
+}

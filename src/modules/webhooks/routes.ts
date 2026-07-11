@@ -226,6 +226,87 @@ app.get("/:id/deliveries", async (c) => {
   return c.json({ deliveries });
 });
 
+// POST /:id/replay/:deliveryId — redeliver a past attempt's payload
+app.post("/:id/replay/:deliveryId", async (c) => {
+  const user = c.get("user");
+  const id = c.req.param("id");
+  const deliveryId = c.req.param("deliveryId");
+  const orgIds = await getUserOrgIds(user.id);
+  const endpoint = await webhookStore.getEndpoint(id, orgIds, user.id);
+
+  if (!endpoint) {
+    return c.json(
+      {
+        code: "NOT_FOUND",
+        message: `Webhook endpoint ${id} not found`,
+        details: [],
+      },
+      404
+    );
+  }
+
+  const prior = webhookDeliveryLog.get(id, deliveryId);
+  if (!prior) {
+    return c.json(
+      {
+        code: "NOT_FOUND",
+        message: `Delivery ${deliveryId} not found`,
+        details: [],
+      },
+      404
+    );
+  }
+
+  try {
+    const delivery = await deliverWebhook(endpoint, prior.event, prior.payload, 1);
+    return c.json(delivery);
+  } catch (err) {
+    return c.json(
+      {
+        code: "DELIVERY_ERROR",
+        message: "Failed to replay webhook",
+        details: [String(err)],
+      },
+      500
+    );
+  }
+});
+
+// POST /:id/rotate-secret — generate a new signing secret (shown once)
+app.post("/:id/rotate-secret", async (c) => {
+  const user = c.get("user");
+  const id = c.req.param("id");
+  const orgIds = await getUserOrgIds(user.id);
+  const endpoint = await webhookStore.getEndpoint(id, orgIds, user.id);
+
+  if (!endpoint) {
+    return c.json(
+      {
+        code: "NOT_FOUND",
+        message: `Webhook endpoint ${id} not found`,
+        details: [],
+      },
+      404
+    );
+  }
+
+  const { randomBytes } = await import("node:crypto");
+  const secret = `whsec_${randomBytes(32).toString("base64url")}`;
+  const updated = await webhookStore.updateEndpoint(id, { secret }, orgIds, user.id);
+  if (!updated) {
+    return c.json(
+      {
+        code: "NOT_FOUND",
+        message: `Webhook endpoint ${id} not found`,
+        details: [],
+      },
+      404
+    );
+  }
+
+  return c.json({ id, secret, rotatedAt: new Date().toISOString() });
+});
+
 // POST /:id/ping — send test ping (org-scoped)
 app.post("/:id/ping", async (c) => {
   const user = c.get("user");

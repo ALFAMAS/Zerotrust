@@ -1,0 +1,27 @@
+# Staging Helm value overrides — use with:
+#   helm upgrade --install zerotrust deploy/k8s/helm/zerotrust -n zerotrust-staging -f values-helm.yaml
+
+global:
+  imageRegistry: registry.example.com
+
+api:
+  replicaCount: 2
+  hpa:
+    minReplicas: 2
+    maxReplicas: 6
+
+ui:
+  replicaCount: 1
+
+ingress:
+  hosts:
+    - host: staging.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+          service: ui
+    - host: api-staging.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+          service: api
