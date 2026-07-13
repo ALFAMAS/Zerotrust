@@ -9,17 +9,20 @@ const REFRESH_COOKIE_PATH = "/";
 const LEGACY_REFRESH_COOKIE_PATH = "/auth/token/refresh";
 
 export function setRefreshTokenCookie(c: Context, token: string, maxAgeSecs: number): void {
+  // Clear legacy cookie at its old path so clients don't carry two refresh cookies.
+  // Deliberately first: the refresh cookie is then the last Set-Cookie header,
+  // which keeps it visible to clients that only surface the final header
+  // (e.g. load-test tooling parsing folded headers).
+  deleteCookie(c, LEGACY_REFRESH_TOKEN_COOKIE, {
+    path: LEGACY_REFRESH_COOKIE_PATH,
+    secure: process.env.NODE_ENV === "production",
+  });
   setCookie(c, REFRESH_TOKEN_COOKIE, token, {
     path: REFRESH_COOKIE_PATH,
     httpOnly: true,
     secure: true,
     sameSite: "Lax",
     maxAge: maxAgeSecs,
-  });
-  // Clear legacy cookie at its old path so clients don't carry two refresh cookies.
-  deleteCookie(c, LEGACY_REFRESH_TOKEN_COOKIE, {
-    path: LEGACY_REFRESH_COOKIE_PATH,
-    secure: process.env.NODE_ENV === "production",
   });
 }
 

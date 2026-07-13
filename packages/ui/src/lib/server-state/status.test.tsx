@@ -45,7 +45,11 @@ describe("status TanStack Query server state", () => {
   });
 
   it("renders status page through apiClient/TanStack Query", async () => {
-    mockApiGet.mockResolvedValue(statusData);
+    mockApiGet.mockImplementation((path: string) =>
+      String(path).startsWith("/status/history")
+        ? Promise.resolve({ history: [] })
+        : Promise.resolve(statusData)
+    );
     renderWithQueryClient(<StatusPage />);
 
     expect(await screen.findByText("All systems operational")).toBeInTheDocument();
@@ -61,7 +65,11 @@ describe("status TanStack Query server state", () => {
   });
 
   it("subscribes to SSE stream for live updates", async () => {
-    mockApiGet.mockResolvedValue(statusData);
+    mockApiGet.mockImplementation((path: string) =>
+      String(path).startsWith("/status/history")
+        ? Promise.resolve({ history: [] })
+        : Promise.resolve(statusData)
+    );
     renderWithQueryClient(<StatusPage />);
     await screen.findByText("All systems operational");
 

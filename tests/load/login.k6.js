@@ -35,6 +35,30 @@ export const options = {
 
 const BASE_URL = __ENV.BASE_URL || "http://localhost:3000";
 
+// The API returns the refresh token only as a Secure __Host- cookie
+// (ADR 008 / SEC-9). Over plain http, cookie-prefix rules make clients
+// reject __Host- cookies, so k6's jar/cookie map may not expose it —
+// fall back to parsing the raw Set-Cookie header. The refresh endpoint
+// still accepts the token via the body field.
+let warnedNoRefreshCookie = false;
+function extractRefreshToken(res) {
+  const fromMap = res.cookies && res.cookies["__Host-za_refresh_token"];
+  if (fromMap && fromMap.length > 0 && fromMap[0].value) return fromMap[0].value;
+  const raw = String(
+    (res.headers && (res.headers["Set-Cookie"] || res.headers["set-cookie"])) || ""
+  );
+  const m = /__Host-za_refresh_token=([^;,\s]+)/.exec(raw);
+  if (m) return m[1];
+  if (!warnedNoRefreshCookie) {
+    warnedNoRefreshCookie = true;
+    console.error(
+      `refresh-token extraction failed; cookie keys=${JSON.stringify(Object.keys(res.cookies || {}))} header keys=${JSON.stringify(Object.keys(res.headers || {}))}`
+    );
+  }
+  return null;
+}
+
+
 const testUsers = Array.from({ length: 20 }, (_, i) => ({
   email: `loadtest${i}@example.com`,
   password: "Load@Test1234!",
@@ -62,12 +86,7 @@ export default function () {
 
   if (loginOk && loginRes.status === 200) {
     try {
-      // Refresh token arrives as a Secure __Host- cookie (ADR 008 / SEC-9),
-      // not in the body; k6 won't replay Secure cookies over http, so pass it
-      // via the body field the endpoint still accepts.
-      const refreshCookie = loginRes.cookies["__Host-za_refresh_token"];
-      const refreshToken =
-        refreshCookie && refreshCookie.length > 0 ? refreshCookie[0].value : null;
+      const refreshToken = extractRefreshToken(loginRes);
       const refreshRes = http.post(
         `${BASE_URL}/auth/token/refresh`,
         JSON.stringify({ refreshToken }),

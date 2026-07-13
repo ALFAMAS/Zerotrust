@@ -5,8 +5,8 @@ export default {
   out: "./drizzle",
   dialect: "postgresql",
   dbCredentials: {
-    url:
-      process.env.DATABASE_URL ||
-      "postgresql://neon_owner:3J6RcaLXeGwO@ep-noisy-hill-a1hjd9xk-pooler.ap-southeast-1.aws.neon.tech/neon?sslmode=require&channel_binding=require",
+    // Never hardcode a connection string here (CWE-798) — a real Neon
+    // credential previously committed as the fallback had to be rotated.
+    url: process.env.DATABASE_URL || "postgresql://localhost:5432/zerotrust",
   },
 } satisfies Config;

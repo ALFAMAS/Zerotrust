@@ -47,6 +47,7 @@ const completeUser = {
   emailVerified: true,
   avatarUrl: "https://example.com/a.png",
   mfa: { totp: { enabled: true } },
+  onboarding: { hasOrg: true, hasSentInvite: true, hasMfa: true, hasApiKey: true },
 };
 
 function renderWithQueryClient(ui: React.ReactElement) {

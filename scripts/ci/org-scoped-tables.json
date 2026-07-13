@@ -25,7 +25,9 @@
     "src/api/routes/globalization.routes.ts": "tax endpoints validate org membership",
     "src/api/routes/passkey.routes.ts": "optional orgId with membership assert",
     "src/api/routes/api-keys.routes.ts": "keys scoped by userId with optional org membership check",
-    "src/db/repositories/webhooks.repository.ts": "SEC-12 org-scoped factory \u2014 eq(orgId) on every query"
+    "src/db/repositories/webhooks.repository.ts": "SEC-12 org-scoped factory \u2014 eq(orgId) on every query",
+    "src/api/routes/auth/profile.routes.ts": "self-scoped membership lookup for onboarding hints (filters on authenticated userId)",
+    "src/api/routes/scim.routes.ts": "SCIM 2.0 routes scoped by org bearer token; member queries filter on orgId"
   },
   "orgPredicatePatterns": [
     "orgScopeWhere",
