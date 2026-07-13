@@ -49,6 +49,10 @@ const config: KnipConfig = {
     "packages/ui/src/lib/offlineQueue.ts",
   ],
   ignoreDependencies: [
+    // Tailwind v4 is CSS-first: consumed via `@import "tailwindcss"` /
+    // `@import "tw-animate-css"` in globals.css, which knip cannot see.
+    "tailwindcss",
+    "tw-animate-css",
     "@radix-ui/react-popover",
     "@radix-ui/react-separator",
     "@stripe/stripe-js",

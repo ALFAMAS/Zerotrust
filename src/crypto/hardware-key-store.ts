@@ -350,10 +350,10 @@ export class PKCS11Provider implements HardwareKeyProvider {
   public name = "pkcs11";
 
   private pkcs11: Pkcs11Instance | null = null;
-  private session: unknown = null;
-  private slot = 0;
+  private session: Buffer | null = null;
+  private slot: Buffer | null = null;
   private initialized = false;
-  private keyHandles = new Map<string, unknown>();
+  private keyHandles = new Map<string, Buffer>();
 
   constructor(
     private libraryPath: string,
@@ -380,7 +380,7 @@ export class PKCS11Provider implements HardwareKeyProvider {
     this.initialized = true;
     this.pkcs11 = pkcs11;
 
-    const slots = pkcs11.C_GetSlotList(true) as number[];
+    const slots = pkcs11.C_GetSlotList(true);
     if (!slots.length) {
       throw new Error("PKCS11Provider: no token slots available");
     }
@@ -398,7 +398,7 @@ export class PKCS11Provider implements HardwareKeyProvider {
     return mod != null;
   }
 
-  private async findKeyHandle(keyId: string): Promise<unknown> {
+  private async findKeyHandle(keyId: string): Promise<Buffer> {
     const cached = this.keyHandles.get(keyId);
     if (cached) return cached;
 
@@ -407,12 +407,12 @@ export class PKCS11Provider implements HardwareKeyProvider {
     const session = this.session!;
     const template = [{ type: CKA_LABEL, value: keyId }];
     pkcs11.C_FindObjectsInit(session, template);
-    const handles = pkcs11.C_FindObjects(session, 1) as unknown[];
+    const handles = pkcs11.C_FindObjects(session, 1);
     pkcs11.C_FindObjectsFinal(session);
     if (!handles.length) {
       throw new Error(`PKCS11Provider: key not found: ${keyId}`);
     }
-    this.keyHandles.set(keyId, handles[0]);
+    this.keyHandles.set(keyId, handles[0]!);
     return handles[0];
   }
 
@@ -500,7 +500,7 @@ export class PKCS11Provider implements HardwareKeyProvider {
     const session = this.session!;
     const template = [{ type: CKA_CLASS, value: CKO_SECRET_KEY }];
     pkcs11.C_FindObjectsInit(session, template);
-    const handles = pkcs11.C_FindObjects(session, 100) as unknown[];
+    const handles = pkcs11.C_FindObjects(session, 100);
     pkcs11.C_FindObjectsFinal(session);
 
     const labels: string[] = [];

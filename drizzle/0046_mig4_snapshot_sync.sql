@@ -1,0 +1,8 @@
+-- Snapshot sync (MIG-4): intentionally empty — no DDL.
+-- The MIG-1 journal repair left drizzle/meta snapshots stale (latest was
+-- 0026), so `drizzle-kit generate` diffed the code schema against a
+-- years-old state and raised interactive table-conflict prompts, hanging
+-- the schema-drift gate and its test. drizzle/meta/0046_snapshot.json is a
+-- fresh snapshot of src/db/schema (generated against an empty baseline);
+-- the SQL chain itself is already schema-equivalent, verified by pg_dump
+-- diff of a fresh `db:migrate` database against a `db:push` database.
