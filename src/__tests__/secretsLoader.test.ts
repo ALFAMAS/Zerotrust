@@ -61,6 +61,9 @@ describe("secretsLoader", () => {
 
   it("does not overwrite existing env vars from Doppler", async () => {
     process.env.DATABASE_URL = "postgresql://local/existing";
+    // The CI Tests job exports REDIS_URI for its Redis service container;
+    // clear it so the loader's fill-when-unset path is exercised.
+    delete process.env.REDIS_URI;
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue({
