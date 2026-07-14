@@ -41,10 +41,10 @@ New open items below come from the **2026-07-09 codebase audit**
       in this PR by testing the two biggest untested surfaces — `scim.routes.http.test.ts`
       (SCIM Users/Groups CRUD, 18 cases) and `admin.analytics.routes.test.ts` (cohorts, auth
       mix, anomaly trends) — measured after: statements 63.76%, branches 55.89%, lines 65.26%.
-- [ ] **DX-3 (P2)** — Biome 2.5.3 throws non-fatal internal panics in CI
+- [x] **DX-3 (P2)** — Biome 2.5.3 throws non-fatal internal panics in CI
       (`biome_module_graph … index out of bounds`) on `packages/ui/src/components/charts/*` and
-      `src/db/schema/*`; the step still passes but the noise buries real diagnostics. Track the
-      upstream fix (biomejs/biome) or pin back to 2.5.2 if it worsens.
+      `src/db/schema/*`; pinned Biome and its platform CLIs back to 2.5.2 on 2026-07-14 to
+      keep lint diagnostics readable until the upstream fix lands.
 
 ### Pre-launch (operator, from [`production-checklist.md`](../production-checklist.md))
 
