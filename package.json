@@ -83,7 +83,7 @@
     "geoip-lite": "^2.0.3",
     "hono": "^4.12.27",
     "ioredis": "^5.11.1",
-    "nanoid": "^5.1.16",
+    "nanoid": "^6.0.0",
     "nodemailer": "^9.0.1",
     "otpauth": "^9.5.1",
     "postgres": "^3.4.9",
