@@ -36,11 +36,11 @@ New open items below come from the **2026-07-09 codebase audit**
 
 ### Code (assignable to an agent)
 
-- [ ] **DQ-3 (P1)** — Coverage ratchet is the **only red CI gate** on `main`: lines 63.93% vs
-      64%, statements 62.34% vs 63%, branches 54.53% vs 55% — the Tier 1–5 roadmap code diluted
-      the ratio (all tests pass). Preferred fix: add API tests for the biggest untested new
-      surfaces (`scim.routes.ts`, `admin/analytics`, feature flags). Fallback: re-baseline the
-      floors in `vitest.config.ts` to just below measured, per that config's comment.
+- [x] **DQ-3 (P1)** — Coverage ratchet red after the Tier 1–5 merges diluted the ratio (lines
+      63.93% vs 64%, statements 62.34% vs 63%, branches 54.53% vs 55%; all tests passed). Fixed
+      in this PR by testing the two biggest untested surfaces — `scim.routes.http.test.ts`
+      (SCIM Users/Groups CRUD, 18 cases) and `admin.analytics.routes.test.ts` (cohorts, auth
+      mix, anomaly trends) — measured after: statements 63.76%, branches 55.89%, lines 65.26%.
 - [ ] **DX-3 (P2)** — Biome 2.5.3 throws non-fatal internal panics in CI
       (`biome_module_graph … index out of bounds`) on `packages/ui/src/components/charts/*` and
       `src/db/schema/*`; the step still passes but the noise buries real diagnostics. Track the
