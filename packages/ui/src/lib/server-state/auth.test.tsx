@@ -53,6 +53,7 @@ const completeUser = {
     hasApiKey: true,
   },
   mfa: { totp: { enabled: true } },
+  onboarding: { hasOrg: true, hasSentInvite: true, hasMfa: true, hasApiKey: true },
 };
 
 function renderWithQueryClient(ui: React.ReactElement) {

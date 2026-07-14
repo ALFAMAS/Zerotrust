@@ -4,6 +4,10 @@ All notable changes to zerotrust are documented here.
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and [Conventional Commits](https://www.conventionalcommits.org/).
 
 
+## [1.6.1](https://github.com/ALFAMAS/Zerotrust/compare/v1.6.0...v1.6.1) (2026-07-14)
+
+## [1.6.0](https://github.com/ALFAMAS/Zerotrust/compare/v1.5.0...v1.6.0) (2026-07-13)
+
 ## [1.5.0](https://github.com/ALFAMAS/Zerotrust/compare/v1.4.0...v1.5.0) (2026-07-11)
 
 ## [1.4.0](https://github.com/ALFAMAS/Zerotrust/compare/v1.3.0...v1.4.0) (2026-07-11)
