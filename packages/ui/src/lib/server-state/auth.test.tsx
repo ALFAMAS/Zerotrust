@@ -46,6 +46,12 @@ const completeUser = {
   displayName: "Complete User",
   emailVerified: true,
   avatarUrl: "https://example.com/a.png",
+  onboarding: {
+    hasOrg: true,
+    hasSentInvite: true,
+    hasMfa: true,
+    hasApiKey: true,
+  },
   mfa: { totp: { enabled: true } },
 };
 

@@ -1,14 +1,13 @@
 "use client";
 
 import { Shield, User } from "lucide-react";
+import type { AuthMe } from "@/lib/server-state/types";
 
 /**
- * Shows three progress bars:
- * 1. Onboarding completion % (from SetupChecklist items)
- * 2. Profile completeness %
- * 3. Plan usage % (if on a paid plan)
+ * Shows progress bars for profile completeness and SaaS onboarding steps
+ * (aligned with SetupChecklist).
  */
-export function ProgressBars({ user }: { user: any }) {
+export function ProgressBars({ user }: { user: AuthMe | null }) {
   if (!user) return null;
 
   const bars = [];
@@ -18,7 +17,12 @@ export function ProgressBars({ user }: { user: any }) {
     { label: "Display name", done: !!user.displayName && user.displayName !== user.email },
     { label: "Email verified", done: user.emailVerified === true },
     { label: "Avatar", done: !!user.avatarUrl },
-    { label: "MFA enabled", done: user?.mfa?.totp?.enabled === true },
+    {
+      label: "MFA enabled",
+      done:
+        user?.mfa?.totp?.enabled === true ||
+        user?.mfa?.webauthn?.enabled === true,
+    },
   ];
   const profileComplete = profileFields.filter((f) => f.done).length;
   const profilePct = Math.round((profileComplete / profileFields.length) * 100);
@@ -31,12 +35,18 @@ export function ProgressBars({ user }: { user: any }) {
     detail: `${profileComplete}/${profileFields.length} fields`,
   });
 
-  // Onboarding completion
+  // Onboarding completion — same steps as SetupChecklist
   const onboardingItems = [
-    { label: "Email verified", done: user.emailVerified === true },
-    { label: "Display name", done: !!user.displayName && user.displayName !== user.email },
-    { label: "MFA enabled", done: user?.mfa?.totp?.enabled === true },
-    { label: "Profile photo", done: !!user.avatarUrl },
+    { label: "Create an organization", done: user.onboarding?.hasOrg === true },
+    { label: "Invite a team member", done: user.onboarding?.hasSentInvite === true },
+    {
+      label: "Enable two-factor authentication",
+      done:
+        user.onboarding?.hasMfa === true ||
+        user?.mfa?.totp?.enabled === true ||
+        user?.mfa?.webauthn?.enabled === true,
+    },
+    { label: "Create an API key", done: user.onboarding?.hasApiKey === true },
   ];
   const onboardingDone = onboardingItems.filter((i) => i.done).length;
   const onboardingPct = Math.round((onboardingDone / onboardingItems.length) * 100);
