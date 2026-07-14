@@ -16,6 +16,44 @@ New open items below come from the **2026-07-09 codebase audit**
 
 ---
 
+## Open now (2026-07-13, post-#95) — work top to bottom
+
+### Operator actions (only a repo/infra admin can do these)
+
+- [ ] **SEC-ROT (P0, ~5 min)** — **Rotate the Neon `neon_owner` password.** A real Neon
+      connection string was committed as the `drizzle.config.ts` fallback (removed in #95) and
+      remains in git history of a public repo. Neon console → project → reset role password;
+      update `DATABASE_URL` wherever it is deployed. Also add a connection-string rule to the
+      Gitleaks config — it did not flag this.
+- [ ] **PROC-1 (P0, ~5 min)** — **Apply branch protection on `main`** per
+      `docs/deployment.md` § Branch protection (require the CI check, block direct pushes).
+      The runbook shipped 2026-07-12 but the GitHub setting is not applied; five separate CI
+      breakages this week landed because work merged while CI was red or unfinished.
+- [ ] **MIG-3 (P1, operator)** — Databases historically provisioned with `db:push` lack the
+      RLS tenant-isolation policies (0035/0038/0043) and audit-immutability triggers (0031).
+      Apply those migrations manually (or re-baseline `__drizzle_migrations`) and verify with
+      `SELECT * FROM pg_policies;` before trusting tenant isolation in that environment.
+
+### Code (assignable to an agent)
+
+- [x] **DQ-3 (P1)** — Coverage ratchet red after the Tier 1–5 merges diluted the ratio (lines
+      63.93% vs 64%, statements 62.34% vs 63%, branches 54.53% vs 55%; all tests passed). Fixed
+      in this PR by testing the two biggest untested surfaces — `scim.routes.http.test.ts`
+      (SCIM Users/Groups CRUD, 18 cases) and `admin.analytics.routes.test.ts` (cohorts, auth
+      mix, anomaly trends) — measured after: statements 63.76%, branches 55.89%, lines 65.26%.
+- [ ] **DX-3 (P2)** — Biome 2.5.3 throws non-fatal internal panics in CI
+      (`biome_module_graph … index out of bounds`) on `packages/ui/src/components/charts/*` and
+      `src/db/schema/*`; the step still passes but the noise buries real diagnostics. Track the
+      upstream fix (biomejs/biome) or pin back to 2.5.2 if it worsens.
+
+### Pre-launch (operator, from [`production-checklist.md`](../production-checklist.md))
+
+- [ ] Walk the **Pre-launch sign-off** table: production env vars, `bootstrap:admin`, TLS +
+      vhosts, `WORKER_MODE` topology, backup + restore drill, staging validation
+      (Lighthouse + ZAP), alerting receivers, `/metrics` auth.
+
+---
+
 ## Codebase audit (2026-07-09) — open items
 
 _All items from the 2026-07-09 audit backlog are shipped — see [`shipped.md`](./shipped.md) § Recent work (2026-07-10)._
