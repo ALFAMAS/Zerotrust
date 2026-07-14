@@ -18,6 +18,9 @@ COPY package.json bun.lock ./
 COPY packages/client/package.json ./packages/client/
 COPY packages/shared-types/package.json ./packages/shared-types/
 COPY packages/ui/package.json ./packages/ui/
+# Bun resolves the shared workspace's exported TypeScript entry while linking
+# workspaces, so its source must exist during the frozen install.
+COPY packages/shared-types/src ./packages/shared-types/src/
 COPY scripts/postinstall.js ./scripts/
 
 RUN bun install --frozen-lockfile

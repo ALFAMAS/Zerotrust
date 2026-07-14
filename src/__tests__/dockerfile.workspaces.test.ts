@@ -26,6 +26,17 @@ describe("API Docker workspace install (CI-4)", () => {
     }
   });
 
+  it("copies the shared-types source required by its workspace export before install", () => {
+    const dockerfile = readFileSync(join(process.cwd(), "Dockerfile"), "utf8");
+    const installIndex = dockerfile.indexOf("RUN bun install --frozen-lockfile");
+    const sourceCopyIndex = dockerfile.indexOf(
+      "COPY packages/shared-types/src ./packages/shared-types/src/"
+    );
+
+    expect(sourceCopyIndex).toBeGreaterThan(-1);
+    expect(sourceCopyIndex).toBeLessThan(installIndex);
+  });
+
   it("recursively excludes generated workspace trees from the build context", () => {
     const dockerignore = readFileSync(join(process.cwd(), ".dockerignore"), "utf8");
 

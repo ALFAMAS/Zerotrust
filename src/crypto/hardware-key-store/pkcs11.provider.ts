@@ -246,10 +246,13 @@ export class PKCS11Provider implements HardwareKeyProvider {
     }
     const labels: string[] = [];
     for (const handle of handles) {
-      const value = this.pkcs11!.C_GetAttributeValue(this.session!, handle, [
+      // pkcs11js types an attribute requested without a value buffer as
+      // `never`, while its runtime returns the label as a Buffer.
+      const [attribute] = this.pkcs11!.C_GetAttributeValue(this.session!, handle, [
         { type: CKA_LABEL },
-      ])[0]?.value;
-      const label = Buffer.isBuffer(value) ? value.toString("utf8") : value?.toString();
+      ]) as Array<{ value?: Buffer | string }>;
+      const value = attribute?.value;
+      const label = typeof value === "string" ? value : value?.toString("utf8");
       if (label && !label.endsWith(MAC_LABEL_SUFFIX)) labels.push(label);
     }
     return labels;

@@ -177,4 +177,12 @@ describe("PKCS11Provider hardened operations (CRYPTO-2)", () => {
     );
     expect(token.generated).toHaveLength(0);
   });
+
+  it("lists encryption keys without exposing their paired MAC keys", async () => {
+    vi.spyOn(fs, "existsSync").mockReturnValue(true);
+    const provider = createProvider(new FakePkcs11Token());
+    await provider.generateKey("customer-key", "AES-256");
+
+    await expect(provider.listKeys()).resolves.toEqual(["customer-key"]);
+  });
 });

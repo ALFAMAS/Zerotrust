@@ -220,8 +220,9 @@ export function loginScenario() {
 
 /** Scenario 2: Session refresh */
 export function refreshScenario() {
-  // Use a known test user for refresh
-  const user = testUsers[0];
+  // Refresh VUs need separate accounts: login/refresh rotation plus the
+  // concurrent-session cap would otherwise revoke another VU's token.
+  const user = testUsers[(__VU - 1) % testUsers.length];
 
   group("Refresh", () => {
     if (!refreshToken) {
