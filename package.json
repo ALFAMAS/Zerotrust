@@ -37,7 +37,7 @@
     "lint": "biome check",
     "lint:fix": "biome check --write",
     "format": "biome format --write",
-    "lint:ci": "biome ci",
+    "lint:ci": "bun run scripts/ci/run-biome-ci.ts",
     "load:auth-cache": "k6 run tests/load/auth-cache.k6.js",
     "load:login": "k6 run tests/load/login.k6.js",
     "branch-protection:check": "bun scripts/ci/verify-branch-protection.ts",

@@ -192,6 +192,7 @@ jobs:
         uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e # v3.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_CONFIG: .gitleaks.toml
       - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
         with:
           bun-version-file: .bun-version
@@ -365,6 +366,11 @@ jobs:
       # measure the API, not the limiter — disable it here only. Staging
       # validation (staging-validation.yml) keeps real limits on.
       RATE_LIMITING_ENABLED: "false"
+      # Secure __Host- cookies are correctly rejected over this job's plain HTTP
+      # transport. Test-only POST-body delivery lets k6 exercise rotation without
+      # weakening production cookie policy (the server also requires NODE_ENV=test).
+      NODE_ENV: test
+      LOAD_TEST_REFRESH_TOKEN_BODY: "true"
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2

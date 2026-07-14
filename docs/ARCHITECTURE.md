@@ -229,5 +229,6 @@ module boundaries.
 
 ---
 
-All proposals above are shipped. Open production-readiness gaps remain — see
-[`project/todo.md`](./project/todo.md) (AUTH-1, FE-1).
+All proposals above are shipped. Current implementation and operator gaps are tracked in
+[`project/todo.md`](./project/todo.md); the 2026-07-15 delta audit is
+[`project/codebase-audit-2026-07-15.md`](./project/codebase-audit-2026-07-15.md).

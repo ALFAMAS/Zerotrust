@@ -16,6 +16,7 @@ WORKDIR /app
 # install; scripts/postinstall.js runs as the root postinstall hook.
 COPY package.json bun.lock ./
 COPY packages/client/package.json ./packages/client/
+COPY packages/shared-types/package.json ./packages/shared-types/
 COPY packages/ui/package.json ./packages/ui/
 COPY scripts/postinstall.js ./scripts/
 

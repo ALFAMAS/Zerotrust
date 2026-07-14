@@ -1,7 +1,7 @@
 # Quarterly Maintenance Scorecard
 
 **Quarter:** Q3 2026 (Jul – Sep)
-**Last updated:** 2026-07-12 (Tier 3 architecture shipped: shared-types, deploy/k8s, terraform, read-replica repos)
+**Last updated:** 2026-07-15 (codebase delta audit and latest `main` CI run 29358710417)
 **Owner:** Platform team
 
 Tracked trend: dependency freshness, CI health, test health, migration health,
@@ -28,10 +28,10 @@ Grouped `dependency-update.yml` PR merges are manual when majors are detected.
 
 | Metric | Current | Target | Trend |
 |---|---|---|---|
-| CI success rate (last 30 days) | **~42%** historical (Jun 3–Jul 3 burst); **remediated 2026-07-03** — `bun run lint:ci` green; forward window rebaselined | ≥95% | 🔶 |
+| CI success rate (last 30 days) | Latest completed `main` run **29358710417 failed** Docker smoke, Playwright, and load jobs; rolling rate must be remeasured after fixes land | ≥95% | 🔴 |
 | CI median duration (main PR) | **~3.5 min** wall-clock (run #282, 2026-07-02) | <5 min | ✅ |
 | CI p95 duration | **~4.5 min** (successful runs, Jul 1–2 sample) | <10 min | ✅ |
-| Flaky tests (failing ≥2 of last 10 runs) | **0** identified (failures are lint/build/schema, not test flakes) | 0 | ✅ |
+| Flaky tests (failing ≥2 of last 10 runs) | Command-palette E2E needed a retry in run 29358710417; deterministic trigger implemented, full-CI rerun pending | 0 | 🔶 |
 | `verify:generated` drift failures | 0 (idempotent regen verified) | 0 | ✅ |
 
 **Notes (B6, 2026-07-03):** Root-cause triage identified deterministic Biome format/import
@@ -43,7 +43,13 @@ drift (not flaky tests) during the Jul 2 refactor burst. Remediation applied to
 [`ci-health/2026-07-03-ci-recovery.md`](./compliance/evidence/2026/Q3/ci-health/2026-07-03-ci-recovery.md).
 Rolling 30-day success rate reaches ≥95% as green runs accumulate post-remediation.
 
-**Jobs:** `lint:ci` (Biome) · `type-check` (tsc) · `test` (Vitest, 1003 API tests) ·
+**Current note (2026-07-15):** See
+[`project/codebase-audit-2026-07-15.md`](./project/codebase-audit-2026-07-15.md). Local verification
+now includes both Docker runtime builds, the complete fresh-database Playwright suite, the k6 CI
+profile, type-checking, and the full root suite. The recorded remote `main` run predates these fixes;
+a new remote run is still a release gate.
+
+**Jobs:** `lint:ci` (Biome) · `type-check` (tsc) · `test` (Vitest) ·
 `test:coverage:ui` (UI ratchet) · `test:coverage` (API ratchet) ·
 `migrations:check` (destructive DDL gate) · `verify:generated` (SDK+docs drift) · UI build · SAST (Semgrep, blocking) · Trivy filesystem (blocking, `trivy-action@0.35.0`)
 
@@ -53,14 +59,15 @@ Rolling 30-day success rate reaches ≥95% as green runs accumulate post-remedia
 
 | Metric | Current | Target | Trend |
 |---|---|---|---|
-| Total test count | 1003 API + 239 UI = **1242** (181 files) | Growing | ✅ |
+| Root unit suite | **1,269 passed / 31 skipped** (182 passed files; local 2026-07-15) | Growing | ✅ |
+| UI unit suite | **240/240 passed** (58 files; local 2026-07-15) | 100% | ✅ |
 | API unit test coverage (lines) | **67.41%** measured; ≥67% ratchet (`vitest.config.ts`) | ≥85% long-term | 🔶 ↑ |
 | API unit test coverage (branches) | **60.02%** measured; ≥60% ratchet | ≥85% long-term | 🔶 ↑ |
 | UI page/component coverage (lines) | **54.59%** measured; ≥54% ratchet on `packages/ui` app/components/lib | ≥85% long-term | 🔶 ↑ |
 | Page-level component tests | 27 `.test.tsx` under `packages/ui/src/app/` + client splits (organizations, settings, invite, access-reviews + prior pages) | High-traffic flows covered | ✅ |
-| E2E smoke passing | 6 Playwright specs (auth, public, dashboard-polish, wallet, webhooks, security) | 100% | ✅ |
-| Playwright E2E passing | 6 specs in CI `e2e-ui` job | 100% | ✅ |
-| k6 load test thresholds met | CI `load-test` job: p95 &lt;100ms, p99 &lt;300ms (`full-suite.k6.js`) | p95 &lt;100ms, p99 &lt;300ms | ✅ |
+| E2E smoke passing | Corrected dashboard onboarding and command-palette paths pass in the full local run | 100% | ✅ |
+| Playwright E2E passing | Fresh-database full suite **88/88 passed** (local 2026-07-15) | 100% | ✅ |
+| k6 load test thresholds met | Local containerized CI profile: **3,710/3,710 checks**, 0% HTTP/refresh errors | CI profile budgets plus <2% refresh errors | ✅ |
 
 **Notes (T5 shipped, 2026-07-04):** Added `queryKeys.test.ts` (root suite) and
 expanded `SecurityClient` page tests (TOTP verify/disable, OAuth, passkeys).
@@ -96,7 +103,7 @@ policy rejection, concurrent-session eviction, suspended/deleted accounts).
 
 | Metric | Current | Target | Trend |
 |---|---|---|---|
-| Pending (unapplied) migrations | 0 (latest: `0041_sync_code_schema_drift`) | 0 | ✅ |
+| Pending (unapplied) migrations | 0 (latest: `0046_mig4_snapshot_sync`) | 0 | ✅ |
 | Irreversible migrations in last quarter | 5 (`0020`–`0024`, DROP CASCADE) — gated by `.destructive-migrations.json` + CI | 0 new without allowlist | ✅ |
 | Migration applied with rollback tested | 2026-07-03 restore drill ([evidence](./compliance/evidence/2026/Q3/backup-restore-drills/2026-07-03-restore-drill.md)) | All destructive | ✅ |
 | `db:generate` drift (`drizzle/` vs schema) | 0 — guarded by `migrations:schema:check` (MIG-4, verified 2026-07-12) | No diff | ✅ |
@@ -104,7 +111,7 @@ policy rejection, concurrent-session eviction, suspended/deleted accounts).
 **Notes:** Migrations `0020`–`0024` are irreversible `DROP … CASCADE`, allowlisted in
 `.destructive-migrations.json`. New destructive DDL is blocked by `bun run migrations:check`
 (CI + pre-commit). Schema↔migration drift is blocked by `bun run migrations:schema:check` (CI).
-Total migrations: 44 (`0000`–`0041`).
+Total migration files: 47 (latest numeric prefix `0046`; duplicate historical prefixes retained).
 
 ---
 
@@ -129,18 +136,19 @@ Total migrations: 44 (`0000`–`0041`).
 
 | Metric | Current | Target | Trend |
 |---|---|---|---|
-| API p95 latency | CI k6 baseline: **&lt;100ms** (`http_req_duration` p95) | &lt;100ms | ✅ |
-| API p99 latency | CI k6 baseline: **&lt;300ms** (`http_req_duration` p99) | &lt;300ms | ✅ |
+| API p95 latency | Local k6 CI profile overall **318.29ms**; hot reads **358.95ms** (regression budget, not production SLO) | Staging/production hot paths &lt;100ms | 🔶 |
+| API p99 latency | Local k6 CI profile overall **870.38ms**; production value unavailable | Staging/production &lt;300ms | — |
 | Error rate (5xx / minute) | _TBD_ | <0.1% | — |
 | `/healthz` uptime (30 days) | _TBD_ | ≥99.9% | — |
 | SLO burn rate alerts triggered | _TBD_ | 0 | — |
 | Sentry error count (30 days) | _TBD_ | Trending down | — |
 
 **Notes:** SLO service (`src/services/ops/slo.service.ts`) and Prometheus
-`/metrics` endpoint are wired. Production latency metrics require a live deploy
-with the scrape config from the reference architecture. k6 load tests
-(`tests/load/`) enforce p95 &lt;100ms / p99 &lt;300ms in CI (`load-test` job);
-see `tests/load/full-suite.k6.js` thresholds.
+`/metrics` endpoint are wired. Production latency metrics require a live deploy with the scrape
+config from the reference architecture. The k6 CI profile is a regression budget for shared
+GitHub runners: overall p95 &lt;2.5s/p99 &lt;4s, login p95 &lt;3s, refresh p95 &lt;1.5s, hot-read p95
+&lt;1s, and status p95 &lt;5s. The default staging profile retains p95 &lt;100ms/p99 &lt;300ms for the
+hot scenarios. Neither is a measured production SLO.
 
 ---
 
@@ -148,7 +156,8 @@ see `tests/load/full-suite.k6.js` thresholds.
 
 | ID | Finding | Severity | Opened | Target fix | Status |
 |---|---|---|---|---|---|
-| — | _No open security exceptions_ | — | — | — | — |
+| SEC-ROT | Historically committed production-style database credential requires rotation | P0 | 2026-07-15 | Immediate | Operator action open |
+| MIG-3 | Legacy `db:push` environments may lack RLS and audit-immutability migrations | P1 | 2026-07-09 | Before production trust | Operator verification open |
 
 **Closed (P4.7):** SAST-Semgrep — was triaged Low (2026-06); verified green on
 `main` CI run 28624304093 (2026-07-02). `p/owasp-top-ten` passes with zero
@@ -158,8 +167,10 @@ blocking findings.
 Production boot requires `METRICS_AUTH_TOKEN`; reference architecture documents
 token-gated scrape configs.
 
-**Security baseline ([`docs/security.md`](./security.md)):** **0 open** SEC items (DQ-2 shipped 2026-07-09). Production gaps in [`project/todo.md`](./project/todo.md): **AUTH-1**, **FE-1**. SEC-1…SEC-27 shipped
-(SEC-27 2026-07-08); SEC-28 documented out-of-scope. CWE hardening (601/918/78/22/532/1333/327/1427/79)
+**Security baseline ([`docs/security.md`](./security.md)):** **0 open baseline SEC items**.
+Operator security work in [`project/todo.md`](./project/todo.md): **SEC-ROT**, **MIG-3**.
+CRYPTO-2 shipped 2026-07-15; SEC-1…SEC-27 shipped (SEC-27 2026-07-08); SEC-28
+documented out-of-scope. CWE hardening (601/918/78/22/532/1333/327/1427/79)
 tracked in `CLAUDE.md` / `AGENTS.md` — do not duplicate as SEC items.
 
 ---
@@ -169,8 +180,8 @@ tracked in `CLAUDE.md` / `AGENTS.md` — do not duplicate as SEC items.
 | Metric | Current | Target | Trend |
 |---|---|---|---|
 | `verify:generated` (API reference drift) | 0 diff | 0 diff | ✅ |
-| Unaddressed TODO P0 items | 0 (P0.1–P0.3 done) | 0 | ✅ |
-| Unaddressed TODO P1 items | 0 (P1.1–P1.5 done) | 0 | ✅ |
+| Unaddressed TODO P0 items | **2**: SEC-ROT rotation; OPS-ENV-1 deployment configuration | 0 | 🔴 |
+| Unaddressed TODO P1 items | **1**: MIG-3 operator verification | 0 | 🔴 |
 | Unaddressed TODO P4 items | 0 (P4.1–P4.9 done) | 0 | ✅ |
 | Open backlog (B6–B7) | 0 (P3 Operations & compliance shipped) | 0 | ✅ |
 | P1 security & access control gaps | 0 (B1, B3, ALFA-3 done) | 0 | ✅ |

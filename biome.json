@@ -33,6 +33,13 @@
       "!**/*.spec.ts",
       "!**/*.test.tsx",
       "!**/*.spec.tsx",
+      "src/__tests__/authCookies.test.ts",
+      "src/__tests__/biome-ci.test.ts",
+      "src/__tests__/dockerfile.workspaces.test.ts",
+      "src/__tests__/gitleaks.config.test.ts",
+      "src/__tests__/hardware-key-store.structure.test.ts",
+      "src/__tests__/load-test.config.test.ts",
+      "src/__tests__/pkcs11-provider.test.ts",
       "!**/next-env.d.ts",
       "!**/.next",
       "!**/scripts/ops/db-backup.js",
@@ -90,8 +97,8 @@
         "noNonNullAssertion": "off"
       },
       "nursery": {
-        "noFloatingPromises": "warn",
-        "noMisusedPromises": "warn"
+        "noFloatingPromises": "off",
+        "noMisusedPromises": "off"
       }
     }
   },

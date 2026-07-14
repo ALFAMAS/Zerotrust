@@ -1059,6 +1059,40 @@ describe("POST /token/refresh", () => {
       })
     );
   });
+
+  it("returns the rotated refresh token only for an explicitly enabled test load", async () => {
+    vi.stubEnv("NODE_ENV", "test");
+    vi.stubEnv("LOAD_TEST_REFRESH_TOKEN_BODY", "true");
+    db.limit
+      .mockResolvedValueOnce([
+        {
+          id: "rt-1",
+          userId: USER_ID,
+          sessionId: SESSION_ID,
+          familyId: FAMILY_ID,
+          tokenHash: "hash",
+          isRevoked: false,
+          expiresAt: new Date(Date.now() + 3_600_000),
+        },
+      ])
+      .mockResolvedValueOnce([makeActiveUser()])
+      .mockResolvedValueOnce([{ activeOrgId: null }]);
+
+    try {
+      const router = await getRouter();
+      const app = new Hono().route("/", router);
+      const res = await app.request("/token/refresh", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ refreshToken: "a".repeat(96) }),
+      });
+
+      expect(res.status).toBe(200);
+      expect((await res.json()).refreshToken).toMatch(/^[a-f0-9]{96}$/);
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
 });
 
 // ── POST /oauth/state ──────────────────────────────────────────────────────

@@ -11,6 +11,13 @@ export type MockUser = {
   passkeys?: { credentialId: string; name: string; createdAt: string }[];
   oauthProviders?: string[];
   roles?: string[];
+  onboarding?: {
+    hasOrg: boolean;
+    hasSentInvite: boolean;
+    hasMfa: boolean;
+    hasApiKey: boolean;
+    completedAt?: string | null;
+  };
 };
 
 const DEFAULT_USER: MockUser = {

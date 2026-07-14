@@ -11,14 +11,14 @@ ship a feature. Planned work lives in [`todo.md`](./todo.md) (this directory).
 
 | Metric                      |                                                                       Count |
 | --------------------------- | --------------------------------------------------------------------------: |
-| Route modules               |                                                                          26 |
-| Service files               |                                                                          46 |
-| DB tables                   |                                                                          40 |
-| Middleware                  |                                                                          21 |
-| Migrations                  |                                      41 (latest: `0040_session_active_org_id`) |
-| Route mounts in `server.ts` |                                                                          29 |
+| Route modules               |                                                                          25 |
+| Service files               |                                                                          58 |
+| DB tables                   |                                                                          44 |
+| Middleware                  |                                                                          26 |
+| Migrations                  |                                      47 (latest: `0046_mig4_snapshot_sync`) |
+| Route mounts in `server.ts` |                                                                          28 |
 | UI pages                    |                                                                          53 |
-| Tests                       |                                         1330 (1088 API + 242 UI, 139 files) |
+| Tests                       | 1509 passed (1269 API + 240 UI); 31 skipped (240 files) |
 | Stack                       | Hono 4 · TypeScript 6 · Bun · Next.js 16 · Drizzle ORM · PostgreSQL · Redis |
 
 ---
@@ -333,6 +333,66 @@ Cross-audit of `docs/security.md` §0–§10. **SEC-27** shipped 2026-07-08 (VPS
 - ✅ Search — global search page (Postgres FTS by default; Elasticsearch opt-in for large tenants)
 - ✅ Notifications — notification center with preferences
 - ✅ App shell — responsive with collapsible sidebar, sticky topbar, mobile drawer
+
+## Recent work (2026-07-15)
+
+- **CI-4 — Docker workspace build fixed and verified:** the build context now recursively excludes
+  generated workspace output, and the manifest regression test covers every workspace plus nested
+  ignores. Real `docker build` runs completed for both the default Bun runtime and
+  `--build-arg RUNTIME=node`.
+- **E2E-2 — complete fresh-database browser suite:** recreated `zerotrust_test`, applied the current
+  schema, and ran the entire Playwright suite with PostgreSQL and Redis; **88/88 passed** in 2.8
+  minutes, including the corrected onboarding fixture and deterministic command palette flow.
+- **PERF-3 — refresh rotation and load budgets verified:** the k6 CI profile now logs in once per
+  VU, carries rotated refresh credentials, and separates login, refresh, hot-read, and status
+  metrics. The real containerized run passed **3,710/3,710 checks** with 0% HTTP/refresh errors;
+  p95 was 228.39 ms login, 161 ms refresh, 358.95 ms hot reads, 717.1 ms status, and 318.29 ms
+  overall (p99 870.38 ms). Staging/production SLO measurements remain a pre-launch operator gate.
+- **DX-4 — deterministic Biome CI:** disabled the unstable type-aware nursery rules that activated
+  the crashing scanner, added a wrapper that fails on panic/internal-error output even when Biome
+  exits zero, and incrementally enrolled security and build regression tests. `bun run lint:ci`
+  now checks 572 files without a panic and exits zero.
+- **STR-5 — hardware key-store split by provider:** reduced the 757-line combined module to a small
+  selector/singleton entry point, with software, platform-stub, PKCS#11, and shared-type modules
+  under `src/crypto/hardware-key-store/`. A structure test prevents provider implementations from
+  returning to the selector; focused provider tests pass **22/22** and TypeScript passes.
+
+- **CRYPTO-2 — PKCS#11 HSM hardening:** corrected optional dependency types to use Buffer handles;
+  replaced application-memory `C_CreateObject` key imports with token-side `C_GenerateKey` for
+  non-extractable AES and HMAC keys; replaced AES-CBC with AES-256-GCM using 96-bit IVs, 128-bit
+  tags, and caller context as AAD; and explicitly rejects the unimplemented ECDSA-P256 path.
+- **CRYPTO-2 regression coverage:** injected mock-token tests prove AES-GCM round trips, tamper and
+  wrong-AAD rejection, token-side/non-extractable key templates, HMAC signing, deletion/listing,
+  and unsupported-algorithm rejection. Focused hardware tests pass **21/21** and `bun run
+  type-check` passes. Production qualification against the operator's selected HSM/SoftHSM remains
+  a deployment gate, not an open repository defect.
+- **DOC-3 — status documentation reconciled:** the maintenance scorecard now records the latest red
+  `main` run, actual CI/staging k6 budgets, open SEC-ROT/MIG-3 operator risks, current TODO counts,
+  and pending Docker/Playwright/load verification. Stale AUTH-1/CRYPTO-1/INF-3/FE-1 references
+  were removed from active-gap prose across agent, architecture, security, and checklist docs.
+- **Current verification:** full root suite **1,269 passed / 31 skipped** (182 passed files) and UI
+  suite **240/240 passed** (58 files); type-check and Biome CI pass. Both Docker runtime variants,
+  the fresh-database Playwright suite, and the local k6 CI profile are green. The latest recorded
+  remote `main` run predates these fixes, so a new remote run is still required before release.
+  Remote verification also found no protected deployment environments or deployment configuration;
+  that operator-owned **OPS-ENV-1** blocker is tracked in `todo.md`.
+- **PROC-1 — `main` branch protection applied:** enabled protection on
+  `ALFAMAS/Zerotrust` with all eight CI jobs required in strict mode, one approving review,
+  stale-review dismissal, conversation resolution, and admin enforcement. Force pushes and
+  branch deletion are disabled. Verified live with `bun run branch-protection:check --
+  ALFAMAS/Zerotrust` and a direct GitHub API readback of every configured control.
+- **SEC-ROT repository hardening — database connection-string detection:** added
+  `.gitleaks.toml`, extending the built-in Gitleaks rules with a credentialed PostgreSQL,
+  MySQL/MariaDB, MongoDB, and Redis URL detector. The password capture uses an entropy floor
+  so generated credentials are blocked without flagging documented local placeholders. CI now
+  loads the repository config explicitly through `GITLEAKS_CONFIG`.
+- **Regression coverage:** `gitleaks.config.test.ts` parses the shipped rule and proves a
+  generated Neon-style credential is detected, the local `password` fixture is ignored, the
+  default rules remain enabled, and CI is wired to the custom config.
+- **Verification:** focused Gitleaks test **3 passed**; current full API suite **1,269 passed / 31
+  skipped** (182 files). Repository type-check passes after CRYPTO-2. The scanner configuration is
+  covered by regression tests and wired into CI. The Neon `neon_owner` credential rotation remains
+  open as operator-only `SEC-ROT` work.
 
 ## Product/SaaS surface (Tier 4 — shipped 2026-07-12)
 

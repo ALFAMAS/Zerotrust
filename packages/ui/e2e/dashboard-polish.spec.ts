@@ -10,6 +10,13 @@ const completeUser: MockUser = {
   mfa: { totp: { enabled: true } },
   passkeys: [{ credentialId: "passkey-1", name: "Laptop", createdAt: new Date().toISOString() }],
   oauthProviders: [],
+  onboarding: {
+    hasOrg: true,
+    hasSentInvite: true,
+    hasMfa: true,
+    hasApiKey: true,
+    completedAt: null,
+  },
 };
 
 test.describe("dashboard polish", () => {

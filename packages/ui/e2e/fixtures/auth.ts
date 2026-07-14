@@ -16,11 +16,12 @@ export async function dismissCookieBanner(page: Page): Promise<void> {
   await accept.click({ force: true, timeout: 3000 }).catch(() => {});
 }
 
-/** Open the dashboard command palette without relying on keyboard shortcuts. */
+/** Open the dashboard command palette after the app shell has mounted. */
 export async function openCommandPalette(page: Page): Promise<void> {
-  await page.evaluate(() => {
-    document.dispatchEvent(new CustomEvent("zerotrust:open-command-palette"));
-  });
+  const trigger = page.getByRole("button", { name: "Open command palette" });
+  await expect(trigger).toBeVisible();
+  await trigger.click();
+  await expect(page.getByRole("dialog", { name: "Command palette" })).toBeVisible();
 }
 
 /**

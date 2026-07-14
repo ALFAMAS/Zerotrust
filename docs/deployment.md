@@ -104,7 +104,7 @@ reducing “green PR → red main” from fast-forward races.
 
 ### Apply via `gh` CLI (repo admin)
 
-Replace `<owner>/<repo>` with your remote (e.g. `ALFAMAS/zeroauth`):
+Replace `<owner>/<repo>` with your remote (e.g. `ALFAMAS/Zerotrust`):
 
 ```bash
 gh api --method PUT "repos/<owner>/<repo>/branches/main/protection" \

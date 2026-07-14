@@ -1,12 +1,15 @@
 # Dependencies
 node_modules
 packages/*/node_modules
+**/node_modules
 .bun
 
 # Build outputs (rebuilt inside container)
 dist
 packages/ui/.next
+**/.next
 packages/ui/out
+**/out
 
 # Development files
 *.log
@@ -17,7 +20,15 @@ packages/ui/out
 
 # Test artifacts
 coverage
+**/coverage
 .nyc_output
+**/test-results
+**/playwright-report
+
+# Local agent/runtime artifacts
+.fallow
+backups-test
+uploads
 
 # Version control
 .git
