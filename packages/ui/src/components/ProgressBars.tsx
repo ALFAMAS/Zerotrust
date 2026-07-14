@@ -19,9 +19,7 @@ export function ProgressBars({ user }: { user: AuthMe | null }) {
     { label: "Avatar", done: !!user.avatarUrl },
     {
       label: "MFA enabled",
-      done:
-        user?.mfa?.totp?.enabled === true ||
-        user?.mfa?.webauthn?.enabled === true,
+      done: user?.mfa?.totp?.enabled === true || user?.mfa?.webauthn?.enabled === true,
     },
   ];
   const profileComplete = profileFields.filter((f) => f.done).length;
