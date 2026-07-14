@@ -95,12 +95,12 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.5.3",
-    "@biomejs/cli-darwin-arm64": "2.5.3",
-    "@biomejs/cli-darwin-x64": "2.5.3",
-    "@biomejs/cli-linux-arm64": "2.5.3",
-    "@biomejs/cli-linux-x64": "2.5.3",
-    "@biomejs/cli-win32-x64": "2.5.3",
+    "@biomejs/biome": "2.5.2",
+    "@biomejs/cli-darwin-arm64": "2.5.2",
+    "@biomejs/cli-darwin-x64": "2.5.2",
+    "@biomejs/cli-linux-arm64": "2.5.2",
+    "@biomejs/cli-linux-x64": "2.5.2",
+    "@biomejs/cli-win32-x64": "2.5.2",
     "@commitlint/cli": "^21.1.0",
     "@commitlint/config-conventional": "^21.1.0",
     "@rollup/rollup-linux-x64-gnu": "^4.62.2",
