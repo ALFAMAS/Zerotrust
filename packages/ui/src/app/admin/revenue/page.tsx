@@ -15,6 +15,7 @@ import MetricCard from "@/components/admin/MetricCard";
 import { ServerStateStatus } from "@/components/ServerStateStatus";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PageHeader } from "@/components/ui/page-header";
 import { ErrorState } from "@/components/ui/States";
 import {
   Select,
@@ -67,12 +68,10 @@ export default function RevenuePage() {
     <div className="space-y-8">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
-            Revenue
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            MRR, churn and subscription health at a glance
-          </p>
+          <PageHeader
+            title={<>Revenue</>}
+            description={<>MRR, churn and subscription health at a glance</>}
+          />
         </div>
         <div className="flex items-center gap-2">
           <ServerStateStatus query={revenueQuery} />
@@ -144,7 +143,10 @@ export default function RevenuePage() {
       ) : loading ? (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {[...Array(4)].map((_, i) => (
-            <div key={i} className="h-32 animate-pulse rounded-xl border border-border bg-card" />
+            <div
+              key={i}
+              className="h-32 animate-pulse rounded-xl border border-border bg-card motion-reduce:animate-none"
+            />
           ))}
         </div>
       ) : data ? (
@@ -187,15 +189,19 @@ export default function RevenuePage() {
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-foreground/80">In trial</span>
-                  <span className="text-sm font-semibold text-blue-400">{data.trialing}</span>
+                  <span className="text-sm font-semibold text-secondary-action">
+                    {data.trialing}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-foreground/80">Past due (dunning)</span>
-                  <span className="text-sm font-semibold text-amber-400">{data.pastDue}</span>
+                  <span className="text-sm font-semibold text-warning-subtle-foreground">
+                    {data.pastDue}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-foreground/80">Canceled (last 30 days)</span>
-                  <span className="text-sm font-semibold text-red-400">
+                  <span className="text-sm font-semibold text-danger-subtle-foreground">
                     {data.canceledLast30Days}
                   </span>
                 </div>

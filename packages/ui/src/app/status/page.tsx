@@ -3,18 +3,19 @@
 import { ServerStateStatus } from "@/components/ServerStateStatus";
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
+import { PageHeader } from "@/components/ui/page-header";
 import { ErrorState } from "@/components/ui/States";
 import { useStatusHistoryQuery, useStatusQuery, useStatusStream } from "@/lib/server-state/status";
 
 const STATUS_STYLES: Record<string, { dot: string; label: string; text: string }> = {
   operational: {
-    dot: "bg-emerald-400",
+    dot: "bg-success",
     label: "Operational",
-    text: "text-emerald-400",
+    text: "text-success-subtle-foreground",
   },
-  degraded: { dot: "bg-amber-400", label: "Degraded", text: "text-amber-400" },
-  down: { dot: "bg-red-500", label: "Down", text: "text-red-400" },
-  "not set": { dot: "bg-zinc-500", label: "Not set", text: "text-zinc-400" },
+  degraded: { dot: "bg-warning", label: "Degraded", text: "text-warning-subtle-foreground" },
+  down: { dot: "bg-destructive", label: "Down", text: "text-danger-subtle-foreground" },
+  "not set": { dot: "bg-muted", label: "Not set", text: "text-muted-foreground" },
 };
 
 const COMPONENT_LABELS: Record<string, string> = {
@@ -24,6 +25,15 @@ const COMPONENT_LABELS: Record<string, string> = {
   s3Backup: "Database backups (S3)",
   s3ObjectStorage: "Object storage (S3)",
 };
+
+function StatusHeading() {
+  return (
+    <PageHeader
+      title="System status"
+      description="Live status of all platform components. Updates in real time."
+    />
+  );
+}
 
 export default function StatusPage() {
   const statusQuery = useStatusQuery();
@@ -41,8 +51,11 @@ export default function StatusPage() {
     return (
       <div className="flex min-h-screen flex-col bg-background text-foreground">
         <SiteHeader />
-        <main className="mx-auto w-full max-w-2xl flex-1 px-6 py-16">
-          <p className="text-sm text-muted-foreground">Loading system status…</p>
+        <main className="mx-auto w-full max-w-2xl flex-1 px-6 py-8">
+          <StatusHeading />
+          <p className="mt-8 text-sm text-muted-foreground" aria-live="polite">
+            Loading system status…
+          </p>
         </main>
         <SiteFooter />
       </div>
@@ -53,11 +66,14 @@ export default function StatusPage() {
     return (
       <div className="flex min-h-screen flex-col bg-background text-foreground">
         <SiteHeader />
-        <main className="mx-auto w-full max-w-2xl flex-1 px-6 py-16">
-          <ErrorState
-            message={statusQuery.error?.message || "API unreachable"}
-            retry={() => void statusQuery.refetch()}
-          />
+        <main className="mx-auto w-full max-w-2xl flex-1 px-6 py-8">
+          <StatusHeading />
+          <div className="mt-8">
+            <ErrorState
+              message="We couldn't reach the status service. Check your connection and try again."
+              retry={() => void statusQuery.refetch()}
+            />
+          </div>
         </main>
         <SiteFooter />
       </div>
@@ -67,11 +83,8 @@ export default function StatusPage() {
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
       <SiteHeader />
-      <main className="mx-auto w-full max-w-2xl flex-1 px-6 py-16">
-        <h1 className="font-display text-3xl font-semibold tracking-tight">System status</h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Live status of all platform components. Updates in real-time.
-        </p>
+      <main className="mx-auto w-full max-w-2xl flex-1 px-6 py-8">
+        <StatusHeading />
 
         <ServerStateStatus
           isFetching={statusQuery.isFetching}
@@ -80,15 +93,15 @@ export default function StatusPage() {
         />
 
         <div
-          className={`mb-8 mt-10 flex items-center gap-4 rounded-xl border p-6 ${
+          className={`mb-8 mt-8 flex items-center gap-4 rounded-xl border p-6 ${
             overall === "operational"
-              ? "border-emerald-800/60 bg-emerald-950/30"
+              ? "border-success bg-success-subtle"
               : overall === "degraded"
-                ? "border-amber-800/60 bg-amber-950/30"
-                : "border-red-800/60 bg-red-950/30"
+                ? "border-warning bg-warning-subtle"
+                : "border-destructive bg-danger-subtle"
           }`}
         >
-          <span className={`h-3.5 w-3.5 rounded-full ${style.dot} animate-pulse`} />
+          <span className={`h-3.5 w-3.5 rounded-full ${style.dot}`} aria-hidden="true" />
           <div>
             <p className={`font-medium ${style.text}`}>
               {error
@@ -100,7 +113,7 @@ export default function StatusPage() {
                     : "Major outage"}
             </p>
             {lastChecked && (
-              <p className="mt-0.5 text-xs text-muted-foreground">
+              <p className="mt-1 text-xs text-muted-foreground">
                 Last updated {lastChecked.toLocaleTimeString()}
               </p>
             )}
@@ -111,8 +124,8 @@ export default function StatusPage() {
           {error && (
             <div className="flex items-center justify-between px-6 py-4">
               <span className="text-sm text-foreground/80">API</span>
-              <span className="flex items-center gap-2 text-sm text-red-400">
-                <span className="h-2 w-2 rounded-full bg-red-500" />
+              <span className="flex items-center gap-2 text-sm text-danger-subtle-foreground">
+                <span className="h-2 w-2 rounded-full bg-destructive" />
                 Unreachable
               </span>
             </div>
@@ -140,25 +153,26 @@ export default function StatusPage() {
         )}
 
         {historyQuery.data && historyQuery.data.history.length > 0 && (
-          <section className="mt-10">
+          <section className="mt-8">
             <h2 className="mb-3 text-sm font-semibold text-foreground">90-day uptime history</h2>
-            <div className="flex flex-wrap gap-1">
+            <ul aria-label="Daily uptime snapshots" className="flex flex-wrap gap-1">
               {historyQuery.data.history.map((snap) => (
-                <div
+                <li
                   key={snap.date}
+                  aria-label={`${snap.date}: ${STATUS_STYLES[snap.status]?.label ?? snap.status}`}
                   title={`${snap.date}: ${snap.status}`}
                   className={`h-8 w-2 rounded-sm ${
                     snap.status === "operational"
-                      ? "bg-emerald-500/80"
+                      ? "bg-success/80"
                       : snap.status === "degraded"
-                        ? "bg-amber-500/80"
-                        : "bg-red-500/80"
+                        ? "bg-warning/80"
+                        : "bg-destructive/80"
                   }`}
                 />
               ))}
-            </div>
+            </ul>
             <p className="mt-2 text-xs text-muted-foreground">
-              Daily snapshots — green operational, amber degraded, red down
+              Every daily snapshot includes its date and status label.
             </p>
           </section>
         )}

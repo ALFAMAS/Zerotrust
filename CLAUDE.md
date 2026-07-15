@@ -95,10 +95,13 @@ Cross-agent performance, accessibility, best-practice, and SEO directives are in
 
 ## MCP servers
 
-Only one MCP is needed for this repo, already registered in `.mcp.json`:
+The repository MCP servers are registered in `.mcp.json`:
 
 - **`nextjs`** — routes, build/runtime errors, and dev-server logs (see section above).
   Auto-connects when `bun dev:ui` / `bun dev` is running.
+
+- **`playwright`** - browser automation for local UI verification.
+- **`typeui`** - remote TypeUI component and design-system tooling.
 
 Postgres/Redis/Elasticsearch are runtime services, not MCPs. For ad-hoc DB
 inspection use the `postgres` skill (read-only SQL, no config) rather than wiring

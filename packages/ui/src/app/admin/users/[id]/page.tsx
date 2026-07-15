@@ -1,9 +1,11 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import Badge from "@/components/Badge";
 import { ServerStateStatus } from "@/components/ServerStateStatus";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/ui/page-header";
+import { DangerZone } from "@/components/ui/page-patterns";
 import { ErrorState } from "@/components/ui/States";
 import { useToast } from "@/context/ToastContext";
 import {
@@ -82,18 +84,31 @@ export default function UserDetailPage() {
 
   if (userQuery.isPending) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-muted-foreground">Loading…</div>
+      <div className="space-y-6">
+        <PageHeader title="User Detail" />
+        <div className="flex h-64 items-center justify-center">
+          <div className="text-muted-foreground">Loading…</div>
+        </div>
       </div>
     );
   }
 
   if (userQuery.error && !hasUser) {
-    return <ErrorState message={userQuery.error.message} retry={() => void userQuery.refetch()} />;
+    return (
+      <div className="space-y-6">
+        <PageHeader title="User Detail" />
+        <ErrorState message={userQuery.error.message} retry={() => void userQuery.refetch()} />
+      </div>
+    );
   }
 
   if (!user) {
-    return <div className="text-center py-16 text-muted-foreground">User not found.</div>;
+    return (
+      <div className="space-y-6">
+        <PageHeader title="User Detail" />
+        <div className="py-8 text-center text-muted-foreground">User not found.</div>
+      </div>
+    );
   }
 
   const sessionCount = user.activeSessions ?? user.sessionsCount ?? 0;
@@ -108,9 +123,7 @@ export default function UserDetailPage() {
         >
           ← Back
         </Button>
-        <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
-          User Detail
-        </h1>
+        <PageHeader title={<>User Detail</>} />
       </div>
 
       <ServerStateStatus
@@ -123,7 +136,7 @@ export default function UserDetailPage() {
 
       {/* Profile Card */}
       <div className="rounded-xl bg-card border border-border p-6">
-        <div className="flex items-center gap-5">
+        <div className="flex items-center gap-6">
           <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/15 text-2xl font-bold text-primary">
             {(user.displayName?.[0] ?? user.email[0]).toUpperCase()}
           </div>
@@ -136,7 +149,7 @@ export default function UserDetailPage() {
               {(user.roles?.length ? user.roles : ["user"]).map((r) => (
                 <span
                   key={r}
-                  className={`rounded-full px-2 py-0.5 text-[10px] font-medium ring-1 ${
+                  className={`rounded-full px-2 py-1 text-xs font-medium ring-1 ${
                     r === "admin"
                       ? "bg-primary/15 text-primary ring-primary/30"
                       : "bg-muted text-muted-foreground ring-border"
@@ -146,54 +159,54 @@ export default function UserDetailPage() {
                 </span>
               ))}
             </div>
-            <p className="text-sm text-muted-foreground mt-0.5">
+            <p className="text-sm text-muted-foreground mt-1">
               {user.email}{" "}
               {user.emailVerifiedAt ? (
                 <span
-                  className="text-xs text-green-400"
+                  className="text-xs text-success-subtle-foreground"
                   title={`Verified ${fmt(user.emailVerifiedAt)}`}
                 >
                   ✓ verified
                 </span>
               ) : (
-                <span className="text-xs text-yellow-400">unverified</span>
+                <span className="text-xs text-warning-subtle-foreground">unverified</span>
               )}
             </p>
           </div>
         </div>
 
         {/* Account metadata */}
-        <dl className="mt-5 grid grid-cols-2 gap-x-6 gap-y-3 border-t border-border pt-5 text-sm sm:grid-cols-3">
+        <dl className="mt-6 grid grid-cols-2 gap-x-6 gap-y-3 border-t border-border pt-6 text-sm sm:grid-cols-3">
           <div>
             <dt className="text-xs uppercase tracking-wider text-muted-foreground">Created</dt>
-            <dd className="mt-0.5 text-foreground">{fmt(user.createdAt)}</dd>
+            <dd className="mt-1 text-foreground">{fmt(user.createdAt)}</dd>
           </div>
           <div>
             <dt className="text-xs uppercase tracking-wider text-muted-foreground">Last login</dt>
-            <dd className="mt-0.5 text-foreground">
+            <dd className="mt-1 text-foreground">
               {user.lastLoginAt ? fmt(user.lastLoginAt) : "Never"}
             </dd>
           </div>
           <div>
             <dt className="text-xs uppercase tracking-wider text-muted-foreground">Updated</dt>
-            <dd className="mt-0.5 text-foreground">{fmt(user.updatedAt)}</dd>
+            <dd className="mt-1 text-foreground">{fmt(user.updatedAt)}</dd>
           </div>
           {user.username && (
             <div>
               <dt className="text-xs uppercase tracking-wider text-muted-foreground">Username</dt>
-              <dd className="mt-0.5 text-foreground">{user.username}</dd>
+              <dd className="mt-1 text-foreground">{user.username}</dd>
             </div>
           )}
           {user.phone && (
             <div>
               <dt className="text-xs uppercase tracking-wider text-muted-foreground">Phone</dt>
-              <dd className="mt-0.5 text-foreground">{user.phone}</dd>
+              <dd className="mt-1 text-foreground">{user.phone}</dd>
             </div>
           )}
           {user.locale && (
             <div>
               <dt className="text-xs uppercase tracking-wider text-muted-foreground">Locale</dt>
-              <dd className="mt-0.5 text-foreground">{user.locale}</dd>
+              <dd className="mt-1 text-foreground">{user.locale}</dd>
             </div>
           )}
           {user.oauthProviders && user.oauthProviders.length > 0 && (
@@ -201,9 +214,7 @@ export default function UserDetailPage() {
               <dt className="text-xs uppercase tracking-wider text-muted-foreground">
                 Linked logins
               </dt>
-              <dd className="mt-0.5 text-foreground capitalize">
-                {user.oauthProviders.join(", ")}
-              </dd>
+              <dd className="mt-1 text-foreground capitalize">{user.oauthProviders.join(", ")}</dd>
             </div>
           )}
         </dl>
@@ -222,13 +233,13 @@ export default function UserDetailPage() {
           ].map((item) => (
             <div key={item.label} className="rounded-lg bg-muted p-3 text-center">
               <div
-                className={`text-lg mb-1 ${item.enabled ? "text-green-400" : "text-muted-foreground"}`}
+                className={`text-lg mb-1 ${item.enabled ? "text-success-subtle-foreground" : "text-muted-foreground"}`}
               >
                 {item.enabled ? "✓" : "✗"}
               </div>
               <p className="text-xs text-muted-foreground">{item.label}</p>
               <p
-                className={`text-xs font-medium mt-0.5 ${item.enabled ? "text-green-400" : "text-muted-foreground"}`}
+                className={`text-xs font-medium mt-1 ${item.enabled ? "text-success-subtle-foreground" : "text-muted-foreground"}`}
               >
                 {item.enabled ? "Enabled" : "Disabled"}
               </p>
@@ -242,7 +253,7 @@ export default function UserDetailPage() {
         <div className="flex items-center justify-between">
           <div>
             <h3 className="font-semibold text-foreground">Active Sessions</h3>
-            <p className="text-sm text-muted-foreground mt-0.5">
+            <p className="text-sm text-muted-foreground mt-1">
               {sessionCount} session{sessionCount !== 1 ? "s" : ""} active
             </p>
           </div>
@@ -250,7 +261,7 @@ export default function UserDetailPage() {
             variant="outline"
             onClick={handleForceLogout}
             disabled={actionPending || sessionCount === 0}
-            className="border-orange-500/30 bg-orange-900/40 text-orange-400 hover:bg-orange-900/60 disabled:opacity-40"
+            className="border-warning bg-warning/40 text-warning-subtle-foreground hover:bg-warning/60 disabled:opacity-40"
           >
             Force logout all
           </Button>
@@ -260,7 +271,7 @@ export default function UserDetailPage() {
       {/* Customer Segment */}
       <div className="rounded-xl bg-card border border-border p-6">
         <h3 className="font-semibold text-foreground">Customer Segment</h3>
-        <p className="text-sm text-muted-foreground mt-0.5 mb-3">
+        <p className="text-sm text-muted-foreground mt-1 mb-3">
           Tag this account for CS/success workflows.
         </p>
         <div className="flex flex-wrap gap-2">
@@ -272,7 +283,7 @@ export default function UserDetailPage() {
                 variant="outline"
                 onClick={() => handleSegmentChange(seg)}
                 disabled={actionPending}
-                className={`px-3 py-1.5 ${
+                className={`px-3 py-2 ${
                   active
                     ? "border-primary bg-primary/15 text-primary"
                     : "border-border text-muted-foreground hover:text-foreground hover:border-primary/40"
@@ -285,15 +296,16 @@ export default function UserDetailPage() {
         </div>
       </div>
 
-      {/* Danger Zone */}
-      <div className="rounded-xl bg-card border border-red-900/40 p-6 space-y-4">
-        <h3 className="font-semibold text-red-400">Danger Zone</h3>
+      <DangerZone
+        title="Danger zone"
+        description="Suspend access temporarily or permanently delete this user."
+      >
         <div className="flex flex-wrap gap-3">
           <Button
             variant="outline"
             onClick={handleToggleStatus}
             disabled={actionPending}
-            className="border-orange-500/30 bg-orange-900/30 text-orange-400 hover:bg-orange-900/50 disabled:opacity-50"
+            className="border-warning bg-warning/30 text-warning-subtle-foreground hover:bg-warning/50 disabled:opacity-50"
           >
             {user.status === "active" ? "Suspend User" : "Activate User"}
           </Button>
@@ -301,12 +313,12 @@ export default function UserDetailPage() {
             variant="destructive"
             onClick={handleDelete}
             disabled={actionPending}
-            className="border-red-500/30 bg-red-900/30 text-red-400 hover:bg-red-900/50 disabled:opacity-50"
+            className="border-destructive bg-destructive/30 text-danger-subtle-foreground hover:bg-destructive/50 disabled:opacity-50"
           >
             Delete User
           </Button>
         </div>
-      </div>
+      </DangerZone>
     </div>
   );
 }

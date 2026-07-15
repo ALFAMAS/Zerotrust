@@ -3,9 +3,10 @@
 import { Globe2 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PageHeader } from "@/components/ui/page-header";
+import { FormSection } from "@/components/ui/page-patterns";
 import { useToast } from "@/context/ToastContext";
 import { useSetOrgDomainMutation, useUpdateOrgBrandingMutation } from "@/lib/server-state/regions";
 
@@ -62,102 +63,89 @@ export default function RegionsPage() {
       <div className="flex items-center gap-3">
         <Globe2 className="h-6 w-6 text-primary" />
         <div>
-          <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
-            Branding &amp; Domains
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Per-organization white-label branding and custom hostname mapping.
-          </p>
+          <PageHeader
+            title={<>Branding &amp; Domains</>}
+            description={<>Per-organization white-label branding and custom hostname mapping.</>}
+          />
         </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Org branding</CardTitle>
-          <CardDescription>
-            White-label app name, colors, and logo for an organization.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={saveBranding} className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-1.5 sm:col-span-2">
-              <Label htmlFor="brandingOrgId">Organization ID</Label>
-              <Input
-                id="brandingOrgId"
-                value={brandingOrgId}
-                onChange={(e) => setBrandingOrgId(e.target.value)}
-                placeholder="org uuid"
-                required
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="appName">App name</Label>
-              <Input
-                id="appName"
-                value={branding.appName}
-                onChange={(e) => setBranding((b) => ({ ...b, appName: e.target.value }))}
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="brandColor">Brand color</Label>
-              <Input
-                id="brandColor"
-                value={branding.brandColor}
-                onChange={(e) => setBranding((b) => ({ ...b, brandColor: e.target.value }))}
-                placeholder="#6366f1"
-              />
-            </div>
-            <div className="space-y-1.5 sm:col-span-2">
-              <Label htmlFor="logoUrl">Logo URL</Label>
-              <Input
-                id="logoUrl"
-                value={branding.logoUrl}
-                onChange={(e) => setBranding((b) => ({ ...b, logoUrl: e.target.value }))}
-                placeholder="https://…"
-              />
-            </div>
-            <div className="sm:col-span-2">
-              <Button type="submit" disabled={updateBrandingMutation.isPending}>
-                {updateBrandingMutation.isPending ? "Saving…" : "Save branding"}
-              </Button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
+      <FormSection
+        title="Org branding"
+        description="White-label app name, colors, and logo for an organization."
+      >
+        <form onSubmit={saveBranding} className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-2 sm:col-span-2">
+            <Label htmlFor="brandingOrgId">Organization ID</Label>
+            <Input
+              id="brandingOrgId"
+              value={brandingOrgId}
+              onChange={(e) => setBrandingOrgId(e.target.value)}
+              placeholder="org uuid"
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="appName">App name</Label>
+            <Input
+              id="appName"
+              value={branding.appName}
+              onChange={(e) => setBranding((b) => ({ ...b, appName: e.target.value }))}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="brandColor">Brand color</Label>
+            <Input
+              id="brandColor"
+              value={branding.brandColor}
+              onChange={(e) => setBranding((b) => ({ ...b, brandColor: e.target.value }))}
+              placeholder="#6366f1"
+            />
+          </div>
+          <div className="space-y-2 sm:col-span-2">
+            <Label htmlFor="logoUrl">Logo URL</Label>
+            <Input
+              id="logoUrl"
+              value={branding.logoUrl}
+              onChange={(e) => setBranding((b) => ({ ...b, logoUrl: e.target.value }))}
+              placeholder="https://…"
+            />
+          </div>
+          <div className="sm:col-span-2">
+            <Button type="submit" disabled={updateBrandingMutation.isPending}>
+              {updateBrandingMutation.isPending ? "Saving…" : "Save branding"}
+            </Button>
+          </div>
+        </form>
+      </FormSection>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Custom domain</CardTitle>
-          <CardDescription>Map a custom hostname to an organization.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={saveDomain} className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-1.5">
-              <Label htmlFor="domainOrgId">Organization ID</Label>
-              <Input
-                id="domainOrgId"
-                value={domainOrgId}
-                onChange={(e) => setDomainOrgId(e.target.value)}
-                required
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="customDomain">Domain (empty to clear)</Label>
-              <Input
-                id="customDomain"
-                value={customDomain}
-                onChange={(e) => setCustomDomain(e.target.value)}
-                placeholder="app.example.com"
-              />
-            </div>
-            <div className="sm:col-span-2">
-              <Button type="submit" disabled={setDomainMutation.isPending}>
-                {setDomainMutation.isPending ? "Saving…" : "Set domain"}
-              </Button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
+      <FormSection title="Custom domain" description="Map a custom hostname to an organization.">
+        <form onSubmit={saveDomain} className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-2">
+            <Label htmlFor="domainOrgId">Organization ID</Label>
+            <Input
+              id="domainOrgId"
+              value={domainOrgId}
+              onChange={(e) => setDomainOrgId(e.target.value)}
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="customDomain">Domain (empty to clear)</Label>
+            <Input
+              id="customDomain"
+              value={customDomain}
+              onChange={(e) => setCustomDomain(e.target.value)}
+              placeholder="app.example.com"
+            />
+          </div>
+          <div className="sm:col-span-2">
+            <Button type="submit" disabled={setDomainMutation.isPending}>
+              {setDomainMutation.isPending ? "Saving…" : "Set domain"}
+            </Button>
+          </div>
+        </form>
+      </FormSection>
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { mockAuthenticatedShell, type MockUser } from "./fixtures/apiMocks";
+import { E2E_API_URL } from "./fixtures/urls";
 
 const completeUser: MockUser = {
   id: "user-complete",
@@ -34,7 +35,7 @@ test.describe("dashboard polish", () => {
 
   test("notifies onboarding-complete and shows the completion card at 100%", async ({ page }) => {
     let onboardingCalls = 0;
-    await page.route("http://localhost:1337/auth/me/onboarding-complete", (route) => {
+    await page.route(`${E2E_API_URL}/auth/me/onboarding-complete`, (route) => {
       onboardingCalls++;
       return route.fulfill({ json: { ok: true } });
     });
@@ -50,7 +51,7 @@ test("native support chat posts to the mounted support API", async ({ page }) =>
   await mockAuthenticatedShell(page, completeUser);
 
   let supportRequest: { subject?: string; message?: string } | null = null;
-  await page.route("http://localhost:1337/support", async (route) => {
+  await page.route(`${E2E_API_URL}/support`, async (route) => {
     supportRequest = route.request().postDataJSON();
     await route.fulfill({
       status: 201,

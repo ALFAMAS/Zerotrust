@@ -18,6 +18,9 @@ const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 const nextConfig: NextConfig = {
   output: "standalone",
   outputFileTracingRoot: monorepoRoot,
+  // Allows production verification to run alongside `next dev` without both
+  // processes contending for the same .next directory. Defaults are unchanged.
+  distDir: process.env.ZEROTRUST_NEXT_DIST_DIR ?? ".next",
 
   // Keep server-only telemetry hooks external in dev/build so Turbopack does
   // not rewrite optional OpenTelemetry/Sentry shims into synthetic package

@@ -60,7 +60,11 @@ describe("status TanStack Query server state", () => {
     mockApiGet.mockRejectedValue(new Error("status unavailable"));
     renderWithQueryClient(<StatusPage />);
 
-    expect(await screen.findByText("status unavailable")).toBeInTheDocument();
+    expect(
+      await screen.findByText(
+        "We couldn't reach the status service. Check your connection and try again."
+      )
+    ).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Try again" })).toBeInTheDocument();
   });
 

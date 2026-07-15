@@ -1,4 +1,5 @@
 import { expect, type Browser, type Page } from "@playwright/test";
+import { E2E_API_URL } from "./urls";
 
 export function uniqueEmail(): string {
   return `e2e_${Date.now()}_${Math.floor(Math.random() * 1e6)}@example.com`;
@@ -11,9 +12,12 @@ export const E2E_PASSWORD = `E2e!${Date.now()}aB9x#Qz`;
 /** Dismiss the cookie banner when it blocks interactions. */
 export async function dismissCookieBanner(page: Page): Promise<void> {
   const accept = page.getByRole("button", { name: "Accept All" });
-  const visible = await accept.isVisible({ timeout: 1500 }).catch(() => false);
-  if (!visible) return;
-  await accept.click({ force: true, timeout: 3000 }).catch(() => {});
+  const mounted = await accept
+    .waitFor({ state: "attached", timeout: 5000 })
+    .then(() => true)
+    .catch(() => false);
+  if (!mounted) return;
+  await accept.evaluate((button) => (button as HTMLElement).click());
 }
 
 /** Open the dashboard command palette after the app shell has mounted. */
@@ -55,7 +59,7 @@ export async function registerAndGetUserId(page: Page, email = uniqueEmail()): P
   await registerViaUi(page, email);
   const token = await readAccessToken(page);
   if (!token) throw new Error("Missing access token after registration");
-  const meRes = await page.request.get("http://localhost:1337/auth/me", {
+  const meRes = await page.request.get(`${E2E_API_URL}/auth/me`, {
     headers: { Authorization: `Bearer ${token}` },
   });
   if (!meRes.ok()) throw new Error(`auth/me failed: ${meRes.status()}`);
@@ -70,7 +74,34 @@ export async function registerViaUi(page: Page, email: string): Promise<void> {
   await page.getByLabel("Email").fill(email);
   await page.getByLabel("Password", { exact: true }).fill(E2E_PASSWORD);
   await page.getByLabel("Confirm Password").fill(E2E_PASSWORD);
+
+  const registerResponse = page.waitForResponse(
+    (response) => new URL(response.url()).pathname === "/auth/register"
+  );
+  const loginResponse = registerResponse.then((registration) =>
+    registration.ok()
+      ? page.waitForResponse((response) => new URL(response.url()).pathname === "/auth/login")
+      : null
+  );
   await page.getByRole("button", { name: /create account/i }).click();
+
+  const registration = await registerResponse;
+  if (!registration.ok()) {
+    const body = (await registration.json().catch(() => null)) as { message?: string } | null;
+    throw new Error(
+      `Registration failed (${registration.status()}): ${body?.message ?? "unknown error"}`
+    );
+  }
+
+  const login = await loginResponse;
+  if (!login) throw new Error("Post-registration login did not start");
+  if (!login.ok()) {
+    const body = (await login.json().catch(() => null)) as { message?: string } | null;
+    throw new Error(
+      `Post-registration login failed (${login.status()}): ${body?.message ?? "unknown error"}`
+    );
+  }
+
   await expect(page).toHaveURL(/\/dashboard/, { timeout: 30_000 });
 }
 

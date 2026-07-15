@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState, ErrorState } from "@/components/ui/States";
 import {
   Table,
@@ -85,7 +86,7 @@ function WalletContent() {
       <WalletHeader />
 
       {params.get("success") === "1" && (
-        <Alert className="border-green-700 bg-green-900/30 text-green-300">
+        <Alert className="border-success bg-success-subtle text-success-subtle-foreground">
           <AlertDescription>
             Payment received. Your wallet balance will update shortly after Stripe confirms the
             payment.
@@ -93,7 +94,7 @@ function WalletContent() {
         </Alert>
       )}
       {params.get("canceled") === "1" && (
-        <Alert className="border-yellow-700 bg-yellow-900/30 text-yellow-300">
+        <Alert className="border-warning bg-warning-subtle text-warning-subtle-foreground">
           <AlertDescription>Checkout canceled. You have not been charged.</AlertDescription>
         </Alert>
       )}
@@ -133,7 +134,7 @@ function WalletContent() {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleTopUp} className="flex items-end gap-3">
-              <div className="flex-1 space-y-1.5">
+              <div className="flex-1 space-y-2">
                 <Label htmlFor="amount">Amount ({currency})</Label>
                 <Input
                   id="amount"
@@ -200,7 +201,7 @@ function WalletContent() {
                         {tx.description ?? "—"}
                       </TableCell>
                       <TableCell
-                        className={`text-right font-medium ${tx.amount < 0 ? "text-destructive" : "text-emerald-600"}`}
+                        className={`text-right font-medium ${tx.amount < 0 ? "text-destructive" : "text-success-subtle-foreground"}`}
                       >
                         {tx.amount < 0 ? "-" : "+"}
                         {money(Math.abs(tx.amount), currency)}
@@ -232,12 +233,10 @@ function WalletHeader() {
     <div className="flex items-center gap-3">
       <WalletIcon className="h-6 w-6 text-primary" />
       <div>
-        <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
-          Wallet
-        </h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Your account credit balance and transaction history.
-        </p>
+        <PageHeader
+          title={<>Wallet</>}
+          description={<>Your account credit balance and transaction history.</>}
+        />
       </div>
     </div>
   );

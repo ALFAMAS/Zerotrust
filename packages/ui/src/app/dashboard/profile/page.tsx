@@ -1,4 +1,6 @@
 "use client";
+
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { ServerStateStatus } from "@/components/ServerStateStatus";
@@ -16,6 +18,8 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PageHeader } from "@/components/ui/page-header";
+import { DangerZone } from "@/components/ui/page-patterns";
 import { ErrorState } from "@/components/ui/States";
 import {
   useAuthMeQuery,
@@ -128,9 +132,7 @@ export default function ProfilePage() {
 
   return (
     <div className="max-w-lg">
-      <h1 className="mb-6 font-display text-2xl font-semibold tracking-tight text-foreground">
-        Profile Settings
-      </h1>
+      <PageHeader title={<>Profile Settings</>} />
 
       <ServerStateStatus
         isFetching={userQuery.isFetching}
@@ -145,7 +147,7 @@ export default function ProfilePage() {
           <CardTitle>Avatar</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center gap-5">
+          <div className="flex items-center gap-6">
             {form.avatarUrl ? (
               <Button
                 type="button"
@@ -202,10 +204,12 @@ export default function ProfilePage() {
             </DialogDescription>
           </DialogHeader>
           {form.avatarUrl ? (
-            // biome-ignore lint/performance/noImgElement: user avatar URL from any host; next/image needs known domains
-            <img
+            <Image
               src={form.avatarUrl}
               alt={`Profile avatar of ${user?.displayName || "user"}`}
+              width={512}
+              height={512}
+              unoptimized
               className="mx-auto max-h-[70vh] w-full rounded-lg object-contain"
             />
           ) : null}
@@ -223,7 +227,7 @@ export default function ProfilePage() {
             </Alert>
           )}
           <form onSubmit={handleSave} className="space-y-4">
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <Label htmlFor="displayName">Display Name</Label>
               <Input
                 id="displayName"
@@ -231,7 +235,7 @@ export default function ProfilePage() {
                 onChange={(e) => setForm({ ...form, displayName: e.target.value })}
               />
             </div>
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <Label htmlFor="username">Username</Label>
               <Input
                 id="username"
@@ -240,11 +244,11 @@ export default function ProfilePage() {
                 placeholder="lowercase, hyphens, underscores"
               />
             </div>
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input id="email" value={user?.email || ""} disabled />
             </div>
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <Label htmlFor="phone">Phone</Label>
               <Input
                 id="phone"
@@ -299,25 +303,20 @@ export default function ProfilePage() {
         </CardContent>
       </Card>
 
-      <Card className="border-destructive/50">
-        <CardHeader>
-          <CardTitle className="text-destructive">Danger Zone</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="mb-4 text-sm text-muted-foreground">
-            Permanently delete your account. This cannot be undone.
-          </p>
-          <Button
-            variant="destructive"
-            onClick={() =>
-              confirm("Are you absolutely sure?") &&
-              alert("Contact an administrator to delete your account.")
-            }
-          >
-            Delete Account
-          </Button>
-        </CardContent>
-      </Card>
+      <DangerZone
+        title="Danger zone"
+        description="Permanently delete your account. This cannot be undone."
+      >
+        <Button
+          variant="destructive"
+          onClick={() =>
+            confirm("Are you absolutely sure?") &&
+            alert("Contact an administrator to delete your account.")
+          }
+        >
+          Delete Account
+        </Button>
+      </DangerZone>
     </div>
   );
 }

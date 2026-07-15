@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { mockAuthenticatedShell } from "./fixtures/apiMocks";
+import { E2E_API_URL } from "./fixtures/urls";
 
 test.describe("webhooks page", () => {
   test.beforeEach(async ({ page }) => {
@@ -7,7 +8,7 @@ test.describe("webhooks page", () => {
   });
 
   test("lists webhook endpoints", async ({ page }) => {
-    await page.route("http://localhost:1337/webhooks", (route) =>
+    await page.route(`${E2E_API_URL}/webhooks`, (route) =>
       route.fulfill({
         json: [
           {

@@ -71,7 +71,7 @@ function ResetForm() {
         </Alert>
       )}
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="space-y-1.5">
+        <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
           <Input
             id="email"
@@ -82,7 +82,7 @@ function ResetForm() {
             placeholder="you@example.com"
           />
         </div>
-        <div className="space-y-1.5">
+        <div className="space-y-2">
           <Label htmlFor="code">Reset code</Label>
           <Input
             id="code"
@@ -96,7 +96,7 @@ function ResetForm() {
             className="font-mono tracking-[0.3em]"
           />
         </div>
-        <div className="space-y-1.5">
+        <div className="space-y-2">
           <Label htmlFor="password">New Password</Label>
           <PasswordInput
             id="password"
@@ -107,7 +107,7 @@ function ResetForm() {
             placeholder="At least 8 characters"
           />
         </div>
-        <div className="space-y-1.5">
+        <div className="space-y-2">
           <Label htmlFor="confirm">Confirm Password</Label>
           <PasswordInput
             id="confirm"

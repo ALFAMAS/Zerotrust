@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { PageHeader } from "@/components/ui/page-header";
 import { ErrorState } from "@/components/ui/States";
 import {
   Select,
@@ -80,10 +81,7 @@ export default function UsersClient() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
-            Users
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">{total} total users</p>
+          <PageHeader title={<>Users</>} description={<>{total} total users</>} />
         </div>
       </div>
 
@@ -169,18 +167,18 @@ export default function UsersClient() {
                               <p className="font-medium text-foreground">
                                 {u.displayName ?? u.email}
                               </p>
-                              <div className="flex items-center gap-1.5">
+                              <div className="flex items-center gap-2">
                                 <p className="text-xs text-muted-foreground">{u.email}</p>
                                 {u.emailVerifiedAt ? (
                                   <span
-                                    className="text-[10px] text-emerald-500"
+                                    className="text-xs text-success-subtle-foreground"
                                     title={`Verified ${fmt(u.emailVerifiedAt)}`}
                                   >
                                     ✓ verified
                                   </span>
                                 ) : (
                                   <span
-                                    className="text-[10px] text-amber-500"
+                                    className="text-xs text-warning-subtle-foreground"
                                     title="Email not verified"
                                   >
                                     unverified

@@ -4,10 +4,11 @@ import { Download, KeyRound, LogIn, Monitor, UserCheck, UserPlus, Users } from "
 import Link from "next/link";
 import MetricCard from "@/components/admin/MetricCard";
 import RadialGauge from "@/components/admin/RadialGauge";
-import Badge from "@/components/Badge";
 import { ServerStateStatus } from "@/components/ServerStateStatus";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { PageHeader } from "@/components/ui/page-header";
 import { ErrorState, SkeletonList } from "@/components/ui/States";
 import {
   useAdminRecentUsersQuery,
@@ -70,14 +71,7 @@ export default function AdminOverviewClient() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
-          Dashboard
-        </h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Overview of your authentication platform
-        </p>
-      </div>
+      <PageHeader title="Dashboard" description="Overview of your authentication platform" />
 
       <ServerStateStatus
         isFetching={statsQuery.isFetching || usersQuery.isFetching}
@@ -101,7 +95,7 @@ export default function AdminOverviewClient() {
       )}
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <Card className="p-5">
+        <Card className="p-6">
           <h2 className="font-medium text-foreground">User activity</h2>
           <p className="text-xs text-muted-foreground">Active in the last 30 days</p>
           <div className="mt-4">
@@ -114,7 +108,7 @@ export default function AdminOverviewClient() {
         </Card>
 
         <Card className="overflow-hidden lg:col-span-2">
-          <div className="flex items-center justify-between border-b border-border px-5 py-4">
+          <div className="flex items-center justify-between border-b border-border px-6 py-4">
             <h2 className="font-medium text-foreground">Recent users</h2>
             <Link href="/admin/users" className="text-xs text-primary hover:text-primary/80">
               View all →
@@ -122,10 +116,10 @@ export default function AdminOverviewClient() {
           </div>
           <div className="divide-y divide-border">
             {recentUsers.length === 0 && !loading && (
-              <p className="px-5 py-6 text-sm text-muted-foreground">No users found.</p>
+              <p className="px-6 py-6 text-sm text-muted-foreground">No users found.</p>
             )}
             {recentUsers.map((u) => (
-              <div key={u.id} className="flex items-center gap-3 px-5 py-3">
+              <div key={u.id} className="flex items-center gap-3 px-6 py-3">
                 <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-primary/15 text-sm font-medium text-primary">
                   {(u.name?.[0] ?? u.email[0]).toUpperCase()}
                 </div>
@@ -143,10 +137,10 @@ export default function AdminOverviewClient() {
       </div>
 
       <Card className="overflow-hidden">
-        <CardHeader className="border-b border-border px-5 py-4">
+        <CardHeader className="border-b border-border px-6 py-4">
           <CardTitle>Quick actions</CardTitle>
         </CardHeader>
-        <CardContent className="grid grid-cols-2 gap-3 p-5 lg:grid-cols-4">
+        <CardContent className="grid grid-cols-2 gap-3 p-6 lg:grid-cols-4">
           {quickActions.map((a) => (
             <Link
               key={a.href}

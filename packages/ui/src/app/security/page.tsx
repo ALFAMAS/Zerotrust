@@ -15,15 +15,15 @@ export default function SecurityPage() {
     <div className="flex min-h-screen flex-col bg-background">
       <SiteHeader />
 
-      <main className="mx-auto w-full max-w-3xl flex-1 px-6 py-16">
+      <main className="mx-auto w-full max-w-3xl flex-1 px-6 py-8">
         <h1 className="font-display text-4xl font-semibold tracking-tight text-foreground">
           Security &amp; Responsible Disclosure
         </h1>
-        <p className="mb-12 mt-3 text-sm text-muted-foreground">
+        <p className="mb-8 mt-3 text-sm text-muted-foreground">
           We welcome reports from security researchers and treat them as a priority.
         </p>
 
-        <div className="space-y-10 leading-relaxed text-foreground/80">
+        <div className="space-y-8 leading-relaxed text-foreground/80">
           <section>
             <h2 className="mb-4 border-b border-border pb-2 text-xl font-semibold text-foreground">
               Reporting a vulnerability
@@ -46,7 +46,7 @@ export default function SecurityPage() {
             <h2 className="mb-4 border-b border-border pb-2 text-xl font-semibold text-foreground">
               Our commitment
             </h2>
-            <ul className="list-disc space-y-2 pl-5">
+            <ul className="list-disc space-y-2 pl-6">
               <li>We acknowledge reports within 3 business days.</li>
               <li>We&apos;ll keep you updated on remediation progress.</li>
               <li>

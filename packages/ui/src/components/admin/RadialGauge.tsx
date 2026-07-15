@@ -24,7 +24,7 @@ export default function RadialGauge({ value, label, caption }: RadialGaugeProps)
         size={240}
         strokeWidth={14}
       >
-        <Ring index={0} showGlow={false} />
+        <Ring index={0} />
         <RingCenter defaultLabel={label} suffix="%" />
       </RingChart>
       {caption && <p className="-mt-2 text-center text-sm text-muted-foreground">{caption}</p>}

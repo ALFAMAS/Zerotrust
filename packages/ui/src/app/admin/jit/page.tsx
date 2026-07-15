@@ -3,6 +3,7 @@
 import { Check, Clock, Loader2, ShieldQuestion, X } from "lucide-react";
 import { ServerStateStatus } from "@/components/ServerStateStatus";
 import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/ui/page-header";
 import { ErrorState } from "@/components/ui/States";
 import { useToast } from "@/context/ToastContext";
 import {
@@ -13,9 +14,9 @@ import {
 import type { JitRequestStatus } from "@/lib/server-state/types";
 
 const STATUS_STYLES: Record<JitRequestStatus, string> = {
-  pending: "border-amber-500/30 bg-amber-500/10 text-amber-400",
-  approved: "border-green-500/30 bg-green-500/10 text-green-400",
-  denied: "border-red-500/30 bg-red-500/10 text-red-400",
+  pending: "border-warning bg-warning/10 text-warning-subtle-foreground",
+  approved: "border-success bg-success/10 text-success-subtle-foreground",
+  denied: "border-destructive bg-destructive/10 text-danger-subtle-foreground",
   expired: "border-border bg-muted text-muted-foreground",
 };
 
@@ -58,13 +59,15 @@ export default function AdminJITPage() {
   return (
     <div className="max-w-4xl space-y-6">
       <div>
-        <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
-          Cross-tenant access requests
-        </h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Approve or deny just-in-time access requests targeting your tenant. Approved grants expire
-          automatically.
-        </p>
+        <PageHeader
+          title={<>Cross-tenant access requests</>}
+          description={
+            <>
+              Approve or deny just-in-time access requests targeting your tenant. Approved grants
+              expire automatically.
+            </>
+          }
+        />
       </div>
 
       <ServerStateStatus
@@ -88,7 +91,7 @@ export default function AdminJITPage() {
         <>
           <section className="space-y-3">
             <h2 className="flex items-center gap-2 font-medium text-foreground">
-              <ShieldQuestion className="h-4 w-4 text-amber-400" />
+              <ShieldQuestion className="h-4 w-4 text-warning-subtle-foreground" />
               Pending approval ({pending.length})
             </h2>
             {pending.length === 0 ? (
@@ -119,7 +122,7 @@ export default function AdminJITPage() {
                         <Button
                           onClick={() => void approve(r.id)}
                           disabled={isActing(r.id)}
-                          className="flex items-center gap-1.5 rounded-lg bg-green-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-green-500 disabled:opacity-50"
+                          className="flex min-h-11 items-center gap-2 rounded-lg bg-success-subtle px-3 py-2 text-xs font-medium text-success-subtle-foreground transition-colors hover:bg-success-subtle/80 disabled:opacity-50"
                         >
                           {isActing(r.id) ? (
                             <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -131,7 +134,7 @@ export default function AdminJITPage() {
                         <Button
                           onClick={() => void deny(r.id)}
                           disabled={isActing(r.id)}
-                          className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:border-red-700 hover:text-red-400 disabled:opacity-50"
+                          className="flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-xs font-medium text-muted-foreground transition-colors hover:border-destructive hover:text-danger-subtle-foreground disabled:opacity-50"
                         >
                           <X className="h-3.5 w-3.5" />
                           Deny
@@ -170,7 +173,7 @@ export default function AdminJITPage() {
                       )}
                     </div>
                     <span
-                      className={`shrink-0 rounded-full border px-2.5 py-1 text-xs font-medium capitalize ${STATUS_STYLES[r.status]}`}
+                      className={`shrink-0 rounded-full border px-3 py-1 text-xs font-medium capitalize ${STATUS_STYLES[r.status]}`}
                     >
                       {r.status}
                     </span>

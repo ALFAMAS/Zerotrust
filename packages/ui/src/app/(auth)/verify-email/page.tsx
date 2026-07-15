@@ -63,13 +63,13 @@ function VerifyEmailInner() {
   if (status === "success") {
     return (
       <div className="text-center">
-        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-400 ring-1 ring-emerald-500/30">
+        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-success/10 text-success-subtle-foreground ring-1 ring-success">
           <CheckCircle2 className="h-7 w-7" />
         </div>
         <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
           Email verified
         </h1>
-        <p className="mt-1.5 text-sm text-muted-foreground">Taking you to your dashboard…</p>
+        <p className="mt-2 text-sm text-muted-foreground">Taking you to your dashboard…</p>
       </div>
     );
   }
@@ -82,7 +82,7 @@ function VerifyEmailInner() {
         <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
           Verify your email
         </h1>
-        <p className="mt-1.5 text-sm text-muted-foreground">
+        <p className="mt-2 text-sm text-muted-foreground">
           Enter the 6-digit code we emailed you, or open the link in that message.
         </p>
       </div>
@@ -94,7 +94,7 @@ function VerifyEmailInner() {
         }}
         className="space-y-4"
       >
-        <div className="space-y-1.5">
+        <div className="space-y-2">
           <Label htmlFor="code">Verification code</Label>
           <Input
             id="code"

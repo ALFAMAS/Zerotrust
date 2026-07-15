@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import AppFooter from "./AppFooter";
 import AppSidebar, { type NavItem } from "./AppSidebar";
@@ -39,9 +39,11 @@ export default function AppShell({
   profileMenu,
   children,
 }: AppShellProps) {
-  const _pathname = usePathname();
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const previousPathnameRef = useRef(pathname);
 
   useEffect(() => {
     try {
@@ -63,31 +65,24 @@ export default function AppShell({
     });
   }, []);
 
-  // Close the mobile drawer whenever the route changes.
-  useEffect(() => {
+  const closeMobileNavigation = useCallback(() => {
     setOpen(false);
+    setTimeout(() => menuButtonRef.current?.focus(), 0);
   }, []);
 
-  // Esc closes the drawer; lock body scroll while it's open.
+  // Close the mobile drawer whenever the route changes.
   useEffect(() => {
-    if (!open) return;
-    function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") setOpen(false);
-    }
-    document.addEventListener("keydown", onKey);
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = "";
-    };
-  }, [open]);
+    if (previousPathnameRef.current === pathname) return;
+    previousPathnameRef.current = pathname;
+    setOpen(false);
+  }, [pathname]);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
       <AppSidebar
         items={navItems}
         open={open}
-        onClose={() => setOpen(false)}
+        onClose={closeMobileNavigation}
         brandSuffix={brandSuffix}
         footer={sidebarFooter}
         collapsed={sidebarCollapsed}
@@ -96,20 +91,21 @@ export default function AppShell({
 
       <div
         className={cn(
-          "flex min-h-screen flex-col transition-[margin] duration-200 ease-out md:ml-16",
-          !sidebarCollapsed && "md:ml-64"
+          "flex min-h-screen flex-col transition-[margin] duration-200 ease-out min-[1024px]:ml-16",
+          !sidebarCollapsed && "min-[1024px]:ml-64"
         )}
       >
         <AppTopbar
           brandSuffix={brandSuffix}
           onMenuClick={() => setOpen(true)}
+          menuButtonRef={menuButtonRef}
           actions={actions}
           profileMenu={profileMenu}
         />
         {banner}
         <main
           id="main-content"
-          className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:px-6 sm:py-8"
+          className="mx-auto w-full max-w-[1600px] flex-1 px-4 py-6 sm:px-6 sm:py-8"
         >
           {children}
         </main>

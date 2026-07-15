@@ -32,20 +32,41 @@ import VerifyEmailBanner from "@/components/VerifyEmailBanner";
 import { bootstrapAccessToken, clearToken, isAuthenticated } from "../../lib/auth";
 
 const navItems: NavItem[] = [
-  { href: "/dashboard", label: "Overview", icon: LayoutDashboard, exact: true },
-  { href: "/dashboard/search", label: "Search", icon: Search },
-  { href: "/dashboard/profile", label: "Profile", icon: User },
-  { href: "/dashboard/security", label: "Security", icon: ShieldCheck },
-  { href: "/dashboard/sessions", label: "Sessions", icon: Monitor },
-  { href: "/dashboard/notifications", label: "Notifications", icon: Bell },
-  { href: "/dashboard/organizations", label: "Organizations", icon: Building2 },
-  { href: "/dashboard/api-keys", label: "API Keys", icon: KeyRound },
-  { href: "/dashboard/webhooks", label: "Webhooks", icon: Webhook },
-  { href: "/dashboard/billing", label: "Billing", icon: CreditCard },
-  { href: "/dashboard/wallet", label: "Wallet", icon: Wallet },
-  { href: "/dashboard/jit", label: "Cross-tenant", icon: ShieldQuestion },
-  { href: "/dashboard/support", label: "Support", icon: LifeBuoy },
-  { href: "/dashboard/account", label: "Account", icon: UserCog },
+  {
+    href: "/dashboard",
+    label: "Overview",
+    icon: LayoutDashboard,
+    exact: true,
+    group: "Workspace",
+  },
+  { href: "/dashboard/search", label: "Search", icon: Search, group: "Workspace" },
+  { href: "/dashboard/profile", label: "Profile", icon: User, group: "Workspace" },
+  { href: "/dashboard/security", label: "Security", icon: ShieldCheck, group: "Protection" },
+  { href: "/dashboard/sessions", label: "Sessions", icon: Monitor, group: "Protection" },
+  {
+    href: "/dashboard/notifications",
+    label: "Notifications",
+    icon: Bell,
+    group: "Protection",
+  },
+  {
+    href: "/dashboard/organizations",
+    label: "Organizations",
+    icon: Building2,
+    group: "Teams",
+  },
+  { href: "/dashboard/api-keys", label: "API Keys", icon: KeyRound, group: "Developer" },
+  { href: "/dashboard/webhooks", label: "Webhooks", icon: Webhook, group: "Developer" },
+  { href: "/dashboard/billing", label: "Billing", icon: CreditCard, group: "Commerce" },
+  { href: "/dashboard/wallet", label: "Wallet", icon: Wallet, group: "Commerce" },
+  {
+    href: "/dashboard/jit",
+    label: "Cross-tenant",
+    icon: ShieldQuestion,
+    group: "Access",
+  },
+  { href: "/dashboard/support", label: "Support", icon: LifeBuoy, group: "Account" },
+  { href: "/dashboard/account", label: "Account", icon: UserCog, group: "Account" },
 ];
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -115,7 +136,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       actions={
         <>
           <LocaleSwitcher />
-          <ThemeToggle />
+          <span className="hidden min-[1024px]:inline-flex">
+            <ThemeToggle />
+          </span>
           <NotificationBell />
         </>
       }

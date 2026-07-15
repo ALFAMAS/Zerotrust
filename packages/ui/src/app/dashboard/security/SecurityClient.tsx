@@ -1,5 +1,7 @@
 "use client";
+
 import { KeyRound } from "lucide-react";
+import Image from "next/image";
 import { useState } from "react";
 import { ServerStateStatus } from "@/components/ServerStateStatus";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -7,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { PageHeader } from "@/components/ui/page-header";
 import { ErrorState } from "@/components/ui/States";
 import {
   useAuthMeQuery,
@@ -137,9 +140,7 @@ export default function SecurityClient() {
 
   return (
     <div className="max-w-2xl space-y-6">
-      <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
-        Security Settings
-      </h1>
+      <PageHeader title={<>Security Settings</>} />
 
       <ServerStateStatus
         isFetching={userQuery.isFetching}
@@ -228,11 +229,13 @@ export default function SecurityClient() {
               <p className="text-sm text-muted-foreground">
                 Scan this QR code with your authenticator app:
               </p>
-              {/* biome-ignore lint/performance/noImgElement: TOTP QR is a runtime data: URL, not optimizable by next/image */}
-              <img
+              <Image
                 src={totpSetup.qrCodeUrl}
                 alt="TOTP QR Code"
-                className="h-40 w-40 rounded-lg bg-white p-2"
+                width={160}
+                height={160}
+                unoptimized
+                className="h-40 w-40 rounded-lg bg-qr-background p-2"
               />
               <div className="flex gap-2">
                 <Input
@@ -244,7 +247,7 @@ export default function SecurityClient() {
                 <Button
                   onClick={verifyTOTP}
                   disabled={verifyTotpMutation.isPending}
-                  className="bg-emerald-600 hover:bg-emerald-500"
+                  className="bg-success-subtle text-success-subtle-foreground hover:bg-success-subtle/80"
                 >
                   Verify
                 </Button>
@@ -306,10 +309,10 @@ export default function SecurityClient() {
               return (
                 <div
                   key={provider}
-                  className="flex items-center justify-between rounded-lg bg-muted p-3"
+                  className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-muted p-3"
                 >
                   <span className="text-sm capitalize text-foreground">{provider}</span>
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     <Badge variant={linked ? "success" : "secondary"}>
                       {linked ? "Connected" : "Not connected"}
                     </Badge>

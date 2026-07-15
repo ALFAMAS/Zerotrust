@@ -7,6 +7,7 @@ import { ServerStateStatus } from "@/components/ServerStateStatus";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { PageHeader } from "@/components/ui/page-header";
 import { ErrorState } from "@/components/ui/States";
 import {
   Table,
@@ -90,12 +91,10 @@ export default function CompliancePage() {
           <ShieldCheck className="h-5 w-5" />
         </span>
         <div>
-          <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
-            Compliance
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            SOC 2 control readiness and the annual risk register.
-          </p>
+          <PageHeader
+            title={<>Compliance</>}
+            description={<>SOC 2 control readiness and the annual risk register.</>}
+          />
         </div>
       </div>
 
@@ -140,7 +139,7 @@ export default function CompliancePage() {
                 <Card>
                   <CardHeader className="pb-2">
                     <CardDescription>Implemented</CardDescription>
-                    <CardTitle className="text-3xl text-emerald-500">
+                    <CardTitle className="text-3xl text-success-subtle-foreground">
                       {readiness?.implemented ?? "—"}
                     </CardTitle>
                   </CardHeader>
@@ -148,7 +147,7 @@ export default function CompliancePage() {
                 <Card>
                   <CardHeader className="pb-2">
                     <CardDescription>Partial</CardDescription>
-                    <CardTitle className="text-3xl text-amber-500">
+                    <CardTitle className="text-3xl text-warning-subtle-foreground">
                       {readiness?.partial ?? "—"}
                     </CardTitle>
                   </CardHeader>
@@ -263,7 +262,7 @@ export default function CompliancePage() {
                   <Card>
                     <CardHeader className="pb-2">
                       <CardDescription>Open</CardDescription>
-                      <CardTitle className="text-3xl text-red-500">
+                      <CardTitle className="text-3xl text-danger-subtle-foreground">
                         {risk?.openRisks ?? "—"}
                       </CardTitle>
                     </CardHeader>
@@ -271,7 +270,7 @@ export default function CompliancePage() {
                   <Card>
                     <CardHeader className="pb-2">
                       <CardDescription>Mitigated</CardDescription>
-                      <CardTitle className="text-3xl text-amber-500">
+                      <CardTitle className="text-3xl text-warning-subtle-foreground">
                         {risk?.mitigatedRisks ?? "—"}
                       </CardTitle>
                     </CardHeader>

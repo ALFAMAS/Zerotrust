@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { PageHeader } from "@/components/ui/page-header";
 import { ErrorState } from "@/components/ui/States";
 import {
   Select,
@@ -76,12 +77,10 @@ export default function ApiKeysPage() {
 
   return (
     <div className="max-w-3xl">
-      <h1 className="mb-1 font-display text-2xl font-semibold tracking-tight text-foreground">
-        API Keys
-      </h1>
-      <p className="mb-8 text-sm text-muted-foreground">
-        Use API keys to authenticate programmatic access to your account.
-      </p>
+      <PageHeader
+        title={<>API Keys</>}
+        description={<>Use API keys to authenticate programmatic access to your account.</>}
+      />
 
       <ServerStateStatus
         isFetching={keysQuery.isFetching}
@@ -92,12 +91,12 @@ export default function ApiKeysPage() {
       />
 
       {newKey && (
-        <div className="mb-6 rounded-xl border border-emerald-700 bg-emerald-900/30 p-4">
-          <p className="mb-2 text-sm font-semibold text-emerald-300">
+        <div className="mb-6 rounded-xl border border-success bg-success-subtle p-4">
+          <p className="mb-2 text-sm font-semibold text-success-subtle-foreground">
             API key created — copy it now, you won&apos;t see it again.
           </p>
           <div className="flex items-center gap-2">
-            <code className="flex-1 break-all rounded-lg bg-background p-2 font-mono text-xs text-emerald-300">
+            <code className="flex-1 break-all rounded-lg bg-background p-2 font-mono text-xs text-success-subtle-foreground">
               {newKey}
             </code>
             <Button type="button" variant="secondary" size="sm" onClick={() => copy(newKey)}>
@@ -189,18 +188,16 @@ export default function ApiKeysPage() {
                       {key.name}
                       {key.environment === "test" && <Badge variant="warning">Test</Badge>}
                     </p>
-                    <p className="mt-0.5 font-mono text-xs text-muted-foreground">
-                      {key.keyPrefix}…
-                    </p>
+                    <p className="mt-1 font-mono text-xs text-muted-foreground">{key.keyPrefix}…</p>
                     {key.lastUsedAt ? (
-                      <p className="mt-0.5 text-xs text-muted-foreground">
+                      <p className="mt-1 text-xs text-muted-foreground">
                         Last used {new Date(key.lastUsedAt).toLocaleString()}
                       </p>
                     ) : (
-                      <p className="mt-0.5 text-xs text-muted-foreground">Never used</p>
+                      <p className="mt-1 text-xs text-muted-foreground">Never used</p>
                     )}
                     {key.expiresAt && (
-                      <p className="mt-0.5 text-xs text-amber-600">
+                      <p className="mt-1 text-xs text-warning-subtle-foreground">
                         Expires {new Date(key.expiresAt).toLocaleDateString()}
                       </p>
                     )}

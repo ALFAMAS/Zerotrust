@@ -1,7 +1,7 @@
 "use client";
 
+import { Webhook } from "lucide-react";
 import { useState } from "react";
-import EmptyState from "@/components/EmptyState";
 import { ServerStateStatus } from "@/components/ServerStateStatus";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -16,7 +16,8 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ErrorState } from "@/components/ui/States";
+import { PageHeader } from "@/components/ui/page-header";
+import { EmptyState, ErrorState } from "@/components/ui/States";
 import {
   Table,
   TableBody,
@@ -146,14 +147,16 @@ export default function WebhooksPage() {
     <div className="max-w-4xl">
       <div className="mb-8 flex items-start justify-between">
         <div>
-          <h1 className="mb-1 font-display text-2xl font-semibold tracking-tight text-foreground">
-            Webhooks
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Receive signed HTTP callbacks when events happen in your account. Payloads are signed
-            with HMAC-SHA256 in the <code className="text-primary">X-zerotrust-Signature</code>{" "}
-            header.
-          </p>
+          <PageHeader
+            title={<>Webhooks</>}
+            description={
+              <>
+                Receive signed HTTP callbacks when events happen in your account. Payloads are
+                signed with HMAC-SHA256 in the{" "}
+                <code className="text-primary">X-zerotrust-Signature</code> header.
+              </>
+            }
+          />
         </div>
         <Button type="button" className="shrink-0" onClick={() => setCreateOpen(true)}>
           Add endpoint
@@ -176,29 +179,39 @@ export default function WebhooksPage() {
       ) : endpointsQuery.isPending ? (
         <div className="space-y-3">
           {[...Array(2)].map((_, i) => (
-            <div key={i} className="h-20 animate-pulse rounded-xl bg-card" />
+            <div
+              key={i}
+              className="h-20 animate-pulse rounded-xl bg-card motion-reduce:animate-none"
+            />
           ))}
           <p className="sr-only">Loading webhooks…</p>
         </div>
       ) : endpoints.length === 0 ? (
         <Card>
           <EmptyState
-            icon="🪝"
+            icon={Webhook}
             title="No webhook endpoints yet"
             description="Add an endpoint to receive real-time events like logins, user changes and anomaly alerts."
-            actionLabel="Add your first endpoint"
-            onAction={() => setCreateOpen(true)}
+            action={
+              <Button type="button" onClick={() => setCreateOpen(true)}>
+                Add your first endpoint
+              </Button>
+            }
           />
         </Card>
       ) : (
         <div className="space-y-3">
           {endpoints.map((ep) => (
-            <Card key={ep.id} className="flex items-center justify-between gap-4 p-5">
+            <Card key={ep.id} className="flex items-center justify-between gap-4 p-6">
               <div className="min-w-0">
                 <p className="truncate text-sm font-medium text-foreground">{ep.url}</p>
                 <p className="mt-1 text-xs text-muted-foreground">
                   {ep.events.length} event{ep.events.length === 1 ? "" : "s"} ·{" "}
-                  <span className={ep.active ? "text-emerald-500" : "text-muted-foreground"}>
+                  <span
+                    className={
+                      ep.active ? "text-success-subtle-foreground" : "text-muted-foreground"
+                    }
+                  >
                     {ep.active ? "Active" : "Disabled"}
                   </span>
                   {pingResult[ep.id] && (
@@ -281,7 +294,7 @@ export default function WebhooksPage() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <Label htmlFor="wh-url">Endpoint URL</Label>
               <Input
                 id="wh-url"
@@ -290,7 +303,7 @@ export default function WebhooksPage() {
                 placeholder="https://example.com/webhooks/zerotrust"
               />
             </div>
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <Label htmlFor="wh-secret">Signing secret</Label>
               <Input
                 id="wh-secret"
@@ -303,7 +316,7 @@ export default function WebhooksPage() {
               </p>
             </div>
             <div>
-              <span className="mb-1.5 block text-sm text-foreground/80">Events</span>
+              <span className="mb-2 block text-sm text-foreground/80">Events</span>
               <div className="grid grid-cols-2 gap-2">
                 {EVENT_OPTIONS.map((ev) => (
                   <div key={ev} className="flex items-center gap-2 text-xs text-foreground/80">

@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { mockAuthenticatedShell } from "./fixtures/apiMocks";
+import { E2E_API_URL } from "./fixtures/urls";
 
 test.describe("wallet page", () => {
   test.beforeEach(async ({ page }) => {
@@ -7,12 +8,12 @@ test.describe("wallet page", () => {
   });
 
   test("shows wallet balance from the API", async ({ page }) => {
-    await page.route("http://localhost:1337/wallet", (route) =>
+    await page.route(`${E2E_API_URL}/wallet`, (route) =>
       route.fulfill({
         json: { balance: 4200, lifetimeBalance: 9000, currency: "USD", autoTopUp: false },
       })
     );
-    await page.route("http://localhost:1337/wallet/transactions*", (route) =>
+    await page.route(`${E2E_API_URL}/wallet/transactions*`, (route) =>
       route.fulfill({ json: { data: [], pagination: { total: 0 } } })
     );
 

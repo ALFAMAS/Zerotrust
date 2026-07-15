@@ -18,7 +18,7 @@ ship a feature. Planned work lives in [`todo.md`](./todo.md) (this directory).
 | Migrations                  |                                      47 (latest: `0046_mig4_snapshot_sync`) |
 | Route mounts in `server.ts` |                                                                          28 |
 | UI pages                    |                                                                          53 |
-| Tests                       | 1509 passed (1269 API + 240 UI); 31 skipped (240 files) |
+| Tests                       | 1512 passed (1272 API + 240 UI); 31 skipped (241 files) |
 | Stack                       | Hono 4 · TypeScript 6 · Bun · Next.js 16 · Drizzle ORM · PostgreSQL · Redis |
 
 ---
@@ -337,7 +337,8 @@ Cross-audit of `docs/security.md` §0–§10. **SEC-27** shipped 2026-07-08 (VPS
 ## Recent work (2026-07-15)
 
 - **CI-4 — Docker workspace build fixed and verified:** the build context now recursively excludes
-  generated workspace output, and the manifest regression test covers every workspace plus nested
+  generated workspace output. The shared-types exported source is copied before the frozen workspace
+  install; regression tests cover every workspace manifest, the required export source, and nested
   ignores. Real `docker build` runs completed for both the default Bun runtime and
   `--build-arg RUNTIME=node`.
 - **E2E-2 — complete fresh-database browser suite:** recreated `zerotrust_test`, applied the current
@@ -345,7 +346,8 @@ Cross-audit of `docs/security.md` §0–§10. **SEC-27** shipped 2026-07-08 (VPS
   minutes, including the corrected onboarding fixture and deterministic command palette flow.
 - **PERF-3 — refresh rotation and load budgets verified:** the k6 CI profile now logs in once per
   VU, carries rotated refresh credentials, and separates login, refresh, hot-read, and status
-  metrics. The real containerized run passed **3,710/3,710 checks** with 0% HTTP/refresh errors;
+  metrics. Each refresh VU uses a distinct seeded account, preventing concurrent-session revocation.
+  The real containerized run passed **3,710/3,710 checks** with 0% HTTP/refresh errors;
   p95 was 228.39 ms login, 161 ms refresh, 358.95 ms hot reads, 717.1 ms status, and 318.29 ms
   overall (p99 870.38 ms). Staging/production SLO measurements remain a pre-launch operator gate.
 - **DX-4 — deterministic Biome CI:** disabled the unstable type-aware nursery rules that activated
@@ -370,7 +372,7 @@ Cross-audit of `docs/security.md` §0–§10. **SEC-27** shipped 2026-07-08 (VPS
   `main` run, actual CI/staging k6 budgets, open SEC-ROT/MIG-3 operator risks, current TODO counts,
   and pending Docker/Playwright/load verification. Stale AUTH-1/CRYPTO-1/INF-3/FE-1 references
   were removed from active-gap prose across agent, architecture, security, and checklist docs.
-- **Current verification:** full root suite **1,269 passed / 31 skipped** (182 passed files) and UI
+- **Current verification:** full root suite **1,272 passed / 31 skipped** (183 passed files) and UI
   suite **240/240 passed** (58 files); type-check and Biome CI pass. Both Docker runtime variants,
   the fresh-database Playwright suite, and the local k6 CI profile are green. The latest recorded
   remote `main` run predates these fixes, so a new remote run is still required before release.
@@ -389,8 +391,8 @@ Cross-audit of `docs/security.md` §0–§10. **SEC-27** shipped 2026-07-08 (VPS
 - **Regression coverage:** `gitleaks.config.test.ts` parses the shipped rule and proves a
   generated Neon-style credential is detected, the local `password` fixture is ignored, the
   default rules remain enabled, and CI is wired to the custom config.
-- **Verification:** focused Gitleaks test **3 passed**; current full API suite **1,269 passed / 31
-  skipped** (182 files). Repository type-check passes after CRYPTO-2. The scanner configuration is
+- **Verification:** focused Gitleaks test **3 passed**; current full API suite **1,272 passed / 31
+  skipped** (183 files). Repository type-check passes after CRYPTO-2. The scanner configuration is
   covered by regression tests and wired into CI. The Neon `neon_owner` credential rotation remains
   open as operator-only `SEC-ROT` work.
 

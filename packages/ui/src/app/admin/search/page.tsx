@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PageHeader } from "@/components/ui/page-header";
 import {
   Select,
   SelectContent,
@@ -69,12 +70,10 @@ export default function AdminSearchPage() {
       <div className="flex items-center gap-3">
         <Search className="h-6 w-6 text-primary" />
         <div>
-          <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
-            Search index
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Manage the full-text search index (Postgres FTS or Elasticsearch).
-          </p>
+          <PageHeader
+            title={<>Search index</>}
+            description={<>Manage the full-text search index (Postgres FTS or Elasticsearch).</>}
+          />
         </div>
       </div>
 
@@ -98,7 +97,7 @@ export default function AdminSearchPage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleIndex} className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <Label htmlFor="docId">Document ID</Label>
               <Input
                 id="docId"
@@ -107,7 +106,7 @@ export default function AdminSearchPage() {
                 required
               />
             </div>
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <Label htmlFor="docType">Type</Label>
               <Select
                 value={form.type}
@@ -123,7 +122,7 @@ export default function AdminSearchPage() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-1.5 sm:col-span-2">
+            <div className="space-y-2 sm:col-span-2">
               <Label htmlFor="orgId">Org ID</Label>
               <Input
                 id="orgId"
@@ -132,7 +131,7 @@ export default function AdminSearchPage() {
                 required
               />
             </div>
-            <div className="space-y-1.5 sm:col-span-2">
+            <div className="space-y-2 sm:col-span-2">
               <Label htmlFor="title">Title</Label>
               <Input
                 id="title"
@@ -141,7 +140,7 @@ export default function AdminSearchPage() {
                 required
               />
             </div>
-            <div className="space-y-1.5 sm:col-span-2">
+            <div className="space-y-2 sm:col-span-2">
               <Label htmlFor="content">Content (optional)</Label>
               <Input
                 id="content"
@@ -166,7 +165,7 @@ export default function AdminSearchPage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleDelete} className="flex flex-wrap items-end gap-4">
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <Label htmlFor="delType">Type</Label>
               <Select
                 value={deleteForm.type}
@@ -182,7 +181,7 @@ export default function AdminSearchPage() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <Label htmlFor="delId">Document ID</Label>
               <Input
                 id="delId"

@@ -35,8 +35,8 @@ export function NpsSurveyPrompt() {
   if (!visible || dismissed) return null;
 
   return (
-    <div className="fixed bottom-20 left-1/2 z-40 w-full max-w-md -translate-x-1/2 px-4">
-      <Card className="p-5 shadow-2xl">
+    <div className="fixed bottom-8 left-1/2 z-40 w-full max-w-md -translate-x-1/2 px-4">
+      <Card className="p-6 shadow-lg">
         {submitted ? (
           <div className="text-center">
             <p className="text-sm font-medium text-foreground">Thank you for your feedback! 🎉</p>

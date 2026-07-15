@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { dismissCookieBanner } from "./fixtures/auth";
 import { mockLoginMfaFlow, mockOAuthExchange } from "./fixtures/apiMocks";
+import { E2E_API_URL } from "./fixtures/urls";
 
 test.describe("login edge flows (mocked API)", () => {
   test("password login shows MFA step and completes", async ({ page }) => {
@@ -29,7 +30,7 @@ test.describe("login edge flows (mocked API)", () => {
   });
 
   test("login honors safe ?next= redirect", async ({ page }) => {
-    await page.route("http://localhost:1337/auth/login", async (route) => {
+    await page.route(`${E2E_API_URL}/auth/login`, async (route) => {
       if (route.request().method() !== "POST") {
         await route.continue();
         return;

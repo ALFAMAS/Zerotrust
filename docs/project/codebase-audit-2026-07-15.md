@@ -30,7 +30,7 @@ and pre-launch checks.
 
 ### Repository gates
 
-- `bun run test -- --run`: **1,269 passed / 31 skipped** (182 passed files).
+- `bun run test -- --run`: **1,272 passed / 31 skipped** (183 passed files).
 - `bun run boundaries:check`: pass.
 - `bun run org-scoping:check`: pass (52 files).
 - `bun run migrations:journal:check`: pass (47 migrations).
@@ -47,9 +47,9 @@ and pre-launch checks.
   excluded from the build context and covered by regression tests.
 - Playwright: a newly recreated `zerotrust_test` database plus Redis completed the full suite at
   **88/88 passed** in 2.8 minutes.
-- k6: the containerized CI profile passed **3,710/3,710 checks**, 0% HTTP and refresh errors, overall
-  p95 **318.29 ms** / p99 **870.38 ms**, refresh p95 **161 ms**, login p95 **228.39 ms**, hot-read
-  p95 **358.95 ms**, and status p95 **717.1 ms**.
+- k6: the containerized CI profile passed **3,694/3,694 checks**, 0% HTTP and refresh errors, overall
+  p95 **307.26 ms** / p99 **350.93 ms**, refresh p95 **133 ms**, login p95 **198.69 ms**, hot-read
+  p95 **319.05 ms**, and status p95 **673.62 ms**.
 
 ### Latest `main` CI
 
@@ -93,8 +93,9 @@ The pre-fix provider had the following release-blocking defects:
 
 ### Stability
 
-1. **CI-4:** copied every workspace manifest before the Docker frozen install and added a test that
-   derives expected workspaces from the root manifest.
+1. **CI-4:** copied every workspace manifest and the shared-types exported source before the Docker
+   frozen install; regression tests derive expected workspaces from the root manifest and require
+   the export source copy.
 2. **E2E-2:** aligned mock user types with the API onboarding contract, fixed the completion fixture,
    and removed the command-palette race using deterministic readiness assertions.
 3. Keep branch protection enabled and treat any red required check as a release blocker.
@@ -111,9 +112,9 @@ The pre-fix provider had the following release-blocking defects:
 
 ### Scalability
 
-1. **PERF-3:** made the refresh load scenario acquire and rotate a usable credential without
-   weakening production cookie policy, then separated hot-read, status, refresh, and CPU-bound
-   Argon2 latency budgets.
+1. **PERF-3:** made the refresh load scenario assign a distinct seeded account to each VU, then
+   acquire and rotate a usable credential without weakening production cookie policy; separated
+   hot-read, status, refresh, and CPU-bound Argon2 latency budgets.
 2. Stop presenting relaxed GitHub-runner thresholds as the production SLO. Record staging and
    production p95/p99 separately in the maintenance scorecard.
 3. Add a sustained soak profile and DB/Redis saturation metrics before raising arrival rates.

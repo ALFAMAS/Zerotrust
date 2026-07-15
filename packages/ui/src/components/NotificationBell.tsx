@@ -123,7 +123,7 @@ export function NotificationBell() {
       >
         <Bell className="h-5 w-5" />
         {unreadCount > 0 && (
-          <span className="absolute right-0.5 top-0.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-destructive px-0.5 text-[10px] font-bold leading-none text-destructive-foreground">
+          <span className="absolute right-0.5 top-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-destructive px-1 text-xs font-bold leading-none text-destructive-foreground">
             {unreadCount > 99 ? "99+" : unreadCount}
           </span>
         )}
@@ -134,9 +134,9 @@ export function NotificationBell() {
           role="dialog"
           aria-label="Notifications"
           aria-modal="false"
-          className="absolute right-0 z-50 mt-2 w-[28rem] max-w-[calc(100vw-24px)] overflow-hidden rounded-xl border border-border bg-popover shadow-2xl"
+          className="absolute right-0 z-50 mt-2 w-[28rem] max-w-[calc(100vw-24px)] overflow-hidden rounded-xl border border-border bg-popover shadow-lg"
         >
-          <div className="flex items-center justify-between border-b border-border px-5 py-3.5">
+          <div className="flex items-center justify-between border-b border-border px-6 py-4">
             <span className="text-sm font-semibold text-foreground">Notifications</span>
             {unreadCount > 0 && (
               <Button variant="ghost" onClick={markAllRead} className="text-xs text-primary">
@@ -147,9 +147,9 @@ export function NotificationBell() {
 
           <div className="max-h-[min(32rem,calc(100vh-8rem))] overflow-y-auto">
             {loadingList ? (
-              <div className="px-5 py-8 text-center text-sm text-muted-foreground">Loading…</div>
+              <div className="px-6 py-8 text-center text-sm text-muted-foreground">Loading…</div>
             ) : notifications.length === 0 ? (
-              <div className="px-5 py-8 text-center text-sm text-muted-foreground">
+              <div className="px-6 py-8 text-center text-sm text-muted-foreground">
                 No notifications
               </div>
             ) : (
@@ -160,13 +160,11 @@ export function NotificationBell() {
                       variant="ghost"
                       onClick={() => handleNotificationClick(n)}
                       className={cn(
-                        "flex h-auto min-h-[5.5rem] w-full items-start gap-4 whitespace-normal rounded-none px-5 py-4 text-left",
+                        "flex h-auto min-h-[5.5rem] w-full items-start gap-4 whitespace-normal rounded-none px-6 py-4 text-left",
                         n.read && "opacity-60"
                       )}
                     >
-                      <span className="mt-0.5 shrink-0 text-xl leading-none">
-                        {typeIcon(n.type)}
-                      </span>
+                      <span className="mt-1 shrink-0 text-xl leading-none">{typeIcon(n.type)}</span>
                       <div className="min-w-0 flex-1 space-y-1">
                         <div className="line-clamp-2 text-sm font-medium leading-snug text-foreground">
                           {n.title}
@@ -192,7 +190,7 @@ export function NotificationBell() {
           </div>
 
           {notifications.length > 0 && (
-            <div className="border-t border-border px-5 py-2.5">
+            <div className="border-t border-border px-6 py-3">
               <Button
                 variant="ghost"
                 onClick={markAllRead}

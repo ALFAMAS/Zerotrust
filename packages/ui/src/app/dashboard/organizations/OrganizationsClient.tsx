@@ -1,11 +1,13 @@
 "use client";
+
 import Link from "next/link";
 import { useState } from "react";
 import { ServerStateStatus } from "@/components/ServerStateStatus";
-import { SkeletonCard } from "@/components/Skeleton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PageHeader } from "@/components/ui/page-header";
 import { ErrorState } from "@/components/ui/States";
+import { SkeletonCard } from "@/components/ui/skeleton";
 import { useToast } from "@/context/ToastContext";
 import {
   useAcceptInviteMutation,
@@ -16,8 +18,8 @@ import {
 } from "@/lib/server-state/organizations";
 
 const ROLE_COLORS: Record<string, string> = {
-  owner: "bg-indigo-900 text-indigo-200 border border-indigo-700",
-  admin: "bg-blue-900 text-blue-200 border border-blue-700",
+  owner: "border border-secondary-action bg-secondary-action text-secondary-action-foreground",
+  admin: "border border-secondary-action bg-secondary-action text-secondary-action-foreground",
   member: "bg-muted text-foreground/80 border border-border",
   viewer: "bg-card text-muted-foreground border border-border",
 };
@@ -121,9 +123,7 @@ export default function OrganizationsClient() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
-          Organizations
-        </h1>
+        <PageHeader title={<>Organizations</>} />
         <Button
           type="button"
           onClick={() => setShowCreateForm((v) => !v)}
@@ -146,14 +146,14 @@ export default function OrganizationsClient() {
                   <div className="flex items-center gap-2">
                     <span className="font-semibold text-foreground">{org.name}</span>
                     <span
-                      className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                      className={`text-xs px-2 py-1 rounded-full font-medium ${
                         ROLE_COLORS[invite.role] ?? ROLE_COLORS.member
                       }`}
                     >
                       {invite.role}
                     </span>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-0.5">
+                  <p className="text-xs text-muted-foreground mt-1">
                     Invitation expires {new Date(invite.expiresAt).toLocaleDateString()}
                   </p>
                 </div>
@@ -161,7 +161,7 @@ export default function OrganizationsClient() {
                   <Button
                     type="button"
                     variant="destructive"
-                    className="text-xs px-3 py-1.5 h-auto"
+                    className="text-xs px-3 py-2 h-auto"
                     onClick={() => handleDeclineInvite(invite.id)}
                     disabled={respondingInviteId === invite.id}
                   >
@@ -169,7 +169,7 @@ export default function OrganizationsClient() {
                   </Button>
                   <Button
                     type="button"
-                    className="text-xs px-3 py-1.5 h-auto bg-primary hover:bg-primary/90 text-primary-foreground"
+                    className="text-xs px-3 py-2 h-auto bg-primary hover:bg-primary/90 text-primary-foreground"
                     onClick={() => handleAcceptInvite(invite.token, invite.id)}
                     disabled={respondingInviteId === invite.id}
                   >
@@ -193,7 +193,7 @@ export default function OrganizationsClient() {
       {showCreateForm && (
         <form
           onSubmit={handleCreate}
-          className="mb-6 bg-card border border-border rounded-xl p-5 space-y-4"
+          className="mb-6 bg-card border border-border rounded-xl p-6 space-y-4"
         >
           <h2 className="text-sm font-semibold text-foreground">New organization</h2>
           <div className="space-y-1">
@@ -247,7 +247,7 @@ export default function OrganizationsClient() {
           <SkeletonCard />
         </div>
       ) : orgs.length === 0 ? (
-        <div className="text-center py-16 text-muted-foreground">
+        <div className="text-center py-8 text-muted-foreground">
           <p className="mb-3">You don&apos;t belong to any organizations yet.</p>
           <Button
             type="button"
@@ -263,21 +263,21 @@ export default function OrganizationsClient() {
             <Link
               key={org.id}
               href={`/dashboard/organizations/${org.id}`}
-              className="block bg-card border border-border rounded-xl p-5 hover:border-primary/40 transition-colors"
+              className="block bg-card border border-border rounded-xl p-6 hover:border-primary/40 transition-colors"
             >
               <div className="flex items-center justify-between">
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="font-semibold text-foreground">{org.name}</span>
                     <span
-                      className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                      className={`text-xs px-2 py-1 rounded-full font-medium ${
                         ROLE_COLORS[member.role] ?? ROLE_COLORS.member
                       }`}
                     >
                       {member.role}
                     </span>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-0.5 font-mono">{org.slug}</p>
+                  <p className="text-xs text-muted-foreground mt-1 font-mono">{org.slug}</p>
                 </div>
                 <svg
                   aria-hidden="true"

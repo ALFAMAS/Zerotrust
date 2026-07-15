@@ -3,9 +3,10 @@ import { KeyRound, Monitor, ShieldCheck, User, Wallet } from "lucide-react";
 import Link from "next/link";
 import { ProgressBars } from "@/components/ProgressBars";
 import SetupChecklist from "@/components/SetupChecklist";
-import { SkeletonCard, SkeletonText } from "@/components/Skeleton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { PageHeader } from "@/components/ui/page-header";
 import { ErrorState } from "@/components/ui/States";
+import { SkeletonCard, SkeletonText } from "@/components/ui/skeleton";
 import { useAuthMeQuery } from "@/lib/server-state/auth";
 import { useUserSessionsListQuery } from "@/lib/server-state/sessions";
 
@@ -77,12 +78,11 @@ export default function DashboardClient() {
 
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
-          Welcome back, {user?.displayName || "…"}
-        </h1>
-        <p className="mt-1 text-muted-foreground">{user?.email}</p>
-      </div>
+      <PageHeader
+        className="mb-8"
+        title={<>Welcome back, {user?.displayName || "…"}</>}
+        description={user?.email}
+      />
 
       <SetupChecklist user={user ?? null} />
 
@@ -90,7 +90,7 @@ export default function DashboardClient() {
 
       <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-3">
         {stats.map((stat) => (
-          <Card key={stat.label} className="p-5">
+          <Card key={stat.label} className="p-6">
             <div className="flex items-center gap-4">
               <span className="flex h-11 w-11 items-center justify-center rounded-lg border border-border bg-background text-primary">
                 <stat.icon className="h-5 w-5" />
@@ -117,10 +117,10 @@ export default function DashboardClient() {
               href={link.href}
               className="flex items-start gap-3 rounded-xl border border-border bg-background p-4 transition-colors hover:border-primary/50"
             >
-              <link.icon className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+              <link.icon className="mt-1 h-5 w-5 shrink-0 text-primary" />
               <div>
                 <span className="block text-sm font-medium text-foreground">{link.label}</span>
-                <span className="mt-0.5 block text-xs text-muted-foreground">{link.desc}</span>
+                <span className="mt-1 block text-xs text-muted-foreground">{link.desc}</span>
               </div>
             </Link>
           ))}
@@ -128,10 +128,10 @@ export default function DashboardClient() {
             href="/dashboard/wallet"
             className="flex items-start gap-3 rounded-xl border border-border bg-background p-4 transition-colors hover:border-primary/50"
           >
-            <Wallet className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+            <Wallet className="mt-1 h-5 w-5 shrink-0 text-primary" />
             <div>
               <span className="block text-sm font-medium text-foreground">Wallet</span>
-              <span className="mt-0.5 block text-xs text-muted-foreground">
+              <span className="mt-1 block text-xs text-muted-foreground">
                 Manage your balance and transactions
               </span>
             </div>

@@ -55,11 +55,11 @@ export default function LocaleSwitcher() {
   const active = LOCALES.find((l) => l.code === current) ?? LOCALES[0];
 
   return (
-    <div ref={ref} className="relative">
+    <div ref={ref} className="relative hidden min-[768px]:block">
       <Button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="gap-1.5 px-2.5 py-1.5 text-muted-foreground"
+        className="gap-2 px-3 py-2 text-muted-foreground"
         variant="ghost"
         size="sm"
         aria-label="Switch language"
@@ -67,7 +67,7 @@ export default function LocaleSwitcher() {
         aria-haspopup="listbox"
       >
         <span>{active.flag}</span>
-        <span className="hidden sm:inline">{active.label}</span>
+        <span className="hidden min-[1024px]:inline">{active.label}</span>
         <ChevronDown className="h-3 w-3 opacity-60" />
       </Button>
 
@@ -84,7 +84,7 @@ export default function LocaleSwitcher() {
               aria-selected={locale.code === current}
               onClick={() => switchLocale(locale.code)}
               className={cn(
-                "h-auto w-full justify-start gap-2.5 rounded-none px-3 py-2",
+                "h-auto w-full justify-start gap-3 rounded-none px-3 py-2",
                 locale.code === current ? "bg-accent text-foreground" : "text-muted-foreground"
               )}
               variant="ghost"

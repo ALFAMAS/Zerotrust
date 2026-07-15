@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PageHeader } from "@/components/ui/page-header";
 import { ErrorState } from "@/components/ui/States";
 import {
   Table,
@@ -77,12 +78,10 @@ export default function AnomalyPage() {
       <div className="flex items-center gap-3">
         <Activity className="h-6 w-6 text-primary" />
         <div>
-          <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
-            Anomaly Detection
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Per-user behavior baselines and on-demand login risk scoring.
-          </p>
+          <PageHeader
+            title={<>Anomaly Detection</>}
+            description={<>Per-user behavior baselines and on-demand login risk scoring.</>}
+          />
         </div>
       </div>
 
@@ -97,7 +96,7 @@ export default function AnomalyPage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleScore} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <Label htmlFor="userId">User ID</Label>
               <Input
                 id="userId"
@@ -107,7 +106,7 @@ export default function AnomalyPage() {
                 required
               />
             </div>
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <Label htmlFor="ip">IP address</Label>
               <Input
                 id="ip"
@@ -117,7 +116,7 @@ export default function AnomalyPage() {
                 required
               />
             </div>
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <Label htmlFor="country">Country (optional)</Label>
               <Input
                 id="country"
@@ -126,7 +125,7 @@ export default function AnomalyPage() {
                 placeholder="US"
               />
             </div>
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <Label htmlFor="deviceHash">Device hash</Label>
               <Input
                 id="deviceHash"
@@ -136,7 +135,7 @@ export default function AnomalyPage() {
                 required
               />
             </div>
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <Label htmlFor="loginHour">Login hour (0–23)</Label>
               <Input
                 id="loginHour"

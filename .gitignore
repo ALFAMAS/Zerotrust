@@ -63,6 +63,8 @@ temp/
 # Development
 .bun/
 .next/
+.next-build/
+.next-e2e/
 
 # Verify/tooling artifacts (HYG-1, codebase audit 2026-07-09)
 tmp-verify/

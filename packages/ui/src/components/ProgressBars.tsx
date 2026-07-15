@@ -29,7 +29,7 @@ export function ProgressBars({ user }: { user: AuthMe | null }) {
     label: "Profile completeness",
     pct: profilePct,
     icon: User,
-    color: "bg-blue-500",
+    color: "bg-secondary-action",
     detail: `${profileComplete}/${profileFields.length} fields`,
   });
 
@@ -54,7 +54,7 @@ export function ProgressBars({ user }: { user: AuthMe | null }) {
       label: "Onboarding progress",
       pct: onboardingPct,
       icon: Shield,
-      color: "bg-emerald-500",
+      color: "bg-success",
       detail: `${onboardingDone}/${onboardingItems.length} steps`,
     });
   }
@@ -67,7 +67,7 @@ export function ProgressBars({ user }: { user: AuthMe | null }) {
       <div className="space-y-4">
         {bars.map((bar) => (
           <div key={bar.label}>
-            <div className="mb-1.5 flex items-center justify-between">
+            <div className="mb-2 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <bar.icon className="h-4 w-4 text-muted-foreground" />
                 <span className="text-sm text-foreground">{bar.label}</span>

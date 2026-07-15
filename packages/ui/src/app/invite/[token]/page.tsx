@@ -3,12 +3,27 @@
 import { AlertCircle, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
+import type { ReactNode } from "react";
 import { useEffect, useRef } from "react";
+import SiteFooter from "@/components/SiteFooter";
+import SiteHeader from "@/components/SiteHeader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { LoadingSpinner } from "@/components/ui/States";
 import { useAcceptInviteMutation } from "@/lib/server-state/organizations";
 import { getToken } from "../../../lib/auth";
+
+function InviteShell({ children }: { children: ReactNode }) {
+  return (
+    <div className="flex min-h-screen flex-col bg-background text-foreground">
+      <SiteHeader />
+      <main id="main-content" className="flex w-full flex-1 items-center justify-center px-4 py-8">
+        {children}
+      </main>
+      <SiteFooter />
+    </div>
+  );
+}
 
 export default function InviteAcceptPage() {
   const params = useParams();
@@ -30,24 +45,27 @@ export default function InviteAcceptPage() {
 
   if (acceptMutation.isPending) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background px-4">
-        <div className="w-full max-w-sm space-y-4 text-center">
+      <InviteShell>
+        <div className="w-full max-w-sm rounded-xl border border-border bg-surface p-8 text-center">
           <LoadingSpinner />
-          <p className="text-sm text-muted-foreground">Accepting invitation…</p>
+          <h1 className="mt-4 font-display text-xl font-semibold">Accepting invitation</h1>
+          <p className="mt-2 text-sm text-muted-foreground">This should only take a moment.</p>
         </div>
-      </div>
+      </InviteShell>
     );
   }
 
   if (acceptMutation.isError) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background px-4">
+      <InviteShell>
         <Card className="w-full max-w-sm border-destructive/40 text-center">
           <CardHeader className="items-center space-y-3">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10 text-destructive">
               <AlertCircle className="h-6 w-6" aria-hidden />
             </div>
-            <h2 className="font-semibold leading-none tracking-tight">Invite error</h2>
+            <h1 className="font-display text-xl font-semibold leading-tight tracking-tight">
+              Invite error
+            </h1>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground">
@@ -60,20 +78,20 @@ export default function InviteAcceptPage() {
             </Button>
           </CardFooter>
         </Card>
-      </div>
+      </InviteShell>
     );
   }
 
   const result = acceptMutation.data;
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <Card className="w-full max-w-sm border-emerald-900/40 text-center">
+    <InviteShell>
+      <Card className="w-full max-w-sm border-success text-center">
         <CardHeader className="items-center space-y-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-400">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-success/10 text-success-subtle-foreground">
             <CheckCircle2 className="h-6 w-6" aria-hidden />
           </div>
-          <h1 className="font-semibold leading-none tracking-tight">
+          <h1 className="font-display text-xl font-semibold leading-tight tracking-tight">
             You&apos;ve joined {result?.org?.name ?? "the organization"}!
           </h1>
         </CardHeader>
@@ -95,6 +113,6 @@ export default function InviteAcceptPage() {
           </Button>
         </CardFooter>
       </Card>
-    </div>
+    </InviteShell>
   );
 }

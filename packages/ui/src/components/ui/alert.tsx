@@ -4,14 +4,15 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 
 const alertVariants = cva(
-  "relative w-full rounded-lg border px-4 py-3 text-sm [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg]:text-foreground [&>svg~*]:pl-7",
+  "relative w-full rounded-xl border px-4 py-3 text-sm [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg~*]:pl-8",
   {
     variants: {
       variant: {
-        default: "bg-card text-card-foreground",
+        default: "border-border bg-card text-card-foreground [&>svg]:text-foreground",
         destructive:
-          "border-destructive/50 text-destructive [&>svg]:text-destructive dark:border-destructive",
-        warning: "border-amber-500/50 text-amber-200 [&>svg]:text-amber-400 bg-amber-500/10",
+          "border-danger-subtle-foreground/40 bg-danger-subtle text-danger-subtle-foreground [&>svg]:text-danger-subtle-foreground",
+        warning:
+          "border-warning-subtle-foreground/40 bg-warning-subtle text-warning-subtle-foreground [&>svg]:text-warning-subtle-foreground",
       },
     },
     defaultVariants: {

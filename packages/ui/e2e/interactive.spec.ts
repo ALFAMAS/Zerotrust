@@ -2,6 +2,7 @@ import { mkdirSync } from "node:fs";
 import { expect, test } from "@playwright/test";
 import { dismissCookieBanner, openCommandPalette, readAccessToken, registerViaUi, uniqueEmail, withStoredAuth } from "./fixtures/auth";
 import { verifyUserEmail } from "./fixtures/db";
+import { E2E_API_URL } from "./fixtures/urls";
 
 const INTERACTIVE_AUTH_FILE = "e2e/.auth/interactive.json";
 
@@ -21,13 +22,13 @@ test.describe("interactive dashboard flows (real API)", () => {
     const token = await readAccessToken(page);
     expect(token).toBeTruthy();
 
-    const meRes = await page.request.get("http://localhost:1337/auth/me", {
+    const meRes = await page.request.get(`${E2E_API_URL}/auth/me`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     const me = (await meRes.json()) as { id: string };
     await verifyUserEmail(me.id);
 
-    const orgRes = await page.request.post("http://localhost:1337/orgs", {
+    const orgRes = await page.request.post(`${E2E_API_URL}/orgs`, {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",

@@ -19,13 +19,13 @@ export interface TooltipContentProps {
 export function TooltipContent({ title, rows, children }: TooltipContentProps) {
   return (
     <div className="overflow-hidden">
-      <div className="px-3 py-2.5">
+      <div className="px-3 py-3">
         {title && (
           <div className="mb-2 text-left font-medium text-chart-tooltip-foreground text-xs">
             {title}
           </div>
         )}
-        <div className="space-y-1.5">
+        <div className="space-y-2">
           {rows.map((row) => (
             <div
               className="flex items-center justify-between gap-4"
