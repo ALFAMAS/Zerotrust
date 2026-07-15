@@ -32,6 +32,7 @@ import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
 import { buttonVariants } from "@/components/ui/button";
 import { brand } from "@/config/brand";
+import { formatPlanPrice } from "@/config/pricing";
 import { cn } from "@/lib/utils";
 
 const features = [
@@ -199,9 +200,13 @@ const steps = [
 ];
 
 const pricingTeaser = [
-  { name: "Free", price: "$0", blurb: "Every auth feature, small-team limits." },
-  { name: "Pro", price: "$29", blurb: "Custom roles, audit log, advanced MFA." },
-  { name: "Enterprise", price: "$99", blurb: "Unlimited usage, SCIM, priority support." },
+  { name: "Free", price: formatPlanPrice("free"), blurb: "Every auth feature, small-team limits." },
+  { name: "Pro", price: formatPlanPrice("pro"), blurb: "Custom roles, audit log, advanced MFA." },
+  {
+    name: "Enterprise",
+    price: formatPlanPrice("enterprise"),
+    blurb: "Unlimited usage, SCIM, priority support.",
+  },
 ];
 
 export default function LandingPage() {

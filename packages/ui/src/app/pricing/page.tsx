@@ -5,6 +5,7 @@ import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
 import { buttonVariants } from "@/components/ui/button";
 import { brand } from "@/config/brand";
+import { formatPlanPrice } from "@/config/pricing";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
@@ -17,7 +18,7 @@ export const metadata: Metadata = {
 const tiers = [
   {
     name: "Free",
-    price: "$0",
+    price: formatPlanPrice("free"),
     tagline: "Every core auth feature, sized for side projects and small teams.",
     cta: "Start free",
     href: "/register",
@@ -33,7 +34,7 @@ const tiers = [
   },
   {
     name: "Pro",
-    price: "$29",
+    price: formatPlanPrice("pro"),
     tagline: "For growing products that need real access control and an audit trail.",
     cta: "Start with Pro",
     href: "/register",
@@ -52,7 +53,7 @@ const tiers = [
   },
   {
     name: "Enterprise",
-    price: "$99",
+    price: formatPlanPrice("enterprise"),
     tagline: "For organizations that need SSO, compliance surfaces, and no ceilings.",
     cta: "Start with Enterprise",
     href: "/register",

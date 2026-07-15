@@ -25,12 +25,13 @@ From the supplemental
 [`production-readiness-audit-2026-07-15.md`](./production-readiness-audit-2026-07-15.md)
 (MKT-1 and JIT-1 shipped same day):
 
-- [ ] **MFA-SMS-1 (P1)** — Admin → Auth Settings exposes an **SMS OTP** toggle
-      (`smsOtpEnabled`) but no SMS delivery service exists. Wire a provider (see
-      `docs/extending.md`) or hide the toggle until one is implemented.
-- [ ] **BILL-PRICE-1 (P2)** — Plan prices are env-configurable in `src/shared/plans.ts`
-      but hardcoded on `/pricing` and in `dashboard/billing/BillingClient.tsx` (which also
-      disagrees on Enterprise: “Custom” vs $99). Establish one source of truth.
+- [x] **MFA-SMS-1 (P1)** — Shipped 2026-07-15: the SMS OTP toggle is hidden in
+      Admin → Auth Settings until an SMS delivery provider is wired (the inert
+      `smsOtpEnabled` API flag is retained for forward compatibility).
+- [x] **BILL-PRICE-1 (P2)** — Shipped 2026-07-15: `packages/ui/src/config/pricing.ts`
+      is the single display-price source (env-overridable via
+      `NEXT_PUBLIC_PLAN_*_PRICE_MONTHLY`), consumed by `/pricing`, the landing
+      teaser, and the billing dashboard (Enterprise now shows the same price).
 
 Earlier 2026-07-15 audit items (CI-4, PERF-3, E2E-2, DX-4, STR-5) were verified locally and moved
 to [`shipped.md`](./shipped.md). A new remote `main` run and staging latency measurements remain
