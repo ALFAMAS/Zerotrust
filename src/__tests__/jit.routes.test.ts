@@ -165,6 +165,17 @@ describe("Cross-tenant JIT routes", () => {
     expect(Array.isArray(await res.json())).toBe(true);
   });
 
+  it("resolves a missing orgId to the admin's only org for the incoming inbox", async () => {
+    const res = await req("/incoming", { userId: ADMIN, roles: "admin" });
+    expect(res.status).toBe(200);
+    expect(Array.isArray(await res.json())).toBe(true);
+  });
+
+  it("still hides the incoming inbox from non-admins when orgId is omitted", async () => {
+    const res = await req("/incoming", { userId: REQUESTOR, roles: "user" });
+    expect(res.status).toBe(403);
+  });
+
   it("forbids non-admins from approving", async () => {
     const createRes = await req("/", { method: "POST", body: validBody, userId: REQUESTOR });
     const { id } = await createRes.json();

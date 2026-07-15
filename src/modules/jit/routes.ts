@@ -126,9 +126,19 @@ app.get("/incoming", async (c) => {
     return c.json({ error: "UNAUTHENTICATED", message: "Authentication required" }, 401);
   }
 
-  const targetOrgId = c.req.query("orgId");
+  // Like GET /, an omitted orgId resolves to the caller's only org; the
+  // membership/role check below still gates access to the resolved org.
+  let targetOrgId = c.req.query("orgId");
   if (!targetOrgId) {
-    return c.json({ error: "ORG_REQUIRED", message: "orgId query parameter is required" }, 400);
+    const source = await resolveRequestorOrgId(userId);
+    if ("error" in source) {
+      const message =
+        source.error === "ORG_REQUIRED"
+          ? "orgId query parameter is required when you belong to multiple organizations"
+          : "You must belong to an organization to view incoming JIT requests";
+      return c.json({ error: source.error, message }, 400);
+    }
+    targetOrgId = source.orgId;
   }
 
   const [membership] = await getReadDb()
