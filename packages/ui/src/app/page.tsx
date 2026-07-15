@@ -448,10 +448,7 @@ export default function LandingPage() {
                   key={item}
                   className="flex items-start gap-3 rounded-lg border border-border bg-background px-4 py-3 text-sm leading-6 text-muted-foreground"
                 >
-                  <ShieldCheck
-                    className="mt-1 h-4 w-4 shrink-0 text-success"
-                    aria-hidden="true"
-                  />
+                  <ShieldCheck className="mt-1 h-4 w-4 shrink-0 text-success" aria-hidden="true" />
                   {item}
                 </li>
               ))}
