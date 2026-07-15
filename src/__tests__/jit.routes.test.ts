@@ -69,6 +69,7 @@ vi.mock("../modules/jit/cross-tenant", () => {
         [...store.values()].filter((r) => r.requestorUserId === userId && r.requestorOrgId === orgId),
       listByTarget: async (orgId: string) =>
         [...store.values()].filter((r) => r.targetOrgId === orgId),
+      listAll: async () => [...store.values()],
       get: async (id: string) => store.get(id) ?? null,
       approve: async (id: string, approverId: string) => {
         const r = store.get(id);
@@ -165,10 +166,13 @@ describe("Cross-tenant JIT routes", () => {
     expect(Array.isArray(await res.json())).toBe(true);
   });
 
-  it("resolves a missing orgId to the admin's only org for the incoming inbox", async () => {
+  it("gives a system admin the cross-org inbox when orgId is omitted", async () => {
+    await req("/", { method: "POST", body: validBody, userId: REQUESTOR });
     const res = await req("/incoming", { userId: ADMIN, roles: "admin" });
     expect(res.status).toBe(200);
-    expect(Array.isArray(await res.json())).toBe(true);
+    const rows = await res.json();
+    expect(Array.isArray(rows)).toBe(true);
+    expect(rows.some((r: any) => r.targetOrgId === ORG_B)).toBe(true);
   });
 
   it("still hides the incoming inbox from non-admins when orgId is omitted", async () => {

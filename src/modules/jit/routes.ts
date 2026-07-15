@@ -126,10 +126,15 @@ app.get("/incoming", async (c) => {
     return c.json({ error: "UNAUTHENTICATED", message: "Authentication required" }, 401);
   }
 
-  // Like GET /, an omitted orgId resolves to the caller's only org; the
-  // membership/role check below still gates access to the resolved org.
+  // Without an explicit orgId: system admins get the cross-org inbox
+  // (they may view any org's inbox anyway); org members resolve to their
+  // only org, and the membership/role check below still gates access.
+  const isSystemAdmin = userRoles.includes("admin") || userRoles.includes("tenant_admin");
   let targetOrgId = c.req.query("orgId");
   if (!targetOrgId) {
+    if (isSystemAdmin) {
+      return c.json(await crossTenantJITStore.listAll());
+    }
     const source = await resolveRequestorOrgId(userId);
     if ("error" in source) {
       const message =
