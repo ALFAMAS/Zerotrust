@@ -6,6 +6,7 @@ import { compress } from "hono/compress";
 import { cors } from "hono/cors";
 import { initializezerotrust } from "..";
 import { initSentry } from "../instrument";
+import jitRoutes from "../jit/routes";
 import { startJobScheduler } from "../jobs/scheduler";
 import {
   resolveBackgroundJobTopology,
@@ -21,8 +22,6 @@ import { csrfOriginMiddleware } from "../middleware/csrfOrigin";
 import { inferredCountryMiddleware } from "../middleware/inferredCountry";
 import { rateLimit } from "../middleware/rateLimiting";
 import { securityHeaders } from "../middleware/securityHeaders";
-import jitRoutes from "../modules/jit/routes";
-import webhookManagementRoutes from "../modules/webhooks/routes";
 import notificationChannelRoutes from "../notifications/routes";
 import { loadPlugins } from "../plugins/loader";
 import { getPluginRegistry } from "../plugins/registry";
@@ -34,6 +33,7 @@ import { initEmailQueue } from "../services/notifications/emailQueue";
 import { alertingMiddleware } from "../services/ops/alerting.service";
 import { sloAlertingMiddleware, sloRouteHandler } from "../services/ops/slo.service";
 import { initTelemetry, telemetryMiddleware } from "../telemetry";
+import webhookManagementRoutes from "../webhooks/routes";
 import accessReviewRoutes from "./routes/access-review.routes";
 import adminRoutes from "./routes/admin/index";
 import adminToolsRoutes from "./routes/admin-tools.routes";
@@ -235,11 +235,11 @@ export async function createServer() {
     try {
       const signature = c.req.header("x-ssf-signature");
       const body = await c.req.json();
-      const { verifySSFSignature } = await import("../modules/ssf/verify.js");
+      const { verifySSFSignature } = await import("../ssf/verify.js");
       const ok = verifySSFSignature(body, signature);
       if (!ok) return c.json({ error: "INVALID_SIGNATURE" }, 401);
 
-      const { handleSSFEvent } = await import("../modules/ssf/receiver.js");
+      const { handleSSFEvent } = await import("../ssf/receiver.js");
       const result = await handleSSFEvent(body);
       return c.json(result);
     } catch (err) {

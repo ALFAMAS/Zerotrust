@@ -354,6 +354,10 @@ Use this before pointing real users at your deployment.
 
 ## Project structure
 
+> **New to the codebase?** Start with the guided
+> [codebase tour](./docs/codebase-tour.md) — request flow, what lives where,
+> and "where do I add X".
+
 ```
 .
 ├── plugins/                 # Feature plugins (magic-link, mfa, oauth — see docs/plugins.md)
@@ -364,6 +368,8 @@ Use this before pointing real users at your deployment.
 │   ├── services/            # Business logic (auth, billing, email, backup…)
 │   ├── middleware/          # Auth, rate limit, CSRF, input sanitization
 │   ├── shared/              # Pagination, permissions, safeRedirect, safeFetch…
+│   ├── <feature>/           # One flat dir per subsystem: audit, crypto, jit, jobs,
+│   │                        #   mfa, notifications, scim, ssf, webhooks, metrics…
 │   └── __tests__/           # Vitest tests
 ├── packages/
 │   ├── client/              # Generated TypeScript SDK

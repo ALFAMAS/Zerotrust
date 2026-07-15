@@ -1,11 +1,11 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import { ThemeProvider } from "next-themes";
+import { ThemeProvider } from "@/components/ThemeProvider";
 import { describe, expect, it } from "vitest";
 import HelpPage from "./page";
 
 function renderPage() {
   return render(
-    <ThemeProvider attribute="class" defaultTheme="light">
+    <ThemeProvider>
       <HelpPage />
     </ThemeProvider>
   );

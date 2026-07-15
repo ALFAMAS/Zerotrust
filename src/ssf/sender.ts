@@ -1,5 +1,5 @@
-import { getLogger } from "../../logger";
-import { fetchPublicUrl } from "../../shared/safeFetch";
+import { getLogger } from "../logger";
+import { fetchPublicUrl } from "../shared/safeFetch";
 
 const logger = getLogger("ssf-sender");
 

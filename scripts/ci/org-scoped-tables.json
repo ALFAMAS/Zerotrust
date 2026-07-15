@@ -9,11 +9,11 @@
     "taxExemptionsTable"
   ],
   "scanDirs": [
-    "src/modules/webhooks",
+    "src/webhooks",
     "src/api/routes"
   ],
   "allowlist": {
-    "src/modules/webhooks/store.ts": "orgScopeWhere / listEndpointsForOrgs centralizes org filters",
+    "src/webhooks/store.ts": "orgScopeWhere / listEndpointsForOrgs centralizes org filters",
     "src/api/routes/org.routes.ts": "membership-scoped org routes",
     "src/api/routes/admin.routes.ts": "platform admin \u2014 intentional cross-org reads",
     "src/api/routes/admin-tools.routes.ts": "platform admin tools",

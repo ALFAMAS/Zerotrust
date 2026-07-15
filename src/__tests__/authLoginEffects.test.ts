@@ -9,7 +9,7 @@ vi.mock("../services/auth/loginAudit.service", () => ({
   recordLoginFailure: (...args: unknown[]) => auditLoginFailure(...args),
 }));
 
-vi.mock("../modules/webhooks/delivery", () => ({
+vi.mock("../webhooks/delivery", () => ({
   dispatchEvent: (...args: unknown[]) => dispatchEvent(...args),
 }));
 

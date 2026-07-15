@@ -1,15 +1,22 @@
 import {
   Activity,
   ArrowRight,
+  BellRing,
   Building2,
   CheckCircle2,
   CreditCard,
+  Database,
   Fingerprint,
   Globe,
+  HardDriveDownload,
   KeyRound,
+  Languages,
+  Layers,
+  LockKeyhole,
   Mail,
   RadioTower,
   ScrollText,
+  Server,
   ShieldAlert,
   ShieldCheck,
   Smartphone,
@@ -18,12 +25,14 @@ import {
   UserCog,
   Users,
   Webhook,
+  Workflow,
 } from "lucide-react";
 import Link from "next/link";
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
 import { buttonVariants } from "@/components/ui/button";
 import { brand } from "@/config/brand";
+import { formatPlanPrice } from "@/config/pricing";
 import { cn } from "@/lib/utils";
 
 const features = [
@@ -41,7 +50,8 @@ const features = [
   {
     icon: Smartphone,
     title: "Multi-factor auth",
-    description: "TOTP, email OTP, SMS, WhatsApp, and Telegram challenges, adaptive and built in.",
+    description:
+      "TOTP authenticator apps and email one-time codes, admin-toggleable without a restart.",
   },
   {
     icon: ShieldCheck,
@@ -68,17 +78,19 @@ const features = [
   {
     icon: Globe,
     title: "Social and OAuth",
-    description: "Google, GitHub, and Facebook providers wired up out of the box.",
+    description: "Google, GitHub, Facebook, and Apple providers wired up out of the box.",
   },
   {
     icon: RadioTower,
-    title: "OIDC provider",
-    description: `Expose ${brand.name} as a standards-compliant OpenID Connect identity provider.`,
+    title: "Cross-tenant JIT access",
+    description:
+      "Request-and-approval workflow for temporary cross-org access with auto-expiring grants.",
   },
   {
     icon: Building2,
-    title: "SAML 2.0 SSO",
-    description: "SP-initiated SSO for Okta, Microsoft Entra ID, and Google Workspace.",
+    title: "Field-level encryption",
+    description:
+      "CSFLE encrypts sensitive columns with AES-256-GCM and versioned key rotation built in.",
   },
   {
     icon: Users,
@@ -94,10 +106,14 @@ const features = [
 ];
 
 const alsoIncluded = [
-  { icon: ScrollText, label: "Tamper-aware audit logs" },
-  { icon: CreditCard, label: "Billing and revenue dashboards" },
+  { icon: ScrollText, label: "Tamper-evident audit logs" },
+  { icon: CreditCard, label: "Stripe billing and revenue dashboards" },
   { icon: ShieldAlert, label: "Compromised-password checks" },
   { icon: RadioTower, label: "Shared Signals Framework" },
+  { icon: BellRing, label: "Real-time notification center" },
+  { icon: Languages, label: "i18n with RTL support" },
+  { icon: HardDriveDownload, label: "Encrypted automated backups" },
+  { icon: Workflow, label: "SCIM provisioning" },
 ];
 
 const standards = [
@@ -105,14 +121,92 @@ const standards = [
   "FIDO2 / WebAuthn",
   "OAuth 2.1",
   "OpenID Connect",
-  "SAML 2.0",
-  "SCIM-ready",
+  "TOTP (RFC 6238)",
+  "SCIM 2.0",
+];
+
+const avoidShips = [
+  {
+    avoid: "Weeks on login, sessions, and token rotation",
+    ships: "PASETO v4 access tokens, hashed refresh rotation, session lifecycle",
+  },
+  {
+    avoid: "Bolt-on MFA and passkeys later",
+    ships: "TOTP, email OTP, WebAuthn (FIDO2), magic links",
+  },
+  {
+    avoid: "Rebuilding org RBAC from scratch",
+    ships: "Organizations, custom roles, JIT cross-tenant access",
+  },
+  {
+    avoid: "Stripe webhook idempotency bugs",
+    ships: "Replay-safe webhook handling, plan gates, billing lifecycle",
+  },
+  {
+    avoid: "“We'll add compliance later”",
+    ships: "SOC 2 readiness docs, audit hash-chain, backup runbooks",
+  },
+  {
+    avoid: "Security footguns in redirects, fetches, uploads",
+    ships: "CWE-hardened patterns enforced across the codebase",
+  },
+];
+
+const architecture = [
+  {
+    icon: Layers,
+    title: "Next.js app",
+    detail: "Landing page, user dashboard, and guarded admin console in one App Router project.",
+    meta: "Next.js 16 · Tailwind · shadcn/ui",
+  },
+  {
+    icon: Server,
+    title: "Hono API",
+    detail:
+      "One process, ~27 route modules backed by ~45 services, plus a generated TypeScript SDK.",
+    meta: "Hono 4 · TypeScript · Bun",
+  },
+  {
+    icon: Database,
+    title: "PostgreSQL",
+    detail: "Drizzle ORM with versioned migrations, row-level security, and audit triggers.",
+    meta: "Drizzle ORM · RLS · CSFLE",
+  },
+  {
+    icon: Activity,
+    title: "Redis + workers",
+    detail: "Sessions, sliding-window rate limits, and a BullMQ queue with scheduled jobs.",
+    meta: "Redis · BullMQ · Prometheus / OTel",
+  },
+];
+
+const securityBaseline = [
+  "PASETO v4 access tokens; refresh tokens SHA-256-hashed and rotated on use",
+  "Argon2id password hashing with bcrypt verify-and-rehash fallback",
+  "CSFLE field encryption with key-version rotation",
+  "Tamper-evident SHA-256 hash-chained audit log in Postgres",
+  "HIBP breach checks, credential-stuffing defense, progressive login backoff",
+  "Hardened against open redirects, SSRF, path traversal, and secret leakage (CWE baseline)",
 ];
 
 const steps = [
   { step: "01", title: "Clone and configure", code: "cp .env.example .env" },
-  { step: "02", title: "Start the stack", code: "docker compose up -d" },
-  { step: "03", title: "Open the app", code: `open ${brand.url}` },
+  {
+    step: "02",
+    title: "Migrate and bootstrap",
+    code: "bun run db:migrate && bun run bootstrap:admin",
+  },
+  { step: "03", title: "Start API + UI", code: "bun run dev" },
+];
+
+const pricingTeaser = [
+  { name: "Free", price: formatPlanPrice("free"), blurb: "Every auth feature, small-team limits." },
+  { name: "Pro", price: formatPlanPrice("pro"), blurb: "Custom roles, audit log, advanced MFA." },
+  {
+    name: "Enterprise",
+    price: formatPlanPrice("enterprise"),
+    blurb: "Unlimited usage, SCIM, priority support.",
+  },
 ];
 
 export default function LandingPage() {
@@ -252,8 +346,126 @@ export default function LandingPage() {
           </ul>
         </section>
 
-        <section className="border-y border-border bg-surface">
+        <section aria-labelledby="why-heading" className="border-y border-border bg-surface">
+          <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-8 lg:px-8">
+            <div className="max-w-2xl">
+              <p className="text-sm font-semibold text-secondary-action">A real foundation</p>
+              <h2
+                id="why-heading"
+                className="mt-2 font-display text-2xl font-semibold tracking-tight sm:text-3xl"
+              >
+                Why start here instead of rolling your own
+              </h2>
+              <p className="mt-3 text-base leading-7 text-muted-foreground">
+                Authentication and tenant isolation are high-stakes and easy to get subtly wrong.
+                The hard parts ship already integrated.
+              </p>
+            </div>
+
+            <div className="mt-8 overflow-x-auto rounded-xl border border-border">
+              <table className="w-full min-w-[36rem] border-collapse bg-background text-left text-sm">
+                <thead>
+                  <tr className="border-b border-border bg-muted">
+                    <th scope="col" className="px-4 py-3 font-semibold text-foreground">
+                      You avoid
+                    </th>
+                    <th scope="col" className="px-4 py-3 font-semibold text-foreground">
+                      {brand.name} ships
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {avoidShips.map((row) => (
+                    <tr key={row.avoid} className="border-b border-border last:border-b-0">
+                      <td className="px-4 py-3 text-muted-foreground">{row.avoid}</td>
+                      <td className="px-4 py-3">
+                        <span className="flex items-start gap-2 text-foreground">
+                          <CheckCircle2
+                            className="mt-1 h-4 w-4 shrink-0 text-success"
+                            aria-hidden="true"
+                          />
+                          {row.ships}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section
+          aria-labelledby="architecture-heading"
+          className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-8 lg:px-8"
+        >
+          <div className="max-w-2xl">
+            <p className="text-sm font-semibold text-secondary-action">Modular monolith</p>
+            <h2
+              id="architecture-heading"
+              className="mt-2 font-display text-2xl font-semibold tracking-tight sm:text-3xl"
+            >
+              An architecture you can actually operate
+            </h2>
+            <p className="mt-3 text-base leading-7 text-muted-foreground">
+              A Bun monorepo you can deploy on a VPS, containers, or Kubernetes — with metrics,
+              tracing, encrypted backups, and a public status page included.
+            </p>
+          </div>
+
+          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {architecture.map((item) => (
+              <article key={item.title} className="rounded-xl border border-border bg-surface p-6">
+                <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-control bg-muted text-secondary-action">
+                  <item.icon className="h-5 w-5" aria-hidden="true" />
+                </span>
+                <h3 className="mt-4 text-base font-semibold">{item.title}</h3>
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">{item.detail}</p>
+                <p className="mt-3 font-mono text-xs text-secondary-action">{item.meta}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section aria-labelledby="security-heading" className="border-y border-border bg-surface">
           <div className="mx-auto grid max-w-7xl gap-8 px-4 py-8 sm:px-6 sm:py-8 lg:grid-cols-[0.72fr_1fr] lg:px-8">
+            <div>
+              <p className="text-sm font-semibold text-secondary-action">Security baseline</p>
+              <h2
+                id="security-heading"
+                className="mt-2 font-display text-2xl font-semibold tracking-tight sm:text-3xl"
+              >
+                Hardened by default, documented in the open
+              </h2>
+              <p className="mt-3 max-w-md text-base leading-7 text-muted-foreground">
+                A documented baseline covers auth, tenant isolation, and the vulnerability classes
+                that actually bite — enforced across the codebase, not bolted on.
+              </p>
+              <Link
+                href="/security"
+                className={cn(buttonVariants({ variant: "outline" }), "mt-6 px-6")}
+              >
+                <LockKeyhole aria-hidden="true" />
+                Read the security overview
+              </Link>
+            </div>
+
+            <ul className="grid content-start gap-3">
+              {securityBaseline.map((item) => (
+                <li
+                  key={item}
+                  className="flex items-start gap-3 rounded-lg border border-border bg-background px-4 py-3 text-sm leading-6 text-muted-foreground"
+                >
+                  <ShieldCheck className="mt-1 h-4 w-4 shrink-0 text-success" aria-hidden="true" />
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+
+        <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-8 lg:px-8">
+          <div className="grid gap-8 lg:grid-cols-[0.72fr_1fr]">
             <div>
               <p className="text-sm font-semibold text-secondary-action">Simple operations</p>
               <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight sm:text-3xl">
@@ -279,6 +491,46 @@ export default function LandingPage() {
                 </li>
               ))}
             </ol>
+          </div>
+        </section>
+
+        <section
+          aria-labelledby="pricing-teaser-heading"
+          className="border-y border-border bg-surface"
+        >
+          <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-8 lg:px-8">
+            <div className="flex flex-wrap items-end justify-between gap-4">
+              <div className="max-w-2xl">
+                <p className="text-sm font-semibold text-secondary-action">Pricing</p>
+                <h2
+                  id="pricing-teaser-heading"
+                  className="mt-2 font-display text-2xl font-semibold tracking-tight sm:text-3xl"
+                >
+                  Predictable plans, no per-user math
+                </h2>
+              </div>
+              <Link href="/pricing" className={cn(buttonVariants({ variant: "outline" }), "px-6")}>
+                Compare all plans
+                <ArrowRight aria-hidden="true" />
+              </Link>
+            </div>
+
+            <div className="mt-8 grid gap-4 sm:grid-cols-3">
+              {pricingTeaser.map((tier) => (
+                <Link
+                  key={tier.name}
+                  href="/pricing"
+                  className="rounded-xl border border-border bg-background p-6 transition-colors hover:border-control motion-reduce:transition-none"
+                >
+                  <h3 className="text-base font-semibold">{tier.name}</h3>
+                  <p className="mt-2 font-display text-2xl font-semibold">
+                    {tier.price}
+                    <span className="text-sm font-normal text-muted-foreground"> /month</span>
+                  </p>
+                  <p className="mt-2 text-sm leading-6 text-muted-foreground">{tier.blurb}</p>
+                </Link>
+              ))}
+            </div>
           </div>
         </section>
 

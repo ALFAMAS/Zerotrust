@@ -17,7 +17,7 @@ vi.mock("../db/repositories/processedWebhookEvents.repository", () => ({
   releaseProcessedWebhookEvent: h.release,
 }));
 
-vi.mock("../modules/webhooks/store", () => ({
+vi.mock("../webhooks/store", () => ({
   webhookStore: {
     registerEndpoint: vi.fn(async (input: any) => {
       const endpoint = { id: `ep-${h.nextId++}`, createdAt: new Date(), ...input };
@@ -41,9 +41,9 @@ vi.mock("../modules/webhooks/store", () => ({
   },
 }));
 
-import { dispatchEvent } from "../modules/webhooks/delivery";
-import { webhookStore } from "../modules/webhooks/store";
-import type { WebhookEndpoint, WebhookEventType } from "../modules/webhooks/types";
+import { dispatchEvent } from "../webhooks/delivery";
+import { webhookStore } from "../webhooks/store";
+import type { WebhookEndpoint, WebhookEventType } from "../webhooks/types";
 
 const endpoints: WebhookEndpoint[] = [];
 

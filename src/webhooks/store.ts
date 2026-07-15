@@ -1,7 +1,7 @@
 import { and, desc, eq, inArray } from "drizzle-orm";
-import { getDb } from "../../db";
-import { type OrgRlsTx, withOrgRls } from "../../db/rls";
-import { webhookEndpointsTable } from "../../db/schema";
+import { getDb } from "../db";
+import { type OrgRlsTx, withOrgRls } from "../db/rls";
+import { webhookEndpointsTable } from "../db/schema";
 import type { WebhookEndpoint, WebhookEventType } from "./types";
 
 type RetryPolicy = WebhookEndpoint["retryPolicy"];

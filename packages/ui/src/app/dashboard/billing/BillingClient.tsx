@@ -4,6 +4,7 @@ import { Check } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useMemo, useState } from "react";
 import { PageHeader } from "@/components/ui/page-header";
+import { formatPlanPrice } from "@/config/pricing";
 import Modal from "../../../components/Modal";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
@@ -49,7 +50,7 @@ const PLANS = [
   {
     id: "free",
     name: "Free",
-    price: "$0",
+    price: formatPlanPrice("free"),
     period: "forever",
     features: ["Up to 2 API keys", "5 org members", "Basic auth flows", "Community support"],
     priceId: null,
@@ -57,7 +58,7 @@ const PLANS = [
   {
     id: "pro",
     name: "Pro",
-    price: "$29",
+    price: formatPlanPrice("pro"),
     period: "/ month",
     features: [
       "20 API keys",
@@ -73,9 +74,15 @@ const PLANS = [
   {
     id: "enterprise",
     name: "Enterprise",
-    price: "Custom",
-    period: "",
-    features: ["Unlimited API keys", "Unlimited members", "SAML SSO", "Priority support", "SLA"],
+    price: formatPlanPrice("enterprise"),
+    period: "/ month",
+    features: [
+      "Unlimited API keys",
+      "Unlimited members",
+      "Custom domains",
+      "Priority support",
+      "SLA",
+    ],
     priceId: null,
     cta: "Contact us",
   },

@@ -14,7 +14,8 @@ export const brand = {
   apiUrl: process.env.NEXT_PUBLIC_ZEROTRUST_URL ?? "http://localhost:1337",
   githubUrl: process.env.NEXT_PUBLIC_GITHUB_URL ?? "https://github.com/ALFAMAS/zerotrust",
   supportEmail: process.env.NEXT_PUBLIC_SUPPORT_EMAIL ?? "support@example.com",
-  announcementBadge: process.env.NEXT_PUBLIC_ANNOUNCEMENT ?? "Now with OIDC provider + SAML 2.0",
+  announcementBadge:
+    process.env.NEXT_PUBLIC_ANNOUNCEMENT ?? "Auth, orgs, and billing — wired and hardened",
   heroTitle: process.env.NEXT_PUBLIC_HERO_TITLE ?? "Zero Trust Authentication",
   heroSubtitle: process.env.NEXT_PUBLIC_HERO_SUBTITLE ?? "for Modern Apps",
   heroDescription:

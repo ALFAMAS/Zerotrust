@@ -28,6 +28,9 @@ function PublicLinks({ mobile = false }: { mobile?: boolean }) {
       <Link href="/#features" className={navLinkClass}>
         Features
       </Link>
+      <Link href="/pricing" className={navLinkClass}>
+        Pricing
+      </Link>
       <a href={`${brand.apiUrl}/docs`} className={navLinkClass}>
         Docs
       </a>

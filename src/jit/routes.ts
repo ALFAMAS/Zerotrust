@@ -5,11 +5,11 @@
 
 import { and, eq } from "drizzle-orm";
 import { Hono } from "hono";
-import { getReadDb } from "../../db";
-import { organizationMembersTable } from "../../db/schema";
-import { authMiddleware } from "../../middleware/auth";
-import { orgRlsMiddleware } from "../../middleware/orgRls";
-import type { HonoEnv } from "../../shared/types";
+import { getReadDb } from "../db";
+import { organizationMembersTable } from "../db/schema";
+import { authMiddleware } from "../middleware/auth";
+import { orgRlsMiddleware } from "../middleware/orgRls";
+import type { HonoEnv } from "../shared/types";
 import { crossTenantJITStore, requestCrossTenantAccess } from "./cross-tenant";
 
 const app = new Hono<HonoEnv>();
@@ -126,9 +126,24 @@ app.get("/incoming", async (c) => {
     return c.json({ error: "UNAUTHENTICATED", message: "Authentication required" }, 401);
   }
 
-  const targetOrgId = c.req.query("orgId");
+  // Without an explicit orgId: system admins get the cross-org inbox
+  // (they may view any org's inbox anyway); org members resolve to their
+  // only org, and the membership/role check below still gates access.
+  const isSystemAdmin = userRoles.includes("admin") || userRoles.includes("tenant_admin");
+  let targetOrgId = c.req.query("orgId");
   if (!targetOrgId) {
-    return c.json({ error: "ORG_REQUIRED", message: "orgId query parameter is required" }, 400);
+    if (isSystemAdmin) {
+      return c.json(await crossTenantJITStore.listAll());
+    }
+    const source = await resolveRequestorOrgId(userId);
+    if ("error" in source) {
+      const message =
+        source.error === "ORG_REQUIRED"
+          ? "orgId query parameter is required when you belong to multiple organizations"
+          : "You must belong to an organization to view incoming JIT requests";
+      return c.json({ error: source.error, message }, 400);
+    }
+    targetOrgId = source.orgId;
   }
 
   const [membership] = await getReadDb()

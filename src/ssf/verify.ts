@@ -1,5 +1,5 @@
 import crypto from "node:crypto";
-import { getLogger } from "../../logger";
+import { getLogger } from "../logger";
 
 const logger = getLogger("ssf-verify");
 

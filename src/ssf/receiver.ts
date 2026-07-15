@@ -1,8 +1,8 @@
-import { insertAuditLog } from "../../audit/chain";
-import { claimProcessedWebhookEvent } from "../../db/repositories/processedWebhookEvents.repository";
-import { getLogger } from "../../logger";
-import { revokeSession } from "../../middleware/sessionControl";
-import { sha256Hex } from "../../shared/cryptoHash";
+import { insertAuditLog } from "../audit/chain";
+import { claimProcessedWebhookEvent } from "../db/repositories/processedWebhookEvents.repository";
+import { getLogger } from "../logger";
+import { revokeSession } from "../middleware/sessionControl";
+import { sha256Hex } from "../shared/cryptoHash";
 
 const logger = getLogger("ssf-receiver");
 

@@ -43,7 +43,7 @@ vi.mock("../db/rls", () => ({
   ),
 }));
 
-import { WebhookStore } from "../modules/webhooks/store";
+import { WebhookStore } from "../webhooks/store";
 
 function resetDbMocks() {
   vi.clearAllMocks();

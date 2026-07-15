@@ -37,7 +37,7 @@ vi.mock("../db", () => ({
 // The store is DB-backed in production; these tests exercise the route layer
 // (validation, role guards, state transitions, status codes), so we back it with
 // a faithful in-memory fake — no database required.
-vi.mock("../modules/jit/cross-tenant", () => {
+vi.mock("../jit/cross-tenant", () => {
   const store = new Map<string, any>();
   let seq = 0;
   return {
@@ -69,6 +69,7 @@ vi.mock("../modules/jit/cross-tenant", () => {
         [...store.values()].filter((r) => r.requestorUserId === userId && r.requestorOrgId === orgId),
       listByTarget: async (orgId: string) =>
         [...store.values()].filter((r) => r.targetOrgId === orgId),
+      listAll: async () => [...store.values()],
       get: async (id: string) => store.get(id) ?? null,
       approve: async (id: string, approverId: string) => {
         const r = store.get(id);
@@ -89,7 +90,7 @@ vi.mock("../modules/jit/cross-tenant", () => {
   };
 });
 
-import jitRoutes from "../modules/jit/routes";
+import jitRoutes from "../jit/routes";
 
 const REQUESTOR = "11111111-1111-1111-1111-111111111111";
 const ADMIN = "22222222-2222-2222-2222-222222222222";
@@ -163,6 +164,20 @@ describe("Cross-tenant JIT routes", () => {
     const res = await req(`/incoming?orgId=${ORG_B}`, { userId: ADMIN, roles: "admin" });
     expect(res.status).toBe(200);
     expect(Array.isArray(await res.json())).toBe(true);
+  });
+
+  it("gives a system admin the cross-org inbox when orgId is omitted", async () => {
+    await req("/", { method: "POST", body: validBody, userId: REQUESTOR });
+    const res = await req("/incoming", { userId: ADMIN, roles: "admin" });
+    expect(res.status).toBe(200);
+    const rows = await res.json();
+    expect(Array.isArray(rows)).toBe(true);
+    expect(rows.some((r: any) => r.targetOrgId === ORG_B)).toBe(true);
+  });
+
+  it("still hides the incoming inbox from non-admins when orgId is omitted", async () => {
+    const res = await req("/incoming", { userId: REQUESTOR, roles: "user" });
+    expect(res.status).toBe(403);
   });
 
   it("forbids non-admins from approving", async () => {

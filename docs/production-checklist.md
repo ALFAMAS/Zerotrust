@@ -264,7 +264,7 @@ Complete before pointing DNS at production. Archive signed copies in
 | Wire boundaries to CI | `boundaries:check` in `ci.yml` | **Done (CI-2, 2026-07-08)** |
 | SEC-27 runbook | Add VPS hardening to `docs/deployment.md` | **Done (SEC-27, 2026-07-08)** |
 | Group scripts | `scripts/ops/`, `scripts/codegen/`, `scripts/ci/` | Easier onboarding |
-| Optional modules folder | `src/jit`, `src/ssf`, `src/webhooks` → `src/modules/` | One mental model for mounted subsystems |
+| ✅ Flat feature dirs | `src/modules/{jit,ssf,webhooks}` → `src/{jit,ssf,webhooks}` | One mental model: every feature subsystem sits at `src/<feature>/` — **done (STR-6, 2026-07-15)** |
 
 **Do not over-refactor:** Keep `src/shared/` canonical modules, root `plugins/`, and
 `packages/ui` server-state layer — they are strengths.
@@ -312,7 +312,7 @@ for API↔UI Zod schemas, `deploy/k8s/` Helm per `docs/reference-architecture.md
 8. ~~**Repository extraction** — Move hot-path writes behind `src/db/repositories/` per `CLAUDE.md`.~~ **Done (DB-1, 2026-07-09)**
 9. ~~**Staging secrets** — Wire `deploy-staging.yml` so staging validation runs on every release candidate.~~ **Done (INF-2, 2026-07-08)**
 10. ~~**semantic-release CI** — Add `.github/workflows/release.yml` on `main` merge.~~ **Done (CI-1, 2026-07-09)**
-11. **Consolidate cross-cutting modules** — `src/jit`, `src/ssf`, `src/webhooks` under `src/modules/` (re-exports only).
+11. ~~**Consolidate cross-cutting modules** under `src/modules/`~~ — superseded: feature subsystems are flat at `src/<feature>/` (STR-6, 2026-07-15).
 
 ### Larger refactors (fork-dependent)
 

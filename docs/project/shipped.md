@@ -598,7 +598,13 @@ Cross-audit of `docs/security.md` §0–§10. **SEC-27** shipped 2026-07-08 (VPS
 
 ## Recent work (2026-07-10)
 
-### STR-2 — Consolidate mounted subsystems under `src/modules/` (shipped)
+### STR-2 — Consolidate mounted subsystems under `src/modules/` (shipped; superseded 2026-07-15)
+
+> **Superseded (2026-07-15, STR-6):** the `src/modules/` consolidation was partial — peer
+> subsystems (`src/mfa`, `src/scim`, `src/audit`, `src/notifications`) never moved, and agent
+> docs kept referencing the flat paths. All feature subsystems now live flat at `src/<feature>/`
+> (`jit`, `ssf`, `webhooks` moved back); `.boundaries.json` remains the source of truth for
+> domain boundaries.
 
 - **Problem:** Cross-cutting API subsystems (`jit`, `ssf`, `webhooks`) lived as top-level
   roots beside layer dirs, making boundaries and navigation harder.

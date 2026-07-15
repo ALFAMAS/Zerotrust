@@ -9,11 +9,11 @@
  * `expiresAt` has passed is reported (and treated) as "expired".
  */
 
-import { and, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { createMiddleware } from "hono/factory";
-import { getDb } from "../../db";
-import { crossTenantJITRequestsTable } from "../../db/schema";
-import type { HonoEnv } from "../../shared/types";
+import { getDb } from "../db";
+import { crossTenantJITRequestsTable } from "../db/schema";
+import type { HonoEnv } from "../shared/types";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -160,6 +160,16 @@ class CrossTenantJITStore {
       .select()
       .from(crossTenantJITRequestsTable)
       .where(eq(crossTenantJITRequestsTable.targetOrgId, orgId));
+    return rows.map(fromRow);
+  }
+
+  /** List requests across all orgs — system-admin surfaces only. */
+  async listAll(): Promise<CrossTenantJITRequest[]> {
+    const db = getDb();
+    const rows = await db
+      .select()
+      .from(crossTenantJITRequestsTable)
+      .orderBy(desc(crossTenantJITRequestsTable.createdAt));
     return rows.map(fromRow);
   }
 

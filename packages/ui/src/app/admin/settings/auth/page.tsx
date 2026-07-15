@@ -225,12 +225,9 @@ export default function AuthSettingsPage() {
                 checked={settings.emailOtpEnabled}
                 onChange={(v) => set("emailOtpEnabled", v)}
               />
-              <ToggleRow
-                label="SMS OTP"
-                description="One-time codes via SMS (requires Twilio)"
-                checked={settings.smsOtpEnabled}
-                onChange={(v) => set("smsOtpEnabled", v)}
-              />
+              {/* SMS OTP intentionally not exposed: the smsOtpEnabled flag exists in
+                  the API but no SMS delivery provider ships yet (MFA-SMS-1 — see
+                  docs/project/todo.md). Restore this toggle when a sender is wired. */}
               <ToggleRow
                 label="Require MFA for all users"
                 description="Force MFA enrollment on first login"
