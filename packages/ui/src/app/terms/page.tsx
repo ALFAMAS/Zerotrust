@@ -53,9 +53,9 @@ export default function TermsPage() {
             <ul className="list-disc list-inside space-y-2 text-muted-foreground">
               <li>PASETO-based session management and token issuance.</li>
               <li>WebAuthn / FIDO2 passkey enrollment and verification.</li>
-              <li>Multi-factor authentication (TOTP, Email OTP, SMS, WebAuthn).</li>
+              <li>Multi-factor authentication (TOTP, Email OTP, WebAuthn).</li>
               <li>Role-based and attribute-based access control (RBAC / ABAC).</li>
-              <li>OIDC Provider and SAML 2.0 service-provider integrations.</li>
+              <li>Multi-tenant organizations, billing, and audit logging.</li>
             </ul>
             <p className="mt-3 text-muted-foreground">
               The Service is provided &ldquo;as is&rdquo; and may be updated, modified, or

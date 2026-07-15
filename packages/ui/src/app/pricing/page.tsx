@@ -60,7 +60,7 @@ const tiers = [
     features: [
       "Everything in Pro",
       "Unlimited members, API keys, calls, and storage",
-      "SAML 2.0 SSO (Okta, Entra ID, Google Workspace)",
+      "Custom domains and branding",
       "SCIM provisioning",
       "SOC 2 readiness and compliance consoles",
       "Priority support",
@@ -76,7 +76,7 @@ const comparison: { label: string; values: [string, string, string] }[] = [
   { label: "Custom roles", values: ["—", "Included", "Included"] },
   { label: "Audit log", values: ["—", "Included", "Included"] },
   { label: "Advanced MFA", values: ["—", "Included", "Included"] },
-  { label: "SAML 2.0 SSO", values: ["—", "—", "Included"] },
+  { label: "Custom domains", values: ["—", "—", "Included"] },
   { label: "Priority support", values: ["—", "—", "Included"] },
 ];
 

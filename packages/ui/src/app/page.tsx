@@ -49,7 +49,8 @@ const features = [
   {
     icon: Smartphone,
     title: "Multi-factor auth",
-    description: "TOTP, email OTP, SMS, WhatsApp, and Telegram challenges, adaptive and built in.",
+    description:
+      "TOTP authenticator apps and email one-time codes, admin-toggleable without a restart.",
   },
   {
     icon: ShieldCheck,
@@ -80,13 +81,15 @@ const features = [
   },
   {
     icon: RadioTower,
-    title: "OIDC provider",
-    description: `Expose ${brand.name} as a standards-compliant OpenID Connect identity provider.`,
+    title: "Cross-tenant JIT access",
+    description:
+      "Request-and-approval workflow for temporary cross-org access with auto-expiring grants.",
   },
   {
     icon: Building2,
-    title: "SAML 2.0 SSO",
-    description: "SP-initiated SSO for Okta, Microsoft Entra ID, and Google Workspace.",
+    title: "Field-level encryption",
+    description:
+      "CSFLE encrypts sensitive columns with AES-256-GCM and versioned key rotation built in.",
   },
   {
     icon: Users,
@@ -117,7 +120,7 @@ const standards = [
   "FIDO2 / WebAuthn",
   "OAuth 2.1",
   "OpenID Connect",
-  "SAML 2.0",
+  "TOTP (RFC 6238)",
   "SCIM 2.0",
 ];
 
@@ -198,7 +201,7 @@ const steps = [
 const pricingTeaser = [
   { name: "Free", price: "$0", blurb: "Every auth feature, small-team limits." },
   { name: "Pro", price: "$29", blurb: "Custom roles, audit log, advanced MFA." },
-  { name: "Enterprise", price: "$99", blurb: "SAML SSO, unlimited usage, priority support." },
+  { name: "Enterprise", price: "$99", blurb: "Unlimited usage, SCIM, priority support." },
 ];
 
 export default function LandingPage() {
