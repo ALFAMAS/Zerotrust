@@ -39,8 +39,7 @@ describe("API Docker workspace install (CI-4)", () => {
 
   it("copies shared-types into runtime stages so workspace links resolve", () => {
     const dockerfile = readFileSync(join(process.cwd(), "Dockerfile"), "utf8");
-    const runtimeCopy =
-      "COPY --from=builder /app/packages/shared-types ./packages/shared-types";
+    const runtimeCopy = "COPY --from=builder /app/packages/shared-types ./packages/shared-types";
     const runtimeBunIndex = dockerfile.indexOf("AS runtime-bun");
     const runtimeNodeIndex = dockerfile.indexOf("AS runtime-node");
     const finalRuntimeIndex = dockerfile.indexOf("FROM runtime-${RUNTIME} AS runtime");
