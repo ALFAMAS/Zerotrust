@@ -53,10 +53,10 @@ export function UserProfileMenu({ onSignOut, showDashboardLink = false }: UserPr
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
-          className="h-auto gap-2 rounded-full py-1 pl-2 pr-1.5 hover:bg-accent"
+          className="h-11 gap-2 rounded-full px-2 py-1 hover:bg-accent"
           aria-label="Open account menu"
         >
-          <span className="hidden max-w-[7rem] truncate text-sm font-medium tabular-nums text-foreground sm:inline">
+          <span className="hidden max-w-[7rem] truncate text-sm font-medium tabular-nums text-foreground min-[1024px]:inline">
             {balanceLabel}
           </span>
           <Avatar className="h-8 w-8 border border-border">

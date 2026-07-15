@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { dismissCookieBanner } from "./fixtures/auth";
+import { E2E_APP_URL } from "./fixtures/urls";
 
 // Public, unauthenticated pages. These exercise rendering, navigation, and
 // client-side validation only — they do not depend on the API/DB being healthy
@@ -32,7 +33,7 @@ test.describe("public pages", () => {
     );
     await expect(page.locator('link[rel="alternate"][hreflang="x-default"]')).toHaveAttribute(
       "href",
-      /localhost:3000/
+      E2E_APP_URL
     );
   });
 

@@ -1,12 +1,13 @@
 "use client";
 
+import { Ticket } from "lucide-react";
 import { useState } from "react";
-import EmptyState from "@/components/EmptyState";
 import Modal from "@/components/Modal";
 import { ServerStateStatus } from "@/components/ServerStateStatus";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ErrorState } from "@/components/ui/States";
+import { PageHeader } from "@/components/ui/page-header";
+import { EmptyState, ErrorState } from "@/components/ui/States";
 import {
   Select,
   SelectContent,
@@ -24,8 +25,8 @@ import {
 } from "@/lib/server-state/support";
 
 const STATUS_STYLES: Record<string, string> = {
-  open: "bg-emerald-900/40 text-emerald-400",
-  pending: "bg-amber-900/40 text-amber-400",
+  open: "bg-success/40 text-success-subtle-foreground",
+  pending: "bg-warning/40 text-warning-subtle-foreground",
   closed: "bg-muted text-muted-foreground",
 };
 
@@ -86,12 +87,14 @@ export default function SupportPage() {
     <div className="max-w-4xl">
       <div className="mb-8 flex items-start justify-between">
         <div>
-          <h1 className="mb-1 font-display text-2xl font-semibold tracking-tight text-foreground">
-            Support
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Open a ticket and our team will reply here. You&apos;ll also be notified by email.
-          </p>
+          <PageHeader
+            title={<>Support</>}
+            description={
+              <>
+                Open a ticket and our team will reply here. You&apos;ll also be notified by email.
+              </>
+            }
+          />
         </div>
         <Button type="button" onClick={() => setCreateOpen(true)} className="shrink-0">
           New ticket
@@ -114,18 +117,24 @@ export default function SupportPage() {
       ) : ticketsQuery.isPending ? (
         <div className="space-y-3">
           {[...Array(3)].map((_, i) => (
-            <div key={i} className="h-16 animate-pulse rounded-xl bg-card" />
+            <div
+              key={i}
+              className="h-16 animate-pulse rounded-xl bg-card motion-reduce:animate-none"
+            />
           ))}
           <p className="sr-only">Loading support tickets…</p>
         </div>
       ) : tickets.length === 0 ? (
         <div className="rounded-xl border border-border bg-card">
           <EmptyState
-            icon="🎫"
+            icon={Ticket}
             title="No support tickets yet"
             description="Have a question or hit a snag? Open a ticket and we'll help you out."
-            actionLabel="Open your first ticket"
-            onAction={() => setCreateOpen(true)}
+            action={
+              <Button type="button" onClick={() => setCreateOpen(true)}>
+                Open your first ticket
+              </Button>
+            }
           />
         </div>
       ) : (
@@ -140,18 +149,18 @@ export default function SupportPage() {
               >
                 <div className="min-w-0">
                   <p className="truncate text-sm font-medium text-foreground">{t.subject}</p>
-                  <p className="mt-0.5 text-xs text-muted-foreground">
+                  <p className="mt-1 text-xs text-muted-foreground">
                     Updated {new Date(t.updatedAt).toLocaleString()}
                   </p>
                 </div>
                 <div className="flex shrink-0 items-center gap-2">
                   {t.priority === "high" && (
-                    <span className="rounded bg-red-900/40 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-red-400">
+                    <span className="rounded bg-destructive/40 px-2 py-1 text-xs font-semibold uppercase text-danger-subtle-foreground">
                       High
                     </span>
                   )}
                   <span
-                    className={`rounded px-2 py-0.5 text-xs font-medium ${STATUS_STYLES[t.status]}`}
+                    className={`rounded px-2 py-1 text-xs font-medium ${STATUS_STYLES[t.status]}`}
                   >
                     {t.status}
                   </span>
@@ -167,7 +176,7 @@ export default function SupportPage() {
         <Modal title="New support ticket" onClose={() => setCreateOpen(false)}>
           <div className="space-y-4">
             <div>
-              <label htmlFor="page-f0" className="mb-1.5 block text-sm text-foreground/80">
+              <label htmlFor="page-f0" className="mb-2 block text-sm text-foreground/80">
                 Subject
               </label>
               <Input
@@ -179,7 +188,7 @@ export default function SupportPage() {
               />
             </div>
             <div>
-              <label htmlFor="page-f1" className="mb-1.5 block text-sm text-foreground/80">
+              <label htmlFor="page-f1" className="mb-2 block text-sm text-foreground/80">
                 Message
               </label>
               <Textarea
@@ -192,7 +201,7 @@ export default function SupportPage() {
               />
             </div>
             <div>
-              <span className="mb-1.5 block text-sm text-foreground/80">Priority</span>
+              <span className="mb-2 block text-sm text-foreground/80">Priority</span>
               <Select
                 value={form.priority}
                 onValueChange={(v) => setForm({ ...form, priority: v })}
@@ -207,7 +216,7 @@ export default function SupportPage() {
                 </SelectContent>
               </Select>
             </div>
-            {error && <p className="text-sm text-red-400">{error}</p>}
+            {error && <p className="text-sm text-danger-subtle-foreground">{error}</p>}
             <Button
               type="button"
               onClick={createTicket}
@@ -248,7 +257,7 @@ export default function SupportPage() {
                         : "bg-muted text-foreground/90"
                     }`}
                   >
-                    <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                    <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                       {m.authorRole === "agent" ? "Support" : "You"} ·{" "}
                       {new Date(m.createdAt).toLocaleString()}
                     </p>

@@ -16,7 +16,11 @@ WORKDIR /app
 # install; scripts/postinstall.js runs as the root postinstall hook.
 COPY package.json bun.lock ./
 COPY packages/client/package.json ./packages/client/
+COPY packages/shared-types/package.json ./packages/shared-types/
 COPY packages/ui/package.json ./packages/ui/
+# Bun resolves the shared workspace's exported TypeScript entry while linking
+# workspaces, so its source must exist during the frozen install.
+COPY packages/shared-types/src ./packages/shared-types/src/
 COPY scripts/postinstall.js ./scripts/
 
 RUN bun install --frozen-lockfile
@@ -33,6 +37,8 @@ WORKDIR /app
 
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
+# node_modules/@zerotrust/shared-types links to ../../packages/shared-types
+COPY --from=builder /app/packages/shared-types ./packages/shared-types
 COPY package.json ./
 
 # oven/bun already ships a non-root `bun` user (UID 1000); creating another
@@ -59,6 +65,8 @@ WORKDIR /app
 
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
+# node_modules/@zerotrust/shared-types links to ../../packages/shared-types
+COPY --from=builder /app/packages/shared-types ./packages/shared-types
 COPY package.json ./
 
 # node:alpine already ships a non-root `node` user (UID 1000)

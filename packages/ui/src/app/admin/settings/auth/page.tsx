@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PageHeader } from "@/components/ui/page-header";
 import { ErrorState, LoadingSpinner } from "@/components/ui/States";
 import { useToast } from "@/context/ToastContext";
 import {
@@ -28,7 +29,7 @@ function ToggleRow({ label, description, checked, onChange }: ToggleRowProps) {
     <div className="flex items-center justify-between py-3">
       <div className="flex-1 pr-6">
         <p className="text-sm font-medium text-foreground">{label}</p>
-        <p className="text-xs text-muted-foreground mt-0.5">{description}</p>
+        <p className="text-xs text-muted-foreground mt-1">{description}</p>
       </div>
       <Toggle checked={checked} onChange={onChange} />
     </div>
@@ -110,12 +111,10 @@ export default function AuthSettingsPage() {
   return (
     <div className="max-w-4xl space-y-6">
       <div>
-        <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
-          Auth Settings
-        </h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Configure authentication methods, MFA, and security policy
-        </p>
+        <PageHeader
+          title={<>Auth Settings</>}
+          description={<>Configure authentication methods, MFA, and security policy</>}
+        />
       </div>
 
       <ServerStateStatus
@@ -290,7 +289,7 @@ export default function AuthSettingsPage() {
         <Button
           onClick={handleSave}
           disabled={saveMutation.isPending}
-          className="gap-2 px-6 py-2.5 text-sm font-medium min-w-[140px]"
+          className="gap-2 px-6 py-3 text-sm font-medium min-w-[140px]"
         >
           {saveMutation.isPending ? "Saving…" : "Save Settings"}
         </Button>

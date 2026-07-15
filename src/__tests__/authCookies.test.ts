@@ -1,12 +1,23 @@
-import { describe, expect, it } from "vitest";
 import { Hono } from "hono";
+import { afterEach, describe, expect, it } from "vitest";
 import {
+  clearRefreshTokenCookie,
+  includeLoadTestRefreshToken,
   LEGACY_REFRESH_TOKEN_COOKIE,
   REFRESH_TOKEN_COOKIE,
-  clearRefreshTokenCookie,
   readRefreshTokenFromRequest,
   setRefreshTokenCookie,
 } from "../shared/authCookies";
+
+const originalNodeEnv = process.env.NODE_ENV;
+const originalLoadTestTransport = process.env.LOAD_TEST_REFRESH_TOKEN_BODY;
+
+afterEach(() => {
+  if (originalNodeEnv === undefined) delete process.env.NODE_ENV;
+  else process.env.NODE_ENV = originalNodeEnv;
+  if (originalLoadTestTransport === undefined) delete process.env.LOAD_TEST_REFRESH_TOKEN_BODY;
+  else process.env.LOAD_TEST_REFRESH_TOKEN_BODY = originalLoadTestTransport;
+});
 
 describe("authCookies (SEC-9)", () => {
   it("sets __Host- refresh cookie with path=/ and clears legacy cookie", async () => {
@@ -52,5 +63,24 @@ describe("authCookies (SEC-9)", () => {
       headers: { Cookie: `${LEGACY_REFRESH_TOKEN_COOKIE}=legacy-token` },
     });
     expect((await legacyRes.json()).token).toBe("legacy-token");
+  });
+
+  it("exposes a refresh token in the body only for an explicitly enabled test load", () => {
+    process.env.NODE_ENV = "test";
+    process.env.LOAD_TEST_REFRESH_TOKEN_BODY = "true";
+
+    expect(includeLoadTestRefreshToken({ accessToken: "access" }, "refresh-secret")).toEqual({
+      accessToken: "access",
+      refreshToken: "refresh-secret",
+    });
+  });
+
+  it("never exposes a refresh token in production even when the load-test flag is set", () => {
+    process.env.NODE_ENV = "production";
+    process.env.LOAD_TEST_REFRESH_TOKEN_BODY = "true";
+
+    expect(includeLoadTestRefreshToken({ accessToken: "access" }, "refresh-secret")).toEqual({
+      accessToken: "access",
+    });
   });
 });

@@ -2,6 +2,7 @@ import { mkdirSync } from "node:fs";
 import { expect, test } from "@playwright/test";
 import { readAccessToken, registerAndGetUserId, uniqueEmail, withStoredAuth } from "./fixtures/auth";
 import { grantAdminRole, verifyUserEmail } from "./fixtures/db";
+import { E2E_API_URL } from "./fixtures/urls";
 
 const ADMIN_AUTH_FILE = "e2e/.auth/access-review-admin.json";
 
@@ -17,7 +18,7 @@ async function approveAllPendingViaApi(
 
   while (hasNext) {
     const detailRes = await page.request.get(
-      `http://localhost:1337/admin/access-reviews/${reviewId}?page=${pageNum}&limit=200`,
+      `${E2E_API_URL}/admin/access-reviews/${reviewId}?page=${pageNum}&limit=200`,
       { headers: { Authorization: `Bearer ${token}` } }
     );
     expect(detailRes.ok()).toBeTruthy();
@@ -31,7 +32,7 @@ async function approveAllPendingViaApi(
     for (const item of items) {
       if (item.decision !== "pending") continue;
       const patchRes = await page.request.patch(
-        `http://localhost:1337/admin/access-reviews/${reviewId}/items/${item.id}`,
+        `${E2E_API_URL}/admin/access-reviews/${reviewId}/items/${item.id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

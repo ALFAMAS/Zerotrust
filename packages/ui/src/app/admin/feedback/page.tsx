@@ -5,6 +5,7 @@ import { useState } from "react";
 import { ServerStateStatus } from "@/components/ServerStateStatus";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { PageHeader } from "@/components/ui/page-header";
 import { ErrorState, SkeletonList } from "@/components/ui/States";
 import {
   Select,
@@ -35,12 +36,10 @@ export default function AdminFeedbackPage() {
       <div className="flex items-center gap-3">
         <MessageSquare className="h-6 w-6 text-primary" />
         <div>
-          <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
-            Feedback inbox
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            NPS, CSAT, and thumbs-up/down responses from the in-app widget.
-          </p>
+          <PageHeader
+            title={<>Feedback inbox</>}
+            description={<>NPS, CSAT, and thumbs-up/down responses from the in-app widget.</>}
+          />
         </div>
       </div>
 

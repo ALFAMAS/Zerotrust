@@ -66,7 +66,11 @@ describe("InviteAcceptPage", () => {
 
     renderInvite();
 
-    expect(await screen.findByText("Invite error")).toBeInTheDocument();
+    expect(
+      await screen.findByRole("heading", { level: 1, name: "Invite error" })
+    ).toBeInTheDocument();
     expect(screen.getByText("Invite expired")).toBeInTheDocument();
+    expect(screen.getByRole("banner")).toBeInTheDocument();
+    expect(screen.getByRole("contentinfo")).toBeInTheDocument();
   });
 });

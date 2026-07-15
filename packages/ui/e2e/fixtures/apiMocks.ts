@@ -1,5 +1,6 @@
 import type { Page } from "@playwright/test";
 import { seedMockAuth } from "./auth";
+import { E2E_API_URL } from "./urls";
 
 export type MockUser = {
   id: string;
@@ -11,6 +12,13 @@ export type MockUser = {
   passkeys?: { credentialId: string; name: string; createdAt: string }[];
   oauthProviders?: string[];
   roles?: string[];
+  onboarding?: {
+    hasOrg: boolean;
+    hasSentInvite: boolean;
+    hasMfa: boolean;
+    hasApiKey: boolean;
+    completedAt?: string | null;
+  };
 };
 
 const DEFAULT_USER: MockUser = {
@@ -32,23 +40,23 @@ export async function mockAuthenticatedShell(
 ): Promise<void> {
   await seedMockAuth(page, token);
 
-  await page.route("http://localhost:1337/auth/me", (route) => route.fulfill({ json: user }));
-  await page.route("http://localhost:1337/sessions", (route) =>
+  await page.route(`${E2E_API_URL}/auth/me`, (route) => route.fulfill({ json: user }));
+  await page.route(`${E2E_API_URL}/sessions`, (route) =>
     route.fulfill({
       json: {
         sessions: [{ id: "session-1", isActive: true, userAgent: "Playwright", createdAt: new Date().toISOString() }],
       },
     })
   );
-  await page.route("http://localhost:1337/notifications/unread-count", (route) =>
+  await page.route(`${E2E_API_URL}/notifications/unread-count`, (route) =>
     route.fulfill({ json: { count: 0 } })
   );
   // SSE uses fetch streaming — abort so tests don't hang on live connections.
-  await page.route("http://localhost:1337/notifications/sse", (route) => route.abort());
-  await page.route("http://localhost:1337/notifications", (route) =>
+  await page.route(`${E2E_API_URL}/notifications/sse`, (route) => route.abort());
+  await page.route(`${E2E_API_URL}/notifications`, (route) =>
     route.fulfill({ json: { data: [], pagination: { total: 0 } } })
   );
-  await page.route("http://localhost:1337/notifications/preferences", (route) =>
+  await page.route(`${E2E_API_URL}/notifications/preferences`, (route) =>
     route.fulfill({
       json: {
         emailFallback: true,
@@ -65,7 +73,7 @@ export async function mockAuthenticatedShell(
 
 /** Mock billing endpoints for the billing page. */
 export async function mockBillingApis(page: Page): Promise<void> {
-  await page.route("http://localhost:1337/billing/subscription", (route) =>
+  await page.route(`${E2E_API_URL}/billing/subscription`, (route) =>
     route.fulfill({
       json: {
         plan: "free",
@@ -75,7 +83,7 @@ export async function mockBillingApis(page: Page): Promise<void> {
       },
     })
   );
-  await page.route("http://localhost:1337/billing/usage", (route) =>
+  await page.route(`${E2E_API_URL}/billing/usage`, (route) =>
     route.fulfill({
       json: {
         apiKeys: { used: 1, limit: 2 },
@@ -84,10 +92,17 @@ export async function mockBillingApis(page: Page): Promise<void> {
       },
     })
   );
-  await page.route("http://localhost:1337/billing/currencies", (route) =>
-    route.fulfill({ json: { currencies: ["USD", "EUR"] } })
+  await page.route(`${E2E_API_URL}/billing/currencies`, (route) =>
+    route.fulfill({
+      json: {
+        currencies: [
+          { code: "USD", symbol: "$" },
+          { code: "EUR", symbol: "€" },
+        ],
+      },
+    })
   );
-  await page.route("http://localhost:1337/billing/pricing*", (route) =>
+  await page.route(`${E2E_API_URL}/billing/pricing*`, (route) =>
     route.fulfill({
       json: {
         plans: [
@@ -109,14 +124,14 @@ export async function mockAdminShell(
 
 /** Mock login → MFA challenge → MFA verify for the login page. */
 export async function mockLoginMfaFlow(page: Page, token = "mfa-session-token"): Promise<void> {
-  await page.route("http://localhost:1337/auth/login", async (route) => {
+  await page.route(`${E2E_API_URL}/auth/login`, async (route) => {
     if (route.request().method() !== "POST") {
       await route.continue();
       return;
     }
     await route.fulfill({ json: { mfaRequired: true, mfaToken: "mfa-tok-e2e" } });
   });
-  await page.route("http://localhost:1337/auth/login/mfa", async (route) => {
+  await page.route(`${E2E_API_URL}/auth/login/mfa`, async (route) => {
     await route.fulfill({
       json: { accessToken: token, refreshToken: "refresh-mfa-e2e" },
     });
@@ -128,7 +143,7 @@ export async function mockOAuthExchange(
   page: Page,
   token = "oauth-access-token"
 ): Promise<void> {
-  await page.route("http://localhost:1337/auth/oauth/exchange", async (route) => {
+  await page.route(`${E2E_API_URL}/auth/oauth/exchange`, async (route) => {
     await route.fulfill({
       json: { accessToken: token, refreshToken: "oauth-refresh-e2e" },
     });

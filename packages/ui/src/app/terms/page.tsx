@@ -14,15 +14,15 @@ export default function TermsPage() {
     <div className="flex min-h-screen flex-col bg-background">
       <SiteHeader />
 
-      <main className="mx-auto w-full max-w-3xl flex-1 px-6 py-16">
+      <main className="mx-auto w-full max-w-3xl flex-1 px-6 py-8">
         <h1 className="font-display text-4xl font-semibold tracking-tight text-foreground">
           Terms of Service
         </h1>
-        <p className="mb-12 mt-3 text-sm text-muted-foreground">
+        <p className="mb-8 mt-3 text-sm text-muted-foreground">
           Last updated: {legal.termsEffectiveDate}
         </p>
 
-        <div className="space-y-12 text-foreground/80 leading-relaxed">
+        <div className="space-y-8 text-foreground/80 leading-relaxed">
           {/* 1 — Acceptance */}
           <section>
             <h2 className="text-xl font-semibold text-foreground mb-4 pb-2 border-b border-border">

@@ -1,11 +1,12 @@
 "use client";
+
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { ServerStateStatus } from "@/components/ServerStateStatus";
-import { SkeletonCard, SkeletonTable } from "@/components/Skeleton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PageHeader } from "@/components/ui/page-header";
 import { ErrorState } from "@/components/ui/States";
 import {
   Select,
@@ -14,6 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { SkeletonCard, SkeletonTable } from "@/components/ui/skeleton";
 import { useToast } from "@/context/ToastContext";
 import { useAuthMeQuery } from "@/lib/server-state/auth";
 import {
@@ -26,8 +28,8 @@ import {
 } from "@/lib/server-state/organizations";
 
 const ROLE_COLORS: Record<string, string> = {
-  owner: "bg-indigo-900 text-indigo-200 border border-indigo-700",
-  admin: "bg-blue-900 text-blue-200 border border-blue-700",
+  owner: "border border-secondary-action bg-secondary-action text-secondary-action-foreground",
+  admin: "border border-secondary-action bg-secondary-action text-secondary-action-foreground",
   member: "bg-muted text-foreground/80 border border-border",
   viewer: "bg-card text-muted-foreground border border-border",
 };
@@ -115,19 +117,23 @@ export default function OrgDetailPage() {
     const message =
       detailQuery.error?.message || membersQuery.error?.message || "Failed to load organization";
     return (
-      <ErrorState
-        message={message}
-        retry={() => {
-          void detailQuery.refetch();
-          void membersQuery.refetch();
-        }}
-      />
+      <div className="space-y-6">
+        <PageHeader title="Organization" />
+        <ErrorState
+          message={message}
+          retry={() => {
+            void detailQuery.refetch();
+            void membersQuery.refetch();
+          }}
+        />
+      </div>
     );
   }
 
   if (loading) {
     return (
       <div className="space-y-4">
+        <PageHeader title="Organization" />
         <SkeletonCard />
         <SkeletonTable rows={4} columns={4} />
       </div>
@@ -136,8 +142,11 @@ export default function OrgDetailPage() {
 
   if (!org) {
     return (
-      <div className="text-muted-foreground py-16 text-center">
-        Organization not found or you do not have access.
+      <div className="space-y-6">
+        <PageHeader title="Organization" />
+        <div className="py-8 text-center text-muted-foreground">
+          Organization not found or you do not have access.
+        </div>
       </div>
     );
   }
@@ -153,18 +162,16 @@ export default function OrgDetailPage() {
       <div className="flex items-start justify-between">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
-              {org.name}
-            </h1>
+            <PageHeader title={org.name} />
             <span
-              className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+              className={`text-xs px-2 py-1 rounded-full font-medium ${
                 ROLE_COLORS[myRole] ?? ROLE_COLORS.member
               }`}
             >
               {myRole}
             </span>
           </div>
-          <p className="text-xs text-muted-foreground mt-0.5 font-mono">{org.slug}</p>
+          <p className="text-xs text-muted-foreground mt-1 font-mono">{org.slug}</p>
           <p className="text-sm text-muted-foreground mt-1">
             {memberCount} member{memberCount !== 1 ? "s" : ""}
           </p>
@@ -173,7 +180,7 @@ export default function OrgDetailPage() {
           {isAdminOrOwner && (
             <Link
               href={`/dashboard/organizations/${orgId}/settings`}
-              className="text-sm text-muted-foreground hover:text-foreground border border-border px-3 py-1.5 rounded-lg hover:bg-accent transition-colors"
+              className="text-sm text-muted-foreground hover:text-foreground border border-border px-3 py-2 rounded-lg hover:bg-accent transition-colors"
             >
               Settings
             </Link>
@@ -216,7 +223,7 @@ export default function OrgDetailPage() {
                   <div className="text-xs text-muted-foreground truncate">{user.email}</div>
                 </div>
                 <span
-                  className={`text-xs px-2 py-0.5 rounded-full font-medium whitespace-nowrap ${
+                  className={`text-xs px-2 py-1 rounded-full font-medium whitespace-nowrap ${
                     ROLE_COLORS[member.role] ?? ROLE_COLORS.member
                   }`}
                 >
@@ -289,7 +296,7 @@ export default function OrgDetailPage() {
               >
                 <span className="text-sm text-foreground truncate">{invite.email}</span>
                 <span
-                  className={`text-xs px-2 py-0.5 rounded-full font-medium whitespace-nowrap ${
+                  className={`text-xs px-2 py-1 rounded-full font-medium whitespace-nowrap ${
                     ROLE_COLORS[invite.role] ?? ROLE_COLORS.member
                   }`}
                 >
@@ -301,7 +308,7 @@ export default function OrgDetailPage() {
                 <Button
                   type="button"
                   variant="destructive"
-                  className="text-xs px-2 py-0.5 h-auto whitespace-nowrap"
+                  className="text-xs px-2 py-1 h-auto whitespace-nowrap"
                   onClick={() => handleRevokeInvite(invite.id)}
                   disabled={revokeInviteMutation.isPending}
                 >

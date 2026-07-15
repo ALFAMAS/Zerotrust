@@ -17,7 +17,7 @@ The Security hardening rules table in `CLAUDE.md` is authoritative. Re-introduci
 
 Before opening a PR touching auth, crypto, uploads, webhooks/fetches, filesystem, command execution, OAuth/OIDC/SAML/MFA/WebAuthn, or logging, re-scan the diff against these rules.
 
-Structural gaps from [`docs/security.md`](./docs/security.md) are tracked as **SEC-*** in [`docs/project/todo.md`](./docs/project/todo.md) (security baseline closed; open production gaps: **AUTH-1**, **CRYPTO-1**, **INF-3**, **FE-1**). Verified fixes: [`docs/project/shipped.md`](./docs/project/shipped.md) § Security baseline audit (SEC-1…SEC-27, SEC-28 shipped 2026-07-05; SEC-27 2026-07-08; DQ-2 2026-07-09). Prefer `assertCan()` / `authorizeOrg()` from `src/shared/permissions.ts` for org authz; use `hasOrgPermission()` only for the permission matrix. Next.js `middleware.ts` is not an auth boundary.
+Structural gaps from [`docs/security.md`](./docs/security.md) are tracked in [`docs/project/todo.md`](./docs/project/todo.md) (security baseline SEC items closed; open operator security work: **SEC-ROT**, **MIG-3**). Verified fixes: [`docs/project/shipped.md`](./docs/project/shipped.md) § Security baseline audit and Recent work (including **CRYPTO-2**, 2026-07-15). Prefer `assertCan()` / `authorizeOrg()` from `src/shared/permissions.ts` for org authz; use `hasOrgPermission()` only for the permission matrix. Next.js `middleware.ts` is not an auth boundary.
 
 ## Canonical shared modules (reuse, don't re-implement)
 

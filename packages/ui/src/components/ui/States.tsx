@@ -8,8 +8,15 @@ import { Button } from "@/components/ui/button";
  */
 export function LoadingSpinner({ className = "" }: { className?: string }) {
   return (
-    <div className={`flex items-center justify-center py-12 ${className}`}>
-      <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+    <div
+      role="status"
+      aria-label="Loading"
+      className={`flex items-center justify-center py-8 ${className}`}
+    >
+      <div
+        aria-hidden="true"
+        className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent motion-reduce:animate-none"
+      />
     </div>
   );
 }
@@ -29,7 +36,7 @@ export function EmptyState({
   action?: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col items-center justify-center py-12 text-center">
+    <div className="flex flex-col items-center justify-center py-8 text-center">
       {Icon && (
         <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full border border-border bg-background text-muted-foreground">
           <Icon className="h-5 w-5" />
@@ -53,11 +60,14 @@ export function ErrorState({
   retry?: () => void;
 }) {
   return (
-    <div className="flex flex-col items-center justify-center py-12 text-center">
-      <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full border border-red-800 bg-red-950 text-red-400">
+    <div
+      role="alert"
+      className="flex flex-col items-center justify-center rounded-xl border border-danger-subtle-foreground/40 bg-danger-subtle px-6 py-8 text-center text-danger-subtle-foreground"
+    >
+      <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full border border-danger-subtle-foreground/40 bg-surface text-danger-subtle-foreground">
         <AlertCircle className="h-5 w-5" />
       </div>
-      <p className="text-sm font-medium text-foreground">{message}</p>
+      <p className="text-sm font-medium">{message}</p>
       {retry && (
         <Button type="button" variant="outline" onClick={retry} className="mt-4">
           Try again
@@ -76,7 +86,7 @@ export function SkeletonList({ count = 3 }: { count?: number }) {
       {Array.from({ length: count }).map((_, i) => (
         <div
           key={i}
-          className="h-16 w-full animate-pulse rounded-xl border border-border bg-card"
+          className="h-16 w-full animate-pulse rounded-xl border border-border bg-card motion-reduce:animate-none"
         />
       ))}
     </div>

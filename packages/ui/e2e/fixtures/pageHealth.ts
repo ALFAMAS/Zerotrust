@@ -1,5 +1,6 @@
 import { expect, type Page } from "@playwright/test";
 import { dismissCookieBanner } from "./auth";
+import { E2E_API_URL } from "./urls";
 
 export type PageSmokeCase = {
   path: string;
@@ -21,7 +22,7 @@ export async function assertPageHealthy(
 
   const onResponse = (response: import("@playwright/test").Response) => {
     const url = response.url();
-    if (url.includes("localhost:1337") && response.status() >= 500) {
+    if (url.startsWith(E2E_API_URL) && response.status() >= 500) {
       apiErrors.push(`${response.status()} ${url}`);
     }
   };

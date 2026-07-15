@@ -3,12 +3,12 @@
 import { Bell, Plus, Send, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { ServerStateStatus } from "@/components/ServerStateStatus";
-import { SkeletonCard } from "@/components/Skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PageHeader } from "@/components/ui/page-header";
 import { ErrorState } from "@/components/ui/States";
 import {
   Select,
@@ -17,6 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { SkeletonCard } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/context/ToastContext";
 import {
@@ -120,13 +121,19 @@ export default function AdminAlertsPage() {
 
   return (
     <div className="max-w-3xl">
-      <h1 className="mb-1 flex items-center gap-2 font-display text-2xl font-semibold tracking-tight text-foreground">
-        <Bell className="h-6 w-6 text-primary" aria-hidden="true" /> Alert Channels
-      </h1>
-      <p className="mb-8 text-sm text-muted-foreground">
-        Fan out security and reliability events (anomalies, brute-force, SLO burn) to Slack,
-        Microsoft Teams, or PagerDuty.
-      </p>
+      <PageHeader
+        title={
+          <>
+            <Bell className="h-6 w-6 text-primary" aria-hidden="true" /> Alert Channels
+          </>
+        }
+        description={
+          <>
+            Fan out security and reliability events (anomalies, brute-force, SLO burn) to Slack,
+            Microsoft Teams, or PagerDuty.
+          </>
+        }
+      />
 
       <ServerStateStatus
         isFetching={channelsQuery.isFetching}
@@ -143,7 +150,7 @@ export default function AdminAlertsPage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={(e) => void addChannel(e)} className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <Label htmlFor="ch-type">Destination</Label>
               <Select value={type} onValueChange={(v) => setType(v as AlertChannelType)}>
                 <SelectTrigger id="ch-type">
@@ -156,7 +163,7 @@ export default function AdminAlertsPage() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <Label htmlFor="ch-name">Name</Label>
               <Input
                 id="ch-name"
@@ -166,7 +173,7 @@ export default function AdminAlertsPage() {
                 maxLength={80}
               />
             </div>
-            <div className="space-y-1.5 sm:col-span-2">
+            <div className="space-y-2 sm:col-span-2">
               <Label htmlFor="ch-secret">{secretLabel}</Label>
               <Input
                 id="ch-secret"
@@ -195,7 +202,7 @@ export default function AdminAlertsPage() {
         <SkeletonCard className="h-40" />
       ) : channels.length === 0 ? (
         <Card>
-          <CardContent className="py-10 text-center">
+          <CardContent className="py-8 text-center">
             <Bell className="mx-auto mb-3 h-9 w-9 text-muted-foreground/40" aria-hidden="true" />
             <p className="text-sm text-muted-foreground">
               No alert channels yet. Add one above to start receiving alerts.

@@ -3,6 +3,7 @@
 import { Check } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useMemo, useState } from "react";
+import { PageHeader } from "@/components/ui/page-header";
 import Modal from "../../../components/Modal";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
@@ -187,26 +188,24 @@ function BillingContent() {
 
   return (
     <div className="max-w-4xl">
-      <h1 className="mb-1 font-display text-2xl font-semibold tracking-tight text-foreground">
-        Billing
-      </h1>
-      <p className="text-muted-foreground text-sm mb-8">
-        Manage your subscription and payment details.
-      </p>
+      <PageHeader
+        title={<>Billing</>}
+        description={<>Manage your subscription and payment details.</>}
+      />
 
       {params.get("success") === "1" && (
-        <div className="mb-6 bg-green-900/30 border border-green-700 rounded-xl p-4 text-green-300 text-sm">
+        <div className="mb-6 rounded-xl border border-success bg-success-subtle p-4 text-sm text-success-subtle-foreground">
           Subscription updated successfully!
         </div>
       )}
       {params.get("canceled") === "1" && (
-        <div className="mb-6 bg-yellow-900/30 border border-yellow-700 rounded-xl p-4 text-yellow-300 text-sm">
+        <div className="mb-6 rounded-xl border border-warning bg-warning-subtle p-4 text-sm text-warning-subtle-foreground">
           Checkout canceled. You have not been charged.
         </div>
       )}
 
       {retentionOffer && (
-        <div className="mb-6 bg-indigo-900/30 border border-indigo-700 rounded-xl p-4 text-indigo-200 text-sm">
+        <div className="mb-6 rounded-xl border border-secondary-action bg-muted p-4 text-sm text-secondary-action">
           Sorry to see you go! Use code{" "}
           <span className="font-mono font-bold">{retentionOffer}</span> for a discount if you change
           your mind.
@@ -245,7 +244,7 @@ function BillingContent() {
           }}
           className="flex flex-wrap items-end gap-3"
         >
-          <div className="space-y-1.5 flex-1 min-w-[200px]">
+          <div className="space-y-2 flex-1 min-w-[200px]">
             <label htmlFor="vat" className="text-sm text-muted-foreground">
               Validate EU VAT number
             </label>
@@ -266,7 +265,7 @@ function BillingContent() {
           </p>
         )}
         <form onSubmit={handleSubmitExemption} className="grid gap-3 sm:grid-cols-2">
-          <div className="space-y-1.5 sm:col-span-2">
+          <div className="space-y-2 sm:col-span-2">
             <label htmlFor="exOrgId" className="text-sm text-muted-foreground">
               Submit tax exemption (org owner/admin)
             </label>
@@ -303,11 +302,11 @@ function BillingContent() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground">Current plan</p>
-              <p className="text-lg font-bold text-foreground capitalize mt-0.5">{sub.plan}</p>
+              <p className="text-lg font-bold text-foreground capitalize mt-1">{sub.plan}</p>
               <p className="text-sm text-muted-foreground mt-1">
                 Status: <span className="capitalize text-foreground/80">{sub.status}</span>
                 {sub.trialEnd && new Date(sub.trialEnd) > new Date() && (
-                  <span className="ml-2 text-blue-400">
+                  <span className="ml-2 text-secondary-action">
                     Trial ends {new Date(sub.trialEnd).toLocaleDateString()}
                   </span>
                 )}
@@ -315,7 +314,7 @@ function BillingContent() {
                   <> · Renews {new Date(sub.currentPeriodEnd).toLocaleDateString()}</>
                 )}
                 {sub.cancelAtPeriodEnd && (
-                  <span className="ml-2 text-yellow-400">Cancels at period end</span>
+                  <span className="ml-2 text-warning-subtle-foreground">Cancels at period end</span>
                 )}
               </p>
             </div>
@@ -324,7 +323,7 @@ function BillingContent() {
                 <Button
                   type="button"
                   onClick={handleReactivate}
-                  className="px-4 py-2 bg-green-700 hover:bg-green-600 text-foreground text-sm rounded-lg transition-colors"
+                  className="min-h-11 rounded-lg bg-success-subtle px-4 py-2 text-sm font-medium text-success-subtle-foreground transition-colors hover:bg-success-subtle/80"
                 >
                   Reactivate
                 </Button>
@@ -401,7 +400,7 @@ function BillingContent() {
                 type="button"
                 onClick={() => handleCancel("cancel")}
                 disabled={cancelMutation.isPending || !cancelReason}
-                className="flex-1 py-2 bg-red-900/60 hover:bg-red-900 disabled:opacity-50 text-red-200 text-sm font-medium rounded-lg transition-colors"
+                className="min-h-11 flex-1 rounded-lg bg-danger-subtle py-2 text-sm font-medium text-danger-subtle-foreground transition-colors hover:bg-danger-subtle/80 disabled:opacity-50"
               >
                 {cancelMutation.isPending ? "Working…" : "Cancel at period end"}
               </Button>
@@ -455,7 +454,7 @@ function BillingContent() {
                   <span className="text-muted-foreground text-sm ml-1">{plan.period}</span>
                 )}
                 {showLocalized && localized.pppDiscountPercent > 0 && (
-                  <span className="ml-2 inline-block rounded bg-emerald-500/15 px-1.5 py-0.5 text-xs font-medium text-emerald-400">
+                  <span className="ml-2 inline-block rounded bg-success/15 px-2 py-1 text-xs font-medium text-success-subtle-foreground">
                     −{localized.pppDiscountPercent}% local pricing
                   </span>
                 )}
@@ -463,7 +462,7 @@ function BillingContent() {
               <ul className="space-y-2 mb-6 flex-1">
                 {plan.features.map((f) => (
                   <li key={f} className="text-sm text-foreground/80 flex items-start gap-2">
-                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" />
+                    <Check className="mt-1 h-4 w-4 shrink-0 text-success-subtle-foreground" />
                     {f}
                   </li>
                 ))}

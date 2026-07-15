@@ -53,8 +53,6 @@ export interface PieSliceProps {
   fill?: string;
   /** Animate the slice on mount. Default: true */
   animate?: boolean;
-  /** Show glow effect on hover. Default: true */
-  showGlow?: boolean;
   /**
    * Hover effect type. Default: "translate"
    * - "translate": Slice moves outward along its radial axis
@@ -77,11 +75,9 @@ interface AnimatedSliceTranslateProps {
   cornerRadius: number;
   padAngle: number;
   fill: string;
-  color: string;
   isHovered: boolean;
   isFaded: boolean;
   animationKey: number;
-  showGlow: boolean;
   hoverOffset: number;
 }
 
@@ -94,11 +90,9 @@ function AnimatedSliceTranslate({
   cornerRadius,
   padAngle,
   fill,
-  color,
   isHovered,
   isFaded,
   animationKey,
-  showGlow,
   hoverOffset,
 }: AnimatedSliceTranslateProps) {
   const { enterTransition, enterStaggerScale, animationKey: pieAnimationKey } = usePieStable();
@@ -122,7 +116,6 @@ function AnimatedSliceTranslate({
   });
 
   const offset = getSliceOffset(startAngle, endAngle, hoverOffset);
-  const glowColor = color;
   const hitboxPath = generateArcPath(
     innerRadius,
     outerRadius,
@@ -144,9 +137,6 @@ function AnimatedSliceTranslate({
         d={hitboxPath}
         fill={fill}
         pointerEvents="none"
-        style={{
-          filter: showGlow && isHovered ? `drop-shadow(0 0 12px ${glowColor})` : "none",
-        }}
         transition={{
           opacity: { duration: 0.15 },
           x: { type: "spring", stiffness: 400, damping: 25 },
@@ -167,9 +157,6 @@ function AnimatedSliceTranslate({
       fill={fill}
       key={`slice-${animationKey}-${index}`}
       pointerEvents="none"
-      style={{
-        filter: showGlow && isHovered ? `drop-shadow(0 0 12px ${glowColor})` : "none",
-      }}
       transition={{
         opacity: { duration: 0.15 },
         x: { type: "spring", stiffness: 400, damping: 25 },
@@ -188,11 +175,9 @@ interface AnimatedSliceGrowProps {
   cornerRadius: number;
   padAngle: number;
   fill: string;
-  color: string;
   isHovered: boolean;
   isFaded: boolean;
   animationKey: number;
-  showGlow: boolean;
   hoverOffset: number;
 }
 
@@ -205,11 +190,9 @@ function AnimatedSliceGrow({
   cornerRadius,
   padAngle,
   fill,
-  color,
   isHovered,
   isFaded,
   animationKey,
-  showGlow,
   hoverOffset,
 }: AnimatedSliceGrowProps) {
   const { enterTransition, enterStaggerScale, animationKey: pieAnimationKey } = usePieStable();
@@ -241,7 +224,6 @@ function AnimatedSliceGrow({
     );
   });
 
-  const glowColor = color;
   const grownOuterRadius = isHovered ? outerRadius + hoverOffset : outerRadius;
   const grownPath = generateArcPath(
     innerRadius,
@@ -262,9 +244,6 @@ function AnimatedSliceGrow({
         d={grownPath}
         fill={fill}
         pointerEvents="none"
-        style={{
-          filter: showGlow && isHovered ? `drop-shadow(0 0 12px ${glowColor})` : "none",
-        }}
         transition={{
           opacity: { duration: 0.15 },
           d: { type: "spring", stiffness: 400, damping: 25 },
@@ -282,9 +261,6 @@ function AnimatedSliceGrow({
       fill={fill}
       key={`slice-${animationKey}-${index}`}
       pointerEvents="none"
-      style={{
-        filter: showGlow && isHovered ? `drop-shadow(0 0 12px ${glowColor})` : "none",
-      }}
       transition={{
         opacity: { duration: 0.15 },
       }}
@@ -297,7 +273,6 @@ export const PieSlice = memo(function PieSlice({
   color: colorProp,
   fill: fillProp,
   animate = true,
-  showGlow = true,
   hoverEffect = "translate",
   hoverOffset: hoverOffsetProp,
 }: PieSliceProps) {
@@ -310,7 +285,6 @@ export const PieSlice = memo(function PieSlice({
     animationKey,
     geometryScrubbing,
     scrubSlicePaths,
-    getColor,
     getFill,
   } = usePieStable();
   const { hoveredIndex, setHoveredIndex } = usePieHover();
@@ -323,8 +297,7 @@ export const PieSlice = memo(function PieSlice({
     return null;
   }
 
-  const color = colorProp || getColor(index);
-  const fill = fillProp || getFill(index);
+  const fill = fillProp || colorProp || getFill(index);
 
   if (geometryScrubbing) {
     const scrubPath = scrubSlicePaths?.[index];
@@ -367,7 +340,6 @@ export const PieSlice = memo(function PieSlice({
       return (
         <AnimatedSliceGrow
           animationKey={animationKey}
-          color={color}
           cornerRadius={cornerRadius}
           endAngle={arcData.endAngle}
           fill={fill}
@@ -378,7 +350,6 @@ export const PieSlice = memo(function PieSlice({
           isHovered={isHovered}
           outerRadius={outerRadius}
           padAngle={arcData.padAngle}
-          showGlow={showGlow}
           startAngle={arcData.startAngle}
         />
       );
@@ -388,7 +359,6 @@ export const PieSlice = memo(function PieSlice({
     return (
       <AnimatedSliceTranslate
         animationKey={animationKey}
-        color={color}
         cornerRadius={cornerRadius}
         endAngle={arcData.endAngle}
         fill={fill}
@@ -399,7 +369,6 @@ export const PieSlice = memo(function PieSlice({
         isHovered={isHovered}
         outerRadius={outerRadius}
         padAngle={arcData.padAngle}
-        showGlow={showGlow}
         startAngle={arcData.startAngle}
       />
     );
@@ -417,9 +386,6 @@ export const PieSlice = memo(function PieSlice({
           d={hitboxPath}
           fill={fill}
           pointerEvents="none"
-          style={{
-            filter: showGlow && isHovered ? `drop-shadow(0 0 12px ${color})` : "none",
-          }}
           transition={{
             opacity: { duration: 0.15 },
             d: { type: "spring", stiffness: 400, damping: 25 },
@@ -443,9 +409,6 @@ export const PieSlice = memo(function PieSlice({
         d={hitboxPath}
         fill={fill}
         pointerEvents="none"
-        style={{
-          filter: showGlow && isHovered ? `drop-shadow(0 0 12px ${color})` : "none",
-        }}
         transition={{
           opacity: { duration: 0.15 },
           x: { type: "spring", stiffness: 400, damping: 25 },

@@ -13,6 +13,7 @@ import { requireProofOfPossession } from "../../../middleware/proofOfPossession"
 import { rateLimit } from "../../../middleware/rateLimiting";
 import {
   clearRefreshTokenCookie,
+  includeLoadTestRefreshToken,
   readRefreshTokenFromRequest,
   setRefreshTokenCookie,
 } from "../../../shared/authCookies";
@@ -125,11 +126,16 @@ router.post(
 
       setRefreshTokenCookie(c, newRefreshPlain, cfg.session.refreshTokenTTL);
 
-      return c.json({
-        accessToken,
-        expiresIn: cfg.session.defaultTTL,
-        tokenType: "Bearer",
-      });
+      return c.json(
+        includeLoadTestRefreshToken(
+          {
+            accessToken,
+            expiresIn: cfg.session.defaultTTL,
+            tokenType: "Bearer",
+          },
+          newRefreshPlain
+        )
+      );
     } catch (err) {
       return internalError(c, logger, "Refresh token error", err, "Refresh failed");
     }

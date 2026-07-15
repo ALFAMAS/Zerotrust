@@ -113,7 +113,7 @@ export function ChartStatFlow({
           staticValue
         )}
       </span>
-      <span className={cn("mt-0.5 text-chart-label", labelClassName)}>{label}</span>
+      <span className={cn("mt-1 text-chart-label", labelClassName)}>{label}</span>
     </>
   );
 }

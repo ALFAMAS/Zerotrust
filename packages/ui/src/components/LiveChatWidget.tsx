@@ -160,7 +160,7 @@ function NativeChatWidget() {
 
       {/* Chat panel */}
       {open && (
-        <Card className="fixed bottom-24 right-6 z-50 flex h-96 w-80 flex-col shadow-2xl">
+        <Card className="fixed bottom-8 right-6 z-50 flex h-96 w-80 flex-col shadow-lg">
           <CardHeader className="flex-row items-center gap-2 space-y-0 border-b border-border px-4 py-3">
             <MessageCircle className="h-5 w-5 text-primary" />
             <span className="text-sm font-medium text-foreground">Support</span>

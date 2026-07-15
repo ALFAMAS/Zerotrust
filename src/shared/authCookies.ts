@@ -44,3 +44,17 @@ export function readRefreshTokenFromRequest(c: Context, bodyToken?: string): str
     getCookie(c, LEGACY_REFRESH_TOKEN_COOKIE)
   );
 }
+
+/**
+ * Plain-HTTP load runners cannot retain a Secure `__Host-` cookie. Expose the
+ * token in the POST response body only in an explicitly enabled test process.
+ */
+export function includeLoadTestRefreshToken<T extends Record<string, unknown>>(
+  body: T,
+  refreshToken: string
+): T | (T & { refreshToken: string }) {
+  if (process.env.NODE_ENV !== "test" || process.env.LOAD_TEST_REFRESH_TOKEN_BODY !== "true") {
+    return body;
+  }
+  return { ...body, refreshToken };
+}

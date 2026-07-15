@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Bricolage_Grotesque, Hanken_Grotesk, JetBrains_Mono } from "next/font/google";
+import { Inter, JetBrains_Mono } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
 import AnalyticsScript from "@/components/AnalyticsScript";
@@ -14,19 +14,14 @@ import { directionForLocale, SUPPORTED_LOCALES } from "@/i18n/locales";
 import { ToastProvider } from "../context/ToastContext";
 import "./globals.css";
 
-const fontDisplay = Bricolage_Grotesque({
+const fontSans = Inter({
   subsets: ["latin"],
-  variable: "--font-display",
-  display: "swap",
-});
-const fontSans = Hanken_Grotesk({
-  subsets: ["latin"],
-  variable: "--font-sans",
+  variable: "--font-levels-sans",
   display: "swap",
 });
 const fontMono = JetBrains_Mono({
   subsets: ["latin"],
-  variable: "--font-mono",
+  variable: "--font-levels-mono",
   display: "swap",
 });
 
@@ -75,13 +70,13 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       lang={locale}
       dir={directionForLocale(locale)}
       suppressHydrationWarning
-      className={`dark ${fontDisplay.variable} ${fontSans.variable} ${fontMono.variable}`}
+      className={`light ${fontSans.variable} ${fontMono.variable}`}
     >
       <head>
         <script
           // biome-ignore lint/security/noDangerouslySetInnerHtml: static theme bootstrap (same pattern as next-themes)
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var d=document.documentElement,c=d.classList;c.remove('light','dark');var e=localStorage.getItem('theme');if(e==='system'||(!e&&true)){var m=window.matchMedia('(prefers-color-scheme: dark)');c.add(m.matches?'dark':'light')}else if(e==='light'||e==='dark'){c.add(e)}else{c.add('dark')}var cs=e==='system'?(window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'):(e||'dark');if(cs==='light'||cs==='dark')d.style.colorScheme=cs}catch(e){}})();`,
+            __html: `(function(){try{var d=document.documentElement,c=d.classList;c.remove('light','dark');var e=localStorage.getItem('theme');var t=e==='system'?(window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'):(e==='dark'?'dark':'light');c.add(t);d.style.colorScheme=t}catch(e){}})();`,
           }}
         />
       </head>
@@ -90,7 +85,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           Skip to main content
         </a>
         <NextIntlClientProvider messages={messages}>
-          <ThemeProvider defaultTheme="dark" enableSystem>
+          <ThemeProvider defaultTheme="light" enableSystem>
             <ErrorBoundary>
               <QueryProvider>
                 <ReverificationProvider>

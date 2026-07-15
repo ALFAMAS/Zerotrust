@@ -1,11 +1,13 @@
 "use client";
+
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { OrgFeatureFlagsPanel } from "@/components/OrgFeatureFlagsPanel";
 import { ServerStateStatus } from "@/components/ServerStateStatus";
-import { SkeletonCard } from "@/components/Skeleton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PageHeader } from "@/components/ui/page-header";
+import { DangerZone } from "@/components/ui/page-patterns";
 import { ErrorState } from "@/components/ui/States";
 import {
   Select,
@@ -14,6 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { SkeletonCard } from "@/components/ui/skeleton";
 import { useToast } from "@/context/ToastContext";
 import { useAuthMeQuery } from "@/lib/server-state/auth";
 import {
@@ -109,12 +112,12 @@ export default function OrgSettingsPage() {
   }
 
   if (!org) {
-    return <div className="text-muted-foreground py-16 text-center">Organization not found.</div>;
+    return <div className="text-muted-foreground py-8 text-center">Organization not found.</div>;
   }
 
   if (myRole !== "admin" && myRole !== "owner") {
     return (
-      <div className="text-muted-foreground py-16 text-center">
+      <div className="text-muted-foreground py-8 text-center">
         <p className="font-semibold text-foreground mb-1">Access denied</p>
         <p>You need admin or owner access to view settings.</p>
       </div>
@@ -220,13 +223,10 @@ export default function OrgSettingsPage() {
       />
 
       <div>
-        <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
-          {org.name} — Settings
-        </h1>
-        <p className="text-sm text-muted-foreground mt-0.5 font-mono">{org.slug}</p>
+        <PageHeader title={<>{org.name} — Settings</>} description={org.slug} />
       </div>
 
-      <form onSubmit={handleSave} className="bg-card border border-border rounded-xl p-5 space-y-4">
+      <form onSubmit={handleSave} className="bg-card border border-border rounded-xl p-6 space-y-4">
         <h2 className="font-semibold text-foreground">General</h2>
         <div className="space-y-1">
           <label htmlFor="page-f0" className="text-xs text-muted-foreground">
@@ -277,11 +277,11 @@ export default function OrgSettingsPage() {
       {policy && (
         <form
           onSubmit={handleSavePolicy}
-          className="bg-card border border-border rounded-xl p-5 space-y-4"
+          className="bg-card border border-border rounded-xl p-6 space-y-4"
         >
           <div>
             <h2 className="font-semibold text-foreground">Security policy</h2>
-            <p className="text-sm text-muted-foreground mt-0.5">
+            <p className="text-sm text-muted-foreground mt-1">
               Passkey requirements (enforced via FIDO MDS3 attestation at registration) and an
               optional IP allowlist for organization access.
             </p>
@@ -298,7 +298,7 @@ export default function OrgSettingsPage() {
               onChange={(e) =>
                 setPolicy({ ...policy, requirePasskeyAttestation: e.target.checked })
               }
-              className="mt-0.5 h-4 w-4 accent-primary"
+              className="mt-1 h-4 w-4 accent-primary"
             />
             <span className="text-sm text-foreground">
               Require attestation
@@ -318,7 +318,7 @@ export default function OrgSettingsPage() {
               type="checkbox"
               checked={policy.requireHardwarePasskey}
               onChange={(e) => setPolicy({ ...policy, requireHardwarePasskey: e.target.checked })}
-              className="mt-0.5 h-4 w-4 accent-primary"
+              className="mt-1 h-4 w-4 accent-primary"
             />
             <span className="text-sm text-foreground">
               Hardware keys only
@@ -365,7 +365,7 @@ export default function OrgSettingsPage() {
               placeholder="203.0.113.0/24, 198.51.100.10"
               className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm font-mono text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-ring"
             />
-            <p className="text-xs text-amber-500/90">
+            <p className="text-xs text-warning-subtle-foreground">
               ⚠ When set, all access to this organization is restricted to these ranges — including
               this settings page. Make sure your current IP is included.
             </p>
@@ -462,7 +462,7 @@ export default function OrgSettingsPage() {
       {myRole === "owner" && nonOwnerMembers.length > 0 && (
         <form
           onSubmit={handleTransfer}
-          className="bg-card border border-border rounded-xl p-5 space-y-4"
+          className="bg-card border border-border rounded-xl p-6 space-y-4"
         >
           <h2 className="font-semibold text-foreground">Transfer ownership</h2>
           <p className="text-sm text-muted-foreground">
@@ -486,7 +486,7 @@ export default function OrgSettingsPage() {
           <Button
             type="submit"
             disabled={!transferTo || transferMutation.isPending}
-            className="bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-foreground text-sm px-4 py-2 rounded-lg transition-colors"
+            className="min-h-11 rounded-lg bg-warning-subtle px-4 py-2 text-sm font-medium text-warning-subtle-foreground transition-colors hover:bg-warning-subtle/80 disabled:opacity-50"
           >
             {transferMutation.isPending ? "Transferring…" : "Transfer ownership"}
           </Button>
@@ -494,35 +494,32 @@ export default function OrgSettingsPage() {
       )}
 
       {myRole === "owner" && (
-        <form
-          onSubmit={handleDelete}
-          className="bg-card border border-red-900 rounded-xl p-5 space-y-4"
+        <DangerZone
+          title="Delete organization"
+          description="This is irreversible. All members and invites will be removed."
         >
-          <h2 className="font-semibold text-red-400">Delete organization</h2>
-          <p className="text-sm text-muted-foreground">
-            This is irreversible. All members and invites will be removed. Type the organization
-            name to confirm.
-          </p>
-          <div className="space-y-1">
-            <label htmlFor="page-f12" className="text-xs text-muted-foreground">
-              Type <span className="font-mono text-foreground">{org.name}</span> to confirm
-            </label>
-            <Input
-              id="page-f12"
-              value={deleteConfirm}
-              onChange={(e) => setDeleteConfirm(e.target.value)}
-              placeholder={org.name}
-              className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-red-500"
-            />
-          </div>
-          <Button
-            type="submit"
-            disabled={deleteConfirm !== org.name || deleteMutation.isPending}
-            className="bg-red-700 hover:bg-red-600 disabled:opacity-50 text-foreground text-sm px-4 py-2 rounded-lg transition-colors"
-          >
-            {deleteMutation.isPending ? "Deleting…" : "Delete organization"}
-          </Button>
-        </form>
+          <form onSubmit={handleDelete} className="space-y-4">
+            <div className="space-y-1">
+              <label htmlFor="page-f12" className="text-xs text-muted-foreground">
+                Type <span className="font-mono text-foreground">{org.name}</span> to confirm
+              </label>
+              <Input
+                id="page-f12"
+                value={deleteConfirm}
+                onChange={(e) => setDeleteConfirm(e.target.value)}
+                placeholder={org.name}
+                className="border-border bg-muted focus:border-destructive focus:outline-none"
+              />
+            </div>
+            <Button
+              type="submit"
+              variant="destructive"
+              disabled={deleteConfirm !== org.name || deleteMutation.isPending}
+            >
+              {deleteMutation.isPending ? "Deleting…" : "Delete organization"}
+            </Button>
+          </form>
+        </DangerZone>
       )}
     </div>
   );

@@ -28,7 +28,6 @@ export interface RingProps {
   index: number;
   color?: string;
   animate?: boolean;
-  showGlow?: boolean;
   lineCap?: RingLineCap;
 }
 
@@ -66,7 +65,6 @@ export const Ring = memo(function Ring({
   index,
   color: colorProp,
   animate = true,
-  showGlow = true,
   lineCap = "round",
 }: RingProps) {
   const {
@@ -151,7 +149,6 @@ export const Ring = memo(function Ring({
   const groupStyle = {
     cursor: "pointer" as const,
     transformOrigin: "0px 0px",
-    filter: showGlow && isHovered ? `drop-shadow(0 0 12px ${color})` : "none",
   };
 
   if (enterDone) {

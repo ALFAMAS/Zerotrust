@@ -1,8 +1,10 @@
 "use client";
+
 import { CalendarClock, Clock, Globe, Laptop, MapPin, ShieldCheck } from "lucide-react";
 import { ServerStateStatus } from "@/components/ServerStateStatus";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState, ErrorState, SkeletonList } from "@/components/ui/States";
 import {
   useRevokeAllUserSessionsMutation,
@@ -41,9 +43,7 @@ export default function SessionsPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
-          Active Sessions
-        </h1>
+        <PageHeader title={<>Active Sessions</>} />
         <Button
           variant="outline"
           onClick={() => {
@@ -57,7 +57,7 @@ export default function SessionsPage() {
             }
           }}
           disabled={revokeAllMutation.isPending}
-          className="text-sm text-red-400 hover:text-red-300 border border-red-800 px-3 py-1.5 rounded-lg hover:bg-red-950 transition-colors"
+          className="min-h-11 rounded-lg border border-destructive px-3 py-2 text-sm text-danger-subtle-foreground transition-colors hover:bg-danger-subtle hover:text-danger-subtle-foreground"
         >
           Revoke All
         </Button>
@@ -81,7 +81,7 @@ export default function SessionsPage() {
               <Card key={session.id}>
                 <CardContent className="flex items-start justify-between gap-4 p-4">
                   <div className="flex items-start gap-3 min-w-0">
-                    <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border bg-background text-primary">
+                    <span className="mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border bg-background text-primary">
                       <Laptop className="h-4 w-4" />
                     </span>
                     <div className="min-w-0">
@@ -90,39 +90,39 @@ export default function SessionsPage() {
                           {fp?.browser || "Unknown browser"} on {fp?.os || "Unknown OS"}
                         </span>
                         {session.isCurrent && (
-                          <span className="rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary">
+                          <span className="rounded-full bg-primary/15 px-2 py-1 text-xs font-semibold uppercase tracking-wide text-primary">
                             This device
                           </span>
                         )}
                         {fp?.isTrusted && (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-400">
+                          <span className="inline-flex items-center gap-1 rounded-full bg-success/15 px-2 py-1 text-xs font-semibold uppercase tracking-wide text-success-subtle-foreground">
                             <ShieldCheck className="h-3 w-3" /> Trusted
                           </span>
                         )}
                       </div>
 
-                      <dl className="mt-1.5 grid grid-cols-1 gap-x-6 gap-y-1 text-xs text-muted-foreground sm:grid-cols-2">
-                        <div className="flex items-center gap-1.5">
+                      <dl className="mt-2 grid grid-cols-1 gap-x-6 gap-y-1 text-xs text-muted-foreground sm:grid-cols-2">
+                        <div className="flex items-center gap-2">
                           <Globe className="h-3 w-3 shrink-0" />
                           <span className="font-mono">{session.ipAddress || "Unknown IP"}</span>
                           {session.country && <span>· {session.country}</span>}
                         </div>
                         {fp?.platform && (
-                          <div className="flex items-center gap-1.5">
+                          <div className="flex items-center gap-2">
                             <MapPin className="h-3 w-3 shrink-0" />
                             <span>{fp.platform}</span>
                           </div>
                         )}
-                        <div className="flex items-center gap-1.5">
+                        <div className="flex items-center gap-2">
                           <Clock className="h-3 w-3 shrink-0" />
                           <span>Last active {fmt(session.lastActivityAt)}</span>
                         </div>
-                        <div className="flex items-center gap-1.5">
+                        <div className="flex items-center gap-2">
                           <CalendarClock className="h-3 w-3 shrink-0" />
                           <span>Signed in {fmt(session.createdAt)}</span>
                         </div>
                         {session.expiresAt && (
-                          <div className="flex items-center gap-1.5">
+                          <div className="flex items-center gap-2">
                             <CalendarClock className="h-3 w-3 shrink-0" />
                             <span>Expires {fmt(session.expiresAt)}</span>
                           </div>
@@ -131,7 +131,7 @@ export default function SessionsPage() {
 
                       {session.userAgent && (
                         <p
-                          className="mt-1.5 truncate text-[11px] text-muted-foreground/70"
+                          className="mt-2 truncate text-xs text-muted-foreground/70"
                           title={session.userAgent}
                         >
                           {session.userAgent}
@@ -144,7 +144,7 @@ export default function SessionsPage() {
                       variant="outline"
                       onClick={() => revoke(session.id)}
                       disabled={revokeMutation.isPending}
-                      className="shrink-0 text-xs text-red-400 hover:text-red-300 border border-red-800 px-2.5 py-1 rounded-lg hover:bg-red-950 transition-colors"
+                      className="min-h-11 shrink-0 rounded-lg border border-destructive px-3 py-2 text-xs text-danger-subtle-foreground transition-colors hover:bg-danger-subtle hover:text-danger-subtle-foreground"
                     >
                       Revoke
                     </Button>

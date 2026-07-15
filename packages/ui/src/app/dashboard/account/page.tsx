@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PageHeader } from "@/components/ui/page-header";
+import { DangerZone } from "@/components/ui/page-patterns";
 import {
   useCancelAccountDeletionMutation,
   useGdprExportMutation,
@@ -65,12 +67,9 @@ export default function AccountPage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto space-y-10 p-6">
+    <div className="max-w-2xl mx-auto space-y-8 p-6">
       <div>
-        <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
-          Account
-        </h1>
-        <p className="mt-1 text-sm text-muted-foreground">Manage your data and account status</p>
+        <PageHeader title={<>Account</>} description={<>Manage your data and account status</>} />
       </div>
 
       <Card>
@@ -88,18 +87,18 @@ export default function AccountPage() {
         </CardContent>
       </Card>
 
-      <Card className="border-red-900/50">
-        <CardHeader>
-          <CardTitle className="text-red-400">Delete account</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
+      <DangerZone
+        title="Delete account"
+        description="Schedule permanent removal of your account and associated data."
+      >
+        <div className="space-y-4">
           {deleteStatus?.scheduled ? (
             <div className="space-y-3">
-              <div className="rounded-lg bg-red-950/50 border border-red-800 p-4 text-sm text-red-300">
+              <div className="rounded-lg border border-destructive bg-danger-subtle p-4 text-sm text-danger-subtle-foreground">
                 <p className="font-medium">Account deletion scheduled</p>
-                <p className="mt-1 text-red-400">
+                <p className="mt-1 text-danger-subtle-foreground">
                   Your account and all associated data will be permanently deleted on{" "}
-                  <span className="font-mono text-red-300">
+                  <span className="font-mono text-danger-subtle-foreground">
                     {new Date(deleteStatus.scheduledFor!).toLocaleDateString(undefined, {
                       year: "numeric",
                       month: "long",
@@ -125,14 +124,16 @@ export default function AccountPage() {
               </p>
 
               {deleteStatus?.error && (
-                <p className="text-sm text-red-400 bg-red-950/40 border border-red-800 rounded-lg px-3 py-2">
+                <p className="rounded-lg border border-destructive bg-danger-subtle px-3 py-2 text-sm text-danger-subtle-foreground">
                   {deleteStatus.error}
                 </p>
               )}
 
               <div className="space-y-3">
                 <Label htmlFor="account-delete-confirm">
-                  Type <span className="font-mono font-bold text-red-400">DELETE</span> to confirm
+                  Type{" "}
+                  <span className="font-mono font-bold text-danger-subtle-foreground">DELETE</span>{" "}
+                  to confirm
                 </Label>
                 <Input
                   id="account-delete-confirm"
@@ -140,7 +141,7 @@ export default function AccountPage() {
                   value={deleteConfirm}
                   onChange={(e) => setDeleteConfirm(e.target.value)}
                   placeholder="DELETE"
-                  className="focus-visible:ring-red-500"
+                  className="focus-visible:ring-destructive"
                 />
                 <Button
                   variant="destructive"
@@ -152,8 +153,8 @@ export default function AccountPage() {
               </div>
             </>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </DangerZone>
     </div>
   );
 }

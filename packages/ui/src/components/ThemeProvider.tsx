@@ -52,11 +52,11 @@ type ThemeProviderProps = {
 
 export function ThemeProvider({
   children,
-  defaultTheme = "dark",
+  defaultTheme = "light",
   enableSystem = true,
 }: ThemeProviderProps) {
   const [theme, setThemeState] = useState(defaultTheme);
-  const [systemTheme, setSystemTheme] = useState<"dark" | "light">("dark");
+  const [systemTheme, setSystemTheme] = useState<"dark" | "light">("light");
 
   useEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEY);

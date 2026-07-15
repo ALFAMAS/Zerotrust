@@ -6,6 +6,7 @@ import { ServerStateStatus } from "@/components/ServerStateStatus";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { PageHeader } from "@/components/ui/page-header";
 import { ErrorState } from "@/components/ui/States";
 import {
   Select,
@@ -72,12 +73,12 @@ export default function AdminJitGrantsPage() {
       <div className="flex items-center gap-3">
         <Shield className="h-6 w-6 text-primary" />
         <div>
-          <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
-            JIT privilege grants
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            System-wide just-in-time access grants (distinct from cross-tenant JIT requests).
-          </p>
+          <PageHeader
+            title={<>JIT privilege grants</>}
+            description={
+              <>System-wide just-in-time access grants (distinct from cross-tenant JIT requests).</>
+            }
+          />
         </div>
       </div>
 
@@ -133,7 +134,7 @@ export default function AdminJitGrantsPage() {
                             size="sm"
                             onClick={() => void approve(g.id)}
                             disabled={isActing(g.id)}
-                            className="gap-1 bg-green-600 hover:bg-green-500"
+                            className="gap-1 bg-success-subtle text-success-subtle-foreground hover:bg-success-subtle/80"
                           >
                             <Check className="h-3.5 w-3.5" /> Approve
                           </Button>

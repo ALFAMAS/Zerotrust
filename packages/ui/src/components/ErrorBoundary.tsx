@@ -35,14 +35,16 @@ export default class ErrorBoundary extends React.Component<Props, State> {
     if (this.state.hasError) {
       if (this.props.fallback) return this.props.fallback;
       return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-950 px-4">
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-8 max-w-md w-full text-center">
-            <h2 className="text-xl font-bold text-white mb-3">Something went wrong</h2>
-            <p className="text-gray-400 text-sm mb-6">
+        <div className="flex min-h-screen items-center justify-center bg-background px-4 text-foreground">
+          <div className="w-full max-w-md rounded-xl border border-border bg-surface p-8 text-center">
+            <h2 className="mb-3 text-xl font-semibold">Something went wrong</h2>
+            <p className="mb-6 text-sm text-muted-foreground">
               An unexpected error occurred. The team has been notified.
             </p>
             {this.state.eventId && (
-              <p className="text-xs text-gray-600 mb-4 font-mono">Ref: {this.state.eventId}</p>
+              <p className="mb-4 font-mono text-xs text-muted-foreground">
+                Ref: {this.state.eventId}
+              </p>
             )}
             <Button type="button" onClick={() => this.setState({ hasError: false, eventId: null })}>
               Try again

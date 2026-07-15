@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { PageHeader } from "@/components/ui/page-header";
 import { useSearchQuery } from "@/lib/server-state/search";
 import type { SearchHitType } from "@/lib/server-state/types";
 
@@ -49,12 +50,14 @@ export default function SearchPage() {
 
   return (
     <div className="max-w-2xl">
-      <h1 className="mb-1 flex items-center gap-2 font-display text-2xl font-semibold tracking-tight text-foreground">
-        <SearchIcon className="h-6 w-6 text-primary" aria-hidden="true" /> Search
-      </h1>
-      <p className="mb-6 text-sm text-muted-foreground">
-        Full-text search across users, organizations, notes, and support tickets.
-      </p>
+      <PageHeader
+        title={
+          <>
+            <SearchIcon className="h-6 w-6 text-primary" aria-hidden="true" /> Search
+          </>
+        }
+        description={<>Full-text search across users, organizations, notes, and support tickets.</>}
+      />
 
       <div className="relative mb-4">
         <SearchIcon
@@ -65,7 +68,7 @@ export default function SearchPage() {
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder="Search users, orgs, notes, tickets…"
-          className="h-10 w-full rounded-lg border-input bg-muted/30 pl-9 shadow-sm transition-colors focus-visible:bg-background"
+          className="h-10 w-full rounded-lg border-input bg-muted/30 pl-8 shadow-sm transition-colors focus-visible:bg-background"
           aria-label="Search query"
         />
       </div>
@@ -114,7 +117,7 @@ export default function SearchPage() {
               <li key={`${hit.type}-${hit.id}`}>
                 <Card>
                   <CardContent className="flex items-start gap-3 p-4">
-                    <Icon className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
+                    <Icon className="mt-1 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
                         <span className="truncate font-medium text-foreground">{hit.title}</span>
@@ -136,7 +139,7 @@ export default function SearchPage() {
         debouncedQ.length >= 2 &&
         !searching &&
         results && (
-          <div className="py-12 text-center">
+          <div className="py-8 text-center">
             <SearchIcon
               className="mx-auto mb-3 h-9 w-9 text-muted-foreground/40"
               aria-hidden="true"

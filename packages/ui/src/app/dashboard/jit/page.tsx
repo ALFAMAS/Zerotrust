@@ -5,6 +5,7 @@ import { useState } from "react";
 import { ServerStateStatus } from "@/components/ServerStateStatus";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PageHeader } from "@/components/ui/page-header";
 import { ErrorState } from "@/components/ui/States";
 import { Textarea } from "@/components/ui/textarea";
 import { useMyJitRequestsQuery, useSubmitJitRequestMutation } from "@/lib/server-state/jit";
@@ -12,9 +13,9 @@ import type { JitRequestStatus } from "@/lib/server-state/types";
 import { useToast } from "@/lib/toast";
 
 const STATUS_STYLES: Record<JitRequestStatus, string> = {
-  pending: "border-amber-500/30 bg-amber-500/10 text-amber-400",
-  approved: "border-green-500/30 bg-green-500/10 text-green-400",
-  denied: "border-red-500/30 bg-red-500/10 text-red-400",
+  pending: "border-warning bg-warning/10 text-warning-subtle-foreground",
+  approved: "border-success bg-success/10 text-success-subtle-foreground",
+  denied: "border-destructive bg-destructive/10 text-danger-subtle-foreground",
   expired: "border-border bg-muted text-muted-foreground",
 };
 
@@ -55,21 +56,23 @@ export default function JITRequestPage() {
   return (
     <div className="max-w-3xl space-y-6">
       <div>
-        <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
-          Cross-tenant access
-        </h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Request temporary, just-in-time access to a resource in another tenant. Grants require
-          admin approval and expire automatically (max 1 hour).
-        </p>
+        <PageHeader
+          title={<>Cross-tenant access</>}
+          description={
+            <>
+              Request temporary, just-in-time access to a resource in another tenant. Grants require
+              admin approval and expire automatically (max 1 hour).
+            </>
+          }
+        />
       </div>
 
       <form
         onSubmit={handleSubmit}
-        className="space-y-4 rounded-xl border border-border bg-card p-5"
+        className="space-y-4 rounded-xl border border-border bg-card p-6"
       >
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div className="space-y-1.5">
+          <div className="space-y-2">
             <label htmlFor="page-f0" className="text-sm font-medium text-foreground">
               Target organization ID
             </label>
@@ -82,7 +85,7 @@ export default function JITRequestPage() {
               className="w-full rounded-lg border border-border bg-muted px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none"
             />
           </div>
-          <div className="space-y-1.5">
+          <div className="space-y-2">
             <label htmlFor="page-f1" className="text-sm font-medium text-foreground">
               Resource
             </label>
@@ -97,7 +100,7 @@ export default function JITRequestPage() {
           </div>
         </div>
 
-        <div className="space-y-1.5">
+        <div className="space-y-2">
           <label htmlFor="page-f2" className="text-sm font-medium text-foreground">
             Justification
           </label>
@@ -113,7 +116,7 @@ export default function JITRequestPage() {
         </div>
 
         <div className="flex items-end justify-between gap-4">
-          <div className="space-y-1.5">
+          <div className="space-y-2">
             <label htmlFor="page-f3" className="text-sm font-medium text-foreground">
               Duration (minutes)
             </label>
@@ -135,7 +138,7 @@ export default function JITRequestPage() {
           <Button
             type="submit"
             disabled={submitMutation.isPending}
-            className="flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
+            className="flex items-center gap-2 rounded-lg bg-primary px-6 py-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
           >
             {submitMutation.isPending ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -187,13 +190,13 @@ export default function JITRequestPage() {
                     {r.justification}
                   </p>
                   {r.status === "approved" && r.expiresAt && (
-                    <p className="mt-1 flex items-center gap-1 text-xs text-green-400">
+                    <p className="mt-1 flex items-center gap-1 text-xs text-success-subtle-foreground">
                       <Clock className="h-3 w-3" /> expires {new Date(r.expiresAt).toLocaleString()}
                     </p>
                   )}
                 </div>
                 <span
-                  className={`shrink-0 rounded-full border px-2.5 py-1 text-xs font-medium capitalize ${STATUS_STYLES[r.status]}`}
+                  className={`shrink-0 rounded-full border px-3 py-1 text-xs font-medium capitalize ${STATUS_STYLES[r.status]}`}
                 >
                   {r.status}
                 </span>

@@ -4,7 +4,8 @@ import Link from "next/link";
 import { ServerStateStatus } from "@/components/ServerStateStatus";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { PageHeader } from "@/components/ui/page-header";
+import { DataRegion } from "@/components/ui/page-patterns";
 import { ErrorState } from "@/components/ui/States";
 import {
   Table,
@@ -48,12 +49,12 @@ export default function AccessReviewsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
-            Access Reviews
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Periodic review of privileged (non-default) role grants — SOC 2 CC6 evidence.
-          </p>
+          <PageHeader
+            title={<>Access Reviews</>}
+            description={
+              <>Periodic review of privileged (non-default) role grants — SOC 2 CC6 evidence.</>
+            }
+          />
         </div>
         <div className="flex items-center gap-3">
           <ServerStateStatus query={reviewsQuery} />
@@ -69,73 +70,76 @@ export default function AccessReviewsPage() {
           retry={() => reviewsQuery.refetch()}
         />
       ) : (
-        <Card>
-          <CardContent className="pt-6">
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
+        <DataRegion
+          title="Review history"
+          description="Privileged access snapshots and their review progress."
+        >
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Review</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Progress</TableHead>
+                  <TableHead>Started by</TableHead>
+                  <TableHead>Created</TableHead>
+                  <TableHead>Completed</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {loading && (
                   <TableRow>
-                    <TableHead>Review</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Progress</TableHead>
-                    <TableHead>Started by</TableHead>
-                    <TableHead>Created</TableHead>
-                    <TableHead>Completed</TableHead>
+                    <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
+                      Loading…
+                    </TableCell>
                   </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {loading && (
-                    <TableRow>
-                      <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
-                        Loading…
+                )}
+                {!loading && reviews.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
+                      No access reviews yet. Start one to snapshot current privileged grants.
+                    </TableCell>
+                  </TableRow>
+                )}
+                {!loading &&
+                  reviews.map((r) => (
+                    <TableRow key={r.id}>
+                      <TableCell>
+                        <Link
+                          href={`/admin/access-reviews/${r.id}`}
+                          className="font-medium text-primary hover:underline"
+                        >
+                          {r.title}
+                        </Link>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={r.status === "completed" ? "success" : "warning"}>
+                          {r.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-xs text-muted-foreground">
+                        {(r.itemCount ?? 0) - (r.pendingCount ?? 0)}/{r.itemCount ?? 0} decided
+                        {(r.pendingCount ?? 0) > 0 && (
+                          <span className="ml-1 text-warning-subtle-foreground">
+                            ({r.pendingCount} pending)
+                          </span>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-xs text-muted-foreground">
+                        {r.createdByEmail ?? "—"}
+                      </TableCell>
+                      <TableCell className="text-xs text-muted-foreground">
+                        {fmt(r.createdAt)}
+                      </TableCell>
+                      <TableCell className="text-xs text-muted-foreground">
+                        {fmt(r.completedAt)}
                       </TableCell>
                     </TableRow>
-                  )}
-                  {!loading && reviews.length === 0 && (
-                    <TableRow>
-                      <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
-                        No access reviews yet. Start one to snapshot current privileged grants.
-                      </TableCell>
-                    </TableRow>
-                  )}
-                  {!loading &&
-                    reviews.map((r) => (
-                      <TableRow key={r.id}>
-                        <TableCell>
-                          <Link
-                            href={`/admin/access-reviews/${r.id}`}
-                            className="font-medium text-primary hover:underline"
-                          >
-                            {r.title}
-                          </Link>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant={r.status === "completed" ? "success" : "warning"}>
-                            {r.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-xs text-muted-foreground">
-                          {(r.itemCount ?? 0) - (r.pendingCount ?? 0)}/{r.itemCount ?? 0} decided
-                          {(r.pendingCount ?? 0) > 0 && (
-                            <span className="ml-1 text-amber-500">({r.pendingCount} pending)</span>
-                          )}
-                        </TableCell>
-                        <TableCell className="text-xs text-muted-foreground">
-                          {r.createdByEmail ?? "—"}
-                        </TableCell>
-                        <TableCell className="text-xs text-muted-foreground">
-                          {fmt(r.createdAt)}
-                        </TableCell>
-                        <TableCell className="text-xs text-muted-foreground">
-                          {fmt(r.completedAt)}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                </TableBody>
-              </Table>
-            </div>
-          </CardContent>
-        </Card>
+                  ))}
+              </TableBody>
+            </Table>
+          </div>
+        </DataRegion>
       )}
     </div>
   );

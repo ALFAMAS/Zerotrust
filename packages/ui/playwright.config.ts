@@ -4,6 +4,10 @@ import { defineConfig, devices } from "@playwright/test";
 // Repo root (two levels up from packages/ui), so the webServer can launch the
 // full `bun dev` stack (API on :1337 + UI on :3000).
 const repoRoot = path.resolve(__dirname, "..", "..");
+const reuseExistingServer = process.env.E2E_REUSE_SERVER === "true";
+const isolatedStack = process.env.E2E_ISOLATED_STACK === "true";
+const apiUrl = isolatedStack ? "http://localhost:1437" : "http://localhost:1337";
+const appUrl = isolatedStack ? "http://localhost:3100" : "http://localhost:3000";
 
 export default defineConfig({
   testDir: "./e2e",
@@ -18,7 +22,7 @@ export default defineConfig({
   reporter: process.env.CI ? "github" : "list",
 
   use: {
-    baseURL: "http://localhost:3000",
+    baseURL: appUrl,
     trace: "on-first-retry",
     screenshot: "only-on-failure",
   },
@@ -31,23 +35,41 @@ export default defineConfig({
 
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
 
-  // Boots the whole app. NEXT_PUBLIC_ZEROTRUST_URL points the UI's API client at
-  // the API on :1337 (its default is :3000, which only serves the Next.js app).
-  // HIBP_CHECK_ENABLED=false keeps registration deterministic offline (the live
-  // HaveIBeenPwned check would otherwise reject some passwords).
-  webServer: {
-    command: "bun run dev",
-    cwd: repoRoot,
-    url: "http://localhost:3000",
-    reuseExistingServer: !process.env.CI,
-    timeout: 240_000,
-    stdout: "pipe",
-    stderr: "pipe",
-    env: {
-      NODE_ENV: "development",
-      NEXT_PUBLIC_ZEROTRUST_URL: "http://localhost:1337",
-      HIBP_CHECK_ENABLED: "false",
-      RATE_LIMITING_ENABLED: "false",
+  // Launch and probe both services independently. Waiting only for Next.js can
+  // race the API during cold starts, causing the first auth flow to reach the
+  // proof-of-work endpoint before :1337 is ready.
+  webServer: [
+    {
+      command: "bun run dev:api",
+      cwd: repoRoot,
+      url: `${apiUrl}/health`,
+      reuseExistingServer,
+      timeout: 240_000,
+      stdout: "pipe",
+      stderr: "pipe",
+      env: {
+        NODE_ENV: "development",
+        HIBP_CHECK_ENABLED: "false",
+        RATE_LIMITING_ENABLED: "false",
+        PORT: isolatedStack ? "1437" : "1337",
+        APP_URL: appUrl,
+        CORS_ALLOWED_ORIGINS: appUrl,
+      },
     },
-  },
+    {
+      command: isolatedStack ? "bunx next dev -p 3100" : "bun run dev:ui",
+      cwd: isolatedStack ? path.resolve(repoRoot, "packages", "ui") : repoRoot,
+      url: appUrl,
+      reuseExistingServer,
+      timeout: 240_000,
+      stdout: "pipe",
+      stderr: "pipe",
+      env: {
+        NODE_ENV: "development",
+        NEXT_PUBLIC_ZEROTRUST_URL: apiUrl,
+        NEXT_PUBLIC_APP_URL: appUrl,
+        ...(isolatedStack ? { ZEROTRUST_NEXT_DIST_DIR: ".next-e2e" } : {}),
+      },
+    },
+  ],
 });

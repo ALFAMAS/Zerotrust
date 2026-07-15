@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PageHeader } from "@/components/ui/page-header";
+import { FilterBar } from "@/components/ui/page-patterns";
 import { ErrorState, SkeletonList } from "@/components/ui/States";
 import {
   Table,
@@ -42,12 +44,10 @@ export default function AdminWebhookDeliveriesPage() {
       <div className="flex items-center gap-3">
         <Webhook className="h-6 w-6 text-primary" />
         <div>
-          <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
-            Webhook delivery log
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Admin-wide delivery attempts for any webhook endpoint (cross-tenant).
-          </p>
+          <PageHeader
+            title={<>Webhook delivery log</>}
+            description={<>Admin-wide delivery attempts for any webhook endpoint (cross-tenant).</>}
+          />
         </div>
       </div>
 
@@ -59,8 +59,8 @@ export default function AdminWebhookDeliveriesPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleLookup} className="flex flex-wrap items-end gap-4">
-            <div className="space-y-1.5 flex-1 min-w-[200px]">
+          <FilterBar onSubmit={handleLookup}>
+            <div className="space-y-2 flex-1 min-w-[200px]">
               <Label htmlFor="webhookId">Webhook ID</Label>
               <Input
                 id="webhookId"
@@ -71,7 +71,7 @@ export default function AdminWebhookDeliveriesPage() {
               />
             </div>
             <Button type="submit">Load deliveries</Button>
-          </form>
+          </FilterBar>
         </CardContent>
       </Card>
 

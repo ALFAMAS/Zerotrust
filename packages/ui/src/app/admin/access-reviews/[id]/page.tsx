@@ -5,6 +5,7 @@ import { ServerStateStatus } from "@/components/ServerStateStatus";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { PageHeader } from "@/components/ui/page-header";
 import { ErrorState } from "@/components/ui/States";
 import {
   Table,
@@ -91,7 +92,7 @@ export default function AccessReviewDetailPage() {
   }
 
   if (!review) {
-    return <div className="py-16 text-center text-muted-foreground">Review not found.</div>;
+    return <div className="py-8 text-center text-muted-foreground">Review not found.</div>;
   }
 
   const pending = review.pendingCount ?? items.filter((i) => i.decision === "pending").length;
@@ -109,16 +110,22 @@ export default function AccessReviewDetailPage() {
           >
             ← Back
           </Button>
-          <h1 className="mt-2 flex items-center gap-3 font-display text-2xl font-semibold tracking-tight text-foreground">
-            {review.title}
-            <Badge variant={review.status === "completed" ? "success" : "warning"}>
-              {review.status}
-            </Badge>
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Started by {review.createdByEmail ?? "—"} on {fmt(review.createdAt)}
-            {review.completedAt && ` · completed ${fmt(review.completedAt)}`}
-          </p>
+          <PageHeader
+            title={
+              <>
+                {review.title}
+                <Badge variant={review.status === "completed" ? "success" : "warning"}>
+                  {review.status}
+                </Badge>
+              </>
+            }
+            description={
+              <>
+                Started by {review.createdByEmail ?? "—"} on {fmt(review.createdAt)}
+                {review.completedAt && ` · completed ${fmt(review.completedAt)}`}
+              </>
+            }
+          />
         </div>
         <div className="flex items-center gap-3">
           <ServerStateStatus query={detailQuery} />
@@ -197,7 +204,7 @@ export default function AccessReviewDetailPage() {
                             type="button"
                             variant="ghost"
                             size="sm"
-                            className="text-emerald-600 hover:text-emerald-600"
+                            className="text-success-subtle-foreground hover:text-success-subtle-foreground"
                             onClick={() => decide(item, "approved")}
                             disabled={busyId === item.id}
                           >
@@ -207,7 +214,7 @@ export default function AccessReviewDetailPage() {
                             type="button"
                             variant="ghost"
                             size="sm"
-                            className="text-amber-600 hover:text-amber-600"
+                            className="text-warning-subtle-foreground hover:text-warning-subtle-foreground"
                             onClick={() => decide(item, "flagged")}
                             disabled={busyId === item.id}
                           >

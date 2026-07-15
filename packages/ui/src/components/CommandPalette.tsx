@@ -204,7 +204,7 @@ export function CommandPalette() {
       {/* Backdrop */}
       <Button
         aria-label="Close command palette"
-        className="fixed inset-0 bg-background/80 backdrop-blur-sm"
+        className="fixed inset-0 bg-background/80 "
         onClick={() => {
           setOpen(false);
           setQuery("");
@@ -216,7 +216,7 @@ export function CommandPalette() {
         role="dialog"
         aria-modal="true"
         aria-label="Command palette"
-        className="relative w-full max-w-lg overflow-hidden rounded-xl border border-border bg-popover shadow-2xl"
+        className="relative w-full max-w-lg overflow-hidden rounded-xl border border-border bg-popover shadow-lg"
       >
         {/* Search input */}
         <div className="flex items-center gap-3 border-b border-border bg-muted/20 px-4 py-3">
@@ -230,7 +230,7 @@ export function CommandPalette() {
             className="h-9 flex-1 border-0 bg-transparent px-0 py-0 text-base shadow-none placeholder:text-muted-foreground focus-visible:ring-0 md:text-sm"
             aria-label="Search"
           />
-          <kbd className="hidden shrink-0 rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground sm:inline">
+          <kbd className="hidden shrink-0 rounded border border-border bg-muted px-2 py-1 text-xs font-medium text-muted-foreground sm:inline">
             ESC
           </kbd>
         </div>
@@ -254,7 +254,7 @@ export function CommandPalette() {
                   onMouseEnter={() => setSelectedIndex(i)}
                   variant="ghost"
                   className={cn(
-                    "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors",
+                    "flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left transition-colors",
                     i === selectedIndex
                       ? "bg-accent text-accent-foreground"
                       : "text-foreground hover:bg-accent hover:text-accent-foreground"
@@ -278,7 +278,7 @@ export function CommandPalette() {
                       </div>
                     )}
                   </div>
-                  <span className="shrink-0 rounded bg-muted px-1.5 py-0.5 text-[10px] font-medium uppercase text-muted-foreground">
+                  <span className="shrink-0 rounded bg-muted px-2 py-1 text-xs font-medium uppercase text-muted-foreground">
                     {result.type}
                   </span>
                 </Button>
@@ -295,16 +295,16 @@ export function CommandPalette() {
 
         {/* Footer hint */}
         <div className="flex items-center gap-4 border-t border-border px-4 py-2">
-          <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
-            <kbd className="rounded border border-border bg-muted px-1 text-[10px]">↑↓</kbd>
+          <span className="flex items-center gap-1 text-xs text-muted-foreground">
+            <kbd className="rounded border border-border bg-muted px-1 text-xs">↑↓</kbd>
             navigate
           </span>
-          <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
-            <kbd className="rounded border border-border bg-muted px-1 text-[10px]">↵</kbd>
+          <span className="flex items-center gap-1 text-xs text-muted-foreground">
+            <kbd className="rounded border border-border bg-muted px-1 text-xs">↵</kbd>
             open
           </span>
-          <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
-            <kbd className="rounded border border-border bg-muted px-1 text-[10px]">esc</kbd>
+          <span className="flex items-center gap-1 text-xs text-muted-foreground">
+            <kbd className="rounded border border-border bg-muted px-1 text-xs">esc</kbd>
             close
           </span>
         </div>

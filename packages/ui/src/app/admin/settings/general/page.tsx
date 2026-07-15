@@ -1,11 +1,13 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { ServerStateStatus } from "@/components/ServerStateStatus";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PageHeader } from "@/components/ui/page-header";
 import { ErrorState, LoadingSpinner } from "@/components/ui/States";
 import { useToast } from "@/context/ToastContext";
 import {
@@ -58,10 +60,10 @@ export default function GeneralSettingsPage() {
   return (
     <div className="max-w-2xl space-y-6">
       <div>
-        <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
-          General Settings
-        </h1>
-        <p className="mt-1 text-sm text-muted-foreground">Branding and contact information</p>
+        <PageHeader
+          title={<>General Settings</>}
+          description={<>Branding and contact information</>}
+        />
       </div>
 
       <ServerStateStatus
@@ -74,7 +76,7 @@ export default function GeneralSettingsPage() {
 
       <Card>
         <form onSubmit={handleSave}>
-          <CardContent className="space-y-5 pt-6">
+          <CardContent className="space-y-6 pt-6">
             <div className="space-y-2">
               <Label htmlFor="general-app-name">App Name</Label>
               <Input
@@ -131,10 +133,12 @@ export default function GeneralSettingsPage() {
               {form.logoUrl && (
                 <div className="mt-3 flex items-center gap-3">
                   <div className="flex items-center justify-center rounded-lg border border-border bg-muted p-3">
-                    {/* biome-ignore lint/performance/noImgElement: operator-supplied logo URL from any host; next/image needs known domains/dimensions */}
-                    <img
+                    <Image
                       src={form.logoUrl}
                       alt="Logo preview"
+                      width={128}
+                      height={48}
+                      unoptimized
                       className="max-h-12 max-w-32 object-contain"
                       onError={(e) => {
                         (e.target as HTMLImageElement).style.display = "none";

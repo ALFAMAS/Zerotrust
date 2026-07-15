@@ -109,7 +109,7 @@ export default function SetupChecklist({ user }: { user: AuthMe | null }) {
         {completed.length}/{total} steps completed
       </p>
 
-      <div className="mb-5 h-2 rounded-full bg-muted">
+      <div className="mb-6 h-2 rounded-full bg-muted">
         <div className="h-2 rounded-full bg-primary transition-all" style={{ width: `${pct}%` }} />
       </div>
 
@@ -120,7 +120,7 @@ export default function SetupChecklist({ user }: { user: AuthMe | null }) {
             <li key={item.id}>
               {done ? (
                 <div className="flex items-center gap-3 text-sm text-muted-foreground line-through">
-                  <Check className="h-4 w-4 flex-shrink-0 text-green-500" />
+                  <Check className="h-4 w-4 flex-shrink-0 text-success-subtle-foreground" />
                   {item.label}
                 </div>
               ) : (

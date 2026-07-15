@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { mockAuthenticatedShell, mockBillingApis } from "./fixtures/apiMocks";
+import { E2E_API_URL } from "./fixtures/urls";
 
 test.describe("billing page flows (mocked Stripe)", () => {
   test.beforeEach(async ({ page }) => {
@@ -25,7 +26,7 @@ test.describe("billing page flows (mocked Stripe)", () => {
 
   test("upgrade triggers checkout API call", async ({ page }) => {
     let checkoutCalled = false;
-    await page.route("http://localhost:1337/billing/checkout", async (route) => {
+    await page.route(`${E2E_API_URL}/billing/checkout`, async (route) => {
       checkoutCalled = true;
       await route.fulfill({ json: { url: "https://checkout.stripe.com/e2e-session" } });
     });

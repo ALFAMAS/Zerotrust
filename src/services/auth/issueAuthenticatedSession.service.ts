@@ -3,7 +3,7 @@ import type { Context } from "hono";
 import { getConfig } from "../../config";
 import { createAuthenticatedSession } from "../../db/repositories/authSessions.repository";
 import { enforceMaxConcurrentDevices } from "../../middleware/sessionControl";
-import { setRefreshTokenCookie } from "../../shared/authCookies";
+import { includeLoadTestRefreshToken, setRefreshTokenCookie } from "../../shared/authCookies";
 import { getClientIp } from "../../shared/clientIp";
 import type { HonoEnv } from "../../shared/types";
 import { FingerprintService } from "./fingerprint.service";
@@ -98,11 +98,14 @@ export async function issueAuthenticatedSession(
   setRefreshTokenCookie(c, refreshTokenPlain, cfg.session.refreshTokenTTL);
 
   return {
-    body: {
-      accessToken,
-      expiresIn: cfg.session.defaultTTL,
-      tokenType: "Bearer",
-    },
+    body: includeLoadTestRefreshToken(
+      {
+        accessToken,
+        expiresIn: cfg.session.defaultTTL,
+        tokenType: "Bearer",
+      },
+      refreshTokenPlain
+    ),
     refreshTokenPlain,
     sessionId: session.id,
   };

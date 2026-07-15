@@ -6,6 +6,7 @@ import { ServerStateStatus } from "@/components/ServerStateStatus";
 import Toggle from "@/components/Toggle";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { PageHeader } from "@/components/ui/page-header";
 import { ErrorState } from "@/components/ui/States";
 import { useToast } from "@/context/ToastContext";
 import { isPushSupported, isSubscribed, subscribeToPush, unsubscribeFromPush } from "@/lib/push";
@@ -108,12 +109,12 @@ export default function NotificationSettingsPage() {
   return (
     <div className="max-w-2xl space-y-6">
       <div>
-        <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
-          Notifications
-        </h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Choose how zerotrust reaches you about security events and account activity.
-        </p>
+        <PageHeader
+          title={<>Notifications</>}
+          description={
+            <>Choose how zerotrust reaches you about security events and account activity.</>
+          }
+        />
       </div>
 
       <ServerStateStatus
@@ -144,12 +145,12 @@ export default function NotificationSettingsPage() {
               {pushSupported ? (
                 <div className="flex items-center justify-between gap-4">
                   <div className="flex items-start gap-3">
-                    <Smartphone className="mt-0.5 h-5 w-5 flex-shrink-0 text-muted-foreground" />
+                    <Smartphone className="mt-1 h-5 w-5 flex-shrink-0 text-muted-foreground" />
                     <div>
                       <Label className="text-sm font-medium text-foreground">
                         Enable on this device
                       </Label>
-                      <p className="mt-0.5 text-xs text-muted-foreground">
+                      <p className="mt-1 text-xs text-muted-foreground">
                         Get real-time alerts even when zerotrust isn't open. Manage this per device.
                       </p>
                     </div>
@@ -176,7 +177,7 @@ export default function NotificationSettingsPage() {
                   <Label className="text-sm font-medium text-foreground">
                     Email me when I'm away
                   </Label>
-                  <p className="mt-0.5 text-xs text-muted-foreground">
+                  <p className="mt-1 text-xs text-muted-foreground">
                     If you haven't seen an important notification in-app, send it to your email too.
                   </p>
                 </div>
@@ -214,11 +215,11 @@ export default function NotificationSettingsPage() {
                   >
                     <div>
                       <Label className="text-sm font-medium text-foreground">{cat.label}</Label>
-                      <p className="mt-0.5 text-xs text-muted-foreground">{cat.desc}</p>
+                      <p className="mt-1 text-xs text-muted-foreground">{cat.desc}</p>
                     </div>
                     <div className="flex items-center gap-3">
                       {(["email", "push", "inApp"] as const).map((ch) => (
-                        <div key={ch} className="flex items-center gap-1.5">
+                        <div key={ch} className="flex items-center gap-2">
                           <Label className="text-xs capitalize text-muted-foreground">{ch}</Label>
                           <Toggle
                             checked={c[ch] !== false}

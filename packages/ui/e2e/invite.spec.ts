@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { registerAndGetUserId, uniqueEmail } from "./fixtures/auth";
 import { getInviteTokenByEmail, verifyUserEmail } from "./fixtures/db";
+import { E2E_API_URL } from "./fixtures/urls";
 
 test.describe("organization invite flow (real API)", () => {
   test.describe.configure({ mode: "serial" });
@@ -13,7 +14,7 @@ test.describe("organization invite flow (real API)", () => {
     const { token, userId } = await registerAndGetUserId(page, ownerEmail);
     await verifyUserEmail(userId);
 
-    const orgRes = await page.request.post("http://localhost:1337/orgs", {
+    const orgRes = await page.request.post(`${E2E_API_URL}/orgs`, {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
@@ -23,7 +24,7 @@ test.describe("organization invite flow (real API)", () => {
     expect(orgRes.ok()).toBeTruthy();
     const { org } = (await orgRes.json()) as { org: { id: string } };
 
-    const inviteRes = await page.request.post(`http://localhost:1337/orgs/${org.id}/invites`, {
+    const inviteRes = await page.request.post(`${E2E_API_URL}/orgs/${org.id}/invites`, {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",

@@ -11,6 +11,8 @@ file-structure guidance.
 **How to use:** Work top-to-bottom before first production traffic. Mark each row Done/Partial/Missing
 in your deploy runbook or SOC 2 evidence folder. Open backlog items live in
 [`project/todo.md`](./project/todo.md); shipped capabilities in [`project/shipped.md`](./project/shipped.md).
+The latest repository delta and current CI blockers are recorded in
+[`project/codebase-audit-2026-07-15.md`](./project/codebase-audit-2026-07-15.md).
 
 **Legend:** **P0** = ship blocker · **P1** = fix before scale · **P2** = improvement
 
@@ -74,8 +76,8 @@ Complete before pointing DNS at production. Archive signed copies in
 | ☐ | `docker-compose.yml` (API + worker + PG + Redis) | P0 | **Done** | `WORKER_MODE=true` on API service |
 | ☐ | **UI container image** | P1 | **Done** | `packages/ui/Dockerfile`; `zerotrust-ui` in `docker-compose.yml` (host :3001) |
 | ☐ | Reference architectures (VM, containers, K8s) | P1 | **Done** | `docs/reference-architecture.md` |
-| ☐ | Staging deploy workflow | P1 | **Done** | `deploy-staging.yml` chains `staging-validation.yml`; secrets/vars documented in `docs/deployment.md` § Staging secrets |
-| ☐ | Production auto-deploy | P2 | **Done** | `deploy-production.yml` (manual dispatch, production env reviewers, ops:smoke post-deploy); secrets/vars in `docs/deployment.md` § Production deploy |
+| ☐ | Staging deploy workflow | P1 | **Partial** | Workflow chains `staging-validation.yml`, but remote verification found no protected `staging` environment or repository deployment secrets/URL variables (OPS-ENV-1). |
+| ☐ | Production deploy workflow | P2 | **Partial** | Manual workflow and smoke gate exist, but remote verification found no protected `production` environment or repository deployment secrets/URL variables (OPS-ENV-1). |
 | ☐ | Postgres role separation (app vs migrator) | P1 | **Done** | `scripts/ops/setup-postgres-roles.sql`, `.env.example` |
 | ☐ | Encrypted backups + S3 | P0 | **Done** | `scripts/ops/db-backup.js`, `src/services/dbBackup.service.ts` |
 | ☐ | DR restore drill automation | P1 | **Done** | `.github/workflows/dr-restore-drill.yml` (weekly + manual) |
@@ -203,7 +205,7 @@ Complete before pointing DNS at production. Archive signed copies in
 | - | ---- | -------- | ------ | ----- |
 | ☐ | Rate limiting (Redis + fallback) | P0 | **Done** | `src/middleware/rateLimiting.ts` |
 | ☐ | Auth hot-path JOIN + Redis cache | P1 | **Done** | `src/services/auth/sessionCache.service.ts` |
-| ☐ | k6 p95 thresholds | P1 | **Done** | CI blocking (`K6_PROFILE=ci`, p95<500ms); staging strict p95<100ms via `staging-validation.yml` (PERF-1) |
+| ☐ | k6 latency/error thresholds | P1 | **Partial** | Local CI profile passed 3,710/3,710 checks with 0% refresh errors and overall p95 318.29ms/p99 870.38ms. Staging/production SLO measurement remains required before launch. |
 | ☐ | Lighthouse >90 gate | P1 | **Done** | CI runs Lighthouse against `next start` (`ci.yml` `lighthouse-ci` job) + staging validation uses `staging-validation.yml` |
 | ☐ | Server-side pagination | P1 | **Done** | `src/shared/pagination.ts` on list endpoints |
 

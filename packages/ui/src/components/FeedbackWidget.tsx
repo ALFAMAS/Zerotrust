@@ -73,7 +73,7 @@ export default function FeedbackWidget({
 
   return (
     <Card
-      className="fixed bottom-20 right-4 z-40 w-80 bg-popover p-5 shadow-2xl transition-all"
+      className="fixed bottom-8 right-4 z-40 w-80 bg-popover p-6 shadow-lg transition-all"
       role="dialog"
       aria-label="Feedback"
     >
@@ -119,7 +119,7 @@ export default function FeedbackWidget({
             <Button
               type="button"
               onClick={() => handleScore(1)}
-              className="flex-1 text-xl hover:border-emerald-500 hover:bg-emerald-900/30 hover:text-emerald-300"
+              className="flex-1 text-xl hover:border-success hover:bg-success/30 hover:text-success-subtle-foreground"
               variant="outline"
               aria-label="Thumbs up"
             >
@@ -128,7 +128,7 @@ export default function FeedbackWidget({
             <Button
               type="button"
               onClick={() => handleScore(-1)}
-              className="flex-1 text-xl hover:border-red-500 hover:bg-red-900/30 hover:text-red-300"
+              className="flex-1 text-xl hover:border-destructive hover:bg-destructive/30 hover:text-danger-subtle-foreground"
               variant="outline"
               aria-label="Thumbs down"
             >
@@ -170,7 +170,9 @@ export default function FeedbackWidget({
       )}
 
       {step === "done" && (
-        <p className="py-2 text-center text-sm text-emerald-400">Thanks for your feedback!</p>
+        <p className="py-2 text-center text-sm text-success-subtle-foreground">
+          Thanks for your feedback!
+        </p>
       )}
     </Card>
   );

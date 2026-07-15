@@ -3,6 +3,7 @@
 import { Fingerprint, KeyRound, Shield } from "lucide-react";
 import MetricCard from "@/components/admin/MetricCard";
 import { ServerStateStatus } from "@/components/ServerStateStatus";
+import { PageHeader } from "@/components/ui/page-header";
 import { useAnalyticsQuery } from "@/lib/server-state/admin/analytics";
 
 export default function AdminAnalyticsPage() {
@@ -13,12 +14,10 @@ export default function AdminAnalyticsPage() {
     <div className="space-y-8">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
-            Analytics
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Cohort retention, auth-method mix, and anomaly trends
-          </p>
+          <PageHeader
+            title={<>Analytics</>}
+            description={<>Cohort retention, auth-method mix, and anomaly trends</>}
+          />
         </div>
         <ServerStateStatus query={analyticsQuery} />
       </div>
@@ -90,11 +89,11 @@ export default function AdminAnalyticsPage() {
                 {data.anomalyTrends.map((pt) => (
                   <div key={pt.date} className="flex flex-col items-center gap-1">
                     <div
-                      className="w-4 rounded-sm bg-amber-500/80"
+                      className="w-4 rounded-sm bg-warning/80"
                       style={{ height: `${Math.max(8, pt.flaggedSessions * 4)}px` }}
                       title={`${pt.date}: ${pt.flaggedSessions}`}
                     />
-                    <span className="text-[10px] text-muted-foreground">{pt.date.slice(5)}</span>
+                    <span className="text-xs text-muted-foreground">{pt.date.slice(5)}</span>
                   </div>
                 ))}
               </div>

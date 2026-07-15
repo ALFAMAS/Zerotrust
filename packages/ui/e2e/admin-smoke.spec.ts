@@ -3,6 +3,7 @@ import { expect, test } from "@playwright/test";
 import { assertPageHealthy } from "./fixtures/pageHealth";
 import { readAccessToken, registerViaUi, uniqueEmail, withStoredAuth } from "./fixtures/auth";
 import { grantAdminRole, verifyUserEmail } from "./fixtures/db";
+import { E2E_API_URL } from "./fixtures/urls";
 
 const ADMIN_AUTH_FILE = "e2e/.auth/admin.json";
 
@@ -22,7 +23,7 @@ test.describe("admin page smoke (real API)", () => {
     const token = await readAccessToken(page);
     expect(token).toBeTruthy();
 
-    const meRes = await page.request.get("http://localhost:1337/auth/me", {
+    const meRes = await page.request.get(`${E2E_API_URL}/auth/me`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     expect(meRes.ok()).toBeTruthy();

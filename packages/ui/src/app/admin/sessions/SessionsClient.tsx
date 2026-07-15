@@ -6,6 +6,7 @@ import { ServerStateStatus } from "@/components/ServerStateStatus";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { PageHeader } from "@/components/ui/page-header";
 import { ErrorState } from "@/components/ui/States";
 import {
   Table,
@@ -92,10 +93,7 @@ export default function SessionsClient() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
-          Sessions
-        </h1>
-        <p className="mt-1 text-sm text-muted-foreground">{total} total sessions</p>
+        <PageHeader title={<>Sessions</>} description={<>{total} total sessions</>} />
       </div>
 
       <ServerStateStatus
@@ -114,7 +112,7 @@ export default function SessionsClient() {
             key={t.key}
             variant="ghost"
             onClick={() => setTab(t.key)}
-            className={`px-4 py-2.5 text-sm font-medium -mb-px border-b-2 transition-colors ${
+            className={`px-4 py-3 text-sm font-medium -mb-px border-b-2 transition-colors ${
               tab === t.key
                 ? "border-primary text-primary"
                 : "border-transparent text-muted-foreground hover:text-foreground"
@@ -191,11 +189,11 @@ export default function SessionsClient() {
                           className="text-muted-foreground"
                           title={s.userAgent ?? undefined}
                         >
-                          <div className="flex items-center gap-1.5 text-foreground">
+                          <div className="flex items-center gap-2 text-foreground">
                             {deviceLabel}
                             {fp?.isTrusted && (
                               <span title="Trusted device">
-                                <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
+                                <ShieldCheck className="h-3.5 w-3.5 text-success-subtle-foreground" />
                               </span>
                             )}
                           </div>
@@ -218,13 +216,13 @@ export default function SessionsClient() {
                           <div className="flex flex-col items-start gap-1">
                             <Badge variant={badgeVariant}>{label}</Badge>
                             {label === "revoked" && s.revokedReason && (
-                              <span className="text-[10px] text-muted-foreground">
+                              <span className="text-xs text-muted-foreground">
                                 {s.revokedReason}
                               </span>
                             )}
                             {anomalies > 0 && (
                               <span
-                                className="inline-flex items-center gap-1 text-[10px] font-medium text-amber-500"
+                                className="inline-flex items-center gap-1 text-xs font-medium text-warning-subtle-foreground"
                                 title="Anomaly flags raised for this session"
                               >
                                 <AlertTriangle className="h-3 w-3" />

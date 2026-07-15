@@ -57,7 +57,7 @@ function VerifyMagicLinkInner() {
         <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
           Sign-in link invalid
         </h1>
-        <p className="mt-1.5 text-sm text-muted-foreground">{error}</p>
+        <p className="mt-2 text-sm text-muted-foreground">{error}</p>
         <Link
           href="/magic-link"
           className="mt-6 inline-block text-sm font-medium text-primary hover:text-primary/80"
@@ -71,7 +71,7 @@ function VerifyMagicLinkInner() {
   return (
     <div className="py-4 text-center">
       {status === "success" ? (
-        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-400 ring-1 ring-emerald-500/30">
+        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-success/10 text-success-subtle-foreground ring-1 ring-success">
           <CheckCircle2 className="h-7 w-7" />
         </div>
       ) : (
@@ -80,7 +80,7 @@ function VerifyMagicLinkInner() {
       <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
         {status === "success" ? "Signed in" : "Verifying your link…"}
       </h1>
-      <p className="mt-1.5 text-sm text-muted-foreground">
+      <p className="mt-2 text-sm text-muted-foreground">
         {status === "success"
           ? "Taking you to your dashboard…"
           : "Hang tight while we confirm your magic link."}

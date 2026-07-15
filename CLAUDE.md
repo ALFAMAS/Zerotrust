@@ -95,10 +95,13 @@ Cross-agent performance, accessibility, best-practice, and SEO directives are in
 
 ## MCP servers
 
-Only one MCP is needed for this repo, already registered in `.mcp.json`:
+The repository MCP servers are registered in `.mcp.json`:
 
 - **`nextjs`** — routes, build/runtime errors, and dev-server logs (see section above).
   Auto-connects when `bun dev:ui` / `bun dev` is running.
+
+- **`playwright`** - browser automation for local UI verification.
+- **`typeui`** - remote TypeUI component and design-system tooling.
 
 Postgres/Redis/Elasticsearch are runtime services, not MCPs. For ad-hoc DB
 inspection use the `postgres` skill (read-only SQL, no config) rather than wiring
@@ -145,10 +148,11 @@ MFA, WebAuthn, CSFLE, breach checks, or any new `fetch`/`spawn`/`fs.writeFile`.
 
 ### Security baseline (`docs/security.md`)
 
-Structural gaps beyond the CWE table above are tracked as **SEC-*** in
-[`docs/project/todo.md`](./docs/project/todo.md) (open: production-readiness gaps **AUTH-1**, **CRYPTO-1**, **INF-3**, **FE-1**) with
-verified fixes in [`docs/project/shipped.md`](./docs/project/shipped.md) § Security baseline audit (SEC-1…SEC-27,
-SEC-28 shipped 2026-07-05; SEC-27 2026-07-08). When touching authz, sessions, or tenant isolation:
+Structural gaps beyond the CWE table above are tracked in
+[`docs/project/todo.md`](./docs/project/todo.md) (security baseline SEC items closed; open operator
+security work **SEC-ROT** and **MIG-3**) with verified fixes in
+[`docs/project/shipped.md`](./docs/project/shipped.md) § Security baseline audit and Recent work
+(including **CRYPTO-2**, 2026-07-15). When touching authz, sessions, or tenant isolation:
 prefer `assertCan()` / `authorizeOrg()` from `src/shared/permissions.ts` and
 org-scoped repositories; do not add inline `user.roles?.includes` checks. Passwords
 use `src/shared/passwordHash.ts` (`Bun.password` argon2id with bcrypt verify/rehash
@@ -185,4 +189,3 @@ Every agent working in this repo MUST reuse these modules instead of re-implemen
 | `src/db/repositories/` | `claimStripeEvent()`/`releaseStripeEvent()` (stripeEvents) — growing | **Repository layer for hot-path writes.** New multi-statement / idempotent / append-only mutations (refresh-token rotation, session lifecycle, billing, wallet ledger, org role transitions, support tickets, passkeys) go behind a repository method that owns the transaction and invariants, instead of inline Drizzle in a route/service. |
 
 When adding a new list endpoint: use `parsePaginatedQuery` + `countRows` + `paginated()` (or `routeHandler()` to drop the try/catch). In a route `catch` block, use `httpErrors.internalError`. For an admin-only router, mount `requireAdmin`. For a role check, use `roles.ts`. When adding a new crypto hash: use `cryptoHash.ts`. When adding a redirect: use `safeRedirect.ts`. When adding a server fetch: use `safeFetch.ts`. When adding a DB query that may hit a not-yet-migrated table: use `dbGuard()`. When adding a hot-path / multi-statement / append-only write, or any external-event consumer (webhook, queue), put it behind a `src/db/repositories/` method that owns the transaction and records an idempotency key so retries/replays are no-ops (see `stripeEvents.repository.ts`). For frontend data fetching, add/extend a `packages/ui/src/lib/server-state/<domain>.ts` module with query keys, `queryOptions`, hooks, and mutations — pages import those hooks, not `apiClient` directly. Extracting/replacing inline implementations with these modules is always preferred.
-

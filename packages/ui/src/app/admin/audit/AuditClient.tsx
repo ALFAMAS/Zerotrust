@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { PageHeader } from "@/components/ui/page-header";
 import {
   Table,
   TableBody,
@@ -75,12 +76,10 @@ export default function AuditClient() {
     <div className="space-y-6">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
-            Audit Logs
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Recent authentication and admin events
-          </p>
+          <PageHeader
+            title={<>Audit Logs</>}
+            description={<>Recent authentication and admin events</>}
+          />
         </div>
         <Button type="button" variant="outline" onClick={runVerify} disabled={verifying}>
           {verifying ? "Verifying…" : "Verify integrity"}
@@ -91,7 +90,7 @@ export default function AuditClient() {
         <div
           className={`rounded-lg border px-4 py-3 text-sm ${
             verify.ok
-              ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+              ? "border-success bg-success/10 text-success-subtle-foreground dark:text-success-subtle-foreground"
               : "border-destructive/30 bg-destructive/10 text-destructive"
           }`}
         >
@@ -169,7 +168,7 @@ export default function AuditClient() {
                       </TableCell>
                       <TableCell className="text-foreground">{getUser(entry)}</TableCell>
                       <TableCell>
-                        <code className="rounded bg-muted px-1.5 py-0.5 text-xs text-primary">
+                        <code className="rounded bg-muted px-2 py-1 text-xs text-primary">
                           {entry.action}
                         </code>
                       </TableCell>
@@ -194,25 +193,25 @@ export default function AuditClient() {
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <div>
-                  <p className="mb-0.5 text-xs text-muted-foreground">Timestamp</p>
+                  <p className="mb-1 text-xs text-muted-foreground">Timestamp</p>
                   <p className="text-foreground">{getTimestamp(selected)}</p>
                 </div>
                 <div>
-                  <p className="mb-0.5 text-xs text-muted-foreground">User</p>
+                  <p className="mb-1 text-xs text-muted-foreground">User</p>
                   <p className="text-foreground">{getUser(selected)}</p>
                 </div>
                 <div>
-                  <p className="mb-0.5 text-xs text-muted-foreground">Action</p>
-                  <code className="rounded bg-muted px-1.5 py-0.5 text-xs text-primary">
+                  <p className="mb-1 text-xs text-muted-foreground">Action</p>
+                  <code className="rounded bg-muted px-2 py-1 text-xs text-primary">
                     {selected.action}
                   </code>
                 </div>
                 <div>
-                  <p className="mb-0.5 text-xs text-muted-foreground">IP Address</p>
+                  <p className="mb-1 text-xs text-muted-foreground">IP Address</p>
                   <p className="font-mono text-xs text-foreground">{getIp(selected)}</p>
                 </div>
                 <div>
-                  <p className="mb-0.5 text-xs text-muted-foreground">Status</p>
+                  <p className="mb-1 text-xs text-muted-foreground">Status</p>
                   {statusBadge(getStatus(selected))}
                 </div>
               </div>

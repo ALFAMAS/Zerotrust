@@ -43,7 +43,7 @@ export function ServerStateStatus({
   if (!isStale) return null;
 
   return (
-    <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-amber-500/25 bg-amber-500/10 px-3 py-2 text-xs text-amber-600 dark:text-amber-300">
+    <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-warning bg-warning-subtle px-3 py-2 text-xs text-warning-subtle-foreground">
       <span>Cached {label} may be stale.</span>
       {onRefresh && (
         <Button

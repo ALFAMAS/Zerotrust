@@ -35,21 +35,27 @@ export default function HelpPage() {
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <SiteHeader />
-      <main className="mx-auto w-full max-w-3xl flex-1 px-6 py-16">
-        <div className="mb-12 text-center">
+      <main className="mx-auto w-full max-w-3xl flex-1 px-6 py-8">
+        <div className="mb-8 text-center">
           <h1 className="font-display text-4xl font-semibold tracking-tight text-foreground">
             Help center
           </h1>
           <p className="mt-3 text-lg text-muted-foreground">Find answers to common questions.</p>
-          <div className="relative mt-8">
-            <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              type="search"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search FAQs…"
-              className="w-full rounded-xl border border-border bg-card py-3 pl-11 pr-4 text-sm text-foreground transition-colors focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
-            />
+          <div className="mt-8 text-left">
+            <label htmlFor="faq-search" className="mb-2 block text-sm font-medium text-foreground">
+              Search help articles
+            </label>
+            <div className="relative">
+              <Search className="pointer-events-none absolute start-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                id="faq-search"
+                type="search"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search questions and answers"
+                className="w-full bg-surface pe-4 ps-11"
+              />
+            </div>
           </div>
         </div>
 
@@ -57,12 +63,10 @@ export default function HelpPage() {
           <div className="mb-8 flex flex-wrap justify-center gap-2">
             <Button
               type="button"
+              variant={activeCategory === null ? "secondary" : "outline"}
+              aria-pressed={activeCategory === null}
               onClick={() => setActiveCategory(null)}
-              className={`rounded-full px-3 py-1.5 text-sm transition-colors ${
-                activeCategory === null
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted text-muted-foreground hover:text-foreground"
-              }`}
+              className="rounded-full px-3"
             >
               All
             </Button>
@@ -70,12 +74,10 @@ export default function HelpPage() {
               <Button
                 type="button"
                 key={cat}
+                variant={activeCategory === cat ? "secondary" : "outline"}
+                aria-pressed={activeCategory === cat}
                 onClick={() => setActiveCategory(cat === activeCategory ? null : cat)}
-                className={`rounded-full px-3 py-1.5 text-sm transition-colors ${
-                  activeCategory === cat
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted text-muted-foreground hover:text-foreground"
-                }`}
+                className="rounded-full px-3"
               >
                 {cat}
               </Button>
@@ -84,7 +86,7 @@ export default function HelpPage() {
         )}
 
         {filtered.length === 0 ? (
-          <div className="py-16 text-center">
+          <div className="py-8 text-center">
             <p className="text-sm text-muted-foreground">No results for &ldquo;{query}&rdquo;.</p>
             <Button
               type="button"
@@ -108,8 +110,12 @@ export default function HelpPage() {
                 >
                   <Button
                     type="button"
+                    variant="ghost"
+                    id={`faq-question-${item.id}`}
+                    aria-expanded={isOpen}
+                    aria-controls={`faq-answer-${item.id}`}
                     onClick={() => setOpenId(isOpen ? null : item.id)}
-                    className="flex w-full items-center justify-between gap-4 px-6 py-4 text-left transition-colors hover:bg-accent/50"
+                    className="h-auto min-h-11 w-full justify-between whitespace-normal px-6 py-4 text-left"
                   >
                     <div className="min-w-0">
                       <span className="mr-3 text-xs font-medium text-primary">{item.category}</span>
@@ -120,9 +126,13 @@ export default function HelpPage() {
                     </span>
                   </Button>
                   {isOpen && (
-                    <div className="px-6 pb-5">
+                    <section
+                      id={`faq-answer-${item.id}`}
+                      aria-labelledby={`faq-question-${item.id}`}
+                      className="px-6 pb-6"
+                    >
                       <p className="text-sm leading-relaxed text-muted-foreground">{item.answer}</p>
-                    </div>
+                    </section>
                   )}
                 </div>
               );
@@ -130,12 +140,12 @@ export default function HelpPage() {
           </div>
         )}
 
-        <div className="mt-16 rounded-2xl border border-border bg-card/50 p-8 text-center">
+        <div className="mt-8 rounded-xl border border-border bg-card/50 p-8 text-center">
           <LifeBuoy className="mx-auto h-7 w-7 text-primary" />
           <p className="mt-3 text-sm text-muted-foreground">Still have questions?</p>
           <Link
             href={`mailto:${brand.supportEmail}`}
-            className="mt-4 inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+            className="mt-4 inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
           >
             <Mail className="h-4 w-4" />
             Contact support

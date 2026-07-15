@@ -39,7 +39,7 @@ export default function ForgotPasswordPage() {
         We&apos;ll send a reset link to your email.
       </p>
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="space-y-1.5">
+        <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
           <Input
             id="email"

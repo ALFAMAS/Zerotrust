@@ -20,12 +20,12 @@ function passwordStrength(p: string): { score: number; label: string; color: str
   if (/[0-9]/.test(p)) score++;
   if (/[^A-Za-z0-9]/.test(p)) score++;
   const levels = [
-    { label: "Weak", color: "bg-red-500" },
-    { label: "Weak", color: "bg-red-500" },
-    { label: "Fair", color: "bg-yellow-500" },
-    { label: "Good", color: "bg-blue-500" },
-    { label: "Strong", color: "bg-emerald-500" },
-    { label: "Very Strong", color: "bg-emerald-400" },
+    { label: "Weak", color: "bg-destructive" },
+    { label: "Weak", color: "bg-destructive" },
+    { label: "Fair", color: "bg-warning" },
+    { label: "Good", color: "bg-secondary-action" },
+    { label: "Strong", color: "bg-success" },
+    { label: "Very Strong", color: "bg-success" },
   ];
   return { score, ...levels[score] };
 }
@@ -67,13 +67,13 @@ export default function RegisterPage() {
         <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
           Create your account
         </h1>
-        <p className="mt-1.5 text-sm text-muted-foreground">
+        <p className="mt-2 text-sm text-muted-foreground">
           Start building with {brand.name} — free, no card required
         </p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="space-y-1.5">
+        <div className="space-y-2">
           <Label htmlFor="displayName">Display Name</Label>
           <Input
             id="displayName"
@@ -84,7 +84,7 @@ export default function RegisterPage() {
             placeholder="Your Name"
           />
         </div>
-        <div className="space-y-1.5">
+        <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
           <Input
             id="email"
@@ -96,7 +96,7 @@ export default function RegisterPage() {
             placeholder="you@example.com"
           />
         </div>
-        <div className="space-y-1.5">
+        <div className="space-y-2">
           <Label htmlFor="password">Password</Label>
           <PasswordInput
             id="password"
@@ -123,7 +123,7 @@ export default function RegisterPage() {
             </div>
           )}
         </div>
-        <div className="space-y-1.5">
+        <div className="space-y-2">
           <Label htmlFor="confirm">Confirm Password</Label>
           <PasswordInput
             id="confirm"

@@ -3,71 +3,120 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/*
- * shadcn/ui design tokens — dark + indigo.
- * The app is dark-first, so :root carries the dark palette; .dark repeats it
- * so an explicit `class="dark"` (next-themes default) stays consistent.
- */
-:root,
-.dark {
-  --background: hsl(224 71% 4%);
-  --foreground: hsl(210 20% 96%);
-
-  --card: hsl(221 39% 11%);
-  --card-foreground: hsl(210 20% 96%);
-
-  --popover: hsl(221 39% 11%);
-  --popover-foreground: hsl(210 20% 96%);
-
-  /* L 64% keeps white-on-primary buttons ≥ 4.5:1 (WCAG AA / Lighthouse gate) */
-  --primary: hsl(239 84% 64%);
-  --primary-foreground: hsl(0 0% 100%);
-
-  --secondary: hsl(215 28% 17%);
-  --secondary-foreground: hsl(210 20% 96%);
-
-  --muted: hsl(215 28% 17%);
-  --muted-foreground: hsl(218 11% 65%);
-
-  --accent: hsl(215 28% 17%);
-  --accent-foreground: hsl(210 20% 96%);
-
-  --destructive: hsl(0 72% 51%);
-  --destructive-foreground: hsl(210 20% 98%);
-
-  --border: hsl(215 28% 17%);
-  --input: hsl(215 28% 17%);
-  --ring: hsl(239 84% 67%);
-
-  --radius: 0.5rem;
-
-  /* Bklit UI chart tokens (full color values — not hsl() components) */
-  --chart-background: hsl(224 71% 4%);
-  --chart-foreground: hsl(210 20% 96%);
-  --chart-foreground-muted: hsl(218 11% 65%);
-  --chart-label: hsl(218 11% 65%);
-  --chart-1: hsl(239 84% 67%);
-  --chart-2: hsl(234 89% 74%);
-  --chart-3: hsl(243 75% 59%);
-  --chart-4: hsl(258 90% 66%);
-  --chart-5: hsl(217 91% 60%);
+/* Levels semantic foundations: light-first with a complete dark theme. */
+:root {
+  color-scheme: light;
+  --background: #f8fafc;
+  --foreground: #111827;
+  --surface: #ffffff;
+  --surface-elevated: #ffffff;
+  --card: var(--surface);
+  --card-foreground: var(--foreground);
+  --popover: var(--surface-elevated);
+  --popover-foreground: var(--foreground);
+  --primary: #27272a;
+  --primary-foreground: #ffffff;
+  --secondary-accent: #8b5cf6;
+  --secondary-action: #7c3aed;
+  --secondary-action-foreground: #ffffff;
+  --secondary: var(--secondary-action);
+  --secondary-foreground: var(--secondary-action-foreground);
+  --muted: #f4f4f5;
+  --muted-foreground: #52525b;
+  --accent: #f4f4f5;
+  --accent-foreground: #27272a;
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+  --border: #d4d4d8;
+  --control-border: #71717a;
+  --input: var(--control-border);
+  --ring: #7c3aed;
+  --overlay: rgb(9 9 11 / 64%);
+  --tour-overlay-shadow: 0 0 0 9999px var(--overlay);
+  --success: #16a34a;
+  --warning: #d97706;
+  --qr-background: #ffffff;
+  --provider-google-blue: #4285f4;
+  --provider-google-green: #34a853;
+  --provider-google-yellow: #fbbc05;
+  --provider-google-red: #ea4335;
+  --success-subtle: #dcfce7;
+  --success-subtle-foreground: #166534;
+  --warning-subtle: #fef3c7;
+  --warning-subtle-foreground: #92400e;
+  --danger-subtle: #fee2e2;
+  --danger-subtle-foreground: #991b1b;
+  --radius-control: 0.5rem;
+  --radius-panel: 0.75rem;
+  --chart-background: var(--background);
+  --chart-foreground: var(--foreground);
+  --chart-foreground-muted: var(--muted-foreground);
+  --chart-label: var(--muted-foreground);
+  --chart-1: #7c3aed;
+  --chart-2: #16a34a;
+  --chart-3: #d97706;
+  --chart-4: #dc2626;
+  --chart-5: #2563eb;
   --chart-line-primary: var(--chart-1);
   --chart-line-secondary: var(--chart-2);
-  --chart-crosshair: hsl(239 84% 67%);
-  --chart-grid: hsl(215 28% 22%);
-  --chart-brush-border: var(--chart-grid);
-  --chart-tooltip-background: hsl(221 39% 11% / 0.92);
-  --chart-tooltip-foreground: hsl(210 20% 96%);
-  --chart-tooltip-muted: hsl(218 11% 65%);
-  --chart-marker-background: hsl(221 39% 11%);
-  --chart-marker-border: hsl(215 28% 22%);
-  --chart-marker-foreground: hsl(210 20% 96%);
-  --chart-scale-01: hsl(239 84% 67% / 0.12);
-  --chart-scale-02: hsl(239 84% 67% / 0.22);
-  --chart-scale-03: hsl(239 84% 67% / 0.34);
-  --chart-scale-04: hsl(239 84% 67% / 0.48);
-  --chart-scale-05: hsl(239 84% 67% / 0.62);
-  --chart-scale-pattern-color: hsl(224 71% 4%);
+  --chart-crosshair: var(--ring);
+  --chart-grid: var(--border);
+  --chart-brush-border: var(--control-border);
+  --chart-tooltip-background: var(--surface-elevated);
+  --chart-tooltip-foreground: var(--foreground);
+  --chart-tooltip-muted: var(--muted-foreground);
+  --chart-marker-background: var(--surface);
+  --chart-marker-border: var(--control-border);
+  --chart-marker-foreground: var(--foreground);
+  --chart-scale-01: color-mix(in srgb, var(--chart-1) 12%, transparent);
+  --chart-scale-02: color-mix(in srgb, var(--chart-1) 22%, transparent);
+  --chart-scale-03: color-mix(in srgb, var(--chart-1) 34%, transparent);
+  --chart-scale-04: color-mix(in srgb, var(--chart-1) 48%, transparent);
+  --chart-scale-05: color-mix(in srgb, var(--chart-1) 62%, transparent);
+  --chart-scale-pattern-color: var(--surface);
+}
+
+.dark {
+  color-scheme: dark;
+  --background: #09090b;
+  --foreground: #fafafa;
+  --surface: #18181b;
+  --surface-elevated: #27272a;
+  --card: var(--surface);
+  --card-foreground: var(--foreground);
+  --popover: var(--surface-elevated);
+  --popover-foreground: var(--foreground);
+  --primary: #fafafa;
+  --primary-foreground: #18181b;
+  --secondary-accent: #a78bfa;
+  --secondary-action: #a78bfa;
+  --secondary-action-foreground: #18181b;
+  --secondary: var(--secondary-action);
+  --secondary-foreground: var(--secondary-action-foreground);
+  --muted: #27272a;
+  --muted-foreground: #a1a1aa;
+  --accent: #27272a;
+  --accent-foreground: #fafafa;
+  --destructive: #f87171;
+  --destructive-foreground: #18181b;
+  --border: #3f3f46;
+  --control-border: #71717a;
+  --input: var(--control-border);
+  --ring: #c4b5fd;
+  --success: #4ade80;
+  --warning: #fbbf24;
+  --qr-background: #ffffff;
+  --success-subtle: #14532d;
+  --success-subtle-foreground: #86efac;
+  --warning-subtle: #78350f;
+  --warning-subtle-foreground: #fde68a;
+  --danger-subtle: #7f1d1d;
+  --danger-subtle-foreground: #fca5a5;
+  --chart-1: #a78bfa;
+  --chart-2: #4ade80;
+  --chart-3: #fbbf24;
+  --chart-4: #f87171;
+  --chart-5: #60a5fa;
 }
 
 @theme inline {
@@ -77,10 +126,15 @@
   --color-card-foreground: var(--card-foreground);
   --color-popover: var(--popover);
   --color-popover-foreground: var(--popover-foreground);
+  --color-surface: var(--surface);
+  --color-surface-elevated: var(--surface-elevated);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary-accent: var(--secondary-accent);
+  --color-secondary-action: var(--secondary-action);
+  --color-secondary-action-foreground: var(--secondary-action-foreground);
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
@@ -88,36 +142,43 @@
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);
+  --color-control: var(--control-border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  /* Legacy brand palette — kept so any un-migrated `*-brand-*` utilities still resolve. */
-  --color-brand-50: #eef2ff;
-  --color-brand-500: #6366f1;
-  --color-brand-600: #4f46e5;
-  --color-brand-700: #4338ca;
-  --font-sans: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-display), var(--font-sans), sans-serif;
-  --font-mono: var(--font-mono), ui-monospace, SFMono-Regular, monospace;
-  --radius-lg: var(--radius);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-sm: calc(var(--radius) - 4px);
-  --animate-slideIn: slideIn 0.3s ease-out forwards;
-  --animate-slideOut: slideOut 0.3s ease-in forwards;
-  --animate-fade-up: fade-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+  --color-overlay: var(--overlay);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-qr-background: var(--qr-background);
+  --color-provider-google-blue: var(--provider-google-blue);
+  --color-provider-google-green: var(--provider-google-green);
+  --color-provider-google-yellow: var(--provider-google-yellow);
+  --color-provider-google-red: var(--provider-google-red);
+  --color-success-subtle: var(--success-subtle);
+  --color-success-subtle-foreground: var(--success-subtle-foreground);
+  --color-warning-subtle: var(--warning-subtle);
+  --color-warning-subtle-foreground: var(--warning-subtle-foreground);
+  --color-danger-subtle: var(--danger-subtle);
+  --color-danger-subtle-foreground: var(--danger-subtle-foreground);
+  --font-sans: var(--font-levels-sans), "Inter", sans-serif;
+  --font-display: var(--font-levels-sans), "Inter", sans-serif;
+  --font-mono: var(--font-levels-mono), "JetBrains Mono", monospace;
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 2rem;
+  --text-4xl: 2rem;
+  --text-5xl: 2rem;
+  --text-6xl: 2rem;
+  --radius-xl: var(--radius-panel);
+  --radius-lg: var(--radius-control);
+  --radius-md: var(--radius-control);
+  --radius-sm: calc(var(--radius-control) - 0.125rem);
   --container-center: true;
   --container-padding: 2rem;
   --breakpoint-2xl: 1400px;
-}
-
-@keyframes fade-up {
-  0% {
-    opacity: 0;
-    transform: translateY(14px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 @layer base {
@@ -126,30 +187,10 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-family: var(--font-levels-sans), "Inter", sans-serif;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
-}
-
-@layer utilities {
-  /* Technical blueprint grid for atmospheric panels */
-  .bg-grid {
-    background-image:
-      linear-gradient(to right, color-mix(in oklab, var(--border) 60%, transparent) 1px, transparent 1px),
-      linear-gradient(to bottom, color-mix(in oklab, var(--border) 60%, transparent) 1px, transparent 1px);
-    background-size: 54px 54px;
-  }
-  /* Radial fade so a full-bleed texture dissolves toward the edges */
-  .mask-fade {
-    -webkit-mask-image: radial-gradient(ellipse 90% 75% at 50% 28%, #000 30%, transparent 100%);
-    mask-image: radial-gradient(ellipse 90% 75% at 50% 28%, #000 30%, transparent 100%);
-  }
-}
-
-:root {
-  --brand: #6366f1;
-  --brand-dark: #4f46e5;
 }
 
 * {
@@ -158,9 +199,9 @@
 
 /* Global keyboard focus ring — visible only for keyboard users */
 :focus-visible {
-  outline: 2px solid #6366f1;
+  outline: 2px solid var(--ring);
   outline-offset: 2px;
-  border-radius: 4px;
+  border-radius: var(--radius-control);
 }
 
 /* Skip-to-main link — logical inset so it parks off the *start* edge in both
@@ -171,10 +212,10 @@
   top: 1rem;
   z-index: 9999;
   padding: 0.5rem 1rem;
-  background: #6366f1;
-  color: white;
+  background: var(--primary);
+  color: var(--primary-foreground);
   font-weight: 600;
-  border-radius: 0.375rem;
+  border-radius: var(--radius-control);
   text-decoration: none;
 }
 .skip-to-main:focus {
@@ -182,38 +223,13 @@
   outline: none;
 }
 
-/*
- * Toast slide-in distance. Corner-anchored toasts should slide in from the
- * *inline-end* edge; that edge is the right in LTR and the left in RTL, so the
- * offset sign is driven by direction. Keyframes read the variable, so any
- * element using them flips automatically under `dir="rtl"` — no per-component
- * RTL overrides needed.
- */
-:root {
-  --toast-slide-from: 110%;
-}
-[dir="rtl"] {
-  --toast-slide-from: -110%;
-}
-
-@keyframes slideIn {
-  from {
-    transform: translateX(var(--toast-slide-from));
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
-}
-
-@keyframes slideOut {
-  from {
-    transform: translateX(0);
-    opacity: 1;
-  }
-  to {
-    transform: translateX(var(--toast-slide-from));
-    opacity: 0;
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

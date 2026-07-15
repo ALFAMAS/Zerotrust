@@ -2,6 +2,7 @@ import { expect, test } from "@playwright/test";
 import { mockAuthenticatedShell } from "./fixtures/apiMocks";
 import { assertPageHealthy } from "./fixtures/pageHealth";
 import { readAccessToken, registerViaUi, uniqueEmail } from "./fixtures/auth";
+import { E2E_API_URL } from "./fixtures/urls";
 
 test.describe("notifications (real API)", () => {
   test("notification settings page loads and bell opens without error", async ({ page }) => {
@@ -54,7 +55,7 @@ test.describe("notifications (real API)", () => {
 test.describe("notifications (mocked shell)", () => {
   test("preferences toggles render", async ({ page }) => {
     await mockAuthenticatedShell(page);
-    await page.route("http://localhost:1337/notifications/preferences", (route) =>
+    await page.route(`${E2E_API_URL}/notifications/preferences`, (route) =>
       route.fulfill({
         json: {
           emailFallback: true,

@@ -80,7 +80,7 @@ export async function buildSignedNdjsonExport(opts: {
   };
 
   const bodyLines = rows.map((row) => JSON.stringify(serializeRow(row)));
-  const ndjson = [JSON.stringify(header), ...bodyLines].join("\n") + "\n";
+  const ndjson = `${[JSON.stringify(header), ...bodyLines].join("\n")}\n`;
   const signature = signExportPayload(ndjson);
 
   return { ndjson, signature, exportId, rowCount: rows.length, chainTip };

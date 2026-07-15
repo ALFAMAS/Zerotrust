@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PageHeader } from "@/components/ui/page-header";
 import { ErrorState, SkeletonList } from "@/components/ui/States";
 import {
   Table,
@@ -61,12 +62,10 @@ export default function AdminContentPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
-          Content tools
-        </h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          File attachments and lifecycle email batch triggers.
-        </p>
+        <PageHeader
+          title={<>Content tools</>}
+          description={<>File attachments and lifecycle email batch triggers.</>}
+        />
       </div>
 
       <Card>
@@ -93,7 +92,7 @@ export default function AdminContentPage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleUpload} className="flex flex-wrap items-end gap-4">
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <Label htmlFor="feature">Feature tag</Label>
               <Input
                 id="feature"
@@ -102,7 +101,7 @@ export default function AdminContentPage() {
                 className="w-48"
               />
             </div>
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <Label htmlFor="file">File</Label>
               <Input id="file" type="file" ref={fileRef} />
             </div>

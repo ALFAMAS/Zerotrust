@@ -135,7 +135,7 @@ export default function ProductTour() {
       <Button
         type="button"
         aria-label="Skip tour"
-        className="absolute inset-0 h-auto rounded-none bg-black/60 hover:bg-black/60"
+        className="absolute inset-0 h-auto rounded-none bg-overlay hover:bg-overlay"
         variant="ghost"
         onClick={finish}
       />
@@ -148,22 +148,22 @@ export default function ProductTour() {
             left: rect.left - pad,
             width: rect.width + pad * 2,
             height: rect.height + pad * 2,
-            boxShadow: "0 0 0 9999px rgba(0,0,0,0.6)",
+            boxShadow: "var(--tour-overlay-shadow)",
           }}
         />
       )}
 
       <div
-        className="absolute w-80 max-w-[calc(100vw-24px)] rounded-xl border border-border bg-popover p-5 shadow-2xl"
+        className="absolute w-80 max-w-[calc(100vw-24px)] rounded-xl border border-border bg-popover p-6 shadow-lg"
         style={tooltipStyle}
       >
         <h2 className="font-display text-base font-semibold tracking-tight text-foreground">
           {current.title}
         </h2>
-        <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{current.body}</p>
+        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{current.body}</p>
 
         <div className="mt-4 flex items-center justify-between">
-          <div className="flex items-center gap-1.5" aria-hidden>
+          <div className="flex items-center gap-2" aria-hidden>
             {STEPS.map((_, i) => (
               <span
                 key={i}
