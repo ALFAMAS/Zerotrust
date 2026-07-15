@@ -373,7 +373,7 @@ export default function LandingPage() {
                       <td className="px-4 py-3">
                         <span className="flex items-start gap-2 text-foreground">
                           <CheckCircle2
-                            className="mt-0.5 h-4 w-4 shrink-0 text-success"
+                            className="mt-1 h-4 w-4 shrink-0 text-success"
                             aria-hidden="true"
                           />
                           {row.ships}
@@ -435,7 +435,7 @@ export default function LandingPage() {
               </p>
               <Link
                 href="/security"
-                className={cn(buttonVariants({ variant: "outline" }), "mt-6 px-5")}
+                className={cn(buttonVariants({ variant: "outline" }), "mt-6 px-6")}
               >
                 <LockKeyhole aria-hidden="true" />
                 Read the security overview
@@ -449,7 +449,7 @@ export default function LandingPage() {
                   className="flex items-start gap-3 rounded-lg border border-border bg-background px-4 py-3 text-sm leading-6 text-muted-foreground"
                 >
                   <ShieldCheck
-                    className="mt-0.5 h-4 w-4 shrink-0 text-success"
+                    className="mt-1 h-4 w-4 shrink-0 text-success"
                     aria-hidden="true"
                   />
                   {item}
@@ -504,7 +504,7 @@ export default function LandingPage() {
                   Predictable plans, no per-user math
                 </h2>
               </div>
-              <Link href="/pricing" className={cn(buttonVariants({ variant: "outline" }), "px-5")}>
+              <Link href="/pricing" className={cn(buttonVariants({ variant: "outline" }), "px-6")}>
                 Compare all plans
                 <ArrowRight aria-hidden="true" />
               </Link>

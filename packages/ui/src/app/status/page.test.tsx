@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import { ThemeProvider } from "next-themes";
+import { ThemeProvider } from "@/components/ThemeProvider";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import StatusPage from "./page";
 
@@ -14,7 +14,7 @@ vi.mock("@/lib/server-state/status", () => ({
 
 function renderPage() {
   return render(
-    <ThemeProvider attribute="class" defaultTheme="light">
+    <ThemeProvider>
       <StatusPage />
     </ThemeProvider>
   );
