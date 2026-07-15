@@ -38,6 +38,11 @@ export default function SiteFooter() {
                   </Link>
                 </li>
                 <li>
+                  <Link href="/pricing" className={footerLinkClass}>
+                    Pricing
+                  </Link>
+                </li>
+                <li>
                   <Link href="/status" className={footerLinkClass}>
                     Status
                   </Link>

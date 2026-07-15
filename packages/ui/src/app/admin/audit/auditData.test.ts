@@ -13,7 +13,11 @@ describe("auditVolumeByDay", () => {
   });
 
   it("counts entries on their UTC calendar day", () => {
-    const day = "2026-07-01";
+    // Yesterday (UTC) is always inside the 14-day window regardless of run date.
+    const yesterday = new Date();
+    yesterday.setUTCHours(0, 0, 0, 0);
+    yesterday.setUTCDate(yesterday.getUTCDate() - 1);
+    const day = yesterday.toISOString().slice(0, 10);
     const entries: AuditEntry[] = [
       { id: "1", action: "login", createdAt: `${day}T10:00:00.000Z` },
       { id: "2", action: "logout", createdAt: `${day}T18:30:00.000Z` },
