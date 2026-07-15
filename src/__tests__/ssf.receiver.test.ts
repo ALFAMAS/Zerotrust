@@ -24,7 +24,7 @@ vi.mock("../logger", () => ({
   getLogger: () => ({ info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() }),
 }));
 
-import { handleSSFEvent } from "../modules/ssf/receiver";
+import { handleSSFEvent } from "../ssf/receiver";
 
 describe("handleSSFEvent - idempotency", () => {
   beforeEach(() => {

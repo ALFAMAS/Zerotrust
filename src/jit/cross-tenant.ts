@@ -11,9 +11,9 @@
 
 import { and, desc, eq } from "drizzle-orm";
 import { createMiddleware } from "hono/factory";
-import { getDb } from "../../db";
-import { crossTenantJITRequestsTable } from "../../db/schema";
-import type { HonoEnv } from "../../shared/types";
+import { getDb } from "../db";
+import { crossTenantJITRequestsTable } from "../db/schema";
+import type { HonoEnv } from "../shared/types";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

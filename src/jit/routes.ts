@@ -5,11 +5,11 @@
 
 import { and, eq } from "drizzle-orm";
 import { Hono } from "hono";
-import { getReadDb } from "../../db";
-import { organizationMembersTable } from "../../db/schema";
-import { authMiddleware } from "../../middleware/auth";
-import { orgRlsMiddleware } from "../../middleware/orgRls";
-import type { HonoEnv } from "../../shared/types";
+import { getReadDb } from "../db";
+import { organizationMembersTable } from "../db/schema";
+import { authMiddleware } from "../middleware/auth";
+import { orgRlsMiddleware } from "../middleware/orgRls";
+import type { HonoEnv } from "../shared/types";
 import { crossTenantJITStore, requestCrossTenantAccess } from "./cross-tenant";
 
 const app = new Hono<HonoEnv>();

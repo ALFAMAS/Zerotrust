@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { WebhookDeliveryLog } from "../modules/webhooks/deliveryLog";
-import type { WebhookDelivery } from "../modules/webhooks/types";
+import { WebhookDeliveryLog } from "../webhooks/deliveryLog";
+import type { WebhookDelivery } from "../webhooks/types";
 
 function sampleDelivery(id: string, endpointId: string): WebhookDelivery {
   return {

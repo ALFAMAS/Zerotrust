@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
-import { getReadDb } from "../../db";
-import { organizationMembersTable } from "../../db/schema";
+import { getReadDb } from "../db";
+import { organizationMembersTable } from "../db/schema";
 
 /** Org IDs the user belongs to — used to scope webhook admin routes. */
 export async function getUserOrgIds(userId: string): Promise<string[]> {

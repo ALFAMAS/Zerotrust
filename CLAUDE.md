@@ -59,6 +59,9 @@ the terminal via `logging.browserToTerminal: true` in
 
 ## Key source locations
 
+Beginner-oriented map with request flow and "where do I add X":
+[`docs/codebase-tour.md`](./docs/codebase-tour.md).
+
 ```
 src/
   api/routes/       Core Hono route modules (auth, orgs, billing…)
@@ -66,6 +69,9 @@ src/
   services/         Business logic (email, MFA, OAuth, billing…)
   middleware/       Rate limiting, CSRF, auth guards
   db/               Drizzle ORM schema + migrations
+  <feature>/        Feature subsystems, one flat dir each: audit, crypto, jit,
+                    jobs, metrics, mfa, notifications, scim, ssf, telemetry,
+                    templates, webhooks (boundaries in .boundaries.json)
   __tests__/        Vitest tests (unit + integration)
 
 plugins/            Feature plugins at repo root (oauth, mfa, magic-link) — see docs/plugins.md

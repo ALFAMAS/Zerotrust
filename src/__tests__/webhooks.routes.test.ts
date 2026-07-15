@@ -31,7 +31,7 @@ vi.mock("../middleware/auth", () => ({
   },
 }));
 
-vi.mock("../modules/webhooks/orgScope", () => ({
+vi.mock("../webhooks/orgScope", () => ({
   getUserOrgIds: vi.fn(async (userId: string) => h.orgIdsByUser.get(userId) ?? []),
   resolveOrgForWebhookCreate: vi.fn(async (userId: string, requestedOrgId?: string) => {
     const orgIds = h.orgIdsByUser.get(userId) ?? [];
@@ -46,7 +46,7 @@ vi.mock("../modules/webhooks/orgScope", () => ({
   }),
 }));
 
-vi.mock("../modules/webhooks/store", () => ({
+vi.mock("../webhooks/store", () => ({
   webhookStore: {
     listEndpointsForOrgs: vi.fn(async (orgIds: string[]) =>
       h.endpoints.filter((ep) => orgIds.includes(ep.tenantId))
@@ -83,7 +83,7 @@ vi.mock("../modules/webhooks/store", () => ({
   },
 }));
 
-import webhookRouter from "../modules/webhooks/routes";
+import webhookRouter from "../webhooks/routes";
 
 function app() {
   return new Hono().route("/webhooks", webhookRouter);

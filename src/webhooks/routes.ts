@@ -1,8 +1,8 @@
 import { Hono } from "hono";
-import { authMiddleware } from "../../middleware/auth";
-import { orgRlsMiddleware } from "../../middleware/orgRls";
-import { assertSafeFetchUrl } from "../../shared/safeFetch";
-import type { HonoEnv } from "../../shared/types";
+import { authMiddleware } from "../middleware/auth";
+import { orgRlsMiddleware } from "../middleware/orgRls";
+import { assertSafeFetchUrl } from "../shared/safeFetch";
+import type { HonoEnv } from "../shared/types";
 import { deliverWebhook } from "./delivery";
 import { webhookDeliveryLog } from "./deliveryLog";
 import { getUserOrgIds, resolveOrgForWebhookCreate } from "./orgScope";

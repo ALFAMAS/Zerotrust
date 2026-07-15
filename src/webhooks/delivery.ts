@@ -3,9 +3,9 @@ import {
   claimProcessedWebhookEvent,
   type ProcessedWebhookEventKey,
   releaseProcessedWebhookEvent,
-} from "../../db/repositories/processedWebhookEvents.repository";
-import { sha256Hex } from "../../shared/cryptoHash";
-import { fetchPublicUrl } from "../../shared/safeFetch";
+} from "../db/repositories/processedWebhookEvents.repository";
+import { sha256Hex } from "../shared/cryptoHash";
+import { fetchPublicUrl } from "../shared/safeFetch";
 import { webhookDeliveryLog } from "./deliveryLog";
 import { webhookStore } from "./store";
 import type { WebhookDelivery, WebhookEndpoint, WebhookEventType } from "./types";

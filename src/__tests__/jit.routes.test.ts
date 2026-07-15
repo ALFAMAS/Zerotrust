@@ -37,7 +37,7 @@ vi.mock("../db", () => ({
 // The store is DB-backed in production; these tests exercise the route layer
 // (validation, role guards, state transitions, status codes), so we back it with
 // a faithful in-memory fake — no database required.
-vi.mock("../modules/jit/cross-tenant", () => {
+vi.mock("../jit/cross-tenant", () => {
   const store = new Map<string, any>();
   let seq = 0;
   return {
@@ -90,7 +90,7 @@ vi.mock("../modules/jit/cross-tenant", () => {
   };
 });
 
-import jitRoutes from "../modules/jit/routes";
+import jitRoutes from "../jit/routes";
 
 const REQUESTOR = "11111111-1111-1111-1111-111111111111";
 const ADMIN = "22222222-2222-2222-2222-222222222222";

@@ -53,7 +53,7 @@
       "paths": [
         "src/api/routes/org.routes.ts",
         "src/api/routes/tenant.routes.ts",
-        "src/modules/jit/"
+        "src/jit/"
       ],
       "can_import": ["shared", "integrations", "identity"]
     },
@@ -90,8 +90,8 @@
         "src/api/routes/anomaly.routes.ts",
         "src/api/routes/email-events.routes.ts",
         "src/services/ops/",
-        "src/modules/webhooks/",
-        "src/modules/ssf/",
+        "src/webhooks/",
+        "src/ssf/",
         "src/metrics/",
         "src/telemetry/",
         "src/notifications/routes.ts"
