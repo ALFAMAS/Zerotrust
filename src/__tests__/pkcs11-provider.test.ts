@@ -22,6 +22,7 @@ class FakePkcs11Token {
   private keys = new Map<string, Buffer>();
   private labels = new Map<string, string>();
   private searchLabel: string | undefined;
+  private searchOffset = 0;
   private activeKey: Buffer | undefined;
   private activeGcm: GcmParams | undefined;
 
@@ -54,15 +55,19 @@ class FakePkcs11Token {
 
   C_FindObjectsInit(_session: Buffer, template: Attribute[]) {
     this.searchLabel = template.find((attribute) => attribute.type === CKA_LABEL)?.value as string;
+    this.searchOffset = 0;
   }
   C_FindObjects(_session: Buffer, max: number) {
-    return [...this.labels.entries()]
-      .filter(([, label]) => this.searchLabel === undefined || label === this.searchLabel)
-      .slice(0, max)
-      .map(([handle]) => Buffer.from(handle, "hex"));
+    const matches = [...this.labels.entries()].filter(
+      ([, label]) => this.searchLabel === undefined || label === this.searchLabel
+    );
+    const batch = matches.slice(this.searchOffset, this.searchOffset + max);
+    this.searchOffset += batch.length;
+    return batch.map(([handle]) => Buffer.from(handle, "hex"));
   }
   C_FindObjectsFinal() {
     this.searchLabel = undefined;
+    this.searchOffset = 0;
   }
   C_GetAttributeValue(_session: Buffer, handle: Buffer) {
     return [{ type: CKA_LABEL, value: Buffer.from(this.labels.get(handle.toString("hex")) ?? "") }];
@@ -184,5 +189,20 @@ describe("PKCS11Provider hardened operations (CRYPTO-2)", () => {
     await provider.generateKey("customer-key", "AES-256");
 
     await expect(provider.listKeys()).resolves.toEqual(["customer-key"]);
+  });
+
+  it("pages through all PKCS#11 objects before filtering MAC companion keys", async () => {
+    vi.spyOn(fs, "existsSync").mockReturnValue(true);
+    const token = new FakePkcs11Token();
+    const provider = createProvider(token);
+
+    for (let index = 0; index < 60; index++) {
+      await provider.generateKey(`key-${index}`, "AES-256");
+    }
+
+    const listed = await provider.listKeys();
+    expect(listed).toHaveLength(60);
+    expect(listed).toEqual(Array.from({ length: 60 }, (_, index) => `key-${index}`));
+    expect(listed.every((label) => !label.endsWith(":mac"))).toBe(true);
   });
 });

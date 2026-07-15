@@ -37,6 +37,8 @@ WORKDIR /app
 
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
+# node_modules/@zerotrust/shared-types links to ../../packages/shared-types
+COPY --from=builder /app/packages/shared-types ./packages/shared-types
 COPY package.json ./
 
 # oven/bun already ships a non-root `bun` user (UID 1000); creating another
@@ -63,6 +65,8 @@ WORKDIR /app
 
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
+# node_modules/@zerotrust/shared-types links to ../../packages/shared-types
+COPY --from=builder /app/packages/shared-types ./packages/shared-types
 COPY package.json ./
 
 # node:alpine already ships a non-root `node` user (UID 1000)

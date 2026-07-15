@@ -37,6 +37,32 @@ describe("API Docker workspace install (CI-4)", () => {
     expect(sourceCopyIndex).toBeLessThan(installIndex);
   });
 
+  it("copies shared-types into runtime stages so workspace links resolve", () => {
+    const dockerfile = readFileSync(join(process.cwd(), "Dockerfile"), "utf8");
+    const runtimeCopy =
+      "COPY --from=builder /app/packages/shared-types ./packages/shared-types";
+    const runtimeBunIndex = dockerfile.indexOf("AS runtime-bun");
+    const runtimeNodeIndex = dockerfile.indexOf("AS runtime-node");
+    const finalRuntimeIndex = dockerfile.indexOf("FROM runtime-${RUNTIME} AS runtime");
+
+    expect(runtimeBunIndex).toBeGreaterThan(-1);
+    expect(runtimeNodeIndex).toBeGreaterThan(runtimeBunIndex);
+    expect(finalRuntimeIndex).toBeGreaterThan(runtimeNodeIndex);
+
+    const bunCopyIndex = dockerfile.indexOf(runtimeCopy, runtimeBunIndex);
+    const nodeCopyIndex = dockerfile.indexOf(runtimeCopy, runtimeNodeIndex);
+
+    expect(bunCopyIndex, "runtime-bun copies shared-types").toBeGreaterThan(runtimeBunIndex);
+    expect(bunCopyIndex, "runtime-bun copy precedes runtime-node stage").toBeLessThan(
+      runtimeNodeIndex
+    );
+    expect(nodeCopyIndex, "runtime-node copies shared-types").toBeGreaterThan(runtimeNodeIndex);
+    expect(nodeCopyIndex, "runtime-node copy precedes final runtime stage").toBeLessThan(
+      finalRuntimeIndex
+    );
+    expect(dockerfile.split(runtimeCopy).length - 1).toBe(2);
+  });
+
   it("recursively excludes generated workspace trees from the build context", () => {
     const dockerignore = readFileSync(join(process.cwd(), ".dockerignore"), "utf8");
 

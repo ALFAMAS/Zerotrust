@@ -64,4 +64,19 @@ describe("Gitleaks database connection-string protection (SEC-ROT)", () => {
   it("does not report the documented local development placeholder", () => {
     expect(isDetected("postgresql://zerotrust:password@localhost:5432/zerotrust_test")).toBe(false);
   });
+
+  it("detects Redis URLs with username and password", () => {
+    const connectionString = "redis://appuser:npg_K9mQ2xV7cR4tY8wZ@redis.example.com:6379/0";
+    expect(isDetected(connectionString)).toBe(true);
+  });
+
+  it("detects password-only Redis URLs with an empty ACL username", () => {
+    const connectionString = "redis://:npg_K9mQ2xV7cR4tY8wZ@redis.example.com:6379/0";
+    expect(isDetected(connectionString)).toBe(true);
+  });
+
+  it("detects password-only Rediss URLs with an empty ACL username", () => {
+    const connectionString = "rediss://:npg_K9mQ2xV7cR4tY8wZ@redis.example.com:6379/0";
+    expect(isDetected(connectionString)).toBe(true);
+  });
 });

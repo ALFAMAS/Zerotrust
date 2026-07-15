@@ -238,9 +238,14 @@ export class PKCS11Provider implements HardwareKeyProvider {
   async listKeys(): Promise<string[]> {
     await this.ensureSession();
     this.pkcs11!.C_FindObjectsInit(this.session!, [{ type: CKA_CLASS, value: CKO_SECRET_KEY }]);
-    let handles: Buffer[];
+    const handles: Buffer[] = [];
+    const batchSize = 100;
     try {
-      handles = this.pkcs11!.C_FindObjects(this.session!, 100);
+      for (;;) {
+        const batch = this.pkcs11!.C_FindObjects(this.session!, batchSize);
+        if (batch.length === 0) break;
+        handles.push(...batch);
+      }
     } finally {
       this.pkcs11!.C_FindObjectsFinal(this.session!);
     }
