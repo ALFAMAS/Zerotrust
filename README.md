@@ -124,6 +124,7 @@ point DNS at it, and focus on your product surface.
 - PWA — installable, offline app-shell, web push (VAPID)
 - i18n (next-intl, EN/ES/FR/AR with RTL support), locale-aware `Intl.*` formatting, dark mode
 - GDPR — cookie consent, data export, 30-day soft-delete; privacy/terms pages
+- Consent-gated analytics — Plausible and GA4 offloaded through Partytown workers
 - Notification center (SSE real-time + email fallback), feedback widget, product tour
 - Command palette (client-side page navigator)
 
@@ -190,7 +191,7 @@ retention, billing lifecycle, `pg_dump` backup, audit anchoring) run in
 | API           | [Hono](https://hono.dev) 4 · TypeScript 6 · run on [Bun](https://bun.sh)                    |
 | Database      | PostgreSQL via [Drizzle ORM](https://orm.drizzle.team) (works with Neon)                    |
 | Cache / queue | Redis (ioredis) · [BullMQ](https://docs.bullmq.io) email queue                              |
-| Frontend      | [Next.js](https://nextjs.org) 16 (App Router) · Tailwind CSS · shadcn/ui                    |
+| Frontend      | [Next.js](https://nextjs.org) 16 (App Router) · Tailwind CSS · shadcn/ui · Partytown        |
 | Crypto        | PASETO v4, `@noble/*`, CSFLE field encryption                                               |
 | Auth libs     | `@simplewebauthn/server` (WebAuthn) · `otpauth` (TOTP)                                      |
 | Observability | Prometheus (`prom-client`) · OpenTelemetry · Sentry                                         |

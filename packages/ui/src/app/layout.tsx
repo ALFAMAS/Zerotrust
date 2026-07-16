@@ -1,3 +1,4 @@
+import { Partytown } from "@qwik.dev/partytown/react";
 import type { Metadata, Viewport } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
@@ -74,6 +75,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       className={`light ${fontSans.variable} ${fontMono.variable}`}
     >
       <head>
+        <Partytown forward={["dataLayer.push"]} />
         <script
           // biome-ignore lint/security/noDangerouslySetInnerHtml: static theme bootstrap (same pattern as next-themes)
           dangerouslySetInnerHTML={{

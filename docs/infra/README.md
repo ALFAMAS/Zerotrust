@@ -290,7 +290,12 @@ machine meets the RAM/disk budget above.
 3. `AnalyticsScript.tsx` loads PostHog **only after cookie consent is accepted**
    (same pattern as Plausible/GA) when `NEXT_PUBLIC_POSTHOG_KEY` and
    `NEXT_PUBLIC_POSTHOG_HOST` are set.
-4. For sensitive server-side events, use PostHog's HTTP capture API from the Hono
+4. Plausible and GA4 are marked `text/partytown` after consent and execute in a
+   Partytown worker. PostHog remains a bundled client because it uses the npm SDK.
+   `bun run --cwd packages/ui partytown:copy` regenerates the ignored same-origin
+   files in `packages/ui/public/~partytown`; UI dev/build lifecycle scripts run it
+   automatically.
+5. For sensitive server-side events, use PostHog's HTTP capture API from the Hono
    API — never include tokens or PII in URLs (CWE-532).
 
 ---

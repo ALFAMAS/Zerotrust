@@ -18,7 +18,7 @@ ship a feature. Planned work lives in [`todo.md`](./todo.md) (this directory).
 | Migrations                  |                                      47 (latest: `0046_mig4_snapshot_sync`) |
 | Route mounts in `server.ts` |                                                                          28 |
 | UI pages                    |                                                                          53 |
-| Tests                       | 1604 passed (1297 API + 307 UI); 33 skipped (259 files) |
+| Tests                       | 1609 passed (1297 API + 312 UI); 33 skipped (261 files) |
 | Stack                       | Hono 4 · TypeScript 6 · Bun · Next.js 16 · Drizzle ORM · PostgreSQL · Redis |
 
 ---
@@ -335,6 +335,14 @@ Cross-audit of `docs/security.md` §0–§10. **SEC-27** shipped 2026-07-08 (VPS
 - ✅ App shell — responsive with collapsible sidebar, sticky topbar, mobile drawer
 
 ## Recent work (2026-07-16)
+
+- **Partytown analytics offloading:** initialized the official React integration
+  in the App Router head, moved consent-gated Plausible and GA4 scripts into the
+  Partytown worker with `dataLayer.push` forwarding and dynamic `ptupdate`
+  discovery, added fail-closed GA measurement-ID validation and explicit worker
+  CSP, and made same-origin worker assets reproducible across dev, CI, standalone,
+  and Docker builds. PostHog, live chat, Stripe, and render-critical first-party
+  scripts retain their reliable main-thread paths.
 
 - **High-value UI and production tooling rollout:** replaced the hand-rolled command
   palette with `cmdk`; standardized admin users, sessions, audit logs, and webhooks on

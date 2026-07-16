@@ -28,6 +28,7 @@ describe("UI security headers config", () => {
     expect(csp).toContain("default-src 'self'");
     expect(csp).toContain("http://localhost:1337");
     expect(csp).toContain("frame-ancestors 'none'");
+    expect(csp).toContain("worker-src 'self' blob:");
     expect(headers.some((h) => h.key === "X-Frame-Options" && h.value === "DENY")).toBe(true);
     expect(headers.some((h) => h.key === "Strict-Transport-Security")).toBe(true);
   });

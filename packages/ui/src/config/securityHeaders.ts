@@ -75,6 +75,7 @@ function buildDefaultCsp(): string {
     "img-src 'self' data: blob: https:",
     "font-src 'self' data:",
     `connect-src ${[...new Set(connectExtras)].join(" ")}`,
+    "worker-src 'self' blob:",
     "frame-ancestors 'none'",
     "base-uri 'self'",
     "form-action 'self'",
