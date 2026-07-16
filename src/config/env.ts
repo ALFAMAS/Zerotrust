@@ -31,6 +31,7 @@ export const EnvSchema = z
     BACKUP_ENCRYPTION_KEY_HEX: optionalHexSecret("BACKUP_ENCRYPTION_KEY_HEX"),
     BACKUP_REQUIRE_ENCRYPTION: z.string().optional(),
     BACKUP_ENABLED: z.string().optional(),
+    API_DOCS_ENABLED: z.enum(["true", "false"]).optional(),
   })
   .superRefine((env, ctx) => {
     const isProduction = env.NODE_ENV === "production";
