@@ -4,9 +4,9 @@ Scope: multi-tenant SaaS. Cookie-authenticated web client (Next.js), bearer-auth
 
 Priority order matters. §1–2 are structural — getting them wrong later means a rewrite. §3–6 are middleware and discipline. §7–9 are ops.
 
-**Tracking (updated 2026-07-15):** Actionable gaps are tracked in
+**Tracking (updated 2026-07-16):** Actionable gaps are tracked in
 [`todo.md`](./project/todo.md) (security baseline SEC items closed; open operator security work
-**SEC-ROT** and **MIG-3**) and
+**SEC-ROT**; **MIG-3** closed 2026-07-16) and
 verified shipped items in [`shipped.md`](./project/shipped.md) § Security baseline audit
 (SEC-1…SEC-26 shipped 2026-07-05; SEC-28 Expo out-of-scope). Standing production
 audit decisions are tracked in this security baseline. CWE hardening classes
@@ -410,8 +410,9 @@ Tiers are ordered by **how the flaw enters the codebase**, not by CVSS.
 majority Verified or N/A (no mobile client); security baseline ops runbook **SEC-27**
 shipped 2026-07-08 ([`deployment.md`](./deployment.md) § VPS network hardening).
 Open security work is operator-owned: rotate the historically exposed database credential
-(**SEC-ROT**) and apply/verify RLS plus audit-immutability migrations on legacy `db:push`
-environments (**MIG-3**) in [`todo.md`](./project/todo.md). Security baseline closed (**DQ-2**
+(**SEC-ROT**) in [`todo.md`](./project/todo.md). **MIG-3** (RLS/audit baseline for legacy
+`db:push` DBs) closed 2026-07-16 — see [`shipped.md`](./project/shipped.md) § MIG-3.
+Security baseline closed (**DQ-2**
 shipped 2026-07-09; **CRYPTO-2** PKCS#11 hardening shipped 2026-07-15). See [`shipped.md`](./project/shipped.md) § Security baseline
 audit for per-control evidence.
 

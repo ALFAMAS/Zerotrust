@@ -14,8 +14,8 @@ production guards.
 | ID | Priority | Area | Finding | Status |
 | --- | --- | --- | --- | --- |
 | **MKT-1** | **P0** | Honesty / legal | Marketing and legal surfaces claimed features that do not exist: SAML 2.0 SSO, an OIDC identity **provider**, and SMS/WhatsApp/Telegram MFA (landing features + standards strip, pricing tiers + comparison, terms of service, dashboard billing tiers, default announcement badge). | **Shipped 2026-07-15** — all surfaces now describe shipped features only |
-| **MFA-SMS-1** | **P1** | Product trap | Admin → Auth Settings exposes an **SMS OTP** toggle (`smsOtpEnabled` in `saasSettings.service.ts`, admin settings schema, and the UI) but there is **no SMS delivery service** in the codebase. Enabling it advertises a channel that can never deliver a code. | Open — wire a provider (see `docs/extending.md`) or hide the toggle until one exists |
-| **BILL-PRICE-1** | **P2** | Consistency | Plan prices are env-configurable (`PLAN_PRO_PRICE_MONTHLY`, `PLAN_ENTERPRISE_PRICE_MONTHLY` in `src/shared/plans.ts`) but the public `/pricing` page and `dashboard/billing/BillingClient.tsx` hardcode $29/$99 — and the dashboard shows Enterprise as “Custom / Contact us” while `/pricing` shows $99. Needs one source of truth (e.g. `NEXT_PUBLIC_*` price vars or a public pricing endpoint). | Open |
+| **MFA-SMS-1** | **P1** | Product trap | Admin → Auth Settings exposes an **SMS OTP** toggle (`smsOtpEnabled` in `saasSettings.service.ts`, admin settings schema, and the UI) but there is **no SMS delivery service** in the codebase. Enabling it advertises a channel that can never deliver a code. | **Shipped 2026-07-15** — SMS OTP toggle hidden until a delivery provider is wired; API flag retained |
+| **BILL-PRICE-1** | **P2** | Consistency | Plan prices are env-configurable (`PLAN_PRO_PRICE_MONTHLY`, `PLAN_ENTERPRISE_PRICE_MONTHLY` in `src/shared/plans.ts`) but the public `/pricing` page and `dashboard/billing/BillingClient.tsx` hardcode $29/$99 — and the dashboard shows Enterprise as “Custom / Contact us” while `/pricing` shows $99. Needs one source of truth (e.g. `NEXT_PUBLIC_*` price vars or a public pricing endpoint). | **Shipped 2026-07-15** — `packages/ui/src/config/pricing.ts` is the single UI display-price source |
 | **JIT-1** | **P1** | Broken page | `GET /jit/cross-tenant/incoming` required an `orgId` the UI never sent, so `/admin/jit` always rendered an error state (masked in CI because the Playwright job was skipped behind a failing unit-test job). | **Shipped 2026-07-15** (PR #100) |
 
 ## Verified healthy (no action)
@@ -38,11 +38,11 @@ production guards.
 ## Operator blockers (unchanged, tracked in [`todo.md`](./todo.md))
 
 **SEC-ROT** (rotate the leaked Neon credential), **OPS-ENV-1** (create GitHub
-`staging`/`production` environments + deploy secrets), **MIG-3** (apply RLS /
-audit-trigger migrations to `db:push`-provisioned databases), and the
+`staging`/`production` environments + deploy secrets), and the
 pre-launch sign-off walk in
-[`production-checklist.md`](../production-checklist.md). These are
-configuration/credential actions only a repo or infra admin can perform; the
+[`production-checklist.md`](../production-checklist.md). **MIG-3** closed 2026-07-16
+(local/dev baselined; other legacy DBs: `docs/deployment.md` § MIG-3). These remaining
+items are configuration/credential actions only a repo or infra admin can perform; the
 repository code is not the blocker.
 
 ## MKT-1 detail — what changed

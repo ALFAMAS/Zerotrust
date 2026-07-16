@@ -334,6 +334,30 @@ Cross-audit of `docs/security.md` §0–§10. **SEC-27** shipped 2026-07-08 (VPS
 - ✅ Notifications — notification center with preferences
 - ✅ App shell — responsive with collapsible sidebar, sticky topbar, mobile drawer
 
+## Recent work (2026-07-16)
+
+- **OPS-ENV-1 code prerequisite — deploy environment gate:** added
+  `bun run deploy-env:check` (`scripts/ci/verify-deploy-environments.ts`) mirroring
+  `branch-protection:check`. Confirms GitHub `staging` + `production` environments exist
+  and that `production` has required reviewers, without reading secret values. Documented
+  in `docs/deployment.md` § OPS-ENV-1. Operator must still create the environments and set
+  SSH/metrics/URL secrets — `deploy-env:check` fails until scaffolding exists (verified
+  2026-07-16 against `ALFAMAS/Zerotrust`: 0 environments).
+- **MIG-3 closed — Tier-5 RLS in baseline-push + live local baseline:** `0043_tier5_rls_expansion`
+  was journal-baselined but not applied by `db:baseline-push`, so legacy `db:push`
+  databases would skip `org_feature_flags` / `org_scim_tokens` RLS after switching to
+  migrate. Added the migration to `BASELINE_SQL_TAGS` and verification table list.
+  Live `bun run db:baseline-push` against local/dev `DATABASE_URL` applied all five
+  push-skipped SQL migrations, backfilled 28 journal rows, and verified 16 org-scoped
+  RLS policy tables + both `audit_logs` immutability triggers. Remaining staging/prod
+  legacy DBs use the same documented one-liner (`docs/deployment.md` § MIG-3).
+- **MKT-1 leftover — pricing copy honesty:** `/pricing` still described Enterprise as SSO;
+  aligned metadata, tagline, and hero copy with shipped custom-domains positioning
+  (`packages/ui/src/app/pricing/page.tsx`).
+- **Docs:** `todo.md` marks code prerequisites complete for OPS-ENV-1 / SEC-ROT; MIG-3
+  closed; production-readiness audit status for MFA-SMS-1 / BILL-PRICE-1 corrected to shipped;
+  production-checklist Partial deploy rows point at `deploy-env:check`.
+
 ## Recent work (2026-07-15)
 
 - **CI-4 — Docker workspace build fixed and verified:** the build context now recursively excludes
@@ -369,7 +393,7 @@ Cross-audit of `docs/security.md` §0–§10. **SEC-27** shipped 2026-07-08 (VPS
   type-check` passes. Production qualification against the operator's selected HSM/SoftHSM remains
   a deployment gate, not an open repository defect.
 - **DOC-3 — status documentation reconciled:** the maintenance scorecard now records the latest red
-  `main` run, actual CI/staging k6 budgets, open SEC-ROT/MIG-3 operator risks, current TODO counts,
+  `main` run, actual CI/staging k6 budgets, open SEC-ROT operator risk (MIG-3 closed 2026-07-16), current TODO counts,
   and pending Docker/Playwright/load verification. Stale AUTH-1/CRYPTO-1/INF-3/FE-1 references
   were removed from active-gap prose across agent, architecture, security, and checklist docs.
 - **Current verification:** full root suite **1,272 passed / 31 skipped** (183 passed files) and UI
@@ -871,9 +895,11 @@ Cross-audit of `docs/security.md` §0–§10. **SEC-27** shipped 2026-07-08 (VPS
 ### MIG-3 — Baseline `db:push` databases for `db:migrate` (shipped)
 
 - **Problem:** Databases first synced with `db:push` have application tables/columns but lack Postgres RLS policies (`0035`/`0038`), audit-immutability triggers (`0031`), usage-counter RLS (`0036`), and `drizzle.__drizzle_migrations` journal rows — so switching to `db:migrate` would either skip security DDL or attempt to re-apply it.
-- **Fix:** Added operator script `db:baseline-push` that applies the four push-skipped SQL migrations idempotently, inserts missing journal rows from `drizzle/meta/_journal.json` (SHA-256 hashes matching drizzle-orm), verifies `pg_policies` on org-scoped tables and audit trigger presence, and supports `--dry-run`. Documented the workflow in `docs/deployment.md`.
+- **Fix:** Added operator script `db:baseline-push` that applies the five push-skipped SQL migrations idempotently (`0031`, `0035`, `0036`, `0038`, `0043`), inserts missing journal rows from `drizzle/meta/_journal.json` (SHA-256 hashes matching drizzle-orm), verifies `pg_policies` on org-scoped tables and audit trigger presence, and supports `--dry-run`. Documented the workflow in `docs/deployment.md`.
 - **Paths:** `scripts/ops/db-baseline-push.ts`, `scripts/ops/db-baseline-push.lib.ts`, `package.json`, `docs/deployment.md`
 - **Verification (2026-07-12):** `bun run db:baseline-push -- --dry-run` (logic/unit) → **pass**; journal baseline helper tests → **pass**; `bun run lint` → **pass**.
+- **Follow-up (2026-07-16):** included `0043_tier5_rls_expansion` (org_feature_flags + org_scim_tokens RLS) in `BASELINE_SQL_TAGS` so journal backfill cannot mark Tier-5 RLS as applied without running the SQL.
+- **Live baseline (2026-07-16):** `bun run db:baseline-push` on local/dev DB → **pass** (RLS on 16 org-scoped tables including Tier-5; audit triggers present; journal row count 76). Vitest `drizzleMigrations.script.test.ts` MIG-3 helpers → **pass**. Item closed in `todo.md`; other legacy environments follow `docs/deployment.md` § MIG-3.
 
 ### MIG-4 — Schema↔migrations drift guard in CI (shipped)
 

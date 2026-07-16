@@ -76,8 +76,8 @@ Complete before pointing DNS at production. Archive signed copies in
 | ☐ | `docker-compose.yml` (API + worker + PG + Redis) | P0 | **Done** | `WORKER_MODE=true` on API service |
 | ☐ | **UI container image** | P1 | **Done** | `packages/ui/Dockerfile`; `zerotrust-ui` in `docker-compose.yml` (host :3001) |
 | ☐ | Reference architectures (VM, containers, K8s) | P1 | **Done** | `docs/reference-architecture.md` |
-| ☐ | Staging deploy workflow | P1 | **Partial** | Workflow chains `staging-validation.yml`, but remote verification found no protected `staging` environment or repository deployment secrets/URL variables (OPS-ENV-1). |
-| ☐ | Production deploy workflow | P2 | **Partial** | Manual workflow and smoke gate exist, but remote verification found no protected `production` environment or repository deployment secrets/URL variables (OPS-ENV-1). |
+| ☐ | Staging deploy workflow | P1 | **Partial** | Workflow chains `staging-validation.yml`. Code prerequisite: `bun run deploy-env:check` + `docs/deployment.md` § OPS-ENV-1. Remote still lacks protected `staging` environment / deploy secrets (operator OPS-ENV-1). |
+| ☐ | Production deploy workflow | P2 | **Partial** | Manual workflow and smoke gate exist. Same OPS-ENV-1 operator gate for `production` environment + secrets; `deploy-env:check` requires reviewers on `production`. |
 | ☐ | Postgres role separation (app vs migrator) | P1 | **Done** | `scripts/ops/setup-postgres-roles.sql`, `.env.example` |
 | ☐ | Encrypted backups + S3 | P0 | **Done** | `scripts/ops/db-backup.js`, `src/services/dbBackup.service.ts` |
 | ☐ | DR restore drill automation | P1 | **Done** | `.github/workflows/dr-restore-drill.yml` (weekly + manual) |

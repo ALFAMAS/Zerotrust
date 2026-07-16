@@ -835,10 +835,17 @@ switching such a database to the migrate deploy path:
 2. **Preview** — `bun run db:baseline-push -- --dry-run` with `DATABASE_URL` pointed
    at the target (migrator/superuser credentials).
 3. **Apply** — `bun run db:baseline-push` (applies migrations `0031`, `0035`, `0036`,
-   `0038`, backfills missing `drizzle.__drizzle_migrations` rows from
+   `0038`, `0043`, backfills missing `drizzle.__drizzle_migrations` rows from
    `drizzle/meta/_journal.json`, verifies RLS + audit triggers).
 4. **Confirm** — `SELECT * FROM pg_policies WHERE schemaname = 'public';` shows policies
-   on org-scoped tables; `bun run db:migrate` on staging should report nothing pending.
+   on org-scoped tables (including `org_feature_flags` and `org_scim_tokens` from
+   `0043`); `bun run db:migrate` on staging should report nothing pending.
+
+If you already ran an older `db:baseline-push` **before** `0043` was added to the
+baseline set (2026-07-16), the journal may list `0043` as applied while the SQL was
+never executed. Apply `drizzle/0043_tier5_rls_expansion.sql` once manually (or re-run
+`db:baseline-push` after deleting only that journal hash — prefer the SQL apply), then
+re-check `pg_policies`.
 
 Fresh databases should use `bun run db:migrate` from the start — this baseline step is
 only for legacy `db:push` environments.
@@ -944,11 +951,34 @@ chosen ref to a staging host that matches the README's PM2 + nginx model, waits 
 the API health gate, then **chains** `staging-validation.yml` (ops-smoke · Lighthouse
 · ZAP · k6). It is deliberately not push-triggered — promote explicitly.
 
+### OPS-ENV-1 — protected environments (operator)
+
+Before the first real staging or production deploy, a repo admin must create the
+GitHub Environments the workflows target. Until then, `deploy-staging.yml` /
+`deploy-production.yml` remain **safe no-ops** when SSH secrets are unset.
+
+1. **Settings → Environments** → create **`staging`** and **`production`**.
+2. On **`production`**, enable **Required reviewers** (at least one human approver).
+3. Configure the secrets and public URL variables in the tables below (staging /
+   production sections).
+4. Verify structure (does not print secret values):
+
+```bash
+bun run deploy-env:check
+# or: bun run deploy-env:check -- owner/repo
+```
+
+`deploy-env:check` fails until both environments exist and `production` has
+required reviewers. Secret/variable *values* still need a manual operator pass —
+the check only confirms the environment scaffolding.
+
+Tracked as **OPS-ENV-1** in [`project/todo.md`](./project/todo.md).
+
 ### Staging secrets (INF-2)
 
 Configure in **Settings → Secrets and variables → Actions**. Create a **`staging`**
 [environment](https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment)
-with optional required reviewers before the first real deploy.
+with optional required reviewers before the first real deploy (see **OPS-ENV-1** above).
 
 **Repository secrets** (deploy + validation):
 

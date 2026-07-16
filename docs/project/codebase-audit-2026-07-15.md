@@ -108,7 +108,7 @@ The pre-fix provider had the following release-blocking defects:
    exists.
 2. Add an injected mock PKCS#11 module for deterministic unit coverage and retain a documented
    SoftHSM integration gate for production qualification.
-3. Complete operator-only `SEC-ROT` and `MIG-3` before launch.
+3. Complete operator-only `SEC-ROT` before launch (**MIG-3** closed 2026-07-16).
 
 ### Scalability
 
@@ -132,5 +132,5 @@ The pre-fix provider had the following release-blocking defects:
 All repository-owned P0/P1 findings are verified and cataloged in `shipped.md`. A new remote `main`
 run remains required because the recorded run predates these changes. Protected deployment
 environments and target configuration (OPS-ENV-1), production qualification of a specific HSM,
-staging SLO measurement, SEC-ROT, MIG-3, and the pre-launch checklist remain operator deployment
-gates rather than repository implementation defects.
+staging SLO measurement, SEC-ROT, and the pre-launch checklist remain operator deployment
+gates rather than repository implementation defects. **MIG-3** closed 2026-07-16.

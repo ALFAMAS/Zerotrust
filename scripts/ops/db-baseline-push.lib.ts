@@ -17,6 +17,7 @@ export const BASELINE_SQL_TAGS = [
   "0035_org_rls_policies",
   "0036_usage_counters_rls",
   "0038_org_rls_expansion",
+  "0043_tier5_rls_expansion",
 ] as const;
 
 /** Tables that must have at least one RLS policy after baseline SQL runs. */
@@ -35,6 +36,8 @@ export const RLS_ORG_TABLES = [
   "file_attachments",
   "feedback",
   "cross_tenant_jit_requests",
+  "org_feature_flags",
+  "org_scim_tokens",
 ] as const;
 
 export const AUDIT_IMMUTABILITY_TRIGGERS = [

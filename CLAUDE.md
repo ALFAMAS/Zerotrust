@@ -156,7 +156,7 @@ MFA, WebAuthn, CSFLE, breach checks, or any new `fetch`/`spawn`/`fs.writeFile`.
 
 Structural gaps beyond the CWE table above are tracked in
 [`docs/project/todo.md`](./docs/project/todo.md) (security baseline SEC items closed; open operator
-security work **SEC-ROT** and **MIG-3**) with verified fixes in
+security work **SEC-ROT**; **MIG-3** closed 2026-07-16) with verified fixes in
 [`docs/project/shipped.md`](./docs/project/shipped.md) § Security baseline audit and Recent work
 (including **CRYPTO-2**, 2026-07-15). When touching authz, sessions, or tenant isolation:
 prefer `assertCan()` / `authorizeOrg()` from `src/shared/permissions.ts` and

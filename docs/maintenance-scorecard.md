@@ -157,7 +157,7 @@ hot scenarios. Neither is a measured production SLO.
 | ID | Finding | Severity | Opened | Target fix | Status |
 |---|---|---|---|---|---|
 | SEC-ROT | Historically committed production-style database credential requires rotation | P0 | 2026-07-15 | Immediate | Operator action open |
-| MIG-3 | Legacy `db:push` environments may lack RLS and audit-immutability migrations | P1 | 2026-07-09 | Before production trust | Operator verification open |
+| MIG-3 | Legacy `db:push` environments may lack RLS and audit-immutability migrations | P1 | 2026-07-09 | Before production trust | **Closed 2026-07-16** — script + local baseline verified; staging/prod one-liner in deployment.md |
 
 **Closed (P4.7):** SAST-Semgrep — was triaged Low (2026-06); verified green on
 `main` CI run 28624304093 (2026-07-02). `p/owasp-top-ten` passes with zero
@@ -168,7 +168,7 @@ Production boot requires `METRICS_AUTH_TOKEN`; reference architecture documents
 token-gated scrape configs.
 
 **Security baseline ([`docs/security.md`](./security.md)):** **0 open baseline SEC items**.
-Operator security work in [`project/todo.md`](./project/todo.md): **SEC-ROT**, **MIG-3**.
+Operator security work in [`project/todo.md`](./project/todo.md): **SEC-ROT** (MIG-3 closed 2026-07-16).
 CRYPTO-2 shipped 2026-07-15; SEC-1…SEC-27 shipped (SEC-27 2026-07-08); SEC-28
 documented out-of-scope. CWE hardening (601/918/78/22/532/1333/327/1427/79)
 tracked in `CLAUDE.md` / `AGENTS.md` — do not duplicate as SEC items.
@@ -180,8 +180,8 @@ tracked in `CLAUDE.md` / `AGENTS.md` — do not duplicate as SEC items.
 | Metric | Current | Target | Trend |
 |---|---|---|---|
 | `verify:generated` (API reference drift) | 0 diff | 0 diff | ✅ |
-| Unaddressed TODO P0 items | **2**: SEC-ROT rotation; OPS-ENV-1 deployment configuration | 0 | 🔴 |
-| Unaddressed TODO P1 items | **1**: MIG-3 operator verification | 0 | 🔴 |
+| Unaddressed TODO P0 items | **2**: SEC-ROT rotation; OPS-ENV-1 deployment configuration (code gate: `deploy-env:check`) | 0 | 🔴 |
+| Unaddressed TODO P1 items | **0** (MIG-3 closed 2026-07-16) | 0 | ✅ |
 | Unaddressed TODO P4 items | 0 (P4.1–P4.9 done) | 0 | ✅ |
 | Open backlog (B6–B7) | 0 (P3 Operations & compliance shipped) | 0 | ✅ |
 | P1 security & access control gaps | 0 (B1, B3, ALFA-3 done) | 0 | ✅ |

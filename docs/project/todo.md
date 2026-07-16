@@ -39,21 +39,30 @@ part of the operator pre-launch sign-off below.
 
 ### Operator actions (only a repo/infra admin can do these)
 
-- [ ] **OPS-ENV-1 (P0, operator)** — GitHub API verification on 2026-07-15 found no `staging` or
-      `production` environment and no repository Actions secrets or variables. Before a deployment,
-      create protected environments with the intended reviewers; configure the documented
-      `STAGING_SSH_*` / `PRODUCTION_SSH_*` secrets, `METRICS_AUTH_TOKEN`, and public
-      `STAGING_*_URL` / `PRODUCTION_*_URL` variables. The deploy workflows are otherwise safe
-      no-ops, so this is a release configuration blocker rather than a repository-code defect.
+Code-side prerequisites for each item are complete; the checkboxes below remain
+open until an operator performs the live action.
+
+- [ ] **OPS-ENV-1 (P0, operator)** — GitHub API verification on 2026-07-15 (re-checked
+      2026-07-16) found no `staging` or `production` environment and no repository
+      Actions secrets or variables. Before a deployment, create protected environments
+      with the intended reviewers; configure the documented `STAGING_SSH_*` /
+      `PRODUCTION_SSH_*` secrets, `METRICS_AUTH_TOKEN`, and public
+      `STAGING_*_URL` / `PRODUCTION_*_URL` variables. The deploy workflows are otherwise
+      safe no-ops, so this is a release configuration blocker rather than a
+      repository-code defect.
+      **Code prerequisite (2026-07-16):** `bun run deploy-env:check` verifies environment
+      scaffolding (existence + production required reviewers) without reading secret
+      values; runbook in `docs/deployment.md` § OPS-ENV-1.
 - [ ] **SEC-ROT (P0, ~5 min)** — **Rotate the Neon `neon_owner` password.** A real Neon
       connection string was committed as the `drizzle.config.ts` fallback (removed in #95) and
       remains in git history of a public repo. Neon console → project → reset role password;
       update `DATABASE_URL` wherever it is deployed. Repository-side scanner hardening shipped
-      2026-07-15; only the credential rotation remains.
-- [ ] **MIG-3 (P1, operator)** — Databases historically provisioned with `db:push` lack the
-      RLS tenant-isolation policies (0035/0038/0043) and audit-immutability triggers (0031).
-      Apply those migrations manually (or re-baseline `__drizzle_migrations`) and verify with
-      `SELECT * FROM pg_policies;` before trusting tenant isolation in that environment.
+      2026-07-15 (`.gitleaks.toml` + CI); only the credential rotation remains — no further
+      code change can revoke the historically published password.
+
+~~MIG-3~~ shipped 2026-07-16 — see [`shipped.md`](./shipped.md) § MIG-3. Script applies
+`0031`/`0035`/`0036`/`0038`/`0043`, verifies RLS + audit triggers; local/dev DB baselined.
+Other legacy `db:push` environments: one-liner in [`deployment.md`](../deployment.md) § MIG-3.
 
 ### Pre-launch (operator, from [`production-checklist.md`](../production-checklist.md))
 

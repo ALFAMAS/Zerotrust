@@ -64,7 +64,8 @@ describe("db-baseline-push journal helpers (MIG-3)", () => {
     expect(rows.length).toBe(entries.length - 1);
   });
 
-  it("includes the four push-skipped SQL migrations in the baseline set", () => {
+  it("includes every push-skipped RLS/audit SQL migration in the baseline set", () => {
+    expect(BASELINE_SQL_TAGS).toContain("0043_tier5_rls_expansion");
     for (const tag of BASELINE_SQL_TAGS) {
       expect(() => readMigrationSql(tag)).not.toThrow();
     }
