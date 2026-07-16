@@ -87,7 +87,7 @@ predicates on org-scoped tables.
 | OAuth         | `oauth/`                                                                  | provider factory + adapters (Google/GitHub/Facebook/Apple)                 |
 | Access        | `jit/`                                                                    | cross-tenant just-in-time elevation                                                                     |
 | Platform      | `audit/` `metrics/` `telemetry/` `webhooks/` `notifications/` `ssf/`      | hash-chained audit log, Prometheus, OTel, outbound webhooks, SSF receiver                               |
-| Cross-cutting | `shared/` `config/` `logger/` `templates/`                                | safe-fetch/redirect guards, typed config, structured logging, email templates                           |
+| Cross-cutting | `shared/` `config/` `logger/` `templates/`                                | safe-fetch/redirect guards, typed config, Pino structured logging, email templates                      |
 
 ## 4. State & data
 

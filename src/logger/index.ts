@@ -3,9 +3,10 @@
  * Supports JSON logging, correlation IDs, and Elasticsearch streaming
  */
 
+import pino, { type LoggerOptions, type Logger as PinoLogger } from "pino";
 import { getConfig } from "../config";
 import { streamToSiem } from "../services/shared/siem.service";
-import { redactLogEntry } from "../shared/logRedaction";
+import { REDACT_CENSOR, redactLogEntry } from "../shared/logRedaction";
 import { type AuditPrincipal, principalAuditFields } from "../shared/principal";
 import { fetchFixedUrl } from "../shared/safeFetch";
 import type { zerotrustConfig } from "../shared/types";
@@ -22,22 +23,80 @@ export interface LogContext {
 
 export type LogLevel = "debug" | "info" | "warn" | "error";
 
-const LOG_LEVELS: Record<LogLevel, number> = {
-  debug: 0,
-  info: 1,
-  warn: 2,
-  error: 3,
-};
+const PINO_REDACT_PATHS = [
+  "password",
+  "passwd",
+  "pwd",
+  "secret",
+  "token",
+  "authorization",
+  "cookie",
+  "otp",
+  "pin",
+  "tfn",
+  "apiKey",
+  "api_key",
+  "clientSecret",
+  "client_secret",
+  "accessToken",
+  "access_token",
+  "refreshToken",
+  "refresh_token",
+  "headers.authorization",
+  "headers.cookie",
+  "req.headers.authorization",
+  "req.headers.cookie",
+  "request.headers.authorization",
+  "request.headers.cookie",
+  "*.password",
+  "*.secret",
+  "*.token",
+  "*.authorization",
+  "*.cookie",
+  "*.otp",
+] as const;
+
+function pinoOptions(config: zerotrustConfig): LoggerOptions {
+  return {
+    level: config.logging.level,
+    base: null,
+    messageKey: "message",
+    timestamp: () => `,"timestamp":"${new Date().toISOString()}"`,
+    formatters: {
+      level: (label) => ({ level: label }),
+    },
+    redact: {
+      paths: [...PINO_REDACT_PATHS],
+      censor: REDACT_CENSOR,
+    },
+  };
+}
+
+function createPinoLogger(config: zerotrustConfig): PinoLogger {
+  if (process.env.NODE_ENV !== "production" && config.logging.format === "text") {
+    const transport = pino.transport({
+      target: "pino-pretty",
+      options: {
+        colorize: Boolean(process.stdout.isTTY),
+        messageKey: "message",
+        translateTime: false,
+        ignore: "pid,hostname",
+      },
+    });
+    return pino(pinoOptions(config), transport);
+  }
+  return pino(pinoOptions(config), process.stdout);
+}
 
 class Logger {
   private config: zerotrustConfig;
   private context: LogContext = {};
-  private minLogLevel: number;
+  private pinoLogger: PinoLogger;
   private elasticsearchClient: any; // Will be populated if ES enabled
 
   constructor(config: zerotrustConfig, contextModule?: string) {
     this.config = config;
-    this.minLogLevel = LOG_LEVELS[config.logging.level];
+    this.pinoLogger = createPinoLogger(config);
 
     if (contextModule) {
       this.context.module = contextModule;
@@ -121,10 +180,6 @@ class Logger {
    * Core logging function
    */
   private log(level: LogLevel, message: string, data?: Record<string, unknown>): void {
-    if (LOG_LEVELS[level] < this.minLogLevel) {
-      return; // Skip logs below configured level
-    }
-
     const logEntry = redactLogEntry({
       timestamp: new Date().toISOString(),
       level,
@@ -132,20 +187,8 @@ class Logger {
       ...this.context,
       ...data,
     });
-
-    // Output based on configured format
-    if (this.config.logging.format === "json") {
-      process.stdout.write(`${JSON.stringify(logEntry)}\n`);
-    } else {
-      const levelColor = this.getLevelColor(level);
-      const timestamp = String(logEntry.timestamp);
-      const correlationId = logEntry.correlationId ? ` [${String(logEntry.correlationId)}]` : "";
-      const userId = logEntry.userId ? ` [user:${String(logEntry.userId)}]` : "";
-      const reset = "\x1b[0m";
-      process.stdout.write(
-        `${timestamp} ${levelColor}${level.toUpperCase()}${reset}${correlationId}${userId} ${message}\n`
-      );
-    }
+    const { timestamp: _timestamp, level: _level, message: safeMessage, ...fields } = logEntry;
+    this.pinoLogger[level](fields, String(safeMessage));
 
     // Stream to Elasticsearch if enabled
     if (this.config.elasticsearch.enabled && level !== "debug") {
@@ -177,19 +220,6 @@ class Logger {
     } catch (error) {
       console.error("Failed to index log in Elasticsearch:", error);
     }
-  }
-
-  /**
-   * Get ANSI color code for log level
-   */
-  private getLevelColor(level: LogLevel): string {
-    const colors: Record<LogLevel, string> = {
-      debug: "\x1b[36m", // Cyan
-      info: "\x1b[32m", // Green
-      warn: "\x1b[33m", // Yellow
-      error: "\x1b[31m", // Red
-    };
-    return colors[level];
   }
 
   /**

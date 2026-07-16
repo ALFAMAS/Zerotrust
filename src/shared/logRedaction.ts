@@ -25,8 +25,8 @@ export function isSensitiveLogKey(key: string): boolean {
 /** Redact sensitive substrings inside free-form log text (errors, stacks). */
 export function redactLogString(value: string): string {
   return value
-    .replace(SENSITIVE_STRING_RE, "$1=[REDACTED]")
     .replace(BEARER_RE, `Bearer ${REDACT_CENSOR}`)
+    .replace(SENSITIVE_STRING_RE, "$1=[REDACTED]")
     .replace(DB_URL_RE, `$1${REDACT_CENSOR}$3`)
     .replace(QUERY_SECRET_RE, "$1[REDACTED]");
 }
