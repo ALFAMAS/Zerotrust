@@ -1,0 +1,12 @@
+[
+  {
+    "name": "Production JavaScript",
+    "path": ".next/static/chunks/**/*.js",
+    "limit": "1010 kB"
+  },
+  {
+    "name": "Production CSS",
+    "path": ".next/static/chunks/**/*.css",
+    "limit": "20 kB"
+  }
+]

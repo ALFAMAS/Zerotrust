@@ -230,6 +230,7 @@ jobs:
       - run: bun run build
         env:
           NEXT_PUBLIC_ZEROTRUST_URL: http://localhost:3000
+      - run: bun run size
 
   lighthouse-ci:
     name: Lighthouse CI gate

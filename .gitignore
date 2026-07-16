@@ -66,6 +66,7 @@ temp/
 .next-build/
 .next-e2e/
 /packages/ui/public/~partytown/
+/packages/ui/.next/diagnostics/analyze/
 
 # Verify/tooling artifacts (HYG-1, codebase audit 2026-07-09)
 tmp-verify/
