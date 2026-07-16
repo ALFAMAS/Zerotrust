@@ -1,3 +1,4 @@
+import { replySupportTicketSchema, supportTicketSchema } from "@zerotrust/shared-types/support";
 import { desc, eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { z } from "zod";
@@ -26,14 +27,6 @@ router.use("*", orgRlsMiddleware({ allowQueryOrg: true }));
 
 const TICKET_STATUSES = ["open", "pending", "closed"] as const;
 
-const createSchema = z.object({
-  subject: z.string().min(1).max(200),
-  message: z.string().min(1).max(5000),
-  priority: z.enum(["low", "normal", "high"]).optional(),
-  orgId: z.string().uuid().optional(),
-});
-
-const replySchema = z.object({ body: z.string().min(1).max(5000) });
 const statusSchema = z.object({ status: z.enum(TICKET_STATUSES) });
 
 function isAgent(user: { roles?: string[] }): boolean {
@@ -44,7 +37,7 @@ function isAgent(user: { roles?: string[] }): boolean {
 router.post("/", rateLimit({ points: 20, windowSecs: 3600 }), async (c) => {
   const user = c.get("user");
   const body = await c.req.json().catch(() => ({}));
-  const parsed = createSchema.safeParse(body);
+  const parsed = supportTicketSchema.safeParse(body);
   if (!parsed.success)
     return c.json({ error: "INVALID_REQUEST", issues: parsed.error.issues }, 400);
 
@@ -129,7 +122,7 @@ router.post("/:id/messages", rateLimit({ points: 60, windowSecs: 3600 }), async 
   const user = c.get("user");
   const id = c.req.param("id");
   const body = await c.req.json().catch(() => ({}));
-  const parsed = replySchema.safeParse(body);
+  const parsed = replySupportTicketSchema.safeParse(body);
   if (!parsed.success)
     return c.json({ error: "INVALID_REQUEST", issues: parsed.error.issues }, 400);
 

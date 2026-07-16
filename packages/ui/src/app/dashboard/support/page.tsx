@@ -1,7 +1,15 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  type ReplySupportTicketInput,
+  replySupportTicketSchema,
+  type SupportTicketInput,
+  supportTicketSchema,
+} from "@zerotrust/shared-types/support";
 import { Ticket } from "lucide-react";
 import { useState } from "react";
+import { Controller, useForm } from "react-hook-form";
 import Modal from "@/components/Modal";
 import { ServerStateStatus } from "@/components/ServerStateStatus";
 import { Button } from "@/components/ui/button";
@@ -36,43 +44,43 @@ export default function SupportPage() {
   const replyMutation = useReplySupportTicketMutation();
   const statusMutation = useUpdateTicketStatusMutation();
   const [createOpen, setCreateOpen] = useState(false);
-  const [form, setForm] = useState({ subject: "", message: "", priority: "normal" });
-  const [error, setError] = useState<string | null>(null);
   const [activeId, setActiveId] = useState<string | null>(null);
-  const [reply, setReply] = useState("");
+  const createForm = useForm<SupportTicketInput>({
+    resolver: zodResolver(supportTicketSchema),
+    mode: "onBlur",
+    defaultValues: { subject: "", message: "", priority: "normal" },
+  });
+  const replyForm = useForm<ReplySupportTicketInput>({
+    resolver: zodResolver(replySupportTicketSchema),
+    mode: "onBlur",
+    defaultValues: { body: "" },
+  });
 
   const threadQuery = useSupportThreadQuery(activeId);
   const tickets = ticketsQuery.data?.tickets ?? [];
   const thread = threadQuery.data ?? null;
 
-  async function createTicket() {
-    if (!form.subject.trim() || !form.message.trim()) {
-      setError("Subject and message are required");
-      return;
-    }
-    setError(null);
+  const createTicket = createForm.handleSubmit(async (values) => {
     try {
-      await createMutation.mutateAsync({
-        subject: form.subject.trim(),
-        message: form.message.trim(),
-        priority: form.priority as "low" | "normal" | "high",
-      });
+      await createMutation.mutateAsync(values);
       setCreateOpen(false);
-      setForm({ subject: "", message: "", priority: "normal" });
+      createForm.reset();
     } catch (e) {
-      setError((e as Error).message);
+      createForm.setError("root", { message: (e as Error).message });
     }
-  }
+  });
 
-  async function sendReply() {
-    if (!activeId || !reply.trim()) return;
+  const sendReply = replyForm.handleSubmit(async (values) => {
+    if (!activeId) return;
     try {
-      await replyMutation.mutateAsync({ id: activeId, body: reply.trim() });
-      setReply("");
-    } catch {
-      /* surfaced by refetch */
+      await replyMutation.mutateAsync({ id: activeId, body: values.body });
+      replyForm.reset();
+    } catch (error) {
+      replyForm.setError("root", {
+        message: error instanceof Error ? error.message : "Failed to send reply",
+      });
     }
-  }
+  });
 
   async function closeTicket() {
     if (!activeId) return;
@@ -173,59 +181,97 @@ export default function SupportPage() {
 
       {/* Create ticket modal */}
       {createOpen && (
-        <Modal title="New support ticket" onClose={() => setCreateOpen(false)}>
-          <div className="space-y-4">
+        <Modal
+          title="New support ticket"
+          onClose={() => {
+            setCreateOpen(false);
+            createForm.reset();
+          }}
+        >
+          <form className="space-y-4" onSubmit={createTicket} noValidate>
             <div>
-              <label htmlFor="page-f0" className="mb-2 block text-sm text-foreground/80">
+              <label htmlFor="support-subject" className="mb-2 block text-sm text-foreground/80">
                 Subject
               </label>
               <Input
-                id="page-f0"
-                value={form.subject}
-                onChange={(e) => setForm({ ...form, subject: e.target.value })}
+                id="support-subject"
                 placeholder="Brief summary of the issue"
                 className="bg-muted"
+                aria-invalid={Boolean(createForm.formState.errors.subject)}
+                aria-describedby={
+                  createForm.formState.errors.subject ? "support-subject-error" : undefined
+                }
+                {...createForm.register("subject")}
               />
+              {createForm.formState.errors.subject && (
+                <p
+                  id="support-subject-error"
+                  className="mt-1 text-xs text-destructive"
+                  aria-live="polite"
+                >
+                  {createForm.formState.errors.subject.message}
+                </p>
+              )}
             </div>
             <div>
-              <label htmlFor="page-f1" className="mb-2 block text-sm text-foreground/80">
+              <label htmlFor="support-message" className="mb-2 block text-sm text-foreground/80">
                 Message
               </label>
               <Textarea
-                id="page-f1"
-                value={form.message}
-                onChange={(e) => setForm({ ...form, message: e.target.value })}
+                id="support-message"
                 rows={5}
                 placeholder="Describe what's happening, and any steps to reproduce."
                 className="bg-muted"
+                aria-invalid={Boolean(createForm.formState.errors.message)}
+                aria-describedby={
+                  createForm.formState.errors.message ? "support-message-error" : undefined
+                }
+                {...createForm.register("message")}
               />
+              {createForm.formState.errors.message && (
+                <p
+                  id="support-message-error"
+                  className="mt-1 text-xs text-destructive"
+                  aria-live="polite"
+                >
+                  {createForm.formState.errors.message.message}
+                </p>
+              )}
             </div>
             <div>
-              <span className="mb-2 block text-sm text-foreground/80">Priority</span>
-              <Select
-                value={form.priority}
-                onValueChange={(v) => setForm({ ...form, priority: v })}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="low">Low</SelectItem>
-                  <SelectItem value="normal">Normal</SelectItem>
-                  <SelectItem value="high">High</SelectItem>
-                </SelectContent>
-              </Select>
+              <label htmlFor="support-priority" className="mb-2 block text-sm text-foreground/80">
+                Priority
+              </label>
+              <Controller
+                name="priority"
+                control={createForm.control}
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger id="support-priority" onBlur={field.onBlur}>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="low">Low</SelectItem>
+                      <SelectItem value="normal">Normal</SelectItem>
+                      <SelectItem value="high">High</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
             </div>
-            {error && <p className="text-sm text-danger-subtle-foreground">{error}</p>}
+            {createForm.formState.errors.root && (
+              <p className="text-sm text-danger-subtle-foreground" aria-live="polite">
+                {createForm.formState.errors.root.message}
+              </p>
+            )}
             <Button
-              type="button"
-              onClick={createTicket}
-              disabled={!form.subject.trim() || !form.message.trim() || createMutation.isPending}
+              type="submit"
+              disabled={createMutation.isPending || createForm.formState.isSubmitting}
               className="w-full"
             >
               {createMutation.isPending ? "Submitting…" : "Submit ticket"}
             </Button>
-          </div>
+          </form>
         </Modal>
       )}
 
@@ -235,7 +281,7 @@ export default function SupportPage() {
           title={thread?.ticket.subject ?? "Ticket"}
           onClose={() => {
             setActiveId(null);
-            setReply("");
+            replyForm.reset();
           }}
         >
           {threadQuery.isPending ? (
@@ -271,14 +317,35 @@ export default function SupportPage() {
                   This ticket is closed. Open a new ticket if you need more help.
                 </p>
               ) : (
-                <div className="space-y-2">
+                <form className="space-y-2" onSubmit={sendReply} noValidate>
+                  <label htmlFor="support-reply" className="sr-only">
+                    Reply
+                  </label>
                   <Textarea
-                    value={reply}
-                    onChange={(e) => setReply(e.target.value)}
+                    id="support-reply"
                     rows={3}
                     placeholder="Write a reply…"
                     className="bg-muted"
+                    aria-invalid={Boolean(replyForm.formState.errors.body)}
+                    aria-describedby={
+                      replyForm.formState.errors.body ? "support-reply-error" : undefined
+                    }
+                    {...replyForm.register("body")}
                   />
+                  {replyForm.formState.errors.body && (
+                    <p
+                      id="support-reply-error"
+                      className="text-xs text-destructive"
+                      aria-live="polite"
+                    >
+                      {replyForm.formState.errors.body.message}
+                    </p>
+                  )}
+                  {replyForm.formState.errors.root && (
+                    <p className="text-xs text-destructive" aria-live="polite">
+                      {replyForm.formState.errors.root.message}
+                    </p>
+                  )}
                   <div className="flex items-center justify-between">
                     <Button
                       type="button"
@@ -291,14 +358,13 @@ export default function SupportPage() {
                       Close ticket
                     </Button>
                     <Button
-                      type="button"
-                      onClick={sendReply}
-                      disabled={!reply.trim() || replyMutation.isPending}
+                      type="submit"
+                      disabled={replyMutation.isPending || replyForm.formState.isSubmitting}
                     >
                       {replyMutation.isPending ? "Sending…" : "Send reply"}
                     </Button>
                   </div>
-                </div>
+                </form>
               )}
             </div>
           )}

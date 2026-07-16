@@ -1,5 +1,11 @@
 import { randomBytes } from "node:crypto";
-import { acceptOrgInviteSchema, createOrgSchema, orgInviteSchema } from "@zerotrust/shared-types";
+import {
+  acceptOrgInviteSchema,
+  createOrgSchema,
+  orgInviteSchema,
+  updateOrgSchema,
+  updateOrgSecurityPolicySchema,
+} from "@zerotrust/shared-types";
 import { and, eq, sql } from "drizzle-orm";
 import { Hono } from "hono";
 import { z } from "zod";
@@ -41,26 +47,9 @@ import type { HonoEnv } from "../../shared/types";
 const router = new Hono<HonoEnv>();
 const logger = getLogger("org-routes");
 
-const updateOrgSchema = z.object({
-  name: z.string().trim().min(1).max(120).optional(),
-  logoUrl: z.string().url().nullable().optional(),
-  billingEmail: z.string().email().nullable().optional(),
-  version: z.number().int().nonnegative().optional(),
-});
 const INVITE_TTL_DAYS = 7;
 const APP_URL = process.env.APP_URL ?? "http://localhost:3000";
 const transferSchema = z.object({ newOwnerId: z.string().uuid() });
-const securityPolicySchema = z.object({
-  requirePasskeyAttestation: z.boolean().default(false),
-  requireHardwarePasskey: z.boolean().default(false),
-  allowedPasskeyAaguids: z.array(z.string()).default([]),
-  deniedPasskeyAaguids: z.array(z.string()).default([]),
-  ipAllowlist: z.array(z.string()).default([]),
-  maxSessionAgeSeconds: z.number().int().min(0).default(0),
-  idleTimeoutSeconds: z.number().int().min(0).default(0),
-  maxConcurrentSessions: z.number().int().min(0).default(0),
-  allowedCountries: z.array(z.string().length(2)).default([]),
-});
 
 function slugify(value: string): string {
   const slug = value
@@ -462,7 +451,7 @@ router.put("/:orgId/security/policy", async (c) => {
   } catch (err) {
     return forbiddenResponse(c, err);
   }
-  const parsed = securityPolicySchema.safeParse(await c.req.json().catch(() => ({})));
+  const parsed = updateOrgSecurityPolicySchema.safeParse(await c.req.json().catch(() => ({})));
   if (!parsed.success)
     return c.json({ error: "VALIDATION_ERROR", message: parsed.error.issues[0]?.message }, 400);
   const [policy] = await getDb()

@@ -14,6 +14,16 @@
       "types": "./src/auth.ts",
       "import": "./src/auth.ts",
       "default": "./src/auth.ts"
+    },
+    "./org": {
+      "types": "./src/org.ts",
+      "import": "./src/org.ts",
+      "default": "./src/org.ts"
+    },
+    "./support": {
+      "types": "./src/support.ts",
+      "import": "./src/support.ts",
+      "default": "./src/support.ts"
     }
   },
   "scripts": {

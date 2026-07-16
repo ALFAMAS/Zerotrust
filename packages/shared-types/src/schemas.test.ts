@@ -4,9 +4,14 @@ import {
   apiErrorEnvelopeSchema,
   loginSchema,
   orgInviteSchema,
+  orgSecurityPolicyFormSchema,
   paginationQuerySchema,
   parsePaginationQuery,
   registerSchema,
+  replySupportTicketSchema,
+  supportTicketSchema,
+  updateOrgSchema,
+  updateOrgSecurityPolicySchema,
 } from "./index.js";
 
 describe("@zerotrust/shared-types schemas", () => {
@@ -60,6 +65,83 @@ describe("@zerotrust/shared-types schemas", () => {
       role: "member",
     });
     expect(acceptOrgInviteSchema.parse({ token: "abc" })).toEqual({ token: "abc" });
+  });
+
+  it("organization update schemas normalize input and reject invalid contact fields", () => {
+    expect(
+      updateOrgSchema.parse({
+        name: "  Acme Security  ",
+        billingEmail: "billing@example.com",
+        logoUrl: "https://example.com/logo.png",
+      })
+    ).toEqual({
+      name: "Acme Security",
+      billingEmail: "billing@example.com",
+      logoUrl: "https://example.com/logo.png",
+    });
+    expect(updateOrgSchema.safeParse({ billingEmail: "not-email" }).success).toBe(false);
+    expect(updateOrgSchema.safeParse({ logoUrl: "not-url" }).success).toBe(false);
+    expect(updateOrgSchema.parse({ billingEmail: "", logoUrl: "" })).toEqual({
+      billingEmail: null,
+      logoUrl: null,
+    });
+
+    expect(
+      updateOrgSecurityPolicySchema.safeParse({
+        requirePasskeyAttestation: false,
+        requireHardwarePasskey: false,
+        allowedPasskeyAaguids: [],
+        deniedPasskeyAaguids: [],
+        ipAllowlist: [],
+        maxSessionAgeSeconds: 0,
+        idleTimeoutSeconds: 0,
+        maxConcurrentSessions: 0,
+        allowedCountries: ["AU", "US"],
+      }).success
+    ).toBe(true);
+    expect(
+      updateOrgSecurityPolicySchema.safeParse({ allowedCountries: ["AUS"] }).success
+    ).toBe(false);
+    expect(
+      orgSecurityPolicyFormSchema.parse({
+        requirePasskeyAttestation: false,
+        requireHardwarePasskey: false,
+        allowedPasskeyAaguids: " AAGUID-1, aaguid-2 ",
+        deniedPasskeyAaguids: "",
+        ipAllowlist: "203.0.113.0/24",
+        maxSessionAgeMinutes: 30,
+        idleTimeoutMinutes: 5,
+        maxConcurrentSessions: 2,
+        allowedCountries: "au us",
+      })
+    ).toEqual({
+      requirePasskeyAttestation: false,
+      requireHardwarePasskey: false,
+      allowedPasskeyAaguids: ["aaguid-1", "aaguid-2"],
+      deniedPasskeyAaguids: [],
+      ipAllowlist: ["203.0.113.0/24"],
+      maxSessionAgeSeconds: 1800,
+      idleTimeoutSeconds: 300,
+      maxConcurrentSessions: 2,
+      allowedCountries: ["AU", "US"],
+    });
+  });
+
+  it("support schemas trim messages and enforce API length limits", () => {
+    expect(
+      supportTicketSchema.parse({
+        subject: "  Login problem  ",
+        message: "  I cannot sign in.  ",
+        priority: "normal",
+      })
+    ).toEqual({
+      subject: "Login problem",
+      message: "I cannot sign in.",
+      priority: "normal",
+    });
+    expect(supportTicketSchema.safeParse({ subject: "", message: "Help" }).success).toBe(false);
+    expect(replySupportTicketSchema.parse({ body: "  Thanks  " })).toEqual({ body: "Thanks" });
+    expect(replySupportTicketSchema.safeParse({ body: "   " }).success).toBe(false);
   });
 
   it("apiErrorEnvelopeSchema accepts canonical 4xx/5xx bodies", () => {

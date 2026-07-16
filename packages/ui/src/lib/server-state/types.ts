@@ -700,8 +700,8 @@ export interface CreateOrgInviteInput {
 
 export interface UpdateOrganizationInput {
   name?: string;
-  billingEmail?: string;
-  logoUrl?: string;
+  billingEmail?: string | null;
+  logoUrl?: string | null;
 }
 
 export interface OrgSecurityPolicy {

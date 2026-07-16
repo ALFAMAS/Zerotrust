@@ -72,9 +72,10 @@ interface ReplySupportTicketInput {
 export function useReplySupportTicketMutation() {
   const queryClient = useQueryClient();
 
-  return useMutation<SupportMessage, Error, ReplySupportTicketInput>({
-    mutationFn: ({ id, body }) => apiPost<SupportMessage>(`/support/${id}/messages`, { body }),
-    onSuccess: (message, { id }) => {
+  return useMutation<{ message: SupportMessage }, Error, ReplySupportTicketInput>({
+    mutationFn: ({ id, body }) =>
+      apiPost<{ message: SupportMessage }>(`/support/${id}/messages`, { body }),
+    onSuccess: ({ message }, { id }) => {
       queryClient.setQueryData<SupportThreadResponse>(supportKeys.detail(id), (current) => {
         if (!current) return current;
         return { ...current, messages: [...current.messages, message] };

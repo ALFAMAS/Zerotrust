@@ -83,10 +83,12 @@ describe("support TanStack Query server state", () => {
   it("uses mutations for create, reply, and close with targeted invalidation", async () => {
     mockSupportSuccess();
     mockApiPost.mockResolvedValue({
-      id: "m2",
-      authorRole: "agent",
-      body: "We're looking into it",
-      createdAt: "2026-07-01T02:00:00Z",
+      message: {
+        id: "m2",
+        authorRole: "agent",
+        body: "We're looking into it",
+        createdAt: "2026-07-01T02:00:00Z",
+      },
     });
     mockApiPatch.mockResolvedValue({
       ticket: { ...tickets[0], status: "closed" },
@@ -94,6 +96,7 @@ describe("support TanStack Query server state", () => {
     const user = userEvent.setup();
     const { queryClient } = renderWithQueryClient(<SupportPage />);
     const invalidateSpy = vi.spyOn(queryClient, "invalidateQueries");
+    const setQueryDataSpy = vi.spyOn(queryClient, "setQueryData");
 
     await screen.findByText("Cannot log in");
 
@@ -106,7 +109,10 @@ describe("support TanStack Query server state", () => {
     expect(mockApiGet).toHaveBeenCalledWith("/support/t1");
 
     // Reply
-    await user.type(screen.getByPlaceholderText("Write a reply…"), "Thanks");
+    await user.click(screen.getByRole("button", { name: "Send reply" }));
+    expect(await screen.findByText("Reply is required")).toBeInTheDocument();
+    expect(screen.getByLabelText("Reply")).toHaveFocus();
+    await user.type(screen.getByLabelText("Reply"), "Thanks");
     await user.click(screen.getByRole("button", { name: "Send reply" }));
     await waitFor(() => {
       expect(mockApiPost).toHaveBeenCalledWith("/support/t1/messages", { body: "Thanks" });
@@ -115,6 +121,16 @@ describe("support TanStack Query server state", () => {
       expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: supportKeys.detail("t1") });
       expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: supportKeys.list() });
     });
+    const replyCacheUpdate = setQueryDataSpy.mock.calls.find(
+      ([key, updater]) =>
+        JSON.stringify(key) === JSON.stringify(supportKeys.detail("t1")) &&
+        typeof updater === "function"
+    )?.[1] as ((current: typeof thread) => typeof thread) | undefined;
+    expect(replyCacheUpdate?.(thread).messages).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ id: "m2", body: "We're looking into it" }),
+      ])
+    );
 
     // Close ticket
     await user.click(screen.getByRole("button", { name: "Close ticket" }));
