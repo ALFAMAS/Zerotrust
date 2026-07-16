@@ -26,5 +26,13 @@ export const registerBodySchema = registerSchema.extend({
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type RegisterBodyInput = z.infer<typeof registerBodySchema>;
 
+/** Core login fields shared by API validation and the UI login form. */
+export const loginSchema = z.object({
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(1, "Password is required"),
+});
+
+export type LoginInput = z.infer<typeof loginSchema>;
+
 /** Password complexity rules — reused by password-reset confirm on the API. */
 export const passwordSchemaExport = passwordSchema;

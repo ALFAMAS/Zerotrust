@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   acceptOrgInviteSchema,
   apiErrorEnvelopeSchema,
+  loginSchema,
   orgInviteSchema,
   paginationQuerySchema,
   parsePaginationQuery,
@@ -39,6 +40,18 @@ describe("@zerotrust/shared-types schemas", () => {
       displayName: "User",
     });
     expect(ok.success).toBe(true);
+  });
+
+  it("loginSchema requires only a valid email and a non-empty password", () => {
+    // Unlike registration, login must accept passwords created under older/looser
+    // complexity rules — it only checks presence, not strength.
+    expect(loginSchema.safeParse({ email: "user@example.com", password: "x" }).success).toBe(
+      true
+    );
+    expect(loginSchema.safeParse({ email: "not-an-email", password: "x" }).success).toBe(false);
+    expect(loginSchema.safeParse({ email: "user@example.com", password: "" }).success).toBe(
+      false
+    );
   });
 
   it("org invite and accept schemas match API route contracts", () => {

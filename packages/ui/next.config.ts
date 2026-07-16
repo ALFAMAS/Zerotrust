@@ -18,6 +18,14 @@ const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 const nextConfig: NextConfig = {
   output: "standalone",
   outputFileTracingRoot: monorepoRoot,
+
+  // @zerotrust/shared-types ships raw TypeScript (nodenext-style `./x.js`
+  // relative imports resolved to sibling `.ts` files, understood by Bun/tsc)
+  // with no compiled dist. Next only runs its TS-aware transform/resolution
+  // over first-party app code and packages listed here — without this, the
+  // bundler treats the workspace package as pre-built and fails to resolve
+  // those `.js` specifiers to their `.ts` files.
+  transpilePackages: ["@zerotrust/shared-types"],
   // Allows production verification to run alongside `next dev` without both
   // processes contending for the same .next directory. Defaults are unchanged.
   distDir: process.env.ZEROTRUST_NEXT_DIST_DIR ?? ".next",

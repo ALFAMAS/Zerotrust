@@ -61,7 +61,6 @@ describe("Levels route migration", () => {
     const allowedSteps = new Set(["0", "1", "2", "3", "4", "6", "8"]);
     const documentedConstraints: Record<string, Set<string>> = {
       "components/app-shell/AppShell.tsx": new Set(["ml-16", "ml-64"]),
-      "components/CommandPalette.tsx": new Set(["pt-[15vh]"]),
       "components/ui/password-input.tsx": new Set(["pr-12"]),
     };
     const offenders = routeAndComponentRoots.flatMap(sourceFiles).flatMap((file) => {
