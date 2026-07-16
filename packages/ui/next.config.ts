@@ -18,6 +18,7 @@ const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 const nextConfig: NextConfig = {
   output: "standalone",
   outputFileTracingRoot: monorepoRoot,
+  reactCompiler: { compilationMode: "annotation" },
 
   // @zerotrust/shared-types ships raw TypeScript (nodenext-style `./x.js`
   // relative imports resolved to sibling `.ts` files, understood by Bun/tsc)

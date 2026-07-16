@@ -106,17 +106,26 @@ navigation, admin-chart hover/scrub, and shell/sidebar interactions in
 
 **Red**
 
-1. Add contract tests requiring `babel-plugin-react-compiler` and
-   `reactCompiler: true`.
+1. Add contract tests requiring `babel-plugin-react-compiler` and the selected
+   `reactCompiler` mode.
 2. Run the focused test and observe the missing compiler configuration.
 
 **Green**
 
-1. Add the compiler development dependency and enable the stable Next.js option.
+1. Add the compiler development dependency and pilot the stable Next.js option
+   in global inference mode.
 2. Run focused tests, UI tests, UI type checking, and a production build.
 3. Re-run Size Limit and compare analyzer artifacts to the Stage 1 baseline.
 4. Exercise the four render-baseline interactions in a browser with React Scan.
-5. Add `"use no memo"` only where a reproducible failure proves it necessary.
+5. If global inference exceeds the existing budget, use annotation mode with
+   function-level `"use memo"` only on hot paths that retain measured wins.
+6. Add `"use no memo"` only where a reproducible failure proves it necessary.
+
+**Outcome:** global inference improved the command palette and chart but added
+about 103 kB Brotli and failed the 1.01 MB aggregate budget. Function-level
+annotation on the measured hot paths retained those reductions at 927.2 kB
+total (+9.62 kB from the 917.58 kB baseline), so the original budget remains
+unchanged.
 
 ## Task 4: consent-gated field Web Vitals
 

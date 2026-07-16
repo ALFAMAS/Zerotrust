@@ -116,4 +116,35 @@ describe("UI performance tooling", () => {
     expect(knipConfig).toContain('"react-scan"');
     expect(existsSync(join(uiRoot, "src", "instrumentation-client.ts"))).toBe(false);
   });
+
+  it("enables React Compiler annotation mode for measured hot paths", () => {
+    const manifest = readJson(join(uiRoot, "package.json")) as {
+      devDependencies: Record<string, string>;
+    };
+    const nextConfig = readFileSync(join(uiRoot, "next.config.ts"), "utf8");
+    const annotatedModules: Array<[string, number]> = [
+      ["src/app/admin/users/UsersClient.tsx", 1],
+      ["src/components/CommandPalette.tsx", 1],
+      ["src/components/NotificationBell.tsx", 1],
+      ["src/components/app-shell/AppShell.tsx", 1],
+      ["src/components/app-shell/AppSidebar.tsx", 3],
+      ["src/components/ui/data-table.tsx", 1],
+      ["src/components/charts/area-chart.tsx", 2],
+      ["src/components/charts/area.tsx", 2],
+      ["src/components/charts/chart-reveal-clip.tsx", 1],
+      ["src/components/charts/grid.tsx", 1],
+      ["src/components/charts/series-highlight-layer.tsx", 1],
+      ["src/components/charts/time-series-chart-shell.tsx", 2],
+      ["src/components/charts/tooltip/chart-tooltip.tsx", 4],
+      ["src/components/charts/x-axis.tsx", 3],
+    ];
+
+    expect(manifest.devDependencies["babel-plugin-react-compiler"]).toBeTruthy();
+    expect(nextConfig).toContain('compilationMode: "annotation"');
+    for (const [module, directiveCount] of annotatedModules) {
+      const source = readFileSync(join(uiRoot, module), "utf8");
+      expect(source).toMatch(/^"use client";/);
+      expect(source.match(/"use memo";/g)).toHaveLength(directiveCount);
+    }
+  });
 });

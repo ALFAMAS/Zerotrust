@@ -47,6 +47,8 @@ function XAxisLabel({
   tickerHalfWidth,
   animatePosition,
 }: XAxisLabelProps) {
+  "use memo";
+
   const fadeBuffer = 20;
   const fadeRadius = tickerHalfWidth + fadeBuffer;
 
@@ -536,6 +538,8 @@ function appendProjectionTailTicks(
 }
 
 export function XAxis(props: XAxisProps) {
+  "use memo";
+
   const { containerRef } = useChartStable();
   const [mounted, setMounted] = useState(false);
 
@@ -557,6 +561,8 @@ const XAxisInner = memo(function XAxisInner({
   tickMode = "data",
   container,
 }: XAxisProps & { container: HTMLDivElement }) {
+  "use memo";
+
   const { xScale, margin, tooltipData, data, xAccessor, dateLabels, xDomain } = useChart();
 
   const labelsToShow = useMemo(() => {

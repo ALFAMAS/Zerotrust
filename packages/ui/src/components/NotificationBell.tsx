@@ -37,6 +37,8 @@ function typeIcon(type: Notification["type"]): string {
 }
 
 export function NotificationBell() {
+  "use memo";
+
   const fmt = useFormat();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);

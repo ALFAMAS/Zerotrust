@@ -93,9 +93,17 @@ Record a manual baseline for these representative interactions:
 - Toggle the dashboard sidebar and notification panel.
 
 Then install `babel-plugin-react-compiler` and enable Next.js `reactCompiler`.
-Global compilation is preferred because the project already uses React 19 and
-Next 16, but individual incompatible components may opt out with `"use no memo"`
-when a failing test or runtime trace proves the need.
+Pilot global inference first because the project already uses React 19 and Next
+16. If that pilot exceeds the production bundle budget, switch to annotation
+mode and add function-level `"use memo"` only to the measured table, command
+palette, chart, and app-shell hot paths. Individual incompatible components may
+opt out with `"use no memo"` only when a failing test or runtime trace proves the
+need.
+
+The implemented pilot follows that fallback: global inference added about 103
+kB Brotli and failed the existing budget, while targeted annotation added 9.62
+kB, kept the original limit, and retained the measured command-palette and chart
+render reductions.
 
 Acceptance requires no new browser errors or hydration warnings, all existing
 tests passing, production bundle budgets passing, and no measured interaction

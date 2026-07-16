@@ -97,6 +97,8 @@ function useAreaLoadingPulseState(
   loadingPulseMode: LineLoadingPulseMode | undefined,
   notifyLoadingPulseComplete?: () => void
 ) {
+  "use memo";
+
   const phasePulseMode = resolveLineLoadingPulseMode(chartPhase);
   const pulseMode =
     loading === false ? null : (loadingPulseMode ?? (loading === true ? "loop" : phasePulseMode));
@@ -148,6 +150,8 @@ export function Area({
   loadingPulseMode,
   loadingStyle = "pulse",
 }: AreaProps) {
+  "use memo";
+
   // Stable slice only: hover state lives inside `<SeriesHoverDim>` and
   // `<SeriesHighlightLayer>` so this component (and its expensive
   // <SeriesDashTailOverlay> child) does not re-render on cursor motion.

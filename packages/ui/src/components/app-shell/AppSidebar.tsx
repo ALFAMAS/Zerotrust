@@ -33,6 +33,8 @@ interface SidebarNavLinkProps {
 }
 
 function SidebarNavLink({ item, active, collapsed, onNavigate }: SidebarNavLinkProps) {
+  "use memo";
+
   const Icon = item.icon;
   const link = (
     <Link
@@ -83,6 +85,8 @@ function SidebarContent({
   onNavigate,
   showCollapseToggle = false,
 }: SidebarContentProps) {
+  "use memo";
+
   const pathname = usePathname();
   const groups = items.reduce<Array<{ label?: string; items: NavItem[] }>>((result, item) => {
     const current = result.at(-1);
@@ -228,6 +232,8 @@ export default function AppSidebar({
   collapsed = false,
   onToggleCollapsed,
 }: AppSidebarProps) {
+  "use memo";
+
   return (
     <>
       {/* Desktop: fixed sidebar */}

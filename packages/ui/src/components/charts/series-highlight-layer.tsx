@@ -29,6 +29,8 @@ export function SeriesHighlightLayer({
   stroke,
   strokeWidth,
 }: SeriesHighlightLayerProps) {
+  "use memo";
+
   const { isLoaded } = useChartStable();
   const { xSpring, widthSpring, isActive } = useHighlightSegment({ enabled });
   return (

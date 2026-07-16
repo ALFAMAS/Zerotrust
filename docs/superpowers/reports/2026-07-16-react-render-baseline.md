@@ -40,3 +40,26 @@ Re-run the same four interactions after enabling React Compiler. A regression is
 either a browser/hydration error or a material count/time increase on the same
 deterministic fixture; timing differences below a few milliseconds are treated
 as development-build noise unless repeatable.
+
+## Compiler pilot result
+
+Global inference compiled all eligible UI modules and improved the command
+palette and chart, but increased aggregate production JavaScript from 917.58 kB
+to about 1.02 MB Brotli. That exceeded the existing 1.01 MB Size Limit budget,
+so the global configuration was rejected.
+
+The accepted configuration uses `compilationMode: "annotation"` with
+function-level `"use memo"` directives on the measured table, command palette,
+chart, shell, and notification components. It produced 927.2 kB Brotli (+9.62
+kB) and passed the original budget without changing its threshold.
+
+| Interaction | Baseline → annotated compiler | Result |
+| --- | --- | --- |
+| Admin users filter and sort | `Button` 156 → 152; anonymous wrappers 44 → 40; cells and rows unchanged | Small reduction; expected row/cell work remains because sorting/filtering changes every visible row. |
+| Command palette search and navigation | anonymous wrappers 154 → 119; `Primitive.div` 60 → 56; `Presence` 31 → 27 | Material reduction in dialog/search/navigation fan-out. |
+| Admin audit chart hover and scrub | `TimeSeriesChartCore` and annotated chart children 2 → 1; repeated `XAxisLabel` and `Line` entries disappear | Pointer work is reduced to one chart-subtree update. |
+| Dashboard sidebar and notifications | navigation and tooltip counts materially unchanged | Stable; no regression, but no meaningful count reduction. |
+
+No hydration warning, page error, or application console error occurred during
+the annotated comparison. Development timing varied between runs, so the
+acceptance decision is based on render counts plus the production bundle gate.

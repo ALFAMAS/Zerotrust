@@ -38,6 +38,8 @@ export function ChartRevealClip({
   mode = "reveal",
   onComplete,
 }: ChartRevealClipProps) {
+  "use memo";
+
   const transition = clipRevealTransition(enterTransition);
   const paddedWidth = Math.max(0, targetWidth + padding * 2);
   const paddedHeight = height + padding * 2;

@@ -25,6 +25,8 @@ import {
 import type { AdminUserListItem } from "@/lib/server-state/types";
 
 export default function UsersClient() {
+  "use memo";
+
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [page, setPage] = useState(1);

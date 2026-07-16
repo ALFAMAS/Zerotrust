@@ -154,6 +154,8 @@ export interface TimeSeriesChartInnerProps {
 }
 
 export function TimeSeriesChartInner(props: TimeSeriesChartInnerProps) {
+  "use memo";
+
   const { width, height } = props;
   if (width < 10 || height < 10) {
     return null;
@@ -192,6 +194,8 @@ const TimeSeriesChartCore = memo(function TimeSeriesChartCore({
   tweenYDomainOnXDomainChange = false,
   onPhaseChange,
 }: TimeSeriesChartInnerProps) {
+  "use memo";
+
   const staticPreview = useStaticChartPreview();
   const innerWidth = width - margin.left - margin.right;
   const innerHeight = height - margin.top - margin.bottom;

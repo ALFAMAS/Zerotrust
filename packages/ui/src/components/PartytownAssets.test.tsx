@@ -18,8 +18,12 @@ describe("Partytown build contract", () => {
     expect(manifest.scripts["partytown:copy"]).toBe(
       "partytown copylib public/~partytown"
     );
-    expect(manifest.scripts.predev).toBe("bun run partytown:copy");
-    expect(manifest.scripts.prebuild).toBe("bun run partytown:copy");
+    expect(manifest.scripts.predev).toBe(
+      "bun run partytown:copy && bun run react-scan:copy"
+    );
+    expect(manifest.scripts.prebuild).toBe(
+      "bun run partytown:copy && bun run react-scan:clean"
+    );
     expect(manifest.scripts.pretest).toBe("bun run partytown:copy");
     expect(gitignore).toContain("/packages/ui/public/~partytown/");
 

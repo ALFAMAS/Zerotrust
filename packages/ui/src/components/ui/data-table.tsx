@@ -102,6 +102,8 @@ export function DataTable<TData, TValue>({
   selection,
   tableLabel,
 }: DataTableProps<TData, TValue>) {
+  "use memo";
+
   const [sorting, setSorting] = useState<SortingState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
   const [internalRowSelection, setInternalRowSelection] = useState<RowSelectionState>({});

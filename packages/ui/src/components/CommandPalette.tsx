@@ -119,6 +119,8 @@ const DESTINATIONS: PaletteDestination[] = [
 const GROUPS: PaletteDestination["group"][] = ["Pages", "Settings"];
 
 export function CommandPalette() {
+  "use memo";
+
   const router = useRouter();
   const [open, setOpen] = useState(false);
 

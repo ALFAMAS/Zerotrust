@@ -39,6 +39,8 @@ export default function AppShell({
   profileMenu,
   children,
 }: AppShellProps) {
+  "use memo";
+
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);

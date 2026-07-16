@@ -147,6 +147,8 @@ function ChartInner({
   containerRef,
   onPhaseChange,
 }: ChartInnerProps) {
+  "use memo";
+
   const lines = useMemo(() => extractAreaConfigs(children), [children]);
 
   return (
@@ -198,6 +200,8 @@ export function AreaChart({
   onPhaseChange,
   children,
 }: AreaChartProps) {
+  "use memo";
+
   const containerRef = useRef<HTMLDivElement>(null);
   const margin = { ...DEFAULT_MARGIN, ...marginProp };
   const [chartPhase, setChartPhase] = useState<ChartPhase>(() => resolveRestingChartPhase(status));

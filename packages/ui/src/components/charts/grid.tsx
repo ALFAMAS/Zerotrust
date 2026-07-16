@@ -113,6 +113,8 @@ export function Grid({
   shimmerSpeed = DEFAULT_SHIMMER_SPEED,
   shimmerSync = false,
 }: GridProps) {
+  "use memo";
+
   const { xScale, innerWidth, innerHeight, orientation, barScale, chartPhase } = useChartStable();
   const yScale = useYScale(yAxisId);
   const shimmerActive = shimmer && isLoadingChromePhase(chartPhase);

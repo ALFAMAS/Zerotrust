@@ -111,6 +111,8 @@ const ChartTooltipInner = memo(function ChartTooltipInner({
   panelStyle,
   backgroundColor,
 }: ChartTooltipInnerProps) {
+  "use memo";
+
   const {
     tooltipData,
     width,
@@ -325,6 +327,8 @@ const ChartTooltipInner = memo(function ChartTooltipInner({
 });
 
 export function ChartTooltip(props: ChartTooltipProps) {
+  "use memo";
+
   const { containerRef } = useChartStable();
   const [mounted, setMounted] = useState(false);
 
@@ -356,6 +360,8 @@ interface DatePillTrackerProps {
 // Inner-only-on-visible so `useSpring` initializes at the real cursor x
 // instead of `margin.left` on first hover.
 function DatePillTracker(props: DatePillTrackerProps) {
+  "use memo";
+
   if (!(props.enabled && props.visible && props.labels.length > 0)) {
     return null;
   }
@@ -370,6 +376,8 @@ function DatePillTrackerInner({
   springConfig,
   visible,
 }: DatePillTrackerProps) {
+  "use memo";
+
   const { tooltipSpring } = useChartConfig();
   const effectiveSpring = springConfig ?? tooltipSpring;
   const animatedX = useSpring(xWithMargin, effectiveSpring);
