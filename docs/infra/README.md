@@ -53,6 +53,111 @@ docker compose -f docker-compose.yml -f docker-compose.observability.yml -f dock
 
 ---
 
+## PostgreSQL performance profile
+
+`docker-compose.performance.yml` is an optional overlay for self-hosted
+Postgres. It adds PgBouncer transaction pooling and a loopback-only PgHero
+dashboard. Neither service is part of the default stack, and managed Postgres
+users should normally prefer their provider's pooler and query-insights UI.
+
+### PgBouncer transaction pooling
+
+Create the least-privileged app and migrator roles first (see
+[`deployment.md`](../deployment.md#postgres-roles-app-vs-migrator--sec-25)), then
+export only the app-role credential for PgBouncer:
+
+```bash
+export PGBOUNCER_DATABASE_USER=zerotrust_app_user
+export PGBOUNCER_DATABASE_PASSWORD='<app-role-password>'
+export PGBOUNCER_DATABASE_NAME=zerotrust
+
+docker compose \
+  -f docker-compose.yml \
+  -f docker-compose.performance.yml \
+  --profile pooling \
+  up -d postgres pgbouncer
+```
+
+PgBouncer listens on `127.0.0.1:6432`. Point the API and worker runtime
+`DATABASE_URL` at that port. The generated authentication file is written only
+to PgBouncer's ephemeral `/var/run/pgbouncer` tmpfs; it is not stored in the
+repository or a volume. The credential is still injected into the container
+environment, so restrict Docker daemon access and source it from your secrets
+manager rather than a committed env file.
+
+Keep `DATABASE_MIGRATOR_URL` pointed directly at Postgres on port `5432`.
+Drizzle migrations and `db:push` must bypass transaction pooling because schema
+operations and migration session state are not runtime traffic. The runtime
+pool supports the app's multi-statement transactions and protocol-level prepared
+queries (`max_prepared_statements = 100`). Tenant RLS context remains safe because
+`src/db/rls.ts` applies `set_config(..., true)` inside the same transaction; do
+not replace it with session-level `SET` state.
+
+The checked-in limits are a conservative starting point: 200 client connections,
+20 backend connections per user/database pool, and 40 backend connections per
+database. Tune those numbers against the Postgres connection limit and leave
+headroom for the direct migrator, PgHero, backups, and operator access.
+
+### PgHero query insights
+
+The overlay enables `pg_stat_statements` when it starts the local Postgres
+service. Provision the dedicated diagnostics role and set its login password
+interactively:
+
+```bash
+docker compose \
+  -f docker-compose.yml \
+  -f docker-compose.performance.yml \
+  up -d postgres
+
+docker compose \
+  -f docker-compose.yml \
+  -f docker-compose.performance.yml \
+  exec -T postgres \
+  psql -U zerotrust -d zerotrust \
+  < scripts/ops/setup-pghero-readonly-role.sql
+
+docker compose \
+  -f docker-compose.yml \
+  -f docker-compose.performance.yml \
+  exec postgres psql -U zerotrust -d zerotrust
+# In psql: \password zerotrust_pghero_user
+```
+
+Then set a URL containing that dedicated login, plus optional dashboard Basic
+auth, and start PgHero:
+
+```bash
+export PGHERO_DATABASE_URL='postgresql://zerotrust_pghero_user:<url-encoded-password>@postgres:5432/zerotrust'
+export PGHERO_USERNAME=operator
+export PGHERO_PASSWORD='<dashboard-password>'
+
+docker compose \
+  -f docker-compose.yml \
+  -f docker-compose.performance.yml \
+  --profile database-insights \
+  up -d pghero
+```
+
+Open `http://127.0.0.1:8082`. The role is read-only and exposes only the safe
+diagnostic views PgHero needs; query termination and stats-reset functions are
+deliberately omitted. Do not publish this port or reuse the app, migrator, or
+database-owner URL. Put authentication and TLS at a private reverse proxy if
+remote operator access is required.
+
+Validate the merged overlay before deployment:
+
+```bash
+docker compose \
+  -f docker-compose.yml \
+  -f docker-compose.performance.yml \
+  --profile pooling \
+  --profile database-insights \
+  config
+```
+
+---
+
 ## Default URLs and ports
 
 | Service | URL | Compose file |
@@ -73,6 +178,8 @@ docker compose -f docker-compose.yml -f docker-compose.observability.yml -f dock
 | **HashiCorp Vault** | http://localhost:8200 | `docker-compose.platform.yml` |
 | **NocoDB** | http://localhost:8080 | `docker-compose.platform.yml` |
 | Jaeger (alternative traces) | http://localhost:16686 | `docker-compose.tracing.yml` |
+| **PgBouncer** (optional) | postgresql://127.0.0.1:6432 | `docker-compose.performance.yml` |
+| **PgHero** (optional) | http://127.0.0.1:8082 | `docker-compose.performance.yml` |
 
 ---
 

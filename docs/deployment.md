@@ -852,6 +852,30 @@ only for legacy `db:push` environments.
 
 ---
 
+## Optional PgBouncer and PgHero profile
+
+Self-hosted deployments can merge `docker-compose.performance.yml` to add
+PgBouncer transaction pooling and the PgHero query dashboard. Both services are
+profile-gated and absent from the default Compose topology. PgBouncer is bound to
+`127.0.0.1:6432`; PgHero is bound to `http://127.0.0.1:8082`.
+
+Runtime API and worker processes may point `DATABASE_URL` at PgBouncer. Continue
+to point `DATABASE_MIGRATOR_URL` directly at Postgres so migrations bypass the
+transaction pool. Never send `db:migrate`, `db:push`, restore, or baseline jobs
+through port `6432`. The transaction-local RLS context in `src/db/rls.ts` is
+compatible with transaction pooling; session-level tenant state is not.
+
+PgHero requires `pg_stat_statements` and the dedicated read-only role created by
+`scripts/ops/setup-pghero-readonly-role.sql`. Set `PGHERO_DATABASE_URL` to that
+role only—never the runtime, migrator, or owner URL. The checked-in role cannot
+write, terminate queries, or reset query statistics. Keep the dashboard on the
+loopback bind or place it behind a private authenticated TLS proxy.
+
+Start commands, credential setup, pool limits, and verification steps are in the
+[`docs/infra` PostgreSQL performance profile](./infra/README.md#postgresql-performance-profile).
+For managed Postgres, prefer the provider's supported pooler and query-insights
+surface unless you specifically operate these components yourself.
+
 ## Read replica routing
 
 When `DATABASE_URL_READ_REPLICA` is set, read-heavy paths call `getReadDb()` (or
