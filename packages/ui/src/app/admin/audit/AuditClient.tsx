@@ -2,22 +2,22 @@
 
 import { useMemo, useState } from "react";
 import AreaTrendChart from "@/components/admin/AreaTrendChart";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { DataTable } from "@/components/ui/data-table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { PageHeader } from "@/components/ui/page-header";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { useAuditEntriesQuery, useAuditVerifyQuery } from "@/lib/server-state/audit";
 import type { AuditEntry } from "@/lib/server-state/types";
 import { auditEntriesFromResponse, auditVolumeByDay } from "./auditData";
+import {
+  AuditStatusBadge,
+  createAuditColumns,
+  getAuditDetail,
+  getAuditIp,
+  getAuditTimestamp,
+  getAuditUser,
+} from "./columns";
 
 export default function AuditClient() {
   const entriesQuery = useAuditEntriesQuery();
@@ -38,38 +38,10 @@ export default function AuditClient() {
   const loading = entriesQuery.isPending;
   const verifying = verifyQuery.isFetching;
   const loadError = entriesQuery.error ? "Failed to load audit entries." : null;
+  const columns = createAuditColumns(setSelected);
 
   async function runVerify() {
     await verifyQuery.refetch();
-  }
-
-  function getStatus(entry: AuditEntry): string {
-    if (entry.success === false) return "failure";
-    if (entry.success === true) return "success";
-    return entry.status ?? "success";
-  }
-
-  function getTimestamp(entry: AuditEntry): string {
-    const raw = entry.timestamp ?? entry.createdAt;
-    if (!raw) return "—";
-    return new Date(raw).toLocaleString();
-  }
-
-  function getUser(entry: AuditEntry): string {
-    return entry.actorEmail ?? entry.userEmail ?? entry.user ?? entry.userId ?? "—";
-  }
-
-  function getIp(entry: AuditEntry): string {
-    return entry.ip ?? entry.ipAddress ?? "—";
-  }
-
-  function getDetail(entry: AuditEntry): Record<string, unknown> {
-    return entry.metadata ?? entry.details ?? entry.resourceDetails ?? {};
-  }
-
-  function statusBadge(status: string) {
-    const failed = status === "failure" || status === "error";
-    return <Badge variant={failed ? "destructive" : "success"}>{status}</Badge>;
   }
 
   return (
@@ -101,7 +73,7 @@ export default function AuditClient() {
             </>
           ) : (
             <>
-              ✗ Tamper detected after checking {verify.checked} entries
+              ✕ Tamper detected after checking {verify.checked} entries
               {verify.brokenAt?.seq ? ` — broke at seq ${verify.brokenAt.seq}` : ""}
               {verify.brokenAt?.reason ? ` (${verify.brokenAt.reason})` : ""}.
             </>
@@ -130,57 +102,14 @@ export default function AuditClient() {
 
       <Card>
         <CardContent className="pt-6">
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Timestamp</TableHead>
-                  <TableHead>User</TableHead>
-                  <TableHead>Action</TableHead>
-                  <TableHead>IP</TableHead>
-                  <TableHead>Status</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {loading && (
-                  <TableRow>
-                    <TableCell colSpan={5} className="py-8 text-center text-muted-foreground">
-                      Loading…
-                    </TableCell>
-                  </TableRow>
-                )}
-                {!loading && entries.length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={5} className="py-8 text-center text-muted-foreground">
-                      No audit entries found.
-                    </TableCell>
-                  </TableRow>
-                )}
-                {!loading &&
-                  entries.map((entry) => (
-                    <TableRow
-                      key={entry.id}
-                      onClick={() => setSelected(entry)}
-                      className="cursor-pointer"
-                    >
-                      <TableCell className="whitespace-nowrap text-xs text-muted-foreground">
-                        {getTimestamp(entry)}
-                      </TableCell>
-                      <TableCell className="text-foreground">{getUser(entry)}</TableCell>
-                      <TableCell>
-                        <code className="rounded bg-muted px-2 py-1 text-xs text-primary">
-                          {entry.action}
-                        </code>
-                      </TableCell>
-                      <TableCell className="font-mono text-xs text-muted-foreground">
-                        {getIp(entry)}
-                      </TableCell>
-                      <TableCell>{statusBadge(getStatus(entry))}</TableCell>
-                    </TableRow>
-                  ))}
-              </TableBody>
-            </Table>
-          </div>
+          <DataTable
+            columns={columns}
+            data={entries}
+            isLoading={loading}
+            emptyMessage="No audit entries found."
+            search={{ placeholder: "Search audit logs" }}
+            tableLabel="Audit logs"
+          />
         </CardContent>
       </Card>
 
@@ -194,11 +123,11 @@ export default function AuditClient() {
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <div>
                   <p className="mb-1 text-xs text-muted-foreground">Timestamp</p>
-                  <p className="text-foreground">{getTimestamp(selected)}</p>
+                  <p className="text-foreground">{getAuditTimestamp(selected)}</p>
                 </div>
                 <div>
                   <p className="mb-1 text-xs text-muted-foreground">User</p>
-                  <p className="text-foreground">{getUser(selected)}</p>
+                  <p className="text-foreground">{getAuditUser(selected)}</p>
                 </div>
                 <div>
                   <p className="mb-1 text-xs text-muted-foreground">Action</p>
@@ -208,18 +137,18 @@ export default function AuditClient() {
                 </div>
                 <div>
                   <p className="mb-1 text-xs text-muted-foreground">IP Address</p>
-                  <p className="font-mono text-xs text-foreground">{getIp(selected)}</p>
+                  <p className="font-mono text-xs text-foreground">{getAuditIp(selected)}</p>
                 </div>
                 <div>
                   <p className="mb-1 text-xs text-muted-foreground">Status</p>
-                  {statusBadge(getStatus(selected))}
+                  <AuditStatusBadge entry={selected} />
                 </div>
               </div>
-              {Object.keys(getDetail(selected)).length > 0 && (
+              {Object.keys(getAuditDetail(selected)).length > 0 && (
                 <div>
                   <p className="mb-2 text-xs text-muted-foreground">Details</p>
                   <pre className="max-h-48 overflow-auto rounded-lg bg-muted p-3 text-xs text-foreground/80">
-                    {JSON.stringify(getDetail(selected), null, 2)}
+                    {JSON.stringify(getAuditDetail(selected), null, 2)}
                   </pre>
                 </div>
               )}

@@ -3,30 +3,16 @@
 import { Webhook } from "lucide-react";
 import { useState } from "react";
 import { ServerStateStatus } from "@/components/ServerStateStatus";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { DataTable } from "@/components/ui/data-table";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PageHeader } from "@/components/ui/page-header";
 import { FilterBar } from "@/components/ui/page-patterns";
 import { ErrorState, SkeletonList } from "@/components/ui/States";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { useAdminWebhookDeliveriesQuery } from "@/lib/server-state/adminWebhooks";
-
-const STATUS_VARIANT: Record<string, "success" | "destructive" | "warning" | "secondary"> = {
-  delivered: "success",
-  failed: "destructive",
-  retrying: "warning",
-  pending: "secondary",
-};
+import { webhookDeliveryColumns } from "./columns";
 
 export default function AdminWebhookDeliveriesPage() {
   const [webhookId, setWebhookId] = useState("");
@@ -34,15 +20,15 @@ export default function AdminWebhookDeliveriesPage() {
   const deliveriesQuery = useAdminWebhookDeliveriesQuery(submittedId, { limit: 50 });
   const deliveries = deliveriesQuery.data?.data ?? [];
 
-  function handleLookup(e: React.FormEvent) {
-    e.preventDefault();
+  function handleLookup(event: React.FormEvent) {
+    event.preventDefault();
     setSubmittedId(webhookId.trim());
   }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
-        <Webhook className="h-6 w-6 text-primary" />
+        <Webhook className="h-6 w-6 text-primary" aria-hidden="true" />
         <div>
           <PageHeader
             title={<>Webhook delivery log</>}
@@ -65,7 +51,7 @@ export default function AdminWebhookDeliveriesPage() {
               <Input
                 id="webhookId"
                 value={webhookId}
-                onChange={(e) => setWebhookId(e.target.value)}
+                onChange={(event) => setWebhookId(event.target.value)}
                 placeholder="uuid"
                 required
               />
@@ -94,37 +80,14 @@ export default function AdminWebhookDeliveriesPage() {
               />
             ) : deliveriesQuery.isPending ? (
               <SkeletonList count={5} />
-            ) : deliveries.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No deliveries found.</p>
             ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Event</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Attempt</TableHead>
-                    <TableHead>HTTP</TableHead>
-                    <TableHead>When</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {deliveries.map((d) => (
-                    <TableRow key={d.id}>
-                      <TableCell className="font-mono text-xs">{d.event}</TableCell>
-                      <TableCell>
-                        <Badge variant={STATUS_VARIANT[d.status] ?? "secondary"}>{d.status}</Badge>
-                      </TableCell>
-                      <TableCell>{d.attempt}</TableCell>
-                      <TableCell className="text-muted-foreground">
-                        {d.responseStatus ?? "—"}
-                      </TableCell>
-                      <TableCell className="text-muted-foreground">
-                        {new Date(d.recordedAt).toLocaleString()}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+              <DataTable
+                columns={webhookDeliveryColumns}
+                data={deliveries}
+                emptyMessage="No deliveries found."
+                search={{ placeholder: "Search webhook deliveries" }}
+                tableLabel="Webhook deliveries"
+              />
             )}
           </CardContent>
         </Card>

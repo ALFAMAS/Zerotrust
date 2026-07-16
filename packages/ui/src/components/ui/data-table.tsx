@@ -4,20 +4,26 @@ import {
   type ColumnDef,
   flexRender,
   getCoreRowModel,
+  getFilteredRowModel,
   getSortedRowModel,
+  type OnChangeFn,
+  type RowSelectionState,
   type SortingState,
+  type Table as TanStackTable,
   useReactTable,
   type VisibilityState,
 } from "@tanstack/react-table";
 import { ArrowDown, ArrowUp, ArrowUpDown, SlidersHorizontal } from "lucide-react";
-import { useState } from "react";
+import { type ReactNode, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -44,6 +50,40 @@ interface DataTableProps<TData, TValue> {
   emptyMessage?: string;
   /** Column id to hide from the visibility dropdown as well as the table (e.g. an id column). */
   initialColumnVisibility?: VisibilityState;
+  search?: {
+    placeholder: string;
+  };
+  tableLabel?: string;
+  selection?: {
+    getRowId: (row: TData) => string;
+    rowSelection?: RowSelectionState;
+    onRowSelectionChange?: OnChangeFn<RowSelectionState>;
+    renderToolbar?: (context: { table: TanStackTable<TData>; selectedRows: TData[] }) => ReactNode;
+  };
+}
+
+function createSelectionColumn<TData, TValue>(): ColumnDef<TData, TValue> {
+  return {
+    id: "select",
+    enableHiding: false,
+    enableSorting: false,
+    header: ({ table }) => (
+      <Checkbox
+        aria-label="Select all visible rows"
+        checked={
+          table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && "indeterminate")
+        }
+        onCheckedChange={(value) => table.toggleAllPageRowsSelected(value === true)}
+      />
+    ),
+    cell: ({ row }) => (
+      <Checkbox
+        aria-label={`Select row ${row.id}`}
+        checked={row.getIsSelected()}
+        onCheckedChange={(value) => row.toggleSelected(value === true)}
+      />
+    ),
+  };
 }
 
 /**
@@ -58,55 +98,87 @@ export function DataTable<TData, TValue>({
   isLoading = false,
   emptyMessage = "No results.",
   initialColumnVisibility,
+  search,
+  selection,
+  tableLabel,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
+  const [globalFilter, setGlobalFilter] = useState("");
+  const [internalRowSelection, setInternalRowSelection] = useState<RowSelectionState>({});
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
     initialColumnVisibility ?? {}
   );
+  const tableColumns = selection ? [createSelectionColumn<TData, TValue>(), ...columns] : columns;
+  const rowSelection = selection?.rowSelection ?? internalRowSelection;
 
   const table = useReactTable({
     data,
-    columns,
-    state: { sorting, columnVisibility },
+    columns: tableColumns,
+    state: { sorting, columnVisibility, globalFilter, rowSelection },
     onSortingChange: setSorting,
     onColumnVisibilityChange: setColumnVisibility,
+    onGlobalFilterChange: setGlobalFilter,
+    onRowSelectionChange: selection?.onRowSelectionChange ?? setInternalRowSelection,
+    enableRowSelection: Boolean(selection),
+    getRowId: selection?.getRowId,
     getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
   });
 
   const hideableColumns = table.getAllLeafColumns().filter((column) => column.getCanHide());
+  const selectedRows = table.getSelectedRowModel().flatRows.map((row) => row.original);
 
   return (
     <div className="space-y-3">
-      {hideableColumns.length > 0 && (
-        <div className="flex justify-end">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button type="button" variant="outline" size="sm">
-                <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />
-                Columns
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {hideableColumns.map((column) => (
-                <DropdownMenuCheckboxItem
-                  key={column.id}
-                  checked={column.getIsVisible()}
-                  onCheckedChange={(value) => column.toggleVisibility(!!value)}
-                  onSelect={(e) => e.preventDefault()}
-                >
-                  {typeof column.columnDef.header === "string"
-                    ? column.columnDef.header
-                    : column.id}
-                </DropdownMenuCheckboxItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
+      {(search || hideableColumns.length > 0 || selection?.renderToolbar) && (
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          {search ? (
+            <div className="w-full max-w-sm space-y-1">
+              <Input
+                type="search"
+                aria-label={search.placeholder}
+                placeholder={search.placeholder}
+                value={globalFilter}
+                onChange={(event) => setGlobalFilter(event.target.value)}
+              />
+              <p className="text-xs text-muted-foreground">Search applies to this page only.</p>
+            </div>
+          ) : (
+            <span />
+          )}
+          <div className="flex items-center gap-2">
+            {selection?.renderToolbar?.({ table, selectedRows })}
+            {hideableColumns.length > 0 && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button type="button" variant="outline" size="sm">
+                    <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />
+                    Columns
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  {hideableColumns.map((column) => (
+                    <DropdownMenuCheckboxItem
+                      key={column.id}
+                      checked={column.getIsVisible()}
+                      onCheckedChange={(value) => column.toggleVisibility(!!value)}
+                      onSelect={(e) => e.preventDefault()}
+                    >
+                      {typeof column.columnDef.header === "string"
+                        ? column.columnDef.header
+                        : column.id}
+                    </DropdownMenuCheckboxItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+          </div>
         </div>
       )}
 
       <div className="overflow-x-auto">
-        <Table>
+        <Table aria-label={tableLabel}>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
@@ -114,7 +186,19 @@ export function DataTable<TData, TValue>({
                   const meta = header.column.columnDef.meta;
                   const sortState = header.column.getIsSorted();
                   return (
-                    <TableHead key={header.id} className={meta?.headerClassName}>
+                    <TableHead
+                      key={header.id}
+                      className={meta?.headerClassName}
+                      aria-sort={
+                        header.column.getCanSort()
+                          ? sortState === "asc"
+                            ? "ascending"
+                            : sortState === "desc"
+                              ? "descending"
+                              : "none"
+                          : undefined
+                      }
+                    >
                       {header.isPlaceholder ? null : header.column.getCanSort() ? (
                         <button
                           type="button"
@@ -146,7 +230,7 @@ export function DataTable<TData, TValue>({
             {isLoading && (
               <TableRow>
                 <TableCell
-                  colSpan={columns.length}
+                  colSpan={table.getVisibleLeafColumns().length}
                   className="py-8 text-center text-muted-foreground"
                 >
                   Loading…
@@ -156,16 +240,16 @@ export function DataTable<TData, TValue>({
             {!isLoading && table.getRowModel().rows.length === 0 && (
               <TableRow>
                 <TableCell
-                  colSpan={columns.length}
+                  colSpan={table.getVisibleLeafColumns().length}
                   className="py-8 text-center text-muted-foreground"
                 >
-                  {emptyMessage}
+                  {data.length > 0 && globalFilter ? "No results match your search." : emptyMessage}
                 </TableCell>
               </TableRow>
             )}
             {!isLoading &&
               table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id}>
+                <TableRow key={row.id} data-state={row.getIsSelected() ? "selected" : undefined}>
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id} className={cell.column.columnDef.meta?.className}>
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}

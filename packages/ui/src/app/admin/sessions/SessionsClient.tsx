@@ -1,38 +1,21 @@
 "use client";
 
-import { AlertTriangle, ShieldCheck } from "lucide-react";
 import { useState } from "react";
 import { ServerStateStatus } from "@/components/ServerStateStatus";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { DataTable } from "@/components/ui/data-table";
 import { PageHeader } from "@/components/ui/page-header";
 import { ErrorState } from "@/components/ui/States";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { useToast } from "@/context/ToastContext";
 import {
   useAdminSessionsListQuery,
   useRevokeAdminSessionMutation,
 } from "@/lib/server-state/sessions";
 import type { AdminSession } from "@/lib/server-state/types";
+import { createSessionColumns, isActiveSession } from "./columns";
 
 type TabFilter = "all" | "active" | "expired";
-
-const fmt = (d?: string | null) => (d ? new Date(d).toLocaleString() : "—");
-
-function anomalyCount(flags: unknown): number {
-  if (!flags) return 0;
-  if (Array.isArray(flags)) return flags.length;
-  if (typeof flags === "object") return Object.keys(flags as object).length;
-  return 0;
-}
 
 export default function SessionsClient() {
   const { toast } = useToast();
@@ -58,21 +41,9 @@ export default function SessionsClient() {
     }
   }
 
-  function isActiveSession(s: AdminSession): boolean {
-    if (s.isActive === false || s.revokedAt) return false;
-    if (s.expiresAt && new Date(s.expiresAt) < new Date()) return false;
-    return true;
-  }
-
-  function statusLabel(s: AdminSession): string {
-    if (s.revokedAt) return "revoked";
-    if (!isActiveSession(s)) return "expired";
-    return "active";
-  }
-
-  const filtered = sessions.filter((s) => {
+  const filtered = sessions.filter((session) => {
     if (tab === "all") return true;
-    return tab === "active" ? isActiveSession(s) : !isActiveSession(s);
+    return tab === "active" ? isActiveSession(session) : !isActiveSession(session);
   });
 
   const tabs: { key: TabFilter; label: string }[] = [
@@ -80,6 +51,10 @@ export default function SessionsClient() {
     { key: "active", label: "Active" },
     { key: "expired", label: "Expired" },
   ];
+  const columns = createSessionColumns({
+    isRevoking: (sessionId) => revokeMutation.isPending && revokeMutation.variables === sessionId,
+    onRevoke: (session) => void handleRevoke(session),
+  });
 
   if (error && !sessionsQuery.data) {
     return (
@@ -104,21 +79,20 @@ export default function SessionsClient() {
         onRefresh={() => void sessionsQuery.refetch()}
       />
 
-      {/* Tabs */}
       <div className="flex gap-1 border-b border-border">
-        {tabs.map((t) => (
+        {tabs.map((item) => (
           <Button
             type="button"
-            key={t.key}
+            key={item.key}
             variant="ghost"
-            onClick={() => setTab(t.key)}
+            onClick={() => setTab(item.key)}
             className={`px-4 py-3 text-sm font-medium -mb-px border-b-2 transition-colors ${
-              tab === t.key
+              tab === item.key
                 ? "border-primary text-primary"
                 : "border-transparent text-muted-foreground hover:text-foreground"
             }`}
           >
-            {t.label}
+            {item.label}
           </Button>
         ))}
       </div>
@@ -134,125 +108,14 @@ export default function SessionsClient() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>User</TableHead>
-                  <TableHead>Device</TableHead>
-                  <TableHead>Location</TableHead>
-                  <TableHead>Created</TableHead>
-                  <TableHead>Last Active</TableHead>
-                  <TableHead>Expires</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {loading && (
-                  <TableRow>
-                    <TableCell colSpan={8} className="py-8 text-center text-muted-foreground">
-                      Loading…
-                    </TableCell>
-                  </TableRow>
-                )}
-                {!loading && filtered.length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={8} className="py-8 text-center text-muted-foreground">
-                      No sessions found.
-                    </TableCell>
-                  </TableRow>
-                )}
-                {!loading &&
-                  filtered.map((s) => {
-                    const fp = s.deviceFingerprint;
-                    const active = isActiveSession(s);
-                    const label = statusLabel(s);
-                    const anomalies = anomalyCount(s.anomalyFlags);
-                    const deviceLabel =
-                      fp?.browser || fp?.os
-                        ? `${fp?.browser || "Unknown"} on ${fp?.os || "Unknown OS"}`
-                        : s.userAgent || "Unknown device";
-                    const badgeVariant =
-                      label === "revoked" ? "destructive" : active ? "success" : "secondary";
-                    return (
-                      <TableRow key={s.id} className="align-top">
-                        <TableCell className="text-foreground">
-                          <div className="font-medium">
-                            {s.userEmail ?? `User ${s.userId ?? "unknown"}`}
-                          </div>
-                          {s.userDisplayName && (
-                            <div className="text-xs text-muted-foreground">{s.userDisplayName}</div>
-                          )}
-                        </TableCell>
-                        <TableCell
-                          className="text-muted-foreground"
-                          title={s.userAgent ?? undefined}
-                        >
-                          <div className="flex items-center gap-2 text-foreground">
-                            {deviceLabel}
-                            {fp?.isTrusted && (
-                              <span title="Trusted device">
-                                <ShieldCheck className="h-3.5 w-3.5 text-success-subtle-foreground" />
-                              </span>
-                            )}
-                          </div>
-                          {fp?.platform && <div className="text-xs">{fp.platform}</div>}
-                        </TableCell>
-                        <TableCell className="text-muted-foreground">
-                          <div className="font-mono text-xs">{s.ipAddress ?? "—"}</div>
-                          {s.country && <div className="text-xs">{s.country}</div>}
-                        </TableCell>
-                        <TableCell className="text-xs text-muted-foreground">
-                          {fmt(s.createdAt)}
-                        </TableCell>
-                        <TableCell className="text-xs text-muted-foreground">
-                          {fmt(s.lastActivityAt)}
-                        </TableCell>
-                        <TableCell className="text-xs text-muted-foreground">
-                          {fmt(s.expiresAt)}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex flex-col items-start gap-1">
-                            <Badge variant={badgeVariant}>{label}</Badge>
-                            {label === "revoked" && s.revokedReason && (
-                              <span className="text-xs text-muted-foreground">
-                                {s.revokedReason}
-                              </span>
-                            )}
-                            {anomalies > 0 && (
-                              <span
-                                className="inline-flex items-center gap-1 text-xs font-medium text-warning-subtle-foreground"
-                                title="Anomaly flags raised for this session"
-                              >
-                                <AlertTriangle className="h-3 w-3" />
-                                {anomalies} {anomalies === 1 ? "anomaly" : "anomalies"}
-                              </span>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          {active && (
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleRevoke(s)}
-                              disabled={
-                                revokeMutation.isPending && revokeMutation.variables === s.id
-                              }
-                              className="text-destructive hover:text-destructive"
-                            >
-                              Revoke
-                            </Button>
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-              </TableBody>
-            </Table>
-          </div>
+          <DataTable
+            columns={columns}
+            data={filtered}
+            isLoading={loading}
+            emptyMessage="No sessions found."
+            search={{ placeholder: "Search sessions" }}
+            tableLabel="Admin sessions"
+          />
         </CardContent>
       </Card>
 
@@ -265,7 +128,7 @@ export default function SessionsClient() {
             type="button"
             variant="outline"
             size="sm"
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            onClick={() => setPage((currentPage) => Math.max(1, currentPage - 1))}
             disabled={page <= 1 || loading}
           >
             Previous
@@ -274,7 +137,7 @@ export default function SessionsClient() {
             type="button"
             variant="outline"
             size="sm"
-            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            onClick={() => setPage((currentPage) => Math.min(totalPages, currentPage + 1))}
             disabled={page >= totalPages || loading}
           >
             Next
