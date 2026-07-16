@@ -1,7 +1,7 @@
 # Open-source optimization rollout design
 
 **Date:** 2026-07-16
-**Status:** Approved direction; written specification awaiting review
+**Status:** Approved
 
 ## Objective
 
