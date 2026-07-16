@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: `Pricing — ${brand.name}`,
-  description: `Simple, predictable plans for ${brand.name}: a free tier for small teams, Pro for growing products, and Enterprise for SSO and unlimited usage.`,
+  description: `Simple, predictable plans for ${brand.name}: a free tier for small teams, Pro for growing products, and Enterprise for custom domains and unlimited usage.`,
 };
 
 // Public mirror of the server-side plan gates in `src/shared/plans.ts`
@@ -54,7 +54,7 @@ const tiers = [
   {
     name: "Enterprise",
     price: formatPlanPrice("enterprise"),
-    tagline: "For organizations that need SSO, compliance surfaces, and no ceilings.",
+    tagline: "For organizations that need custom domains, compliance surfaces, and no ceilings.",
     cta: "Start with Enterprise",
     href: "/register",
     highlighted: false,
@@ -119,7 +119,7 @@ export default function PricingPage() {
             <p className="mt-4 max-w-2xl text-base leading-7 text-muted-foreground">
               Every plan includes the full authentication platform — passwords, passkeys, MFA,
               organizations, and anomaly detection. Paid tiers raise limits and unlock access
-              control, audit, and SSO.
+              control, audit, and custom domains.
             </p>
           </div>
         </section>
