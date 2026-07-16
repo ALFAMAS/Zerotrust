@@ -15,7 +15,7 @@ export default defineConfig({
       "packages/ui/src/**/*.{test,spec}.ts",
       "packages/shared-types/src/**/*.test.ts",
     ],
-    exclude: ["node_modules", "dist"],
+    exclude: ["node_modules", "dist", "src/**/*.container.test.ts"],
     coverage: {
       provider: "v8",
       reporter: ["text", "json", "html", "json-summary"],

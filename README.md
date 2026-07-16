@@ -285,6 +285,7 @@ exits cleanly if an admin already exists.
 | `bun run bootstrap:admin`          | First admin + default org            |
 | `bun run db:backup` / `db:restore` | Encrypted `pg_dump` backup/restore   |
 | `bun run test`                     | Vitest suite (API + UI logic)        |
+| `bun run test:integration:containers` | Hermetic Postgres + Redis integration tests |
 | `bun run lint` / `lint:fix`        | Biome check / autofix                |
 | `bun run type-check`               | `tsc --noEmit`                       |
 | `bun run verify:generated`         | Regenerate SDK + docs; fail on drift |
@@ -510,6 +511,7 @@ Generated SDK: [`packages/client`](./packages/client/README.md)
 bun run test            # Vitest (API + packages/ui plain-logic tests)
 bun run test:watch      # watch mode
 bun run test:coverage   # coverage report
+bun run test:integration:containers # pinned Postgres + Redis via Testcontainers
 bun run lint            # Biome lint
 bun run lint:fix        # autofix (also runs on commit via Husky)
 bun run type-check      # tsc --noEmit
@@ -518,6 +520,10 @@ bun run verify:generated # SDK + API docs drift check
 
 CI runs lint, type-check, tests, generated-output drift checks, and the UI
 build on every push/PR to `main`.
+
+The Testcontainers command starts one PostgreSQL and one Redis container for the
+run, applies the migration chain, and tears both down afterward. It requires a
+running Docker-compatible container runtime; ordinary unit tests do not.
 
 > Set `HIBP_CHECK_ENABLED=false` for fully offline test runs (breach check hits the network by default).
 

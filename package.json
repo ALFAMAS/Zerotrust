@@ -33,6 +33,8 @@
     "test": "bunx vitest",
     "test:watch": "bunx vitest --watch",
     "test:coverage": "bunx vitest --coverage",
+    "test:integration:containers": "bunx vitest run --config vitest.integration.config.ts",
+    "test:integration:containers:watch": "bunx vitest --config vitest.integration.config.ts",
     "test:coverage:ui": "bun run --cwd packages/ui vitest run --coverage",
     "lint": "biome check",
     "lint:fix": "biome check --write",
