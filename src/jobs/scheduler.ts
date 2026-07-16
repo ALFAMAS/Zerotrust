@@ -25,31 +25,19 @@
 import { type Job, Queue, Worker } from "bullmq";
 import Redis from "ioredis";
 import { getLogger } from "../logger";
+import { parseRedisConnection, QUEUE_NAMES } from "./queueConfig";
 import { getJob, JOB_REGISTRY, type JobDef } from "./registry";
 
 const logger = getLogger("jobs-scheduler");
 
 // BullMQ v5 disallows ":" in queue names (it's the Redis key separator).
-const QUEUE_NAME = "zerotrust-scheduled-jobs";
+const QUEUE_NAME = QUEUE_NAMES.scheduledJobs;
 const IDEMPOTENCY_PREFIX = "zerotrust:job:completed:";
 const IDEMPOTENCY_TTL_MS = 7 * 24 * 3600 * 1000; // 7 days
 
 let _queue: Queue | null = null;
 let _worker: Worker | null = null;
 let _redis: Redis | null = null;
-
-function parseRedisUri(uri: string): { host: string; port: number; password?: string } | null {
-  try {
-    const url = new URL(uri);
-    return {
-      host: url.hostname,
-      port: parseInt(url.port || "6379", 10),
-      password: url.password ? decodeURIComponent(url.password) : undefined,
-    };
-  } catch {
-    return null;
-  }
-}
 
 /** The underlying BullMQ queue — for ops/admin introspection (e.g. failed-job counts). */
 export function getScheduledJobQueue(): Queue | null {
@@ -171,7 +159,7 @@ export async function startJobScheduler(redisUri = process.env.REDIS_URI): Promi
     logger.warn("REDIS_URI not set — scheduled jobs (BullMQ) will not run");
     return;
   }
-  const conn = parseRedisUri(redisUri);
+  const conn = parseRedisConnection(redisUri);
   if (!conn) {
     logger.warn("Cannot parse REDIS_URI — scheduled jobs (BullMQ) will not run");
     return;

@@ -166,6 +166,7 @@ the BullMQ email queue.
 | API server          | http://localhost:1337      | `PORT` env (default **1337**)             |
 | Next.js app + admin | http://localhost:3000      | admin panel at `/admin`                   |
 | API docs (Scalar)   | http://localhost:1337/docs | dev; production opt-in                    |
+| Queue dashboard     | http://localhost:1337/admin/queues | admin-only; production opt-in       |
 | Health / metrics    | `/healthz` · `/metrics`    | on the API port                           |
 | Next.js MCP (dev)   | `/_next/mcp`               | coding-agent tools when `bun dev:ui` runs |
 | PostgreSQL          | localhost:5432             | or a managed provider (e.g. Neon)         |
@@ -316,6 +317,7 @@ Use this before pointing real users at your deployment.
 - [ ] `METRICS_AUTH_TOKEN` — protects `/metrics` scrape endpoint
 - [ ] `BACKUP_ENCRYPTION_KEY_HEX` + `BACKUP_REQUIRE_ENCRYPTION=true` (unless `BACKUP_ENABLED=false`)
 - [ ] Keep `API_DOCS_ENABLED=false`, or explicitly set `true` to publish Scalar at `/docs`
+- [ ] Keep `QUEUE_DASHBOARD_ENABLED=false`, or explicitly set `true` for admin Bull Board access
 
 ### Auth & domains
 

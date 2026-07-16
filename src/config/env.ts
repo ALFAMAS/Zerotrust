@@ -32,6 +32,7 @@ export const EnvSchema = z
     BACKUP_REQUIRE_ENCRYPTION: z.string().optional(),
     BACKUP_ENABLED: z.string().optional(),
     API_DOCS_ENABLED: z.enum(["true", "false"]).optional(),
+    QUEUE_DASHBOARD_ENABLED: z.enum(["true", "false"]).optional(),
   })
   .superRefine((env, ctx) => {
     const isProduction = env.NODE_ENV === "production";

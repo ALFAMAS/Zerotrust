@@ -1,4 +1,5 @@
 import { Queue, Worker } from "bullmq";
+import { parseRedisConnection, QUEUE_NAMES } from "../../jobs/queueConfig";
 import { getLogger } from "../../logger/index";
 
 const logger = getLogger("email-queue");
@@ -19,30 +20,17 @@ export interface EmailJobData {
 }
 
 // BullMQ v5 disallows ":" in queue names (it's the Redis key separator).
-const QUEUE_NAME = "zerotrust-email";
+const QUEUE_NAME = QUEUE_NAMES.email;
 
 let _queue: Queue<EmailJobData> | null = null;
 let _worker: Worker<EmailJobData> | null = null;
-
-function parseRedisUri(uri: string): { host: string; port: number; password?: string } | null {
-  try {
-    const url = new URL(uri);
-    return {
-      host: url.hostname,
-      port: parseInt(url.port || "6379", 10),
-      password: url.password ? decodeURIComponent(url.password) : undefined,
-    };
-  } catch {
-    return null;
-  }
-}
 
 export function getEmailQueue(): Queue<EmailJobData> | null {
   return _queue;
 }
 
 export async function initEmailQueue(redisUri: string): Promise<void> {
-  const conn = parseRedisUri(redisUri);
+  const conn = parseRedisConnection(redisUri);
   if (!conn) {
     logger.warn("Cannot parse REDIS_URI — email queue disabled");
     return;

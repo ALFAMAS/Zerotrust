@@ -16,13 +16,14 @@
  */
 import { Queue, Worker } from "bullmq";
 import { releaseStripeEvent } from "../../db/repositories/stripeEvents.repository";
+import { parseRedisConnection, QUEUE_NAMES } from "../../jobs/queueConfig";
 import { getLogger } from "../../logger/index";
 import { processStripeEvent } from "./stripeWebhookProcessor";
 
 const logger = getLogger("stripe-webhook-queue");
 
 // BullMQ v5 disallows ":" in queue names (it's the Redis key separator).
-const QUEUE_NAME = "zerotrust-stripe-webhooks";
+const QUEUE_NAME = QUEUE_NAMES.stripeWebhooks;
 
 export interface StripeWebhookJobData {
   eventId: string;
@@ -33,19 +34,6 @@ export interface StripeWebhookJobData {
 let _queue: Queue<StripeWebhookJobData> | null = null;
 let _worker: Worker<StripeWebhookJobData> | null = null;
 
-function parseRedisUri(uri: string): { host: string; port: number; password?: string } | null {
-  try {
-    const url = new URL(uri);
-    return {
-      host: url.hostname,
-      port: parseInt(url.port || "6379", 10),
-      password: url.password ? decodeURIComponent(url.password) : undefined,
-    };
-  } catch {
-    return null;
-  }
-}
-
 export function getStripeWebhookQueue(): Queue<StripeWebhookJobData> | null {
   return _queue;
 }
@@ -53,7 +41,7 @@ export function getStripeWebhookQueue(): Queue<StripeWebhookJobData> | null {
 /** Producer: enables enqueueing. Call in the API process (webhooks arrive there). */
 export function initStripeWebhookQueueProducer(redisUri: string): void {
   if (_queue) return;
-  const conn = parseRedisUri(redisUri);
+  const conn = parseRedisConnection(redisUri);
   if (!conn) {
     logger.warn("Cannot parse REDIS_URI — Stripe webhook queue producer disabled");
     return;
@@ -73,7 +61,7 @@ export function initStripeWebhookQueueProducer(redisUri: string): void {
 /** Consumer: processes queued events. Call wherever background jobs run. */
 export function initStripeWebhookQueueConsumer(redisUri: string): void {
   if (_worker) return;
-  const conn = parseRedisUri(redisUri);
+  const conn = parseRedisConnection(redisUri);
   if (!conn) {
     logger.warn("Cannot parse REDIS_URI — Stripe webhook queue consumer disabled");
     return;
