@@ -18,17 +18,9 @@ export interface WelcomeEmailData {
   locale?: Locale;
 }
 
-export async function welcomeEmailTemplate(data: WelcomeEmailData): Promise<{
-  subject: string;
-  html: string;
-  text: string;
-}> {
-  const { name, appName, appUrl, loginUrl, locale } = data;
+export function WelcomeEmail({ name, appName, loginUrl, locale }: WelcomeEmailData) {
   const v = { name, appName };
-
-  const subject = tr(locale, "welcome_subject", v);
-
-  const html = await renderEmail(
+  return (
     <EmailShell
       lang={htmlLang(locale)}
       appName={appName}
@@ -47,6 +39,19 @@ export async function welcomeEmailTemplate(data: WelcomeEmailData): Promise<{
       <LinkFallback label={tr(locale, "welcome_link_help", v)} url={loginUrl} />
     </EmailShell>
   );
+}
+
+export async function welcomeEmailTemplate(data: WelcomeEmailData): Promise<{
+  subject: string;
+  html: string;
+  text: string;
+}> {
+  const { name, appName, appUrl, loginUrl, locale } = data;
+  const v = { name, appName };
+
+  const subject = tr(locale, "welcome_subject", v);
+
+  const html = await renderEmail(<WelcomeEmail {...data} />);
 
   const text = `${tr(locale, "welcome_heading", v)}
 

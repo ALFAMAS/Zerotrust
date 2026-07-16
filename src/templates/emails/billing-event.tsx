@@ -22,16 +22,10 @@ export interface BillingEventEmailData {
   appUrl: string;
 }
 
-export async function billingEventEmailTemplate(data: BillingEventEmailData): Promise<{
-  subject: string;
-  html: string;
-  text: string;
-}> {
+export function BillingEventEmail(data: BillingEventEmailData) {
   const { name, title, body, ctaLabel, ctaUrl, appName, appUrl } = data;
 
-  const subject = `${title} — ${appName}`;
-
-  const html = await renderEmail(
+  return (
     <EmailShell
       lang="en"
       appName={appName}
@@ -56,6 +50,18 @@ export async function billingEventEmailTemplate(data: BillingEventEmailData): Pr
       {ctaLabel && ctaUrl && <EmailButton href={ctaUrl}>{ctaLabel}</EmailButton>}
     </EmailShell>
   );
+}
+
+export async function billingEventEmailTemplate(data: BillingEventEmailData): Promise<{
+  subject: string;
+  html: string;
+  text: string;
+}> {
+  const { name, title, body, ctaLabel, ctaUrl, appName, appUrl } = data;
+
+  const subject = `${title} — ${appName}`;
+
+  const html = await renderEmail(<BillingEventEmail {...data} />);
 
   const text = `${title} — ${appName}
 

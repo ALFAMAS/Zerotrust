@@ -336,6 +336,17 @@ Cross-audit of `docs/security.md` §0–§10. **SEC-27** shipped 2026-07-08 (VPS
 
 ## Recent work (2026-07-16)
 
+- **High-value UI and production tooling rollout:** replaced the hand-rolled command
+  palette with `cmdk`; standardized admin users, sessions, audit logs, and webhooks on
+  a shared TanStack Table with sorting, filtering, column visibility, pagination, and
+  meaningful row selection; migrated auth, support, and organization settings forms
+  to React Hook Form with shared Zod contracts and accessible error focus; added branded
+  `next/og` cards to public landing and pricing routes; upgraded `/docs` to Scalar with
+  an explicit production gate; mounted an admin-guarded Bull Board queue dashboard;
+  preserved the existing logger API on Pino with canonical deep redaction; added pinned,
+  migration-aware PostgreSQL/Redis Testcontainers integration tests; and added a React
+  Email CLI gallery that reuses all nine production templates with synthetic preview data.
+
 - **OPS-ENV-1 code prerequisite — deploy environment gate:** added
   `bun run deploy-env:check` (`scripts/ci/verify-deploy-environments.ts`) mirroring
   `branch-protection:check`. Confirms GitHub `staging` + `production` environments exist

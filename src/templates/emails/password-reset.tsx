@@ -20,17 +20,12 @@ export interface PasswordResetEmailData {
   locale?: Locale;
 }
 
-export async function passwordResetEmailTemplate(data: PasswordResetEmailData): Promise<{
-  subject: string;
-  html: string;
-  text: string;
-}> {
+export function PasswordResetEmail(data: PasswordResetEmailData) {
   const { name, resetUrl, expiresInMinutes, appName, appUrl, locale } = data;
   const t = (key: string, vars: Record<string, string | number> = {}) =>
     tr(locale, key, { ...vars, name, appName, appUrl, minutes: expiresInMinutes });
-  const subject = t("reset_subject");
 
-  const html = await renderEmail(
+  return (
     <EmailShell
       lang={htmlLang(locale)}
       appName={appName}
@@ -50,6 +45,19 @@ export async function passwordResetEmailTemplate(data: PasswordResetEmailData): 
       <WarningNote>{t("reset_security")}</WarningNote>
     </EmailShell>
   );
+}
+
+export async function passwordResetEmailTemplate(data: PasswordResetEmailData): Promise<{
+  subject: string;
+  html: string;
+  text: string;
+}> {
+  const { name, resetUrl, expiresInMinutes, appName, appUrl, locale } = data;
+  const t = (key: string, vars: Record<string, string | number> = {}) =>
+    tr(locale, key, { ...vars, name, appName, appUrl, minutes: expiresInMinutes });
+  const subject = t("reset_subject");
+
+  const html = await renderEmail(<PasswordResetEmail {...data} />);
 
   const text = `${t("reset_heading")}
 

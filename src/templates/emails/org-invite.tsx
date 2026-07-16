@@ -23,17 +23,11 @@ export interface OrgInviteEmailData {
   appUrl: string;
 }
 
-export async function orgInviteEmailTemplate(data: OrgInviteEmailData): Promise<{
-  subject: string;
-  html: string;
-  text: string;
-}> {
+export function OrgInviteEmail(data: OrgInviteEmailData) {
   const { email, inviterName, orgName, role, acceptUrl, expiresInDays, appName, appUrl } = data;
-
-  const subject = `${inviterName} invited you to join ${orgName} on ${appName}`;
   const dayWord = expiresInDays === 1 ? "day" : "days";
 
-  const html = await renderEmail(
+  return (
     <EmailShell
       lang="en"
       appName={appName}
@@ -64,6 +58,19 @@ export async function orgInviteEmailTemplate(data: OrgInviteEmailData): Promise<
       </FinePrint>
     </EmailShell>
   );
+}
+
+export async function orgInviteEmailTemplate(data: OrgInviteEmailData): Promise<{
+  subject: string;
+  html: string;
+  text: string;
+}> {
+  const { email, inviterName, orgName, role, acceptUrl, expiresInDays, appName, appUrl } = data;
+
+  const subject = `${inviterName} invited you to join ${orgName} on ${appName}`;
+  const dayWord = expiresInDays === 1 ? "day" : "days";
+
+  const html = await renderEmail(<OrgInviteEmail {...data} />);
 
   const text = `You're invited to join ${orgName} on ${appName}
 

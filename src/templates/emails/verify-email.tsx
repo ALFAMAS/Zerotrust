@@ -20,17 +20,11 @@ export interface VerifyEmailData {
   locale?: Locale;
 }
 
-export async function verifyEmailTemplate(data: VerifyEmailData): Promise<{
-  subject: string;
-  html: string;
-  text: string;
-}> {
+export function VerifyEmail(data: VerifyEmailData) {
   const { name, code, verifyUrl, expiresInMinutes, appName, locale } = data;
   const v = { name, appName, minutes: expiresInMinutes };
 
-  const subject = tr(locale, "verify_subject", v);
-
-  const html = await renderEmail(
+  return (
     <EmailShell
       lang={htmlLang(locale)}
       appName={appName}
@@ -45,6 +39,19 @@ export async function verifyEmailTemplate(data: VerifyEmailData): Promise<{
       <LinkFallback label={tr(locale, "verify_link_help", v)} url={verifyUrl} />
     </EmailShell>
   );
+}
+
+export async function verifyEmailTemplate(data: VerifyEmailData): Promise<{
+  subject: string;
+  html: string;
+  text: string;
+}> {
+  const { name, code, verifyUrl, expiresInMinutes, appName, locale } = data;
+  const v = { name, appName, minutes: expiresInMinutes };
+
+  const subject = tr(locale, "verify_subject", v);
+
+  const html = await renderEmail(<VerifyEmail {...data} />);
 
   const text = `${tr(locale, "verify_heading", v)}
 

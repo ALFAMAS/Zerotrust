@@ -167,6 +167,7 @@ the BullMQ email queue.
 | Next.js app + admin | http://localhost:3000      | admin panel at `/admin`                   |
 | API docs (Scalar)   | http://localhost:1337/docs | dev; production opt-in                    |
 | Queue dashboard     | http://localhost:1337/admin/queues | admin-only; production opt-in       |
+| Email previews      | http://localhost:3001      | `bun run email:dev`; development only     |
 | Health / metrics    | `/healthz` · `/metrics`    | on the API port                           |
 | Next.js MCP (dev)   | `/_next/mcp`               | coding-agent tools when `bun dev:ui` runs |
 | PostgreSQL          | localhost:5432             | or a managed provider (e.g. Neon)         |
@@ -286,6 +287,7 @@ exits cleanly if an admin already exists.
 | `bun run db:backup` / `db:restore` | Encrypted `pg_dump` backup/restore   |
 | `bun run test`                     | Vitest suite (API + UI logic)        |
 | `bun run test:integration:containers` | Hermetic Postgres + Redis integration tests |
+| `bun run email:dev`                | Hot-reloading gallery for all nine emails |
 | `bun run lint` / `lint:fix`        | Biome check / autofix                |
 | `bun run type-check`               | `tsc --noEmit`                       |
 | `bun run verify:generated`         | Regenerate SDK + docs; fail on drift |
@@ -512,6 +514,7 @@ bun run test            # Vitest (API + packages/ui plain-logic tests)
 bun run test:watch      # watch mode
 bun run test:coverage   # coverage report
 bun run test:integration:containers # pinned Postgres + Redis via Testcontainers
+bun run email:dev       # production email templates at localhost:3001
 bun run lint            # Biome lint
 bun run lint:fix        # autofix (also runs on commit via Husky)
 bun run type-check      # tsc --noEmit
@@ -524,6 +527,9 @@ build on every push/PR to `main`.
 The Testcontainers command starts one PostgreSQL and one Redis container for the
 run, applies the migration chain, and tears both down afterward. It requires a
 running Docker-compatible container runtime; ordinary unit tests do not.
+
+The email gallery imports the same components used for production delivery and
+supplies synthetic preview data. It never reads runtime secrets.
 
 > Set `HIBP_CHECK_ENABLED=false` for fully offline test runs (breach check hits the network by default).
 

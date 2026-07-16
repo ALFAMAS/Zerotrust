@@ -19,16 +19,10 @@ export interface NotificationEmailData {
   appUrl: string;
 }
 
-export async function notificationEmailTemplate(data: NotificationEmailData): Promise<{
-  subject: string;
-  html: string;
-  text: string;
-}> {
+export function NotificationEmail(data: NotificationEmailData) {
   const { name, title, body, link, unsubscribeUrl, appName, appUrl } = data;
 
-  const subject = `${title} — ${appName}`;
-
-  const html = await renderEmail(
+  return (
     <EmailShell
       lang="en"
       appName={appName}
@@ -62,6 +56,18 @@ export async function notificationEmailTemplate(data: NotificationEmailData): Pr
       {link && <EmailButton href={link}>View in app</EmailButton>}
     </EmailShell>
   );
+}
+
+export async function notificationEmailTemplate(data: NotificationEmailData): Promise<{
+  subject: string;
+  html: string;
+  text: string;
+}> {
+  const { name, title, body, link, unsubscribeUrl, appName, appUrl } = data;
+
+  const subject = `${title} — ${appName}`;
+
+  const html = await renderEmail(<NotificationEmail {...data} />);
 
   const ctaText = link ? `\nView in app: ${link}\n` : "";
   const unsubLine = unsubscribeUrl ? `\nTo unsubscribe: ${unsubscribeUrl}\n` : "";

@@ -35,6 +35,7 @@
     "test:coverage": "bunx vitest --coverage",
     "test:integration:containers": "bunx vitest run --config vitest.integration.config.ts",
     "test:integration:containers:watch": "bunx vitest --config vitest.integration.config.ts",
+    "email:dev": "email dev --dir emails --port 3001",
     "test:coverage:ui": "bun run --cwd packages/ui vitest run --coverage",
     "lint": "biome check",
     "lint:fix": "biome check --write",

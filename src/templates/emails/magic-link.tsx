@@ -20,17 +20,17 @@ export interface MagicLinkEmailData {
   locale?: Locale;
 }
 
-export async function magicLinkEmailTemplate(data: MagicLinkEmailData): Promise<{
-  subject: string;
-  html: string;
-  text: string;
-}> {
-  const { name, magicLinkUrl, expiresInMinutes, appName, appUrl, locale } = data;
+export function MagicLinkEmail({
+  name,
+  magicLinkUrl,
+  expiresInMinutes,
+  appName,
+  appUrl,
+  locale,
+}: MagicLinkEmailData) {
   const t = (key: string, vars: Record<string, string | number> = {}) =>
     tr(locale, key, { ...vars, name, appName, appUrl, minutes: expiresInMinutes });
-  const subject = t("magiclink_subject");
-
-  const html = await renderEmail(
+  return (
     <EmailShell
       lang={htmlLang(locale)}
       appName={appName}
@@ -50,6 +50,19 @@ export async function magicLinkEmailTemplate(data: MagicLinkEmailData): Promise<
       <FinePrint>{t("magiclink_ignore")}</FinePrint>
     </EmailShell>
   );
+}
+
+export async function magicLinkEmailTemplate(data: MagicLinkEmailData): Promise<{
+  subject: string;
+  html: string;
+  text: string;
+}> {
+  const { name, magicLinkUrl, expiresInMinutes, appName, appUrl, locale } = data;
+  const t = (key: string, vars: Record<string, string | number> = {}) =>
+    tr(locale, key, { ...vars, name, appName, appUrl, minutes: expiresInMinutes });
+  const subject = t("magiclink_subject");
+
+  const html = await renderEmail(<MagicLinkEmail {...data} />);
 
   const text = `${t("magiclink_heading")}
 

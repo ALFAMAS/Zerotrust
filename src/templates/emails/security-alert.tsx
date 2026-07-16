@@ -46,16 +46,10 @@ function ActivityRow({ label, value, last }: { label: string; value: string; las
   );
 }
 
-export async function securityAlertEmailTemplate(data: SecurityAlertEmailData): Promise<{
-  subject: string;
-  html: string;
-  text: string;
-}> {
+export function SecurityAlertEmail(data: SecurityAlertEmailData) {
   const { name, action, device, location, time, appName, appUrl, revokeSessionUrl } = data;
 
-  const subject = `Security alert: ${action} on your ${appName} account`;
-
-  const html = await renderEmail(
+  return (
     <EmailShell
       lang="en"
       appName={appName}
@@ -103,6 +97,18 @@ export async function securityAlertEmailTemplate(data: SecurityAlertEmailData): 
       </EmailButton>
     </EmailShell>
   );
+}
+
+export async function securityAlertEmailTemplate(data: SecurityAlertEmailData): Promise<{
+  subject: string;
+  html: string;
+  text: string;
+}> {
+  const { name, action, device, location, time, appName, appUrl, revokeSessionUrl } = data;
+
+  const subject = `Security alert: ${action} on your ${appName} account`;
+
+  const html = await renderEmail(<SecurityAlertEmail {...data} />);
 
   const text = `Security Alert — ${appName}
 

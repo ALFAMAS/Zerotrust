@@ -14,16 +14,8 @@ export interface OtpEmailData {
   appName: string;
 }
 
-export async function otpEmailTemplate(data: OtpEmailData): Promise<{
-  subject: string;
-  html: string;
-  text: string;
-}> {
-  const { name, code, expiresInMinutes, appName } = data;
-
-  const subject = `Your verification code: ${code}`;
-
-  const html = await renderEmail(
+export function OtpEmail({ name, code, expiresInMinutes, appName }: OtpEmailData) {
+  return (
     <EmailShell
       lang="en"
       appName={appName}
@@ -45,6 +37,18 @@ export async function otpEmailTemplate(data: OtpEmailData): Promise<{
       </EmailText>
     </EmailShell>
   );
+}
+
+export async function otpEmailTemplate(data: OtpEmailData): Promise<{
+  subject: string;
+  html: string;
+  text: string;
+}> {
+  const { name, code, expiresInMinutes, appName } = data;
+
+  const subject = `Your verification code: ${code}`;
+
+  const html = await renderEmail(<OtpEmail {...data} />);
 
   const text = `Hi ${name},
 
