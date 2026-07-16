@@ -185,6 +185,18 @@ describe("Security Headers Middleware", () => {
     const res = await app.request("/test");
     expect(res.headers.get("x-frame-options")).toBe("SAMEORIGIN");
   });
+
+  it("buildScalarDocsCsp allows Scalar CDN + nonce without unsafe-inline scripts", async () => {
+    const { buildScalarDocsCsp } = await import("../middleware/securityHeaders");
+    const nonce = "test-nonce-abc123";
+    const csp = buildScalarDocsCsp(nonce);
+    expect(csp).toContain(`'nonce-${nonce}'`);
+    expect(csp).toContain("https://cdn.jsdelivr.net");
+    expect(csp).toMatch(/script-src 'self' 'nonce-[^']+' https:\/\/cdn\.jsdelivr\.net/);
+    expect(csp).not.toMatch(/script-src[^;]*'unsafe-inline'/);
+    expect(csp).not.toContain("'unsafe-eval'");
+    expect(csp).toContain("style-src 'self' 'unsafe-inline'");
+  });
 });
 
 // ── Audit Pipeline ─────────────────────────────────────────────────────────

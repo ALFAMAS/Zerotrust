@@ -57,6 +57,49 @@ describe("createServer security headers (ZT-2)", () => {
     expect(src).not.toMatch(/app\.use\("\*",\s*secureHeaders\(\)\)/);
   });
 
+  it("overrides CSP on /docs for Scalar (dev/test only)", async () => {
+    vi.stubEnv("NODE_ENV", "test");
+    vi.doMock("..", () => ({
+      initializezerotrust: vi.fn().mockResolvedValue({
+        logger: { info: vi.fn(), error: vi.fn(), warn: vi.fn(), debug: vi.fn() },
+      }),
+    }));
+    vi.doMock("../instrument", () => ({ initSentry: vi.fn() }));
+    vi.doMock("../telemetry", () => ({
+      initTelemetry: vi.fn(),
+      telemetryMiddleware: () => async (_c: unknown, next: () => Promise<void>) => next(),
+    }));
+    vi.doMock("../jobs/scheduler", () => ({
+      startJobScheduler: vi.fn().mockResolvedValue(undefined),
+    }));
+    vi.doMock("../services/billing/stripeWebhookQueue", () => ({
+      initStripeWebhookQueueProducer: vi.fn(),
+      initStripeWebhookQueueConsumer: vi.fn(),
+    }));
+    vi.doMock("../services/notifications/emailQueue", () => ({
+      initEmailQueue: vi.fn().mockResolvedValue(undefined),
+    }));
+
+    const { createServer } = await import("../api/server");
+    const app = await createServer();
+
+    const docs = await app.request("/docs");
+    expect(docs.status).toBe(200);
+    const docsCsp = docs.headers.get("content-security-policy") ?? "";
+    expect(docsCsp).toContain("https://cdn.jsdelivr.net");
+    expect(docsCsp).toMatch(/'nonce-[A-Za-z0-9_-]+'/);
+    expect(docsCsp).not.toMatch(/script-src[^;]*'unsafe-inline'/);
+
+    const html = await docs.text();
+    expect(html).toContain("cdn.jsdelivr.net/npm/@scalar/api-reference");
+    expect(html).toMatch(/nonce="[A-Za-z0-9_-]+"/);
+
+    const health = await app.request("/health");
+    const healthCsp = health.headers.get("content-security-policy") ?? "";
+    expect(healthCsp).toContain("script-src 'self'");
+    expect(healthCsp).not.toContain("cdn.jsdelivr.net");
+  }, 30_000);
+
   it("does not mount orphaned /admin/tenants routes (ARCH-1)", () => {
     const src = readFileSync(serverTsPath, "utf8");
     expect(src).not.toContain("/admin/tenants");

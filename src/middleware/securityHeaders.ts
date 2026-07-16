@@ -22,6 +22,31 @@ const DEFAULT_CSP = [
   "form-action 'self'",
 ].join("; ");
 
+/** Default CDN used by `@scalar/hono-api-reference` / client-side rendering. */
+export const SCALAR_DOCS_CDN = "https://cdn.jsdelivr.net/npm/@scalar/api-reference";
+
+/**
+ * Dev/test-only CSP for the Scalar `/docs` page.
+ *
+ * Global API CSP is `script-src 'self'` which blocks Scalar's CDN script and
+ * inline bootstrap. This policy keeps the rest of the defaults, allows the
+ * Scalar CDN host, and authorizes the page's scripts via a per-request nonce
+ * (no `'unsafe-inline'` / `'unsafe-eval'`). Production never mounts `/docs`.
+ */
+export function buildScalarDocsCsp(nonce: string): string {
+  return [
+    "default-src 'self'",
+    `script-src 'self' 'nonce-${nonce}' https://cdn.jsdelivr.net`,
+    "style-src 'self' 'unsafe-inline'",
+    "img-src 'self' data: https:",
+    "font-src 'self'",
+    "connect-src 'self'",
+    "frame-ancestors 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+  ].join("; ");
+}
+
 export function securityHeaders(opts: SecurityHeadersOptions = {}) {
   const {
     hstsMaxAge = 63072000,
