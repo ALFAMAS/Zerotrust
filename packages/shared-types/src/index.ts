@@ -7,6 +7,8 @@ export {
   orgInviteSchema,
 } from "./org.js";
 export {
+  type LoginInput,
+  loginSchema,
   type RegisterBodyInput,
   type RegisterInput,
   passwordSchemaExport,

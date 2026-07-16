@@ -1,145 +1,138 @@
 "use client";
 
-import { ArrowRight, File, Search, Settings, User } from "lucide-react";
+import {
+  Bell,
+  Building2,
+  CreditCard,
+  KeyRound,
+  LayoutDashboard,
+  LifeBuoy,
+  Monitor,
+  Settings,
+  ShieldCheck,
+  User,
+  Webhook,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { useEffect, useState } from "react";
+import {
+  CommandDialog,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+  CommandShortcut,
+} from "@/components/ui/command";
 import { OPEN_COMMAND_PALETTE_EVENT } from "@/lib/commandPalette";
 import { safeRelativeRedirect } from "@/lib/safeRedirect";
-import { cn } from "@/lib/utils";
 
-interface SearchResult {
-  type: "page" | "user" | "setting" | "note";
+interface PaletteDestination {
   title: string;
   description?: string;
   href: string;
-  icon?: string;
+  icon: React.ComponentType<{ className?: string }>;
+  group: "Pages" | "Settings";
 }
 
 // Static dashboard destinations the command palette can jump to.
-const PAGES: SearchResult[] = [
+const DESTINATIONS: PaletteDestination[] = [
   {
-    type: "page",
     title: "Dashboard",
     description: "Overview",
     href: "/dashboard",
+    icon: LayoutDashboard,
+    group: "Pages",
   },
   {
-    type: "page",
     title: "Profile",
     description: "Your profile",
     href: "/dashboard/profile",
+    icon: User,
+    group: "Pages",
   },
   {
-    type: "page",
     title: "Security",
     description: "Passkeys, MFA, sessions",
     href: "/dashboard/security",
+    icon: ShieldCheck,
+    group: "Pages",
   },
   {
-    type: "page",
     title: "Sessions",
     description: "Active sessions",
     href: "/dashboard/sessions",
+    icon: Monitor,
+    group: "Pages",
   },
   {
-    type: "page",
     title: "Notifications",
     description: "Notification center",
     href: "/dashboard/notifications",
+    icon: Bell,
+    group: "Pages",
   },
   {
-    type: "page",
     title: "Organizations",
     description: "Workspaces & teams",
     href: "/dashboard/organizations",
+    icon: Building2,
+    group: "Pages",
   },
   {
-    type: "page",
     title: "API Keys",
     description: "Manage API keys",
     href: "/dashboard/api-keys",
+    icon: KeyRound,
+    group: "Pages",
   },
   {
-    type: "page",
     title: "Webhooks",
     description: "Outgoing webhooks",
     href: "/dashboard/webhooks",
+    icon: Webhook,
+    group: "Pages",
   },
   {
-    type: "page",
     title: "Billing",
     description: "Plans & invoices",
     href: "/dashboard/billing",
+    icon: CreditCard,
+    group: "Pages",
   },
   {
-    type: "page",
     title: "Support",
     description: "Contact support",
     href: "/dashboard/support",
+    icon: LifeBuoy,
+    group: "Pages",
   },
   {
-    type: "setting",
     title: "Account",
     description: "Account settings",
     href: "/dashboard/account",
+    icon: Settings,
+    group: "Settings",
   },
 ];
 
-const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
-  LayoutDashboard: () => <ArrowRight className="h-4 w-4" />,
-  User: User,
-  ShieldCheck: () => <ArrowRight className="h-4 w-4" />,
-  Monitor: () => <ArrowRight className="h-4 w-4" />,
-  Bell: () => <ArrowRight className="h-4 w-4" />,
-  Building2: () => <ArrowRight className="h-4 w-4" />,
-  KeyRound: () => <ArrowRight className="h-4 w-4" />,
-  Webhook: () => <ArrowRight className="h-4 w-4" />,
-  CreditCard: () => <ArrowRight className="h-4 w-4" />,
-  Award: () => <ArrowRight className="h-4 w-4" />,
-  LifeBuoy: () => <ArrowRight className="h-4 w-4" />,
-  UserCog: () => <ArrowRight className="h-4 w-4" />,
-  file: File,
-  settings: Settings,
-};
-
-function ResultIcon({ icon, type }: { icon?: string; type: string }) {
-  if (icon && ICON_MAP[icon]) {
-    const Comp = ICON_MAP[icon];
-    return <Comp className="h-4 w-4" />;
-  }
-  if (type === "note") return <File className="h-4 w-4" />;
-  if (type === "user") return <User className="h-4 w-4" />;
-  return <ArrowRight className="h-4 w-4" />;
-}
+const GROUPS: PaletteDestination["group"][] = ["Pages", "Settings"];
 
 export function CommandPalette() {
   const router = useRouter();
   const [open, setOpen] = useState(false);
-  const [query, setQuery] = useState("");
-  const [results, setResults] = useState<SearchResult[]>([]);
-  const [selectedIndex, setSelectedIndex] = useState(0);
-  const inputRef = useRef<HTMLInputElement>(null);
 
   // Cmd+K / Ctrl+K to open; topbar search dispatches OPEN_COMMAND_PALETTE_EVENT.
+  // Escape-to-close and focus management are handled by the underlying Radix Dialog.
   useEffect(() => {
     function openPalette() {
       setOpen(true);
-      setTimeout(() => inputRef.current?.focus(), 50);
     }
 
     function handleKey(e: KeyboardEvent) {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
         e.preventDefault();
         setOpen((v) => !v);
-        if (!open) {
-          setTimeout(() => inputRef.current?.focus(), 50);
-        }
-      }
-      if (e.key === "Escape" && open) {
-        setOpen(false);
-        setQuery("");
       }
     }
 
@@ -149,166 +142,43 @@ export function CommandPalette() {
       document.removeEventListener(OPEN_COMMAND_PALETTE_EVENT, openPalette);
       document.removeEventListener("keydown", handleKey);
     };
-  }, [open]);
+  }, []);
 
-  // Client-side page navigator: filter the static page list by the query.
-  useEffect(() => {
-    if (query.length < 2) {
-      setResults([]);
-      return;
-    }
-    const q = query.toLowerCase();
-    setResults(
-      PAGES.filter(
-        (p) => p.title.toLowerCase().includes(q) || p.description?.toLowerCase().includes(q)
-      )
-    );
-    setSelectedIndex(0);
-  }, [query]);
-
-  const navigateTo = useCallback(
-    (result: SearchResult) => {
-      setOpen(false);
-      setQuery("");
-      router.push(safeRelativeRedirect(result.href, "/dashboard"));
-    },
-    [router]
-  );
-
-  // Keyboard navigation. navigateTo is declared above so the hook order and the
-  // dependency list stay valid (no temporal-dead-zone reference).
-  useEffect(() => {
-    if (!open || results.length === 0) return;
-    function handleNav(e: KeyboardEvent) {
-      if (e.key === "ArrowDown") {
-        e.preventDefault();
-        setSelectedIndex((i) => Math.min(i + 1, results.length - 1));
-      } else if (e.key === "ArrowUp") {
-        e.preventDefault();
-        setSelectedIndex((i) => Math.max(i - 1, 0));
-      } else if (e.key === "Enter") {
-        e.preventDefault();
-        if (results[selectedIndex]) {
-          navigateTo(results[selectedIndex]);
-        }
-      }
-    }
-    document.addEventListener("keydown", handleNav);
-    return () => document.removeEventListener("keydown", handleNav);
-  }, [open, results, selectedIndex, navigateTo]);
-
-  if (!open) return null;
+  function navigateTo(href: string) {
+    setOpen(false);
+    router.push(safeRelativeRedirect(href, "/dashboard"));
+  }
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-start justify-center pt-[15vh]">
-      {/* Backdrop */}
-      <Button
-        aria-label="Close command palette"
-        className="fixed inset-0 bg-background/80 "
-        onClick={() => {
-          setOpen(false);
-          setQuery("");
-        }}
-      />
-
-      {/* Palette */}
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-label="Command palette"
-        className="relative w-full max-w-lg overflow-hidden rounded-xl border border-border bg-popover shadow-lg"
-      >
-        {/* Search input */}
-        <div className="flex items-center gap-3 border-b border-border bg-muted/20 px-4 py-3">
-          <Search className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
-          <Input
-            ref={inputRef}
-            type="search"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search pages, notes, people…"
-            className="h-9 flex-1 border-0 bg-transparent px-0 py-0 text-base shadow-none placeholder:text-muted-foreground focus-visible:ring-0 md:text-sm"
-            aria-label="Search"
-          />
-          <kbd className="hidden shrink-0 rounded border border-border bg-muted px-2 py-1 text-xs font-medium text-muted-foreground sm:inline">
-            ESC
-          </kbd>
-        </div>
-
-        {/* Results */}
-        <div className="max-h-80 overflow-y-auto p-2">
-          {query.length >= 2 && results.length === 0 && (
-            <div className="px-3 py-6 text-center text-sm text-muted-foreground">
-              No results found
-            </div>
-          )}
-
-          {results.length > 0 && (
-            <div role="listbox">
-              {results.map((result, i) => (
-                <Button
-                  key={`${result.type}-${result.href}-${i}`}
-                  role="option"
-                  aria-selected={i === selectedIndex}
-                  onClick={() => navigateTo(result)}
-                  onMouseEnter={() => setSelectedIndex(i)}
-                  variant="ghost"
-                  className={cn(
-                    "flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left transition-colors",
-                    i === selectedIndex
-                      ? "bg-accent text-accent-foreground"
-                      : "text-foreground hover:bg-accent hover:text-accent-foreground"
+    <CommandDialog open={open} onOpenChange={setOpen} label="Command palette">
+      <CommandInput placeholder="Search pages, settings…" aria-label="Search" />
+      <CommandList>
+        <CommandEmpty>No results found.</CommandEmpty>
+        {GROUPS.map((group) => (
+          <CommandGroup key={group} heading={group}>
+            {DESTINATIONS.filter((d) => d.group === group).map((destination) => (
+              <CommandItem
+                key={destination.href}
+                value={`${destination.title} ${destination.description ?? ""}`}
+                onSelect={() => navigateTo(destination.href)}
+              >
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
+                  <destination.icon className="h-4 w-4" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-sm font-medium">{destination.title}</div>
+                  {destination.description && (
+                    <div className="truncate text-xs text-muted-foreground">
+                      {destination.description}
+                    </div>
                   )}
-                >
-                  <span
-                    className={cn(
-                      "flex h-7 w-7 items-center justify-center rounded-md",
-                      i === selectedIndex
-                        ? "bg-primary/10 text-primary"
-                        : "bg-muted text-muted-foreground"
-                    )}
-                  >
-                    <ResultIcon icon={result.icon} type={result.type} />
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <div className="truncate text-sm font-medium">{result.title}</div>
-                    {result.description && (
-                      <div className="truncate text-xs text-muted-foreground">
-                        {result.description}
-                      </div>
-                    )}
-                  </div>
-                  <span className="shrink-0 rounded bg-muted px-2 py-1 text-xs font-medium uppercase text-muted-foreground">
-                    {result.type}
-                  </span>
-                </Button>
-              ))}
-            </div>
-          )}
-
-          {query.length < 2 && (
-            <div className="px-3 py-4 text-center text-xs text-muted-foreground">
-              Type at least 2 characters to search
-            </div>
-          )}
-        </div>
-
-        {/* Footer hint */}
-        <div className="flex items-center gap-4 border-t border-border px-4 py-2">
-          <span className="flex items-center gap-1 text-xs text-muted-foreground">
-            <kbd className="rounded border border-border bg-muted px-1 text-xs">↑↓</kbd>
-            navigate
-          </span>
-          <span className="flex items-center gap-1 text-xs text-muted-foreground">
-            <kbd className="rounded border border-border bg-muted px-1 text-xs">↵</kbd>
-            open
-          </span>
-          <span className="flex items-center gap-1 text-xs text-muted-foreground">
-            <kbd className="rounded border border-border bg-muted px-1 text-xs">esc</kbd>
-            close
-          </span>
-        </div>
-      </div>
-    </div>
+                </div>
+                <CommandShortcut>↵</CommandShortcut>
+              </CommandItem>
+            ))}
+          </CommandGroup>
+        ))}
+      </CommandList>
+    </CommandDialog>
   );
 }

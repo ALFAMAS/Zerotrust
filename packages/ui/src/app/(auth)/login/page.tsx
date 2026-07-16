@@ -1,7 +1,11 @@
 "use client";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { loginSchema } from "@zerotrust/shared-types/auth";
 import { Fingerprint } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { useForm } from "react-hook-form";
+import type { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,11 +24,21 @@ import { setToken } from "../../../lib/auth";
 import { navigateToSafeExternal, navigateToSafeRelative } from "../../../lib/safeRedirect";
 import { isWebAuthnAvailable, startAuthentication } from "../../../lib/webauthn";
 
+type LoginFormValues = z.infer<typeof loginSchema>;
+
 export default function LoginPage() {
-  const [form, setForm] = useState({ email: "", password: "" });
   const [mfaToken, setMfaToken] = useState<string | null>(null);
   const [mfaCode, setMfaCode] = useState("");
   const { toast } = useToast();
+  const {
+    register,
+    handleSubmit,
+    getValues,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: { email: "", password: "" },
+  });
 
   const loginMutation = useLoginMutation();
   const loginMfaMutation = useLoginMfaMutation();
@@ -83,10 +97,9 @@ export default function LoginPage() {
     navigateToSafeRelative(next, "/dashboard");
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSubmit = async (values: LoginFormValues) => {
     try {
-      const data = await loginMutation.mutateAsync(form);
+      const data = await loginMutation.mutateAsync(values);
       if (data.mfaRequired) {
         setMfaToken(data.mfaToken ?? null);
         toast({
@@ -114,14 +127,15 @@ export default function LoginPage() {
       return;
     }
     try {
+      const email = getValues("email");
       const options = await passkeyOptionsMutation.mutateAsync({
-        email: form.email || undefined,
+        email: email || undefined,
       });
       const assertion = await startAuthentication(options);
       const data = await passkeyVerifyMutation.mutateAsync({
         ...assertion,
         challengeKey: options._challengeKey as string | undefined,
-        email: form.email || undefined,
+        email: email || undefined,
       });
       finishLogin(data);
     } catch (err: unknown) {
@@ -217,18 +231,17 @@ export default function LoginPage() {
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">Sign in to your {brand.name} account</p>
       </div>
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
           <Input
             id="email"
             type="email"
-            required
             autoComplete="email"
-            value={form.email}
-            onChange={(e) => setForm({ ...form, email: e.target.value })}
             placeholder="you@example.com"
+            {...register("email")}
           />
+          {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
         </div>
         <div className="space-y-2">
           <div className="flex items-center justify-between">
@@ -239,15 +252,14 @@ export default function LoginPage() {
           </div>
           <PasswordInput
             id="password"
-            required
             autoComplete="current-password"
-            value={form.password}
-            onChange={(e) => setForm({ ...form, password: e.target.value })}
             placeholder="••••••••"
+            {...register("password")}
           />
+          {errors.password && <p className="text-xs text-destructive">{errors.password.message}</p>}
         </div>
-        <Button type="submit" disabled={loading} className="w-full">
-          {loading ? "Signing in…" : "Sign in"}
+        <Button type="submit" disabled={loading || isSubmitting} className="w-full">
+          {loading || isSubmitting ? "Signing in…" : "Sign in"}
         </Button>
       </form>
       <div className="relative my-6">

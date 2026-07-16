@@ -58,11 +58,27 @@ describe("RegisterPage", () => {
 
     await user.type(screen.getByLabelText("Display Name"), "Jane Doe");
     await user.type(screen.getByLabelText("Email"), "jane@example.com");
-    await user.type(screen.getByLabelText("Password"), "hunter22222");
-    await user.type(screen.getByLabelText("Confirm Password"), "different");
+    await user.type(screen.getByLabelText("Password"), "Hunter2222!");
+    await user.type(screen.getByLabelText("Confirm Password"), "Different3@");
     await user.click(screen.getByRole("button", { name: "Create account" }));
 
-    expect(mockToast).toHaveBeenCalledWith({ message: "Passwords do not match", type: "error" });
+    expect(await screen.findByText("Passwords do not match")).toBeInTheDocument();
+    expect(mockApiPost).not.toHaveBeenCalled();
+  });
+
+  it("rejects a password that doesn't meet the complexity requirements", async () => {
+    const user = userEvent.setup();
+    renderRegister();
+
+    await user.type(screen.getByLabelText("Display Name"), "Jane Doe");
+    await user.type(screen.getByLabelText("Email"), "jane@example.com");
+    await user.type(screen.getByLabelText("Password"), "hunter#2222");
+    await user.type(screen.getByLabelText("Confirm Password"), "hunter#2222");
+    await user.click(screen.getByRole("button", { name: "Create account" }));
+
+    expect(
+      await screen.findByText("Password must contain at least one uppercase letter")
+    ).toBeInTheDocument();
     expect(mockApiPost).not.toHaveBeenCalled();
   });
 
@@ -75,8 +91,8 @@ describe("RegisterPage", () => {
     renderRegister();
     await user.type(screen.getByLabelText("Display Name"), "Jane Doe");
     await user.type(screen.getByLabelText("Email"), "jane@example.com");
-    await user.type(screen.getByLabelText("Password"), "hunter22222");
-    await user.type(screen.getByLabelText("Confirm Password"), "hunter22222");
+    await user.type(screen.getByLabelText("Password"), "Hunter2222!");
+    await user.type(screen.getByLabelText("Confirm Password"), "Hunter2222!");
     await user.click(screen.getByRole("button", { name: "Create account" }));
 
     await waitFor(() => {
@@ -84,7 +100,7 @@ describe("RegisterPage", () => {
         "/auth/register",
         {
           email: "jane@example.com",
-          password: "hunter22222",
+          password: "Hunter2222!",
           displayName: "Jane Doe",
         },
         { skipAuth: true }
@@ -109,8 +125,8 @@ describe("RegisterPage", () => {
     renderRegister();
     await user.type(screen.getByLabelText("Display Name"), "Jane Doe");
     await user.type(screen.getByLabelText("Email"), "jane@example.com");
-    await user.type(screen.getByLabelText("Password"), "hunter22222");
-    await user.type(screen.getByLabelText("Confirm Password"), "hunter22222");
+    await user.type(screen.getByLabelText("Password"), "Hunter2222!");
+    await user.type(screen.getByLabelText("Confirm Password"), "Hunter2222!");
     await user.click(screen.getByRole("button", { name: "Create account" }));
 
     await waitFor(() => {
@@ -129,8 +145,8 @@ describe("RegisterPage", () => {
     renderRegister();
     await user.type(screen.getByLabelText("Display Name"), "Jane Doe");
     await user.type(screen.getByLabelText("Email"), "jane@example.com");
-    await user.type(screen.getByLabelText("Password"), "hunter22222");
-    await user.type(screen.getByLabelText("Confirm Password"), "hunter22222");
+    await user.type(screen.getByLabelText("Password"), "Hunter2222!");
+    await user.type(screen.getByLabelText("Confirm Password"), "Hunter2222!");
     await user.click(screen.getByRole("button", { name: "Create account" }));
 
     await waitFor(() => {

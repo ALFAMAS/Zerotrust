@@ -1,6 +1,9 @@
 "use client";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { registerSchema } from "@zerotrust/shared-types/auth";
 import Link from "next/link";
-import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,6 +14,17 @@ import { useToast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
 import { setToken } from "../../../lib/auth";
 import { solveSignupPow } from "../../../lib/pow";
+
+// Extends the API's registerSchema (shared via @zerotrust/shared-types) with a
+// client-only confirm field, so client-side validation matches server rules exactly.
+const registerFormSchema = registerSchema
+  .extend({ confirm: z.string().min(1, "Confirm your password") })
+  .refine((data) => data.password === data.confirm, {
+    message: "Passwords do not match",
+    path: ["confirm"],
+  });
+
+type RegisterFormValues = z.infer<typeof registerFormSchema>;
 
 function passwordStrength(p: string): { score: number; label: string; color: string } {
   let score = 0;
@@ -31,23 +45,29 @@ function passwordStrength(p: string): { score: number; label: string; color: str
 }
 
 export default function RegisterPage() {
-  const [form, setForm] = useState({ displayName: "", email: "", password: "", confirm: "" });
   const registerMutation = useRegisterAndLoginMutation();
   const { toast } = useToast();
-  const strength = passwordStrength(form.password);
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors, isSubmitting },
+  } = useForm<RegisterFormValues>({
+    resolver: zodResolver(registerFormSchema),
+    defaultValues: { displayName: "", email: "", password: "", confirm: "" },
+  });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (form.password !== form.confirm) {
-      toast({ message: "Passwords do not match", type: "error" });
-      return;
-    }
+  const password = watch("password");
+  const confirm = watch("confirm");
+  const strength = passwordStrength(password ?? "");
+
+  const onSubmit = async (values: RegisterFormValues) => {
     try {
       const pow = await solveSignupPow();
       const data = await registerMutation.mutateAsync({
-        email: form.email,
-        password: form.password,
-        displayName: form.displayName,
+        email: values.email,
+        password: values.password,
+        displayName: values.displayName,
         ...pow,
       });
       setToken(data.accessToken, data.refreshToken);
@@ -72,41 +92,39 @@ export default function RegisterPage() {
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
         <div className="space-y-2">
           <Label htmlFor="displayName">Display Name</Label>
           <Input
             id="displayName"
             type="text"
-            required
-            value={form.displayName}
-            onChange={(e) => setForm({ ...form, displayName: e.target.value })}
             placeholder="Your Name"
+            {...register("displayName")}
           />
+          {errors.displayName && (
+            <p className="text-xs text-destructive">{errors.displayName.message}</p>
+          )}
         </div>
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
           <Input
             id="email"
             type="email"
-            required
             autoComplete="email"
-            value={form.email}
-            onChange={(e) => setForm({ ...form, email: e.target.value })}
             placeholder="you@example.com"
+            {...register("email")}
           />
+          {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
         </div>
         <div className="space-y-2">
           <Label htmlFor="password">Password</Label>
           <PasswordInput
             id="password"
-            required
             autoComplete="new-password"
-            value={form.password}
-            onChange={(e) => setForm({ ...form, password: e.target.value })}
             placeholder="At least 8 characters"
+            {...register("password")}
           />
-          {form.password && (
+          {password && (
             <div className="mt-2">
               <div className="flex gap-1">
                 {[1, 2, 3, 4, 5].map((i) => (
@@ -122,21 +140,25 @@ export default function RegisterPage() {
               <span className="mt-1 block text-xs text-muted-foreground">{strength.label}</span>
             </div>
           )}
+          {errors.password && <p className="text-xs text-destructive">{errors.password.message}</p>}
         </div>
         <div className="space-y-2">
           <Label htmlFor="confirm">Confirm Password</Label>
           <PasswordInput
             id="confirm"
-            required
-            value={form.confirm}
-            onChange={(e) => setForm({ ...form, confirm: e.target.value })}
             placeholder="Repeat password"
-            className={cn(form.confirm && form.confirm !== form.password && "border-destructive")}
+            className={cn(confirm && confirm !== password && "border-destructive")}
+            {...register("confirm")}
           />
+          {errors.confirm && <p className="text-xs text-destructive">{errors.confirm.message}</p>}
         </div>
 
-        <Button type="submit" disabled={registerMutation.isPending} className="mt-2 w-full">
-          {registerMutation.isPending ? "Creating account…" : "Create account"}
+        <Button
+          type="submit"
+          disabled={isSubmitting || registerMutation.isPending}
+          className="mt-2 w-full"
+        >
+          {isSubmitting || registerMutation.isPending ? "Creating account…" : "Create account"}
         </Button>
       </form>
 

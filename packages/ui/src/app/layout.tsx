@@ -29,6 +29,7 @@ const title = `${brand.name} — ${brand.tagline}`;
 const description = brand.description;
 
 export const metadata: Metadata = {
+  metadataBase: new URL(brand.url),
   title,
   description,
   keywords: ["authentication", "zero trust", "passkeys", "webauthn", "mfa", "security"],

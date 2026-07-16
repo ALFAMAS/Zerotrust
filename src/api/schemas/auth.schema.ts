@@ -1,4 +1,5 @@
 import {
+  loginSchema,
   passwordSchemaExport as passwordSchema,
   type RegisterBodyInput,
   type RegisterInput,
@@ -12,10 +13,7 @@ export const RegisterSchema = registerSchema;
 /** Register body including optional PoW, locale, and CAPTCHA fields. */
 export const RegisterBodySchema = registerBodySchema;
 
-export const LoginSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(1, "Password is required"),
-});
+export const LoginSchema = loginSchema;
 
 /** Login body including optional PoW and CAPTCHA fields for progressive backoff. */
 export const LoginBodySchema = LoginSchema.extend({
