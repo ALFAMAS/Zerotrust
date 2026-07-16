@@ -42,8 +42,8 @@ describe("email translation helper", () => {
 });
 
 describe("localized templates", () => {
-  it("renders the welcome email in Spanish and French", () => {
-    const es = welcomeEmailTemplate({
+  it("renders the welcome email in Spanish and French", async () => {
+    const es = await welcomeEmailTemplate({
       name: "Ana",
       appName: "zerotrust",
       appUrl: "https://app.test",
@@ -54,7 +54,7 @@ describe("localized templates", () => {
     expect(es.html).toContain("¡Bienvenido, Ana!");
     expect(es.html).toContain('lang="es"');
 
-    const fr = welcomeEmailTemplate({
+    const fr = await welcomeEmailTemplate({
       name: "Jean",
       appName: "zerotrust",
       appUrl: "https://app.test",
@@ -65,8 +65,8 @@ describe("localized templates", () => {
     expect(fr.html).toContain("Bienvenue, Jean");
   });
 
-  it("defaults the verify email to English when no locale is given", () => {
-    const en = verifyEmailTemplate({
+  it("defaults the verify email to English when no locale is given", async () => {
+    const en = await verifyEmailTemplate({
       name: "Bob",
       code: "123456",
       verifyUrl: "https://app.test/verify",
@@ -78,8 +78,8 @@ describe("localized templates", () => {
     expect(en.html).toContain("expire in 30 minutes");
   });
 
-  it("localizes the verify email subject and expiry copy in Spanish", () => {
-    const es = verifyEmailTemplate({
+  it("localizes the verify email subject and expiry copy in Spanish", async () => {
+    const es = await verifyEmailTemplate({
       name: "Ana",
       code: "654321",
       verifyUrl: "https://app.test/verify",
