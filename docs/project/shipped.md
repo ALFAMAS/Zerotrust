@@ -18,7 +18,7 @@ ship a feature. Planned work lives in [`todo.md`](./todo.md) (this directory).
 | Migrations                  |                                      47 (latest: `0046_mig4_snapshot_sync`) |
 | Route mounts in `server.ts` |                                                                          28 |
 | UI pages                    |                                                                          53 |
-| Tests                       | 1512 passed (1272 API + 240 UI); 31 skipped (241 files) |
+| Tests                       | 1604 passed (1297 API + 307 UI); 33 skipped (259 files) |
 | Stack                       | Hono 4 · TypeScript 6 · Bun · Next.js 16 · Drizzle ORM · PostgreSQL · Redis |
 
 ---
