@@ -31,7 +31,8 @@
       "Bash(ls *.md)",
       "Bash(wc -l todo.md tdone.md)",
       "Bash(find . -maxdepth 2 -iname \"audit-report.md\")",
-      "mcp__Claude_Code_Remote__send_later"
+      "mcp__Claude_Code_Remote__send_later",
+      "mcp__Claude_Code_Remote__delete_trigger"
     ]
   },
   "enableAllProjectMcpServers": true,
