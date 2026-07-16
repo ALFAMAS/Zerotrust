@@ -1,7 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getConsent } from "@/lib/consent";
+import {
+  toWebVitalPayload,
+  WEB_VITAL_EVENT,
+  type WebVitalMetricInput,
+  type WebVitalPayload,
+} from "@/lib/webVitals";
 
 const PLAUSIBLE_DOMAIN = process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN;
 const GA_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
@@ -9,6 +15,18 @@ const POSTHOG_KEY = process.env.NEXT_PUBLIC_POSTHOG_KEY;
 const POSTHOG_HOST = process.env.NEXT_PUBLIC_POSTHOG_HOST;
 const PARTYTOWN_SCRIPT_TYPE = "text/partytown";
 const GA_MEASUREMENT_ID_PATTERN = /^G-[A-Z0-9]{4,20}$/;
+
+type AnalyticsDataLayer = unknown[];
+
+interface PostHogCaptureClient {
+  capture: (eventName: string, properties?: object) => unknown;
+}
+
+declare global {
+  interface Window {
+    dataLayer?: AnalyticsDataLayer;
+  }
+}
 
 function appendPartytownScript({
   id,
@@ -52,6 +70,7 @@ window.gtag("config", "${measurementId}");`;
 
 export default function AnalyticsScript() {
   const [accepted, setAccepted] = useState(false);
+  const posthogRef = useRef<PostHogCaptureClient | null>(null);
 
   useEffect(() => {
     setAccepted(getConsent() === "accepted");
@@ -111,13 +130,55 @@ export default function AnalyticsScript() {
           person_profiles: "identified_only",
           capture_pageview: true,
         });
+        posthogRef.current = posthog;
       });
 
       return () => {
         cancelled = true;
+        posthogRef.current = null;
         void import("posthog-js").then(({ default: posthog }) => posthog.reset());
       };
     }
+  }, [accepted]);
+
+  useEffect(() => {
+    if (!accepted) return;
+
+    function onWebVital(event: Event) {
+      let metric: WebVitalPayload;
+      try {
+        metric = toWebVitalPayload((event as CustomEvent<WebVitalMetricInput>).detail);
+      } catch {
+        return;
+      }
+
+      if (GA_ID && GA_MEASUREMENT_ID_PATTERN.test(GA_ID)) {
+        try {
+          const dataLayer = window.dataLayer ?? [];
+          window.dataLayer = dataLayer;
+          dataLayer.push({
+            event: "web_vital",
+            web_vital_name: metric.name,
+            web_vital_value: metric.value,
+            web_vital_delta: metric.delta,
+            web_vital_rating: metric.rating,
+            web_vital_id: metric.id,
+            web_vital_navigation_type: metric.navigationType,
+          });
+        } catch {
+          // One analytics provider must not break the app or the other provider.
+        }
+      }
+
+      try {
+        posthogRef.current?.capture("web_vital", metric);
+      } catch {
+        // Field telemetry is best-effort.
+      }
+    }
+
+    window.addEventListener(WEB_VITAL_EVENT, onWebVital);
+    return () => window.removeEventListener(WEB_VITAL_EVENT, onWebVital);
   }, [accepted]);
 
   return null;

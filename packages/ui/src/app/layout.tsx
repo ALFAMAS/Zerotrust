@@ -11,6 +11,7 @@ import { QueryProvider } from "@/components/QueryProvider";
 import { ReverificationProvider } from "@/components/ReverificationProvider";
 import ServiceWorkerRegistrar from "@/components/ServiceWorkerRegistrar";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import WebVitalsReporter from "@/components/WebVitalsReporter";
 import { brand } from "@/config/brand";
 import { directionForLocale, SUPPORTED_LOCALES } from "@/i18n/locales";
 import { ToastProvider } from "../context/ToastContext";
@@ -103,6 +104,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                     {children}
                     <CookieBanner />
                     <AnalyticsScript />
+                    <WebVitalsReporter />
                     <ServiceWorkerRegistrar />
                   </ToastProvider>
                 </ReverificationProvider>

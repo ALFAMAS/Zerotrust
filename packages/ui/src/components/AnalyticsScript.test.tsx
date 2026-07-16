@@ -1,6 +1,15 @@
 import { render, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { CONSENT_KEY } from "@/lib/consent";
+import { WEB_VITAL_EVENT, type WebVitalPayload } from "@/lib/webVitals";
+
+const posthogMock = vi.hoisted(() => ({
+  capture: vi.fn(),
+  init: vi.fn(),
+  reset: vi.fn(),
+}));
+
+vi.mock("posthog-js", () => ({ default: posthogMock }));
 
 const ANALYTICS_SCRIPT_IDS = [
   "plausible-analytics",
@@ -11,22 +20,39 @@ const ANALYTICS_SCRIPT_IDS = [
 async function renderAnalytics({
   plausibleDomain = "app.example.com",
   gaId = "G-ABC1234567",
+  posthogKey = "",
+  posthogHost = "",
 }: {
   plausibleDomain?: string;
   gaId?: string;
+  posthogKey?: string;
+  posthogHost?: string;
 } = {}) {
   vi.resetModules();
   vi.stubEnv("NEXT_PUBLIC_PLAUSIBLE_DOMAIN", plausibleDomain);
   vi.stubEnv("NEXT_PUBLIC_GA_MEASUREMENT_ID", gaId);
-  vi.stubEnv("NEXT_PUBLIC_POSTHOG_KEY", "");
-  vi.stubEnv("NEXT_PUBLIC_POSTHOG_HOST", "");
+  vi.stubEnv("NEXT_PUBLIC_POSTHOG_KEY", posthogKey);
+  vi.stubEnv("NEXT_PUBLIC_POSTHOG_HOST", posthogHost);
   const { default: AnalyticsScript } = await import("./AnalyticsScript");
   return render(<AnalyticsScript />);
 }
 
 describe("AnalyticsScript Partytown integration", () => {
+  const webVital: WebVitalPayload = {
+    name: "LCP",
+    value: 1800,
+    delta: 200,
+    rating: "good",
+    id: "v4-lcp",
+    navigationType: "navigate",
+  };
+
   beforeEach(() => {
     localStorage.clear();
+    posthogMock.capture.mockReset();
+    posthogMock.init.mockReset();
+    posthogMock.reset.mockReset();
+    delete (window as typeof window & { dataLayer?: unknown[] }).dataLayer;
     for (const id of ANALYTICS_SCRIPT_IDS) {
       document.getElementById(id)?.remove();
     }
@@ -95,5 +121,71 @@ describe("AnalyticsScript Partytown integration", () => {
     });
     expect(document.getElementById("google-analytics")).toBeNull();
     expect(document.getElementById("google-analytics-init")).toBeNull();
+  });
+
+  it("routes an accepted Web Vital to GA through the forwarded data layer", async () => {
+    localStorage.setItem(CONSENT_KEY, "accepted");
+    await renderAnalytics({ plausibleDomain: "" });
+    await waitFor(() => {
+      expect(document.getElementById("google-analytics-init")).toBeInstanceOf(
+        HTMLScriptElement
+      );
+    });
+
+    window.dispatchEvent(new CustomEvent(WEB_VITAL_EVENT, { detail: webVital }));
+
+    expect((window as typeof window & { dataLayer: unknown[] }).dataLayer).toContainEqual({
+      event: "web_vital",
+      web_vital_name: "LCP",
+      web_vital_value: 1800,
+      web_vital_delta: 200,
+      web_vital_rating: "good",
+      web_vital_id: "v4-lcp",
+      web_vital_navigation_type: "navigate",
+    });
+  });
+
+  it("routes an accepted Web Vital only to an initialized PostHog client", async () => {
+    localStorage.setItem(CONSENT_KEY, "accepted");
+    await renderAnalytics({
+      plausibleDomain: "",
+      gaId: "",
+      posthogKey: "ph_test",
+      posthogHost: "https://posthog.example.com",
+    });
+    await waitFor(() => expect(posthogMock.init).toHaveBeenCalledTimes(1));
+
+    window.dispatchEvent(new CustomEvent(WEB_VITAL_EVENT, { detail: webVital }));
+
+    expect(posthogMock.capture).toHaveBeenCalledWith("web_vital", webVital);
+  });
+
+  it("discards Web Vitals when no configured provider is ready", async () => {
+    localStorage.setItem(CONSENT_KEY, "accepted");
+    await renderAnalytics({ plausibleDomain: "", gaId: "" });
+
+    window.dispatchEvent(new CustomEvent(WEB_VITAL_EVENT, { detail: webVital }));
+
+    expect((window as typeof window & { dataLayer?: unknown[] }).dataLayer).toBeUndefined();
+    expect(posthogMock.capture).not.toHaveBeenCalled();
+  });
+
+  it("does not let provider failures escape the event handler", async () => {
+    localStorage.setItem(CONSENT_KEY, "accepted");
+    await renderAnalytics({ plausibleDomain: "" });
+    await waitFor(() => {
+      expect(document.getElementById("google-analytics-init")).toBeInstanceOf(
+        HTMLScriptElement
+      );
+    });
+    (window as typeof window & { dataLayer: unknown }).dataLayer = {
+      push: () => {
+        throw new Error("provider failure");
+      },
+    };
+
+    expect(() =>
+      window.dispatchEvent(new CustomEvent(WEB_VITAL_EVENT, { detail: webVital }))
+    ).not.toThrow();
   });
 });
