@@ -61,30 +61,35 @@
 
 **Files**
 
-- Add `packages/ui/src/components/ReactScan.tsx`.
-- Add `packages/ui/src/components/ReactScan.test.tsx`.
+- Add `packages/ui/scripts/react-scan-assets.mjs`.
 - Update `packages/ui/src/app/layout.tsx`.
+- Extend `src/__tests__/ui-performance-tooling.test.ts`.
 - Update `packages/ui/.env.example`, `packages/ui/package.json`, and `bun.lock`.
 
 **Red**
 
-1. Add component tests proving the scanner:
-   - does nothing unless both development mode and the explicit public flag are
-     enabled;
-   - dynamically imports and initializes React Scan once when enabled;
-   - absorbs a diagnostic import failure without throwing into the tree.
-2. Add a layout contract assertion proving the scanner is mounted as a leaf.
-3. Run the focused tests and observe the missing component/dependency failures.
+1. Add contract tests proving the scanner:
+   - is copied to an ignored self-hosted path for development;
+   - removes its external version-check request during the copy;
+   - loads before React only when development mode and the explicit public flag
+     are enabled;
+   - is removed before production builds.
+2. Run the focused tests and observe the missing dependency, asset lifecycle,
+   and layout failures.
 
 **Green**
 
 1. Add `react-scan` as a development dependency.
-2. Implement a client leaf with a compile-time production guard and dynamic
-   import.
-3. Mount it in the root layout without adding `"use client"` to the layout.
+2. Implement a fail-closed asset copy/clean script. Copy the browser bundle for
+   `next dev`, removing the external version-check block by a verified signature,
+   and clean it before production builds.
+3. Load the self-hosted asset with `next/script` and `beforeInteractive` without
+   adding `"use client"` to the root layout.
 4. Document `NEXT_PUBLIC_REACT_SCAN=false`.
 5. Run focused tests, type checking, and a production build.
-6. Inspect production chunks and analyzer output to prove React Scan is absent.
+6. Use a real browser to prove the React Scan hook and toolbar initialize before
+   React without application console errors.
+7. Inspect production chunks and analyzer output to prove React Scan is absent.
 
 **Manual baseline**
 

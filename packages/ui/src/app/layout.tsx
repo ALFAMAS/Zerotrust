@@ -1,6 +1,7 @@
 import { Partytown } from "@qwik.dev/partytown/react";
 import type { Metadata, Viewport } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
+import Script from "next/script";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
 import AnalyticsScript from "@/components/AnalyticsScript";
@@ -25,6 +26,9 @@ const fontMono = JetBrains_Mono({
   variable: "--font-levels-mono",
   display: "swap",
 });
+
+const reactScanEnabled =
+  process.env.NODE_ENV === "development" && process.env.NEXT_PUBLIC_REACT_SCAN === "true";
 
 const title = `${brand.name} — ${brand.tagline}`;
 const description = brand.description;
@@ -75,6 +79,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       className={`light ${fontSans.variable} ${fontMono.variable}`}
     >
       <head>
+        {reactScanEnabled ? (
+          <Script src="/~react-scan/auto.global.js" strategy="beforeInteractive" />
+        ) : null}
         <Partytown forward={["dataLayer.push"]} />
         <script
           // biome-ignore lint/security/noDangerouslySetInnerHtml: static theme bootstrap (same pattern as next-themes)

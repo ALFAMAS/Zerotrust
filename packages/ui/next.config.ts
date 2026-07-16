@@ -42,6 +42,7 @@ const nextConfig: NextConfig = {
   ],
 
   env: {
+    NEXT_PUBLIC_REACT_SCAN: process.env.NEXT_PUBLIC_REACT_SCAN ?? "false",
     NEXT_PUBLIC_ZEROTRUST_URL:
       process.env.NEXT_PUBLIC_ZEROTRUST_URL ?? "http://localhost:1337",
   },

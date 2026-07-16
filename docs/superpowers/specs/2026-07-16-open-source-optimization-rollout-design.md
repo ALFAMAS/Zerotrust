@@ -76,10 +76,14 @@ artifact when a budget fails, but it is not committed.
 
 ### Stage 2: render measurement and React Compiler
 
-Add React Scan as a development-only dynamic import behind both
-`NODE_ENV === "development"` and `NEXT_PUBLIC_REACT_SCAN === "true"`. The scanner
-must not be imported, initialized, or included in production route chunks. It is
-mounted as a client leaf; the root layout remains a Server Component.
+Add React Scan behind both `NODE_ENV === "development"` and
+`NEXT_PUBLIC_REACT_SCAN === "true"`. React Scan must install its hook before
+React initializes, so `predev` copies its browser bundle to an ignored,
+self-hosted public path and the Server Component root layout loads it with
+`next/script` using `beforeInteractive`. The copy step removes React Scan's
+external version-check request so local diagnostics do not require a CSP
+exception or contact a third party. `prebuild` removes the generated asset; the
+scanner must not be initialized or included in production route chunks.
 
 Record a manual baseline for these representative interactions:
 

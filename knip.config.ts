@@ -40,6 +40,8 @@ const config: KnipConfig = {
     "@types/bcryptjs",
     "@types/ua-parser-js",
     "esbuild",
+    // Copied from its browser distribution by the UI's development-asset script.
+    "react-scan",
     /^@biomejs\/cli-/,
     /^@parcel\/watcher-/,
     /^@swc\/core-/,

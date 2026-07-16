@@ -1,4 +1,5 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
+import { execFileSync } from "node:child_process";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
@@ -63,5 +64,56 @@ describe("UI performance tooling", () => {
     expect(nextJobStart).toBeGreaterThan(buildJobStart);
     expect(buildIndex).toBeGreaterThan(-1);
     expect(sizeIndex).toBeGreaterThan(buildIndex);
+  });
+
+  it("loads a self-hosted React Scan script before React only in development", () => {
+    const manifest = readJson(join(uiRoot, "package.json")) as {
+      scripts: Record<string, string>;
+      devDependencies: Record<string, string>;
+    };
+    const assetScriptPath = join(uiRoot, "scripts", "react-scan-assets.mjs");
+
+    expect(manifest.devDependencies["react-scan"]).toMatch(/^\^0\./);
+    expect(manifest.scripts["react-scan:copy"]).toBe(
+      "node scripts/react-scan-assets.mjs copy"
+    );
+    expect(manifest.scripts["react-scan:clean"]).toBe(
+      "node scripts/react-scan-assets.mjs clean"
+    );
+    expect(manifest.scripts.predev).toBe(
+      "bun run partytown:copy && bun run react-scan:copy"
+    );
+    expect(manifest.scripts.prebuild).toBe(
+      "bun run partytown:copy && bun run react-scan:clean"
+    );
+    expect(existsSync(assetScriptPath)).toBe(true);
+
+    const assetScript = readFileSync(assetScriptPath, "utf8");
+    const layout = readFileSync(join(uiRoot, "src", "app", "layout.tsx"), "utf8");
+    const nextConfig = readFileSync(join(uiRoot, "next.config.ts"), "utf8");
+    const knipConfig = readFileSync(join(root, "knip.config.ts"), "utf8");
+    const envExample = readFileSync(join(uiRoot, ".env.example"), "utf8");
+    const gitignore = readFileSync(join(root, ".gitignore"), "utf8");
+
+    expect(assetScript).toContain('react-scan/dist/auto.global.js');
+    execFileSync(process.execPath, [assetScriptPath, "copy"], {
+      cwd: uiRoot,
+      stdio: "ignore",
+    });
+    expect(
+      readFileSync(join(uiRoot, "public", "~react-scan", "auto.global.js"), "utf8")
+    ).not.toContain("https://www.react-grab.com/api/version");
+    expect(layout).toContain('import Script from "next/script"');
+    expect(layout).toContain('process.env.NODE_ENV === "development"');
+    expect(layout).toContain('process.env.NEXT_PUBLIC_REACT_SCAN === "true"');
+    expect(layout).toContain('src="/~react-scan/auto.global.js"');
+    expect(layout).toContain('strategy="beforeInteractive"');
+    expect(nextConfig).toContain(
+      'NEXT_PUBLIC_REACT_SCAN: process.env.NEXT_PUBLIC_REACT_SCAN ?? "false"'
+    );
+    expect(envExample).toContain("NEXT_PUBLIC_REACT_SCAN=false");
+    expect(gitignore.split(/\r?\n/)).toContain("/packages/ui/public/~react-scan/");
+    expect(knipConfig).toContain('"react-scan"');
+    expect(existsSync(join(uiRoot, "src", "instrumentation-client.ts"))).toBe(false);
   });
 });
