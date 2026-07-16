@@ -53,6 +53,37 @@ docker compose -f docker-compose.yml -f docker-compose.observability.yml -f dock
 
 ---
 
+## Local API profiling
+
+Bun's built-in profiler and the pinned Speedscope viewer provide a local
+diagnostic workflow without adding instrumentation to the normal API runtime.
+Build first, then start one profiler in a development environment:
+
+```bash
+bun run build
+bun run profile:api:cpu
+# Or generate a text summary instead:
+bun run profile:api:cpu:md
+# Or inspect retained heap objects:
+bun run profile:api:heap
+```
+
+Exercise a fixed, representative workflow such as health checks, login, and a
+paginated admin list, then stop the API cleanly with Ctrl+C so Bun flushes the
+artifact into the ignored `profiles/` directory. Open the CPU capture locally:
+
+```bash
+bun run profile:view
+```
+
+These commands use fixed output names and never interpolate request or user
+values into a command. Do not enable profiling for normal production traffic:
+profiles add overhead, and CPU stacks or heap snapshots can expose sensitive
+values held in memory. Treat every file under `profiles/` as confidential,
+delete it after diagnosis, and never attach it to an issue without reviewing it.
+
+---
+
 ## PostgreSQL performance profile
 
 `docker-compose.performance.yml` is an optional overlay for self-hosted

@@ -50,6 +50,7 @@ packages/ui/e2e/.auth/
 .cache/
 *.log
 logs/
+profiles/
 
 # OS
 Thumbs.db
