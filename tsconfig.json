@@ -8,6 +8,7 @@
     "rootDir": ".",
     "outDir": "./dist",
     "resolveJsonModule": true,
+    "jsx": "react-jsx",
     "skipLibCheck": true,
     "strict": false,
     "esModuleInterop": true,
@@ -42,6 +43,6 @@
       "@types": ["./src/shared/types"]
     }
   },
-  "include": ["src/**/*.ts", "src/**/*.d.ts", "plugins/**/*.ts"],
+  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.d.ts", "plugins/**/*.ts"],
   "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts"]
 }

@@ -15,7 +15,7 @@ const config: KnipConfig = {
         "plugins/*/index.ts!",
         "tests/load/*.k6.js!",
       ],
-      project: ["src/**/*.ts", "plugins/**/*.ts", "scripts/**/*.{js,mjs,cjs,ts}"],
+      project: ["src/**/*.{ts,tsx}", "plugins/**/*.ts", "scripts/**/*.{js,mjs,cjs,ts}"],
     },
     "packages/ui": {
       entry: [
@@ -32,6 +32,9 @@ const config: KnipConfig = {
     "tailwindcss",
     "tw-animate-css",
     "@radix-ui/react-popover",
+    // Types for the react/jsx-runtime import that tsc emits for the React
+    // Email templates in src/templates/emails — no direct import for knip to see.
+    "@types/react",
     "@stripe/stripe-js",
     "@visx/gradient",
     "@types/bcryptjs",

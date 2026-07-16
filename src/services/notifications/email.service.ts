@@ -77,7 +77,7 @@ export async function sendWelcomeEmail(
   to: string,
   data: Omit<WelcomeEmailData, "appName" | "appUrl">
 ): Promise<void> {
-  const { subject, html, text } = welcomeEmailTemplate({
+  const { subject, html, text } = await welcomeEmailTemplate({
     ...data,
     appName: APP_NAME,
     appUrl: APP_URL,
@@ -95,7 +95,7 @@ export async function sendMagicLinkEmail(
     locale?: Locale;
   }
 ): Promise<void> {
-  const { subject, html, text } = magicLinkEmailTemplate({
+  const { subject, html, text } = await magicLinkEmailTemplate({
     name: data.name,
     magicLinkUrl: data.magicLinkUrl,
     expiresInMinutes: data.expiresInMinutes ?? 15,
@@ -110,7 +110,7 @@ export async function sendOtpEmail(
   to: string,
   data: { name: string; code: string; expiresInMinutes?: number }
 ): Promise<void> {
-  const { subject, html, text } = otpEmailTemplate({
+  const { subject, html, text } = await otpEmailTemplate({
     name: data.name,
     code: data.code,
     expiresInMinutes: data.expiresInMinutes ?? 10,
@@ -129,7 +129,7 @@ export async function sendVerificationEmail(
     locale?: Locale;
   }
 ): Promise<void> {
-  const { subject, html, text } = verifyEmailTemplate({
+  const { subject, html, text } = await verifyEmailTemplate({
     name: data.name,
     code: data.code,
     verifyUrl: data.verifyUrl,
@@ -149,7 +149,7 @@ export async function sendPasswordResetEmail(
     locale?: Locale;
   }
 ): Promise<void> {
-  const { subject, html, text } = passwordResetEmailTemplate({
+  const { subject, html, text } = await passwordResetEmailTemplate({
     name: data.name,
     resetUrl: data.resetUrl,
     expiresInMinutes: data.expiresInMinutes ?? 30,
@@ -171,7 +171,7 @@ export async function sendSecurityAlertEmail(
     revokeSessionUrl?: string;
   }
 ): Promise<void> {
-  const { subject, html, text } = securityAlertEmailTemplate({
+  const { subject, html, text } = await securityAlertEmailTemplate({
     name: data.name,
     action: data.action,
     device: data.device,
@@ -194,7 +194,7 @@ export async function sendBillingEventEmail(
     ctaUrl?: string;
   }
 ): Promise<void> {
-  const { subject, html, text } = billingEventEmailTemplate({
+  const { subject, html, text } = await billingEventEmailTemplate({
     ...data,
     appName: APP_NAME,
     appUrl: APP_URL,
@@ -212,7 +212,7 @@ export async function sendOrgInviteEmail(
     expiresInDays?: number;
   }
 ): Promise<void> {
-  const { subject, html, text } = orgInviteEmailTemplate({
+  const { subject, html, text } = await orgInviteEmailTemplate({
     email: to,
     inviterName: data.inviterName,
     orgName: data.orgName,
@@ -235,7 +235,7 @@ export async function sendNotificationEmail(
     unsubscribeUrl?: string;
   }
 ): Promise<void> {
-  const { subject, html, text } = notificationEmailTemplate({
+  const { subject, html, text } = await notificationEmailTemplate({
     name: data.name,
     title: data.title,
     body: data.body,
