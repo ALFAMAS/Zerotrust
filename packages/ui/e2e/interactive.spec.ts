@@ -49,9 +49,12 @@ test.describe("interactive dashboard flows (real API)", () => {
       await page.goto("/dashboard");
       await dismissCookieBanner(page);
       await openCommandPalette(page);
+      // cmdk renders its input with role="combobox" (aria-autocomplete="list"),
+      // not "searchbox" — querying searchbox makes fill() hang until the test
+      // timeout. Match the real role + aria-label.
       const paletteSearch = page
         .getByRole("dialog", { name: "Command palette" })
-        .getByRole("searchbox", { name: "Search" });
+        .getByRole("combobox", { name: "Search" });
       await paletteSearch.fill("profile");
       await page.getByRole("option", { name: /^Profile/i }).click();
       await expect(page).toHaveURL(/\/dashboard\/profile/);

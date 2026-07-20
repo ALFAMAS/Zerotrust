@@ -27,6 +27,7 @@ export const EnvSchema = z
     APP_URL: z.string().url().optional(),
     CORS_ALLOWED_ORIGINS: z.string().min(1).optional(),
     METRICS_AUTH_TOKEN: z.string().min(1).optional(),
+    UNSUBSCRIBE_SECRET: z.string().min(1).optional(),
     STRIPE_WEBHOOK_SECRET: z.string().min(1).optional(),
     BACKUP_ENCRYPTION_KEY_HEX: optionalHexSecret("BACKUP_ENCRYPTION_KEY_HEX"),
     BACKUP_REQUIRE_ENCRYPTION: z.string().optional(),
@@ -66,6 +67,15 @@ export const EnvSchema = z
           code: z.ZodIssueCode.custom,
           message:
             "CORS_ALLOWED_ORIGINS is required in production — set it to your app/admin origins",
+        });
+      }
+      if (!env.UNSUBSCRIBE_SECRET) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message:
+            "UNSUBSCRIBE_SECRET is required in production — it signs email unsubscribe links; " +
+            "without it token generation/verification throws, silently breaking notification " +
+            "emails and returning 500 on unsubscribe. Generate with: openssl rand -hex 32",
         });
       }
       const redisUri = env.REDIS_URI ?? env.REDIS_URL;

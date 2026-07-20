@@ -231,20 +231,25 @@ router.post("/oauth/exchange", rateLimit({ points: 10, windowSecs: 60 }), async 
     }
 
     const db = getDb();
+    // Atomically claim the code: the UPDATE only matches an unused, unexpired
+    // row, so two concurrent exchanges of the same code can never both succeed
+    // (the loser's WHERE finds no row). Read-then-update would leave a race
+    // window where a leaked code is redeemed twice.
     const [row] = await db
-      .select()
-      .from(oauthExchangeCodesTable)
-      .where(eq(oauthExchangeCodesTable.code, code))
-      .limit(1);
-
-    if (!row || row.usedAt || row.expiresAt < new Date()) {
-      return c.json({ error: "INVALID_CODE", message: "Invalid or expired code" }, 400);
-    }
-
-    await db
       .update(oauthExchangeCodesTable)
       .set({ usedAt: new Date() })
-      .where(eq(oauthExchangeCodesTable.code, code));
+      .where(
+        and(
+          eq(oauthExchangeCodesTable.code, code),
+          sql`${oauthExchangeCodesTable.usedAt} IS NULL`,
+          sql`${oauthExchangeCodesTable.expiresAt} > now()`
+        )
+      )
+      .returning();
+
+    if (!row) {
+      return c.json({ error: "INVALID_CODE", message: "Invalid or expired code" }, 400);
+    }
 
     const cfg = getConfig();
     setRefreshTokenCookie(c, row.refreshToken, cfg.session.refreshTokenTTL);

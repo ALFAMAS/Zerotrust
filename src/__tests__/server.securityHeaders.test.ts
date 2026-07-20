@@ -40,6 +40,7 @@ function stubProductionEnv(apiDocsEnabled: "true" | "false") {
   vi.stubEnv("METRICS_AUTH_TOKEN", "production-test-metrics-token");
   vi.stubEnv("CORS_ALLOWED_ORIGINS", "https://app.example.com");
   vi.stubEnv("REDIS_URI", "redis://localhost:6379");
+  vi.stubEnv("UNSUBSCRIBE_SECRET", "production-test-unsubscribe-secret");
   vi.stubEnv("BACKUP_ENABLED", "false");
 }
 

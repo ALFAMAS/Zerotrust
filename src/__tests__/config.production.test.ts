@@ -16,6 +16,7 @@ function setBaseEnv(): void {
     "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2";
   process.env.CSFLE_MASTER_KEY_HEX =
     "f6e5d4c3b2a1f6e5d4c3b2a1f6e5d4c3b2a1f6e5d4c3b2a1f6e5d4c3b2a1f6e5";
+  process.env.UNSUBSCRIBE_SECRET = "unsubscribe-secret-for-tests";
 }
 
 describe("P4.3 — Production fail-fast config validation", () => {
@@ -30,6 +31,7 @@ describe("P4.3 — Production fail-fast config validation", () => {
     delete process.env.BACKUP_ENCRYPTION_KEY_HEX;
     delete process.env.BACKUP_REQUIRE_ENCRYPTION;
     delete process.env.BACKUP_ENABLED;
+    delete process.env.UNSUBSCRIBE_SECRET;
   });
 
   afterEach(() => {
@@ -119,6 +121,19 @@ describe("P4.3 — Production fail-fast config validation", () => {
     process.env.BACKUP_REQUIRE_ENCRYPTION = "true";
     const loadConfig = await loadFreshConfig();
     expect(() => loadConfig()).toThrow(/placeholder value/);
+  });
+
+  it("refuses to boot in production without UNSUBSCRIBE_SECRET", async () => {
+    process.env.NODE_ENV = "production";
+    setBaseEnv();
+    process.env.METRICS_AUTH_TOKEN = "secret-token";
+    process.env.CORS_ALLOWED_ORIGINS = "https://app.example.com";
+    process.env.REDIS_URI = "redis://localhost:6379";
+    process.env.BACKUP_ENABLED = "false";
+    // Unset after setBaseEnv() so only this requirement is missing.
+    delete process.env.UNSUBSCRIBE_SECRET;
+    const loadConfig = await loadFreshConfig();
+    expect(() => loadConfig()).toThrow(/UNSUBSCRIBE_SECRET is required in production/);
   });
 
   it("allows production boot when all prod-only env vars are set", async () => {
