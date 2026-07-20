@@ -44,6 +44,9 @@ playwright-report/
 blob-report/
 .playwright/
 packages/ui/e2e/.auth/
+# Relocated E2E artifacts (auth state, screenshots, traces) — kept outside
+# packages/ui so the `next dev` watcher does not recompile on each write.
+.e2e-artifacts/
 **/.last-run.json
 
 # Runtime

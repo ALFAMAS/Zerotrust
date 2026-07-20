@@ -11,6 +11,12 @@ const appUrl = isolatedStack ? "http://localhost:3100" : "http://localhost:3000"
 
 export default defineConfig({
   testDir: "./e2e",
+  // Keep generated artifacts (screenshots, traces, error context) OUT of
+  // packages/ui. The E2E webServer runs the UI with `next dev`, whose file
+  // watcher treats writes under the project dir as source changes — a
+  // screenshot/trace written mid-run triggers a Fast Refresh reload that
+  // destroys the page's execution context and times out the active test.
+  outputDir: path.resolve(repoRoot, ".e2e-artifacts", "test-results"),
   // E2E specs are intentionally serial-friendly; keep workers modest so the
   // shared dev backend isn't hammered.
   fullyParallel: false,
