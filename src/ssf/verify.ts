@@ -12,17 +12,22 @@ export function verifySSFSignature(payload: any, signatureHeader?: string): bool
   if (!secret) {
     // The /ssf/events endpoint is unauthenticated and CSRF-exempt, and a valid
     // event can inject audit-log entries and revoke arbitrary sessions. Failing
-    // open here (accepting unsigned events) is only acceptable for local dev.
-    // In production/test-as-production, reject when no shared secret is set so a
-    // misconfiguration cannot be exploited to forge events.
-    if (process.env.NODE_ENV === "production") {
+    // open here (accepting unsigned events) is only acceptable in an explicitly
+    // recognized local development/test mode. Fail CLOSED by default — anything
+    // that is not exactly `development`/`test` (production, staging, unset, …)
+    // rejects, so a misconfiguration cannot be exploited to forge events.
+    const nodeEnv = process.env.NODE_ENV;
+    const isDevOrTest = nodeEnv === "development" || nodeEnv === "test";
+    if (!isDevOrTest) {
       logger.error(
-        "SSF_SHARED_SECRET not configured in production; rejecting SSF event (fail-closed)"
+        "SSF_SHARED_SECRET not configured outside development; rejecting SSF event (fail-closed)"
       );
       return false;
     }
-    logger.warn("SSF_SHARED_SECRET not configured; skipping signature verification (dev only)");
-    return true; // permissive when not configured, non-production only
+    logger.warn(
+      "SSF_SHARED_SECRET not configured; skipping signature verification (dev/test only)"
+    );
+    return true; // permissive only in explicit development/test
   }
   if (!signatureHeader) return false;
   const prefix = "sha256=";
