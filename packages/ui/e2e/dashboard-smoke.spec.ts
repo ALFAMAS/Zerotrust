@@ -1,11 +1,11 @@
+import { mkdirSync } from "node:fs";
 import { expect, test } from "@playwright/test";
 import { assertPageHealthy } from "./fixtures/pageHealth";
 import { readAccessToken, registerViaUi, uniqueEmail, withStoredAuth } from "./fixtures/auth";
 import { verifyUserEmail } from "./fixtures/db";
-import { e2eAuthFile } from "./fixtures/paths";
 import { E2E_API_URL } from "./fixtures/urls";
 
-const USER_AUTH_FILE = e2eAuthFile("user");
+const USER_AUTH_FILE = "e2e/.auth/user.json";
 
 test.describe("dashboard page smoke (real API)", () => {
   test.describe.configure({ mode: "serial" });
@@ -14,6 +14,7 @@ test.describe("dashboard page smoke (real API)", () => {
   let authReady = false;
 
   test.beforeAll(async ({ browser }) => {
+    mkdirSync("e2e/.auth", { recursive: true });
     const context = await browser.newContext();
     const page = await context.newPage();
     const email = uniqueEmail();

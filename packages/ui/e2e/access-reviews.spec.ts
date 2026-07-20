@@ -1,10 +1,10 @@
+import { mkdirSync } from "node:fs";
 import { expect, test } from "@playwright/test";
 import { readAccessToken, registerAndGetUserId, uniqueEmail, withStoredAuth } from "./fixtures/auth";
 import { grantAdminRole, verifyUserEmail } from "./fixtures/db";
-import { e2eAuthFile } from "./fixtures/paths";
 import { E2E_API_URL } from "./fixtures/urls";
 
-const ADMIN_AUTH_FILE = e2eAuthFile("access-review-admin");
+const ADMIN_AUTH_FILE = "e2e/.auth/access-review-admin.json";
 
 type ReviewItem = { id: string; decision: string };
 
@@ -51,6 +51,7 @@ async function approveAllPendingViaApi(
 
 test.describe("access review lifecycle (real API)", () => {
   test.beforeAll(async ({ browser }) => {
+    mkdirSync("e2e/.auth", { recursive: true });
     const context = await browser.newContext();
     const page = await context.newPage();
     const email = uniqueEmail();

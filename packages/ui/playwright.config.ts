@@ -9,27 +9,8 @@ const isolatedStack = process.env.E2E_ISOLATED_STACK === "true";
 const apiUrl = isolatedStack ? "http://localhost:1437" : "http://localhost:1337";
 const appUrl = isolatedStack ? "http://localhost:3100" : "http://localhost:3000";
 
-// In CI, serve the UI from a production build (`next build` + `next start`)
-// instead of `next dev`. The dev server's HMR/Fast Refresh continuously reloads
-// the page under CI, destroying the page's execution context mid-test and timing
-// out interaction-heavy specs (e.g. the command palette). A production build has
-// no HMR, so the reload storm cannot occur. Local runs keep `next dev` for fast
-// iteration. The isolated-stack path (opt-in) is unchanged.
-const useProdUiBuild = !!process.env.CI && !isolatedStack;
-const uiCommand = isolatedStack
-  ? "bunx next dev -p 3100"
-  : useProdUiBuild
-    ? "bun run --cwd packages/ui build && bun run --cwd packages/ui start"
-    : "bun run dev:ui";
-
 export default defineConfig({
   testDir: "./e2e",
-  // Keep generated artifacts (screenshots, traces, error context) OUT of
-  // packages/ui. The E2E webServer runs the UI with `next dev`, whose file
-  // watcher treats writes under the project dir as source changes — a
-  // screenshot/trace written mid-run triggers a Fast Refresh reload that
-  // destroys the page's execution context and times out the active test.
-  outputDir: path.resolve(repoRoot, ".e2e-artifacts", "test-results"),
   // E2E specs are intentionally serial-friendly; keep workers modest so the
   // shared dev backend isn't hammered.
   fullyParallel: false,
@@ -76,7 +57,7 @@ export default defineConfig({
       },
     },
     {
-      command: uiCommand,
+      command: isolatedStack ? "bunx next dev -p 3100" : "bun run dev:ui",
       cwd: isolatedStack ? path.resolve(repoRoot, "packages", "ui") : repoRoot,
       url: appUrl,
       reuseExistingServer,
@@ -84,9 +65,7 @@ export default defineConfig({
       stdout: "pipe",
       stderr: "pipe",
       env: {
-        // A production build (CI) must not run in development mode or Next keeps
-        // HMR/Fast Refresh enabled. Local/isolated runs stay in development.
-        NODE_ENV: useProdUiBuild ? "production" : "development",
+        NODE_ENV: "development",
         NEXT_PUBLIC_ZEROTRUST_URL: apiUrl,
         NEXT_PUBLIC_APP_URL: appUrl,
         ...(isolatedStack ? { ZEROTRUST_NEXT_DIST_DIR: ".next-e2e" } : {}),

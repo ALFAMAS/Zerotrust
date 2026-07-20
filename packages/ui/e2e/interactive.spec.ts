@@ -1,10 +1,10 @@
+import { mkdirSync } from "node:fs";
 import { expect, test } from "@playwright/test";
 import { dismissCookieBanner, openCommandPalette, readAccessToken, registerViaUi, uniqueEmail, withStoredAuth } from "./fixtures/auth";
 import { verifyUserEmail } from "./fixtures/db";
-import { e2eAuthFile } from "./fixtures/paths";
 import { E2E_API_URL } from "./fixtures/urls";
 
-const INTERACTIVE_AUTH_FILE = e2eAuthFile("interactive");
+const INTERACTIVE_AUTH_FILE = "e2e/.auth/interactive.json";
 
 test.describe("interactive dashboard flows (real API)", () => {
   test.describe.configure({ mode: "serial" });
@@ -13,6 +13,7 @@ test.describe("interactive dashboard flows (real API)", () => {
   let authReady = false;
 
   test.beforeAll(async ({ browser }) => {
+    mkdirSync("e2e/.auth", { recursive: true });
     const context = await browser.newContext();
     const page = await context.newPage();
     const email = uniqueEmail();
@@ -48,9 +49,12 @@ test.describe("interactive dashboard flows (real API)", () => {
       await page.goto("/dashboard");
       await dismissCookieBanner(page);
       await openCommandPalette(page);
+      // cmdk renders its input with role="combobox" (aria-autocomplete="list"),
+      // not "searchbox" — querying searchbox makes fill() hang until the test
+      // timeout. Match the real role + aria-label.
       const paletteSearch = page
         .getByRole("dialog", { name: "Command palette" })
-        .getByRole("searchbox", { name: "Search" });
+        .getByRole("combobox", { name: "Search" });
       await paletteSearch.fill("profile");
       await page.getByRole("option", { name: /^Profile/i }).click();
       await expect(page).toHaveURL(/\/dashboard\/profile/);
