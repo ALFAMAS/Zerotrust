@@ -73,7 +73,7 @@
     "@bull-board/hono": "^8.1.2",
     "@elastic/elasticsearch": "^9.4.2",
     "@hono/node-server": "^2.0.6",
-    "@hono/zod-validator": "^0.8.0",
+    "@hono/zod-validator": "^0.9.0",
     "@noble/ciphers": "^2.2.0",
     "@noble/hashes": "^2.2.0",
     "@opentelemetry/api": "^1.9.1",
@@ -160,17 +160,17 @@
     "@parcel/watcher-darwin-arm64": "2.5.6",
     "@parcel/watcher-darwin-x64": "2.5.6",
     "@parcel/watcher-linux-x64-glibc": "2.5.6",
-    "@swc/core-linux-x64-gnu": "1.15.43",
+    "@swc/core-linux-x64-gnu": "1.15.46",
     "@next/swc-win32-x64-msvc": "16.2.10",
     "@next/swc-wasm-nodejs": "16.2.10",
     "@next/swc-wasm-web": "16.2.10",
     "@parcel/watcher-win32-x64": "^2.5.6",
     "@swc/core-win32-x64-msvc": "^1.15.43",
-    "@rolldown/binding-darwin-arm64": "1.1.5",
-    "@rolldown/binding-darwin-x64": "1.1.5",
-    "@rolldown/binding-linux-x64-gnu": "1.1.5",
-    "@rolldown/binding-win32-x64-msvc": "1.1.5",
-    "@swc/core-darwin-arm64": "1.15.43",
-    "@swc/core-darwin-x64": "1.15.43"
+    "@rolldown/binding-darwin-arm64": "1.2.0",
+    "@rolldown/binding-darwin-x64": "1.2.0",
+    "@rolldown/binding-linux-x64-gnu": "1.2.0",
+    "@rolldown/binding-win32-x64-msvc": "1.2.0",
+    "@swc/core-darwin-arm64": "1.15.46",
+    "@swc/core-darwin-x64": "1.15.46"
   }
 }
