@@ -87,7 +87,7 @@ jobs:
         run: k6 run --out json=staging-k6-results.json -e BASE_URL=${{ inputs.api_url }} tests/load/full-suite.k6.js
       - name: Upload k6 results
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: staging-k6-results
           path: staging-k6-results.json
